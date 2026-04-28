@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-28'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 473
+total_adrs: 474
 adr_number_range:
   first: '0001'
-  last: '0446'
-  next_available: '0447'
+  last: '0447'
+  next_available: 0448
 implementation_status_summary:
   Implemented: 361
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 38
+  Proposed: 39
 decision_status_summary:
   Accepted: 365
-  Proposed: 45
+  Proposed: 46
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 41
+      count: 42
       first_adr: '0400'
-      last_adr: '0446'
+      last_adr: '0447'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -88,7 +88,7 @@ facets:
       count: 32
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 146
+      count: 147
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -131,64 +131,74 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 38
+      count: 39
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0447'
+  next_available_adr: 0448
 latest_adrs:
+  - adr: '0447'
+    title: Phase 3 LLM Ergonomics + Traceability
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: platform
+    path: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
   - adr: '0446'
     title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
     implementation_status: Proposed
+    currently_describes: goal_state
     concern: security
     path: docs/adr/0446-phase2-multi-deployment-hardening.md
   - adr: '0445'
     title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
     implementation_status: Proposed
+    currently_describes: goal_state
     concern: security
     path: docs/adr/0445-phase1-multi-deployment-hardening.md
   - adr: '0444'
     title: nginx Buffer Sizing for oauth2-proxy Subrequest and Callback
     implementation_status: Implemented
+    currently_describes: current_state
     concern: security
     path: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
   - adr: '0443'
     title: Continuous Topology Reconciler & Drift Detection
     implementation_status: Implemented
+    currently_describes: current_state
     concern: vm-topology
     path: docs/adr/0443-continuous-topology-reconciler.md
   - adr: '0442'
     title: Multi-Deployment Make Interface & Agent Worktree Binding
     implementation_status: Proposed
+    currently_describes: goal_state
     concern: agent-discovery
     path: docs/adr/0442-multi-deployment-make-interface-and-worktree-binding.md
   - adr: '0441'
     title: Deployment-Scoped Service Subsetting via Service Profiles
     implementation_status: Proposed
+    currently_describes: goal_state
     concern: platform
     path: docs/adr/0441-deployment-scoped-service-subsetting.md
   - adr: '0440'
     title: Per-Deployment Identity & Artifact Isolation
     implementation_status: Proposed
+    currently_describes: goal_state
     concern: identity
     path: docs/adr/0440-per-deployment-identity-and-artifact-isolation.md
   - adr: 0439
     title: Multi-Deployment Repo Architecture — N Independent Servers from One Checkout
     implementation_status: Proposed
+    currently_describes: goal_state
     concern: networking
     path: docs/adr/0439-multi-deployment-repo-architecture.md
   - adr: 0439
     title: Deployment Profiles — Subset-of-Services Selection for Forks
     implementation_status: Proposed
+    currently_describes: goal_state
     concern: networking
     path: docs/adr/0439-deployment-profiles-subset-selection.md
-  - adr: 0438
-    title: Generic-by-Construction — Generative Cascade IaC
-    implementation_status: Proposed
-    concern: resilience
-    path: docs/adr/0438-generic-by-construction.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

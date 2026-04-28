@@ -71,6 +71,37 @@ IMPLEMENTATION_STATUS_ORDER = (
     "Accepted",
     "Proposed",
 )
+
+# ADR 0447 item 17 — `currently_describes` semantic axis.
+#
+# implementation_status answers "where is this ADR in its lifecycle?";
+# currently_describes answers "what kind of state should an LLM treat
+# this ADR's content as?". The two are correlated but distinct: a
+# Proposed ADR describes the goal state, an Implemented ADR describes
+# the current state, a Deprecated ADR describes historical state. Adding
+# the second axis to the index lets the LLM choose the right mental
+# model without re-deriving it from status text.
+CURRENTLY_DESCRIBES_BY_STATUS: dict[str, str] = {
+    "Implemented": "current_state",
+    "Accepted": "current_state",
+    "Partial": "mixed_state",
+    "Proposed": "goal_state",
+    "Not Implemented": "goal_state",
+    "Deprecated": "historical",
+}
+# Fallback for any future status value that hasn't been mapped — surfaces
+# the gap rather than silently labelling everything `current_state`.
+CURRENTLY_DESCRIBES_FALLBACK = "unknown"
+
+
+def currently_describes_for(implementation_status: str) -> str:
+    """Map a normalised implementation_status to its `currently_describes`
+    semantic. Returns the fallback string when the mapping is missing,
+    so callers can detect schema drift instead of relying on a default.
+    """
+    return CURRENTLY_DESCRIBES_BY_STATUS.get(implementation_status, CURRENTLY_DESCRIBES_FALLBACK)
+
+
 DECISION_STATUS_ORDER = (
     "Accepted",
     "Proposed",
@@ -134,12 +165,18 @@ class AdrMeta:
     filename: str
     path: str
 
+    @property
+    def currently_describes(self) -> str:
+        """ADR 0447 item 17 — semantic axis derived from implementation_status."""
+        return currently_describes_for(self.implementation_status)
+
     def to_entry(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "adr": self.number,
             "title": self.title,
             "status": self.status,
             "implementation_status": self.implementation_status,
+            "currently_describes": self.currently_describes,
             "date": self.date,
             "concern": self.concern,
             "keywords": self.keywords,
@@ -160,6 +197,7 @@ class AdrMeta:
             "adr": self.number,
             "title": self.title,
             "implementation_status": self.implementation_status,
+            "currently_describes": self.currently_describes,
             "concern": self.concern,
             "path": self.path,
         }

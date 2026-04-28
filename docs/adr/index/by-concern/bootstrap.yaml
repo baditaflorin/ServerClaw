@@ -15,6 +15,7 @@ adrs:
     title: Bootstrap Dedicated Host With Ansible
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-21'
     concern: bootstrap
     keywords:
@@ -32,6 +33,7 @@ adrs:
     title: Prefer Hetzner Rescue Plus Installimage For Bootstrap
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: bootstrap
     keywords:
@@ -51,6 +53,7 @@ adrs:
     title: Node Role Taxonomy For Bootstrap, Control, State, Edge, Workload, Observability, Recovery, And Build
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: bootstrap
     keywords:
@@ -71,6 +74,7 @@ adrs:
     title: Bootstrap And Recovery Sequencing For Environment Cells
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: bootstrap
     keywords:
@@ -86,6 +90,7 @@ adrs:
     title: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: bootstrap
     keywords:
@@ -106,6 +111,7 @@ adrs:
     title: Reproducible Zero-to-Platform Bootstrap for Public Forks
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: bootstrap
     keywords:
@@ -121,6 +127,7 @@ adrs:
     title: Automated DNS Propagation From Single IP Source of Truth
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-11'
     concern: bootstrap
     keywords:
@@ -142,6 +149,7 @@ adrs:
     title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at 0fork.com
     status: Proposed
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-21'
     concern: bootstrap
     keywords:
@@ -162,6 +170,7 @@ adrs:
     title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-22'
     concern: bootstrap
     keywords:

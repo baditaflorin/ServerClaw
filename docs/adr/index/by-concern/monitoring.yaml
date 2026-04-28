@@ -15,6 +15,7 @@ adrs:
     title: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: monitoring
     keywords:
@@ -38,6 +39,7 @@ adrs:
     title: Centralized Log Aggregation With Grafana Loki
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: monitoring
     keywords:
@@ -56,6 +58,7 @@ adrs:
     title: OpenTelemetry Traces And Service Maps With Grafana Tempo
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: monitoring
     keywords:
@@ -75,6 +78,7 @@ adrs:
     title: Langfuse For Agent Observability
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: monitoring
     keywords:
@@ -91,6 +95,7 @@ adrs:
     title: Netdata Realtime Streaming Metrics
     status: Deprecated
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: monitoring
     keywords:
@@ -108,6 +113,7 @@ adrs:
     title: Log Ingestion And Queryability Canaries Via Loki Canary
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: monitoring
     keywords:
@@ -127,6 +133,7 @@ adrs:
     title: Temporal As The Durable ServerClaw Session Orchestrator
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: monitoring
     keywords:
@@ -143,6 +150,7 @@ adrs:
     title: Changedetection.io For External Content And API Change Monitoring
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: monitoring
     keywords:
@@ -163,6 +171,7 @@ adrs:
     title: Temporal As The Durable Workflow And Task Queue Engine
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: monitoring
     keywords:
@@ -183,6 +192,7 @@ adrs:
     title: Plane as Agent Task HQ — Live Work Tracking for LLM Agents
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-05'
     concern: monitoring
     keywords:
@@ -203,6 +213,7 @@ adrs:
     title: Remove Netdata from the Platform
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: monitoring
     keywords:

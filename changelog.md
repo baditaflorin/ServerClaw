@@ -12,12 +12,23 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0447 + ws-0447: Phase 3 LLM ergonomics + traceability —
+  `currently_describes` semantic axis added to every entry in the ADR
+  index (current_state / goal_state / mixed_state / historical /
+  unknown), driven from `implementation_status`. New
+  `scripts/generate_traceability.py` joins workstream YAMLs ×
+  ADR index into a single `build/traceability.yaml`; live signal
+  resolves all 22 active workstreams to ADRs and surfaces 10 with
+  dangling shared_surfaces. Both wired into `validate_repo.sh` as
+  advisory steps.
+
 ## Latest Release
 
-- [0.179.8 release notes](docs/release-notes/0.179.8.md)
+- [0.179.9 release notes](docs/release-notes/0.179.9.md)
 
 ## Previous Releases
 
+- [0.179.8 release notes](docs/release-notes/0.179.8.md)
 - [0.179.7 release notes](docs/release-notes/0.179.7.md)
 - [0.179.6 release notes](docs/release-notes/0.179.6.md)
 - [0.179.5 release notes](docs/release-notes/0.179.5.md)
@@ -29,9 +40,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.178.232 release notes](docs/release-notes/0.178.232.md)
 - [0.178.231 release notes](docs/release-notes/0.178.231.md)
 - [0.178.230 release notes](docs/release-notes/0.178.230.md)
-- [0.178.229 release notes](docs/release-notes/0.178.229.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (524 releases)](docs/release-notes/index/2026.md)
+- [2026 (525 releases)](docs/release-notes/index/2026.md)

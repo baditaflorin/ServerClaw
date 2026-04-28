@@ -12,12 +12,13 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 41
+total_adrs: 42
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: api
     keywords:
@@ -40,6 +41,7 @@ adrs:
     title: Remove Netdata from the Platform
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: monitoring
     keywords:
@@ -61,6 +63,7 @@ adrs:
     title: Remove JupyterHub from the Platform
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: platform
     keywords:
@@ -81,6 +84,7 @@ adrs:
     title: Safe Password Alphabet Standard
     status: Accepted
     implementation_status: Partial
+    currently_describes: mixed_state
     date: '2026-04-10'
     concern: security
     keywords:
@@ -101,6 +105,7 @@ adrs:
     title: Service Lifecycle Contract — BEGIN/END Markers as Platform Standard
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: platform
     keywords:
@@ -120,6 +125,7 @@ adrs:
     title: Emergency Credential Rotation After Public Release
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-11'
     concern: security
     keywords:
@@ -142,6 +148,7 @@ adrs:
     title: Automated DNS Propagation From Single IP Source of Truth
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-11'
     concern: bootstrap
     keywords:
@@ -163,6 +170,7 @@ adrs:
     title: Generic-by-Default Codebase with Local Overlay
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: resilience
     keywords:
@@ -177,6 +185,7 @@ adrs:
     title: Generic Inventory Hostnames
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-11'
     concern: platform
     keywords:
@@ -190,6 +199,7 @@ adrs:
     title: — Zero-Sanitization Publication
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: platform
     keywords:
@@ -202,6 +212,7 @@ adrs:
     title: — Docker Isolation Testing and IoC Completion
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: testing
     keywords:
@@ -217,6 +228,7 @@ adrs:
     title: Unified Account Provisioning API
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -231,6 +243,7 @@ adrs:
     title: Keycloak Native Account Expiry
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: networking
     keywords:
@@ -245,6 +258,7 @@ adrs:
     title: SSO Redirect URI Mismatch and Service Topology Variable Drift
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -263,6 +277,7 @@ adrs:
     title: Certificate Lifecycle Agent Tools and Cron Sync
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-14'
     concern: security
     keywords:
@@ -279,6 +294,7 @@ adrs:
     title: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-14'
     concern: ci-cd
     keywords:
@@ -296,6 +312,7 @@ adrs:
     title: Topology Consistency Enforcement
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -309,6 +326,7 @@ adrs:
     title: External Attack Surface Hardening
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: security
     keywords:
@@ -323,6 +341,7 @@ adrs:
     title: Service VM Migration IaC — Single Canonical Procedure
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -340,6 +359,7 @@ adrs:
     title: Automatic Receipt-to-Outline Publishing — Shared Utility and Coverage Gaps
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: platform
     keywords:
@@ -357,6 +377,7 @@ adrs:
     title: Pull Request-Based Integration Flow
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: platform
     keywords:
@@ -371,6 +392,7 @@ adrs:
     title: CI Release-Readiness Checks
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: ci-cd
     keywords:
@@ -384,6 +406,7 @@ adrs:
     title: Platform-Wide Service Watchdog
     status: Accepted
     implementation_status: Partial
+    currently_describes: mixed_state
     date: '2026-04-21'
     concern: resilience
     keywords:
@@ -402,6 +425,7 @@ adrs:
     title: Evaluate lsp-ai as an Editor-Side AI Language Server
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-21'
     concern: platform
     keywords:
@@ -423,6 +447,7 @@ adrs:
     title: Operator-Local lsp-ai Against LiteLLM — Runbook and Model Alias
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-21'
     concern: documentation
     keywords:
@@ -443,6 +468,7 @@ adrs:
     title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at 0fork.com
     status: Proposed
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-21'
     concern: bootstrap
     keywords:
@@ -463,6 +489,7 @@ adrs:
     title: Retrospective on the 420-ADR Agent-Built Platform — What Breaks When You Try to Clone It
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-21'
     concern: identity
     keywords:
@@ -483,6 +510,7 @@ adrs:
     title: Local Overlay for `inventory/host_vars/proxmox-host.yml`
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-21'
     concern: host-os
     keywords:
@@ -503,6 +531,7 @@ adrs:
     title: 0fork Full-Day Deployment — Single-Command IaC Entry Point
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-21'
     concern: platform
     keywords:
@@ -523,6 +552,7 @@ adrs:
     title: Topology-Derived Health-Probe URLs
     status: Accepted
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-22'
     concern: vm-topology
     keywords:
@@ -541,6 +571,7 @@ adrs:
     title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-22'
     concern: bootstrap
     keywords:
@@ -561,6 +592,7 @@ adrs:
     title: Generic-by-Construction — Generative Cascade IaC
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-23'
     concern: resilience
     keywords:
@@ -580,6 +612,7 @@ adrs:
     title: Deployment Profiles — Subset-of-Services Selection for Forks
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-27'
     concern: networking
     keywords:
@@ -600,6 +633,7 @@ adrs:
     title: Multi-Deployment Repo Architecture — N Independent Servers from One Checkout
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-27'
     concern: networking
     keywords:
@@ -620,6 +654,7 @@ adrs:
     title: Per-Deployment Identity & Artifact Isolation
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-27'
     concern: identity
     keywords:
@@ -638,6 +673,7 @@ adrs:
     title: Deployment-Scoped Service Subsetting via Service Profiles
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-27'
     concern: platform
     keywords:
@@ -657,6 +693,7 @@ adrs:
     title: Multi-Deployment Make Interface & Agent Worktree Binding
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-27'
     concern: agent-discovery
     keywords:
@@ -677,6 +714,7 @@ adrs:
     title: Continuous Topology Reconciler & Drift Detection
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-27'
     concern: vm-topology
     keywords:
@@ -695,6 +733,7 @@ adrs:
     title: nginx Buffer Sizing for oauth2-proxy Subrequest and Callback
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-28'
     concern: security
     keywords:
@@ -714,6 +753,7 @@ adrs:
     title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-28'
     concern: security
     keywords:
@@ -734,6 +774,7 @@ adrs:
     title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-28'
     concern: security
     keywords:
@@ -748,3 +789,20 @@ adrs:
     summary: 'Three deliverables, in order:'
     filename: 0446-phase2-multi-deployment-hardening.md
     path: docs/adr/0446-phase2-multi-deployment-hardening.md
+  - adr: '0447'
+    title: Phase 3 LLM Ergonomics + Traceability
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-28'
+    concern: platform
+    keywords:
+      - llm
+      - traceability
+      - onboarding
+      - multi-deployment
+      - phase
+      - ergonomics
+    summary: 'Three deliverables, ordered light-to-heavy:'
+    filename: 0447-phase3-llm-ergonomics-and-traceability.md
+    path: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md

@@ -15,6 +15,7 @@ adrs:
     title: Role Interface Contracts And Defaults Boundaries
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -32,6 +33,7 @@ adrs:
     title: Workflow Catalog And Machine-Readable Execution Contracts
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -48,6 +50,7 @@ adrs:
     title: Shared Controller Automation Toolkit
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -64,6 +67,7 @@ adrs:
     title: Windmill For Agent And Operator Workflows
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -81,6 +85,7 @@ adrs:
     title: Ansible Role Composability And DRY Defaults
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -98,6 +103,7 @@ adrs:
     title: Playbook Decomposition And Shared Execution Model
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -115,6 +121,7 @@ adrs:
     title: Ansible Collection Packaging and Versioned Role Distribution
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -134,6 +141,7 @@ adrs:
     title: Formal RTO/RPO Targets and Disaster Recovery Playbook
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: automation
     keywords:
@@ -154,6 +162,7 @@ adrs:
     title: Operator Onboarding and Off-boarding Workflow
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: automation
     keywords:
@@ -172,6 +181,7 @@ adrs:
     title: Budgeted Workflow Scheduler
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: automation
     keywords:
@@ -189,6 +199,7 @@ adrs:
     title: Windmill Operator Access Admin Surface
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: automation
     keywords:
@@ -207,6 +218,7 @@ adrs:
     title: Runbook Automation Executor
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: automation
     keywords:
@@ -222,6 +234,7 @@ adrs:
     title: Agent State Persistence Across Workflow Boundaries
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: automation
     keywords:
@@ -241,6 +254,7 @@ adrs:
     title: Semaphore For Ansible Job Management UI And API
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: automation
     keywords:
@@ -261,6 +275,7 @@ adrs:
     title: n8n for Webhook and API Integration Automation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: automation
     keywords:
@@ -280,6 +295,7 @@ adrs:
     title: Playbook and Role Metadata Standard for Agent Discovery
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: automation
     keywords:
@@ -298,6 +314,7 @@ adrs:
     title: Inventory Sharding and Host-Scoped Ansible Execution
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: automation
     keywords:
@@ -316,6 +333,7 @@ adrs:
     title: Dify - Visual LLM Workflow and Agent Canvas
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: automation
     keywords:
@@ -336,6 +354,7 @@ adrs:
     title: Self-Correcting Automation Loops
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: automation
     keywords:
@@ -352,6 +371,7 @@ adrs:
     title: Role-Based Node Pools And Placement Boundaries
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: automation
     keywords:
@@ -367,6 +387,7 @@ adrs:
     title: Windmill As The Default Browser-And-API Operations Surface
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: automation
     keywords:
@@ -386,6 +407,7 @@ adrs:
     title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: automation
     keywords:
@@ -407,6 +429,7 @@ adrs:
     title: Operator Tool Interface Contract
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-04'
     concern: automation
     keywords:
@@ -429,6 +452,7 @@ adrs:
     title: Outline Programmatic Wiki API and Automation Hooks
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-05'
     concern: automation
     keywords:
@@ -448,6 +472,7 @@ adrs:
     title: Plane Agent Tools — Programmatic Task Management for Agents
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -470,6 +495,7 @@ adrs:
     title: Outline Agent Tools — Programmatic Wiki Access for Agents
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -491,6 +517,7 @@ adrs:
     title: Service Lifecycle Task Includes
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -513,6 +540,7 @@ adrs:
     title: Parameterized Service Verification Tasks
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -534,6 +562,7 @@ adrs:
     title: Service Registry and Derived Defaults
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -555,6 +584,7 @@ adrs:
     title: Login Service Contracts and Session Recovery Automation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-07'
     concern: automation
     keywords:
@@ -579,6 +609,7 @@ adrs:
     title: Standard Procedure for Decommissioning a Platform Service
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: automation
     keywords:
@@ -600,6 +631,7 @@ adrs:
     title: Integrate LibreChat Agents API for Programmatic Agent Access
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-10'
     concern: automation
     keywords:
@@ -620,6 +652,7 @@ adrs:
     title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: automation
     keywords:

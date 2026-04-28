@@ -15,6 +15,7 @@ adrs:
     title: Controller-Local Secret Manifest And Preflight
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: security
     keywords:
@@ -31,6 +32,7 @@ adrs:
     title: step-ca For SSH And Internal TLS
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: security
     keywords:
@@ -48,6 +50,7 @@ adrs:
     title: OpenBao For Secrets, Transit, And Dynamic Credentials
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: security
     keywords:
@@ -66,6 +69,7 @@ adrs:
     title: Short-Lived Credentials And Internal mTLS
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: security
     keywords:
@@ -83,6 +87,7 @@ adrs:
     title: Keycloak For Operator And Agent SSO
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: security
     keywords:
@@ -101,6 +106,7 @@ adrs:
     title: Secret Rotation Automation With OpenBao
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: security
     keywords:
@@ -118,6 +124,7 @@ adrs:
     title: Compose Runtime Secrets Injection Via OpenBao Agent
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: security
     keywords:
@@ -137,6 +144,7 @@ adrs:
     title: Automated Certificate Lifecycle Management
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: security
     keywords:
@@ -155,6 +163,7 @@ adrs:
     title: Security Posture Reporting and Benchmark Drift
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: security
     keywords:
@@ -174,6 +183,7 @@ adrs:
     title: HTTP Security Headers Hardening
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -192,6 +202,7 @@ adrs:
     title: Published Artifact Secret Scanning
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -208,6 +219,7 @@ adrs:
     title: Grafana Public Access Hardening
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -226,6 +238,7 @@ adrs:
     title: API Token Lifecycle and Exposure Response
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -244,6 +257,7 @@ adrs:
     title: Public Surface Automated Security Scan
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -262,6 +276,7 @@ adrs:
     title: Vaultwarden for Operator Credential Management
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -280,6 +295,7 @@ adrs:
     title: Workflow Idempotency Keys and Double-Execution Prevention
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -298,6 +314,7 @@ adrs:
     title: Data-Class Replication Policies For Queues, Object Stores, Search, Cache, Secrets, And Time-Series
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: security
     keywords:
@@ -318,6 +335,7 @@ adrs:
     title: Local Secret Delivery Via OpenBao Agent And Systemd Credentials
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: security
     keywords:
@@ -338,6 +356,7 @@ adrs:
     title: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: security
     keywords:
@@ -359,6 +378,7 @@ adrs:
     title: HTTPS And TLS Assurance Via Blackbox Exporter And testssl.sh
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: security
     keywords:
@@ -379,6 +399,7 @@ adrs:
     title: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: security
     keywords:
@@ -398,6 +419,7 @@ adrs:
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: security
     keywords:
@@ -420,6 +442,7 @@ adrs:
     title: Semgrep For SAST And Application Code Security Scanning In The CI Gate
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: security
     keywords:
@@ -440,6 +463,7 @@ adrs:
     title: Private Overlay Files For Deployment-Specific Secrets And Identities
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: security
     keywords:
@@ -462,6 +486,7 @@ adrs:
     title: Open WebUI Keycloak OIDC With Break-Glass Fallback
     status: Deprecated
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-03'
     concern: security
     keywords:
@@ -483,6 +508,7 @@ adrs:
     title: Per-Service LLM Context File (service.llm.yaml)
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-05'
     concern: security
     keywords:
@@ -503,6 +529,7 @@ adrs:
     title: Token-Budgeted Agent Onboarding Packs
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-05'
     concern: security
     keywords:
@@ -521,6 +548,7 @@ adrs:
     title: OpenBao TLS Cert Lifetime And Renewal Hardening
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-05'
     concern: security
     keywords:
@@ -538,6 +566,7 @@ adrs:
     title: Nomad OIDC Auth and Edge Publication
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-05'
     concern: security
     keywords:
@@ -556,6 +585,7 @@ adrs:
     title: Semaphore Keycloak OIDC Integration
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-07'
     concern: security
     keywords:
@@ -575,6 +605,7 @@ adrs:
     title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: security
     keywords:
@@ -597,6 +628,7 @@ adrs:
     title: Certificate Validation And Concordance Enforcement
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: security
     keywords:
@@ -611,6 +643,7 @@ adrs:
     title: Credential Isolation and Agent Safety for .local/ Secrets
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: security
     keywords:
@@ -628,6 +661,7 @@ adrs:
     title: Keycloak Sign-In Button Stuck Incident Postmortem
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-08'
     concern: security
     keywords:
@@ -647,6 +681,7 @@ adrs:
     title: Centralize Keycloak Realm Name and OIDC Issuer URL
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: security
     keywords:
@@ -664,6 +699,7 @@ adrs:
     title: — Optional Secret Propagation in Role Convergence
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: security
     keywords:
@@ -679,6 +715,7 @@ adrs:
     title: Safe Password Alphabet Standard
     status: Accepted
     implementation_status: Partial
+    currently_describes: mixed_state
     date: '2026-04-10'
     concern: security
     keywords:
@@ -699,6 +736,7 @@ adrs:
     title: Emergency Credential Rotation After Public Release
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-11'
     concern: security
     keywords:
@@ -721,6 +759,7 @@ adrs:
     title: Certificate Lifecycle Agent Tools and Cron Sync
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-14'
     concern: security
     keywords:
@@ -737,6 +776,7 @@ adrs:
     title: External Attack Surface Hardening
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: security
     keywords:
@@ -751,6 +791,7 @@ adrs:
     title: nginx Buffer Sizing for oauth2-proxy Subrequest and Callback
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-28'
     concern: security
     keywords:
@@ -770,6 +811,7 @@ adrs:
     title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-28'
     concern: security
     keywords:
@@ -790,6 +832,7 @@ adrs:
     title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-28'
     concern: security
     keywords:

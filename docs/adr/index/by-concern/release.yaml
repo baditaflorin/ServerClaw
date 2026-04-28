@@ -15,6 +15,7 @@ adrs:
     title: Versioning Model For Repo And Host
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: release
     keywords:
@@ -30,6 +31,7 @@ adrs:
     title: Platform Versioning, Release Notes, and Upgrade Path
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: release
     keywords:
@@ -49,6 +51,7 @@ adrs:
     title: Dry-Run Semantic Diff Engine
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: release
     keywords:
@@ -66,6 +69,7 @@ adrs:
     title: Intent Queue with Release-Triggered Scheduling
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: release
     keywords:
@@ -84,6 +88,7 @@ adrs:
     title: Startup, Readiness, Liveness, And Degraded State Semantics
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: release
     keywords:
@@ -103,6 +108,7 @@ adrs:
     title: Renovate Bot As The Automated Stack Version Upgrade Proposer
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: release
     keywords:
@@ -124,6 +130,7 @@ adrs:
     title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: release
     keywords:

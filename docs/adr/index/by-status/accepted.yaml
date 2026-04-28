@@ -16,6 +16,7 @@ adrs:
     title: Target Proxmox VE 9 on Debian 13
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -32,6 +33,7 @@ adrs:
     title: Prefer Hetzner Rescue Plus Installimage For Bootstrap
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: bootstrap
     keywords:
@@ -51,6 +53,7 @@ adrs:
     title: Install Proxmox VE From Debian Packages
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -70,6 +73,7 @@ adrs:
     title: Security Baseline For Proxmox Host
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -86,6 +90,7 @@ adrs:
     title: Agent-Oriented Access Model
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: identity
     keywords:
@@ -101,6 +106,7 @@ adrs:
     title: Versioning Model For Repo And Host
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: release
     keywords:
@@ -116,6 +122,7 @@ adrs:
     title: DRY And Solid Engineering Principles
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: ci-cd
     keywords:
@@ -131,6 +138,7 @@ adrs:
     title: Initial Proxmox VM Topology
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -147,6 +155,7 @@ adrs:
     title: Proxmox Host Bridge And NAT Network
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -164,6 +173,7 @@ adrs:
     title: Public Ingress And Guest Egress Model
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: vm-topology
     keywords:
@@ -181,6 +191,7 @@ adrs:
     title: example.com DNS And Subdomain Model
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: networking
     keywords:
@@ -198,6 +209,7 @@ adrs:
     title: Provision Guests From Debian 13 Cloud Template
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -216,6 +228,7 @@ adrs:
     title: ADR Lifecycle And Implementation Metadata
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: agent-discovery
     keywords:
@@ -231,6 +244,7 @@ adrs:
     title: Parallel ADR Delivery With Workstreams
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -246,6 +260,7 @@ adrs:
     title: Initial Storage And Backup Model
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-22'
     concern: storage
     keywords:
@@ -260,6 +275,7 @@ adrs:
     title: Public Subdomain Publication At The NGINX Edge
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-22'
     concern: networking
     keywords:
@@ -278,6 +294,7 @@ adrs:
     title: Uptime Kuma On The Docker Runtime VM
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -295,6 +312,7 @@ adrs:
     title: Shared Guest Observability Framework
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -310,6 +328,7 @@ adrs:
     title: Workflow Catalog And Machine-Readable Execution Contracts
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-22'
     concern: automation
     keywords:
@@ -326,6 +345,7 @@ adrs:
     title: Schema-Validated Repository Data Models
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -342,6 +362,7 @@ adrs:
     title: Centralized Port Registry
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-05'
     concern: platform
     keywords:
@@ -360,6 +381,7 @@ adrs:
     title: PostgreSQL Domain Clustering
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-04'
     concern: vm-topology
     keywords:
@@ -379,6 +401,7 @@ adrs:
     title: Docker Runtime Workload Split
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-04'
     concern: vm-topology
     keywords:
@@ -398,6 +421,7 @@ adrs:
     title: Plane as Agent Task HQ — Live Work Tracking for LLM Agents
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-05'
     concern: monitoring
     keywords:
@@ -418,6 +442,7 @@ adrs:
     title: Platform DRY Consolidation
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-09'
     concern: vm-topology
     keywords:
@@ -435,6 +460,7 @@ adrs:
     title: Emergency Credential Rotation After Public Release
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-11'
     concern: security
     keywords:
@@ -457,6 +483,7 @@ adrs:
     title: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-14'
     concern: ci-cd
     keywords:
@@ -474,6 +501,7 @@ adrs:
     title: Evaluate lsp-ai as an Editor-Side AI Language Server
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-21'
     concern: platform
     keywords:
@@ -495,6 +523,7 @@ adrs:
     title: Retrospective on the 420-ADR Agent-Built Platform — What Breaks When You Try to Clone It
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-21'
     concern: identity
     keywords:
@@ -515,6 +544,7 @@ adrs:
     title: Local Overlay for `inventory/host_vars/proxmox-host.yml`
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-21'
     concern: host-os
     keywords:
@@ -535,6 +565,7 @@ adrs:
     title: 0fork Full-Day Deployment — Single-Command IaC Entry Point
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-21'
     concern: platform
     keywords:
@@ -555,6 +586,7 @@ adrs:
     title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-22'
     concern: bootstrap
     keywords:

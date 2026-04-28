@@ -15,6 +15,7 @@ adrs:
     title: Target Proxmox VE 9 on Debian 13
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -31,6 +32,7 @@ adrs:
     title: Install Proxmox VE From Debian Packages
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -50,6 +52,7 @@ adrs:
     title: Security Baseline For Proxmox Host
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -66,6 +69,7 @@ adrs:
     title: Initial Proxmox VM Topology
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -82,6 +86,7 @@ adrs:
     title: Monitoring VM With Grafana And Proxmox Metrics
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -100,6 +105,7 @@ adrs:
     title: Proxmox Host Bridge And NAT Network
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -117,6 +123,7 @@ adrs:
     title: Provision Guests From Debian 13 Cloud Template
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: host-os
     keywords:
@@ -135,6 +142,7 @@ adrs:
     title: Proxmox Break-Glass SSH Port
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: host-os
     keywords:
@@ -152,6 +160,7 @@ adrs:
     title: Zero-SSH Guest Operations via Proxmox QAPI
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-04'
     concern: host-os
     keywords:
@@ -175,6 +184,7 @@ adrs:
     title: Local Overlay for `inventory/host_vars/proxmox-host.yml`
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-21'
     concern: host-os
     keywords:

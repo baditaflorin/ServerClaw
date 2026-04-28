@@ -16,6 +16,7 @@ adrs:
     title: Docker Guest Security Baseline
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-22'
     concern: vm-topology
     keywords:
@@ -31,6 +32,7 @@ adrs:
     title: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -50,6 +52,7 @@ adrs:
     title: Production And Staging Cells As The Unit Of High Availability
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -67,6 +70,7 @@ adrs:
     title: Node Role Taxonomy For Bootstrap, Control, State, Edge, Workload, Observability, Recovery, And Build
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: bootstrap
     keywords:
@@ -87,6 +91,7 @@ adrs:
     title: Service Criticality Rings For Foundation, Core, Supporting, And Peripheral Functions
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -105,6 +110,7 @@ adrs:
     title: One-Way Environment Data Flow And Replication Authority
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -121,6 +127,7 @@ adrs:
     title: Relational Database Replication And Single-Writer Policy
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -136,6 +143,7 @@ adrs:
     title: Data-Class Replication Policies For Queues, Object Stores, Search, Cache, Secrets, And Time-Series
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: security
     keywords:
@@ -156,6 +164,7 @@ adrs:
     title: Bootstrap And Recovery Sequencing For Environment Cells
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: bootstrap
     keywords:
@@ -171,6 +180,7 @@ adrs:
     title: Role-Based Node Pools And Placement Boundaries
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: automation
     keywords:
@@ -186,6 +196,7 @@ adrs:
     title: Failover Authority And Service Endpoint Separation
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -201,6 +212,7 @@ adrs:
     title: Canonical HA Topology Catalog And Reusable Automation Profiles
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: vm-topology
     keywords:
@@ -218,6 +230,7 @@ adrs:
     title: Authenticated Browser Journey Verification Via Playwright
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -233,6 +246,7 @@ adrs:
     title: Temporal As The Durable ServerClaw Session Orchestrator
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-28'
     concern: monitoring
     keywords:
@@ -249,6 +263,7 @@ adrs:
     title: Netbox As The Network IPAM And Topology Source Of Truth
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-29'
     concern: vm-topology
     keywords:
@@ -266,6 +281,7 @@ adrs:
     title: Vikunja As The Task And Project Management REST API
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-29'
     concern: api
     keywords:
@@ -283,6 +299,7 @@ adrs:
     title: LiteLLM As The Unified LLM API Proxy And Router
     status: Deprecated
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-29'
     concern: api
     keywords:
@@ -300,6 +317,7 @@ adrs:
     title: MLflow As The Machine Learning Experiment Tracker And Model Registry
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -318,6 +336,7 @@ adrs:
     title: SFTPGo As The Managed File Transfer Service With REST Provisioning
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-29'
     concern: vm-topology
     keywords:
@@ -336,6 +355,7 @@ adrs:
     title: Agent File-Domain Locking for Atomic Infrastructure Mutations
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -356,6 +376,7 @@ adrs:
     title: Agent Capability Manifest and Peer Discovery
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -376,6 +397,7 @@ adrs:
     title: Nginx Fragment-Based Atomic Configuration
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -394,6 +416,7 @@ adrs:
     title: Change Provenance Tagging in All Generated and Managed Files
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -414,6 +437,7 @@ adrs:
     title: Service Integration Contract Registry
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: ci-cd
     keywords:
@@ -433,6 +457,7 @@ adrs:
     title: Structured Agent Mutation Audit Log
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -452,6 +477,7 @@ adrs:
     title: Apply-Phase Serialization via Resource-Group Semaphore
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -470,6 +496,7 @@ adrs:
     title: Idempotent Workstream Apply Receipts
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -489,6 +516,7 @@ adrs:
     title: Platform Health Contract and Inter-Service Dependency SLO
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -509,6 +537,7 @@ adrs:
     title: Identity Core VM Isolation and Aggressive Health Watchdog
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-06'
     concern: vm-topology
     keywords:
@@ -529,6 +558,7 @@ adrs:
     title: Open WebUI Platform Knowledge Integration
     status: Deprecated
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-06'
     concern: platform
     keywords:
@@ -544,6 +574,7 @@ adrs:
     title: Integrate LibreChat Agents API for Programmatic Agent Access
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-10'
     concern: automation
     keywords:
@@ -564,6 +595,7 @@ adrs:
     title: Agent Interface Abstraction Layer — Provider-Agnostic DTOs
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-10'
     concern: agent-discovery
     keywords:
@@ -584,6 +616,7 @@ adrs:
     title: Operator-Local lsp-ai Against LiteLLM — Runbook and Model Alias
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-21'
     concern: documentation
     keywords:

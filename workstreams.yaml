@@ -1403,6 +1403,108 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-0447-phase3-llm-ergonomics-and-traceability
+  adr: 295
+  title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
+    \ ADR index, build/traceability.yaml generator"
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
+  depends_on:
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0446-phase2-multi-deployment-hardening
+  - adr-0175-cross-workstream-interface-contracts
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
+  - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
+  - scripts/adr_discovery.py
+  - tests/test_adr_currently_describes.py
+  - scripts/generate_traceability.py
+  - tests/test_generate_traceability.py
+  - build/traceability.yaml
+  - scripts/validate_repo.sh
+  summary: 'Phase 3 of the 20-change platform-maturity review (2026-04-28). Two LLM-ergonomics
+    items with no current owner: status-context tag on the ADR index (item 17) and
+    a generated traceability matrix (item 19). Items 7, 8, 9, 18 are heavy structural
+    refactors tracked elsewhere (ws-0438 phase 2). Item 16 (per-service onboarding
+    cards) deferred pending design refresh.
+
+    '
+  phases:
+    phase_0_open_workstream:
+      status: in_progress
+      target_version: 0.179.x
+      tasks:
+      - draft ADR 0447
+      - draft workstream YAML
+      - regenerate workstreams.yaml + ADR index
+      - commit workstream registration before implementation
+    phase_1_currently_describes:
+      status: completed
+      target_version: 0.179.x
+      tasks:
+      - extend AdrMeta with currently_describes computed field
+      - surface in to_entry and to_compact_entry
+      - "tests/test_adr_currently_describes.py \u2014 pin mapping for every status\
+        \ value"
+      - regenerate docs/adr/.index.yaml + shards
+    phase_2_traceability:
+      status: completed
+      target_version: 0.179.x
+      tasks:
+      - "scripts/generate_traceability.py \u2014 joins workstream YAML \xD7 ADR index"
+      - "build/traceability.yaml \u2014 generated artifact"
+      - "tests/test_generate_traceability.py \u2014 tmp-fixture-based join logic +\
+        \ dangling-ref detection"
+      - wire validate_traceability into scripts/validate_repo.sh as advisory
+    phase_3_onboarding_cards:
+      status: deferred
+      target_version: 0.181.x
+      deferred_reason: 'build/onboarding/service-catalog.yaml already covers flattened
+
+        service info; the per-service card design needs more thought
+
+        before generating duplicative files. Pick up once items 17 + 19
+
+        land and incremental value is measured.
+
+        '
+  acceptance_criteria:
+  - every ADR index entry carries currently_describes
+  - scripts/generate_traceability.py --write emits build/traceability.yaml
+  - "validate_traceability flags broken workstream\u2192ADR refs"
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0447_docs
+      paths:
+      - docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
+      - workstreams/active/ws-0447-phase3-llm-ergonomics-and-traceability.yaml
+      mode: shared_contract
+      contract: adr-0447-phase3-llm-ergonomics-v1
+    - id: ws_0447_currently_describes
+      paths:
+      - scripts/adr_discovery.py
+      - tests/test_adr_currently_describes.py
+      mode: shared_contract
+      contract: adr-0447-currently-describes-v1
+    - id: ws_0447_traceability
+      paths:
+      - scripts/generate_traceability.py
+      - tests/test_generate_traceability.py
+      - build/traceability.yaml
+      mode: shared_contract
+      contract: adr-0447-traceability-v1
+  notes:
+  - 'Phase 3 items 7, 8, 9, 18 are heavy structural refactors tracked via ws-0438.
+    Item 16 (per-service onboarding) deferred pending design refresh. This workstream
+    owns 17 + 19.
+
+    '
 - id: ws-0446-phase2-multi-deployment-hardening
   adr: 294
   title: "Phase 2 multi-deployment hardening \u2014 receipt freshness + Molecule starter\

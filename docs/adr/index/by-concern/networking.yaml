@@ -15,6 +15,7 @@ adrs:
     title: example.com DNS And Subdomain Model
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: networking
     keywords:
@@ -32,6 +33,7 @@ adrs:
     title: Public Subdomain Publication At The NGINX Edge
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-22'
     concern: networking
     keywords:
@@ -50,6 +52,7 @@ adrs:
     title: NATS JetStream For Internal Event Bus And Agent Coordination
     status: Deprecated
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: networking
     keywords:
@@ -68,6 +71,7 @@ adrs:
     title: ntopng For Private Network Flow Visibility
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: networking
     keywords:
@@ -86,6 +90,7 @@ adrs:
     title: Subdomain Governance And DNS Lifecycle
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: networking
     keywords:
@@ -102,6 +107,7 @@ adrs:
     title: Platform Event Taxonomy And Canonical NATS Topics
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: networking
     keywords:
@@ -122,6 +128,7 @@ adrs:
     title: Subdomain Exposure Audit and Registry
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: networking
     keywords:
@@ -138,6 +145,7 @@ adrs:
     title: Real-Time Agent Coordination Map
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: networking
     keywords:
@@ -156,6 +164,7 @@ adrs:
     title: Keycloak Uses Shared-Mail-Network Internal Submission
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: networking
     keywords:
@@ -172,6 +181,7 @@ adrs:
     title: Network Impairment Test Matrix for Staging and Previews
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: networking
     keywords:
@@ -191,6 +201,7 @@ adrs:
     title: Route And DNS Publication Assertion Ledger
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: networking
     keywords:
@@ -209,6 +220,7 @@ adrs:
     title: Mautrix Bridges For External Chat Channel Adapters
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: networking
     keywords:
@@ -228,6 +240,7 @@ adrs:
     title: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: networking
     keywords:
@@ -249,6 +262,7 @@ adrs:
     title: NATS JetStream As The Platform Event Bus
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: networking
     keywords:
@@ -268,6 +282,7 @@ adrs:
     title: Workstream Registry Shards With Active And Archive Assembly
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: networking
     keywords:
@@ -288,6 +303,7 @@ adrs:
     title: Shared Docker Runtime Bridge-Chain Checks Must Fail Safe Before Daemon Restart
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: networking
     keywords:
@@ -310,6 +326,7 @@ adrs:
     title: Agent File-Domain Locking for Atomic Infrastructure Mutations
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -330,6 +347,7 @@ adrs:
     title: Agent Capability Manifest and Peer Discovery
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -350,6 +368,7 @@ adrs:
     title: Nginx Fragment-Based Atomic Configuration
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -368,6 +387,7 @@ adrs:
     title: Change Provenance Tagging in All Generated and Managed Files
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -388,6 +408,7 @@ adrs:
     title: Structured Agent Mutation Audit Log
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -407,6 +428,7 @@ adrs:
     title: Apply-Phase Serialization via Resource-Group Semaphore
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -425,6 +447,7 @@ adrs:
     title: LLM Inference Routing and Model Registry
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -445,6 +468,7 @@ adrs:
     title: Idempotent Workstream Apply Receipts
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -464,6 +488,7 @@ adrs:
     title: Platform Health Contract and Inter-Service Dependency SLO
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -484,6 +509,7 @@ adrs:
     title: Native Build Server Gate Execution
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: networking
     keywords:
@@ -499,6 +525,7 @@ adrs:
     title: Data-Driven Playbook Composition
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: networking
     keywords:
@@ -520,6 +547,7 @@ adrs:
     title: Cross-Cutting Service Manifest
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: networking
     keywords:
@@ -542,6 +570,7 @@ adrs:
     title: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: networking
     keywords:
@@ -565,6 +594,7 @@ adrs:
     title: Keycloak Native Account Expiry
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: networking
     keywords:
@@ -579,6 +609,7 @@ adrs:
     title: Deployment Profiles — Subset-of-Services Selection for Forks
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-27'
     concern: networking
     keywords:
@@ -599,6 +630,7 @@ adrs:
     title: Multi-Deployment Repo Architecture — N Independent Servers from One Checkout
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-27'
     concern: networking
     keywords:

@@ -366,6 +366,18 @@ validate_receipt_freshness() {
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/check_receipt_freshness.py" --quiet
 }
 
+validate_traceability() {
+  # ADR 0447 item 19 — workstream → ADR → shared-surfaces traceability.
+  # Advisory: prints dangling-ref details to stderr but exits 0 so the
+  # gate doesn't block on workstream-author hygiene gaps. Surfaces real
+  # signal: missing-on-disk shared_surfaces are usually a rename someone
+  # forgot to mirror into the workstream YAML.
+  echo "Workstream traceability validation (ADR 0447 — advisory)"
+  if ! run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_traceability.py" --validate; then
+    echo "validate_traceability: dangling refs reported above (advisory — not blocking)"
+  fi
+}
+
 validate_yaml() {
   local yaml_files=()
 
@@ -927,6 +939,7 @@ for stage in "$@"; do
       validate_dependency_direction
       validate_no_hardcoded_topology
       validate_receipt_freshness
+      validate_traceability
       validate_health_probes
       validate_alert_rules
       validate_tofu
@@ -982,6 +995,9 @@ for stage in "$@"; do
       ;;
     receipt-freshness)
       validate_receipt_freshness
+      ;;
+    traceability)
+      validate_traceability
       ;;
     service-definitions)
       validate_service_definitions

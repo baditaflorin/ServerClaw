@@ -15,6 +15,7 @@ adrs:
     title: DRY And Solid Engineering Principles
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: ci-cd
     keywords:
@@ -30,6 +31,7 @@ adrs:
     title: Repository Validation Pipeline For Automation Changes
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -47,6 +49,7 @@ adrs:
     title: Command Catalog And Approval Gates
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -64,6 +67,7 @@ adrs:
     title: Environment Promotion Gate And Deployment Pipeline
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -81,6 +85,7 @@ adrs:
     title: Remote Build Execution Gateway
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -98,6 +103,7 @@ adrs:
     title: Repository Validation Gate (Pre-Push and CI)
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -116,6 +122,7 @@ adrs:
     title: Continuous Drift Detection and Reconciliation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: ci-cd
     keywords:
@@ -133,6 +140,7 @@ adrs:
     title: Unified Platform API Gateway
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: ci-cd
     keywords:
@@ -151,6 +159,7 @@ adrs:
     title: Interactive Ops Portal with Live Actions
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: ci-cd
     keywords:
@@ -170,6 +179,7 @@ adrs:
     title: Platform Capacity Model and Resource Quota Enforcement
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: ci-cd
     keywords:
@@ -190,6 +200,7 @@ adrs:
     title: Rule-Based Incident Triage Engine
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -208,6 +219,7 @@ adrs:
     title: Gitea for Self-Hosted Git and Webhook-Driven Automation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -227,6 +239,7 @@ adrs:
     title: Speculative Parallel Execution with Compensating Transactions
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -245,6 +258,7 @@ adrs:
     title: Parallel Dry-Run Fan-Out for Intent Batch Validation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -264,6 +278,7 @@ adrs:
     title: Circuit Breaker Pattern for External Service Calls
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -283,6 +298,7 @@ adrs:
     title: Ansible Role Idempotency CI Enforcement
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -300,6 +316,7 @@ adrs:
     title: Controlled Fault Injection for Resilience Validation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -319,6 +336,7 @@ adrs:
     title: Standby Capacity Reservation and Placement Rules
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: ci-cd
     keywords:
@@ -336,6 +354,7 @@ adrs:
     title: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -355,6 +374,7 @@ adrs:
     title: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -375,6 +395,7 @@ adrs:
     title: Failover Rehearsal Gate for Redundancy Tiers
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -394,6 +415,7 @@ adrs:
     title: Synthetic Transaction Replay for Capacity and Recovery Validation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -412,6 +434,7 @@ adrs:
     title: Separate Capacity Classes for Standby, Recovery, and Preview Workloads
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -432,6 +455,7 @@ adrs:
     title: Architecture Fitness Functions In The Validation Gate
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -450,6 +474,7 @@ adrs:
     title: Server-Resident Reconciliation Via Ansible Pull
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -467,6 +492,7 @@ adrs:
     title: Gitea Actions Runners For On-Platform Validation And Release Preparation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -487,6 +513,7 @@ adrs:
     title: Policy Decisions Via Open Policy Agent And Conftest
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -505,6 +532,7 @@ adrs:
     title: Signed Release Bundles Via Gitea Releases And Cosign
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -524,6 +552,7 @@ adrs:
     title: Stage-Scoped Smoke Suites And Promotion Gates
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -542,6 +571,7 @@ adrs:
     title: Failure-Domain-Isolated Validation Lanes
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -558,6 +588,7 @@ adrs:
     title: Immutable Validation Snapshots For Remote Builders And Schema Checks
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -578,6 +609,7 @@ adrs:
     title: Validation Runner Capability Contracts And Environment Attestation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -597,6 +629,7 @@ adrs:
     title: Expiring Gate Bypass Waivers With Structured Reason Codes
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -617,6 +650,7 @@ adrs:
     title: Vulnerability Budgets And Image-Host Freshness Promotion Gates
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: ci-cd
     keywords:
@@ -636,6 +670,7 @@ adrs:
     title: Apache Tika Server For Document Text Extraction In The RAG Pipeline
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: ci-cd
     keywords:
@@ -657,6 +692,7 @@ adrs:
     title: Woodpecker CI As The API-Driven Continuous Integration Server
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: ci-cd
     keywords:
@@ -677,6 +713,7 @@ adrs:
     title: Shared Artifact Cache Plane For Container And Package Dependencies
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: ci-cd
     keywords:
@@ -697,6 +734,7 @@ adrs:
     title: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: ci-cd
     keywords:
@@ -719,6 +757,7 @@ adrs:
     title: Public Entrypoint Leakage Validation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: ci-cd
     keywords:
@@ -737,6 +776,7 @@ adrs:
     title: Compose Dependency Health Gates As A Repo-Enforced Resilience Baseline
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-04'
     concern: ci-cd
     keywords:
@@ -760,6 +800,7 @@ adrs:
     title: Service Integration Contract Registry
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: ci-cd
     keywords:
@@ -779,6 +820,7 @@ adrs:
     title: Python Validation Toolkit
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: ci-cd
     keywords:
@@ -798,6 +840,7 @@ adrs:
     title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: ci-cd
     keywords:
@@ -820,6 +863,7 @@ adrs:
     title: Postmortem — cert_mismatch Gate Forced `--no-verify` Push
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-14'
     concern: ci-cd
     keywords:
@@ -837,6 +881,7 @@ adrs:
     title: CI Release-Readiness Checks
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: ci-cd
     keywords:

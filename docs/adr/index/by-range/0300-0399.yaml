@@ -18,6 +18,7 @@ adrs:
     title: Falco For Container Runtime Syscall Security Monitoring And Autonomous Anomaly Detection
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: security
     keywords:
@@ -40,6 +41,7 @@ adrs:
     title: Semgrep For SAST And Application Code Security Scanning In The CI Gate
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: security
     keywords:
@@ -60,6 +62,7 @@ adrs:
     title: Restic For Encrypted File-Level Backup Of Platform Configuration And State Artifacts
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: storage
     keywords:
@@ -81,6 +84,7 @@ adrs:
     title: pgaudit For PostgreSQL Query And Privilege Change Audit Logging
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -101,6 +105,7 @@ adrs:
     title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration Linting
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: release
     keywords:
@@ -122,6 +127,7 @@ adrs:
     title: k6 For Continuous Load Testing And SLO Error Budget Burn Validation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: ci-cd
     keywords:
@@ -144,6 +150,7 @@ adrs:
     title: Checkov For IaC Policy Compliance Scanning Of OpenTofu, Compose, And Ansible
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: automation
     keywords:
@@ -165,6 +172,7 @@ adrs:
     title: Platform Workbench As The Cohesive First-Party App Frame
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -185,6 +193,7 @@ adrs:
     title: Temporary Guest Operator Accounts With 72-Hour Expiry
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: vm-topology
     keywords:
@@ -205,6 +214,7 @@ adrs:
     title: Journey-Aware Entry Routing And Saved Home Selection
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -224,6 +234,7 @@ adrs:
     title: LLM Agent Execution Surface and Connectivity Contracts for Operator Provisioning
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: vm-topology
     keywords:
@@ -245,6 +256,7 @@ adrs:
     title: Task-Oriented Information Architecture Across The Platform Workbench
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -264,6 +276,7 @@ adrs:
     title: First-Run Activation Checklists And Progressive Capability Reveal
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -283,6 +296,7 @@ adrs:
     title: Global Command Palette And Universal Open Dialog Via cmdk
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -303,6 +317,7 @@ adrs:
     title: Shared Notification Center And Activity Timeline Across Human Surfaces
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -324,6 +339,7 @@ adrs:
     title: Contextual Help, Glossary, And Escalation Drawer
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: agent-discovery
     keywords:
@@ -342,6 +358,7 @@ adrs:
     title: Resumable Multi-Step Flows And Return-To-Task Reentry
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -360,6 +377,7 @@ adrs:
     title: Canonical Page States And Next-Best-Action Guidance For Human Surfaces
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -380,6 +398,7 @@ adrs:
     title: Journey Analytics And Onboarding Success Scorecards
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: platform
     keywords:
@@ -398,6 +417,7 @@ adrs:
     title: Keycloak Direct-API Operator Provisioning via SSH Proxy
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: vm-topology
     keywords:
@@ -420,6 +440,7 @@ adrs:
     title: Repeatable Operator Onboarding with CC Audit Trail
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: vm-topology
     keywords:
@@ -442,6 +463,7 @@ adrs:
     title: Dynamic Inventory as Source of Truth for Topology-Tracking Services
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-05'
     concern: vm-topology
     keywords:
@@ -460,6 +482,7 @@ adrs:
     title: Runtime Pools As The Service Partition Boundary
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: platform
     keywords:
@@ -479,6 +502,7 @@ adrs:
     title: Pool-Scoped Deployment Surfaces And Agent Execution Lanes
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: agent-discovery
     keywords:
@@ -498,6 +522,7 @@ adrs:
     title: Runtime Pool Memory Envelopes And Reserved Host Headroom
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: platform
     keywords:
@@ -518,6 +543,7 @@ adrs:
     title: Memory-Pressure Autoscaling For Elastic Runtime Pools
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: platform
     keywords:
@@ -535,6 +561,7 @@ adrs:
     title: Service Mobility Tiers And Migration Waves For Runtime Pools
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: platform
     keywords:
@@ -555,6 +582,7 @@ adrs:
     title: Service Definition Shards And Generated Service Catalog Assembly
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: documentation
     keywords:
@@ -578,6 +606,7 @@ adrs:
     title: Faceted ADR Index Shards And Reservation Windows
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: documentation
     keywords:
@@ -600,6 +629,7 @@ adrs:
     title: Workstream Registry Shards With Active And Archive Assembly
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: networking
     keywords:
@@ -620,6 +650,7 @@ adrs:
     title: Sectional Agent Discovery Registries And Generated Onboarding Packs
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: documentation
     keywords:
@@ -642,6 +673,7 @@ adrs:
     title: Size-Budgeted Root Summaries And Automatic Rollover Ledgers
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: documentation
     keywords:
@@ -663,6 +695,7 @@ adrs:
     title: Shared Docker Runtime Bridge-Chain Checks Must Fail Safe Before Daemon Restart
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: networking
     keywords:
@@ -685,6 +718,7 @@ adrs:
     title: Public GitHub Readiness As A First-Class Repository Lifecycle
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: vm-topology
     keywords:
@@ -707,6 +741,7 @@ adrs:
     title: Repository-Relative Paths For Public Metadata And Generated Docs
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: agent-discovery
     keywords:
@@ -727,6 +762,7 @@ adrs:
     title: Relative Release And Status Links In Generated Root Surfaces
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: documentation
     keywords:
@@ -749,6 +785,7 @@ adrs:
     title: Private Overlay Files For Deployment-Specific Secrets And Identities
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: security
     keywords:
@@ -771,6 +808,7 @@ adrs:
     title: Example-First Inventory And Service Identity Catalogs
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: vm-topology
     keywords:
@@ -791,6 +829,7 @@ adrs:
     title: Public-Safe Agent Onboarding Entrypoints
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: agent-discovery
     keywords:
@@ -810,6 +849,7 @@ adrs:
     title: Public Entrypoint Leakage Validation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: ci-cd
     keywords:
@@ -828,6 +868,7 @@ adrs:
     title: Fork-First Workstream And Worktree Metadata
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: agent-discovery
     keywords:
@@ -848,6 +889,7 @@ adrs:
     title: Public Documentation Tiers And Private History Boundaries
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: documentation
     keywords:
@@ -867,6 +909,7 @@ adrs:
     title: Reference Deployment Samples And Replaceable Provider Profiles
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: vm-topology
     keywords:
@@ -888,6 +931,7 @@ adrs:
     title: Dedicated Coolify Apps VM Separation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-03'
     concern: vm-topology
     keywords:
@@ -910,6 +954,7 @@ adrs:
     title: Open WebUI Keycloak OIDC With Break-Glass Fallback
     status: Deprecated
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-03'
     concern: security
     keywords:
@@ -931,6 +976,7 @@ adrs:
     title: Zero-SSH Guest Operations via Proxmox QAPI
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-04'
     concern: host-os
     keywords:
@@ -954,6 +1000,7 @@ adrs:
     title: Operator Tool Interface Contract
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-04'
     concern: automation
     keywords:
@@ -976,6 +1023,7 @@ adrs:
     title: Single-Source Environment Topology
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-04'
     concern: vm-topology
     keywords:
@@ -996,6 +1044,7 @@ adrs:
     title: Layered Operator Tool Separation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-04'
     concern: platform
     keywords:
@@ -1018,6 +1067,7 @@ adrs:
     title: Centralized Port Registry
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-05'
     concern: platform
     keywords:
@@ -1036,6 +1086,7 @@ adrs:
     title: Compose Dependency Health Gates As A Repo-Enforced Resilience Baseline
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-04'
     concern: ci-cd
     keywords:
@@ -1059,6 +1110,7 @@ adrs:
     title: Outline Programmatic Wiki API and Automation Hooks
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-05'
     concern: automation
     keywords:
@@ -1078,6 +1130,7 @@ adrs:
     title: PostgreSQL Domain Clustering
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-04'
     concern: vm-topology
     keywords:
@@ -1097,6 +1150,7 @@ adrs:
     title: '— Repowise: local semantic code search over the git repo'
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-05'
     concern: documentation
     keywords:
@@ -1118,6 +1172,7 @@ adrs:
     title: Agent File-Domain Locking for Atomic Infrastructure Mutations
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1138,6 +1193,7 @@ adrs:
     title: Docker Runtime Workload Split
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-04'
     concern: vm-topology
     keywords:
@@ -1157,6 +1213,7 @@ adrs:
     title: Per-Service LLM Context File (service.llm.yaml)
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1177,6 +1234,7 @@ adrs:
     title: Agent Capability Manifest and Peer Discovery
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1197,6 +1255,7 @@ adrs:
     title: Nginx Fragment-Based Atomic Configuration
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1215,6 +1274,7 @@ adrs:
     title: Change Provenance Tagging in All Generated and Managed Files
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1235,6 +1295,7 @@ adrs:
     title: Token-Budgeted Agent Onboarding Packs
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1253,6 +1314,7 @@ adrs:
     title: Service Integration Contract Registry
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: ci-cd
     keywords:
@@ -1272,6 +1334,7 @@ adrs:
     title: Structured Agent Mutation Audit Log
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1291,6 +1354,7 @@ adrs:
     title: Apply-Phase Serialization via Resource-Group Semaphore
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1309,6 +1373,7 @@ adrs:
     title: LLM Inference Routing and Model Registry
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1329,6 +1394,7 @@ adrs:
     title: Idempotent Workstream Apply Receipts
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1348,6 +1414,7 @@ adrs:
     title: Platform Health Contract and Inter-Service Dependency SLO
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-05'
     concern: networking
     keywords:
@@ -1368,6 +1435,7 @@ adrs:
     title: Declarative PostgreSQL Client Registry
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-05'
     concern: platform
     keywords:
@@ -1386,6 +1454,7 @@ adrs:
     title: OpenBao TLS Cert Lifetime And Renewal Hardening
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1403,6 +1472,7 @@ adrs:
     title: Plane as Agent Task HQ — Live Work Tracking for LLM Agents
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-05'
     concern: monitoring
     keywords:
@@ -1423,6 +1493,7 @@ adrs:
     title: Nomad OIDC Auth and Edge Publication
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-05'
     concern: security
     keywords:
@@ -1441,6 +1512,7 @@ adrs:
     title: Semaphore Keycloak OIDC Integration
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-07'
     concern: security
     keywords:
@@ -1460,6 +1532,7 @@ adrs:
     title: Agent Service API Gateway — Governed Pattern for Internal Service Tools
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: security
     keywords:
@@ -1482,6 +1555,7 @@ adrs:
     title: Plane Agent Tools — Programmatic Task Management for Agents
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -1504,6 +1578,7 @@ adrs:
     title: Native Build Server Gate Execution
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: networking
     keywords:
@@ -1519,6 +1594,7 @@ adrs:
     title: Outline Agent Tools — Programmatic Wiki Access for Agents
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -1540,6 +1616,7 @@ adrs:
     title: Docker Compose Jinja2 Macro Library
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: vm-topology
     keywords:
@@ -1562,6 +1639,7 @@ adrs:
     title: Python Validation Toolkit
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: ci-cd
     keywords:
@@ -1581,6 +1659,7 @@ adrs:
     title: Service Lifecycle Task Includes
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -1603,6 +1682,7 @@ adrs:
     title: Parameterized Service Verification Tasks
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -1624,6 +1704,7 @@ adrs:
     title: Data-Driven Playbook Composition
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: networking
     keywords:
@@ -1645,6 +1726,7 @@ adrs:
     title: Service Registry and Derived Defaults
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: automation
     keywords:
@@ -1666,6 +1748,7 @@ adrs:
     title: Cross-Cutting Service Manifest
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: networking
     keywords:
@@ -1688,6 +1771,7 @@ adrs:
     title: Certificate Validation And Concordance Enforcement
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: security
     keywords:
@@ -1702,6 +1786,7 @@ adrs:
     title: Credential Isolation and Agent Safety for .local/ Secrets
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: security
     keywords:
@@ -1719,6 +1804,7 @@ adrs:
     title: Identity Core VM Isolation and Aggressive Health Watchdog
     status: Accepted
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-06'
     concern: vm-topology
     keywords:
@@ -1739,6 +1825,7 @@ adrs:
     title: Open WebUI Platform Knowledge Integration
     status: Deprecated
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-06'
     concern: platform
     keywords:
@@ -1754,6 +1841,7 @@ adrs:
     title: ServerClaw Tool Surface In Open WebUI
     status: Deprecated
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: platform
     keywords:
@@ -1769,6 +1857,7 @@ adrs:
     title: Neko Remote Desktop for Interactive Operator Browser Access
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-06'
     concern: identity
     keywords:
@@ -1792,6 +1881,7 @@ adrs:
     title: Login Service Contracts and Session Recovery Automation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-07'
     concern: automation
     keywords:
@@ -1816,6 +1906,7 @@ adrs:
     title: Keycloak Sign-In Button Stuck Incident Postmortem
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-08'
     concern: security
     keywords:
@@ -1835,6 +1926,7 @@ adrs:
     title: Discovery Surface Refresh Cascade
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: agent-discovery
     keywords:
@@ -1849,6 +1941,7 @@ adrs:
     title: MemPalace Agent Memory System Integration
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: agent-discovery
     keywords:
@@ -1864,6 +1957,7 @@ adrs:
     title: Decouple Platform from Operator Identity
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: identity
     keywords:
@@ -1879,6 +1973,7 @@ adrs:
     title: MemPalace Integration with chat.example.com
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: platform
     keywords:
@@ -1895,6 +1990,7 @@ adrs:
     title: Agent Cross-Host Execution and MCP Tool Surface
     status: Accepted
     implementation_status: Partial
+    currently_describes: mixed_state
     date: '2026-04-09'
     concern: agent-discovery
     keywords:
@@ -1914,6 +2010,7 @@ adrs:
     title: Reproducible Zero-to-Platform Bootstrap for Public Forks
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: bootstrap
     keywords:
@@ -1929,6 +2026,7 @@ adrs:
     title: — Unified Disk Space Monitoring
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: storage
     keywords:
@@ -1943,6 +2041,7 @@ adrs:
     title: Platform DRY Consolidation
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-04-09'
     concern: vm-topology
     keywords:
@@ -1960,6 +2059,7 @@ adrs:
     title: ServerClaw-in-Docker — Containerized Platform Development Environment
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: platform
     keywords:
@@ -1975,6 +2075,7 @@ adrs:
     title: Centralize Keycloak Realm Name and OIDC Issuer URL
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: security
     keywords:
@@ -1992,6 +2093,7 @@ adrs:
     title: Standard Procedure for Decommissioning a Platform Service
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: automation
     keywords:
@@ -2013,6 +2115,7 @@ adrs:
     title: Remove Open WebUI from the Platform
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: platform
     keywords:
@@ -2034,6 +2137,7 @@ adrs:
     title: CPU-Only Operational Automation — Eliminate AI from Deterministic Work
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: networking
     keywords:
@@ -2057,6 +2161,7 @@ adrs:
     title: Convergence Speed and Incremental Apply
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: platform
     keywords:
@@ -2071,6 +2176,7 @@ adrs:
     title: — Optional Secret Propagation in Role Convergence
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: security
     keywords:
@@ -2086,6 +2192,7 @@ adrs:
     title: Remove One-API from the Platform
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: api
     keywords:
@@ -2106,6 +2213,7 @@ adrs:
     title: Integrate LibreChat Agents API for Programmatic Agent Access
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-10'
     concern: automation
     keywords:
@@ -2126,6 +2234,7 @@ adrs:
     title: Agent Interface Abstraction Layer — Provider-Agnostic DTOs
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-10'
     concern: agent-discovery
     keywords:
@@ -2146,6 +2255,7 @@ adrs:
     title: Deterministic Service Decommissioning — Catalog Schema Registry, YAML Block Markers, and Dry-Run Preview
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: automation
     keywords:
@@ -2168,6 +2278,7 @@ adrs:
     title: Managed S3 Bucket Consumer Pattern
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-10'
     concern: platform
     keywords:
@@ -2183,6 +2294,7 @@ adrs:
     title: Outline Shared S3 Migration
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-10'
     concern: platform
     keywords:
@@ -2198,6 +2310,7 @@ adrs:
     title: Platform Reconciliation Daemon — Continuous Portal and Artifact Regeneration
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-10'
     concern: ci-cd
     keywords:

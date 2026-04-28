@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.8",
+  "repo_version": "0.179.9",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-28T10:38:01Z",
-  "next_refresh_at": "2026-04-28T11:38:01Z",
+  "generated_at": "2026-04-28T11:33:24Z",
+  "next_refresh_at": "2026-04-28T12:33:24Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.7",
+    "last_version": "0.179.8",
     "deployed_at": "2026-04-28",
-    "summary": "No changelog notes were present in `## Unreleased` at release time.",
-    "release_notes_url": "docs/release-notes/0.179.8.md"
+    "summary": "ADR 0447 + ws-0447: Phase 3 LLM ergonomics + traceability \u2014",
+    "release_notes_url": "docs/release-notes/0.179.9.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -15,6 +15,7 @@ adrs:
     title: Initial Storage And Backup Model
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-22'
     concern: storage
     keywords:
@@ -29,6 +30,7 @@ adrs:
     title: Control-Plane Backup, Recovery, And Break-Glass
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: storage
     keywords:
@@ -46,6 +48,7 @@ adrs:
     title: Automated Backup Restore Verification
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: storage
     keywords:
@@ -64,6 +67,7 @@ adrs:
     title: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: storage
     keywords:
@@ -83,6 +87,7 @@ adrs:
     title: MinIO As The S3-Compatible Object Storage Layer
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: storage
     keywords:
@@ -102,6 +107,7 @@ adrs:
     title: Restic For Encrypted File-Level Backup Of Platform Configuration And State Artifacts
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: storage
     keywords:
@@ -123,6 +129,7 @@ adrs:
     title: — Unified Disk Space Monitoring
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: storage
     keywords:

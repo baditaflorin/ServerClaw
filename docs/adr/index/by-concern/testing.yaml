@@ -15,6 +15,7 @@ adrs:
     title: End-to-End Integration Test Suite
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: testing
     keywords:
@@ -33,6 +34,7 @@ adrs:
     title: Anonymized Seed Data Snapshots for Repeatable Tests
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: testing
     keywords:
@@ -52,6 +54,7 @@ adrs:
     title: Declared-To-Live Service Attestation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: testing
     keywords:
@@ -68,6 +71,7 @@ adrs:
     title: — Docker Isolation Testing and IoC Completion
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: testing
     keywords:

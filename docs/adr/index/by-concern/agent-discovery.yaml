@@ -15,6 +15,7 @@ adrs:
     title: ADR Lifecycle And Implementation Metadata
     status: Accepted
     implementation_status: Accepted
+    currently_describes: current_state
     date: '2026-03-21'
     concern: agent-discovery
     keywords:
@@ -30,6 +31,7 @@ adrs:
     title: Mattermost For ChatOps And Operator-Agent Collaboration
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: agent-discovery
     keywords:
@@ -47,6 +49,7 @@ adrs:
     title: Open WebUI For Operator And Agent Workbench
     status: Deprecated
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: agent-discovery
     keywords:
@@ -65,6 +68,7 @@ adrs:
     title: Agent Tool Registry And Governed Tool Calls
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: agent-discovery
     keywords:
@@ -82,6 +86,7 @@ adrs:
     title: Retrieval-Augmented Context For Platform Queries
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: agent-discovery
     keywords:
@@ -100,6 +105,7 @@ adrs:
     title: Agent Observation Loop And Autonomous Drift Detection
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-22'
     concern: agent-discovery
     keywords:
@@ -118,6 +124,7 @@ adrs:
     title: Agent Capability Bounds and Autonomous Action Policy
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: agent-discovery
     keywords:
@@ -137,6 +144,7 @@ adrs:
     title: Platform Health Composite Index
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: agent-discovery
     keywords:
@@ -154,6 +162,7 @@ adrs:
     title: Multi-Agent Handoff Protocol
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: agent-discovery
     keywords:
@@ -169,6 +178,7 @@ adrs:
     title: Agent Session Workspace Isolation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: agent-discovery
     keywords:
@@ -186,6 +196,7 @@ adrs:
     title: Repository Structure Index for Agent Discovery
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: agent-discovery
     keywords:
@@ -203,6 +214,7 @@ adrs:
     title: ADR Metadata Index and Fast Discovery Protocol
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: agent-discovery
     keywords:
@@ -221,6 +233,7 @@ adrs:
     title: Automated Enforcement of Agent Discovery and Handoff Standards
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: agent-discovery
     keywords:
@@ -239,6 +252,7 @@ adrs:
     title: Off-Host Witness and Control Metadata Replication
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: agent-discovery
     keywords:
@@ -258,6 +272,7 @@ adrs:
     title: Self-Service Repo Intake And Agent-Assisted Deployments
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: agent-discovery
     keywords:
@@ -276,6 +291,7 @@ adrs:
     title: ServerClaw As A Distinct Self-Hosted Agent Product On LV3
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-28'
     concern: agent-discovery
     keywords:
@@ -296,6 +312,7 @@ adrs:
     title: Livekit As The Real-Time Audio And Voice Channel For Agents
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-29'
     concern: agent-discovery
     keywords:
@@ -316,6 +333,7 @@ adrs:
     title: Contextual Help, Glossary, And Escalation Drawer
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-31'
     concern: agent-discovery
     keywords:
@@ -334,6 +352,7 @@ adrs:
     title: Pool-Scoped Deployment Surfaces And Agent Execution Lanes
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-01'
     concern: agent-discovery
     keywords:
@@ -353,6 +372,7 @@ adrs:
     title: Repository-Relative Paths For Public Metadata And Generated Docs
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: agent-discovery
     keywords:
@@ -373,6 +393,7 @@ adrs:
     title: Public-Safe Agent Onboarding Entrypoints
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: agent-discovery
     keywords:
@@ -392,6 +413,7 @@ adrs:
     title: Fork-First Workstream And Worktree Metadata
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-04-02'
     concern: agent-discovery
     keywords:
@@ -412,6 +434,7 @@ adrs:
     title: Discovery Surface Refresh Cascade
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: agent-discovery
     keywords:
@@ -426,6 +449,7 @@ adrs:
     title: MemPalace Agent Memory System Integration
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-03-21'
     concern: agent-discovery
     keywords:
@@ -441,6 +465,7 @@ adrs:
     title: Agent Cross-Host Execution and MCP Tool Surface
     status: Accepted
     implementation_status: Partial
+    currently_describes: mixed_state
     date: '2026-04-09'
     concern: agent-discovery
     keywords:
@@ -460,6 +485,7 @@ adrs:
     title: Agent Interface Abstraction Layer — Provider-Agnostic DTOs
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-04-10'
     concern: agent-discovery
     keywords:
@@ -480,6 +506,7 @@ adrs:
     title: Multi-Deployment Make Interface & Agent Worktree Binding
     status: Proposed
     implementation_status: Proposed
+    currently_describes: goal_state
     date: '2026-04-27'
     concern: agent-discovery
     keywords:

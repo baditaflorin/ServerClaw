@@ -16,6 +16,7 @@ adrs:
     title: Whisper ASR As The CPU Speech-To-Text Service
     status: Accepted
     implementation_status: Partial
+    currently_describes: mixed_state
     date: '2026-03-29'
     concern: platform
     keywords:
@@ -32,6 +33,7 @@ adrs:
     title: Agent Cross-Host Execution and MCP Tool Surface
     status: Accepted
     implementation_status: Partial
+    currently_describes: mixed_state
     date: '2026-04-09'
     concern: agent-discovery
     keywords:
@@ -51,6 +53,7 @@ adrs:
     title: Safe Password Alphabet Standard
     status: Accepted
     implementation_status: Partial
+    currently_describes: mixed_state
     date: '2026-04-10'
     concern: security
     keywords:
@@ -71,6 +74,7 @@ adrs:
     title: Platform-Wide Service Watchdog
     status: Accepted
     implementation_status: Partial
+    currently_describes: mixed_state
     date: '2026-04-21'
     concern: resilience
     keywords:

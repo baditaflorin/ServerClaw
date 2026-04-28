@@ -16,6 +16,7 @@ adrs:
     title: GlitchTip For Application Exceptions And Task Failures
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-03-22'
     concern: platform
     keywords:
@@ -33,6 +34,7 @@ adrs:
     title: Unified Search Across Platform Services
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-03-23'
     concern: documentation
     keywords:
@@ -51,6 +53,7 @@ adrs:
     title: Per-Service LLM Context File (service.llm.yaml)
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-05'
     concern: security
     keywords:
@@ -71,6 +74,7 @@ adrs:
     title: Token-Budgeted Agent Onboarding Packs
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-05'
     concern: security
     keywords:
@@ -89,6 +93,7 @@ adrs:
     title: LLM Inference Routing and Model Registry
     status: Deprecated
     implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-05'
     concern: networking
     keywords:

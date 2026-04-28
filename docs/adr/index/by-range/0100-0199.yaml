@@ -18,6 +18,7 @@ adrs:
     title: Formal RTO/RPO Targets and Disaster Recovery Playbook
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: automation
     keywords:
@@ -38,6 +39,7 @@ adrs:
     title: Automated Certificate Lifecycle Management
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: security
     keywords:
@@ -56,6 +58,7 @@ adrs:
     title: Security Posture Reporting and Benchmark Drift
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: security
     keywords:
@@ -75,6 +78,7 @@ adrs:
     title: Data Classification and Retention Policy
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -93,6 +97,7 @@ adrs:
     title: Service Dependency Graph and Failure Propagation Model
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -113,6 +118,7 @@ adrs:
     title: Platform Capacity Model and Resource Quota Enforcement
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: ci-cd
     keywords:
@@ -133,6 +139,7 @@ adrs:
     title: Ephemeral Environment Lifecycle and Teardown Policy
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -152,6 +159,7 @@ adrs:
     title: Platform Extension Model for Adding New Services
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -172,6 +180,7 @@ adrs:
     title: Operator Onboarding and Off-boarding Workflow
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: automation
     keywords:
@@ -190,6 +199,7 @@ adrs:
     title: Public Status Page
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: platform
     keywords:
@@ -207,6 +217,7 @@ adrs:
     title: Platform Versioning, Release Notes, and Upgrade Path
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: release
     keywords:
@@ -226,6 +237,7 @@ adrs:
     title: End-to-End Integration Test Suite
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-23'
     concern: testing
     keywords:
@@ -244,6 +256,7 @@ adrs:
     title: Deterministic Goal Compiler
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -260,6 +273,7 @@ adrs:
     title: World-State Materializer
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -276,6 +290,7 @@ adrs:
     title: Rule-Based Incident Triage Engine
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -294,6 +309,7 @@ adrs:
     title: Event-Sourced Mutation Ledger
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -311,6 +327,7 @@ adrs:
     title: Change Risk Scoring Without LLMs
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -329,6 +346,7 @@ adrs:
     title: Service Dependency Graph As First-Class Runtime
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -349,6 +367,7 @@ adrs:
     title: Replayable Failure Case Library
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -365,6 +384,7 @@ adrs:
     title: Budgeted Workflow Scheduler
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: automation
     keywords:
@@ -382,6 +402,7 @@ adrs:
     title: Dry-Run Semantic Diff Engine
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: release
     keywords:
@@ -399,6 +420,7 @@ adrs:
     title: Local Search and Indexing Fabric
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: documentation
     keywords:
@@ -417,6 +439,7 @@ adrs:
     title: Windmill Operator Access Admin Surface
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: automation
     keywords:
@@ -435,6 +458,7 @@ adrs:
     title: Service Uptime Contracts And Monitor-Backed Health
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -453,6 +477,7 @@ adrs:
     title: Platform Event Taxonomy And Canonical NATS Topics
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: networking
     keywords:
@@ -473,6 +498,7 @@ adrs:
     title: Agent Capability Bounds and Autonomous Action Policy
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: agent-discovery
     keywords:
@@ -492,6 +518,7 @@ adrs:
     title: Observation-to-Action Closure Loop
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -508,6 +535,7 @@ adrs:
     title: Intent Deduplication and Conflict Resolution
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -524,6 +552,7 @@ adrs:
     title: Platform Health Composite Index
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: agent-discovery
     keywords:
@@ -541,6 +570,7 @@ adrs:
     title: Runbook Automation Executor
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: automation
     keywords:
@@ -556,6 +586,7 @@ adrs:
     title: Agent State Persistence Across Workflow Boundaries
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: automation
     keywords:
@@ -575,6 +606,7 @@ adrs:
     title: Multi-Agent Handoff Protocol
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: agent-discovery
     keywords:
@@ -590,6 +622,7 @@ adrs:
     title: Self-Describing Platform Manifest
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -606,6 +639,7 @@ adrs:
     title: Portal Authentication by Default
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: identity
     keywords:
@@ -623,6 +657,7 @@ adrs:
     title: Changelog Portal Content Redaction
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: documentation
     keywords:
@@ -640,6 +675,7 @@ adrs:
     title: Developer Portal Sensitivity Classification
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: documentation
     keywords:
@@ -657,6 +693,7 @@ adrs:
     title: HTTP Security Headers Hardening
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -675,6 +712,7 @@ adrs:
     title: Robots.txt and Crawl Policy
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: platform
     keywords:
@@ -692,6 +730,7 @@ adrs:
     title: Published Artifact Secret Scanning
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -708,6 +747,7 @@ adrs:
     title: Subdomain Exposure Audit and Registry
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: networking
     keywords:
@@ -724,6 +764,7 @@ adrs:
     title: Grafana Public Access Hardening
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -742,6 +783,7 @@ adrs:
     title: API Token Lifecycle and Exposure Response
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -760,6 +802,7 @@ adrs:
     title: Public Surface Automated Security Scan
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -778,6 +821,7 @@ adrs:
     title: Gitea for Self-Hosted Git and Webhook-Driven Automation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -797,6 +841,7 @@ adrs:
     title: Headscale For Zero-Trust Mesh VPN
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: platform
     keywords:
@@ -815,6 +860,7 @@ adrs:
     title: Ollama for Local LLM Inference API
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: api
     keywords:
@@ -833,6 +879,7 @@ adrs:
     title: Langfuse For Agent Observability
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: monitoring
     keywords:
@@ -849,6 +896,7 @@ adrs:
     title: Vaultwarden for Operator Credential Management
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -867,6 +915,7 @@ adrs:
     title: SearXNG for Agent Web Search
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: documentation
     keywords:
@@ -884,6 +933,7 @@ adrs:
     title: Semaphore For Ansible Job Management UI And API
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: automation
     keywords:
@@ -904,6 +954,7 @@ adrs:
     title: Dozzle for Real-Time Container Log Access
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: identity
     keywords:
@@ -922,6 +973,7 @@ adrs:
     title: n8n for Webhook and API Integration Automation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: automation
     keywords:
@@ -941,6 +993,7 @@ adrs:
     title: Homepage for Unified Service Dashboard
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -959,6 +1012,7 @@ adrs:
     title: Distributed Resource Lock Registry
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: agent-coordination
     keywords:
@@ -977,6 +1031,7 @@ adrs:
     title: VM-Scoped Parallel Execution Lanes
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: vm-topology
     keywords:
@@ -995,6 +1050,7 @@ adrs:
     title: Intent Queue with Release-Triggered Scheduling
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: release
     keywords:
@@ -1013,6 +1069,7 @@ adrs:
     title: Agent Session Workspace Isolation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: agent-discovery
     keywords:
@@ -1030,6 +1087,7 @@ adrs:
     title: Per-VM Concurrency Budget and Resource Reservation
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: vm-topology
     keywords:
@@ -1049,6 +1107,7 @@ adrs:
     title: Conflict-Free Configuration Merge Protocol
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -1067,6 +1126,7 @@ adrs:
     title: Speculative Parallel Execution with Compensating Transactions
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -1085,6 +1145,7 @@ adrs:
     title: Parallel Dry-Run Fan-Out for Intent Batch Validation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -1104,6 +1165,7 @@ adrs:
     title: Real-Time Agent Coordination Map
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: networking
     keywords:
@@ -1122,6 +1184,7 @@ adrs:
     title: Distributed Deadlock Detection and Resolution
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: agent-coordination
     keywords:
@@ -1140,6 +1203,7 @@ adrs:
     title: Platform-Wide Retry Taxonomy and Exponential Backoff
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: resilience
     keywords:
@@ -1159,6 +1223,7 @@ adrs:
     title: Proxmox Break-Glass SSH Port
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: host-os
     keywords:
@@ -1176,6 +1241,7 @@ adrs:
     title: Repository Structure Index for Agent Discovery
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: agent-discovery
     keywords:
@@ -1193,6 +1259,7 @@ adrs:
     title: ADR Metadata Index and Fast Discovery Protocol
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: agent-discovery
     keywords:
@@ -1211,6 +1278,7 @@ adrs:
     title: Circuit Breaker Pattern for External Service Calls
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -1230,6 +1298,7 @@ adrs:
     title: Playbook and Role Metadata Standard for Agent Discovery
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: automation
     keywords:
@@ -1248,6 +1317,7 @@ adrs:
     title: Workflow Idempotency Keys and Double-Execution Prevention
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: security
     keywords:
@@ -1266,6 +1336,7 @@ adrs:
     title: Canonical Configuration Locations Registry
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -1281,6 +1352,7 @@ adrs:
     title: Canonical Error Response Format and Error Code Registry
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -1301,6 +1373,7 @@ adrs:
     title: Agent Handoff and Context Preservation Protocol
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: documentation
     keywords:
@@ -1318,6 +1391,7 @@ adrs:
     title: Graceful Degradation Mode Declarations
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: resilience
     keywords:
@@ -1335,6 +1409,7 @@ adrs:
     title: Ansible Role Idempotency CI Enforcement
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -1352,6 +1427,7 @@ adrs:
     title: Automated Enforcement of Agent Discovery and Handoff Standards
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: agent-discovery
     keywords:
@@ -1370,6 +1446,7 @@ adrs:
     title: Structured Log Field Contract
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: platform
     keywords:
@@ -1387,6 +1464,7 @@ adrs:
     title: Platform-Wide Timeout Hierarchy
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-25'
     concern: resilience
     keywords:
@@ -1404,6 +1482,7 @@ adrs:
     title: Controlled Fault Injection for Resilience Validation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: ci-cd
     keywords:
@@ -1423,6 +1502,7 @@ adrs:
     title: Watchdog Escalation and Stale Job Self-Healing
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: resilience
     keywords:
@@ -1441,6 +1521,7 @@ adrs:
     title: Workstream Surface Ownership Manifest
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -1458,6 +1539,7 @@ adrs:
     title: Integration-Only Canonical Truth Assembly
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -1475,6 +1557,7 @@ adrs:
     title: Cross-Workstream Interface Contracts
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -1491,6 +1574,7 @@ adrs:
     title: Inventory Sharding and Host-Scoped Ansible Execution
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: automation
     keywords:
@@ -1509,6 +1593,7 @@ adrs:
     title: Run Namespace Partitioning for Parallel Tooling
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -1526,6 +1611,7 @@ adrs:
     title: Dependency Wave Manifests for Parallel Apply
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -1544,6 +1630,7 @@ adrs:
     title: Service Redundancy Tier Matrix
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -1561,6 +1648,7 @@ adrs:
     title: Standby Capacity Reservation and Placement Rules
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: ci-cd
     keywords:
@@ -1578,6 +1666,7 @@ adrs:
     title: Off-Host Witness and Control Metadata Replication
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: agent-discovery
     keywords:
@@ -1597,6 +1686,7 @@ adrs:
     title: Live Apply Merge Train and Rollback Bundle
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -1616,6 +1706,7 @@ adrs:
     title: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity
     status: Proposed
     implementation_status: Not Implemented
+    currently_describes: goal_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -1635,6 +1726,7 @@ adrs:
     title: Keycloak Uses Shared-Mail-Network Internal Submission
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: networking
     keywords:
@@ -1651,6 +1743,7 @@ adrs:
     title: Multi-Environment Live Lanes
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -1667,6 +1760,7 @@ adrs:
     title: Failure-Domain Labels and Anti-Affinity Policy
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -1685,6 +1779,7 @@ adrs:
     title: Branch-Scoped Ephemeral Preview Environments
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -1703,6 +1798,7 @@ adrs:
     title: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -1723,6 +1819,7 @@ adrs:
     title: Anonymized Seed Data Snapshots for Repeatable Tests
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: testing
     keywords:
@@ -1742,6 +1839,7 @@ adrs:
     title: Failover Rehearsal Gate for Redundancy Tiers
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -1761,6 +1859,7 @@ adrs:
     title: Network Impairment Test Matrix for Staging and Previews
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: networking
     keywords:
@@ -1780,6 +1879,7 @@ adrs:
     title: Synthetic Transaction Replay for Capacity and Recovery Validation
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -1798,6 +1898,7 @@ adrs:
     title: Immutable Guest Replacement for Stateful and Edge Services
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: vm-topology
     keywords:
@@ -1818,6 +1919,7 @@ adrs:
     title: Separate Capacity Classes for Standby, Recovery, and Preview Workloads
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -1838,6 +1940,7 @@ adrs:
     title: Plane Kanban Task Board
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -1855,6 +1958,7 @@ adrs:
     title: Coolify PaaS Deploy From Repo
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -1874,6 +1978,7 @@ adrs:
     title: Netdata Realtime Streaming Metrics
     status: Deprecated
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: monitoring
     keywords:
@@ -1891,6 +1996,7 @@ adrs:
     title: Dify - Visual LLM Workflow and Agent Canvas
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: automation
     keywords:
@@ -1911,6 +2017,7 @@ adrs:
     title: Qdrant Vector Search for Semantic Platform RAG
     status: Implemented
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: documentation
     keywords:
@@ -1931,6 +2038,7 @@ adrs:
     title: Outline Living Knowledge Wiki
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-27'
     concern: platform
     keywords:

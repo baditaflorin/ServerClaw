@@ -15,6 +15,7 @@ adrs:
     title: Distributed Resource Lock Registry
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: agent-coordination
     keywords:
@@ -33,6 +34,7 @@ adrs:
     title: Distributed Deadlock Detection and Resolution
     status: Accepted
     implementation_status: Implemented
+    currently_describes: current_state
     date: '2026-03-24'
     concern: agent-coordination
     keywords:

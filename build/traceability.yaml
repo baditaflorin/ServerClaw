@@ -1,0 +1,445 @@
+# =============================================================================
+# GENERATED — do not edit manually.
+# Run: python3 scripts/generate_traceability.py --write
+# Source: workstreams/active/*.yaml × docs/adr/.index.yaml
+# ADR 0447 — workstream → ADR → role traceability matrix.
+# =============================================================================
+schema_version: 1
+generator: scripts/generate_traceability.py
+summary:
+  total_workstreams: 22
+  with_resolved_adr: 22
+  with_dangling_dependencies: 0
+  with_dangling_surfaces: 10
+  ready_to_merge: 7
+workstreams:
+- workstream_id: adr-0058-nats-event-bus
+  title: NATS JetStream for internal event bus and agent coordination
+  status: ready
+  ready_to_merge: false
+  primary_adr: 0058
+  depends_on:
+  - adr-0045-communication-lanes
+  - adr-0046-identity-classes
+  - adr-0047-short-lived-creds
+  surfaces:
+    total: 4
+    present_on_disk: 0
+  adr:
+    title: NATS JetStream For Internal Event Bus And Agent Coordination
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: networking
+    path: docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+  dangling_surfaces:
+  - workflow events
+  - alert events
+  - agent handoffs
+  - internal consumers
+- workstream_id: adr-0061-glitchtip-failure-signals
+  title: GlitchTip for application exceptions and task failures
+  status: ready
+  ready_to_merge: false
+  primary_adr: '0061'
+  depends_on:
+  - adr-0026-postgres-vm
+  - adr-0049-private-api-publication
+  - adr-0053-tempo-traces
+  surfaces:
+    total: 4
+    present_on_disk: 0
+  adr:
+    title: GlitchTip For Application Exceptions And Task Failures
+    implementation_status: Deprecated
+    currently_describes: historical
+    concern: platform
+    path: docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
+  dangling_surfaces:
+  - application errors
+  - workflow failures
+  - issue notifications
+  - release regressions
+- workstream_id: adr-0066-mutation-audit-log
+  title: Structured mutation audit log
+  status: ready
+  ready_to_merge: false
+  primary_adr: '0066'
+  depends_on:
+  - adr-0052-loki-logs
+  - adr-0048-command-catalog
+  - adr-0044-windmill
+  - adr-0043-openbao
+  surfaces:
+    total: 6
+    present_on_disk: 3
+  adr:
+    title: Structured Mutation Audit Log
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: platform
+    path: docs/adr/0066-structured-mutation-audit-log.md
+  dangling_surfaces:
+  - Loki mutation-audit label
+  - Windmill workflow template
+  - command-catalog scripts
+- workstream_id: adr-0095-unified-search
+  title: Unified search across platform services
+  status: ready
+  ready_to_merge: false
+  primary_adr: 0095
+  depends_on:
+  - adr-0092-platform-api-gateway
+  - adr-0054-netbox
+  - adr-0066-mutation-audit-log
+  - adr-0069-agent-tool-registry
+  surfaces:
+    total: 3
+    present_on_disk: 2
+  adr:
+    title: Unified Search Across Platform Services
+    implementation_status: Deprecated
+    currently_describes: historical
+    concern: documentation
+    path: docs/adr/0095-unified-platform-search.md
+  dangling_surfaces:
+  - Compose stack docker-runtime
+- workstream_id: adr-0360-openbao-cert-hardening
+  title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0360'
+  depends_on:
+  - adr-0043-openbao-secrets-backend
+  - adr-0101-step-ca-internal-ca
+  - adr-0165-openbao-tls-mtls-endpoint-design
+  surfaces:
+    total: 1
+    present_on_disk: 1
+  adr:
+    title: OpenBao TLS Cert Lifetime And Renewal Hardening
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0360-openbao-tls-cert-lifetime-and-renewal-hardening.md
+- workstream_id: ws-0364-service-api-agent-tools
+  title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR
+    0362 follow-up)'
+  status: planned
+  ready_to_merge: false
+  primary_adr: '0364'
+  depends_on: []
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Native Build Server Gate Execution
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: networking
+    path: docs/adr/0364-native-build-server-gate-execution.md
+- workstream_id: ws-0375-certificate-validation
+  title: Certificate Validation and Concordance Enforcement
+  status: ready
+  ready_to_merge: false
+  primary_adr: '0375'
+  depends_on:
+  - adr-0101-automated-certificate-lifecycle
+  - adr-0273-public-endpoint-admission-control
+  surfaces:
+    total: 4
+    present_on_disk: 4
+  adr:
+    title: Certificate Validation And Concordance Enforcement
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0375-certificate-validation-and-concordance-enforcement.md
+- workstream_id: ws-0377-repo-intake-subdomain
+  title: Repo Intake as First-Class Subdomain
+  status: ready
+  ready_to_merge: false
+  primary_adr: '0224'
+  depends_on:
+  - adr-0224-self-service-repo-intake-and-agent-assisted-deployments
+  surfaces:
+    total: 6
+    present_on_disk: 4
+  adr:
+    title: Self-Service Repo Intake And Agent-Assisted Deployments
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: agent-discovery
+    path: docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md
+  dangling_surfaces:
+  - config/generated/nginx-upstreams.yaml
+  - inventory/group_vars/platform_services.yml
+- workstream_id: ws-0396-live-apply
+  title: Deterministic service decommissioning live apply and validation replay
+  status: ready_for_merge
+  ready_to_merge: true
+  primary_adr: 0396
+  depends_on:
+  - adr-0389-service-decommissioning-procedure
+  - adr-0391-cpu-only-operational-automation
+  surfaces:
+    total: 41
+    present_on_disk: 39
+  adr:
+    title: "Deterministic Service Decommissioning \u2014 Catalog Schema Registry,\
+      \ YAML Block Markers, and Dry-Run Preview"
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: automation
+    path: docs/adr/0396-deterministic-service-decommissioning.md
+  dangling_surfaces:
+  - workstreams/archive/2026/ws-0396-live-apply.yaml
+  - workstreams/active/ws-0391-live-apply.yaml
+- workstream_id: ws-0414-cert-lifecycle-agent-tools
+  title: 'Cert Lifecycle Management: Agent Tools, Cron Sync, and Skip-Validation Mode'
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0414'
+  depends_on:
+  - adr-0375-certificate-validation-and-concordance-enforcement
+  - adr-0101-automated-certificate-lifecycle
+  - adr-0021-public-subdomain-publication-nginx-edge
+  surfaces:
+    total: 4
+    present_on_disk: 4
+  adr:
+    title: Certificate Lifecycle Agent Tools and Cron Sync
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0414-cert-lifecycle-agent-tools-and-cron-sync.md
+- workstream_id: ws-0417-attack-surface-hardening
+  title: "ADR 0417 \u2014 External Attack Surface Hardening"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0417'
+  depends_on: []
+  surfaces:
+    total: 3
+    present_on_disk: 3
+  adr:
+    title: External Attack Surface Hardening
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: security
+    path: docs/adr/0417-external-attack-surface-hardening.md
+- workstream_id: ws-0421-platform-service-watchdog
+  title: "ADR 0421 \u2014 Platform-Wide Service Watchdog"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0421'
+  depends_on:
+  - adr-0376-identity-core-watchdog
+  - adr-0226-systemd-timers
+  - adr-0064-health-probe-catalog
+  surfaces:
+    total: 4
+    present_on_disk: 4
+  adr:
+    title: Platform-Wide Service Watchdog
+    implementation_status: Partial
+    currently_describes: mixed_state
+    concern: resilience
+    path: docs/adr/0421-platform-wide-service-watchdog.md
+- workstream_id: ws-0422-lsp-ai-decision
+  title: "ADR 0422/0423 \u2014 lsp-ai editor-side AI language server decision (do\
+    \ not deploy)"
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0422'
+  depends_on: []
+  surfaces:
+    total: 13
+    present_on_disk: 13
+  adr:
+    title: Evaluate lsp-ai as an Editor-Side AI Language Server
+    implementation_status: Accepted
+    currently_describes: current_state
+    concern: platform
+    path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
+- workstream_id: ws-0424-fork-clone-0fork
+  title: "ADR 0424 \u2014 0fork.com Clone onto Hetzner AX41-NVMe"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0424'
+  depends_on:
+  - adr-0385-operator-identity-core
+  - adr-0407-generic-by-default
+  - adr-0409-host-specific-overrides
+  - adr-0376-local-is-sacred
+  surfaces:
+    total: 5
+    present_on_disk: 5
+  adr:
+    title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at 0fork.com
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: bootstrap
+    path: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+- workstream_id: ws-0438-generic-by-construction
+  title: "Generic-by-construction \u2014 eliminate lv3-prefix and credential-variable\
+    \ hardcoding"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: 0438
+  depends_on:
+  - adr-0407-generic-by-default
+  - adr-0409-zero-sanitization-publication
+  - adr-0437-overlay-aware-bootstrap
+  - adr-0373-service-registry
+  - adr-0359-postgres-client-registry
+  surfaces:
+    total: 34
+    present_on_disk: 34
+  adr:
+    title: "Generic-by-Construction \u2014 Generative Cascade IaC"
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: resilience
+    path: docs/adr/0438-generic-by-construction.md
+- workstream_id: ws-0439-deployment-profiles
+  title: "Deployment profiles \u2014 subset-of-services selection for forks"
+  status: ready
+  ready_to_merge: true
+  primary_adr: 0439
+  depends_on:
+  - adr-0407-generic-by-default
+  - adr-0431-0fork-full-day-deploy
+  - adr-0438-generic-by-construction
+  surfaces:
+    total: 3
+    present_on_disk: 1
+  adr:
+    title: "Deployment Profiles \u2014 Subset-of-Services Selection for Forks"
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: networking
+    path: docs/adr/0439-deployment-profiles-subset-selection.md
+  dangling_surfaces:
+  - playbook composition
+  - fork bootstrap entry point
+- workstream_id: ws-0443-topology-drift-detection
+  title: Continuous Topology Reconciler & Drift Detection (multi-deployment release
+    0.179.0)
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0443'
+  depends_on:
+  - adr-0373-service-registry-derived-defaults
+  - adr-0416-pg-hba-from-service-registry
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  surfaces:
+    total: 3
+    present_on_disk: 3
+  adr:
+    title: Continuous Topology Reconciler & Drift Detection
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: vm-topology
+    path: docs/adr/0443-continuous-topology-reconciler.md
+- workstream_id: ws-0444-nginx-oauth2-proxy-buffer-sizing
+  title: "nginx oauth2-proxy buffer sizing \u2014 64k on /oauth2/{auth,callback}"
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0444'
+  depends_on: []
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: nginx Buffer Sizing for oauth2-proxy Subrequest and Callback
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
+- workstream_id: ws-0445-phase1-multi-deployment-hardening
+  title: "Phase 1 multi-deployment hardening \u2014 fork-shape fixtures, convergence\
+    \ dry-run, late-bound topology lint, inventory parameterization"
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: 0293
+  depends_on:
+  - adr-0438-generic-by-construction
+  - adr-0439-multi-deployment-repo-architecture
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0442-multi-deployment-make-interface
+  - adr-0443-continuous-topology-reconciler
+  - adr-0373-service-registry
+  surfaces:
+    total: 16
+    present_on_disk: 15
+  adr:
+    title: Livekit As The Real-Time Audio And Voice Channel For Agents
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: agent-discovery
+    path: docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
+  dangling_surfaces:
+  - deployment-model.yaml
+- workstream_id: ws-0446-phase2-multi-deployment-hardening
+  title: "Phase 2 multi-deployment hardening \u2014 receipt freshness + Molecule starter\
+    \ + service-registry cross-refs"
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: 0294
+  depends_on:
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0438-generic-by-construction
+  - adr-0439-multi-deployment-repo-architecture
+  - adr-0443-continuous-topology-reconciler
+  - adr-0373-service-registry
+  surfaces:
+    total: 10
+    present_on_disk: 6
+  adr:
+    title: One-API As The Unified LLM API Proxy And Router
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: api
+    path: docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md
+  dangling_surfaces:
+  - roles/mail_platform_runtime/molecule/default/molecule.yml
+  - roles/mail_platform_runtime/molecule/default/converge.yml
+  - roles/mail_platform_runtime/molecule/default/verify.yml
+  - roles/mail_platform_runtime/molecule/README.md
+- workstream_id: ws-0447-phase3-llm-ergonomics-and-traceability
+  title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
+    \ ADR index, build/traceability.yaml generator"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: 0295
+  depends_on:
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0446-phase2-multi-deployment-hardening
+  - adr-0175-cross-workstream-interface-contracts
+  surfaces:
+    total: 8
+    present_on_disk: 8
+  adr:
+    title: Shared Artifact Cache Plane For Container And Package Dependencies
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: ci-cd
+    path: docs/adr/0295-shared-artifact-cache-plane-for-container-and-package-dependencies.md
+- workstream_id: ws-realtime-dynamic-children
+  title: Auto-discover all production hosts as Netdata streaming children
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: 0196
+  depends_on: []
+  surfaces:
+    total: 14
+    present_on_disk: 12
+  adr:
+    title: Netdata Realtime Streaming Metrics
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: monitoring
+    path: docs/adr/0196-netdata-realtime-streaming-metrics.md
+  dangling_surfaces:
+  - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
+  - collections/ansible_collections/lv3/platform/roles/netdata_runtime/defaults/main.yml
