@@ -1528,10 +1528,7 @@ workstreams:
   - workstreams/active/ws-0446-phase2-multi-deployment-hardening.yaml
   - scripts/check_receipt_freshness.py
   - tests/test_check_receipt_freshness.py
-  - roles/mail_platform_runtime/molecule/default/molecule.yml
-  - roles/mail_platform_runtime/molecule/default/converge.yml
-  - roles/mail_platform_runtime/molecule/default/verify.yml
-  - roles/mail_platform_runtime/molecule/README.md
+  - roles/mail_platform_runtime/molecule/**
   - scripts/validate_service_registry.py
   - tests/test_validate_service_registry.py
   summary: "Phase 2 of the 20-change platform-maturity review (2026-04-28). Items\
@@ -1655,7 +1652,6 @@ workstreams:
   - scripts/run_gate.py
   - inventory/hosts.yml
   - inventory/group_vars/all/identity.yml
-  - deployment-model.yaml
   - Makefile
   summary: 'Open Phase 1 of the 20-change platform-maturity review (2026-04-28). Adds
     the four items not already in flight: fork-shape fixture inventories, per-service

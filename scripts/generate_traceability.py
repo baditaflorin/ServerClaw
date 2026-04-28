@@ -194,6 +194,23 @@ def load_workstreams(
     return out
 
 
+def _looks_like_prose(value: str) -> bool:
+    """Return True if `value` is a conceptual surface, not a file path.
+
+    Workstream YAMLs sometimes list `shared_surfaces` entries like
+    "workflow events" or "fork bootstrap entry point" — descriptions of
+    a surface area, not paths the validator can stat. The heuristic:
+    contains whitespace AND has no path separator. That keeps "Makefile"
+    and "VERSION" (real bare-name files) eligible while skipping prose.
+    """
+    s = value.strip()
+    if not s:
+        return True
+    if "/" in s:
+        return False
+    return any(ch.isspace() for ch in s)
+
+
 def _normalise_adr_ref(value: Any) -> str | None:
     """Return a 4-digit ADR key or None.
 
@@ -248,9 +265,16 @@ def build_traceability(
         surfaces_raw = ws.get("shared_surfaces") or []
         if not isinstance(surfaces_raw, list):
             surfaces_raw = []
-        # Skip glob-y entries (`**`, `*`) — they're contracts, not exact
-        # paths, so dangling-disk-check would be a false positive.
-        surface_paths = [str(s) for s in surfaces_raw if "*" not in str(s)]
+        # Filter out entries that aren't path-shaped:
+        #   - globs (`**`, `*`)         — contracts, not exact paths
+        #   - prose with whitespace     — workstreams sometimes list
+        #                                 conceptual surfaces ("workflow
+        #                                 events", "fork bootstrap entry
+        #                                 point") under shared_surfaces.
+        #                                 The traceability validator can't
+        #                                 stat those, so flagging them as
+        #                                 dangling is a false positive.
+        surface_paths = [str(s) for s in surfaces_raw if "*" not in str(s) and not _looks_like_prose(str(s))]
         present = sum(1 for s in surface_paths if (repo_root / s).exists())
         dangling_surfaces = [s for s in surface_paths if not (repo_root / s).exists()]
 

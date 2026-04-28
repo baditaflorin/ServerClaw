@@ -37,8 +37,13 @@ shared_surfaces:
   # Item 5 — inventory parameterization
   - inventory/hosts.yml
   - inventory/group_vars/all/identity.yml
-  - deployment-model.yaml
   - Makefile
+  # Note: deployment-model.yaml never landed as a top-level file. The
+  # substrate ws-0439 chose was per-deployment overlays under
+  # .local/deployments/<slug>/{identity,topology,profile}.yml, validated
+  # by config/contracts/deployment-v1/*.schema.json. Removed from
+  # shared_surfaces so the ws-0447 traceability validator stops flagging
+  # it as dangling.
 summary: >
   Open Phase 1 of the 20-change platform-maturity review (2026-04-28).
   Adds the four items not already in flight: fork-shape fixture

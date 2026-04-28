@@ -10,8 +10,8 @@ summary:
   total_workstreams: 22
   with_resolved_adr: 22
   with_dangling_dependencies: 0
-  with_dangling_surfaces: 10
-  ready_to_merge: 7
+  with_dangling_surfaces: 3
+  ready_to_merge: 8
 workstreams:
 - workstream_id: adr-0058-nats-event-bus
   title: NATS JetStream for internal event bus and agent coordination
@@ -23,7 +23,7 @@ workstreams:
   - adr-0046-identity-classes
   - adr-0047-short-lived-creds
   surfaces:
-    total: 4
+    total: 0
     present_on_disk: 0
   adr:
     title: NATS JetStream For Internal Event Bus And Agent Coordination
@@ -31,11 +31,6 @@ workstreams:
     currently_describes: current_state
     concern: networking
     path: docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
-  dangling_surfaces:
-  - workflow events
-  - alert events
-  - agent handoffs
-  - internal consumers
 - workstream_id: adr-0061-glitchtip-failure-signals
   title: GlitchTip for application exceptions and task failures
   status: ready
@@ -46,7 +41,7 @@ workstreams:
   - adr-0049-private-api-publication
   - adr-0053-tempo-traces
   surfaces:
-    total: 4
+    total: 0
     present_on_disk: 0
   adr:
     title: GlitchTip For Application Exceptions And Task Failures
@@ -54,11 +49,6 @@ workstreams:
     currently_describes: historical
     concern: platform
     path: docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
-  dangling_surfaces:
-  - application errors
-  - workflow failures
-  - issue notifications
-  - release regressions
 - workstream_id: adr-0066-mutation-audit-log
   title: Structured mutation audit log
   status: ready
@@ -70,7 +60,7 @@ workstreams:
   - adr-0044-windmill
   - adr-0043-openbao
   surfaces:
-    total: 6
+    total: 3
     present_on_disk: 3
   adr:
     title: Structured Mutation Audit Log
@@ -78,10 +68,6 @@ workstreams:
     currently_describes: current_state
     concern: platform
     path: docs/adr/0066-structured-mutation-audit-log.md
-  dangling_surfaces:
-  - Loki mutation-audit label
-  - Windmill workflow template
-  - command-catalog scripts
 - workstream_id: adr-0095-unified-search
   title: Unified search across platform services
   status: ready
@@ -93,7 +79,7 @@ workstreams:
   - adr-0066-mutation-audit-log
   - adr-0069-agent-tool-registry
   surfaces:
-    total: 3
+    total: 2
     present_on_disk: 2
   adr:
     title: Unified Search Across Platform Services
@@ -101,8 +87,6 @@ workstreams:
     currently_describes: historical
     concern: documentation
     path: docs/adr/0095-unified-platform-search.md
-  dangling_surfaces:
-  - Compose stack docker-runtime
 - workstream_id: adr-0360-openbao-cert-hardening
   title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"
   status: in_progress
@@ -311,7 +295,7 @@ workstreams:
   - adr-0431-0fork-full-day-deploy
   - adr-0438-generic-by-construction
   surfaces:
-    total: 3
+    total: 1
     present_on_disk: 1
   adr:
     title: "Deployment Profiles \u2014 Subset-of-Services Selection for Forks"
@@ -319,9 +303,6 @@ workstreams:
     currently_describes: goal_state
     concern: networking
     path: docs/adr/0439-deployment-profiles-subset-selection.md
-  dangling_surfaces:
-  - playbook composition
-  - fork bootstrap entry point
 - workstream_id: ws-0443-topology-drift-detection
   title: Continuous Topology Reconciler & Drift Detection (multi-deployment release
     0.179.0)
@@ -370,7 +351,7 @@ workstreams:
   - adr-0443-continuous-topology-reconciler
   - adr-0373-service-registry
   surfaces:
-    total: 16
+    total: 15
     present_on_disk: 15
   adr:
     title: Livekit As The Real-Time Audio And Voice Channel For Agents
@@ -378,8 +359,6 @@ workstreams:
     currently_describes: current_state
     concern: agent-discovery
     path: docs/adr/0293-livekit-as-the-real-time-audio-and-voice-channel-for-agents.md
-  dangling_surfaces:
-  - deployment-model.yaml
 - workstream_id: ws-0446-phase2-multi-deployment-hardening
   title: "Phase 2 multi-deployment hardening \u2014 receipt freshness + Molecule starter\
     \ + service-registry cross-refs"
@@ -393,7 +372,7 @@ workstreams:
   - adr-0443-continuous-topology-reconciler
   - adr-0373-service-registry
   surfaces:
-    total: 10
+    total: 6
     present_on_disk: 6
   adr:
     title: One-API As The Unified LLM API Proxy And Router
@@ -401,16 +380,11 @@ workstreams:
     currently_describes: current_state
     concern: api
     path: docs/adr/0294-one-api-as-the-unified-llm-api-proxy-and-router.md
-  dangling_surfaces:
-  - roles/mail_platform_runtime/molecule/default/molecule.yml
-  - roles/mail_platform_runtime/molecule/default/converge.yml
-  - roles/mail_platform_runtime/molecule/default/verify.yml
-  - roles/mail_platform_runtime/molecule/README.md
 - workstream_id: ws-0447-phase3-llm-ergonomics-and-traceability
   title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
     \ ADR index, build/traceability.yaml generator"
   status: in_progress
-  ready_to_merge: false
+  ready_to_merge: true
   primary_adr: 0295
   depends_on:
   - adr-0445-phase1-multi-deployment-hardening

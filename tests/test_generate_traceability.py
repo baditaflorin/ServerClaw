@@ -204,6 +204,56 @@ def test_build_traceability_flags_missing_surfaces(gt, tmp_path):
     assert t.dangling_surfaces == ["missing.yml"]
 
 
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        # Real paths — never prose
+        ("inventory/hosts.yml", False),
+        ("scripts/check_receipt_freshness.py", False),
+        ("Makefile", False),  # bare-name file with no whitespace
+        ("VERSION", False),
+        # Prose / conceptual surfaces
+        ("workflow events", True),
+        ("alert events", True),
+        ("Loki mutation-audit label", True),
+        ("fork bootstrap entry point", True),
+        # Edge cases
+        ("", True),  # empty string — treat as prose
+        ("   ", True),  # whitespace only
+    ],
+)
+def test_looks_like_prose_heuristic(gt, value, expected):
+    """The heuristic must distinguish real paths (file/dir refs) from
+    prose surface descriptions. The current rule: contains whitespace
+    AND has no `/` separator. This keeps `Makefile` eligible (a real
+    bare-name file) while skipping `workflow events`."""
+    assert gt._looks_like_prose(value) is expected
+
+
+def test_build_traceability_skips_prose_surfaces(gt, tmp_path):
+    """Prose entries in shared_surfaces (e.g. "workflow events") are
+    not paths the validator can stat. They must be skipped, not
+    flagged as dangling — that was a false-positive class on the live
+    workstream registry (10 workstreams hit by it before this filter)."""
+    (tmp_path / "real.yml").write_text("x")
+    workstreams = [
+        {
+            "id": "ws-x",
+            "adr": "0001",
+            "shared_surfaces": [
+                "real.yml",  # path → stat'd, exists
+                "workflow events",  # prose → skipped
+                "Loki mutation-audit label",  # prose → skipped
+                "missing.yml",  # path → stat'd, missing
+            ],
+        }
+    ]
+    traces = gt.build_traceability(workstreams, {"0001": {}}, tmp_path)
+    t = traces[0]
+    assert t.surfaces_total == 2  # prose excluded
+    assert t.dangling_surfaces == ["missing.yml"]
+
+
 def test_build_traceability_handles_missing_id_via_source_path(gt, tmp_path):
     workstreams = [{"__source_path": "workstreams/active/ws-no-id.yaml"}]
     traces = gt.build_traceability(workstreams, {}, tmp_path)

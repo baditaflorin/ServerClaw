@@ -22,11 +22,12 @@ shared_surfaces:
   # Item 14 — receipt freshness checker
   - scripts/check_receipt_freshness.py
   - tests/test_check_receipt_freshness.py
-  # Item 11 — Molecule scaffold
-  - roles/mail_platform_runtime/molecule/default/molecule.yml
-  - roles/mail_platform_runtime/molecule/default/converge.yml
-  - roles/mail_platform_runtime/molecule/default/verify.yml
-  - roles/mail_platform_runtime/molecule/README.md
+  # Item 11 — Molecule scaffold (DEFERRED to phase 4; the
+  # proxmox-fixture driver under collections/.../molecule/ is presently
+  # a .gitkeep). The glob below tracks the eventual surface without
+  # asserting any of its files exist on disk yet — it's filtered out by
+  # the ws-0447 traceability validator's glob-skip rule.
+  - roles/mail_platform_runtime/molecule/**
   # Bonus — service registry cross-refs (only if gaps confirmed)
   - scripts/validate_service_registry.py
   - tests/test_validate_service_registry.py
