@@ -568,6 +568,155 @@ def _cmd_connection(args: argparse.Namespace) -> int:
     return 0
 
 
+# ---------------------------------------------------------------------------
+# ADR 0459 — deployment lifecycle Make targets (use / new / bind)
+# ---------------------------------------------------------------------------
+
+
+SLUG_PATTERN = "^[a-z0-9][a-z0-9_-]*$"
+
+
+def _validate_slug(slug: str) -> None:
+    import re
+
+    if not re.match(SLUG_PATTERN, slug):
+        raise DeploymentError(
+            f"slug {slug!r} does not match {SLUG_PATTERN}; use lowercase letters, digits, '-', '_' (must start with letter/digit)"
+        )
+
+
+def _cmd_use(args: argparse.Namespace) -> int:
+    """Write the slug to .local/active-deployment so future commands resolve to it."""
+    try:
+        _validate_slug(args.slug)
+    except DeploymentError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    if not (DEPLOYMENTS_DIR / args.slug).is_dir():
+        known = list_all()
+        print(
+            f"deployment {args.slug!r} not found at {DEPLOYMENTS_DIR / args.slug}. "
+            f"Known: {', '.join(known) if known else '(none)'}. "
+            f"Run `python3 scripts/deployment.py new --slug {args.slug} --apex <domain>` first.",
+            file=sys.stderr,
+        )
+        return 2
+    ACTIVE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    ACTIVE_FILE.write_text(f"{args.slug}\n")
+    print(f"active deployment set to {args.slug!r} ({ACTIVE_FILE})")
+    return 0
+
+
+def _cmd_new(args: argparse.Namespace) -> int:
+    """Scaffold a new deployment under .local/deployments/<slug>/."""
+    try:
+        _validate_slug(args.slug)
+    except DeploymentError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    root = DEPLOYMENTS_DIR / args.slug
+    if root.exists():
+        print(
+            f"deployment directory already exists: {root}. "
+            "Refusing to overwrite. Edit the existing files or pick a different slug.",
+            file=sys.stderr,
+        )
+        return 2
+
+    operator = (args.operator or "").strip()
+    if "<" in operator and ">" in operator:
+        # Parse "Name <email>" form.
+        name = operator.split("<")[0].strip()
+        email = operator.split("<", 1)[1].rsplit(">", 1)[0].strip()
+    elif "@" in operator:
+        name = ""
+        email = operator
+    else:
+        name = operator
+        email = ""
+
+    root.mkdir(parents=True, exist_ok=False)
+    (root / "identity.yml").write_text(
+        f"# Identity for deployment {args.slug!r} — ADR 0440.\n"
+        f"# Edit before running any converge.\n"
+        f"platform_domain: {args.apex}\n"
+        f"platform_operator_name: {name or 'TODO Operator Name'}\n"
+        f"platform_operator_email: {email or 'TODO@' + args.apex}\n"
+    )
+    (root / "topology.yml").write_text(
+        f"# Topology for deployment {args.slug!r} — ADR 0440.\n"
+        f"# Populate proxmox_guests with at least one VM (name, vmid, ipv4).\n"
+        f"# See config/contracts/deployment-v1/topology.schema.json.\n"
+        f"proxmox_guests: []\n"
+    )
+    (root / "profile.yml").write_text(
+        f"# Service profile for deployment {args.slug!r} — ADR 0441.\n"
+        f"profiles:\n"
+        f"  - core\n"
+        f"extra_services: []\n"
+        f"disabled_services: []\n"
+        f"service_overrides: {{}}\n"
+    )
+    (root / "connection.yml").write_text(
+        f"# Connection registry for deployment {args.slug!r} — ADR 0448.\n"
+        f"# Edit before running any converge.\n"
+        f"schema_version: 1\n"
+        f"proxmox_host:\n"
+        f"  addr: TODO.example.invalid\n"
+        f"  port: 22\n"
+        f"  user: ops\n"
+        f"  key: bootstrap.id_ed25519\n"
+        f"guest_ssh:\n"
+        f"  user: ops\n"
+        f"  key: bootstrap.id_ed25519\n"
+        f"  jump_via: proxmox_host\n"
+    )
+    for sub in ("generated", "secrets", "receipts", "state"):
+        (root / sub).mkdir(parents=True, exist_ok=True)
+
+    print(f"created deployment scaffold at {root}")
+    print(f"next steps:")
+    print(f"  1. edit {root}/identity.yml (real operator name + email)")
+    print(f"  2. edit {root}/topology.yml (populate proxmox_guests)")
+    print(f"  3. edit {root}/connection.yml (real Proxmox host addr)")
+    print(f"  4. python3 scripts/deployment.py use --slug {args.slug}")
+    return 0
+
+
+def _cmd_bind(args: argparse.Namespace) -> int:
+    """Write a .deployment marker in the current worktree binding it to a slug."""
+    try:
+        _validate_slug(args.slug)
+    except DeploymentError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    if not (DEPLOYMENTS_DIR / args.slug).is_dir():
+        known = list_all()
+        print(
+            f"deployment {args.slug!r} not found. Known: {', '.join(known) if known else '(none)'}.",
+            file=sys.stderr,
+        )
+        return 2
+    cwd = Path.cwd().resolve()
+    # Walk up to find the worktree root (where .git exists).
+    target = None
+    for candidate in [cwd, *cwd.parents]:
+        if (candidate / ".git").exists():
+            target = candidate
+            break
+    if target is None:
+        print(
+            f"could not locate a worktree root from {cwd}. Run `bind` from inside a git worktree.",
+            file=sys.stderr,
+        )
+        return 2
+    marker = target / ".deployment"
+    marker.write_text(f"{args.slug}\n")
+    print(f"worktree {target} bound to deployment {args.slug!r} ({marker})")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="deployment", description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -604,6 +753,32 @@ def main(argv: list[str] | None = None) -> int:
         help="Output format. 'env' = KEY=value lines, 'shell' = export KEY='value', 'json' = JSON object.",
     )
     p_conn.set_defaults(func=_cmd_connection)
+
+    # ADR 0459 lifecycle subcommands ----------------------------------------
+
+    p_use = sub.add_parser("use", help="Set the active deployment (writes .local/active-deployment)")
+    p_use.add_argument("--slug", required=True)
+    p_use.set_defaults(func=_cmd_use)
+
+    p_new = sub.add_parser(
+        "new",
+        help="Scaffold a new deployment under .local/deployments/<slug>/ (ADR 0440 layout)",
+    )
+    p_new.add_argument("--slug", required=True)
+    p_new.add_argument("--apex", required=True, help="Apex domain (e.g. example.com)")
+    p_new.add_argument(
+        "--operator",
+        default="",
+        help="Operator identity in 'Name <email>' or 'name@example.com' form. Optional; placeholders filled when omitted.",
+    )
+    p_new.set_defaults(func=_cmd_new)
+
+    p_bind = sub.add_parser(
+        "bind",
+        help="Bind the current worktree to a deployment slug (writes .deployment marker)",
+    )
+    p_bind.add_argument("--slug", required=True)
+    p_bind.set_defaults(func=_cmd_bind)
 
     args = parser.parse_args(argv)
     return args.func(args)

@@ -1,0 +1,56 @@
+id: ws-0462-deployment-lifecycle-cli-parity
+adr: "0459"
+title: "Deployment lifecycle CLI parity (use/new/bind subcommands)"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0459-deployment-lifecycle-cli-parity.md
+depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0442-multi-deployment-make-interface-and-worktree-binding
+  - adr-0448-deployment-connection-registry-and-wrapper
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0462-deployment-lifecycle-cli-parity.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0462_adr
+    paths:
+      - docs/adr/0459-deployment-lifecycle-cli-parity.md
+    mode: exclusive
+  - id: ws_0462_deployment_cli
+    paths:
+      - scripts/deployment.py
+    mode: shared_contract
+    contract: deployment-loader-v1
+  - id: ws_0462_tests
+    paths:
+      - tests/test_ws0462_deployment_lifecycle_cli.py
+    mode: exclusive
+  - id: ws_0462_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0462_workstream
+    paths:
+      - workstreams/active/ws-0462-deployment-lifecycle-cli-parity.yaml
+    mode: exclusive
+notes: |
+  Mirror the existing Make targets (mk/multi-deployment.mk:
+  new-deployment / use-deployment / bind-worktree) as Python CLI
+  subcommands on scripts/deployment.py.
+
+  Why both surfaces: Make targets are operator-friendly (terminal),
+  Python CLI is agent-friendly (typed exit codes, unit-testable).
+  Both produce the same .local/deployments/<slug>/ data layout —
+  ADR 0440 contract is the source of truth.
+
+  9 new tests cover slug validation, file scaffolding, overwrite
+  refusal, operator parsing, and worktree binding.

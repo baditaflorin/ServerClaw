@@ -67,6 +67,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
   Validator-catalogue freshness wired into `validate_repo.sh` as
   advisory `validate_catalogue_freshness`. 60 new tests.
 - ADR 0458 + ws-0461: cert validator multi-deployment auto-detect. New `--all-deployments` flag walks every slug; auto-triggers when no slug passed AND multiple deployments exist. The pre-push gate's all-lane runner now covers every deployment in a multi-deployment install. 6 new tests.
+- ADR 0459 + ws-0462: deployment lifecycle CLI parity. New `use`/`new`/`bind` subcommands on `scripts/deployment.py` mirror the existing `make use-deployment`/`make new-deployment`/`make bind-worktree` targets so agents and scripts can drive the deployment lifecycle programmatically without shelling out to Make. 9 new tests.
 
 ## Latest Release
 
