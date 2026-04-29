@@ -75,6 +75,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - ADR 0462 + ws-0464: topology pre-commit schema hook. `scripts/validate_topology_schema.py` + `validate-topology-schema` pre-commit hook reject malformed `proxmox_guests` topology at commit time (the 2026-04-28 class of bug ws-0448's runtime auto-fill papered over). 11 new tests.
 - ADR 0463 + ws-0466: post-converge / on-demand health-probe runner. `scripts/run_health_probes.py` reads `catalog/services/<svc>/service.yaml::health.liveness` and runs HTTP/TCP probes, writing per-probe receipts to `receipts/health-probes/`. Closes the "converge succeeded but the service didn't actually come up" class of bug. 8 new tests.
 - ADR 0464 + ws-0467: SSH retry with backoff + failure classification. `scripts/ssh_with_retry.py` retries ssh up to N times with exponential backoff + jitter, classifies stderr into 7 failure types, and writes receipts to `receipts/ssh-failures/`. 21 new tests.
+- ADR 0466 + ws-0468: converge state diff receipts. `scripts/converge_state_receipt.py` snapshots managed-file before/after sha256 + records handlers-fired/notified-but-skipped, writes atomic receipts to `receipts/converge-state/`. 9 new tests.
 - ws-0465: regression test that locks in the ws-0460 host_pinning_guard sweep. Catches the "someone refactored shared preflight" class of bug. 10 new tests; no code change.
 
 ## Latest Release

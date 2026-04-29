@@ -1,0 +1,55 @@
+id: ws-0468-converge-state-diff
+adr: "0466"
+title: "Converge state diff receipts"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0466-converge-state-diff-receipt.md
+depends_on:
+  - adr-0461-atomic-receipt-write-and-dangling-check
+  - adr-0463-post-converge-health-probe
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0468-converge-state-diff.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0468_adr
+    paths:
+      - docs/adr/0466-converge-state-diff-receipt.md
+    mode: exclusive
+  - id: ws_0468_script
+    paths:
+      - scripts/converge_state_receipt.py
+    mode: exclusive
+  - id: ws_0468_tests
+    paths:
+      - tests/test_ws0468_converge_state_receipt.py
+    mode: exclusive
+  - id: ws_0468_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0468_workstream
+    paths:
+      - workstreams/active/ws-0468-converge-state-diff.yaml
+    mode: exclusive
+notes: |
+  Closes the half-applied-state class of bug at the receipt layer.
+
+  scripts/converge_state_receipt.py with two subcommands:
+   - snapshot <paths>...: emit JSON array of {path, sha256, size_bytes}
+   - write-receipt --run-id --host --role --before --after --handlers-fired:
+     diff snapshots, write atomic receipt to receipts/converge-state/
+
+  9 tests cover snapshot existing/missing files, diff change/no-change
+  /add/remove, atomic receipt write, and both CLI subcommands.
+
+  Wiring into per-role task files is a follow-up. ws-0468 only ships
+  the leaf primitive.
