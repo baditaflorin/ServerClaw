@@ -1,0 +1,51 @@
+id: ws-0465-host-pinning-sweep-regression-test
+adr: "0457"
+title: "Host-pinning sweep regression test (locks in ws-0460 wiring)"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0457-host-pinning-deployment-owner.md
+depends_on:
+  - adr-0457-host-pinning-deployment-owner
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0465-host-pinning-sweep-regression-test.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0465_tests
+    paths:
+      - tests/test_ws0465_host_pinning_sweep_regression.py
+    mode: exclusive
+  - id: ws_0465_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0465_workstream
+    paths:
+      - workstreams/active/ws-0465-host-pinning-sweep-regression-test.yaml
+    mode: exclusive
+notes: |
+  Locks in the ws-0460 sweep that wired host_pinning_guard into 52
+  service playbooks via shared preflight. Without this test, a
+  refactor of tasks/preflight.yml could silently remove the guard
+  from every service playbook at once.
+
+  10 tests cover:
+   - role exists at documented path
+   - tasks/preflight.yml mentions host_pinning_guard
+   - tasks/preflight.yml invokes via include_role/import_role (not
+     just text mention)
+   - playbooks/public-edge.yml has the role wired explicitly
+   - >= 30 service playbooks import tasks/preflight.yml
+   - 5 canonical service playbooks (ops-portal, keycloak, gitea,
+     mail-platform, openbao) import tasks/preflight.yml
+
+  No new ADR — this is a regression-test increment for ADR 0457
+  Phase 2. Reservation res-0463 cleared after merge.
