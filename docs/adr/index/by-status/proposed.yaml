@@ -10,7 +10,7 @@ generated: '2026-04-29'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 50
+total_adrs: 51
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -871,3 +871,23 @@ adrs:
     summary: 'A new Make target that:'
     filename: 0472-phase10-reservation-hardening.md
     path: docs/adr/0472-phase10-reservation-hardening.md
+  - adr: '0473'
+    title: Phase 11 — Four CPU-Only Automation Primitives
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: automation
+    keywords:
+      - cpu-only
+      - derived-views
+      - sqlite
+      - pr-body
+      - context-packs
+      - phase
+      - four
+      - automation
+      - primitives
+    summary: Ship four CPU-only primitives that materialise these views ahead of
+    filename: 0473-phase11-cpu-only-automation-primitives.md
+    path: docs/adr/0473-phase11-cpu-only-automation-primitives.md

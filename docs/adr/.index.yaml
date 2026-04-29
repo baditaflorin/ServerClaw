@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-29'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 499
+total_adrs: 500
 adr_number_range:
   first: '0001'
-  last: '0472'
-  next_available: '0473'
+  last: '0473'
+  next_available: '0474'
 implementation_status_summary:
   Implemented: 375
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 50
+  Proposed: 51
 decision_status_summary:
   Accepted: 379
-  Proposed: 57
+  Proposed: 58
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 67
+      count: 68
       first_adr: '0400'
-      last_adr: '0472'
+      last_adr: '0473'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -64,7 +64,7 @@ facets:
       count: 12
     - concern: automation
       path: docs/adr/index/by-concern/automation.yaml
-      count: 36
+      count: 37
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
       count: 9
@@ -131,14 +131,20 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 50
+      count: 51
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0473'
+  next_available_adr: '0474'
 latest_adrs:
+  - adr: '0473'
+    title: Phase 11 — Four CPU-Only Automation Primitives
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: automation
+    path: docs/adr/0473-phase11-cpu-only-automation-primitives.md
   - adr: '0472'
     title: Phase 10 — Fix ADR-Collision Class via Early-Merge Reservation
     implementation_status: Proposed
@@ -193,12 +199,6 @@ latest_adrs:
     currently_describes: current_state
     concern: resilience
     path: docs/adr/0464-ssh-retry-with-classification.md
-  - adr: '0463'
-    title: Post-Converge / On-Demand Health-Probe Runner
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: monitoring
-    path: docs/adr/0463-post-converge-health-probe.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

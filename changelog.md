@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0473 + ws-0474: Phase 11 ships four CPU-only automation primitives that take LLM round-trips out of routine view-rendering. `scripts/generate_service_cards.py` writes one Markdown card per service to `build/service-cards/<svc>.md` (78 services). `scripts/build_workstream_db.py` indexes `workstreams.yaml` into `build/workstreams.sqlite3` so agents query "what's in flight for service X" in 50 ms instead of parsing 2.7 MB of YAML. `scripts/generate_pr_body.py` drafts the five recurring sections of a release PR from real artifacts. `scripts/generate_context_packs.py` materialises `build/context-packs/<ws-id>.md` per active workstream — cold-start agents read one file. New `make refresh-cpu-views` umbrella target. 61 new tests.
 - ADR 0472 + ws-0473: Phase 10 fixes the ADR-collision loop that hit Phase 9 four times. `make reserve-adr-pr reason="<X>"` opens a tiny single-commit reservation PR + auto-merges it; the number is canonical on origin/main within seconds. `scripts/validate_adr_reservation.py` rejects PRs adding an unreserved ADR (advisory through rollout). `scripts/reserve_adr.py --release N` clears the entry once the ADR lands. 38 new tests.
 - ADR 0470 + ws-0472: per-deployment fixture inventory + matrix CI. Three synthetic deployments (`minimal` / `multi-host` / `host-pinned`) under `tests/fixtures/deployments/<slug>/` exercise every deployment-v1 contract (`identity.yml` + `topology.yml` + `profile.yml` + `connection.yml`). Parametrised matrix asserts schema validity and cross-file invariants (CIDR membership, unique vmids). Closes the "schema bump breaks deployment X but unit tests still pass" regression class. 28 new tests. Concludes the 2026-04-29 reliability-improvement sweep (10 of 10 landed).
 - ADR 0469 + ws-0471: connection.yml SSH key pull from OpenBao. `proxmox_host.key` and `guest_ssh.key` in `.local/deployments/<slug>/connection.yml` now accept `{vault: <path>, field?: <name>}` in addition to a literal path string. `_materialize_vault_key()` shells `openbao read -field` and writes the secret to a mode-0600 tempfile for the duration of the SSH command. Closes the "ship every operator a private-key file" friction in the multi-deployment bootstrap path. Schema enforces `additionalProperties: false` on the dict form so typos fail at validation. 11 new tests.
@@ -75,10 +76,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.179.37 release notes](docs/release-notes/0.179.37.md)
+- [0.179.38 release notes](docs/release-notes/0.179.38.md)
 
 ## Previous Releases
 
+- [0.179.37 release notes](docs/release-notes/0.179.37.md)
 - [0.179.36 release notes](docs/release-notes/0.179.36.md)
 - [0.179.35 release notes](docs/release-notes/0.179.35.md)
 - [0.179.34 release notes](docs/release-notes/0.179.34.md)
@@ -90,7 +92,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.24 release notes](docs/release-notes/0.179.24.md)
 - [0.179.23 release notes](docs/release-notes/0.179.23.md)
 - [0.179.22 release notes](docs/release-notes/0.179.22.md)
-- [0.179.21 release notes](docs/release-notes/0.179.21.md)
 - [0.179.31 release notes](docs/release-notes/0.179.31.md)
 - [0.179.30 release notes](docs/release-notes/0.179.30.md)
 - [0.179.29 release notes](docs/release-notes/0.179.29.md)
@@ -99,4 +100,4 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (548 releases)](docs/release-notes/index/2026.md)
+- [2026 (549 releases)](docs/release-notes/index/2026.md)

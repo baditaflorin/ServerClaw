@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: automation
-total_adrs: 36
+total_adrs: 37
 adrs:
   - adr: '0030'
     title: Role Interface Contracts And Defaults Boundaries
@@ -728,3 +728,23 @@ adrs:
     summary: Extend scripts/generatetraceability.py to recognise an inline
     filename: 0455-phase7-drive-doctor-to-zero.md
     path: docs/adr/0455-phase7-drive-doctor-to-zero.md
+  - adr: '0473'
+    title: Phase 11 — Four CPU-Only Automation Primitives
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: automation
+    keywords:
+      - cpu-only
+      - derived-views
+      - sqlite
+      - pr-body
+      - context-packs
+      - phase
+      - four
+      - automation
+      - primitives
+    summary: Ship four CPU-only primitives that materialise these views ahead of
+    filename: 0473-phase11-cpu-only-automation-primitives.md
+    path: docs/adr/0473-phase11-cpu-only-automation-primitives.md

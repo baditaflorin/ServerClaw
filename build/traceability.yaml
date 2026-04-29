@@ -7,8 +7,8 @@
 schema_version: 1
 generator: scripts/generate_traceability.py
 summary:
-  total_workstreams: 51
-  with_resolved_adr: 50
+  total_workstreams: 52
+  with_resolved_adr: 51
   with_dangling_dependencies: 1
   with_dangling_surfaces: 3
   ready_to_merge: 26
@@ -555,7 +555,7 @@ workstreams:
   title: "Phase 7 \u2014 drive remaining doctor signals to zero"
   status: in_progress
   ready_to_merge: false
-  primary_adr: '0301'
+  primary_adr: '0455'
   depends_on:
   - adr-0447-phase3-llm-ergonomics-and-traceability
   - adr-0450-phase5-doctor-aggregator-and-rename-hook
@@ -564,11 +564,11 @@ workstreams:
     total: 11
     present_on_disk: 11
   adr:
-    title: Semgrep For SAST And Application Code Security Scanning In The CI Gate
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: security
-    path: docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md
+    title: "Phase 7 \u2014 Drive Doctor Signals to Zero"
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: automation
+    path: docs/adr/0455-phase7-drive-doctor-to-zero.md
 - workstream_id: ws-0456-deployment-aware-cert-validation
   title: Deployment-aware cert validation + cross_deployment_drift gate-bypass reason
   status: in_progress
@@ -659,7 +659,7 @@ workstreams:
   title: "Phase 8 \u2014 cross-deployment doctor + advisory auto-promotion tracker"
   status: in_progress
   ready_to_merge: false
-  primary_adr: '0304'
+  primary_adr: '0460'
   depends_on:
   - adr-0450-phase5-doctor-aggregator-and-rename-hook
   - adr-0451-phase6-self-healing-actions
@@ -670,12 +670,11 @@ workstreams:
     total: 10
     present_on_disk: 10
   adr:
-    title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration
-      Linting
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: release
-    path: docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+    title: "Phase 8 \u2014 Cross-Deployment Doctor + Advisory Auto-Promotion"
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: platform
+    path: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
 - workstream_id: ws-0461-cert-validator-multi-deployment
   title: Cert validator multi-deployment auto-detect (--all-deployments)
   status: in_progress
@@ -765,7 +764,7 @@ workstreams:
     \ + regression watcher + daily heal)"
   status: in_progress
   ready_to_merge: false
-  primary_adr: 0309
+  primary_adr: '0465'
   depends_on:
   - adr-0450-phase5-doctor-aggregator-and-rename-hook
   - adr-0451-phase6-self-healing-actions
@@ -775,11 +774,11 @@ workstreams:
     total: 10
     present_on_disk: 10
   adr:
-    title: Task-Oriented Information Architecture Across The Platform Workbench
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: platform
-    path: docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
+    title: "Phase 9 \u2014 Self-Running Automation Primitives"
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: networking
+    path: docs/adr/0465-phase9-self-running-automation.md
 - workstream_id: ws-0466-post-converge-health-probe
   title: Post-converge / on-demand health-probe runner
   status: in_progress
@@ -903,7 +902,7 @@ workstreams:
     \ gate"
   status: in_progress
   ready_to_merge: false
-  primary_adr: '0314'
+  primary_adr: '0472'
   depends_on:
   - adr-0325-adr-discovery-and-reservation-ledger
   - adr-0449-phase4-self-healing-primitives
@@ -911,11 +910,30 @@ workstreams:
     total: 8
     present_on_disk: 8
   adr:
-    title: Resumable Multi-Step Flows And Return-To-Task Reentry
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: platform
-    path: docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md
+    title: "Phase 10 \u2014 Fix ADR-Collision Class via Early-Merge Reservation"
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: ci-cd
+    path: docs/adr/0472-phase10-reservation-hardening.md
+- workstream_id: ws-0474-phase11-cpu-only-automation
+  title: "Phase 11 \u2014 four CPU-only automation primitives (service cards, workstream\
+    \ SQLite, auto-PR-body, context packs)"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0473'
+  depends_on:
+  - adr-0449-phase4-self-healing-primitives
+  - adr-0465-phase9-self-running-automation
+  - adr-0472-phase10-reservation-hardening
+  surfaces:
+    total: 10
+    present_on_disk: 10
+  adr:
+    title: "Phase 11 \u2014 Four CPU-Only Automation Primitives"
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: automation
+    path: docs/adr/0473-phase11-cpu-only-automation-primitives.md
 - workstream_id: ws-realtime-dynamic-children
   title: Auto-discover all production hosts as Netdata streaming children
   status: in_progress

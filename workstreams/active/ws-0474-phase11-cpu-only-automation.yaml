@@ -1,0 +1,73 @@
+id: ws-0474-phase11-cpu-only-automation
+adr: "0473"
+title: Phase 11 — four CPU-only automation primitives (service cards, workstream SQLite, auto-PR-body, context packs)
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/objective-carson-cbe0c3
+worktree_path: .claude/worktrees/objective-carson-cbe0c3
+doc: docs/adr/0473-phase11-cpu-only-automation-primitives.md
+depends_on:
+  - adr-0449-phase4-self-healing-primitives
+  - adr-0465-phase9-self-running-automation
+  - adr-0472-phase10-reservation-hardening
+shared_surfaces:
+  - docs/adr/0473-phase11-cpu-only-automation-primitives.md
+  - workstreams/active/ws-0474-phase11-cpu-only-automation.yaml
+  - scripts/generate_service_cards.py
+  - scripts/build_workstream_db.py
+  - scripts/generate_pr_body.py
+  - scripts/generate_context_packs.py
+  - tests/test_generate_service_cards.py
+  - tests/test_build_workstream_db.py
+  - tests/test_generate_pr_body.py
+  - tests/test_generate_context_packs.py
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0474_docs
+      paths:
+        - docs/adr/0473-phase11-cpu-only-automation-primitives.md
+        - workstreams/active/ws-0474-phase11-cpu-only-automation.yaml
+      mode: shared_contract
+      contract: adr-0473-phase11-cpu-only-automation-v1
+    - id: ws_0474_service_cards
+      paths:
+        - scripts/generate_service_cards.py
+        - tests/test_generate_service_cards.py
+      mode: shared_contract
+      contract: service-cards-v1
+    - id: ws_0474_workstream_db
+      paths:
+        - scripts/build_workstream_db.py
+        - tests/test_build_workstream_db.py
+      mode: shared_contract
+      contract: workstream-db-v1
+    - id: ws_0474_pr_body
+      paths:
+        - scripts/generate_pr_body.py
+        - tests/test_generate_pr_body.py
+      mode: shared_contract
+      contract: pr-body-v1
+    - id: ws_0474_context_packs
+      paths:
+        - scripts/generate_context_packs.py
+        - tests/test_generate_context_packs.py
+      mode: shared_contract
+      contract: context-packs-v1
+tasks:
+  - id: t1
+    title: "Phase 11.1 — scripts/generate_service_cards.py + tests"
+    status: pending
+  - id: t2
+    title: "Phase 11.2 — scripts/build_workstream_db.py + tests"
+    status: pending
+  - id: t3
+    title: "Phase 11.3 — scripts/generate_pr_body.py + tests"
+    status: pending
+  - id: t4
+    title: "Phase 11.4 — scripts/generate_context_packs.py + tests"
+    status: pending
+  - id: t5
+    title: "Wire all four into make refresh-cpu-views + doctor freshness probes"
+    status: pending

@@ -260,6 +260,26 @@ heal:
 heal-apply:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/heal.py --apply
 
+# ADR 0473 phase 11 — refresh every CPU-only derived view in one shot.
+# Per-service cards, workstream SQLite index, PR-body draft and
+# per-workstream context packs. Cheap enough to run on every commit;
+# wired into `make doctor` as freshness probes.
+.PHONY: refresh-cpu-views generate-service-cards build-workstream-db \
+        generate-pr-body generate-context-packs
+refresh-cpu-views: generate-service-cards build-workstream-db generate-context-packs
+
+generate-service-cards:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_service_cards.py
+
+build-workstream-db:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/build_workstream_db.py --write
+
+generate-pr-body:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_pr_body.py --write
+
+generate-context-packs:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_context_packs.py
+
 # ADR 0465 phase 9.1 — write build/doctor-snapshot.json. Agents read
 # the snapshot instead of re-running probes. Refresh on every commit
 # that changes a drift-related surface.

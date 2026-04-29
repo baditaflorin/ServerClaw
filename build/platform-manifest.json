@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.37",
+  "repo_version": "0.179.38",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-29T09:16:46Z",
-  "next_refresh_at": "2026-04-29T10:16:46Z",
+  "generated_at": "2026-04-29T12:55:10Z",
+  "next_refresh_at": "2026-04-29T13:55:10Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.35",
+    "last_version": "0.179.36",
     "deployed_at": "2026-04-29",
-    "summary": "ADR 0470 + ws-0472: per-deployment fixture inventory + matrix CI. Three synthetic deployments (`minimal` / `multi-host` / `host-pinned`) live under `tests/fixtures/deployments/<slug>/`, each carrying the full deployment-v1 quartet (`identity.yml` + `topology.yml` + `profile.yml` + `connection.yml`). The parametrised matrix in `tests/test_ws0472_deployment_fixture_matrix.py` validates every contract against its schema for every fixture and asserts cross-file invariants (every guest IP falls inside the identity CIDR, vmids unique within a topology). 28 new tests. Closes the \"schema rev breaks deployment X but not Y\" class of regression. Concludes the 2026-04-29 reliability-improvement sweep \u2014 all ten improvements (ADRs 0461 / 0462 / 0463 / 0464 / 0466 / 0467 / 0468 / 0469 / 0470 plus the ws-0465 regression test) are landed.",
-    "release_notes_url": "docs/release-notes/0.179.36.md"
+    "summary": "ADR 0470 + ws-0472: per-deployment fixture inventory + matrix CI. Three synthetic deployments (`minimal` / `multi-host` / `host-pinned`) under `tests/fixtures/deployments/<slug>/` exercise every deployment-v1 contract (`identity.yml` + `topology.yml` + `profile.yml` + `connection.yml`). Parametrised matrix asserts schema validity and cross-file invariants (CIDR membership, unique vmids). Closes the \"schema bump breaks deployment X but unit tests still pass\" regression class. 28 new tests. Concludes the 2026-04-29 reliability-improvement sweep (10 of 10 landed). ADR 0469 + ws-0471: connection.yml SSH key pull from OpenBao. `proxmox_host.key` and `guest_ssh.key` in `.local/deployments/<slug>/connection.yml` now accept `{vault: <path>, field?: <name>}` in addition to a literal path string. `_materialize_vault_key()` shells `openbao read -field` and writes the secret to a mode-0600 tempfile for the duration of the SSH command. Closes the \"ship every operator a private-key file\" friction in the multi-deployment bootstrap path. Schema enforces `additionalProperties: false` on the dict form so typos fail at validation. 11 new tests.",
+    "release_notes_url": "docs/release-notes/0.179.37.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
