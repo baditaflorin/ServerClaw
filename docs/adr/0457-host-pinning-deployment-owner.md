@@ -1,7 +1,7 @@
 # ADR 0457: Host-Pinning via `proxmox_guests[*].deployment_owner`
 
 - Status: Accepted
-- Implementation Status: Phase 1 — data model + standalone audit script (`scripts/host_pinning_check.py`). Role-side enforcement (Phase 2) is a deliberate follow-up.
+- Implementation Status: Phase 1 (data model + audit script) + Phase 2 (role-side guard `lv3.platform.host_pinning_guard`, wired into `playbooks/public-edge.yml`) implemented. Wiring into other playbooks is per-playbook owner work.
 - Date: 2026-04-28
 - Concern: multi-deployment-correctness, port-collision, role-side-effects
 - Tags: multi-deployment, host-pinning, topology, oauth2-proxy, port-collision
@@ -83,15 +83,25 @@ python3 scripts/host_pinning_check.py --all --json
 
 Exit codes: `0` clean, `1` drift, `2` usage/data error.
 
-### 3. Phase 2 — role-side enforcement (NOT in this ADR)
+### 3. Phase 2 — role-side enforcement (ws-0459, IMPLEMENTED)
 
-The next workstream wires the field into specific role tasks so that
-`nginx_edge_publication` and `public_edge_oidc_auth` refuse to install
-or enable services on a host whose `deployment_owner` points at a
-different slug. That change touches role behavior across many services
-and should land per-role, with the owning team reviewing each switch.
-ADR 0457 ships only the data model + audit primitive so the field is
-available for those role-author conversations to start.
+Implemented as a new role `lv3.platform.host_pinning_guard` that:
+
+- Resolves the active deployment slug from
+  `active_deployment_slug` extra-var → `$DEPLOYMENT` env → `.local/active-deployment`.
+- Looks up the host's `deployment_owner` from `proxmox_guests`.
+- Fails the play with a remediation message when slugs mismatch,
+  OR when `deployment_owner` is set but no active slug is resolvable
+  (strict mode default).
+- Skips silently when neither side is set (legacy single-deployment
+  behavior preserved).
+
+Wired into `playbooks/public-edge.yml` as the first role so it runs
+before `linux_guest_firewall`, `public_edge_oidc_auth`, and
+`nginx_edge_publication`. Other playbooks (`ops-portal.yml`,
+`keycloak.yml`, etc.) can opt in by adding the same role at the top of
+their `roles:` list. Wiring beyond public-edge is deliberately
+deferred — each playbook's author should review the change.
 
 ## Consequences
 

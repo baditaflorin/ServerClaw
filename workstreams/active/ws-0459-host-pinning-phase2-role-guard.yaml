@@ -1,0 +1,67 @@
+id: ws-0459-host-pinning-phase2-role-guard
+adr: "0457"
+title: "Host-pinning Phase 2: host_pinning_guard role + public-edge wiring"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0457-host-pinning-deployment-owner.md
+depends_on:
+  - adr-0457-host-pinning-deployment-owner
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0459_host_pinning_guard_role
+    paths:
+      - collections/ansible_collections/lv3/platform/roles/host_pinning_guard/**
+    mode: exclusive
+  - id: ws_0459_public_edge_playbook
+    paths:
+      - playbooks/public-edge.yml
+    mode: shared_contract
+    contract: public-edge-playbook-v1
+  - id: ws_0459_tests
+    paths:
+      - tests/test_ws0459_host_pinning_guard_role.py
+    mode: exclusive
+  - id: ws_0459_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0459_workstream
+    paths:
+      - workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
+    mode: exclusive
+notes: |
+  Phase 2 of ADR 0457. Closes the lv3 ↔ 0fork oauth2-proxy@4180
+  collision class of bug at converge time rather than at incident time.
+
+  New role `lv3.platform.host_pinning_guard`:
+   - Resolves the active deployment slug from active_deployment_slug,
+     $DEPLOYMENT, or .local/active-deployment.
+   - Looks up the host's deployment_owner from proxmox_guests.
+   - Refuses the converge with a remediation message when the slugs
+     mismatch, OR when deployment_owner is set but no active slug is
+     resolvable (strict mode default).
+   - Skips silently when neither side is set (legacy single-deployment
+     behavior).
+
+  Wired into playbooks/public-edge.yml as the first role so it runs
+  before linux_guest_firewall, public_edge_oidc_auth, and
+  nginx_edge_publication. Other playbooks (ops-portal.yml,
+  keycloak.yml, etc.) can opt in by adding the same role. Wiring
+  beyond public-edge is deliberately deferred — each playbook's
+  author should review the change.
+
+  9 tests: 5 structure (role exists, files present, defaults
+  unchanged, public-edge wired) + 4 behavioural (ansible-playbook
+  --check on a synthetic inventory). Behavioural tests skip when
+  ansible-playbook is not on PATH.

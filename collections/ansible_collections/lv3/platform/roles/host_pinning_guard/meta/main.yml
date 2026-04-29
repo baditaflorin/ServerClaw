@@ -1,0 +1,6 @@
+---
+galaxy_info:
+  author: Platform Operator
+  description: ADR 0457 Phase 2 — refuse converge when proxmox_guests[*].deployment_owner pins the host to a different deployment.
+  license: MIT
+  min_ansible_version: "2.17"
