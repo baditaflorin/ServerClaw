@@ -1,0 +1,99 @@
+id: ws-0460-phase8-cross-deploy-and-auto-promote
+adr: 0460
+title: Phase 8 — cross-deployment doctor + advisory auto-promotion tracker
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/objective-carson-cbe0c3
+worktree_path: .claude/worktrees/objective-carson-cbe0c3
+doc: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+depends_on:
+  - adr-0450-phase5-doctor-aggregator-and-rename-hook
+  - adr-0451-phase6-self-healing-actions
+  - adr-0455-phase7-drive-doctor-to-zero
+  - adr-0439-multi-deployment-repo-architecture
+  - adr-0456-deployment-aware-certificate-validation
+conflicts_with: []
+shared_surfaces:
+  - docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+  - workstreams/active/ws-0460-phase8-cross-deploy-and-auto-promote.yaml
+  # Option C — promotion tracker
+  - scripts/promotion_tracker.py
+  - tests/test_promotion_tracker.py
+  - receipts/gate-runs/README.md
+  # Option B — cross-deployment doctor
+  - scripts/cross_deployment_doctor.py
+  - tests/test_cross_deployment_doctor.py
+  - scripts/doctor.py
+  - tests/test_doctor.py
+  # Make wiring
+  - Makefile
+summary: >
+  Phase 8 ships the two structural follow-ups left after Phase 7:
+  cross-deployment visibility (Option B) and advisory auto-promotion
+  (Option C). The local doctor signal is already at 1/7 non-zero;
+  Phase 8 makes the remaining drift surfaces visible across
+  deployments and starts graduating long-clean advisories toward
+  required.
+phases:
+  phase_0_open_workstream:
+    status: in_progress
+  phase_1_promotion_tracker:
+    status: not_started
+    target_version: 0.179.x
+    tasks:
+      - "scripts/promotion_tracker.py: classify each gate as eligible/streaking/unstable from receipts/gate-runs/"
+      - "receipts/gate-runs/README.md: schema + one synthetic example"
+      - "tests cover ledger parsing, classification window, malformed-entry tolerance"
+  phase_2_cross_deployment_doctor:
+    status: not_started
+    target_version: 0.179.x
+    tasks:
+      - "scripts/cross_deployment_doctor.py: walks .local/deployments/<slug>/state/, computes per-receipt drift"
+      - "Output shape mirrors doctor.py for ops_portal consumers"
+      - "tests/test_cross_deployment_doctor.py covers no-deployments, single-deployment, multi-deployment"
+  phase_3_doctor_integration:
+    status: not_started
+    target_version: 0.179.x
+    tasks:
+      - "make doctor surfaces [promotion_eligible] row"
+      - "make doctor deployment=<slug> entry point invokes cross-deployment subset"
+  phase_4_apply_promotions:
+    status: deferred
+    target_version: 0.180.x
+    deferred_reason: |
+      Flipping a gate from advisory to required mutates validate_repo.sh
+      and possibly the pre-push hook. That's a deliberate cross-cutting
+      operation that should land in its own focused PR after the
+      tracker has produced multi-week eligibility evidence.
+acceptance_criteria:
+  - "promotion_tracker --list classifies the three known-clean gates as eligible against synthetic ledger fixtures"
+  - "cross_deployment_doctor reports per-deployment drift or graceful no-deployment fallback"
+  - "make doctor integrates promotion_eligible row"
+  - "all new tests pass; existing tests unaffected"
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0460_docs
+      paths:
+        - docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+        - workstreams/active/ws-0460-phase8-cross-deploy-and-auto-promote.yaml
+      mode: shared_contract
+      contract: adr-0460-phase8-cross-deploy-and-auto-promote-v1
+    - id: ws_0460_promotion_tracker
+      paths:
+        - scripts/promotion_tracker.py
+        - tests/test_promotion_tracker.py
+        - receipts/gate-runs/README.md
+      mode: shared_contract
+      contract: adr-0460-promotion-tracker-v1
+    - id: ws_0460_cross_deployment_doctor
+      paths:
+        - scripts/cross_deployment_doctor.py
+        - tests/test_cross_deployment_doctor.py
+      mode: shared_contract
+      contract: adr-0460-cross-deployment-doctor-v1
+notes:
+  - >
+    First workstream to use scripts/reserve_adr.py with --reserve in
+    the live ledger. Reservation id res-0460-phase-8-cross-deploy-auto-promote.

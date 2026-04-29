@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-28'
+generated: '2026-04-29'
 facet: concern
 concern: platform
-total_adrs: 148
+total_adrs: 150
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2806,3 +2806,41 @@ adrs:
     summary: A new per-deployment file (gitignored under .local/) describing how
     filename: 0448-deployment-connection-registry-and-wrapper.md
     path: docs/adr/0448-deployment-connection-registry-and-wrapper.md
+  - adr: 0459
+    title: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - multi-deployment
+      - deployment-lifecycle
+      - cli
+      - deployment
+      - lifecycle
+      - parity
+      - use
+      - new
+      - bind
+    summary: 'Add three subcommands to scripts/deployment.py that mirror the Make targets:'
+    filename: 0459-deployment-lifecycle-cli-parity.md
+    path: docs/adr/0459-deployment-lifecycle-cli-parity.md
+  - adr: '0460'
+    title: Phase 8 — Cross-Deployment Doctor + Advisory Auto-Promotion
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - doctor
+      - cross-deployment
+      - advisory
+      - promotion
+      - auto-graduation
+      - phase
+      - auto-promotion
+    summary: 'A new receipts/gate-runs/ ledger captures per-run gate outcomes:'
+    filename: 0460-phase8-cross-deploy-and-auto-promote.md
+    path: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md

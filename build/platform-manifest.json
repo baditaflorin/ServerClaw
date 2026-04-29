@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.24",
+  "repo_version": "0.179.25",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-29T07:28:11Z",
-  "next_refresh_at": "2026-04-29T08:28:11Z",
+  "generated_at": "2026-04-29T07:55:01Z",
+  "next_refresh_at": "2026-04-29T08:55:01Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.23",
+    "last_version": "0.179.24",
     "deployed_at": "2026-04-29",
-    "summary": "`playbooks/coolify.yml`: localhost-scoped *Register coolify-apps as the Fix education_wemeshup API routing: add Traefik dynamic config to route `/api/` to `catalog-api` backend; add `coolify_traefik_extra_dynamic_configs` for persistent IaC",
-    "release_notes_url": "docs/release-notes/0.179.24.md"
+    "summary": "ADR 0460 + ws-0460: Phase 8 cross-deploy doctor + advisory `playbooks/coolify.yml`: localhost-scoped *Register coolify-apps as the",
+    "release_notes_url": "docs/release-notes/0.179.25.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

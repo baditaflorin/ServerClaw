@@ -347,6 +347,93 @@ def probe_blocked_substrate(repo_root: Path) -> Signal:
     )
 
 
+def probe_promotion_eligible(repo_root: Path) -> Signal:
+    """ADR 0460 phase 8.1 — surface gates eligible for advisory→required
+    promotion. Reads `receipts/gate-runs/` via promotion_tracker.py and
+    counts the eligible bucket. Informational: count is the number of
+    gates ready to promote, not a drift indicator. The point is to
+    nudge an operator to flip them, not to block a push.
+    """
+    script = repo_root / "scripts" / "promotion_tracker.py"
+    if not script.is_file():
+        return Signal(
+            name="promotion_eligible",
+            headline="promotion_tracker.py not found",
+            count=0,
+            error="script missing",
+        )
+    proc = _run_python_script([str(script), "--json"], cwd=repo_root)
+    try:
+        payload = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return Signal(
+            name="promotion_eligible",
+            headline="promotion_tracker emitted unparseable JSON",
+            count=0,
+            error=proc.stdout[:200],
+        )
+    summary = payload.get("summary", {}).get("by_status", {})
+    eligible = int(summary.get("eligible", 0))
+    streaking = int(summary.get("streaking", 0))
+    headline = f"{eligible} gate(s) eligible for advisory→required promotion ({streaking} streaking)"
+    return Signal(
+        name="promotion_eligible",
+        headline=headline,
+        # Informational: never count > 0 from a drift perspective.
+        # The eligible bucket is opportunity, not failure.
+        count=0,
+        detail=summary,
+        explain_command="python3 scripts/promotion_tracker.py",
+    )
+
+
+def probe_cross_deployment_drift(repo_root: Path) -> Signal:
+    """ADR 0460 phase 8.2 — read .local/deployments/<slug>/state/ and
+    surface receipt drift between deployments. Worktrees that don't
+    carry .local/ (per CLAUDE.md) get count=0 with a "no deployments"
+    note — same graceful degradation pattern other probes use.
+    """
+    script = repo_root / "scripts" / "cross_deployment_doctor.py"
+    if not script.is_file():
+        return Signal(
+            name="cross_deployment_drift",
+            headline="cross_deployment_doctor.py not found",
+            count=0,
+            error="script missing",
+        )
+    proc = _run_python_script([str(script), "--json"], cwd=repo_root)
+    try:
+        payload = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return Signal(
+            name="cross_deployment_drift",
+            headline="cross_deployment_doctor emitted unparseable JSON",
+            count=0,
+            error=proc.stdout[:200],
+        )
+    summary = payload.get("summary", {})
+    presence = int(summary.get("presence_drift", 0))
+    skew = int(summary.get("skew_drift", 0))
+    deployments = int(summary.get("deployments", 0))
+    if deployments == 0:
+        return Signal(
+            name="cross_deployment_drift",
+            headline="no deployments configured under .local/deployments/",
+            count=0,
+        )
+    drift_count = presence + skew
+    return Signal(
+        name="cross_deployment_drift",
+        headline=(
+            f"{drift_count} cross-deployment drift entries "
+            f"({presence} presence, {skew} skew) across {deployments} deployment(s)"
+        ),
+        count=drift_count,
+        detail=summary,
+        explain_command="python3 scripts/cross_deployment_doctor.py",
+    )
+
+
 PROBES = (
     probe_stale_receipts,
     probe_safe_to_refresh,
@@ -355,6 +442,8 @@ PROBES = (
     probe_late_bound_defaults,
     probe_unreserved_adrs,
     probe_blocked_substrate,
+    probe_promotion_eligible,
+    probe_cross_deployment_drift,
 )
 
 

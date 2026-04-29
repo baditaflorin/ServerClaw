@@ -21,6 +21,379 @@ archive_summary:
   by_year:
     '2026': 323
 workstreams:
+- id: ws-0462-deployment-lifecycle-cli-parity
+  adr: 0459
+  title: Deployment lifecycle CLI parity (use/new/bind subcommands)
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0459-deployment-lifecycle-cli-parity.md
+  depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0442-multi-deployment-make-interface-and-worktree-binding
+  - adr-0448-deployment-connection-registry-and-wrapper
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0462-deployment-lifecycle-cli-parity.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0462_adr
+      paths:
+      - docs/adr/0459-deployment-lifecycle-cli-parity.md
+      mode: exclusive
+    - id: ws_0462_deployment_cli
+      paths:
+      - scripts/deployment.py
+      mode: shared_contract
+      contract: deployment-loader-v1
+    - id: ws_0462_tests
+      paths:
+      - tests/test_ws0462_deployment_lifecycle_cli.py
+      mode: exclusive
+    - id: ws_0462_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0462_workstream
+      paths:
+      - workstreams/active/ws-0462-deployment-lifecycle-cli-parity.yaml
+      mode: exclusive
+  notes: "Mirror the existing Make targets (mk/multi-deployment.mk:\nnew-deployment\
+    \ / use-deployment / bind-worktree) as Python CLI\nsubcommands on scripts/deployment.py.\n\
+    \nWhy both surfaces: Make targets are operator-friendly (terminal),\nPython CLI\
+    \ is agent-friendly (typed exit codes, unit-testable).\nBoth produce the same\
+    \ .local/deployments/<slug>/ data layout \u2014\nADR 0440 contract is the source\
+    \ of truth.\n\n9 new tests cover slug validation, file scaffolding, overwrite\n\
+    refusal, operator parsing, and worktree binding.\n"
+- id: ws-0461-cert-validator-multi-deployment
+  adr: 0458
+  title: Cert validator multi-deployment auto-detect (--all-deployments)
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0458-cert-validator-multi-deployment.md
+  depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0456-deployment-aware-certificate-validation
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0461-cert-validator-multi-deployment.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0461_adr
+      paths:
+      - docs/adr/0458-cert-validator-multi-deployment.md
+      mode: exclusive
+    - id: ws_0461_cert_validator
+      paths:
+      - scripts/certificate_validator.py
+      mode: shared_contract
+      contract: cert-validator-v1
+    - id: ws_0461_tests
+      paths:
+      - tests/test_ws0461_cert_validator_multi_deployment.py
+      mode: exclusive
+    - id: ws_0461_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0461_workstream
+      paths:
+      - workstreams/active/ws-0461-cert-validator-multi-deployment.yaml
+      mode: exclusive
+  notes: 'Closes follow-up #3 from the ws-0448 postmortem.
+
+
+    Adds --all-deployments flag to scripts/certificate_validator.py
+
+    AND auto-triggers it when no slug is passed AND multiple deployments
+
+    exist under .local/deployments/. The pre-push gate''s all-lane runner
+
+    now covers every deployment instead of whichever happens to be active.
+
+
+    6 new tests covering slug listing, flag presence in --help, and
+
+    module-import sanity.
+
+    '
+- id: ws-0460-host-pinning-sweep
+  adr: '0457'
+  title: 'Host-pinning sweep: include host_pinning_guard via shared preflight surface'
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0457-host-pinning-deployment-owner.md
+  depends_on:
+  - adr-0457-host-pinning-deployment-owner
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0460-host-pinning-sweep.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0460_shared_preflight
+      paths:
+      - playbooks/tasks/preflight.yml
+      mode: shared_contract
+      contract: shared-preflight-v1
+    - id: ws_0460_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0460_workstream
+      paths:
+      - workstreams/active/ws-0460-host-pinning-sweep.yaml
+      mode: exclusive
+  notes: "Sweep ADR 0457 Phase 2's host_pinning_guard role across every service\n\
+    playbook in one edit instead of touching 50+ files individually.\n\nMechanism:\
+    \ 52 service playbooks (ops-portal, keycloak, gitea,\nmail-platform, openbao,\
+    \ dify, etc.) already import\n`playbooks/tasks/preflight.yml` as a shared pre_task\
+    \ surface. Adding\nthe guard there propagates to all of them automatically.\n\n\
+    The guard is included via `include_role` (not import) so its tasks\nparticipate\
+    \ in the play's execution rather than being deferred to\nparse time. Operators\
+    \ can opt out per-play with\n`host_pinning_guard_skip_in_preflight: true` \u2014\
+    \ documented but not\nrecommended.\n\nPlaybooks that do NOT use `tasks/preflight.yml`\
+    \ (proxmox-host\nbootstrap plays, fixture playbooks, the standalone public-edge\n\
+    playbook which already has the guard wired directly) are unchanged.\n"
+- id: ws-0459-host-pinning-phase2-role-guard
+  adr: '0457'
+  title: 'Host-pinning Phase 2: host_pinning_guard role + public-edge wiring'
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0457-host-pinning-deployment-owner.md
+  depends_on:
+  - adr-0457-host-pinning-deployment-owner
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0459_host_pinning_guard_role
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/host_pinning_guard/**
+      mode: exclusive
+    - id: ws_0459_public_edge_playbook
+      paths:
+      - playbooks/public-edge.yml
+      mode: shared_contract
+      contract: public-edge-playbook-v1
+    - id: ws_0459_tests
+      paths:
+      - tests/test_ws0459_host_pinning_guard_role.py
+      mode: exclusive
+    - id: ws_0459_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0459_workstream
+      paths:
+      - workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
+      mode: exclusive
+  notes: "Phase 2 of ADR 0457. Closes the lv3 \u2194 0fork oauth2-proxy@4180\ncollision\
+    \ class of bug at converge time rather than at incident time.\n\nNew role `lv3.platform.host_pinning_guard`:\n\
+    \ - Resolves the active deployment slug from active_deployment_slug,\n   $DEPLOYMENT,\
+    \ or .local/active-deployment.\n - Looks up the host's deployment_owner from proxmox_guests.\n\
+    \ - Refuses the converge with a remediation message when the slugs\n   mismatch,\
+    \ OR when deployment_owner is set but no active slug is\n   resolvable (strict\
+    \ mode default).\n - Skips silently when neither side is set (legacy single-deployment\n\
+    \   behavior).\n\nWired into playbooks/public-edge.yml as the first role so it\
+    \ runs\nbefore linux_guest_firewall, public_edge_oidc_auth, and\nnginx_edge_publication.\
+    \ Other playbooks (ops-portal.yml,\nkeycloak.yml, etc.) can opt in by adding the\
+    \ same role. Wiring\nbeyond public-edge is deliberately deferred \u2014 each playbook's\n\
+    author should review the change.\n\n9 tests: 5 structure (role exists, files present,\
+    \ defaults\nunchanged, public-edge wired) + 4 behavioural (ansible-playbook\n\
+    --check on a synthetic inventory). Behavioural tests skip when\nansible-playbook\
+    \ is not on PATH.\n"
+- id: ws-0458-host-pinning-gate-wiring
+  adr: '0457'
+  title: "Host-pinning gate wiring \u2014 host-pinning lane in validate_repo.sh"
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0457-host-pinning-deployment-owner.md
+  depends_on:
+  - adr-0457-host-pinning-deployment-owner
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0458-host-pinning-gate-wiring.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0458_validate_repo
+      paths:
+      - scripts/validate_repo.sh
+      mode: shared_contract
+      contract: validate-repo-shell-v1
+    - id: ws_0458_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0458_workstream
+      paths:
+      - workstreams/active/ws-0458-host-pinning-gate-wiring.yaml
+      mode: exclusive
+  notes: "Promotes the ADR 0457 audit primitive from operator-on-demand to\npre-push-gate\
+    \ visibility. New advisory lane `host-pinning` runs\n`scripts/host_pinning_check.py\
+    \ --all` and reports drift without\nblocking \u2014 same pattern as `validate_catalogue_freshness`\
+    \ (ADR 0449).\n\nSkip-when-absent: when `.local/deployments/` is missing (CI runner\n\
+    with no overlays) the lane no-ops with a clear message instead of\nfailing.\n\n\
+    Phase 2 of ADR 0457 (role-side enforcement in nginx_edge_publication\n+ public_edge_oidc_auth)\
+    \ is the real incident-prevention. That belongs\nin a separate per-role workstream\
+    \ that the role-author reviews.\nws-0458 only ships the gate visibility so role-author\
+    \ conversations\nhave a live signal to grep against.\n"
+- id: ws-0457-host-pinning-deployment-owner
+  adr: '0457'
+  title: 'Host-pinning Phase 1: deployment_owner data model + audit primitive'
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0457-host-pinning-deployment-owner.md
+  depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0448-deployment-connection-registry-and-wrapper
+  - adr-0456-deployment-aware-certificate-validation
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0457-host-pinning-deployment-owner.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0457_adr
+      paths:
+      - docs/adr/0457-host-pinning-deployment-owner.md
+      mode: exclusive
+    - id: ws_0457_topology_schema
+      paths:
+      - config/contracts/deployment-v1/topology.schema.json
+      mode: shared_contract
+      contract: deployment-schema-v1
+    - id: ws_0457_audit_script
+      paths:
+      - scripts/host_pinning_check.py
+      mode: exclusive
+    - id: ws_0457_tests
+      paths:
+      - tests/test_ws0457_host_pinning_check.py
+      mode: exclusive
+    - id: ws_0457_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0457_workstream
+      paths:
+      - workstreams/active/ws-0457-host-pinning-deployment-owner.yaml
+      mode: exclusive
+  notes: "Closes Slice D from the ws-0448 postmortem (the lv3 \u2194 0fork\noauth2-proxy@4180\
+    \ collision class of bug).\n\nPhase 1 (this workstream) ships:\n - config/contracts/deployment-v1/topology.schema.json:\
+    \ optional\n   `deployment_owner` field on each proxmox_guests[*] entry,\n   pattern\
+    \ ^[a-z0-9][a-z0-9_-]*$.\n - scripts/host_pinning_check.py: read-only audit primitive\
+    \ that\n   walks active or all deployments and reports drift (declared_owner\n\
+    \   != declaring deployment).\n - 12 new tests covering schema acceptance, drift\
+    \ detection,\n   host filter, cross-deployment info surfacing, and CLI exit codes.\n\
+    \nPhase 2 (NOT in this workstream \u2014 deferred): wire the field into\nnginx_edge_publication\
+    \ / public_edge_oidc_auth role tasks so a\nconverge refuses to install services\
+    \ on a host pinned to a\ndifferent deployment. That's role-author work that should\
+    \ land\nper-role with review.\n"
+- id: ws-0456-deployment-aware-cert-validation
+  adr: '0456'
+  title: Deployment-aware cert validation + cross_deployment_drift gate-bypass reason
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0456-deployment-aware-certificate-validation.md
+  depends_on:
+  - adr-0375-certificate-validation-and-concordance-enforcement
+  - adr-0410-generic-by-default-architecture
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0448-deployment-connection-registry-and-wrapper
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0456-deployment-aware-cert-validation.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0456_adr
+      paths:
+      - docs/adr/0456-deployment-aware-certificate-validation.md
+      mode: exclusive
+    - id: ws_0456_cert_validator
+      paths:
+      - scripts/certificate_validator.py
+      mode: shared_contract
+      contract: cert-validator-v1
+    - id: ws_0456_gate_bypass_catalog
+      paths:
+      - config/gate-bypass-waiver-catalog.json
+      mode: shared_contract
+      contract: gate-bypass-catalog-v1
+    - id: ws_0456_tests
+      paths:
+      - tests/test_ws0456_deployment_aware_cert_validation.py
+      mode: exclusive
+    - id: ws_0456_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0456_workstream
+      paths:
+      - workstreams/active/ws-0456-deployment-aware-cert-validation.yaml
+      mode: exclusive
+  notes: "Closes follow-up #2 from the ws-0448 postmortem (2026-04-28).\n\n- scripts/certificate_validator.py:\
+    \ --deployment <slug> reads identity\n  from .local/deployments/<slug>/identity.yml.\
+    \ Falls back to legacy\n  .local/identity.yml for single-deployment installs.\n\
+    - config/gate-bypass-waiver-catalog.json: cross_deployment_drift reason\n  code\
+    \ (max 2-day expiry) allows skip_cert_validation +\n  skip_remote_gate. Composes\
+    \ with cert_lane_pre_existing_failures\n  (ADR 0451).\n\nRenumbered through 0450/0451/0452/0453/0454/0455\
+    \ (taken concurrently\nby other agents) before settling on 0456.\n"
 - id: ws-0454-incident-and-postmortem-registry
   adr: '0454'
   title: Incident & postmortem registry (mirror of ADR index pattern)
@@ -2434,6 +2807,112 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-0460-phase8-cross-deploy-and-auto-promote
+  adr: 304
+  title: "Phase 8 \u2014 cross-deployment doctor + advisory auto-promotion tracker"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+  depends_on:
+  - adr-0450-phase5-doctor-aggregator-and-rename-hook
+  - adr-0451-phase6-self-healing-actions
+  - adr-0455-phase7-drive-doctor-to-zero
+  - adr-0439-multi-deployment-repo-architecture
+  - adr-0456-deployment-aware-certificate-validation
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+  - workstreams/active/ws-0460-phase8-cross-deploy-and-auto-promote.yaml
+  - scripts/promotion_tracker.py
+  - tests/test_promotion_tracker.py
+  - receipts/gate-runs/README.md
+  - scripts/cross_deployment_doctor.py
+  - tests/test_cross_deployment_doctor.py
+  - scripts/doctor.py
+  - tests/test_doctor.py
+  - Makefile
+  summary: 'Phase 8 ships the two structural follow-ups left after Phase 7: cross-deployment
+    visibility (Option B) and advisory auto-promotion (Option C). The local doctor
+    signal is already at 1/7 non-zero; Phase 8 makes the remaining drift surfaces
+    visible across deployments and starts graduating long-clean advisories toward
+    required.
+
+    '
+  phases:
+    phase_0_open_workstream:
+      status: in_progress
+    phase_1_promotion_tracker:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - 'scripts/promotion_tracker.py: classify each gate as eligible/streaking/unstable
+        from receipts/gate-runs/'
+      - 'receipts/gate-runs/README.md: schema + one synthetic example'
+      - tests cover ledger parsing, classification window, malformed-entry tolerance
+    phase_2_cross_deployment_doctor:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - 'scripts/cross_deployment_doctor.py: walks .local/deployments/<slug>/state/,
+        computes per-receipt drift'
+      - Output shape mirrors doctor.py for ops_portal consumers
+      - tests/test_cross_deployment_doctor.py covers no-deployments, single-deployment,
+        multi-deployment
+    phase_3_doctor_integration:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - make doctor surfaces [promotion_eligible] row
+      - make doctor deployment=<slug> entry point invokes cross-deployment subset
+    phase_4_apply_promotions:
+      status: deferred
+      target_version: 0.180.x
+      deferred_reason: 'Flipping a gate from advisory to required mutates validate_repo.sh
+
+        and possibly the pre-push hook. That''s a deliberate cross-cutting
+
+        operation that should land in its own focused PR after the
+
+        tracker has produced multi-week eligibility evidence.
+
+        '
+  acceptance_criteria:
+  - promotion_tracker --list classifies the three known-clean gates as eligible against
+    synthetic ledger fixtures
+  - cross_deployment_doctor reports per-deployment drift or graceful no-deployment
+    fallback
+  - make doctor integrates promotion_eligible row
+  - all new tests pass; existing tests unaffected
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0460_docs
+      paths:
+      - docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+      - workstreams/active/ws-0460-phase8-cross-deploy-and-auto-promote.yaml
+      mode: shared_contract
+      contract: adr-0460-phase8-cross-deploy-and-auto-promote-v1
+    - id: ws_0460_promotion_tracker
+      paths:
+      - scripts/promotion_tracker.py
+      - tests/test_promotion_tracker.py
+      - receipts/gate-runs/README.md
+      mode: shared_contract
+      contract: adr-0460-promotion-tracker-v1
+    - id: ws_0460_cross_deployment_doctor
+      paths:
+      - scripts/cross_deployment_doctor.py
+      - tests/test_cross_deployment_doctor.py
+      mode: shared_contract
+      contract: adr-0460-cross-deployment-doctor-v1
+  notes:
+  - 'First workstream to use scripts/reserve_adr.py with --reserve in the live ledger.
+    Reservation id res-0460-phase-8-cross-deploy-auto-promote.
+
+    '
 - id: ws-0455-phase7-drive-doctor-to-zero
   adr: 301
   title: "Phase 7 \u2014 drive remaining doctor signals to zero"

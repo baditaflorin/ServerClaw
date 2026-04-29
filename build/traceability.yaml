@@ -7,11 +7,11 @@
 schema_version: 1
 generator: scripts/generate_traceability.py
 summary:
-  total_workstreams: 27
-  with_resolved_adr: 27
-  with_dangling_dependencies: 0
-  with_dangling_surfaces: 0
-  ready_to_merge: 9
+  total_workstreams: 39
+  with_resolved_adr: 38
+  with_dangling_dependencies: 1
+  with_dangling_surfaces: 3
+  ready_to_merge: 16
 workstreams:
 - workstream_id: adr-0058-nats-event-bus
   title: NATS JetStream for internal event bus and agent coordination
@@ -374,6 +374,16 @@ workstreams:
     currently_describes: goal_state
     concern: security
     path: docs/adr/0446-phase2-multi-deployment-hardening.md
+- workstream_id: ws-0447-coolify-apps-self-healing
+  title: 'Coolify apps self-healing: coolify-apps bootstrap + DNS-01 cert + app-deploy
+    role'
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: null
+  depends_on: []
+  surfaces:
+    total: 0
+    present_on_disk: 0
 - workstream_id: ws-0447-phase3-llm-ergonomics-and-traceability
   title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
     \ ADR index, build/traceability.yaml generator"
@@ -434,7 +444,7 @@ workstreams:
     \ + Windmill schedule template"
   status: in_progress
   ready_to_merge: false
-  primary_adr: 0296
+  primary_adr: '0450'
   depends_on:
   - adr-0445-phase1-multi-deployment-hardening
   - adr-0446-phase2-receipt-freshness
@@ -444,17 +454,17 @@ workstreams:
     total: 9
     present_on_disk: 9
   adr:
-    title: Dedicated Artifact-Cache VM With Phased Consumer Adoption
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: vm-topology
-    path: docs/adr/0296-dedicated-artifact-cache-vm-with-phased-consumer-adoption.md
+    title: "Phase 5 \u2014 `make doctor` Aggregator + Post-Merge Rename Hook"
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: automation
+    path: docs/adr/0450-phase5-doctor-aggregator-and-rename-hook.md
 - workstream_id: ws-0451-phase6-self-healing-actions
   title: "Phase 6 self-healing actions \u2014 registry-driven receipts + make heal\
     \ + docstring backfill"
   status: in_progress
   ready_to_merge: false
-  primary_adr: 0297
+  primary_adr: '0451'
   depends_on:
   - adr-0450-phase5-doctor-aggregator-and-rename-hook
   - adr-0449-phase4-self-healing-primitives
@@ -464,11 +474,83 @@ workstreams:
     total: 9
     present_on_disk: 9
   adr:
-    title: Renovate Bot As The Automated Stack Version Upgrade Proposer
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: release
-    path: docs/adr/0297-renovate-bot-as-the-automated-stack-version-upgrade-proposer.md
+    title: Phase 6 Self-Healing Actions
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: ci-cd
+    path: docs/adr/0451-phase6-self-healing-actions.md
+- workstream_id: ws-0452-workstream-lifecycle-auto-close
+  title: Workstream lifecycle auto-close + receipt slug convention (umbrella for ADRs
+    0452/0453/0454)
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0452'
+  depends_on:
+  - adr-0326-workstream-registry-shards
+  - adr-0420-ci-release-readiness-checks
+  - adr-0036-live-apply-receipts
+  - adr-0267-expiring-gate-bypass-waivers
+  surfaces:
+    total: 4
+    present_on_disk: 0
+  adr:
+    title: Workstream Lifecycle Auto-Close
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: automation
+    path: docs/adr/0452-workstream-lifecycle-auto-close.md
+  dangling_surfaces:
+  - workstream-registry
+  - release-readiness-ci
+  - live-apply-receipt-slug-format
+  - gate-bypass-waiver-catalog
+- workstream_id: ws-0453-integration-health-telemetry
+  title: Integration-health telemetry (release stability, bypass rate, live-apply
+    lag)
+  status: planned
+  ready_to_merge: false
+  primary_adr: '0453'
+  depends_on:
+  - adr-0267-expiring-gate-bypass-waivers
+  - adr-0419-pr-based-integration-flow
+  - adr-0420-ci-release-readiness-checks
+  - ws-0452-workstream-lifecycle-auto-close
+  surfaces:
+    total: 3
+    present_on_disk: 0
+  adr:
+    title: Integration-Health Telemetry
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: monitoring
+    path: docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
+  dangling_dependencies:
+  - ws-0452-workstream-lifecycle-auto-close
+  dangling_surfaces:
+  - release-readiness-ci
+  - build/integration-health.json
+  - schedule-routines
+- workstream_id: ws-0454-incident-and-postmortem-registry
+  title: Incident & postmortem registry (mirror of ADR index pattern)
+  status: planned
+  ready_to_merge: false
+  primary_adr: '0454'
+  depends_on:
+  - adr-0114-rule-based-incident-triage-engine
+  - adr-0420-ci-release-readiness-checks
+  surfaces:
+    total: 3
+    present_on_disk: 0
+  adr:
+    title: Incident & Postmortem Registry
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: ci-cd
+    path: docs/adr/0454-incident-and-postmortem-registry.md
+  dangling_surfaces:
+  - docs/incidents/
+  - release-readiness-ci
+  - pre-push-hook
 - workstream_id: ws-0455-phase7-drive-doctor-to-zero
   title: "Phase 7 \u2014 drive remaining doctor signals to zero"
   status: in_progress
@@ -487,6 +569,148 @@ workstreams:
     currently_describes: current_state
     concern: security
     path: docs/adr/0301-semgrep-for-sast-and-application-code-security-scanning-in-the-ci-gate.md
+- workstream_id: ws-0456-deployment-aware-cert-validation
+  title: Deployment-aware cert validation + cross_deployment_drift gate-bypass reason
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0456'
+  depends_on:
+  - adr-0375-certificate-validation-and-concordance-enforcement
+  - adr-0410-generic-by-default-architecture
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0448-deployment-connection-registry-and-wrapper
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Deployment-Aware Certificate Validation
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0456-deployment-aware-certificate-validation.md
+- workstream_id: ws-0457-host-pinning-deployment-owner
+  title: 'Host-pinning Phase 1: deployment_owner data model + audit primitive'
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0457'
+  depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0448-deployment-connection-registry-and-wrapper
+  - adr-0456-deployment-aware-certificate-validation
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Host-Pinning via `proxmox_guests[*].deployment_owner`
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: host-os
+    path: docs/adr/0457-host-pinning-deployment-owner.md
+- workstream_id: ws-0458-host-pinning-gate-wiring
+  title: "Host-pinning gate wiring \u2014 host-pinning lane in validate_repo.sh"
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0457'
+  depends_on:
+  - adr-0457-host-pinning-deployment-owner
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Host-Pinning via `proxmox_guests[*].deployment_owner`
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: host-os
+    path: docs/adr/0457-host-pinning-deployment-owner.md
+- workstream_id: ws-0459-host-pinning-phase2-role-guard
+  title: 'Host-pinning Phase 2: host_pinning_guard role + public-edge wiring'
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0457'
+  depends_on:
+  - adr-0457-host-pinning-deployment-owner
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Host-Pinning via `proxmox_guests[*].deployment_owner`
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: host-os
+    path: docs/adr/0457-host-pinning-deployment-owner.md
+- workstream_id: ws-0460-host-pinning-sweep
+  title: 'Host-pinning sweep: include host_pinning_guard via shared preflight surface'
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0457'
+  depends_on:
+  - adr-0457-host-pinning-deployment-owner
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Host-Pinning via `proxmox_guests[*].deployment_owner`
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: host-os
+    path: docs/adr/0457-host-pinning-deployment-owner.md
+- workstream_id: ws-0460-phase8-cross-deploy-and-auto-promote
+  title: "Phase 8 \u2014 cross-deployment doctor + advisory auto-promotion tracker"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0304'
+  depends_on:
+  - adr-0450-phase5-doctor-aggregator-and-rename-hook
+  - adr-0451-phase6-self-healing-actions
+  - adr-0455-phase7-drive-doctor-to-zero
+  - adr-0439-multi-deployment-repo-architecture
+  - adr-0456-deployment-aware-certificate-validation
+  surfaces:
+    total: 10
+    present_on_disk: 10
+  adr:
+    title: Atlas For Declarative Database Schema Migration Versioning And Pre-Migration
+      Linting
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: release
+    path: docs/adr/0304-atlas-for-declarative-database-schema-migration-versioning-and-pre-migration-linting.md
+- workstream_id: ws-0461-cert-validator-multi-deployment
+  title: Cert validator multi-deployment auto-detect (--all-deployments)
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: 0458
+  depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0456-deployment-aware-certificate-validation
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Cert-Validator Multi-Deployment Mode (Auto-Detect)
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0458-cert-validator-multi-deployment.md
+- workstream_id: ws-0462-deployment-lifecycle-cli-parity
+  title: Deployment lifecycle CLI parity (use/new/bind subcommands)
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: 0459
+  depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0442-multi-deployment-make-interface-and-worktree-binding
+  - adr-0448-deployment-connection-registry-and-wrapper
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: platform
+    path: docs/adr/0459-deployment-lifecycle-cli-parity.md
 - workstream_id: ws-realtime-dynamic-children
   title: Auto-discover all production hosts as Netdata streaming children
   status: in_progress

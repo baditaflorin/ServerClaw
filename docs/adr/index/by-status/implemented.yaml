@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-28'
+generated: '2026-04-29'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 362
+total_adrs: 366
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -7144,3 +7144,78 @@ adrs:
     summary: A new per-deployment file (gitignored under .local/) describing how
     filename: 0448-deployment-connection-registry-and-wrapper.md
     path: docs/adr/0448-deployment-connection-registry-and-wrapper.md
+  - adr: '0456'
+    title: Deployment-Aware Certificate Validation
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - tls
+      - multi-deployment
+      - cert-validation
+      - gate-bypass
+      - deployment-aware
+      - certificate
+      - validation
+    summary: When passed, the validator reads platformdomain from
+    filename: 0456-deployment-aware-certificate-validation.md
+    path: docs/adr/0456-deployment-aware-certificate-validation.md
+  - adr: '0457'
+    title: Host-Pinning via `proxmox_guests[*].deployment_owner`
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-28'
+    concern: host-os
+    keywords:
+      - multi-deployment
+      - host-pinning
+      - topology
+      - oauth2-proxy
+      - port-collision
+      - proxmox
+      - guests
+      - deployment
+      - owner
+    summary: The deployment-v1 topology schema gains an optional field on each
+    filename: 0457-host-pinning-deployment-owner.md
+    path: docs/adr/0457-host-pinning-deployment-owner.md
+  - adr: 0458
+    title: Cert-Validator Multi-Deployment Mode (Auto-Detect)
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: security
+    keywords:
+      - tls
+      - multi-deployment
+      - cert-validation
+      - cert-validator
+      - mode
+      - auto-detect
+    summary: 'Add multi-deployment mode to the validator:'
+    filename: 0458-cert-validator-multi-deployment.md
+    path: docs/adr/0458-cert-validator-multi-deployment.md
+  - adr: 0459
+    title: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - multi-deployment
+      - deployment-lifecycle
+      - cli
+      - deployment
+      - lifecycle
+      - parity
+      - use
+      - new
+      - bind
+    summary: 'Add three subcommands to scripts/deployment.py that mirror the Make targets:'
+    filename: 0459-deployment-lifecycle-cli-parity.md
+    path: docs/adr/0459-deployment-lifecycle-cli-parity.md

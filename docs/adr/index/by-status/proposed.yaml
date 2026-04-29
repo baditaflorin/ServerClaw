@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-28'
+generated: '2026-04-29'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 46
+total_adrs: 47
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -795,3 +795,21 @@ adrs:
     summary: Extend scripts/generatetraceability.py to recognise an inline
     filename: 0455-phase7-drive-doctor-to-zero.md
     path: docs/adr/0455-phase7-drive-doctor-to-zero.md
+  - adr: '0460'
+    title: Phase 8 — Cross-Deployment Doctor + Advisory Auto-Promotion
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - doctor
+      - cross-deployment
+      - advisory
+      - promotion
+      - auto-graduation
+      - phase
+      - auto-promotion
+    summary: 'A new receipts/gate-runs/ ledger captures per-run gate outcomes:'
+    filename: 0460-phase8-cross-deploy-and-auto-promote.md
+    path: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md

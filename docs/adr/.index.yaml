@@ -6,23 +6,23 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-28'
+generated: '2026-04-29'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 482
+total_adrs: 487
 adr_number_range:
   first: '0001'
-  last: '0455'
-  next_available: '0456'
+  last: '0460'
+  next_available: '0461'
 implementation_status_summary:
-  Implemented: 362
+  Implemented: 366
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 46
+  Proposed: 47
 decision_status_summary:
-  Accepted: 366
-  Proposed: 53
+  Accepted: 370
+  Proposed: 54
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 50
+      count: 55
       first_adr: '0400'
-      last_adr: '0455'
+      last_adr: '0460'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -76,7 +76,7 @@ facets:
       count: 23
     - concern: host-os
       path: docs/adr/index/by-concern/host-os.yaml
-      count: 10
+      count: 11
     - concern: identity
       path: docs/adr/index/by-concern/identity.yaml
       count: 9
@@ -88,7 +88,7 @@ facets:
       count: 32
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 148
+      count: 150
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -97,7 +97,7 @@ facets:
       count: 8
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 43
+      count: 45
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 7
@@ -111,7 +111,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 362
+      count: 366
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -131,14 +131,44 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 46
+      count: 47
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0456'
+  next_available_adr: '0461'
 latest_adrs:
+  - adr: '0460'
+    title: Phase 8 — Cross-Deployment Doctor + Advisory Auto-Promotion
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: platform
+    path: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+  - adr: 0459
+    title: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: platform
+    path: docs/adr/0459-deployment-lifecycle-cli-parity.md
+  - adr: 0458
+    title: Cert-Validator Multi-Deployment Mode (Auto-Detect)
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0458-cert-validator-multi-deployment.md
+  - adr: '0457'
+    title: Host-Pinning via `proxmox_guests[*].deployment_owner`
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: host-os
+    path: docs/adr/0457-host-pinning-deployment-owner.md
+  - adr: '0456'
+    title: Deployment-Aware Certificate Validation
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0456-deployment-aware-certificate-validation.md
   - adr: '0455'
     title: Phase 7 — Drive Doctor Signals to Zero
     implementation_status: Proposed
@@ -169,36 +199,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: ci-cd
     path: docs/adr/0451-phase6-self-healing-actions.md
-  - adr: '0450'
-    title: Phase 5 — `make doctor` Aggregator + Post-Merge Rename Hook
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: automation
-    path: docs/adr/0450-phase5-doctor-aggregator-and-rename-hook.md
-  - adr: 0449
-    title: Phase 4 Self-Healing Primitives
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: documentation
-    path: docs/adr/0449-phase4-self-healing-primitives.md
-  - adr: 0448
-    title: Per-Deployment Connection Registry & Wrapper
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: platform
-    path: docs/adr/0448-deployment-connection-registry-and-wrapper.md
-  - adr: '0447'
-    title: Phase 3 LLM Ergonomics + Traceability
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: platform
-    path: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
-  - adr: '0446'
-    title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: security
-    path: docs/adr/0446-phase2-multi-deployment-hardening.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-28'
+generated: '2026-04-29'
 facet: concern
 concern: host-os
-total_adrs: 10
+total_adrs: 11
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
@@ -201,3 +201,23 @@ adrs:
     summary: Introduce a local overlay file at .local/hostvars/proxmox-host.yml. When
     filename: 0430-topology-host-vars-local-overlay.md
     path: docs/adr/0430-topology-host-vars-local-overlay.md
+  - adr: '0457'
+    title: Host-Pinning via `proxmox_guests[*].deployment_owner`
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-28'
+    concern: host-os
+    keywords:
+      - multi-deployment
+      - host-pinning
+      - topology
+      - oauth2-proxy
+      - port-collision
+      - proxmox
+      - guests
+      - deployment
+      - owner
+    summary: The deployment-v1 topology schema gains an optional field on each
+    filename: 0457-host-pinning-deployment-owner.md
+    path: docs/adr/0457-host-pinning-deployment-owner.md

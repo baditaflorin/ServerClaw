@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-28'
+generated: '2026-04-29'
 facet: range
 label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 50
+total_adrs: 55
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -951,3 +951,96 @@ adrs:
     summary: Extend scripts/generatetraceability.py to recognise an inline
     filename: 0455-phase7-drive-doctor-to-zero.md
     path: docs/adr/0455-phase7-drive-doctor-to-zero.md
+  - adr: '0456'
+    title: Deployment-Aware Certificate Validation
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - tls
+      - multi-deployment
+      - cert-validation
+      - gate-bypass
+      - deployment-aware
+      - certificate
+      - validation
+    summary: When passed, the validator reads platformdomain from
+    filename: 0456-deployment-aware-certificate-validation.md
+    path: docs/adr/0456-deployment-aware-certificate-validation.md
+  - adr: '0457'
+    title: Host-Pinning via `proxmox_guests[*].deployment_owner`
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-28'
+    concern: host-os
+    keywords:
+      - multi-deployment
+      - host-pinning
+      - topology
+      - oauth2-proxy
+      - port-collision
+      - proxmox
+      - guests
+      - deployment
+      - owner
+    summary: The deployment-v1 topology schema gains an optional field on each
+    filename: 0457-host-pinning-deployment-owner.md
+    path: docs/adr/0457-host-pinning-deployment-owner.md
+  - adr: 0458
+    title: Cert-Validator Multi-Deployment Mode (Auto-Detect)
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: security
+    keywords:
+      - tls
+      - multi-deployment
+      - cert-validation
+      - cert-validator
+      - mode
+      - auto-detect
+    summary: 'Add multi-deployment mode to the validator:'
+    filename: 0458-cert-validator-multi-deployment.md
+    path: docs/adr/0458-cert-validator-multi-deployment.md
+  - adr: 0459
+    title: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - multi-deployment
+      - deployment-lifecycle
+      - cli
+      - deployment
+      - lifecycle
+      - parity
+      - use
+      - new
+      - bind
+    summary: 'Add three subcommands to scripts/deployment.py that mirror the Make targets:'
+    filename: 0459-deployment-lifecycle-cli-parity.md
+    path: docs/adr/0459-deployment-lifecycle-cli-parity.md
+  - adr: '0460'
+    title: Phase 8 — Cross-Deployment Doctor + Advisory Auto-Promotion
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - doctor
+      - cross-deployment
+      - advisory
+      - promotion
+      - auto-graduation
+      - phase
+      - auto-promotion
+    summary: 'A new receipts/gate-runs/ ledger captures per-run gate outcomes:'
+    filename: 0460-phase8-cross-deploy-and-auto-promote.md
+    path: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md

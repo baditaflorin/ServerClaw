@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0460 + ws-0460: Phase 8 cross-deploy doctor + advisory auto-promotion. `scripts/promotion_tracker.py` classifies gates as eligible/streaking/unstable/promoted from `receipts/gate-runs/<gate>/*.yaml`. `scripts/cross_deployment_doctor.py` reads `.local/deployments/<slug>/state/` and reports per-receipt presence/skew drift. Both wired into `make doctor` (now 9 signals, still 1/9 non-zero). 38 new tests.
 - `playbooks/coolify.yml`: localhost-scoped *Register coolify-apps as the
   Coolify deployment server* play loads `coolify_runtime/defaults/main.yml`
   via `vars_files`, so the controller-side `coolify_tool.py` shim resolves
@@ -78,10 +79,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.179.24 release notes](docs/release-notes/0.179.24.md)
+- [0.179.25 release notes](docs/release-notes/0.179.25.md)
 
 ## Previous Releases
 
+- [0.179.24 release notes](docs/release-notes/0.179.24.md)
 - [0.179.23 release notes](docs/release-notes/0.179.23.md)
 - [0.179.22 release notes](docs/release-notes/0.179.22.md)
 - [0.179.21 release notes](docs/release-notes/0.179.21.md)
@@ -93,9 +95,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.15 release notes](docs/release-notes/0.179.15.md)
 - [0.179.14 release notes](docs/release-notes/0.179.14.md)
 - [0.179.13 release notes](docs/release-notes/0.179.13.md)
-- [0.179.12 release notes](docs/release-notes/0.179.12.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (539 releases)](docs/release-notes/index/2026.md)
+- [2026 (540 releases)](docs/release-notes/index/2026.md)
