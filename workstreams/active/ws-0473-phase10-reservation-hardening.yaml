@@ -1,0 +1,69 @@
+id: ws-0473-phase10-reservation-hardening
+adr: "0472"
+title: Phase 10 — fix ADR-collision class via early-merge reservation + CI gate
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/objective-carson-cbe0c3
+worktree_path: .claude/worktrees/objective-carson-cbe0c3
+doc: docs/adr/0472-phase10-reservation-hardening.md
+depends_on:
+  - adr-0325-adr-discovery-and-reservation-ledger
+  - adr-0449-phase4-self-healing-primitives
+shared_surfaces:
+  - docs/adr/0472-phase10-reservation-hardening.md
+  - workstreams/active/ws-0473-phase10-reservation-hardening.yaml
+  - scripts/reserve_adr.py
+  - scripts/validate_adr_reservation.py
+  - tests/test_validate_adr_reservation.py
+  - tests/test_reserve_adr_release.py
+  - Makefile
+  - scripts/validate_repo.sh
+summary: >
+  Phase 10 closes the ADR-collision loop. Adds a make target that
+  reserves an ADR number via a fast-merged single-commit PR
+  (reservation lives on main within seconds, not stuck in feature
+  branch). Adds a CI gate that rejects PRs adding unreserved ADRs.
+  Adds `reserve_adr.py --release` to clear realized reservations.
+phases:
+  phase_0_open_workstream:
+    status: in_progress
+  phase_1_make_reserve_adr_pr:
+    status: not_started
+    target_version: 0.179.x
+  phase_2_validate_adr_reservation:
+    status: not_started
+    target_version: 0.179.x
+  phase_3_reserve_adr_release_flag:
+    status: not_started
+    target_version: 0.179.x
+acceptance_criteria:
+  - "make reserve-adr-pr reason=<X> reserves a number via fast-merged single-commit PR"
+  - "validate_adr_reservation.py fails on unreserved-ADR PRs"
+  - "reserve_adr.py --release <N> idempotently removes the matching entry"
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0470_docs
+      paths:
+        - docs/adr/0472-phase10-reservation-hardening.md
+        - workstreams/active/ws-0473-phase10-reservation-hardening.yaml
+      mode: shared_contract
+      contract: adr-0472-phase10-reservation-hardening-v1
+    - id: ws_0470_reserve_adr_extension
+      paths:
+        - scripts/reserve_adr.py
+      mode: shared_contract
+      contract: adr-0470-reserve-adr-v2
+    - id: ws_0470_reservation_gate
+      paths:
+        - scripts/validate_adr_reservation.py
+        - tests/test_validate_adr_reservation.py
+      mode: shared_contract
+      contract: adr-0470-reservation-gate-v1
+notes:
+  - >
+    The make target deliberately bypasses the worktree's PR flow —
+    it opens its OWN tiny PR for the reservation, separate from the
+    PR for the actual ADR work. This is the only way to make
+    reservations visible to other agents within seconds.

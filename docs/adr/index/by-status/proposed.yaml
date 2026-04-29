@@ -10,7 +10,7 @@ generated: '2026-04-29'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 48
+total_adrs: 50
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -833,3 +833,41 @@ adrs:
     summary: scripts/doctor.py gains a --snapshot mode that runs every probe
     filename: 0465-phase9-self-running-automation.md
     path: docs/adr/0465-phase9-self-running-automation.md
+  - adr: '0471'
+    title: — Karakeep Coolify Deployment + Runtime Recovery Protocol
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - karakeep
+      - coolify
+      - deployment
+      - runtime
+      - recovery
+      - protocol
+    summary: When make converge-coolify is unavailable (Tailscale/Proxmox unreachable), the
+    filename: 0471-karakeep-coolify-deploy-and-runtime-recovery.md
+    path: docs/adr/0471-karakeep-coolify-deploy-and-runtime-recovery.md
+  - adr: '0472'
+    title: Phase 10 — Fix ADR-Collision Class via Early-Merge Reservation
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: ci-cd
+    keywords:
+      - adr-reservation
+      - collision-prevention
+      - fast-merge
+      - ci-gate
+      - phase
+      - fix
+      - adr-collision
+      - class
+      - early-merge
+      - reservation
+    summary: 'A new Make target that:'
+    filename: 0472-phase10-reservation-hardening.md
+    path: docs/adr/0472-phase10-reservation-hardening.md

@@ -10,7 +10,7 @@ generated: '2026-04-29'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 370
+total_adrs: 375
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -7289,3 +7289,94 @@ adrs:
     summary: 'scripts/sshwithretry.py:'
     filename: 0464-ssh-retry-with-classification.md
     path: docs/adr/0464-ssh-retry-with-classification.md
+  - adr: '0466'
+    title: Converge State Diff Receipts
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: monitoring
+    keywords:
+      - converge
+      - receipts
+      - observability
+      - state
+      - diff
+    summary: 'scripts/convergestatereceipt.py:'
+    filename: 0466-converge-state-diff-receipt.md
+    path: docs/adr/0466-converge-state-diff-receipt.md
+  - adr: '0467'
+    title: Pre-Converge Live State Check (DNS + Cert SAN)
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: networking
+    keywords:
+      - dns
+      - cert
+      - pre-converge
+      - live-state
+      - live
+      - state
+      - check
+      - san
+    summary: 'scripts/preconvergelivecheck.py:'
+    filename: 0467-preconverge-live-state-check.md
+    path: docs/adr/0467-preconverge-live-state-check.md
+  - adr: 0468
+    title: Pre-Converge State Snapshot
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - snapshot
+      - receipts
+      - rollback
+      - pre-converge
+      - state
+    summary: 'scripts/preconvergesnapshot.py compose writes one receipts/pre-converge-state/<host>-<runid>.json per converge
+      with three sections:'
+    filename: 0468-preconverge-snapshot.md
+    path: docs/adr/0468-preconverge-snapshot.md
+  - adr: 0469
+    title: connection.yml SSH key pull from OpenBao
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: security
+    keywords:
+      - openbao
+      - ssh
+      - secrets
+      - deployment-v1
+      - connection
+      - yml
+      - key
+      - pull
+      - from
+    summary: 'Extend connection.schema.json so both proxmoxhost.key and guestssh.key accept either of two shapes:'
+    filename: 0469-connection-yml-vault-key-pull.md
+    path: docs/adr/0469-connection-yml-vault-key-pull.md
+  - adr: '0470'
+    title: Per-Deployment Fixture Inventory + Matrix CI
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: ci-cd
+    keywords:
+      - testing
+      - fixtures
+      - deployment-v1
+      - ci
+      - matrix
+      - per-deployment
+      - fixture
+      - inventory
+    summary: 'Three synthetic deployments live under tests/fixtures/deployments/<slug>/:'
+    filename: 0470-deployment-fixture-matrix.md
+    path: docs/adr/0470-deployment-fixture-matrix.md

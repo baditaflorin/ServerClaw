@@ -7,11 +7,11 @@
 schema_version: 1
 generator: scripts/generate_traceability.py
 summary:
-  total_workstreams: 45
-  with_resolved_adr: 44
+  total_workstreams: 51
+  with_resolved_adr: 50
   with_dangling_dependencies: 1
   with_dangling_surfaces: 3
-  ready_to_merge: 21
+  ready_to_merge: 26
 workstreams:
 - workstream_id: adr-0058-nats-event-bus
   title: NATS JetStream for internal event bus and agent coordination
@@ -814,6 +814,108 @@ workstreams:
     currently_describes: current_state
     concern: resilience
     path: docs/adr/0464-ssh-retry-with-classification.md
+- workstream_id: ws-0468-converge-state-diff
+  title: Converge state diff receipts
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0466'
+  depends_on:
+  - adr-0461-atomic-receipt-write-and-dangling-check
+  - adr-0463-post-converge-health-probe
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Converge State Diff Receipts
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: monitoring
+    path: docs/adr/0466-converge-state-diff-receipt.md
+- workstream_id: ws-0469-preconverge-live-state-check
+  title: Pre-converge live state check (DNS + cert SAN)
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0467'
+  depends_on:
+  - adr-0463-post-converge-health-probe
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Pre-Converge Live State Check (DNS + Cert SAN)
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: networking
+    path: docs/adr/0467-preconverge-live-state-check.md
+- workstream_id: ws-0470-preconverge-snapshot
+  title: Pre-converge state snapshot
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: 0468
+  depends_on:
+  - adr-0461-atomic-receipt-write-and-dangling-check
+  - adr-0466-converge-state-diff-receipt
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Pre-Converge State Snapshot
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: platform
+    path: docs/adr/0468-preconverge-snapshot.md
+- workstream_id: ws-0471-connection-yml-vault-pull
+  title: connection.yml SSH key pull from OpenBao
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: 0469
+  depends_on:
+  - adr-0440-per-deployment-connection-registry
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: connection.yml SSH key pull from OpenBao
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0469-connection-yml-vault-key-pull.md
+- workstream_id: ws-0472-fixture-matrix-ci
+  title: Per-deployment fixture inventory + matrix CI
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0470'
+  depends_on:
+  - adr-0440-per-deployment-identity
+  - adr-0457-host-pinning
+  - adr-0469-connection-yml-vault-key-pull
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Per-Deployment Fixture Inventory + Matrix CI
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: ci-cd
+    path: docs/adr/0470-deployment-fixture-matrix.md
+- workstream_id: ws-0473-phase10-reservation-hardening
+  title: "Phase 10 \u2014 fix ADR-collision class via early-merge reservation + CI\
+    \ gate"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0314'
+  depends_on:
+  - adr-0325-adr-discovery-and-reservation-ledger
+  - adr-0449-phase4-self-healing-primitives
+  surfaces:
+    total: 8
+    present_on_disk: 8
+  adr:
+    title: Resumable Multi-Step Flows And Return-To-Task Reentry
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: platform
+    path: docs/adr/0314-resumable-multi-step-flows-and-return-to-task-reentry.md
 - workstream_id: ws-realtime-dynamic-children
   title: Auto-discover all production hosts as Netdata streaming children
   status: in_progress

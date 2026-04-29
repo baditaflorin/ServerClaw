@@ -1,5 +1,5 @@
 id: ws-0465-phase9-self-running-automation
-adr: 0465
+adr: "0465"
 title: Phase 9 — self-running automation primitives (snapshot cache + auto-promote + regression watcher + daily heal)
 status: in_progress
 ready_to_merge: false

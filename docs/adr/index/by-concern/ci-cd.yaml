@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: ci-cd
-total_adrs: 48
+total_adrs: 50
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -945,3 +945,43 @@ adrs:
     summary: 'Added to scripts/checkreceiptfreshness.py. Pattern:'
     filename: 0461-atomic-receipt-write-and-dangling-check.md
     path: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
+  - adr: '0470'
+    title: Per-Deployment Fixture Inventory + Matrix CI
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: ci-cd
+    keywords:
+      - testing
+      - fixtures
+      - deployment-v1
+      - ci
+      - matrix
+      - per-deployment
+      - fixture
+      - inventory
+    summary: 'Three synthetic deployments live under tests/fixtures/deployments/<slug>/:'
+    filename: 0470-deployment-fixture-matrix.md
+    path: docs/adr/0470-deployment-fixture-matrix.md
+  - adr: '0472'
+    title: Phase 10 — Fix ADR-Collision Class via Early-Merge Reservation
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: ci-cd
+    keywords:
+      - adr-reservation
+      - collision-prevention
+      - fast-merge
+      - ci-gate
+      - phase
+      - fix
+      - adr-collision
+      - class
+      - early-merge
+      - reservation
+    summary: 'A new Make target that:'
+    filename: 0472-phase10-reservation-hardening.md
+    path: docs/adr/0472-phase10-reservation-hardening.md

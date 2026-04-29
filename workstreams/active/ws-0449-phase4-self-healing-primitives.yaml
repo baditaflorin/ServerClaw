@@ -1,5 +1,5 @@
 id: ws-0449-phase4-self-healing-primitives
-adr: 0449
+adr: "0449"
 title: Phase 4 self-healing primitives — reserve_adr + validator-catalogue + safe receipt refresh
 status: in_progress
 ready_to_merge: false

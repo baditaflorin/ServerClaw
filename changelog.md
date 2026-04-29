@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0472 + ws-0473: Phase 10 fixes the ADR-collision loop that hit Phase 9 four times. `make reserve-adr-pr reason="<X>"` opens a tiny single-commit reservation PR + auto-merges it; the number is canonical on origin/main within seconds. `scripts/validate_adr_reservation.py` rejects PRs adding an unreserved ADR (advisory through rollout). `scripts/reserve_adr.py --release N` clears the entry once the ADR lands. 38 new tests.
 - ADR 0470 + ws-0472: per-deployment fixture inventory + matrix CI. Three synthetic deployments (`minimal` / `multi-host` / `host-pinned`) under `tests/fixtures/deployments/<slug>/` exercise every deployment-v1 contract (`identity.yml` + `topology.yml` + `profile.yml` + `connection.yml`). Parametrised matrix asserts schema validity and cross-file invariants (CIDR membership, unique vmids). Closes the "schema bump breaks deployment X but unit tests still pass" regression class. 28 new tests. Concludes the 2026-04-29 reliability-improvement sweep (10 of 10 landed).
 - ADR 0469 + ws-0471: connection.yml SSH key pull from OpenBao. `proxmox_host.key` and `guest_ssh.key` in `.local/deployments/<slug>/connection.yml` now accept `{vault: <path>, field?: <name>}` in addition to a literal path string. `_materialize_vault_key()` shells `openbao read -field` and writes the secret to a mode-0600 tempfile for the duration of the SSH command. Closes the "ship every operator a private-key file" friction in the multi-deployment bootstrap path. Schema enforces `additionalProperties: false` on the dict form so typos fail at validation. 11 new tests.
 - ADR 0465 + ws-0465: Phase 9 self-running automation primitives. Four CPU-only swaps that take LLM round-trips out of the loop: `scripts/doctor.py --snapshot` writes `build/doctor-snapshot.json` (cached view agents read instead of re-running 9 probes); new `probe_doctor_snapshot_freshness` reports cache-vs-HEAD staleness. `scripts/apply_promotion.py` consumes `promotion_tracker --json` and rewrites `validate_repo.sh` advisory→required for ALLOWED_GATES. `scripts/doctor_regression_watch.py` diffs live doctor against the latest baseline under `receipts/doctor-baselines/` (exit 1 on regression). Two committed Windmill schedule templates: hourly regression watcher + daily `make heal --apply`. `make doctor` now surfaces 10 signals (was 9). 63 new tests.
@@ -71,28 +72,18 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
   live signal: 11 needs-review against the live stack.yaml).
   Validator-catalogue freshness wired into `validate_repo.sh` as
   advisory `validate_catalogue_freshness`. 60 new tests.
-- ADR 0458 + ws-0461: cert validator multi-deployment auto-detect. New `--all-deployments` flag walks every slug; auto-triggers when no slug passed AND multiple deployments exist. The pre-push gate's all-lane runner now covers every deployment in a multi-deployment install. 6 new tests.
-- ADR 0459 + ws-0462: deployment lifecycle CLI parity. New `use`/`new`/`bind` subcommands on `scripts/deployment.py` mirror the existing `make use-deployment`/`make new-deployment`/`make bind-worktree` targets so agents and scripts can drive the deployment lifecycle programmatically without shelling out to Make. 9 new tests.
-- ADR 0461 + ws-0463: atomic receipt write + dangling-receipt gate flag. `write_receipt_atomic()` helper eliminates half-written receipts on crash. `--check-files` detects `latest_receipts` entries with no matching `receipts/live-applies/<slug>.json` file — closes the PR #71 dangling-receipt class of bug. Live signal: 2 pre-existing dangling receipts surfaced (preview_environment, staging_environment). 10 new tests.
-- ADR 0462 + ws-0464: topology pre-commit schema hook. `scripts/validate_topology_schema.py` + `validate-topology-schema` pre-commit hook reject malformed `proxmox_guests` topology at commit time (the 2026-04-28 class of bug ws-0448's runtime auto-fill papered over). 11 new tests.
-- ADR 0463 + ws-0466: post-converge / on-demand health-probe runner. `scripts/run_health_probes.py` reads `catalog/services/<svc>/service.yaml::health.liveness` and runs HTTP/TCP probes, writing per-probe receipts to `receipts/health-probes/`. Closes the "converge succeeded but the service didn't actually come up" class of bug. 8 new tests.
-- ADR 0464 + ws-0467: SSH retry with backoff + failure classification. `scripts/ssh_with_retry.py` retries ssh up to N times with exponential backoff + jitter, classifies stderr into 7 failure types, and writes receipts to `receipts/ssh-failures/`. 21 new tests.
-- ADR 0466 + ws-0468: converge state diff receipts. `scripts/converge_state_receipt.py` snapshots managed-file before/after sha256 + records handlers-fired/notified-but-skipped, writes atomic receipts to `receipts/converge-state/`. 9 new tests.
-- ADR 0467 + ws-0469: pre-converge live state check. `scripts/preconverge_live_check.py` runs DNS resolution + TLS cert SAN match against every service's catalog FQDN. Composes with ws-0445's `converge_dry_run.py`. 11 new tests.
-- ADR 0468 + ws-0470: pre-converge state snapshot. `scripts/preconverge_snapshot.py compose` writes systemd-units + docker-containers + managed-file-hashes to `receipts/pre-converge-state/` for triage / rollback. Read-only; no automatic revert. 5 new tests.
-- ws-0465: regression test that locks in the ws-0460 host_pinning_guard sweep. Catches the "someone refactored shared preflight" class of bug. 10 new tests; no code change.
 
 ## Latest Release
 
-- [0.179.36 release notes](docs/release-notes/0.179.36.md)
+- [0.179.37 release notes](docs/release-notes/0.179.37.md)
 
 ## Previous Releases
 
+- [0.179.36 release notes](docs/release-notes/0.179.36.md)
 - [0.179.35 release notes](docs/release-notes/0.179.35.md)
 - [0.179.34 release notes](docs/release-notes/0.179.34.md)
 - [0.179.33 release notes](docs/release-notes/0.179.33.md)
 - [0.179.32 release notes](docs/release-notes/0.179.32.md)
-- [0.179.31 release notes](docs/release-notes/0.179.31.md)
 - [0.179.28 release notes](docs/release-notes/0.179.28.md)
 - [0.179.26 release notes](docs/release-notes/0.179.26.md)
 - [0.179.25 release notes](docs/release-notes/0.179.25.md)
@@ -100,11 +91,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.23 release notes](docs/release-notes/0.179.23.md)
 - [0.179.22 release notes](docs/release-notes/0.179.22.md)
 - [0.179.21 release notes](docs/release-notes/0.179.21.md)
-- [0.179.20 release notes](docs/release-notes/0.179.20.md)
-- [0.179.19 release notes](docs/release-notes/0.179.19.md)
-- [0.179.18 release notes](docs/release-notes/0.179.18.md)
-- [0.179.17 release notes](docs/release-notes/0.179.17.md)
-- [0.179.16 release notes](docs/release-notes/0.179.16.md)
+- [0.179.31 release notes](docs/release-notes/0.179.31.md)
 - [0.179.30 release notes](docs/release-notes/0.179.30.md)
 - [0.179.29 release notes](docs/release-notes/0.179.29.md)
 - [0.179.27 release notes](docs/release-notes/0.179.27.md)
@@ -112,4 +99,4 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (543 releases)](docs/release-notes/index/2026.md)
+- [2026 (548 releases)](docs/release-notes/index/2026.md)

@@ -255,6 +255,51 @@ def _resolve_branch() -> str:
         return "unknown"
 
 
+def _release(number: int, *, reservations_path: Path) -> int:
+    """Remove the reservation entry covering `number`. Idempotent —
+    returning 0 even when no entry exists. ADR 0470 phase 10.3.
+
+    Multiple reservations covering the same number (rare but legal —
+    the loader's first-wins rule applies) are all removed in one
+    pass; the caller is alerted via the printed `removed N` count.
+    """
+    if number < 1:
+        print(f"reserve_adr --release: number must be >= 1, got {number}", file=sys.stderr)
+        return 2
+    if not reservations_path.is_file():
+        print(f"reserve_adr --release: ledger missing at {reservations_path}", file=sys.stderr)
+        return 2
+    data = yaml.safe_load(reservations_path.read_text()) or {}
+    raw = data.get("reservations") or []
+    if not isinstance(raw, list):
+        print(
+            "reserve_adr --release: reservations.yaml top-level must be a list",
+            file=sys.stderr,
+        )
+        return 2
+    kept: list = []
+    removed = 0
+    for entry in raw:
+        if not isinstance(entry, dict):
+            kept.append(entry)
+            continue
+        try:
+            start = int(entry.get("start"))
+            end = int(entry.get("end", entry.get("start")))
+        except (TypeError, ValueError):
+            kept.append(entry)
+            continue
+        if start <= number <= end:
+            removed += 1
+            continue
+        kept.append(entry)
+    if removed > 0:
+        data["reservations"] = kept
+        reservations_path.write_text(yaml.safe_dump(data, sort_keys=False))
+    print(f"reserve_adr: released {removed} reservation(s) covering {number:04d}")
+    return 0
+
+
 def main(argv: list[str] | None = None, *, today: dt.date | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     parser.add_argument(
@@ -266,6 +311,14 @@ def main(argv: list[str] | None = None, *, today: dt.date | None = None) -> int:
         "--reserve",
         action="store_true",
         help="Reserve the next free number atomically (writes to reservations.yaml).",
+    )
+    parser.add_argument(
+        "--release",
+        type=int,
+        metavar="N",
+        help="Release a previously-reserved ADR number (idempotent; ADR 0470 phase 10.3). "
+        "Removes any matching entry from reservations.yaml. Run from the release "
+        "commit that lands the ADR file, after the entry has served its purpose.",
     )
     parser.add_argument(
         "--reason",
@@ -307,6 +360,13 @@ def main(argv: list[str] | None = None, *, today: dt.date | None = None) -> int:
         help="Override the ADR directory (for tests).",
     )
     args = parser.parse_args(argv)
+
+    # --release is independent of --next/--reserve. Handle it first.
+    if args.release is not None:
+        return _release(
+            args.release,
+            reservations_path=args.reservations_path,
+        )
 
     if not args.next and not args.reserve:
         parser.print_help(sys.stderr)

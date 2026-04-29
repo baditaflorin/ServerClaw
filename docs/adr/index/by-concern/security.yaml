@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: security
-total_adrs: 45
+total_adrs: 46
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -882,3 +882,23 @@ adrs:
     summary: 'Add multi-deployment mode to the validator:'
     filename: 0458-cert-validator-multi-deployment.md
     path: docs/adr/0458-cert-validator-multi-deployment.md
+  - adr: 0469
+    title: connection.yml SSH key pull from OpenBao
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: security
+    keywords:
+      - openbao
+      - ssh
+      - secrets
+      - deployment-v1
+      - connection
+      - yml
+      - key
+      - pull
+      - from
+    summary: 'Extend connection.schema.json so both proxmoxhost.key and guestssh.key accept either of two shapes:'
+    filename: 0469-connection-yml-vault-key-pull.md
+    path: docs/adr/0469-connection-yml-vault-key-pull.md

@@ -390,6 +390,20 @@ validate_catalogue_freshness() {
   fi
 }
 
+validate_adr_reservation() {
+  # ADR 0472 phase 10.2 — reject PRs adding an ADR whose number is not
+  # backed by any reservation on origin/main or in this PR's local
+  # reservations.yaml. Closes the renumber-mid-session class of bug
+  # that hit Phase 9 four times. Advisory through the rollout window;
+  # promoted to required when the gate-runs ledger shows 3 consecutive
+  # clean runs (per ADR 0460 promotion-tracker pattern).
+  echo "ADR reservation gate (ADR 0472 — advisory)"
+  if ! run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_adr_reservation.py" --advisory; then
+    echo "validate_adr_reservation: unreserved ADRs reported above (advisory — not blocking)"
+    echo "  Reserve via: make reserve-adr-pr reason=\"<short>\""
+  fi
+}
+
 validate_host_pinning() {
   # ADR 0457 — host-pinning audit primitive (Phase 1). Advisory: walks
   # every deployment under .local/deployments/ and reports drift when a
@@ -972,6 +986,7 @@ for stage in "$@"; do
       validate_receipt_freshness
       validate_traceability
       validate_catalogue_freshness
+      validate_adr_reservation
       validate_host_pinning
       validate_health_probes
       validate_alert_rules
@@ -1034,6 +1049,9 @@ for stage in "$@"; do
       ;;
     catalogue-freshness)
       validate_catalogue_freshness
+      ;;
+    adr-reservation)
+      validate_adr_reservation
       ;;
     host-pinning)
       validate_host_pinning

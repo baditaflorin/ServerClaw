@@ -236,6 +236,22 @@ doctor-json:
 doctor-strict:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/doctor.py --strict
 
+# ADR 0472 phase 10.1 — atomic ADR-number reservation via fast-merged
+# single-commit PR. Use BEFORE starting work on a new ADR so the
+# number is canonical on origin/main within seconds, eliminating the
+# renumber-mid-session class of failure that hit Phase 9 four times.
+#
+#   make reserve-adr-pr reason="<short>" [workstream=<ws-id>]
+.PHONY: reserve-adr-pr
+reserve-adr-pr:
+	@if [ -z "$(reason)" ]; then \
+		echo "make reserve-adr-pr: reason=<X> is required" >&2; \
+		exit 2; \
+	fi
+	@uv run --with pyyaml python $(REPO_ROOT)/scripts/reserve_adr_pr.py \
+		--reason "$(reason)" \
+		$(if $(workstream),--workstream "$(workstream)",)
+
 # ADR 0451 phase 6.2 — `make heal`. Runs every doctor heal command in
 # sequence. Default dry-run; `make heal-apply` mutates disk state.
 heal:

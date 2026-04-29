@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: platform
-total_adrs: 150
+total_adrs: 152
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2844,3 +2844,37 @@ adrs:
     summary: 'A new receipts/gate-runs/ ledger captures per-run gate outcomes:'
     filename: 0460-phase8-cross-deploy-and-auto-promote.md
     path: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+  - adr: 0468
+    title: Pre-Converge State Snapshot
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - snapshot
+      - receipts
+      - rollback
+      - pre-converge
+      - state
+    summary: 'scripts/preconvergesnapshot.py compose writes one receipts/pre-converge-state/<host>-<runid>.json per converge
+      with three sections:'
+    filename: 0468-preconverge-snapshot.md
+    path: docs/adr/0468-preconverge-snapshot.md
+  - adr: '0471'
+    title: — Karakeep Coolify Deployment + Runtime Recovery Protocol
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - karakeep
+      - coolify
+      - deployment
+      - runtime
+      - recovery
+      - protocol
+    summary: When make converge-coolify is unavailable (Tailscale/Proxmox unreachable), the
+    filename: 0471-karakeep-coolify-deploy-and-runtime-recovery.md
+    path: docs/adr/0471-karakeep-coolify-deploy-and-runtime-recovery.md

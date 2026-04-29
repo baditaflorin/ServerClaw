@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: monitoring
-total_adrs: 13
+total_adrs: 14
 adrs:
   - adr: '0041'
     title: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability
@@ -265,3 +265,19 @@ adrs:
     summary: 'scripts/runhealthprobes.py:'
     filename: 0463-post-converge-health-probe.md
     path: docs/adr/0463-post-converge-health-probe.md
+  - adr: '0466'
+    title: Converge State Diff Receipts
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: monitoring
+    keywords:
+      - converge
+      - receipts
+      - observability
+      - state
+      - diff
+    summary: 'scripts/convergestatereceipt.py:'
+    filename: 0466-converge-state-diff-receipt.md
+    path: docs/adr/0466-converge-state-diff-receipt.md

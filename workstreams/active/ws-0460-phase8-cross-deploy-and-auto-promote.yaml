@@ -1,5 +1,5 @@
 id: ws-0460-phase8-cross-deploy-and-auto-promote
-adr: 0460
+adr: "0460"
 title: Phase 8 — cross-deployment doctor + advisory auto-promotion tracker
 status: in_progress
 ready_to_merge: false

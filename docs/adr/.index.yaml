@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-29'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 492
+total_adrs: 499
 adr_number_range:
   first: '0001'
-  last: '0465'
-  next_available: '0466'
+  last: '0472'
+  next_available: '0473'
 implementation_status_summary:
-  Implemented: 370
+  Implemented: 375
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 48
+  Proposed: 50
 decision_status_summary:
-  Accepted: 374
-  Proposed: 55
+  Accepted: 379
+  Proposed: 57
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 60
+      count: 67
       first_adr: '0400'
-      last_adr: '0465'
+      last_adr: '0472'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -70,7 +70,7 @@ facets:
       count: 9
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
-      count: 48
+      count: 50
     - concern: documentation
       path: docs/adr/index/by-concern/documentation.yaml
       count: 23
@@ -82,13 +82,13 @@ facets:
       count: 9
     - concern: monitoring
       path: docs/adr/index/by-concern/monitoring.yaml
-      count: 13
+      count: 14
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
-      count: 33
+      count: 34
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 150
+      count: 152
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -97,7 +97,7 @@ facets:
       count: 9
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 45
+      count: 46
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 7
@@ -111,7 +111,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 370
+      count: 375
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -131,14 +131,56 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 48
+      count: 50
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0466'
+  next_available_adr: '0473'
 latest_adrs:
+  - adr: '0472'
+    title: Phase 10 — Fix ADR-Collision Class via Early-Merge Reservation
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: ci-cd
+    path: docs/adr/0472-phase10-reservation-hardening.md
+  - adr: '0471'
+    title: — Karakeep Coolify Deployment + Runtime Recovery Protocol
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: platform
+    path: docs/adr/0471-karakeep-coolify-deploy-and-runtime-recovery.md
+  - adr: '0470'
+    title: Per-Deployment Fixture Inventory + Matrix CI
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: ci-cd
+    path: docs/adr/0470-deployment-fixture-matrix.md
+  - adr: 0469
+    title: connection.yml SSH key pull from OpenBao
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0469-connection-yml-vault-key-pull.md
+  - adr: 0468
+    title: Pre-Converge State Snapshot
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: platform
+    path: docs/adr/0468-preconverge-snapshot.md
+  - adr: '0467'
+    title: Pre-Converge Live State Check (DNS + Cert SAN)
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: networking
+    path: docs/adr/0467-preconverge-live-state-check.md
+  - adr: '0466'
+    title: Converge State Diff Receipts
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: monitoring
+    path: docs/adr/0466-converge-state-diff-receipt.md
   - adr: '0465'
     title: Phase 9 — Self-Running Automation Primitives
     implementation_status: Proposed
@@ -157,48 +199,6 @@ latest_adrs:
     currently_describes: current_state
     concern: monitoring
     path: docs/adr/0463-post-converge-health-probe.md
-  - adr: '0462'
-    title: Topology Pre-Commit Schema Hook
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: vm-topology
-    path: docs/adr/0462-topology-precommit-schema-hook.md
-  - adr: '0461'
-    title: Atomic Receipt Write + Dangling-Receipt Gate
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: ci-cd
-    path: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
-  - adr: '0460'
-    title: Phase 8 — Cross-Deployment Doctor + Advisory Auto-Promotion
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: platform
-    path: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
-  - adr: 0459
-    title: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: platform
-    path: docs/adr/0459-deployment-lifecycle-cli-parity.md
-  - adr: 0458
-    title: Cert-Validator Multi-Deployment Mode (Auto-Detect)
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: security
-    path: docs/adr/0458-cert-validator-multi-deployment.md
-  - adr: '0457'
-    title: Host-Pinning via `proxmox_guests[*].deployment_owner`
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: host-os
-    path: docs/adr/0457-host-pinning-deployment-owner.md
-  - adr: '0456'
-    title: Deployment-Aware Certificate Validation
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: security
-    path: docs/adr/0456-deployment-aware-certificate-validation.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

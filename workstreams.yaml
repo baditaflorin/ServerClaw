@@ -21,6 +21,332 @@ archive_summary:
   by_year:
     '2026': 323
 workstreams:
+- id: ws-0473-phase10-reservation-hardening
+  adr: '0472'
+  title: "Phase 10 \u2014 fix ADR-collision class via early-merge reservation + CI\
+    \ gate"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0472-phase10-reservation-hardening.md
+  depends_on:
+  - adr-0325-adr-discovery-and-reservation-ledger
+  - adr-0449-phase4-self-healing-primitives
+  shared_surfaces:
+  - docs/adr/0472-phase10-reservation-hardening.md
+  - workstreams/active/ws-0473-phase10-reservation-hardening.yaml
+  - scripts/reserve_adr.py
+  - scripts/validate_adr_reservation.py
+  - tests/test_validate_adr_reservation.py
+  - tests/test_reserve_adr_release.py
+  - Makefile
+  - scripts/validate_repo.sh
+  summary: 'Phase 10 closes the ADR-collision loop. Adds a make target that reserves
+    an ADR number via a fast-merged single-commit PR (reservation lives on main within
+    seconds, not stuck in feature branch). Adds a CI gate that rejects PRs adding
+    unreserved ADRs. Adds `reserve_adr.py --release` to clear realized reservations.
+
+    '
+  phases:
+    phase_0_open_workstream:
+      status: in_progress
+    phase_1_make_reserve_adr_pr:
+      status: not_started
+      target_version: 0.179.x
+    phase_2_validate_adr_reservation:
+      status: not_started
+      target_version: 0.179.x
+    phase_3_reserve_adr_release_flag:
+      status: not_started
+      target_version: 0.179.x
+  acceptance_criteria:
+  - make reserve-adr-pr reason=<X> reserves a number via fast-merged single-commit
+    PR
+  - validate_adr_reservation.py fails on unreserved-ADR PRs
+  - reserve_adr.py --release <N> idempotently removes the matching entry
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0470_docs
+      paths:
+      - docs/adr/0472-phase10-reservation-hardening.md
+      - workstreams/active/ws-0473-phase10-reservation-hardening.yaml
+      mode: shared_contract
+      contract: adr-0472-phase10-reservation-hardening-v1
+    - id: ws_0470_reserve_adr_extension
+      paths:
+      - scripts/reserve_adr.py
+      mode: shared_contract
+      contract: adr-0470-reserve-adr-v2
+    - id: ws_0470_reservation_gate
+      paths:
+      - scripts/validate_adr_reservation.py
+      - tests/test_validate_adr_reservation.py
+      mode: shared_contract
+      contract: adr-0470-reservation-gate-v1
+  notes:
+  - "The make target deliberately bypasses the worktree's PR flow \u2014 it opens\
+    \ its OWN tiny PR for the reservation, separate from the PR for the actual ADR\
+    \ work. This is the only way to make reservations visible to other agents within\
+    \ seconds.\n"
+- id: ws-0472-fixture-matrix-ci
+  adr: '0470'
+  title: Per-deployment fixture inventory + matrix CI
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0470-deployment-fixture-matrix.md
+  depends_on:
+  - adr-0440-per-deployment-identity
+  - adr-0457-host-pinning
+  - adr-0469-connection-yml-vault-key-pull
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0472-fixture-matrix-ci.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0472_adr
+      paths:
+      - docs/adr/0470-deployment-fixture-matrix.md
+      mode: exclusive
+    - id: ws_0472_fixtures
+      paths:
+      - tests/fixtures/deployments/**
+      mode: exclusive
+    - id: ws_0472_tests
+      paths:
+      - tests/test_ws0472_deployment_fixture_matrix.py
+      mode: exclusive
+    - id: ws_0472_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0472_workstream
+      paths:
+      - workstreams/active/ws-0472-fixture-matrix-ci.yaml
+      mode: exclusive
+  notes: 'Three synthetic deployments (minimal / multi-host / host-pinned) under
+
+    tests/fixtures/deployments/<slug>/. Parametrised matrix asserts every
+
+    contract validates against its schema for every fixture, plus
+
+    cross-file invariants (CIDR membership, vmid uniqueness). 28 new tests.
+
+    '
+- id: ws-0471-connection-yml-vault-pull
+  adr: 0469
+  title: connection.yml SSH key pull from OpenBao
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0469-connection-yml-vault-key-pull.md
+  depends_on:
+  - adr-0440-per-deployment-connection-registry
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0471-connection-yml-vault-pull.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0471_adr
+      paths:
+      - docs/adr/0469-connection-yml-vault-key-pull.md
+      mode: exclusive
+    - id: ws_0471_schema
+      paths:
+      - config/contracts/deployment-v1/connection.schema.json
+      mode: shared_contract
+      contract: deployment-v1
+    - id: ws_0471_script
+      paths:
+      - scripts/deployment.py
+      mode: shared_contract
+      contract: deployment-cli
+    - id: ws_0471_tests
+      paths:
+      - tests/test_ws0471_vault_key_pull.py
+      mode: exclusive
+    - id: ws_0471_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0471_workstream
+      paths:
+      - workstreams/active/ws-0471-connection-yml-vault-pull.yaml
+      mode: exclusive
+  notes: 'Extends connection.yml key field to accept {vault: <path>, field: <fld>}
+
+    in addition to a literal string. Materializes to mode-0600 tempfile at
+
+    use time. Closes the "ship operators a key file" friction in the
+
+    multi-deployment bootstrap path. 11 new tests.
+
+    '
+- id: ws-0470-preconverge-snapshot
+  adr: 0468
+  title: Pre-converge state snapshot
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0468-preconverge-snapshot.md
+  depends_on:
+  - adr-0461-atomic-receipt-write-and-dangling-check
+  - adr-0466-converge-state-diff-receipt
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0470-preconverge-snapshot.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0470_adr
+      paths:
+      - docs/adr/0468-preconverge-snapshot.md
+      mode: exclusive
+    - id: ws_0470_script
+      paths:
+      - scripts/preconverge_snapshot.py
+      mode: exclusive
+    - id: ws_0470_tests
+      paths:
+      - tests/test_ws0470_preconverge_snapshot.py
+      mode: exclusive
+    - id: ws_0470_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0470_workstream
+      paths:
+      - workstreams/active/ws-0470-preconverge-snapshot.yaml
+      mode: exclusive
+  notes: 'Read-only snapshot of host state captured before any converge.
+
+    systemd-units + docker-containers + managed-file hashes.
+
+    Operator-judgement rollback (no automatic revert).
+
+    5 new tests.
+
+    '
+- id: ws-0469-preconverge-live-state-check
+  adr: '0467'
+  title: Pre-converge live state check (DNS + cert SAN)
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0467-preconverge-live-state-check.md
+  depends_on:
+  - adr-0463-post-converge-health-probe
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0469-preconverge-live-state-check.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0469_adr
+      paths:
+      - docs/adr/0467-preconverge-live-state-check.md
+      mode: exclusive
+    - id: ws_0469_script
+      paths:
+      - scripts/preconverge_live_check.py
+      mode: exclusive
+    - id: ws_0469_tests
+      paths:
+      - tests/test_ws0469_preconverge_live_check.py
+      mode: exclusive
+    - id: ws_0469_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0469_workstream
+      paths:
+      - workstreams/active/ws-0469-preconverge-live-state-check.yaml
+      mode: exclusive
+  notes: 'Live-state pre-converge probe. DNS resolution + cert SAN match per
+
+    service. 11 tests cover SAN matching (RFC 6125 wildcard semantics),
+
+    DNS resolution success/failure/expected-ip, and CLI usage error.
+
+    '
+- id: ws-0468-converge-state-diff
+  adr: '0466'
+  title: Converge state diff receipts
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0466-converge-state-diff-receipt.md
+  depends_on:
+  - adr-0461-atomic-receipt-write-and-dangling-check
+  - adr-0463-post-converge-health-probe
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0468-converge-state-diff.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0468_adr
+      paths:
+      - docs/adr/0466-converge-state-diff-receipt.md
+      mode: exclusive
+    - id: ws_0468_script
+      paths:
+      - scripts/converge_state_receipt.py
+      mode: exclusive
+    - id: ws_0468_tests
+      paths:
+      - tests/test_ws0468_converge_state_receipt.py
+      mode: exclusive
+    - id: ws_0468_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0468_workstream
+      paths:
+      - workstreams/active/ws-0468-converge-state-diff.yaml
+      mode: exclusive
+  notes: "Closes the half-applied-state class of bug at the receipt layer.\n\nscripts/converge_state_receipt.py\
+    \ with two subcommands:\n - snapshot <paths>...: emit JSON array of {path, sha256,\
+    \ size_bytes}\n - write-receipt --run-id --host --role --before --after --handlers-fired:\n\
+    \   diff snapshots, write atomic receipt to receipts/converge-state/\n\n9 tests\
+    \ cover snapshot existing/missing files, diff change/no-change\n/add/remove, atomic\
+    \ receipt write, and both CLI subcommands.\n\nWiring into per-role task files\
+    \ is a follow-up. ws-0468 only ships\nthe leaf primitive.\n"
 - id: ws-0467-ssh-retry-classifier
   adr: '0464'
   title: SSH retry with backoff + failure classification

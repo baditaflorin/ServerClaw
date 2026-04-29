@@ -1,5 +1,5 @@
 id: ws-0455-phase7-drive-doctor-to-zero
-adr: 0455
+adr: "0455"
 title: Phase 7 — drive remaining doctor signals to zero
 status: in_progress
 ready_to_merge: false

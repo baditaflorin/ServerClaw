@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: networking
-total_adrs: 33
+total_adrs: 34
 adrs:
   - adr: '0015'
     title: example.com DNS And Subdomain Model
@@ -667,3 +667,22 @@ adrs:
     summary: scripts/doctor.py gains a --snapshot mode that runs every probe
     filename: 0465-phase9-self-running-automation.md
     path: docs/adr/0465-phase9-self-running-automation.md
+  - adr: '0467'
+    title: Pre-Converge Live State Check (DNS + Cert SAN)
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: networking
+    keywords:
+      - dns
+      - cert
+      - pre-converge
+      - live-state
+      - live
+      - state
+      - check
+      - san
+    summary: 'scripts/preconvergelivecheck.py:'
+    filename: 0467-preconverge-live-state-check.md
+    path: docs/adr/0467-preconverge-live-state-check.md

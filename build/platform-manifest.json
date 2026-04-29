@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.31",
+  "repo_version": "0.179.37",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-29T08:20:37Z",
-  "next_refresh_at": "2026-04-29T09:20:37Z",
+  "generated_at": "2026-04-29T09:16:46Z",
+  "next_refresh_at": "2026-04-29T10:16:46Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.26",
+    "last_version": "0.179.35",
     "deployed_at": "2026-04-29",
-    "summary": "ws-0465: regression test that locks in the ws-0460 host_pinning_guard sweep. 10 tests verify the role exists, the shared `playbooks/tasks/preflight.yml` invokes it via `include_role`, `playbooks/public-edge.yml` wires it explicitly, \u226530 service playbooks import the shared preflight, and 5 canonical service playbooks (ops-portal, keycloak, gitea, mail-platform, openbao) are covered. Catches the \"someone refactored the shared preflight\" regression class. No code change; pure test increment for ADR 0457 Phase 2.",
-    "release_notes_url": "docs/release-notes/0.179.28.md"
+    "summary": "ADR 0470 + ws-0472: per-deployment fixture inventory + matrix CI. Three synthetic deployments (`minimal` / `multi-host` / `host-pinned`) live under `tests/fixtures/deployments/<slug>/`, each carrying the full deployment-v1 quartet (`identity.yml` + `topology.yml` + `profile.yml` + `connection.yml`). The parametrised matrix in `tests/test_ws0472_deployment_fixture_matrix.py` validates every contract against its schema for every fixture and asserts cross-file invariants (every guest IP falls inside the identity CIDR, vmids unique within a topology). 28 new tests. Closes the \"schema rev breaks deployment X but not Y\" class of regression. Concludes the 2026-04-29 reliability-improvement sweep \u2014 all ten improvements (ADRs 0461 / 0462 / 0463 / 0464 / 0466 / 0467 / 0468 / 0469 / 0470 plus the ws-0465 regression test) are landed.",
+    "release_notes_url": "docs/release-notes/0.179.36.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
