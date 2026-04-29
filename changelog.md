@@ -17,6 +17,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - ADR 0457 + ws-0457: host-pinning Phase 1. New optional `deployment_owner` field on `proxmox_guests[*]` in the deployment-v1 topology schema. New `scripts/host_pinning_check.py` audit primitive (`--all`, `--host`, `--cross`, `--json`). Closes Slice D from the ws-0448 postmortem (lv3 ↔ 0fork `oauth2-proxy@4180` port-collision class of bug). 12 new tests. Phase 2 (role-side enforcement) deferred.
 - ws-0458: wire ADR 0457 audit into `scripts/validate_repo.sh` as advisory `host-pinning` lane. Promotes the audit from operator-on-demand to pre-push-gate visibility; skips silently when `.local/deployments/` is absent.
 - ADR 0457 Phase 2 + ws-0459: role-side enforcement. New `lv3.platform.host_pinning_guard` role refuses converge when the host's `deployment_owner` mismatches the active deployment slug. Wired into `playbooks/public-edge.yml`. Closes the `oauth2-proxy@4180` collision class of bug at converge time. 9 new tests.
+- ws-0460: sweep host_pinning_guard across every service playbook by including it in the shared `playbooks/tasks/preflight.yml` surface. 52 service playbooks (ops-portal, keycloak, gitea, mail-platform, openbao, dify, etc.) inherit the guard automatically. Single edit; opt-out via `host_pinning_guard_skip_in_preflight: true`.
 
 - ADR 0452 + ws-0452: Phase 7 drives doctor signals from 3/7 → 1/7
   non-zero. Adds `# pending: <reason>` marker filter to

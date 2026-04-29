@@ -1,4 +1,13 @@
 ---
+# ADR 0457 Phase 2 (ws-0460): host-pinning enforcement runs first so a
+# deployment-mismatched converge fails before any other preflight task
+# touches the target host. Single source of truth — every service
+# playbook that imports this preflight surface inherits the guard.
+- name: Enforce host-pinning per ADR 0457 (deployment_owner check)
+  ansible.builtin.include_role:
+    name: lv3.platform.host_pinning_guard
+  when: not (host_pinning_guard_skip_in_preflight | default(false) | bool)
+
 - name: Assert the requested execution environment is supported
   ansible.builtin.assert:
     that:
