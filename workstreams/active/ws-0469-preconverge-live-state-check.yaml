@@ -1,0 +1,45 @@
+id: ws-0469-preconverge-live-state-check
+adr: "0467"
+title: "Pre-converge live state check (DNS + cert SAN)"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0467-preconverge-live-state-check.md
+depends_on:
+  - adr-0463-post-converge-health-probe
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0469-preconverge-live-state-check.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0469_adr
+    paths:
+      - docs/adr/0467-preconverge-live-state-check.md
+    mode: exclusive
+  - id: ws_0469_script
+    paths:
+      - scripts/preconverge_live_check.py
+    mode: exclusive
+  - id: ws_0469_tests
+    paths:
+      - tests/test_ws0469_preconverge_live_check.py
+    mode: exclusive
+  - id: ws_0469_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0469_workstream
+    paths:
+      - workstreams/active/ws-0469-preconverge-live-state-check.yaml
+    mode: exclusive
+notes: |
+  Live-state pre-converge probe. DNS resolution + cert SAN match per
+  service. 11 tests cover SAN matching (RFC 6125 wildcard semantics),
+  DNS resolution success/failure/expected-ip, and CLI usage error.
