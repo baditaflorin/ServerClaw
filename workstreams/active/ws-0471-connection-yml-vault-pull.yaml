@@ -1,0 +1,52 @@
+id: ws-0471-connection-yml-vault-pull
+adr: "0469"
+title: "connection.yml SSH key pull from OpenBao"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0469-connection-yml-vault-key-pull.md
+depends_on:
+  - adr-0440-per-deployment-connection-registry
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0471-connection-yml-vault-pull.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0471_adr
+    paths:
+      - docs/adr/0469-connection-yml-vault-key-pull.md
+    mode: exclusive
+  - id: ws_0471_schema
+    paths:
+      - config/contracts/deployment-v1/connection.schema.json
+    mode: shared_contract
+    contract: deployment-v1
+  - id: ws_0471_script
+    paths:
+      - scripts/deployment.py
+    mode: shared_contract
+    contract: deployment-cli
+  - id: ws_0471_tests
+    paths:
+      - tests/test_ws0471_vault_key_pull.py
+    mode: exclusive
+  - id: ws_0471_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0471_workstream
+    paths:
+      - workstreams/active/ws-0471-connection-yml-vault-pull.yaml
+    mode: exclusive
+notes: |
+  Extends connection.yml key field to accept {vault: <path>, field: <fld>}
+  in addition to a literal string. Materializes to mode-0600 tempfile at
+  use time. Closes the "ship operators a key file" friction in the
+  multi-deployment bootstrap path. 11 new tests.

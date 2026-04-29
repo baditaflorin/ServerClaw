@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- ADR 0469 + ws-0471: connection.yml SSH key pull from OpenBao. `proxmox_host.key` and `guest_ssh.key` in `.local/deployments/<slug>/connection.yml` now accept `{vault: <path>, field?: <name>}` in addition to a literal path string. `_materialize_vault_key()` shells `openbao read -field` and writes the secret to a mode-0600 tempfile for the duration of the SSH command. Closes the "ship every operator a private-key file" friction in the multi-deployment bootstrap path. Schema enforces `additionalProperties: false` on the dict form so typos fail at validation. 11 new tests.
 - ADR 0465 + ws-0465: Phase 9 self-running automation primitives. Four CPU-only swaps that take LLM round-trips out of the loop: `scripts/doctor.py --snapshot` writes `build/doctor-snapshot.json` (cached view agents read instead of re-running 9 probes); new `probe_doctor_snapshot_freshness` reports cache-vs-HEAD staleness. `scripts/apply_promotion.py` consumes `promotion_tracker --json` and rewrites `validate_repo.sh` advisory→required for ALLOWED_GATES. `scripts/doctor_regression_watch.py` diffs live doctor against the latest baseline under `receipts/doctor-baselines/` (exit 1 on regression). Two committed Windmill schedule templates: hourly regression watcher + daily `make heal --apply`. `make doctor` now surfaces 10 signals (was 9). 63 new tests.
 - ADR 0460 + ws-0460: Phase 8 cross-deploy doctor + advisory auto-promotion. `scripts/promotion_tracker.py` classifies gates as eligible/streaking/unstable/promoted from `receipts/gate-runs/<gate>/*.yaml`. `scripts/cross_deployment_doctor.py` reads `.local/deployments/<slug>/state/` and reports per-receipt presence/skew drift. Both wired into `make doctor` (now 9 signals, still 1/9 non-zero). 38 new tests.
 
@@ -82,10 +83,14 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.179.31 release notes](docs/release-notes/0.179.31.md)
+- [0.179.35 release notes](docs/release-notes/0.179.35.md)
 
 ## Previous Releases
 
+- [0.179.34 release notes](docs/release-notes/0.179.34.md)
+- [0.179.33 release notes](docs/release-notes/0.179.33.md)
+- [0.179.32 release notes](docs/release-notes/0.179.32.md)
+- [0.179.31 release notes](docs/release-notes/0.179.31.md)
 - [0.179.28 release notes](docs/release-notes/0.179.28.md)
 - [0.179.26 release notes](docs/release-notes/0.179.26.md)
 - [0.179.25 release notes](docs/release-notes/0.179.25.md)

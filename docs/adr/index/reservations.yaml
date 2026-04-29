@@ -1,2 +1,12 @@
 schema_version: 1
-reservations: []
+reservations:
+- id: res-0469-connection-yml-vault-secret-pull
+  start: 469
+  end: 469
+  owner: Florin Badita-Nistor
+  branch: claude/crazy-chaplygin-c7c256
+  workstream: ws-0471-connection-yml-vault-pull
+  reason: connection-yml-vault-secret-pull
+  reserved_on: '2026-04-29'
+  expires_on: '2026-05-29'
+  status: active

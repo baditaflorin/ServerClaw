@@ -32,8 +32,29 @@
           "description": "Admin user on the Proxmox host (typically 'root' or 'ops')."
         },
         "key": {
-          "type": "string",
-          "description": "Path to the SSH key used to authenticate as <user>@<addr>. Relative paths resolve against the repo's .local/ssh/ directory."
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Path to the SSH key used to authenticate as <user>@<addr>. Relative paths resolve against the repo's .local/ssh/ directory."
+            },
+            {
+              "type": "object",
+              "required": ["vault"],
+              "additionalProperties": false,
+              "properties": {
+                "vault": {
+                  "type": "string",
+                  "description": "ADR 0469 — OpenBao secret path. Materialized to a tempfile (mode 0600) at use time and unlinked when the wrapper exits."
+                },
+                "field": {
+                  "type": "string",
+                  "default": "private_key",
+                  "description": "Secret field name. Defaults to 'private_key'."
+                }
+              }
+            }
+          ],
+          "description": "SSH key reference. Either a literal path or a {vault: <path>} form."
         }
       }
     },
@@ -47,8 +68,29 @@
           "description": "Admin user inside guest VMs (typically 'ops')."
         },
         "key": {
-          "type": "string",
-          "description": "Path to the SSH key used to authenticate as <user>@<guest>. Relative paths resolve against the repo's .local/ssh/ directory. Often distinct from proxmox_host.key (host root key vs guest ops key)."
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Path to the SSH key used to authenticate as <user>@<guest>. Relative paths resolve against the repo's .local/ssh/ directory. Often distinct from proxmox_host.key (host root key vs guest ops key)."
+            },
+            {
+              "type": "object",
+              "required": ["vault"],
+              "additionalProperties": false,
+              "properties": {
+                "vault": {
+                  "type": "string",
+                  "description": "ADR 0469 — OpenBao secret path. Materialized to a tempfile (mode 0600) at use time and unlinked when the wrapper exits."
+                },
+                "field": {
+                  "type": "string",
+                  "default": "private_key",
+                  "description": "Secret field name. Defaults to 'private_key'."
+                }
+              }
+            }
+          ],
+          "description": "SSH key reference. Either a literal path or a {vault: <path>} form."
         },
         "jump_user": {
           "type": "string",

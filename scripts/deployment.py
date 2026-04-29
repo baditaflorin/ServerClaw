@@ -504,6 +504,67 @@ def _resolve_ssh_key(value: str, repo_root: Path) -> Path:
     return (repo_root / ".local" / "ssh" / p).resolve()
 
 
+def _materialize_vault_key(spec: dict, repo_root: Path) -> Path:
+    """ADR 0469 — materialize a key from OpenBao to a tempfile (0600).
+
+    Spec shape: ``{vault: <path>, field: <field_name>}``. The CLI used
+    is configurable via ``$LV3_VAULT_FETCH_CMD`` (default ``openbao``)
+    so tests can substitute a stub. The fetched contents are written
+    to ``$LV3_VAULT_KEY_TMPDIR`` (default ``$XDG_RUNTIME_DIR``,
+    fallback ``/tmp``) with mode 0600. The path is returned; the
+    caller is responsible for unlinking.
+
+    Raises DeploymentError when the fetch fails so the operator gets
+    a clear message instead of an opaque empty-file SSH error.
+    """
+    if not isinstance(spec, dict) or "vault" not in spec:
+        raise DeploymentError("vault key spec must be an object with a 'vault' field")
+    path = str(spec["vault"]).strip()
+    if not path:
+        raise DeploymentError("vault key spec has empty 'vault' field")
+    field = str(spec.get("field", "private_key"))
+    cmd = os.environ.get("LV3_VAULT_FETCH_CMD", "openbao")
+    tmpdir_root = os.environ.get("LV3_VAULT_KEY_TMPDIR") or os.environ.get("XDG_RUNTIME_DIR") or "/tmp"
+    import tempfile
+
+    proc = subprocess.run(
+        [cmd, "read", "-field", field, path],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        raise DeploymentError(
+            f"vault fetch failed for {path!r} field={field!r}: {proc.stderr.strip() or 'rc={}'.format(proc.returncode)}"
+        )
+    secret = proc.stdout
+    if not secret:
+        raise DeploymentError(f"vault fetch returned empty body for {path!r} field={field!r}")
+    fd, tmp_str = tempfile.mkstemp(prefix="lv3-vault-key-", dir=tmpdir_root)
+    tmp = Path(tmp_str)
+    try:
+        with os.fdopen(fd, "w") as fh:
+            fh.write(secret if secret.endswith("\n") else secret + "\n")
+        os.chmod(tmp, 0o600)
+    except Exception:
+        try:
+            tmp.unlink()
+        except FileNotFoundError:
+            pass
+        raise
+    return tmp
+
+
+def _resolve_ssh_key_spec(value, repo_root: Path) -> Path:
+    """Dispatch on the key spec type (string vs vault dict).
+
+    Strings → file path resolution (legacy). Dicts → vault fetch.
+    """
+    if isinstance(value, dict):
+        return _materialize_vault_key(value, repo_root)
+    return _resolve_ssh_key(str(value), repo_root)
+
+
 def _connection_env_block(deployment: Deployment) -> dict[str, str]:
     """Return the env-var block for a deployment's connection registry.
 
@@ -525,7 +586,7 @@ def _connection_env_block(deployment: Deployment) -> dict[str, str]:
     if "user" in proxmox:
         env["LV3_PROXMOX_HOST_USER"] = str(proxmox["user"])
     if "key" in guest:
-        env["LV3_BOOTSTRAP_SSH_PRIVATE_KEY"] = str(_resolve_ssh_key(str(guest["key"]), REPO_ROOT))
+        env["LV3_BOOTSTRAP_SSH_PRIVATE_KEY"] = str(_resolve_ssh_key_spec(guest["key"], REPO_ROOT))
     if "user" in guest:
         env["LV3_GUEST_SSH_USER"] = str(guest["user"])
     # PLATFORM_IDENTITY_OVERLAY mirrors ADR 0437 — point Ansible at the
