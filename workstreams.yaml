@@ -21,6 +21,227 @@ archive_summary:
   by_year:
     '2026': 323
 workstreams:
+- id: ws-0467-ssh-retry-classifier
+  adr: '0464'
+  title: SSH retry with backoff + failure classification
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0464-ssh-retry-with-classification.md
+  depends_on:
+  - adr-0461-atomic-receipt-write-and-dangling-check
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0467-ssh-retry-classifier.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0467_adr
+      paths:
+      - docs/adr/0464-ssh-retry-with-classification.md
+      mode: exclusive
+    - id: ws_0467_wrapper_script
+      paths:
+      - scripts/ssh_with_retry.py
+      mode: exclusive
+    - id: ws_0467_tests
+      paths:
+      - tests/test_ws0467_ssh_retry.py
+      mode: exclusive
+    - id: ws_0467_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0467_workstream
+      paths:
+      - workstreams/active/ws-0467-ssh-retry-classifier.yaml
+      mode: exclusive
+  notes: "Closes the \"ssh failed once and we never retried\" failure mode.\n\nDrop-in\
+    \ wrapper around ssh: --retries (default 3), exponential\nbackoff with jitter,\
+    \ classifier that distinguishes auth_failure\n/ banner_timeout / connection_refused\
+    \ / dns_failure /\nnetwork_partition / host_key_mismatch / unknown.\n\nReceipts\
+    \ at receipts/ssh-failures/<target>-<ts>.json composed with\nthe ADR 0461 atomic-write\
+    \ helper.\n\n21 tests cover the classifier (12), backoff (2), receipt write (1),\n\
+    target extraction from ssh args (4), and CLI exit codes (2).\n\nWiring into Ansible's\
+    \ ssh_common_args / convergence paths is a\nfollow-up workstream \u2014 that's\
+    \ per-role review territory. ws-0467\nships only the leaf primitive.\n"
+- id: ws-0466-post-converge-health-probe
+  adr: '0463'
+  title: Post-converge / on-demand health-probe runner
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0463-post-converge-health-probe.md
+  depends_on:
+  - adr-0205-capability-contracts-before-product-selection
+  - adr-0446-phase2-multi-deployment-hardening
+  - adr-0461-atomic-receipt-write-and-dangling-check
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0466-post-converge-health-probe.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0466_adr
+      paths:
+      - docs/adr/0463-post-converge-health-probe.md
+      mode: exclusive
+    - id: ws_0466_runner_script
+      paths:
+      - scripts/run_health_probes.py
+      mode: exclusive
+    - id: ws_0466_tests
+      paths:
+      - tests/test_ws0466_health_probes.py
+      mode: exclusive
+    - id: ws_0466_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0466_workstream
+      paths:
+      - workstreams/active/ws-0466-post-converge-health-probe.yaml
+      mode: exclusive
+  notes: 'Reads catalog/services/<svc>/service.yaml::health.liveness blocks
+
+    (already populated per ADR 0205) and runs the probe live, writing
+
+    per-probe receipts under receipts/health-probes/.
+
+
+    HTTP and TCP probes supported. Unknown kinds fail cleanly.
+
+
+    8 tests cover: TCP open/closed port, HTTP 200/404, unknown kind,
+
+    receipt write content + atomicity, CLI exit codes for usage error
+
+    and unknown service.
+
+
+    Wiring into per-role converge tasks and a make doctor signal
+
+    reading the receipt format are explicit follow-ups (out of scope
+
+    here so the leaf primitive can land first).
+
+    '
+- id: ws-0464-topology-precommit-schema-hook
+  adr: '0462'
+  title: Topology pre-commit schema hook
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0462-topology-precommit-schema-hook.md
+  depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0457-host-pinning-deployment-owner
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0464-topology-precommit-schema-hook.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0464_adr
+      paths:
+      - docs/adr/0462-topology-precommit-schema-hook.md
+      mode: exclusive
+    - id: ws_0464_validator_script
+      paths:
+      - scripts/validate_topology_schema.py
+      mode: exclusive
+    - id: ws_0464_precommit_config
+      paths:
+      - .pre-commit-config.yaml
+      mode: shared_contract
+      contract: precommit-config-v1
+    - id: ws_0464_tests
+      paths:
+      - tests/test_ws0464_topology_schema_hook.py
+      mode: exclusive
+    - id: ws_0464_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0464_workstream
+      paths:
+      - workstreams/active/ws-0464-topology-precommit-schema-hook.yaml
+      mode: exclusive
+  notes: "Closes the 2026-04-28 topology-shape class of bug at commit time.\n\n- scripts/validate_topology_schema.py:\
+    \ jsonschema-validates topology\n  YAML against config/contracts/deployment-v1/topology.schema.json.\n\
+    \  Falls back to minimal required-keys check when jsonschema is missing.\n- .pre-commit-config.yaml:\
+    \ new validate-topology-schema hook fires\n  on inventory/host_vars/proxmox-host.yml.\n\
+    \n11 new tests cover well-formed topology, empty proxmox_guests,\nmissing required\
+    \ fields, malformed deployment_owner slugs,\nnon-topology rejection, unparseable\
+    \ YAML handling, and CLI exit codes.\n"
+- id: ws-0463-atomic-receipt-write
+  adr: '0461'
+  title: Atomic receipt write + dangling-receipt gate flag
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
+  depends_on:
+  - adr-0446-phase2-multi-deployment-hardening
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0463-atomic-receipt-write.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0463_adr
+      paths:
+      - docs/adr/0461-atomic-receipt-write-and-dangling-check.md
+      mode: exclusive
+    - id: ws_0463_check_receipt_freshness
+      paths:
+      - scripts/check_receipt_freshness.py
+      mode: shared_contract
+      contract: receipt-freshness-v1
+    - id: ws_0463_tests
+      paths:
+      - tests/test_ws0463_atomic_receipt_write.py
+      mode: exclusive
+    - id: ws_0463_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0463_workstream
+      paths:
+      - workstreams/active/ws-0463-atomic-receipt-write.yaml
+      mode: exclusive
+  notes: "Closes the PR #71 dangling-receipt class of bug.\n\n- write_receipt_atomic()\
+    \ helper: tmpfile + fsync + os.replace.\n- --check-files flag: detects latest_receipts\
+    \ entries with no\n  matching receipts/live-applies/<slug>.json, exits 1 on findings.\n\
+    \nLive signal: two pre-existing dangling receipts surfaced\n(preview_environment,\
+    \ staging_environment, both 2026-03-27).\nOut of scope to fix here \u2014 operator\
+    \ action, separate workstream.\n\n10 new tests cover atomic write, idempotent\
+    \ rewrite, no-temp-leftover\non success and on exception, parent-dir creation,\
+    \ dangling-check\nempty/dirty/empty-slug paths, and CLI exit codes.\n"
 - id: ws-0462-deployment-lifecycle-cli-parity
   adr: 0459
   title: Deployment lifecycle CLI parity (use/new/bind subcommands)
@@ -132,6 +353,49 @@ workstreams:
     module-import sanity.
 
     '
+- id: ws-0465-host-pinning-sweep-regression-test
+  adr: '0457'
+  title: Host-pinning sweep regression test (locks in ws-0460 wiring)
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: platform-infrastructure
+  branch: claude/crazy-chaplygin-c7c256
+  worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+  doc: docs/adr/0457-host-pinning-deployment-owner.md
+  depends_on:
+  - adr-0457-host-pinning-deployment-owner
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0465-host-pinning-sweep-regression-test.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0465_tests
+      paths:
+      - tests/test_ws0465_host_pinning_sweep_regression.py
+      mode: exclusive
+    - id: ws_0465_release_artifacts
+      paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: ws_0465_workstream
+      paths:
+      - workstreams/active/ws-0465-host-pinning-sweep-regression-test.yaml
+      mode: exclusive
+  notes: "Locks in the ws-0460 sweep that wired host_pinning_guard into 52\nservice\
+    \ playbooks via shared preflight. Without this test, a\nrefactor of tasks/preflight.yml\
+    \ could silently remove the guard\nfrom every service playbook at once.\n\n10\
+    \ tests cover:\n - role exists at documented path\n - tasks/preflight.yml mentions\
+    \ host_pinning_guard\n - tasks/preflight.yml invokes via include_role/import_role\
+    \ (not\n   just text mention)\n - playbooks/public-edge.yml has the role wired\
+    \ explicitly\n - >= 30 service playbooks import tasks/preflight.yml\n - 5 canonical\
+    \ service playbooks (ops-portal, keycloak, gitea,\n   mail-platform, openbao)\
+    \ import tasks/preflight.yml\n\nNo new ADR \u2014 this is a regression-test increment\
+    \ for ADR 0457\nPhase 2. Reservation res-0463 cleared after merge.\n"
 - id: ws-0460-host-pinning-sweep
   adr: '0457'
   title: 'Host-pinning sweep: include host_pinning_guard via shared preflight surface'
@@ -2807,6 +3071,112 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-0465-phase9-self-running-automation
+  adr: 309
+  title: "Phase 9 \u2014 self-running automation primitives (snapshot cache + auto-promote\
+    \ + regression watcher + daily heal)"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0465-phase9-self-running-automation.md
+  depends_on:
+  - adr-0450-phase5-doctor-aggregator-and-rename-hook
+  - adr-0451-phase6-self-healing-actions
+  - adr-0455-phase7-drive-doctor-to-zero
+  - adr-0460-phase8-cross-deploy-and-auto-promote
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0465-phase9-self-running-automation.md
+  - workstreams/active/ws-0465-phase9-self-running-automation.yaml
+  - scripts/doctor.py
+  - tests/test_doctor.py
+  - scripts/apply_promotion.py
+  - tests/test_apply_promotion.py
+  - scripts/doctor_regression_watch.py
+  - tests/test_doctor_regression_watch.py
+  - config/windmill/schedules/doctor-regression-watch.yaml
+  - config/windmill/schedules/daily-heal-apply.yaml
+  summary: 'Phase 9 turns four LLM-orchestrated read/fix loops into deterministic
+    CPU/scheduled jobs. Cached doctor snapshot eliminates per-session probe runs.
+    apply_promotion graduates eligible advisories without operator input. Regression
+    watcher inverts "agent must look" into "watcher must page". Daily heal-apply Windmill
+    schedule converges drift overnight.
+
+    '
+  phases:
+    phase_0_open_workstream:
+      status: in_progress
+    phase_1_doctor_snapshot:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - scripts/doctor.py --snapshot writes build/doctor-snapshot.json
+      - new probe_doctor_snapshot_freshness reports snapshot mtime vs git HEAD
+      - tests cover snapshot generation + freshness logic
+    phase_2_apply_promotion:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - scripts/apply_promotion.py emits plan from promotion_tracker --json
+      - "--apply rewrites validate_repo.sh advisory\u2192required + seeds mode: required\
+        \ ledger entry"
+      - tests cover plan synthesis, dry-run vs apply, idempotence
+    phase_3_regression_watcher:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - scripts/doctor_regression_watch.py compares live doctor --json against baseline
+      - exits non-zero on regression with machine-readable diff
+      - config/windmill/schedules/doctor-regression-watch.yaml hourly template
+    phase_4_daily_heal_schedule:
+      status: not_started
+      target_version: 0.179.x
+      tasks:
+      - "config/windmill/schedules/daily-heal-apply.yaml \u2014 03:00 UTC daily"
+      - schema-validates against existing windmill schedule contract
+  acceptance_criteria:
+  - make doctor surfaces 10 signals (was 9) with the new snapshot freshness probe
+  - apply_promotion --json lists eligible gates with proposed edits
+  - doctor_regression_watch exits 0 on no-regression baseline match
+  - two committed Windmill schedule templates
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0465_docs
+      paths:
+      - docs/adr/0465-phase9-self-running-automation.md
+      - workstreams/active/ws-0465-phase9-self-running-automation.yaml
+      mode: shared_contract
+      contract: adr-0465-phase9-self-running-v1
+    - id: ws_0465_doctor_snapshot
+      paths:
+      - scripts/doctor.py
+      - tests/test_doctor.py
+      mode: shared_contract
+      contract: adr-0465-doctor-snapshot-v1
+    - id: ws_0465_apply_promotion
+      paths:
+      - scripts/apply_promotion.py
+      - tests/test_apply_promotion.py
+      mode: shared_contract
+      contract: adr-0465-apply-promotion-v1
+    - id: ws_0465_regression_watcher
+      paths:
+      - scripts/doctor_regression_watch.py
+      - tests/test_doctor_regression_watch.py
+      - config/windmill/schedules/doctor-regression-watch.yaml
+      mode: shared_contract
+      contract: adr-0465-regression-watcher-v1
+    - id: ws_0465_daily_heal_schedule
+      paths:
+      - config/windmill/schedules/daily-heal-apply.yaml
+      mode: shared_contract
+      contract: adr-0465-daily-heal-schedule-v1
+  notes:
+  - "Items 2, 3, 5, 8, 9 from the 10-item review are deferred to phase 10 \u2014 they're\
+    \ each higher-effort or require coordination that doesn't fit this PR.\n"
 - id: ws-0460-phase8-cross-deploy-and-auto-promote
   adr: 304
   title: "Phase 8 \u2014 cross-deployment doctor + advisory auto-promotion tracker"

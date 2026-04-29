@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.25",
+  "repo_version": "0.179.31",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-29T07:55:01Z",
-  "next_refresh_at": "2026-04-29T08:55:01Z",
+  "generated_at": "2026-04-29T08:20:37Z",
+  "next_refresh_at": "2026-04-29T09:20:37Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.24",
+    "last_version": "0.179.26",
     "deployed_at": "2026-04-29",
-    "summary": "ADR 0460 + ws-0460: Phase 8 cross-deploy doctor + advisory `playbooks/coolify.yml`: localhost-scoped *Register coolify-apps as the",
-    "release_notes_url": "docs/release-notes/0.179.25.md"
+    "summary": "ws-0465: regression test that locks in the ws-0460 host_pinning_guard sweep. 10 tests verify the role exists, the shared `playbooks/tasks/preflight.yml` invokes it via `include_role`, `playbooks/public-edge.yml` wires it explicitly, \u226530 service playbooks import the shared preflight, and 5 canonical service playbooks (ops-portal, keycloak, gitea, mail-platform, openbao) are covered. Catches the \"someone refactored the shared preflight\" regression class. No code change; pure test increment for ADR 0457 Phase 2.",
+    "release_notes_url": "docs/release-notes/0.179.28.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

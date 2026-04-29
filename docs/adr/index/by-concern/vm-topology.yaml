@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: vm-topology
-total_adrs: 46
+total_adrs: 47
 adrs:
   - adr: '0005'
     title: Single-Node First Topology
@@ -896,3 +896,19 @@ adrs:
     summary: A new script scripts/validatenohardcodedtopology.py walks all
     filename: 0443-continuous-topology-reconciler.md
     path: docs/adr/0443-continuous-topology-reconciler.md
+  - adr: '0462'
+    title: Topology Pre-Commit Schema Hook
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: vm-topology
+    keywords:
+      - pre-commit
+      - topology
+      - schema
+      - deployment-v1
+      - hook
+    summary: 'Add a pre-commit hook that runs scripts/validatetopologyschema.py against any committed topology file. The script:'
+    filename: 0462-topology-precommit-schema-hook.md
+    path: docs/adr/0462-topology-precommit-schema-hook.md

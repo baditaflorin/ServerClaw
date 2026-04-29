@@ -10,7 +10,7 @@ generated: '2026-04-29'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 47
+total_adrs: 48
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -813,3 +813,23 @@ adrs:
     summary: 'A new receipts/gate-runs/ ledger captures per-run gate outcomes:'
     filename: 0460-phase8-cross-deploy-and-auto-promote.md
     path: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+  - adr: '0465'
+    title: Phase 9 — Self-Running Automation Primitives
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: networking
+    keywords:
+      - doctor
+      - snapshot
+      - auto-promote
+      - regression-watcher
+      - daily-heal
+      - phase
+      - self-running
+      - automation
+      - primitives
+    summary: scripts/doctor.py gains a --snapshot mode that runs every probe
+    filename: 0465-phase9-self-running-automation.md
+    path: docs/adr/0465-phase9-self-running-automation.md

@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: networking
-total_adrs: 32
+total_adrs: 33
 adrs:
   - adr: '0015'
     title: example.com DNS And Subdomain Model
@@ -647,3 +647,23 @@ adrs:
     summary: Introduce deployments as a first-class concept in this repo. A
     filename: 0439-multi-deployment-repo-architecture.md
     path: docs/adr/0439-multi-deployment-repo-architecture.md
+  - adr: '0465'
+    title: Phase 9 — Self-Running Automation Primitives
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: networking
+    keywords:
+      - doctor
+      - snapshot
+      - auto-promote
+      - regression-watcher
+      - daily-heal
+      - phase
+      - self-running
+      - automation
+      - primitives
+    summary: scripts/doctor.py gains a --snapshot mode that runs every probe
+    filename: 0465-phase9-self-running-automation.md
+    path: docs/adr/0465-phase9-self-running-automation.md

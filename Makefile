@@ -244,6 +244,18 @@ heal:
 heal-apply:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/heal.py --apply
 
+# ADR 0465 phase 9.1 — write build/doctor-snapshot.json. Agents read
+# the snapshot instead of re-running probes. Refresh on every commit
+# that changes a drift-related surface.
+.PHONY: doctor-snapshot doctor-regression-watch
+doctor-snapshot:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/doctor.py --snapshot
+
+# ADR 0465 phase 9.3 — diff current doctor signals against the latest
+# baseline under receipts/doctor-baselines/. Exits 1 on regression.
+doctor-regression-watch:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/doctor_regression_watch.py
+
 validate-ansible-syntax:
 	$(REPO_ROOT)/scripts/validate_repo.sh ansible-syntax
 

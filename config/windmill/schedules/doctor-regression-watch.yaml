@@ -1,0 +1,67 @@
+# =============================================================================
+# Windmill schedule template — ADR 0465 phase 9.3.
+# Activate via: wmill schedule create -f config/windmill/schedules/doctor-regression-watch.yaml
+# Tracker: config/windmill/schedules/README.md
+# =============================================================================
+schema_version: 1
+schedule_id: doctor-regression-watch
+adr: '0465'
+description: |
+  Hourly drift-regression check. Runs `make doctor --json` against
+  the latest committed baseline under `receipts/doctor-baselines/`,
+  computes per-signal diff via
+  `scripts/doctor_regression_watch.py`, and posts a Plane issue
+  whenever any signal flips from `count=0` (clean) to `count>0`
+  (drift detected). Inverts the "agent must look" pattern from
+  Phase 5 — operators no longer need to remember to run
+  `make doctor`; the watcher pages them.
+cadence:
+  cron: "0 * * * *"
+  timezone: UTC
+runner:
+  type: bash
+  path: |
+    cd /opt/platform &&
+    uv run --with pyyaml python scripts/doctor.py --snapshot &&
+    uv run --with pyyaml python scripts/doctor_regression_watch.py --json
+  cwd: /opt/platform
+on_signal:
+  - condition: ".summary.regressions > 0"
+    action: plane_issue
+    target:
+      project: platform-ops
+      title_template: "Doctor regression — {{ summary.regressions }} signal(s) flipped"
+      body_template: |
+        The hourly doctor regression watcher detected
+        {{ summary.regressions }} signal(s) that flipped from clean
+        to non-zero since the last committed baseline.
+
+        {{#each deltas}}
+        {{#if (eq this.kind "regression")}}
+        - **{{ this.name }}**: {{ this.baseline_count }} → {{ this.current_count }}
+        {{/if}}
+        {{/each}}
+
+        Source: scripts/doctor_regression_watch.py
+        Baseline: {{ baseline_path }}
+        Current: {{ current_path }}
+        ADR: 0465 (this watcher) + 0450 (doctor itself)
+        Schedule: doctor-regression-watch (hourly UTC)
+  - condition: ".exit_code != 0 and .exit_code != 1"
+    action: ops_portal_widget
+    target:
+      widget: schedule-failures
+      severity: P3
+ownership:
+  workstream: ws-0465-phase9-self-running-automation
+  contact: claude
+notes:
+  - >
+    Activation requires Windmill workspace access — operator imports
+    the template via `wmill schedule create`. Until activated, run
+    the watcher locally with `make doctor-regression-watch` (defined
+    in the Makefile alongside `make doctor`).
+  - >
+    The watcher needs `build/doctor-snapshot.json` to exist; the
+    `--snapshot` step in the runner generates it before the diff
+    runs. ADR 0465 phase 9.1 added `--snapshot` mode to doctor.py.

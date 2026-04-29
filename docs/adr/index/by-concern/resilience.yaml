@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: resilience
-total_adrs: 8
+total_adrs: 9
 adrs:
   - adr: '0163'
     title: Platform-Wide Retry Taxonomy and Exponential Backoff
@@ -160,3 +160,20 @@ adrs:
     summary: Generic-by-Construction — Generative Cascade IaC
     filename: 0438-generic-by-construction.md
     path: docs/adr/0438-generic-by-construction.md
+  - adr: '0464'
+    title: SSH Retry With Backoff + Failure Classification
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: resilience
+    keywords:
+      - ssh
+      - retry
+      - backoff
+      - classification
+      - receipts
+      - failure
+    summary: 'scripts/sshwithretry.py:'
+    filename: 0464-ssh-retry-with-classification.md
+    path: docs/adr/0464-ssh-retry-with-classification.md

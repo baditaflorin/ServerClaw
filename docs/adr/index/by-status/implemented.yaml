@@ -10,7 +10,7 @@ generated: '2026-04-29'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 366
+total_adrs: 370
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -7219,3 +7219,73 @@ adrs:
     summary: 'Add three subcommands to scripts/deployment.py that mirror the Make targets:'
     filename: 0459-deployment-lifecycle-cli-parity.md
     path: docs/adr/0459-deployment-lifecycle-cli-parity.md
+  - adr: '0461'
+    title: Atomic Receipt Write + Dangling-Receipt Gate
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: ci-cd
+    keywords:
+      - receipts
+      - live-apply
+      - gate
+      - atomic-io
+      - atomic
+      - receipt
+      - write
+      - dangling-receipt
+    summary: 'Added to scripts/checkreceiptfreshness.py. Pattern:'
+    filename: 0461-atomic-receipt-write-and-dangling-check.md
+    path: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
+  - adr: '0462'
+    title: Topology Pre-Commit Schema Hook
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: vm-topology
+    keywords:
+      - pre-commit
+      - topology
+      - schema
+      - deployment-v1
+      - hook
+    summary: 'Add a pre-commit hook that runs scripts/validatetopologyschema.py against any committed topology file. The script:'
+    filename: 0462-topology-precommit-schema-hook.md
+    path: docs/adr/0462-topology-precommit-schema-hook.md
+  - adr: '0463'
+    title: Post-Converge / On-Demand Health-Probe Runner
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: monitoring
+    keywords:
+      - health
+      - observability
+      - receipts
+      - post-converge
+      - on-demand
+      - health-probe
+      - runner
+    summary: 'scripts/runhealthprobes.py:'
+    filename: 0463-post-converge-health-probe.md
+    path: docs/adr/0463-post-converge-health-probe.md
+  - adr: '0464'
+    title: SSH Retry With Backoff + Failure Classification
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: resilience
+    keywords:
+      - ssh
+      - retry
+      - backoff
+      - classification
+      - receipts
+      - failure
+    summary: 'scripts/sshwithretry.py:'
+    filename: 0464-ssh-retry-with-classification.md
+    path: docs/adr/0464-ssh-retry-with-classification.md

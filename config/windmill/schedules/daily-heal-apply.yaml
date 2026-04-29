@@ -1,0 +1,71 @@
+# =============================================================================
+# Windmill schedule template — ADR 0465 phase 9.4.
+# Activate via: wmill schedule create -f config/windmill/schedules/daily-heal-apply.yaml
+# Tracker: config/windmill/schedules/README.md
+# =============================================================================
+schema_version: 1
+schedule_id: daily-heal-apply
+adr: '0465'
+description: |
+  Daily 03:00 UTC run of `make heal --apply`. The heal orchestrator
+  (ADR 0451 phase 6.2) is idempotent and dry-run-safe; daily runs
+  opportunistically converge anything safe-to-fix while the operator
+  is offline. Reduces the number of "open the worktree → make doctor
+  → make heal" cycles operators perform manually. Compounds with
+  the doctor-regression-watch hourly schedule: when this morning's
+  heal run resolves a signal that flipped overnight, the watcher
+  reports `improvement` instead of `regression`.
+cadence:
+  cron: "0 3 * * *"
+  timezone: UTC
+runner:
+  type: bash
+  path: |
+    cd /opt/platform &&
+    uv run --with pyyaml python scripts/heal.py --apply --json
+  cwd: /opt/platform
+on_signal:
+  # Heal commands that returned non-zero need human attention. Most
+  # often this means a `--apply` mutation refused (dirty tree) or a
+  # downstream tool errored. Page on-call so an operator can look.
+  - condition: '.outcomes | map(select(.exit_code != null and .exit_code != 0)) | length > 0'
+    action: plane_issue
+    target:
+      project: platform-ops
+      title_template: "Daily heal — at least one heal command failed"
+      body_template: |
+        The daily 03:00 UTC heal run completed with at least one
+        non-zero exit code from a heal command.
+
+        {{#each outcomes}}
+        {{#if (gt this.exit_code 0)}}
+        - **{{ this.signal_name }}**: exit {{ this.exit_code }}
+          {{#if this.stderr_summary}}
+          - {{ this.stderr_summary }}
+          {{/if}}
+        {{/if}}
+        {{/each}}
+
+        Source: scripts/heal.py --apply
+        ADR: 0465 (this schedule) + 0451 (heal orchestrator)
+        Schedule: daily-heal-apply (03:00 UTC daily)
+  - condition: ".exit_code != 0 and .exit_code != 1"
+    action: ops_portal_widget
+    target:
+      widget: schedule-failures
+      severity: P3
+ownership:
+  workstream: ws-0465-phase9-self-running-automation
+  contact: claude
+notes:
+  - >
+    Activation requires Windmill workspace access — operator imports
+    via `wmill schedule create`. The runner needs git-push access on
+    whatever branch heal commits land on (typically a dedicated
+    automation branch, not main).
+  - >
+    Heal commands that mutate disk state (refresh_safe_receipts,
+    heal_workstream_renames) are designed to be safe in the daily
+    cadence — they refuse on a dirty tree, leave NEEDS-REVIEW items
+    untouched, and only refresh receipts where the role hasn't
+    changed since the last live-apply.

@@ -8,21 +8,21 @@
 schema_version: 2
 generated: '2026-04-29'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 487
+total_adrs: 492
 adr_number_range:
   first: '0001'
-  last: '0460'
-  next_available: '0461'
+  last: '0465'
+  next_available: '0466'
 implementation_status_summary:
-  Implemented: 366
+  Implemented: 370
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 47
+  Proposed: 48
 decision_status_summary:
-  Accepted: 370
-  Proposed: 54
+  Accepted: 374
+  Proposed: 55
   Deprecated: 14
   Implemented: 49
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 55
+      count: 60
       first_adr: '0400'
-      last_adr: '0460'
+      last_adr: '0465'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -70,7 +70,7 @@ facets:
       count: 9
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
-      count: 47
+      count: 48
     - concern: documentation
       path: docs/adr/index/by-concern/documentation.yaml
       count: 23
@@ -82,10 +82,10 @@ facets:
       count: 9
     - concern: monitoring
       path: docs/adr/index/by-concern/monitoring.yaml
-      count: 12
+      count: 13
     - concern: networking
       path: docs/adr/index/by-concern/networking.yaml
-      count: 32
+      count: 33
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
       count: 150
@@ -94,7 +94,7 @@ facets:
       count: 7
     - concern: resilience
       path: docs/adr/index/by-concern/resilience.yaml
-      count: 8
+      count: 9
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
       count: 45
@@ -106,12 +106,12 @@ facets:
       count: 4
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 46
+      count: 47
   by_status:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 366
+      count: 370
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -131,14 +131,44 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 47
+      count: 48
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0461'
+  next_available_adr: '0466'
 latest_adrs:
+  - adr: '0465'
+    title: Phase 9 — Self-Running Automation Primitives
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: networking
+    path: docs/adr/0465-phase9-self-running-automation.md
+  - adr: '0464'
+    title: SSH Retry With Backoff + Failure Classification
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: resilience
+    path: docs/adr/0464-ssh-retry-with-classification.md
+  - adr: '0463'
+    title: Post-Converge / On-Demand Health-Probe Runner
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: monitoring
+    path: docs/adr/0463-post-converge-health-probe.md
+  - adr: '0462'
+    title: Topology Pre-Commit Schema Hook
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: vm-topology
+    path: docs/adr/0462-topology-precommit-schema-hook.md
+  - adr: '0461'
+    title: Atomic Receipt Write + Dangling-Receipt Gate
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: ci-cd
+    path: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
   - adr: '0460'
     title: Phase 8 — Cross-Deployment Doctor + Advisory Auto-Promotion
     implementation_status: Proposed
@@ -169,36 +199,6 @@ latest_adrs:
     currently_describes: current_state
     concern: security
     path: docs/adr/0456-deployment-aware-certificate-validation.md
-  - adr: '0455'
-    title: Phase 7 — Drive Doctor Signals to Zero
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: automation
-    path: docs/adr/0455-phase7-drive-doctor-to-zero.md
-  - adr: '0454'
-    title: Incident & Postmortem Registry
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: ci-cd
-    path: docs/adr/0454-incident-and-postmortem-registry.md
-  - adr: '0453'
-    title: Integration-Health Telemetry
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: monitoring
-    path: docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
-  - adr: '0452'
-    title: Workstream Lifecycle Auto-Close
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: automation
-    path: docs/adr/0452-workstream-lifecycle-auto-close.md
-  - adr: '0451'
-    title: Phase 6 Self-Healing Actions
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: ci-cd
-    path: docs/adr/0451-phase6-self-healing-actions.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

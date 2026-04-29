@@ -262,3 +262,83 @@ def test_run_all_returns_one_signal_per_probe(d, tmp_path):
     names = {s.name for s in signals}
     assert "stale_receipts" in names
     assert "blocked_substrate" in names
+
+
+# ---------------------------------------------------------------------------
+# ADR 0465 phase 9.1 — doctor snapshot + freshness probe
+# ---------------------------------------------------------------------------
+
+
+def test_probe_doctor_snapshot_freshness_missing(d, tmp_path):
+    """No snapshot on disk → flagged as stale (count=1)."""
+    sig = d.probe_doctor_snapshot_freshness(tmp_path)
+    assert sig.count == 1
+    assert "missing" in sig.headline.lower()
+    assert sig.heal_command and "--snapshot" in sig.heal_command
+
+
+def test_probe_doctor_snapshot_freshness_unparseable(d, tmp_path):
+    """Snapshot exists but is corrupt → error path, count=1."""
+    (tmp_path / "build").mkdir()
+    (tmp_path / "build" / "doctor-snapshot.json").write_text("{not json")
+    sig = d.probe_doctor_snapshot_freshness(tmp_path)
+    assert sig.count == 1
+    assert sig.error  # error string set
+
+
+def test_probe_doctor_snapshot_freshness_no_head_sha(d, tmp_path):
+    """Legacy snapshot without head_sha → flagged for refresh."""
+    import json as _json
+
+    (tmp_path / "build").mkdir()
+    (tmp_path / "build" / "doctor-snapshot.json").write_text(_json.dumps({"summary": {}, "signals": []}))
+    sig = d.probe_doctor_snapshot_freshness(tmp_path)
+    assert sig.count == 1
+    assert "head_sha" in sig.headline or "legacy" in sig.headline.lower()
+
+
+def test_cli_snapshot_writes_file(d, tmp_path, capsys):
+    """`doctor.py --snapshot --root <tmp>` writes build/doctor-snapshot.json
+    with the freshness envelope."""
+    rc = d.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--snapshot",
+            "--probes",
+            "blocked_substrate",  # one cheap probe — no need to run all 9
+        ]
+    )
+    assert rc == 0
+    snapshot = tmp_path / "build" / "doctor-snapshot.json"
+    assert snapshot.is_file()
+    import json as _json
+
+    payload = _json.loads(snapshot.read_text())
+    assert "schema_version" in payload
+    assert "generated_at" in payload
+    assert "head_sha" in payload
+    assert "summary" in payload
+    assert "signals" in payload
+
+
+def test_cli_snapshot_excludes_freshness_probe(d, tmp_path):
+    """The snapshot must NOT include the freshness probe — that probe
+    runs against the snapshot, so writing one that says "the snapshot
+    is missing" is nonsense."""
+    rc = d.main(["--root", str(tmp_path), "--snapshot"])
+    assert rc == 0
+    snapshot = tmp_path / "build" / "doctor-snapshot.json"
+    import json as _json
+
+    payload = _json.loads(snapshot.read_text())
+    names = {s["name"] for s in payload["signals"]}
+    assert "doctor_snapshot_freshness" not in names
+
+
+def test_run_all_includes_snapshot_freshness_probe(d, tmp_path):
+    """The full PROBES tuple must include the freshness probe so
+    `make doctor` surfaces the cache-staleness signal."""
+    signals = d.run_all(tmp_path)
+    names = {s.name for s in signals}
+    assert "doctor_snapshot_freshness" in names

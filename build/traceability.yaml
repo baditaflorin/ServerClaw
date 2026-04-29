@@ -7,11 +7,11 @@
 schema_version: 1
 generator: scripts/generate_traceability.py
 summary:
-  total_workstreams: 39
-  with_resolved_adr: 38
+  total_workstreams: 45
+  with_resolved_adr: 44
   with_dangling_dependencies: 1
   with_dangling_surfaces: 3
-  ready_to_merge: 16
+  ready_to_merge: 21
 workstreams:
 - workstream_id: adr-0058-nats-event-bus
   title: NATS JetStream for internal event bus and agent coordination
@@ -711,6 +711,109 @@ workstreams:
     currently_describes: current_state
     concern: platform
     path: docs/adr/0459-deployment-lifecycle-cli-parity.md
+- workstream_id: ws-0463-atomic-receipt-write
+  title: Atomic receipt write + dangling-receipt gate flag
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0461'
+  depends_on:
+  - adr-0446-phase2-multi-deployment-hardening
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Atomic Receipt Write + Dangling-Receipt Gate
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: ci-cd
+    path: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
+- workstream_id: ws-0464-topology-precommit-schema-hook
+  title: Topology pre-commit schema hook
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0462'
+  depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0457-host-pinning-deployment-owner
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Topology Pre-Commit Schema Hook
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: vm-topology
+    path: docs/adr/0462-topology-precommit-schema-hook.md
+- workstream_id: ws-0465-host-pinning-sweep-regression-test
+  title: Host-pinning sweep regression test (locks in ws-0460 wiring)
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0457'
+  depends_on:
+  - adr-0457-host-pinning-deployment-owner
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Host-Pinning via `proxmox_guests[*].deployment_owner`
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: host-os
+    path: docs/adr/0457-host-pinning-deployment-owner.md
+- workstream_id: ws-0465-phase9-self-running-automation
+  title: "Phase 9 \u2014 self-running automation primitives (snapshot cache + auto-promote\
+    \ + regression watcher + daily heal)"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: 0309
+  depends_on:
+  - adr-0450-phase5-doctor-aggregator-and-rename-hook
+  - adr-0451-phase6-self-healing-actions
+  - adr-0455-phase7-drive-doctor-to-zero
+  - adr-0460-phase8-cross-deploy-and-auto-promote
+  surfaces:
+    total: 10
+    present_on_disk: 10
+  adr:
+    title: Task-Oriented Information Architecture Across The Platform Workbench
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: platform
+    path: docs/adr/0309-task-oriented-information-architecture-across-the-platform-workbench.md
+- workstream_id: ws-0466-post-converge-health-probe
+  title: Post-converge / on-demand health-probe runner
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0463'
+  depends_on:
+  - adr-0205-capability-contracts-before-product-selection
+  - adr-0446-phase2-multi-deployment-hardening
+  - adr-0461-atomic-receipt-write-and-dangling-check
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: Post-Converge / On-Demand Health-Probe Runner
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: monitoring
+    path: docs/adr/0463-post-converge-health-probe.md
+- workstream_id: ws-0467-ssh-retry-classifier
+  title: SSH retry with backoff + failure classification
+  status: in_progress
+  ready_to_merge: true
+  primary_adr: '0464'
+  depends_on:
+  - adr-0461-atomic-receipt-write-and-dangling-check
+  surfaces:
+    total: 2
+    present_on_disk: 2
+  adr:
+    title: SSH Retry With Backoff + Failure Classification
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: resilience
+    path: docs/adr/0464-ssh-retry-with-classification.md
 - workstream_id: ws-realtime-dynamic-children
   title: Auto-discover all production hosts as Netdata streaming children
   status: in_progress

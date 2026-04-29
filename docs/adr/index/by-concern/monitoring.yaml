@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: monitoring
-total_adrs: 12
+total_adrs: 13
 adrs:
   - adr: '0041'
     title: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability
@@ -247,3 +247,21 @@ adrs:
     summary: Add scripts/generateintegrationhealth.py --write, producing
     filename: 0453-integration-health-telemetry-and-bypass-governance.md
     path: docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
+  - adr: '0463'
+    title: Post-Converge / On-Demand Health-Probe Runner
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: monitoring
+    keywords:
+      - health
+      - observability
+      - receipts
+      - post-converge
+      - on-demand
+      - health-probe
+      - runner
+    summary: 'scripts/runhealthprobes.py:'
+    filename: 0463-post-converge-health-probe.md
+    path: docs/adr/0463-post-converge-health-probe.md

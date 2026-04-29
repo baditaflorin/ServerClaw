@@ -434,6 +434,79 @@ def probe_cross_deployment_drift(repo_root: Path) -> Signal:
     )
 
 
+def probe_doctor_snapshot_freshness(repo_root: Path) -> Signal:
+    """ADR 0465 phase 9.1 — surface whether build/doctor-snapshot.json
+    is current.
+
+    Agents reading the cached snapshot save tokens vs. re-running the
+    full probe set. The freshness probe lets them know when the cached
+    view is stale so they re-run only when needed.
+
+    Three states:
+      - cached + matches HEAD → [ok]
+      - cached but HEAD has moved → count=1 (stale; re-run snapshot)
+      - missing entirely → count=1 (no cache available)
+    """
+    snapshot_path = repo_root / "build" / "doctor-snapshot.json"
+    if not snapshot_path.is_file():
+        return Signal(
+            name="doctor_snapshot_freshness",
+            headline="build/doctor-snapshot.json missing — agents must run full probe set",
+            count=1,
+            heal_command="python3 scripts/doctor.py --snapshot",
+            explain_command="ls -l build/doctor-snapshot.json",
+        )
+    try:
+        payload = json.loads(snapshot_path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        return Signal(
+            name="doctor_snapshot_freshness",
+            headline="build/doctor-snapshot.json unparseable",
+            count=1,
+            error=str(exc),
+            heal_command="python3 scripts/doctor.py --snapshot",
+        )
+    snapshot_sha = payload.get("head_sha", "")
+    head_sha = _git_head_sha(repo_root)
+    if not snapshot_sha:
+        return Signal(
+            name="doctor_snapshot_freshness",
+            headline="snapshot lacks head_sha envelope (legacy format)",
+            count=1,
+            heal_command="python3 scripts/doctor.py --snapshot",
+        )
+    if head_sha and snapshot_sha != head_sha:
+        return Signal(
+            name="doctor_snapshot_freshness",
+            headline=f"snapshot stale: head={head_sha[:8]}, snapshot={snapshot_sha[:8]}",
+            count=1,
+            detail={"snapshot_sha": snapshot_sha, "head_sha": head_sha},
+            heal_command="python3 scripts/doctor.py --snapshot",
+        )
+    return Signal(
+        name="doctor_snapshot_freshness",
+        headline=f"snapshot current at {snapshot_sha[:8]}",
+        count=0,
+        detail={"snapshot_sha": snapshot_sha, "generated_at": payload.get("generated_at", "")},
+    )
+
+
+def _git_head_sha(repo_root: Path) -> str:
+    """Return the current HEAD SHA, or empty string if not a git repo."""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return ""
+    if proc.returncode != 0:
+        return ""
+    return proc.stdout.strip()
+
+
 PROBES = (
     probe_stale_receipts,
     probe_safe_to_refresh,
@@ -444,6 +517,7 @@ PROBES = (
     probe_blocked_substrate,
     probe_promotion_eligible,
     probe_cross_deployment_drift,
+    probe_doctor_snapshot_freshness,
 )
 
 
@@ -493,10 +567,23 @@ def main(argv: list[str] | None = None) -> int:
         default=os.environ.get("DOCTOR_PROBES", ""),
         help="Comma-separated probe names to run (default: all). Useful for tests.",
     )
+    parser.add_argument(
+        "--snapshot",
+        action="store_true",
+        help="Write build/doctor-snapshot.json (ADR 0465 phase 9.1). "
+        "Cached snapshot agents can read instead of re-running probes. "
+        "Implies --json output to stdout AND a written file.",
+    )
     args = parser.parse_args(argv)
 
     repo_root = Path(args.root)
     probes = list(PROBES)
+    # Snapshot mode runs every probe except its own freshness check —
+    # writing a snapshot that includes "the snapshot is missing" is
+    # nonsense. The freshness probe runs after the snapshot is written
+    # via subsequent `make doctor` calls.
+    if args.snapshot:
+        probes = [p for p in probes if p.__name__ != "probe_doctor_snapshot_freshness"]
     if args.probes:
         wanted = {p.strip() for p in args.probes.split(",") if p.strip()}
         probes = [p for p in probes if p.__name__.removeprefix("probe_") in wanted]
@@ -506,21 +593,43 @@ def main(argv: list[str] | None = None) -> int:
 
     signals = [probe(repo_root) for probe in probes]
 
-    if args.json:
-        print(
-            json.dumps(
-                {
-                    "summary": {
-                        "total": len(signals),
-                        "nonzero": sum(1 for s in signals if s.count > 0),
-                        "errored": sum(1 for s in signals if s.error),
-                    },
-                    "signals": [s.to_dict() for s in signals],
-                },
-                indent=2,
-                sort_keys=True,
-            )
-        )
+    payload = {
+        "summary": {
+            "total": len(signals),
+            "nonzero": sum(1 for s in signals if s.count > 0),
+            "errored": sum(1 for s in signals if s.error),
+        },
+        "signals": [s.to_dict() for s in signals],
+    }
+
+    if args.snapshot:
+        # ADR 0465 phase 9.1 — wrap in a freshness envelope and write
+        # to build/doctor-snapshot.json. Agents read the snapshot
+        # instead of re-running probes.
+        import datetime as dt
+
+        envelope = {
+            "schema_version": 1,
+            "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "head_sha": _git_head_sha(repo_root),
+            **payload,
+        }
+        snapshot_path = repo_root / "build" / "doctor-snapshot.json"
+        snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+        snapshot_path.write_text(json.dumps(envelope, indent=2, sort_keys=True))
+        # Default snapshot output to stdout-quiet so the file write is
+        # the primary side effect; pair --snapshot with --json to also
+        # echo to stdout.
+        if args.json:
+            print(json.dumps(envelope, indent=2, sort_keys=True))
+        else:
+            try:
+                rel = snapshot_path.relative_to(repo_root)
+            except ValueError:
+                rel = snapshot_path
+            print(f"doctor: wrote snapshot to {rel}")
+    elif args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
     elif args.quiet:
         nonzero = sum(1 for s in signals if s.count > 0)
         print(f"doctor: {nonzero}/{len(signals)} signal(s) non-zero")

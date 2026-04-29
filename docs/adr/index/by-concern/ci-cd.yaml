@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: ci-cd
-total_adrs: 47
+total_adrs: 48
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -926,3 +926,22 @@ adrs:
     summary: ''
     filename: 0454-incident-and-postmortem-registry.md
     path: docs/adr/0454-incident-and-postmortem-registry.md
+  - adr: '0461'
+    title: Atomic Receipt Write + Dangling-Receipt Gate
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: ci-cd
+    keywords:
+      - receipts
+      - live-apply
+      - gate
+      - atomic-io
+      - atomic
+      - receipt
+      - write
+      - dangling-receipt
+    summary: 'Added to scripts/checkreceiptfreshness.py. Pattern:'
+    filename: 0461-atomic-receipt-write-and-dangling-check.md
+    path: docs/adr/0461-atomic-receipt-write-and-dangling-check.md

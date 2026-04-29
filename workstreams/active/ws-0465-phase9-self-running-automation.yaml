@@ -1,0 +1,110 @@
+id: ws-0465-phase9-self-running-automation
+adr: 0465
+title: Phase 9 — self-running automation primitives (snapshot cache + auto-promote + regression watcher + daily heal)
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/objective-carson-cbe0c3
+worktree_path: .claude/worktrees/objective-carson-cbe0c3
+doc: docs/adr/0465-phase9-self-running-automation.md
+depends_on:
+  - adr-0450-phase5-doctor-aggregator-and-rename-hook
+  - adr-0451-phase6-self-healing-actions
+  - adr-0455-phase7-drive-doctor-to-zero
+  - adr-0460-phase8-cross-deploy-and-auto-promote
+conflicts_with: []
+shared_surfaces:
+  - docs/adr/0465-phase9-self-running-automation.md
+  - workstreams/active/ws-0465-phase9-self-running-automation.yaml
+  # 9.1 — snapshot cache
+  - scripts/doctor.py
+  - tests/test_doctor.py
+  # 9.2 — apply promotion
+  - scripts/apply_promotion.py
+  - tests/test_apply_promotion.py
+  # 9.3 — regression watcher
+  - scripts/doctor_regression_watch.py
+  - tests/test_doctor_regression_watch.py
+  - config/windmill/schedules/doctor-regression-watch.yaml
+  # 9.4 — daily heal schedule
+  - config/windmill/schedules/daily-heal-apply.yaml
+summary: >
+  Phase 9 turns four LLM-orchestrated read/fix loops into deterministic
+  CPU/scheduled jobs. Cached doctor snapshot eliminates per-session
+  probe runs. apply_promotion graduates eligible advisories without
+  operator input. Regression watcher inverts "agent must look" into
+  "watcher must page". Daily heal-apply Windmill schedule converges
+  drift overnight.
+phases:
+  phase_0_open_workstream:
+    status: in_progress
+  phase_1_doctor_snapshot:
+    status: not_started
+    target_version: 0.179.x
+    tasks:
+      - "scripts/doctor.py --snapshot writes build/doctor-snapshot.json"
+      - "new probe_doctor_snapshot_freshness reports snapshot mtime vs git HEAD"
+      - "tests cover snapshot generation + freshness logic"
+  phase_2_apply_promotion:
+    status: not_started
+    target_version: 0.179.x
+    tasks:
+      - "scripts/apply_promotion.py emits plan from promotion_tracker --json"
+      - "--apply rewrites validate_repo.sh advisory→required + seeds mode: required ledger entry"
+      - "tests cover plan synthesis, dry-run vs apply, idempotence"
+  phase_3_regression_watcher:
+    status: not_started
+    target_version: 0.179.x
+    tasks:
+      - "scripts/doctor_regression_watch.py compares live doctor --json against baseline"
+      - "exits non-zero on regression with machine-readable diff"
+      - "config/windmill/schedules/doctor-regression-watch.yaml hourly template"
+  phase_4_daily_heal_schedule:
+    status: not_started
+    target_version: 0.179.x
+    tasks:
+      - "config/windmill/schedules/daily-heal-apply.yaml — 03:00 UTC daily"
+      - "schema-validates against existing windmill schedule contract"
+acceptance_criteria:
+  - "make doctor surfaces 10 signals (was 9) with the new snapshot freshness probe"
+  - "apply_promotion --json lists eligible gates with proposed edits"
+  - "doctor_regression_watch exits 0 on no-regression baseline match"
+  - "two committed Windmill schedule templates"
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0465_docs
+      paths:
+        - docs/adr/0465-phase9-self-running-automation.md
+        - workstreams/active/ws-0465-phase9-self-running-automation.yaml
+      mode: shared_contract
+      contract: adr-0465-phase9-self-running-v1
+    - id: ws_0465_doctor_snapshot
+      paths:
+        - scripts/doctor.py
+        - tests/test_doctor.py
+      mode: shared_contract
+      contract: adr-0465-doctor-snapshot-v1
+    - id: ws_0465_apply_promotion
+      paths:
+        - scripts/apply_promotion.py
+        - tests/test_apply_promotion.py
+      mode: shared_contract
+      contract: adr-0465-apply-promotion-v1
+    - id: ws_0465_regression_watcher
+      paths:
+        - scripts/doctor_regression_watch.py
+        - tests/test_doctor_regression_watch.py
+        - config/windmill/schedules/doctor-regression-watch.yaml
+      mode: shared_contract
+      contract: adr-0465-regression-watcher-v1
+    - id: ws_0465_daily_heal_schedule
+      paths:
+        - config/windmill/schedules/daily-heal-apply.yaml
+      mode: shared_contract
+      contract: adr-0465-daily-heal-schedule-v1
+notes:
+  - >
+    Items 2, 3, 5, 8, 9 from the 10-item review are deferred to
+    phase 10 — they're each higher-effort or require coordination
+    that doesn't fit this PR.
