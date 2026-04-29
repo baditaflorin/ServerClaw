@@ -1,0 +1,57 @@
+id: ws-0466-post-converge-health-probe
+adr: "0463"
+title: "Post-converge / on-demand health-probe runner"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0463-post-converge-health-probe.md
+depends_on:
+  - adr-0205-capability-contracts-before-product-selection
+  - adr-0446-phase2-multi-deployment-hardening
+  - adr-0461-atomic-receipt-write-and-dangling-check
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0466-post-converge-health-probe.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0466_adr
+    paths:
+      - docs/adr/0463-post-converge-health-probe.md
+    mode: exclusive
+  - id: ws_0466_runner_script
+    paths:
+      - scripts/run_health_probes.py
+    mode: exclusive
+  - id: ws_0466_tests
+    paths:
+      - tests/test_ws0466_health_probes.py
+    mode: exclusive
+  - id: ws_0466_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0466_workstream
+    paths:
+      - workstreams/active/ws-0466-post-converge-health-probe.yaml
+    mode: exclusive
+notes: |
+  Reads catalog/services/<svc>/service.yaml::health.liveness blocks
+  (already populated per ADR 0205) and runs the probe live, writing
+  per-probe receipts under receipts/health-probes/.
+
+  HTTP and TCP probes supported. Unknown kinds fail cleanly.
+
+  8 tests cover: TCP open/closed port, HTTP 200/404, unknown kind,
+  receipt write content + atomicity, CLI exit codes for usage error
+  and unknown service.
+
+  Wiring into per-role converge tasks and a make doctor signal
+  reading the receipt format are explicit follow-ups (out of scope
+  here so the leaf primitive can land first).
