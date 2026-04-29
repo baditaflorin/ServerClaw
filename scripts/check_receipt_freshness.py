@@ -46,6 +46,60 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STACK_YAML = REPO_ROOT / "versions" / "stack.yaml"
+RECEIPT_DIR = REPO_ROOT / "receipts" / "live-applies"
+
+
+# ---------------------------------------------------------------------------
+# ADR 0461 — receipt-file-existence check
+# ---------------------------------------------------------------------------
+
+
+def find_dangling_receipts(receipts: dict[str, str], receipt_dir: Path = RECEIPT_DIR) -> list[tuple[str, str]]:
+    """Return [(service, slug), ...] for receipt slugs that have no JSON file.
+
+    PR #71 (2026-04-28) added a `latest_receipts.coolify_runtime` slug
+    to versions/stack.yaml without committing the corresponding
+    receipts/live-applies/<slug>.json file. The schema-validation gate
+    failed for every subsequent push to main until ws-0448 reconstructed
+    the missing file. This function gives the gate a programmatic way
+    to refuse the same class of commit.
+    """
+    dangling: list[tuple[str, str]] = []
+    for service, slug in sorted(receipts.items()):
+        if not slug:
+            continue
+        path = receipt_dir / f"{slug}.json"
+        if not path.is_file():
+            dangling.append((str(service), str(slug)))
+    return dangling
+
+
+def write_receipt_atomic(path: Path, payload: dict, *, indent: int = 2) -> None:
+    """Atomic JSON-receipt write (ADR 0461).
+
+    Writes to <path>.tmp, fsync, rename. Never leaves a half-written file
+    in place: a crash between fsync and rename leaves the original
+    receipt (or no receipt) intact, never a truncated one.
+    """
+    import os as _os
+    import tempfile
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_str = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
+    tmp = Path(tmp_str)
+    try:
+        with _os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(payload, fh, indent=indent, sort_keys=True)
+            fh.write("\n")
+            fh.flush()
+            _os.fsync(fh.fileno())
+        _os.replace(tmp, path)
+    except Exception:
+        try:
+            tmp.unlink()
+        except FileNotFoundError:
+            pass
+        raise
 
 # A receipt slug starts `YYYY-MM-DD-<rest>`. Examples from the live file:
 #   2026-04-27-ws-0372-0fork-services-all-7-deployed
@@ -205,6 +259,15 @@ def main(argv: list[str] | None = None, *, today: dt.date | None = None) -> int:
         action="store_true",
         help="Exit 1 when stale receipts present (default: advisory, exit 0)",
     )
+    parser.add_argument(
+        "--check-files",
+        action="store_true",
+        help=(
+            "ADR 0461 — also verify each latest_receipts slug has a "
+            "matching receipts/live-applies/<slug>.json file. Always "
+            "exits non-zero on dangling references regardless of --strict."
+        ),
+    )
     args = parser.parse_args(argv)
 
     if args.max_age_days < 0:
@@ -226,6 +289,22 @@ def main(argv: list[str] | None = None, *, today: dt.date | None = None) -> int:
     if not receipts:
         print("check_receipt_freshness: no receipts in live_apply_evidence.latest_receipts.")
         return 0
+
+    if args.check_files:
+        # Read RECEIPT_DIR from the module so tests can monkeypatch it.
+        import sys as _sys
+
+        _mod = _sys.modules[__name__]
+        dangling = find_dangling_receipts(receipts, receipt_dir=getattr(_mod, "RECEIPT_DIR"))
+        if dangling:
+            for service, slug in dangling:
+                print(
+                    f"check_receipt_freshness: DANGLING receipt — service={service} slug={slug} "
+                    f"has no matching receipts/live-applies/{slug}.json (ADR 0461). "
+                    f"Either commit the receipt JSON or revert the latest_receipts entry.",
+                    file=sys.stderr,
+                )
+            return 1
 
     today = today or dt.date.today()
     results = evaluate_receipts(receipts, args.max_age_days, today)

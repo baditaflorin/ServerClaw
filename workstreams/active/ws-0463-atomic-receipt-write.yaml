@@ -1,0 +1,56 @@
+id: ws-0463-atomic-receipt-write
+adr: "0461"
+title: "Atomic receipt write + dangling-receipt gate flag"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
+depends_on:
+  - adr-0446-phase2-multi-deployment-hardening
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0463-atomic-receipt-write.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0463_adr
+    paths:
+      - docs/adr/0461-atomic-receipt-write-and-dangling-check.md
+    mode: exclusive
+  - id: ws_0463_check_receipt_freshness
+    paths:
+      - scripts/check_receipt_freshness.py
+    mode: shared_contract
+    contract: receipt-freshness-v1
+  - id: ws_0463_tests
+    paths:
+      - tests/test_ws0463_atomic_receipt_write.py
+    mode: exclusive
+  - id: ws_0463_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0463_workstream
+    paths:
+      - workstreams/active/ws-0463-atomic-receipt-write.yaml
+    mode: exclusive
+notes: |
+  Closes the PR #71 dangling-receipt class of bug.
+
+  - write_receipt_atomic() helper: tmpfile + fsync + os.replace.
+  - --check-files flag: detects latest_receipts entries with no
+    matching receipts/live-applies/<slug>.json, exits 1 on findings.
+
+  Live signal: two pre-existing dangling receipts surfaced
+  (preview_environment, staging_environment, both 2026-03-27).
+  Out of scope to fix here — operator action, separate workstream.
+
+  10 new tests cover atomic write, idempotent rewrite, no-temp-leftover
+  on success and on exception, parent-dir creation, dangling-check
+  empty/dirty/empty-slug paths, and CLI exit codes.

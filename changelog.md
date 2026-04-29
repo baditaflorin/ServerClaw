@@ -76,6 +76,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
   advisory `validate_catalogue_freshness`. 60 new tests.
 - ADR 0458 + ws-0461: cert validator multi-deployment auto-detect. New `--all-deployments` flag walks every slug; auto-triggers when no slug passed AND multiple deployments exist. The pre-push gate's all-lane runner now covers every deployment in a multi-deployment install. 6 new tests.
 - ADR 0459 + ws-0462: deployment lifecycle CLI parity. New `use`/`new`/`bind` subcommands on `scripts/deployment.py` mirror the existing `make use-deployment`/`make new-deployment`/`make bind-worktree` targets so agents and scripts can drive the deployment lifecycle programmatically without shelling out to Make. 9 new tests.
+- ADR 0461 + ws-0463: atomic receipt write + dangling-receipt gate flag. `write_receipt_atomic()` helper eliminates half-written receipts on crash. `--check-files` detects `latest_receipts` entries with no matching `receipts/live-applies/<slug>.json` file — closes the PR #71 dangling-receipt class of bug. Live signal: 2 pre-existing dangling receipts surfaced (preview_environment, staging_environment). 10 new tests.
 
 ## Latest Release
 
