@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: platform
-total_adrs: 152
+total_adrs: 153
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2878,3 +2878,23 @@ adrs:
     summary: When make converge-coolify is unavailable (Tailscale/Proxmox unreachable), the
     filename: 0471-karakeep-coolify-deploy-and-runtime-recovery.md
     path: docs/adr/0471-karakeep-coolify-deploy-and-runtime-recovery.md
+  - adr: '0474'
+    title: Phase 12 — Receipt Mass-Refresh + `make heal-receipts`
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - receipts
+      - heal
+      - doctor
+      - batch
+      - phase
+      - receipt
+      - mass-refresh
+      - make
+      - heal-receipts
+    summary: 'Two surfaces:'
+    filename: 0474-phase12-receipt-mass-refresh.md
+    path: docs/adr/0474-phase12-receipt-mass-refresh.md

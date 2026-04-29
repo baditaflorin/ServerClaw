@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.38",
+  "repo_version": "0.179.39",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-29T12:55:10Z",
-  "next_refresh_at": "2026-04-29T13:55:10Z",
+  "generated_at": "2026-04-29T13:00:08Z",
+  "next_refresh_at": "2026-04-29T14:00:08Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.36",
+    "last_version": "0.179.37",
     "deployed_at": "2026-04-29",
-    "summary": "ADR 0470 + ws-0472: per-deployment fixture inventory + matrix CI. Three synthetic deployments (`minimal` / `multi-host` / `host-pinned`) under `tests/fixtures/deployments/<slug>/` exercise every deployment-v1 contract (`identity.yml` + `topology.yml` + `profile.yml` + `connection.yml`). Parametrised matrix asserts schema validity and cross-file invariants (CIDR membership, unique vmids). Closes the \"schema bump breaks deployment X but unit tests still pass\" regression class. 28 new tests. Concludes the 2026-04-29 reliability-improvement sweep (10 of 10 landed). ADR 0469 + ws-0471: connection.yml SSH key pull from OpenBao. `proxmox_host.key` and `guest_ssh.key` in `.local/deployments/<slug>/connection.yml` now accept `{vault: <path>, field?: <name>}` in addition to a literal path string. `_materialize_vault_key()` shells `openbao read -field` and writes the secret to a mode-0600 tempfile for the duration of the SSH command. Closes the \"ship every operator a private-key file\" friction in the multi-deployment bootstrap path. Schema enforces `additionalProperties: false` on the dict form so typos fail at validation. 11 new tests.",
-    "release_notes_url": "docs/release-notes/0.179.37.md"
+    "summary": "ADR 0473 + ws-0474: Phase 11 ships four CPU-only automation primitives that take LLM round-trips out of routine view-rendering. `scripts/generate_service_cards.py` writes one Markdown card per service to `build/service-cards/<svc>.md` (78 services). `scripts/build_workstream_db.py` indexes `workstreams.yaml` into `build/workstreams.sqlite3` so agents query \"what's in flight for service X\" in 50 ms instead of parsing 2.7 MB of YAML. `scripts/generate_pr_body.py` drafts the five recurring sections of a release PR from real artifacts. `scripts/generate_context_packs.py` materialises `build/context-packs/<ws-id>.md` per active workstream \u2014 cold-start agents read one file. New `make refresh-cpu-views` umbrella target. 61 new tests. ADR 0472 + ws-0473: Phase 10 fixes the ADR-collision loop that hit Phase 9 four times. `make reserve-adr-pr reason=\"<X>\"` opens a tiny single-commit reservation PR + auto-merges it; the number is canonical on origin/main within seconds. `scripts/validate_adr_reservation.py` rejects PRs adding an unreserved ADR (advisory through rollout). `scripts/reserve_adr.py --release N` clears the entry once the ADR lands. 38 new tests.",
+    "release_notes_url": "docs/release-notes/0.179.38.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

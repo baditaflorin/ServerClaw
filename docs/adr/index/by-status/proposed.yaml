@@ -10,7 +10,7 @@ generated: '2026-04-29'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 51
+total_adrs: 52
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -891,3 +891,23 @@ adrs:
     summary: Ship four CPU-only primitives that materialise these views ahead of
     filename: 0473-phase11-cpu-only-automation-primitives.md
     path: docs/adr/0473-phase11-cpu-only-automation-primitives.md
+  - adr: '0474'
+    title: Phase 12 — Receipt Mass-Refresh + `make heal-receipts`
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - receipts
+      - heal
+      - doctor
+      - batch
+      - phase
+      - receipt
+      - mass-refresh
+      - make
+      - heal-receipts
+    summary: 'Two surfaces:'
+    filename: 0474-phase12-receipt-mass-refresh.md
+    path: docs/adr/0474-phase12-receipt-mass-refresh.md

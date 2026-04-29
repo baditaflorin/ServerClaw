@@ -7,8 +7,8 @@
 schema_version: 1
 generator: scripts/generate_traceability.py
 summary:
-  total_workstreams: 52
-  with_resolved_adr: 51
+  total_workstreams: 53
+  with_resolved_adr: 52
   with_dangling_dependencies: 1
   with_dangling_surfaces: 3
   ready_to_merge: 26
@@ -934,6 +934,24 @@ workstreams:
     currently_describes: goal_state
     concern: automation
     path: docs/adr/0473-phase11-cpu-only-automation-primitives.md
+- workstream_id: ws-0475-phase12-receipt-mass-refresh
+  title: "Phase 12 \u2014 receipt mass-refresh + heal-receipts target + doctor backlog\
+    \ probe"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0474'
+  depends_on:
+  - adr-0449-phase4-self-healing-primitives
+  - adr-0451-phase6-self-healing-actions
+  surfaces:
+    total: 5
+    present_on_disk: 5
+  adr:
+    title: "Phase 12 \u2014 Receipt Mass-Refresh + `make heal-receipts`"
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: platform
+    path: docs/adr/0474-phase12-receipt-mass-refresh.md
 - workstream_id: ws-realtime-dynamic-children
   title: Auto-discover all production hosts as Netdata streaming children
   status: in_progress

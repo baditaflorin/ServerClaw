@@ -21,6 +21,50 @@ archive_summary:
   by_year:
     '2026': 323
 workstreams:
+- id: ws-0475-phase12-receipt-mass-refresh
+  adr: '0474'
+  title: "Phase 12 \u2014 receipt mass-refresh + heal-receipts target + doctor backlog\
+    \ probe"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0474-phase12-receipt-mass-refresh.md
+  depends_on:
+  - adr-0449-phase4-self-healing-primitives
+  - adr-0451-phase6-self-healing-actions
+  shared_surfaces:
+  - docs/adr/0474-phase12-receipt-mass-refresh.md
+  - workstreams/active/ws-0475-phase12-receipt-mass-refresh.yaml
+  - scripts/mass_refresh_receipts.py
+  - tests/test_mass_refresh_receipts.py
+  - Makefile
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0475_docs
+      paths:
+      - docs/adr/0474-phase12-receipt-mass-refresh.md
+      - workstreams/active/ws-0475-phase12-receipt-mass-refresh.yaml
+      mode: shared_contract
+      contract: adr-0474-phase12-receipt-mass-refresh-v1
+    - id: ws_0475_orchestrator
+      paths:
+      - scripts/mass_refresh_receipts.py
+      - tests/test_mass_refresh_receipts.py
+      mode: shared_contract
+      contract: mass-refresh-receipts-v1
+  tasks:
+  - id: t1
+    title: "Phase 12.1 \u2014 scripts/mass_refresh_receipts.py orchestrator + tests"
+    status: pending
+  - id: t2
+    title: "Phase 12.2 \u2014 Makefile heal-receipts target"
+    status: pending
+  - id: t3
+    title: "Phase 12.3 \u2014 doctor probe_safe_refresh_backlog"
+    status: pending
 - id: ws-0474-phase11-cpu-only-automation
   adr: '0473'
   title: "Phase 11 \u2014 four CPU-only automation primitives (service cards, workstream\

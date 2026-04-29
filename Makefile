@@ -260,6 +260,18 @@ heal:
 heal-apply:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/heal.py --apply
 
+# ADR 0474 phase 12.2 — receipt mass-refresh.
+# Classifies stale receipts via ADR 0449's safe-refresh classifier,
+# writes a heal receipt to receipts/heal-receipts/, and (with --apply)
+# lands the bump commit. Use this when `make doctor` reports a
+# safe_to_refresh backlog above the threshold.
+.PHONY: heal-receipts heal-receipts-dry-run
+heal-receipts:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/mass_refresh_receipts.py --apply
+
+heal-receipts-dry-run:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/mass_refresh_receipts.py
+
 # ADR 0473 phase 11 — refresh every CPU-only derived view in one shot.
 # Per-service cards, workstream SQLite index, PR-body draft and
 # per-workstream context packs. Cheap enough to run on every commit;
