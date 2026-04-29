@@ -5,6 +5,11 @@
 # catalog-web Traefik label: Host(`education-wemeshup.apps.0fork.com`) && PathPrefix(`/`)
 # Without this file, ALL traffic (including /api/v1/) goes to the Vite frontend.
 #
+# IMPORTANT: Traefik v3 file provider requires double-quote syntax for matcher args.
+# Backticks work in Docker labels (Docker provider) but NOT in file-provider rules.
+# Docker labels: Host(`example.com`) — works in Docker provider
+# File config:   Host("example.com") — required for file provider in Traefik v3+
+#
 # The catalog-api container IP (10.200.1.4) is stable within the Coolify app
 # network (o96z9s4ospvkdbz2ge1c0p3t). If the app is redeployed and the IP
 # changes, update the url below or replace with the container name when
@@ -15,7 +20,7 @@
 http:
   routers:
     api-education-wemeshup:
-      rule: "Host(`education-wemeshup.apps.0fork.com`) && PathPrefix(`/api/`)"
+      rule: 'Host("education-wemeshup.apps.0fork.com") && PathPrefix("/api/")'
       entryPoints:
         - http
         - https
