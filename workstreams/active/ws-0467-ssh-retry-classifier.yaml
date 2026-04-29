@@ -1,0 +1,58 @@
+id: ws-0467-ssh-retry-classifier
+adr: "0464"
+title: "SSH retry with backoff + failure classification"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0464-ssh-retry-with-classification.md
+depends_on:
+  - adr-0461-atomic-receipt-write-and-dangling-check
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0467-ssh-retry-classifier.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0467_adr
+    paths:
+      - docs/adr/0464-ssh-retry-with-classification.md
+    mode: exclusive
+  - id: ws_0467_wrapper_script
+    paths:
+      - scripts/ssh_with_retry.py
+    mode: exclusive
+  - id: ws_0467_tests
+    paths:
+      - tests/test_ws0467_ssh_retry.py
+    mode: exclusive
+  - id: ws_0467_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0467_workstream
+    paths:
+      - workstreams/active/ws-0467-ssh-retry-classifier.yaml
+    mode: exclusive
+notes: |
+  Closes the "ssh failed once and we never retried" failure mode.
+
+  Drop-in wrapper around ssh: --retries (default 3), exponential
+  backoff with jitter, classifier that distinguishes auth_failure
+  / banner_timeout / connection_refused / dns_failure /
+  network_partition / host_key_mismatch / unknown.
+
+  Receipts at receipts/ssh-failures/<target>-<ts>.json composed with
+  the ADR 0461 atomic-write helper.
+
+  21 tests cover the classifier (12), backoff (2), receipt write (1),
+  target extraction from ssh args (4), and CLI exit codes (2).
+
+  Wiring into Ansible's ssh_common_args / convergence paths is a
+  follow-up workstream — that's per-role review territory. ws-0467
+  ships only the leaf primitive.
