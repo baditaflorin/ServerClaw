@@ -1,0 +1,47 @@
+id: ws-0470-preconverge-snapshot
+adr: "0468"
+title: "Pre-converge state snapshot"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0468-preconverge-snapshot.md
+depends_on:
+  - adr-0461-atomic-receipt-write-and-dangling-check
+  - adr-0466-converge-state-diff-receipt
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0470-preconverge-snapshot.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0470_adr
+    paths:
+      - docs/adr/0468-preconverge-snapshot.md
+    mode: exclusive
+  - id: ws_0470_script
+    paths:
+      - scripts/preconverge_snapshot.py
+    mode: exclusive
+  - id: ws_0470_tests
+    paths:
+      - tests/test_ws0470_preconverge_snapshot.py
+    mode: exclusive
+  - id: ws_0470_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0470_workstream
+    paths:
+      - workstreams/active/ws-0470-preconverge-snapshot.yaml
+    mode: exclusive
+notes: |
+  Read-only snapshot of host state captured before any converge.
+  systemd-units + docker-containers + managed-file hashes.
+  Operator-judgement rollback (no automatic revert).
+  5 new tests.
