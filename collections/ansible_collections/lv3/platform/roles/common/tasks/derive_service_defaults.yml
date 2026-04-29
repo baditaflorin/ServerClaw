@@ -43,30 +43,79 @@
 #          container_name, image, internal_port, internal_base_url,
 #          local_artifact_dir, openbao_*
 
+# Each derived variable goes through `lookup('vars', '<svc>_<key>',
+# default=<derived_value>)`. When an operator overrides a derivation via
+# extra-vars (-e @.local/identity.yml or -e <var>=<value>), Ansible's
+# variable precedence (extra-vars are level 22, set_fact is 21) means the
+# override is already in scope before this task runs — but `set_fact`
+# unconditionally writes a new fact at level 21 and that new fact
+# propagates to subsequent tasks via the host's fact cache, effectively
+# clobbering the operator override for the rest of the role's lifetime.
+# By passing the overridden value back into set_fact through `lookup`,
+# we make the operator's choice survive: the lookup returns the existing
+# extra-var value, set_fact stores it back, and downstream tasks read
+# the operator's value just as they would a derived default.
+#
+# Practically this lets per-deployment overrides like
+#   coolify_env_file: /opt/coolify/runtime.env
+#   coolify_tunnel_host: 65.108.75.123
+# in a deployment overlay actually take effect, instead of being silently
+# replaced by the derived default on every converge.
 - name: "Derive docker_compose defaults for {{ common_derive_service_name }} (with image catalog)"
   ansible.builtin.set_fact:
     "{{ common_derive_service_name }}_site_dir": >-
-      {{ __derive_service_entry.site_dir | default('/opt/' + common_derive_service_name) }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_site_dir',
+                 default=(__derive_service_entry.site_dir
+                          | default('/opt/' + common_derive_service_name))) }}
     "{{ common_derive_service_name }}_data_dir": >-
-      {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/data' }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_data_dir',
+                 default=((__derive_service_entry.site_dir
+                           | default('/opt/' + common_derive_service_name)) + '/data')) }}
     "{{ common_derive_service_name }}_secret_dir": >-
-      {{ __derive_service_entry.secret_dir | default('/etc/' + platform_identity.unix_prefix + '/' + common_derive_service_name) }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_secret_dir',
+                 default=(__derive_service_entry.secret_dir
+                          | default('/etc/' + platform_identity.unix_prefix + '/' + common_derive_service_name))) }}
     "{{ common_derive_service_name }}_compose_file": >-
-      {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/docker-compose.yml' }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_compose_file',
+                 default=((__derive_service_entry.site_dir
+                           | default('/opt/' + common_derive_service_name)) + '/docker-compose.yml')) }}
     "{{ common_derive_service_name }}_env_file": >-
-      {{ compose_runtime_secret_root + '/' + common_derive_service_name + '/runtime.env' }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_env_file',
+                 default=(compose_runtime_secret_root + '/' + common_derive_service_name + '/runtime.env')) }}
     "{{ common_derive_service_name }}_legacy_env_file": >-
-      {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/' + common_derive_service_name + '.env' }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_legacy_env_file',
+                 default=((__derive_service_entry.site_dir
+                           | default('/opt/' + common_derive_service_name))
+                          + '/' + common_derive_service_name + '.env')) }}
     "{{ common_derive_service_name }}_container_name": >-
-      {{ __derive_service_entry.container_name | default(common_derive_service_name) }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_container_name',
+                 default=(__derive_service_entry.container_name
+                          | default(common_derive_service_name))) }}
     "{{ common_derive_service_name }}_image": >-
-      {{ container_image_catalog.images[__derive_service_entry.image_catalog_key].ref }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_image',
+                 default=container_image_catalog.images[__derive_service_entry.image_catalog_key].ref) }}
     "{{ common_derive_service_name }}_internal_port": >-
-      {{ __derive_service_entry.internal_port }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_internal_port',
+                 default=__derive_service_entry.internal_port) }}
     "{{ common_derive_service_name }}_internal_base_url": >-
-      {{ 'http://127.0.0.1:' + (__derive_service_entry.internal_port | string) }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_internal_base_url',
+                 default=('http://127.0.0.1:' + (__derive_service_entry.internal_port | string))) }}
     "{{ common_derive_service_name }}_local_artifact_dir": >-
-      {{ repo_shared_local_root + '/' + (__derive_service_entry.local_artifact_dir | default(common_derive_service_name)) }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_local_artifact_dir',
+                 default=(repo_shared_local_root + '/'
+                          + (__derive_service_entry.local_artifact_dir
+                             | default(common_derive_service_name)))) }}
   when:
     - __derive_service_type == 'docker_compose'
     - (__derive_service_entry.image_catalog_key | default('')) | length > 0
@@ -74,25 +123,54 @@
 - name: "Derive docker_compose defaults for {{ common_derive_service_name }} (no image catalog)"
   ansible.builtin.set_fact:
     "{{ common_derive_service_name }}_site_dir": >-
-      {{ __derive_service_entry.site_dir | default('/opt/' + common_derive_service_name) }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_site_dir',
+                 default=(__derive_service_entry.site_dir
+                          | default('/opt/' + common_derive_service_name))) }}
     "{{ common_derive_service_name }}_data_dir": >-
-      {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/data' }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_data_dir',
+                 default=((__derive_service_entry.site_dir
+                           | default('/opt/' + common_derive_service_name)) + '/data')) }}
     "{{ common_derive_service_name }}_secret_dir": >-
-      {{ __derive_service_entry.secret_dir | default('/etc/' + platform_identity.unix_prefix + '/' + common_derive_service_name) }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_secret_dir',
+                 default=(__derive_service_entry.secret_dir
+                          | default('/etc/' + platform_identity.unix_prefix + '/' + common_derive_service_name))) }}
     "{{ common_derive_service_name }}_compose_file": >-
-      {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/docker-compose.yml' }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_compose_file',
+                 default=((__derive_service_entry.site_dir
+                           | default('/opt/' + common_derive_service_name)) + '/docker-compose.yml')) }}
     "{{ common_derive_service_name }}_env_file": >-
-      {{ compose_runtime_secret_root + '/' + common_derive_service_name + '/runtime.env' }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_env_file',
+                 default=(compose_runtime_secret_root + '/' + common_derive_service_name + '/runtime.env')) }}
     "{{ common_derive_service_name }}_legacy_env_file": >-
-      {{ (__derive_service_entry.site_dir | default('/opt/' + common_derive_service_name)) + '/' + common_derive_service_name + '.env' }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_legacy_env_file',
+                 default=((__derive_service_entry.site_dir
+                           | default('/opt/' + common_derive_service_name))
+                          + '/' + common_derive_service_name + '.env')) }}
     "{{ common_derive_service_name }}_container_name": >-
-      {{ __derive_service_entry.container_name | default(common_derive_service_name) }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_container_name',
+                 default=(__derive_service_entry.container_name
+                          | default(common_derive_service_name))) }}
     "{{ common_derive_service_name }}_internal_port": >-
-      {{ __derive_service_entry.internal_port }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_internal_port',
+                 default=__derive_service_entry.internal_port) }}
     "{{ common_derive_service_name }}_internal_base_url": >-
-      {{ 'http://127.0.0.1:' + (__derive_service_entry.internal_port | string) }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_internal_base_url',
+                 default=('http://127.0.0.1:' + (__derive_service_entry.internal_port | string))) }}
     "{{ common_derive_service_name }}_local_artifact_dir": >-
-      {{ repo_shared_local_root + '/' + (__derive_service_entry.local_artifact_dir | default(common_derive_service_name)) }}
+      {{ lookup('ansible.builtin.vars',
+                 common_derive_service_name + '_local_artifact_dir',
+                 default=(repo_shared_local_root + '/'
+                          + (__derive_service_entry.local_artifact_dir
+                             | default(common_derive_service_name)))) }}
   when:
     - __derive_service_type == 'docker_compose'
     - (__derive_service_entry.image_catalog_key | default('')) | length == 0

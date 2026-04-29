@@ -12,6 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- `playbooks/coolify.yml`: localhost-scoped *Register coolify-apps as the
+  Coolify deployment server* play loads `coolify_runtime/defaults/main.yml`
+  via `vars_files`, so the controller-side `coolify_tool.py` shim resolves
+  `coolify_admin_auth_local_file` (and other role-defined artefact paths)
+  without manual env-var setup. Closes the `coolify_admin_auth_local_file
+  is undefined` failure on first-bootstrap converge-coolify runs.
+
 - Fix education_wemeshup API routing: add Traefik dynamic config to route `/api/` to `catalog-api` backend; add `coolify_traefik_extra_dynamic_configs` for persistent IaC
 - ADR 0456 + ws-0456: deployment-aware certificate validation. `scripts/certificate_validator.py --deployment <slug>` reads identity from `.local/deployments/<slug>/identity.yml`. New `cross_deployment_drift` reason code in `config/gate-bypass-waiver-catalog.json`. 11 new tests. Closes follow-up #2 from the ws-0448 postmortem.
 - ADR 0457 + ws-0457: host-pinning Phase 1. New optional `deployment_owner` field on `proxmox_guests[*]` in the deployment-v1 topology schema. New `scripts/host_pinning_check.py` audit primitive (`--all`, `--host`, `--cross`, `--json`). Closes Slice D from the ws-0448 postmortem (lv3 ↔ 0fork `oauth2-proxy@4180` port-collision class of bug). 12 new tests. Phase 2 (role-side enforcement) deferred.
@@ -71,24 +78,24 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.179.16 release notes](docs/release-notes/0.179.16.md)
+- [0.179.24 release notes](docs/release-notes/0.179.24.md)
 
 ## Previous Releases
 
+- [0.179.23 release notes](docs/release-notes/0.179.23.md)
+- [0.179.22 release notes](docs/release-notes/0.179.22.md)
+- [0.179.21 release notes](docs/release-notes/0.179.21.md)
+- [0.179.20 release notes](docs/release-notes/0.179.20.md)
+- [0.179.19 release notes](docs/release-notes/0.179.19.md)
+- [0.179.18 release notes](docs/release-notes/0.179.18.md)
+- [0.179.17 release notes](docs/release-notes/0.179.17.md)
+- [0.179.16 release notes](docs/release-notes/0.179.16.md)
 - [0.179.15 release notes](docs/release-notes/0.179.15.md)
 - [0.179.14 release notes](docs/release-notes/0.179.14.md)
 - [0.179.13 release notes](docs/release-notes/0.179.13.md)
 - [0.179.12 release notes](docs/release-notes/0.179.12.md)
-- [0.179.11 release notes](docs/release-notes/0.179.11.md)
-- [0.179.10 release notes](docs/release-notes/0.179.10.md)
-- [0.179.9 release notes](docs/release-notes/0.179.9.md)
-- [0.179.8 release notes](docs/release-notes/0.179.8.md)
-- [0.179.7 release notes](docs/release-notes/0.179.7.md)
-- [0.179.6 release notes](docs/release-notes/0.179.6.md)
-- [0.179.5 release notes](docs/release-notes/0.179.5.md)
-- [0.179.4 release notes](docs/release-notes/0.179.4.md)
 
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (531 releases)](docs/release-notes/index/2026.md)
+- [2026 (539 releases)](docs/release-notes/index/2026.md)

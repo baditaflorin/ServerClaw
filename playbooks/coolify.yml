@@ -237,6 +237,13 @@
   gather_facts: false
   vars_files:
     - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+    # Pull in coolify_runtime role defaults so this localhost-scoped play
+    # has access to controller-local artefact paths
+    # (coolify_admin_auth_local_file, coolify_local_artifact_dir, etc.).
+    # These are otherwise only loaded when the role is in `roles:` for a
+    # play, which doesn't apply here because the play just runs the
+    # controller-side coolify_tool.py shim.
+    - "{{ playbook_dir }}/../collections/ansible_collections/lv3/platform/roles/coolify_runtime/defaults/main.yml"
   tags:
     - tier-3
     - automation
