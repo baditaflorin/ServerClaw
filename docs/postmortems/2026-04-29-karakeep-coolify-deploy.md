@@ -121,10 +121,12 @@ per-VM override files that the `coolify_runtime` role applies if present.
 
 ## What We Didn't Fix (Follow-ups)
 
-- [ ] `coolify_tool.py` `deploy-repo` `--env-file` flag for declarative secret injection
+- [x] `coolify_tool.py` `deploy-repo` `--env` / `--env-file` flags for declarative secret injection
 - [ ] `coolify_tool.py` `--verify-url` post-deploy health check
 - [ ] Persistent secrets mount to survive VM reboots without reconverge
 - [ ] `make converge-*` fallback path when Tailscale is unreachable (direct SSH)
 - [ ] `docs/runbooks/coolify-runtime-recovery.md` (full step-by-step runbook)
 - [ ] Karakeep `worker` service (background bookmark crawler) — not yet confirmed running
-- [ ] DNS entry for `karakeep.apps.0fork.org` (requires Hetzner DNS confirmation)
+- [ ] DNS entry for `karakeep.apps.0fork.com` — confirmed live via `*.apps.0fork.com` wildcard
+- [ ] nginx proxy for `*.apps.0fork.com` — manually patched to `https://10.10.10.70:443`; needs `make converge-nginx` to persist via Ansible (upstream in `platform.yml` should be `https://10.10.10.70:443` not `https://10.10.10.71:443`)
+- [ ] Double SSL termination root cause — nginx Ansible config references `10.10.10.71` (coolify-apps VM, not provisioned); wrong in `platform.yml`; needs correction before next converge

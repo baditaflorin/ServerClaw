@@ -320,6 +320,18 @@ class CoolifyClient:
             raise RuntimeError(f"Coolify did not queue a deployment for application {application_uuid}: {response}")
         return str(deployment_uuid)
 
+    def set_env_vars(self, application_uuid: str, env_vars: dict[str, str]) -> None:
+        """Bulk-upsert env vars for an application.  Returns on 200 or 201."""
+        if not env_vars:
+            return
+        data = [{"key": k, "value": v} for k, v in env_vars.items()]
+        self._request(
+            "PATCH",
+            f"/api/v1/applications/{application_uuid}/envs/bulk",
+            payload={"data": data},
+            expected=(200, 201),
+        )
+
     def deployments(self) -> list[dict[str, Any]]:
         return self._request("GET", "/api/v1/deployments")
 
@@ -486,6 +498,26 @@ def normalize_repository(repo: str) -> str:
 
 def slugify(value: str) -> str:
     return "".join(char.lower() if char.isalnum() else "-" for char in value).strip("-")
+
+
+def _parse_env_args(env_list: list[str] | None, env_file: str | None) -> dict[str, str]:
+    """Parse --env KEY=VALUE flags and/or an --env-file into a merged dict."""
+    result: dict[str, str] = {}
+    if env_file:
+        for raw in Path(env_file).read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" not in line:
+                raise ValueError(f"Invalid line in env-file (no '='): {line!r}")
+            k, _, v = line.partition("=")
+            result[k.strip()] = v
+    for item in env_list or []:
+        if "=" not in item:
+            raise ValueError(f"Invalid --env value (no '='): {item!r}")
+        k, _, v = item.partition("=")
+        result[k.strip()] = v
+    return result
 
 
 def resolve_source(requested_source: str, repo: str) -> str:
@@ -973,6 +1005,7 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
             )
             private_key_uuid = str(coolify_private_key["uuid"])
 
+    env_vars = _parse_env_args(getattr(args, "env", None), getattr(args, "env_file", None))
     application = client.ensure_application(
         app_name=args.app_name,
         project_uuid=str(project["uuid"]),
@@ -993,6 +1026,8 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
         docker_compose_domains=compose_domains,
         publish_directory=args.publish_directory,
     )
+    if env_vars:
+        client.set_env_vars(str(application["uuid"]), env_vars)
     result = {
         "application_uuid": str(application["uuid"]),
         "application_name": args.app_name,
@@ -1440,6 +1475,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     deploy_parser.add_argument(
         "--publish-directory", help="Static publish directory for static build pack deployments."
+    )
+    deploy_parser.add_argument(
+        "--env",
+        action="append",
+        metavar="KEY=VALUE",
+        help="Set an application env var at deploy time. Repeat for multiple vars.",
+    )
+    deploy_parser.add_argument(
+        "--env-file",
+        metavar="PATH",
+        help="Path to a .env file; each KEY=VALUE line is set as an application env var.",
     )
     deploy_parser.add_argument("--wait", action="store_true", help="Wait for the deployment result.")
     deploy_parser.add_argument("--timeout", type=int, default=900, help="Wait timeout in seconds.")
