@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 69
+total_adrs: 70
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -1303,3 +1303,19 @@ adrs:
     summary: 'Two surfaces:'
     filename: 0474-phase12-receipt-mass-refresh.md
     path: docs/adr/0474-phase12-receipt-mass-refresh.md
+  - adr: '0475'
+    title: Workstream-Surfaces Validator Cleanup
+    status: Implemented
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: ci-cd
+    keywords:
+      - workstream-surfaces
+      - gate-cleanup
+      - follow-up
+      - validator
+      - cleanup
+    summary: 'Two surgical edits:'
+    filename: 0475-workstream-surfaces-cleanup.md
+    path: docs/adr/0475-workstream-surfaces-cleanup.md

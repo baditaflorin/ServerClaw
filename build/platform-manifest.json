@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.39",
+  "repo_version": "0.179.40",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-29T13:00:08Z",
-  "next_refresh_at": "2026-04-29T14:00:08Z",
+  "generated_at": "2026-04-29T13:14:08Z",
+  "next_refresh_at": "2026-04-29T14:14:08Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.37",
+    "last_version": "0.179.38",
     "deployed_at": "2026-04-29",
-    "summary": "ADR 0473 + ws-0474: Phase 11 ships four CPU-only automation primitives that take LLM round-trips out of routine view-rendering. `scripts/generate_service_cards.py` writes one Markdown card per service to `build/service-cards/<svc>.md` (78 services). `scripts/build_workstream_db.py` indexes `workstreams.yaml` into `build/workstreams.sqlite3` so agents query \"what's in flight for service X\" in 50 ms instead of parsing 2.7 MB of YAML. `scripts/generate_pr_body.py` drafts the five recurring sections of a release PR from real artifacts. `scripts/generate_context_packs.py` materialises `build/context-packs/<ws-id>.md` per active workstream \u2014 cold-start agents read one file. New `make refresh-cpu-views` umbrella target. 61 new tests. ADR 0472 + ws-0473: Phase 10 fixes the ADR-collision loop that hit Phase 9 four times. `make reserve-adr-pr reason=\"<X>\"` opens a tiny single-commit reservation PR + auto-merges it; the number is canonical on origin/main within seconds. `scripts/validate_adr_reservation.py` rejects PRs adding an unreserved ADR (advisory through rollout). `scripts/reserve_adr.py --release N` clears the entry once the ADR lands. 38 new tests.",
-    "release_notes_url": "docs/release-notes/0.179.38.md"
+    "summary": "ADR 0474 + ws-0475: Phase 12 receipt mass-refresh. `scripts/mass_refresh_receipts.py` orchestrates ADR 0449's safe-refresh classifier end-to-end, prints a one-line summary (`safe=\u2026 needs_review=\u2026 unknown=\u2026 total=\u2026`), and writes a YAML receipt under `receipts/heal-receipts/<ISO>.yaml` so the next operator can audit when the last sweep ran. New `make heal-receipts` (with --apply) + `make heal-receipts-dry-run` targets. Live signal: 12 needs-review, 77 unknown, 0 safe-to-refresh against the current stack.yaml. 16 new tests. ADR 0473 + ws-0474: Phase 11 ships four CPU-only automation primitives that take LLM round-trips out of routine view-rendering. `scripts/generate_service_cards.py` writes one Markdown card per service to `build/service-cards/<svc>.md` (78 services). `scripts/build_workstream_db.py` indexes `workstreams.yaml` into `build/workstreams.sqlite3` so agents query \"what's in flight for service X\" in 50 ms instead of parsing 2.7 MB of YAML. `scripts/generate_pr_body.py` drafts the five recurring sections of a release PR from real artifacts. `scripts/generate_context_packs.py` materialises `build/context-packs/<ws-id>.md` per active workstream \u2014 cold-start agents read one file. New `make refresh-cpu-views` umbrella target. 61 new tests.",
+    "release_notes_url": "docs/release-notes/0.179.39.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

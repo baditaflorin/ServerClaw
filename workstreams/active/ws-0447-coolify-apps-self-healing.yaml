@@ -5,6 +5,23 @@ priority: p0
 owner: platform
 created: 2026-04-28
 branch: claude/ws-0447-coolify-apps-self-healing
+doc: docs/adr/0340-coolify-vm-separation.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0447_coolify_runtime_role
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/coolify_runtime/
+      mode: shared_contract
+      contract: coolify-runtime-v1
+    - id: ws_0447_coolify_app_deploy_role
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/
+      mode: shared_contract
+      contract: coolify-app-deploy-v1
+    - id: ws_0447_workstream_doc
+      paths:
+        - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+      mode: exclusive
 
 context: |
   After the 0fork Coolify deployment (converges 16-25) and the first app deploy

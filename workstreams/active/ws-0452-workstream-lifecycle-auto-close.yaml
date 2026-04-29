@@ -24,20 +24,23 @@ ownership_manifest:
         - docs/adr/0452-workstream-lifecycle-auto-close.md
         - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
       mode: exclusive
-    - id: adr_0453_doc
+    - id: adr_0453_umbrella_ref
       paths:
         - docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
         - workstreams/active/ws-0453-integration-health-telemetry.yaml
-      mode: exclusive
-    - id: adr_0454_doc
+      mode: shared_contract
+      contract: workstream-lifecycle-umbrella-v1
+    - id: adr_0454_umbrella_ref
       paths:
         - docs/adr/0454-incident-and-postmortem-registry.md
         - workstreams/active/ws-0454-incident-and-postmortem-registry.yaml
-      mode: exclusive
-    - id: gate_bypass_baseline_audit
+      mode: shared_contract
+      contract: workstream-lifecycle-umbrella-v1
+    - id: gate_bypass_baseline_audit_umbrella_ref
       paths:
         - receipts/audits/2026-04-28-gate-bypass-baseline.json
-      mode: exclusive
+      mode: shared_contract
+      contract: workstream-lifecycle-umbrella-v1
     - id: gate_bypass_waiver_catalog_extension
       paths:
         - config/gate-bypass-waiver-catalog.json

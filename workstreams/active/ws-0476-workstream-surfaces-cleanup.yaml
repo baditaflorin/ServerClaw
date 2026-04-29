@@ -1,0 +1,44 @@
+id: ws-0476-workstream-surfaces-cleanup
+adr: "0475"
+title: Workstream-surfaces validator cleanup — Phases 10/11/12 follow-up
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/objective-carson-cbe0c3
+worktree_path: .claude/worktrees/objective-carson-cbe0c3
+doc: docs/adr/0475-workstream-surfaces-cleanup.md
+depends_on:
+  - adr-0326-workstream-registry-shards
+  - adr-0444-workstream-surface-ownership
+shared_surfaces:
+  - docs/adr/0475-workstream-surfaces-cleanup.md
+  - workstreams/active/ws-0476-workstream-surfaces-cleanup.yaml
+  - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+  - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0476_docs
+      paths:
+        - docs/adr/0475-workstream-surfaces-cleanup.md
+        - workstreams/active/ws-0476-workstream-surfaces-cleanup.yaml
+      mode: shared_contract
+      contract: adr-0475-workstream-surfaces-cleanup-v1
+    - id: ws_0476_ws_0447_repair
+      paths:
+        - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+      mode: shared_contract
+      contract: ws-registry-repair-v1
+    - id: ws_0476_ws_0452_repair
+      paths:
+        - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
+      mode: shared_contract
+      contract: ws-registry-repair-v1
+tasks:
+  - id: t1
+    title: "Phase 13.1 — populate ws-0447 with doc + ownership_manifest"
+    status: completed
+  - id: t2
+    title: "Phase 13.2 — relax umbrella claims on ws-0452"
+    status: completed

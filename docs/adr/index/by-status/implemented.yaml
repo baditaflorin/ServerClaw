@@ -10,7 +10,7 @@ generated: '2026-04-29'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 375
+total_adrs: 376
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -7380,3 +7380,19 @@ adrs:
     summary: 'Three synthetic deployments live under tests/fixtures/deployments/<slug>/:'
     filename: 0470-deployment-fixture-matrix.md
     path: docs/adr/0470-deployment-fixture-matrix.md
+  - adr: '0475'
+    title: Workstream-Surfaces Validator Cleanup
+    status: Implemented
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: ci-cd
+    keywords:
+      - workstream-surfaces
+      - gate-cleanup
+      - follow-up
+      - validator
+      - cleanup
+    summary: 'Two surgical edits:'
+    filename: 0475-workstream-surfaces-cleanup.md
+    path: docs/adr/0475-workstream-surfaces-cleanup.md

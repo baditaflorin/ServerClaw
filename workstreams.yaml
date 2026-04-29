@@ -21,6 +21,54 @@ archive_summary:
   by_year:
     '2026': 323
 workstreams:
+- id: ws-0476-workstream-surfaces-cleanup
+  adr: '0475'
+  title: "Workstream-surfaces validator cleanup \u2014 Phases 10/11/12 follow-up"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0475-workstream-surfaces-cleanup.md
+  depends_on:
+  - adr-0326-workstream-registry-shards
+  - adr-0444-workstream-surface-ownership
+  shared_surfaces:
+  - docs/adr/0475-workstream-surfaces-cleanup.md
+  - workstreams/active/ws-0476-workstream-surfaces-cleanup.yaml
+  - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+  - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0476_docs
+      paths:
+      - docs/adr/0475-workstream-surfaces-cleanup.md
+      - workstreams/active/ws-0476-workstream-surfaces-cleanup.yaml
+      mode: shared_contract
+      contract: adr-0475-workstream-surfaces-cleanup-v1
+    - id: ws_0476_ws_0447_repair
+      paths:
+      - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+      mode: shared_contract
+      contract: ws-registry-repair-v1
+    - id: ws_0476_ws_0452_repair
+      paths:
+      - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
+      mode: shared_contract
+      contract: ws-registry-repair-v1
+    - id: ws_0476_workstreams_yaml
+      paths:
+      - workstreams.yaml
+      mode: generated
+  tasks:
+  - id: t1
+    title: "Phase 13.1 \u2014 populate ws-0447 with doc + ownership_manifest"
+    status: completed
+  - id: t2
+    title: "Phase 13.2 \u2014 relax umbrella claims on ws-0452"
+    status: completed
 - id: ws-0475-phase12-receipt-mass-refresh
   adr: '0474'
   title: "Phase 12 \u2014 receipt mass-refresh + heal-receipts target + doctor backlog\
@@ -1567,20 +1615,23 @@ workstreams:
       - docs/adr/0452-workstream-lifecycle-auto-close.md
       - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
       mode: exclusive
-    - id: adr_0453_doc
+    - id: adr_0453_umbrella_ref
       paths:
       - docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
       - workstreams/active/ws-0453-integration-health-telemetry.yaml
-      mode: exclusive
-    - id: adr_0454_doc
+      mode: shared_contract
+      contract: workstream-lifecycle-umbrella-v1
+    - id: adr_0454_umbrella_ref
       paths:
       - docs/adr/0454-incident-and-postmortem-registry.md
       - workstreams/active/ws-0454-incident-and-postmortem-registry.yaml
-      mode: exclusive
-    - id: gate_bypass_baseline_audit
+      mode: shared_contract
+      contract: workstream-lifecycle-umbrella-v1
+    - id: gate_bypass_baseline_audit_umbrella_ref
       paths:
       - receipts/audits/2026-04-28-gate-bypass-baseline.json
-      mode: exclusive
+      mode: shared_contract
+      contract: workstream-lifecycle-umbrella-v1
     - id: gate_bypass_waiver_catalog_extension
       paths:
       - config/gate-bypass-waiver-catalog.json
@@ -4155,6 +4206,23 @@ workstreams:
   owner: platform
   created: 2026-04-28
   branch: claude/ws-0447-coolify-apps-self-healing
+  doc: docs/adr/0340-coolify-vm-separation.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0447_coolify_runtime_role
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/coolify_runtime/
+      mode: shared_contract
+      contract: coolify-runtime-v1
+    - id: ws_0447_coolify_app_deploy_role
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/
+      mode: shared_contract
+      contract: coolify-app-deploy-v1
+    - id: ws_0447_workstream_doc
+      paths:
+      - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+      mode: exclusive
   context: "After the 0fork Coolify deployment (converges 16-25) and the first app\
     \ deploy\n(education_wemeshup), several manual steps were required:\n  1. nginx\
     \ was manually patched to point to coolify VM (10.10.10.70:80) instead\n     of\

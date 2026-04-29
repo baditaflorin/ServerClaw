@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: ci-cd
-total_adrs: 50
+total_adrs: 51
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -985,3 +985,19 @@ adrs:
     summary: 'A new Make target that:'
     filename: 0472-phase10-reservation-hardening.md
     path: docs/adr/0472-phase10-reservation-hardening.md
+  - adr: '0475'
+    title: Workstream-Surfaces Validator Cleanup
+    status: Implemented
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: ci-cd
+    keywords:
+      - workstream-surfaces
+      - gate-cleanup
+      - follow-up
+      - validator
+      - cleanup
+    summary: 'Two surgical edits:'
+    filename: 0475-workstream-surfaces-cleanup.md
+    path: docs/adr/0475-workstream-surfaces-cleanup.md

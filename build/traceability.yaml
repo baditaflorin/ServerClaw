@@ -7,8 +7,8 @@
 schema_version: 1
 generator: scripts/generate_traceability.py
 summary:
-  total_workstreams: 53
-  with_resolved_adr: 52
+  total_workstreams: 54
+  with_resolved_adr: 53
   with_dangling_dependencies: 1
   with_dangling_surfaces: 3
   ready_to_merge: 26
@@ -952,6 +952,23 @@ workstreams:
     currently_describes: goal_state
     concern: platform
     path: docs/adr/0474-phase12-receipt-mass-refresh.md
+- workstream_id: ws-0476-workstream-surfaces-cleanup
+  title: "Workstream-surfaces validator cleanup \u2014 Phases 10/11/12 follow-up"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0475'
+  depends_on:
+  - adr-0326-workstream-registry-shards
+  - adr-0444-workstream-surface-ownership
+  surfaces:
+    total: 5
+    present_on_disk: 5
+  adr:
+    title: Workstream-Surfaces Validator Cleanup
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: ci-cd
+    path: docs/adr/0475-workstream-surfaces-cleanup.md
 - workstream_id: ws-realtime-dynamic-children
   title: Auto-discover all production hosts as Netdata streaming children
   status: in_progress
