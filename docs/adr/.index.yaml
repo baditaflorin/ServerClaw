@@ -8,13 +8,13 @@
 schema_version: 2
 generated: '2026-04-29'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 502
+total_adrs: 503
 adr_number_range:
   first: '0001'
-  last: '0475'
-  next_available: '0476'
+  last: '0476'
+  next_available: '0477'
 implementation_status_summary:
-  Implemented: 376
+  Implemented: 377
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
@@ -24,7 +24,7 @@ decision_status_summary:
   Accepted: 379
   Proposed: 59
   Deprecated: 14
-  Implemented: 50
+  Implemented: 51
 facets:
   by_range:
     - label: 0000-0099
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 70
+      count: 71
       first_adr: '0400'
-      last_adr: '0475'
+      last_adr: '0476'
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -97,7 +97,7 @@ facets:
       count: 9
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 46
+      count: 47
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 7
@@ -111,7 +111,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 376
+      count: 377
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -137,8 +137,14 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: '0476'
+  next_available_adr: '0477'
 latest_adrs:
+  - adr: '0476'
+    title: Wire `make converge-nginx-edge` to `fix-edge-certificate.yml`
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
   - adr: '0475'
     title: Workstream-Surfaces Validator Cleanup
     implementation_status: Implemented
@@ -193,12 +199,6 @@ latest_adrs:
     currently_describes: current_state
     concern: networking
     path: docs/adr/0467-preconverge-live-state-check.md
-  - adr: '0466'
-    title: Converge State Diff Receipts
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: monitoring
-    path: docs/adr/0466-converge-state-diff-receipt.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

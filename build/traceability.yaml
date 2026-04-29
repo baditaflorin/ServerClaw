@@ -7,8 +7,8 @@
 schema_version: 1
 generator: scripts/generate_traceability.py
 summary:
-  total_workstreams: 54
-  with_resolved_adr: 53
+  total_workstreams: 55
+  with_resolved_adr: 54
   with_dangling_dependencies: 1
   with_dangling_surfaces: 3
   ready_to_merge: 26
@@ -969,6 +969,24 @@ workstreams:
     currently_describes: current_state
     concern: ci-cd
     path: docs/adr/0475-workstream-surfaces-cleanup.md
+- workstream_id: ws-0477-cert-lifecycle-make-target-fix
+  title: "Wire make converge-nginx-edge to fix-edge-certificate.yml \u2014 ADR 0414\
+    \ followup"
+  status: in_progress
+  ready_to_merge: false
+  primary_adr: '0476'
+  depends_on:
+  - adr-0414-cert-lifecycle-manager
+  - adr-0375-certificate-validation
+  surfaces:
+    total: 3
+    present_on_disk: 3
+  adr:
+    title: Wire `make converge-nginx-edge` to `fix-edge-certificate.yml`
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: security
+    path: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
 - workstream_id: ws-realtime-dynamic-children
   title: Auto-discover all production hosts as Netdata streaming children
   status: in_progress

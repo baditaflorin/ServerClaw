@@ -21,6 +21,41 @@ archive_summary:
   by_year:
     '2026': 323
 workstreams:
+- id: ws-0477-cert-lifecycle-make-target-fix
+  adr: '0476'
+  title: "Wire make converge-nginx-edge to fix-edge-certificate.yml \u2014 ADR 0414\
+    \ followup"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/objective-carson-cbe0c3
+  worktree_path: .claude/worktrees/objective-carson-cbe0c3
+  doc: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
+  depends_on:
+  - adr-0414-cert-lifecycle-manager
+  - adr-0375-certificate-validation
+  shared_surfaces:
+  - docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
+  - workstreams/active/ws-0477-cert-lifecycle-make-target-fix.yaml
+  - Makefile
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0477_docs
+      paths:
+      - docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
+      - workstreams/active/ws-0477-cert-lifecycle-make-target-fix.yaml
+      mode: shared_contract
+      contract: adr-0476-cert-lifecycle-make-target-fix-v1
+    - id: ws_0477_makefile_target
+      paths:
+      - Makefile
+      mode: shared_contract
+      contract: cert-lifecycle-make-target-v1
+  tasks:
+  - id: t1
+    title: Add converge-nginx-edge target wrapping fix-edge-certificate.yml
+    status: completed
 - id: ws-0476-workstream-surfaces-cleanup
   adr: '0475'
   title: "Workstream-surfaces validator cleanup \u2014 Phases 10/11/12 follow-up"
@@ -58,10 +93,6 @@ workstreams:
       - workstreams/active/ws-0452-workstream-lifecycle-auto-close.yaml
       mode: shared_contract
       contract: ws-registry-repair-v1
-    - id: ws_0476_workstreams_yaml
-      paths:
-      - workstreams.yaml
-      mode: generated
   tasks:
   - id: t1
     title: "Phase 13.1 \u2014 populate ws-0447 with doc + ownership_manifest"

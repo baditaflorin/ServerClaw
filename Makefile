@@ -1207,6 +1207,13 @@ configure-edge-publication:
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/public-edge.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
 	$(MAKE) validate-certificates
 
+# ADR 0414 — narrow target invoked by cert_lifecycle_manager.py sync-missing.
+# Only reconciles the shared edge SAN cert (no full edge converge); much
+# faster + safer than configure-edge-publication when only certs drift.
+.PHONY: converge-nginx-edge
+converge-nginx-edge:
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/fix-edge-certificate.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
+
 configure-tailscale:
 	$(MAKE) preflight WORKFLOW=configure-tailscale
 	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags tailscale

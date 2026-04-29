@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 70
+total_adrs: 71
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -1319,3 +1319,22 @@ adrs:
     summary: 'Two surgical edits:'
     filename: 0475-workstream-surfaces-cleanup.md
     path: docs/adr/0475-workstream-surfaces-cleanup.md
+  - adr: '0476'
+    title: Wire `make converge-nginx-edge` to `fix-edge-certificate.yml`
+    status: Implemented
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: security
+    keywords:
+      - cert-validation
+      - adr-0414-followup
+      - gate-cleanup
+      - wire
+      - make
+      - converge-nginx-edge
+      - fix-edge-certificate
+      - yml
+    summary: Add a top-level converge-nginx-edge make target that wraps
+    filename: 0476-cert-lifecycle-manager-make-target-fix.md
+    path: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md

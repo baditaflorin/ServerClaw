@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: security
-total_adrs: 46
+total_adrs: 47
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -902,3 +902,22 @@ adrs:
     summary: 'Extend connection.schema.json so both proxmoxhost.key and guestssh.key accept either of two shapes:'
     filename: 0469-connection-yml-vault-key-pull.md
     path: docs/adr/0469-connection-yml-vault-key-pull.md
+  - adr: '0476'
+    title: Wire `make converge-nginx-edge` to `fix-edge-certificate.yml`
+    status: Implemented
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-04-29'
+    concern: security
+    keywords:
+      - cert-validation
+      - adr-0414-followup
+      - gate-cleanup
+      - wire
+      - make
+      - converge-nginx-edge
+      - fix-edge-certificate
+      - yml
+    summary: Add a top-level converge-nginx-edge make target that wraps
+    filename: 0476-cert-lifecycle-manager-make-target-fix.md
+    path: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md

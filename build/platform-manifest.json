@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.41",
+  "repo_version": "0.179.42",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-29T13:20:38Z",
-  "next_refresh_at": "2026-04-29T14:20:38Z",
+  "generated_at": "2026-04-29T14:12:11Z",
+  "next_refresh_at": "2026-04-29T15:12:11Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
