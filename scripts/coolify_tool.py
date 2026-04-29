@@ -423,6 +423,12 @@ class CoolifyClient:
         for application in self.applications():
             if application.get("name") == app_name:
                 payload = update_payload(include_private_key_uuid=False)
+                # Coolify stores git_repository in its own normalized form internally.
+                # Overwriting it on update can corrupt the stored URL (double-prefix
+                # bug in check_git_if_build_needed when the value is a full HTTPS URL).
+                # Leave git_repository and git_branch unchanged on update.
+                payload.pop("git_repository", None)
+                payload.pop("git_branch", None)
                 self.update_application(str(application["uuid"]), payload)
                 application = dict(application)
                 application.update(payload)
@@ -932,7 +938,9 @@ def command_deploy_repo(args: argparse.Namespace) -> int:
         domains_for_api = domains
 
     private_key_uuid = args.private_key_uuid
-    repo_for_coolify = normalized_repo
+    # Coolify API requires a full URL (https://, http://, git://, or git@).
+    # For public repos, keep the original URL; normalize_repository strips the scheme.
+    repo_for_coolify = args.repo if source != "private-deploy-key" else normalized_repo
     github_deploy_key: dict[str, Any] | None = None
     coolify_private_key: dict[str, Any] | None = None
     if source == "private-deploy-key":
