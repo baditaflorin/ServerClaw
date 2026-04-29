@@ -10,7 +10,7 @@ generated: '2026-04-29'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 52
+total_adrs: 53
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -911,3 +911,23 @@ adrs:
     summary: 'Two surfaces:'
     filename: 0474-phase12-receipt-mass-refresh.md
     path: docs/adr/0474-phase12-receipt-mass-refresh.md
+  - adr: '0477'
+    title: '— Coolify-apps self-healing bootstrap: SSH access, DNS-01 cert, and app-deploy role'
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - coolify-apps
+      - self-healing
+      - bootstrap
+      - ssh
+      - access
+      - dns-01
+      - cert
+      - app-deploy
+      - role
+    summary: A new tasks file coolifyruntime/tasks/bootstrapappsvm.yml runs against coolify-apps
+    filename: 0477-coolify-apps-self-healing-bootstrap.md
+    path: docs/adr/0477-coolify-apps-self-healing-bootstrap.md

@@ -1,0 +1,17 @@
+---
+# Purpose: Defaults for the coolify_app_deploy role (ws-0447 t3, ADR 0477).
+# Inputs: Platform service topology and controller-local Coolify artifact paths.
+
+coolify_app_deploy_profile: {}
+coolify_app_deploy_auth_file: "{{ coolify_admin_auth_local_file }}"
+coolify_app_deploy_apps_vm_host: >-
+  {{
+    playbook_execution_host_patterns.coolify_apps[playbook_execution_env]
+    | default('coolify-apps')
+  }}
+coolify_app_deploy_dynamic_config_dir: /data/coolify/proxy/dynamic
+coolify_app_deploy_extra_routes: []
+
+# Seconds to poll for a Coolify deployment to reach status=finished.
+coolify_app_deploy_wait_timeout: 300
+coolify_app_deploy_wait_poll: 10

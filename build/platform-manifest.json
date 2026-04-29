@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.42",
+  "repo_version": "0.179.43",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-29T14:12:11Z",
-  "next_refresh_at": "2026-04-29T15:12:11Z",
+  "generated_at": "2026-04-29T14:20:53Z",
+  "next_refresh_at": "2026-04-29T15:20:53Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.40",
+    "last_version": "0.179.42",
     "deployed_at": "2026-04-29",
-    "summary": "ADR 0471: karakeep Coolify deploy + `coolify_tool.py` programmatic env-var injection. `deploy-repo` gains `--env KEY=VALUE` (repeatable) and `--env-file PATH` flags; bulk-upserts application env vars via Coolify API before triggering the deployment. Fixes `git_repository` double-prefix bug on redeploy. Documents Coolify runtime-recovery procedure (tmpfs secrets + API token via DB). Postmortem 2026-04-29 captures six key learnings.",
-    "release_notes_url": "docs/release-notes/0.179.41.md"
+    "summary": "ADR 0477: coolify-apps self-healing bootstrap \u2014 SSH access via `Match Address` sshd directive, DNS-01 cert resolution via Hetzner (replaces HTTP-01), and new `coolify_app_deploy` role that discovers container names via `docker ps` instead of hardcoded IPs. All three changes self-heal on re-converge.",
+    "release_notes_url": "docs/release-notes/0.179.43.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

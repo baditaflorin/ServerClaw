@@ -221,6 +221,21 @@
     - role: lv3.platform.repo_deploy_image_cache
 
   post_tasks:
+    # t1 (ws-0447): Bootstrap SSH access so Coolify can reach coolify-apps as root.
+    # Must run BEFORE register-deployment-server — Coolify validates the server immediately
+    # after registration by SSHing in; authorized_keys must exist at that point.
+    - name: Bootstrap coolify-apps SSH access for Coolify control plane
+      ansible.builtin.include_role:
+        name: lv3.platform.coolify_runtime
+        tasks_from: bootstrap_apps_vm
+      vars:
+        coolify_server_public_key: >-
+          {{
+            lookup('file',
+              repo_shared_local_root ~ '/coolify/server-key.pub',
+              errors='ignore') | default('')
+          }}
+
     - name: Run shared post-verify checks
       ansible.builtin.import_tasks: tasks/post-verify.yml
       vars:
@@ -305,6 +320,31 @@
       failed_when: coolify_server_migration.rc not in [0, 2]
       tags:
         - coolify-deploy-server-migration
+
+# t2 (ws-0447): Patch the Coolify-managed Traefik on coolify-apps to use DNS-01.
+# Coolify installs Traefik during server validation (triggered by register-deployment-server).
+# The default Coolify Traefik config uses HTTP-01, which is structurally broken when an
+# nginx edge owns port 80 (challenge requests are redirected to 443 and never answered).
+# This play runs against coolify-apps directly, after Traefik is installed.
+- name: Patch coolify-apps Traefik to use DNS-01 cert resolver
+  hosts: "{{ 'coolify-apps' if (env | default('production')) == 'production' else 'coolify-apps-staging' }}"
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+    - "{{ playbook_dir }}/../collections/ansible_collections/lv3/platform/roles/coolify_runtime/defaults/main.yml"
+  tags:
+    - tier-3
+    - automation
+    - service-coolify
+    - service-coolify-apps
+    - coolify-dns01-patch
+
+  tasks:
+    - name: Apply DNS-01 patch to coolify-apps Traefik
+      ansible.builtin.include_role:
+        name: lv3.platform.coolify_runtime
+        tasks_from: patch_apps_proxy
 
 - name: Publish Coolify on the NGINX edge
   hosts: "{{ 'nginx' if (env | default('production')) == 'production' else 'nginx-staging' }}"

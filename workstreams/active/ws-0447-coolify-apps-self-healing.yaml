@@ -141,21 +141,25 @@ design: |
 tasks:
   - id: t1
     title: "Bootstrap coolify-apps in coolify_runtime play"
-    status: pending
+    status: done
+    completed: 2026-04-29
     files:
-      - collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/bootstrap_apps_vm.yml
       - playbooks/coolify.yml
   - id: t2
     title: "Switch Traefik to DNS-01 cert resolver (Hetzner)"
-    status: pending
+    status: done
+    completed: 2026-04-29
     files:
       - collections/ansible_collections/lv3/platform/roles/coolify_runtime/templates/docker-compose.yml.j2
       - collections/ansible_collections/lv3/platform/roles/coolify_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/patch_apps_proxy.yml
   - id: t3
     title: "Write coolify_app_deploy role"
-    status: pending
+    status: done
+    completed: 2026-04-29
     files:
-      - collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/ (new)
+      - collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/
   - id: t4
     title: "Add make deploy-app target"
     status: pending
@@ -172,6 +176,8 @@ tasks:
 
 references:
   - postmortem: docs/postmortems/2026-04-28-coolify-0fork-deployment-and-education-wemeshup.md
+  - adr: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
   - adr: docs/adr/0340-coolify-vm-separation.md
   - template: publication/templates/proxmox-host.yml:2982
   - role: collections/ansible_collections/lv3/platform/roles/coolify_runtime/
+  - role: collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/
