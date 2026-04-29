@@ -1,0 +1,59 @@
+id: ws-0464-topology-precommit-schema-hook
+adr: "0462"
+title: "Topology pre-commit schema hook"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0462-topology-precommit-schema-hook.md
+depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0457-host-pinning-deployment-owner
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0464-topology-precommit-schema-hook.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0464_adr
+    paths:
+      - docs/adr/0462-topology-precommit-schema-hook.md
+    mode: exclusive
+  - id: ws_0464_validator_script
+    paths:
+      - scripts/validate_topology_schema.py
+    mode: exclusive
+  - id: ws_0464_precommit_config
+    paths:
+      - .pre-commit-config.yaml
+    mode: shared_contract
+    contract: precommit-config-v1
+  - id: ws_0464_tests
+    paths:
+      - tests/test_ws0464_topology_schema_hook.py
+    mode: exclusive
+  - id: ws_0464_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0464_workstream
+    paths:
+      - workstreams/active/ws-0464-topology-precommit-schema-hook.yaml
+    mode: exclusive
+notes: |
+  Closes the 2026-04-28 topology-shape class of bug at commit time.
+
+  - scripts/validate_topology_schema.py: jsonschema-validates topology
+    YAML against config/contracts/deployment-v1/topology.schema.json.
+    Falls back to minimal required-keys check when jsonschema is missing.
+  - .pre-commit-config.yaml: new validate-topology-schema hook fires
+    on inventory/host_vars/proxmox-host.yml.
+
+  11 new tests cover well-formed topology, empty proxmox_guests,
+  missing required fields, malformed deployment_owner slugs,
+  non-topology rejection, unparseable YAML handling, and CLI exit codes.

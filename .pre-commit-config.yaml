@@ -71,3 +71,9 @@ repos:
         pass_filenames: false
         files: ^collections/ansible_collections/lv3/platform/plugins/.*\.py$
         always_run: false
+      - id: validate-topology-schema
+        name: ADR 0462 — validate proxmox_guests topology against deployment-v1 schema
+        entry: bash -c 'uv run --quiet --with pyyaml --with jsonschema python3 scripts/validate_topology_schema.py "$@" --quiet' --
+        language: system
+        pass_filenames: true
+        files: ^(inventory/host_vars/proxmox-host\.yml)$
