@@ -393,6 +393,14 @@ def _entry_matches_domain(entry: dict, domain: str) -> bool:
     return fqdn == domain or fqdn.endswith(f".{domain}")
 
 
+def _list_deployment_slugs() -> list[str]:
+    """ADR 0458 — every deployment registered under .local/deployments/."""
+    deployments_dir = LOCAL_ROOT / "deployments"
+    if not deployments_dir.is_dir():
+        return []
+    return sorted(p.name for p in deployments_dir.iterdir() if p.is_dir() and not p.name.startswith("."))
+
+
 def main():
     parser = argparse.ArgumentParser(description="Validate SSL certificates for platform domains (ADR 0375)")
     parser.add_argument(
@@ -417,17 +425,92 @@ def main():
             ".local/identity.yml when no deployment is registered."
         ),
     )
+    parser.add_argument(
+        "--all-deployments",
+        action="store_true",
+        help=(
+            "Validate certs for every deployment under .local/deployments/ "
+            "in turn (ADR 0458). Aggregate results; exit 1 if any deployment "
+            "reports an expired or mismatched cert."
+        ),
+    )
     args = parser.parse_args()
 
-    entries = load_catalog(args.config)
-    if not entries:
+    entries_master = load_catalog(args.config)
+    if not entries_master:
         print(f"[warn] {args.config} empty or missing — using {args.subdomain_config}", file=sys.stderr)
-        entries = load_subdomain_catalog(args.subdomain_config)
+        entries_master = load_subdomain_catalog(args.subdomain_config)
 
-    if not entries:
+    if not entries_master:
         print("No active domains found to validate.", file=sys.stderr)
         sys.exit(2)
 
+    # ADR 0458 — multi-deployment dispatch. When --all-deployments is set
+    # (or implicitly when no slug resolved AND multiple deployments exist),
+    # iterate per slug and aggregate results. Single-deployment installs
+    # are unaffected — they take the legacy fallback path below.
+    if args.all_deployments or (not args.deployment and not args.fqdn and len(_list_deployment_slugs()) > 1):
+        slugs = _list_deployment_slugs()
+        if not slugs:
+            print(
+                "[info] --all-deployments: no .local/deployments/ — nothing to validate.",
+                file=sys.stderr,
+            )
+            sys.exit(0)
+        all_results: list = []
+        for slug in slugs:
+            print(f"=== Validating deployment={slug} ===", file=sys.stderr)
+            slug_domain = _get_real_domain(deployment_slug=slug)
+            if slug_domain is None:
+                print(
+                    f"[info] No real platform_domain for deployment={slug} — skipping.",
+                    file=sys.stderr,
+                )
+                continue
+            slug_entries = _rewrite_entries_for_real_domain(list(entries_master), slug_domain)
+            slug_entries = [e for e in slug_entries if _entry_matches_domain(e, slug_domain)]
+            if not slug_entries:
+                print(
+                    f"[info] No catalog entries match domain '{slug_domain}' for deployment={slug} — skipping.",
+                    file=sys.stderr,
+                )
+                continue
+            for e in slug_entries:
+                print(f"Checking {e['fqdn']} (deployment={slug})...", file=sys.stderr)
+                all_results.append(
+                    validate(
+                        fqdn=e["fqdn"],
+                        target=e["target"],
+                        port=e["target_port"],
+                        service_id=e["service_id"],
+                        warn_days=e.get("warn_days", 21),
+                        timeout=args.timeout,
+                    )
+                )
+        if args.json_out:
+            print(
+                json.dumps(
+                    [
+                        {
+                            "fqdn": r.fqdn,
+                            "service": r.service_id,
+                            "status": r.status.value,
+                            "cn": r.common_name,
+                            "sans": r.subject_alt_names or [],
+                            "expires": r.not_after,
+                            "days_until_expiry": r.days_until_expiry,
+                            "error": r.error_message,
+                        }
+                        for r in all_results
+                    ],
+                    indent=2,
+                )
+            )
+        else:
+            print(format_text(all_results))
+        sys.exit(1 if any(r.status in (CertStatus.EXPIRED, CertStatus.CERT_MISMATCH) for r in all_results) else 0)
+
+    entries = list(entries_master)
     deployment_slug = _resolve_deployment_slug(args.deployment)
     real_domain = _get_real_domain(deployment_slug=deployment_slug)
     if real_domain:

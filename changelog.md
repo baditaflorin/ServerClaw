@@ -66,6 +66,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
   live signal: 11 needs-review against the live stack.yaml).
   Validator-catalogue freshness wired into `validate_repo.sh` as
   advisory `validate_catalogue_freshness`. 60 new tests.
+- ADR 0458 + ws-0461: cert validator multi-deployment auto-detect. New `--all-deployments` flag walks every slug; auto-triggers when no slug passed AND multiple deployments exist. The pre-push gate's all-lane runner now covers every deployment in a multi-deployment install. 6 new tests.
 
 ## Latest Release
 

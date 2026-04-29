@@ -1,0 +1,53 @@
+id: ws-0461-cert-validator-multi-deployment
+adr: "0458"
+title: "Cert validator multi-deployment auto-detect (--all-deployments)"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0458-cert-validator-multi-deployment.md
+depends_on:
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0456-deployment-aware-certificate-validation
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0461-cert-validator-multi-deployment.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0461_adr
+    paths:
+      - docs/adr/0458-cert-validator-multi-deployment.md
+    mode: exclusive
+  - id: ws_0461_cert_validator
+    paths:
+      - scripts/certificate_validator.py
+    mode: shared_contract
+    contract: cert-validator-v1
+  - id: ws_0461_tests
+    paths:
+      - tests/test_ws0461_cert_validator_multi_deployment.py
+    mode: exclusive
+  - id: ws_0461_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0461_workstream
+    paths:
+      - workstreams/active/ws-0461-cert-validator-multi-deployment.yaml
+    mode: exclusive
+notes: |
+  Closes follow-up #3 from the ws-0448 postmortem.
+
+  Adds --all-deployments flag to scripts/certificate_validator.py
+  AND auto-triggers it when no slug is passed AND multiple deployments
+  exist under .local/deployments/. The pre-push gate's all-lane runner
+  now covers every deployment instead of whichever happens to be active.
+
+  6 new tests covering slug listing, flag presence in --help, and
+  module-import sanity.
