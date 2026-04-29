@@ -1,0 +1,49 @@
+id: ws-0458-host-pinning-gate-wiring
+adr: "0457"
+title: "Host-pinning gate wiring — host-pinning lane in validate_repo.sh"
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0457-host-pinning-deployment-owner.md
+depends_on:
+  - adr-0457-host-pinning-deployment-owner
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0458-host-pinning-gate-wiring.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0458_validate_repo
+    paths:
+      - scripts/validate_repo.sh
+    mode: shared_contract
+    contract: validate-repo-shell-v1
+  - id: ws_0458_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0458_workstream
+    paths:
+      - workstreams/active/ws-0458-host-pinning-gate-wiring.yaml
+    mode: exclusive
+notes: |
+  Promotes the ADR 0457 audit primitive from operator-on-demand to
+  pre-push-gate visibility. New advisory lane `host-pinning` runs
+  `scripts/host_pinning_check.py --all` and reports drift without
+  blocking — same pattern as `validate_catalogue_freshness` (ADR 0449).
+
+  Skip-when-absent: when `.local/deployments/` is missing (CI runner
+  with no overlays) the lane no-ops with a clear message instead of
+  failing.
+
+  Phase 2 of ADR 0457 (role-side enforcement in nginx_edge_publication
+  + public_edge_oidc_auth) is the real incident-prevention. That belongs
+  in a separate per-role workstream that the role-author reviews.
+  ws-0458 only ships the gate visibility so role-author conversations
+  have a live signal to grep against.

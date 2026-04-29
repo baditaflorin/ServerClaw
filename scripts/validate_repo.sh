@@ -21,7 +21,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|semgrep|compose-runtime-envs|retry-guard|dependency-direction|no-hardcoded-topology|receipt-freshness|service-definitions|data-models|cross-catalog|python-type-safety|waiver-escalation-proofs|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|semgrep|compose-runtime-envs|retry-guard|dependency-direction|no-hardcoded-topology|receipt-freshness|host-pinning|service-definitions|data-models|cross-catalog|python-type-safety|waiver-escalation-proofs|policy|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
 
 Examples:
   scripts/validate_repo.sh
@@ -387,6 +387,25 @@ validate_catalogue_freshness() {
   if ! run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_validator_catalogue.py" --check; then
     echo "validate_catalogue_freshness: drift reported above (advisory — not blocking)"
     echo "  Refresh: python3 scripts/generate_validator_catalogue.py --write"
+  fi
+}
+
+validate_host_pinning() {
+  # ADR 0457 — host-pinning audit primitive (Phase 1). Advisory: walks
+  # every deployment under .local/deployments/ and reports drift when a
+  # `proxmox_guests[*].deployment_owner` value disagrees with the
+  # deployment whose topology declared it. Single-deployment installs
+  # and topologies that don't opt into the field are silently fine.
+  # When .local/deployments/ is absent (CI runner without overlays),
+  # the script exits 0 with "no drift detected" and the lane is a no-op.
+  if [[ ! -d "$REPO_ROOT/.local/deployments" ]]; then
+    echo "Host-pinning audit (ADR 0457 — advisory): no .local/deployments/ — skipped"
+    return 0
+  fi
+  echo "Host-pinning audit (ADR 0457 — advisory)"
+  if ! run_uv_python pyyaml -- "$REPO_ROOT/scripts/host_pinning_check.py" --all; then
+    echo "validate_host_pinning: drift reported above (advisory — not blocking)"
+    echo "  Investigate: python3 scripts/host_pinning_check.py --all --json"
   fi
 }
 
@@ -953,6 +972,7 @@ for stage in "$@"; do
       validate_receipt_freshness
       validate_traceability
       validate_catalogue_freshness
+      validate_host_pinning
       validate_health_probes
       validate_alert_rules
       validate_tofu
@@ -1014,6 +1034,9 @@ for stage in "$@"; do
       ;;
     catalogue-freshness)
       validate_catalogue_freshness
+      ;;
+    host-pinning)
+      validate_host_pinning
       ;;
     service-definitions)
       validate_service_definitions
