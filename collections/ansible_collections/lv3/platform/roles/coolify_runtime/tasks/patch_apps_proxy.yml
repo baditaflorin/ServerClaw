@@ -1,0 +1,83 @@
+---
+# Purpose: Patch the Coolify-managed Traefik on coolify-apps to use DNS-01 cert resolution.
+#          Coolify installs Traefik on coolify-apps during server validation using HTTP-01 by
+#          default. HTTP-01 is structurally broken when an nginx edge is in front (port 80
+#          redirects to 443, so the ACME challenge response can never be served).
+#
+#          This task runs AFTER register-deployment-server has completed and Traefik is
+#          installed. It rewrites the cert-resolver section and injects HETZNER_DNS_API_TOKEN.
+#          Coolify may overwrite the docker-compose.yml on proxy restart/update — if that
+#          happens, re-run converge-coolify to reapply this patch.
+#
+#          Skip entirely when coolify_traefik_cert_resolver == "http" (non-nginx deployments).
+#
+# Inputs:
+#   coolify_hetzner_dns_api_token — Hetzner DNS API token (from env, never in repo).
+#   coolify_proxy_path            — /data/coolify/proxy on the remote host.
+#   coolify_proxy_service_name    — Traefik container name (coolify-proxy).
+#
+# ADR: 0477
+
+- name: Check that Traefik proxy compose file exists on coolify-apps
+  ansible.builtin.stat:
+    path: "{{ coolify_proxy_path }}/docker-compose.yml"
+  register: coolify_apps_proxy_compose_stat
+
+- name: Patch coolify-apps Traefik — replace HTTP-01 with DNS-01 cert resolver
+  when:
+    - coolify_apps_proxy_compose_stat.stat.exists
+    - coolify_traefik_cert_resolver == 'dns'
+    - coolify_hetzner_dns_api_token | length > 0
+  block:
+    - name: Remove httpchallenge lines from coolify-apps Traefik compose
+      ansible.builtin.replace:
+        path: "{{ coolify_proxy_path }}/docker-compose.yml"
+        regexp: '^\s+- --certificatesresolvers\.letsencrypt\.acme\.httpchallenge.*\n'
+        replace: ""
+      register: _proxy_compose_httpchallenge_removed
+
+    - name: Insert dnschallenge lines after acme.storage line in coolify-apps Traefik compose
+      ansible.builtin.replace:
+        path: "{{ coolify_proxy_path }}/docker-compose.yml"
+        regexp: '(^\s+- --certificatesresolvers\.letsencrypt\.acme\.storage=.*)'
+        replace: |
+          \1
+                  - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+                  - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=hetzner
+                  - --certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=10
+      register: _proxy_compose_dns_inserted
+
+    - name: Inject HETZNER_DNS_API_TOKEN into coolify-apps Traefik environment
+      ansible.builtin.replace:
+        path: "{{ coolify_proxy_path }}/docker-compose.yml"
+        regexp: '(^\s+image:\s+traefik.*)'
+        replace: |
+          \1
+              environment:
+                HETZNER_DNS_API_TOKEN: "{{ coolify_hetzner_dns_api_token }}"
+      register: _proxy_compose_env_injected
+
+    - name: Restart coolify-apps Traefik to apply DNS-01 config
+      ansible.builtin.shell: |
+        set -euo pipefail
+        cd "{{ coolify_proxy_path }}"
+        docker compose pull proxy 2>/dev/null || true
+        docker compose up -d --force-recreate proxy
+      args:
+        executable: /bin/bash
+      when: >-
+        _proxy_compose_httpchallenge_removed is changed
+        or _proxy_compose_dns_inserted is changed
+        or _proxy_compose_env_injected is changed
+      register: _proxy_restart
+      changed_when: true
+
+- name: Skip DNS-01 patch — coolify_traefik_cert_resolver is not dns or token absent
+  ansible.builtin.debug:
+    msg: >-
+      Skipping coolify-apps Traefik DNS-01 patch:
+      cert_resolver={{ coolify_traefik_cert_resolver }},
+      token_present={{ coolify_hetzner_dns_api_token | length > 0 }}.
+  when: >-
+    coolify_traefik_cert_resolver != 'dns'
+    or coolify_hetzner_dns_api_token | length == 0

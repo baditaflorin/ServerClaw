@@ -9,7 +9,7 @@ schema_version: 2
 generated: '2026-04-29'
 facet: concern
 concern: bootstrap
-total_adrs: 9
+total_adrs: 10
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -187,3 +187,23 @@ adrs:
     summary: make bootstrap becomes overlay-aware. The single environment variable
     filename: 0437-overlay-aware-bootstrap.md
     path: docs/adr/0437-overlay-aware-bootstrap.md
+  - adr: '0477'
+    title: '— Coolify-apps self-healing bootstrap: SSH access, DNS-01 cert, and app-deploy role'
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - coolify-apps
+      - self-healing
+      - bootstrap
+      - ssh
+      - access
+      - dns-01
+      - cert
+      - app-deploy
+      - role
+    summary: A new tasks file coolifyruntime/tasks/bootstrapappsvm.yml runs against coolify-apps
+    filename: 0477-coolify-apps-self-healing-bootstrap.md
+    path: docs/adr/0477-coolify-apps-self-healing-bootstrap.md

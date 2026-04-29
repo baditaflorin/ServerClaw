@@ -77,6 +77,31 @@ coolify_smoke_base_directory: static
 coolify_smoke_domain: http://apps.{{ platform_domain }}
 coolify_smoke_alias_domain: http://repo-smoke.apps.{{ platform_domain }}
 
+# --- t1: coolify-apps bootstrap (ws-0447) ---
+# IP of the coolify-apps VM. Coolify SSHes here to install Traefik after server registration.
+coolify_apps_vm_ip: >-
+  {{
+    (proxmox_guests
+     | selectattr('name', 'equalto', 'coolify-apps-lv3')
+     | map(attribute='ipv4')
+     | list
+     | first)
+    | default('')
+  }}
+# Port on coolify-apps that Coolify's SSH client connects to (usually 22).
+coolify_apps_vm_ssh_port: 22
+# Name Coolify uses for the apps deployment server record.
+coolify_apps_server_name: coolify-apps
+
+# --- t2: Traefik cert resolver (ws-0447) ---
+# Set to "dns" to use DNS-01 via Hetzner (required when nginx is in front on port 80).
+# Set to "http" to keep the legacy HTTP-01 challenge (only works when Traefik owns port 80).
+# DNS-01 requires HETZNER_DNS_API_TOKEN to be available in the environment at converge time.
+coolify_traefik_cert_resolver: dns
+# Hetzner DNS API token env var name injected into the Traefik proxy container.
+# Resolved from the shell environment at Ansible render time — never stored in the repo.
+coolify_hetzner_dns_api_token: "{{ lookup('env', 'HETZNER_DNS_API_TOKEN') }}"
+
 # Extra Traefik dynamic routing config files to deploy to {{ coolify_proxy_path }}/dynamic/.
 # Each entry is a filename under roles/coolify_runtime/files/dynamic/ that adds
 # per-app routers/services Coolify's Docker labels cannot express (e.g. routing

@@ -1,0 +1,46 @@
+---
+# Purpose: Prepare coolify-apps VM so Coolify can SSH in as root to install and manage Traefik.
+#          Run this play targeting coolify-apps BEFORE the localhost play that calls
+#          register-deployment-server — Coolify immediately attempts SSH validation after
+#          the server is registered, so the authorized_keys entry must exist first.
+#
+# Inputs (from coolify_runtime defaults):
+#   coolify_server_public_key      — Coolify's deploy public key (written by coolify_runtime).
+#   coolify_apps_vm_ip             — IP of the coolify VM (source of Coolify's SSH connections).
+#   coolify_traefik_cert_resolver  — "dns" or "http"; controls whether to patch the
+#                                    Coolify-managed Traefik after it is installed.
+#   coolify_hetzner_dns_api_token  — Hetzner DNS API token (from env, not stored in repo).
+#
+# ADR: 0477
+
+- name: Ensure /root/.ssh directory exists on coolify-apps
+  ansible.builtin.file:
+    path: /root/.ssh
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Install Coolify deploy public key in coolify-apps authorized_keys
+  ansible.posix.authorized_key:
+    user: root
+    key: "{{ coolify_server_public_key }}"
+    state: present
+
+- name: Allow root key-based login from the Coolify control-plane VM
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/95-coolify-control.conf
+    content: |
+      # Permit root login with a key from the Coolify control-plane VM ({{ coolify_apps_vm_ip }}).
+      # Coolify SSHes here as root to install Traefik and manage deployments (ADR 0477).
+      # Source IP is the coolify VM, not the Docker bridge — Coolify container SSH traffic
+      # is NAT'd through the host before crossing the LAN to coolify-apps.
+      Match Address {{ coolify_apps_vm_ip }}
+          PermitRootLogin prohibit-password
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload sshd
+
+- name: Flush sshd reload handler before Coolify server registration proceeds
+  ansible.builtin.meta: flush_handlers

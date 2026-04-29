@@ -1,0 +1,174 @@
+---
+# Purpose: Deploy one repo-backed application to Coolify and configure Traefik routing.
+#
+# Flow:
+#   1. Call coolify_tool.py deploy-repo (idempotent: creates or updates the application).
+#   2. Wait for the deployment to reach status=finished.
+#   3. For each extra route (beyond the Coolify-labeled domain service), discover the
+#      running container name on coolify-apps via Docker inspect on the app network.
+#   4. Write a Traefik file-provider dynamic config on coolify-apps using the discovered
+#      container name (not a hardcoded IP). Traefik hot-reloads from the dynamic/ dir.
+#
+# Inputs:  coolify_app_deploy_profile  (dict from repo-deploy-catalog.json)
+#          coolify_app_deploy_extra_routes  (list of {service, port, path_prefix, priority})
+#          coolify_app_deploy_auth_file
+#          coolify_app_deploy_apps_vm_host
+#          coolify_app_deploy_dynamic_config_dir
+#
+# Runs on: localhost (delegate_to for container discovery on coolify-apps)
+# ADR: 0477
+
+- name: Validate coolify_app_deploy_profile is not empty
+  ansible.builtin.assert:
+    that:
+      - coolify_app_deploy_profile | length > 0
+      - coolify_app_deploy_profile.app_name is defined
+      - coolify_app_deploy_profile.repo is defined
+    fail_msg: "coolify_app_deploy requires a non-empty profile with app_name and repo."
+
+- name: Set convenience facts from profile
+  ansible.builtin.set_fact:
+    _app_name: "{{ coolify_app_deploy_profile.app_name }}"
+    _app_repo: "{{ coolify_app_deploy_profile.repo }}"
+    _app_branch: "{{ coolify_app_deploy_profile.branch | default('main') }}"
+    _app_source: "{{ coolify_app_deploy_profile.source | default('auto') }}"
+    _app_build_pack: "{{ coolify_app_deploy_profile.build_pack | default('dockercompose') }}"
+    _app_project: "{{ coolify_app_deploy_profile.project | default('LV3 Apps') }}"
+    _app_environment: "{{ coolify_app_deploy_profile.environment | default('production') }}"
+    _app_compose_file: "{{ coolify_app_deploy_profile.docker_compose_location | default('/compose.yaml') }}"
+    _compose_domains: "{{ coolify_app_deploy_profile.compose_domains | default([]) }}"
+    _extra_routes: "{{ coolify_app_deploy_extra_routes }}"
+
+- name: Derive primary public domain from compose_domains (first entry's domain)
+  ansible.builtin.set_fact:
+    _public_domain: >-
+      {{
+        (_compose_domains | first).domain
+        | replace('example.com', platform_domain)
+        if _compose_domains | length > 0
+        else (_app_name ~ '.apps.' ~ platform_domain)
+      }}
+
+- name: Build coolify_tool.py deploy-repo arguments
+  ansible.builtin.set_fact:
+    _deploy_args: >-
+      python3 scripts/coolify_tool.py
+      --auth-file {{ coolify_app_deploy_auth_file | quote }}
+      deploy-repo
+      --repo {{ _app_repo | quote }}
+      --branch {{ _app_branch | quote }}
+      --source {{ _app_source | quote }}
+      --app-name {{ _app_name | quote }}
+      --project {{ _app_project | quote }}
+      --environment {{ _app_environment | quote }}
+      --build-pack {{ _app_build_pack | quote }}
+      {%- if _app_build_pack == 'dockercompose' %}
+      --docker-compose-location {{ _app_compose_file | quote }}
+      {%- endif %}
+      {%- for cd in _compose_domains %}
+      --compose-domain {{ (cd.service ~ '=' ~ (cd.domain | replace('example.com', platform_domain))) | quote }}
+      {%- endfor %}
+
+- name: Deploy application via Coolify (idempotent)
+  ansible.builtin.command: "{{ _deploy_args }}"
+  args:
+    chdir: "{{ playbook_dir }}/.."
+  delegate_to: localhost
+  become: false
+  register: _coolify_deploy_result
+  changed_when: "'\"status\": \"deployed\"' in _coolify_deploy_result.stdout"
+  failed_when: _coolify_deploy_result.rc != 0
+
+- name: Show deploy result summary
+  ansible.builtin.debug:
+    msg: "{{ _coolify_deploy_result.stdout | from_json | dict2items | selectattr('key', 'in', ['status', 'application_uuid', 'deployment_uuid']) | list }}"
+  when: _coolify_deploy_result.stdout | length > 0
+
+- name: Wait for deployment to finish (polls Coolify deployment status)
+  ansible.builtin.command: >
+    python3 scripts/coolify_tool.py
+    --auth-file {{ coolify_app_deploy_auth_file | quote }}
+    deploy-repo
+    --repo {{ _app_repo | quote }}
+    --branch {{ _app_branch | quote }}
+    --source {{ _app_source | quote }}
+    --app-name {{ _app_name | quote }}
+    --project {{ _app_project | quote }}
+    --environment {{ _app_environment | quote }}
+    --build-pack {{ _app_build_pack | quote }}
+    {%- if _app_build_pack == 'dockercompose' %}
+    --docker-compose-location {{ _app_compose_file | quote }}
+    {%- endif %}
+    --wait
+  args:
+    chdir: "{{ playbook_dir }}/.."
+  delegate_to: localhost
+  become: false
+  register: _coolify_wait_result
+  changed_when: false
+  failed_when: _coolify_wait_result.rc != 0
+  when: _coolify_deploy_result is changed
+
+# --- Container name discovery ---
+# Traefik (coolify-proxy) is connected to the app's Docker network and can reach
+# containers by name via Docker's internal DNS. We discover the current container
+# name via `docker ps --filter name=^{service}-` so the Traefik config never
+# contains a hardcoded IP. Re-running this role after a Coolify redeploy (when
+# container names change) refreshes the config automatically.
+
+- name: Discover container names for extra routes on coolify-apps
+  when: _extra_routes | length > 0
+  block:
+    - name: Query coolify-apps Docker for each extra-route service container name
+      ansible.builtin.command: >
+        docker ps --filter "name=^{{ item.service }}-" --format "{{ '{{' }}.Names{{ '}}' }}" --no-trunc
+      loop: "{{ _extra_routes }}"
+      loop_control:
+        label: "{{ item.service }}"
+      delegate_to: "{{ coolify_app_deploy_apps_vm_host }}"
+      become: true
+      register: _container_name_query
+      changed_when: false
+      failed_when: _container_name_query.rc != 0
+
+    - name: Assemble extra routes with resolved container names
+      ansible.builtin.set_fact:
+        _resolved_extra_routes: >-
+          {%- set result = [] -%}
+          {%- for i in range(_extra_routes | length) -%}
+            {%- set route = _extra_routes[i] -%}
+            {%- set stdout = _container_name_query.results[i].stdout | default('') | trim -%}
+            {%- set names = stdout.split('\n') | select | list -%}
+            {%- if names | length > 0 -%}
+              {%- set _ = result.append(route | combine({'_resolved_name': names[0]})) -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{ result }}
+
+- name: Write Traefik file-provider dynamic config on coolify-apps
+  when:
+    - _extra_routes | length > 0
+    - _resolved_extra_routes is defined
+    - _resolved_extra_routes | length > 0
+  block:
+    - name: Render Traefik extra-routes config
+      ansible.builtin.template:
+        src: traefik-extra-routes.yml.j2
+        dest: "{{ coolify_app_deploy_dynamic_config_dir }}/{{ _app_name }}-extra-routes.yml"
+        owner: root
+        group: root
+        mode: "0644"
+      delegate_to: "{{ coolify_app_deploy_apps_vm_host }}"
+      become: true
+      vars:
+        _extra_routes: "{{ _resolved_extra_routes }}"
+
+- name: Log skipped extra-routes config (no container names resolved)
+  ansible.builtin.debug:
+    msg: >-
+      No extra routes written for {{ _app_name }} — either no extra routes configured
+      or container name discovery returned no results. Check that the app is deployed
+      and containers are running on {{ coolify_app_deploy_apps_vm_host }}.
+  when: >-
+    _extra_routes | length > 0
+    and (_resolved_extra_routes is not defined or _resolved_extra_routes | length == 0)

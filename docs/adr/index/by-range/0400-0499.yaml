@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 71
+total_adrs: 72
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -1338,3 +1338,23 @@ adrs:
     summary: Add a top-level converge-nginx-edge make target that wraps
     filename: 0476-cert-lifecycle-manager-make-target-fix.md
     path: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
+  - adr: '0477'
+    title: '— Coolify-apps self-healing bootstrap: SSH access, DNS-01 cert, and app-deploy role'
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - coolify-apps
+      - self-healing
+      - bootstrap
+      - ssh
+      - access
+      - dns-01
+      - cert
+      - app-deploy
+      - role
+    summary: A new tasks file coolifyruntime/tasks/bootstrapappsvm.yml runs against coolify-apps
+    filename: 0477-coolify-apps-self-healing-bootstrap.md
+    path: docs/adr/0477-coolify-apps-self-healing-bootstrap.md

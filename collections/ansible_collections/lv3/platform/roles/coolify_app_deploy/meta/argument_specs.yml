@@ -1,0 +1,47 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy a repo-backed application to Coolify and configure Traefik routing.
+    description: |
+      Idempotent role that registers or updates one application in Coolify from the
+      repo-deploy-catalog.json profile, triggers a deployment, waits for it to finish,
+      then writes a Traefik file-provider dynamic config on coolify-apps so that all
+      service routes (e.g. /api/) reach their backends without hardcoded container IPs.
+
+      Container addressing uses Docker network inspection at deploy time — the role
+      discovers the current container name and writes it into the dynamic config. Re-running
+      the role after a Coolify redeploy (when container names change) refreshes the config.
+
+      ADR: 0477
+    options:
+      coolify_app_deploy_profile:
+        type: dict
+        required: true
+        description: Entry from config/repo-deploy-catalog.json describing the app to deploy.
+      coolify_app_deploy_auth_file:
+        type: str
+        required: false
+        description: Path to the Coolify admin-auth JSON file. Defaults to coolify_admin_auth_local_file.
+      coolify_app_deploy_apps_vm_host:
+        type: str
+        required: false
+        description: >-
+          Ansible inventory hostname for the coolify-apps VM.
+          Used to SSH in and discover container names post-deployment.
+          Defaults to the coolify-apps host for the current env.
+      coolify_app_deploy_dynamic_config_dir:
+        type: str
+        required: false
+        description: >-
+          Path on coolify-apps where Traefik file-provider configs are written.
+          Defaults to /data/coolify/proxy/dynamic/.
+      coolify_app_deploy_extra_routes:
+        type: list
+        required: false
+        description: >-
+          Additional service→port mappings to expose via Traefik file-provider config
+          beyond what Coolify's Docker labels handle. Each entry is a dict with keys:
+            service: compose service name (e.g. catalog-api)
+            port: container port to proxy to (e.g. 8080)
+            path_prefix: URL prefix to route (e.g. /api/)
+            priority: Traefik router priority (default 200)

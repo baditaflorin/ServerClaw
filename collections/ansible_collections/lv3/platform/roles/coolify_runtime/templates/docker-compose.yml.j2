@@ -21,14 +21,24 @@ services:
       - --providers.file.watch=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
+{% if coolify_traefik_cert_resolver == 'dns' %}
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=hetzner
+      - --certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=10
+{% else %}
       - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
       - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http
+{% endif %}
       - --certificatesresolvers.letsencrypt.acme.storage=/traefik/acme.json
     ports:
       - "{{ coolify_proxy_port }}:80"
       - "443:443"
       - "443:443/udp"
       - "8080:8080"
+{% if coolify_traefik_cert_resolver == 'dns' and coolify_hetzner_dns_api_token %}
+    environment:
+      HETZNER_DNS_API_TOKEN: "{{ coolify_hetzner_dns_api_token }}"
+{% endif %}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - {{ coolify_proxy_path }}:/traefik
