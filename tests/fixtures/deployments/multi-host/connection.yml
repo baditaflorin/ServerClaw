@@ -1,0 +1,14 @@
+schema_version: 1
+proxmox_host:
+  addr: 203.0.113.20
+  port: 22
+  user: root
+  key:
+    vault: secret/multi/ssh/proxmox-bootstrap
+    field: private_key
+guest_ssh:
+  user: ops
+  key:
+    vault: secret/multi/ssh/guest-ops
+  jump_user: root
+  jump_via: proxmox_host

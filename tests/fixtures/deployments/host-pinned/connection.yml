@@ -1,0 +1,10 @@
+schema_version: 1
+proxmox_host:
+  addr: 203.0.113.30
+  port: 22
+  user: ops
+  key: bootstrap.id_ed25519
+guest_ssh:
+  user: ops
+  key: bootstrap.id_ed25519
+  jump_via: proxmox_host

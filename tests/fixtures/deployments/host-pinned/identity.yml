@@ -1,0 +1,5 @@
+platform_domain: pinned.example.com
+platform_operator_email: ops@pinned.example.com
+platform_operator_name: Host Pinned Test Operator
+platform_config_prefix: pinned
+platform_guest_network_cidr: 10.40.0.0/24

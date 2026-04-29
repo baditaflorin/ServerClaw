@@ -61,5 +61,5 @@ The schema uses `oneOf` on both key fields and forbids unknown properties on the
 
 ## References
 
-- [ADR 0440 — Per-Deployment Connection Registry](0440-per-deployment-connection-registry.md)
-- [ADR 0448 — Multi-Deployment Postmortem](0448-multi-deployment-2026-04-28-postmortem.md)
+- [ADR 0440 — Per-Deployment Identity and Artifact Isolation](0440-per-deployment-identity-and-artifact-isolation.md)
+- [ADR 0448 — Deployment Connection Registry and Wrapper](0448-deployment-connection-registry-and-wrapper.md)

@@ -10,3 +10,13 @@ reservations:
   reserved_on: '2026-04-29'
   expires_on: '2026-05-29'
   status: active
+- id: res-0470-multi-deployment-fixture-matrix
+  start: 470
+  end: 470
+  owner: Florin Badita-Nistor
+  branch: claude/crazy-chaplygin-c7c256
+  workstream: ws-0472-fixture-matrix-ci
+  reason: multi-deployment-fixture-matrix
+  reserved_on: '2026-04-29'
+  expires_on: '2026-05-29'
+  status: active

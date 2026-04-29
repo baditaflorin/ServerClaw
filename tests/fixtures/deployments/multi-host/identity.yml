@@ -1,0 +1,6 @@
+platform_domain: multi.example.com
+platform_operator_email: ops@multi.example.com
+platform_operator_name: Multi Host Test Operator
+platform_config_prefix: multi
+platform_guest_network_cidr: 10.30.0.0/24
+hetzner_dns_zone_name: multi.example.com

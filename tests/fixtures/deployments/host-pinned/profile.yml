@@ -1,0 +1,5 @@
+profiles:
+  - core
+extra_services: []
+disabled_services:
+  - heavy_optional_service

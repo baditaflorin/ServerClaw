@@ -1,0 +1,9 @@
+host_public_ipv4: 203.0.113.10
+management_ipv4: 10.20.0.1
+proxmox_guests:
+  - name: control
+    vmid: 100
+    ipv4: 10.20.0.10
+    tags: [control]
+    memory_mb: 2048
+    cores: 2

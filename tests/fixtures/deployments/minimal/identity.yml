@@ -1,0 +1,5 @@
+platform_domain: minimal.example.com
+platform_operator_email: ops@minimal.example.com
+platform_operator_name: Minimal Test Operator
+platform_config_prefix: minimal
+platform_guest_network_cidr: 10.20.0.0/24

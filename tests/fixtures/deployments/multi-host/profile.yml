@@ -1,0 +1,9 @@
+profiles:
+  - core
+  - data
+extra_services:
+  - example_service
+disabled_services: []
+service_overrides:
+  example_service:
+    replicas: 2

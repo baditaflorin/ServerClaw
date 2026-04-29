@@ -1,0 +1,17 @@
+host_public_ipv4: 203.0.113.30
+management_ipv4: 10.40.0.1
+proxmox_guests:
+  - name: edge-pinned
+    vmid: 300
+    ipv4: 10.40.0.10
+    tags: [edge]
+    deployment_owner: host-pinned
+    memory_mb: 4096
+    cores: 2
+  - name: data-pinned
+    vmid: 301
+    ipv4: 10.40.0.20
+    tags: [data]
+    deployment_owner: host-pinned
+    memory_mb: 8192
+    cores: 4
