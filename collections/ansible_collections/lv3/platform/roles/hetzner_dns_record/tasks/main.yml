@@ -53,6 +53,19 @@
   ansible.builtin.set_fact:
     dns_provider_boundary_zone: "{{ dns_provider_boundary_zone_candidates[0] }}"
 
+- name: Alert - Cloud API does not support record listings
+  ansible.builtin.debug:
+    msg: |
+      ALERT: Hetzner Cloud API (api.hetzner.cloud) does NOT provide DNS record management endpoints.
+      Zone query succeeded but records listing endpoint does not exist.
+
+      To fix this, determine the correct Hetzner DNS API endpoint:
+      - Option 1: Use the deprecated DNS API (dns.hetzner.com/api/v1) with old token format
+      - Option 2: Use a new Hetzner DNS service with its own API endpoint
+      - Option 3: Use a different DNS provider API
+
+      Required: Clarify with user which DNS API endpoint should be used for record CRUD operations.
+
 - name: Query existing Hetzner DNS records for the zone
   ansible.builtin.uri:
     url: "{{ hetzner_dns_api_url }}/records?zone_id={{ dns_provider_boundary_zone.provider_ref }}"
