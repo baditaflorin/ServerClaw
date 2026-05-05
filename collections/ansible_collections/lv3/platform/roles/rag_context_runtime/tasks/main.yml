@@ -67,7 +67,8 @@
     set -euo pipefail
     if [ ! -s "{{ platform_context_api_token_remote_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ platform_context_api_token_remote_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ platform_context_api_token_remote_file }}"
+                # Replace with: {{ "rag_context" | secret }}
       echo changed
     fi
   args:

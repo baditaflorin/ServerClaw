@@ -108,7 +108,8 @@
     if [ ! -s "{{ windmill_integration_test_runner_password_local_file }}" ]; then
       umask 077
       mkdir -p "$(dirname "{{ windmill_integration_test_runner_password_local_file }}")"
-      openssl rand -base64 24 | tr -d '\n' > "{{ windmill_integration_test_runner_password_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n' > "{{ windmill_integration_test_runner_password_local_file }}"
+                # Replace with: {{ "windmill" | secret }}
       echo changed
     fi
   args:
@@ -1014,7 +1015,8 @@
     set -euo pipefail
     if [ ! -s "{{ windmill_superadmin_secret_remote_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ windmill_superadmin_secret_remote_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ windmill_superadmin_secret_remote_file }}"
+                # Replace with: {{ "windmill" | secret }}
       echo changed
     fi
   args:

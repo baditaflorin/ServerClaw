@@ -47,7 +47,8 @@
     set -euo pipefail
     if [ ! -s "{{ vaultwarden_admin_token_local_file }}" ]; then
       umask 077
-      openssl rand -base64 36 | tr -d '\n' > "{{ vaultwarden_admin_token_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 36 | tr -d '\n' > "{{ vaultwarden_admin_token_local_file }}"
+                # Replace with: {{ "vaultwarden" | secret }}
       echo changed
     fi
   args:

@@ -61,7 +61,8 @@
     set -euo pipefail
     if [ ! -s "{{ librechat_jwt_secret_remote_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ librechat_jwt_secret_remote_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ librechat_jwt_secret_remote_file }}"
+                # Replace with: {{ "librechat" | secret }}
       echo changed
     fi
   args:
@@ -75,7 +76,8 @@
     set -euo pipefail
     if [ ! -s "{{ librechat_jwt_refresh_secret_remote_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ librechat_jwt_refresh_secret_remote_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ librechat_jwt_refresh_secret_remote_file }}"
+                # Replace with: {{ "librechat" | secret }}
       echo changed
     fi
   args:
@@ -89,7 +91,8 @@
     set -euo pipefail
     if [ ! -s "{{ librechat_creds_key_remote_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ librechat_creds_key_remote_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ librechat_creds_key_remote_file }}"
+                # Replace with: {{ "librechat" | secret }}
       echo changed
     fi
   args:
@@ -103,7 +106,8 @@
     set -euo pipefail
     if [ ! -s "{{ librechat_creds_iv_remote_file }}" ]; then
       umask 077
-      openssl rand -hex 16 > "{{ librechat_creds_iv_remote_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 16 > "{{ librechat_creds_iv_remote_file }}"
+                # Replace with: {{ "librechat" | secret }}
       echo changed
     fi
   args:
@@ -117,7 +121,8 @@
     set -euo pipefail
     if [ ! -s "{{ librechat_secret_dir }}/oidc-session-secret" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ librechat_secret_dir }}/oidc-session-secret"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ librechat_secret_dir }}/oidc-session-secret"
+                # Replace with: {{ "librechat" | secret }}
       echo changed
     fi
   args:

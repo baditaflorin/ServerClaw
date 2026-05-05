@@ -56,7 +56,8 @@
     set -euo pipefail
     if [ ! -s "{{ litellm_master_key_remote_file }}" ]; then
       umask 077
-      echo "sk-$(openssl rand -hex 32)" > "{{ litellm_master_key_remote_file }}"
+      echo "sk-$(# ADR 0480: Manual migration needed for: openssl rand -hex 32)" > "{{ litellm_master_key_remote_file }}"
+                # Replace with: {{ "litellm" | secret }}
       echo changed
     fi
   args:

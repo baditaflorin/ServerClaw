@@ -65,7 +65,8 @@
     set -euo pipefail
     if [ ! -s "{{ portainer_admin_password_local_file }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ portainer_admin_password_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ portainer_admin_password_local_file }}"
+                # Replace with: {{ "portainer" | secret }}
       echo changed
     fi
   args:

@@ -61,7 +61,8 @@
     set -euo pipefail
     if [ ! -s "{{ item.password_local_file }}" ]; then
       umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ item.password_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n' > "{{ item.password_local_file }}"
+                # Replace with: {{ "matrix_synapse" | secret }}
       echo changed
     fi
   args:

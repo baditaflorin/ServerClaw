@@ -109,7 +109,8 @@
     set -euo pipefail
     if [ ! -s "{{ mail_platform_admin_password_file }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ mail_platform_admin_password_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ mail_platform_admin_password_file }}"
+                # Replace with: {{ "mail_platform" | secret }}
       echo changed
     fi
   args:
@@ -122,7 +123,8 @@
     set -euo pipefail
     if [ ! -s "{{ mail_platform_mailbox_password_file }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ mail_platform_mailbox_password_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ mail_platform_mailbox_password_file }}"
+                # Replace with: {{ "mail_platform" | secret }}
       echo changed
     fi
   args:
@@ -135,7 +137,8 @@
     set -euo pipefail
     if [ ! -s "{{ mail_platform_metrics_password_file }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ mail_platform_metrics_password_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ mail_platform_metrics_password_file }}"
+                # Replace with: {{ "mail_platform" | secret }}
       echo changed
     fi
   args:
@@ -148,7 +151,8 @@
     set -euo pipefail
     if [ ! -s "{{ mail_platform_gateway_api_key_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ mail_platform_gateway_api_key_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ mail_platform_gateway_api_key_file }}"
+                # Replace with: {{ "mail_platform" | secret }}
       echo changed
     fi
   args:
@@ -159,7 +163,8 @@
 - name: Generate notification profile mailbox passwords
   ansible.builtin.shell: |
     umask 077
-    openssl rand -base64 24 > "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-mailbox-password"
+    # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-mailbox-password"
+                # Replace with: {{ "mail_platform" | secret }}
   args:
     executable: /bin/bash
     creates: "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-mailbox-password"
@@ -170,7 +175,8 @@
 - name: Generate notification profile gateway API keys
   ansible.builtin.shell: |
     umask 077
-    openssl rand -hex 32 > "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-gateway-api-key"
+    # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-gateway-api-key"
+                # Replace with: {{ "mail_platform" | secret }}
   args:
     executable: /bin/bash
     creates: "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-gateway-api-key"

@@ -86,11 +86,11 @@
     executable: /bin/bash
   loop:
     - path: "{{ paperless_secret_key_remote_file }}"
-      command: "openssl rand -hex 32"
+      command: "{{ 'paperless' | secret(length=32) }}"
     - path: "{{ paperless_redis_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\\n'"
+      command: "{{ 'paperless' | secret(length=32) }}"
     - path: "{{ paperless_admin_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\\n'"
+      command: "{{ 'paperless' | secret(length=32) }}"
   register: paperless_secret_generation
   changed_when: "'changed' in paperless_secret_generation.stdout"
   no_log: true

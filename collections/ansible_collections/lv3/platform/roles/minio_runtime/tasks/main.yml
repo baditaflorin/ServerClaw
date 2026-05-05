@@ -120,7 +120,8 @@
     set -euo pipefail
     if [ ! -s "{{ minio_root_password_remote_file }}" ]; then
       umask 077
-      openssl rand -hex 20 > "{{ minio_root_password_remote_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 20 > "{{ minio_root_password_remote_file }}"
+                # Replace with: {{ "minio" | secret }}
       echo changed
     fi
   args:
@@ -134,7 +135,8 @@
     set -euo pipefail
     if [ ! -s "{{ item.secret_key_remote_file }}" ]; then
       umask 077
-      openssl rand -hex 20 > "{{ item.secret_key_remote_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 20 > "{{ item.secret_key_remote_file }}"
+                # Replace with: {{ "minio" | secret }}
       echo changed
     fi
   args:

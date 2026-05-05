@@ -258,7 +258,8 @@
     set -euo pipefail
     if [ ! -s "{{ monitoring_grafana_admin_password_file }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ monitoring_grafana_admin_password_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ monitoring_grafana_admin_password_file }}"
+                # Replace with: {{ "unknown" | secret }}
       echo changed
     fi
   args:
@@ -271,7 +272,8 @@
     set -euo pipefail
     if [ ! -s "{{ monitoring_influxdb_admin_password_file }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ monitoring_influxdb_admin_password_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ monitoring_influxdb_admin_password_file }}"
+                # Replace with: {{ "unknown" | secret }}
       echo changed
     fi
   args:
@@ -404,7 +406,8 @@
     set -euo pipefail
     if [ ! -s "{{ monitoring_influxdb_operator_token_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ monitoring_influxdb_operator_token_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ monitoring_influxdb_operator_token_file }}"
+                # Replace with: {{ "unknown" | secret }}
       echo changed
     fi
   args:

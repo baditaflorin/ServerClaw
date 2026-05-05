@@ -52,7 +52,8 @@
     fi
     if [ "$current_length" != "16" ] && [ "$current_length" != "24" ] && [ "$current_length" != "32" ]; then
       umask 077
-      openssl rand -hex 16 | tr -d '\n' > "{{ public_edge_oidc_auth_cookie_secret_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 16 | tr -d '\n' > "{{ public_edge_oidc_auth_cookie_secret_local_file }}"
+                # Replace with: {{ "unknown" | secret }}
       echo changed
     fi
   args:

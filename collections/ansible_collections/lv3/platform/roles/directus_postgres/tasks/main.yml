@@ -40,7 +40,8 @@
     set -euo pipefail
     if [ ! -s "{{ directus_service_registry_token_local_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ directus_service_registry_token_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ directus_service_registry_token_local_file }}"
+                # Replace with: {{ "directus" | secret }}
       echo changed
     fi
   args:

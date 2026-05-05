@@ -67,7 +67,8 @@
     set -euo pipefail
     if [ ! -s "{{ typesense_api_key_local_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ typesense_api_key_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ typesense_api_key_local_file }}"
+                # Replace with: {{ "typesense" | secret }}
       echo changed
     fi
   args:

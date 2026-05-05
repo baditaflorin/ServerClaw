@@ -92,7 +92,8 @@
     set -euo pipefail
     if [ ! -s "{{ label_studio_admin_password_local_file }}" ]; then
       umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ label_studio_admin_password_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n' > "{{ label_studio_admin_password_local_file }}"
+                # Replace with: {{ "label_studio" | secret }}
       echo changed
     fi
   args:
@@ -108,7 +109,8 @@
     set -euo pipefail
     if [ ! -s "{{ label_studio_admin_token_local_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ label_studio_admin_token_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ label_studio_admin_token_local_file }}"
+                # Replace with: {{ "label_studio" | secret }}
       echo changed
     fi
   args:

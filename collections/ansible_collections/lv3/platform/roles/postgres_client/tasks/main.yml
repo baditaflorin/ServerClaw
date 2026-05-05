@@ -27,20 +27,19 @@
   delegate_to: localhost
   become: false
 
-- name: Generate database password when missing for {{ postgres_client_service }}
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ postgres_client_password_local_file }}" ]; then
-      umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ postgres_client_password_local_file }}"
-      echo changed
-    fi
+- name: Generate database password when missing for {{ postgres_client_service }} (ADR 0480)
+  ansible.builtin.shell: >
+    python3 scripts/generate_secret_with_mask.py
+    --service "{{ postgres_client_service }}"
+    --type password
+    --output "{{ postgres_client_password_local_file }}"
+    --metadata "{{ postgres_client_password_local_file | dirname }}/.masked-secret"
   args:
     executable: /bin/bash
   delegate_to: localhost
   become: false
   register: postgres_client_password_generation
-  changed_when: "'changed' in postgres_client_password_generation.stdout"
+  changed_when: "'real_secret' in postgres_client_password_generation.stdout"
   no_log: true
 
 - name: Read database password from controller for {{ postgres_client_service }}

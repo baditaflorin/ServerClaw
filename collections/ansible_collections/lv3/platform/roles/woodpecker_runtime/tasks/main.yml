@@ -150,7 +150,8 @@
     set -euo pipefail
     if [ ! -s "{{ woodpecker_agent_secret_local_file }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ woodpecker_agent_secret_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ woodpecker_agent_secret_local_file }}"
+                # Replace with: {{ "woodpecker" | secret }}
       echo changed
     fi
   args:
@@ -175,7 +176,8 @@
     set -euo pipefail
     if [ ! -s "{{ woodpecker_secret_smoke_local_file }}" ]; then
       umask 077
-      openssl rand -hex 16 > "{{ woodpecker_secret_smoke_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 16 > "{{ woodpecker_secret_smoke_local_file }}"
+                # Replace with: {{ "woodpecker" | secret }}
       echo changed
     fi
   args:

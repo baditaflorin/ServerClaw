@@ -71,7 +71,8 @@
     set -euo pipefail
     if [ ! -s "{{ item }}" ]; then
       umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ item }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n' > "{{ item }}"
+                # Replace with: {{ "sftpgo" | secret }}
       echo changed
     fi
   args:

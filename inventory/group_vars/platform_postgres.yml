@@ -214,3 +214,12 @@ platform_postgres_clients:
   - service: openbao
     database: postgres
     user: openbao_rotator
+
+  # DBeaver administrative access for database diagnostics and management
+  - service: dbeaver
+    database: postgres
+    user: dbeaver
+    password_local_file: "{{ repo_shared_root }}/.local/dbeaver/database-password.txt"
+    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/dbeaver"
+    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/dbeaver/database-password"
+    role_options: SUPERUSER CREATEDB CREATEROLE

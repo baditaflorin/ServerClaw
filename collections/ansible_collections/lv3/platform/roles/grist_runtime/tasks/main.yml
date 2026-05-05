@@ -88,7 +88,7 @@
   vars:
     common_manage_service_secrets_generate:
       - path: "{{ grist_session_secret_remote_file }}"
-        command: "openssl rand -hex 32"
+        command: "{{ 'grist' | secret(length=32) }}"
         label: "grist-session-secret"
     common_manage_service_secrets_read:
       - "{{ grist_session_secret_remote_file }}"

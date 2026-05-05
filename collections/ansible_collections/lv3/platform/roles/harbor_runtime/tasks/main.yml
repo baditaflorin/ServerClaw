@@ -95,7 +95,8 @@
     set -euo pipefail
     if [ ! -s "{{ harbor_admin_password_remote_file }}" ]; then
       umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ harbor_admin_password_remote_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n' > "{{ harbor_admin_password_remote_file }}"
+                # Replace with: {{ "harbor" | secret }}
       echo changed
     fi
   args:
@@ -109,7 +110,8 @@
     set -euo pipefail
     if [ ! -s "{{ harbor_database_password_remote_file }}" ]; then
       umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ harbor_database_password_remote_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n' > "{{ harbor_database_password_remote_file }}"
+                # Replace with: {{ "harbor" | secret }}
       echo changed
     fi
   args:
@@ -1462,7 +1464,8 @@
   ansible.builtin.shell: |
     set -euo pipefail
     while true; do
-      candidate="$(openssl rand -base64 24 | tr -d '\n')"
+      candidate="$(# ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n')"
+                # Replace with: {{ "harbor" | secret }}
       if printf '%s' "$candidate" | grep -q '[a-z]' \
         && printf '%s' "$candidate" | grep -q '[A-Z]' \
         && printf '%s' "$candidate" | grep -q '[0-9]'; then

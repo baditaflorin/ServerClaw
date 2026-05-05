@@ -77,3 +77,10 @@ repos:
         language: system
         pass_filenames: true
         files: ^(inventory/host_vars/proxmox-host\.yml)$
+      - id: detect-unmasked-secrets
+        name: ADR 0480 — detect unmasked secrets in commits
+        entry: python3 scripts/detect_unmasked_secrets.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]

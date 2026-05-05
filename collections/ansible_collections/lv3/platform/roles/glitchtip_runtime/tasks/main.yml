@@ -90,9 +90,9 @@
     executable: /bin/bash
   loop:
     - path: "{{ glitchtip_secret_key_remote_file }}"
-      command: "openssl rand -hex 32"
+      command: "{{ 'glitchtip' | secret(length=32) }}"
     - path: "{{ glitchtip_valkey_password_remote_file }}"
-      command: "openssl rand -base64 24 | tr -d '\\n'"
+      command: "{{ 'glitchtip' | secret(length=32) }}"
   register: glitchtip_secret_generation
   changed_when: "'changed' in glitchtip_secret_generation.stdout"
   no_log: true
@@ -119,7 +119,8 @@
     set -euo pipefail
     if [ ! -s "{{ glitchtip_admin_password_local_file }}" ]; then
       umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ glitchtip_admin_password_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n' > "{{ glitchtip_admin_password_local_file }}"
+                # Replace with: {{ "glitchtip" | secret }}
       echo changed
     fi
   args:
