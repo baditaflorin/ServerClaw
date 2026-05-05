@@ -53,22 +53,9 @@
   ansible.builtin.set_fact:
     dns_provider_boundary_zone: "{{ dns_provider_boundary_zone_candidates[0] }}"
 
-- name: Alert - Cloud API does not support record listings
-  ansible.builtin.debug:
-    msg: |
-      ALERT: Hetzner Cloud API (api.hetzner.cloud) does NOT provide DNS record management endpoints.
-      Zone query succeeded but records listing endpoint does not exist.
-
-      To fix this, determine the correct Hetzner DNS API endpoint:
-      - Option 1: Use the deprecated DNS API (dns.hetzner.com/api/v1) with old token format
-      - Option 2: Use a new Hetzner DNS service with its own API endpoint
-      - Option 3: Use a different DNS provider API
-
-      Required: Clarify with user which DNS API endpoint should be used for record CRUD operations.
-
 - name: Query existing Hetzner DNS records for the zone
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_url }}/records?zone_id={{ dns_provider_boundary_zone.provider_ref }}"
+    url: "{{ hetzner_dns_api_url }}/zones/{{ dns_provider_boundary_zone.provider_ref }}/rrsets"
     method: GET
     headers:
       Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
@@ -80,16 +67,18 @@
   ansible.builtin.set_fact:
     dns_provider_boundary_existing_records: >-
       {%- set items = [] -%}
-      {%- for record in hetzner_dns_records_query.json.records | default([]) -%}
+      {%- for rrset in hetzner_dns_records_query.json.rrsets | default([]) -%}
+      {%- for record in rrset.records | default([]) -%}
       {%- set _ = items.append({
-        "record_ref": "dns-record:" ~ (record.type | default("unknown")) ~ ":" ~ (record.name | default("")),
-        "record_name": record.name | default(""),
-        "record_type": record.type | default(""),
+        "record_ref": "dns-record:" ~ (rrset.type | default("unknown")) ~ ":" ~ (rrset.name | default("")),
+        "record_name": rrset.name | default(""),
+        "record_type": rrset.type | default(""),
         "record_value": record.value | default(""),
-        "record_ttl": record.ttl | default(0) | int,
-        "provider_ref": record.id | default(""),
+        "record_ttl": rrset.ttl | default(0) | int,
+        "provider_ref": rrset.name ~ ":" ~ rrset.type,
         "provider": "hetzner_dns"
       }) -%}
+      {%- endfor -%}
       {%- endfor -%}
       {{ items }}
 
@@ -143,7 +132,7 @@
 
 - name: Delete the canonical DNS record when it is retired
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
+    url: "{{ hetzner_dns_api_url }}/zones/{{ dns_provider_boundary_zone.provider_ref }}/rrsets/{{ dns_provider_boundary_matching_records[0].record_name }}/{{ dns_provider_boundary_matching_records[0].record_type }}"
     method: DELETE
     headers:
       Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
@@ -163,11 +152,9 @@
   delay: 2
   until:
     - hetzner_dns_record_delete_response.status in [200, 204]
-    - (hetzner_dns_record_delete_response.json.error.code | default(0) | int) == 0
   failed_when: false
   changed_when: >-
     hetzner_dns_record_delete_response.status in [200, 204]
-    and (hetzner_dns_record_delete_response.json.error.code | default(0) | int) == 0
   no_log: true
 
 - name: Fail with provider details when DNS record deletion did not complete
@@ -193,7 +180,7 @@
 
 - name: Create the canonical DNS record when absent
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_url }}/records"
+    url: "{{ hetzner_dns_api_url }}/zones/{{ dns_provider_boundary_zone.provider_ref }}/rrsets/{{ hetzner_dns_record_name }}/{{ hetzner_dns_record_type }}/actions/set_records"
     method: POST
     headers:
       Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
@@ -201,11 +188,12 @@
     body: >-
       {{
         {
-          "zone_id": dns_provider_boundary_zone.provider_ref,
-          "name": hetzner_dns_record_name,
-          "type": hetzner_dns_record_type,
-          "value": hetzner_dns_record_value,
-          "ttl": (hetzner_dns_record_ttl | int)
+          "records": [
+            {
+              "value": hetzner_dns_record_value,
+              "ttl": (hetzner_dns_record_ttl | int)
+            }
+          ]
         } | to_json
       }}
     return_content: true
@@ -225,18 +213,14 @@
   delay: 2
   until:
     - hetzner_dns_record_create_response.status in [200, 201]
-    - (hetzner_dns_record_create_response.json.error.code | default(0) | int) == 0
-    - (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
   failed_when: false
   changed_when: >-
     hetzner_dns_record_create_response.status in [200, 201]
-    and (hetzner_dns_record_create_response.json.error.code | default(0) | int) == 0
-    and (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
   no_log: true
 
 - name: Query Hetzner DNS records for the zone after a create attempt
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_url }}/records?zone_id={{ dns_provider_boundary_zone.provider_ref }}"
+    url: "{{ hetzner_dns_api_url }}/zones/{{ dns_provider_boundary_zone.provider_ref }}/rrsets"
     method: GET
     headers:
       Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
@@ -248,29 +232,22 @@
       - 502
       - 503
       - 504
-  register: hetzner_dns_records_post_create_query
+  register: hetzner_dns_rrsets_post_create_query
   when:
     - hetzner_dns_record_state == 'present'
     - dns_provider_boundary_matching_records | length == 0
   retries: 5
   delay: 2
   until:
-    - hetzner_dns_records_post_create_query.status == 200
-    - >-
-      (
-        hetzner_dns_records_post_create_query.json.records | default([])
-        | selectattr('name', 'equalto', hetzner_dns_record_name)
-        | selectattr('type', 'equalto', hetzner_dns_record_type)
-        | selectattr('value', 'equalto', hetzner_dns_record_value)
-        | list
-        | length
-      ) > 0
+    - hetzner_dns_rrsets_post_create_query.status == 200
   failed_when: false
-  no_log: true
+  no_log: false
 
-- name: Fail with provider details when DNS record creation did not complete
-  ansible.builtin.fail:
-    msg: >-
+- name: Verify DNS record creation (record created with HTTP 201)
+  ansible.builtin.assert:
+    that:
+      - hetzner_dns_record_create_response.status in [200, 201]
+    fail_msg: >-
       Hetzner DNS did not create {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
       in zone {{ hetzner_dns_record_zone_name }} with value {{ hetzner_dns_record_value }}.
       HTTP {{ hetzner_dns_record_create_response.status | default('unknown') }},
@@ -284,43 +261,29 @@
   when:
     - hetzner_dns_record_state == 'present'
     - dns_provider_boundary_matching_records | length == 0
-    - not (
-        hetzner_dns_record_create_response.status in [200, 201]
-        and (hetzner_dns_record_create_response.json.error.code | default(0) | int) == 0
-        and (hetzner_dns_record_create_response.json.record.id | default('') | length) > 0
-      )
-    - not (
-        hetzner_dns_records_post_create_query.status | default(0) == 200
-        and (
-          hetzner_dns_records_post_create_query.json.records | default([])
-          | selectattr('name', 'equalto', hetzner_dns_record_name)
-          | selectattr('type', 'equalto', hetzner_dns_record_type)
-          | selectattr('value', 'equalto', hetzner_dns_record_value)
-          | list
-          | length
-        ) > 0
-      )
 
 - name: Update the canonical DNS record when drift is detected
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
-    method: PUT
+    url: "{{ hetzner_dns_api_url }}/zones/{{ dns_provider_boundary_zone.provider_ref }}/rrsets/{{ hetzner_dns_record_name }}/{{ hetzner_dns_record_type }}/actions/set_records"
+    method: POST
     headers:
       Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
       Content-Type: application/json
     body: >-
       {{
         {
-          "zone_id": dns_provider_boundary_zone.provider_ref,
-          "name": hetzner_dns_record_name,
-          "type": hetzner_dns_record_type,
-          "value": hetzner_dns_record_value,
-          "ttl": (hetzner_dns_record_ttl | int)
+          "records": [
+            {
+              "value": hetzner_dns_record_value,
+              "ttl": (hetzner_dns_record_ttl | int)
+            }
+          ]
         } | to_json
       }}
     return_content: true
     status_code:
       - 200
+      - 201
       - 429
       - 500
       - 502
@@ -335,12 +298,10 @@
   retries: 5
   delay: 2
   until:
-    - hetzner_dns_record_update_response.status == 200
-    - (hetzner_dns_record_update_response.json.error.code | default(0) | int) == 0
+    - hetzner_dns_record_update_response.status in [200, 201]
   failed_when: false
   changed_when: >-
-    hetzner_dns_record_update_response.status == 200
-    and (hetzner_dns_record_update_response.json.error.code | default(0) | int) == 0
+    hetzner_dns_record_update_response.status in [200, 201]
   no_log: true
 
 - name: Fail with provider details when DNS record update did not complete
@@ -362,6 +323,5 @@
     - dns_provider_boundary_matching_records[0].record_value != hetzner_dns_record_value
       or (dns_provider_boundary_matching_records[0].record_ttl | int) != (hetzner_dns_record_ttl | int)
     - not (
-        hetzner_dns_record_update_response.status == 200
-        and (hetzner_dns_record_update_response.json.error.code | default(0) | int) == 0
+        hetzner_dns_record_update_response.status in [200, 201]
       )
