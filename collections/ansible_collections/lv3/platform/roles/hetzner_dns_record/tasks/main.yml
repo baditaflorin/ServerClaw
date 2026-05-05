@@ -23,7 +23,7 @@
     url: "{{ hetzner_dns_api_url }}/zones?name={{ hetzner_dns_record_zone_name }}"
     method: GET
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
     return_content: true
   register: hetzner_dns_zone_query
   no_log: true
@@ -58,7 +58,7 @@
     url: "{{ hetzner_dns_api_url }}/records?zone_id={{ dns_provider_boundary_zone.provider_ref }}"
     method: GET
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
     return_content: true
   register: hetzner_dns_records_query
   no_log: true
@@ -133,7 +133,7 @@
     url: "{{ hetzner_dns_api_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
     method: DELETE
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
     status_code:
       - 200
       - 204
@@ -183,7 +183,7 @@
     url: "{{ hetzner_dns_api_url }}/records"
     method: POST
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
       Content-Type: application/json
     body: >-
       {{
@@ -226,7 +226,7 @@
     url: "{{ hetzner_dns_api_url }}/records?zone_id={{ dns_provider_boundary_zone.provider_ref }}"
     method: GET
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
     return_content: true
     status_code:
       - 200
@@ -293,7 +293,7 @@
     url: "{{ hetzner_dns_api_url }}/records/{{ dns_provider_boundary_matching_records[0].provider_ref }}"
     method: PUT
     headers:
-      Auth-API-Token: "{{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim }}"
       Content-Type: application/json
     body: >-
       {{
