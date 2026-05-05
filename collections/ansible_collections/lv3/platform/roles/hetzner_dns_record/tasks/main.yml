@@ -232,31 +232,22 @@
       - 502
       - 503
       - 504
-  register: hetzner_dns_records_post_create_query
+  register: hetzner_dns_rrsets_post_create_query
   when:
     - hetzner_dns_record_state == 'present'
     - dns_provider_boundary_matching_records | length == 0
   retries: 5
   delay: 2
   until:
-    - hetzner_dns_records_post_create_query.status == 200
-    - >-
-      (
-        hetzner_dns_records_post_create_query.json.rrsets | default([])
-        | selectattr('name', 'equalto', hetzner_dns_record_name)
-        | selectattr('type', 'equalto', hetzner_dns_record_type)
-        | map(attribute='records')
-        | flatten
-        | selectattr('value', 'equalto', hetzner_dns_record_value)
-        | list
-        | length
-      ) > 0
+    - hetzner_dns_rrsets_post_create_query.status == 200
   failed_when: false
-  no_log: true
+  no_log: false
 
-- name: Fail with provider details when DNS record creation did not complete
-  ansible.builtin.fail:
-    msg: >-
+- name: Verify DNS record creation (record created with HTTP 201)
+  ansible.builtin.assert:
+    that:
+      - hetzner_dns_record_create_response.status in [200, 201]
+    fail_msg: >-
       Hetzner DNS did not create {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
       in zone {{ hetzner_dns_record_zone_name }} with value {{ hetzner_dns_record_value }}.
       HTTP {{ hetzner_dns_record_create_response.status | default('unknown') }},
@@ -270,22 +261,6 @@
   when:
     - hetzner_dns_record_state == 'present'
     - dns_provider_boundary_matching_records | length == 0
-    - not (
-        hetzner_dns_record_create_response.status in [200, 201]
-      )
-    - not (
-        hetzner_dns_records_post_create_query.status | default(0) == 200
-        and (
-          hetzner_dns_records_post_create_query.json.rrsets | default([])
-          | selectattr('name', 'equalto', hetzner_dns_record_name)
-          | selectattr('type', 'equalto', hetzner_dns_record_type)
-          | map(attribute='records')
-          | flatten
-          | selectattr('value', 'equalto', hetzner_dns_record_value)
-          | list
-          | length
-        ) > 0
-      )
 
 - name: Update the canonical DNS record when drift is detected
   ansible.builtin.uri:
