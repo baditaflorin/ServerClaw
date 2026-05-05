@@ -185,7 +185,7 @@ monitoring_loki_push_api_url: >-
 platform_log_dir: /var/log/platform
 mutation_audit_log_file: "{{ platform_log_dir }}/mutation-audit.jsonl"
 openbao_host_audit_log_file: /opt/openbao/logs/audit.log
-hetzner_dns_api_url: https://dns.hetzner.com/api/v1
+hetzner_dns_api_url: https://api.hetzner.cloud/v1
 hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
 
 mail_platform_mailbox_localpart: server
