@@ -714,6 +714,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: public
           protocol: tcp
           ports:
@@ -728,6 +736,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: management
           protocol: tcp
           ports:
@@ -1151,6 +1167,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: docker-runtime
           protocol: tcp
           ports:
@@ -1169,6 +1193,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: host
           protocol: tcp
           ports:
@@ -1221,6 +1253,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: host
           protocol: tcp
           ports:
@@ -1277,6 +1317,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: public
           protocol: tcp
           ports:
@@ -1371,6 +1419,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: host
           protocol: tcp
           ports:
@@ -1465,6 +1521,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: host
           protocol: tcp
           ports:
@@ -1496,6 +1560,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: coolify
           protocol: tcp
           ports:
@@ -1519,6 +1591,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: host
           protocol: tcp
           ports:
@@ -1566,6 +1646,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: host
           protocol: tcp
           ports:
@@ -1621,6 +1709,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: postgres
           protocol: tcp
           ports:
@@ -1645,6 +1741,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: host
           protocol: tcp
           ports:
@@ -1692,6 +1796,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: host
           protocol: tcp
           ports:
@@ -1734,6 +1846,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: nginx
           protocol: tcp
           ports:
@@ -1807,6 +1927,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: nginx
           protocol: tcp
           ports:
@@ -1855,6 +1983,14 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: management
+          protocol: icmp
+          description: Headscale mesh connectivity testing (ping)
+        - source: management
+          protocol: udp
+          ports:
+            - 41641
+          description: Tailscale mesh VPN protocol
         - source: docker-runtime
           protocol: tcp
           ports:

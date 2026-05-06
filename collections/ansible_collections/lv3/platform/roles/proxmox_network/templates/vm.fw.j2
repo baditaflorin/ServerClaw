@@ -12,7 +12,7 @@ IN ACCEPT{% if source %} -source {{ source }}{% endif %} -p {{ rule.protocol }}{
 {%- endmacro %}
 {% macro render_rule(rule) -%}
 {% if rule.source == 'public' %}
-{% if rule.protocol == 'vrrp' %}
+{% if rule.protocol == 'vrrp' or rule.protocol == 'icmp' %}
 {{ render_line(rule) }}
 {% else %}
 {% for port in rule.ports %}
@@ -21,7 +21,7 @@ IN ACCEPT{% if source %} -source {{ source }}{% endif %} -p {{ rule.protocol }}{
 {% endif %}
 {% elif rule.source == 'management' %}
 {% for source in policy.guest_management_sources %}
-{% if rule.protocol == 'vrrp' %}
+{% if rule.protocol == 'vrrp' or rule.protocol == 'icmp' %}
 {{ render_line(rule, source=source) }}
 {% else %}
 {% for port in rule.ports %}
@@ -30,7 +30,7 @@ IN ACCEPT{% if source %} -source {{ source }}{% endif %} -p {{ rule.protocol }}{
 {% endif %}
 {% endfor %}
 {% elif rule.source == 'host' %}
-{% if rule.protocol == 'vrrp' %}
+{% if rule.protocol == 'vrrp' or rule.protocol == 'icmp' %}
 {{ render_line(rule, source=policy.host_source) }}
 {% else %}
 {% for port in rule.ports %}
@@ -39,7 +39,7 @@ IN ACCEPT{% if source %} -source {{ source }}{% endif %} -p {{ rule.protocol }}{
 {% endif %}
 {% elif rule.source == 'all_guests' %}
 {% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != guest.name %}
-{% if rule.protocol == 'vrrp' %}
+{% if rule.protocol == 'vrrp' or rule.protocol == 'icmp' %}
 {{ render_line(rule, source=guest_ip ~ '/32') }}
 {% else %}
 {% for port in rule.ports %}
@@ -48,7 +48,7 @@ IN ACCEPT{% if source %} -source {{ source }}{% endif %} -p {{ rule.protocol }}{
 {% endif %}
 {% endfor %}
 {% elif rule.source in guest_ip_map %}
-{% if rule.protocol == 'vrrp' %}
+{% if rule.protocol == 'vrrp' or rule.protocol == 'icmp' %}
 {{ render_line(rule, source=guest_ip_map[rule.source] ~ '/32') }}
 {% else %}
 {% for port in rule.ports %}
@@ -60,7 +60,7 @@ IN ACCEPT{% if source %} -source {{ source }}{% endif %} -p {{ rule.protocol }}{
 {# Docker bridge CIDRs are enforced inside the guest nftables policy. Proxmox's
    VM firewall compiler drops these broad cache-plane rules for VM 130, so keep
    the outer firewall focused on concrete guest sources. #}
-{% if rule.protocol == 'vrrp' %}
+{% if rule.protocol == 'vrrp' or rule.protocol == 'icmp' %}
 {{ render_line(rule, source=rule.source) }}
 {% else %}
 {% for port in rule.ports %}

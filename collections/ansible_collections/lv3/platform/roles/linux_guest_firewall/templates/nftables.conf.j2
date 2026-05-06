@@ -10,6 +10,8 @@ flush ruleset
 {% macro render_match(rule) -%}
 {% if rule.protocol == 'vrrp' -%}
 ip protocol vrrp
+{%- elif rule.protocol == 'icmp' -%}
+icmp type echo-request
 {%- else -%}
 {{ rule.protocol }} dport { {{ rule.ports | map('string') | map('replace', ':', '-') | join(', ') }} }
 {%- endif %}
