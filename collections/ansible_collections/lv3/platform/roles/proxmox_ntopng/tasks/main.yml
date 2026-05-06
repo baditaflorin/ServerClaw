@@ -77,7 +77,8 @@
     set -euo pipefail
     if [ ! -s "{{ ntopng_admin_password_file }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ ntopng_admin_password_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ ntopng_admin_password_file }}"
+                # Replace with: {{ "unknown" | secret }}
       echo changed
     fi
   args:

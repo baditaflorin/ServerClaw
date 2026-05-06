@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.179.43",
   "platform_version": "0.178.222",
-  "generated_at": "2026-04-29T14:20:53Z",
-  "next_refresh_at": "2026-04-29T15:20:53Z",
+  "generated_at": "2026-05-05T12:07:51Z",
+  "next_refresh_at": "2026-05-05T13:07:51Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -6359,7 +6359,7 @@
   },
   "recent_changes": {
     "last_version": "0.179.42",
-    "deployed_at": "2026-04-29",
+    "deployed_at": "2026-05-05",
     "summary": "ADR 0477: coolify-apps self-healing bootstrap \u2014 SSH access via `Match Address` sshd directive, DNS-01 cert resolution via Hetzner (replaces HTTP-01), and new `coolify_app_deploy` role that discovers container names via `docker ps` instead of hardcoded IPs. All three changes self-heal on re-converge.",
     "release_notes_url": "docs/release-notes/0.179.43.md"
   },

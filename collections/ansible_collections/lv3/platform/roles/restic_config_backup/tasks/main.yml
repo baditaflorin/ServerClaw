@@ -49,7 +49,8 @@
   ansible.builtin.shell: |
     set -euo pipefail
     if [ ! -s "{{ restic_config_backup_repository_password_local_file }}" ]; then
-      openssl rand -base64 48 > "{{ restic_config_backup_repository_password_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 48 > "{{ restic_config_backup_repository_password_local_file }}"
+                # Replace with: {{ "unknown" | secret }}
       chmod 600 "{{ restic_config_backup_repository_password_local_file }}"
       echo changed
     fi

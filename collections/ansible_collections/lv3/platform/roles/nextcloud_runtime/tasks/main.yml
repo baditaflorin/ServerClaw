@@ -119,10 +119,10 @@
   vars:
     common_manage_service_secrets_generate:
       - path: "{{ nextcloud_admin_password_remote_file }}"
-        command: "openssl rand -base64 24 | tr -d '\\n'"
+        command: "{{ 'nextcloud' | secret(length=32) }}"
         label: "nextcloud-admin-password"
       - path: "{{ nextcloud_redis_password_remote_file }}"
-        command: "openssl rand -base64 24 | tr -d '\\n'"
+        command: "{{ 'nextcloud' | secret(length=32) }}"
         label: "nextcloud-redis-password"
     common_manage_service_secrets_read:
       - "{{ nextcloud_admin_password_remote_file }}"

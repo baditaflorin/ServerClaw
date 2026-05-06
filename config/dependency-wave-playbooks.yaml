@@ -187,3 +187,16 @@ playbooks:
       - vm:110/service:nginx_edge_publication
       - vm:120
       - vm:120/service:ntfy
+
+  - path: playbooks/fix-edge-certificate.yml
+    workflow_id: converge-nginx-edge
+    make_target: converge-nginx-edge
+    mutation_scope: platform
+    shared_surfaces:
+      - vm:110
+      - vm:110/service:nginx_edge_publication
+      - config/subdomain-catalog.json
+      - config/certificate-catalog.json
+    lock_resources:
+      - vm:110
+      - vm:110/service:nginx_edge_publication

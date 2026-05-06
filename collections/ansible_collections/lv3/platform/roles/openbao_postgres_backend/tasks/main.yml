@@ -22,7 +22,8 @@
     set -euo pipefail
     if [ ! -s "{{ openbao_postgres_rotator_password_local_file }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ openbao_postgres_rotator_password_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ openbao_postgres_rotator_password_local_file }}"
+                # Replace with: {{ "unknown" | secret }}
       echo changed
     fi
   args:

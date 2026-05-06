@@ -71,13 +71,13 @@
   vars:
     common_manage_service_secrets_generate:
       - path: "{{ outline_secret_key_remote_file }}"
-        command: "openssl rand -hex 32"
+        command: "{{ 'outline' | secret(length=32) }}"
         label: "outline-secret-key"
       - path: "{{ outline_utils_secret_remote_file }}"
-        command: "openssl rand -hex 32"
+        command: "{{ 'outline' | secret(length=32) }}"
         label: "outline-utils-secret"
       - path: "{{ outline_redis_password_remote_file }}"
-        command: "openssl rand -base64 24 | tr -d '\\n'"
+        command: "{{ 'outline' | secret(length=32) }}"
         label: "outline-redis-password"
     common_manage_service_secrets_read:
       - "{{ outline_secret_key_remote_file }}"

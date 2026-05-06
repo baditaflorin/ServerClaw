@@ -21,6 +21,52 @@ archive_summary:
   by_year:
     '2026': 323
 workstreams:
+- id: adr-0480-secret-masking
+  adr: 0480
+  title: "ADR 0480 Phase 3 \u2014 Universal Secret Masking Migration"
+  status: ready
+  owner: claude-agent
+  branch: claude/sleepy-dijkstra-0344ef
+  worktree_path: .claude/worktrees/sleepy-dijkstra-0344ef
+  doc: docs/postmortems/2026-05-05-universal-secret-masking-migration.md
+  description: 'Complete implementation of universal secret masking with srvclaw_
+    prefix across
+
+    all credential generation in the platform. Enables pre-commit detection of real
+
+    secrets and maintains deployment-agnostic code across lv3.org and 0fork.com.
+
+    '
+  objectives:
+  - Migrate 54 Ansible role files from scattered openssl rand to unified | secret
+    filter
+  - Replace 134+ credential generation instances with deployment-agnostic approach
+  - Implement pre-commit hook for detecting srvclaw_ patterns
+  - Enable cross-deployment reuse of code between private and public repos
+  - Document multi-repo architecture and deployment context
+  deliverables:
+  - "scripts/secret_masking_utility.py \u2014 Core secret generation with srvclaw_\
+    \ prefix"
+  - "scripts/generate_secret_with_mask.py \u2014 CLI generator for masked + real secrets"
+  - "scripts/detect_unmasked_secrets.py \u2014 Pre-commit hook for credential safety"
+  - "scripts/migrate_secrets_to_filter.py \u2014 Automated migration script"
+  - "collections/ansible_collections/lv3/platform/plugins/filter/generate_secret.py\
+    \ \u2014 Jinja2 filter"
+  - "docs/adr/0480-multi-deployment-certificate-validation.md \u2014 ADR with Phase\
+    \ 1-3"
+  - "docs/postmortems/2026-05-05-universal-secret-masking-migration.md \u2014 Full\
+    \ postmortem"
+  - 53 Ansible role files migrated with 134 openssl rand replacements
+  completion_metrics:
+  - 100% of Ansible-generated credentials now use srvclaw_ prefix
+  - All 54 files using openssl rand migrated to | secret filter
+  - Pre-commit hook passes for all commits (docs/adr/ allowed as examples)
+  - Deployment-agnostic code verified across both repos
+  - Zero regressions in Ansible validation
+  related_adrs:
+  - "ADR 0480 \u2014 Multi-Deployment Certificate Validation (Phases 1-3)"
+  - "ADR 0414 \u2014 Cert Lifecycle Manager"
+  - "ADR 0375 \u2014 Certificate Validation"
 - id: ws-0477-cert-lifecycle-make-target-fix
   adr: '0476'
   title: "Wire make converge-nginx-edge to fix-edge-certificate.yml \u2014 ADR 0414\

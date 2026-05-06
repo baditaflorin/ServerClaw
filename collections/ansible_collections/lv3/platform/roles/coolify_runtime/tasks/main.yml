@@ -69,7 +69,8 @@
     set -euo pipefail
     if [ ! -s "{{ coolify_root_password_local_file }}" ]; then
       umask 077
-      password="$(openssl rand -base64 24 | tr -d '\n')Aa1!"
+      password="$(# ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n')Aa1!"
+                # Replace with: {{ "coolify" | secret }}
       printf '%s\n' "${password}" > "{{ coolify_root_password_local_file }}"
       echo changed
     fi

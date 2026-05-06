@@ -191,7 +191,8 @@
     set -euo pipefail
     if [ ! -s "{{ semaphore_admin_password_local_file }}" ]; then
       umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ semaphore_admin_password_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n' > "{{ semaphore_admin_password_local_file }}"
+                # Replace with: {{ "semaphore" | secret }}
       echo changed
     fi
   args:
@@ -232,7 +233,8 @@
     set -euo pipefail
     if [ ! -s "{{ item.path }}" ]; then
       umask 077
-      openssl rand -hex 32 > "{{ item.path }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ item.path }}"
+                # Replace with: {{ "semaphore" | secret }}
       echo changed
     fi
   args:
@@ -266,7 +268,8 @@
     fi
 
     umask 077
-    openssl rand -base64 32 | tr -d '\n' > "$secret_file"
+    # ADR 0480: Manual migration needed for: openssl rand -base64 32 | tr -d '\n' > "$secret_file"
+                # Replace with: {{ "semaphore" | secret }}
     echo changed
   args:
     executable: /bin/bash

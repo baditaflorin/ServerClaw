@@ -45,7 +45,8 @@
     set -euo pipefail
     if [ ! -s "{{ nats_jetstream_admin_password_local_file }}" ]; then
       umask 077
-      openssl rand -base64 24 > "{{ nats_jetstream_admin_password_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ nats_jetstream_admin_password_local_file }}"
+                # Replace with: {{ "nats_jetstream" | secret }}
       echo changed
     fi
   args:

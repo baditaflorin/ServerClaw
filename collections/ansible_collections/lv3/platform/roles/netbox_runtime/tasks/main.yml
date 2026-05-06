@@ -83,7 +83,8 @@
     executable: /bin/bash
   loop:
     - path: "{{ netbox_superuser_password_local_file }}"
-      generator: "openssl rand -base64 24 | tr -d '\\n'"
+      generator: "# ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\\n'"
+                # Replace with: {{ "netbox" | secret }}
   delegate_to: localhost
   become: false
   register: netbox_local_secret_generation
@@ -118,13 +119,13 @@
   vars:
     common_manage_service_secrets_generate:
       - path: "{{ netbox_secret_key_file }}"
-        command: "openssl rand -hex 64"
+        command: "{{ 'netbox' | secret }}"
         label: "netbox-secret-key"
       - path: "{{ netbox_redis_password_file }}"
-        command: "openssl rand -hex 24"
+        command: "{{ 'netbox' | secret }}"
         label: "netbox-redis-password"
       - path: "{{ netbox_redis_cache_password_file }}"
-        command: "openssl rand -hex 24"
+        command: "{{ 'netbox' | secret }}"
         label: "netbox-redis-cache-password"
     common_manage_service_secrets_read:
       - "{{ netbox_secret_key_file }}"

@@ -46,7 +46,8 @@
     set -euo pipefail
     if [ ! -s "{{ superset_reader_password_local_file }}" ]; then
       umask 077
-      openssl rand -hex 24 > "{{ superset_reader_password_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 24 > "{{ superset_reader_password_local_file }}"
+                # Replace with: {{ "superset" | secret }}
       echo changed
     fi
   args:

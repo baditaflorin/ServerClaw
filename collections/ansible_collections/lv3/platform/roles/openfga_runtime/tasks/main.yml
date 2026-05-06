@@ -50,7 +50,8 @@
     set -euo pipefail
     if [ ! -s "{{ openfga_preshared_key_local_file }}" ]; then
       umask 077
-      openssl rand -hex 32 | tr -d '\n' > "{{ openfga_preshared_key_local_file }}"
+      # ADR 0480: Manual migration needed for: openssl rand -hex 32 | tr -d '\n' > "{{ openfga_preshared_key_local_file }}"
+                # Replace with: {{ "openfga" | secret }}
       echo changed
     fi
   args:
