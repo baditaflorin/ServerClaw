@@ -36,14 +36,17 @@ workstreams:
       - collections/ansible_collections/lv3/platform/plugins/filter/generate_secret.py
       - scripts/secret_masking_utility.py
       mode: shared_contract
+      contract: adr-0480-secret-filter-v1
     - id: adr-0480-documentation
       paths:
       - docs/postmortems/2026-05-05-universal-secret-masking-migration.md
       mode: shared_contract
+      contract: adr-0480-documentation-v1
     - id: adr-0480-gate-integration
       paths:
       - .githooks/pre-push
       mode: shared_contract
+      contract: adr-0480-gate-integration-v1
   description: 'Complete implementation of universal secret masking with srvclaw_
     prefix across
 
