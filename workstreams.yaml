@@ -29,6 +29,16 @@ workstreams:
   branch: claude/sleepy-dijkstra-0344ef
   worktree_path: .claude/worktrees/sleepy-dijkstra-0344ef
   doc: docs/postmortems/2026-05-05-universal-secret-masking-migration.md
+  ownership_manifest:
+  - surface: secret-masking-infrastructure
+    owner: claude-agent
+    contact: baditaflorin@gmail.com
+  - surface: adr-0480-documentation
+    owner: claude-agent
+    contact: baditaflorin@gmail.com
+  - surface: pre-push-gate-integration
+    owner: claude-agent
+    contact: baditaflorin@gmail.com
   description: 'Complete implementation of universal secret masking with srvclaw_
     prefix across
 
