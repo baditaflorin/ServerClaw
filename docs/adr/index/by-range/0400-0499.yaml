@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-29'
+generated: '2026-05-11'
 facet: range
 label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 72
+total_adrs: 73
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -1358,3 +1358,17 @@ adrs:
     summary: A new tasks file coolifyruntime/tasks/bootstrapappsvm.yml runs against coolify-apps
     filename: 0477-coolify-apps-self-healing-bootstrap.md
     path: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
+  - adr: 0480
+    title: Multi-Deployment Certificate Validation
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - multi-deployment
+      - certificate
+      - validation
+    summary: 'Implement deployment-aware certificate validation with three tiers:'
+    filename: 0480-multi-deployment-certificate-validation.md
+    path: docs/adr/0480-multi-deployment-certificate-validation.md

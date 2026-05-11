@@ -1,0 +1,84 @@
+id: adr-0481-multi-deployment-service-registry
+adr: '0481'
+title: 'ADR 0481 — Multi-Deployment Service Registry (Schema v3 + list_services.py)'
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/friendly-pike-233883
+worktree_path: .claude/worktrees/friendly-pike-233883
+doc: docs/postmortems/2026-05-11-service-inventory-gap-multi-deployment.md
+related_adrs:
+  - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+  - docs/adr/0437-fork-bootstrap-gaps.md
+  - docs/adr/0440-per-deployment-layout.md
+  - docs/adr/0480-multi-deployment-certificate-validation.md
+depends_on:
+  - adr-0407-generic-by-default
+  - adr-0424-fork-clone-onto-hetzner-ax41
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/adr-0481-multi-deployment-service-registry.yaml
+  - config/deployment-registry.yaml
+  - config/subdomain-exposure-registry.json
+  - docs/schema/subdomain-exposure-registry.schema.json
+  - scripts/subdomain_exposure_audit.py
+  - scripts/list_services.py
+  - tests/test_list_services.py
+  - Makefile
+started: '2026-05-11'
+priority: p2
+surfaces:
+  - config/deployment-registry.yaml (new — operator-editable source of truth)
+  - config/subdomain-exposure-registry.json (schema v2 → v3)
+  - docs/schema/subdomain-exposure-registry.schema.json (v3 schema)
+  - scripts/list_services.py (new CLI)
+  - tests/test_list_services.py (29 tests)
+  - Makefile (list-services, diff-services, list-service-deployments targets)
+summary: >
+  Implements P3 from postmortem 2026-05-11-service-inventory-gap-multi-deployment.md.
+  Upgrades the subdomain-exposure-registry to schema v3 with a top-level
+  deployments block (backward-compatible — publications[] is unchanged).
+  Adds config/deployment-registry.yaml as the operator-editable source of
+  truth for per-deployment metadata (platform_domain, provider, service
+  exclusions). Creates scripts/list_services.py with --deployment, --diff,
+  --list-deployments, and --format table|json|csv flags, backed by 29 tests.
+  Adds make list-services / diff-services / list-service-deployments targets.
+ownership_manifest:
+  owned_surfaces:
+    - id: adr_0481_config
+      paths:
+        - config/deployment-registry.yaml
+        - config/subdomain-exposure-registry.json
+        - docs/schema/subdomain-exposure-registry.schema.json
+      mode: exclusive
+    - id: adr_0481_scripts
+      paths:
+        - scripts/list_services.py
+        - tests/test_list_services.py
+      mode: exclusive
+    - id: adr_0481_audit_patch
+      paths:
+        - scripts/subdomain_exposure_audit.py
+      mode: shared_contract
+      contract: adr-0481-audit-extension-v1
+    - id: adr_0481_makefile
+      paths:
+        - Makefile
+      mode: shared_contract
+      contract: adr-0481-makefile-targets-v1
+    - id: adr_0481_workstream
+      paths:
+        - workstreams/active/adr-0481-multi-deployment-service-registry.yaml
+        - workstreams.yaml
+        - docs/postmortems/2026-05-11-service-inventory-gap-multi-deployment.md
+      mode: exclusive
+    - id: adr_0481_generated
+      paths:
+        - docs/adr/.index.yaml
+        - docs/adr/index/*
+        - docs/diagrams/*
+        - config/prometheus/file_sd/https_tls_targets.yml
+      mode: shared_contract
+      contract: mainline-release-integration-v1

@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-29'
+generated: '2026-05-11'
 facet: concern
 concern: security
-total_adrs: 47
+total_adrs: 48
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -921,3 +921,17 @@ adrs:
     summary: Add a top-level converge-nginx-edge make target that wraps
     filename: 0476-cert-lifecycle-manager-make-target-fix.md
     path: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
+  - adr: 0480
+    title: Multi-Deployment Certificate Validation
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - multi-deployment
+      - certificate
+      - validation
+    summary: 'Implement deployment-aware certificate validation with three tiers:'
+    filename: 0480-multi-deployment-certificate-validation.md
+    path: docs/adr/0480-multi-deployment-certificate-validation.md

@@ -12,6 +12,7 @@ depends_on:
   - adr-0449-phase4-self-healing-primitives
   - adr-0465-phase9-self-running-automation
   - adr-0472-phase10-reservation-hardening
+conflicts_with: []
 shared_surfaces:
   - docs/adr/0473-phase11-cpu-only-automation-primitives.md
   - workstreams/active/ws-0474-phase11-cpu-only-automation.yaml

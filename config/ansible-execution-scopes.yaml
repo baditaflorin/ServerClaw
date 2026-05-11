@@ -1,4 +1,8 @@
 playbooks:
+  playbooks/fix-edge-certificate.yml:
+    playbook_id: fix-edge-certificate
+    mutation_scope: platform
+    execution_class: mutation
   playbooks/api-gateway.yml:
     playbook_id: api-gateway
     mutation_scope: lane

@@ -1,6 +1,38 @@
 {
-  "schema_version": "2.0.0",
+  "schema_version": "3.0.0",
   "zone_name": "localhost",
+  "primary_deployment": "lv3.org",
+  "deployments": {
+    "lv3.org": {
+      "platform_domain": "lv3.org",
+      "environment": "production",
+      "infrastructure": {
+        "provider": "proxmox",
+        "description": "Dedicated bare-metal Proxmox host (production)"
+      },
+      "service_exclusions": [],
+      "feature_flags": {}
+    },
+    "0fork.com": {
+      "platform_domain": "0fork.com",
+      "environment": "production",
+      "forked_from": "lv3.org",
+      "infrastructure": {
+        "provider": "hetzner",
+        "description": "Hetzner AX41-NVMe #2952989 (fork viability test, ADR 0424)",
+        "apex_ip_v4": "65.109.84.223",
+        "apex_ip_v6": "2a01:4f9:3051:52d5::2"
+      },
+      "service_exclusions": [
+        "glitchtip"
+      ],
+      "feature_flags": {
+        "keycloak_glitchtip_enabled": false,
+        "keycloak_mail_platform_submission_recovery_enabled": false
+      },
+      "overrides_file": "playbooks/vars/fork-overrides.yml"
+    }
+  },
   "publications": [
     {
       "fqdn": "agents.lv3.org",

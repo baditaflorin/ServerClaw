@@ -36,6 +36,7 @@ import subdomain_catalog
 
 REGISTRY_PATH = repo_path("config", "subdomain-exposure-registry.json")
 REGISTRY_SCHEMA_PATH = repo_path("docs", "schema", "subdomain-exposure-registry.schema.json")
+DEPLOYMENT_REGISTRY_PATH = repo_path("config", "deployment-registry.yaml")
 CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
 PUBLIC_EDGE_DEFAULTS_PATH = repo_path("roles", "nginx_edge_publication", "defaults", "main.yml")
 GLOBAL_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
@@ -332,6 +333,19 @@ def resolve_route_for_hostname(
     return None
 
 
+def _load_deployment_registry() -> dict[str, Any]:
+    """Load config/deployment-registry.yaml without failing if pyyaml is absent."""
+    if not DEPLOYMENT_REGISTRY_PATH.is_file():
+        return {}
+    try:
+        import yaml  # type: ignore[import]
+
+        data = yaml.safe_load(DEPLOYMENT_REGISTRY_PATH.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
 def build_registry(
     catalog: dict[str, Any] | None = None,
     host_vars: dict[str, Any] | None = None,
@@ -376,9 +390,15 @@ def build_registry(
         ),
     }
 
+    dep_registry = _load_deployment_registry()
+    primary = dep_registry.get("primary_deployment", "lv3.org")
+    deployments = dep_registry.get("deployments", {})
+
     return {
-        "schema_version": "2.0.0",
+        "schema_version": "3.0.0",
         "zone_name": "localhost",
+        "primary_deployment": primary,
+        "deployments": deployments,
         "publications": publication_entries,
         "summary": summary,
     }

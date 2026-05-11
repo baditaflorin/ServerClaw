@@ -3,12 +3,12 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.179.43",
   "platform_version": "0.178.222",
-  "generated_at": "2026-05-05T12:07:51Z",
-  "next_refresh_at": "2026-05-05T13:07:51Z",
+  "generated_at": "2026-05-11T14:57:05Z",
+  "next_refresh_at": "2026-05-11T15:57:05Z",
   "environment": "production",
   "identity": {
-    "platform_name": "lv3.org",
-    "operator": "Florin Badita-Nistor",
+    "platform_name": "0fork.com",
+    "operator": "0fork Clone Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -6359,7 +6359,7 @@
   },
   "recent_changes": {
     "last_version": "0.179.42",
-    "deployed_at": "2026-05-05",
+    "deployed_at": "2026-05-11",
     "summary": "ADR 0477: coolify-apps self-healing bootstrap \u2014 SSH access via `Match Address` sshd directive, DNS-01 cert resolution via Hetzner (replaces HTTP-01), and new `coolify_app_deploy` role that discovers container names via `docker ps` instead of hardcoded IPs. All three changes self-heal on re-converge.",
     "release_notes_url": "docs/release-notes/0.179.43.md"
   },
@@ -6373,17 +6373,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.lv3.org",
+        "endpoint": "https://ops.0fork.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.lv3.org",
+        "endpoint": "https://windmill.0fork.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.lv3.org",
+        "endpoint": "https://api.0fork.com",
         "adr": "0092"
       }
     ],

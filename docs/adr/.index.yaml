@@ -6,23 +6,23 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-29'
+generated: '2026-05-11'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 504
+total_adrs: 505
 adr_number_range:
   first: '0001'
-  last: '0477'
-  next_available: 0478
+  last: 0480
+  next_available: 0481
 implementation_status_summary:
   Implemented: 377
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 53
+  Proposed: 54
 decision_status_summary:
   Accepted: 379
-  Proposed: 60
+  Proposed: 61
   Deprecated: 14
   Implemented: 51
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 72
+      count: 73
       first_adr: '0400'
-      last_adr: '0477'
+      last_adr: 0480
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -97,7 +97,7 @@ facets:
       count: 9
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 47
+      count: 48
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 7
@@ -131,14 +131,20 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 53
+      count: 54
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0478
+  next_available_adr: 0481
 latest_adrs:
+  - adr: 0480
+    title: Multi-Deployment Certificate Validation
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: security
+    path: docs/adr/0480-multi-deployment-certificate-validation.md
   - adr: '0477'
     title: '— Coolify-apps self-healing bootstrap: SSH access, DNS-01 cert, and app-deploy role'
     implementation_status: Proposed
@@ -193,12 +199,6 @@ latest_adrs:
     currently_describes: current_state
     concern: security
     path: docs/adr/0469-connection-yml-vault-key-pull.md
-  - adr: 0468
-    title: Pre-Converge State Snapshot
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: platform
-    path: docs/adr/0468-preconverge-snapshot.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

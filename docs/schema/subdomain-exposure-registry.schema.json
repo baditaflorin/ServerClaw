@@ -4,15 +4,69 @@
   "title": "Canonical Publication Registry",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "zone_name", "publications", "summary"],
+  "required": ["schema_version", "zone_name", "primary_deployment", "deployments", "publications", "summary"],
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "2.0.0"
+      "const": "3.0.0"
     },
     "zone_name": {
       "type": "string",
-      "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+      "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$",
+      "description": "Deprecated: use primary_deployment instead. Kept for backward compatibility with existing consumers."
+    },
+    "primary_deployment": {
+      "type": "string",
+      "description": "The deployment slug whose publications[] array is authoritative. All other deployments derive from it."
+    },
+    "deployments": {
+      "type": "object",
+      "description": "Per-deployment metadata. Keys are platform_domain values (e.g. lv3.org, 0fork.com).",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["platform_domain", "environment", "infrastructure", "service_exclusions", "feature_flags"],
+        "properties": {
+          "platform_domain": {
+            "type": "string",
+            "description": "The apex domain for this deployment."
+          },
+          "environment": {
+            "type": "string",
+            "enum": ["production", "staging"]
+          },
+          "forked_from": {
+            "type": ["string", "null"],
+            "description": "Slug of the parent deployment this fork was cloned from. Null for the primary."
+          },
+          "infrastructure": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["provider", "description"],
+            "properties": {
+              "provider": {"type": "string"},
+              "description": {"type": "string"},
+              "apex_ip_v4": {"type": "string"},
+              "apex_ip_v6": {"type": "string"}
+            }
+          },
+          "service_exclusions": {
+            "type": "array",
+            "items": {"type": "string"},
+            "uniqueItems": true,
+            "description": "service_id values from the primary deployment's publications that are disabled on this fork."
+          },
+          "feature_flags": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Ansible variable overrides that gate the service exclusions. Kept for traceability."
+          },
+          "overrides_file": {
+            "type": "string",
+            "description": "Repo-relative path to the Ansible vars file containing the runtime overrides."
+          }
+        }
+      }
     },
     "publications": {
       "type": "array",

@@ -2,6 +2,10 @@ id: ws-dry-centralization-0368-0374
 adr: "0368"
 title: "DRY Centralization — ADRs 0368–0374"
 status: merged
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - workstreams/archive/2026/ws-dry-centralization-0368-0374.yaml
 owner: platform-infrastructure
 branch: claude/objective-bose
 worktree_path: .claude/worktrees/objective-bose

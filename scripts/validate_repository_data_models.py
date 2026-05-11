@@ -198,7 +198,7 @@ HTTP_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"}
 IDENTITY_CLASSES = {"human_operator", "service", "agent", "break_glass"}
 AGENT_POLICY_IDENTITY_CLASSES = {"operator-agent", "service-agent"}
 TRUST_TIERS = {"T1", "T2", "T3", "T4"}
-NETWORK_POLICY_PROTOCOLS = {"tcp", "udp", "vrrp"}
+NETWORK_POLICY_PROTOCOLS = {"tcp", "udp", "vrrp", "icmp"}
 IMAGE_SOURCE_KINDS = {"upstream", "local_build"}
 IMAGE_PIN_STATUSES = {"pinned", "unpinned", "local_build"}
 SCAFFOLD_PLACEHOLDER_MARKER = "TODO"
@@ -626,7 +626,7 @@ def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> Non
                 NETWORK_POLICY_PROTOCOLS,
             )
             ports = rule.get("ports", [])
-            if rule.get("protocol") != "vrrp":
+            if rule.get("protocol") not in {"vrrp", "icmp"}:
                 ports = require_list(
                     ports,
                     f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports",

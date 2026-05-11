@@ -4,7 +4,7 @@
 - labels:
     assurance_id: api-gateway-public
     auth_requirement: upstream_auth
-    certificate_id: api-edge
+    certificate_id: ''
     display_url: https://api.example.com:443/healthz
     environment: production
     expected_issuer: letsencrypt
@@ -44,7 +44,7 @@
 - labels:
     assurance_id: changelog-portal-public
     auth_requirement: edge_oidc
-    certificate_id: changelog-edge
+    certificate_id: ''
     display_url: https://changelog.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -64,7 +64,7 @@
 - labels:
     assurance_id: coolify-public
     auth_requirement: edge_oidc
-    certificate_id: coolify-edge
+    certificate_id: ''
     display_url: https://coolify.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -84,7 +84,7 @@
 - labels:
     assurance_id: coolify-apps-public
     auth_requirement: none
-    certificate_id: apps-edge
+    certificate_id: ''
     display_url: https://apps.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -122,7 +122,7 @@
 - labels:
     assurance_id: dify-public
     auth_requirement: edge_oidc
-    certificate_id: agents-edge
+    certificate_id: ''
     display_url: https://agents.example.com:443/healthz
     environment: production
     expected_issuer: letsencrypt
@@ -162,7 +162,7 @@
 - labels:
     assurance_id: docker-build-public
     auth_requirement: none
-    certificate_id: build-edge
+    certificate_id: ''
     display_url: https://build.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -182,7 +182,7 @@
 - labels:
     assurance_id: docker-runtime-public
     auth_requirement: none
-    certificate_id: docker-runtime-edge
+    certificate_id: ''
     display_url: https://docker.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -202,7 +202,7 @@
 - labels:
     assurance_id: docs-portal-public
     auth_requirement: edge_oidc
-    certificate_id: docs-edge
+    certificate_id: ''
     display_url: https://docs.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -222,7 +222,7 @@
 - labels:
     assurance_id: dozzle-public
     auth_requirement: edge_oidc
-    certificate_id: logs-edge
+    certificate_id: ''
     display_url: https://logs.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -242,7 +242,7 @@
 - labels:
     assurance_id: excalidraw-public
     auth_requirement: edge_oidc
-    certificate_id: draw-edge
+    certificate_id: ''
     display_url: https://draw.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -262,7 +262,7 @@
 - labels:
     assurance_id: flagsmith-public
     auth_requirement: edge_oidc
-    certificate_id: flags-edge
+    certificate_id: ''
     display_url: https://flags.example.com:443/health
     environment: production
     expected_issuer: letsencrypt
@@ -282,7 +282,7 @@
 - labels:
     assurance_id: glitchtip-public
     auth_requirement: upstream_auth
-    certificate_id: errors-edge
+    certificate_id: ''
     display_url: https://errors.example.com:443/api/0/internal/health/
     environment: production
     expected_issuer: letsencrypt
@@ -302,7 +302,7 @@
 - labels:
     assurance_id: grafana-public
     auth_requirement: upstream_auth
-    certificate_id: grafana-edge
+    certificate_id: ''
     display_url: https://grafana.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -322,7 +322,7 @@
 - labels:
     assurance_id: grist-public
     auth_requirement: upstream_auth
-    certificate_id: grist-edge
+    certificate_id: ''
     display_url: https://grist.example.com:443/status
     environment: production
     expected_issuer: letsencrypt
@@ -342,7 +342,7 @@
 - labels:
     assurance_id: harbor-public
     auth_requirement: none
-    certificate_id: registry-edge
+    certificate_id: ''
     display_url: https://registry.example.com:443/api/v2.0/ping
     environment: production
     expected_issuer: letsencrypt
@@ -362,7 +362,7 @@
 - labels:
     assurance_id: headscale-public
     auth_requirement: upstream_auth
-    certificate_id: headscale-edge
+    certificate_id: ''
     display_url: https://headscale.example.com:443/health
     environment: production
     expected_issuer: letsencrypt
@@ -382,7 +382,7 @@
 - labels:
     assurance_id: homepage-public
     auth_requirement: edge_oidc
-    certificate_id: home-edge
+    certificate_id: ''
     display_url: https://home.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -402,7 +402,7 @@
 - labels:
     assurance_id: keycloak-public
     auth_requirement: upstream_auth
-    certificate_id: keycloak-edge
+    certificate_id: ''
     display_url: https://sso.example.com:443/realms/lv3/.well-known/openid-configuration
     environment: production
     expected_issuer: letsencrypt
@@ -422,7 +422,7 @@
 - labels:
     assurance_id: label-studio-public
     auth_requirement: edge_oidc
-    certificate_id: annotate-edge
+    certificate_id: ''
     display_url: https://annotate.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -442,7 +442,7 @@
 - labels:
     assurance_id: lago-public
     auth_requirement: edge_oidc
-    certificate_id: billing-edge
+    certificate_id: ''
     display_url: https://billing.example.com:443/api/health
     environment: production
     expected_issuer: letsencrypt
@@ -462,7 +462,7 @@
 - labels:
     assurance_id: langfuse-public
     auth_requirement: edge_oidc
-    certificate_id: langfuse-edge
+    certificate_id: ''
     display_url: https://langfuse.example.com:443/api/public/health
     environment: production
     expected_issuer: letsencrypt
@@ -482,7 +482,7 @@
 - labels:
     assurance_id: librechat-public
     auth_requirement: upstream_auth
-    certificate_id: chat-edge
+    certificate_id: ''
     display_url: https://chat.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -502,7 +502,7 @@
 - labels:
     assurance_id: livekit-public
     auth_requirement: upstream_auth
-    certificate_id: livekit-edge
+    certificate_id: ''
     display_url: https://livekit.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -522,7 +522,7 @@
 - labels:
     assurance_id: mail-platform-public
     auth_requirement: none
-    certificate_id: mail-platform-edge
+    certificate_id: ''
     display_url: https://mail.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -542,7 +542,7 @@
 - labels:
     assurance_id: matrix-synapse-public
     auth_requirement: upstream_auth
-    certificate_id: matrix-edge
+    certificate_id: ''
     display_url: https://matrix.example.com:443/_matrix/client/versions
     environment: production
     expected_issuer: letsencrypt
@@ -562,7 +562,7 @@
 - labels:
     assurance_id: minio-public
     auth_requirement: none
-    certificate_id: minio-edge
+    certificate_id: ''
     display_url: https://minio.example.com:443/minio/health/live
     environment: production
     expected_issuer: letsencrypt
@@ -582,7 +582,7 @@
 - labels:
     assurance_id: n8n-public
     auth_requirement: edge_oidc
-    certificate_id: n8n-edge
+    certificate_id: ''
     display_url: https://n8n.example.com:443/healthz
     environment: production
     expected_issuer: letsencrypt
@@ -602,7 +602,7 @@
 - labels:
     assurance_id: neko-public
     auth_requirement: none
-    certificate_id: browser-edge
+    certificate_id: ''
     display_url: https://browser.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -622,7 +622,7 @@
 - labels:
     assurance_id: nextcloud-public
     auth_requirement: upstream_auth
-    certificate_id: cloud-edge
+    certificate_id: ''
     display_url: https://cloud.example.com:443/status.php
     environment: production
     expected_issuer: letsencrypt
@@ -642,7 +642,7 @@
 - labels:
     assurance_id: nginx-edge-public
     auth_requirement: none
-    certificate_id: nginx-edge-public
+    certificate_id: ''
     display_url: https://nginx.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -662,7 +662,7 @@
 - labels:
     assurance_id: nomad-public
     auth_requirement: upstream_auth
-    certificate_id: scheduler-edge
+    certificate_id: ''
     display_url: https://scheduler.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -700,7 +700,7 @@
 - labels:
     assurance_id: ntfy-public
     auth_requirement: upstream_auth
-    certificate_id: ntfy-edge
+    certificate_id: ''
     display_url: https://ntfy.example.com:443/v1/health
     environment: production
     expected_issuer: letsencrypt
@@ -740,7 +740,7 @@
 - labels:
     assurance_id: ops-portal-public
     auth_requirement: edge_oidc
-    certificate_id: ops-edge
+    certificate_id: ''
     display_url: https://ops.example.com:443/health
     environment: production
     expected_issuer: letsencrypt
@@ -760,7 +760,7 @@
 - labels:
     assurance_id: outline-public
     auth_requirement: upstream_auth
-    certificate_id: wiki-edge
+    certificate_id: ''
     display_url: https://wiki.example.com:443/_health
     environment: production
     expected_issuer: letsencrypt
@@ -780,7 +780,7 @@
 - labels:
     assurance_id: paperless-public
     auth_requirement: upstream_auth
-    certificate_id: paperless-edge
+    certificate_id: ''
     display_url: https://paperless.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -800,7 +800,7 @@
 - labels:
     assurance_id: plane-public
     auth_requirement: edge_oidc
-    certificate_id: tasks-edge
+    certificate_id: ''
     display_url: https://tasks.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -820,7 +820,7 @@
 - labels:
     assurance_id: plausible-public
     auth_requirement: edge_oidc
-    certificate_id: analytics-edge
+    certificate_id: ''
     display_url: https://analytics.example.com:443/api/system/health/ready
     environment: production
     expected_issuer: letsencrypt
@@ -860,7 +860,7 @@
 - labels:
     assurance_id: proxmox-ui-public
     auth_requirement: upstream_auth
-    certificate_id: proxmox-edge-page
+    certificate_id: ''
     display_url: https://proxmox.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -886,7 +886,7 @@
     policy_critical: '14'
     policy_unit: days
     policy_warn: '21'
-    probe_hostname: proxmox.example.com
+    probe_hostname: proxmox.lv3.org
     probe_module: http_2xx_follow_redirects
     scope: internal
     service_id: proxmox_ui
@@ -898,7 +898,7 @@
 - labels:
     assurance_id: repo-intake-public
     auth_requirement: edge_oidc
-    certificate_id: repo-intake-edge
+    certificate_id: ''
     display_url: https://repo-intake.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -918,7 +918,7 @@
 - labels:
     assurance_id: repowise-public
     auth_requirement: upstream_auth
-    certificate_id: repowise-edge
+    certificate_id: ''
     display_url: https://repowise.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -978,7 +978,7 @@
 - labels:
     assurance_id: status-page-public
     auth_requirement: none
-    certificate_id: status-edge
+    certificate_id: ''
     display_url: https://status.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -1018,7 +1018,7 @@
 - labels:
     assurance_id: superset-public
     auth_requirement: upstream_auth
-    certificate_id: bi-edge
+    certificate_id: ''
     display_url: https://bi.example.com:443/health
     environment: production
     expected_issuer: letsencrypt
@@ -1038,7 +1038,7 @@
 - labels:
     assurance_id: uptime-kuma-public
     auth_requirement: upstream_auth
-    certificate_id: uptime-kuma-edge
+    certificate_id: ''
     display_url: https://uptime.example.com:443/
     environment: production
     expected_issuer: letsencrypt
@@ -1058,7 +1058,7 @@
 - labels:
     assurance_id: vaultwarden-operator
     auth_requirement: private_network
-    certificate_id: vaultwarden-private
+    certificate_id: ''
     display_url: https://vault.example.com:443/alive
     environment: production
     expected_issuer: step-ca
@@ -1078,7 +1078,7 @@
 - labels:
     assurance_id: woodpecker-public
     auth_requirement: upstream_auth
-    certificate_id: ci-edge
+    certificate_id: ''
     display_url: https://ci.example.com:443/healthz
     environment: production
     expected_issuer: letsencrypt

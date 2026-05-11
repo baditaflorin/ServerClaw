@@ -11,6 +11,7 @@ doc: docs/adr/0475-workstream-surfaces-cleanup.md
 depends_on:
   - adr-0326-workstream-registry-shards
   - adr-0444-workstream-surface-ownership
+conflicts_with: []
 shared_surfaces:
   - docs/adr/0475-workstream-surfaces-cleanup.md
   - workstreams/active/ws-0476-workstream-surfaces-cleanup.yaml

@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-04-29'
+generated: '2026-05-11'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 53
+total_adrs: 54
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -931,3 +931,17 @@ adrs:
     summary: A new tasks file coolifyruntime/tasks/bootstrapappsvm.yml runs against coolify-apps
     filename: 0477-coolify-apps-self-healing-bootstrap.md
     path: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
+  - adr: 0480
+    title: Multi-Deployment Certificate Validation
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - multi-deployment
+      - certificate
+      - validation
+    summary: 'Implement deployment-aware certificate validation with three tiers:'
+    filename: 0480-multi-deployment-certificate-validation.md
+    path: docs/adr/0480-multi-deployment-certificate-validation.md

@@ -1,0 +1,52 @@
+# Deployment registry — authoritative source of per-deployment metadata.
+#
+# Consumed by:
+#   scripts/list_services.py           — service list and cross-deployment diff
+#   scripts/subdomain_exposure_audit.py — embeds this into the generated registry JSON
+#
+# Adding a new deployment (fork):
+#   1. Copy the 0fork.com block; change platform_domain and forked_from.
+#   2. Set service_exclusions to the service_id values disabled in your
+#      fork-overrides.yml (keycloak_<service>_enabled: false, etc.).
+#   3. Run: python3 scripts/subdomain_exposure_audit.py --write-registry
+#      to regenerate config/subdomain-exposure-registry.json.
+#   4. Commit both files together.
+#
+# service_exclusions: list of service_id values from the primary deployment's
+#   publications that are NOT deployed on this fork. These appear in
+#   `make diff-services` output as "only on <primary>". The service still
+#   exists in the codebase — it is just disabled at runtime for this fork.
+#
+# feature_flags: Ansible variable overrides that gate the exclusions. Kept
+#   here for traceability; the actual runtime values live in overrides_file.
+
+schema_version: "1.0.0"
+primary_deployment: lv3.org
+
+deployments:
+  lv3.org:
+    platform_domain: lv3.org
+    environment: production
+    infrastructure:
+      provider: proxmox
+      description: "Dedicated bare-metal Proxmox host (production)"
+    service_exclusions: []
+    feature_flags: {}
+
+  0fork.com:
+    platform_domain: 0fork.com
+    environment: production
+    forked_from: lv3.org
+    infrastructure:
+      provider: hetzner
+      description: "Hetzner AX41-NVMe #2952989 (fork viability test, ADR 0424)"
+      apex_ip_v4: "65.109.84.223"
+      apex_ip_v6: "2a01:4f9:3051:52d5::2"
+    # service_id values from the primary that are disabled on this fork.
+    # glitchtip: keycloak_glitchtip_enabled: false (ADR 0424 / ADR 0435)
+    service_exclusions:
+      - glitchtip
+    feature_flags:
+      keycloak_glitchtip_enabled: false
+      keycloak_mail_platform_submission_recovery_enabled: false
+    overrides_file: playbooks/vars/fork-overrides.yml

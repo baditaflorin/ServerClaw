@@ -11,6 +11,7 @@ doc: docs/adr/0474-phase12-receipt-mass-refresh.md
 depends_on:
   - adr-0449-phase4-self-healing-primitives
   - adr-0451-phase6-self-healing-actions
+conflicts_with: []
 shared_surfaces:
   - docs/adr/0474-phase12-receipt-mass-refresh.md
   - workstreams/active/ws-0475-phase12-receipt-mass-refresh.yaml

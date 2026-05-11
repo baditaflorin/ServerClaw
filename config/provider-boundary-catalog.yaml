@@ -12,7 +12,7 @@ provider_boundaries:
       - Translate Hetzner DNS record provider payload into canonical record facts
     raw_pattern_counts:
       hetzner_dns_zone_query.json.zones: 1
-      hetzner_dns_records_query.json.records: 1
+      hetzner_dns_records_query.json.rrsets: 1
     canonical_patterns:
       - dns_provider_boundary_zone_candidates
       - dns_provider_boundary_zone
@@ -28,10 +28,10 @@ provider_boundaries:
       - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml
     translation_tasks:
       - Translate Hetzner DNS zone provider payload into canonical zone facts
-      - Translate Hetzner DNS record provider payload into canonical record facts
+      - Translate Hetzner DNS rrset provider payload into canonical record facts
     raw_pattern_counts:
       hetzner_dns_zone_lookup.json.zones: 1
-      hetzner_dns_records_lookup.json.records: 1
+      hetzner_dns_records_lookup.json.rrsets: 1
     canonical_patterns:
       - dns_provider_boundary_zone_candidates
       - dns_provider_boundary_zone

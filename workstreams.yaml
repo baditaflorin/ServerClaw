@@ -21,10 +21,99 @@ archive_summary:
   by_year:
     '2026': 323
 workstreams:
+- id: adr-0481-multi-deployment-service-registry
+  adr: 0481
+  title: "ADR 0481 \u2014 Multi-Deployment Service Registry (Schema v3 + list_services.py)"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/friendly-pike-233883
+  worktree_path: .claude/worktrees/friendly-pike-233883
+  doc: docs/postmortems/2026-05-11-service-inventory-gap-multi-deployment.md
+  related_adrs:
+  - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+  - docs/adr/0437-fork-bootstrap-gaps.md
+  - docs/adr/0440-per-deployment-layout.md
+  - docs/adr/0480-multi-deployment-certificate-validation.md
+  depends_on:
+  - adr-0407-generic-by-default
+  - adr-0424-fork-clone-onto-hetzner-ax41
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/adr-0481-multi-deployment-service-registry.yaml
+  - config/deployment-registry.yaml
+  - config/subdomain-exposure-registry.json
+  - docs/schema/subdomain-exposure-registry.schema.json
+  - scripts/subdomain_exposure_audit.py
+  - scripts/list_services.py
+  - tests/test_list_services.py
+  - Makefile
+  started: '2026-05-11'
+  priority: p2
+  surfaces:
+  - "config/deployment-registry.yaml (new \u2014 operator-editable source of truth)"
+  - "config/subdomain-exposure-registry.json (schema v2 \u2192 v3)"
+  - docs/schema/subdomain-exposure-registry.schema.json (v3 schema)
+  - scripts/list_services.py (new CLI)
+  - tests/test_list_services.py (29 tests)
+  - Makefile (list-services, diff-services, list-service-deployments targets)
+  summary: "Implements P3 from postmortem 2026-05-11-service-inventory-gap-multi-deployment.md.\
+    \ Upgrades the subdomain-exposure-registry to schema v3 with a top-level deployments\
+    \ block (backward-compatible \u2014 publications[] is unchanged). Adds config/deployment-registry.yaml\
+    \ as the operator-editable source of truth for per-deployment metadata (platform_domain,\
+    \ provider, service exclusions). Creates scripts/list_services.py with --deployment,\
+    \ --diff, --list-deployments, and --format table|json|csv flags, backed by 29\
+    \ tests. Adds make list-services / diff-services / list-service-deployments targets.\n"
+  ownership_manifest:
+    owned_surfaces:
+    - id: adr_0481_config
+      paths:
+      - config/deployment-registry.yaml
+      - config/subdomain-exposure-registry.json
+      - docs/schema/subdomain-exposure-registry.schema.json
+      mode: exclusive
+    - id: adr_0481_scripts
+      paths:
+      - scripts/list_services.py
+      - tests/test_list_services.py
+      mode: exclusive
+    - id: adr_0481_audit_patch
+      paths:
+      - scripts/subdomain_exposure_audit.py
+      mode: shared_contract
+      contract: adr-0481-audit-extension-v1
+    - id: adr_0481_makefile
+      paths:
+      - Makefile
+      mode: shared_contract
+      contract: adr-0481-makefile-targets-v1
+    - id: adr_0481_workstream
+      paths:
+      - workstreams/active/adr-0481-multi-deployment-service-registry.yaml
+      - workstreams.yaml
+      - docs/postmortems/2026-05-11-service-inventory-gap-multi-deployment.md
+      mode: exclusive
+    - id: adr_0481_generated
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/*
+      - docs/diagrams/*
+      - config/prometheus/file_sd/https_tls_targets.yml
+      mode: shared_contract
+      contract: mainline-release-integration-v1
 - id: adr-0480-secret-masking
   adr: 0480
   title: "ADR 0480 Phase 3 \u2014 Universal Secret Masking Migration"
   status: ready
+  ready_to_merge: false
+  live_applied: false
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams/active/adr-0480-secret-masking.yaml
+  - workstreams.yaml
   owner: claude-agent
   branch: claude/sleepy-dijkstra-0344ef
   worktree_path: .claude/worktrees/sleepy-dijkstra-0344ef
@@ -99,6 +188,7 @@ workstreams:
   depends_on:
   - adr-0414-cert-lifecycle-manager
   - adr-0375-certificate-validation
+  conflicts_with: []
   shared_surfaces:
   - docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
   - workstreams/active/ws-0477-cert-lifecycle-make-target-fix.yaml
@@ -133,6 +223,7 @@ workstreams:
   depends_on:
   - adr-0326-workstream-registry-shards
   - adr-0444-workstream-surface-ownership
+  conflicts_with: []
   shared_surfaces:
   - docs/adr/0475-workstream-surfaces-cleanup.md
   - workstreams/active/ws-0476-workstream-surfaces-cleanup.yaml
@@ -178,6 +269,7 @@ workstreams:
   depends_on:
   - adr-0449-phase4-self-healing-primitives
   - adr-0451-phase6-self-healing-actions
+  conflicts_with: []
   shared_surfaces:
   - docs/adr/0474-phase12-receipt-mass-refresh.md
   - workstreams/active/ws-0475-phase12-receipt-mass-refresh.yaml
@@ -223,6 +315,7 @@ workstreams:
   - adr-0449-phase4-self-healing-primitives
   - adr-0465-phase9-self-running-automation
   - adr-0472-phase10-reservation-hardening
+  conflicts_with: []
   shared_surfaces:
   - docs/adr/0473-phase11-cpu-only-automation-primitives.md
   - workstreams/active/ws-0474-phase11-cpu-only-automation.yaml
@@ -296,6 +389,7 @@ workstreams:
   depends_on:
   - adr-0325-adr-discovery-and-reservation-ledger
   - adr-0449-phase4-self-healing-primitives
+  conflicts_with: []
   shared_surfaces:
   - docs/adr/0472-phase10-reservation-hardening.md
   - workstreams/active/ws-0473-phase10-reservation-hardening.yaml
@@ -1556,8 +1650,8 @@ workstreams:
   title: Incident & postmortem registry (mirror of ADR index pattern)
   status: planned
   owner: claude
-  branch: unassigned/ws-0454-incident-and-postmortem-registry
-  worktree_path: unassigned/ws-0454-incident-and-postmortem-registry
+  branch: claude/ws-0454-incident-and-postmortem-registry
+  worktree_path: .claude/worktrees/ws-0454-incident-and-postmortem-registry
   doc: docs/adr/0454-incident-and-postmortem-registry.md
   depends_on:
   - adr-0114-rule-based-incident-triage-engine
@@ -1624,8 +1718,8 @@ workstreams:
     lag)
   status: planned
   owner: claude
-  branch: unassigned/ws-0453-integration-health-telemetry
-  worktree_path: unassigned/ws-0453-integration-health-telemetry
+  branch: claude/ws-0453-integration-health-telemetry
+  worktree_path: .claude/worktrees/ws-0453-integration-health-telemetry
   doc: docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
   depends_on:
   - adr-0267-expiring-gate-bypass-waivers
@@ -2302,6 +2396,149 @@ workstreams:
     '
   see_also:
   - ws-0448-deployment-connection-registry
+- id: ws-0447-coolify-apps-self-healing
+  adr: '0447'
+  title: 'Coolify apps self-healing: coolify-apps bootstrap + DNS-01 cert + app-deploy
+    role'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+  priority: p0
+  owner: platform
+  created: 2026-04-28
+  branch: claude/ws-0447-coolify-apps-self-healing
+  worktree_path: .claude/worktrees/ws-0447-coolify-apps-self-healing
+  doc: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0447_coolify_runtime_role
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/coolify_runtime/
+      mode: shared_contract
+      contract: coolify-runtime-v1
+    - id: ws_0447_coolify_app_deploy_role
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/
+      mode: shared_contract
+      contract: coolify-app-deploy-v1
+    - id: ws_0447_workstream_doc
+      paths:
+      - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+      mode: exclusive
+  context: "After the 0fork Coolify deployment (converges 16-25) and the first app\
+    \ deploy\n(education_wemeshup), several manual steps were required:\n  1. nginx\
+    \ was manually patched to point to coolify VM (10.10.10.70:80) instead\n     of\
+    \ coolify-apps VM (10.10.10.71:443), because coolify-apps has no Traefik.\n  2.\
+    \ The app's domain scheme was switched from https:// to http:// to avoid\n   \
+    \  Traefik's HTTP-01 ACME challenge loop (nginx redirects port 80\u2192443, so\n\
+    \     the challenge can never complete).\n  3. PermitRootLogin was manually enabled\
+    \ on coolify-apps VM.\n\nThese patches are WRONG. The next `make converge-nginx`\
+    \ overwrites the manual\nnginx patch and the app breaks. This workstream makes\
+    \ the platform converge to\nthe correct state unattended.\n\nKey insight: the\
+    \ nginx template at publication/templates/proxmox-host.yml:2982\nis ALREADY CORRECT\
+    \ \u2014 it looks up coolify-apps-lv3 by name, not by hardcoded IP.\nThe problem\
+    \ is that coolify-apps never has Traefik on it, so the upstream is dead.\n"
+  design: "Three independent Ansible-level changes, all self-healing:\n\n## 1. coolify_runtime:\
+    \ bootstrap coolify-apps VM as a Coolify server\n\nAdd a second play in the coolify\
+    \ playbook targeting coolify-apps-lv3 that:\n- Installs Docker (same docker_runtime\
+    \ role already used elsewhere)\n- Adds PermitRootLogin yes + coolify deploy pubkey\
+    \ to authorized_keys\n  (derived from coolify_deploy_ssh_pubkey, already in defaults/main.yml)\n\
+    - Registers coolify-apps as a Coolify server via API call\n  (idempotent: check\
+    \ if server with ip == coolify_apps_ip exists first)\n- Triggers validate \u2192\
+    \ Coolify installs its own Traefik on coolify-apps\n\nWhen this runs, the nginx\
+    \ upstream (https://coolify-apps-lv3:443) is live and\ncorrect. When coolify-apps\
+    \ IP changes, generate-platform-vars + converge heals it.\n\nVariables needed\
+    \ (add to coolify_runtime defaults):\n  coolify_apps_vm_host: \"{{ (proxmox_guests\
+    \ | selectattr('name', 'equalto',\n                            'coolify-apps-lv3')\
+    \ | map(attribute='ipv4') | first) }}\"\n  coolify_apps_vm_ssh_port: 22\n  coolify_apps_server_name:\
+    \ coolify-apps\n\n## 2. coolify_runtime: switch Traefik to DNS-01 cert resolution\n\
+    \nThe docker-compose.yml.j2 template hardcodes HTTP-01 acme.httpchallenge.\nHTTP-01\
+    \ is broken when nginx is in front (port 80 redirects to 443; the\nACME challenge\
+    \ response can never be served).\n\nReplace with DNS-01 via Hetzner DNS, which\
+    \ the platform already uses:\n  --certificatesresolvers.letsencrypt.acme.dnschallenge=true\n\
+    \  --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=hetzner\n  --certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=10\n\
+    \nTraefik needs HETZNER_API_KEY env var injected at runtime (from Vault/OpenBao\n\
+    or from the coolify .env file). The platform already has hetzner_dns_zone_id\n\
+    in .local/identity.yml and a rotate-hetzner-dns-token playbook.\n\nNew variable\
+    \ (add to coolify_runtime defaults):\n  coolify_traefik_cert_resolver: dns  #\
+    \ or http; default dns for behind-nginx use\n  coolify_hetzner_dns_api_token_vault_path:\
+    \ \"secret/hetzner/dns-api-token\"\n\nWhen coolify_traefik_cert_resolver == dns:\n\
+    \  - Render the dnschallenge lines instead of httpchallenge in docker-compose.yml.j2\n\
+    \  - Inject HETZNER_API_KEY into the proxy container env\n\nThis makes Traefik\
+    \ on coolify-apps get real certs for *.apps.0fork.com via\nDNS TXT records \u2014\
+    \ no dependency on nginx port-80 routing whatsoever.\n\n## 3. coolify_app_deploy\
+    \ role: idempotent app registration via Coolify API\n\nA new role that, given:\n\
+    \  - repo_url, branch, compose_file\n  - domain (derived from platform_domain\
+    \ \u2014 never hardcoded)\n  - service_name (the compose service that gets the\
+    \ domain)\n  - project_name, server_name\n\nDoes, via delegate_to targeting the\
+    \ coolify VM (bypasses API IP whitelist):\n  1. Check if project exists \u2192\
+    \ create if not\n  2. Check if application exists \u2192 create if not\n  3. Check\
+    \ if GitHub deploy key exists for the repo \u2192 add if not\n     (uses coolify_deploy_ssh_pubkey,\
+    \ already derived from server-key.pub)\n  4. Trigger deploy if application config\
+    \ changed (changed_when on diff)\n  5. Wait for deployment status: finished\n\n\
+    Domain derivation (no hardcoded TLD or host):\n  coolify_app_domain: \"http://{{\
+    \ app_name }}.apps.{{ platform_domain }}\"\n  (http:// because nginx terminates\
+    \ TLS; Traefik on coolify-apps serves HTTP\n  internally and handles TLS from\
+    \ DNS-01 cert at its own entrypoint)\n\nReceipts written to .local/coolify/apps/{{\
+    \ app_name }}.json for admin-auth\nparity.\n\n## What self-heals without LLM involvement\n\
+    \nAfter these three changes, the full lifecycle is:\n\n  VM IP changes:\n    make\
+    \ generate-platform-vars \u2192 regenerates all IP references by name lookup\n\
+    \    make converge-nginx \u2192 nginx picks up new coolify-apps IP from topology\n\
+    \    make converge-coolify \u2192 coolify-apps re-registered if IP changed\n\n\
+    \  New app deployment:\n    make deploy-app app=education_wemeshup \u2192 runs\
+    \ coolify_app_deploy role\n    GitHub deploy key added automatically\n    App\
+    \ registered in Coolify with correct domain from platform_domain\n    Deployed\
+    \ and health-checked\n\n  Certificate rotation:\n    Traefik on coolify-apps handles\
+    \ DNS-01 renewal automatically\n    No nginx involvement, no HTTP-01 dependency\n\
+    \nNothing in this path calls an LLM or requires a human to:\n  - patch nginx\n\
+    \  - switch domain schemes\n  - relay API calls manually\n  - hardcode any IP\
+    \ or hostname\n"
+  tasks:
+  - id: t1
+    title: Bootstrap coolify-apps in coolify_runtime play
+    status: done
+    completed: 2026-04-29
+    files:
+    - collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/bootstrap_apps_vm.yml
+    - playbooks/coolify.yml
+  - id: t2
+    title: Switch Traefik to DNS-01 cert resolver (Hetzner)
+    status: done
+    completed: 2026-04-29
+    files:
+    - collections/ansible_collections/lv3/platform/roles/coolify_runtime/templates/docker-compose.yml.j2
+    - collections/ansible_collections/lv3/platform/roles/coolify_runtime/defaults/main.yml
+    - collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/patch_apps_proxy.yml
+  - id: t3
+    title: Write coolify_app_deploy role
+    status: done
+    completed: 2026-04-29
+    files:
+    - collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/
+  - id: t4
+    title: Add make deploy-app target
+    status: pending
+    files:
+    - Makefile
+  - id: t5
+    title: Revert manual nginx patch via converge
+    status: pending
+    notes: 'Once t1 is complete (coolify-apps has Traefik on 443), run `make converge-nginx`
+      to restore the correct upstream from the template. The manual nginx patch (http://10.10.10.70:80)
+      is TEMPORARY and will be overwritten.
+
+      '
+  references:
+  - postmortem: docs/postmortems/2026-04-28-coolify-0fork-deployment-and-education-wemeshup.md
+  - adr: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
+  - adr: docs/adr/0340-coolify-vm-separation.md
+  - template: publication/templates/proxmox-host.yml:2982
+  - role: collections/ansible_collections/lv3/platform/roles/coolify_runtime/
+  - role: collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/
 - id: ws-0446-phase2-multi-deployment-hardening
   adr: '0446'
   title: "Phase 2 multi-deployment hardening \u2014 receipt freshness + Molecule starter\
@@ -4293,141 +4530,6 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 26a30662-ed8e-4d3d-9f07-154522ff67cd
-- id: ws-0447-coolify-apps-self-healing
-  title: 'Coolify apps self-healing: coolify-apps bootstrap + DNS-01 cert + app-deploy
-    role'
-  status: in_progress
-  priority: p0
-  owner: platform
-  created: 2026-04-28
-  branch: claude/ws-0447-coolify-apps-self-healing
-  doc: docs/adr/0340-coolify-vm-separation.md
-  ownership_manifest:
-    owned_surfaces:
-    - id: ws_0447_coolify_runtime_role
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/coolify_runtime/
-      mode: shared_contract
-      contract: coolify-runtime-v1
-    - id: ws_0447_coolify_app_deploy_role
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/
-      mode: shared_contract
-      contract: coolify-app-deploy-v1
-    - id: ws_0447_workstream_doc
-      paths:
-      - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
-      mode: exclusive
-  context: "After the 0fork Coolify deployment (converges 16-25) and the first app\
-    \ deploy\n(education_wemeshup), several manual steps were required:\n  1. nginx\
-    \ was manually patched to point to coolify VM (10.10.10.70:80) instead\n     of\
-    \ coolify-apps VM (10.10.10.71:443), because coolify-apps has no Traefik.\n  2.\
-    \ The app's domain scheme was switched from https:// to http:// to avoid\n   \
-    \  Traefik's HTTP-01 ACME challenge loop (nginx redirects port 80\u2192443, so\n\
-    \     the challenge can never complete).\n  3. PermitRootLogin was manually enabled\
-    \ on coolify-apps VM.\n\nThese patches are WRONG. The next `make converge-nginx`\
-    \ overwrites the manual\nnginx patch and the app breaks. This workstream makes\
-    \ the platform converge to\nthe correct state unattended.\n\nKey insight: the\
-    \ nginx template at publication/templates/proxmox-host.yml:2982\nis ALREADY CORRECT\
-    \ \u2014 it looks up coolify-apps-lv3 by name, not by hardcoded IP.\nThe problem\
-    \ is that coolify-apps never has Traefik on it, so the upstream is dead.\n"
-  design: "Three independent Ansible-level changes, all self-healing:\n\n## 1. coolify_runtime:\
-    \ bootstrap coolify-apps VM as a Coolify server\n\nAdd a second play in the coolify\
-    \ playbook targeting coolify-apps-lv3 that:\n- Installs Docker (same docker_runtime\
-    \ role already used elsewhere)\n- Adds PermitRootLogin yes + coolify deploy pubkey\
-    \ to authorized_keys\n  (derived from coolify_deploy_ssh_pubkey, already in defaults/main.yml)\n\
-    - Registers coolify-apps as a Coolify server via API call\n  (idempotent: check\
-    \ if server with ip == coolify_apps_ip exists first)\n- Triggers validate \u2192\
-    \ Coolify installs its own Traefik on coolify-apps\n\nWhen this runs, the nginx\
-    \ upstream (https://coolify-apps-lv3:443) is live and\ncorrect. When coolify-apps\
-    \ IP changes, generate-platform-vars + converge heals it.\n\nVariables needed\
-    \ (add to coolify_runtime defaults):\n  coolify_apps_vm_host: \"{{ (proxmox_guests\
-    \ | selectattr('name', 'equalto',\n                            'coolify-apps-lv3')\
-    \ | map(attribute='ipv4') | first) }}\"\n  coolify_apps_vm_ssh_port: 22\n  coolify_apps_server_name:\
-    \ coolify-apps\n\n## 2. coolify_runtime: switch Traefik to DNS-01 cert resolution\n\
-    \nThe docker-compose.yml.j2 template hardcodes HTTP-01 acme.httpchallenge.\nHTTP-01\
-    \ is broken when nginx is in front (port 80 redirects to 443; the\nACME challenge\
-    \ response can never be served).\n\nReplace with DNS-01 via Hetzner DNS, which\
-    \ the platform already uses:\n  --certificatesresolvers.letsencrypt.acme.dnschallenge=true\n\
-    \  --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=hetzner\n  --certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=10\n\
-    \nTraefik needs HETZNER_API_KEY env var injected at runtime (from Vault/OpenBao\n\
-    or from the coolify .env file). The platform already has hetzner_dns_zone_id\n\
-    in .local/identity.yml and a rotate-hetzner-dns-token playbook.\n\nNew variable\
-    \ (add to coolify_runtime defaults):\n  coolify_traefik_cert_resolver: dns  #\
-    \ or http; default dns for behind-nginx use\n  coolify_hetzner_dns_api_token_vault_path:\
-    \ \"secret/hetzner/dns-api-token\"\n\nWhen coolify_traefik_cert_resolver == dns:\n\
-    \  - Render the dnschallenge lines instead of httpchallenge in docker-compose.yml.j2\n\
-    \  - Inject HETZNER_API_KEY into the proxy container env\n\nThis makes Traefik\
-    \ on coolify-apps get real certs for *.apps.0fork.com via\nDNS TXT records \u2014\
-    \ no dependency on nginx port-80 routing whatsoever.\n\n## 3. coolify_app_deploy\
-    \ role: idempotent app registration via Coolify API\n\nA new role that, given:\n\
-    \  - repo_url, branch, compose_file\n  - domain (derived from platform_domain\
-    \ \u2014 never hardcoded)\n  - service_name (the compose service that gets the\
-    \ domain)\n  - project_name, server_name\n\nDoes, via delegate_to targeting the\
-    \ coolify VM (bypasses API IP whitelist):\n  1. Check if project exists \u2192\
-    \ create if not\n  2. Check if application exists \u2192 create if not\n  3. Check\
-    \ if GitHub deploy key exists for the repo \u2192 add if not\n     (uses coolify_deploy_ssh_pubkey,\
-    \ already derived from server-key.pub)\n  4. Trigger deploy if application config\
-    \ changed (changed_when on diff)\n  5. Wait for deployment status: finished\n\n\
-    Domain derivation (no hardcoded TLD or host):\n  coolify_app_domain: \"http://{{\
-    \ app_name }}.apps.{{ platform_domain }}\"\n  (http:// because nginx terminates\
-    \ TLS; Traefik on coolify-apps serves HTTP\n  internally and handles TLS from\
-    \ DNS-01 cert at its own entrypoint)\n\nReceipts written to .local/coolify/apps/{{\
-    \ app_name }}.json for admin-auth\nparity.\n\n## What self-heals without LLM involvement\n\
-    \nAfter these three changes, the full lifecycle is:\n\n  VM IP changes:\n    make\
-    \ generate-platform-vars \u2192 regenerates all IP references by name lookup\n\
-    \    make converge-nginx \u2192 nginx picks up new coolify-apps IP from topology\n\
-    \    make converge-coolify \u2192 coolify-apps re-registered if IP changed\n\n\
-    \  New app deployment:\n    make deploy-app app=education_wemeshup \u2192 runs\
-    \ coolify_app_deploy role\n    GitHub deploy key added automatically\n    App\
-    \ registered in Coolify with correct domain from platform_domain\n    Deployed\
-    \ and health-checked\n\n  Certificate rotation:\n    Traefik on coolify-apps handles\
-    \ DNS-01 renewal automatically\n    No nginx involvement, no HTTP-01 dependency\n\
-    \nNothing in this path calls an LLM or requires a human to:\n  - patch nginx\n\
-    \  - switch domain schemes\n  - relay API calls manually\n  - hardcode any IP\
-    \ or hostname\n"
-  tasks:
-  - id: t1
-    title: Bootstrap coolify-apps in coolify_runtime play
-    status: done
-    completed: 2026-04-29
-    files:
-    - collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/bootstrap_apps_vm.yml
-    - playbooks/coolify.yml
-  - id: t2
-    title: Switch Traefik to DNS-01 cert resolver (Hetzner)
-    status: done
-    completed: 2026-04-29
-    files:
-    - collections/ansible_collections/lv3/platform/roles/coolify_runtime/templates/docker-compose.yml.j2
-    - collections/ansible_collections/lv3/platform/roles/coolify_runtime/defaults/main.yml
-    - collections/ansible_collections/lv3/platform/roles/coolify_runtime/tasks/patch_apps_proxy.yml
-  - id: t3
-    title: Write coolify_app_deploy role
-    status: done
-    completed: 2026-04-29
-    files:
-    - collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/
-  - id: t4
-    title: Add make deploy-app target
-    status: pending
-    files:
-    - Makefile
-  - id: t5
-    title: Revert manual nginx patch via converge
-    status: pending
-    notes: 'Once t1 is complete (coolify-apps has Traefik on 443), run `make converge-nginx`
-      to restore the correct upstream from the template. The manual nginx patch (http://10.10.10.70:80)
-      is TEMPORARY and will be overwritten.
-
-      '
-  references:
-  - postmortem: docs/postmortems/2026-04-28-coolify-0fork-deployment-and-education-wemeshup.md
-  - adr: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
-  - adr: docs/adr/0340-coolify-vm-separation.md
-  - template: publication/templates/proxmox-host.yml:2982
-  - role: collections/ansible_collections/lv3/platform/roles/coolify_runtime/
-  - role: collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/
 surface_ownership:
   global_mutable_paths:
   - receipts/gate-bypasses/*

@@ -11,6 +11,7 @@ doc: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
 depends_on:
   - adr-0414-cert-lifecycle-manager
   - adr-0375-certificate-validation
+conflicts_with: []
 shared_surfaces:
   - docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
   - workstreams/active/ws-0477-cert-lifecycle-make-target-fix.yaml

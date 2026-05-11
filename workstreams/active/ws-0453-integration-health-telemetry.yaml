@@ -3,8 +3,8 @@ adr: "0453"
 title: Integration-health telemetry (release stability, bypass rate, live-apply lag)
 status: planned
 owner: claude
-branch: unassigned/ws-0453-integration-health-telemetry
-worktree_path: unassigned/ws-0453-integration-health-telemetry
+branch: claude/ws-0453-integration-health-telemetry
+worktree_path: .claude/worktrees/ws-0453-integration-health-telemetry
 doc: docs/adr/0453-integration-health-telemetry-and-bypass-governance.md
 depends_on:
   - adr-0267-expiring-gate-bypass-waivers

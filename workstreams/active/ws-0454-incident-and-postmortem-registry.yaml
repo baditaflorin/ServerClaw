@@ -3,8 +3,8 @@ adr: "0454"
 title: Incident & postmortem registry (mirror of ADR index pattern)
 status: planned
 owner: claude
-branch: unassigned/ws-0454-incident-and-postmortem-registry
-worktree_path: unassigned/ws-0454-incident-and-postmortem-registry
+branch: claude/ws-0454-incident-and-postmortem-registry
+worktree_path: .claude/worktrees/ws-0454-incident-and-postmortem-registry
 doc: docs/adr/0454-incident-and-postmortem-registry.md
 depends_on:
   - adr-0114-rule-based-incident-triage-engine

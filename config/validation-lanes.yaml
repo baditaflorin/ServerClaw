@@ -60,6 +60,7 @@ surface_classes:
     paths:
       - AGENTS.md
       - docs/adr/*.md
+      - docs/postmortems/*.md
       - docs/runbooks/*.md
       - docs/workstreams/*.md
       - docs/release-notes/*.md
@@ -117,6 +118,8 @@ surface_classes:
       - docs/schema/*
       - docs/schema/**/*
       - workstreams.yaml
+      - workstreams/active/*.yaml
+      - workstreams/archive/*.yaml
       - config/atlas/*.hcl
       - config/atlas/**/*.hcl
       - config/*.json

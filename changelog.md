@@ -12,8 +12,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- ADR 0477: coolify-apps self-healing bootstrap — SSH access via `Match Address` sshd directive, DNS-01 cert resolution via Hetzner (replaces HTTP-01), and new `coolify_app_deploy` role that discovers container names via `docker ps` instead of hardcoded IPs. All three changes self-heal on re-converge.
-
 ## Latest Release
 
 - [0.179.43 release notes](docs/release-notes/0.179.43.md)

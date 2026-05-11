@@ -1,11 +1,19 @@
 id: ws-0447-coolify-apps-self-healing
+adr: '0447'
 title: "Coolify apps self-healing: coolify-apps bootstrap + DNS-01 cert + app-deploy role"
 status: in_progress
+ready_to_merge: false
+live_applied: false
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
 priority: p0
 owner: platform
 created: 2026-04-28
 branch: claude/ws-0447-coolify-apps-self-healing
-doc: docs/adr/0340-coolify-vm-separation.md
+worktree_path: .claude/worktrees/ws-0447-coolify-apps-self-healing
+doc: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
 ownership_manifest:
   owned_surfaces:
     - id: ws_0447_coolify_runtime_role

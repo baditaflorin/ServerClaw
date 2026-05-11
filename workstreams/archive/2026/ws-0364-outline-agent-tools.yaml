@@ -1,6 +1,10 @@
 id: ws-0364-outline-agent-tools
 title: 'Outline agent tools: list/search/get/create documents (ADR 0362 + 0364)'
 status: merged
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - workstreams/archive/2026/ws-0364-outline-agent-tools.yaml
 owner: claude
 branch: claude/implement-aw22-23
 worktree_path: .claude/worktrees/implement-aw22-23

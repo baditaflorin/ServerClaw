@@ -11,6 +11,7 @@ doc: docs/adr/0472-phase10-reservation-hardening.md
 depends_on:
   - adr-0325-adr-discovery-and-reservation-ledger
   - adr-0449-phase4-self-healing-primitives
+conflicts_with: []
 shared_surfaces:
   - docs/adr/0472-phase10-reservation-hardening.md
   - workstreams/active/ws-0473-phase10-reservation-hardening.yaml
