@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-11'
+generated: '2026-05-12'
 facet: range
 label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 73
+total_adrs: 78
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -1372,3 +1372,80 @@ adrs:
     summary: 'Implement deployment-aware certificate validation with three tiers:'
     filename: 0480-multi-deployment-certificate-validation.md
     path: docs/adr/0480-multi-deployment-certificate-validation.md
+  - adr: 0481
+    title: Explicit Deployment Context (no implicit identity.yml swap)
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: ci-cd
+    keywords:
+      - explicit
+      - deployment
+      - context
+      - 'no'
+      - implicit
+      - identity
+      - yml
+      - swap
+    summary: Deployment selection becomes mandatory, explicit, and observable in one command.
+    filename: 0481-explicit-deployment-context.md
+    path: docs/adr/0481-explicit-deployment-context.md
+  - adr: 0482
+    title: Capacity-Aware Dynamic VM Sizing
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - capacity-aware
+      - dynamic
+      - vm
+      - sizing
+    summary: '| File | Source | Purpose |'
+    filename: 0482-capacity-aware-dynamic-sizing.md
+    path: docs/adr/0482-capacity-aware-dynamic-sizing.md
+  - adr: 0483
+    title: Hands-Off Bootstrap — Machine-to-Machine Deployment
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - hands-off
+      - bootstrap
+      - machine-to-machine
+      - deployment
+    summary: 'A new file replaces the operator''s hand-editing chain:'
+    filename: 0483-hands-off-bootstrap.md
+    path: docs/adr/0483-hands-off-bootstrap.md
+  - adr: 0484
+    title: Self-Verification Contracts
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - self-verification
+      - contracts
+    summary: 'Every check is one entry in config/postconditions.yml (committed):'
+    filename: 0484-self-verification-contracts.md
+    path: docs/adr/0484-self-verification-contracts.md
+  - adr: 0485
+    title: Convergence Idempotency Tests
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: testing
+    keywords:
+      - convergence
+      - idempotency
+      - tests
+    summary: 'Every converge target gets a corresponding make idempotency-test-<target> (or rolled up under make idempotency-test-all).
+      The test:'
+    filename: 0485-convergence-idempotency-tests.md
+    path: docs/adr/0485-convergence-idempotency-tests.md

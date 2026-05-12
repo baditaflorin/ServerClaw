@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-11'
+generated: '2026-05-12'
 facet: concern
 concern: vm-topology
-total_adrs: 47
+total_adrs: 48
 adrs:
   - adr: '0005'
     title: Single-Node First Topology
@@ -912,3 +912,18 @@ adrs:
     summary: 'Add a pre-commit hook that runs scripts/validatetopologyschema.py against any committed topology file. The script:'
     filename: 0462-topology-precommit-schema-hook.md
     path: docs/adr/0462-topology-precommit-schema-hook.md
+  - adr: 0482
+    title: Capacity-Aware Dynamic VM Sizing
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - capacity-aware
+      - dynamic
+      - vm
+      - sizing
+    summary: '| File | Source | Purpose |'
+    filename: 0482-capacity-aware-dynamic-sizing.md
+    path: docs/adr/0482-capacity-aware-dynamic-sizing.md

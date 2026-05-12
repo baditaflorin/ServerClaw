@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-11'
+generated: '2026-05-12'
 facet: concern
 concern: ci-cd
-total_adrs: 51
+total_adrs: 52
 adrs:
   - adr: 0009
     title: DRY And Solid Engineering Principles
@@ -1001,3 +1001,22 @@ adrs:
     summary: 'Two surgical edits:'
     filename: 0475-workstream-surfaces-cleanup.md
     path: docs/adr/0475-workstream-surfaces-cleanup.md
+  - adr: 0481
+    title: Explicit Deployment Context (no implicit identity.yml swap)
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: ci-cd
+    keywords:
+      - explicit
+      - deployment
+      - context
+      - 'no'
+      - implicit
+      - identity
+      - yml
+      - swap
+    summary: Deployment selection becomes mandatory, explicit, and observable in one command.
+    filename: 0481-explicit-deployment-context.md
+    path: docs/adr/0481-explicit-deployment-context.md

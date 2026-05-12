@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-11'
+generated: '2026-05-12'
 facet: concern
 concern: documentation
 total_adrs: 23

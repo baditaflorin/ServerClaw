@@ -1,0 +1,57 @@
+id: ws-0486-hands-off-bootstrap
+adr: "0483"
+title: Hands-off bootstrap — single declarative input → verified-running platform
+status: planned
+ready_to_merge: false
+live_applied: false
+owner: unassigned
+deployment: 0fork
+branch: unassigned/ws-0486-hands-off-bootstrap
+worktree_path: unassigned/ws-0486-hands-off-bootstrap
+doc: docs/adr/0483-hands-off-bootstrap.md
+depends_on:
+  - adr-0407-generic-by-default
+  - adr-0420-receipt-schema
+  - adr-0440-deployment-layout
+  - adr-0441-service-profiles
+  - adr-0481-explicit-deployment-context
+  - adr-0482-capacity-aware-dynamic-sizing
+  - adr-0484-self-verification-contracts
+  - adr-0485-convergence-idempotency-tests
+shared_surfaces:
+  - docs/adr/0483-hands-off-bootstrap.md
+  - config/contracts/deployment-v1/manifest.schema.json
+  - config/bootstrap_steps.yml
+  - scripts/derive_manifest.py
+  - scripts/bootstrap_orchestrator.py
+  - Makefile
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0486_adr
+      paths:
+        - docs/adr/0483-hands-off-bootstrap.md
+        - workstreams/active/ws-0486-hands-off-bootstrap.yaml
+      mode: shared_contract
+      contract: adr-0483-hands-off-bootstrap-v1
+tasks:
+  - id: t1-manifest-schema
+    title: config/contracts/deployment-v1/manifest.schema.json — single declarative input format
+    status: pending
+  - id: t2-derive-manifest
+    title: scripts/derive_manifest.py — introspect lv3 + 0fork to emit draft manifests
+    status: pending
+  - id: t3-bootstrap-steps
+    title: config/bootstrap_steps.yml — the 14-step contract chain (preconditions + postconditions per step)
+    status: pending
+  - id: t4-orchestrator
+    title: scripts/bootstrap_orchestrator.py — drives steps, honors gates.fail_fast, writes receipts, supports resume-from
+    status: pending
+  - id: t5-resume-from
+    title: make bootstrap supports resume-from=<step> reading the last failure receipt
+    status: pending
+  - id: t6-bootstrap-status
+    title: make bootstrap-status — JSON summary of where the chain is (current step / last-passed / failing condition)
+    status: pending
+  - id: t7-handoff-protocol
+    title: ADR 0486 (future) — agent-to-agent handoff protocol (this workstream surfaces the receipt patterns)
+    status: pending

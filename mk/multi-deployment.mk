@@ -142,3 +142,87 @@ validate-deployment:
 .PHONY: validate-all-deployments
 validate-all-deployments:
 	@$(PYTHON_DEPLOYMENT) validate --all
+
+# -----------------------------------------------------------------------------
+# ADR 0481 additions — agent-facing guard + legacy compatibility shim
+# -----------------------------------------------------------------------------
+
+# Alias for `list-deployments` so both spellings work.
+.PHONY: deployments-list
+deployments-list: list-deployments
+
+# Refresh .local/identity.yml as a symlink to the active deployment's identity.
+# Keeps the existing ~420 call sites that hardcode `.local/identity.yml`
+# working without per-site changes. Run after `make use-deployment`.
+.PHONY: sync-identity-link
+sync-identity-link:
+	@slug=$$($(PYTHON_DEPLOYMENT) resolve --quiet 2>/dev/null); \
+	if [ -z "$$slug" ]; then \
+	  echo "ERROR: no deployment resolved; cannot sync identity link" >&2; \
+	  exit 2; \
+	fi; \
+	target="$(LOCAL_OVERLAY_ROOT)/deployments/$$slug/identity.yml"; \
+	if [ ! -f "$$target" ]; then \
+	  echo "ERROR: $$target does not exist" >&2; exit 2; \
+	fi; \
+	link="$(LOCAL_OVERLAY_ROOT)/identity.yml"; \
+	if [ -L "$$link" ] || [ -f "$$link" ]; then rm -f "$$link"; fi; \
+	ln -s "deployments/$$slug/identity.yml" "$$link"; \
+	echo "Linked $$link -> deployments/$$slug/identity.yml"
+
+# -----------------------------------------------------------------------------
+# ADR 0482 — capacity-aware dynamic VM sizing
+# -----------------------------------------------------------------------------
+
+.PHONY: probe-capacity resolve-topology plan-capacity
+
+probe-capacity: _require-deployment  ## Probe Proxmox host and write capacity.yml (read-only on remote).
+	@slug=$$($(PYTHON_DEPLOYMENT) resolve --quiet); \
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/capacity_probe.py --slug "$$slug" --write
+
+resolve-topology: _require-deployment  ## Resolve a per-VM topology from capacity + policy + profile and write topology.yml.
+	@slug=$$($(PYTHON_DEPLOYMENT) resolve --quiet); \
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/resolve_topology.py --slug "$$slug" --write
+
+plan-capacity: _require-deployment  ## Plan-only: show what the resolver would write without persisting.
+	@slug=$$($(PYTHON_DEPLOYMENT) resolve --quiet); \
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/resolve_topology.py --slug "$$slug"
+
+# -----------------------------------------------------------------------------
+# ADR 0484 — self-verification contracts
+# -----------------------------------------------------------------------------
+
+.PHONY: self-check self-check-strict self-check-json detect-drift
+
+self-check: _require-deployment  ## Run all post-conditions for the active deployment (skips bootstrap-only).
+	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/self_check.py $(if $(step),--step $(step),) $(if $(tag),--tag $(tag),) $(if $(id),--id $(id),)
+
+self-check-strict: _require-deployment  ## Same as self-check, but non-critical failures also exit non-zero.
+	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/self_check.py --strict $(if $(step),--step $(step),) $(if $(tag),--tag $(tag),)
+
+self-check-json: _require-deployment  ## Emit machine-readable JSON only.
+	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/self_check.py --json $(if $(step),--step $(step),) $(if $(tag),--tag $(tag),)
+
+# Stub for ADR 0485 detect-drift. The real implementation runs Ansible
+# in --check mode and parses the changed-count. Placeholder for now.
+detect-drift: _require-deployment  ## (ADR 0485 stub) Run converge in check-mode; non-zero changed = drift.
+	@echo "detect-drift: not implemented yet (ADR 0485 stub). Run \`make self-check\` for current state assertions." >&2
+	@exit 0
+
+# Internal guard target. Safety-critical wrappers (converge-*, live-apply-*,
+# bootstrap, edge-publication, etc.) can list this as a prereq to fail loudly
+# when no deployment is selected. Phase 2: retrofit existing wrappers; new
+# wrappers MUST include this prereq.
+.PHONY: _require-deployment
+_require-deployment:
+	@if ! $(PYTHON_DEPLOYMENT) resolve --quiet >/dev/null 2>&1; then \
+	  echo "" >&2; \
+	  echo "ERROR (ADR 0481): no deployment resolved." >&2; \
+	  echo "Set one of:" >&2; \
+	  echo "  - export DEPLOYMENT=<slug>" >&2; \
+	  echo "  - make use-deployment slug=<slug>     # repo-wide default" >&2; \
+	  echo "  - make bind-worktree slug=<slug>      # worktree-only" >&2; \
+	  known=$$($(PYTHON_DEPLOYMENT) list 2>/dev/null | tr '\n' ' '); \
+	  echo "Known: $${known:-(none yet)}" >&2; \
+	  exit 2; \
+	fi

@@ -594,7 +594,7 @@ install-cli:
 
 update-cli: install-cli
 
-init-remote: ## Create the ops sudoer on a fresh remote host (overlay-mode prerequisite for Stage 2)
+init-remote: _require-deployment ## Create the ops sudoer on a fresh remote host (overlay-mode prerequisite for Stage 2)
 ifneq ($(BOOTSTRAP_OVERLAY_MODE),1)
 	@echo "init-remote is overlay-mode only; set PLATFORM_IDENTITY_OVERLAY to use it." >&2
 	@exit 1
@@ -896,7 +896,10 @@ agent-tool-info:
 export-mcp-tools:
 	@$(REPO_ROOT)/scripts/agent_tool_registry.py --export-mcp
 
-preflight:
+# ADR 0481 — when WORKFLOW is set (i.e. preflight is gating a real action),
+# require a resolved deployment. The bare `make preflight` form (no WORKFLOW)
+# just lists available workflows and does not need a deployment context.
+preflight: $(if $(strip $(WORKFLOW)),_require-deployment,)
 	@if [ -z "$(WORKFLOW)" ]; then \
 		uv run --with pyyaml python $(REPO_ROOT)/scripts/preflight_controller_local.py --list; \
 		echo "set WORKFLOW=<workflow-id>"; \
@@ -1184,7 +1187,7 @@ sync-operators:
 quarterly-access-review:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/operator_manager.py quarterly-review --warning-days $(WARNING_DAYS) --inactive-days $(INACTIVE_DAYS) $(if $(filter true,$(DRY_RUN)),--dry-run,) --emit-json
 
-install-proxmox:
+install-proxmox: _require-deployment
 	$(MAKE) preflight WORKFLOW=install-proxmox
 	# Runs the Proxmox-base playbook only and defers guest provisioning to
 	# Stage 4. Skipping the `guests` tag prevents the proxmox_guests role
@@ -1240,7 +1243,7 @@ configure-host-control-loops:
 	$(MAKE) preflight WORKFLOW=configure-host-control-loops
 	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/proxmox-install.yml --private-key $(BOOTSTRAP_KEY) --tags control-loops
 
-provision-guests:
+provision-guests: _require-deployment
 	$(MAKE) preflight WORKFLOW=provision-guests
 	# The `guests` tag lives on the proxmox_guests role inside
 	# proxmox-install.yml. Routing through site.yml would trigger arg-spec
@@ -1649,7 +1652,7 @@ migrate-service-dry-run:
 	@test -n "$(to)"  || (echo "Usage: make migrate-service-dry-run svc=<name> to=<vm>"; exit 1)
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/migrate_service.py --svc $(svc) --to $(to) --env $(env) --dry-run
 
-migrate-service:
+migrate-service: _require-deployment
 	@test -n "$(svc)" || (echo "Usage: make migrate-service svc=<name> to=<vm> [env=production]"; exit 1)
 	@test -n "$(to)"  || (echo "Usage: make migrate-service svc=<name> to=<vm> [env=production]"; exit 1)
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/migrate_service.py --svc $(svc) --to $(to) --env $(env) --execute
@@ -1692,7 +1695,7 @@ detect-topology-drift:
 plan-topology:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/topology_reconciler.py --mode plan $(if $(deployment),--deployment $(deployment),)
 
-rotate-secret:
+rotate-secret: _require-deployment
 	$(MAKE) preflight WORKFLOW=rotate-secret
 	@test -n "$(SECRET_ID)" || (echo "set SECRET_ID=<secret-id>"; exit 1)
 	python3 $(REPO_ROOT)/scripts/secret_rotation.py --secret $(SECRET_ID) $(ROTATION_ARGS)
@@ -2087,7 +2090,7 @@ init-local: ## Initialize .local/ overlay with SSH keys and secrets
 generate-local-example: ## Regenerate local-overlay-template/ scaffold from secret manifest
 	python3 $(REPO_ROOT)/scripts/init_local_overlay.py --generate-example
 
-bootstrap: ## Full platform bootstrap from bare Debian 13 (ADR 0386)
+bootstrap: _require-deployment ## Full platform bootstrap from bare Debian 13 (ADR 0386)
 ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
 	@echo "=== ADR 0437: overlay-aware bootstrap ==="
 	@echo "  PLATFORM_IDENTITY_OVERLAY = $(PLATFORM_IDENTITY_OVERLAY)"

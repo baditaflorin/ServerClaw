@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-11'
+generated: '2026-05-12'
 facet: concern
 concern: platform
-total_adrs: 153
+total_adrs: 154
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2898,3 +2898,16 @@ adrs:
     summary: 'Two surfaces:'
     filename: 0474-phase12-receipt-mass-refresh.md
     path: docs/adr/0474-phase12-receipt-mass-refresh.md
+  - adr: 0484
+    title: Self-Verification Contracts
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - self-verification
+      - contracts
+    summary: 'Every check is one entry in config/postconditions.yml (committed):'
+    filename: 0484-self-verification-contracts.md
+    path: docs/adr/0484-self-verification-contracts.md

@@ -1,0 +1,54 @@
+id: ws-0485-convergence-idempotency-tests
+adr: "0485"
+title: Convergence idempotency tests — running twice = no-op; drift always detected
+status: planned
+ready_to_merge: false
+live_applied: false
+owner: unassigned
+deployment: 0fork
+branch: unassigned/ws-0485-convergence-idempotency-tests
+worktree_path: unassigned/ws-0485-convergence-idempotency-tests
+doc: docs/adr/0485-convergence-idempotency-tests.md
+depends_on:
+  - adr-0481-explicit-deployment-context
+  - adr-0482-capacity-aware-dynamic-sizing
+  - adr-0483-hands-off-bootstrap
+  - adr-0484-self-verification-contracts
+shared_surfaces:
+  - docs/adr/0485-convergence-idempotency-tests.md
+  - tests/integration/test_idempotency.py
+  - config/contracts/deployment-v1/fixture-deployments.yml
+  - scripts/detect_drift.py
+  - mk/multi-deployment.mk
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0485_adr
+      paths:
+        - docs/adr/0485-convergence-idempotency-tests.md
+        - workstreams/active/ws-0485-convergence-idempotency-tests.yaml
+      mode: shared_contract
+      contract: adr-0485-convergence-idempotency-v1
+    - id: ws_0485_detect_drift
+      paths:
+        - scripts/detect_drift.py
+      mode: shared_contract
+      contract: detect-drift-v1
+tasks:
+  - id: t1-detect-drift
+    title: scripts/detect_drift.py — runs Ansible --check, parses changed-count, exits nonzero on drift
+    status: pending
+  - id: t2-fixture-deployment
+    title: config/contracts/deployment-v1/fixture-deployments.yml — ephemeral CI deployment used by idempotency tests
+    status: pending
+  - id: t3-idempotency-tests
+    title: tests/integration/test_idempotency.py — run each converge target twice; assert run2.changed == 0
+    status: pending
+  - id: t4-lint
+    title: Pre-push gate lints for the five anti-patterns (shell-without-creates, non-deterministic command, etc.)
+    status: pending
+  - id: t5-secret-audit
+    title: Audit every role that emits secrets for "once-per-deployment, then read-or-create" idempotency
+    status: pending
+  - id: t6-nightly-ci
+    title: Nightly CI job running `make idempotency-test-all` against the fixture deployment
+    status: pending

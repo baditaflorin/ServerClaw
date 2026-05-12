@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schemas/deployment-v1/post-conditions.json",
+  "title": "Post-Conditions Registry",
+  "description": "Machine-checkable post-conditions consumed by scripts/self_check.py. Committed at config/post_conditions.yml. ADR 0484.",
+  "type": "object",
+  "required": ["schema_version", "post_conditions"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": 1 },
+    "post_conditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "type", "after_step"],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9._-]*$",
+            "description": "Globally unique id."
+          },
+          "description": { "type": "string", "minLength": 5 },
+          "after_step": {
+            "type": "string",
+            "description": "Step whose post-condition this is. Used by `make self-check step=<step>`."
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "type": {
+            "enum": ["http", "tcp", "tls", "dns", "pveapi", "docker", "file", "command"]
+          },
+          "critical": {
+            "type": "boolean",
+            "default": true,
+            "description": "When true, failure blocks downstream steps. When false, failure is a warning."
+          },
+          "timeout_s": { "type": "integer", "minimum": 1, "default": 10 },
+          "retries": { "type": "integer", "minimum": 0, "default": 0 },
+          "retry_backoff_s": { "type": "number", "minimum": 0, "default": 1 },
+
+          "url":                  { "type": "string" },
+          "expect_status":        { "type": "integer" },
+          "expect_body_contains": { "type": "string" },
+          "expect_max_latency_s": { "type": "number" },
+
+          "host":  { "type": "string" },
+          "port":  { "type": "integer", "minimum": 1, "maximum": 65535 },
+
+          "expect_san":            { "type": "array", "items": { "type": "string" } },
+          "expect_days_remaining": { "type": "integer", "minimum": 1 },
+
+          "record":       { "type": "string" },
+          "record_type":  { "enum": ["A", "AAAA", "CNAME", "TXT", "MX"] },
+          "expect_value": { "type": "string" },
+
+          "via_ssh":         { "type": "string", "description": "SSH alias (~/.ssh/config) to run the check from." },
+          "via_jump":        { "type": "string", "description": "SSH ProxyJump alias." },
+          "container":       { "type": "string", "description": "Docker container name (for type: docker)." },
+          "expect_running":  { "type": "boolean" },
+          "expect_health":   { "enum": ["healthy", "starting", "unhealthy", "any"] },
+
+          "path":         { "type": "string" },
+          "expect_exists":{ "type": "boolean" },
+          "expect_sha256":{ "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "expect_regex": { "type": "string" },
+
+          "command":         { "type": "string" },
+          "expect_exit":     { "type": "integer", "default": 0 },
+          "expect_stdout":   { "type": "string" }
+        }
+      }
+    }
+  }
+}

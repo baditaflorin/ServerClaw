@@ -1,0 +1,69 @@
+id: ws-0484-self-verification-contracts
+adr: "0484"
+title: Self-verification contracts — every step ships its own machine-checkable post-condition
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+deployment: 0fork
+branch: unassigned/ws-0484-self-verification-contracts
+worktree_path: unassigned/ws-0484-self-verification-contracts
+doc: docs/adr/0484-self-verification-contracts.md
+depends_on:
+  - adr-0420-receipt-schema
+  - adr-0481-explicit-deployment-context
+  - adr-0482-capacity-aware-dynamic-sizing
+  - adr-0483-hands-off-bootstrap
+shared_surfaces:
+  - docs/adr/0484-self-verification-contracts.md
+  - config/contracts/deployment-v1/post-conditions.schema.json
+  - config/post_conditions.yml
+  - scripts/self_check.py
+  - tests/unit/test_self_check.py
+  - mk/multi-deployment.mk
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0484_adr
+      paths:
+        - docs/adr/0484-self-verification-contracts.md
+        - workstreams/active/ws-0484-self-verification-contracts.yaml
+      mode: shared_contract
+      contract: adr-0484-self-verification-contracts-v1
+    - id: ws_0484_schema
+      paths:
+        - config/contracts/deployment-v1/post-conditions.schema.json
+      mode: shared_contract
+      contract: post-conditions-v1
+    - id: ws_0484_registry
+      paths:
+        - config/post_conditions.yml
+      mode: shared_contract
+      contract: post-conditions-registry-v1
+    - id: ws_0484_runner
+      paths:
+        - scripts/self_check.py
+        - tests/unit/test_self_check.py
+      mode: shared_contract
+      contract: self-check-runner-v1
+tasks:
+  - id: t1-schema
+    title: post-conditions JSON schema + sample registry
+    status: completed
+  - id: t2-runner
+    title: scripts/self_check.py runner with 8 check-type plugins (http/tcp/tls/dns/file/command/docker/pveapi)
+    status: completed
+  - id: t3-tests
+    title: tests/unit/test_self_check.py with retry/backoff/template-expansion coverage (16 tests)
+    status: completed
+  - id: t4-targets
+    title: make self-check / self-check-strict / self-check-json
+    status: completed
+  - id: t5-receipts
+    title: Extend receipt schema (ADR 0420) to require a `verification` block; pre-push gate refuses receipts missing it
+    status: pending
+  - id: t6-ci-lint
+    title: CI lint enforcing every step in bootstrap_steps.yml has ≥1 matching post-condition in post_conditions.yml
+    status: pending
+  - id: t7-expand-coverage
+    title: Expand registry to cover every existing converge-* target; goal "no step is 'unverified'"
+    status: pending

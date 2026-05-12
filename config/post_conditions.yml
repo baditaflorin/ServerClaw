@@ -1,0 +1,177 @@
+# Post-conditions registry — ADR 0484.
+#
+# Each entry is a machine-checkable invariant. scripts/self_check.py reads
+# this file, validates against post-conditions.schema.json, and runs the
+# checks against the active deployment.
+#
+# Add a check by appending an entry with a unique id. Run-modes:
+#
+#   make self-check                  # every check not tagged 'bootstrap-only'
+#   make self-check step=converge-X  # checks whose after_step matches
+#   make self-check tag=final-smoke  # checks whose tags include the tag
+#
+# Template variables in url / record / etc. are expanded against the active
+# deployment's identity.yml:
+#   {apex}       -> platform_domain  (e.g. 0fork.com)
+#   {apex_slug}  -> first label of apex (e.g. 0fork)
+#   {operator_email}, {operator_name}
+
+schema_version: 1
+
+post_conditions:
+
+  # --- DNS layer ------------------------------------------------------
+
+  - id: dns.apex-points-at-edge
+    description: Apex DNS A record resolves to the platform's edge IP
+    after_step: converge-edge-publication
+    tags: [bootstrap, final-smoke]
+    type: dns
+    record: "{apex}"
+    record_type: A
+    expect_value: present
+    critical: true
+    timeout_s: 5
+    retries: 2
+
+  # --- Edge / TLS -----------------------------------------------------
+
+  - id: edge.apex-tls-308
+    description: Apex returns 308 (HTTPS redirect or root canonical) over TLS
+    after_step: converge-edge-publication
+    tags: [final-smoke]
+    type: http
+    url: "https://{apex}/"
+    expect_status: 308
+    timeout_s: 10
+    retries: 3
+    retry_backoff_s: 5
+
+  - id: edge.tls-cert-not-expired-30d
+    description: Edge TLS cert has ≥ 30 days remaining
+    after_step: converge-edge-publication
+    tags: [final-smoke, daily]
+    type: tls
+    host: "{apex}"
+    port: 443
+    expect_days_remaining: 30
+    critical: true
+
+  # --- Harbor (the load-bearing motivator) ----------------------------
+
+  - id: harbor.registry.public-ping
+    description: registry.{apex}/api/v2.0/ping returns 200 + "Pong"
+    after_step: converge-harbor
+    tags: [final-smoke]
+    type: http
+    url: "https://registry.{apex}/api/v2.0/ping"
+    expect_status: 200
+    expect_body_contains: "Pong"
+    timeout_s: 10
+    retries: 3
+    retry_backoff_s: 5
+    critical: true
+
+  - id: harbor.containers.nginx-running
+    description: The harbor-proxy nginx container is running on runtime-control
+    after_step: converge-harbor
+    tags: [bootstrap]
+    type: docker
+    via_ssh: 0fork-jump  # TODO: derive from connection.yml in a follow-up
+    container: nginx
+    expect_running: true
+    expect_health: any
+    critical: true
+
+  - id: harbor.containers.harbor-portal-running
+    description: harbor-portal container is running on runtime-control
+    after_step: converge-harbor
+    tags: [bootstrap]
+    type: docker
+    via_ssh: 0fork-jump
+    container: harbor-portal
+    expect_running: true
+    expect_health: any
+    critical: true
+
+  - id: harbor.registry.v2-auth-required
+    description: registry.{apex}/v2/ correctly demands authentication (401)
+    after_step: converge-harbor
+    tags: [final-smoke]
+    type: http
+    url: "https://registry.{apex}/v2/"
+    expect_status: 401
+    critical: false   # informational; some deploys may allow anonymous pulls
+
+  # --- Identity / Keycloak --------------------------------------------
+
+  - id: keycloak.realm-discovery
+    description: Keycloak realm discovery endpoint returns a valid issuer
+    after_step: converge-keycloak
+    tags: [final-smoke]
+    type: http
+    url: "https://sso.{apex}/realms/{apex_slug}/.well-known/openid-configuration"
+    expect_status: 200
+    expect_body_contains: "issuer"
+    timeout_s: 10
+    retries: 3
+    critical: true
+
+  # --- Data plane -----------------------------------------------------
+
+  - id: postgres.tcp-reachable
+    description: postgres VM accepts TCP connections on 5432
+    after_step: converge-postgres-vm
+    tags: [bootstrap]
+    type: tcp
+    host: "10.10.10.50"   # TODO: derive from topology in a follow-up
+    port: 5432
+    timeout_s: 5
+    critical: true
+
+  # --- Platform services ----------------------------------------------
+
+  - id: outline.public-200
+    description: wiki.{apex} responds 200
+    after_step: converge-outline
+    tags: [final-smoke]
+    type: http
+    url: "https://wiki.{apex}/"
+    expect_status: 200
+    retries: 3
+
+  - id: plausible.public-200
+    description: analytics.{apex} responds 200
+    after_step: converge-plausible
+    tags: [final-smoke]
+    type: http
+    url: "https://analytics.{apex}/"
+    expect_status: 200
+    retries: 3
+
+  - id: glitchtip.public-200
+    description: errors.{apex} responds 200
+    after_step: converge-glitchtip
+    tags: [final-smoke]
+    type: http
+    url: "https://errors.{apex}/"
+    expect_status: 200
+    retries: 3
+
+  - id: woodpecker.public-200
+    description: ci.{apex} responds 200
+    after_step: converge-woodpecker
+    tags: [final-smoke]
+    type: http
+    url: "https://ci.{apex}/"
+    expect_status: 200
+    retries: 3
+
+  - id: ntfy.public-200
+    description: ntfy.{apex} responds 200
+    after_step: converge-ntfy
+    tags: [final-smoke]
+    type: http
+    url: "https://ntfy.{apex}/"
+    expect_status: 200
+    retries: 3

@@ -1,0 +1,291 @@
+# Sizing Policy — ADR 0482.
+# Per-service-class resource allocation rules consumed by
+# scripts/resolve_topology.py to compute per-VM allocations from probed
+# host capacity. Operator overrides land in profile.yml service_overrides.
+#
+# Priorities (shrink-order, lowest priority shrinks first under pressure):
+#   critical      — platform cannot function without it
+#   important     — degrades user experience if shrunk to min
+#   nice-to-have  — operational convenience (HA, replication, cache)
+#   optional      — opt-in workloads (AI, large CI)
+#
+# ram_mb values are guest-side allocations (with ballooning enabled, the
+# kernel can reclaim down toward min under host pressure). cpu values are
+# virtual cores.
+
+schema_version: 1
+priority_order:
+- critical
+- important
+- nice-to-have
+- optional
+classes:
+  nginx:
+    priority: critical
+    cpu:
+      min: 1
+      preferred: 2
+      max: 4
+    ram_mb:
+      min: 1024
+      preferred: 4096
+      max: 8192
+    disk_gb:
+      min: 16
+      preferred: 32
+      max: 64
+  postgres:
+    priority: critical
+    cpu:
+      min: 2
+      preferred: 4
+      max: 8
+    ram_mb:
+      min: 2048
+      preferred: 8192
+      max: 32768
+    disk_gb:
+      min: 32
+      preferred: 96
+      max: 512
+  runtime-control:
+    priority: critical
+    cpu:
+      min: 2
+      preferred: 4
+      max: 8
+    ram_mb:
+      min: 4096
+      preferred: 12288
+      max: 24576
+    disk_gb:
+      min: 64
+      preferred: 128
+      max: 256
+  docker-runtime:
+    priority: critical
+    cpu:
+      min: 2
+      preferred: 4
+      max: 12
+    ram_mb:
+      min: 4096
+      preferred: 16384
+      max: 32768
+    disk_gb:
+      min: 64
+      preferred: 128
+      max: 512
+  monitoring:
+    priority: important
+    cpu:
+      min: 2
+      preferred: 2
+      max: 4
+    ram_mb:
+      min: 2048
+      preferred: 8192
+      max: 16384
+    disk_gb:
+      min: 32
+      preferred: 64
+      max: 256
+  runtime-general:
+    priority: important
+    cpu:
+      min: 2
+      preferred: 4
+      max: 8
+    ram_mb:
+      min: 2048
+      preferred: 12288
+      max: 24576
+    disk_gb:
+      min: 64
+      preferred: 128
+      max: 256
+  runtime-apps:
+    priority: important
+    cpu:
+      min: 2
+      preferred: 4
+      max: 8
+    ram_mb:
+      min: 2048
+      preferred: 16384
+      max: 32768
+    disk_gb:
+      min: 64
+      preferred: 192
+      max: 384
+  runtime-comms:
+    priority: important
+    cpu:
+      min: 2
+      preferred: 4
+      max: 8
+    ram_mb:
+      min: 2048
+      preferred: 16384
+      max: 32768
+    disk_gb:
+      min: 64
+      preferred: 256
+      max: 512
+  docker-build:
+    priority: important
+    cpu:
+      min: 4
+      preferred: 8
+      max: 16
+    ram_mb:
+      min: 4096
+      preferred: 16384
+      max: 32768
+    disk_gb:
+      min: 64
+      preferred: 320
+      max: 1024
+  artifact-cache:
+    priority: important
+    cpu:
+      min: 2
+      preferred: 2
+      max: 4
+    ram_mb:
+      min: 1024
+      preferred: 4096
+      max: 16384
+    disk_gb:
+      min: 64
+      preferred: 160
+      max: 512
+  postgres-replica:
+    priority: nice-to-have
+    cpu:
+      min: 1
+      preferred: 2
+      max: 4
+    ram_mb:
+      min: 1024
+      preferred: 4096
+      max: 8192
+    disk_gb:
+      min: 32
+      preferred: 96
+      max: 256
+  postgres-apps:
+    priority: nice-to-have
+    cpu:
+      min: 1
+      preferred: 2
+      max: 4
+    ram_mb:
+      min: 1024
+      preferred: 4096
+      max: 8192
+    disk_gb:
+      min: 32
+      preferred: 128
+      max: 256
+  postgres-data:
+    priority: nice-to-have
+    cpu:
+      min: 1
+      preferred: 2
+      max: 4
+    ram_mb:
+      min: 1024
+      preferred: 4096
+      max: 8192
+    disk_gb:
+      min: 32
+      preferred: 128
+      max: 384
+  backup:
+    priority: nice-to-have
+    cpu:
+      min: 2
+      preferred: 4
+      max: 4
+    ram_mb:
+      min: 1024
+      preferred: 4096
+      max: 8192
+    disk_gb:
+      min: 32
+      preferred: 640
+      max: 4096
+  coolify:
+    priority: nice-to-have
+    cpu:
+      min: 2
+      preferred: 4
+      max: 4
+    ram_mb:
+      min: 2048
+      preferred: 4096
+      max: 8192
+    disk_gb:
+      min: 32
+      preferred: 96
+      max: 256
+  coolify-apps:
+    priority: nice-to-have
+    cpu:
+      min: 2
+      preferred: 4
+      max: 8
+    ram_mb:
+      min: 2048
+      preferred: 4096
+      max: 16384
+    disk_gb:
+      min: 64
+      preferred: 128
+      max: 512
+  runtime-ai:
+    priority: optional
+    requires_capability: gpu
+    cpu:
+      min: 4
+      preferred: 6
+      max: 12
+    ram_mb:
+      min: 8192
+      preferred: 16384
+      max: 65536
+    disk_gb:
+      min: 64
+      preferred: 128
+      max: 512
+profile_defaults:
+  core:
+  - nginx
+  - runtime-control
+  - docker-runtime
+  - postgres
+  - monitoring
+  devtools:
+  - docker-build
+  - artifact-cache
+  data:
+  - postgres-apps
+  - postgres-data
+  full:
+  - nginx
+  - runtime-control
+  - docker-runtime
+  - runtime-general
+  - runtime-comms
+  - runtime-apps
+  - docker-build
+  - artifact-cache
+  - postgres
+  - postgres-replica
+  - postgres-apps
+  - postgres-data
+  - monitoring
+  - backup
+  - coolify
+  - coolify-apps

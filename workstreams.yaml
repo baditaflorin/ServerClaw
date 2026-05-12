@@ -21,6 +21,467 @@ archive_summary:
   by_year:
     '2026': 323
 workstreams:
+- id: ws-0485-convergence-idempotency-tests
+  adr: 0485
+  title: "Convergence idempotency tests \u2014 running twice = no-op; drift always\
+    \ detected"
+  status: planned
+  ready_to_merge: false
+  live_applied: false
+  owner: unassigned
+  deployment: 0fork
+  branch: unassigned/ws-0485-convergence-idempotency-tests
+  worktree_path: unassigned/ws-0485-convergence-idempotency-tests
+  doc: docs/adr/0485-convergence-idempotency-tests.md
+  depends_on:
+  - adr-0481-explicit-deployment-context
+  - adr-0482-capacity-aware-dynamic-sizing
+  - adr-0483-hands-off-bootstrap
+  - adr-0484-self-verification-contracts
+  shared_surfaces:
+  - docs/adr/0485-convergence-idempotency-tests.md
+  - tests/integration/test_idempotency.py
+  - config/contracts/deployment-v1/fixture-deployments.yml
+  - scripts/detect_drift.py
+  - mk/multi-deployment.mk
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0485_adr
+      paths:
+      - docs/adr/0485-convergence-idempotency-tests.md
+      - workstreams/active/ws-0485-convergence-idempotency-tests.yaml
+      mode: shared_contract
+      contract: adr-0485-convergence-idempotency-v1
+    - id: ws_0485_detect_drift
+      paths:
+      - scripts/detect_drift.py
+      mode: shared_contract
+      contract: detect-drift-v1
+  tasks:
+  - id: t1-detect-drift
+    title: "scripts/detect_drift.py \u2014 runs Ansible --check, parses changed-count,\
+      \ exits nonzero on drift"
+    status: pending
+  - id: t2-fixture-deployment
+    title: "config/contracts/deployment-v1/fixture-deployments.yml \u2014 ephemeral\
+      \ CI deployment used by idempotency tests"
+    status: pending
+  - id: t3-idempotency-tests
+    title: "tests/integration/test_idempotency.py \u2014 run each converge target\
+      \ twice; assert run2.changed == 0"
+    status: pending
+  - id: t4-lint
+    title: Pre-push gate lints for the five anti-patterns (shell-without-creates,
+      non-deterministic command, etc.)
+    status: pending
+  - id: t5-secret-audit
+    title: Audit every role that emits secrets for "once-per-deployment, then read-or-create"
+      idempotency
+    status: pending
+  - id: t6-nightly-ci
+    title: Nightly CI job running `make idempotency-test-all` against the fixture
+      deployment
+    status: pending
+- id: ws-0484-self-verification-contracts
+  adr: 0484
+  title: "Self-verification contracts \u2014 every step ships its own machine-checkable\
+    \ post-condition"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  deployment: 0fork
+  branch: unassigned/ws-0484-self-verification-contracts
+  worktree_path: unassigned/ws-0484-self-verification-contracts
+  doc: docs/adr/0484-self-verification-contracts.md
+  depends_on:
+  - adr-0420-receipt-schema
+  - adr-0481-explicit-deployment-context
+  - adr-0482-capacity-aware-dynamic-sizing
+  - adr-0483-hands-off-bootstrap
+  shared_surfaces:
+  - docs/adr/0484-self-verification-contracts.md
+  - config/contracts/deployment-v1/post-conditions.schema.json
+  - config/post_conditions.yml
+  - scripts/self_check.py
+  - tests/unit/test_self_check.py
+  - mk/multi-deployment.mk
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0484_adr
+      paths:
+      - docs/adr/0484-self-verification-contracts.md
+      - workstreams/active/ws-0484-self-verification-contracts.yaml
+      mode: shared_contract
+      contract: adr-0484-self-verification-contracts-v1
+    - id: ws_0484_schema
+      paths:
+      - config/contracts/deployment-v1/post-conditions.schema.json
+      mode: shared_contract
+      contract: post-conditions-v1
+    - id: ws_0484_registry
+      paths:
+      - config/post_conditions.yml
+      mode: shared_contract
+      contract: post-conditions-registry-v1
+    - id: ws_0484_runner
+      paths:
+      - scripts/self_check.py
+      - tests/unit/test_self_check.py
+      mode: shared_contract
+      contract: self-check-runner-v1
+  tasks:
+  - id: t1-schema
+    title: post-conditions JSON schema + sample registry
+    status: completed
+  - id: t2-runner
+    title: scripts/self_check.py runner with 8 check-type plugins (http/tcp/tls/dns/file/command/docker/pveapi)
+    status: completed
+  - id: t3-tests
+    title: tests/unit/test_self_check.py with retry/backoff/template-expansion coverage
+      (16 tests)
+    status: completed
+  - id: t4-targets
+    title: make self-check / self-check-strict / self-check-json
+    status: completed
+  - id: t5-receipts
+    title: Extend receipt schema (ADR 0420) to require a `verification` block; pre-push
+      gate refuses receipts missing it
+    status: pending
+  - id: t6-ci-lint
+    title: "CI lint enforcing every step in bootstrap_steps.yml has \u22651 matching\
+      \ post-condition in post_conditions.yml"
+    status: pending
+  - id: t7-expand-coverage
+    title: Expand registry to cover every existing converge-* target; goal "no step
+      is 'unverified'"
+    status: pending
+- id: ws-0486-hands-off-bootstrap
+  adr: 0483
+  title: "Hands-off bootstrap \u2014 single declarative input \u2192 verified-running\
+    \ platform"
+  status: planned
+  ready_to_merge: false
+  live_applied: false
+  owner: unassigned
+  deployment: 0fork
+  branch: unassigned/ws-0486-hands-off-bootstrap
+  worktree_path: unassigned/ws-0486-hands-off-bootstrap
+  doc: docs/adr/0483-hands-off-bootstrap.md
+  depends_on:
+  - adr-0407-generic-by-default
+  - adr-0420-receipt-schema
+  - adr-0440-deployment-layout
+  - adr-0441-service-profiles
+  - adr-0481-explicit-deployment-context
+  - adr-0482-capacity-aware-dynamic-sizing
+  - adr-0484-self-verification-contracts
+  - adr-0485-convergence-idempotency-tests
+  shared_surfaces:
+  - docs/adr/0483-hands-off-bootstrap.md
+  - config/contracts/deployment-v1/manifest.schema.json
+  - config/bootstrap_steps.yml
+  - scripts/derive_manifest.py
+  - scripts/bootstrap_orchestrator.py
+  - Makefile
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0486_adr
+      paths:
+      - docs/adr/0483-hands-off-bootstrap.md
+      - workstreams/active/ws-0486-hands-off-bootstrap.yaml
+      mode: shared_contract
+      contract: adr-0483-hands-off-bootstrap-v1
+  tasks:
+  - id: t1-manifest-schema
+    title: "config/contracts/deployment-v1/manifest.schema.json \u2014 single declarative\
+      \ input format"
+    status: pending
+  - id: t2-derive-manifest
+    title: "scripts/derive_manifest.py \u2014 introspect lv3 + 0fork to emit draft\
+      \ manifests"
+    status: pending
+  - id: t3-bootstrap-steps
+    title: "config/bootstrap_steps.yml \u2014 the 14-step contract chain (preconditions\
+      \ + postconditions per step)"
+    status: pending
+  - id: t4-orchestrator
+    title: "scripts/bootstrap_orchestrator.py \u2014 drives steps, honors gates.fail_fast,\
+      \ writes receipts, supports resume-from"
+    status: pending
+  - id: t5-resume-from
+    title: make bootstrap supports resume-from=<step> reading the last failure receipt
+    status: pending
+  - id: t6-bootstrap-status
+    title: "make bootstrap-status \u2014 JSON summary of where the chain is (current\
+      \ step / last-passed / failing condition)"
+    status: pending
+  - id: t7-handoff-protocol
+    title: "ADR 0486 (future) \u2014 agent-to-agent handoff protocol (this workstream\
+      \ surfaces the receipt patterns)"
+    status: pending
+- id: ws-0483-capacity-aware-dynamic-sizing
+  adr: 0482
+  title: "Capacity-aware dynamic VM sizing \u2014 make `make new-deployment` actually\
+    \ portable"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  deployment: 0fork
+  branch: unassigned/ws-0483-capacity-aware-dynamic-sizing
+  worktree_path: unassigned/ws-0483-capacity-aware-dynamic-sizing
+  doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
+  depends_on:
+  - adr-0407-generic-by-default
+  - adr-0440-deployment-layout
+  - adr-0441-service-profiles
+  - adr-0481-explicit-deployment-context
+  shared_surfaces:
+  - docs/adr/0482-capacity-aware-dynamic-sizing.md
+  - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
+  - config/contracts/deployment-v1/capacity.schema.json
+  - config/sizing-policy.yml
+  - scripts/capacity_probe.py
+  - scripts/resolve_topology.py
+  - Makefile
+  - mk/multi-deployment.mk
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0483_adr
+      paths:
+      - docs/adr/0482-capacity-aware-dynamic-sizing.md
+      - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
+      mode: shared_contract
+      contract: adr-0482-capacity-aware-dynamic-sizing-v1
+    - id: ws_0483_schemas
+      paths:
+      - config/contracts/deployment-v1/capacity.schema.json
+      - config/contracts/deployment-v1/sizing-policy.schema.json
+      mode: shared_contract
+      contract: deployment-v1-capacity-sizing-v1
+    - id: ws_0483_policy
+      paths:
+      - config/sizing-policy.yml
+      mode: shared_contract
+      contract: sizing-policy-v1
+    - id: ws_0483_scripts
+      paths:
+      - scripts/capacity_probe.py
+      - scripts/resolve_topology.py
+      mode: shared_contract
+      contract: capacity-resolver-v1
+  tasks:
+  - id: t1-schemas
+    title: Capacity + sizing-policy JSON schemas under config/contracts/deployment-v1/
+    status: in_progress
+  - id: t2-policy
+    title: Committed config/sizing-policy.yml covering all 17 current service classes
+    status: in_progress
+  - id: t3-probe
+    title: scripts/capacity_probe.py + `make probe-capacity` target
+    status: in_progress
+  - id: t4-resolver
+    title: scripts/resolve_topology.py + `make resolve-topology` + `make plan-capacity`
+    status: in_progress
+  - id: t5-wire-new-deployment
+    title: Wire probe + resolve into `make new-deployment` so one command bootstraps
+      a forkable deployment
+    status: pending
+  - id: t6-backfill
+    title: Re-probe and re-resolve lv3 and 0fork; diff against current topology and
+      document deltas
+    status: pending
+  - id: t7-apply
+    title: Separate ADR for `make apply-topology` (live-resize semantics)
+    status: pending
+  findings:
+  - '2026-05-11 incident on 0fork showed the lv3-sized topology over-allocates RAM
+    to 180GB on a 64GB host. The fix is structural, not parametric: sizing must be
+    derived from probed host capacity, not copied from another deployment.'
+  - The 0fork-incident audit revealed every VM had balloon=0 (ballooning disabled).
+    Always-on ballooning (40% floor) is now part of the policy defaults; the 0fork
+    host has been queued to enable ballooning on next VM reboot, but new deployments
+    will be ballooning-enabled from creation.
+- id: ws-0482-0fork-platform-not-bootstrapped
+  adr: 0482
+  title: "0fork.com platform deployment never landed \u2014 registry.0fork.com 502\
+    \ + others are catch-all illusions"
+  status: planned
+  ready_to_merge: false
+  live_applied: false
+  owner: unassigned
+  deployment: 0fork
+  branch: unassigned/ws-0482-0fork-platform-not-bootstrapped
+  worktree_path: unassigned/ws-0482-0fork-platform-not-bootstrapped
+  doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
+  depends_on:
+  - ws-0481-explicit-deployment-context
+  shared_surfaces:
+  - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0482_workstream
+      paths:
+      - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
+      mode: shared_contract
+      contract: ws-0482-0fork-platform-not-bootstrapped-v1
+  tasks:
+  - id: t1
+    title: "Decide scope \u2014 bootstrap full platform on 0fork OR remove platform\
+      \ vhosts from nginx-proxy-manager"
+    status: pending
+  - id: t2
+    title: "If bootstrap \u2014 resolve `hosts: runtime-control` hardcode in playbooks/harbor.yml\
+      \ (and likely others) since runtime-control VM does not exist on 0fork (collapsed\
+      \ topology)"
+    status: pending
+  - id: t3
+    title: "If bootstrap \u2014 converge prereqs in order (postgres-vm, openbao, keycloak)\
+      \ before Harbor"
+    status: pending
+  - id: t4
+    title: "If teardown \u2014 remove or correct stale nginx vhost entries that return\
+      \ 200/302 from catch-all (registry, ci, chat, wiki, analytics, errors, ntfy)"
+    status: pending
+  findings:
+  - "2026-05-11 status check found 0fork docker-runtime (10.10.10.20) hosts 78 personal-app\
+    \ /opt projects (wemeshup, badita_org, 0exec_com, scrapetheworld, \u2026) but\
+    \ ZERO platform services (no /opt/harbor, /opt/outline, /opt/librechat, /opt/plausible,\
+    \ /opt/glitchtip, /opt/woodpecker, /opt/ntfy)."
+  - "The 2026-04-27 receipt receipts/live-applies/2026-04-27-ws-0372-0fork-services-all-7-deployed.json\
+    \ claims all 7 services were deployed and verified UP. That claim is incorrect\
+    \ for the current host state \u2014 either the receipt was aspirational, the converge\
+    \ silently failed but reported pass, or the deployment was rolled back manually."
+  - 'On 0fork the Proxmox host only runs 3 VMs (ubuntu-24-04 = 10.10.10.20, nginx-proxy-manager
+    VM, stopped DNS VM). The runtime-control VM (10.10.10.92) that the committed service
+    registry assigns Harbor + Keycloak + others to does not exist. The collapsed-topology
+    pattern (ADR 0424) intended docker-runtime to be the only runtime, but the inventory
+    still names the host runtime-control, and the harbor playbook hardcodes `hosts:
+    runtime-control`.'
+  - Symptoms visible from outside: registry.0fork.com returns 502 (nginx vhost upstream
+      unreachable). chat / wiki / analytics / errors / ntfy / ci return 200/302 from
+      the nginx catch-all but no real backend exists.
+  - This is not a "fix Harbor in 20 minutes" job. It is a "bootstrap 0fork's platform
+    from scratch" job.
+- id: ws-0481-explicit-deployment-context
+  adr: 0481
+  title: Make deployment selection explicit and agent-checkable (no implicit identity.yml
+    swap)
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/condescending-pascal-021248
+  worktree_path: .claude/worktrees/condescending-pascal-021248
+  doc: docs/adr/0481-explicit-deployment-context.md
+  depends_on:
+  - adr-0407-generic-by-default
+  - adr-0437-overlay-aware-bootstrap
+  - adr-0439-multi-deployment-generators
+  - adr-0440-deployment-layout
+  - adr-0480-multi-deployment-certificate-validation
+  shared_surfaces:
+  - docs/adr/0481-explicit-deployment-context.md
+  - workstreams/active/ws-0481-explicit-deployment-context.yaml
+  - Makefile
+  - CLAUDE.md
+  - .local/deployments/lv3/
+  - .local/deployments/0fork/
+  - .local/active-deployment
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0481_docs
+      paths:
+      - docs/adr/0481-explicit-deployment-context.md
+      - workstreams/active/ws-0481-explicit-deployment-context.yaml
+      mode: shared_contract
+      contract: adr-0481-explicit-deployment-context-v1
+    - id: ws_0481_makefile_targets
+      paths:
+      - Makefile
+      mode: shared_contract
+      contract: deployment-context-make-targets-v1
+    - id: ws_0481_claude_md
+      paths:
+      - CLAUDE.md
+      mode: shared_contract
+      contract: claude-md-deployment-section-v1
+    - id: ws_0481_umbrella_adr_0482_0485
+      paths:
+      - docs/adr/0482-capacity-aware-dynamic-sizing.md
+      - docs/adr/0483-hands-off-bootstrap.md
+      - docs/adr/0484-self-verification-contracts.md
+      - docs/adr/0485-convergence-idempotency-tests.md
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+      - workstreams.yaml
+      - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
+      - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
+      - workstreams/active/ws-0484-self-verification-contracts.yaml
+      - workstreams/active/ws-0485-convergence-idempotency-tests.yaml
+      - workstreams/active/ws-0486-hands-off-bootstrap.yaml
+      - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
+      - .deployment
+      - config/contracts/deployment-v1/capacity.schema.json
+      - config/contracts/deployment-v1/sizing-policy.schema.json
+      - config/contracts/deployment-v1/post-conditions.schema.json
+      - config/sizing-policy.yml
+      - config/post_conditions.yml
+      - scripts/capacity_probe.py
+      - scripts/resolve_topology.py
+      - scripts/self_check.py
+      - scripts/new_deployment.sh
+      - mk/multi-deployment.mk
+      - tests/unit/test_resolve_topology.py
+      - tests/unit/test_capacity_probe.py
+      - tests/unit/test_self_check.py
+      mode: shared_contract
+      contract: deployment-context-umbrella-v1
+  tasks:
+  - id: t1
+    title: Backfill .local/deployments/lv3/ from the parked lv3-backup identity
+    status: pending
+  - id: t2
+    title: Remove or repurpose .local/deployments/prod/ (currently a stale 0fork duplicate)
+    status: pending
+  - id: t3
+    title: "Write .local/active-deployment marker (defaults to 0fork \u2014 current\
+      \ active)"
+    status: pending
+  - id: t4
+    title: "Add Makefile targets \u2014 whoami, deployments-list, use-deployment,\
+      \ bind-worktree, new-deployment, sync-identity-link"
+    status: pending
+  - id: t5
+    title: Add _require-deployment guard prereq target
+    status: pending
+  - id: t6
+    title: "Update CLAUDE.md with \"Section 0 \u2014 verify your deployment first\""
+    status: pending
+  - id: t7
+    title: Regenerate workstreams.yaml and ADR index
+    status: pending
+  - id: t8
+    title: Smoke-test make whoami / deployments-list / use-deployment
+    status: completed
+  - id: t9
+    title: Retrofit preflight + bootstrap/init-remote/install-proxmox/provision-guests/migrate-service/rotate-secret/live-apply-*
+      with _require-deployment prereq
+    status: completed
+  - id: t10
+    title: Populate .local/deployments/lv3/topology.yml with canonical proxmox_guests
+      list extracted from committed inventory (network scalars still STUB pending
+      operator verification)
+    status: completed
+  findings:
+  - The structural refactor landed cleanly. `make whoami`, `make deployments-list`,
+    `make use-deployment slug=<s>`, `make bind-worktree slug=<s>`, `make sync-identity-link`,
+    `make _require-deployment` all verified working end-to-end (both happy path and
+    failure path) on 2026-05-11.
+  - "Side discovery (spawned ws-0482) \u2014 0fork's platform deployment from ws-0372\
+    \ never actually landed. The Harbor 502 originally reported is not a transient\
+    \ outage; it is a \"never deployed\" symptom amplified by stale nginx vhost entries."
 - id: adr-0481-multi-deployment-service-registry
   adr: 0481
   title: "ADR 0481 \u2014 Multi-Deployment Service Registry (Schema v3 + list_services.py)"

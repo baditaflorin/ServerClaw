@@ -5,15 +5,50 @@ It supplements `AGENTS.md` with Claude-specific checklists and context.
 
 ---
 
+## 0. Identify Your Deployment FIRST  (ADR 0481)
+
+**Run this before touching any host or running any converge:**
+
+```
+make whoami
+```
+
+This prints the active deployment — slug, apex domain, operator, and *how* it
+was resolved. The platform runs N parallel deployments off one generic codebase
+(today `lv3` and `0fork`). Every probe, SSH alias, receipt, and converge target
+is scoped to one of them. If you don't know which, you will silently operate on
+the wrong one.
+
+`make whoami` errors → resolve the deployment before continuing. In precedence:
+
+```
+export DEPLOYMENT=<slug>            # one-shot, this shell only
+make use-deployment slug=<slug>     # repo-wide default (writes .local/active-deployment)
+make bind-worktree slug=<slug>      # this worktree only (writes .deployment marker)
+```
+
+To enumerate what's available: `make deployments-list`.
+
+Safety-critical targets (converge-*, live-apply-*, bootstrap, edge-*) should
+list `_require-deployment` as a prereq so they fail loudly if you forgot. New
+wrappers MUST include this prereq.
+
+The legacy `.local/identity.yml` is now a *symlink* to
+`.local/deployments/<active>/identity.yml`. Don't edit it; run
+`make sync-identity-link` after switching deployments to refresh it.
+
+---
+
 ## 1. Session Start — Read These First
 
 Before writing any code, in order:
 
-1. `README.md` — current platform status and merged deployment truth
-2. `AGENTS.md` — working rules, conventions, handoff protocol
-3. `workstreams.yaml` — what is in flight, who owns which surfaces
-4. `.repo-structure.yaml` — where everything lives (use instead of `find`)
-5. Check Claude Code memory for any remembered context from prior sessions on this repo
+1. **`make whoami`** — confirm which deployment you're operating on (see §0)
+2. `README.md` — current platform status and merged deployment truth
+3. `AGENTS.md` — working rules, conventions, handoff protocol
+4. `workstreams.yaml` — what is in flight, who owns which surfaces
+5. `.repo-structure.yaml` — where everything lives (use instead of `find`)
+6. Check Claude Code memory for any remembered context from prior sessions on this repo
 
 If the task touches a specific service, also read:
 - `docs/adr/.index.yaml` — search for the ADR covering that service

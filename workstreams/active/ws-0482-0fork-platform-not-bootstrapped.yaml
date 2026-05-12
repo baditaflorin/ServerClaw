@@ -1,0 +1,41 @@
+id: ws-0482-0fork-platform-not-bootstrapped
+adr: "0482"
+title: 0fork.com platform deployment never landed — registry.0fork.com 502 + others are catch-all illusions
+status: planned
+ready_to_merge: false
+live_applied: false
+owner: unassigned
+deployment: 0fork
+branch: unassigned/ws-0482-0fork-platform-not-bootstrapped
+worktree_path: unassigned/ws-0482-0fork-platform-not-bootstrapped
+doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
+depends_on:
+  - ws-0481-explicit-deployment-context
+shared_surfaces:
+  - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0482_workstream
+      paths:
+        - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
+      mode: shared_contract
+      contract: ws-0482-0fork-platform-not-bootstrapped-v1
+tasks:
+  - id: t1
+    title: Decide scope — bootstrap full platform on 0fork OR remove platform vhosts from nginx-proxy-manager
+    status: pending
+  - id: t2
+    title: "If bootstrap — resolve `hosts: runtime-control` hardcode in playbooks/harbor.yml (and likely others) since runtime-control VM does not exist on 0fork (collapsed topology)"
+    status: pending
+  - id: t3
+    title: If bootstrap — converge prereqs in order (postgres-vm, openbao, keycloak) before Harbor
+    status: pending
+  - id: t4
+    title: If teardown — remove or correct stale nginx vhost entries that return 200/302 from catch-all (registry, ci, chat, wiki, analytics, errors, ntfy)
+    status: pending
+findings:
+  - 2026-05-11 status check found 0fork docker-runtime (10.10.10.20) hosts 78 personal-app /opt projects (wemeshup, badita_org, 0exec_com, scrapetheworld, …) but ZERO platform services (no /opt/harbor, /opt/outline, /opt/librechat, /opt/plausible, /opt/glitchtip, /opt/woodpecker, /opt/ntfy).
+  - The 2026-04-27 receipt receipts/live-applies/2026-04-27-ws-0372-0fork-services-all-7-deployed.json claims all 7 services were deployed and verified UP. That claim is incorrect for the current host state — either the receipt was aspirational, the converge silently failed but reported pass, or the deployment was rolled back manually.
+  - "On 0fork the Proxmox host only runs 3 VMs (ubuntu-24-04 = 10.10.10.20, nginx-proxy-manager VM, stopped DNS VM). The runtime-control VM (10.10.10.92) that the committed service registry assigns Harbor + Keycloak + others to does not exist. The collapsed-topology pattern (ADR 0424) intended docker-runtime to be the only runtime, but the inventory still names the host runtime-control, and the harbor playbook hardcodes `hosts: runtime-control`."
+  - Symptoms visible from outside: registry.0fork.com returns 502 (nginx vhost upstream unreachable). chat / wiki / analytics / errors / ntfy / ci return 200/302 from the nginx catch-all but no real backend exists.
+  - This is not a "fix Harbor in 20 minutes" job. It is a "bootstrap 0fork's platform from scratch" job.

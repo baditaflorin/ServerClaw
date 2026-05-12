@@ -6,23 +6,23 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-11'
+generated: '2026-05-12'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 505
+total_adrs: 510
 adr_number_range:
   first: '0001'
-  last: 0480
-  next_available: 0481
+  last: 0485
+  next_available: 0486
 implementation_status_summary:
   Implemented: 377
   Partial: 4
   Not Implemented: 33
   Deprecated: 5
   Accepted: 32
-  Proposed: 54
+  Proposed: 59
 decision_status_summary:
   Accepted: 379
-  Proposed: 61
+  Proposed: 66
   Deprecated: 14
   Implemented: 51
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 73
+      count: 78
       first_adr: '0400'
-      last_adr: 0480
+      last_adr: 0485
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -67,10 +67,10 @@ facets:
       count: 37
     - concern: bootstrap
       path: docs/adr/index/by-concern/bootstrap.yaml
-      count: 10
+      count: 11
     - concern: ci-cd
       path: docs/adr/index/by-concern/ci-cd.yaml
-      count: 51
+      count: 52
     - concern: documentation
       path: docs/adr/index/by-concern/documentation.yaml
       count: 23
@@ -88,7 +88,7 @@ facets:
       count: 34
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 153
+      count: 154
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -103,10 +103,10 @@ facets:
       count: 7
     - concern: testing
       path: docs/adr/index/by-concern/testing.yaml
-      count: 4
+      count: 5
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 47
+      count: 48
   by_status:
     - implementation_status: Implemented
       slug: implemented
@@ -131,14 +131,44 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 54
+      count: 59
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0481
+  next_available_adr: 0486
 latest_adrs:
+  - adr: 0485
+    title: Convergence Idempotency Tests
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: testing
+    path: docs/adr/0485-convergence-idempotency-tests.md
+  - adr: 0484
+    title: Self-Verification Contracts
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: platform
+    path: docs/adr/0484-self-verification-contracts.md
+  - adr: 0483
+    title: Hands-Off Bootstrap — Machine-to-Machine Deployment
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: bootstrap
+    path: docs/adr/0483-hands-off-bootstrap.md
+  - adr: 0482
+    title: Capacity-Aware Dynamic VM Sizing
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: vm-topology
+    path: docs/adr/0482-capacity-aware-dynamic-sizing.md
+  - adr: 0481
+    title: Explicit Deployment Context (no implicit identity.yml swap)
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: ci-cd
+    path: docs/adr/0481-explicit-deployment-context.md
   - adr: 0480
     title: Multi-Deployment Certificate Validation
     implementation_status: Proposed
@@ -169,36 +199,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: platform
     path: docs/adr/0474-phase12-receipt-mass-refresh.md
-  - adr: '0473'
-    title: Phase 11 — Four CPU-Only Automation Primitives
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: automation
-    path: docs/adr/0473-phase11-cpu-only-automation-primitives.md
-  - adr: '0472'
-    title: Phase 10 — Fix ADR-Collision Class via Early-Merge Reservation
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: ci-cd
-    path: docs/adr/0472-phase10-reservation-hardening.md
-  - adr: '0471'
-    title: — Karakeep Coolify Deployment + Runtime Recovery Protocol
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: platform
-    path: docs/adr/0471-karakeep-coolify-deploy-and-runtime-recovery.md
-  - adr: '0470'
-    title: Per-Deployment Fixture Inventory + Matrix CI
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: ci-cd
-    path: docs/adr/0470-deployment-fixture-matrix.md
-  - adr: 0469
-    title: connection.yml SSH key pull from OpenBao
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: security
-    path: docs/adr/0469-connection-yml-vault-key-pull.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

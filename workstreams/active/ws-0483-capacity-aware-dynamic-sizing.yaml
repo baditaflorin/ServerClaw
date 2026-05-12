@@ -1,0 +1,75 @@
+id: ws-0483-capacity-aware-dynamic-sizing
+adr: "0482"
+title: Capacity-aware dynamic VM sizing — make `make new-deployment` actually portable
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+deployment: 0fork
+branch: unassigned/ws-0483-capacity-aware-dynamic-sizing
+worktree_path: unassigned/ws-0483-capacity-aware-dynamic-sizing
+doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
+depends_on:
+  - adr-0407-generic-by-default
+  - adr-0440-deployment-layout
+  - adr-0441-service-profiles
+  - adr-0481-explicit-deployment-context
+shared_surfaces:
+  - docs/adr/0482-capacity-aware-dynamic-sizing.md
+  - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
+  - config/contracts/deployment-v1/capacity.schema.json
+  - config/sizing-policy.yml
+  - scripts/capacity_probe.py
+  - scripts/resolve_topology.py
+  - Makefile
+  - mk/multi-deployment.mk
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0483_adr
+      paths:
+        - docs/adr/0482-capacity-aware-dynamic-sizing.md
+        - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
+      mode: shared_contract
+      contract: adr-0482-capacity-aware-dynamic-sizing-v1
+    - id: ws_0483_schemas
+      paths:
+        - config/contracts/deployment-v1/capacity.schema.json
+        - config/contracts/deployment-v1/sizing-policy.schema.json
+      mode: shared_contract
+      contract: deployment-v1-capacity-sizing-v1
+    - id: ws_0483_policy
+      paths:
+        - config/sizing-policy.yml
+      mode: shared_contract
+      contract: sizing-policy-v1
+    - id: ws_0483_scripts
+      paths:
+        - scripts/capacity_probe.py
+        - scripts/resolve_topology.py
+      mode: shared_contract
+      contract: capacity-resolver-v1
+tasks:
+  - id: t1-schemas
+    title: Capacity + sizing-policy JSON schemas under config/contracts/deployment-v1/
+    status: in_progress
+  - id: t2-policy
+    title: Committed config/sizing-policy.yml covering all 17 current service classes
+    status: in_progress
+  - id: t3-probe
+    title: scripts/capacity_probe.py + `make probe-capacity` target
+    status: in_progress
+  - id: t4-resolver
+    title: scripts/resolve_topology.py + `make resolve-topology` + `make plan-capacity`
+    status: in_progress
+  - id: t5-wire-new-deployment
+    title: Wire probe + resolve into `make new-deployment` so one command bootstraps a forkable deployment
+    status: pending
+  - id: t6-backfill
+    title: Re-probe and re-resolve lv3 and 0fork; diff against current topology and document deltas
+    status: pending
+  - id: t7-apply
+    title: Separate ADR for `make apply-topology` (live-resize semantics)
+    status: pending
+findings:
+  - "2026-05-11 incident on 0fork showed the lv3-sized topology over-allocates RAM to 180GB on a 64GB host. The fix is structural, not parametric: sizing must be derived from probed host capacity, not copied from another deployment."
+  - The 0fork-incident audit revealed every VM had balloon=0 (ballooning disabled). Always-on ballooning (40% floor) is now part of the policy defaults; the 0fork host has been queued to enable ballooning on next VM reboot, but new deployments will be ballooning-enabled from creation.

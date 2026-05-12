@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-11'
+generated: '2026-05-12'
 facet: concern
 concern: testing
-total_adrs: 4
+total_adrs: 5
 adrs:
   - adr: '0111'
     title: End-to-End Integration Test Suite
@@ -83,3 +83,18 @@ adrs:
     summary: Replace the hardcoded 10.10.10.0/24 with a configurable subnet that avoids
     filename: 0410-docker-isolation-testing-and-ioc-completion.md
     path: docs/adr/0410-docker-isolation-testing-and-ioc-completion.md
+  - adr: 0485
+    title: Convergence Idempotency Tests
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: testing
+    keywords:
+      - convergence
+      - idempotency
+      - tests
+    summary: 'Every converge target gets a corresponding make idempotency-test-<target> (or rolled up under make idempotency-test-all).
+      The test:'
+    filename: 0485-convergence-idempotency-tests.md
+    path: docs/adr/0485-convergence-idempotency-tests.md

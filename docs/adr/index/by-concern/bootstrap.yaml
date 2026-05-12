@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-11'
+generated: '2026-05-12'
 facet: concern
 concern: bootstrap
-total_adrs: 10
+total_adrs: 11
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -207,3 +207,18 @@ adrs:
     summary: A new tasks file coolifyruntime/tasks/bootstrapappsvm.yml runs against coolify-apps
     filename: 0477-coolify-apps-self-healing-bootstrap.md
     path: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
+  - adr: 0483
+    title: Hands-Off Bootstrap — Machine-to-Machine Deployment
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - hands-off
+      - bootstrap
+      - machine-to-machine
+      - deployment
+    summary: 'A new file replaces the operator''s hand-editing chain:'
+    filename: 0483-hands-off-bootstrap.md
+    path: docs/adr/0483-hands-off-bootstrap.md
