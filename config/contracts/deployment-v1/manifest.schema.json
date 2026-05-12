@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schemas/deployment-v1/manifest.json",
+  "title": "Deployment Manifest",
+  "description": "Single declarative input that drives hands-off bootstrap (ADR 0483). An operator authors this one file; everything else — identity.yml, connection.yml, topology.yml, profile.yml — is derived from it plus the probe results.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "slug",
+    "apex_domain",
+    "operator",
+    "provider"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version. Bump on incompatible changes."
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "minLength": 2,
+      "description": "Deployment slug. Short, DNS-safe identifier. Used as the directory name under .local/deployments/ and as the apex_slug template variable."
+    },
+    "apex_domain": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$",
+      "minLength": 3,
+      "description": "Apex domain for this deployment (e.g. 0fork.com). Must be DNS-controlled by the operator."
+    },
+    "operator": {
+      "type": "object",
+      "required": ["name", "email"],
+      "additionalProperties": false,
+      "description": "Operator identity. Appears in ACME registrations, mail headers, Proxmox notifications.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable operator name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Operator contact email."
+        }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "required": ["kind", "host", "initial_user", "initial_key_path"],
+      "additionalProperties": false,
+      "description": "Where the Proxmox host lives and how to reach it initially.",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["hetzner", "local", "oracle", "aws-bare-metal", "custom"],
+          "description": "Provider type. Drives provider-specific setup steps in the bootstrap chain. Only 'hetzner' is fully implemented; others are accepted for future drivers."
+        },
+        "host": {
+          "type": "string",
+          "description": "Public address (IPv4, IPv6, or resolvable hostname) of the Proxmox host. Used for both SSH bootstrap and API calls."
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 22,
+          "description": "SSH port on the Proxmox host. Defaults to 22."
+        },
+        "initial_user": {
+          "type": "string",
+          "description": "User for the initial SSH connection (typically 'root'). Replaced by the 'ops' sudoer in step 3-init-remote."
+        },
+        "initial_key_path": {
+          "type": "string",
+          "description": "Path to the SSH private key for the initial connection. Relative paths resolve against .local/ssh/."
+        }
+      }
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]+$"
+      },
+      "uniqueItems": true,
+      "default": ["core"],
+      "description": "Service profiles to activate. Resolved via inventory/group_vars/all/service_profiles.yml. Defaults to ['core']."
+    },
+    "extra_services": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]+$"
+      },
+      "uniqueItems": true,
+      "default": [],
+      "description": "Additional services not included in any selected profile."
+    },
+    "disabled_services": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9_-]+$"
+      },
+      "uniqueItems": true,
+      "default": [],
+      "description": "Services to hard-disable even if a profile would otherwise include them."
+    },
+    "secrets": {
+      "type": "object",
+      "required": ["source"],
+      "additionalProperties": false,
+      "description": "Secret source configuration. The bootstrap chain reads secrets from here rather than prompting the operator.",
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["openbao", "operator-stdin", "vault", "1password"],
+          "description": "How to obtain secrets during bootstrap. 'operator-stdin' is the manual path; 'openbao' uses the platform's own OpenBao instance (requires step-9 to have run). 'vault' and '1password' are future drivers."
+        },
+        "reference": {
+          "type": "string",
+          "description": "Secret reference path (e.g. 'deployments/mycorp/secrets' for openbao, '1password://vaults/Platform/mycorp' for 1password). Required for all sources except operator-stdin."
+        }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Bootstrap chain behaviour under failure.",
+      "properties": {
+        "fail_fast": {
+          "type": "boolean",
+          "default": true,
+          "description": "Abort the chain on the first post-condition failure. When false, best-effort continues and records failures."
+        },
+        "max_retries_per_step": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 3,
+          "description": "How many times to retry a failed step before aborting."
+        },
+        "step_timeout_s": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 7200,
+          "default": 1800,
+          "description": "Wall-clock timeout per step in seconds. Steps that exceed this are treated as failures."
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Final-smoke verification contract. Drives step 12-final-smoke.",
+      "properties": {
+        "smoke_endpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "URLs to verify at final-smoke. Template variables {apex} and {apex_slug} are expanded. Each must return 200 or 308."
+        },
+        "expected_running_vms_count": {
+          "type": "string",
+          "pattern": "^(>=|<=|=|>|<)\\s*[0-9]+$",
+          "description": "Minimum VM count assertion. Evaluated against qm list output at step 12. E.g. '>= 5'."
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-text operator notes. Not interpreted by the bootstrap chain; appears in receipts and status output."
+    }
+  },
+  "examples": [
+    {
+      "schema_version": 1,
+      "slug": "mycorp",
+      "apex_domain": "mycorp.com",
+      "operator": {
+        "name": "Acme Corp Ops",
+        "email": "ops@mycorp.com"
+      },
+      "provider": {
+        "kind": "hetzner",
+        "host": "65.109.84.223",
+        "port": 2222,
+        "initial_user": "root",
+        "initial_key_path": "hetzner_llm_agents_ed25519"
+      },
+      "profiles": ["core", "devtools"],
+      "extra_services": [],
+      "disabled_services": ["runtime-ai"],
+      "secrets": {
+        "source": "operator-stdin"
+      },
+      "gates": {
+        "fail_fast": true,
+        "max_retries_per_step": 3,
+        "step_timeout_s": 1800
+      },
+      "verification": {
+        "smoke_endpoints": [
+          "https://registry.{apex}/api/v2.0/ping",
+          "https://sso.{apex}/realms/{apex_slug}/.well-known/openid-configuration",
+          "https://wiki.{apex}/"
+        ],
+        "expected_running_vms_count": ">= 5"
+      }
+    }
+  ]
+}

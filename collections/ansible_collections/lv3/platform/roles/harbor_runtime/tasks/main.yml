@@ -207,6 +207,20 @@
   register: harbor_prepare
   changed_when: harbor_prepare_needed | bool
 
+- name: Patch Harbor compose logging — replace syslog driver with json-file (prevent circular boot dependency)
+  ansible.builtin.replace:
+    path: "{{ harbor_generated_compose_file }}"
+    regexp: 'driver: syslog'
+    replace: 'driver: json-file'
+  when: harbor_prepare_needed | bool
+
+- name: Patch Harbor compose logging — replace syslog tag options with json-file rotation options
+  ansible.builtin.replace:
+    path: "{{ harbor_generated_compose_file }}"
+    regexp: '( +)tag: "harbor-[^"]*"'
+    replace: '\1max-size: "50m"\n\1max-file: "5"'
+  when: harbor_prepare_needed | bool
+
 - name: Record whether Harbor compose assets changed
   ansible.builtin.set_fact:
     harbor_compose_assets_changed: >-

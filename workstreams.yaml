@@ -25,13 +25,13 @@ workstreams:
   adr: 0485
   title: "Convergence idempotency tests \u2014 running twice = no-op; drift always\
     \ detected"
-  status: planned
+  status: in_progress
   ready_to_merge: false
   live_applied: false
-  owner: unassigned
+  owner: claude
   deployment: 0fork
-  branch: unassigned/ws-0485-convergence-idempotency-tests
-  worktree_path: unassigned/ws-0485-convergence-idempotency-tests
+  branch: claude/happy-maxwell-b79396
+  worktree_path: .claude/worktrees/happy-maxwell-b79396
   doc: docs/adr/0485-convergence-idempotency-tests.md
   depends_on:
   - adr-0481-explicit-deployment-context
@@ -55,13 +55,34 @@ workstreams:
     - id: ws_0485_detect_drift
       paths:
       - scripts/detect_drift.py
+      - tests/unit/test_detect_drift.py
       mode: shared_contract
       contract: detect-drift-v1
+    - id: ws_0485_makefile
+      paths:
+      - mk/multi-deployment.mk
+      mode: shared_contract
+      contract: multi-deployment-mk-v1
+    - id: ws_0485_integration_surfaces
+      paths:
+      - workstreams/active/ws-0484-self-verification-contracts.yaml
+      - workstreams/active/ws-0486-hands-off-bootstrap.yaml
+      - workstreams/policy.yaml
+      - config/post_conditions.yml
+      - config/bootstrap_steps.yml
+      - config/contracts/deployment-v1/manifest.schema.json
+      - scripts/derive_manifest.py
+      - scripts/lint_bootstrap_coverage.py
+      - tests/unit/test_derive_manifest.py
+      - tests/unit/test_lint_bootstrap_coverage.py
+      - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+      mode: shared_contract
+      contract: integration-branch-ws-0484-ws-0486-v1
   tasks:
   - id: t1-detect-drift
     title: "scripts/detect_drift.py \u2014 runs Ansible --check, parses changed-count,\
       \ exits nonzero on drift"
-    status: pending
+    status: completed
   - id: t2-fixture-deployment
     title: "config/contracts/deployment-v1/fixture-deployments.yml \u2014 ephemeral\
       \ CI deployment used by idempotency tests"
@@ -130,6 +151,12 @@ workstreams:
       - tests/unit/test_self_check.py
       mode: shared_contract
       contract: self-check-runner-v1
+    - id: ws_0484_lint_coverage
+      paths:
+      - scripts/lint_bootstrap_coverage.py
+      - tests/unit/test_lint_bootstrap_coverage.py
+      mode: shared_contract
+      contract: lint-bootstrap-coverage-v1
   tasks:
   - id: t1-schema
     title: post-conditions JSON schema + sample registry
@@ -151,22 +178,22 @@ workstreams:
   - id: t6-ci-lint
     title: "CI lint enforcing every step in bootstrap_steps.yml has \u22651 matching\
       \ post-condition in post_conditions.yml"
-    status: pending
+    status: completed
   - id: t7-expand-coverage
     title: Expand registry to cover every existing converge-* target; goal "no step
       is 'unverified'"
-    status: pending
+    status: completed
 - id: ws-0486-hands-off-bootstrap
   adr: 0483
   title: "Hands-off bootstrap \u2014 single declarative input \u2192 verified-running\
     \ platform"
-  status: planned
+  status: in_progress
   ready_to_merge: false
   live_applied: false
-  owner: unassigned
+  owner: claude
   deployment: 0fork
-  branch: unassigned/ws-0486-hands-off-bootstrap
-  worktree_path: unassigned/ws-0486-hands-off-bootstrap
+  branch: claude/happy-maxwell-b79396
+  worktree_path: .claude/worktrees/happy-maxwell-b79396
   doc: docs/adr/0483-hands-off-bootstrap.md
   depends_on:
   - adr-0407-generic-by-default
@@ -192,19 +219,36 @@ workstreams:
       - workstreams/active/ws-0486-hands-off-bootstrap.yaml
       mode: shared_contract
       contract: adr-0483-hands-off-bootstrap-v1
+    - id: ws_0486_manifest_schema
+      paths:
+      - config/contracts/deployment-v1/manifest.schema.json
+      - config/bootstrap_steps.yml
+      mode: shared_contract
+      contract: deployment-manifest-schema-v1
+    - id: ws_0486_derive_manifest
+      paths:
+      - scripts/derive_manifest.py
+      - tests/unit/test_derive_manifest.py
+      mode: shared_contract
+      contract: derive-manifest-v1
+    - id: ws_0486_harbor_fix
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+      mode: shared_contract
+      contract: harbor-runtime-json-file-logging-v1
   tasks:
   - id: t1-manifest-schema
     title: "config/contracts/deployment-v1/manifest.schema.json \u2014 single declarative\
       \ input format"
-    status: pending
+    status: completed
   - id: t2-derive-manifest
     title: "scripts/derive_manifest.py \u2014 introspect lv3 + 0fork to emit draft\
       \ manifests"
-    status: pending
+    status: completed
   - id: t3-bootstrap-steps
     title: "config/bootstrap_steps.yml \u2014 the 14-step contract chain (preconditions\
       \ + postconditions per step)"
-    status: pending
+    status: completed
   - id: t4-orchestrator
     title: "scripts/bootstrap_orchestrator.py \u2014 drives steps, honors gates.fail_fast,\
       \ writes receipts, supports resume-from"
@@ -4997,3 +5041,10 @@ surface_ownership:
   - receipts/restic-backups/*
   - receipts/restic-snapshots-latest.json
   - receipts/sbom/*
+  - VERSION
+  - RELEASE.md
+  - changelog.md
+  - workstreams.yaml
+  - build/platform-manifest.json
+  - build/onboarding/*
+  - docs/release-notes/*

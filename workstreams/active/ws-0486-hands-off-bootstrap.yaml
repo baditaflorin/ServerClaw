@@ -1,13 +1,13 @@
 id: ws-0486-hands-off-bootstrap
 adr: "0483"
 title: Hands-off bootstrap — single declarative input → verified-running platform
-status: planned
+status: in_progress
 ready_to_merge: false
 live_applied: false
-owner: unassigned
+owner: claude
 deployment: 0fork
-branch: unassigned/ws-0486-hands-off-bootstrap
-worktree_path: unassigned/ws-0486-hands-off-bootstrap
+branch: claude/happy-maxwell-b79396
+worktree_path: .claude/worktrees/happy-maxwell-b79396
 doc: docs/adr/0483-hands-off-bootstrap.md
 depends_on:
   - adr-0407-generic-by-default
@@ -33,16 +33,33 @@ ownership_manifest:
         - workstreams/active/ws-0486-hands-off-bootstrap.yaml
       mode: shared_contract
       contract: adr-0483-hands-off-bootstrap-v1
+    - id: ws_0486_manifest_schema
+      paths:
+        - config/contracts/deployment-v1/manifest.schema.json
+        - config/bootstrap_steps.yml
+      mode: shared_contract
+      contract: deployment-manifest-schema-v1
+    - id: ws_0486_derive_manifest
+      paths:
+        - scripts/derive_manifest.py
+        - tests/unit/test_derive_manifest.py
+      mode: shared_contract
+      contract: derive-manifest-v1
+    - id: ws_0486_harbor_fix
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+      mode: shared_contract
+      contract: harbor-runtime-json-file-logging-v1
 tasks:
   - id: t1-manifest-schema
     title: config/contracts/deployment-v1/manifest.schema.json — single declarative input format
-    status: pending
+    status: completed
   - id: t2-derive-manifest
     title: scripts/derive_manifest.py — introspect lv3 + 0fork to emit draft manifests
-    status: pending
+    status: completed
   - id: t3-bootstrap-steps
     title: config/bootstrap_steps.yml — the 14-step contract chain (preconditions + postconditions per step)
-    status: pending
+    status: completed
   - id: t4-orchestrator
     title: scripts/bootstrap_orchestrator.py — drives steps, honors gates.fail_fast, writes receipts, supports resume-from
     status: pending

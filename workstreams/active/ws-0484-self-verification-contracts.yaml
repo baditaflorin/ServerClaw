@@ -45,6 +45,12 @@ ownership_manifest:
         - tests/unit/test_self_check.py
       mode: shared_contract
       contract: self-check-runner-v1
+    - id: ws_0484_lint_coverage
+      paths:
+        - scripts/lint_bootstrap_coverage.py
+        - tests/unit/test_lint_bootstrap_coverage.py
+      mode: shared_contract
+      contract: lint-bootstrap-coverage-v1
 tasks:
   - id: t1-schema
     title: post-conditions JSON schema + sample registry
@@ -63,7 +69,7 @@ tasks:
     status: pending
   - id: t6-ci-lint
     title: CI lint enforcing every step in bootstrap_steps.yml has ≥1 matching post-condition in post_conditions.yml
-    status: pending
+    status: completed
   - id: t7-expand-coverage
     title: Expand registry to cover every existing converge-* target; goal "no step is 'unverified'"
-    status: pending
+    status: completed

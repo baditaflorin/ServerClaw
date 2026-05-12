@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.43",
+  "repo_version": "0.179.44",
   "platform_version": "0.178.222",
-  "generated_at": "2026-05-11T14:57:05Z",
-  "next_refresh_at": "2026-05-11T15:57:05Z",
+  "generated_at": "2026-05-12T21:11:13Z",
+  "next_refresh_at": "2026-05-12T22:11:13Z",
   "environment": "production",
   "identity": {
     "platform_name": "0fork.com",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.42",
-    "deployed_at": "2026-05-11",
-    "summary": "ADR 0477: coolify-apps self-healing bootstrap \u2014 SSH access via `Match Address` sshd directive, DNS-01 cert resolution via Hetzner (replaces HTTP-01), and new `coolify_app_deploy` role that discovers container names via `docker ps` instead of hardcoded IPs. All three changes self-heal on re-converge.",
-    "release_notes_url": "docs/release-notes/0.179.43.md"
+    "last_version": "0.179.43",
+    "deployed_at": "2026-05-12",
+    "summary": "**ws-0486 bootstrap foundations (ADR 0483 phase 1):** `config/contracts/deployment-v1/manifest.schema.json` \u2014 the single declarative operator input; `scripts/derive_manifest.py` \u2014 introspect existing deployment files and emit a draft manifest.yml; `config/bootstrap_steps.yml` \u2014 the 14-step gated chain with pre/postconditions per step **ws-0485 detect-drift (ADR 0485 t1):** `scripts/detect_drift.py` runs Ansible `--check`, parses PLAY RECAP changed-count, exits non-zero on drift; `make detect-drift playbook=<path>` Makefile target",
+    "release_notes_url": "docs/release-notes/0.179.44.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

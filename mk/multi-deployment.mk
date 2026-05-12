@@ -203,11 +203,19 @@ self-check-strict: _require-deployment  ## Same as self-check, but non-critical 
 self-check-json: _require-deployment  ## Emit machine-readable JSON only.
 	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/self_check.py --json $(if $(step),--step $(step),) $(if $(tag),--tag $(tag),)
 
-# Stub for ADR 0485 detect-drift. The real implementation runs Ansible
-# in --check mode and parses the changed-count. Placeholder for now.
-detect-drift: _require-deployment  ## (ADR 0485 stub) Run converge in check-mode; non-zero changed = drift.
-	@echo "detect-drift: not implemented yet (ADR 0485 stub). Run \`make self-check\` for current state assertions." >&2
-	@exit 0
+lint-bootstrap-coverage:  ## (ADR 0484 §5) Verify every bootstrap step has ≥1 post-condition in post_conditions.yml.
+	@uv run --with pyyaml python $(REPO_ROOT)/scripts/lint_bootstrap_coverage.py
+
+detect-drift: _require-deployment  ## (ADR 0485) Run playbook --check and exit non-zero if changed > 0.
+	@if [ -z "$(playbook)" ]; then \
+	  echo "Usage: make detect-drift playbook=playbooks/harbor.yml [extra_vars='env=production']" >&2; \
+	  exit 2; \
+	fi
+	@uv run --with pyyaml python $(REPO_ROOT)/scripts/detect_drift.py \
+	  --playbook "$(playbook)" \
+	  $(if $(extra_vars),--extra-vars "$(extra_vars)",) \
+	  $(if $(slug),--slug "$(slug)",) \
+	  $(if $(write_report),--write-report,)
 
 # Internal guard target. Safety-critical wrappers (converge-*, live-apply-*,
 # bootstrap, edge-publication, etc.) can list this as a prereq to fail loudly

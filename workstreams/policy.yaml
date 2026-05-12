@@ -18,3 +18,10 @@ surface_ownership:
     - receipts/restic-backups/*
     - receipts/restic-snapshots-latest.json
     - receipts/sbom/*
+    - VERSION
+    - RELEASE.md
+    - changelog.md
+    - workstreams.yaml
+    - build/platform-manifest.json
+    - build/onboarding/*
+    - docs/release-notes/*

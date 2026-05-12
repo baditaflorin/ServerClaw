@@ -20,6 +20,78 @@ schema_version: 1
 
 post_conditions:
 
+  # --- Bootstrap chain steps -----------------------------------------
+
+  - id: probe-capacity.file-written
+    description: capacity.yml was written for the active deployment
+    after_step: probe-capacity
+    tags: [bootstrap-only]
+    type: file
+    path: ".local/deployments/{apex_slug}/capacity.yml"
+    expect_exists: true
+    critical: true
+
+  - id: resolve-topology.file-written
+    description: topology.yml was written for the active deployment
+    after_step: resolve-topology
+    tags: [bootstrap-only]
+    type: file
+    path: ".local/deployments/{apex_slug}/topology.yml"
+    expect_exists: true
+    critical: true
+
+  - id: init-remote.ops-ssh-reachable
+    description: ops@ SSH login via bootstrap key succeeds to the Proxmox host
+    after_step: init-remote
+    tags: [bootstrap-only]
+    type: command
+    command: >-
+      ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=no
+      0fork-jump hostname
+    expect_exit: 0
+    timeout_s: 20
+    retries: 1
+    critical: true
+
+  - id: install-proxmox.pveversion-ok
+    description: pveversion on the Proxmox host confirms a running PVE install
+    after_step: install-proxmox
+    tags: [bootstrap-only]
+    type: pveapi
+    via_ssh: 0fork-jump
+    command: "pveversion"
+    expect_stdout: "pve-manager"
+    expect_exit: 0
+    timeout_s: 20
+    retries: 2
+    critical: true
+
+  - id: harden-guests.ufw-active
+    description: ufw is active on the nginx-edge VM (spot check for hardening)
+    after_step: harden-guests
+    tags: [bootstrap-only]
+    type: command
+    command: >-
+      ssh -o BatchMode=yes -J 0fork-jump
+      -i .local/ssh/bootstrap.id_ed25519 ops@10.10.10.110
+      "sudo ufw status | grep -q 'Status: active'"
+    expect_exit: 0
+    timeout_s: 20
+    retries: 1
+    critical: true
+
+  - id: converge-all-services.harbor-ping
+    description: Harbor registry ping passes after all-services converge
+    after_step: converge-all-services
+    tags: [bootstrap-only]
+    type: http
+    url: "https://registry.{apex}/api/v2.0/ping"
+    expect_status: 200
+    expect_body_contains: "Pong"
+    timeout_s: 10
+    retries: 3
+    critical: true
+
   # --- DNS layer ------------------------------------------------------
 
   - id: dns.apex-points-at-edge
@@ -175,3 +247,116 @@ post_conditions:
     url: "https://ntfy.{apex}/"
     expect_status: 200
     retries: 3
+
+  # --- OpenBao secret store -------------------------------------------
+
+  - id: openbao.unsealed
+    description: OpenBao reports unsealed status on runtime-control
+    after_step: converge-openbao
+    tags: [bootstrap, final-smoke]
+    type: command
+    command: >-
+      ssh -o BatchMode=yes -o ConnectTimeout=15 0fork-jump
+      "ssh -o BatchMode=yes -o ConnectTimeout=10 -i /root/.ssh/bootstrap.id_ed25519
+      ops@10.10.10.92 'curl -sf http://localhost:8200/v1/sys/health | grep -v sealed'"
+    expect_exit: 0
+    timeout_s: 30
+    retries: 2
+    critical: true
+
+  # --- Gitea SCM ------------------------------------------------------
+
+  - id: gitea.public-200
+    description: git.{apex} responds 200
+    after_step: converge-gitea
+    tags: [final-smoke]
+    type: http
+    url: "https://git.{apex}/"
+    expect_status: 200
+    retries: 3
+
+  # --- API gateway ----------------------------------------------------
+
+  - id: api-gateway.public-200
+    description: api.{apex} gateway health endpoint responds 200
+    after_step: converge-api-gateway
+    tags: [final-smoke]
+    type: http
+    url: "https://api.{apex}/"
+    expect_status: 200
+    retries: 3
+
+  # --- Object storage -------------------------------------------------
+
+  - id: minio.s3-endpoint-reachable
+    description: s3.{apex} responds (any TLS response) — just tests TCP+TLS
+    after_step: converge-minio
+    tags: [final-smoke]
+    type: tcp
+    host: "s3.{apex}"
+    port: 443
+    timeout_s: 10
+    retries: 3
+    critical: false   # s3.0fork.com has known cert SAN gap — non-critical until fixed
+
+  # --- Ops portal -----------------------------------------------------
+
+  - id: ops-portal.public-200
+    description: ops.{apex} portal responds 200
+    after_step: converge-ops-portal
+    tags: [final-smoke]
+    type: http
+    url: "https://ops.{apex}/"
+    expect_status: 200
+    retries: 3
+
+  # --- Windmill workflow engine ----------------------------------------
+
+  - id: windmill.public-200
+    description: automation.{apex} Windmill instance responds 200
+    after_step: converge-windmill
+    tags: [final-smoke]
+    type: http
+    url: "https://automation.{apex}/"
+    expect_status: 200
+    retries: 3
+    critical: false
+
+  # --- Proxmox host health --------------------------------------------
+
+  - id: proxmox.host.swap-not-thrashing
+    description: Proxmox host swap usage is < 20% of total swap
+    after_step: provision-guests
+    tags: [bootstrap, daily]
+    type: pveapi
+    via_ssh: 0fork-jump
+    command: "free -m | awk '/^Swap:/{if ($2>0 && $3/$2 > 0.2) exit 1; else exit 0}'"
+    expect_exit: 0
+    timeout_s: 20
+    retries: 1
+    critical: false
+
+  - id: proxmox.guest.balloon-enabled
+    description: At least one VM has ballooning enabled (balloon > 0)
+    after_step: provision-guests
+    tags: [bootstrap]
+    type: pveapi
+    via_ssh: 0fork-jump
+    command: "qm list | awk 'NR>1{print $1}' | xargs -I{} qm config {} 2>/dev/null | grep -c '^balloon:' | grep -v '^0$'"
+    expect_exit: 0
+    timeout_s: 30
+    retries: 1
+    critical: false
+
+  # --- Mail platform --------------------------------------------------
+
+  - id: mail-platform.smtp-tcp-reachable
+    description: mail.{apex} SMTP port 587 is reachable
+    after_step: converge-mail-platform
+    tags: [final-smoke]
+    type: tcp
+    host: "mail.{apex}"
+    port: 587
+    timeout_s: 10
+    retries: 2
+    critical: false

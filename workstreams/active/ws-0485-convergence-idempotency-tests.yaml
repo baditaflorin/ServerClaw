@@ -1,13 +1,13 @@
 id: ws-0485-convergence-idempotency-tests
 adr: "0485"
 title: Convergence idempotency tests — running twice = no-op; drift always detected
-status: planned
+status: in_progress
 ready_to_merge: false
 live_applied: false
-owner: unassigned
+owner: claude
 deployment: 0fork
-branch: unassigned/ws-0485-convergence-idempotency-tests
-worktree_path: unassigned/ws-0485-convergence-idempotency-tests
+branch: claude/happy-maxwell-b79396
+worktree_path: .claude/worktrees/happy-maxwell-b79396
 doc: docs/adr/0485-convergence-idempotency-tests.md
 depends_on:
   - adr-0481-explicit-deployment-context
@@ -31,12 +31,33 @@ ownership_manifest:
     - id: ws_0485_detect_drift
       paths:
         - scripts/detect_drift.py
+        - tests/unit/test_detect_drift.py
       mode: shared_contract
       contract: detect-drift-v1
+    - id: ws_0485_makefile
+      paths:
+        - mk/multi-deployment.mk
+      mode: shared_contract
+      contract: multi-deployment-mk-v1
+    - id: ws_0485_integration_surfaces
+      paths:
+        - workstreams/active/ws-0484-self-verification-contracts.yaml
+        - workstreams/active/ws-0486-hands-off-bootstrap.yaml
+        - workstreams/policy.yaml
+        - config/post_conditions.yml
+        - config/bootstrap_steps.yml
+        - config/contracts/deployment-v1/manifest.schema.json
+        - scripts/derive_manifest.py
+        - scripts/lint_bootstrap_coverage.py
+        - tests/unit/test_derive_manifest.py
+        - tests/unit/test_lint_bootstrap_coverage.py
+        - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+      mode: shared_contract
+      contract: integration-branch-ws-0484-ws-0486-v1
 tasks:
   - id: t1-detect-drift
     title: scripts/detect_drift.py — runs Ansible --check, parses changed-count, exits nonzero on drift
-    status: pending
+    status: completed
   - id: t2-fixture-deployment
     title: config/contracts/deployment-v1/fixture-deployments.yml — ephemeral CI deployment used by idempotency tests
     status: pending

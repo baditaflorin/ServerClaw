@@ -1,0 +1,378 @@
+# Bootstrap step chain — ADR 0483 §3.
+#
+# Every step in the hands-off bootstrap is declared here with:
+#   - preconditions: what must hold before this step starts
+#   - make_target:   the Makefile target this step drives
+#   - postconditions: what must hold after this step for it to be "done"
+#   - timeout_s / retries: chain gate knobs (overridable in manifest.yml .gates)
+#
+# scripts/bootstrap_orchestrator.py reads this file and drives the chain.
+# make self-check consumes the postcondition ids here to validate each step.
+# CI lints that every id in make_target list has ≥1 matching entry in
+# config/post_conditions.yml (enforced by scripts/lint_bootstrap_coverage.py).
+#
+# Template variables in preconditions / postconditions / descriptions:
+#   {slug}      -> active deployment slug
+#   {apex}      -> apex domain (platform_domain from identity.yml)
+#   {apex_slug} -> first label of apex
+#
+# Step id format: <N>-<short-name>  (0-indexed, N zero-padded to 2 digits)
+
+schema_version: 1
+
+steps:
+
+  - id: "0-derive"
+    title: "Derive identity, connection, and profile from manifest"
+    make_target: derive-deployment-files
+    description: |
+      Reads .local/deployments/{slug}/manifest.yml and emits identity.yml,
+      connection.yml, and profile.yml. These files are the input to every
+      subsequent step. This step is always re-entrant: re-running it regenerates
+      derived files without touching operator-authored manifests or secrets.
+    preconditions:
+      - id: manifest.exists
+        type: file
+        path: ".local/deployments/{slug}/manifest.yml"
+        expect_exists: true
+      - id: manifest.valid
+        type: schema
+        target: ".local/deployments/{slug}/manifest.yml"
+        schema: "config/contracts/deployment-v1/manifest.schema.json"
+    postconditions:
+      - id: identity.derived.exists
+        type: file
+        path: ".local/deployments/{slug}/identity.yml"
+        expect_exists: true
+      - id: connection.derived.exists
+        type: file
+        path: ".local/deployments/{slug}/connection.yml"
+        expect_exists: true
+      - id: profile.derived.exists
+        type: file
+        path: ".local/deployments/{slug}/profile.yml"
+        expect_exists: true
+    timeout_s: 30
+    retries: 0
+
+  - id: "1-probe-capacity"
+    title: "SSH to Proxmox host and capture hardware capacity"
+    make_target: probe-capacity
+    description: |
+      Runs scripts/capacity_probe.py against the host in connection.yml.
+      Writes .local/deployments/{slug}/capacity.yml. Used by step 2 to size VMs.
+    preconditions:
+      - id: connection.exists
+        type: file
+        path: ".local/deployments/{slug}/connection.yml"
+        expect_exists: true
+      - id: connection.valid
+        type: schema
+        target: ".local/deployments/{slug}/connection.yml"
+        schema: "config/contracts/deployment-v1/connection.schema.json"
+    postconditions:
+      - id: capacity.exists
+        type: file
+        path: ".local/deployments/{slug}/capacity.yml"
+        expect_exists: true
+      - id: capacity.valid
+        type: schema
+        target: ".local/deployments/{slug}/capacity.yml"
+        schema: "config/contracts/deployment-v1/capacity.schema.json"
+    timeout_s: 60
+    retries: 2
+
+  - id: "2-resolve-topology"
+    title: "Compute VM topology from capacity + sizing policy + profile"
+    make_target: resolve-topology
+    description: |
+      Runs scripts/resolve_topology.py. Reads capacity.yml + sizing-policy.yml +
+      profile.yml and writes topology.yml. The topology is deterministic given
+      the same inputs: running this step twice produces the same topology.yml.
+    preconditions:
+      - id: capacity.valid
+        type: schema
+        target: ".local/deployments/{slug}/capacity.yml"
+        schema: "config/contracts/deployment-v1/capacity.schema.json"
+      - id: sizing-policy.exists
+        type: file
+        path: "config/sizing-policy.yml"
+        expect_exists: true
+      - id: profile.exists
+        type: file
+        path: ".local/deployments/{slug}/profile.yml"
+        expect_exists: true
+    postconditions:
+      - id: topology.exists
+        type: file
+        path: ".local/deployments/{slug}/topology.yml"
+        expect_exists: true
+      - id: topology.valid
+        type: schema
+        target: ".local/deployments/{slug}/topology.yml"
+        schema: "config/contracts/deployment-v1/topology.schema.json"
+    timeout_s: 60
+    retries: 0
+
+  - id: "3-init-remote"
+    title: "Bootstrap ops sudoer + install bootstrap SSH key on Proxmox host"
+    make_target: init-remote
+    description: |
+      Connects as provider.initial_user using provider.initial_key_path and
+      creates an 'ops' sudoer, installs .local/ssh/bootstrap.id_ed25519.pub.
+      After this step all subsequent steps connect as ops@<host>.
+    preconditions:
+      - id: initial-key.exists
+        type: file
+        path: ".local/ssh/{initial_key_filename}"
+        expect_exists: true
+      - id: bootstrap-key.exists
+        type: file
+        path: ".local/ssh/bootstrap.id_ed25519"
+        expect_exists: true
+    postconditions:
+      - id: remote.ops-ssh-reachable
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=no
+          -i .local/ssh/bootstrap.id_ed25519 -p {provider_port}
+          ops@{provider_host} hostname
+        expect_exit: 0
+        timeout_s: 20
+    timeout_s: 300
+    retries: 1
+
+  - id: "4-install-proxmox"
+    title: "Configure Proxmox VE: enterprise → community repos, ZFS, firewall"
+    make_target: install-proxmox
+    description: |
+      Runs the Proxmox host configuration playbook. Switches from enterprise to
+      no-subscription repos, installs ZFS if not present, configures ufw firewall,
+      and sets up pve-nag-buster. Idempotent: safe to re-run.
+    preconditions:
+      - id: ops-ssh.reachable
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=15
+          -i .local/ssh/bootstrap.id_ed25519 -p {provider_port}
+          ops@{provider_host} pveversion
+        expect_exit: 0
+        timeout_s: 20
+    postconditions:
+      - id: proxmox.pveversion-ok
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=15
+          -i .local/ssh/bootstrap.id_ed25519 -p {provider_port}
+          ops@{provider_host} pveversion
+        expect_stdout: "pve-manager"
+        expect_exit: 0
+        timeout_s: 20
+    timeout_s: 1800
+    retries: 1
+
+  - id: "5-provision-guests"
+    title: "Create all VMs in topology.yml with sized memory, balloon, cores, disk"
+    make_target: provision-guests
+    description: |
+      Reads .local/deployments/{slug}/topology.yml and provisions every VM via
+      the Proxmox API + qm. VMs are created with the memory/balloon/cores/disk
+      values from the topology resolver. Idempotent: existing VMs are skipped.
+    preconditions:
+      - id: topology.valid
+        type: schema
+        target: ".local/deployments/{slug}/topology.yml"
+        schema: "config/contracts/deployment-v1/topology.schema.json"
+    postconditions:
+      - id: vms.all-running
+        type: pveapi
+        via_ssh: "{proxmox_ssh_alias}"
+        command: "qm list"
+        expect_stdout: "running"
+        timeout_s: 30
+    timeout_s: 1800
+    retries: 1
+
+  - id: "6-harden-guests"
+    title: "Per-guest hardening: ufw, auto-updates, SSH config"
+    make_target: harden-guests
+    description: |
+      Runs the guest hardening playbook across all VMs listed in topology.yml.
+      Sets up ufw rules, unattended-upgrades, and sshd_config. Idempotent.
+    preconditions:
+      - id: vms.running
+        type: pveapi
+        via_ssh: "{proxmox_ssh_alias}"
+        command: "qm list"
+        expect_stdout: "running"
+        timeout_s: 30
+    postconditions:
+      - id: guests.ufw-active
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -J {proxmox_ssh_alias}
+          -i .local/ssh/bootstrap.id_ed25519
+          ops@10.10.10.110 sudo ufw status
+        expect_stdout: "Status: active"
+        expect_exit: 0
+        timeout_s: 20
+    timeout_s: 1200
+    retries: 1
+
+  - id: "7-converge-edge"
+    title: "Deploy nginx edge + ACME TLS certs"
+    make_target: converge-edge-publication
+    description: |
+      Brings up the nginx VM (10.10.10.110) with TLS termination via certbot/ACME.
+      After this step, {apex} and *.{apex} serve valid TLS. Required by all
+      subsequent services that need public HTTPS access.
+    preconditions:
+      - id: dns.apex-resolves
+        type: dns
+        record: "{apex}"
+        record_type: A
+        expect_value: present
+        timeout_s: 5
+    postconditions:
+      - id: edge.apex-tls-308
+        post_condition_ref: edge.apex-tls-308
+      - id: edge.tls-cert-not-expired-30d
+        post_condition_ref: edge.tls-cert-not-expired-30d
+    timeout_s: 1200
+    retries: 2
+
+  - id: "8-converge-postgres"
+    title: "Bootstrap PostgreSQL: create cluster, roles, hba"
+    make_target: converge-postgres-vm
+    description: |
+      Bootstraps PostgreSQL on the postgres VM. Creates the pg cluster, operator
+      role, and initial databases. pg_hba.conf is derived from
+      platform_service_registry (ADR 0416).
+    preconditions:
+      - id: postgres-vm.tcp-reachable
+        type: tcp
+        host: "10.10.10.50"
+        port: 22
+        timeout_s: 5
+    postconditions:
+      - id: postgres.tcp-reachable
+        post_condition_ref: postgres.tcp-reachable
+    timeout_s: 600
+    retries: 2
+
+  - id: "9-converge-openbao"
+    title: "Bootstrap OpenBao secret store"
+    make_target: converge-openbao
+    description: |
+      Deploys OpenBao (the platform's HashiCorp Vault fork). Initialises the
+      root token, unseals, and imports bootstrap secrets from the manifest's
+      secrets.source. After this step, all subsequent services can read secrets
+      from OpenBao.
+    preconditions:
+      - id: postgres.reachable
+        type: tcp
+        host: "10.10.10.50"
+        port: 5432
+        timeout_s: 5
+    postconditions:
+      - id: openbao.unsealed
+        post_condition_ref: openbao.unsealed
+    timeout_s: 600
+    retries: 2
+
+  - id: "10-converge-keycloak"
+    title: "Bootstrap Keycloak identity provider"
+    make_target: converge-keycloak
+    description: |
+      Deploys Keycloak, creates the platform realm, registers all service OIDC
+      clients, and creates the bootstrap admin user. Requires OpenBao for client
+      secrets and PostgreSQL for the backing DB.
+    preconditions:
+      - id: openbao.reachable
+        type: tcp
+        host: "10.10.10.92"
+        port: 8200
+        timeout_s: 5
+      - id: postgres.reachable
+        type: tcp
+        host: "10.10.10.50"
+        port: 5432
+        timeout_s: 5
+    postconditions:
+      - id: keycloak.realm-discovery
+        post_condition_ref: keycloak.realm-discovery
+    timeout_s: 900
+    retries: 2
+
+  - id: "11-converge-services"
+    title: "Converge all enabled services per the deployment profile"
+    make_target: converge-all-services
+    description: |
+      Runs converge-* for every service in the active profile (minus
+      disabled_services). Each service's own postcondition is checked after
+      convergence. Order is resolved from the service dependency graph.
+    preconditions:
+      - id: keycloak.issuer
+        type: http
+        url: "https://sso.{apex}/realms/{apex_slug}/.well-known/openid-configuration"
+        expect_status: 200
+        timeout_s: 10
+      - id: openbao.unsealed
+        post_condition_ref: openbao.unsealed
+      - id: postgres.reachable
+        post_condition_ref: postgres.tcp-reachable
+    postconditions:
+      - id: harbor.registry.public-ping
+        post_condition_ref: harbor.registry.public-ping
+      - id: harbor.containers.nginx-running
+        post_condition_ref: harbor.containers.nginx-running
+      - id: outline.public-200
+        post_condition_ref: outline.public-200
+      - id: ntfy.public-200
+        post_condition_ref: ntfy.public-200
+    timeout_s: 7200
+    retries: 1
+
+  - id: "12-final-smoke"
+    title: "Run every check tagged final-smoke"
+    make_target: self-check
+    description: |
+      Runs scripts/self_check.py --tag final-smoke. Every critical check in
+      config/post_conditions.yml tagged 'final-smoke' must pass. Non-critical
+      failures are recorded as warnings. Failure blocks the write-receipt step.
+    preconditions: []
+    postconditions:
+      - id: all-final-smoke
+        type: command
+        command: >-
+          uv run --with pyyaml --with jsonschema
+          python scripts/self_check.py --tag final-smoke
+        expect_exit: 0
+        timeout_s: 120
+    timeout_s: 300
+    retries: 1
+
+  - id: "13-write-receipt"
+    title: "Write the bootstrap receipt"
+    make_target: write-bootstrap-receipt
+    description: |
+      Writes receipts/live-applies/{slug}/{timestamp}-bootstrap-complete.json.
+      The receipt records which steps ran, their post-condition results, the
+      manifest hash, topology hash, and the time-to-completion. Downstream
+      tooling (ADR 0420 receipt validator) requires this receipt to consider
+      the deployment "verified deployed."
+    preconditions:
+      - id: final-smoke.passed
+        type: command
+        command: >-
+          uv run --with pyyaml --with jsonschema
+          python scripts/self_check.py --tag final-smoke
+        expect_exit: 0
+        timeout_s: 120
+    postconditions:
+      - id: receipt.written
+        type: file
+        path: "receipts/live-applies/{slug}"
+        expect_exists: true
+    timeout_s: 30
+    retries: 0
