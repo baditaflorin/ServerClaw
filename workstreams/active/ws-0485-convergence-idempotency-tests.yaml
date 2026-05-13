@@ -52,6 +52,10 @@ ownership_manifest:
         - tests/unit/test_derive_manifest.py
         - tests/unit/test_lint_bootstrap_coverage.py
         - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+        - scripts/bootstrap_orchestrator.py
+        - tests/unit/test_bootstrap_orchestrator.py
+        - docs/schema/live-apply-receipt.schema.json
+        - scripts/validate_repository_data_models.py
       mode: shared_contract
       contract: integration-branch-ws-0484-ws-0486-v1
 tasks:

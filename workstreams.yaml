@@ -76,6 +76,10 @@ workstreams:
       - tests/unit/test_derive_manifest.py
       - tests/unit/test_lint_bootstrap_coverage.py
       - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+      - scripts/bootstrap_orchestrator.py
+      - tests/unit/test_bootstrap_orchestrator.py
+      - docs/schema/live-apply-receipt.schema.json
+      - scripts/validate_repository_data_models.py
       mode: shared_contract
       contract: integration-branch-ws-0484-ws-0486-v1
   tasks:
@@ -151,6 +155,12 @@ workstreams:
       - tests/unit/test_self_check.py
       mode: shared_contract
       contract: self-check-runner-v1
+    - id: ws_0484_live_apply_receipt_schema
+      paths:
+      - docs/schema/live-apply-receipt.schema.json
+      - scripts/validate_repository_data_models.py
+      mode: shared_contract
+      contract: live-apply-receipt-schema-v1
     - id: ws_0484_lint_coverage
       paths:
       - scripts/lint_bootstrap_coverage.py
@@ -174,7 +184,7 @@ workstreams:
   - id: t5-receipts
     title: Extend receipt schema (ADR 0420) to require a `verification` block; pre-push
       gate refuses receipts missing it
-    status: pending
+    status: completed
   - id: t6-ci-lint
     title: "CI lint enforcing every step in bootstrap_steps.yml has \u22651 matching\
       \ post-condition in post_conditions.yml"
@@ -236,6 +246,13 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
       mode: shared_contract
       contract: harbor-runtime-json-file-logging-v1
+    - id: ws_0486_orchestrator
+      paths:
+      - scripts/bootstrap_orchestrator.py
+      - tests/unit/test_bootstrap_orchestrator.py
+      - mk/multi-deployment.mk
+      mode: shared_contract
+      contract: bootstrap-orchestrator-v1
   tasks:
   - id: t1-manifest-schema
     title: "config/contracts/deployment-v1/manifest.schema.json \u2014 single declarative\
@@ -252,14 +269,14 @@ workstreams:
   - id: t4-orchestrator
     title: "scripts/bootstrap_orchestrator.py \u2014 drives steps, honors gates.fail_fast,\
       \ writes receipts, supports resume-from"
-    status: pending
+    status: completed
   - id: t5-resume-from
     title: make bootstrap supports resume-from=<step> reading the last failure receipt
-    status: pending
+    status: completed
   - id: t6-bootstrap-status
     title: "make bootstrap-status \u2014 JSON summary of where the chain is (current\
       \ step / last-passed / failing condition)"
-    status: pending
+    status: completed
   - id: t7-handoff-protocol
     title: "ADR 0486 (future) \u2014 agent-to-agent handoff protocol (this workstream\
       \ surfaces the receipt patterns)"

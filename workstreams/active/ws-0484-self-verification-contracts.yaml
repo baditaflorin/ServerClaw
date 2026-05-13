@@ -45,6 +45,12 @@ ownership_manifest:
         - tests/unit/test_self_check.py
       mode: shared_contract
       contract: self-check-runner-v1
+    - id: ws_0484_live_apply_receipt_schema
+      paths:
+        - docs/schema/live-apply-receipt.schema.json
+        - scripts/validate_repository_data_models.py
+      mode: shared_contract
+      contract: live-apply-receipt-schema-v1
     - id: ws_0484_lint_coverage
       paths:
         - scripts/lint_bootstrap_coverage.py
@@ -66,7 +72,7 @@ tasks:
     status: completed
   - id: t5-receipts
     title: Extend receipt schema (ADR 0420) to require a `verification` block; pre-push gate refuses receipts missing it
-    status: pending
+    status: completed
   - id: t6-ci-lint
     title: CI lint enforcing every step in bootstrap_steps.yml has ≥1 matching post-condition in post_conditions.yml
     status: completed

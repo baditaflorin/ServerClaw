@@ -151,6 +151,7 @@ CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.
 RUNTIME_POOL_AUTOSCALING_PATH = repo_path("config", "runtime-pool-autoscaling.json")
 RUNTIME_POOL_AUTOSCALING_SCHEMA_PATH = repo_path("docs", "schema", "runtime-pool-autoscaling.schema.json")
 K6_RECEIPT_SCHEMA_PATH = repo_path("docs", "schema", "k6-receipt.schema.json")
+LIVE_APPLY_RECEIPT_SCHEMA_PATH = repo_path("docs", "schema", "live-apply-receipt.schema.json")
 EPHEMERAL_POOL_CATALOG_PATH = repo_path("config", "ephemeral-capacity-pools.json")
 EPHEMERAL_POOL_SCHEMA_PATH = repo_path("docs", "schema", "ephemeral-capacity-pools.schema.json")
 RESTORE_READINESS_PROFILE_PATH = repo_path("config", "restore-readiness-profiles.json")
@@ -1644,6 +1645,31 @@ def validate_k6_receipt_schema() -> None:
 
 def validate_k6_receipt_data() -> None:
     validate_k6_receipts(REPO_ROOT, quiet=True)
+
+
+def validate_live_apply_receipt_schema() -> None:
+    """Validate that docs/schema/live-apply-receipt.schema.json is well-formed — ADR 0484 t5."""
+    schema = require_mapping(load_json(LIVE_APPLY_RECEIPT_SCHEMA_PATH), str(LIVE_APPLY_RECEIPT_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/live-apply-receipt.schema.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/live-apply-receipt.schema.json.$id")
+    require_str(schema.get("title"), "docs/schema/live-apply-receipt.schema.json.title")
+    properties = require_mapping(
+        schema.get("properties"),
+        "docs/schema/live-apply-receipt.schema.json.properties",
+    )
+    for field in ("schema_version", "receipt_id", "applied_on", "workflow_id", "targets", "verification"):
+        if field not in properties:
+            raise ValueError(f"docs/schema/live-apply-receipt.schema.json.properties must include '{field}'")
+    # Verification must be declared as an array with minItems >= 1.
+    verification_schema = require_mapping(
+        properties.get("verification"),
+        "docs/schema/live-apply-receipt.schema.json.properties.verification",
+    )
+    if verification_schema.get("type") != "array":
+        raise ValueError("docs/schema/live-apply-receipt.schema.json.properties.verification.type must be 'array'")
+    min_items = verification_schema.get("minItems", 0)
+    if not isinstance(min_items, int) or min_items < 1:
+        raise ValueError("docs/schema/live-apply-receipt.schema.json.properties.verification.minItems must be >= 1")
 
 
 def validate_shared_policy_packs() -> None:
@@ -3290,6 +3316,7 @@ def validate_repository_data_models() -> int:
     validate_receipts(latest_receipt_paths, label="versions/stack.yaml latest receipts")
     validate_k6_receipt_schema()
     validate_k6_receipt_data()
+    validate_live_apply_receipt_schema()
     validate_promotion_receipts()
     validate_stage_smoke_catalog(load_stage_smoke_catalog())
     validate_uptime_monitors()

@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/live-apply-receipt.schema.json",
+  "title": "Live-apply receipt — ADR 0420",
+  "description": "Structured evidence that a Makefile converge-* target was successfully run and verified in production. Every receipt MUST include a non-empty 'verification' array with at least one passing check.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "applied_on",
+    "recorded_on",
+    "recorded_by",
+    "source_commit",
+    "workflow_id",
+    "summary",
+    "targets",
+    "verification"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema version. Always '1.0.0'."
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-zA-Z0-9_-]+$",
+      "description": "Unique receipt identifier. Matches the filename stem (without .json)."
+    },
+    "applied_on": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "Date the live-apply was performed (YYYY-MM-DD)."
+    },
+    "recorded_on": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "Date the receipt was written (YYYY-MM-DD). May differ from applied_on for backfills."
+    },
+    "recorded_by": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Who wrote the receipt (agent name, operator handle, or CI system)."
+    },
+    "source_commit": {
+      "type": "string",
+      "minLength": 7,
+      "description": "Full or abbreviated git commit SHA of the code that was live-applied."
+    },
+    "repo_version_context": {
+      "type": "string",
+      "description": "VERSION file value at time of live-apply."
+    },
+    "workflow_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Makefile target or workflow that was invoked (e.g. converge-harbor)."
+    },
+    "adr": {
+      "type": "string",
+      "description": "ADR number governing this service (optional)."
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Human-readable summary of what was deployed and why."
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Hosts, VMs, or services that were modified.",
+      "items": {
+        "type": "object",
+        "required": ["kind", "name"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["vm", "host_service", "container", "playbook", "bare-metal", "other"]
+          },
+          "name": {"type": "string", "minLength": 1},
+          "vmid": {"type": "string"},
+          "address": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "verification": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Machine- or operator-observed checks confirming the deployment is healthy. At least one check is required; at least one must have result='pass'.",
+      "items": {
+        "type": "object",
+        "required": ["check", "result", "observed"],
+        "properties": {
+          "check": {
+            "type": "string",
+            "minLength": 3,
+            "description": "Short name for the check (e.g. 'Harbor registry ping')."
+          },
+          "result": {
+            "type": "string",
+            "enum": ["pass", "fail", "warn"],
+            "description": "Outcome of the check."
+          },
+          "observed": {
+            "type": "string",
+            "minLength": 5,
+            "description": "What was actually observed (HTTP 200, container running, etc.)."
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "description": "Optional file paths or doc references providing additional evidence.",
+      "items": {"type": "string"}
+    },
+    "notes": {
+      "type": "array",
+      "description": "Optional free-form notes (backfill context, known caveats, etc.).",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": true,
+  "examples": [
+    {
+      "schema_version": "1.0.0",
+      "receipt_id": "2026-05-13-harbor-live-apply",
+      "applied_on": "2026-05-13",
+      "recorded_on": "2026-05-13",
+      "recorded_by": "claude",
+      "source_commit": "abc1234",
+      "repo_version_context": "0.179.44",
+      "workflow_id": "converge-harbor",
+      "adr": "0025",
+      "summary": "Deployed harbor with json-file logging driver to prevent circular boot dependency.",
+      "targets": [
+        {"kind": "vm", "name": "docker-runtime", "vmid": "120", "address": "10.10.10.20"}
+      ],
+      "verification": [
+        {
+          "check": "Harbor registry ping",
+          "result": "pass",
+          "observed": "GET /api/v2.0/ping returned HTTP 200"
+        }
+      ]
+    }
+  ]
+}

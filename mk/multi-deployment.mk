@@ -206,6 +206,34 @@ self-check-json: _require-deployment  ## Emit machine-readable JSON only.
 lint-bootstrap-coverage:  ## (ADR 0484 §5) Verify every bootstrap step has ≥1 post-condition in post_conditions.yml.
 	@uv run --with pyyaml python $(REPO_ROOT)/scripts/lint_bootstrap_coverage.py
 
+# -----------------------------------------------------------------------------
+# ADR 0483 — hands-off bootstrap orchestrator
+# -----------------------------------------------------------------------------
+
+.PHONY: bootstrap bootstrap-status bootstrap-dry-run
+
+bootstrap: _require-deployment  ## (ADR 0483) Run the full 14-step bootstrap chain. Pass resume-from=<step-id> to skip earlier steps.
+	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/bootstrap_orchestrator.py \
+	  $(if $(slug),--slug "$(slug)",) \
+	  $(if $(resume-from),--resume-from "$(resume-from)",) \
+	  $(if $(resume_last),--resume-last,)
+
+bootstrap-resume: _require-deployment  ## Resume bootstrap from last failed step (reads last failure receipt).
+	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/bootstrap_orchestrator.py \
+	  $(if $(slug),--slug "$(slug)",) \
+	  --resume-last
+
+bootstrap-status: _require-deployment  ## Print status of the last bootstrap run from receipt.
+	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/bootstrap_orchestrator.py \
+	  $(if $(slug),--slug "$(slug)",) \
+	  --status
+
+bootstrap-dry-run: _require-deployment  ## Print which steps would run without invoking make targets.
+	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/bootstrap_orchestrator.py \
+	  $(if $(slug),--slug "$(slug)",) \
+	  $(if $(resume-from),--resume-from "$(resume-from)",) \
+	  --dry-run
+
 detect-drift: _require-deployment  ## (ADR 0485) Run playbook --check and exit non-zero if changed > 0.
 	@if [ -z "$(playbook)" ]; then \
 	  echo "Usage: make detect-drift playbook=playbooks/harbor.yml [extra_vars='env=production']" >&2; \
