@@ -1,9 +1,9 @@
-"""Derive a draft manifest.yml from an existing deployment — ADR 0483 §6.
+"""Derive a draft manifest.yml from `.local/identity.yml` — ADR 0483 + ADR 0488.
 
-For existing deployments (lv3, 0fork) that pre-date the hands-off bootstrap
-pattern, this script introspects the committed/generated files under
-.local/deployments/<slug>/ and emits a manifest.yml that, once committed,
-brings that deployment into the hands-off-capable pattern.
+For existing deployments that pre-date the hands-off bootstrap pattern, this
+script introspects `.local/identity.yml` and `.local/profile.yml` and emits a
+manifest.yml that, once committed, brings the deployment into the
+hands-off-capable pattern.
 
 The output is a *draft* — it includes a `review_required` block listing
 fields the operator must fill in manually (typically secrets.source and
@@ -11,17 +11,14 @@ any provider details not readable from local files).
 
 Usage:
 
-    # Derive a manifest for the active deployment:
+    # Derive a manifest from `.local/identity.yml`:
     uv run --with pyyaml --with jsonschema python scripts/derive_manifest.py
 
-    # For a specific slug:
-    uv run ... python scripts/derive_manifest.py --slug 0fork
-
-    # Write to disk (defaults to .local/deployments/<slug>/manifest.yml.draft):
-    uv run ... python scripts/derive_manifest.py --slug 0fork --write
+    # Write to disk (default path is .local/manifest.yml.draft):
+    uv run ... python scripts/derive_manifest.py --write
 
     # Write to a specific path:
-    uv run ... python scripts/derive_manifest.py --slug 0fork --out path/to/manifest.yml
+    uv run ... python scripts/derive_manifest.py --out path/to/manifest.yml
 
     # Validate an existing manifest against the schema:
     uv run ... python scripts/derive_manifest.py --validate
@@ -43,8 +40,12 @@ from typing import Any
 
 import yaml
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from deployment import REPO_ROOT, load as load_deployment, resolve_active_slug  # noqa: E402
+REPO_ROOT = Path(__file__).resolve().parent.parent
+LOCAL_ROOT = REPO_ROOT / ".local"
+IDENTITY_PATH = LOCAL_ROOT / "identity.yml"
+PROFILE_PATH = LOCAL_ROOT / "profile.yml"
+MANIFEST_PATH = LOCAL_ROOT / "manifest.yml"
+MANIFEST_DRAFT_PATH = LOCAL_ROOT / "manifest.yml.draft"
 
 SCHEMA_PATH = REPO_ROOT / "config" / "contracts" / "deployment-v1" / "manifest.schema.json"
 SIZING_POLICY_PATH = REPO_ROOT / "config" / "sizing-policy.yml"
@@ -133,7 +134,6 @@ def derive_smoke_endpoints(apex: str) -> list[str]:
 
 
 def build_manifest(
-    slug: str,
     identity: dict[str, Any],
     connection: dict[str, Any],
     profile_data: dict[str, Any],
@@ -168,7 +168,6 @@ def build_manifest(
 
     manifest: dict[str, Any] = {
         "schema_version": 1,
-        "slug": slug,
         "apex_domain": apex,
         "operator": operator,
         "provider": provider,
@@ -217,23 +216,25 @@ def validate_manifest(manifest: dict[str, Any]) -> list[str]:
 # --------------------------------------------------------------------------- #
 
 
-def _load_deployment_files(slug: str) -> tuple[dict, dict, dict]:
-    """Load identity, connection, and profile for a slug. Returns three dicts."""
-    from deployment import DEPLOYMENTS_DIR
+def _load_deployment_files() -> tuple[dict, dict, dict]:
+    """Load identity, connection (from identity::proxmox_host_ssh), and profile.
 
-    base = DEPLOYMENTS_DIR / slug
-    if not base.is_dir():
-        sys.exit(f"no deployment directory: {base}")
+    Returns (identity, connection, profile) as three dicts. ADR 0488: all live
+    in `.local/` directly, no per-slug subdirectory.
+    """
 
-    def _read(name: str) -> dict:
-        p = base / name
+    def _read(p: Path) -> dict:
         if not p.is_file():
-            sys.stderr.write(f"  warning: {name} not found in {base} — using empty dict\n")
+            sys.stderr.write(f"  warning: {p} not found — using empty dict\n")
             return {}
         with p.open() as fh:
             return yaml.safe_load(fh) or {}
 
-    return _read("identity.yml"), _read("connection.yml"), _read("profile.yml")
+    identity = _read(IDENTITY_PATH)
+    profile = _read(PROFILE_PATH)
+    # ADR 0488 collapse: connection block lives inside identity.yml.
+    connection = {"proxmox_host": identity.get("proxmox_host_ssh") or {}}
+    return identity, connection, profile
 
 
 def _emit_yaml_with_comments(result: DeriveResult, *, out: Any) -> None:
@@ -255,26 +256,17 @@ def _emit_yaml_with_comments(result: DeriveResult, *, out: Any) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--slug", help="Deployment slug (defaults to active deployment)")
-    p.add_argument("--write", action="store_true", help="Write to .local/deployments/<slug>/manifest.yml.draft")
+    p.add_argument("--write", action="store_true", help="Write to .local/manifest.yml.draft")
     p.add_argument("--out", help="Write to this path instead of stdout")
     p.add_argument(
-        "--validate", action="store_true", help="Validate an existing manifest.yml against the schema and exit"
+        "--validate", action="store_true", help="Validate the existing .local/manifest.yml against the schema and exit"
     )
     args = p.parse_args(argv)
 
-    try:
-        slug = args.slug or resolve_active_slug()
-    except Exception as e:
-        sys.exit(f"deployment not resolved: {e}")
-
     if args.validate:
-        from deployment import DEPLOYMENTS_DIR
-
-        manifest_path = DEPLOYMENTS_DIR / slug / "manifest.yml"
-        if not manifest_path.is_file():
-            sys.exit(f"no manifest.yml found at {manifest_path}")
-        with manifest_path.open() as fh:
+        if not MANIFEST_PATH.is_file():
+            sys.exit(f"no manifest.yml found at {MANIFEST_PATH}")
+        with MANIFEST_PATH.open() as fh:
             manifest = yaml.safe_load(fh) or {}
         errs = validate_manifest(manifest)
         if errs:
@@ -282,11 +274,11 @@ def main(argv: list[str] | None = None) -> int:
             for e in errs:
                 sys.stderr.write(f"  {e}\n")
             return 1
-        sys.stderr.write(f"manifest.yml for {slug!r} is valid.\n")
+        sys.stderr.write(f"{MANIFEST_PATH} is valid.\n")
         return 0
 
-    identity, connection, profile_data = _load_deployment_files(slug)
-    result = build_manifest(slug, identity, connection, profile_data)
+    identity, connection, profile_data = _load_deployment_files()
+    result = build_manifest(identity, connection, profile_data)
 
     # Schema-validate before output.
     errs = validate_manifest(result.manifest)
@@ -303,13 +295,11 @@ def main(argv: list[str] | None = None) -> int:
             _emit_yaml_with_comments(result, out=fh)
         sys.stderr.write(f"  wrote {out_path}\n")
     elif args.write:
-        from deployment import DEPLOYMENTS_DIR
-
-        out_path = DEPLOYMENTS_DIR / slug / "manifest.yml.draft"
-        with out_path.open("w") as fh:
+        MANIFEST_DRAFT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with MANIFEST_DRAFT_PATH.open("w") as fh:
             _emit_yaml_with_comments(result, out=fh)
-        sys.stderr.write(f"  wrote {out_path}\n")
-        sys.stderr.write(f"  review and rename to manifest.yml when ready\n")
+        sys.stderr.write(f"  wrote {MANIFEST_DRAFT_PATH}\n")
+        sys.stderr.write("  review and rename to manifest.yml when ready\n")
     else:
         _emit_yaml_with_comments(result, out=sys.stdout)
 

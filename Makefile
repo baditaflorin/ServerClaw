@@ -1,25 +1,9 @@
 REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 LOCAL_OVERLAY_ROOT ?= $(shell $(REPO_ROOT)/scripts/resolve_local_overlay_root.sh)
 
-# ADR 0439/0440 — multi-deployment feature flag.
-# When MULTI_DEPLOYMENT_ENABLED=1, generator targets (generate-platform-vars,
-# generate-inventory, generate-platform-manifest) thread
-# `--deployment $(DEPLOYMENT)` so artifacts land under
-# .local/deployments/<slug>/generated/ instead of inventory/. The slug
-# resolves via deployment.py (explicit > $DEPLOYMENT > worktree marker >
-# .local/active-deployment). Off by default — single-deployment path is
-# byte-identical to pre-flag behavior.
-MULTI_DEPLOYMENT_ENABLED ?=
-ifeq ($(MULTI_DEPLOYMENT_ENABLED),1)
-DEPLOYMENT ?= $(shell uv run --quiet --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/deployment.py resolve --quiet 2>/dev/null)
-ifneq ($(strip $(DEPLOYMENT)),)
-DEPLOYMENT_ARG := --deployment $(DEPLOYMENT)
-else
+# ADR 0488: single deployment per repo checkout. There is no slug to thread
+# through; identity lives in .local/identity.yml (per ADR 0385).
 DEPLOYMENT_ARG :=
-endif
-else
-DEPLOYMENT_ARG :=
-endif
 
 # ADR 0437: overlay-aware bootstrap.
 # When PLATFORM_IDENTITY_OVERLAY is set, rewire inventory, SSH key, env and
@@ -594,7 +578,7 @@ install-cli:
 
 update-cli: install-cli
 
-init-remote: _require-deployment ## Create the ops sudoer on a fresh remote host (overlay-mode prerequisite for Stage 2)
+init-remote: ## Create the ops sudoer on a fresh remote host (overlay-mode prerequisite for Stage 2)
 ifneq ($(BOOTSTRAP_OVERLAY_MODE),1)
 	@echo "init-remote is overlay-mode only; set PLATFORM_IDENTITY_OVERLAY to use it." >&2
 	@exit 1
@@ -899,7 +883,7 @@ export-mcp-tools:
 # ADR 0481 — when WORKFLOW is set (i.e. preflight is gating a real action),
 # require a resolved deployment. The bare `make preflight` form (no WORKFLOW)
 # just lists available workflows and does not need a deployment context.
-preflight: $(if $(strip $(WORKFLOW)),_require-deployment,)
+preflight:
 	@if [ -z "$(WORKFLOW)" ]; then \
 		uv run --with pyyaml python $(REPO_ROOT)/scripts/preflight_controller_local.py --list; \
 		echo "set WORKFLOW=<workflow-id>"; \
@@ -1187,7 +1171,7 @@ sync-operators:
 quarterly-access-review:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/operator_manager.py quarterly-review --warning-days $(WARNING_DAYS) --inactive-days $(INACTIVE_DAYS) $(if $(filter true,$(DRY_RUN)),--dry-run,) --emit-json
 
-install-proxmox: _require-deployment
+install-proxmox:
 	$(MAKE) preflight WORKFLOW=install-proxmox
 	# Runs the Proxmox-base playbook only and defers guest provisioning to
 	# Stage 4. Skipping the `guests` tag prevents the proxmox_guests role
@@ -1243,7 +1227,7 @@ configure-host-control-loops:
 	$(MAKE) preflight WORKFLOW=configure-host-control-loops
 	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/proxmox-install.yml --private-key $(BOOTSTRAP_KEY) --tags control-loops
 
-provision-guests: _require-deployment
+provision-guests:
 	$(MAKE) preflight WORKFLOW=provision-guests
 	# The `guests` tag lives on the proxmox_guests role inside
 	# proxmox-install.yml. Routing through site.yml would trigger arg-spec
@@ -1652,7 +1636,7 @@ migrate-service-dry-run:
 	@test -n "$(to)"  || (echo "Usage: make migrate-service-dry-run svc=<name> to=<vm>"; exit 1)
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/migrate_service.py --svc $(svc) --to $(to) --env $(env) --dry-run
 
-migrate-service: _require-deployment
+migrate-service:
 	@test -n "$(svc)" || (echo "Usage: make migrate-service svc=<name> to=<vm> [env=production]"; exit 1)
 	@test -n "$(to)"  || (echo "Usage: make migrate-service svc=<name> to=<vm> [env=production]"; exit 1)
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/migrate_service.py --svc $(svc) --to $(to) --env $(env) --execute
@@ -1684,18 +1668,7 @@ validate-topology-templates:
 topology-probe-self:
 	python3 $(REPO_ROOT)/scripts/topology_probe.py --pretty
 
-# Layer 2b — controller-side reconciler. SSH-fan-out to every host
-# claimed by the active deployment's profile, diff against the registry,
-# write drift-report.{json,md} into .local/deployments/<slug>/state/.
-detect-topology-drift:
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/topology_reconciler.py --mode reconcile $(if $(deployment),--deployment $(deployment),)
-
-# Plan-only mode: print the expected (host -> services) mapping for the
-# active deployment without SSHing anywhere. Useful in CI.
-plan-topology:
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/topology_reconciler.py --mode plan $(if $(deployment),--deployment $(deployment),)
-
-rotate-secret: _require-deployment
+rotate-secret:
 	$(MAKE) preflight WORKFLOW=rotate-secret
 	@test -n "$(SECRET_ID)" || (echo "set SECRET_ID=<secret-id>"; exit 1)
 	python3 $(REPO_ROOT)/scripts/secret_rotation.py --secret $(SECRET_ID) $(ROTATION_ARGS)
@@ -2090,7 +2063,7 @@ init-local: ## Initialize .local/ overlay with SSH keys and secrets
 generate-local-example: ## Regenerate local-overlay-template/ scaffold from secret manifest
 	python3 $(REPO_ROOT)/scripts/init_local_overlay.py --generate-example
 
-bootstrap: _require-deployment ## Full platform bootstrap from bare Debian 13 (ADR 0386)
+bootstrap: ## Full platform bootstrap from bare Debian 13 (ADR 0386)
 ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
 	@echo "=== ADR 0437: overlay-aware bootstrap ==="
 	@echo "  PLATFORM_IDENTITY_OVERLAY = $(PLATFORM_IDENTITY_OVERLAY)"
@@ -2314,4 +2287,6 @@ rotate-hetzner-dns-token: ## ADR 0424 item 7 — rotate the Hetzner DNS API toke
 	  $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 # Multi-deployment lifecycle (ADR 0439/0440/0442) — purely additive in Phase 1.
-include $(REPO_ROOT)/mk/multi-deployment.mk
+
+# ADR 0488: bootstrap + capacity sizing + self-check + drift detection.
+include $(REPO_ROOT)/mk/bootstrap.mk

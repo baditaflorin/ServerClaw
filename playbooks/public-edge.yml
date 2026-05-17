@@ -11,7 +11,6 @@
     - service-public-edge
 
   roles:
-    - role: lv3.platform.host_pinning_guard
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.public_edge_oidc_auth
     - role: lv3.platform.nginx_edge_publication

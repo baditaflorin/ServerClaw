@@ -2,10 +2,10 @@ id: ws-0488-collapse-to-single-deployment
 adr: "0488"
 title: Collapse to single-deployment-per-repo + envelope-aware sizing
 status: in_progress
-ready_to_merge: false
+ready_to_merge: true
 live_applied: false
 owner: claude
-branch: claude/agitated-saha-a10fa8
+branch: claude/ws-0488-wave-3
 worktree_path: .claude/worktrees/agitated-saha-a10fa8
 doc: docs/adr/0488-single-deployment-per-repo-checkout.md
 depends_on:
@@ -155,22 +155,22 @@ tasks:
   # ---- Wave 3 (separate branch — playbook surgery) ----
   - id: t10-host-pinning-guard
     title: Remove host_pinning_guard role from playbooks/public-edge.yml + playbooks/tasks/preflight.yml, then delete the role + its 3 tests
-    status: pending
+    status: completed
   - id: t11-makefile-strip
     title: Strip _require-deployment prereq from every converge/live-apply/edge/bootstrap target; drop `include $(REPO_ROOT)/mk/multi-deployment.mk`
-    status: pending
+    status: completed
   - id: t12-delete-deployment-py
     title: Delete scripts/deployment.py + scripts/deployment_lock.py + mk/multi-deployment.mk after refactoring all consumers (certificate_validator, derive_manifest, detect_drift, generate_inventory, generate_platform_vars, generate_discovery_artifacts, bootstrap_orchestrator)
-    status: pending
+    status: completed
   - id: t13-cert-validator
     title: scripts/certificate_validator.py drops deployment resolution; reads .local/identity.yml directly
-    status: pending
+    status: completed
   - id: t14-bootstrap-rewire
     title: scripts/bootstrap_orchestrator.py + scripts/derive_manifest.py + scripts/detect_drift.py drop slug args
-    status: pending
+    status: completed
   - id: t15-inventory-include
     title: inventory/host_vars/proxmox-host.yml or generate_platform_vars.py consumes proxmox-host.generated.yml so provisioning sees envelope-resolved sizes
-    status: pending
+    status: completed
   # ---- Wave 4 (separate branch — enforcement) ----
   - id: t16-sanitization-enforce
     title: Extend scripts/audit_sanitization.py to block lv3.org/0fork.com/65.109.84.223/65.108.75.123 in committed files outside docs/adr/
@@ -178,4 +178,4 @@ tasks:
   # ---- Wave N (final integration) ----
   - id: t17-pre-push-gate
     title: Run pre-push gate end-to-end on the rebased branch; address any cert-validator preexisting failures with documented bypass
-    status: pending
+    status: completed

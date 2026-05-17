@@ -46,11 +46,21 @@ from typing import Any
 
 import yaml
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from deployment import REPO_ROOT, load as load_deployment, resolve_active_slug  # noqa: E402
-
+REPO_ROOT = Path(__file__).resolve().parent.parent
+LOCAL_ROOT = REPO_ROOT / ".local"
+IDENTITY_PATH = LOCAL_ROOT / "identity.yml"
+MANIFEST_PATH = LOCAL_ROOT / "manifest.yml"
 STEPS_PATH = REPO_ROOT / "config" / "bootstrap_steps.yml"
 RECEIPTS_DIR = REPO_ROOT / "receipts" / "bootstrap"
+
+
+def _load_identity() -> dict[str, Any]:
+    """Read .local/identity.yml (ADR 0385 + ADR 0488 — single deployment per repo)."""
+    if not IDENTITY_PATH.is_file():
+        return {}
+    with IDENTITY_PATH.open() as f:
+        return yaml.safe_load(f) or {}
+
 
 # Conditions whose types require no live IO and are always evaluated locally.
 _LOCAL_CONDITION_TYPES = {"file", "schema"}
@@ -94,7 +104,7 @@ class StepResult:
 class BootstrapReceipt:
     schema_version: int
     receipt_id: str
-    slug: str
+    deployment: str
     ran_at: str
     outcome: str  # "success" | "failure" | "partial"
     steps_attempted: int
@@ -138,14 +148,14 @@ def select_steps(
     return list(steps[idx:])
 
 
-def build_template_ctx(slug: str, identity: dict[str, Any]) -> dict[str, str]:
-    """Build the {slug}/{apex}/{apex_slug} template context.
+def build_template_ctx(identity: dict[str, Any]) -> dict[str, str]:
+    """Build the {apex}/{apex_slug} template context.
 
     Pure function — no IO. Tested directly.
     """
     apex = identity.get("platform_domain", "")
     apex_slug = apex.split(".")[0] if apex else ""
-    return {"slug": slug, "apex": apex, "apex_slug": apex_slug}
+    return {"apex": apex, "apex_slug": apex_slug}
 
 
 def expand_templates(ctx: dict[str, str], value: Any) -> Any:
@@ -256,19 +266,18 @@ def step_status(result: StepResult) -> str:
 
 def _run_make(
     target: str,
-    slug: str,
     *,
     repo_root: Path = REPO_ROOT,
     timeout: int = 1800,
     extra_vars: list[str] | None = None,
 ) -> tuple[int, str, str]:
-    """Run `make <target> slug=<slug>` and return (rc, stdout, stderr)."""
+    """Run `make <target>` and return (rc, stdout, stderr)."""
     import os
 
-    cmd = ["make", target, f"slug={slug}"]
+    cmd = ["make", target]
     for ev in extra_vars or []:
         cmd.append(ev)
-    env = {**os.environ, "DEPLOYMENT": slug}
+    env = dict(os.environ)
     try:
         result = subprocess.run(
             cmd,
@@ -287,7 +296,6 @@ def _run_make(
 
 def run_step(
     step: dict[str, Any],
-    slug: str,
     *,
     ctx: dict[str, str],
     max_retries: int = 0,
@@ -317,7 +325,7 @@ def run_step(
 
     if dry_run:
         result.status = "passed"
-        result.make_stdout = f"[dry-run] would run: make {make_target} slug={slug}"
+        result.make_stdout = f"[dry-run] would run: make {make_target}"
         return result
 
     # Run make target with retries.
@@ -327,7 +335,6 @@ def run_step(
     while attempt <= retries:
         rc, stdout, stderr = _run_make(
             make_target,
-            slug,
             repo_root=repo_root,
             timeout=timeout,
         )
@@ -368,20 +375,19 @@ def _write_receipt(receipt: BootstrapReceipt, *, receipts_dir: Path = RECEIPTS_D
     receipts_dir.mkdir(parents=True, exist_ok=True)
     ts = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
     suffix = "receipt" if receipt.outcome == "success" else f"{receipt.failed_step_id or 'unknown'}-failure"
-    out = receipts_dir / f"{ts}-{receipt.slug}-bootstrap-{suffix}.json"
+    out = receipts_dir / f"{ts}-bootstrap-{suffix}.json"
     out.write_text(json.dumps(receipt.to_dict(), indent=2) + "\n")
     return out
 
 
-def load_last_failure_receipt(slug: str, *, receipts_dir: Path = RECEIPTS_DIR) -> dict[str, Any] | None:
-    """Return the most recent failure receipt for the given slug, or None.
+def load_last_failure_receipt(*, receipts_dir: Path = RECEIPTS_DIR) -> dict[str, Any] | None:
+    """Return the most recent failure receipt, or None.
 
     Pure-ish (reads files, no side effects). Used by --resume-from auto-detect.
     """
     if not receipts_dir.is_dir():
         return None
-    pattern = f"*-{slug}-bootstrap-*-failure.json"
-    candidates = sorted(receipts_dir.glob(pattern), reverse=True)
+    candidates = sorted(receipts_dir.glob("*-bootstrap-*-failure.json"), reverse=True)
     if not candidates:
         return None
     try:
@@ -397,7 +403,7 @@ def load_last_failure_receipt(slug: str, *, receipts_dir: Path = RECEIPTS_DIR) -
 
 def orchestrate(
     steps: list[dict[str, Any]],
-    slug: str,
+    deployment: str,
     *,
     ctx: dict[str, str],
     gates: dict[str, Any],
@@ -420,8 +426,8 @@ def orchestrate(
     now = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     receipt = BootstrapReceipt(
         schema_version=1,
-        receipt_id=f"{now}-{slug}",
-        slug=slug,
+        receipt_id=now,
+        deployment=deployment,
         ran_at=now,
         outcome="partial",
         steps_attempted=0,
@@ -435,7 +441,7 @@ def orchestrate(
     skipped_count = len(steps) - len(steps_to_run)
     receipt.steps_skipped = skipped_count
 
-    _stderr.write(f"bootstrap-orchestrator: slug={slug!r} steps={len(steps_to_run)} skip={skipped_count}\n")
+    _stderr.write(f"bootstrap-orchestrator: deployment={deployment!r} steps={len(steps_to_run)} skip={skipped_count}\n")
     if dry_run:
         _stderr.write("  [DRY-RUN] make targets will not be invoked\n")
 
@@ -455,7 +461,6 @@ def orchestrate(
         _stderr.write(f"  step {step['id']}: {step.get('title', '')}\n")
         sr = run_step(
             step,
-            slug,
             ctx=ctx,
             max_retries=max_retries,
             timeout_s=step_timeout_s,
@@ -498,7 +503,7 @@ def format_status(receipt: dict[str, Any]) -> str:
     Pure function — no IO. Tested directly.
     """
     lines = [
-        f"Bootstrap status for {receipt.get('slug', '?')}",
+        f"Bootstrap status for {receipt.get('deployment', '?')}",
         f"  outcome:  {receipt.get('outcome', '?')}",
         f"  ran_at:   {receipt.get('ran_at', '?')}",
         f"  passed:   {receipt.get('steps_passed', 0)}",
@@ -526,12 +531,11 @@ def _load_steps() -> list[dict[str, Any]]:
     return data.get("steps") or []
 
 
-def _load_gates(slug: str) -> dict[str, Any]:
-    """Load gates config from the active deployment manifest, if present."""
-    manifest_path = REPO_ROOT / ".local" / "deployments" / slug / "manifest.yml"
-    if manifest_path.is_file():
+def _load_gates() -> dict[str, Any]:
+    """Load gates config from `.local/manifest.yml`, if present."""
+    if MANIFEST_PATH.is_file():
         try:
-            with manifest_path.open() as fh:
+            with MANIFEST_PATH.open() as fh:
                 manifest = yaml.safe_load(fh) or {}
             return manifest.get("gates") or {}
         except Exception:  # noqa: BLE001
@@ -541,7 +545,6 @@ def _load_gates(slug: str) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--slug", help="Deployment slug (defaults to active deployment)")
     p.add_argument("--resume-from", dest="resume_from", help="Step id to resume from (skip earlier steps)")
     p.add_argument(
         "--resume-last", action="store_true", help="Resume from the last failed step (reads last failure receipt)"
@@ -552,22 +555,19 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--json", action="store_true", help="Emit receipt JSON to stdout on completion")
     args = p.parse_args(argv)
 
-    try:
-        slug = args.slug or resolve_active_slug()
-    except Exception as e:
-        sys.exit(f"deployment not resolved: {e}")
+    identity = _load_identity()
+    deployment_name = identity.get("platform_domain") or "unknown"
 
     # --status: print last receipt and exit.
     if args.status:
-        receipt = load_last_failure_receipt(slug)
+        receipt = load_last_failure_receipt()
         if receipt is None:
-            # Check for success receipts too.
             if RECEIPTS_DIR.is_dir():
-                candidates = sorted(RECEIPTS_DIR.glob(f"*-{slug}-bootstrap-receipt.json"), reverse=True)
+                candidates = sorted(RECEIPTS_DIR.glob("*-bootstrap-receipt.json"), reverse=True)
                 if candidates:
                     receipt = json.loads(candidates[0].read_text())
         if receipt is None:
-            sys.stderr.write(f"No bootstrap receipt found for deployment {slug!r}\n")
+            sys.stderr.write("No bootstrap receipt found.\n")
             return 2
         sys.stderr.write(format_status(receipt) + "\n")
         if args.json:
@@ -576,27 +576,23 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if receipt.get("outcome") == "success" else 1
 
     steps = _load_steps()
-    gates = _load_gates(slug)
+    gates = _load_gates()
 
     # --resume-last: find the failed step from last receipt.
     resume_from = args.resume_from
     if args.resume_last and resume_from is None:
-        last = load_last_failure_receipt(slug)
+        last = load_last_failure_receipt()
         if last and last.get("failed_step_id"):
             resume_from = last["failed_step_id"]
             sys.stderr.write(f"bootstrap-orchestrator: resuming from last failure at {resume_from!r}\n")
         else:
             sys.stderr.write("bootstrap-orchestrator: no prior failure receipt found; starting from step 0\n")
 
-    try:
-        identity = load_deployment(slug).get("identity") or {}
-    except Exception:  # noqa: BLE001
-        identity = {}
-    ctx = build_template_ctx(slug, identity)
+    ctx = build_template_ctx(identity)
 
     receipt = orchestrate(
         steps,
-        slug,
+        deployment_name,
         ctx=ctx,
         gates=gates,
         resume_from=resume_from,

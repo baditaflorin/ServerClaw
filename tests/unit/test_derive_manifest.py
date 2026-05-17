@@ -181,40 +181,35 @@ class TestBuildManifest:
         }
         return identity, connection, profile
 
-    def test_slug_is_used(self):
-        identity, connection, profile = self._make_inputs()
-        result = build_manifest("0fork", identity, connection, profile)
-        assert result.manifest["slug"] == "0fork"
-
     def test_apex_domain_is_set(self):
         identity, connection, profile = self._make_inputs()
-        result = build_manifest("0fork", identity, connection, profile)
+        result = build_manifest(identity, connection, profile)
         assert result.manifest["apex_domain"] == "0fork.com"
 
     def test_schema_version_is_1(self):
         identity, connection, profile = self._make_inputs()
-        result = build_manifest("0fork", identity, connection, profile)
+        result = build_manifest(identity, connection, profile)
         assert result.manifest["schema_version"] == 1
 
     def test_secrets_defaults_to_operator_stdin(self):
         identity, connection, profile = self._make_inputs()
-        result = build_manifest("0fork", identity, connection, profile)
+        result = build_manifest(identity, connection, profile)
         assert result.manifest["secrets"]["source"] == "operator-stdin"
 
     def test_gates_block_present(self):
         identity, connection, profile = self._make_inputs()
-        result = build_manifest("0fork", identity, connection, profile)
+        result = build_manifest(identity, connection, profile)
         assert "fail_fast" in result.manifest["gates"]
         assert result.manifest["gates"]["max_retries_per_step"] == 3
 
     def test_disabled_services_included(self):
         identity, connection, profile = self._make_inputs()
-        result = build_manifest("0fork", identity, connection, profile)
+        result = build_manifest(identity, connection, profile)
         assert "runtime-ai" in result.manifest.get("disabled_services", [])
 
     def test_no_review_required_with_complete_inputs(self):
         identity, connection, profile = self._make_inputs()
-        result = build_manifest("0fork", identity, connection, profile)
+        result = build_manifest(identity, connection, profile)
         # May still have warnings (secrets.source), but no required review items
         # unless the provider heuristic fires
         assert isinstance(result.review_required, list)
@@ -222,22 +217,22 @@ class TestBuildManifest:
     def test_review_required_when_apex_missing(self):
         identity, connection, profile = self._make_inputs()
         identity.pop("platform_domain")
-        result = build_manifest("0fork", identity, connection, profile)
+        result = build_manifest(identity, connection, profile)
         assert any("apex_domain" in r for r in result.review_required)
 
     def test_review_required_when_operator_email_missing(self):
         identity, connection, profile = self._make_inputs()
         identity.pop("platform_operator_email")
-        result = build_manifest("0fork", identity, connection, profile)
+        result = build_manifest(identity, connection, profile)
         assert any("operator" in r for r in result.review_required)
 
     def test_extra_services_omitted_when_empty(self):
         identity, connection, profile = self._make_inputs()
-        result = build_manifest("0fork", identity, connection, profile)
+        result = build_manifest(identity, connection, profile)
         assert "extra_services" not in result.manifest  # empty → not included
 
     def test_verification_block_present(self):
         identity, connection, profile = self._make_inputs()
-        result = build_manifest("0fork", identity, connection, profile)
+        result = build_manifest(identity, connection, profile)
         assert "smoke_endpoints" in result.manifest["verification"]
         assert result.manifest["verification"]["expected_running_vms_count"] == ">= 5"

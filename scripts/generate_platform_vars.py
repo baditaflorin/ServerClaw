@@ -326,6 +326,14 @@ def load_sources(skip_local_override: bool = False) -> tuple[dict[str, Any], dic
     # so forks can substitute their own proxmox_guests list + network scalars
     # without editing the committed (generic-by-default) host_vars.
     host_vars = require_mapping(load_topology_host_vars(), str(TOPOLOGY_HOST_VARS_PATH))
+    # ADR 0488: capacity-aware sizing fragment. When resolve_topology.py has run,
+    # `inventory/host_vars/proxmox-host.generated.yml` carries the envelope-sized
+    # proxmox_guests list. Override the committed (generic) list with it.
+    generated_fragment = repo_path("inventory", "host_vars", "proxmox-host.generated.yml")
+    if generated_fragment.is_file():
+        fragment = load_yaml(generated_fragment) or {}
+        if isinstance(fragment, dict) and fragment.get("proxmox_guests"):
+            host_vars["proxmox_guests"] = fragment["proxmox_guests"]
     # Merge identity vars (platform_domain, operator email/name, etc.) into host_vars
     # so HOST_VAR_TEMPLATE_RE can resolve {{ platform_domain }} in strings like
     # "nginx.{{ platform_domain }}". Identity vars are loaded second so host_vars

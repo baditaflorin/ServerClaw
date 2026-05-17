@@ -45,13 +45,21 @@ from typing import Any
 
 import yaml
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from deployment import REPO_ROOT, load as load_deployment, resolve_active_slug  # noqa: E402
+REPO_ROOT = Path(__file__).resolve().parent.parent
+LOCAL_ROOT = REPO_ROOT / ".local"
+IDENTITY_PATH = LOCAL_ROOT / "identity.yml"
 
 # Paths relative to repo root.
 _DEFAULT_INVENTORY = REPO_ROOT / "inventory" / "hosts.yml"
 _DEFAULT_KEY = REPO_ROOT / ".local" / "ssh" / "bootstrap.id_ed25519"
 _RECEIPTS_DIR = REPO_ROOT / "receipts" / "drift"
+
+
+def _load_identity() -> dict[str, Any]:
+    if not IDENTITY_PATH.is_file():
+        return {}
+    with IDENTITY_PATH.open() as f:
+        return yaml.safe_load(f) or {}
 
 
 # --------------------------------------------------------------------------- #
@@ -151,28 +159,20 @@ def is_drift(hosts: list[HostRecap]) -> bool:
 # --------------------------------------------------------------------------- #
 
 
-def _find_bootstrap_key(slug: str) -> Path:
-    """Locate the bootstrap SSH key for a deployment."""
-    from deployment import DEPLOYMENTS_DIR
-
-    base = DEPLOYMENTS_DIR / slug
-    conn_file = base / "connection.yml"
-    if conn_file.is_file():
-        with conn_file.open() as fh:
-            conn = yaml.safe_load(fh) or {}
-        key_raw = (conn.get("proxmox_host") or {}).get("key", "")
-        if isinstance(key_raw, str) and key_raw:
-            candidate = REPO_ROOT / ".local" / "ssh" / Path(key_raw).name
-            if candidate.is_file():
-                return candidate
-    # Fall back to the standard bootstrap key.
+def _find_bootstrap_key() -> Path:
+    """Locate the bootstrap SSH key from `.local/identity.yml::proxmox_host_ssh`."""
+    identity = _load_identity()
+    key_raw = (identity.get("proxmox_host_ssh") or {}).get("key", "")
+    if isinstance(key_raw, str) and key_raw:
+        candidate = LOCAL_ROOT / "ssh" / Path(key_raw).name
+        if candidate.is_file():
+            return candidate
     return _DEFAULT_KEY
 
 
 def run_playbook_check(
     playbook: Path,
     *,
-    slug: str,
     inventory: Path = _DEFAULT_INVENTORY,
     extra_vars: list[str] | None = None,
     timeout: int = 600,
@@ -181,7 +181,7 @@ def run_playbook_check(
 
     Not a pure function (spawns a subprocess). Extracted for testability.
     """
-    key = _find_bootstrap_key(slug)
+    key = _find_bootstrap_key()
     cmd = [
         "ansible-playbook",
         "--check",
@@ -242,7 +242,6 @@ def _write_report(report: DriftReport) -> Path:
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--playbook", required=True, help="Path to the Ansible playbook to check for drift")
-    p.add_argument("--slug", help="Deployment slug (defaults to active deployment)")
     p.add_argument(
         "--extra-vars",
         dest="extra_vars",
@@ -256,10 +255,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--json", action="store_true", help="Emit machine-readable JSON to stdout")
     args = p.parse_args(argv)
 
-    try:
-        slug = args.slug or resolve_active_slug()
-    except Exception as e:
-        sys.exit(f"deployment not resolved: {e}")
+    identity = _load_identity()
+    deployment_name = identity.get("platform_domain") or "unknown"
 
     playbook = Path(args.playbook)
     if not playbook.is_absolute():
@@ -270,15 +267,14 @@ def main(argv: list[str] | None = None) -> int:
     now = _dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     report = DriftReport(
         playbook=str(args.playbook),
-        deployment=slug,
+        deployment=deployment_name,
         ran_at=now,
         ansible_exit_code=0,
     )
 
-    sys.stderr.write(f"detect-drift: running {playbook.name} --check for deployment {slug!r}\n")
+    sys.stderr.write(f"detect-drift: running {playbook.name} --check for deployment {deployment_name!r}\n")
     rc, stdout, stderr = run_playbook_check(
         playbook,
-        slug=slug,
         inventory=Path(args.inventory),
         extra_vars=args.extra_vars,
         timeout=args.timeout,
