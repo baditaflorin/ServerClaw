@@ -1,6 +1,9 @@
 # ADR 0458: Cert-Validator Multi-Deployment Mode (Auto-Detect)
 
-- Status: Accepted
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+- Status: Superseded by ADR 0488
 - Implementation Status: Implemented (`--all-deployments` flag + auto-trigger when no slug resolved AND multiple deployments registered)
 - Date: 2026-04-29
 - Concern: multi-deployment-coverage, gate-completeness

@@ -1,6 +1,9 @@
 # ADR 0480: Multi-Deployment Certificate Validation
 
-**Status**: ACCEPTED
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+**Status**: SUPERSEDED by ADR 0488
 **Date**: 2026-05-05
 **Decision**: Implement deployment-aware certificate validation to handle multiple parallel deployments (lv3.org, 0fork.com) sharing NGINX edge infrastructure.
 

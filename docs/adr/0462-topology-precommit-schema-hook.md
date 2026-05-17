@@ -1,6 +1,9 @@
 # ADR 0462: Topology Pre-Commit Schema Hook
 
-- Status: Accepted
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+- Status: Superseded by ADR 0488
 - Implementation Status: Implemented (`scripts/validate_topology_schema.py` + `validate-topology-schema` hook in `.pre-commit-config.yaml`)
 - Date: 2026-04-29
 - Concern: shift-left, schema-drift, converge-time-failure

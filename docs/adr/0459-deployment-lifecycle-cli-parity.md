@@ -1,6 +1,9 @@
 # ADR 0459: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
 
-- Status: Accepted
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+- Status: Superseded by ADR 0488
 - Implementation Status: Implemented (`use`/`new`/`bind` subcommands on `scripts/deployment.py`).
 - Date: 2026-04-29
 - Concern: operator-surface, agent-friendly-cli, multi-deployment-ergonomics

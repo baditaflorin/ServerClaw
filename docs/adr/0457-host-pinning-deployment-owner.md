@@ -1,6 +1,9 @@
 # ADR 0457: Host-Pinning via `proxmox_guests[*].deployment_owner`
 
-- Status: Accepted
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+- Status: Superseded by ADR 0488
 - Implementation Status: Phase 1 (data model + audit script) + Phase 2 (role-side guard `lv3.platform.host_pinning_guard`, wired into `playbooks/public-edge.yml`) implemented. Wiring into other playbooks is per-playbook owner work.
 - Date: 2026-04-28
 - Concern: multi-deployment-correctness, port-collision, role-side-effects

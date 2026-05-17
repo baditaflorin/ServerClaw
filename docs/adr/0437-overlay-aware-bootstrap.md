@@ -1,6 +1,9 @@
 # ADR 0437: Overlay-Aware `make bootstrap` — Single Command for Any Fork
 
-- Status: Accepted
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+- Status: Superseded by ADR 0488
 - Implementation Status: Complete
 - Date: 2026-04-22
 - Concern: forkability, operator-onboarding, one-command-deploy, iac-end-to-end, dry-principle

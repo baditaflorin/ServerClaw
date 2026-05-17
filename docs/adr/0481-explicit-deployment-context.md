@@ -1,6 +1,9 @@
 # ADR 0481: Explicit Deployment Context (no implicit identity.yml swap)
 
-**Status**: ACCEPTED
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+**Status**: SUPERSEDED by ADR 0488
 **Date**: 2026-05-11
 **Decision**: Deployment selection is an explicit, agent-checkable parameter. There is no "active deployment" hidden inside an unnamed file at the repo root.
 

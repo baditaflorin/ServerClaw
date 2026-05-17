@@ -56,15 +56,19 @@ from typing import Any, Callable
 
 import yaml
 
-# Resolve repo + main-repo (worktree-aware) per ADR 0481 convention.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from deployment import REPO_ROOT as MAIN_REPO_ROOT  # noqa: E402
-from deployment import load as load_deployment  # noqa: E402
-from deployment import resolve_active_slug  # noqa: E402
-
 CODE_ROOT = Path(__file__).resolve().parent.parent
+LOCAL_ROOT = CODE_ROOT / ".local"
+IDENTITY_PATH = LOCAL_ROOT / "identity.yml"
 REGISTRY_PATH = CODE_ROOT / "config" / "post_conditions.yml"
 SCHEMA_PATH = CODE_ROOT / "config" / "contracts" / "deployment-v1" / "post-conditions.schema.json"
+
+
+def _load_identity() -> dict[str, Any]:
+    """Read .local/identity.yml (ADR 0385 + ADR 0488 — single deployment per repo)."""
+    if not IDENTITY_PATH.is_file():
+        raise FileNotFoundError(f"{IDENTITY_PATH} not found. Edit .local/identity.yml to configure your deployment.")
+    with IDENTITY_PATH.open() as f:
+        return yaml.safe_load(f) or {}
 
 
 # --------------------------------------------------------------------------- #
@@ -478,18 +482,20 @@ def main() -> int:
     args = p.parse_args()
 
     try:
-        slug = resolve_active_slug()
-    except Exception as e:
-        sys.stderr.write(f"deployment not resolved: {e}\n")
+        identity = _load_identity()
+    except FileNotFoundError as e:
+        sys.stderr.write(f"{e}\n")
         return 2
 
-    deployment = load_deployment(slug)
-    ctx = build_template_context(deployment.identity)
+    deployment_name = identity.get("platform_domain", "unknown")
+    ctx = build_template_context(identity)
 
     registry = load_registry(Path(args.registry))
     selected = select_checks(registry, step=args.step, tag=args.tag, only_id=args.only_id)
 
-    report = RunReport(deployment=slug, ran_at=_dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+    report = RunReport(
+        deployment=deployment_name, ran_at=_dt.datetime.now(tz=_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    )
     for c in selected:
         result = run_check(c, DEFAULT_PLUGINS, ctx)
         report.add(result)

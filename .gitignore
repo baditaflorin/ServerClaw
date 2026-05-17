@@ -68,6 +68,8 @@ receipts/
 # Generators resolve example.com → real domain from .local/identity.yml.
 inventory/group_vars/platform.yml
 inventory/group_vars/platform_hairpin.yml
+# ADR 0488: Capacity-aware sizing fragment, written by scripts/resolve_topology.py.
+inventory/host_vars/proxmox-host.generated.yml
 config/prometheus/rules/https_tls_alerts.yml
 config/prometheus/file_sd/https_tls_targets.yml
 config/prometheus/file_sd/slo_targets.yml

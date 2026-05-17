@@ -12,7 +12,7 @@
 # config/post_conditions.yml (enforced by scripts/lint_bootstrap_coverage.py).
 #
 # Template variables in preconditions / postconditions / descriptions:
-#   {slug}      -> active deployment slug
+#   (ADR 0488: single deployment per checkout; no slug substitution needed)
 #   {apex}      -> apex domain (platform_domain from identity.yml)
 #   {apex_slug} -> first label of apex
 #
@@ -26,31 +26,31 @@ steps:
     title: "Derive identity, connection, and profile from manifest"
     make_target: derive-deployment-files
     description: |
-      Reads .local/deployments/{slug}/manifest.yml and emits identity.yml,
+      Reads .local/manifest.yml and emits identity.yml,
       connection.yml, and profile.yml. These files are the input to every
       subsequent step. This step is always re-entrant: re-running it regenerates
       derived files without touching operator-authored manifests or secrets.
     preconditions:
       - id: manifest.exists
         type: file
-        path: ".local/deployments/{slug}/manifest.yml"
+        path: ".local/manifest.yml"
         expect_exists: true
       - id: manifest.valid
         type: schema
-        target: ".local/deployments/{slug}/manifest.yml"
+        target: ".local/manifest.yml"
         schema: "config/contracts/deployment-v1/manifest.schema.json"
     postconditions:
       - id: identity.derived.exists
         type: file
-        path: ".local/deployments/{slug}/identity.yml"
+        path: ".local/identity.yml"
         expect_exists: true
       - id: connection.derived.exists
         type: file
-        path: ".local/deployments/{slug}/connection.yml"
+        path: ".local/connection.yml"
         expect_exists: true
       - id: profile.derived.exists
         type: file
-        path: ".local/deployments/{slug}/profile.yml"
+        path: ".local/profile.yml"
         expect_exists: true
     timeout_s: 30
     retries: 0
@@ -60,24 +60,24 @@ steps:
     make_target: probe-capacity
     description: |
       Runs scripts/capacity_probe.py against the host in connection.yml.
-      Writes .local/deployments/{slug}/capacity.yml. Used by step 2 to size VMs.
+      Writes .local/capacity.yml. Used by step 2 to size VMs.
     preconditions:
       - id: connection.exists
         type: file
-        path: ".local/deployments/{slug}/connection.yml"
+        path: ".local/connection.yml"
         expect_exists: true
       - id: connection.valid
         type: schema
-        target: ".local/deployments/{slug}/connection.yml"
+        target: ".local/connection.yml"
         schema: "config/contracts/deployment-v1/connection.schema.json"
     postconditions:
       - id: capacity.exists
         type: file
-        path: ".local/deployments/{slug}/capacity.yml"
+        path: ".local/capacity.yml"
         expect_exists: true
       - id: capacity.valid
         type: schema
-        target: ".local/deployments/{slug}/capacity.yml"
+        target: ".local/capacity.yml"
         schema: "config/contracts/deployment-v1/capacity.schema.json"
     timeout_s: 60
     retries: 2
@@ -92,7 +92,7 @@ steps:
     preconditions:
       - id: capacity.valid
         type: schema
-        target: ".local/deployments/{slug}/capacity.yml"
+        target: ".local/capacity.yml"
         schema: "config/contracts/deployment-v1/capacity.schema.json"
       - id: sizing-policy.exists
         type: file
@@ -100,16 +100,16 @@ steps:
         expect_exists: true
       - id: profile.exists
         type: file
-        path: ".local/deployments/{slug}/profile.yml"
+        path: ".local/profile.yml"
         expect_exists: true
     postconditions:
       - id: topology.exists
         type: file
-        path: ".local/deployments/{slug}/topology.yml"
+        path: ".local/topology.yml"
         expect_exists: true
       - id: topology.valid
         type: schema
-        target: ".local/deployments/{slug}/topology.yml"
+        target: ".local/topology.yml"
         schema: "config/contracts/deployment-v1/topology.schema.json"
     timeout_s: 60
     retries: 0
@@ -175,13 +175,13 @@ steps:
     title: "Create all VMs in topology.yml with sized memory, balloon, cores, disk"
     make_target: provision-guests
     description: |
-      Reads .local/deployments/{slug}/topology.yml and provisions every VM via
+      Reads .local/topology.yml and provisions every VM via
       the Proxmox API + qm. VMs are created with the memory/balloon/cores/disk
       values from the topology resolver. Idempotent: existing VMs are skipped.
     preconditions:
       - id: topology.valid
         type: schema
-        target: ".local/deployments/{slug}/topology.yml"
+        target: ".local/topology.yml"
         schema: "config/contracts/deployment-v1/topology.schema.json"
     postconditions:
       - id: vms.all-running
@@ -356,7 +356,7 @@ steps:
     title: "Write the bootstrap receipt"
     make_target: write-bootstrap-receipt
     description: |
-      Writes receipts/live-applies/{slug}/{timestamp}-bootstrap-complete.json.
+      Writes receipts/live-applies/{timestamp}-bootstrap-complete.json.
       The receipt records which steps ran, their post-condition results, the
       manifest hash, topology hash, and the time-to-completion. Downstream
       tooling (ADR 0420 receipt validator) requires this receipt to consider
@@ -372,7 +372,7 @@ steps:
     postconditions:
       - id: receipt.written
         type: file
-        path: "receipts/live-applies/{slug}"
+        path: "receipts/live-applies"
         expect_exists: true
     timeout_s: 30
     retries: 0

@@ -1,6 +1,9 @@
 # ADR 0443: Continuous Topology Reconciler & Drift Detection
 
-- Status: Accepted
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+- Status: Superseded by ADR 0488
 - Implementation Status: Implemented — all phases (probe, reconciler, linter, pre-push gate, hourly Windmill schedule, ops-portal receipt)
 - Date: 2026-04-27
 - Concern: drift, debuggability, multi-deployment-safety, registry-as-truth

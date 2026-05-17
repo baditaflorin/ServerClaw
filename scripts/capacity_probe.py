@@ -1,28 +1,36 @@
-"""Capacity probe — ADR 0482.
+"""Capacity probe — ADR 0482 (single-deployment, post-ADR 0488).
 
-Read-only probe of a deployment's Proxmox host. Emits a structured
-capacity.yml at .local/deployments/<slug>/capacity.yml describing what
-RAM / CPU / disk / network the host actually has.
+Read-only probe of the Proxmox host. Emits a structured `.local/capacity.yml`
+describing what RAM / CPU / disk / network the host actually has.
 
 The resolver (scripts/resolve_topology.py) consumes this file alongside
-config/sizing-policy.yml and the deployment's profile.yml to compute
-per-VM allocations that fit the host.
+config/sizing-policy.yml and `.local/profile.yml` to compute per-VM
+allocations that fit the host.
 
-Probe transport: SSH using the deployment's connection.yml. Falls back
-to an explicit `--from-stdin` mode for operator-authored capacity (cold
-provisioning before the host is reachable).
+Probe transport: SSH using the `proxmox_host_ssh` block in `.local/identity.yml`.
+Falls back to an explicit `--from-stdin` mode for operator-authored capacity
+(cold provisioning before the host is reachable).
+
+Expected `.local/identity.yml` shape (ADR 0385 + ADR 0488):
+
+    platform_domain: example.com
+    platform_operator_email: op@example.com
+    platform_operator_name: "Op Name"
+    proxmox_host_ssh:
+      addr: 203.0.113.10        # public IP or DNS of the Proxmox host
+      port: 22                  # SSH port (default 22)
+      user: root                # SSH user (default root)
+      key: bootstrap.id_ed25519 # filename under .local/ssh/, or absolute path
 
 Usage:
 
-    uv run --with pyyaml --with jsonschema python scripts/capacity_probe.py \\
-        --slug 0fork --write
+    uv run --with pyyaml --with jsonschema python scripts/capacity_probe.py --write
 
     # Dry-run (print what would be written):
-    uv run --with pyyaml --with jsonschema python scripts/capacity_probe.py \\
-        --slug 0fork
+    uv run --with pyyaml --with jsonschema python scripts/capacity_probe.py
 
-    # Operator-authored fallback (read from stdin or file):
-    uv run ... python scripts/capacity_probe.py --slug 0fork --from-stdin --write < capacity.yml
+    # Operator-authored fallback (read from stdin):
+    uv run ... python scripts/capacity_probe.py --from-stdin --write < capacity.yml
 
 Exit codes: 0 = success, 2 = bad input, 3 = SSH/probe failed.
 """
@@ -32,7 +40,6 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import json
-import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -40,13 +47,10 @@ from typing import Any
 
 import yaml
 
-# MAIN_REPO_ROOT — for .local/ access (resolves correctly from worktrees via git-common-dir).
-# CODE_ROOT — for committed assets (schemas, policies) that live in this checkout.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from deployment import REPO_ROOT as MAIN_REPO_ROOT  # noqa: E402
-
 CODE_ROOT = Path(__file__).resolve().parent.parent
-DEPLOYMENTS_DIR = MAIN_REPO_ROOT / ".local" / "deployments"
+LOCAL_ROOT = CODE_ROOT / ".local"
+IDENTITY_PATH = LOCAL_ROOT / "identity.yml"
+CAPACITY_PATH = LOCAL_ROOT / "capacity.yml"
 SCHEMA_PATH = CODE_ROOT / "config" / "contracts" / "deployment-v1" / "capacity.schema.json"
 
 PROBE_SCRIPT = r"""
@@ -78,35 +82,45 @@ echo "public_ipv4=${public_ipv4:-}"
 """
 
 
-def _load_connection(slug: str) -> dict[str, Any]:
-    """Load .local/deployments/<slug>/connection.yml for SSH target."""
-    path = DEPLOYMENTS_DIR / slug / "connection.yml"
-    if not path.is_file():
-        sys.exit(f"ERROR: {path} not found. Authoring connection.yml is a prereq for probe-capacity.")
-    with path.open() as f:
+def _load_identity() -> dict[str, Any]:
+    if not IDENTITY_PATH.is_file():
+        sys.exit(
+            f"ERROR: {IDENTITY_PATH} not found.\n"
+            "Edit .local/identity.yml to configure your deployment (ADR 0385 + ADR 0488).\n"
+            "See docs/getting-started.md for the required fields."
+        )
+    with IDENTITY_PATH.open() as f:
         return yaml.safe_load(f) or {}
 
 
-def _ssh_argv(conn: dict[str, Any]) -> list[str]:
-    """Build the ssh command from connection.yml's proxmox_host block."""
-    host = conn.get("proxmox_host", {})
+def _ssh_argv(identity: dict[str, Any]) -> list[str]:
+    """Build the ssh command from identity.yml's proxmox_host_ssh block."""
+    host = identity.get("proxmox_host_ssh") or {}
     addr = host.get("addr")
+    if not addr:
+        sys.exit(
+            "ERROR: .local/identity.yml is missing `proxmox_host_ssh.addr`.\n"
+            "Add a block:\n"
+            "  proxmox_host_ssh:\n"
+            "    addr: <ip-or-hostname-of-proxmox-host>\n"
+            "    port: 22\n"
+            "    user: root\n"
+            "    key: bootstrap.id_ed25519"
+        )
     port = int(host.get("port", 22))
     user = host.get("user", "root")
     key = host.get("key", "")
-    if not addr:
-        sys.exit("ERROR: connection.yml has no proxmox_host.addr")
-    key_path = (MAIN_REPO_ROOT / ".local" / "ssh" / key) if key and not key.startswith("/") else Path(key)
+    key_path = (LOCAL_ROOT / "ssh" / key) if key and not key.startswith("/") else Path(key)
     args = ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", "-p", str(port)]
-    if key_path:
+    if key:
         args += ["-i", str(key_path), "-o", "IdentitiesOnly=yes"]
     args.append(f"{user}@{addr}")
     return args
 
 
-def probe_via_ssh(slug: str) -> dict[str, Any]:
-    conn = _load_connection(slug)
-    argv = _ssh_argv(conn)
+def probe_via_ssh() -> dict[str, Any]:
+    identity = _load_identity()
+    argv = _ssh_argv(identity)
     cmd = argv + ["bash", "-s"]
     try:
         out = subprocess.run(cmd, input=PROBE_SCRIPT, text=True, capture_output=True, timeout=45, check=True).stdout
@@ -161,13 +175,14 @@ def validate(capacity: dict[str, Any]) -> list[str]:
     try:
         from jsonschema import Draft202012Validator  # type: ignore
     except ImportError:
-        # Minimal check fallback.
         errs = []
         if capacity.get("schema_version") != 1:
             errs.append("schema_version must be 1")
         if not isinstance(capacity.get("host", {}).get("ram_total_mb"), int):
             errs.append("host.ram_total_mb missing or not int")
         return errs
+    if not SCHEMA_PATH.is_file():
+        return []
     schema = json.loads(SCHEMA_PATH.read_text())
     v = Draft202012Validator(schema)
     return [f"{'.'.join(str(p) for p in e.absolute_path) or '<root>'}: {e.message}" for e in v.iter_errors(capacity)]
@@ -175,8 +190,7 @@ def validate(capacity: dict[str, Any]) -> list[str]:
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--slug", required=True, help="Deployment slug (under .local/deployments/)")
-    p.add_argument("--write", action="store_true", help="Write to .local/deployments/<slug>/capacity.yml")
+    p.add_argument("--write", action="store_true", help="Write to .local/capacity.yml")
     p.add_argument(
         "--from-stdin", action="store_true", help="Read operator-authored capacity from stdin instead of probing"
     )
@@ -186,7 +200,7 @@ def main() -> int:
         capacity = yaml.safe_load(sys.stdin) or {}
         capacity.setdefault("probed_via", "operator")
     else:
-        capacity = probe_via_ssh(args.slug)
+        capacity = probe_via_ssh()
 
     errs = validate(capacity)
     if errs:
@@ -195,10 +209,9 @@ def main() -> int:
 
     out_yaml = yaml.dump(capacity, sort_keys=False, default_flow_style=False)
     if args.write:
-        out_path = DEPLOYMENTS_DIR / args.slug / "capacity.yml"
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(out_yaml)
-        print(f"wrote {out_path}")
+        CAPACITY_PATH.parent.mkdir(parents=True, exist_ok=True)
+        CAPACITY_PATH.write_text(out_yaml)
+        print(f"wrote {CAPACITY_PATH}")
     else:
         sys.stdout.write(out_yaml)
     return 0

@@ -1,6 +1,9 @@
 # ADR 0446: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
 
-- Status: Proposed
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+- Status: Superseded by ADR 0488
 - Implementation Status: Not started — umbrella workstream
 - Date: 2026-04-28
 - Concern: drift, programmatic-deploy, multi-deployment-safety, role-coverage

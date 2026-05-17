@@ -1,12 +1,15 @@
-"""Topology resolver — ADR 0482.
+"""Topology resolver — ADR 0482 (single-deployment, post-ADR 0488).
 
 Compute per-VM allocations (memory_mb, cores, disk_gb, balloon) from:
-  - .local/deployments/<slug>/capacity.yml  (probed host capacity)
-  - config/sizing-policy.yml                 (per-service-class rules)
-  - .local/deployments/<slug>/profile.yml   (enabled service profiles)
+  - .local/capacity.yml          (probed host capacity, from capacity_probe.py)
+  - config/sizing-policy.yml     (per-service-class rules)
+  - .local/profile.yml           (enabled service profiles)
 
-Writes (or prints, in plan mode) the resolved topology to
-.local/deployments/<slug>/topology.yml.
+Writes (or prints, in plan mode) the resolved topology to `.local/topology.yml`
+and a generated inventory fragment at `inventory/host_vars/proxmox-host.generated.yml`.
+The committed `inventory/host_vars/proxmox-host.yml` is the canonical inventory
+file; the generated fragment is included by the provisioning chain so VM sizes
+match the host envelope on every bootstrap.
 
 Algorithm (priority-shrinkage):
 
@@ -28,14 +31,13 @@ Algorithm (priority-shrinkage):
 
 Usage:
 
-    uv run --with pyyaml --with jsonschema python scripts/resolve_topology.py \\
-        --slug 0fork --write
+    uv run --with pyyaml --with jsonschema python scripts/resolve_topology.py --write
 
     # Plan mode (print what would be written + diff against current topology):
-    uv run ... python scripts/resolve_topology.py --slug 0fork
+    uv run ... python scripts/resolve_topology.py
 
     # Strict mode (fail if any class falls back below preferred):
-    uv run ... python scripts/resolve_topology.py --slug 0fork --strict
+    uv run ... python scripts/resolve_topology.py --strict
 """
 
 from __future__ import annotations
@@ -50,14 +52,13 @@ from typing import Any
 
 import yaml
 
-# MAIN_REPO_ROOT — for .local/ access (resolves correctly from worktrees via git-common-dir).
-# CODE_ROOT — for committed assets (schemas, policies) that live in this checkout.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from deployment import REPO_ROOT as MAIN_REPO_ROOT  # noqa: E402
-
 CODE_ROOT = Path(__file__).resolve().parent.parent
-DEPLOYMENTS_DIR = MAIN_REPO_ROOT / ".local" / "deployments"
+LOCAL_ROOT = CODE_ROOT / ".local"
+CAPACITY_PATH = LOCAL_ROOT / "capacity.yml"
+PROFILE_PATH = LOCAL_ROOT / "profile.yml"
+TOPOLOGY_PATH = LOCAL_ROOT / "topology.yml"
 POLICY_PATH = CODE_ROOT / "config" / "sizing-policy.yml"
+INVENTORY_FRAGMENT_PATH = CODE_ROOT / "inventory" / "host_vars" / "proxmox-host.generated.yml"
 
 
 def _hash(obj: Any) -> str:
@@ -66,7 +67,6 @@ def _hash(obj: Any) -> str:
 
 @dataclass
 class Inputs:
-    slug: str
     capacity: dict[str, Any]
     policy: dict[str, Any]
     profile: dict[str, Any]
@@ -80,20 +80,21 @@ class Inputs:
         }
 
 
-def load_inputs(slug: str) -> Inputs:
-    cap = DEPLOYMENTS_DIR / slug / "capacity.yml"
-    prof = DEPLOYMENTS_DIR / slug / "profile.yml"
-    if not cap.is_file():
-        sys.exit(f"ERROR: {cap} not found. Run `make probe-capacity slug={slug}` first.")
-    if not prof.is_file():
-        sys.exit(f"ERROR: {prof} not found.")
+def load_inputs() -> Inputs:
+    if not CAPACITY_PATH.is_file():
+        sys.exit(f"ERROR: {CAPACITY_PATH} not found. Run `make probe-capacity` first.")
+    if not PROFILE_PATH.is_file():
+        sys.exit(
+            f"ERROR: {PROFILE_PATH} not found. Create it with a `profiles:` list "
+            "(e.g. `profiles: [core, devtools]`). See config/sizing-policy.yml for "
+            "available profile names."
+        )
     if not POLICY_PATH.is_file():
         sys.exit(f"ERROR: {POLICY_PATH} not found.")
     return Inputs(
-        slug=slug,
-        capacity=yaml.safe_load(cap.read_text()) or {},
+        capacity=yaml.safe_load(CAPACITY_PATH.read_text()) or {},
         policy=yaml.safe_load(POLICY_PATH.read_text()) or {},
-        profile=yaml.safe_load(prof.read_text()) or {},
+        profile=yaml.safe_load(PROFILE_PATH.read_text()) or {},
     )
 
 
@@ -105,7 +106,6 @@ def enabled_classes(inputs: Inputs) -> list[str]:
         enabled |= set(defaults.get(name, []) or [])
     enabled |= set(inputs.profile.get("extra_services", []) or [])
     enabled -= set(inputs.profile.get("disabled_services", []) or [])
-    # Filter to classes the policy actually knows about.
     return sorted(c for c in enabled if c in inputs.policy.get("classes", {}))
 
 
@@ -125,19 +125,15 @@ def filter_by_capability(classes: list[str], inputs: Inputs) -> tuple[list[str],
 def _shrink(
     enabled: list[str],
     inputs: Inputs,
-    field: str,  # "ram_mb" | "cpu" | "disk_gb"
+    field: str,
     capacity_value: int,
 ) -> tuple[dict[str, int], list[str]]:
-    """Return {class: resolved_value} for `field`, fitting within capacity_value.
-    Shrinks lowest-priority classes first, never below min."""
     classes_meta = inputs.policy["classes"]
     priority_order = inputs.policy.get("priority_order", ["critical", "important", "nice-to-have", "optional"])
 
-    # Start everyone at "preferred".
     resolved = {c: int(classes_meta[c][field]["preferred"]) for c in enabled}
     notes: list[str] = []
 
-    # Iterate from lowest priority to highest; shrink toward min.
     for tier in reversed(priority_order):
         if sum(resolved.values()) <= capacity_value:
             return resolved, notes
@@ -148,7 +144,6 @@ def _shrink(
             cur = resolved[c]
             mn = int(classes_meta[c][field]["min"])
             if cur > mn:
-                # Shrink by 1/4 of (cur - mn) each pass; loop until fits.
                 while sum(resolved.values()) > capacity_value and resolved[c] > mn:
                     step = max(1, (resolved[c] - mn) // 4)
                     resolved[c] -= step
@@ -159,7 +154,6 @@ def _shrink(
                 )
 
     if sum(resolved.values()) > capacity_value:
-        # Even at all-min, doesn't fit.
         overflow = sum(resolved.values()) - capacity_value
         notes.append(
             f"OVERFLOW: {field} still exceeds capacity by {overflow} even at all-min. "
@@ -172,12 +166,11 @@ def resolve(inputs: Inputs, strict: bool = False) -> tuple[dict[str, Any], list[
     host = inputs.capacity.get("host", {})
     ram_budget = int(host.get("ram_total_mb", 0)) - int(host.get("ram_reserved_mb", 4096))
     cpu_budget = int(host.get("threads") or host.get("cores", 0))
-    # Largest storage pool free_gb, minus 10% headroom.
     storage = host.get("storage", []) or []
     if storage:
         disk_budget = int(max(s.get("free_gb", 0) for s in storage) * 0.9)
     else:
-        disk_budget = 0  # disabled disk constraint if probe didn't surface storage
+        disk_budget = 0
 
     enabled = enabled_classes(inputs)
     enabled, skipped = filter_by_capability(enabled, inputs)
@@ -205,7 +198,7 @@ def resolve(inputs: Inputs, strict: bool = False) -> tuple[dict[str, Any], list[
                 "name": c,
                 "role": c,
                 "memory_mb": ram_mb,
-                "balloon_mb": int(ram_mb * 0.4),  # ADR 0482 §5
+                "balloon_mb": int(ram_mb * 0.4),
                 "cores": cpu[c],
                 "disk_gb": disk[c],
                 "priority": inputs.policy["classes"][c]["priority"],
@@ -233,12 +226,10 @@ def resolve(inputs: Inputs, strict: bool = False) -> tuple[dict[str, Any], list[
     return topology, notes
 
 
-def diff_against_existing(slug: str, new_topology: dict[str, Any]) -> str:
-    """Compute a one-line-per-guest diff between current topology and the new one."""
-    cur_path = DEPLOYMENTS_DIR / slug / "topology.yml"
-    if not cur_path.is_file():
+def diff_against_existing(new_topology: dict[str, Any]) -> str:
+    if not TOPOLOGY_PATH.is_file():
         return "(no existing topology — full new deployment)"
-    cur = yaml.safe_load(cur_path.read_text()) or {}
+    cur = yaml.safe_load(TOPOLOGY_PATH.read_text()) or {}
     cur_guests = {g["name"]: g for g in (cur.get("proxmox_guests") or [])}
     new_guests = {g["name"]: g for g in (new_topology.get("proxmox_guests") or [])}
     names = sorted(set(cur_guests) | set(new_guests))
@@ -260,38 +251,60 @@ def diff_against_existing(slug: str, new_topology: dict[str, Any]) -> str:
     return "\n".join(lines) or "  (no changes)"
 
 
+def write_inventory_fragment(topology: dict[str, Any]) -> None:
+    """Emit a small generated inventory fragment listing only the resolved guests.
+
+    The committed `inventory/host_vars/proxmox-host.yml` is expected to include
+    this fragment so the provisioning chain sees envelope-sized VM definitions.
+    """
+    fragment = {
+        "_generated_by": "scripts/resolve_topology.py",
+        "_generated_at": topology.get("generated_at"),
+        "_source_hashes": topology.get("inputs"),
+        "proxmox_guests": topology.get("proxmox_guests") or [],
+    }
+    INVENTORY_FRAGMENT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    INVENTORY_FRAGMENT_PATH.write_text(
+        "# AUTOGENERATED by scripts/resolve_topology.py — do not edit by hand.\n"
+        "# Operator overrides belong in inventory/host_vars/proxmox-host.yml above the include.\n"
+        + yaml.dump(fragment, sort_keys=False, default_flow_style=False)
+    )
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--slug", required=True)
-    p.add_argument("--write", action="store_true", help="Write the result to topology.yml (otherwise dry-run)")
+    p.add_argument("--write", action="store_true", help="Write the result to .local/topology.yml + inventory fragment")
     p.add_argument("--strict", action="store_true", help="Fail if any class falls below preferred")
     args = p.parse_args()
 
-    inputs = load_inputs(args.slug)
+    inputs = load_inputs()
     topology, notes = resolve(inputs, strict=args.strict)
 
-    sys.stderr.write(f"--- resolve_topology slug={args.slug} ---\n")
+    sys.stderr.write("--- resolve_topology ---\n")
     sys.stderr.write(f"enabled: {[g['name'] for g in topology['proxmox_guests']]}\n")
     sys.stderr.write(
-        f"budget:  ram {topology['budget']['ram_allocated_mb']}/{topology['budget']['ram_usable_mb']} MB, cpu {topology['budget']['cpu_allocated']}/{topology['budget']['cpu_total']}, disk {topology['budget']['disk_allocated_gb']}/{topology['budget']['disk_total_gb']} GB\n"
+        f"budget:  ram {topology['budget']['ram_allocated_mb']}/{topology['budget']['ram_usable_mb']} MB, "
+        f"cpu {topology['budget']['cpu_allocated']}/{topology['budget']['cpu_total']}, "
+        f"disk {topology['budget']['disk_allocated_gb']}/{topology['budget']['disk_total_gb']} GB\n"
     )
     if topology["skipped_for_capability"]:
         sys.stderr.write(f"skipped: {topology['skipped_for_capability']}\n")
     for n in notes:
         sys.stderr.write(f"note: {n}\n")
-    sys.stderr.write("diff against current topology.yml:\n")
-    sys.stderr.write(diff_against_existing(args.slug, topology) + "\n")
+    sys.stderr.write("diff against current .local/topology.yml:\n")
+    sys.stderr.write(diff_against_existing(topology) + "\n")
 
     out = yaml.dump(topology, sort_keys=False, default_flow_style=False)
     if args.write:
-        out_path = DEPLOYMENTS_DIR / args.slug / "topology.yml"
-        # back-up existing file before overwriting
-        if out_path.is_file():
-            backup = out_path.with_suffix(f".yml.bak-{_dt.datetime.now().strftime('%Y%m%d%H%M%S')}")
-            out_path.rename(backup)
+        if TOPOLOGY_PATH.is_file():
+            backup = TOPOLOGY_PATH.with_suffix(f".yml.bak-{_dt.datetime.now().strftime('%Y%m%d%H%M%S')}")
+            TOPOLOGY_PATH.rename(backup)
             sys.stderr.write(f"backed up previous topology to {backup}\n")
-        out_path.write_text(out)
-        sys.stderr.write(f"wrote {out_path}\n")
+        TOPOLOGY_PATH.parent.mkdir(parents=True, exist_ok=True)
+        TOPOLOGY_PATH.write_text(out)
+        sys.stderr.write(f"wrote {TOPOLOGY_PATH}\n")
+        write_inventory_fragment(topology)
+        sys.stderr.write(f"wrote {INVENTORY_FRAGMENT_PATH}\n")
     else:
         sys.stdout.write(out)
     return 0

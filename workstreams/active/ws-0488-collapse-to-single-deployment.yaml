@@ -1,0 +1,181 @@
+id: ws-0488-collapse-to-single-deployment
+adr: "0488"
+title: Collapse to single-deployment-per-repo + envelope-aware sizing
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/agitated-saha-a10fa8
+worktree_path: .claude/worktrees/agitated-saha-a10fa8
+doc: docs/adr/0488-single-deployment-per-repo-checkout.md
+depends_on:
+  - adr-0385-one-identity-file
+  - adr-0407-generic-by-default
+  - adr-0420-receipt-schema
+  - adr-0482-capacity-aware-dynamic-sizing
+  - adr-0484-self-verification-contracts
+  - adr-0485-convergence-idempotency-tests
+supersedes:
+  - adr-0437-overlay-aware-bootstrap
+  - adr-0439-multi-deployment-repo-architecture
+  - adr-0440-per-deployment-identity-and-artifact-isolation
+  - adr-0441-deployment-scoped-service-subsetting
+  - adr-0442-multi-deployment-make-interface-and-worktree-binding
+  - adr-0443-continuous-topology-reconciler
+  - adr-0445-phase1-multi-deployment-hardening
+  - adr-0446-phase2-multi-deployment-hardening
+  - adr-0448-deployment-connection-registry-and-wrapper
+  - adr-0456-deployment-aware-certificate-validation
+  - adr-0457-host-pinning-deployment-owner
+  - adr-0458-cert-validator-multi-deployment
+  - adr-0459-deployment-lifecycle-cli-parity
+  - adr-0460-phase8-cross-deploy-and-auto-promote
+  - adr-0462-topology-precommit-schema-hook
+  - adr-0470-deployment-fixture-matrix
+  - adr-0480-multi-deployment-certificate-validation
+  - adr-0481-explicit-deployment-context
+shared_surfaces:
+  - docs/adr/0488-single-deployment-per-repo-checkout.md
+  - Makefile
+  - mk/multi-deployment.mk
+  - scripts/deployment.py
+  - scripts/migrate_to_multi_deployment.py
+  - scripts/capacity_probe.py
+  - scripts/resolve_topology.py
+  - scripts/self_check.py
+  - scripts/audit_sanitization.py
+  - CLAUDE.md
+  - inventory/host_vars/proxmox-host.yml
+  - reference-deployments/
+  - config/contracts/deployment-v1/
+  - tests/fixtures/deployments/
+  - tests/test_adr_0439_multi_deployment.py
+  - tests/test_ws0461_cert_validator_multi_deployment.py
+  - tests/integration/test_deployment.py
+  - collections/ansible_collections/lv3/platform/roles/host_pinning_guard/
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0488_adr
+      paths:
+        - docs/adr/0488-single-deployment-per-repo-checkout.md
+        - workstreams/active/ws-0488-collapse-to-single-deployment.yaml
+      mode: shared_contract
+      contract: adr-0488-single-deployment-v1
+    - id: ws_0488_substrate_deletion
+      paths:
+        - mk/multi-deployment.mk
+        - scripts/deployment.py
+        - scripts/migrate_to_multi_deployment.py
+        - reference-deployments/
+        - tests/fixtures/deployments/
+        - tests/test_adr_0439_multi_deployment.py
+        - tests/test_adr_0440_phase2_generators.py
+        - tests/test_ws0461_cert_validator_multi_deployment.py
+        - tests/test_ws0472_deployment_fixture_matrix.py
+        - collections/ansible_collections/lv3/platform/roles/host_pinning_guard/
+      mode: exclusive
+    - id: ws_0488_makefile
+      paths:
+        - Makefile
+      mode: shared_contract
+      contract: makefile-no-require-deployment-v1
+    - id: ws_0488_capacity_rewire
+      paths:
+        - scripts/capacity_probe.py
+        - scripts/resolve_topology.py
+        - scripts/self_check.py
+      mode: shared_contract
+      contract: capacity-reads-canonical-identity-v1
+    - id: ws_0488_inventory
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: inventory-includes-generated-fragment-v1
+    - id: ws_0488_claude_md
+      paths:
+        - CLAUDE.md
+      mode: shared_contract
+      contract: claude-md-no-whoami-ritual-v1
+    - id: ws_0488_sanitization
+      paths:
+        - scripts/audit_sanitization.py
+      mode: shared_contract
+      contract: blocks-operator-specific-strings-v1
+    - id: ws_0488_superseded_adr_marker
+      paths:
+        - docs/adr/0437-overlay-aware-bootstrap.md
+        - docs/adr/0439-multi-deployment-repo-architecture.md
+        - docs/adr/0440-per-deployment-identity-and-artifact-isolation.md
+        - docs/adr/0441-deployment-scoped-service-subsetting.md
+        - docs/adr/0442-multi-deployment-make-interface-and-worktree-binding.md
+        - docs/adr/0443-continuous-topology-reconciler.md
+        - docs/adr/0445-phase1-multi-deployment-hardening.md
+        - docs/adr/0446-phase2-multi-deployment-hardening.md
+        - docs/adr/0448-deployment-connection-registry-and-wrapper.md
+        - docs/adr/0456-deployment-aware-certificate-validation.md
+        - docs/adr/0457-host-pinning-deployment-owner.md
+        - docs/adr/0458-cert-validator-multi-deployment.md
+        - docs/adr/0459-deployment-lifecycle-cli-parity.md
+        - docs/adr/0460-phase8-cross-deploy-and-auto-promote.md
+        - docs/adr/0462-topology-precommit-schema-hook.md
+        - docs/adr/0470-deployment-fixture-matrix.md
+        - docs/adr/0480-multi-deployment-certificate-validation.md
+        - docs/adr/0481-explicit-deployment-context.md
+      mode: shared_contract
+      contract: superseded-status-line-v1
+tasks:
+  # ---- Wave 1+2 (this branch) ----
+  - id: t1-adr
+    title: docs/adr/0488 — write the decision
+    status: completed
+  - id: t2-delete-leaves
+    title: Delete reference-deployments/, scripts/migrate_to_multi_deployment.py, multi-deploy test files + fixtures (4 test files + 12 fixtures + 6 reference-deployments files)
+    status: completed
+  - id: t3-superseded-status
+    title: Mark 18 superseded ADRs with Status:Superseded-by-0488 header banner
+    status: completed
+  - id: t4-capacity-rewire
+    title: Rewire capacity_probe.py + resolve_topology.py to read .local/identity.yml (drop --slug + `from deployment import`) and write inventory/host_vars/proxmox-host.generated.yml
+    status: completed
+  - id: t5-self-check-rewire
+    title: scripts/self_check.py reads .local/identity.yml directly (drops resolve_active_slug + load_deployment imports)
+    status: completed
+  - id: t6-claude-md
+    title: Rewrite CLAUDE.md §0+§1 — delete the make-whoami ritual, simplify session start
+    status: completed
+  - id: t7-getting-started
+    title: docs/getting-started.md — clone, edit .local/identity.yml, make bootstrap (forkability surface)
+    status: completed
+  - id: t8-gitignore
+    title: Add inventory/host_vars/proxmox-host.generated.yml to .gitignore
+    status: completed
+  - id: t9-unit-tests
+    title: Update + run tests/unit/ — Inputs.slug dropped, 229 tests passing
+    status: completed
+  # ---- Wave 3 (separate branch — playbook surgery) ----
+  - id: t10-host-pinning-guard
+    title: Remove host_pinning_guard role from playbooks/public-edge.yml + playbooks/tasks/preflight.yml, then delete the role + its 3 tests
+    status: pending
+  - id: t11-makefile-strip
+    title: Strip _require-deployment prereq from every converge/live-apply/edge/bootstrap target; drop `include $(REPO_ROOT)/mk/multi-deployment.mk`
+    status: pending
+  - id: t12-delete-deployment-py
+    title: Delete scripts/deployment.py + scripts/deployment_lock.py + mk/multi-deployment.mk after refactoring all consumers (certificate_validator, derive_manifest, detect_drift, generate_inventory, generate_platform_vars, generate_discovery_artifacts, bootstrap_orchestrator)
+    status: pending
+  - id: t13-cert-validator
+    title: scripts/certificate_validator.py drops deployment resolution; reads .local/identity.yml directly
+    status: pending
+  - id: t14-bootstrap-rewire
+    title: scripts/bootstrap_orchestrator.py + scripts/derive_manifest.py + scripts/detect_drift.py drop slug args
+    status: pending
+  - id: t15-inventory-include
+    title: inventory/host_vars/proxmox-host.yml or generate_platform_vars.py consumes proxmox-host.generated.yml so provisioning sees envelope-resolved sizes
+    status: pending
+  # ---- Wave 4 (separate branch — enforcement) ----
+  - id: t16-sanitization-enforce
+    title: Extend scripts/audit_sanitization.py to block lv3.org/0fork.com/65.109.84.223/65.108.75.123 in committed files outside docs/adr/
+    status: pending
+  # ---- Wave N (final integration) ----
+  - id: t17-pre-push-gate
+    title: Run pre-push gate end-to-end on the rebased branch; address any cert-validator preexisting failures with documented bypass
+    status: pending

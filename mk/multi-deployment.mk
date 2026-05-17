@@ -176,17 +176,14 @@ sync-identity-link:
 
 .PHONY: probe-capacity resolve-topology plan-capacity
 
-probe-capacity: _require-deployment  ## Probe Proxmox host and write capacity.yml (read-only on remote).
-	@slug=$$($(PYTHON_DEPLOYMENT) resolve --quiet); \
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/capacity_probe.py --slug "$$slug" --write
+probe-capacity:  ## (ADR 0482 + 0488) Probe Proxmox host (from .local/identity.yml) and write .local/capacity.yml.
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/capacity_probe.py --write
 
-resolve-topology: _require-deployment  ## Resolve a per-VM topology from capacity + policy + profile and write topology.yml.
-	@slug=$$($(PYTHON_DEPLOYMENT) resolve --quiet); \
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/resolve_topology.py --slug "$$slug" --write
+resolve-topology:  ## (ADR 0482 + 0488) Resolve a per-VM topology from capacity + policy + profile and write .local/topology.yml.
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/resolve_topology.py --write
 
-plan-capacity: _require-deployment  ## Plan-only: show what the resolver would write without persisting.
-	@slug=$$($(PYTHON_DEPLOYMENT) resolve --quiet); \
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/resolve_topology.py --slug "$$slug"
+plan-capacity:  ## (ADR 0482 + 0488) Plan-only: show what the resolver would write without persisting.
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/resolve_topology.py
 
 # -----------------------------------------------------------------------------
 # ADR 0484 — self-verification contracts

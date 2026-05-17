@@ -1,6 +1,9 @@
 # ADR 0442: Multi-Deployment Make Interface & Agent Worktree Binding
 
-- Status: Proposed
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+- Status: Superseded by ADR 0488
 - Implementation Status: Not Started
 - Date: 2026-04-27
 - Concern: forkability, multi-tenancy, agent-isolation, operator-ergonomics

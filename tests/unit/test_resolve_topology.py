@@ -93,7 +93,6 @@ def make_inputs(
     policy: dict | None = None,
 ) -> "Inputs":
     return Inputs(
-        slug="test",
         capacity={
             "schema_version": 1,
             "probed_via": "operator",

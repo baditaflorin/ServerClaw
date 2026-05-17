@@ -5,37 +5,22 @@ It supplements `AGENTS.md` with Claude-specific checklists and context.
 
 ---
 
-## 0. Identify Your Deployment FIRST  (ADR 0481)
+## 0. One Repo, One Deployment  (ADR 0488)
 
-**Run this before touching any host or running any converge:**
+This repo checkout is configured for **exactly one deployment**, defined by
+`.local/identity.yml`. There is no "active deployment" to select, no slug to
+remember, no `make whoami` ritual. The old multi-deployment substrate (ADRs
+0439-0481) was retired by ADR 0488 — see that ADR for the why.
 
-```
-make whoami
-```
+To configure a fresh clone:
 
-This prints the active deployment — slug, apex domain, operator, and *how* it
-was resolved. The platform runs N parallel deployments off one generic codebase
-(today `lv3` and `0fork`). Every probe, SSH alias, receipt, and converge target
-is scoped to one of them. If you don't know which, you will silently operate on
-the wrong one.
+1. Copy/edit `.local/identity.yml` with your `platform_domain`, operator
+   identity, and `proxmox_host_ssh` block.
+2. Run `make bootstrap` — capacity is probed, VM sizes are resolved against
+   the host envelope, then the 14-step provisioning chain runs.
 
-`make whoami` errors → resolve the deployment before continuing. In precedence:
-
-```
-export DEPLOYMENT=<slug>            # one-shot, this shell only
-make use-deployment slug=<slug>     # repo-wide default (writes .local/active-deployment)
-make bind-worktree slug=<slug>      # this worktree only (writes .deployment marker)
-```
-
-To enumerate what's available: `make deployments-list`.
-
-Safety-critical targets (converge-*, live-apply-*, bootstrap, edge-*) should
-list `_require-deployment` as a prereq so they fail loudly if you forgot. New
-wrappers MUST include this prereq.
-
-The legacy `.local/identity.yml` is now a *symlink* to
-`.local/deployments/<active>/identity.yml`. Don't edit it; run
-`make sync-identity-link` after switching deployments to refresh it.
+If `.local/identity.yml` is missing, every script that needs it will tell you
+exactly what fields to add.
 
 ---
 
@@ -43,12 +28,11 @@ The legacy `.local/identity.yml` is now a *symlink* to
 
 Before writing any code, in order:
 
-1. **`make whoami`** — confirm which deployment you're operating on (see §0)
-2. `README.md` — current platform status and merged deployment truth
-3. `AGENTS.md` — working rules, conventions, handoff protocol
-4. `workstreams.yaml` — what is in flight, who owns which surfaces
-5. `.repo-structure.yaml` — where everything lives (use instead of `find`)
-6. Check Claude Code memory for any remembered context from prior sessions on this repo
+1. `README.md` — current platform status
+2. `AGENTS.md` — working rules, conventions, handoff protocol
+3. `workstreams.yaml` — what is in flight, who owns which surfaces
+4. `.repo-structure.yaml` — where everything lives (use instead of `find`)
+5. Check Claude Code memory for any remembered context from prior sessions on this repo
 
 If the task touches a specific service, also read:
 - `docs/adr/.index.yaml` — search for the ADR covering that service

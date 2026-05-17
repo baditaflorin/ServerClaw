@@ -1,6 +1,9 @@
 # ADR 0456: Deployment-Aware Certificate Validation
 
-- Status: Accepted
+> **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
+
+
+- Status: Superseded by ADR 0488
 - Implementation Status: Implemented (`--deployment` flag on certificate validator + `cross_deployment_drift` reason code)
 - Date: 2026-04-28
 - Concern: multi-deployment-correctness, gate-noise
