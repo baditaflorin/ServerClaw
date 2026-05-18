@@ -99,11 +99,13 @@ proxmox_host_ssh_hardening_file: "/etc/ssh/sshd_config.d/90-{{ platform_config_p
 proxmox_breakglass_ssh_port: 2222
 proxmox_acme_account_name: default
 proxmox_acme_directory: https://acme-v02.api.letsencrypt.org/directory
-# ADR 0438: plugin ID is a Proxmox storage identifier (config scope, not
-# a SQL role). Use config_prefix, not sql_prefix — otherwise a domain
-# whose first label starts with a digit would silently lose the leading
-# digit from its plugin name.
-proxmox_acme_plugin_id: "{{ platform_identity.config_prefix }}-hetzner-dns"
+# PVE configuration identifiers (ACME plugins, notification endpoints,
+# storage IDs, automation users, token roles) must start with a letter.
+# Apex slugs beginning with a digit (e.g. '0fork', '1blu') would be
+# rejected by `pvesh` with "invalid configuration ID". Use the
+# sanitized `pve_prefix` so identifiers stay valid across all
+# alphanumeric apex domains.
+proxmox_acme_plugin_id: "{{ platform_identity.pve_prefix }}-hetzner-dns"
 proxmox_acme_validation_delay: 30
 proxmox_tfa_description: Primary TOTP
 # ADR 0438: PVE user names must match `^[A-Za-z]`. Use pve_prefix, not

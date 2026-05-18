@@ -17,10 +17,20 @@ platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
 # unix paths, and Proxmox object names. All forms derive from the apex
 # slug unless an operator overrides them in .local/identity.yml.
 _platform_identity_slug: "{{ platform_domain | split('.') | first }}"
+# Proxmox VE rejects configuration IDs (notification endpoints, matchers,
+# storage IDs, automation users, token roles, ACME plugin IDs) that don't
+# start with a letter. When the apex slug begins with a digit (e.g.
+# '0fork', '1blu', '9zen'), prepend a generic 'pve-' so the resulting
+# identifiers stay valid. The user-facing display names and comments
+# continue to use the raw slug.
+_platform_pve_safe_slug: >-
+  {{ 'pve-' ~ _platform_identity_slug
+     if (_platform_identity_slug | regex_search('^[0-9]'))
+     else _platform_identity_slug }}
 platform_identity:
   config_prefix: "{{ _platform_identity_slug }}"
   unix_prefix: "{{ _platform_identity_slug }}"
-  pve_prefix: "{{ _platform_identity_slug }}"
+  pve_prefix: "{{ _platform_pve_safe_slug | trim }}"
 
 
 # ---------------------------------------------------------------------------
@@ -41,9 +51,9 @@ keycloak_oidc_discovery_url: "{{ keycloak_oidc_issuer_url }}/.well-known/openid-
 proxmox_host_admin_comment: "{{ platform_operator_name }} Operations"
 proxmox_notification_email: "{{ platform_operator_email }}"
 proxmox_notification_author: "Proxmox {{ platform_domain | split('.') | first | upper }}"
-proxmox_notification_endpoint_name: "{{ platform_domain | split('.') | first }}-ops-email"
+proxmox_notification_endpoint_name: "{{ platform_identity.pve_prefix }}-ops-email"
 proxmox_notification_endpoint_comment: "{{ platform_domain | split('.') | first | upper }} operations mailbox"
-proxmox_notification_matcher_name: "{{ platform_domain | split('.') | first }}-all-events"
+proxmox_notification_matcher_name: "{{ platform_identity.pve_prefix }}-all-events"
 proxmox_notification_matcher_comment: "Send all Proxmox notifications to {{ platform_domain | split('.') | first | upper }} operations"
 proxmox_acme_contact_email: "{{ platform_operator_email }}"
 proxmox_acme_domain: "proxmox.{{ platform_domain }}"
