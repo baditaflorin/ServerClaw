@@ -254,9 +254,18 @@ def resolve(inputs: Inputs, strict: bool = False) -> tuple[dict[str, Any], list[
     for c in enabled:
         ram_mb = ram[c]
         net = _resolve_network_fields(c, netmap, prefix, cidr_bits)
+        # NOTE: the committed inventory/host_vars/proxmox-host.yml carries
+        # `network_policy.guests.<role>-lv3` and `owning_vm: <role>-lv3`
+        # entries (legacy operator slug). Renaming all of those committed
+        # references is a larger refactor (separate workstream); for now
+        # we keep `-lv3` as the VM name suffix so the committed policy
+        # entries match every guest's inventory_hostname. This will be
+        # cleaned up to derive from `platform_identity.config_prefix` in
+        # a follow-up PR.
+        guest_name = f"{c}-lv3"
         proxmox_guests.append(
             {
-                "name": c,
+                "name": guest_name,
                 "vmid": net["vmid"],
                 "ipv4": net["ipv4"],
                 "cidr": net["cidr"],
