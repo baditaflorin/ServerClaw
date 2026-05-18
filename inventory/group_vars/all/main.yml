@@ -388,7 +388,13 @@ playbook_execution_correlation_id: >-
     if (platform_trace_id | trim | length > 0)
     else 'playbook:' ~ playbook_execution_env ~ ':' ~ (lookup('ansible.builtin.env', 'USER') | default('unknown', true))
   }}
-playbook_execution_controller_secret_manifest_path: "{{ inventory_dir | dirname }}/config/controller-local-secrets.json"
+# Resolve to the secret manifest path. With overlay inventories
+# (`-i inventory/hosts.yml -i .local/inventory/hosts.yml`), Ansible's
+# `inventory_dir` points at whichever inventory it last loaded — usually
+# the overlay's `.local/inventory/`, so `inventory_dir | dirname` lands
+# in `.local/` rather than the repo root. Try both, preferring the
+# canonical committed file at the repo root.
+playbook_execution_controller_secret_manifest_path: "{{ lookup('first_found', [playbook_dir | dirname ~ '/config/controller-local-secrets.json', inventory_dir | dirname ~ '/config/controller-local-secrets.json']) }}"
 playbook_execution_health_probe_catalog_path: "{{ inventory_dir | dirname }}/config/health-probe-catalog.json"
 playbook_execution_mutation_audit_script: "{{ inventory_dir | dirname }}/scripts/mutation_audit.py"
 playbook_execution_ntfy_publish_script: "{{ inventory_dir | dirname }}/scripts/ntfy_publish.py"

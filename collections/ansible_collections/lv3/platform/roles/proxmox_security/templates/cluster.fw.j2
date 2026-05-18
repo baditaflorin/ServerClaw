@@ -10,6 +10,19 @@ policy_forward: ACCEPT
 {% endfor %}
 
 [RULES]
+{% if (proxmox_management_unrestricted_ssh | default(false)) %}
+# Unrestricted port-22 ACCEPT — emitted during bootstrap when the
+# controller is on the public internet and the management IPSET (Tailscale
+# + guest CIDR) doesn't yet cover it. pve-firewall silently strips broad
+# CIDRs (`0.0.0.0/0`) from IPSETs, so the IPSET-based SSH rule is not a
+# viable workaround.
+IN ACCEPT -p tcp -dport 22 -log nolog
+{% endif %}
+{% for port in (proxmox_management_unrestricted_tcp_ports | default([])) %}
+# Unrestricted ACCEPT for port {{ port }} — same rationale as 22 above;
+# typical bootstrap-time entries are 8006 (PVE UI/API).
+IN ACCEPT -p tcp -dport {{ port }} -log nolog
+{% endfor %}
 IN SSH(ACCEPT) -source +management
 IN ACCEPT -p tcp -dport 8006 -source +management
 {% for port in proxmox_management_allowed_tcp_ports %}

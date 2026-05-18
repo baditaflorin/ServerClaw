@@ -19,12 +19,23 @@ def generate_secret() -> str:
 
 
 def load_or_create_secret(state_file: Path) -> str:
+    # init-local writes empty `{}` placeholders for some external-secret
+    # state files. Treat any missing-or-empty `secret` key as equivalent
+    # to a missing file: generate a fresh secret and write it back,
+    # preserving other fields already in the state file (issuer/account/
+    # otpauth URI may have been recorded by a prior run).
+    data: dict = {}
     if state_file.exists():
-        data = load_json(state_file)
-        return data["secret"]
-
+        try:
+            data = load_json(state_file) or {}
+        except Exception:  # noqa: BLE001
+            data = {}
+    secret = data.get("secret")
+    if secret:
+        return secret
     secret = generate_secret()
-    write_json(state_file, {"secret": secret}, indent=2, mode=0o600)
+    data["secret"] = secret
+    write_json(state_file, data, indent=2, mode=0o600)
     return secret
 
 

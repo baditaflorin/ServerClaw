@@ -15,3 +15,16 @@ proxmox_security_manage_acme: true
 proxmox_tfa_description: Primary TOTP
 proxmox_management_allowed_tcp_ports: []
 proxmox_breakglass_ssh_port: 2222
+# When true, render an unconditional `IN ACCEPT -p tcp -dport 22` rule in
+# /etc/pve/firewall/cluster.fw. Use during initial bootstrap when the
+# operator's controller has no path through the management IPSET
+# (no Tailscale yet, no fixed jump host, public-internet only). pve-firewall
+# strips broad CIDRs from IPSET membership, so per-IP grants are unreliable
+# for a public bootstrap controller. Flip to false in steady state once
+# Tailscale or a stable jump host is in place.
+proxmox_management_unrestricted_ssh: false
+# Additional TCP ports to ACCEPT unconditionally (no source restriction).
+# Typical bootstrap-time entries are 8006 (PVE UI / API), used by the
+# proxmox_api_access role to verify the managed API token from the
+# controller. Empty = no unconditional API exposure.
+proxmox_management_unrestricted_tcp_ports: []

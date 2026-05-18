@@ -1266,7 +1266,13 @@ harden-access:
 
 harden-guest-access:
 	$(MAKE) preflight WORKFLOW=harden-guest-access
-	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/guest-access.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY)
+	# Guest VMs sit on the internal 10.10.10.0/24 bridge and are only
+	# reachable from the controller via SSH ProxyJump through the
+	# Proxmox host. Other ANSIBLE_SCOPED_RUN targets pass the
+	# `proxmox_guest_ssh_connection_mode=proxmox_host_jump` extra-var
+	# explicitly; do the same here so the gather_facts step doesn't try
+	# to dial 10.10.10.x directly from the controller and time out.
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/guest-access.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 harden-security:
 	$(MAKE) preflight WORKFLOW=harden-security

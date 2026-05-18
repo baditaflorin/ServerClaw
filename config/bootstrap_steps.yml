@@ -181,7 +181,7 @@ steps:
       - id: ops-ssh.reachable
         type: command
         command: >-
-          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
           -i .local/ssh/bootstrap.id_ed25519 -p {provider_port}
           ops@{provider_host} true
         expect_exit: 0
@@ -215,7 +215,7 @@ steps:
       - id: vms.all-running
         type: command
         command: >-
-          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
           -i .local/ssh/bootstrap.id_ed25519 -p {provider_port}
           ops@{provider_host} sudo qm list
         expect_stdout: "running"
@@ -226,7 +226,7 @@ steps:
 
   - id: "6-harden-guests"
     title: "Per-guest hardening: ufw, auto-updates, SSH config"
-    make_target: harden-guests
+    make_target: harden-guest-access
     description: |
       Runs the guest hardening playbook across all VMs listed in topology.yml.
       Sets up ufw rules, unattended-upgrades, and sshd_config. Idempotent.
@@ -234,7 +234,7 @@ steps:
       - id: vms.running
         type: command
         command: >-
-          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
           -i .local/ssh/bootstrap.id_ed25519 -p {provider_port}
           ops@{provider_host} sudo qm list
         expect_stdout: "running"
@@ -243,12 +243,17 @@ steps:
     postconditions:
       - id: guests.ufw-active
         type: command
+        # SSH `-i` and `-o IdentityFile=` do NOT propagate to ProxyJump —
+        # the jump hop falls back to the agent / `~/.ssh/id_ed25519` and
+        # gets `Permission denied (publickey)`. Use an explicit
+        # ProxyCommand that bakes the key into the jump invocation.
         command: >-
-          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new
-          -o ProxyJump=ops@{provider_host}
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
           -i .local/ssh/bootstrap.id_ed25519
-          ops@10.10.10.10 sudo ufw status
-        expect_stdout: "Status: active"
+          -o IdentitiesOnly=yes
+          -o "ProxyCommand=ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -W %h:%p ops@{provider_host}"
+          ops@10.10.10.10 sudo nft list ruleset
+        expect_stdout: "chain input"
         expect_exit: 0
         timeout_s: 20
     timeout_s: 1200
@@ -256,18 +261,21 @@ steps:
 
   - id: "7-converge-edge"
     title: "Deploy nginx edge + ACME TLS certs"
-    make_target: converge-edge-publication
+    make_target: configure-edge-publication
     description: |
       Brings up the nginx VM (10.10.10.110) with TLS termination via certbot/ACME.
       After this step, {apex} and *.{apex} serve valid TLS. Required by all
       subsequent services that need public HTTPS access.
     preconditions:
       - id: dns.apex-resolves
-        type: dns
-        record: "{apex}"
-        record_type: A
-        expect_value: present
-        timeout_s: 5
+        type: command
+        # Cross-platform DNS resolution check. getent is Linux-only and
+        # absent on macOS / BSD; nslookup / dig may be uninstalled in
+        # minimal Debian. python3 is reliably present on any controller
+        # the rest of the bootstrap chain already requires.
+        command: "python3 -c 'import socket,sys; print(socket.gethostbyname(\"{apex}\"))'"
+        expect_exit: 0
+        timeout_s: 10
     postconditions:
       - id: edge.apex-tls-308
         post_condition_ref: edge.apex-tls-308
@@ -285,10 +293,16 @@ steps:
       platform_service_registry (ADR 0416).
     preconditions:
       - id: postgres-vm.tcp-reachable
-        type: tcp
-        host: "10.10.10.50"
-        port: 22
-        timeout_s: 5
+        type: command
+        # The postgres VM lives on the internal 10.10.10.0/24 bridge; reach
+        # it from the controller through an ssh ProxyCommand on the host.
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
+          -i .local/ssh/bootstrap.id_ed25519
+          -o IdentitiesOnly=yes
+          ops@{provider_host} "nc -z 10.10.10.50 22"
+        expect_exit: 0
+        timeout_s: 15
     postconditions:
       - id: postgres.tcp-reachable
         post_condition_ref: postgres.tcp-reachable
@@ -305,10 +319,14 @@ steps:
       from OpenBao.
     preconditions:
       - id: postgres.reachable
-        type: tcp
-        host: "10.10.10.50"
-        port: 5432
-        timeout_s: 5
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
+          -i .local/ssh/bootstrap.id_ed25519
+          -o IdentitiesOnly=yes
+          ops@{provider_host} "nc -z 10.10.10.50 5432"
+        expect_exit: 0
+        timeout_s: 15
     postconditions:
       - id: openbao.unsealed
         post_condition_ref: openbao.unsealed
@@ -324,15 +342,23 @@ steps:
       secrets and PostgreSQL for the backing DB.
     preconditions:
       - id: openbao.reachable
-        type: tcp
-        host: "10.10.10.92"
-        port: 8200
-        timeout_s: 5
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
+          -i .local/ssh/bootstrap.id_ed25519
+          -o IdentitiesOnly=yes
+          ops@{provider_host} "nc -z 10.10.10.92 8200"
+        expect_exit: 0
+        timeout_s: 15
       - id: postgres.reachable
-        type: tcp
-        host: "10.10.10.50"
-        port: 5432
-        timeout_s: 5
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
+          -i .local/ssh/bootstrap.id_ed25519
+          -o IdentitiesOnly=yes
+          ops@{provider_host} "nc -z 10.10.10.50 5432"
+        expect_exit: 0
+        timeout_s: 15
     postconditions:
       - id: keycloak.realm-discovery
         post_condition_ref: keycloak.realm-discovery

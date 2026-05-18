@@ -59,7 +59,7 @@ def _validate(instance: dict[str, Any], schema_name: str) -> None:
 def derive_identity(manifest: dict[str, Any]) -> dict[str, Any]:
     apex = manifest["apex_domain"]
     operator = manifest["operator"]
-    return {
+    derived: dict[str, Any] = {
         "platform_domain": apex,
         "platform_operator_email": operator["email"],
         "platform_operator_name": operator["name"],
@@ -68,6 +68,16 @@ def derive_identity(manifest: dict[str, Any]) -> dict[str, Any]:
         "platform_guest_network_cidr": manifest.get("platform_guest_network_cidr", "10.10.10.0/24"),
         "platform_tailscale_network_cidr": manifest.get("platform_tailscale_network_cidr", "100.64.0.0/10"),
     }
+    extra_vars = manifest.get("extra_vars") or {}
+    if extra_vars:
+        clash = sorted(set(derived) & set(extra_vars))
+        if clash:
+            raise ValueError(
+                "manifest.extra_vars contains keys that clash with derived identity fields: "
+                f"{', '.join(clash)}. Remove them from extra_vars or use a first-class manifest field."
+            )
+        derived.update(extra_vars)
+    return derived
 
 
 def derive_connection(manifest: dict[str, Any]) -> dict[str, Any]:
@@ -119,7 +129,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: manifest.yml schema violation at {list(e.absolute_path)}: {e.message}", file=sys.stderr)
         return 2
 
-    identity = derive_identity(manifest)
+    try:
+        identity = derive_identity(manifest)
+    except ValueError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 2
     connection = derive_connection(manifest)
     profile = derive_profile(manifest)
 

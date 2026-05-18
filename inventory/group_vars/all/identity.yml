@@ -20,11 +20,16 @@ _platform_identity_slug: "{{ platform_domain | split('.') | first }}"
 # Proxmox VE rejects configuration IDs (notification endpoints, matchers,
 # storage IDs, automation users, token roles, ACME plugin IDs) that don't
 # start with a letter. When the apex slug begins with a digit (e.g.
-# '0fork', '1blu', '9zen'), prepend a generic 'pve-' so the resulting
+# '0fork', '1blu', '9zen'), prepend a neutral letter so the resulting
 # identifiers stay valid. The user-facing display names and comments
 # continue to use the raw slug.
+#
+# IMPORTANT: do NOT use 'pve-' / 'pve' as the prefix — PVE reserves the
+# case-insensitive `PVE` namespace for built-in role IDs (`pveum role add`
+# rejects `Pve-...`). We use `op-` ("operator"), which is short,
+# semantically descriptive, and outside any PVE-reserved namespace.
 _platform_pve_safe_slug: >-
-  {{ 'pve-' ~ _platform_identity_slug
+  {{ 'op-' ~ _platform_identity_slug
      if (_platform_identity_slug | regex_search('^[0-9]'))
      else _platform_identity_slug }}
 platform_identity:

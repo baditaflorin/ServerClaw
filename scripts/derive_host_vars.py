@@ -117,6 +117,40 @@ def build_host_vars(facts: dict[str, str], identity: dict[str, Any], topology: d
     guests = topology.get("proxmox_guests") or []
     if guests:
         out["proxmox_guests"] = guests
+        # Each guest needs a `network_policy.guests.<name>` entry — without
+        # it `linux_guest_firewall` asserts and the role fails. Generate a
+        # minimal management-SSH-only policy per guest as a sane default;
+        # operators tighten or widen via inventory/host_vars/proxmox-host.yml
+        # for production rules. Generic — keyed by the guest's resolver name
+        # so the entry always matches inventory_hostname.
+        guest_policies: dict[str, Any] = {}
+        for g in guests:
+            policy: dict[str, Any] = {
+                "allowed_inbound": [
+                    {
+                        "source": "management",
+                        "protocol": "tcp",
+                        "ports": [22],
+                        "description": "Operator and Ansible SSH access",
+                    },
+                ],
+            }
+            if g.get("template_key") == "docker-host":
+                policy["allow_container_forwarding"] = True
+            guest_policies[g["name"]] = policy
+        # `linux_guest_firewall` consumes top-level
+        # `network_policy.{guest_management_sources, host_source}` to render
+        # the host-source allow lines in the guest nftables ruleset. Default
+        # to: tailscale CIDR (operator path) + the host's internal bridge IP
+        # (10.10.10.1/32), which the host owns as the guests' gateway.
+        guest_prefix = ".".join(guests[0]["ipv4"].split(".")[:3])
+        host_source = f"{guest_prefix}.1/32"
+        tailscale_cidr = identity.get("platform_tailscale_network_cidr", "100.64.0.0/10")
+        out["network_policy"] = {
+            "guest_management_sources": [tailscale_cidr, host_source],
+            "host_source": host_source,
+            "guests": guest_policies,
+        }
     return out
 
 

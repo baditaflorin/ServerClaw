@@ -34,6 +34,13 @@
     url: "{{ proxmox_base_template_image_url }}"
     dest: "{{ proxmox_base_template_image_dir }}/{{ proxmox_base_template_image_filename }}"
     mode: "0644"
+    # The cloud image is ~600 MB. ansible.builtin.get_url defaults to a
+    # 10-second timeout, which is on the order of the TLS handshake plus
+    # the first few hundred KB on a fast link — nowhere near enough to
+    # finish the body. Bump generously; the operator-overridable variable
+    # `proxmox_base_template_download_timeout_s` (defaults to 600) lets
+    # slow links lengthen it further without editing the role.
+    timeout: "{{ proxmox_base_template_download_timeout_s | default(600) | int }}"
   when: proxmox_base_template_status.rc != 0
 
 - name: Ensure the Proxmox snippets directory exists
