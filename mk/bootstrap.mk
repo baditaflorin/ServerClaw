@@ -10,7 +10,13 @@
 # ADR 0482 — capacity-aware dynamic VM sizing
 # -----------------------------------------------------------------------------
 
-.PHONY: probe-capacity resolve-topology plan-capacity
+.PHONY: derive-deployment-files derive-host-vars probe-capacity resolve-topology plan-capacity
+
+derive-deployment-files:  ## (ADR 0483 §3 step 0) Emit identity.yml/connection.yml/profile.yml from .local/manifest.yml.
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/derive_deployment_files.py
+
+derive-host-vars:  ## (ADR 0488) Probe the Proxmox host's network config and write .local/host_vars/proxmox-host.yml.
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/derive_host_vars.py --write
 
 probe-capacity:  ## (ADR 0482 + 0488) Probe Proxmox host (from .local/identity.yml) and write .local/capacity.yml.
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/capacity_probe.py --write

@@ -58,7 +58,42 @@ CAPACITY_PATH = LOCAL_ROOT / "capacity.yml"
 PROFILE_PATH = LOCAL_ROOT / "profile.yml"
 TOPOLOGY_PATH = LOCAL_ROOT / "topology.yml"
 POLICY_PATH = CODE_ROOT / "config" / "sizing-policy.yml"
+ROLE_NETMAP_PATH = CODE_ROOT / "config" / "role-network-catalog.yml"
+IDENTITY_PATH = LOCAL_ROOT / "identity.yml"
 INVENTORY_FRAGMENT_PATH = CODE_ROOT / "inventory" / "host_vars" / "proxmox-host.generated.yml"
+
+
+def _load_role_netmap() -> dict[str, dict[str, int]]:
+    """Read config/role-network-catalog.yml — role → ipv4_last_octet."""
+    if not ROLE_NETMAP_PATH.is_file():
+        sys.exit(f"ERROR: {ROLE_NETMAP_PATH} not found.")
+    data = yaml.safe_load(ROLE_NETMAP_PATH.read_text()) or {}
+    return data.get("roles") or {}
+
+
+def _guest_network_prefix() -> str:
+    """Return the first three octets of identity.platform_guest_network_cidr.
+
+    e.g. '10.10.10.0/24' -> '10.10.10'. Defaults to '10.10.10' if identity.yml
+    is absent or doesn't carry the CIDR.
+    """
+    if IDENTITY_PATH.is_file():
+        identity = yaml.safe_load(IDENTITY_PATH.read_text()) or {}
+        cidr = identity.get("platform_guest_network_cidr", "10.10.10.0/24")
+    else:
+        cidr = "10.10.10.0/24"
+    return ".".join(cidr.split("/")[0].split(".")[:3])
+
+
+def _resolve_network_fields(role: str, netmap: dict[str, dict[str, int]], prefix: str) -> dict[str, Any]:
+    entry = netmap.get(role)
+    if not entry:
+        sys.exit(
+            f"ERROR: role {role!r} has no entry in {ROLE_NETMAP_PATH.relative_to(CODE_ROOT)}. "
+            "Add an `ipv4_last_octet` for this role before re-running."
+        )
+    last = int(entry["ipv4_last_octet"])
+    return {"vmid": 100 + last, "ipv4": f"{prefix}.{last}"}
 
 
 def _hash(obj: Any) -> str:
@@ -190,12 +225,17 @@ def resolve(inputs: Inputs, strict: bool = False) -> tuple[dict[str, Any], list[
                 if resolved_dict[c] < preferred:
                     sys.exit(f"--strict: {c}.{field} resolved to {resolved_dict[c]} < preferred {preferred}")
 
+    netmap = _load_role_netmap()
+    prefix = _guest_network_prefix()
     proxmox_guests = []
     for c in enabled:
         ram_mb = ram[c]
+        net = _resolve_network_fields(c, netmap, prefix)
         proxmox_guests.append(
             {
                 "name": c,
+                "vmid": net["vmid"],
+                "ipv4": net["ipv4"],
                 "role": c,
                 "memory_mb": ram_mb,
                 "balloon_mb": int(ram_mb * 0.4),

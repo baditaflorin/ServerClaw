@@ -82,31 +82,45 @@ echo "public_ipv4=${public_ipv4:-}"
 """
 
 
-def _load_identity() -> dict[str, Any]:
-    if not IDENTITY_PATH.is_file():
-        sys.exit(
-            f"ERROR: {IDENTITY_PATH} not found.\n"
-            "Edit .local/identity.yml to configure your deployment (ADR 0385 + ADR 0488).\n"
-            "See docs/getting-started.md for the required fields."
-        )
-    with IDENTITY_PATH.open() as f:
-        return yaml.safe_load(f) or {}
+CONNECTION_PATH = LOCAL_ROOT / "connection.yml"
 
 
-def _ssh_argv(identity: dict[str, Any]) -> list[str]:
-    """Build the ssh command from identity.yml's proxmox_host_ssh block."""
-    host = identity.get("proxmox_host_ssh") or {}
-    addr = host.get("addr")
-    if not addr:
-        sys.exit(
-            "ERROR: .local/identity.yml is missing `proxmox_host_ssh.addr`.\n"
-            "Add a block:\n"
-            "  proxmox_host_ssh:\n"
-            "    addr: <ip-or-hostname-of-proxmox-host>\n"
-            "    port: 22\n"
-            "    user: root\n"
-            "    key: bootstrap.id_ed25519"
-        )
+def _load_connection() -> dict[str, Any]:
+    """Read .local/connection.yml — the ADR 0448 schema for how to reach the host.
+
+    Falls back to legacy .local/identity.yml's `proxmox_host_ssh:` block
+    (ADR 0385 era) when connection.yml is absent, so existing deployments
+    keep working through the migration window.
+    """
+    if CONNECTION_PATH.is_file():
+        with CONNECTION_PATH.open() as f:
+            data = yaml.safe_load(f) or {}
+        host = data.get("proxmox_host") or {}
+        if not host.get("addr"):
+            sys.exit(
+                "ERROR: .local/connection.yml has no `proxmox_host.addr`. "
+                "Re-run `make derive-deployment-files` from a manifest with "
+                "`provider.host`, or hand-author the file (see "
+                "config/contracts/deployment-v1/connection.schema.json)."
+            )
+        return host
+    if IDENTITY_PATH.is_file():
+        with IDENTITY_PATH.open() as f:
+            identity = yaml.safe_load(f) or {}
+        legacy = identity.get("proxmox_host_ssh") or {}
+        if legacy.get("addr"):
+            return legacy
+    sys.exit(
+        f"ERROR: neither {CONNECTION_PATH} nor a legacy identity.yml "
+        "proxmox_host_ssh block found.\n"
+        "Run `make derive-deployment-files` after authoring "
+        ".local/manifest.yml (see config/contracts/deployment-v1/)."
+    )
+
+
+def _ssh_argv(host: dict[str, Any]) -> list[str]:
+    """Build the ssh command from a `proxmox_host`-shaped dict."""
+    addr = host["addr"]
     port = int(host.get("port", 22))
     user = host.get("user", "root")
     key = host.get("key", "")
@@ -119,8 +133,8 @@ def _ssh_argv(identity: dict[str, Any]) -> list[str]:
 
 
 def probe_via_ssh() -> dict[str, Any]:
-    identity = _load_identity()
-    argv = _ssh_argv(identity)
+    host = _load_connection()
+    argv = _ssh_argv(host)
     cmd = argv + ["bash", "-s"]
     try:
         out = subprocess.run(cmd, input=PROBE_SCRIPT, text=True, capture_output=True, timeout=45, check=True).stdout

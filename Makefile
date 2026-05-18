@@ -9,7 +9,16 @@ DEPLOYMENT_ARG :=
 # When PLATFORM_IDENTITY_OVERLAY is set, rewire inventory, SSH key, env and
 # ansible extras so `make bootstrap` works for forks off a single env var.
 # Production (no env var) is byte-identical to the pre-ADR-0437 Makefile.
+#
+# ADR 0488: single-deployment-per-checkout. When `.local/identity.yml` exists
+# and the operator hasn't explicitly set PLATFORM_IDENTITY_OVERLAY, default
+# it to that file so the overlay machinery activates automatically.
 PLATFORM_IDENTITY_OVERLAY ?=
+ifeq ($(strip $(PLATFORM_IDENTITY_OVERLAY)),)
+ifneq ($(wildcard $(LOCAL_OVERLAY_ROOT)/identity.yml),)
+PLATFORM_IDENTITY_OVERLAY := $(LOCAL_OVERLAY_ROOT)/identity.yml
+endif
+endif
 # Agents often invoke `make bootstrap` from inside a .claude/worktrees/ copy
 # whose CWD has no `.local/` (per CLAUDE.md: "worktrees intentionally lack
 # .local/"). Relative PLATFORM_IDENTITY_OVERLAY paths like
@@ -29,14 +38,24 @@ BOOTSTRAP_OVERLAY_INVENTORY ?= $(LOCAL_OVERLAY_ROOT)/inventory/hosts.yml
 # only used for the init-remote step via BOOTSTRAP_OVERLAY_ROOT_KEY below.
 BOOTSTRAP_OVERLAY_SSH_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519
 BOOTSTRAP_OVERLAY_ENV ?= clone
-BOOTSTRAP_OVERLAY_HOST_ADDR ?= $(shell awk -F': *' '/^management_ipv4:/ {gsub(/["'"'"' ]/,"",$$2); print $$2; exit}' $(PLATFORM_IDENTITY_OVERLAY) 2>/dev/null)
+# management_ipv4 lives in host_vars (the host-level network config),
+# not in identity.yml (the deployment-level identity). ADR 0488 split
+# the two; we read from the host_vars overlay first and fall back to
+# PLATFORM_IDENTITY_OVERLAY for legacy multi-deployment overlays that
+# still bundle host config into one file.
+BOOTSTRAP_OVERLAY_HOST_ADDR ?= $(shell awk -F': *' '/^management_ipv4:/ {gsub(/["'"'"' ]/,"",$$2); print $$2; exit}' $(BOOTSTRAP_OVERLAY_HOST_VARS) 2>/dev/null || awk -F': *' '/^management_ipv4:/ {gsub(/["'"'"' ]/,"",$$2); print $$2; exit}' $(PLATFORM_IDENTITY_OVERLAY) 2>/dev/null)
 BOOTSTRAP_OVERLAY_ROOT_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/hetzner_llm_agents_ed25519
 BOOTSTRAP_OVERLAY_ROOT_USER ?= root
 BOOTSTRAP_OVERLAY_OPS_USER ?= ops
 BOOTSTRAP_OVERLAY_OPS_PUBKEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519.pub
 # Multi-inventory: committed inventory supplies group_vars/host_vars defaults
-# (so everything in inventory/group_vars/all/main.yml loads), while the
-# overlay inventory wins on host-level data it redefines.
+# from inventory/group_vars/ and inventory/host_vars/ (ansible auto-loads
+# them from the directory containing the inventory file). The overlay
+# inventory at $(BOOTSTRAP_OVERLAY_INVENTORY) wins on host-level data it
+# redefines and adds the real hosts. ADR 0488: the committed inventory must
+# carry no concrete host entries — only group definitions — so that the
+# placeholder names in the public mirror do not show up alongside the
+# operator's real hosts and become "unreachable" failures.
 ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml -i $(BOOTSTRAP_OVERLAY_INVENTORY)
 BOOTSTRAP_KEY := $(BOOTSTRAP_OVERLAY_SSH_KEY)
 env := $(BOOTSTRAP_OVERLAY_ENV)
@@ -578,11 +597,8 @@ install-cli:
 
 update-cli: install-cli
 
-init-remote: ## Create the ops sudoer on a fresh remote host (overlay-mode prerequisite for Stage 2)
-ifneq ($(BOOTSTRAP_OVERLAY_MODE),1)
-	@echo "init-remote is overlay-mode only; set PLATFORM_IDENTITY_OVERLAY to use it." >&2
-	@exit 1
-endif
+init-remote: ## Create the ops sudoer on a fresh remote host (reads .local/connection.yml; overlay vars still honored if set)
+ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
 	@if [ -z "$(strip $(BOOTSTRAP_OVERLAY_HOST_ADDR))" ]; then \
 		echo "init-remote: could not derive host address from $(PLATFORM_IDENTITY_OVERLAY) (need management_ipv4:)" >&2; \
 		exit 1; \
@@ -594,6 +610,9 @@ endif
 	OPS_PUBKEY_PATH=$(BOOTSTRAP_OVERLAY_OPS_PUBKEY) \
 	OPS_PROBE_KEY=$(BOOTSTRAP_KEY) \
 	$(REPO_ROOT)/scripts/init_remote_ops_user.sh
+else
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/init_remote_from_connection.py
+endif
 
 generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in host_vars/platform-host.yml
 ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)

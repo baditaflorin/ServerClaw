@@ -1,0 +1,30 @@
+# Role → vmid / IPv4-offset catalog. Read by scripts/resolve_topology.py
+# to assign vmid + ipv4 to each enabled VM per the topology schema.
+#
+# Convention (ADR 0488 era): vmid = 100 + ipv4_last_octet. The IPv4 address
+# itself is formed from `identity.platform_guest_network_cidr` (first three
+# octets) + the role's `ipv4_last_octet` (last octet). For a /24 like
+# 10.10.10.0/24, nginx with ipv4_last_octet=10 resolves to 10.10.10.10
+# and vmid=110.
+#
+# Add a new role by appending an entry. Last-octet must be unique across
+# all roles. vmids should stay within [100, 999] to avoid clashing with
+# Proxmox-reserved ranges.
+
+schema_version: 1
+roles:
+  nginx:            {ipv4_last_octet: 10}
+  docker-runtime:   {ipv4_last_octet: 20}
+  docker-build:     {ipv4_last_octet: 30}
+  monitoring:       {ipv4_last_octet: 40}
+  postgres:         {ipv4_last_octet: 50}
+  postgres-replica: {ipv4_last_octet: 51}
+  postgres-apps:    {ipv4_last_octet: 52}
+  postgres-data:    {ipv4_last_octet: 54}
+  backup:           {ipv4_last_octet: 60}
+  coolify:          {ipv4_last_octet: 70}
+  coolify-apps:     {ipv4_last_octet: 71}
+  artifact-cache:   {ipv4_last_octet: 80}
+  runtime-ai:       {ipv4_last_octet: 90}
+  runtime-general:  {ipv4_last_octet: 91}
+  runtime-control:  {ipv4_last_octet: 92}

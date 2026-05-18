@@ -114,6 +114,34 @@ steps:
     timeout_s: 60
     retries: 0
 
+  - id: "2a-derive-host-vars"
+    title: "Probe Proxmox host networking and write .local/host_vars/proxmox-host.yml"
+    make_target: derive-host-vars
+    description: |
+      Probes the Proxmox host's primary interface, IPv4 + CIDR + gateway,
+      IPv6 (if present), and hostname over SSH; writes a `.local/host_vars/`
+      overlay that Ansible plus `make generate-inventory` consume. Required
+      before step 4 (install-proxmox) because the playbooks need the real
+      management_ipv4 / gateway / interface — without the overlay, the
+      committed `inventory/host_vars/proxmox-host.yml` placeholder values
+      would point Proxmox networking at 203.0.113.x.
+    preconditions:
+      - id: connection.exists
+        type: file
+        path: ".local/connection.yml"
+        expect_exists: true
+      - id: topology.exists
+        type: file
+        path: ".local/topology.yml"
+        expect_exists: true
+    postconditions:
+      - id: host-vars.exists
+        type: file
+        path: ".local/host_vars/proxmox-host.yml"
+        expect_exists: true
+    timeout_s: 60
+    retries: 1
+
   - id: "3-init-remote"
     title: "Bootstrap ops sudoer + install bootstrap SSH key on Proxmox host"
     make_target: init-remote
@@ -153,9 +181,9 @@ steps:
       - id: ops-ssh.reachable
         type: command
         command: >-
-          ssh -o BatchMode=yes -o ConnectTimeout=15
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new
           -i .local/ssh/bootstrap.id_ed25519 -p {provider_port}
-          ops@{provider_host} pveversion
+          ops@{provider_host} true
         expect_exit: 0
         timeout_s: 20
     postconditions:
@@ -185,10 +213,13 @@ steps:
         schema: "config/contracts/deployment-v1/topology.schema.json"
     postconditions:
       - id: vms.all-running
-        type: pveapi
-        via_ssh: "{proxmox_ssh_alias}"
-        command: "qm list"
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new
+          -i .local/ssh/bootstrap.id_ed25519 -p {provider_port}
+          ops@{provider_host} sudo qm list
         expect_stdout: "running"
+        expect_exit: 0
         timeout_s: 30
     timeout_s: 1800
     retries: 1
@@ -201,18 +232,22 @@ steps:
       Sets up ufw rules, unattended-upgrades, and sshd_config. Idempotent.
     preconditions:
       - id: vms.running
-        type: pveapi
-        via_ssh: "{proxmox_ssh_alias}"
-        command: "qm list"
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new
+          -i .local/ssh/bootstrap.id_ed25519 -p {provider_port}
+          ops@{provider_host} sudo qm list
         expect_stdout: "running"
+        expect_exit: 0
         timeout_s: 30
     postconditions:
       - id: guests.ufw-active
         type: command
         command: >-
-          ssh -o BatchMode=yes -J {proxmox_ssh_alias}
+          ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new
+          -o ProxyJump=ops@{provider_host}
           -i .local/ssh/bootstrap.id_ed25519
-          ops@10.10.10.110 sudo ufw status
+          ops@10.10.10.10 sudo ufw status
         expect_stdout: "Status: active"
         expect_exit: 0
         timeout_s: 20

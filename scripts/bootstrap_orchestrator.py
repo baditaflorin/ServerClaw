@@ -148,14 +148,32 @@ def select_steps(
     return list(steps[idx:])
 
 
-def build_template_ctx(identity: dict[str, Any]) -> dict[str, str]:
-    """Build the {apex}/{apex_slug} template context.
+def build_template_ctx(identity: dict[str, Any], manifest: dict[str, Any] | None = None) -> dict[str, str]:
+    """Build the template context for substitution into preconditions/postconditions.
 
     Pure function — no IO. Tested directly.
+
+    Variables exposed (when sources are present):
+      {apex}                  -- identity.platform_domain
+      {apex_slug}             -- first label of apex
+      {provider_host}         -- manifest.provider.host
+      {provider_port}         -- manifest.provider.port (default 22)
+      {provider_user}         -- manifest.provider.initial_user
+      {initial_key_filename}  -- manifest.provider.initial_key_path
     """
     apex = identity.get("platform_domain", "")
     apex_slug = apex.split(".")[0] if apex else ""
-    return {"apex": apex, "apex_slug": apex_slug}
+    ctx: dict[str, str] = {"apex": apex, "apex_slug": apex_slug}
+    if manifest:
+        provider = manifest.get("provider") or {}
+        if "host" in provider:
+            ctx["provider_host"] = str(provider["host"])
+        ctx["provider_port"] = str(provider.get("port", 22))
+        if "initial_user" in provider:
+            ctx["provider_user"] = str(provider["initial_user"])
+        if "initial_key_path" in provider:
+            ctx["initial_key_filename"] = str(provider["initial_key_path"])
+    return ctx
 
 
 def expand_templates(ctx: dict[str, str], value: Any) -> Any:
@@ -588,7 +606,14 @@ def main(argv: list[str] | None = None) -> int:
         else:
             sys.stderr.write("bootstrap-orchestrator: no prior failure receipt found; starting from step 0\n")
 
-    ctx = build_template_ctx(identity)
+    manifest_for_ctx: dict[str, Any] = {}
+    if MANIFEST_PATH.is_file():
+        try:
+            with MANIFEST_PATH.open() as fh:
+                manifest_for_ctx = yaml.safe_load(fh) or {}
+        except Exception:  # noqa: BLE001
+            manifest_for_ctx = {}
+    ctx = build_template_ctx(identity, manifest_for_ctx)
 
     receipt = orchestrate(
         steps,

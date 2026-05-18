@@ -13,6 +13,16 @@ platform_operator_email: operator@example.com
 platform_operator_name: "Platform Operator"
 platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
 
+# Derived identity prefixes used throughout the platform for filenames,
+# unix paths, and Proxmox object names. All forms derive from the apex
+# slug unless an operator overrides them in .local/identity.yml.
+_platform_identity_slug: "{{ platform_domain | split('.') | first }}"
+platform_identity:
+  config_prefix: "{{ _platform_identity_slug }}"
+  unix_prefix: "{{ _platform_identity_slug }}"
+  pve_prefix: "{{ _platform_identity_slug }}"
+
+
 # ---------------------------------------------------------------------------
 # Keycloak SSO identity — ADR 0388
 # ---------------------------------------------------------------------------
