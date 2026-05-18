@@ -11,7 +11,7 @@
   "platform_version_context": "0.130.96",
   "workflow_id": "adr-0340-coolify-apps-vm-separation-live-apply",
   "adr": "0340",
-  "summary": "Backfilled the canonical live-apply receipt for ADR 0340 after the latest `origin/main` closeout recorded `coolify-apps-lv3` as the dedicated deployment server, migrated the existing Coolify applications onto it via the documented database repair path, corrected the public edge upstream to `http://10.10.10.71:80`, and verified the repo-smoke ingress on `*.apps.lv3.org`.",
+  "summary": "Backfilled the canonical live-apply receipt for ADR 0340 after the latest `origin/main` closeout recorded `coolify-apps-lv3` as the dedicated deployment server, migrated the existing Coolify applications onto it via the documented database repair path, corrected the public edge upstream to `http://10.10.10.71:80`, and verified the repo-smoke ingress on `*.apps.example.com`.",
   "targets": [
     {
       "kind": "guest",
@@ -28,7 +28,7 @@
     {
       "kind": "service_endpoint",
       "name": "Coolify apps ingress",
-      "address": "https://apps.lv3.org"
+      "address": "https://apps.example.com"
     }
   ],
   "verification": [
@@ -40,7 +40,7 @@
     {
       "check": "Latest-main Coolify migration and edge fixes preserved",
       "result": "pass",
-      "observed": "Merged commit `591eb347cfda43a4e2ae8d26499211df9536d7b5` records the final live-apply recovery findings and carries the repo changes in `inventory/group_vars/platform.yml`, `scripts/coolify_tool.py`, and `tests/test_coolify_tool.py` to keep `*.apps.lv3.org` on the corrected HTTP upstream, preserve the direct DB migration note, and retain the graceful `422` handling when the Coolify API cannot programmatically move applications."
+      "observed": "Merged commit `591eb347cfda43a4e2ae8d26499211df9536d7b5` records the final live-apply recovery findings and carries the repo changes in `inventory/group_vars/platform.yml`, `scripts/coolify_tool.py`, and `tests/test_coolify_tool.py` to keep `*.apps.example.com` on the corrected HTTP upstream, preserve the direct DB migration note, and retain the graceful `422` handling when the Coolify API cannot programmatically move applications."
     },
     {
       "check": "Implementation state documented explicitly",

@@ -10,7 +10,7 @@
 
 ### The Incident (2026-04-14)
 
-A user reported `chat.lv3.org` returning "An internal server error has occurred" during
+A user reported `chat.example.com` returning "An internal server error has occurred" during
 Keycloak SSO login. Investigation revealed:
 
 ```
@@ -40,7 +40,7 @@ This is the **third** topology drift incident in 72 hours:
 
 | Date | Incident | Drifted registries |
 |------|----------|--------------------|
-| 2026-04-13 | nginx edge reverting sso.lv3.org to docker-runtime | `lv3_service_topology`, `platform.yml` |
+| 2026-04-13 | nginx edge reverting sso.example.com to docker-runtime | `lv3_service_topology`, `platform.yml` |
 | 2026-04-13 | SSO redirect URI mismatch (ADR 0413) | collection role, standalone role, tests |
 | 2026-04-14 | Keycloak pg_hba.conf blocking runtime-control | `platform_postgres_clients`, `platform_service_registry` |
 

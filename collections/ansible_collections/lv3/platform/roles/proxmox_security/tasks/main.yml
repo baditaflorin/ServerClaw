@@ -84,7 +84,7 @@
 # INPUT policy. If it crashes after setting DROP policy but before adding ACCEPT rules,
 # the host becomes unreachable. This guard detects that state, stops pve-firewall, and
 # aborts convergence so the operator can investigate.
-# Incident reference: 2026-04-12 — 6h outage on 65.108.75.123; root cause was
+# Incident reference: 2026-04-12 — 6h outage on 203.0.113.1; root cause was
 # placeholder IP in /etc/network/interfaces (wrong IP, not firewall), but this guard
 # provides defence-in-depth against the firewall-crash scenario.
 - name: Wait for pve-firewall to populate ACCEPT rules in PVEFW-HOST-IN (up to 30s)

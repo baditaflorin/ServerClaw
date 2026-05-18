@@ -1,10 +1,10 @@
 == static ==
-APP_HOME_URL=https://grist.lv3.org
+APP_HOME_URL=https://grist.example.com
 GRIST_SINGLE_ORG=lv3
-GRIST_DEFAULT_EMAIL=baditaflorin@gmail.com
+GRIST_DEFAULT_EMAIL=operator@example.com
 GRIST_FORCE_LOGIN=true
-GRIST_OIDC_SP_HOST=https://grist.lv3.org
-GRIST_OIDC_IDP_ISSUER=https://sso.lv3.org/realms/lv3
+GRIST_OIDC_SP_HOST=https://grist.example.com
+GRIST_OIDC_IDP_ISSUER=https://sso.example.com/realms/lv3
 GRIST_OIDC_IDP_CLIENT_ID=grist
 GRIST_OIDC_IDP_SCOPES=openid profile email
 

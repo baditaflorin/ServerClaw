@@ -8,7 +8,7 @@
   "waiver": {
     "reason_code": "pre_existing_gate_failures",
     "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
-    "detail": "repo-intake.lv3.org certificate mismatch is pre-existing on origin/main and unrelated to ADR 0369; substitute local evidence confirms the validation-toolkit migration itself is clean.",
+    "detail": "repo-intake.example.com certificate mismatch is pre-existing on origin/main and unrelated to ADR 0369; substitute local evidence confirms the validation-toolkit migration itself is clean.",
     "impacted_lanes": [
       "remote-pre-push-gate"
     ],
@@ -17,7 +17,7 @@
       "make validate-data-models",
       "make validate-cross-catalog"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-15",
     "remediation_ref": "ws-0417-main-merge-edge-cert-and-sftpgo"
   }

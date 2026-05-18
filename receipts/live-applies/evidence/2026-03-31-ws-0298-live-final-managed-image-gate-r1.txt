@@ -1,2 +1,2 @@
-python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/managed_image_gate.py --baseline-revision "origin/main"
+python3 /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/managed_image_gate.py --baseline-revision "origin/main"
 No managed image refs changed from the baseline revision.

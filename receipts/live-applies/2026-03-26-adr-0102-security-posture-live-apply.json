@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -51,7 +51,7 @@
     {
       "check": "Controller Lynis collection",
       "result": "pass",
-      "observed": "A controlled production replay of `ansible-playbook -i inventory/hosts.yml playbooks/tasks/security-scan.yml -l proxmox_florin,docker-runtime-lv3,postgres-lv3,nginx-lv3,monitoring-lv3 -e security_scan_output_dir=.local/security-posture/lynis -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --private-key ...` completed with all five targets at `ok=7 changed=1 unreachable=0 failed=0` after the stale-Lynis-lock cleanup task was added."
+      "observed": "A controlled production replay of `ansible-playbook -i inventory/hosts.yml playbooks/tasks/security-scan.yml -l proxmox-host,docker-runtime-lv3,postgres-lv3,nginx-lv3,monitoring-lv3 -e security_scan_output_dir=.local/security-posture/lynis -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --private-key ...` completed with all five targets at `ok=7 changed=1 unreachable=0 failed=0` after the stale-Lynis-lock cleanup task was added."
     },
     {
       "check": "Production security posture receipt",

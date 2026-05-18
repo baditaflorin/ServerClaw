@@ -10,7 +10,7 @@
         CPU: 612us
      CGroup: /system.slice/lv3-tailscale-proxy-gitea.socket
 
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: Listening on lv3-tailscale-proxy-gitea.socket - LV3 Tailscale TCP proxy socket for gitea.
+Mar 31 10:28:42 debian-base-template systemd[1]: Listening on lv3-tailscale-proxy-gitea.socket - LV3 Tailscale TCP proxy socket for gitea.
 
 ● lv3-tailscale-proxy-gitea.service - LV3 Tailscale TCP proxy service for gitea
      Loaded: loaded (/etc/systemd/system/lv3-tailscale-proxy-gitea.service; static)
@@ -24,25 +24,25 @@ TriggeredBy: ● lv3-tailscale-proxy-gitea.socket
      CGroup: /system.slice/lv3-tailscale-proxy-gitea.service
              └─4192896 /lib/systemd/systemd-socket-proxyd 10.10.10.20:3003
 
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: Started lv3-tailscale-proxy-gitea.service - LV3 Tailscale TCP proxy service for gitea.
-Mar 31 10:44:03 Debian-trixie-latest-amd64-base systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
-Mar 31 10:54:31 Debian-trixie-latest-amd64-base systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
-Mar 31 10:54:31 Debian-trixie-latest-amd64-base systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
+Mar 31 10:28:42 debian-base-template systemd[1]: Started lv3-tailscale-proxy-gitea.service - LV3 Tailscale TCP proxy service for gitea.
+Mar 31 10:44:03 debian-base-template systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
+Mar 31 10:54:31 debian-base-template systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
+Mar 31 10:54:31 debian-base-template systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
 
 == journal ==
-Mar 31 10:26:43 Debian-trixie-latest-amd64-base systemd-socket-proxyd[4179765]: Failed to connect to remote host: Connection refused
-Mar 31 10:26:43 Debian-trixie-latest-amd64-base systemd-socket-proxyd[4179765]: Failed to connect to remote host: Connection refused
-Mar 31 10:27:13 Debian-trixie-latest-amd64-base systemd-socket-proxyd[4179765]: Failed to connect to remote host: Connection refused
-Mar 31 10:27:21 Debian-trixie-latest-amd64-base systemd-socket-proxyd[4179765]: Failed to connect to remote host: Connection refused
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: Stopping lv3-tailscale-proxy-gitea.service - LV3 Tailscale TCP proxy service for gitea...
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: lv3-tailscale-proxy-gitea.service: Deactivated successfully.
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: Stopped lv3-tailscale-proxy-gitea.service - LV3 Tailscale TCP proxy service for gitea.
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: lv3-tailscale-proxy-gitea.service: Consumed 19.989s CPU time, 9.1M memory peak.
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: lv3-tailscale-proxy-gitea.socket: Deactivated successfully.
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: Closed lv3-tailscale-proxy-gitea.socket - LV3 Tailscale TCP proxy socket for gitea.
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: Stopping lv3-tailscale-proxy-gitea.socket - LV3 Tailscale TCP proxy socket for gitea...
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: Listening on lv3-tailscale-proxy-gitea.socket - LV3 Tailscale TCP proxy socket for gitea.
-Mar 31 10:28:42 Debian-trixie-latest-amd64-base systemd[1]: Started lv3-tailscale-proxy-gitea.service - LV3 Tailscale TCP proxy service for gitea.
-Mar 31 10:44:03 Debian-trixie-latest-amd64-base systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
-Mar 31 10:54:31 Debian-trixie-latest-amd64-base systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
-Mar 31 10:54:31 Debian-trixie-latest-amd64-base systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
+Mar 31 10:26:43 debian-base-template systemd-socket-proxyd[4179765]: Failed to connect to remote host: Connection refused
+Mar 31 10:26:43 debian-base-template systemd-socket-proxyd[4179765]: Failed to connect to remote host: Connection refused
+Mar 31 10:27:13 debian-base-template systemd-socket-proxyd[4179765]: Failed to connect to remote host: Connection refused
+Mar 31 10:27:21 debian-base-template systemd-socket-proxyd[4179765]: Failed to connect to remote host: Connection refused
+Mar 31 10:28:42 debian-base-template systemd[1]: Stopping lv3-tailscale-proxy-gitea.service - LV3 Tailscale TCP proxy service for gitea...
+Mar 31 10:28:42 debian-base-template systemd[1]: lv3-tailscale-proxy-gitea.service: Deactivated successfully.
+Mar 31 10:28:42 debian-base-template systemd[1]: Stopped lv3-tailscale-proxy-gitea.service - LV3 Tailscale TCP proxy service for gitea.
+Mar 31 10:28:42 debian-base-template systemd[1]: lv3-tailscale-proxy-gitea.service: Consumed 19.989s CPU time, 9.1M memory peak.
+Mar 31 10:28:42 debian-base-template systemd[1]: lv3-tailscale-proxy-gitea.socket: Deactivated successfully.
+Mar 31 10:28:42 debian-base-template systemd[1]: Closed lv3-tailscale-proxy-gitea.socket - LV3 Tailscale TCP proxy socket for gitea.
+Mar 31 10:28:42 debian-base-template systemd[1]: Stopping lv3-tailscale-proxy-gitea.socket - LV3 Tailscale TCP proxy socket for gitea...
+Mar 31 10:28:42 debian-base-template systemd[1]: Listening on lv3-tailscale-proxy-gitea.socket - LV3 Tailscale TCP proxy socket for gitea.
+Mar 31 10:28:42 debian-base-template systemd[1]: Started lv3-tailscale-proxy-gitea.service - LV3 Tailscale TCP proxy service for gitea.
+Mar 31 10:44:03 debian-base-template systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
+Mar 31 10:54:31 debian-base-template systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused
+Mar 31 10:54:31 debian-base-template systemd-socket-proxyd[4192896]: Failed to connect to remote host: Connection refused

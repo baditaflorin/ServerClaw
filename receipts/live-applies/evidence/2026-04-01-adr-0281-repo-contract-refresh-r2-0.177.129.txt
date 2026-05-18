@@ -1,7 +1,7 @@
 $ make syntax-check-glitchtip
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2/playbooks/glitchtip.yml --syntax-check
+ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0281-mainline-v2/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0281-mainline-v2/playbooks/glitchtip.yml --syntax-check
 
-playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0281-mainline-v2/playbooks/glitchtip.yml
+playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0281-mainline-v2/playbooks/glitchtip.yml
 
 $ uv run --with pyyaml python scripts/subdomain_exposure_audit.py --check-registry
 

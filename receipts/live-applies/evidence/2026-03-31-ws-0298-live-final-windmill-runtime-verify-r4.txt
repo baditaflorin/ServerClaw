@@ -5,6 +5,6 @@ a2daa654b9c3   ghcr.io/windmill-labs/windmill:1.662.0         "windmill"        
 dea914daf3d2   ghcr.io/windmill-labs/windmill-extra:1.662.0   "/entrypoint.sh"         3 hours ago      Up 8 minutes                      3000-3003/tcp, 8000/tcp                                                                                                                                                                                                                                 windmill-windmill_extra-1
 d7fedfa6568e   openbao/openbao:2.5.1                          "docker-entrypoint.s…"   3 hours ago      Up 8 minutes (healthy)                                                                                                                                                                                                                                                                    windmill-openbao-agent
 ---
-                "/srv/proxmox_florin_server:/srv/proxmox_florin_server:rw",
-                "Source": "/srv/proxmox_florin_server",
-                "Destination": "/srv/proxmox_florin_server",
+                "/srv/platform_server:/srv/platform_server:rw",
+                "Source": "/srv/platform_server",
+                "Destination": "/srv/platform_server",

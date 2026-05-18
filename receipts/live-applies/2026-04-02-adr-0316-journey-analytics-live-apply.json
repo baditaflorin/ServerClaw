@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -33,12 +33,12 @@
     {
       "kind": "service_endpoint",
       "name": "Plausible ingest endpoint",
-      "address": "https://analytics.lv3.org/api/event"
+      "address": "https://analytics.example.com/api/event"
     },
     {
       "kind": "service_endpoint",
       "name": "Glitchtip findings endpoint",
-      "address": "https://errors.lv3.org/api/3/store/"
+      "address": "https://errors.example.com/api/3/store/"
     }
   ],
   "verification": [
@@ -50,7 +50,7 @@
     {
       "check": "Governed Plausible and Windmill replays from the exact worktree",
       "result": "pass",
-      "observed": "`make converge-plausible` succeeded in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-plausible-r3.txt`, and the corrected exact-worktree `make converge-windmill` finished with recap `docker-runtime-lv3 : ok=329 changed=48 failed=0`, `postgres-lv3 : ok=93 changed=2 failed=0`, and `proxmox_florin : ok=41 changed=4 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-windmill-r4.txt`."
+      "observed": "`make converge-plausible` succeeded in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-plausible-r3.txt`, and the corrected exact-worktree `make converge-windmill` finished with recap `docker-runtime-lv3 : ok=329 changed=48 failed=0`, `postgres-lv3 : ok=93 changed=2 failed=0`, and `proxmox-host : ok=41 changed=4 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-converge-windmill-r4.txt`."
     },
     {
       "check": "Live journey event capture and durable worker report",
@@ -65,7 +65,7 @@
     {
       "check": "Glitchtip failure-signal delivery path",
       "result": "partial",
-      "observed": "The helper now normalizes DSN-style Glitchtip secrets into the Sentry-compatible store endpoint, but delivery still fails because `errors.lv3.org` presents the wrong TLS identity, resolves to the shared public edge at `65.108.75.123`, and the live runtime host still has no Glitchtip containers attached to `glitchtip_default`; the blocker is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-publication-r2.json` and `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-runtime-state-r3.json`."
+      "observed": "The helper now normalizes DSN-style Glitchtip secrets into the Sentry-compatible store endpoint, but delivery still fails because `errors.example.com` presents the wrong TLS identity, resolves to the shared public edge at `203.0.113.1`, and the live runtime host still has no Glitchtip containers attached to `glitchtip_default`; the blocker is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-publication-r2.json` and `receipts/live-applies/evidence/2026-04-02-ws-0316-mainline-glitchtip-runtime-state-r3.json`."
     }
   ],
   "evidence_refs": [

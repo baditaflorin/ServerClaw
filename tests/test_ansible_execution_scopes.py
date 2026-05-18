@@ -551,7 +551,7 @@ def test_run_planned_playbook_uses_shared_local_identity_overlay_from_worktree(
     worktree_root = shared_root / ".worktrees" / "ws-0371-live-apply"
     local_overlay = shared_root / ".local"
     local_overlay.mkdir(parents=True)
-    (local_overlay / "identity.yml").write_text("platform_domain: lv3.org\n", encoding="utf-8")
+    (local_overlay / "identity.yml").write_text("platform_domain: example.com\n", encoding="utf-8")
     write_execution_lanes(worktree_root / "config" / "execution-lanes.yaml")
     make_repo(worktree_root)
     inventory_path = worktree_root / "inventory" / "hosts.yml"

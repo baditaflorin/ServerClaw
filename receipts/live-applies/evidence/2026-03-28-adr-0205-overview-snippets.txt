@@ -4,8 +4,8 @@ Merged-main ADR 0205 replay overview snippet captured earlier on 2026-03-28 from
 88:      <strong>Identity Provider</strong>
 91:        Keycloak
 93:        via Keycloak
-1178:        <dd>https://ops.lv3.org</dd>
-1193:      <span>ops.lv3.org · operator · shared-edge · platform-sso</span>
+1178:        <dd>https://ops.example.com</dd>
+1193:      <span>ops.example.com · operator · shared-edge · platform-sso</span>
 
 Template snippet captured from the deployed runtime checkout during the same replay:
 38:    <h3>Capability Contracts</h3>

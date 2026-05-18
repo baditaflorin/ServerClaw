@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1/scripts/validate_repo.sh
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-label-studio-live-apply-r1/scripts/validate_repo.sh
 Generated platform vars validation
 Syntax check: playbooks/api-gateway.yml
 Syntax check: playbooks/artifact-cache-vm.yml
@@ -207,9 +207,9 @@ Shell lint
 JSON validation
 Semgrep SAST and secret-pattern validation
 Semgrep gate summary
-  repo: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1
+  repo: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-label-studio-live-apply-r1
   source sha: c4ec1e518f1a14f7573ed97ac47e6f714e19ca65
-  sarif: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1/receipts/sast/c4ec1e518f1a14f7573ed97ac47e6f714e19ca65.sarif.json
+  sarif: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-label-studio-live-apply-r1/receipts/sast/c4ec1e518f1a14f7573ed97ac47e6f714e19ca65.sarif.json
   findings: error=0 warning=3 note=0 total=3
 Compose runtime env guard
 Retry guard

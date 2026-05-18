@@ -107,7 +107,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:40.671Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T18:26:40.681Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0288-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0288-live-apply-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T18:26:40.736Z","vm":"controller","workflow_id":"ansible-playbook"}

@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.80",
   "workflow_id": "adr-0277-typesense-mainline-live-apply",
   "adr": "0277",
-  "summary": "Promoted ADR 0277 onto `main` as repository version `0.177.125` and first verified platform version `0.130.80` after refreshing from the latest realistic `origin/main` commit `4d3bf1325fb97969368cff1f93946a2e7851c3a8`. The private Typesense runtime remains live on `docker-runtime-lv3`, the controller proxy remains available on `http://100.64.0.1:8016`, the authenticated structured-search route at `https://api.lv3.org/v1/platform/search/structured` continues to return Typesense-backed catalog data, and the shared Docker recovery path now unseals the local OpenBao stack before post-apply backup recovery is attempted.",
+  "summary": "Promoted ADR 0277 onto `main` as repository version `0.177.125` and first verified platform version `0.130.80` after refreshing from the latest realistic `origin/main` commit `4d3bf1325fb97969368cff1f93946a2e7851c3a8`. The private Typesense runtime remains live on `docker-runtime-lv3`, the controller proxy remains available on `http://100.64.0.1:8016`, the authenticated structured-search route at `https://api.example.com/v1/platform/search/structured` continues to return Typesense-backed catalog data, and the shared Docker recovery path now unseals the local OpenBao stack before post-apply backup recovery is attempted.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -33,7 +33,7 @@
     {
       "kind": "service_endpoint",
       "name": "Structured search API",
-      "address": "https://api.lv3.org/v1/platform/search/structured"
+      "address": "https://api.example.com/v1/platform/search/structured"
     }
   ],
   "verification": [
@@ -50,7 +50,7 @@
     {
       "check": "Exact-main Typesense live apply",
       "result": "pass",
-      "observed": "The final `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=typesense env=production` replay succeeded end to end from repository version `0.177.125`, with `docker-runtime-lv3 : ok=399 changed=143 failed=0 skipped=76` and `proxmox_florin : ok=41 changed=4 failed=0 skipped=16`, while the runtime assurance envelope and the authenticated structured-search route both passed."
+      "observed": "The final `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=typesense env=production` replay succeeded end to end from repository version `0.177.125`, with `docker-runtime-lv3 : ok=399 changed=143 failed=0 skipped=76` and `proxmox-host : ok=41 changed=4 failed=0 skipped=16`, while the runtime assurance envelope and the authenticated structured-search route both passed."
     },
     {
       "check": "Post-apply Restic backup hook",

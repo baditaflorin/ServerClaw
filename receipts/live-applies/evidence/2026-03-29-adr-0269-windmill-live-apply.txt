@@ -12,4 +12,4 @@ Key proof points:
 Play recap:
 docker-runtime-lv3         : ok=243  changed=47   unreachable=0    failed=0    skipped=38   rescued=0    ignored=0
 postgres-lv3               : ok=64   changed=1    unreachable=0    failed=0    skipped=8    rescued=0    ignored=0
-proxmox_florin             : ok=37   changed=4    unreachable=0    failed=0    skipped=15   rescued=0    ignored=0
+proxmox-host             : ok=37   changed=4    unreachable=0    failed=0    skipped=15   rescued=0    ignored=0

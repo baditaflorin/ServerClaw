@@ -3,12 +3,12 @@ recorded_at: 2026-04-03T10:45:17Z
 
 [commit-summary]
 commit 591eb347cfda43a4e2ae8d26499211df9536d7b5
-Author: Florin Badita-Nistor <baditaflorin@gmail.com>
+Author: Platform Operator <operator@example.com>
 Date:   Fri Apr 3 13:22:30 2026 +0300
 
     [ws-0340] Finalize live apply: HTTP upstream, DB migration, full completion
 
-    - Fix *.apps.lv3.org NGINX upstream from https://10.10.10.71:443 to
+    - Fix *.apps.example.com NGINX upstream from https://10.10.10.71:443 to
       http://10.10.10.71:80 so NGINX terminates TLS and Caddy serves apps
       on port 80 without needing its own ACME cert (Finding 10)
     - Update platform.yml both production and staging coolify_apps service
@@ -32,7 +32,7 @@ Date:   Fri Apr 3 13:22:30 2026 +0300
 [stack-truth]
 88:    coolify_apps: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply
 911:    apps_migration_status: migrated_via_db  # Direct DB: UPDATE applications SET destination_id=34 WHERE destination_id=1 via docker exec coolify-db psql
-912:    nginx_edge_updated: true  # *.apps.lv3.org upstream updated from 10.10.10.70 to http://10.10.10.71:80
+912:    nginx_edge_updated: true  # *.apps.example.com upstream updated from 10.10.10.70 to http://10.10.10.71:80
 914:    repo_smoke_public_http_verified: true
 
 [inventory-upstream]

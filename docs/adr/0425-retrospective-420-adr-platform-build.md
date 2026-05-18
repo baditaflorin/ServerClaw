@@ -41,7 +41,7 @@ No code changes were needed to point the role at a new zone — just a token
 and `hetzner_dns_zone_name` in identity overlay.
 
 ### 3. SSH key provenance
-The `llm-agents@proxmox_florin_server` ed25519 key is stored at
+The `llm-agents@platform_server` ed25519 key is stored at
 `.local/ssh/hetzner_llm_agents_ed25519` on the operator's workstation *and*
 pre-registered in the Hetzner account. The new server was provisioned with
 the key already authorised — zero manual SSH-key-push step.
@@ -117,7 +117,7 @@ that references ADRs 0041, 0076 (subdomain governance), 0045 (lanes),
 and the `.local/mail-platform/` secret layout in one place.
 
 ### 7. Fork-target account-name mismatch (non-blocking observation)
-The Hetzner order emails address "Mr. Raabe", not "Florin Badita-Nistor". In
+The Hetzner order emails address "Mr. Raabe", not "Platform Operator". In
 a trusted session, this is clearly fine. In a less-trusted handoff, this is
 exactly the kind of signal that should trigger a "is this the right account?"
 confirmation. The session protocol captures the *destructive action* side of

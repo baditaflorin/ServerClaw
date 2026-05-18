@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.58",
   "workflow_id": "adr-0255-matrix-synapse-mainline-live-apply",
   "adr": "0255",
-  "summary": "Integrated ADR 0255 on synchronized main release 0.177.85 by replaying the exact-main Matrix converge from release commit cdf1b9a4adaaa35b048f7ecd41e4d6087c07e5cf, correcting the public HTTPS/TLS assurance lane from source commit 169d7e6549e539747d140497acd8a01e9049c330 so blackbox probes connect through the internal edge with matrix.lv3.org as the hostname override, and re-verifying public publication, controller access, runtime health, and monitoring evidence while platform version remained 0.130.58 on top of the already-recorded ADR 0264 mainline baseline.",
+  "summary": "Integrated ADR 0255 on synchronized main release 0.177.85 by replaying the exact-main Matrix converge from release commit cdf1b9a4adaaa35b048f7ecd41e4d6087c07e5cf, correcting the public HTTPS/TLS assurance lane from source commit 169d7e6549e539747d140497acd8a01e9049c330 so blackbox probes connect through the internal edge with matrix.example.com as the hostname override, and re-verifying public publication, controller access, runtime health, and monitoring evidence while platform version remained 0.130.58 on top of the already-recorded ADR 0264 mainline baseline.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -46,7 +46,7 @@
     {
       "kind": "service_endpoint",
       "name": "matrix-public",
-      "address": "https://matrix.lv3.org/_matrix/client/versions"
+      "address": "https://matrix.example.com/_matrix/client/versions"
     },
     {
       "kind": "service_endpoint",
@@ -73,17 +73,17 @@
     {
       "check": "Exact-main Matrix converge replay",
       "result": "pass",
-      "observed": "`make converge-matrix-synapse` completed successfully from release commit `cdf1b9a4adaaa35b048f7ecd41e4d6087c07e5cf`, with final recap `docker-runtime-lv3 ok=131 changed=5 failed=0`, `localhost ok=18 changed=0 failed=0`, `nginx-lv3 ok=38 changed=3 failed=0`, `postgres-lv3 ok=51 changed=0 failed=0`, and `proxmox_florin ok=31 changed=4 failed=0`."
+      "observed": "`make converge-matrix-synapse` completed successfully from release commit `cdf1b9a4adaaa35b048f7ecd41e4d6087c07e5cf`, with final recap `docker-runtime-lv3 ok=131 changed=5 failed=0`, `localhost ok=18 changed=0 failed=0`, `nginx-lv3 ok=38 changed=3 failed=0`, `postgres-lv3 ok=51 changed=0 failed=0`, and `proxmox-host ok=31 changed=4 failed=0`."
     },
     {
       "check": "Exact-main monitoring replay after internal-edge assurance correction",
       "result": "pass",
-      "observed": "`make converge-monitoring` completed successfully from source commit `169d7e6549e539747d140497acd8a01e9049c330`, with final recap `backup-lv3 ok=14 changed=0 failed=0`, `coolify-lv3 ok=14 changed=0 failed=0`, `docker-build-lv3 ok=46 changed=0 failed=0`, `docker-runtime-lv3 ok=72 changed=2 failed=0`, `monitoring-lv3 ok=397 changed=2 failed=0`, `nginx-lv3 ok=150 changed=3 failed=0`, `postgres-lv3 ok=38 changed=0 failed=0`, and `proxmox_florin ok=100 changed=0 failed=0`."
+      "observed": "`make converge-monitoring` completed successfully from source commit `169d7e6549e539747d140497acd8a01e9049c330`, with final recap `backup-lv3 ok=14 changed=0 failed=0`, `coolify-lv3 ok=14 changed=0 failed=0`, `docker-build-lv3 ok=46 changed=0 failed=0`, `docker-runtime-lv3 ok=72 changed=2 failed=0`, `monitoring-lv3 ok=397 changed=2 failed=0`, `nginx-lv3 ok=150 changed=3 failed=0`, `postgres-lv3 ok=38 changed=0 failed=0`, and `proxmox-host ok=100 changed=0 failed=0`."
     },
     {
       "check": "Public and controller Matrix endpoint plus login verification",
       "result": "pass",
-      "observed": "`https://matrix.lv3.org/_matrix/client/versions` returned `status 200` from `server nginx` with `versions_count 20` and `unstable_features 34`; `https://matrix.lv3.org/_matrix/client/v3/login` returned `status 200` in `0.60s` with `user_id @ops:matrix.lv3.org`, `home_server matrix.lv3.org`, and well-known base `https://matrix.lv3.org/`; `http://100.64.0.1:8015/_matrix/client/versions` returned `status 200` with `server Synapse/1.150.0`; the controller login path also returned `status 200` in `9.27s`; and `sudo ss -ltnp` on `proxmox_florin` confirmed the controller listener is bound on `100.64.0.1:8015`."
+      "observed": "`https://matrix.example.com/_matrix/client/versions` returned `status 200` from `server nginx` with `versions_count 20` and `unstable_features 34`; `https://matrix.example.com/_matrix/client/v3/login` returned `status 200` in `0.60s` with `user_id @ops:matrix.example.com`, `home_server matrix.example.com`, and well-known base `https://matrix.example.com/`; `http://100.64.0.1:8015/_matrix/client/versions` returned `status 200` with `server Synapse/1.150.0`; the controller login path also returned `status 200` in `9.27s`; and `sudo ss -ltnp` on `proxmox-host` confirmed the controller listener is bound on `100.64.0.1:8015`."
     },
     {
       "check": "Runtime container health",
@@ -93,7 +93,7 @@
     {
       "check": "Monitoring rule, target, and probe-success verification",
       "result": "pass",
-      "observed": "Prometheus on `monitoring-lv3` reported `probe_success{job=\"https-tls-blackbox\",assurance_id=\"matrix-synapse-public\"} = 1`, `up{job=\"matrix_synapse-readiness\"} = 1`, and `up{job=\"matrix_synapse-liveness\"} = 1`. The live target file at `/etc/prometheus/file_sd/https-tls-targets.yml` now points Matrix at `https://10.10.10.10:443/_matrix/client/versions` with `probe_hostname: matrix.lv3.org`, and `/etc/prometheus/rules/https-tls-alerts.yml` still carries the `matrix-synapse-public` alert definitions."
+      "observed": "Prometheus on `monitoring-lv3` reported `probe_success{job=\"https-tls-blackbox\",assurance_id=\"matrix-synapse-public\"} = 1`, `up{job=\"matrix_synapse-readiness\"} = 1`, and `up{job=\"matrix_synapse-liveness\"} = 1`. The live target file at `/etc/prometheus/file_sd/https-tls-targets.yml` now points Matrix at `https://10.10.10.10:443/_matrix/client/versions` with `probe_hostname: matrix.example.com`, and `/etc/prometheus/rules/https-tls-alerts.yml` still carries the `matrix-synapse-public` alert definitions."
     }
   ],
   "evidence_refs": [
@@ -123,7 +123,7 @@
   ],
   "notes": [
     "This canonical receipt supersedes the branch-local evidence in `2026-03-29-adr-0255-matrix-synapse-live-apply` and the earlier exact-main candidate that predated the internal-edge HTTPS assurance correction.",
-    "Public HTTPS/TLS blackbox probes now connect to the shared internal edge `10.10.10.10` with the public hostname override because guest-network hairpin access to `65.108.75.123:443` is not reliable from `monitoring-lv3`.",
+    "Public HTTPS/TLS blackbox probes now connect to the shared internal edge `10.10.10.10` with the public hostname override because guest-network hairpin access to `203.0.113.1:443` is not reliable from `monitoring-lv3`.",
     "Platform version remained `0.130.58` on this merge because the latest `origin/main` baseline already carried ADR 0264's exact-main live-apply truth before ADR 0255 recorded its final synchronized-main receipt."
   ]
 }

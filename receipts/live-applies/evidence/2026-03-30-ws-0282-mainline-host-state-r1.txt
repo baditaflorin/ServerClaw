@@ -1,1 +1,1 @@
-proxmox_florin | CHANGED | rc=0 | (stdout) Debian-trixie-latest-amd64-base\npve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)
+proxmox-host | CHANGED | rc=0 | (stdout) debian-base-template\npve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)

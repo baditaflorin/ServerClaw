@@ -1,4 +1,4 @@
-host=Debian-trixie-latest-amd64-base
+host=debian-base-template
 kernel=6.17.13-2-pve
 pve=pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)
 status: running

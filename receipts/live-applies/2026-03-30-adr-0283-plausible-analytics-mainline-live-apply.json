@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,12 +34,12 @@
     {
       "kind": "service_endpoint",
       "name": "Plausible public ready endpoint",
-      "address": "https://analytics.lv3.org/api/system/health/ready"
+      "address": "https://analytics.example.com/api/system/health/ready"
     },
     {
       "kind": "service_endpoint",
       "name": "Plausible public event endpoint",
-      "address": "https://analytics.lv3.org/api/event"
+      "address": "https://analytics.example.com/api/event"
     }
   ],
   "verification": [
@@ -56,7 +56,7 @@
     {
       "check": "Current Proxmox host state",
       "result": "pass",
-      "observed": "A fresh host-state probe confirmed the server still reports hostname `Debian-trixie-latest-amd64-base`, `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and running VMs `110` plus `120`, preserved in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-host-state-r1-0.177.99.txt`."
+      "observed": "A fresh host-state probe confirmed the server still reports hostname `debian-base-template`, `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and running VMs `110` plus `120`, preserved in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-host-state-r1-0.177.99.txt`."
     },
     {
       "check": "Current Plausible runtime state",
@@ -66,12 +66,12 @@
     {
       "check": "Current public analytics edge verification",
       "result": "pass",
-      "observed": "A fresh public probe reconfirmed `https://analytics.lv3.org/api/system/health/ready`, the `https://analytics.lv3.org/js/script.js` tracker injection on `nginx.lv3.org`, the dashboard OIDC redirect with `x-robots-tag: noindex, nofollow`, and public DNS `analytics.lv3.org -> 65.108.75.123`, preserved in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-public-verify-r1-0.177.99.txt`."
+      "observed": "A fresh public probe reconfirmed `https://analytics.example.com/api/system/health/ready`, the `https://analytics.example.com/js/script.js` tracker injection on `nginx.example.com`, the dashboard OIDC redirect with `x-robots-tag: noindex, nofollow`, and public DNS `analytics.example.com -> 203.0.113.1`, preserved in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-public-verify-r1-0.177.99.txt`."
     },
     {
       "check": "Current public analytics event ingestion",
       "result": "pass",
-      "observed": "A fresh public pageview smoke posted `202 Accepted` to `https://analytics.lv3.org/api/event` and confirmed the synthetic path `/plausible-e2e-1774863976` reached ClickHouse on poll attempt `2`, preserved in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-public-event-e2e-r1-0.177.99.txt`."
+      "observed": "A fresh public pageview smoke posted `202 Accepted` to `https://analytics.example.com/api/event` and confirmed the synthetic path `/plausible-e2e-1774863976` reached ClickHouse on poll attempt `2`, preserved in `receipts/live-applies/evidence/2026-03-30-adr-0283-mainline-public-event-e2e-r1-0.177.99.txt`."
     },
     {
       "check": "Branch-local receipt superseded",

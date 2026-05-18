@@ -2,4 +2,4 @@ Service definition bundle validation
 Repository data model validation
 Service definition bundle validation
 Generated status document validation
-architecture diagrams error: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0324-live-apply/docs/diagrams is stale for agent-coordination-map.excalidraw. Run 'python3 scripts/generate_diagrams.py --write'.
+architecture diagrams error: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0324-live-apply/docs/diagrams is stale for agent-coordination-map.excalidraw. Run 'python3 scripts/generate_diagrams.py --write'.

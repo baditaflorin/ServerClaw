@@ -1,1 +1,1 @@
-workstream registry error: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0327-live-apply/workstreams/archive/2026/ws-0327-live-apply.yaml is under workstreams/archive but still requires active tracking
+workstream registry error: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0327-live-apply/workstreams/archive/2026/ws-0327-live-apply.yaml is under workstreams/archive but still requires active tracking

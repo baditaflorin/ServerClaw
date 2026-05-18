@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,12 +34,12 @@
     {
       "kind": "service_endpoint",
       "name": "MinIO API",
-      "address": "https://minio.lv3.org"
+      "address": "https://minio.example.com"
     },
     {
       "kind": "service_endpoint",
       "name": "MinIO console",
-      "address": "https://minio-console.lv3.org"
+      "address": "https://minio-console.example.com"
     }
   ],
   "verification": [
@@ -56,7 +56,7 @@
     {
       "check": "Mainline MinIO live apply and edge verification",
       "result": "pass",
-      "observed": "The final `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=minio env=production` replay succeeded end to end, keeping local MinIO health, public `https://minio.lv3.org/minio/health/live`, the authenticated console redirect at `https://minio-console.lv3.org`, and the post-apply Restic backup hook green while writing `receipts/restic-backups/20260331T225338Z.json`."
+      "observed": "The final `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=minio env=production` replay succeeded end to end, keeping local MinIO health, public `https://minio.example.com/minio/health/live`, the authenticated console redirect at `https://minio-console.example.com`, and the post-apply Restic backup hook green while writing `receipts/restic-backups/20260331T225338Z.json`."
     },
     {
       "check": "Shared recovery documentation and automation hardening",

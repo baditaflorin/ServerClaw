@@ -42,7 +42,7 @@ ownership_manifest:
       mode: exclusive
 notes: >
   Service health audit: 73 services, 5 VMs without watchdog coverage.
-  SSH to servers unavailable at time of audit (connection timeout to 65.108.75.123).
+  SSH to servers unavailable at time of audit (connection timeout to 203.0.113.1).
   All service probe URLs derived from config/health-probe-catalog.json.
   Deploy with: make converge-platform-watchdog env=production
   Or per-VM: ansible-playbook playbooks/platform-service-watchdog.yml -e env=production -e watchdog_vm=docker-runtime

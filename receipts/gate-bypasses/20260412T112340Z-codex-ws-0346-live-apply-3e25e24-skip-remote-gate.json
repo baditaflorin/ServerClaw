@@ -15,7 +15,7 @@
     "substitute_evidence": [
       "receipts/live-applies/evidence/2026-04-12-ws-0346-repowise-live-apply-r1.txt"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-13",
     "remediation_ref": "ws-0346-live-apply"
   }

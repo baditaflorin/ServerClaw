@@ -32,17 +32,17 @@ workstream-surfaces   passed             3.91
 yaml-lint             passed             16.08
 
 [packer-validate] docker command
-docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0257-main-validate-r1-57e8b70c76/repo/.lv3-runs/20260331T122828Z-3fae3b3b05be/repo:/workspace -v /opt/builds/.packer.d:/root/.packer.d -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=3fae3b3b05bee17d787dad115842bf56ead4812b35b32acf56c0143b4b9aa4d2 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T12:28:21.595833+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ed905a0d08542b3e77e005faf684bf921db010d1 -e LV3_SNAPSHOT_BRANCH=HEAD -e PACKER_CACHE_ROOT=/root/.packer.d -e PACKER_PLUGIN_PATH=/root/.packer.d/plugins -w /workspace registry.lv3.org/check-runner/infra:2026.03.23 sh -c ./scripts/validate_packer_templates.sh
+docker run --rm --cpus=4 -v /home/ops/builds/platform_server/.lv3-session-workspaces/ws-0257-main-validate-r1-57e8b70c76/repo/.lv3-runs/20260331T122828Z-3fae3b3b05be/repo:/workspace -v /opt/builds/.packer.d:/root/.packer.d -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=3fae3b3b05bee17d787dad115842bf56ead4812b35b32acf56c0143b4b9aa4d2 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T12:28:21.595833+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ed905a0d08542b3e77e005faf684bf921db010d1 -e LV3_SNAPSHOT_BRANCH=HEAD -e PACKER_CACHE_ROOT=/root/.packer.d -e PACKER_PLUGIN_PATH=/root/.packer.d/plugins -w /workspace registry.example.com/check-runner/infra:2026.03.23 sh -c ./scripts/validate_packer_templates.sh
 [packer-validate] stderr
-Unable to find image 'registry.lv3.org/check-runner/infra:2026.03.23' locally
+Unable to find image 'registry.example.com/check-runner/infra:2026.03.23' locally
 docker: Error response from daemon: received unexpected HTTP status: 502 Bad Gateway
 
 Run 'docker run --help' for more information
 
 [tofu-validate] docker command
-docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0257-main-validate-r1-57e8b70c76/repo/.lv3-runs/20260331T122828Z-3fae3b3b05be/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=3fae3b3b05bee17d787dad115842bf56ead4812b35b32acf56c0143b4b9aa4d2 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T12:28:21.595833+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ed905a0d08542b3e77e005faf684bf921db010d1 -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/infra:2026.03.23 sh -c if [ -d tofu ]; then tofu -chdir=tofu validate; else echo 'No tofu configuration present'; fi
+docker run --rm --cpus=4 -v /home/ops/builds/platform_server/.lv3-session-workspaces/ws-0257-main-validate-r1-57e8b70c76/repo/.lv3-runs/20260331T122828Z-3fae3b3b05be/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=3fae3b3b05bee17d787dad115842bf56ead4812b35b32acf56c0143b4b9aa4d2 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T12:28:21.595833+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=ed905a0d08542b3e77e005faf684bf921db010d1 -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.example.com/check-runner/infra:2026.03.23 sh -c if [ -d tofu ]; then tofu -chdir=tofu validate; else echo 'No tofu configuration present'; fi
 [tofu-validate] stderr
-Unable to find image 'registry.lv3.org/check-runner/infra:2026.03.23' locally
+Unable to find image 'registry.example.com/check-runner/infra:2026.03.23' locally
 docker: Error response from daemon: received unexpected HTTP status: 502 Bad Gateway
 
 Run 'docker run --help' for more information

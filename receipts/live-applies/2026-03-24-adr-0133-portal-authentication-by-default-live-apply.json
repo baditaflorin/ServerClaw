@@ -18,41 +18,41 @@
     },
     {
       "kind": "public_hostname",
-      "name": "ops.lv3.org"
+      "name": "ops.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "docs.lv3.org"
+      "name": "docs.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "changelog.lv3.org"
+      "name": "changelog.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "grafana.lv3.org"
+      "name": "grafana.example.com"
     }
   ],
   "verification": [
     {
       "check": "Ops portal unauthenticated access",
       "result": "pass",
-      "observed": "A live HEAD request to https://ops.lv3.org/ on 2026-03-24 returned HTTP 302 with location https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/."
+      "observed": "A live HEAD request to https://ops.example.com/ on 2026-03-24 returned HTTP 302 with location https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/."
     },
     {
       "check": "Docs portal unauthenticated access",
       "result": "pass",
-      "observed": "A live HEAD request to https://docs.lv3.org/ on 2026-03-24 returned HTTP 302 with location https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/ and x-robots-tag: noindex."
+      "observed": "A live HEAD request to https://docs.example.com/ on 2026-03-24 returned HTTP 302 with location https://docs.example.com/oauth2/sign_in?rd=https://docs.example.com/ and x-robots-tag: noindex."
     },
     {
       "check": "Changelog portal unauthenticated access",
       "result": "pass",
-      "observed": "A live HEAD request to https://changelog.lv3.org/ on 2026-03-24 returned HTTP 302 with location https://changelog.lv3.org/oauth2/sign_in?rd=https://changelog.lv3.org/."
+      "observed": "A live HEAD request to https://changelog.example.com/ on 2026-03-24 returned HTTP 302 with location https://changelog.example.com/oauth2/sign_in?rd=https://changelog.example.com/."
     },
     {
       "check": "Grafana anonymous dashboard access",
       "result": "pass",
-      "observed": "A live HEAD request to https://grafana.lv3.org/ on 2026-03-24 returned HTTP 302 with location /login instead of serving a dashboard anonymously."
+      "observed": "A live HEAD request to https://grafana.example.com/ on 2026-03-24 returned HTTP 302 with location /login instead of serving a dashboard anonymously."
     },
     {
       "check": "Protected portal config rendered on nginx-lv3",
@@ -67,7 +67,7 @@
     "versions/stack.yaml"
   ],
   "notes": [
-    "The first public-edge replay exposed a template lookup bug that left docs.lv3.org and changelog.lv3.org publicly reachable even though the policy data was correct. The live apply was re-run after fixing the hostname lookup in the NGINX template.",
-    "The shared edge auth cookie is now scoped to .lv3.org so a single Keycloak-backed browser session covers ops.lv3.org, docs.lv3.org, and changelog.lv3.org."
+    "The first public-edge replay exposed a template lookup bug that left docs.example.com and changelog.example.com publicly reachable even though the policy data was correct. The live apply was re-run after fixing the hostname lookup in the NGINX template.",
+    "The shared edge auth cookie is now scoped to .example.com so a single Keycloak-backed browser session covers ops.example.com, docs.example.com, and changelog.example.com."
   ]
 }

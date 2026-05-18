@@ -1,4 +1,4 @@
-uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0302-live-apply/scripts/backup_coverage_ledger.py --write-receipt
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0302-live-apply/scripts/backup_coverage_ledger.py --write-receipt
 LV3 backup coverage ledger
 Generated: 2026-03-31T06:02:17Z
 

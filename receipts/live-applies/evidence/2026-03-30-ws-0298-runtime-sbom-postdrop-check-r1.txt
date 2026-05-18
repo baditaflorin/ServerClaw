@@ -1,6 +1,6 @@
 docker-runtime-lv3 | CHANGED | rc=0 >>
 ---
-/srv/proxmox_florin_server/receipts/cve:
+/srv/platform_server/receipts/cve:
 total 9800
 -rw-r--r-- 1 root root  46185 Mar 30 17:59 1550310a86db-20260330T175644Z.grype.json
 -rw-r--r-- 1 root root 166744 Mar 30 17:36 118753efcf38-20260330T173555Z.grype.json

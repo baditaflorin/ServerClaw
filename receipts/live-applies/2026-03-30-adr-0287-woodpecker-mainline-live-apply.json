@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,7 +40,7 @@
     {
       "kind": "service_endpoint",
       "name": "Woodpecker public hostname",
-      "address": "https://ci.lv3.org/healthz"
+      "address": "https://ci.example.com/healthz"
     },
     {
       "kind": "service_endpoint",
@@ -67,12 +67,12 @@
     {
       "check": "Authoritative exact-main service replay",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=woodpecker env=production EXTRA_ARGS='-e bypass_promotion=true'` succeeded in `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-live-apply-service-0.177.110.txt` with final recaps `docker-runtime-lv3 : ok=157 changed=4 unreachable=0 failed=0 skipped=44 rescued=0 ignored=0`, `localhost : ok=4 changed=0 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0`, `nginx-lv3 : ok=47 changed=6 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`, `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`, and `proxmox_florin : ok=277 changed=1 unreachable=0 failed=0 skipped=140 rescued=0 ignored=0`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=woodpecker env=production EXTRA_ARGS='-e bypass_promotion=true'` succeeded in `receipts/live-applies/evidence/2026-03-30-ws-0287-mainline-r3-live-apply-service-0.177.110.txt` with final recaps `docker-runtime-lv3 : ok=157 changed=4 unreachable=0 failed=0 skipped=44 rescued=0 ignored=0`, `localhost : ok=4 changed=0 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0`, `nginx-lv3 : ok=47 changed=6 unreachable=0 failed=0 skipped=6 rescued=0 ignored=0`, `postgres-lv3 : ok=51 changed=0 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0`, and `proxmox-host : ok=277 changed=1 unreachable=0 failed=0 skipped=140 rescued=0 ignored=0`."
     },
     {
       "check": "Public, private, and controller API proofs",
       "result": "pass",
-      "observed": "`curl -fsSI https://ci.lv3.org/healthz` returned `HTTP/2 200` with `x-woodpecker-version: 3.13.0`, `curl -fsSI http://100.64.0.1:8017/healthz` returned `HTTP/1.1 200 OK`, `openssl s_client -connect ci.lv3.org:443 -servername ci.lv3.org | openssl x509 -noout -subject -issuer -ext subjectAltName` reported `subject=CN=ci.lv3.org`, issuer `CN=E7`, and SAN `DNS:ci.lv3.org`, `make woodpecker-manage ACTION=whoami` resolved to admin `ops-gitea`, and `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/proxmox_florin_server'` confirmed the seeded `LV3_WOODPECKER_SECRET_SMOKE` repository secret."
+      "observed": "`curl -fsSI https://ci.example.com/healthz` returned `HTTP/2 200` with `x-woodpecker-version: 3.13.0`, `curl -fsSI http://100.64.0.1:8017/healthz` returned `HTTP/1.1 200 OK`, `openssl s_client -connect ci.example.com:443 -servername ci.example.com | openssl x509 -noout -subject -issuer -ext subjectAltName` reported `subject=CN=ci.example.com`, issuer `CN=E7`, and SAN `DNS:ci.example.com`, `make woodpecker-manage ACTION=whoami` resolved to admin `ops-gitea`, and `make woodpecker-manage ACTION=list-secrets WOODPECKER_ARGS='--repo ops/platform_server'` confirmed the seeded `LV3_WOODPECKER_SECRET_SMOKE` repository secret."
     },
     {
       "check": "Exact-main repository validation bundle",
@@ -92,7 +92,7 @@
     {
       "check": "Post-push Woodpecker main trigger visibility",
       "result": "partial",
-      "observed": "After `origin/main` moved to `f9bc208e7930a3b93abda8206c48fb718232e2a4`, `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main'` returned `{\\\"accepted\\\": true, \\\"branch\\\": \\\"main\\\", \\\"repo_id\\\": 1, \\\"status\\\": \\\"accepted\\\"}`, `make woodpecker-manage ACTION=list-pipelines WOODPECKER_ARGS='--repo ops/proxmox_florin_server --branch main'` still returned `[]`, and the bounded wait replay with `--timeout 30` ended with `Woodpecker accepted the manual trigger request but no pipeline run became visible for branch 'main' within 30 seconds`."
+      "observed": "After `origin/main` moved to `f9bc208e7930a3b93abda8206c48fb718232e2a4`, `make woodpecker-manage ACTION=trigger-pipeline WOODPECKER_ARGS='--repo ops/platform_server --branch main'` returned `{\\\"accepted\\\": true, \\\"branch\\\": \\\"main\\\", \\\"repo_id\\\": 1, \\\"status\\\": \\\"accepted\\\"}`, `make woodpecker-manage ACTION=list-pipelines WOODPECKER_ARGS='--repo ops/platform_server --branch main'` still returned `[]`, and the bounded wait replay with `--timeout 30` ended with `Woodpecker accepted the manual trigger request but no pipeline run became visible for branch 'main' within 30 seconds`."
     }
   ],
   "evidence_refs": [

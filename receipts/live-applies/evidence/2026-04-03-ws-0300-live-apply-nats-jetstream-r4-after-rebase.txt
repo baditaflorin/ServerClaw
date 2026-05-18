@@ -3,18 +3,18 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/.local/packer-plugin-cache
+INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/.local/packer-plugin-cache
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/build/ops-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/build/changelog-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/build/docs-portal
 Result: PASS (live-apply-service)
 /Applications/Xcode.app/Contents/Developer/usr/bin/make check-canonical-truth
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/interface_contracts.py --check-live-apply "service:nats-jetstream"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/scripts/interface_contracts.py --check-live-apply "service:nats-jetstream"
 Live apply contract OK: service:nats-jetstream -> playbooks/services/nats-jetstream.yml
 Vulnerability budget gate for nats_jetstream: approved
 Service: nats_jetstream
@@ -24,9 +24,9 @@ Decision: approved
 nats_jetstream: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@runtime-control-lv3
   rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.
 No ADR 0191 immutable guest replacement policy blocks the requested live apply for nats-jetstream.
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=066d5b25e52f489b80608dc55d9f5bb0 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/inventory/hosts.yml --run-id 5dee90c5ad8c44cea3e01cc8d5bdec75 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/playbooks/services/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump  -e platform_trace_id=d2604f7b89714bc083c2067a1dc6becc
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/playbooks/services/nats-jetstream.yml (env=production)
-Running scoped playbook: playbooks/services/nats-jetstream.yml limit=runtime-control-lv3 shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/.ansible/shards/5dee90c5ad8c44cea3e01cc8d5bdec75/nats-jetstream-production.json
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=066d5b25e52f489b80608dc55d9f5bb0 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/inventory/hosts.yml --run-id 5dee90c5ad8c44cea3e01cc8d5bdec75 --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/playbooks/services/nats-jetstream.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump  -e platform_trace_id=d2604f7b89714bc083c2067a1dc6becc
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/playbooks/services/nats-jetstream.yml (env=production)
+Running scoped playbook: playbooks/services/nats-jetstream.yml limit=runtime-control-lv3 shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/.ansible/shards/5dee90c5ad8c44cea3e01cc8d5bdec75/nats-jetstream-production.json
 
 PLAY [Converge NATS JetStream runtime] *****************************************
 
@@ -256,46 +256,46 @@ ok: [runtime-control-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-03T09:20:17.333Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [runtime-control-lv3] => (item=agents.lv3.org)
-ok: [runtime-control-lv3] => (item=analytics.lv3.org)
-ok: [runtime-control-lv3] => (item=api.lv3.org)
-ok: [runtime-control-lv3] => (item=apps.lv3.org)
-ok: [runtime-control-lv3] => (item=bi.lv3.org)
-ok: [runtime-control-lv3] => (item=billing.lv3.org)
-ok: [runtime-control-lv3] => (item=build.lv3.org)
-ok: [runtime-control-lv3] => (item=chat.lv3.org)
-ok: [runtime-control-lv3] => (item=ci.lv3.org)
-ok: [runtime-control-lv3] => (item=cloud.lv3.org)
-ok: [runtime-control-lv3] => (item=coolify.lv3.org)
-ok: [runtime-control-lv3] => (item=data.lv3.org)
-ok: [runtime-control-lv3] => (item=docker.lv3.org)
-ok: [runtime-control-lv3] => (item=draw.lv3.org)
-ok: [runtime-control-lv3] => (item=errors.lv3.org)
-ok: [runtime-control-lv3] => (item=flags.lv3.org)
-ok: [runtime-control-lv3] => (item=grafana.lv3.org)
-ok: [runtime-control-lv3] => (item=grist.lv3.org)
-ok: [runtime-control-lv3] => (item=headscale.lv3.org)
-ok: [runtime-control-lv3] => (item=home.lv3.org)
-ok: [runtime-control-lv3] => (item=langfuse.lv3.org)
-ok: [runtime-control-lv3] => (item=livekit.lv3.org)
-ok: [runtime-control-lv3] => (item=logs.lv3.org)
-ok: [runtime-control-lv3] => (item=mail.lv3.org)
-ok: [runtime-control-lv3] => (item=matrix.lv3.org)
-ok: [runtime-control-lv3] => (item=minio.lv3.org)
-ok: [runtime-control-lv3] => (item=n8n.lv3.org)
-ok: [runtime-control-lv3] => (item=nginx.lv3.org)
-ok: [runtime-control-lv3] => (item=notebooks.lv3.org)
-ok: [runtime-control-lv3] => (item=ntfy.lv3.org)
-ok: [runtime-control-lv3] => (item=ops.lv3.org)
-ok: [runtime-control-lv3] => (item=paperless.lv3.org)
-ok: [runtime-control-lv3] => (item=proxmox.lv3.org)
-ok: [runtime-control-lv3] => (item=realtime.lv3.org)
-ok: [runtime-control-lv3] => (item=registry.lv3.org)
-ok: [runtime-control-lv3] => (item=sso.lv3.org)
-ok: [runtime-control-lv3] => (item=status.lv3.org)
-ok: [runtime-control-lv3] => (item=tasks.lv3.org)
-ok: [runtime-control-lv3] => (item=uptime.lv3.org)
-ok: [runtime-control-lv3] => (item=wiki.lv3.org)
+ok: [runtime-control-lv3] => (item=agents.example.com)
+ok: [runtime-control-lv3] => (item=analytics.example.com)
+ok: [runtime-control-lv3] => (item=api.example.com)
+ok: [runtime-control-lv3] => (item=apps.example.com)
+ok: [runtime-control-lv3] => (item=bi.example.com)
+ok: [runtime-control-lv3] => (item=billing.example.com)
+ok: [runtime-control-lv3] => (item=build.example.com)
+ok: [runtime-control-lv3] => (item=chat.example.com)
+ok: [runtime-control-lv3] => (item=ci.example.com)
+ok: [runtime-control-lv3] => (item=cloud.example.com)
+ok: [runtime-control-lv3] => (item=coolify.example.com)
+ok: [runtime-control-lv3] => (item=data.example.com)
+ok: [runtime-control-lv3] => (item=docker.example.com)
+ok: [runtime-control-lv3] => (item=draw.example.com)
+ok: [runtime-control-lv3] => (item=errors.example.com)
+ok: [runtime-control-lv3] => (item=flags.example.com)
+ok: [runtime-control-lv3] => (item=grafana.example.com)
+ok: [runtime-control-lv3] => (item=grist.example.com)
+ok: [runtime-control-lv3] => (item=headscale.example.com)
+ok: [runtime-control-lv3] => (item=home.example.com)
+ok: [runtime-control-lv3] => (item=langfuse.example.com)
+ok: [runtime-control-lv3] => (item=livekit.example.com)
+ok: [runtime-control-lv3] => (item=logs.example.com)
+ok: [runtime-control-lv3] => (item=mail.example.com)
+ok: [runtime-control-lv3] => (item=matrix.example.com)
+ok: [runtime-control-lv3] => (item=minio.example.com)
+ok: [runtime-control-lv3] => (item=n8n.example.com)
+ok: [runtime-control-lv3] => (item=nginx.example.com)
+ok: [runtime-control-lv3] => (item=notebooks.example.com)
+ok: [runtime-control-lv3] => (item=ntfy.example.com)
+ok: [runtime-control-lv3] => (item=ops.example.com)
+ok: [runtime-control-lv3] => (item=paperless.example.com)
+ok: [runtime-control-lv3] => (item=proxmox.example.com)
+ok: [runtime-control-lv3] => (item=realtime.example.com)
+ok: [runtime-control-lv3] => (item=registry.example.com)
+ok: [runtime-control-lv3] => (item=sso.example.com)
+ok: [runtime-control-lv3] => (item=status.example.com)
+ok: [runtime-control-lv3] => (item=tasks.example.com)
+ok: [runtime-control-lv3] => (item=uptime.example.com)
+ok: [runtime-control-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"runtime-control-lv3","task_status":"ok","trace_id":"background","ts":"2026-04-03T09:20:37.001Z","vm":"runtime-control-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Check whether the current Docker daemon config exists] ***
@@ -973,13 +973,13 @@ skipping: [runtime-control-lv3]
 PLAY RECAP *********************************************************************
 runtime-control-lv3        : ok=133  changed=0    unreachable=0    failed=0    skipped=21   rescued=0    ignored=0
 
-uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by live-apply-service --live-apply-trigger
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by live-apply-service --live-apply-trigger
 {
   "status": "ok",
   "target": "docker-runtime-lv3",
-  "command": "sudo /bin/bash -lc 'set -euo pipefail\nscript_path=/srv/proxmox_florin_server/scripts/restic_config_backup.py\nfallback_script_path=/opt/api-gateway/service/scripts/restic_config_backup.py\ncatalog_path=/srv/proxmox_florin_server/config/restic-file-backup-catalog.json\nfallback_catalog_path=/etc/lv3/restic-config-backup/restic-file-backup-catalog.json\nif [ ! -f \"$script_path\" ] && [ -f \"$fallback_script_path\" ]; then\n  script_path=\"$fallback_script_path\"\nfi\nif [ ! -f \"$script_path\" ]; then\n  echo \"restic_config_backup.py is missing from both $script_path and $fallback_script_path\" >&2\n  exit 2\nfi\nif [ ! -f \"$catalog_path\" ] && [ -f \"$fallback_catalog_path\" ]; then\n  catalog_path=\"$fallback_catalog_path\"\nfi\nif [ ! -f \"$catalog_path\" ]; then\n  echo \"restic-file-backup-catalog.json is missing from both $catalog_path and $fallback_catalog_path\" >&2\n  exit 2\nfi\nexec python3 \"$script_path\" --repo-root /srv/proxmox_florin_server --catalog \"$catalog_path\" --backup-receipts-dir /srv/proxmox_florin_server/receipts/restic-backups --latest-snapshot-receipt /srv/proxmox_florin_server/receipts/restic-snapshots-latest.json --restore-verification-dir /srv/proxmox_florin_server/receipts/restic-restore-verifications --runtime-state-dir /var/lib/lv3/restic-config-backup --cache-dir /var/lib/lv3/restic-config-backup/cache --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by live-apply-service --print-report-json --live-apply-trigger'",
+  "command": "sudo /bin/bash -lc 'set -euo pipefail\nscript_path=/srv/platform_server/scripts/restic_config_backup.py\nfallback_script_path=/opt/api-gateway/service/scripts/restic_config_backup.py\ncatalog_path=/srv/platform_server/config/restic-file-backup-catalog.json\nfallback_catalog_path=/etc/lv3/restic-config-backup/restic-file-backup-catalog.json\nif [ ! -f \"$script_path\" ] && [ -f \"$fallback_script_path\" ]; then\n  script_path=\"$fallback_script_path\"\nfi\nif [ ! -f \"$script_path\" ]; then\n  echo \"restic_config_backup.py is missing from both $script_path and $fallback_script_path\" >&2\n  exit 2\nfi\nif [ ! -f \"$catalog_path\" ] && [ -f \"$fallback_catalog_path\" ]; then\n  catalog_path=\"$fallback_catalog_path\"\nfi\nif [ ! -f \"$catalog_path\" ]; then\n  echo \"restic-file-backup-catalog.json is missing from both $catalog_path and $fallback_catalog_path\" >&2\n  exit 2\nfi\nexec python3 \"$script_path\" --repo-root /srv/platform_server --catalog \"$catalog_path\" --backup-receipts-dir /srv/platform_server/receipts/restic-backups --latest-snapshot-receipt /srv/platform_server/receipts/restic-snapshots-latest.json --restore-verification-dir /srv/platform_server/receipts/restic-restore-verifications --runtime-state-dir /var/lib/lv3/restic-config-backup --cache-dir /var/lib/lv3/restic-config-backup/cache --credential-file /run/lv3-systemd-credentials/restic-config-backup/runtime-config.json --mode backup --triggered-by live-apply-service --print-report-json --live-apply-trigger'",
   "returncode": 0,
-  "stdout": "{\n  \"status\": \"ok\",\n  \"mode\": \"backup\",\n  \"summary\": {\n    \"governed_sources\": 5,\n    \"protected\": 4,\n    \"uncovered\": 0,\n    \"inactive\": 1,\n    \"uncovered_sources\": [],\n    \"inactive_sources\": [\n      \"falco_overrides\"\n    ]\n  },\n  \"receipt_path\": \"receipts/restic-backups/20260403T092200Z.json\",\n  \"latest_snapshot_receipt\": \"receipts/restic-snapshots-latest.json\",\n  \"report\": {\n    \"schema_version\": \"1.0.0\",\n    \"receipt_id\": \"restic-config-backup-20260403T092200Z\",\n    \"recorded_at\": \"2026-04-03T09:22:00Z\",\n    \"recorded_on\": \"2026-04-03\",\n    \"recorded_by\": \"codex\",\n    \"triggered_by\": \"live-apply-service\",\n    \"source_commit\": \"unknown\",\n    \"repository\": {\n      \"bucket\": \"restic-config-backup\",\n      \"endpoint\": \"http://10.200.25.2:9000\",\n      \"repository_url\": \"s3:http://10.200.25.2:9000/restic-config-backup\"\n    },\n    \"summary\": {\n      \"governed_sources\": 5,\n      \"protected\": 4,\n      \"uncovered\": 0,\n      \"inactive\": 1,\n      \"uncovered_sources\": [],\n      \"inactive_sources\": [\n        \"falco_overrides\"\n      ]\n    },\n    \"source_results\": [\n      {\n        \"source_id\": \"config\",\n        \"result\": \"backed_up\",\n        \"host\": \"docker-runtime-lv3\",\n        \"files\": 291,\n        \"paths\": [\n          \"/srv/proxmox_florin_server/config\"\n        ],\n        \"retention\": {\n          \"keep_daily\": 30,\n          \"keep_monthly\": 6\n        },\n        \"restic_stdout\": \"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6635163071770364,\\\"total_files\\\":291,\\\"files_done\\\":132,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":3320292}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":291,\\\"files_done\\\":291,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":5004085}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":291,\\\"files_done\\\":291,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":5004085}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":1,\\\"files_unmodified\\\":290,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":3,\\\"dirs_unmodified\\\":54,\\\"data_blobs\\\":1,\\\"tree_blobs\\\":4,\\\"data_added\\\":39522,\\\"data_added_packed\\\":8711,\\\"total_files_processed\\\":291,\\\"total_bytes_processed\\\":5004085,\\\"total_duration\\\":0.942932521,\\\"backup_start\\\":\\\"2026-04-03T09:22:00.89745825Z\\\",\\\"backup_end\\\":\\\"2026-04-03T09:22:01.840390771Z\\\",\\\"snapshot_id\\\":\\\"4ddf67c0da4ff732c614d918e8d676bd9b228312cbe2e3501963a50960fe2953\\\"}\",\n        \"snapshot_id\": \"4ddf67c0da4ff732c614d918e8d676bd9b228312cbe2e3501963a50960fe2953\"\n      },\n      {\n        \"source_id\": \"versions_stack\",\n        \"result\": \"backed_up\",\n        \"host\": \"docker-runtime-lv3\",\n        \"files\": 1,\n        \"paths\": [\n          \"/srv/proxmox_florin_server/versions/stack.yaml\"\n        ],\n        \"retention\": {\n          \"keep_daily\": 30\n        },\n        \"restic_stdout\": \"{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":0,\\\"files_unmodified\\\":1,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":0,\\\"dirs_unmodified\\\":3,\\\"data_blobs\\\":0,\\\"tree_blobs\\\":0,\\\"data_added\\\":0,\\\"data_added_packed\\\":0,\\\"total_files_processed\\\":1,\\\"total_bytes_processed\\\":49052,\\\"total_duration\\\":0.869156688,\\\"backup_start\\\":\\\"2026-04-03T09:22:03.118090951Z\\\",\\\"backup_end\\\":\\\"2026-04-03T09:22:03.987247639Z\\\",\\\"snapshot_id\\\":\\\"24c2795162655ed7303304e1daecf1dbb2fbdea9b04505dde9e898e8539fba4e\\\"}\",\n        \"snapshot_id\": \"24c2795162655ed7303304e1daecf1dbb2fbdea9b04505dde9e898e8539fba4e\"\n      },\n      {\n        \"source_id\": \"falco_overrides\",\n        \"result\": \"skipped_optional_missing\",\n        \"paths\": [\n          \"/srv/proxmox_florin_server/config/falco\"\n        ],\n        \"reason\": \"optional source path is not present on the runtime host\"\n      }\n    ],\n    \"latest_snapshot_receipt\": \"receipts/restic-snapshots-latest.json\",\n    \"notifications\": []\n  }\n}\nREPORT_JSON={\"status\":\"ok\",\"mode\":\"backup\",\"summary\":{\"governed_sources\":5,\"protected\":4,\"uncovered\":0,\"inactive\":1,\"uncovered_sources\":[],\"inactive_sources\":[\"falco_overrides\"]},\"receipt_path\":\"receipts/restic-backups/20260403T092200Z.json\",\"latest_snapshot_receipt\":\"receipts/restic-snapshots-latest.json\",\"report\":{\"schema_version\":\"1.0.0\",\"receipt_id\":\"restic-config-backup-20260403T092200Z\",\"recorded_at\":\"2026-04-03T09:22:00Z\",\"recorded_on\":\"2026-04-03\",\"recorded_by\":\"codex\",\"triggered_by\":\"live-apply-service\",\"source_commit\":\"unknown\",\"repository\":{\"bucket\":\"restic-config-backup\",\"endpoint\":\"http://10.200.25.2:9000\",\"repository_url\":\"s3:http://10.200.25.2:9000/restic-config-backup\"},\"summary\":{\"governed_sources\":5,\"protected\":4,\"uncovered\":0,\"inactive\":1,\"uncovered_sources\":[],\"inactive_sources\":[\"falco_overrides\"]},\"source_results\":[{\"source_id\":\"config\",\"result\":\"backed_up\",\"host\":\"docker-runtime-lv3\",\"files\":291,\"paths\":[\"/srv/proxmox_florin_server/config\"],\"retention\":{\"keep_daily\":30,\"keep_monthly\":6},\"restic_stdout\":\"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6635163071770364,\\\"total_files\\\":291,\\\"files_done\\\":132,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":3320292}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":291,\\\"files_done\\\":291,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":5004085}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":291,\\\"files_done\\\":291,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":5004085}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":1,\\\"files_unmodified\\\":290,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":3,\\\"dirs_unmodified\\\":54,\\\"data_blobs\\\":1,\\\"tree_blobs\\\":4,\\\"data_added\\\":39522,\\\"data_added_packed\\\":8711,\\\"total_files_processed\\\":291,\\\"total_bytes_processed\\\":5004085,\\\"total_duration\\\":0.942932521,\\\"backup_start\\\":\\\"2026-04-03T09:22:00.89745825Z\\\",\\\"backup_end\\\":\\\"2026-04-03T09:22:01.840390771Z\\\",\\\"snapshot_id\\\":\\\"4ddf67c0da4ff732c614d918e8d676bd9b228312cbe2e3501963a50960fe2953\\\"}\",\"snapshot_id\":\"4ddf67c0da4ff732c614d918e8d676bd9b228312cbe2e3501963a50960fe2953\"},{\"source_id\":\"versions_stack\",\"result\":\"backed_up\",\"host\":\"docker-runtime-lv3\",\"files\":1,\"paths\":[\"/srv/proxmox_florin_server/versions/stack.yaml\"],\"retention\":{\"keep_daily\":30},\"restic_stdout\":\"{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":0,\\\"files_unmodified\\\":1,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":0,\\\"dirs_unmodified\\\":3,\\\"data_blobs\\\":0,\\\"tree_blobs\\\":0,\\\"data_added\\\":0,\\\"data_added_packed\\\":0,\\\"total_files_processed\\\":1,\\\"total_bytes_processed\\\":49052,\\\"total_duration\\\":0.869156688,\\\"backup_start\\\":\\\"2026-04-03T09:22:03.118090951Z\\\",\\\"backup_end\\\":\\\"2026-04-03T09:22:03.987247639Z\\\",\\\"snapshot_id\\\":\\\"24c2795162655ed7303304e1daecf1dbb2fbdea9b04505dde9e898e8539fba4e\\\"}\",\"snapshot_id\":\"24c2795162655ed7303304e1daecf1dbb2fbdea9b04505dde9e898e8539fba4e\"},{\"source_id\":\"falco_overrides\",\"result\":\"skipped_optional_missing\",\"paths\":[\"/srv/proxmox_florin_server/config/falco\"],\"reason\":\"optional source path is not present on the runtime host\"}],\"latest_snapshot_receipt\":\"receipts/restic-snapshots-latest.json\",\"notifications\":[]}}",
+  "stdout": "{\n  \"status\": \"ok\",\n  \"mode\": \"backup\",\n  \"summary\": {\n    \"governed_sources\": 5,\n    \"protected\": 4,\n    \"uncovered\": 0,\n    \"inactive\": 1,\n    \"uncovered_sources\": [],\n    \"inactive_sources\": [\n      \"falco_overrides\"\n    ]\n  },\n  \"receipt_path\": \"receipts/restic-backups/20260403T092200Z.json\",\n  \"latest_snapshot_receipt\": \"receipts/restic-snapshots-latest.json\",\n  \"report\": {\n    \"schema_version\": \"1.0.0\",\n    \"receipt_id\": \"restic-config-backup-20260403T092200Z\",\n    \"recorded_at\": \"2026-04-03T09:22:00Z\",\n    \"recorded_on\": \"2026-04-03\",\n    \"recorded_by\": \"codex\",\n    \"triggered_by\": \"live-apply-service\",\n    \"source_commit\": \"unknown\",\n    \"repository\": {\n      \"bucket\": \"restic-config-backup\",\n      \"endpoint\": \"http://10.200.25.2:9000\",\n      \"repository_url\": \"s3:http://10.200.25.2:9000/restic-config-backup\"\n    },\n    \"summary\": {\n      \"governed_sources\": 5,\n      \"protected\": 4,\n      \"uncovered\": 0,\n      \"inactive\": 1,\n      \"uncovered_sources\": [],\n      \"inactive_sources\": [\n        \"falco_overrides\"\n      ]\n    },\n    \"source_results\": [\n      {\n        \"source_id\": \"config\",\n        \"result\": \"backed_up\",\n        \"host\": \"docker-runtime-lv3\",\n        \"files\": 291,\n        \"paths\": [\n          \"/srv/platform_server/config\"\n        ],\n        \"retention\": {\n          \"keep_daily\": 30,\n          \"keep_monthly\": 6\n        },\n        \"restic_stdout\": \"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6635163071770364,\\\"total_files\\\":291,\\\"files_done\\\":132,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":3320292}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":291,\\\"files_done\\\":291,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":5004085}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":291,\\\"files_done\\\":291,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":5004085}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":1,\\\"files_unmodified\\\":290,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":3,\\\"dirs_unmodified\\\":54,\\\"data_blobs\\\":1,\\\"tree_blobs\\\":4,\\\"data_added\\\":39522,\\\"data_added_packed\\\":8711,\\\"total_files_processed\\\":291,\\\"total_bytes_processed\\\":5004085,\\\"total_duration\\\":0.942932521,\\\"backup_start\\\":\\\"2026-04-03T09:22:00.89745825Z\\\",\\\"backup_end\\\":\\\"2026-04-03T09:22:01.840390771Z\\\",\\\"snapshot_id\\\":\\\"4ddf67c0da4ff732c614d918e8d676bd9b228312cbe2e3501963a50960fe2953\\\"}\",\n        \"snapshot_id\": \"4ddf67c0da4ff732c614d918e8d676bd9b228312cbe2e3501963a50960fe2953\"\n      },\n      {\n        \"source_id\": \"versions_stack\",\n        \"result\": \"backed_up\",\n        \"host\": \"docker-runtime-lv3\",\n        \"files\": 1,\n        \"paths\": [\n          \"/srv/platform_server/versions/stack.yaml\"\n        ],\n        \"retention\": {\n          \"keep_daily\": 30\n        },\n        \"restic_stdout\": \"{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":0,\\\"files_unmodified\\\":1,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":0,\\\"dirs_unmodified\\\":3,\\\"data_blobs\\\":0,\\\"tree_blobs\\\":0,\\\"data_added\\\":0,\\\"data_added_packed\\\":0,\\\"total_files_processed\\\":1,\\\"total_bytes_processed\\\":49052,\\\"total_duration\\\":0.869156688,\\\"backup_start\\\":\\\"2026-04-03T09:22:03.118090951Z\\\",\\\"backup_end\\\":\\\"2026-04-03T09:22:03.987247639Z\\\",\\\"snapshot_id\\\":\\\"24c2795162655ed7303304e1daecf1dbb2fbdea9b04505dde9e898e8539fba4e\\\"}\",\n        \"snapshot_id\": \"24c2795162655ed7303304e1daecf1dbb2fbdea9b04505dde9e898e8539fba4e\"\n      },\n      {\n        \"source_id\": \"falco_overrides\",\n        \"result\": \"skipped_optional_missing\",\n        \"paths\": [\n          \"/srv/platform_server/config/falco\"\n        ],\n        \"reason\": \"optional source path is not present on the runtime host\"\n      }\n    ],\n    \"latest_snapshot_receipt\": \"receipts/restic-snapshots-latest.json\",\n    \"notifications\": []\n  }\n}\nREPORT_JSON={\"status\":\"ok\",\"mode\":\"backup\",\"summary\":{\"governed_sources\":5,\"protected\":4,\"uncovered\":0,\"inactive\":1,\"uncovered_sources\":[],\"inactive_sources\":[\"falco_overrides\"]},\"receipt_path\":\"receipts/restic-backups/20260403T092200Z.json\",\"latest_snapshot_receipt\":\"receipts/restic-snapshots-latest.json\",\"report\":{\"schema_version\":\"1.0.0\",\"receipt_id\":\"restic-config-backup-20260403T092200Z\",\"recorded_at\":\"2026-04-03T09:22:00Z\",\"recorded_on\":\"2026-04-03\",\"recorded_by\":\"codex\",\"triggered_by\":\"live-apply-service\",\"source_commit\":\"unknown\",\"repository\":{\"bucket\":\"restic-config-backup\",\"endpoint\":\"http://10.200.25.2:9000\",\"repository_url\":\"s3:http://10.200.25.2:9000/restic-config-backup\"},\"summary\":{\"governed_sources\":5,\"protected\":4,\"uncovered\":0,\"inactive\":1,\"uncovered_sources\":[],\"inactive_sources\":[\"falco_overrides\"]},\"source_results\":[{\"source_id\":\"config\",\"result\":\"backed_up\",\"host\":\"docker-runtime-lv3\",\"files\":291,\"paths\":[\"/srv/platform_server/config\"],\"retention\":{\"keep_daily\":30,\"keep_monthly\":6},\"restic_stdout\":\"{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":0.6635163071770364,\\\"total_files\\\":291,\\\"files_done\\\":132,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":3320292}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":291,\\\"files_done\\\":291,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":5004085}\\n{\\\"message_type\\\":\\\"status\\\",\\\"percent_done\\\":1,\\\"total_files\\\":291,\\\"files_done\\\":291,\\\"total_bytes\\\":5004085,\\\"bytes_done\\\":5004085}\\n{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":1,\\\"files_unmodified\\\":290,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":3,\\\"dirs_unmodified\\\":54,\\\"data_blobs\\\":1,\\\"tree_blobs\\\":4,\\\"data_added\\\":39522,\\\"data_added_packed\\\":8711,\\\"total_files_processed\\\":291,\\\"total_bytes_processed\\\":5004085,\\\"total_duration\\\":0.942932521,\\\"backup_start\\\":\\\"2026-04-03T09:22:00.89745825Z\\\",\\\"backup_end\\\":\\\"2026-04-03T09:22:01.840390771Z\\\",\\\"snapshot_id\\\":\\\"4ddf67c0da4ff732c614d918e8d676bd9b228312cbe2e3501963a50960fe2953\\\"}\",\"snapshot_id\":\"4ddf67c0da4ff732c614d918e8d676bd9b228312cbe2e3501963a50960fe2953\"},{\"source_id\":\"versions_stack\",\"result\":\"backed_up\",\"host\":\"docker-runtime-lv3\",\"files\":1,\"paths\":[\"/srv/platform_server/versions/stack.yaml\"],\"retention\":{\"keep_daily\":30},\"restic_stdout\":\"{\\\"message_type\\\":\\\"summary\\\",\\\"files_new\\\":0,\\\"files_changed\\\":0,\\\"files_unmodified\\\":1,\\\"dirs_new\\\":0,\\\"dirs_changed\\\":0,\\\"dirs_unmodified\\\":3,\\\"data_blobs\\\":0,\\\"tree_blobs\\\":0,\\\"data_added\\\":0,\\\"data_added_packed\\\":0,\\\"total_files_processed\\\":1,\\\"total_bytes_processed\\\":49052,\\\"total_duration\\\":0.869156688,\\\"backup_start\\\":\\\"2026-04-03T09:22:03.118090951Z\\\",\\\"backup_end\\\":\\\"2026-04-03T09:22:03.987247639Z\\\",\\\"snapshot_id\\\":\\\"24c2795162655ed7303304e1daecf1dbb2fbdea9b04505dde9e898e8539fba4e\\\"}\",\"snapshot_id\":\"24c2795162655ed7303304e1daecf1dbb2fbdea9b04505dde9e898e8539fba4e\"},{\"source_id\":\"falco_overrides\",\"result\":\"skipped_optional_missing\",\"paths\":[\"/srv/platform_server/config/falco\"],\"reason\":\"optional source path is not present on the runtime host\"}],\"latest_snapshot_receipt\":\"receipts/restic-snapshots-latest.json\",\"notifications\":[]}}",
   "stderr": "",
   "synced_local_paths": [
     "receipts/restic-backups/20260403T092200Z.json",
@@ -1030,7 +1030,7 @@ uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin
           "host": "docker-runtime-lv3",
           "files": 291,
           "paths": [
-            "/srv/proxmox_florin_server/config"
+            "/srv/platform_server/config"
           ],
           "retention": {
             "keep_daily": 30,
@@ -1045,7 +1045,7 @@ uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin
           "host": "docker-runtime-lv3",
           "files": 1,
           "paths": [
-            "/srv/proxmox_florin_server/versions/stack.yaml"
+            "/srv/platform_server/versions/stack.yaml"
           ],
           "retention": {
             "keep_daily": 30
@@ -1057,7 +1057,7 @@ uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin
           "source_id": "falco_overrides",
           "result": "skipped_optional_missing",
           "paths": [
-            "/srv/proxmox_florin_server/config/falco"
+            "/srv/platform_server/config/falco"
           ],
           "reason": "optional source path is not present on the runtime host"
         }

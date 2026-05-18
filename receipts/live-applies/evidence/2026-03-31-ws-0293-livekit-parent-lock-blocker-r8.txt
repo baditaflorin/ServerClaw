@@ -39,5 +39,5 @@ ws_0277_state:
 
 shared_host_window:
 - monitoring detected concurrent ansible-playbook runs for monitoring-stack, vaultwarden, windmill, openbao, and lago
-- affected shared surfaces included proxmox_florin, docker-runtime-lv3, nginx-lv3, and postgres-lv3
+- affected shared surfaces included proxmox-host, docker-runtime-lv3, nginx-lv3, and postgres-lv3
 - next safe step remains: wait for both vm:120 parent lock acquisition and a quiet shared-host replay window, then rerun full LiveKit branch replay

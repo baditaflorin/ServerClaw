@@ -3,29 +3,29 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
-PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
-INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/.local/packer-plugin-cache
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519.pub
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/.local/packer-plugin-cache
 Bootstrap manifest: live-apply-generated-artifacts
 Bootstrap description: Generated repo surfaces and ignored controller-local scaffolding required by fresh-worktree live-apply wrappers.
-PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/receipts/image-scans
-PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/receipts/gate-bypasses/.gitkeep
-PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/receipts/drift-reports
-PASS bootstrap artifact security_reports: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/receipts/security-reports
-PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/inventory/group_vars/platform.yml
-PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/config/uptime-kuma/monitors.json
-PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/config/prometheus/file_sd/https_tls_targets.yml
-PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/config/prometheus/rules/https_tls_alerts.yml
+PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/receipts/image-scans
+PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/receipts/gate-bypasses/.gitkeep
+PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/receipts/drift-reports
+PASS bootstrap artifact security_reports: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/receipts/security-reports
+PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/inventory/group_vars/platform.yml
+PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/config/uptime-kuma/monitors.json
+PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/config/prometheus/file_sd/https_tls_targets.yml
+PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/config/prometheus/rules/https_tls_alerts.yml
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/build/docs-portal
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/build/ops-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/build/changelog-portal
 Result: PASS (live-apply-service)
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/scripts/interface_contracts.py --check-live-apply "service:livekit"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/scripts/interface_contracts.py --check-live-apply "service:livekit"
 Live apply contract OK: service:livekit -> playbooks/services/livekit.yml
 Vulnerability budget gate for livekit: approved
 Service: livekit
@@ -36,8 +36,8 @@ livekit: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_o
   rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.
 override: livekit remains governed by immutable guest replacement on docker-runtime (preview_guest, rollback 180m); ALLOW_IN_PLACE_MUTATION=true was supplied for this run.
 INFO live-apply-service: loading playbook descriptor playbooks/vars/livekit.yml
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/playbooks/services/livekit.yml (env=production)
-Running scoped playbook: playbooks/services/livekit.yml limit=localhost,proxmox-host,runtime-comms,nginx shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/.ansible/shards/67c36f28b6d240249ac2aba1527f8cd9/livekit-production.json
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/playbooks/services/livekit.yml (env=production)
+Running scoped playbook: playbooks/services/livekit.yml limit=localhost,proxmox-host,runtime-comms,nginx shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/.ansible/shards/67c36f28b6d240249ac2aba1527f8cd9/livekit-production.json
 
 PLAY [Ensure Hetzner DNS publication for service subdomain] ********************
 
@@ -71,23 +71,23 @@ TASK [Resolve the generic catalog FQDN for the requested service hostname] *****
 ok: [localhost]
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Resolve the generic catalog FQDN for the requested service hostname","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:16:44.188Z","vm":"localhost","workflow_id":"ansible-playbook"}
 
-TASK [Select subdomain entry livekit.lv3.org] **********************************
-{"component":"ansible.task","level":"INFO","msg":"Task start: Select subdomain entry livekit.lv3.org","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:16:44.190Z","vm":"controller","workflow_id":"ansible-playbook"}
+TASK [Select subdomain entry livekit.example.com] **********************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Select subdomain entry livekit.example.com","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:16:44.190Z","vm":"controller","workflow_id":"ansible-playbook"}
 ok: [localhost]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Select subdomain entry livekit.lv3.org","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:16:44.215Z","vm":"localhost","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Select subdomain entry livekit.example.com","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:16:44.215Z","vm":"localhost","workflow_id":"ansible-playbook"}
 
 TASK [Derive the runtime subdomain FQDN from the generic catalog entry] ********
 {"component":"ansible.task","level":"INFO","msg":"Task start: Derive the runtime subdomain FQDN from the generic catalog entry","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:16:44.216Z","vm":"controller","workflow_id":"ansible-playbook"}
 ok: [localhost]
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Derive the runtime subdomain FQDN from the generic catalog entry","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:16:44.236Z","vm":"localhost","workflow_id":"ansible-playbook"}
 
-TASK [Assert subdomain is catalogued livekit.lv3.org] **************************
-{"component":"ansible.task","level":"INFO","msg":"Task start: Assert subdomain is catalogued livekit.lv3.org","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:16:44.239Z","vm":"controller","workflow_id":"ansible-playbook"}
+TASK [Assert subdomain is catalogued livekit.example.com] **************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Assert subdomain is catalogued livekit.example.com","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:16:44.239Z","vm":"controller","workflow_id":"ansible-playbook"}
 ok: [localhost] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert subdomain is catalogued livekit.lv3.org","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:16:44.259Z","vm":"localhost","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Assert subdomain is catalogued livekit.example.com","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:16:44.259Z","vm":"localhost","workflow_id":"ansible-playbook"}
 
 TASK [Derive the managed Hetzner record name] **********************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Derive the managed Hetzner record name","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:16:44.260Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -99,9 +99,9 @@ TASK [Resolve DNS target (substitute placeholder with real management IP from .l
 ok: [localhost]
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Resolve DNS target (substitute placeholder with real management IP from .local/)","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:16:44.301Z","vm":"localhost","workflow_id":"ansible-playbook"}
 
-TASK [Converge Hetzner DNS record livekit.lv3.org] *****************************
-{"component":"ansible.task","level":"INFO","msg":"Task start: Converge Hetzner DNS record livekit.lv3.org","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:16:44.303Z","vm":"controller","workflow_id":"ansible-playbook"}
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Converge Hetzner DNS record livekit.lv3.org","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:16:44.321Z","vm":"localhost","workflow_id":"ansible-playbook"}
+TASK [Converge Hetzner DNS record livekit.example.com] *****************************
+{"component":"ansible.task","level":"INFO","msg":"Task start: Converge Hetzner DNS record livekit.example.com","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:16:44.303Z","vm":"controller","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Converge Hetzner DNS record livekit.example.com","service_id":"ansible","target":"localhost","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:16:44.321Z","vm":"localhost","workflow_id":"ansible-playbook"}
 included: lv3.platform.hetzner_dns_record for localhost
 
 TASK [lv3.platform.hetzner_dns_record : Validating arguments against arg spec 'main' - Hetzner DNS record role inputs.] ***
@@ -1346,7 +1346,7 @@ changed: [runtime-comms]
 TASK [lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:18:58.027Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation","service_id":"ansible","target":"runtime-comms","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:18:58.038Z","vm":"runtime-comms","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/reset_connection.yml for runtime-comms
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/reset_connection.yml for runtime-comms
 
 TASK [lv3.platform.linux_guest_firewall : Reset the SSH connection after linux_guest_firewall updates] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reset the SSH connection after linux_guest_firewall updates","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:18:58.046Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1414,7 +1414,7 @@ ok: [runtime-comms]
 TASK [lv3.platform.common : Reset SSH connection before Docker bridge-chain recovery checks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Reset SSH connection before Docker bridge-chain recovery checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:19:03.821Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Reset SSH connection before Docker bridge-chain recovery checks","service_id":"ansible","target":"runtime-comms","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:19:03.834Z","vm":"runtime-comms","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains_reset_connection.yml for runtime-comms
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains_reset_connection.yml for runtime-comms
 
 TASK [lv3.platform.common : Reset the SSH connection before Docker bridge-chain recovery probes] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Reset the SSH connection before Docker bridge-chain recovery probes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:19:03.846Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1814,7 +1814,7 @@ ok: [runtime-comms]
 TASK [lv3.platform.common : Ensure the configured OpenBao API is unsealed before runtime secret injection] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the configured OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:21:04.289Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the configured OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"runtime-comms","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:21:04.299Z","vm":"runtime-comms","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for runtime-comms
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for runtime-comms
 
 TASK [lv3.platform.common : Read OpenBao seal status before runtime secret injection for livekit] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read OpenBao seal status before runtime secret injection for livekit","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:21:04.318Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1829,9 +1829,9 @@ ok: [runtime-comms]
 TASK [lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for livekit] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for livekit","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:21:05.485Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for livekit","service_id":"ansible","target":"runtime-comms","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:21:05.497Z","vm":"runtime-comms","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-comms => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-comms => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-comms => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-comms => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-comms => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0370-exact-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-comms => (item=(censored due to no_log))
 
 TASK [lv3.platform.common : Submit OpenBao recovery key runtime secret injection for livekit #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery key runtime secret injection for livekit #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:21:05.514Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2441,11 +2441,11 @@ skipping: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:22:03.390Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx] => (item={'slug': 'nginx', 'hostname': 'nginx.lv3.org', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published lv3.org services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
-ok: [nginx] => (item={'slug': 'proxmox', 'hostname': 'proxmox.lv3.org', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
-ok: [nginx] => (item={'slug': 'docker', 'hostname': 'docker.lv3.org', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
-ok: [nginx] => (item={'slug': 'build', 'hostname': 'build.lv3.org', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
-ok: [nginx] => (item={'slug': 'mail', 'hostname': 'mail.lv3.org', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
+ok: [nginx] => (item={'slug': 'nginx', 'hostname': 'nginx.example.com', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published example.com services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
+ok: [nginx] => (item={'slug': 'proxmox', 'hostname': 'proxmox.example.com', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
+ok: [nginx] => (item={'slug': 'docker', 'hostname': 'docker.example.com', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
+ok: [nginx] => (item={'slug': 'build', 'hostname': 'build.example.com', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
+ok: [nginx] => (item={'slug': 'mail', 'hostname': 'mail.example.com', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"nginx","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:22:10.865Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt] ***
@@ -2455,8 +2455,8 @@ ok: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Publish generated static site directories] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:22:12.374Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx -> localhost] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-ok: [nginx -> localhost] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+ok: [nginx -> localhost] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+ok: [nginx -> localhost] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"nginx","task_status":"ok","trace_id":"background","ts":"2026-04-14T10:22:17.541Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists] ***
@@ -2481,51 +2481,51 @@ ok: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T10:22:18.765Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [nginx] => (item={'hostname': 'minio-console.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:9011', 'client_max_body_size': 0, 'chunked_transfer_encoding': True, 'proxy_request_buffering': False, 'proxy_read_timeout_seconds': 900, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False, 'preserve_upstream_security_headers': True})
-skipping: [nginx] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-skipping: [nginx] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
-skipping: [nginx] => (item={'hostname': 'nginx.lv3.org', 'kind': 'static', 'slug': 'nginx'})
-skipping: [nginx] => (item={'hostname': 'grafana.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:3000', 'blocked_exact_paths': [{'path': '/api/health', 'status': 404}], 'proxy_hide_headers': ['X-Grafana-Version', 'Via']})
-skipping: [nginx] => (item={'hostname': 'headscale.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.1:8080'})
-skipping: [nginx] => (item={'hostname': 'proxmox.lv3.org', 'kind': 'static', 'slug': 'proxmox'})
-skipping: [nginx] => (item={'hostname': 'docker.lv3.org', 'kind': 'static', 'slug': 'docker'})
-skipping: [nginx] => (item={'hostname': 'build.lv3.org', 'kind': 'static', 'slug': 'build'})
-skipping: [nginx] => (item={'hostname': 'uptime.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001'})
-skipping: [nginx] => (item={'hostname': 'status.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001', 'root_proxy_path': '/status/lv3-platform'})
-skipping: [nginx] => (item={'hostname': 'mail.lv3.org', 'kind': 'static', 'slug': 'mail'})
-skipping: [nginx] => (item={'hostname': 'livekit.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.21:7880', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
-skipping: [nginx] => (item={'hostname': 'scheduler.lv3.org', 'kind': 'proxy', 'upstream': 'https://10.10.10.40:4646', 'upstream_ssl_verify': False})
-skipping: [nginx] => (item={'hostname': 'matrix.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8008'})
-skipping: [nginx] => (item={'hostname': 'langfuse.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3002'})
-skipping: [nginx] => (item={'hostname': 'flags.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8017'})
-skipping: [nginx] => (item={'hostname': 'analytics.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8016', 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'minio.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:9010', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'crawl_policy_enabled': False, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'errors.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3005'})
-skipping: [nginx] => (item={'hostname': 'billing.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8100', 'prefix_proxy_routes': [{'path': '/api/', 'upstream': 'http://10.10.10.20:8099'}]})
-skipping: [nginx] => (item={'hostname': 'agents.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8094'})
-skipping: [nginx] => (item={'hostname': 'tasks.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8093'})
-skipping: [nginx] => (item={'hostname': 'ci.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8102'})
-skipping: [nginx] => (item={'hostname': 'wiki.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3006'})
-skipping: [nginx] => (item={'hostname': 'grist.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8484'})
-skipping: [nginx] => (item={'hostname': 'paperless.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8018', 'client_max_body_size': '256m', 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'logs.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8089', 'server_sent_events': True})
-skipping: [nginx] => (item={'hostname': 'draw.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3095', 'prefix_proxy_routes': [{'path': '/socket.io/', 'upstream': 'http://10.10.10.20:3096'}]})
-skipping: [nginx] => (item={'hostname': 'chat.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8096'})
-skipping: [nginx] => (item={'hostname': 'n8n.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:5678'})
-skipping: [nginx] => (item={'hostname': 'cloud.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8084', 'client_max_body_size': '16g', 'exact_redirects': [{'path': '/.well-known/carddav', 'location': '/remote.php/dav/', 'status': 301}, {'path': '/.well-known/caldav', 'location': '/remote.php/dav/', 'status': 301}], 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'coolify.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8000'})
-skipping: [nginx] => (item={'hostname': 'apps.lv3.org', 'kind': 'proxy', 'upstream': 'https://10.10.10.71:443', 'aliases': ['*.apps.lv3.org'], 'crawl_policy_enabled': False, 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'api.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8083'})
-skipping: [nginx] => (item={'hostname': 'sso.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8091'})
-skipping: [nginx] => (item={'hostname': 'registry.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8095', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
-skipping: [nginx] => (item={'hostname': 'ops.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8092'})
-skipping: [nginx] => (item={'hostname': 'repo-intake.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8101'})
-skipping: [nginx] => (item={'hostname': 'home.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3090'})
-skipping: [nginx] => (item={'hostname': 'ntfy.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:2586', 'chunked_transfer_encoding': True, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
-skipping: [nginx] => (item={'hostname': 'data.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8055'})
-skipping: [nginx] => (item={'hostname': 'annotate.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8110'})
-skipping: [nginx] => (item={'hostname': 'bi.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8105'})
-skipping: [nginx] => (item={'hostname': 'repowise.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:7070'})
+skipping: [nginx] => (item={'hostname': 'minio-console.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:9011', 'client_max_body_size': 0, 'chunked_transfer_encoding': True, 'proxy_request_buffering': False, 'proxy_read_timeout_seconds': 900, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False, 'preserve_upstream_security_headers': True})
+skipping: [nginx] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+skipping: [nginx] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+skipping: [nginx] => (item={'hostname': 'nginx.example.com', 'kind': 'static', 'slug': 'nginx'})
+skipping: [nginx] => (item={'hostname': 'grafana.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:3000', 'blocked_exact_paths': [{'path': '/api/health', 'status': 404}], 'proxy_hide_headers': ['X-Grafana-Version', 'Via']})
+skipping: [nginx] => (item={'hostname': 'headscale.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.1:8080'})
+skipping: [nginx] => (item={'hostname': 'proxmox.example.com', 'kind': 'static', 'slug': 'proxmox'})
+skipping: [nginx] => (item={'hostname': 'docker.example.com', 'kind': 'static', 'slug': 'docker'})
+skipping: [nginx] => (item={'hostname': 'build.example.com', 'kind': 'static', 'slug': 'build'})
+skipping: [nginx] => (item={'hostname': 'uptime.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001'})
+skipping: [nginx] => (item={'hostname': 'status.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001', 'root_proxy_path': '/status/lv3-platform'})
+skipping: [nginx] => (item={'hostname': 'mail.example.com', 'kind': 'static', 'slug': 'mail'})
+skipping: [nginx] => (item={'hostname': 'livekit.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.21:7880', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
+skipping: [nginx] => (item={'hostname': 'scheduler.example.com', 'kind': 'proxy', 'upstream': 'https://10.10.10.40:4646', 'upstream_ssl_verify': False})
+skipping: [nginx] => (item={'hostname': 'matrix.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8008'})
+skipping: [nginx] => (item={'hostname': 'langfuse.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3002'})
+skipping: [nginx] => (item={'hostname': 'flags.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8017'})
+skipping: [nginx] => (item={'hostname': 'analytics.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8016', 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'minio.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:9010', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'crawl_policy_enabled': False, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'errors.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3005'})
+skipping: [nginx] => (item={'hostname': 'billing.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8100', 'prefix_proxy_routes': [{'path': '/api/', 'upstream': 'http://10.10.10.20:8099'}]})
+skipping: [nginx] => (item={'hostname': 'agents.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8094'})
+skipping: [nginx] => (item={'hostname': 'tasks.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8093'})
+skipping: [nginx] => (item={'hostname': 'ci.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8102'})
+skipping: [nginx] => (item={'hostname': 'wiki.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3006'})
+skipping: [nginx] => (item={'hostname': 'grist.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8484'})
+skipping: [nginx] => (item={'hostname': 'paperless.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8018', 'client_max_body_size': '256m', 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'logs.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8089', 'server_sent_events': True})
+skipping: [nginx] => (item={'hostname': 'draw.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3095', 'prefix_proxy_routes': [{'path': '/socket.io/', 'upstream': 'http://10.10.10.20:3096'}]})
+skipping: [nginx] => (item={'hostname': 'chat.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8096'})
+skipping: [nginx] => (item={'hostname': 'n8n.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:5678'})
+skipping: [nginx] => (item={'hostname': 'cloud.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8084', 'client_max_body_size': '16g', 'exact_redirects': [{'path': '/.well-known/carddav', 'location': '/remote.php/dav/', 'status': 301}, {'path': '/.well-known/caldav', 'location': '/remote.php/dav/', 'status': 301}], 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'coolify.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8000'})
+skipping: [nginx] => (item={'hostname': 'apps.example.com', 'kind': 'proxy', 'upstream': 'https://10.10.10.71:443', 'aliases': ['*.apps.example.com'], 'crawl_policy_enabled': False, 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'api.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8083'})
+skipping: [nginx] => (item={'hostname': 'sso.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8091'})
+skipping: [nginx] => (item={'hostname': 'registry.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8095', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
+skipping: [nginx] => (item={'hostname': 'ops.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8092'})
+skipping: [nginx] => (item={'hostname': 'repo-intake.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8101'})
+skipping: [nginx] => (item={'hostname': 'home.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3090'})
+skipping: [nginx] => (item={'hostname': 'ntfy.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:2586', 'chunked_transfer_encoding': True, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
+skipping: [nginx] => (item={'hostname': 'data.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8055'})
+skipping: [nginx] => (item={'hostname': 'annotate.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8110'})
+skipping: [nginx] => (item={'hostname': 'bi.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8105'})
+skipping: [nginx] => (item={'hostname': 'repowise.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:7070'})
 skipping: [nginx]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx","task_status":"skipped","trace_id":"background","ts":"2026-04-14T10:22:18.944Z","vm":"nginx","workflow_id":"ansible-playbook"}
 

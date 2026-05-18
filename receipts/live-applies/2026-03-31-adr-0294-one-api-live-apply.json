@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -56,7 +56,7 @@
     {
       "kind": "service_endpoint",
       "name": "ServerClaw public edge",
-      "address": "https://chat.lv3.org"
+      "address": "https://chat.example.com"
     }
   ],
   "verification": [
@@ -68,7 +68,7 @@
     {
       "check": "Branch-local One-API live converge",
       "result": "pass",
-      "observed": "`make converge-one-api` completed successfully with final recap `docker-runtime-lv3 : ok=192 changed=2 failed=0`, `localhost : ok=3 failed=0`, `postgres-lv3 : ok=58 changed=5 failed=0`, and `proxmox_florin : ok=41 changed=4 failed=0` after the playbook converged `ollama_runtime` before `one_api_runtime`."
+      "observed": "`make converge-one-api` completed successfully with final recap `docker-runtime-lv3 : ok=192 changed=2 failed=0`, `localhost : ok=3 failed=0`, `postgres-lv3 : ok=58 changed=5 failed=0`, and `proxmox-host : ok=41 changed=4 failed=0` after the playbook converged `ollama_runtime` before `one_api_runtime`."
     },
     {
       "check": "Controller-side bootstrap verification and provider contract generation",
@@ -83,12 +83,12 @@
     {
       "check": "Open WebUI downstream replay",
       "result": "pass",
-      "observed": "`make converge-open-webui` completed successfully with final recap `docker-runtime-lv3 : ok=125 changed=6 failed=0` and `proxmox_florin : ok=41 changed=4 failed=0`, including the admin sign-in verification path."
+      "observed": "`make converge-open-webui` completed successfully with final recap `docker-runtime-lv3 : ok=125 changed=6 failed=0` and `proxmox-host : ok=41 changed=4 failed=0`, including the admin sign-in verification path."
     },
     {
       "check": "ServerClaw downstream replay",
       "result": "pass",
-      "observed": "`make converge-serverclaw` completed successfully with final recap `coolify-lv3 : ok=79 changed=5 failed=0`, `docker-runtime-lv3 : ok=81 changed=2 failed=0`, `nginx-lv3 : ok=45 changed=4 failed=0`, and `proxmox_florin : ok=272 changed=3 failed=0`."
+      "observed": "`make converge-serverclaw` completed successfully with final recap `coolify-lv3 : ok=79 changed=5 failed=0`, `docker-runtime-lv3 : ok=81 changed=2 failed=0`, `nginx-lv3 : ok=45 changed=4 failed=0`, and `proxmox-host : ok=272 changed=3 failed=0`."
     }
   ],
   "evidence_refs": [

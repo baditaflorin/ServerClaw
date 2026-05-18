@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -26,13 +26,13 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "ops.lv3.org health",
-      "address": "https://ops.lv3.org/health"
+      "name": "ops.example.com health",
+      "address": "https://ops.example.com/health"
     },
     {
       "kind": "service_endpoint",
-      "name": "ops.lv3.org root",
-      "address": "https://ops.lv3.org/"
+      "name": "ops.example.com root",
+      "address": "https://ops.example.com/"
     }
   ],
   "verification": [
@@ -64,12 +64,12 @@
     {
       "check": "Public edge verification",
       "result": "pass",
-      "observed": "`curl -fsS https://ops.lv3.org/health` returned `{\"status\":\"ok\"}`, and `curl -sSI https://ops.lv3.org/` returned `HTTP/2 302` redirecting to `https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/` with the expected security headers."
+      "observed": "`curl -fsS https://ops.example.com/health` returned `{\"status\":\"ok\"}`, and `curl -sSI https://ops.example.com/` returned `HTTP/2 302` redirecting to `https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/` with the expected security headers."
     },
     {
       "check": "Capability-contract panel evidence",
       "result": "pass",
-      "observed": "The earlier same-day merged-main replay captured the deployed overview snippet showing `Capability Contracts`, `Identity Provider`, `Keycloak`, and the `ops.lv3.org · operator · shared-edge · platform-sso` publication line. That snippet is preserved under `receipts/live-applies/evidence/2026-03-28-adr-0205-overview-snippets.txt`; the final receipt write re-verified the public health and auth boundary even though the guest-local SSH jump path did not return from this environment."
+      "observed": "The earlier same-day merged-main replay captured the deployed overview snippet showing `Capability Contracts`, `Identity Provider`, `Keycloak`, and the `ops.example.com · operator · shared-edge · platform-sso` publication line. That snippet is preserved under `receipts/live-applies/evidence/2026-03-28-adr-0205-overview-snippets.txt`; the final receipt write re-verified the public health and auth boundary even though the guest-local SSH jump path did not return from this environment."
     }
   ],
   "evidence_refs": [

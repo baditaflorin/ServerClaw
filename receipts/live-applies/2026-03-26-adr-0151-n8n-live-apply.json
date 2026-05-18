@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -37,7 +37,7 @@
     {
       "kind": "service_endpoint",
       "name": "n8n-public-health",
-      "address": "https://n8n.lv3.org/healthz"
+      "address": "https://n8n.example.com/healthz"
     }
   ],
   "verification": [
@@ -49,7 +49,7 @@
     {
       "check": "Latest-main runtime and edge revalidation",
       "result": "pass",
-      "observed": "After rebasing onto the latest `origin/main`, `ansible-playbook -i inventory/hosts.yml playbooks/n8n.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit 'postgres-lv3,docker-runtime-lv3,nginx-lv3'` completed successfully with `docker-runtime-lv3 : ok=119 changed=2 failed=0`, `nginx-lv3 : ok=41 changed=4 failed=0`, and `postgres-lv3 : ok=41 changed=0 failed=0`, while intentionally skipping the already-live localhost DNS play because this shell did not export `HETZNER_DNS_API_TOKEN`."
+      "observed": "After rebasing onto the latest `origin/main`, `ansible-playbook -i inventory/hosts.yml playbooks/n8n.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit 'postgres-lv3,docker-runtime-lv3,nginx-lv3'` completed successfully with `docker-runtime-lv3 : ok=119 changed=2 failed=0`, `nginx-lv3 : ok=41 changed=4 failed=0`, and `postgres-lv3 : ok=41 changed=0 failed=0`, while intentionally skipping the already-live localhost DNS play because this shell did not export `HETZNER_DNS_API_TOKEN`."
     },
     {
       "check": "Rendered runtime database host and local health",
@@ -59,7 +59,7 @@
     {
       "check": "Public edge health endpoint and DNS resolution",
       "result": "pass",
-      "observed": "`dig +short n8n.lv3.org` returned `65.108.75.123`, and `curl -fsSI https://n8n.lv3.org/healthz` returned `HTTP/2 200` through the shared NGINX edge."
+      "observed": "`dig +short n8n.example.com` returned `203.0.113.1`, and `curl -fsSI https://n8n.example.com/healthz` returned `HTTP/2 200` through the shared NGINX edge."
     }
   ],
   "evidence_refs": [
@@ -70,6 +70,6 @@
   "notes": [
     "The first mainline attempt on 2026-03-25 was blocked by a Hetzner DNS brownout window and concurrent Proxmox host reachability failures.",
     "The successful 2026-03-26 rerun narrowed DNS reconciliation to the n8n-owned record, regenerated the shared static portal artifacts required by edge publication, and preserved the shared edge auth contract for langfuse while publishing the final n8n route.",
-    "Repo release 0.174.0 preserves the same live receipt after `origin/main` advanced with unrelated integration work; the latest-main revalidation reconverged postgres, runtime, and edge from the rebased tree without needing to mutate the already-live `n8n.lv3.org` DNS record."
+    "Repo release 0.174.0 preserves the same live receipt after `origin/main` advanced with unrelated integration work; the latest-main revalidation reconverged postgres, runtime, and edge from the rebased tree without needing to mutate the already-live `n8n.example.com` DNS record."
   ]
 }

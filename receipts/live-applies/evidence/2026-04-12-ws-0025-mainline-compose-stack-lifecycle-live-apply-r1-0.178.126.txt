@@ -3,33 +3,33 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
-PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
-INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/packer-plugin-cache
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519.pub
+INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/packer-plugin-cache
 Bootstrap manifest: live-apply-generated-artifacts
 Bootstrap description: Generated repo surfaces and ignored controller-local scaffolding required by fresh-worktree live-apply wrappers.
-PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/gate-bypasses/.gitkeep
-PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml
-PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json
-PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/drift-reports
-PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/file_sd/https_tls_targets.yml
-PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/image-scans
-PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/rules/https_tls_alerts.yml
+PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/receipts/gate-bypasses/.gitkeep
+PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/inventory/group_vars/platform.yml
+PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/config/uptime-kuma/monitors.json
+PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/receipts/drift-reports
+PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/config/prometheus/file_sd/https_tls_targets.yml
+PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/receipts/image-scans
+PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/config/prometheus/rules/https_tls_alerts.yml
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/build/ops-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/build/docs-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/build/changelog-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/build/ops-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/build/docs-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/build/changelog-portal
 Result: PASS (live-apply-service)
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/interface_contracts.py --check-live-apply "service:compose-stack-lifecycle"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/scripts/interface_contracts.py --check-live-apply "service:compose-stack-lifecycle"
 Live apply contract OK: service:compose-stack-lifecycle -> playbooks/services/compose-stack-lifecycle.yml
 INFO live-apply-service: skipping service-catalog gates for non-catalog playbook 'compose-stack-lifecycle'
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=bc6f5930c32d4faaadd91c07f5369b35 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml --run-id dab07893a2934f8496028b0a62835d0a --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/services/compose-stack-lifecycle.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump  -e platform_trace_id=01da9aa3157d47cfb92cba9baba5f8b2
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/services/compose-stack-lifecycle.yml (env=production)
-Running scoped playbook: playbooks/services/compose-stack-lifecycle.yml limit=artifact-cache,coolify,docker-runtime,runtime-ai,runtime-control,runtime-general shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.ansible/shards/dab07893a2934f8496028b0a62835d0a/compose-stack-lifecycle-production.json
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=bc6f5930c32d4faaadd91c07f5369b35 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/inventory/hosts.yml --run-id dab07893a2934f8496028b0a62835d0a --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/playbooks/services/compose-stack-lifecycle.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump  -e platform_trace_id=01da9aa3157d47cfb92cba9baba5f8b2
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/playbooks/services/compose-stack-lifecycle.yml (env=production)
+Running scoped playbook: playbooks/services/compose-stack-lifecycle.yml limit=artifact-cache,coolify,docker-runtime,runtime-ai,runtime-control,runtime-general shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.ansible/shards/dab07893a2934f8496028b0a62835d0a/compose-stack-lifecycle-production.json
 
 PLAY [Converge compose stack lifecycle units on Docker hosts] ******************
 

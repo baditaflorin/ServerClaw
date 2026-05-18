@@ -71,7 +71,7 @@ contract checks.
 The fork clone isn't just a nice-to-have second environment. It is the
 end-to-end test that validates the entire cascade. "Green on 0fork from
 `git clone` to `status.0fork.com` all-green" is the binary acceptance
-signal. Any code path that passes locally against `lv3.org` but breaks
+signal. Any code path that passes locally against `example.com` but breaks
 on 0fork is evidence of a generic-by-construction hole — and the
 lint/contract layer must grow until it catches the hole *before* the
 code ships.
@@ -226,7 +226,7 @@ Flavor invariants:
 - `dns_label` = RFC 1123 label (happens to equal config_prefix today but
   diverges if we ever allow uppercase in domain).
 
-For `lv3.org`, all five flavors equal `"lv3"` — production callsites
+For `example.com`, all five flavors equal `"lv3"` — production callsites
 unchanged. For `0fork.com`: `config_prefix="0fork"`, `sql_prefix="fork"`,
 `pve_prefix="fork"`, `unix_prefix="0fork"`, `dns_label="0fork"`.
 

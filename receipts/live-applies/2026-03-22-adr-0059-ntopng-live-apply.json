@@ -12,7 +12,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.118.189.95"
     },
     {
@@ -40,7 +40,7 @@
     {
       "check": "Top hosts on the private bridge",
       "result": "pass",
-      "observed": "The vmbr10 top-hosts API returned active talkers including 10.10.10.1, 10.10.10.20, 10.10.10.50, grafana.lv3.org, and 10.10.10.30."
+      "observed": "The vmbr10 top-hosts API returned active talkers including 10.10.10.1, 10.10.10.20, 10.10.10.50, grafana.example.com, and 10.10.10.30."
     }
   ],
   "evidence_refs": [

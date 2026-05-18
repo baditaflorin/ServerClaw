@@ -7,7 +7,7 @@
   "source_commit": "80498b98b16b5ef83f5361026dd7c5c0fabbff90",
   "repo_version_context": "0.178.81",
   "workflow_id": "converge-api-gateway",
-  "summary": "ADRs 0389/0390/0391: Standardized ADR metadata block format across platform; removed Open WebUI (chat.lv3.org replaced by LibreChat).",
+  "summary": "ADRs 0389/0390/0391: Standardized ADR metadata block format across platform; removed Open WebUI (chat.example.com replaced by LibreChat).",
   "targets": [
     {
       "kind": "vm",
@@ -19,7 +19,7 @@
     {
       "check": "ADR metadata blocks standardized",
       "result": "pass",
-      "observed": "ADRs 0389-0391 merged; Open WebUI removed from platform; LibreChat (chat.lv3.org) active."
+      "observed": "ADRs 0389-0391 merged; Open WebUI removed from platform; LibreChat (chat.example.com) active."
     }
   ],
   "evidence_refs": [

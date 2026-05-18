@@ -5,5 +5,5 @@ IaC policy scan passed: 0 error, 2 warning, 876 note, 0 suppressed
 - collection-playbooks [ansible] passed_with_findings: 11 active, 0 suppressed
 - collection-roles [ansible] passed_with_findings: 427 active, 0 suppressed
 - compose: Detected 46 Docker Compose template file(s). The repository stores Docker Compose as Jinja templates, and pinned offline Checkov 3.2.469 does not expose the docker_compose framework. The governed gate therefore scans the repo's actual OpenTofu and Ansible surfaces directly and records Compose as a bounded gap until rendered Compose artifacts become a first-class repository surface.
-Summary report: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/receipts/checkov/ec83a428aaf283c16ed53898cb649211fe59e64d.json
-SARIF report: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0306-mainline-v2/receipts/checkov/ec83a428aaf283c16ed53898cb649211fe59e64d.sarif.json
+Summary report: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/receipts/checkov/ec83a428aaf283c16ed53898cb649211fe59e64d.json
+SARIF report: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0306-mainline-v2/receipts/checkov/ec83a428aaf283c16ed53898cb649211fe59e64d.sarif.json

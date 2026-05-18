@@ -75,7 +75,7 @@
   ],
   "notes": [
     "This historical blocked receipt was normalized to the current schema on 2026-04-14 from the original branch evidence.",
-    "The local Tailscale client still listed proxmox-florin-subnet-router online at 100.64.0.1, but the workstation had no usable host or routed-guest management path during the attempt.",
+    "The local Tailscale client still listed proxmox-host-subnet-router online at 100.64.0.1, but the workstation had no usable host or routed-guest management path during the attempt.",
     "The macOS App Store or TestFlight Tailscale build on the workstation did not provide tailscale ssh, so there was no mesh-shell fallback for the blocked converge."
   ],
   "attempted_commands": [
@@ -116,7 +116,7 @@
       "result": "timeout"
     },
     {
-      "probe": "ssh ops@65.108.75.123",
+      "probe": "ssh ops@203.0.113.1",
       "result": "timeout"
     },
     {
@@ -153,7 +153,7 @@
     }
   ],
   "environment_notes": [
-    "tailscale status --json still listed proxmox-florin-subnet-router online at 100.64.0.1, but the local client reported coordination-server health warnings and there was no usable host or routed-guest management path from this workstation",
+    "tailscale status --json still listed proxmox-host-subnet-router online at 100.64.0.1, but the local client reported coordination-server health warnings and there was no usable host or routed-guest management path from this workstation",
     "tailscale ssh could not be used as a fallback because the macOS App Store or TestFlight build installed on this machine does not provide that subcommand"
   ],
   "next_steps": [

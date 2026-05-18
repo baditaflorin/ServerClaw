@@ -1,14 +1,14 @@
-[0] Reusing existing password from /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-tmp-002-password.txt
+[0] Reusing existing password from /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/florin.badita-tmp-002-password.txt
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 698, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 698, in <module>
     main()
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 694, in main
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 694, in main
     provision(args, dry_run=args.dry_run)
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 547, in provision
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 547, in provision
     user_id, user_exists = _fetch_keycloak_user(args.username, bootstrap_pass)
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 482, in _fetch_keycloak_user
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 482, in _fetch_keycloak_user
     token = get_token(bootstrap_pass)
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 204, in get_token
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 204, in get_token
     with urllib.request.urlopen(req, context=_ssl_ctx()) as response:
   File "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/urllib/request.py", line 214, in urlopen
     return opener.open(url, data, timeout)

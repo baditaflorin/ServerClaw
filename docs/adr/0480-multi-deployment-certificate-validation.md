@@ -5,7 +5,7 @@
 
 **Status**: SUPERSEDED by ADR 0488
 **Date**: 2026-05-05
-**Decision**: Implement deployment-aware certificate validation to handle multiple parallel deployments (lv3.org, 0fork.com) sharing NGINX edge infrastructure.
+**Decision**: Implement deployment-aware certificate validation to handle multiple parallel deployments (example.com, 0fork.com) sharing NGINX edge infrastructure.
 
 ---
 
@@ -14,19 +14,19 @@
 ### Problem
 
 The repository supports multiple concurrent deployments:
-- **lv3.org** (Florin's private deployment)
+- **example.com** (Florin's private deployment)
 - **0fork.com** (Public fork reference deployment)
 
 Currently:
 1. NGINX edge has certificates for **0fork.com**
-2. lv3 validator checks FQDNs against **lv3.org** (from `.local/identity.yml`)
+2. lv3 validator checks FQDNs against **example.com** (from `.local/identity.yml`)
 3. Pre-push gate fails with 44 cert_mismatch errors
 4. Root cause: Deployment domain ≠ deployed certificate CN
 
 ### Why This Matters (Business Context)
 
 - ServerClaw is designed as a **portable, forkable infrastructure template**
-- Different organizations deploy with different domains (lv3.org, 0fork.com, customer.com, etc.)
+- Different organizations deploy with different domains (example.com, 0fork.com, customer.com, etc.)
 - Each deployment has its own certificates
 - The validation gate must understand which deployment context it's validating
 
@@ -48,7 +48,7 @@ The validator automatically detects deployment context from:
 
 Each deployment can have its own certificate catalog overlay:
 ```
-.local/deployments/lv3/certificate-catalog.json      (lv3.org certs)
+.local/deployments/lv3/certificate-catalog.json      (example.com certs)
 .local/deployments/0fork/certificate-catalog.json    (0fork.com certs)
 ```
 
@@ -77,8 +77,8 @@ lv3
 ```
 
 This tells the validator:
-- Use lv3.org domains for validation
-- Expect lv3.org certificate CN
+- Use example.com domains for validation
+- Expect example.com certificate CN
 - Check against deployment-specific catalog if present
 
 ### Script Changes Required
@@ -94,7 +94,7 @@ if not args.deployment:
         args.deployment = Path('.local/active-deployment').read_text().strip()
 ```
 
-### Regenerating lv3.org Certificates
+### Regenerating example.com Certificates
 
 Once deployment context is set up, regenerate certificates:
 ```bash
@@ -113,7 +113,7 @@ HETZNER_API_KEY="6k2OLvRXjwQtxhlfiWxW3dAIphH4NiOtoMdEHmfA7oqVTBrX0WZzSSctvgrkSQP
 ### Before (current)
 ```
 config/certificate-catalog.json          (example.com - generic)
-.local/identity.yml                      (lv3.org - overlay only)
+.local/identity.yml                      (example.com - overlay only)
 → Creates domain substitution mismatch
 ```
 
@@ -121,8 +121,8 @@ config/certificate-catalog.json          (example.com - generic)
 ```
 config/certificate-catalog.json          (example.com - public fork template)
 .local/active-deployment                 (lv3 - current deployment)
-.local/identity.yml                      (lv3.org - deployment vars)
-.local/deployments/lv3/certificate-catalog.json   (lv3.org certs - optional override)
+.local/identity.yml                      (example.com - deployment vars)
+.local/deployments/lv3/certificate-catalog.json   (example.com certs - optional override)
 → Explicit deployment context prevents ambiguity
 ```
 
@@ -133,7 +133,7 @@ config/certificate-catalog.json          (example.com - public fork template)
 ### Phase 1 (Now)
 1. Create `.local/active-deployment` file = `lv3`
 2. Update pre-push hook to use `--deployment` flag
-3. Regenerate lv3.org certificates using Hetzner API
+3. Regenerate example.com certificates using Hetzner API
 4. Mark ADR 0375 as superseded by deployment context
 
 ### Phase 2 (Next Release)

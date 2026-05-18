@@ -19,8 +19,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service",
@@ -42,7 +42,7 @@
     {
       "check": "Managed live converge",
       "result": "pass",
-      "observed": "`make converge-rag-context` completed successfully with `docker-runtime-lv3 : ok=92 changed=7 unreachable=0 failed=0 skipped=14` and `proxmox_florin : ok=36 changed=4 unreachable=0 failed=0 skipped=14`; the managed run pulled `nomic-embed-text` into Ollama and rebuilt the remote corpus."
+      "observed": "`make converge-rag-context` completed successfully with `docker-runtime-lv3 : ok=92 changed=7 unreachable=0 failed=0 skipped=14` and `proxmox-host : ok=36 changed=4 unreachable=0 failed=0 skipped=14`; the managed run pulled `nomic-embed-text` into Ollama and rebuilt the remote corpus."
     },
     {
       "check": "Operator CLI retrieval verification",

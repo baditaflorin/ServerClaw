@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -38,7 +38,7 @@
     {
       "check": "Windmill runtime recovery and repo sync",
       "result": "pass",
-      "observed": "After the shared `converge-windmill` replay was blocked by the Windmill runtime collision, the ADR 0113 worker checkout was resynced onto `/srv/proxmox_florin_server`, the OpenBao secret payload was repopulated with the full world-state/NATS/ledger/graph/test-runner superset, and the Windmill containers were recreated cleanly on `docker-runtime-lv3`."
+      "observed": "After the shared `converge-windmill` replay was blocked by the Windmill runtime collision, the ADR 0113 worker checkout was resynced onto `/srv/platform_server`, the OpenBao secret payload was repopulated with the full world-state/NATS/ledger/graph/test-runner superset, and the Windmill containers were recreated cleanly on `docker-runtime-lv3`."
     },
     {
       "check": "world_state schema access for Windmill",
@@ -73,7 +73,7 @@
     {
       "check": "Final steady-state replay",
       "result": "partial",
-      "observed": "Before the final wrapper replay completed, `/opt/windmill/openbao/runtime.env.ctmpl`, `/run/lv3-secrets/windmill/runtime.env`, and `/srv/proxmox_florin_server/platform/world_state/workers.py` were overwritten back to their older three-key / pre-fix variants by another live automation path, so the durable post-fix runtime could not be held long enough to capture a clean final replay from the repaired state."
+      "observed": "Before the final wrapper replay completed, `/opt/windmill/openbao/runtime.env.ctmpl`, `/run/lv3-secrets/windmill/runtime.env`, and `/srv/platform_server/platform/world_state/workers.py` were overwritten back to their older three-key / pre-fix variants by another live automation path, so the durable post-fix runtime could not be held long enough to capture a clean final replay from the repaired state."
     }
   ],
   "evidence_refs": [

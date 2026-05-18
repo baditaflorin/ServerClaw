@@ -750,7 +750,7 @@ adrs:
     filename: 0444-nginx-oauth2-proxy-buffer-sizing.md
     path: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
   - adr: '0445'
-    title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+    title: Phase 1 Multi-Deployment Hardening (0fork.com + example.com)
     status: Proposed
     implementation_status: Proposed
     currently_describes: goal_state

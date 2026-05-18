@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -28,7 +28,7 @@
     {
       "kind": "service_endpoint",
       "name": "Interactive ops portal",
-      "address": "https://ops.lv3.org/"
+      "address": "https://ops.example.com/"
     }
   ],
   "verification": [
@@ -45,7 +45,7 @@
     {
       "check": "Guest-local ops portal verification",
       "result": "pass",
-      "observed": "`2026-04-03-ws-0309-mainline-ops-portal-guest-runtime-r21.txt` records guest-local `{\"status\":\"ok\"}`, the expected lane/help markers, the deployed `workbench_information_architecture.py` helper, the synced `workbench-information-architecture.json` data file, a healthy `ops-portal` container, and the expected internal and public unauthenticated `302` redirect contract for `ops.lv3.org`."
+      "observed": "`2026-04-03-ws-0309-mainline-ops-portal-guest-runtime-r21.txt` records guest-local `{\"status\":\"ok\"}`, the expected lane/help markers, the deployed `workbench_information_architecture.py` helper, the synced `workbench-information-architecture.json` data file, a healthy `ops-portal` container, and the expected internal and public unauthenticated `302` redirect contract for `ops.example.com`."
     },
     {
       "check": "Post-apply backup and OpenBao recovery",

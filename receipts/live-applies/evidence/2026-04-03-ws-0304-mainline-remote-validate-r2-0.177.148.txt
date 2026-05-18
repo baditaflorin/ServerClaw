@@ -23,7 +23,7 @@ type-check            passed    41.53
 workstream-surfaces   timed_out 120.04
 
 [workstream-surfaces] docker command
-docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0304-mainline:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0304-mainline:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/platform_server/.git:/Users/live/Documents/GITHUB_PROJECTS/platform_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/platform_server/.git/worktrees/ws-0304-mainline:/Users/live/Documents/GITHUB_PROJECTS/platform_server/.git/worktrees/ws-0304-mainline:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
 [workstream-surfaces] stdout
 Workstream surface ownership validation
 [workstream-surfaces] stderr

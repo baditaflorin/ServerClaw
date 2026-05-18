@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -45,7 +45,7 @@
     {
       "check": "Exact-main ADR 0263 replay from the synchronized 0.177.87 branch head",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=rag-context env=production` succeeded with `LV3_RUN_ID=e6fa9fca7a534939928bc8c0938756b2`, ansible scope run id `9e8dcfe46d20419fb39c464891acd29c`, trace id `3a088906b6a84a9bae17eb26dac49daf`, and final recap `docker-runtime-lv3 : ok=119 changed=19 unreachable=0 failed=0 skipped=21` plus `proxmox_florin : ok=42 changed=7 unreachable=0 failed=0 skipped=15`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=rag-context env=production` succeeded with `LV3_RUN_ID=e6fa9fca7a534939928bc8c0938756b2`, ansible scope run id `9e8dcfe46d20419fb39c464891acd29c`, trace id `3a088906b6a84a9bae17eb26dac49daf`, and final recap `docker-runtime-lv3 : ok=119 changed=19 unreachable=0 failed=0 skipped=21` plus `proxmox-host : ok=42 changed=7 unreachable=0 failed=0 skipped=15`."
     },
     {
       "check": "External health and operator CLI memory smoke after the exact-main replay",

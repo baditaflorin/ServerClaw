@@ -1,1 +1,1 @@
-Updated generated status docs: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.claude/worktrees/affectionate-galileo/README.md
+Updated generated status docs: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.claude/worktrees/affectionate-galileo/README.md

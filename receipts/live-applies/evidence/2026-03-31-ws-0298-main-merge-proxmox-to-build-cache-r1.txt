@@ -1,4 +1,4 @@
-proxmox_florin | UNREACHABLE! => {
+proxmox-host | UNREACHABLE! => {
     "changed": false,
     "msg": "Failed to connect to the host via ssh: ops@100.64.0.1: Permission denied (publickey).",
     "unreachable": true

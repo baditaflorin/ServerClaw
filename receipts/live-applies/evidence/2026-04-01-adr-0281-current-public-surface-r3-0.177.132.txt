@@ -1,12 +1,12 @@
 == dns ==
-65.108.75.123
+203.0.113.1
 == https headers ==
 HTTP/2 308
 server: nginx
 date: Wed, 01 Apr 2026 16:24:56 GMT
 content-type: text/html
 content-length: 164
-location: https://nginx.lv3.org/health/
+location: https://nginx.example.com/health/
 x-robots-tag: noindex, nofollow
 
 == auth config ==

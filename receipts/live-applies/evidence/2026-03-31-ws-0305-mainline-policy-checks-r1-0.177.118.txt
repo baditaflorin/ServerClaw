@@ -1,1 +1,1 @@
-ADR 0230 policy checks OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/policy
+ADR 0230 policy checks OK: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/policy

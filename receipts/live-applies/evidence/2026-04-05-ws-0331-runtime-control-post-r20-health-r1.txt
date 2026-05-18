@@ -1,4 +1,4 @@
-$ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyJump=ops@100.64.0.1 ops@10.10.10.92 hostname && uptime && echo --- && systemctl is-system-running || true && echo --- && sudo docker ps --format "{{.Names}}	{{.Status}}" | head -n 20
+$ ssh -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyJump=ops@100.64.0.1 ops@10.10.10.92 hostname && uptime && echo --- && systemctl is-system-running || true && echo --- && sudo docker ps --format "{{.Names}}	{{.Status}}" | head -n 20
 exit_code: 0
 runtime-control-lv3
  00:10:00 up 1 min,  1 user,  load average: 0.98, 0.56, 0.22

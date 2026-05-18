@@ -1,2 +1,2 @@
-verified shared edge logout via https://home.lv3.org/
-verified Outline logout via https://wiki.lv3.org/auth/oidc
+verified shared edge logout via https://home.example.com/
+verified Outline logout via https://wiki.example.com/auth/oidc

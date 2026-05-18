@@ -1,1 +1,1 @@
-{"reason": "Atlas drift surfaces are missing from the worker checkout", "status": "blocked", "expected_repo_path": "/srv/proxmox_florin_server"}
+{"reason": "Atlas drift surfaces are missing from the worker checkout", "status": "blocked", "expected_repo_path": "/srv/platform_server"}

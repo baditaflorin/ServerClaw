@@ -12,7 +12,7 @@ base OS, stop and update this runbook — do not guess.
 
 - The SSH private key matching the public key Hetzner has on file, at
   `.local/ssh/hetzner_llm_agents_ed25519` (key comment
-  `llm-agents@proxmox_florin_server`).
+  `llm-agents@platform_server`).
 - Hetzner DNS API token stored at `.local/hetzner/dns.env`:
   ```
   HETZNER_DNS_TOKEN=<token>
@@ -109,7 +109,7 @@ system.
 ## 4. Mesh VPN — Headscale, not external Tailscale
 
 This platform runs its own Headscale instance as a platform service (see
-prod `headscale.lv3.org`; clone target `headscale.0fork.com`). There is no
+prod `headscale.example.com`; clone target `headscale.0fork.com`). There is no
 external Tailscale preauth key.
 
 During bootstrap, operate over **public-IP SSH**. Once the clone's

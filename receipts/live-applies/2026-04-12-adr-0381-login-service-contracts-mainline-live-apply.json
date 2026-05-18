@@ -37,17 +37,17 @@
     {
       "kind": "service_endpoint",
       "name": "ops login entrypoint",
-      "address": "https://ops.lv3.org/"
+      "address": "https://ops.example.com/"
     },
     {
       "kind": "service_endpoint",
       "name": "tasks login entrypoint",
-      "address": "https://tasks.lv3.org/"
+      "address": "https://tasks.example.com/"
     },
     {
       "kind": "service_endpoint",
       "name": "Keycloak realm broker",
-      "address": "https://sso.lv3.org/realms/lv3"
+      "address": "https://sso.example.com/realms/lv3"
     }
   ],
   "verification": [
@@ -64,7 +64,7 @@
     {
       "check": "Exact-main public edge publication and certificate sweep",
       "result": "partial",
-      "observed": "The first `make configure-edge-publication env=production` run stopped because the shared edge catalog still exposed `librechat.example.com` instead of the canonical `chat.example.com`. Aligning the service and subdomain catalogs cleared that shared input, the immediate rerun completed successfully in `receipts/live-applies/evidence/2026-04-12-ws-0381-main-configure-edge-publication-r2-0.178.126.txt`, and the later dedicated certificate sweep in `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-certificates-r1.txt` returned `46` valid domains with one unrelated `vault.lv3.org` reset against `100.64.0.1:443`."
+      "observed": "The first `make configure-edge-publication env=production` run stopped because the shared edge catalog still exposed `librechat.example.com` instead of the canonical `chat.example.com`. Aligning the service and subdomain catalogs cleared that shared input, the immediate rerun completed successfully in `receipts/live-applies/evidence/2026-04-12-ws-0381-main-configure-edge-publication-r2-0.178.126.txt`, and the later dedicated certificate sweep in `receipts/live-applies/evidence/2026-04-12-ws-0381-mainline-certificates-r1.txt` returned `46` valid domains with one unrelated `vault.example.com` reset against `100.64.0.1:443`."
     },
     {
       "check": "Exact-main identity-core watchdog replay",
@@ -74,7 +74,7 @@
     {
       "check": "End-to-end auth redirect contract",
       "result": "pass",
-      "observed": "`receipts/live-applies/evidence/2026-04-12-ws-0381-main-auth-verification-r1.txt` shows `https://ops.lv3.org/` and `https://tasks.lv3.org/` returning `302` to `/oauth2/sign_in`, and both sign-in entrypoints returning `302` into the shared Keycloak authorize flow with `client_id=ops-portal-oauth`."
+      "observed": "`receipts/live-applies/evidence/2026-04-12-ws-0381-main-auth-verification-r1.txt` shows `https://ops.example.com/` and `https://tasks.example.com/` returning `302` to `/oauth2/sign_in`, and both sign-in entrypoints returning `302` into the shared Keycloak authorize flow with `client_id=ops-portal-oauth`."
     },
     {
       "check": "Live watchdog and stale-session reset contract",
@@ -125,6 +125,6 @@
   "notes": [
     "The earlier branch receipt `2026-04-12-adr-0381-login-service-contracts-live-apply` remains the first-live proof from the isolated worktree; this mainline receipt is the canonical integrated evidence for merged repo version `0.178.127` while the verified live-applied platform remains on version `0.178.78`.",
     "The exact-main auth replay was executed against `18dfb4ea01cd6c3787a61eaa5cceff7cfd496543`, the latest realistic mainline revision at apply time. During closeout, reachable `origin/main` advanced to `9afc6d691a9b99e40e8af1cdb2b61005ae8e266c`; the final merge was rebased onto that newer commit and limited to repo-validation, generated-document, and catalog-truth repairs without further ADR 0381 runtime changes.",
-    "The latest-main drifts cleared during integration were the missing compose macro loader, the raw Plane OIDC client update path that triggered a Keycloak HTTP 400, the shared-edge `librechat` versus `chat` catalog mismatch, certificate validation resolving `.local` from worktrees, the `control_plane_lanes.py` bootstrap needed by `generate_status_docs.py`, and a bounded ops-portal probe timeout in repo validation. Besides the unrelated `vault.lv3.org` reset, no ADR 0381 runtime regressions remained."
+    "The latest-main drifts cleared during integration were the missing compose macro loader, the raw Plane OIDC client update path that triggered a Keycloak HTTP 400, the shared-edge `librechat` versus `chat` catalog mismatch, certificate validation resolving `.local` from worktrees, the `control_plane_lanes.py` bootstrap needed by `generate_status_docs.py`, and a bounded ops-portal probe timeout in repo validation. Besides the unrelated `vault.example.com` reset, no ADR 0381 runtime regressions remained."
   ]
 }

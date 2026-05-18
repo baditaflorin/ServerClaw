@@ -15,7 +15,7 @@
   "targets": [
     {
       "kind": "repository",
-      "name": "proxmox_florin_server"
+      "name": "platform_server"
     },
     {
       "kind": "artifact",
@@ -63,7 +63,7 @@
     {
       "check": "Worker post-merge gate readiness",
       "result": "partial",
-      "observed": "The latest worker `post-merge-gate` replay on `/srv/proxmox_florin_server` now shows healthy Docker attestation, a working `.local/validation-gate` workspace, and the expected local fallback for runner unavailability, but the remaining failure is only stale canonical truth on `changelog.md` and `versions/stack.yaml`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-worker-post-merge-gate-r3-0.178.3.txt`."
+      "observed": "The latest worker `post-merge-gate` replay on `/srv/platform_server` now shows healthy Docker attestation, a working `.local/validation-gate` workspace, and the expected local fallback for runner unavailability, but the remaining failure is only stale canonical truth on `changelog.md` and `versions/stack.yaml`, preserved in `receipts/live-applies/evidence/2026-04-04-ws-0324-worker-post-merge-gate-r3-0.178.3.txt`."
     },
     {
       "check": "Release readiness snapshot",
@@ -112,7 +112,7 @@
   ],
   "notes": [
     "This branch-local receipt intentionally leaves `VERSION`, `README.md`, `changelog.md`, and `versions/stack.yaml` for the protected exact-main integration step.",
-    "One bounded manual live sync copied `.repo-structure.yaml`, `.config-locations.yaml`, and `build/onboarding/*.yaml` into `/srv/proxmox_florin_server` after the worker fallback exposed that the mirror checkout was missing generated discovery artifacts; the repo now carries the permanent sync-path fix for later replays.",
+    "One bounded manual live sync copied `.repo-structure.yaml`, `.config-locations.yaml`, and `build/onboarding/*.yaml` into `/srv/platform_server` after the worker fallback exposed that the mirror checkout was missing generated discovery artifacts; the repo now carries the permanent sync-path fix for later replays.",
     "The branch-local worker fallback is now blocked only by canonical-truth refresh on `changelog.md` and `versions/stack.yaml`, which is expected because those protected files were deferred off the workstream branch by design.",
     "Exact-main integration should begin with another `git fetch origin --prune` so the protected-surface refresh is replayed from the latest available `origin/main`."
   ]

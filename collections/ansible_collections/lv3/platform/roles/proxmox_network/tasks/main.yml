@@ -39,7 +39,7 @@
       placeholder. Writing this to /etc/network/interfaces causes TOTAL HOST LOCKOUT
       on the next reboot (wrong IP — server unreachable). Aborting convergence.
       Fix: ensure .local/identity.yml is injected via -e @.local/identity.yml.
-      See incident postmortem 2026-04-12 (6h outage on 65.108.75.123).
+      See incident postmortem 2026-04-12 (6h outage on 203.0.113.1).
 
 - name: Validate optional staging bridge inputs
   ansible.builtin.assert:

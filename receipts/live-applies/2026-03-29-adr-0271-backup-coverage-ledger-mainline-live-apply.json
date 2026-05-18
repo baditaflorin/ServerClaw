@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "hypervisor",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,12 +40,12 @@
     {
       "check": "Exact-main configure-backup-vm replay",
       "result": "pass",
-      "observed": "make configure-backup-vm succeeded from the merged main-integration worktree with backup-lv3 : ok=46 changed=2 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0 and proxmox_florin : ok=35 changed=6 unreachable=0 failed=0 skipped=30 rescued=0 ignored=0."
+      "observed": "make configure-backup-vm succeeded from the merged main-integration worktree with backup-lv3 : ok=46 changed=2 unreachable=0 failed=0 skipped=11 rescued=0 ignored=0 and proxmox-host : ok=35 changed=6 unreachable=0 failed=0 skipped=30 rescued=0 ignored=0."
     },
     {
       "check": "Nightly PBS job still governs coolify-lv3",
       "result": "pass",
-      "observed": "sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty on proxmox_florin returned vmid : \"110,120,130,140,150,170\"."
+      "observed": "sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty on proxmox-host returned vmid : \"110,120,130,140,150,170\"."
     },
     {
       "check": "Mainline backup coverage receipt",

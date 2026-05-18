@@ -101,8 +101,8 @@ def test_validate_environment_references_rejects_unrelated_subdomain_owner() -> 
 
 def test_main_validate_resolves_placeholder_domains_for_private_overlay(monkeypatch: pytest.MonkeyPatch) -> None:
     environment_catalog = build_environment_catalog()
-    environment_catalog["environments"][0]["base_domain"] = "lv3.org"
-    environment_catalog["environments"][0]["hostname_pattern"] = "*.lv3.org"
+    environment_catalog["environments"][0]["base_domain"] = "example.com"
+    environment_catalog["environments"][0]["hostname_pattern"] = "*.example.com"
 
     service_catalog = {
         "services": [
@@ -157,7 +157,7 @@ def test_main_validate_resolves_placeholder_domains_for_private_overlay(monkeypa
 
 def _replace_example_domain(value):
     if isinstance(value, str):
-        return value.replace("example.com", "lv3.org")
+        return value.replace("example.com", "example.com")
     if isinstance(value, list):
         return [_replace_example_domain(item) for item in value]
     if isinstance(value, dict):

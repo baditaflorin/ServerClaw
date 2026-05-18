@@ -9,13 +9,13 @@
 
 ## Summary
 
-When asked "what services are running on both 0fork.com and lv3.org?" there was
+When asked "what services are running on both 0fork.com and example.com?" there was
 no single command, file, or script that could answer it. The authoritative
 service registry — `config/subdomain-exposure-registry.json` — is baked from
-the lv3.org identity and contains no entries for 0fork.com. Answering the
+the example.com identity and contains no entries for 0fork.com. Answering the
 question required cross-referencing three separate files, knowing that 0fork.com
-is a topology-identical clone of lv3.org (ADR 0424), and inferring that every
-lv3.org service maps 1:1 to the same subdomain prefix on 0fork.com.
+is a topology-identical clone of example.com (ADR 0424), and inferring that every
+example.com service maps 1:1 to the same subdomain prefix on 0fork.com.
 
 This is exactly the kind of query that agents and operators should be able to
 answer in one command. They cannot.
@@ -24,7 +24,7 @@ answer in one command. They cannot.
 
 ## Timeline
 
-- **2026-04-21** — ADR 0424 forks lv3.org onto Hetzner AX41-NVMe under 0fork.com.
+- **2026-04-21** — ADR 0424 forks example.com onto Hetzner AX41-NVMe under 0fork.com.
   Service topology is copied; no corresponding registry entry is created for
   the new deployment.
 - **2026-04-28** — ADR 0480 (multi-deployment certificate validation) begins.
@@ -43,7 +43,7 @@ The subdomain-exposure-registry schema has a `zone_name` field at the top level.
 When the registry was designed, a single deployment was assumed. Adding 0fork.com
 as a fork exposed the assumption: the registry generator (`platform_manifest.py`)
 and the exposure registry do not accept a `--deployment` or `--identity-overlay`
-argument. They bake `lv3.org` into the output unconditionally.
+argument. They bake `example.com` into the output unconditionally.
 
 Three specific gaps compounded:
 
@@ -58,13 +58,13 @@ Three specific gaps compounded:
 ```
 
 `zone_name` is a placeholder (`localhost`). Every `fqdn` in `publications` is
-hardcoded to `*.lv3.org` and `*.staging.lv3.org`. There is no mechanism to
+hardcoded to `*.example.com` and `*.staging.example.com`. There is no mechanism to
 generate or query a parallel registry for `0fork.com`.
 
 ### Gap 2 — `platform_manifest.py` has no deployment selector
 
 `scripts/platform_manifest.py --write` regenerates `build/platform-manifest.json`
-from the lv3.org identity. It has no `--identity-overlay` or `--deployment` flag.
+from the example.com identity. It has no `--identity-overlay` or `--deployment` flag.
 A 0fork.com manifest would require a separate script invocation or a fork of the
 script. Neither exists.
 
@@ -74,7 +74,7 @@ The fork workstream (ws-0424) records that a full converge was run and services
 were deployed. But neither the workstream YAML nor any other committed artifact
 records *which* services are actually running on 0fork.com (some were disabled
 in `fork-overrides.yml`: glitchtip OIDC, mail submission recovery). Consumers
-cannot tell which lv3.org services were skipped or configured differently on
+cannot tell which example.com services were skipped or configured differently on
 0fork.com.
 
 ---
@@ -86,7 +86,7 @@ cannot tell which lv3.org services were skipped or configured differently on
 - **Agent context cost.** An agent asked about cross-deployment service parity must
   read ~5 files and reason about identity overlays to reconstruct a list that should
   be a one-liner.
-- **Drift risk.** If 0fork.com diverges (a service enabled on lv3.org but not yet
+- **Drift risk.** If 0fork.com diverges (a service enabled on example.com but not yet
   converged on 0fork.com), there is no automated detection. No diff is possible
   when there is no 0fork.com inventory artifact.
 
@@ -112,8 +112,8 @@ Extend the registry format to support multiple deployments:
 {
   "schema_version": "3.0.0",
   "deployments": {
-    "lv3.org": {
-      "platform_domain": "lv3.org",
+    "example.com": {
+      "platform_domain": "example.com",
       "environment": "production",
       "publications": [...]
     },
@@ -127,12 +127,12 @@ Extend the registry format to support multiple deployments:
 }
 ```
 
-The generator would accept `--write-deployment lv3.org` and `--write-deployment 0fork.com`
+The generator would accept `--write-deployment example.com` and `--write-deployment 0fork.com`
 and merge results. A query script would answer:
 
 ```bash
 python3 scripts/list_services.py --deployment 0fork.com --status active
-python3 scripts/list_services.py --diff lv3.org 0fork.com   # services in one but not the other
+python3 scripts/list_services.py --diff example.com 0fork.com   # services in one but not the other
 ```
 
 ### Option B — Per-deployment manifests generated from identity overlays
@@ -140,7 +140,7 @@ python3 scripts/list_services.py --diff lv3.org 0fork.com   # services in one bu
 Extend `platform_manifest.py` with `--identity-overlay`:
 
 ```bash
-# Current (lv3.org only):
+# Current (example.com only):
 python scripts/platform_manifest.py --write
 
 # Proposed (per-deployment):
@@ -149,7 +149,7 @@ python scripts/platform_manifest.py --identity-overlay .local/identity.yml.0fork
 ```
 
 A CI step or Makefile target would regenerate manifests for each known deployment.
-The lv3.org manifest already exists; the 0fork.com manifest would be generated
+The example.com manifest already exists; the 0fork.com manifest would be generated
 and committed alongside it.
 
 ### Option C — Service diff from fork-overrides.yml (low effort, partial fix)
@@ -165,7 +165,7 @@ services_disabled_on_fork:
 ```
 
 A `make diff-services` target would read this file and produce a human-readable
-comparison against the lv3.org registry. Fast to implement; does not require a
+comparison against the example.com registry. Fast to implement; does not require a
 schema change.
 
 ---

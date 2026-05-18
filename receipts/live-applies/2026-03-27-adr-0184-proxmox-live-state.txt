@@ -1,4 +1,4 @@
-proxmox_florin | CHANGED | rc=0 >>
+proxmox-host | CHANGED | rc=0 >>
       VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID
        110 nginx-lv3            running    4096              32.00 1550
        120 docker-runtime-lv3   running    24576             96.00 1985970
@@ -9,4 +9,4 @@ proxmox_florin | CHANGED | rc=0 >>
        220 docker-runtime-staging-lv3 running    8192              64.00 2233879
        240 monitoring-staging-lv3 running    4096              48.00 2234109
       9000 debian13-cloud-template stopped    2048               0.00 0
----Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/151.conf' does not exist
+---Configuration file 'nodes/debian-base-template/qemu-server/151.conf' does not exist

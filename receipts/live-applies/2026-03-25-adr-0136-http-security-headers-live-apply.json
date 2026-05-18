@@ -19,51 +19,51 @@
     },
     {
       "kind": "public_hostname",
-      "name": "api.lv3.org"
+      "name": "api.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "build.lv3.org"
+      "name": "build.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "changelog.lv3.org"
+      "name": "changelog.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "docker.lv3.org"
+      "name": "docker.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "docs.lv3.org"
+      "name": "docs.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "grafana.lv3.org"
+      "name": "grafana.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "nginx.lv3.org"
+      "name": "nginx.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "ops.lv3.org"
+      "name": "ops.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "proxmox.lv3.org"
+      "name": "proxmox.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "sso.lv3.org"
+      "name": "sso.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "status.lv3.org"
+      "name": "status.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "uptime.lv3.org"
+      "name": "uptime.example.com"
     }
   ],
   "verification": [
@@ -80,12 +80,12 @@
     {
       "check": "Representative HTTPS header probes",
       "result": "pass",
-      "observed": "Direct `curl -sSI` probes for `docs.lv3.org` and `grafana.lv3.org` returned the expected HSTS, CORP, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, and X-Robots-Tag headers."
+      "observed": "Direct `curl -sSI` probes for `docs.example.com` and `grafana.example.com` returned the expected HSTS, CORP, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, and X-Robots-Tag headers."
     },
     {
       "check": "Independent header scan",
       "result": "pass",
-      "observed": "`nmap --script http-security-headers -p 443 docs.lv3.org grafana.lv3.org` reported the expected HSTS, X-Frame-Options, X-Content-Type-Options, and CSP values on both representative public hosts after rollout."
+      "observed": "`nmap --script http-security-headers -p 443 docs.example.com grafana.example.com` reported the expected HSTS, X-Frame-Options, X-Content-Type-Options, and CSP values on both representative public hosts after rollout."
     }
   ],
   "evidence_refs": [

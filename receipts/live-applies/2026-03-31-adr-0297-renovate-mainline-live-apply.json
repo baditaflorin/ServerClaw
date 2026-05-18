@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,12 +34,12 @@
     {
       "kind": "service_endpoint",
       "name": "Private Gitea main validate run 169",
-      "address": "http://100.64.0.1:3009/ops/proxmox_florin_server/actions/runs/169"
+      "address": "http://100.64.0.1:3009/ops/platform_server/actions/runs/169"
     },
     {
       "kind": "service_endpoint",
       "name": "Private Gitea main renovate run 170",
-      "address": "http://100.64.0.1:3009/ops/proxmox_florin_server/actions/runs/170"
+      "address": "http://100.64.0.1:3009/ops/platform_server/actions/runs/170"
     }
   ],
   "verification": [

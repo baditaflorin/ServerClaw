@@ -1,25 +1,25 @@
 ws-0293 livekit branch concurrency drift analysis
 Date: 2026-03-31
 Branch: codex/ws-0293-live-apply-r2
-Context: post-r11 failure investigation while holding host:proxmox_florin, vm:110, and vm:120/service:livekit locks
+Context: post-r11 failure investigation while holding host:proxmox-host, vm:110, and vm:120/service:livekit locks
 
 Summary
 - The `2026-03-31-ws-0293-livekit-branch-converge-r11.txt` replay succeeded through Proxmox ingress programming, Docker runtime convergence, local LiveKit listener checks, local room lifecycle verification, SBOM collection, and NGINX publication.
-- The only replay failure remained the final controller-side public room lifecycle probe against `https://livekit.lv3.org`.
-- Direct TLS verification from the controller returned a hostname mismatch because `livekit.lv3.org` was serving the shared `nginx.lv3.org` certificate instead of the site-local `livekit.lv3.org` certificate.
+- The only replay failure remained the final controller-side public room lifecycle probe against `https://livekit.example.com`.
+- Direct TLS verification from the controller returned a hostname mismatch because `livekit.example.com` was serving the shared `nginx.example.com` certificate instead of the site-local `livekit.example.com` certificate.
 
 Key observations
 - Controller probe:
-  - `curl --max-time 20 -svI https://livekit.lv3.org`
-  - returned a certificate with `subject: CN=nginx.lv3.org`
-  - failed with `subjectAltName does not match host name livekit.lv3.org`
+  - `curl --max-time 20 -svI https://livekit.example.com`
+  - returned a certificate with `subject: CN=nginx.example.com`
+  - failed with `subjectAltName does not match host name livekit.example.com`
 - Edge host certificate on disk:
-  - `/etc/letsencrypt/live/livekit.lv3.org/fullchain.pem`
-  - `subject=CN=livekit.lv3.org`
-  - `DNS:livekit.lv3.org`
+  - `/etc/letsencrypt/live/livekit.example.com/fullchain.pem`
+  - `subject=CN=livekit.example.com`
+  - `DNS:livekit.example.com`
 - Edge host presented certificate over loopback/SNI:
-  - `openssl s_client -servername livekit.lv3.org -connect 127.0.0.1:443`
-  - returned the shared `lv3-edge` certificate with `subject=CN=nginx.lv3.org`
+  - `openssl s_client -servername livekit.example.com -connect 127.0.0.1:443`
+  - returned the shared `lv3-edge` certificate with `subject=CN=nginx.example.com`
 
 Fresh render comparison
 - Fetched live file:
@@ -30,12 +30,12 @@ Fresh render comparison
   - mtime `2026-03-31 21:41:39 UTC`
   - size `185942`
 - The fresh render contains:
-  - `livekit.lv3.org` server blocks
-  - site-local certificate wiring at `/etc/letsencrypt/live/livekit.lv3.org/fullchain.pem`
-  - `flags.lv3.org` server blocks
+  - `livekit.example.com` server blocks
+  - site-local certificate wiring at `/etc/letsencrypt/live/livekit.example.com/fullchain.pem`
+  - `flags.example.com` server blocks
 - The live file on disk does not contain:
-  - `livekit.lv3.org`
-  - `flags.lv3.org`
+  - `livekit.example.com`
+  - `flags.example.com`
 - Therefore the branch template and current hostvars are correct; the live file was overwritten after the r11 replay by a concurrent shared-surface mutation.
 
 Timing evidence
@@ -57,5 +57,5 @@ Concurrent conflicting applies observed on the controller after the overwrite
 
 Conclusion
 - `r11` no longer indicates a branch-side LiveKit defect.
-- The remaining blocker is an unstable shared mutation window on `proxmox_florin`, `docker-runtime-lv3`, and `nginx-lv3`.
+- The remaining blocker is an unstable shared mutation window on `proxmox-host`, `docker-runtime-lv3`, and `nginx-lv3`.
 - The next valid step is to wait for a quiet shared-host window, then rerun the LiveKit replay and public verification before any merge-to-main step.

@@ -10,13 +10,13 @@
   "platform_version_context": "0.130.60",
   "workflow_id": "adr-0279-grist-live-apply",
   "adr": "0279",
-  "summary": "Live-applied ADR 0279 from the isolated worktree by deploying the repo-managed Grist runtime on docker-runtime-lv3, wiring the dedicated Keycloak OIDC client plus shared-edge publication for grist.lv3.org, hardening the OpenBao compose-env helper so secret injection survives concurrent Docker restarts, and verifying public health, auth redirection, TLS coverage, guest runtime state, and repo automation gates while protected mainline truth files remained deferred for the final synchronized main integration.",
+  "summary": "Live-applied ADR 0279 from the isolated worktree by deploying the repo-managed Grist runtime on docker-runtime-lv3, wiring the dedicated Keycloak OIDC client plus shared-edge publication for grist.example.com, hardening the OpenBao compose-env helper so secret injection survives concurrent Docker restarts, and verifying public health, auth redirection, TLS coverage, guest runtime state, and repo automation gates while protected mainline truth files remained deferred for the final synchronized main integration.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -33,12 +33,12 @@
     {
       "kind": "service_endpoint",
       "name": "grist-status",
-      "address": "https://grist.lv3.org/status"
+      "address": "https://grist.example.com/status"
     },
     {
       "kind": "service_endpoint",
       "name": "grist-docs",
-      "address": "https://grist.lv3.org/o/docs/"
+      "address": "https://grist.example.com/o/docs/"
     }
   ],
   "verification": [
@@ -60,17 +60,17 @@
     {
       "check": "Scoped Ansible syntax verification",
       "result": "pass",
-      "observed": "`uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0279syntax2 --playbook playbooks/services/grist.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check` passed."
+      "observed": "`uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0279syntax2 --playbook playbooks/services/grist.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check` passed."
     },
     {
       "check": "Scoped Grist live apply replay",
       "result": "pass",
-      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ./scripts/run_with_namespace.sh uvx --from pyyaml python ./scripts/ansible_scope_runner.py run --inventory ./inventory/hosts.yml --run-id ws0279apply-recover --playbook ./playbooks/services/grist.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` completed successfully with final recap `docker-runtime-lv3 ok=222 changed=16 failed=0`, `localhost ok=24 changed=0 failed=0`, and `nginx-lv3 ok=39 changed=5 failed=0`."
+      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ./scripts/run_with_namespace.sh uvx --from pyyaml python ./scripts/ansible_scope_runner.py run --inventory ./inventory/hosts.yml --run-id ws0279apply-recover --playbook ./playbooks/services/grist.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` completed successfully with final recap `docker-runtime-lv3 ok=222 changed=16 failed=0`, `localhost ok=24 changed=0 failed=0`, and `nginx-lv3 ok=39 changed=5 failed=0`."
     },
     {
       "check": "Public health, auth redirect, and TLS coverage",
       "result": "pass",
-      "observed": "`curl -fsS https://grist.lv3.org/status` returned `Grist server(home,docs,static) is alive.`; `curl -sSI https://grist.lv3.org/o/docs/` returned `HTTP/2 302` to `https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?...client_id=grist...redirect_uri=https%3A%2F%2Fgrist.lv3.org%2Foauth2%2Fcallback...`; and `echo | openssl s_client -servername grist.lv3.org -connect grist.lv3.org:443 2>/dev/null | openssl x509 -noout -issuer -subject -ext subjectAltName` showed a Let's Encrypt issuer (`CN=E7`) with SAN coverage for `DNS:grist.lv3.org`."
+      "observed": "`curl -fsS https://grist.example.com/status` returned `Grist server(home,docs,static) is alive.`; `curl -sSI https://grist.example.com/o/docs/` returned `HTTP/2 302` to `https://sso.example.com/realms/lv3/protocol/openid-connect/auth?...client_id=grist...redirect_uri=https%3A%2F%2Fgrist.example.com%2Foauth2%2Fcallback...`; and `echo | openssl s_client -servername grist.example.com -connect grist.example.com:443 2>/dev/null | openssl x509 -noout -issuer -subject -ext subjectAltName` showed a Let's Encrypt issuer (`CN=E7`) with SAN coverage for `DNS:grist.example.com`."
     },
     {
       "check": "Controller-local secrets and guest runtime state",
@@ -85,7 +85,7 @@
     {
       "check": "Manual DNS exception before the successful rerun",
       "result": "partial",
-      "observed": "The first replay failed inside the hidden Hetzner DNS task before the live evidence could determine whether the `grist` record had been created. To unblock the rerun, a manual Hetzner DNS API `POST` created the `grist` A record pointing at `65.108.75.123`, returning record id `0b604871e23c549236e54742c5790ba8`; the successful scoped replay then observed that record and converged idempotently."
+      "observed": "The first replay failed inside the hidden Hetzner DNS task before the live evidence could determine whether the `grist` record had been created. To unblock the rerun, a manual Hetzner DNS API `POST` created the `grist` A record pointing at `203.0.113.1`, returning record id `0b604871e23c549236e54742c5790ba8`; the successful scoped replay then observed that record and converged idempotently."
     }
   ],
   "evidence_refs": [
@@ -115,7 +115,7 @@
     "receipts/live-applies/2026-03-30-adr-0279-grist-live-apply.json"
   ],
   "notes": [
-    "This receipt records the branch-local live apply from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-live-apply` on branch `codex/ws-0279-live-apply` while protected integration files still remained off the workstream branch.",
+    "This receipt records the branch-local live apply from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-live-apply` on branch `codex/ws-0279-live-apply` while protected integration files still remained off the workstream branch.",
     "The OpenBao helper change in `collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml` was required because the first replay raced with a Docker restart and reached `127.0.0.1:8201` before `lv3-openbao` was back up.",
     "Remaining for the synchronized `main` integration: pull the newest `origin/main`, replay the exact-main Grist apply from that tree, update protected release truth surfaces from main only, and replace this branch-local receipt reference with the canonical mainline receipt."
   ]

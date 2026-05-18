@@ -13,11 +13,11 @@ below (case-insensitive substring match), and exits non-zero on any hit outside
 the allowed contexts.
 
 Blocklist:
-- `lv3.org`              — retired operator apex
+- `example.com`              — retired operator apex
 - `0fork.com`            — retired operator apex
 - `0mpc.com`             — current operator apex (must stay in .local/)
 - `65.109.84.223`        — 0fork host IPv4
-- `65.108.75.123`        — lv3 host IPv4
+- `203.0.113.1`        — lv3 host IPv4
 - `2a01:4f9:6b:4b47`     — operator IPv6 prefix
 
 Allowed contexts (substring of the path):
@@ -47,11 +47,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 BLOCKED_STRINGS: tuple[str, ...] = (
-    "lv3.org",
+    "example.com",
     "0fork.com",
     "0mpc.com",
     "65.109.84.223",
-    "65.108.75.123",
+    "203.0.113.1",
     "2a01:4f9:6b:4b47",
 )
 

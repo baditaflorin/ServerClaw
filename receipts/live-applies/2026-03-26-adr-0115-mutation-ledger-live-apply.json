@@ -25,8 +25,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
@@ -63,7 +63,7 @@
     {
       "check": "Live guest-side ledger emit",
       "result": "pass",
-      "observed": "A guest-local `uv run --with psycopg2-binary python scripts/mutation_audit.py --emit ...` on `docker-runtime-lv3` wrote `execution.completed|operator:ops|host|proxmox_florin|ws0115-emit-20260326T133018Z` into `ledger.events`, and the compatibility `audit_log` view exposed `1|operator:ops|proxmox_florin|success|ws0115-emit-20260326T133018Z`."
+      "observed": "A guest-local `uv run --with psycopg2-binary python scripts/mutation_audit.py --emit ...` on `docker-runtime-lv3` wrote `execution.completed|operator:ops|host|proxmox-host|ws0115-emit-20260326T133018Z` into `ledger.events`, and the compatibility `audit_log` view exposed `1|operator:ops|proxmox-host|success|ws0115-emit-20260326T133018Z`."
     },
     {
       "check": "Windmill runtime reconcile",

@@ -16,7 +16,7 @@
       "./scripts/validate_repo.sh agent-standards",
       "uv run --with pytest --with pyyaml pytest -q tests/test_adr_implementation_scanner.py tests/test_generate_adr_index.py"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-14",
     "remediation_ref": "ws-0374-status-repair"
   }

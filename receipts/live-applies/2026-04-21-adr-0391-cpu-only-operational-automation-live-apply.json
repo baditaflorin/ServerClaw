@@ -18,7 +18,7 @@
   "targets": [
     {
       "kind": "repository",
-      "name": "proxmox_florin_server"
+      "name": "platform_server"
     },
     {
       "kind": "controller_local_tool",

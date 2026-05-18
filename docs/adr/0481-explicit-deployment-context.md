@@ -13,7 +13,7 @@
 
 ### Problem
 
-The repository runs N parallel Proxmox deployments off a single generic-by-default codebase (ADR 0407). Today: `lv3.org` (Florin's primary) and `0fork.com` (public fork). The pattern is correct; the *selection mechanism* is not.
+The repository runs N parallel Proxmox deployments off a single generic-by-default codebase (ADR 0407). Today: `example.com` (Florin's primary) and `0fork.com` (public fork). The pattern is correct; the *selection mechanism* is not.
 
 Until this ADR, the active deployment was identified by **renaming `.local/identity.yml`** (parked copies live next to it as `.local/identity.yml.lv3-backup`, `.local/identity.yml.0fork-backup`, etc.). Whichever happened to be named `identity.yml` at any moment was "the deployment." This produced three concrete failure modes during a 2026-05-11 status-check session:
 

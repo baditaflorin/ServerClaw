@@ -1,5 +1,5 @@
 runtime-control-lv3 | UNREACHABLE! => {
     "changed": false,
-    "msg": "Failed to connect to the host via ssh: no such identity: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0314-live-apply/.local/ssh/hetzner_llm_agents_ed25519: No such file or directory\r\nops@10.10.10.92: Permission denied (publickey).",
+    "msg": "Failed to connect to the host via ssh: no such identity: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0314-live-apply/.local/ssh/hetzner_llm_agents_ed25519: No such file or directory\r\nops@10.10.10.92: Permission denied (publickey).",
     "unreachable": true
 }

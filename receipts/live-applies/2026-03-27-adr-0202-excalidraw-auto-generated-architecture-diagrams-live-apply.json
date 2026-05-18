@@ -9,12 +9,12 @@
   "repo_version_context": "0.177.12",
   "workflow_id": "converge-excalidraw",
   "adr": "0202",
-  "summary": "Implemented ADR 0202 on the workstream branch, added the repo-managed Excalidraw runtime plus generated diagram workflow, converged draw.lv3.org end to end through targeted Hetzner DNS publication and the shared authenticated NGINX edge, and verified the frontend, collaboration room, patched collaboration origin, socket routing, and TLS-authenticated public entrypoint.",
+  "summary": "Implemented ADR 0202 on the workstream branch, added the repo-managed Excalidraw runtime plus generated diagram workflow, converged draw.example.com end to end through targeted Hetzner DNS publication and the shared authenticated NGINX edge, and verified the frontend, collaboration room, patched collaboration origin, socket routing, and TLS-authenticated public entrypoint.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -30,8 +30,8 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "draw.lv3.org",
-      "address": "https://draw.lv3.org"
+      "name": "draw.example.com",
+      "address": "https://draw.example.com"
     }
   ],
   "verification": [
@@ -53,7 +53,7 @@
     {
       "check": "Live Excalidraw converge",
       "result": "pass",
-      "observed": "`make converge-excalidraw` completed successfully after the runtime switched from host networking to explicit loopback port publishing, the BusyBox-incompatible `grep --fixed-strings` usage was replaced with `grep -F`, and the playbook added targeted DNS provisioning for `draw.lv3.org`."
+      "observed": "`make converge-excalidraw` completed successfully after the runtime switched from host networking to explicit loopback port publishing, the BusyBox-incompatible `grep --fixed-strings` usage was replaced with `grep -F`, and the playbook added targeted DNS provisioning for `draw.example.com`."
     },
     {
       "check": "Private frontend and room listeners",
@@ -63,7 +63,7 @@
     {
       "check": "Frontend collaboration-origin patch",
       "result": "pass",
-      "observed": "A live asset grep inside `excalidraw-app` found `https://draw.lv3.org` in `/usr/share/nginx/html/assets/index-D8FNeBTZ.js`, confirming the runtime bootstrap patched the upstream public collab origin to the private deployment."
+      "observed": "A live asset grep inside `excalidraw-app` found `https://draw.example.com` in `/usr/share/nginx/html/assets/index-D8FNeBTZ.js`, confirming the runtime bootstrap patched the upstream public collab origin to the private deployment."
     },
     {
       "check": "Shared-edge socket routing",
@@ -73,7 +73,7 @@
     {
       "check": "Public DNS and authenticated TLS entrypoint",
       "result": "pass",
-      "observed": "`dig +short draw.lv3.org @8.8.8.8` returned `65.108.75.123`, and `curl -Ik --resolve draw.lv3.org:443:65.108.75.123 https://draw.lv3.org` returned `HTTP/2 302` to `https://draw.lv3.org/oauth2/sign_in?rd=https://draw.lv3.org/` with the expected hardened response headers."
+      "observed": "`dig +short draw.example.com @8.8.8.8` returned `203.0.113.1`, and `curl -Ik --resolve draw.example.com:443:203.0.113.1 https://draw.example.com` returned `HTTP/2 302` to `https://draw.example.com/oauth2/sign_in?rd=https://draw.example.com/` with the expected hardened response headers."
     },
     {
       "check": "Repo validation boundary note",
@@ -104,8 +104,8 @@
   ],
   "notes": [
     "During the first live converge attempt, the frontend container never opened `127.0.0.1:3095` because the upstream image still listened on its internal default port while the compose file used `network_mode: host`; the final implementation publishes explicit loopback host ports instead.",
-    "The initial DNS-publication attempt used the broad `hetzner_dns_records` sync pattern and failed on unrelated zone drift; the final playbook uses a targeted single-subdomain converge for `draw.lv3.org` so the workflow only mutates the record this ADR owns.",
-    "At receipt time Google Public DNS already served `draw.lv3.org`, while Cloudflare's `1.1.1.1` had not yet caught up. The runbook now documents `dig @8.8.8.8` plus `curl --resolve` for immediate post-create verification.",
+    "The initial DNS-publication attempt used the broad `hetzner_dns_records` sync pattern and failed on unrelated zone drift; the final playbook uses a targeted single-subdomain converge for `draw.example.com` so the workflow only mutates the record this ADR owns.",
+    "At receipt time Google Public DNS already served `draw.example.com`, while Cloudflare's `1.1.1.1` had not yet caught up. The runbook now documents `dig @8.8.8.8` plus `curl --resolve` for immediate post-create verification.",
     "Merge to `main` still needs the protected integration-file step only: update `VERSION`, `changelog.md`, top-level `README.md`, and `versions/stack.yaml` after branch integration."
   ]
 }

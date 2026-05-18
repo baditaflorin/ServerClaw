@@ -1,11 +1,11 @@
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/playbooks/falco.yml --syntax-check
+ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/playbooks/falco.yml --syntax-check
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/collections/ansible_col
+CTS/platform_server/.worktrees/ws-0300-live-apply/collections/ansible_col
 lections/lv3/platform/roles/ntfy_runtime/tasks/main.yml, line 113, column 3,
 found a duplicate dict key (notify). Using last defined value only.
 ERROR! no module/action detected in task.
 
-The error appears to be in '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/collections/ansible_collections/lv3/platform/roles/ntfy_runtime/tasks/main.yml': line 201, column 3, but may
+The error appears to be in '/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/collections/ansible_collections/lv3/platform/roles/ntfy_runtime/tasks/main.yml': line 201, column 3, but may
 be elsewhere in the file depending on the exact syntax problem.
 
 The offending line appears to be:

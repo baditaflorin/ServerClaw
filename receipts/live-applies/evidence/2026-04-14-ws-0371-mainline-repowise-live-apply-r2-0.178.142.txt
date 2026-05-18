@@ -10,31 +10,31 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
-PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
-INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/.local/packer-plugin-cache
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519.pub
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
+INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/.local/packer-plugin-cache
 Bootstrap manifest: live-apply-generated-artifacts
 Bootstrap description: Generated repo surfaces and ignored controller-local scaffolding required by fresh-worktree live-apply wrappers.
-PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/receipts/image-scans
-PASS bootstrap artifact image_scan_sboms: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/receipts/sbom
-PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/receipts/gate-bypasses/.gitkeep
-PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/receipts/drift-reports
-PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/inventory/group_vars/platform.yml
-PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/config/prometheus/file_sd/https_tls_targets.yml
-PASS bootstrap artifact image_scan_cves: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/receipts/cve
-PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/config/prometheus/rules/https_tls_alerts.yml
-PASS bootstrap artifact security_reports: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/receipts/security-reports
-PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/config/uptime-kuma/monitors.json
+PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/receipts/image-scans
+PASS bootstrap artifact image_scan_sboms: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/receipts/sbom
+PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/receipts/gate-bypasses/.gitkeep
+PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/receipts/drift-reports
+PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/inventory/group_vars/platform.yml
+PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/config/prometheus/file_sd/https_tls_targets.yml
+PASS bootstrap artifact image_scan_cves: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/receipts/cve
+PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/config/prometheus/rules/https_tls_alerts.yml
+PASS bootstrap artifact security_reports: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/receipts/security-reports
+PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/config/uptime-kuma/monitors.json
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/build/docs-portal
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/build/ops-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/build/changelog-portal
 Result: PASS (live-apply-service)
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/scripts/interface_contracts.py --check-live-apply "service:repowise"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/scripts/interface_contracts.py --check-live-apply "service:repowise"
 Live apply contract OK: service:repowise -> playbooks/services/repowise.yml
 Vulnerability budget gate for repowise: approved
 Service: repowise
@@ -44,8 +44,8 @@ Decision: approved
 repowise: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@docker-runtime
   rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.
 override: repowise remains governed by immutable guest replacement on docker-runtime (preview_guest, rollback 180m); ALLOW_IN_PLACE_MUTATION=true was supplied for this run.
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/playbooks/services/repowise.yml (env=production)
-Running scoped playbook: playbooks/services/repowise.yml limit=docker-runtime shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/.ansible/shards/05a9e449c5e048b1b0ed286872b7a3b1/repowise-production.json
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/playbooks/services/repowise.yml (env=production)
+Running scoped playbook: playbooks/services/repowise.yml limit=docker-runtime shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/.ansible/shards/05a9e449c5e048b1b0ed286872b7a3b1/repowise-production.json
 
 PLAY [Converge repowise on the Docker runtime VM] ******************************
 
@@ -151,7 +151,7 @@ changed: [docker-runtime]
 TASK [lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T16:25:17.009Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.linux_guest_firewall : Reset SSH connection after guest nftables policy evaluation","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-14T16:25:17.021Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/reset_connection.yml for docker-runtime
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/reset_connection.yml for docker-runtime
 
 TASK [lv3.platform.linux_guest_firewall : Reset the SSH connection after linux_guest_firewall updates] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.linux_guest_firewall : Reset the SSH connection after linux_guest_firewall updates","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T16:25:17.063Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -219,7 +219,7 @@ ok: [docker-runtime]
 TASK [lv3.platform.common : Reset SSH connection before Docker bridge-chain recovery checks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Reset SSH connection before Docker bridge-chain recovery checks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T16:25:23.145Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Reset SSH connection before Docker bridge-chain recovery checks","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-14T16:25:23.160Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains_reset_connection.yml for docker-runtime
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/collections/ansible_collections/lv3/platform/roles/common/tasks/docker_bridge_chains_reset_connection.yml for docker-runtime
 
 TASK [lv3.platform.common : Reset the SSH connection before Docker bridge-chain recovery probes] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Reset the SSH connection before Docker bridge-chain recovery probes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T16:25:23.203Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -530,9 +530,9 @@ ok: [docker-runtime] => (item=/opt/repowise/data)
 
 TASK [lv3.platform.repowise_runtime : Sync repowise Python scripts to service dir] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.repowise_runtime : Sync repowise Python scripts to service dir","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-14T16:28:10.749Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime] => (item=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/playbooks/../scripts/repowise_corpus.py)
-ok: [docker-runtime] => (item=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/playbooks/../scripts/repowise_index.py)
-ok: [docker-runtime] => (item=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0371-final/playbooks/../scripts/repowise_service.py)
+ok: [docker-runtime] => (item=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/playbooks/../scripts/repowise_corpus.py)
+ok: [docker-runtime] => (item=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/playbooks/../scripts/repowise_index.py)
+ok: [docker-runtime] => (item=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0371-final/playbooks/../scripts/repowise_service.py)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.repowise_runtime : Sync repowise Python scripts to service dir","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-14T16:28:15.347Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.repowise_runtime : Sync platform repo to indexing dir (rsync from controller)] ***

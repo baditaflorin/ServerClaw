@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.91",
   "workflow_id": "adr-0310-activation-checklist-mainline-live-apply",
   "adr": "0310",
-  "summary": "Replayed ADR 0310 from the refreshed exact-main candidate on source commit `4125edb25791a0e025dfc13976fe847282231712`, cut repository version `0.177.144` on top of platform version `0.130.90`, converged the interactive ops portal on `docker-runtime-lv3`, and re-verified the first-run activation checklist, progressive capability reveal, and server-side launcher, runbook, and service-action guardrails on `https://ops.lv3.org` before promoting the platform lineage to `0.130.91`.",
+  "summary": "Replayed ADR 0310 from the refreshed exact-main candidate on source commit `4125edb25791a0e025dfc13976fe847282231712`, cut repository version `0.177.144` on top of platform version `0.130.90`, converged the interactive ops portal on `docker-runtime-lv3`, and re-verified the first-run activation checklist, progressive capability reveal, and server-side launcher, runbook, and service-action guardrails on `https://ops.example.com` before promoting the platform lineage to `0.130.91`.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -28,7 +28,7 @@
     {
       "kind": "service_endpoint",
       "name": "Interactive ops portal",
-      "address": "https://ops.lv3.org/"
+      "address": "https://ops.example.com/"
     }
   ],
   "verification": [
@@ -50,12 +50,12 @@
     {
       "check": "Refreshed exact-main ops portal replay",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0310-live-apply'` completed successfully with final recap `docker-runtime-lv3 : ok=192 changed=17 unreachable=0 failed=0 skipped=36`, refreshed the runtime SBOM receipt, and triggered the follow-on restic backup captured in `receipts/restic-backups/20260402T124641Z.json`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0310-live-apply'` completed successfully with final recap `docker-runtime-lv3 : ok=192 changed=17 unreachable=0 failed=0 skipped=36`, refreshed the runtime SBOM receipt, and triggered the follow-on restic backup captured in `receipts/restic-backups/20260402T124641Z.json`."
     },
     {
       "check": "Guest-local activation and progressive-reveal contract",
       "result": "pass",
-      "observed": "A final guarded journey through the repo-managed Proxmox jump path showed `HOST=docker-runtime-lv3`, `HEALTH={\"status\":\"ok\"}`, `PASS activation_partial_locked`, `PASS launcher_partial_locked`, `PASS locked_launcher_redirect /#activation`, `PASS overview_partial_locked`, `PASS locked_deploy_action`, `PASS complete_required_items`, `PASS activation_partial_unlocked`, `PASS unlocked_launcher_redirect https://sso.lv3.org`, `PASS activation_override`, `PASS launcher_partial_override`, `PASS override_launcher_redirect https://sso.lv3.org`, and `RESULT PASS`."
+      "observed": "A final guarded journey through the repo-managed Proxmox jump path showed `HOST=docker-runtime-lv3`, `HEALTH={\"status\":\"ok\"}`, `PASS activation_partial_locked`, `PASS launcher_partial_locked`, `PASS locked_launcher_redirect /#activation`, `PASS overview_partial_locked`, `PASS locked_deploy_action`, `PASS complete_required_items`, `PASS activation_partial_unlocked`, `PASS unlocked_launcher_redirect https://sso.example.com`, `PASS activation_override`, `PASS launcher_partial_override`, `PASS override_launcher_redirect https://sso.example.com`, and `RESULT PASS`."
     },
     {
       "check": "Repository automation and validation bundle",
@@ -120,7 +120,7 @@
   "notes": [
     "This exact-main receipt supersedes `2026-04-02-adr-0313-contextual-help-mainline-live-apply` as the latest canonical `ops_portal` proof because ADR 0310 re-verified the interactive portal surface later on 2026-04-02.",
     "The evidence directory intentionally preserves earlier correction-loop transcripts, including the absolute-path generator failure and the stale-canonical-truth preflight block, so another agent can audit how the final exact-main replay was repaired.",
-    "Completing the intended remote validation path required one documented manual infrastructure repair outside the repo tree: two stale April 1 build-server session workspaces were removed from `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces` with `sudo rm -rf` after the build server hit `100%` disk usage and blocked immutable snapshot uploads."
+    "Completing the intended remote validation path required one documented manual infrastructure repair outside the repo tree: two stale April 1 build-server session workspaces were removed from `/home/ops/builds/platform_server/.lv3-session-workspaces` with `sudo rm -rf` after the build server hit `100%` disk usage and blocked immutable snapshot uploads."
   ],
   "correction_loop": {
     "loop_id": "2026-04-02-adr-0310-mainline-refresh-and-verification",

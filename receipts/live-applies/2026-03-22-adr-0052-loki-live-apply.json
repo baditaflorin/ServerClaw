@@ -12,7 +12,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.118.189.95"
     },
     {
@@ -48,7 +48,7 @@
     {
       "check": "Loki host coverage",
       "result": "pass",
-      "observed": "The Loki host label values were [\"backup-lv3\",\"docker-build-lv3\",\"docker-runtime-lv3\",\"monitoring-lv3\",\"nginx-lv3\",\"postgres-lv3\",\"proxmox_florin\"]."
+      "observed": "The Loki host label values were [\"backup-lv3\",\"docker-build-lv3\",\"docker-runtime-lv3\",\"monitoring-lv3\",\"nginx-lv3\",\"postgres-lv3\",\"proxmox-host\"]."
     },
     {
       "check": "Docker runtime log streams",
@@ -63,7 +63,7 @@
     {
       "check": "Proxmox host journald ingestion",
       "result": "pass",
-      "observed": "After emitting a verification-only logger event on proxmox_florin, Loki query_range returned the adr0052-verification syslog identifier from the host journal stream."
+      "observed": "After emitting a verification-only logger event on proxmox-host, Loki query_range returned the adr0052-verification syslog identifier from the host journal stream."
     },
     {
       "check": "Tempo service names",

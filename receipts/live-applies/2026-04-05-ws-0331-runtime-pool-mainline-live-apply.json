@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,12 +40,12 @@
     {
       "kind": "service_endpoint",
       "name": "Platform API Gateway Public",
-      "address": "https://api.lv3.org/healthz"
+      "address": "https://api.example.com/healthz"
     },
     {
       "kind": "service_endpoint",
       "name": "Homepage Public",
-      "address": "https://home.lv3.org"
+      "address": "https://home.example.com"
     },
     {
       "kind": "service_endpoint",
@@ -57,17 +57,17 @@
     {
       "check": "Authoritative exact-main runtime-control replay",
       "result": "pass",
-      "observed": "The final exact-main replay preserved in `receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-control-mainline-live-apply-r28.txt` completed with zero failures across `runtime-control-lv3`, `postgres-lv3`, `proxmox_florin`, `nginx-lv3`, `monitoring-lv3`, and the remaining production guests, while the tail of the same receipt shows the runtime-control substrate route verification and the retirement of legacy control-plane copies from `docker-runtime-lv3`."
+      "observed": "The final exact-main replay preserved in `receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-control-mainline-live-apply-r28.txt` completed with zero failures across `runtime-control-lv3`, `postgres-lv3`, `proxmox-host`, `nginx-lv3`, `monitoring-lv3`, and the remaining production guests, while the tail of the same receipt shows the runtime-control substrate route verification and the retirement of legacy control-plane copies from `docker-runtime-lv3`."
     },
     {
       "check": "Runtime-pool post-apply substrate, route, and Nomad verification",
       "result": "pass",
-      "observed": "`receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-pool-post-verify-r2.txt` recorded healthy Dapr metadata on both runtime pools, successful runtime-control route checks for API Gateway, OpenFGA, and Windmill, successful runtime-general route checks for Homepage, Uptime Kuma, and Mailpit, ready Nomad clients in both the `runtime-general` and `runtime-control` namespaces, green public edge probes for `home.lv3.org`, `uptime.lv3.org`, and `status.lv3.org`, the expected mTLS-only OpenBao behavior, a healthy repo-managed `step-ca` runtime healthcheck, the retired legacy control-plane set on `docker-runtime-lv3`, and the live memory allocations plus capacity-governance summary."
+      "observed": "`receipts/live-applies/evidence/2026-04-05-ws-0331-runtime-pool-post-verify-r2.txt` recorded healthy Dapr metadata on both runtime pools, successful runtime-control route checks for API Gateway, OpenFGA, and Windmill, successful runtime-general route checks for Homepage, Uptime Kuma, and Mailpit, ready Nomad clients in both the `runtime-general` and `runtime-control` namespaces, green public edge probes for `home.example.com`, `uptime.example.com`, and `status.example.com`, the expected mTLS-only OpenBao behavior, a healthy repo-managed `step-ca` runtime healthcheck, the retired legacy control-plane set on `docker-runtime-lv3`, and the live memory allocations plus capacity-governance summary."
     },
     {
       "check": "Controller-visible public and private endpoint sweep",
       "result": "pass",
-      "observed": "`receipts/live-applies/evidence/2026-04-05-ws-0331-controller-probes-r1.json` captured green controller-side probes for `https://api.lv3.org/healthz`, `https://registry.lv3.org/api/v2.0/ping`, `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`, `https://home.lv3.org`, `https://uptime.lv3.org`, `https://status.lv3.org`, `https://vault.lv3.org/alive`, plus the private Gitea, Windmill, Semaphore, OpenFGA, and step-ca management proxies."
+      "observed": "`receipts/live-applies/evidence/2026-04-05-ws-0331-controller-probes-r1.json` captured green controller-side probes for `https://api.example.com/healthz`, `https://registry.example.com/api/v2.0/ping`, `https://sso.example.com/realms/lv3/.well-known/openid-configuration`, `https://home.example.com`, `https://uptime.example.com`, `https://status.example.com`, `https://vault.example.com/alive`, plus the private Gitea, Windmill, Semaphore, OpenFGA, and step-ca management proxies."
     },
     {
       "check": "OpenBao mTLS and step-ca health-gated runtime verification",

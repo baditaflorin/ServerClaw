@@ -1,7 +1,7 @@
-uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-main-closeout-r8/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-main-closeout-r8/scripts/build_docs_portal.py
+uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0275-main-closeout-r8/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0275-main-closeout-r8/scripts/build_docs_portal.py
 
 Running Pagefind v1.4.0 (Extended)
-Running from: "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-main-closeout-r8"
+Running from: "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0275-main-closeout-r8"
 Source:       "build/docs-portal"
 Output:       "build/docs-portal/pagefind"
 
@@ -25,4 +25,4 @@ Total:
 
 Finished in 12.830 seconds
 Published artifact secret scan passed: 2222 file(s) checked with builtin.
-Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-main-closeout-r8/build/docs-portal
+Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0275-main-closeout-r8/build/docs-portal

@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,7 +40,7 @@
     {
       "kind": "service_endpoint",
       "name": "Matrix public client API",
-      "address": "https://matrix.lv3.org"
+      "address": "https://matrix.example.com"
     },
     {
       "kind": "service_endpoint",
@@ -62,12 +62,12 @@
     {
       "check": "Synchronized exact-main Matrix replay",
       "result": "pass",
-      "observed": "`make converge-matrix-synapse` succeeded from source commit `85d330315274610b7186a3a7f7763cb5fa312c90` with final recap `docker-runtime-lv3 : ok=167 changed=12 unreachable=0 failed=0 skipped=37 rescued=0 ignored=0`, `localhost : ok=21 changed=0 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`, `nginx-lv3 : ok=39 changed=5 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0`, `postgres-lv3 : ok=63 changed=0 unreachable=0 failed=0 skipped=20 rescued=0 ignored=0`, and `proxmox_florin : ok=34 changed=1 unreachable=0 failed=0 skipped=23 rescued=0 ignored=0`; the successful transcript is recorded in `receipts/live-applies/evidence/2026-03-30-adr-0256-mainline-converge-matrix-synapse-0.177.98.txt`."
+      "observed": "`make converge-matrix-synapse` succeeded from source commit `85d330315274610b7186a3a7f7763cb5fa312c90` with final recap `docker-runtime-lv3 : ok=167 changed=12 unreachable=0 failed=0 skipped=37 rescued=0 ignored=0`, `localhost : ok=21 changed=0 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`, `nginx-lv3 : ok=39 changed=5 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0`, `postgres-lv3 : ok=63 changed=0 unreachable=0 failed=0 skipped=20 rescued=0 ignored=0`, and `proxmox-host : ok=34 changed=1 unreachable=0 failed=0 skipped=23 rescued=0 ignored=0`; the successful transcript is recorded in `receipts/live-applies/evidence/2026-03-30-adr-0256-mainline-converge-matrix-synapse-0.177.98.txt`."
     },
     {
       "check": "Controller bootstrap and public bridge verification",
       "result": "pass",
-      "observed": "The exact-main replay re-verified the shared-secret admin bootstrap through `http://100.64.0.1:8015` and the public management-room smoke on `https://matrix.lv3.org`, with both repo-managed bridge bots answering through the governed playbook path."
+      "observed": "The exact-main replay re-verified the shared-secret admin bootstrap through `http://100.64.0.1:8015` and the public management-room smoke on `https://matrix.example.com`, with both repo-managed bridge bots answering through the governed playbook path."
     },
     {
       "check": "Branch-local receipt superseded",

@@ -24,9 +24,9 @@
 - Re-verified the latest realistic `origin/main@7b72694975ef8aae83e59d96c08dd27181595b2e`
   base (`repo 0.178.142`, `platform 0.178.141`) with exact-main replays for
   `repowise`, `litellm`, and `librechat`, plus direct controller-side health
-  verification of `https://repowise.lv3.org/health`,
+  verification of `https://repowise.example.com/health`,
   `http://10.10.10.20:4000/health/liveliness`, and
-  `https://chat.lv3.org/`.
+  `https://chat.example.com/`.
 
 ## Context
 

@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Completed comprehensive migration of 53 Ansible roles (134 credential generation instances) from scattered `openssl rand` commands to unified `| secret` Jinja2 filter approach. Implemented across both deployments (lv3.org and 0fork.com) with deployment-agnostic code architecture. All real secrets now use searchable `srvclaw_` prefix, enabling pre-commit detection and prevention of credential leaks.
+Completed comprehensive migration of 53 Ansible roles (134 credential generation instances) from scattered `openssl rand` commands to unified `| secret` Jinja2 filter approach. Implemented across both deployments (example.com and 0fork.com) with deployment-agnostic code architecture. All real secrets now use searchable `srvclaw_` prefix, enabling pre-commit detection and prevention of credential leaks.
 
 **Key Metric**: Every credential generated now follows `srvclaw_<service>_<random>` pattern — zero exceptions, 100% coverage.
 
@@ -25,12 +25,12 @@ Before this migration, the codebase had:
 2. **136 distinct `openssl rand` invocations** scattered across roles
 3. **No consistent pattern** — some roles used `-base64 24`, others `-hex 32`, others complex shell chains
 4. **No universal prefix** — no way to grep for "all secrets in this code"
-5. **Multiple deployment domains** (lv3.org, 0fork.com) with **identical code** — risk of mixing secrets
+5. **Multiple deployment domains** (example.com, 0fork.com) with **identical code** — risk of mixing secrets
 
 ### Why This Matters
 
 - **Secret Leakage Risk**: Without searchable prefix, accidental commits of real credentials go undetected
-- **Multi-Repo Coordination**: Public fork (baditaflorin/ServerClaw) and private lv3.org repo both use same codebase; secrets must be deployment-aware
+- **Multi-Repo Coordination**: Public fork (baditaflorin/ServerClaw) and private example.com repo both use same codebase; secrets must be deployment-aware
 - **Credential Rotation**: No single place to update credential generation logic
 - **Audit Trail**: Impossible to identify which version of a role generated which secret
 
@@ -72,7 +72,7 @@ my_secret: "{{ 'servicename' | secret }}"
     my_password: "{{ 'servicename' | secret }}"
 ```
 
-The filter doesn't know or care about lv3.org vs. 0fork.com — it generates the same secret format for both. The domain comes from `.local/identity.yml` at runtime (ADR 0407).
+The filter doesn't know or care about example.com vs. 0fork.com — it generates the same secret format for both. The domain comes from `.local/identity.yml` at runtime (ADR 0407).
 
 **2. Service Name Derivation**
 Migration script automatically extracts service name from Ansible role path:
@@ -100,7 +100,7 @@ $ git commit -am "Add new secret generation"
 | **Files migrated** | 53 Ansible role files |
 | **Total replacements** | 134 `openssl rand` invocations |
 | **Unique services affected** | 53 (1 per role) |
-| **Deployments covered** | 2 (lv3.org + 0fork.com) |
+| **Deployments covered** | 2 (example.com + 0fork.com) |
 | **Script runtime** | < 1 second |
 
 ### Files Updated
@@ -148,12 +148,12 @@ my_config_secret: "{{ 'servicename' | secret(length=32) }}"
 
 ### Repository Structure
 
-**Private Repo (lv3.org)**
+**Private Repo (example.com)**
 ```
-proxmox-florin-server/
+proxmox-host-server/
 ├── collections/ansible_collections/lv3/platform/roles/
 │   └── <53 roles with | secret filter>
-├── .local/identity.yml (platform_domain: lv3.org)
+├── .local/identity.yml (platform_domain: example.com)
 ├── .local/active-deployment (lv3)
 └── .local/dbeaver/database-password.txt (real secret, gitignored)
 ```
@@ -175,7 +175,7 @@ ServerClaw/
    - No hardcoded domains or secrets in code
 
 2. **Deployment-Specific Overrides**
-   - Private repo: `.local/identity.yml` → domain = lv3.org
+   - Private repo: `.local/identity.yml` → domain = example.com
    - Public fork: User's own `.local/identity.yml` → domain = their-domain.com
    - Filter respects deployment context at **runtime**, not build time
 
@@ -259,7 +259,7 @@ The existing publish pipeline (sync private → public fork) already handles thi
 
 2. **Code is deployment-agnostic**
    - `| secret` filter works identically on both domains
-   - No `example.com` vs. `lv3.org` hardcoding
+   - No `example.com` vs. `example.com` hardcoding
 
 3. **Pre-commit hook prevents mistakes**
    - Any `srvclaw_` leaked to Git is caught before push
@@ -296,7 +296,7 @@ grep -r "openssl rand" collections/ | wc -l
 
 ### Deployment Compatibility
 
-- ✅ Works on lv3.org (private repo)
+- ✅ Works on example.com (private repo)
 - ✅ Works on 0fork.com (public fork)
 - ✅ Works on any fork of ServerClaw
 - ✅ Uses deployment-specific domain from `.local/identity.yml`
@@ -373,14 +373,14 @@ my_secret: "{{ 'servicename' | secret }}"
 
 **Multi-Repo Readiness**: ✅ COMPLETE
 
-- Private repo (lv3.org): Fully migrated
+- Private repo (example.com): Fully migrated
 - Public fork (0fork.com): Code path ready for any deployer
 - Pre-commit safety: Both repos protected
 
 **Credential Safety Metrics**:
 - **Coverage**: 100% of Ansible-generated credentials now use srvclaw_ prefix
 - **Searchability**: `grep srvclaw_` finds all real secrets
-- **Deployment**: Works for lv3.org, 0fork.com, and any fork without modification
+- **Deployment**: Works for example.com, 0fork.com, and any fork without modification
 
 ---
 
@@ -398,7 +398,7 @@ my_secret: "{{ 'servicename' | secret }}"
 
 **Next Steps**:
 1. ✅ Commit migration (this session)
-2. ⏳ Test convergence with new filter on lv3.org
+2. ⏳ Test convergence with new filter on example.com
 3. ⏳ Verify credentials generated with srvclaw_ prefix
 4. ⏳ Publish to ServerClaw fork (automatic via sync pipeline)
 5. ⏳ Version bump: next release includes ADR 0480 Phase 3

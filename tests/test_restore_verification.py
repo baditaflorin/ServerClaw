@@ -83,7 +83,7 @@ def test_build_restored_guest_ssh_command_honors_breakglass_port() -> None:
         {
             "bootstrap_key": Path("/tmp/bootstrap.id_ed25519"),
             "host_user": "ops",
-            "host_addr": "65.108.75.123",
+            "host_addr": "203.0.113.1",
             "host_port": "2222",
         },
         "10.10.10.20",

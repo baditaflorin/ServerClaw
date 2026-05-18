@@ -207,7 +207,7 @@ ownership_manifest:
 progress:
   completed_2026_04_21:
     - Hetzner DNS API token verified against zone 0fork.com (id RmJf7JFvpQNfWdEZmhAeEK)
-    - SSH access to 65.109.84.223 confirmed with llm-agents@proxmox_florin_server key
+    - SSH access to 65.109.84.223 confirmed with llm-agents@platform_server key
     - Host key fingerprint pinned (ED25519 9xWVsKZxKXoBR3O9369Ixj/Ke/qwiLQ5SBDli/STwVk)
     - Hardware inventory captured (Ryzen 3600, 62 GiB, 2x476 GB NVMe, /dev/kvm present)
     - ADR 0424 drafted
@@ -242,7 +242,7 @@ progress:
     - Converge postgres, mail-platform, runtime-apps, monitoring, nginx-edge
     - Create DNS records on 0fork.com (wildcard already covers them; blocked on API brownout)
     - Provision operator@0fork.com mailbox
-    - Send confirmation email from operator@0fork.com to baditaflorin@gmail.com
+    - Send confirmation email from operator@0fork.com to operator@example.com
     - Capture live-apply evidence and close workstream
 notes: >
   This workstream was started while the operator was AFK. Destructive actions

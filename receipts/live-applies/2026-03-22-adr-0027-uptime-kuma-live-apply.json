@@ -8,7 +8,7 @@
   "repo_version_context": "0.28.0",
   "workflow_id": "deploy-uptime-kuma",
   "adr": "0027",
-  "summary": "Applied Uptime Kuma live on docker-runtime-lv3, published it at uptime.lv3.org, and bootstrapped repo-managed local auth state.",
+  "summary": "Applied Uptime Kuma live on docker-runtime-lv3, published it at uptime.example.com, and bootstrapped repo-managed local auth state.",
   "targets": [
     {
       "kind": "vm",
@@ -18,7 +18,7 @@
     },
     {
       "kind": "public_hostname",
-      "name": "uptime.lv3.org"
+      "name": "uptime.example.com"
     }
   ],
   "verification": [
@@ -30,7 +30,7 @@
     {
       "check": "Public publication",
       "result": "pass",
-      "observed": "uptime.lv3.org served Uptime Kuma through the NGINX edge."
+      "observed": "uptime.example.com served Uptime Kuma through the NGINX edge."
     },
     {
       "check": "Repo-local management bootstrap",

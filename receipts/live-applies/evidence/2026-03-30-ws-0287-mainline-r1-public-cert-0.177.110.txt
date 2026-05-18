@@ -1,4 +1,4 @@
-subject=CN=ci.lv3.org
+subject=CN=ci.example.com
 issuer=C=US, O=Let's Encrypt, CN=E7
 X509v3 Subject Alternative Name:
-    DNS:ci.lv3.org
+    DNS:ci.example.com

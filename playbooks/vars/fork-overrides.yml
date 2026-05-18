@@ -267,7 +267,7 @@ playbook_execution_health_probe_overrides:
 
 # --- Woodpecker artifact path isolation ---
 # The woodpecker bootstrap play resolves artifact paths from repo_shared_local_root/woodpecker/.
-# On 0fork the seed repo is ops/proxmox_florin_server (not the production ops/platform),
+# On 0fork the seed repo is ops/platform_server (not the production ops/platform),
 # so we redirect the bootstrap spec and output artifacts to the 0fork-specific paths
 # to avoid polluting or being confused by the production woodpecker local directory.
 woodpecker_bootstrap_spec_file: "{{ repo_shared_local_root }}/0fork/woodpecker/bootstrap-spec.json"

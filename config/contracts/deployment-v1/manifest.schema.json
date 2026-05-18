@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schemas/deployment-v1/manifest.json",
+  "$id": "https://example.com/schemas/deployment-v1/manifest.json",
   "title": "Deployment Manifest",
   "description": "Single declarative input that drives hands-off bootstrap (ADR 0483). An operator authors this one file; everything else — identity.yml, connection.yml, topology.yml, profile.yml — is derived from it plus the probe results.",
   "type": "object",

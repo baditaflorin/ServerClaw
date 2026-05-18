@@ -1,8 +1,8 @@
 Checking SSH connectivity to ops@10.10.10.30
 build-server-ok
-Checking remote workspace root /home/ops/builds/proxmox_florin_server
-Checking remote session workspace /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0333-private-overlay-998122afc0/repo
-/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0333-private-overlay-998122afc0/repo
+Checking remote workspace root /home/ops/builds/platform_server
+Checking remote session workspace /home/ops/builds/platform_server/.lv3-session-workspaces/ws-0333-private-overlay-998122afc0/repo
+/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0333-private-overlay-998122afc0/repo
 Checking immutable snapshot dry-run upload from codex/ws-0333-private-overlay@20a66bbf088d1aa456d34f173fd8e2c8664f4c20
 Transfer starting: 1 files
 repository-snapshot-87bb92268c321db5683884346fdf878f33ebdaf0f88f15c380256e1a7c10fe84.tar.gz

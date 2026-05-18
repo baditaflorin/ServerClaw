@@ -14,9 +14,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -42,7 +42,7 @@
     {
       "kind": "service_endpoint",
       "name": "openfga-gateway",
-      "address": "https://api.lv3.org/v1/openfga"
+      "address": "https://api.example.com/v1/openfga"
     }
   ],
   "verification": [
@@ -59,12 +59,12 @@
     {
       "check": "Delegated authorization store and tuple verification",
       "result": "pass",
-      "observed": "`curl -fsS -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores` returned the `serverclaw-authz` store, and `python3 scripts/serverclaw_authz.py verify --config config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091` returned `verification_passed: true`."
+      "observed": "`curl -fsS -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores` returned the `serverclaw-authz` store, and `python3 scripts/serverclaw_authz.py verify --config config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091` returned `verification_passed: true`."
     },
     {
       "check": "Runtime token issuance and governed gateway protection",
       "result": "pass",
-      "observed": "A direct client-credentials request for `serverclaw-runtime` against `http://10.10.10.20:8091/realms/lv3/protocol/openid-connect/token` returned `token_type: Bearer` with the expected scope, and `https://api.lv3.org/v1/openfga/healthz` returned the canonical `AUTH_INSUFFICIENT_ROLE` envelope for the `lv3-agent-hub` bearer token, proving the route is live and still protected by the expected role gate."
+      "observed": "A direct client-credentials request for `serverclaw-runtime` against `http://10.10.10.20:8091/realms/lv3/protocol/openid-connect/token` returned `token_type: Bearer` with the expected scope, and `https://api.example.com/v1/openfga/healthz` returned the canonical `AUTH_INSUFFICIENT_ROLE` envelope for the `lv3-agent-hub` bearer token, proving the route is live and still protected by the expected role gate."
     }
   ],
   "evidence_refs": [

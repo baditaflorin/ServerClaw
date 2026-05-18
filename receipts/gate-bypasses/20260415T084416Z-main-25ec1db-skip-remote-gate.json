@@ -19,7 +19,7 @@
       "./scripts/remote_exec.sh check-build-server",
       "make remote-validate"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-16",
     "remediation_ref": "ws-0372-live-apply"
   }
