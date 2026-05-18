@@ -208,7 +208,13 @@ workstreams:
   - id: t16-sanitization-enforce
     title: Extend scripts/audit_sanitization.py to block lv3.org/0fork.com/65.109.84.223/65.108.75.123
       in committed files outside docs/adr/
-    status: pending
+    status: completed
+  - id: t18-audit-sanitization
+    title: "Wave 4 \u2014 scripts/audit_sanitization.py blocks lv3.org/0fork.com/0mpc.com/65.109.84.223/65.108.75.123/2a01:4f9:6b:4b47\
+      \ in committed files outside the allowed contexts (docs/adr/, docs/release-notes/,\
+      \ docs/runbooks/, changelog.md, receipts/, workstreams/, workstreams.yaml, build/,\
+      \ RELEASE.md) + tests/unit/test_audit_sanitization.py"
+    status: completed
   - id: t17-pre-push-gate
     title: Run pre-push gate end-to-end on the rebased branch; address any cert-validator
       preexisting failures with documented bypass
