@@ -158,6 +158,37 @@
   when: item.name not in step_ca_provisioner_list.stdout
   changed_when: true
 
+- name: Reconcile step-ca provisioner x509 max cert duration
+  ansible.builtin.shell: |
+    set -euo pipefail
+    python3 - <<'PY'
+    import json
+    from pathlib import Path
+
+    path = Path("{{ step_ca_home }}/config/ca.json")
+    payload = json.loads(path.read_text())
+    provisioners = payload.get("authority", {}).get("provisioners", [])
+    desired_durations = {{ step_ca_provisioner_max_tls_cert_durations | to_json }}
+    changed = False
+
+    for prov in provisioners:
+        name = prov.get("name")
+        if name in desired_durations:
+            target = desired_durations[name]
+            claims = prov.setdefault("claims", {})
+            if claims.get("maxTLSCertDuration") != target:
+                claims["maxTLSCertDuration"] = target
+                changed = True
+
+    if changed:
+        path.write_text(json.dumps(payload, indent=2) + "\n")
+        print("changed")
+    PY
+  args:
+    executable: /bin/bash
+  register: step_ca_provisioner_duration_sync
+  changed_when: "'changed' in step_ca_provisioner_duration_sync.stdout"
+
 - name: Ensure step-ca server names match the current controller topology
   ansible.builtin.shell: |
     set -euo pipefail
@@ -367,7 +398,7 @@
     or 'Recreating' in step_ca_up.stdout
     or 'Starting' in step_ca_up.stdout
 
-- name: Restart step-ca after controller SAN changes
+- name: Restart step-ca after controller SAN changes or provisioner duration changes
   ansible.builtin.command:
     argv:
       - docker
@@ -378,7 +409,7 @@
       - step-ca
   args:
     chdir: "{{ step_ca_site_dir }}"
-  when: step_ca_server_names_sync.changed
+  when: step_ca_server_names_sync.changed or step_ca_provisioner_duration_sync.changed
   changed_when: true
 
 - name: Wait for the private step-ca API to listen locally
