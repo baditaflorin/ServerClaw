@@ -649,6 +649,7 @@
         and openbao_legacy_restore_source_host in groups['all']
         and not (openbao_init_status_payload.initialized | default(false) | bool)
         and openbao_init_payload_local.stat.exists
+        and (openbao_existing_init_payload.root_token | default('')) | length > 0
       }}
   no_log: true
 
