@@ -89,7 +89,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8080
-      upstream_host: runtime-control
+      upstream_host: runtime-control-lv3
       public_fqdn: api.{{ platform_domain }}
       auth_proxy: false             # upstream handles its own auth
   # END SERVICE: api_gateway
@@ -145,7 +145,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8000
-      upstream_host: coolify
+      upstream_host: coolify-lv3
       public_fqdn: coolify.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: coolify
@@ -177,9 +177,9 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "agents.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
         - hostname: "dify.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
     dns:
       records:
         - fqdn: "agents.{{ platform_domain }}"
@@ -207,7 +207,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8094
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: agents.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: dify
@@ -231,9 +231,9 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "data.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
     dns:
       records:
         - fqdn: "data.{{ platform_domain }}"
@@ -261,7 +261,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8055
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: data.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
   # END SERVICE: directus
@@ -290,7 +290,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8089
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: logs.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: dozzle
@@ -323,7 +323,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3095
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: draw.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: excalidraw
@@ -359,7 +359,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8017
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: flags.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: flagsmith
@@ -435,7 +435,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3005
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: errors.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
   # END SERVICE: glitchtip
@@ -464,9 +464,9 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "grist.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
     dns:
       records:
         - fqdn: "grist.{{ platform_domain }}"
@@ -494,7 +494,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8484
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: grist.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
   # END SERVICE: grist
@@ -539,7 +539,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8095
-      upstream_host: runtime-control
+      upstream_host: runtime-control-lv3
       public_fqdn: registry.{{ platform_domain }}
       auth_proxy: false             # harbor has its own auth; OCI clients authenticate directly
   # END SERVICE: harbor
@@ -556,7 +556,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3090
-      upstream_host: runtime-general
+      upstream_host: runtime-general-lv3
       public_fqdn: home.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: homepage
@@ -577,7 +577,7 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
     dns:
       records:
         - fqdn: "sso.{{ platform_domain }}"
@@ -593,7 +593,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8091
-      upstream_host: runtime-control
+      upstream_host: runtime-control-lv3
       public_fqdn: sso.{{ platform_domain }}
       auth_proxy: false             # Keycloak IS the SSO provider; cannot front itself
       extra_fqdns:
@@ -629,7 +629,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8110
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: annotate.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: label_studio
@@ -659,7 +659,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8099
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: billing.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: lago
@@ -679,9 +679,9 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "langfuse.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
     dns:
       records:
         - fqdn: "langfuse.{{ platform_domain }}"
@@ -709,7 +709,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3002
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: langfuse.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
   # END SERVICE: langfuse
@@ -738,7 +738,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 7880
-      upstream_host: runtime-comms
+      upstream_host: runtime-comms-lv3
       public_fqdn: livekit.{{ platform_domain }}
       auth_proxy: false             # LiveKit SDK handles token-based auth
       websocket: true               # LiveKit uses WebSockets / WebRTC signalling
@@ -807,7 +807,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8008
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: matrix.{{ platform_domain }}
       auth_proxy: false             # Matrix handles its own auth via homeserver
       websocket: true               # Matrix client-server API uses WebSockets
@@ -859,7 +859,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 9010
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: minio.{{ platform_domain }}
       auth_proxy: false             # MinIO S3 API uses access-key auth
   # END SERVICE: minio
@@ -896,7 +896,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 5678
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: n8n.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       websocket: true               # n8n uses WebSockets for workflow execution events
@@ -951,7 +951,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8084
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: cloud.{{ platform_domain }}
       auth_proxy: false             # Nextcloud has native OIDC via Keycloak
       max_body_size: 4096m          # large file uploads
@@ -981,7 +981,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 2586
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: ntfy.{{ platform_domain }}
       auth_proxy: false             # ntfy has its own access-control layer
   # END SERVICE: ntfy
@@ -1059,7 +1059,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8092
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: ops.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       unauthenticated_prefix_paths:
@@ -1104,7 +1104,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8101
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: repo-intake.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       unauthenticated_prefix_paths:
@@ -1128,9 +1128,9 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "wiki.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
     dns:
       records:
         - fqdn: "wiki.{{ platform_domain }}"
@@ -1158,7 +1158,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3006
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: wiki.{{ platform_domain }}
       auth_proxy: false             # Outline OIDC via Keycloak handles auth
       websocket: true               # Outline real-time collab uses WebSockets
@@ -1184,9 +1184,9 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "paperless.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
     dns:
       records:
         - fqdn: "paperless.{{ platform_domain }}"
@@ -1214,7 +1214,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8018
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: paperless.{{ platform_domain }}
       auth_proxy: false             # upstream Keycloak OIDC handles auth
       max_body_size: 256m           # large document uploads
@@ -1256,7 +1256,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8093
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: tasks.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       websocket: true               # Plane uses WebSockets for real-time updates
@@ -1286,7 +1286,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8016
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: analytics.{{ platform_domain }}
       auth_proxy: true              # dashboard gated; /js/ and /api/event are unauthenticated paths
   # END SERVICE: plausible
@@ -1352,7 +1352,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 7070
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: repowise.{{ platform_domain }}
       auth_proxy: false             # upstream auth handles its own access control
   # END SERVICE: repowise
@@ -1401,9 +1401,9 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "files.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
     dns:
       records:
         - fqdn: "files.{{ platform_domain }}"
@@ -1454,9 +1454,9 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "bi.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
     dns:
       records:
         - fqdn: "bi.{{ platform_domain }}"
@@ -1484,7 +1484,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8105
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: bi.{{ platform_domain }}
       auth_proxy: false             # Superset native Keycloak OIDC handles auth
   # END SERVICE: superset
@@ -1566,7 +1566,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 3001
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: uptime.{{ platform_domain }}
       auth_proxy: false             # upstream auth handles its own access control
       websocket: true               # Uptime Kuma uses WebSockets for live status updates
@@ -1655,7 +1655,7 @@ platform_service_registry:
     proxy:
       enabled: true
       upstream_port: 8102
-      upstream_host: docker-runtime
+      upstream_host: docker-runtime-lv3
       public_fqdn: ci.{{ platform_domain }}
       auth_proxy: false             # Woodpecker has native Gitea OAuth handles auth
       websocket: true               # Woodpecker uses WebSockets for live build logs
@@ -1764,13 +1764,13 @@ platform_service_registry:
     hairpin:
       publish:
         - hostname: "chat.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
         - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx
+          address_host: nginx-lv3
     proxy:
       enabled: true
       upstream_port: 8096
-      upstream_host: coolify
+      upstream_host: coolify-lv3
       public_fqdn: chat.{{ platform_domain }}
       auth_proxy: false             # upstream handles OIDC directly
       websocket: true

@@ -427,53 +427,53 @@ playbook_execution_host_patterns:
     staging: "backup_guests:&staging"
     clone: "backup_guests:&production"
   coolify:
-    production: coolify
+    production: coolify-lv3
     staging: coolify-staging
-    clone: coolify
+    clone: coolify-lv3
   coolify_apps:
-    production: coolify-apps
+    production: coolify-apps-lv3
     staging: coolify-apps-staging
-    clone: coolify-apps
+    clone: coolify-apps-lv3
   nginx_edge:
-    production: nginx
+    production: nginx-lv3
     staging: nginx-staging
-    clone: nginx
+    clone: nginx-lv3
   docker_runtime:
-    production: docker-runtime
+    production: docker-runtime-lv3
     staging: docker-runtime-staging
-    clone: docker-runtime
+    clone: docker-runtime-lv3
   runtime_ai:
-    production: runtime-ai
+    production: runtime-ai-lv3
     staging: docker-runtime-staging
-    clone: runtime-ai
+    clone: runtime-ai-lv3
   runtime_control:
-    production: runtime-control
+    production: runtime-control-lv3
     staging: docker-runtime-staging
-    clone: runtime-control
+    clone: runtime-control-lv3
   runtime_general:
-    production: runtime-general
+    production: runtime-general-lv3
     staging: docker-runtime-staging
-    clone: runtime-general
+    clone: runtime-general-lv3
   runtime_comms:
-    production: runtime-comms
+    production: runtime-comms-lv3
     staging: docker-runtime-staging
-    clone: runtime-comms
+    clone: runtime-comms-lv3
   docker_build:
-    production: docker-build
+    production: docker-build-lv3
     staging: docker-build-staging
-    clone: docker-build
+    clone: docker-build-lv3
   monitoring:
-    production: monitoring
+    production: monitoring-lv3
     staging: monitoring-staging
-    clone: monitoring
+    clone: monitoring-lv3
   postgres:
-    production: postgres
+    production: postgres-lv3
     staging: postgres-staging
-    clone: postgres
+    clone: postgres-lv3
   backup:
-    production: backup
+    production: backup-lv3
     staging: backup-staging
-    clone: backup
+    clone: backup-lv3
 playbook_execution_required_hosts:
   # ADR 0430 — `clone` entries mirror `production` (fork deployments share service names).
   proxmox_hosts:
@@ -485,50 +485,50 @@ playbook_execution_required_hosts:
     staging: "lv3_guests:&staging"
     clone: "lv3_guests:&production"
   nginx_edge:
-    production: nginx
+    production: nginx-lv3
     staging: nginx-staging
-    clone: nginx
+    clone: nginx-lv3
   docker_runtime:
-    production: docker-runtime
+    production: docker-runtime-lv3
     staging: docker-runtime-staging
-    clone: docker-runtime
+    clone: docker-runtime-lv3
   runtime_control:
-    production: runtime-control
+    production: runtime-control-lv3
     staging: docker-runtime-staging
-    clone: runtime-control
+    clone: runtime-control-lv3
   docker_build:
-    production: docker-build
+    production: docker-build-lv3
     staging: docker-build-staging
-    clone: docker-build
+    clone: docker-build-lv3
   runtime_ai:
-    production: runtime-ai
+    production: runtime-ai-lv3
     staging: docker-runtime-staging
-    clone: runtime-ai
+    clone: runtime-ai-lv3
   runtime_general:
-    production: runtime-general
+    production: runtime-general-lv3
     staging: docker-runtime-staging
-    clone: runtime-general
+    clone: runtime-general-lv3
   runtime_comms:
-    production: runtime-comms
+    production: runtime-comms-lv3
     staging: docker-runtime-staging
-    clone: runtime-comms
+    clone: runtime-comms-lv3
   monitoring:
-    production: monitoring
+    production: monitoring-lv3
     staging: monitoring-staging
-    clone: monitoring
+    clone: monitoring-lv3
   postgres:
-    production: postgres
+    production: postgres-lv3
     staging: postgres-staging
-    clone: postgres
+    clone: postgres-lv3
   backup:
-    production: backup
+    production: backup-lv3
     staging: backup-staging
-    clone: backup
+    clone: backup-lv3
   coolify:
-    production: coolify
+    production: coolify-lv3
     staging: coolify-staging
-    clone: coolify
+    clone: coolify-lv3
   coolify_apps:
-    production: coolify-apps
+    production: coolify-apps-lv3
     staging: coolify-apps-staging
-    clone: coolify-apps
+    clone: coolify-apps-lv3

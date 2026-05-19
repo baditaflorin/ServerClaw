@@ -112,10 +112,19 @@ def build_host_vars(facts: dict[str, str], identity: dict[str, Any], topology: d
         out["management_ipv6"] = facts["ipv6"]
         out["management_ipv6_cidr"] = int(facts["ipv6_cidr"])
         out["management_gateway6"] = facts.get("gateway6", "fe80::1")
-    # Inventory overlay needs the proxmox_guests list so generate_inventory.py
-    # can build the overlay hosts.yml that names the real guest VMs.
+    # NOTE: we intentionally do NOT emit `proxmox_guests` in the overlay.
+    # The committed inventory/host_vars/proxmox-host.yml carries the full
+    # `<vm>-lv3` guest catalog (17 entries today) and downstream scripts
+    # like generate_platform_vars.build_service_topology look up IPs by
+    # owning_vm in that catalog — if our overlay replaced the list with
+    # only the 5 currently-deployed VMs, references to the other 12 would
+    # KeyError. As long as the resolver's vmid + ipv4 + name choices align
+    # with the committed catalog (they do: 110/10.10.10.10/nginx-lv3 etc.),
+    # the committed list works for our deployment too.
+    # Generate-inventory still needs to know which guests exist for the
+    # current deployment — that comes from the topology, not host_vars.
     guests = topology.get("proxmox_guests") or []
-    if guests:
+    if False:  # disabled per the comment above
         out["proxmox_guests"] = guests
         # Each guest needs a `network_policy.guests.<name>` entry — without
         # it `linux_guest_firewall` asserts and the role fails. Generate a

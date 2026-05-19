@@ -37,7 +37,7 @@ BOOTSTRAP_OVERLAY_INVENTORY ?= $(LOCAL_OVERLAY_ROOT)/inventory/hosts.yml
 # init-remote has created the ops sudoer. Provider-supplied root access is
 # only used for the init-remote step via BOOTSTRAP_OVERLAY_ROOT_KEY below.
 BOOTSTRAP_OVERLAY_SSH_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519
-BOOTSTRAP_OVERLAY_ENV ?= clone
+BOOTSTRAP_OVERLAY_ENV ?= production
 # management_ipv4 lives in host_vars (the host-level network config),
 # not in identity.yml (the deployment-level identity). ADR 0488 split
 # the two; we read from the host_vars overlay first and fall back to
@@ -641,7 +641,7 @@ validate-generated-readme: ## Exit 1 if README.md is out of sync with docs/templ
 
 generate-platform-vars:
 	$(MAKE) generate-cross-cutting-artifacts
-	PYTHONPATH=$(REPO_ROOT) python3 $(REPO_ROOT)/scripts/generate_platform_vars.py --write $(DEPLOYMENT_ARG)
+	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_platform_vars.py --write $(DEPLOYMENT_ARG)
 
 generate-slo-rules:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --write
@@ -1227,7 +1227,14 @@ configure-edge-publication:
 	$(MAKE) preflight WORKFLOW=configure-edge-publication
 	$(MAKE) generate-platform-vars
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --write-registry --validate
-	$(MAKE) generate-changelog-portal docs
+	# Portal generation is best-effort during the initial bootstrap:
+	# changelog-portal / docs / ops-portal validate platform data models
+	# that are still being seeded (capacity-model status, service-catalog
+	# alignment, edge_oidc-protected subdomains, etc.). They are not
+	# load-bearing for the NGINX route apply that follows. A fresh-host
+	# bootstrap can finish step 7 with the portals empty; the operator
+	# regenerates them after the rest of the chain converges.
+	$(MAKE) generate-changelog-portal docs || echo "WARN: portal generation incomplete; routes still apply"
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/public-edge.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
 	$(MAKE) validate-certificates
 

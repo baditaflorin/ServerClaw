@@ -3,7 +3,7 @@
   "services": {
     "alertmanager": {
       "service_name": "alertmanager",
-      "owning_vm": "monitoring",
+      "owning_vm": "monitoring-lv3",
       "role": "alertmanager_runtime",
       "verify_file": "roles/alertmanager_runtime/tasks/verify.yml",
       "liveness": {
@@ -37,7 +37,7 @@
     },
     "api_gateway": {
       "service_name": "api-gateway",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "api_gateway_runtime",
       "verify_file": "roles/api_gateway_runtime/tasks/verify.yml",
       "startup": {
@@ -104,7 +104,7 @@
     },
     "backup_pbs": {
       "service_name": "backup-pbs",
-      "owning_vm": "backup",
+      "owning_vm": "backup-lv3",
       "role": "backup_vm",
       "verify_file": "roles/backup_vm/tasks/verify.yml",
       "liveness": {
@@ -153,7 +153,7 @@
     },
     "browser_runner": {
       "service_name": "browser-runner",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "browser_runner_runtime",
       "verify_file": "roles/browser_runner_runtime/tasks/verify.yml",
       "liveness": {
@@ -199,7 +199,7 @@
     },
     "changedetection": {
       "service_name": "changedetection",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "changedetection_runtime",
       "verify_file": "roles/changedetection_runtime/tasks/verify.yml",
       "startup": {
@@ -246,7 +246,7 @@
     },
     "coolify": {
       "service_name": "coolify",
-      "owning_vm": "coolify",
+      "owning_vm": "coolify-lv3",
       "role": "coolify_runtime",
       "verify_file": "roles/coolify_runtime/tasks/verify.yml",
       "liveness": {
@@ -292,7 +292,7 @@
     },
     "coolify_apps": {
       "service_name": "coolify-apps",
-      "owning_vm": "coolify-apps",
+      "owning_vm": "coolify-apps-lv3",
       "role": "coolify_apps_runtime",
       "verify_file": "roles/coolify_runtime/tasks/verify.yml",
       "liveness": {
@@ -332,7 +332,7 @@
     },
     "crawl4ai": {
       "service_name": "crawl4ai",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "crawl4ai_runtime",
       "verify_file": "roles/crawl4ai_runtime/tasks/verify.yml",
       "startup": {
@@ -391,7 +391,7 @@
     },
     "dify": {
       "service_name": "dify",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "dify_runtime",
       "verify_file": "roles/dify_runtime/tasks/verify.yml",
       "startup": {
@@ -455,7 +455,7 @@
     },
     "directus": {
       "service_name": "directus",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "directus_runtime",
       "verify_file": "roles/directus_runtime/tasks/verify.yml",
       "startup": {
@@ -525,7 +525,7 @@
     },
     "docker_build": {
       "service_name": "docker-build",
-      "owning_vm": "docker-build",
+      "owning_vm": "docker-build-lv3",
       "role": null,
       "verify_file": null,
       "liveness": {
@@ -568,7 +568,7 @@
     },
     "docker_runtime": {
       "service_name": "docker-runtime",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "docker_runtime",
       "verify_file": "roles/docker_runtime/tasks/verify.yml",
       "liveness": {
@@ -604,7 +604,7 @@
     },
     "dozzle": {
       "service_name": "dozzle",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "dozzle_runtime",
       "verify_file": "roles/dozzle_runtime/tasks/verify.yml",
       "liveness": {
@@ -650,7 +650,7 @@
     },
     "excalidraw": {
       "service_name": "excalidraw",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "excalidraw_runtime",
       "verify_file": "roles/excalidraw_runtime/tasks/verify.yml",
       "liveness": {
@@ -696,7 +696,7 @@
     },
     "flagsmith": {
       "service_name": "flagsmith",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "flagsmith_runtime",
       "verify_file": "roles/flagsmith_runtime/tasks/verify.yml",
       "startup": {
@@ -766,7 +766,7 @@
     },
     "gitea": {
       "service_name": "gitea",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "gitea_runtime",
       "verify_file": "roles/gitea_runtime/tasks/verify.yml",
       "liveness": {
@@ -819,7 +819,7 @@
     },
     "glitchtip": {
       "service_name": "glitchtip",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "glitchtip_runtime",
       "verify_file": "roles/glitchtip_runtime/tasks/verify.yml",
       "startup": {
@@ -892,7 +892,7 @@
     },
     "gotenberg": {
       "service_name": "gotenberg",
-      "owning_vm": "runtime-ai",
+      "owning_vm": "runtime-ai-lv3",
       "role": "gotenberg_runtime",
       "verify_file": "roles/gotenberg_runtime/tasks/verify.yml",
       "startup": {
@@ -939,7 +939,7 @@
     },
     "grafana": {
       "service_name": "grafana",
-      "owning_vm": "monitoring",
+      "owning_vm": "monitoring-lv3",
       "role": "monitoring_vm",
       "verify_file": "roles/monitoring_vm/tasks/verify.yml",
       "liveness": {
@@ -988,7 +988,7 @@
     },
     "grist": {
       "service_name": "grist",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "grist_runtime",
       "verify_file": "roles/grist_runtime/tasks/verify.yml",
       "startup": {
@@ -1046,7 +1046,7 @@
     },
     "harbor": {
       "service_name": "harbor",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "harbor_runtime",
       "verify_file": "roles/harbor_runtime/tasks/verify.yml",
       "liveness": {
@@ -1155,7 +1155,7 @@
     },
     "homepage": {
       "service_name": "homepage",
-      "owning_vm": "runtime-general",
+      "owning_vm": "runtime-general-lv3",
       "role": "homepage_runtime",
       "verify_file": "roles/homepage_runtime/tasks/verify.yml",
       "liveness": {
@@ -1207,7 +1207,7 @@
     },
     "keycloak": {
       "service_name": "keycloak",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "keycloak_runtime",
       "verify_file": "roles/keycloak_runtime/tasks/verify.yml",
       "startup": {
@@ -1290,7 +1290,7 @@
     },
     "label_studio": {
       "service_name": "label_studio",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "label_studio_runtime",
       "verify_file": "roles/label_studio_runtime/tasks/verify.yml",
       "startup": {
@@ -1349,7 +1349,7 @@
     },
     "lago": {
       "service_name": "lago",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "lago_runtime",
       "verify_file": "roles/lago_runtime/tasks/verify.yml",
       "startup": {
@@ -1419,7 +1419,7 @@
     },
     "langfuse": {
       "service_name": "langfuse",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "langfuse_runtime",
       "verify_file": "roles/langfuse_runtime/tasks/verify.yml",
       "startup": {
@@ -1489,7 +1489,7 @@
     },
     "librechat": {
       "service_name": "librechat",
-      "owning_vm": "coolify",
+      "owning_vm": "coolify-lv3",
       "role": "librechat_runtime",
       "verify_file": "roles/librechat_runtime/tasks/verify.yml",
       "startup": {
@@ -1547,7 +1547,7 @@
     },
     "litellm": {
       "service_name": "litellm",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "litellm_runtime",
       "verify_file": "roles/litellm_runtime/tasks/verify.yml",
       "startup": {
@@ -1593,7 +1593,7 @@
     },
     "livekit": {
       "service_name": "livekit",
-      "owning_vm": "runtime-comms",
+      "owning_vm": "runtime-comms-lv3",
       "role": "livekit_runtime",
       "verify_file": "roles/livekit_runtime/tasks/verify.yml",
       "startup": {
@@ -1647,7 +1647,7 @@
     },
     "mail_platform": {
       "service_name": "mail-platform",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "mail_platform_runtime",
       "verify_file": "roles/mail_platform_runtime/tasks/verify.yml",
       "liveness": {
@@ -1697,7 +1697,7 @@
     },
     "mailpit": {
       "service_name": "mailpit",
-      "owning_vm": "runtime-general",
+      "owning_vm": "runtime-general-lv3",
       "role": "mailpit_runtime",
       "verify_file": "roles/mailpit_runtime/tasks/verify.yml",
       "liveness": {
@@ -1732,7 +1732,7 @@
     },
     "matrix_synapse": {
       "service_name": "matrix-synapse",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "matrix_synapse_runtime",
       "verify_file": "roles/matrix_synapse_runtime/tasks/verify.yml",
       "startup": {
@@ -1790,7 +1790,7 @@
     },
     "mattermost": {
       "service_name": "mattermost",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "mattermost_runtime",
       "verify_file": "roles/mattermost_runtime/tasks/verify.yml",
       "liveness": {
@@ -1837,7 +1837,7 @@
     },
     "minio": {
       "service_name": "minio",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "minio_runtime",
       "verify_file": "roles/minio_runtime/tasks/verify.yml",
       "startup": {
@@ -1899,7 +1899,7 @@
     },
     "n8n": {
       "service_name": "n8n",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "n8n_runtime",
       "verify_file": "roles/n8n_runtime/tasks/verify.yml",
       "startup": {
@@ -1957,7 +1957,7 @@
     },
     "neko": {
       "service_name": "neko",
-      "owning_vm": "runtime-comms",
+      "owning_vm": "runtime-comms-lv3",
       "role": "neko_runtime",
       "verify_file": "collections/ansible_collections/lv3/platform/roles/neko_runtime/tasks/verify.yml",
       "liveness": {
@@ -2004,7 +2004,7 @@
     },
     "netbox": {
       "service_name": "netbox",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "netbox_runtime",
       "verify_file": "roles/netbox_runtime/tasks/verify.yml",
       "startup": {
@@ -2062,7 +2062,7 @@
     },
     "nextcloud": {
       "service_name": "nextcloud",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "nextcloud_runtime",
       "verify_file": "roles/nextcloud_runtime/tasks/verify.yml",
       "startup": {
@@ -2132,7 +2132,7 @@
     },
     "nginx_edge": {
       "service_name": "nginx-edge",
-      "owning_vm": "nginx",
+      "owning_vm": "nginx-lv3",
       "role": "nginx_edge_publication",
       "verify_file": "roles/nginx_edge_publication/tasks/verify.yml",
       "liveness": {
@@ -2179,7 +2179,7 @@
     },
     "nomad": {
       "service_name": "nomad",
-      "owning_vm": "monitoring",
+      "owning_vm": "monitoring-lv3",
       "role": "nomad_cluster_bootstrap",
       "verify_file": "roles/nomad_cluster_bootstrap/tasks/verify.yml",
       "liveness": {
@@ -2212,7 +2212,7 @@
     },
     "ntfy": {
       "service_name": "ntfy",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "ntfy_runtime",
       "verify_file": "roles/ntfy_runtime/tasks/verify.yml",
       "liveness": {
@@ -2293,7 +2293,7 @@
     },
     "ollama": {
       "service_name": "ollama",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "ollama_runtime",
       "verify_file": "roles/ollama_runtime/tasks/verify.yml",
       "liveness": {
@@ -2331,7 +2331,7 @@
     },
     "openbao": {
       "service_name": "openbao",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "openbao_runtime",
       "verify_file": "roles/openbao_runtime/tasks/verify.yml",
       "startup": {
@@ -2401,7 +2401,7 @@
     },
     "openfga": {
       "service_name": "openfga",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "openfga_runtime",
       "verify_file": "roles/openfga_runtime/tasks/verify.yml",
       "startup": {
@@ -2447,7 +2447,7 @@
     },
     "ops_portal": {
       "service_name": "ops-portal",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "ops_portal_runtime",
       "verify_file": "roles/ops_portal_runtime/tasks/verify.yml",
       "liveness": {
@@ -2493,7 +2493,7 @@
     },
     "outline": {
       "service_name": "outline",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "outline_runtime",
       "verify_file": "roles/outline_runtime/tasks/verify.yml",
       "startup": {
@@ -2563,7 +2563,7 @@
     },
     "paperless": {
       "service_name": "paperless",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "paperless_runtime",
       "verify_file": "roles/paperless_runtime/tasks/verify.yml",
       "startup": {
@@ -2624,7 +2624,7 @@
     },
     "piper": {
       "service_name": "piper",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "piper_runtime",
       "verify_file": "roles/piper_runtime/tasks/verify.yml",
       "startup": {
@@ -2671,7 +2671,7 @@
     },
     "plane": {
       "service_name": "plane",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "plane_runtime",
       "verify_file": "roles/plane_runtime/tasks/verify.yml",
       "liveness": {
@@ -2717,7 +2717,7 @@
     },
     "platform_context_api": {
       "service_name": "platform-context-api",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "rag_context_runtime",
       "verify_file": "roles/rag_context_runtime/tasks/verify.yml",
       "startup": {
@@ -2775,7 +2775,7 @@
     },
     "plausible": {
       "service_name": "plausible",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "plausible_runtime",
       "verify_file": "roles/plausible_runtime/tasks/verify.yml",
       "startup": {
@@ -2845,7 +2845,7 @@
     },
     "portainer": {
       "service_name": "portainer",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "portainer_runtime",
       "verify_file": "roles/portainer_runtime/tasks/verify.yml",
       "liveness": {
@@ -2893,7 +2893,7 @@
     },
     "postgres": {
       "service_name": "postgres",
-      "owning_vm": "postgres",
+      "owning_vm": "postgres-lv3",
       "role": "postgres_ha",
       "verify_file": "roles/postgres_ha/tasks/verify.yml",
       "liveness": {
@@ -2985,7 +2985,7 @@
     },
     "redpanda": {
       "service_name": "redpanda",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "redpanda_runtime",
       "verify_file": "roles/redpanda_runtime/tasks/verify.yml",
       "startup": {
@@ -3034,7 +3034,7 @@
     },
     "repo_intake": {
       "service_name": "repo-intake",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "repo_intake_runtime",
       "verify_file": "roles/repo_intake_runtime/tasks/verify.yml",
       "startup": {
@@ -3080,7 +3080,7 @@
     },
     "repowise": {
       "service_name": "repowise",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": null,
       "liveness": {
         "kind": "http",
@@ -3125,7 +3125,7 @@
     },
     "searxng": {
       "service_name": "searxng",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "searxng_runtime",
       "verify_file": "roles/searxng_runtime/tasks/verify.yml",
       "liveness": {
@@ -3159,7 +3159,7 @@
     },
     "semaphore": {
       "service_name": "semaphore",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "semaphore_runtime",
       "verify_file": "roles/semaphore_runtime/tasks/verify.yml",
       "liveness": {
@@ -3205,7 +3205,7 @@
     },
     "serverclaw": {
       "service_name": "serverclaw",
-      "owning_vm": "coolify",
+      "owning_vm": "coolify-lv3",
       "role": null,
       "verify_file": null,
       "startup": {
@@ -3263,7 +3263,7 @@
     },
     "status_page": {
       "service_name": "status-page",
-      "owning_vm": "runtime-general",
+      "owning_vm": "runtime-general-lv3",
       "role": null,
       "verify_file": null,
       "liveness": {
@@ -3301,7 +3301,7 @@
     },
     "step_ca": {
       "service_name": "step-ca",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "step_ca_runtime",
       "verify_file": "roles/step_ca_runtime/tasks/verify.yml",
       "liveness": {
@@ -3382,7 +3382,7 @@
     },
     "superset": {
       "service_name": "superset",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "superset_runtime",
       "verify_file": "roles/superset_runtime/tasks/verify.yml",
       "startup": {
@@ -3452,7 +3452,7 @@
     },
     "temporal": {
       "service_name": "temporal",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "temporal_runtime",
       "verify_file": "roles/temporal_runtime/tasks/verify.yml",
       "startup": {
@@ -3522,7 +3522,7 @@
     },
     "tesseract_ocr": {
       "service_name": "tesseract-ocr",
-      "owning_vm": "runtime-ai",
+      "owning_vm": "runtime-ai-lv3",
       "role": "tesseract_ocr_runtime",
       "verify_file": "roles/tesseract_ocr_runtime/tasks/verify.yml",
       "startup": {
@@ -3569,7 +3569,7 @@
     },
     "tika": {
       "service_name": "tika",
-      "owning_vm": "runtime-ai",
+      "owning_vm": "runtime-ai-lv3",
       "role": "tika_runtime",
       "verify_file": "roles/tika_runtime/tasks/verify.yml",
       "startup": {
@@ -3628,7 +3628,7 @@
     },
     "typesense": {
       "service_name": "typesense",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "typesense_runtime",
       "verify_file": "roles/typesense_runtime/tasks/verify.yml",
       "startup": {
@@ -3674,7 +3674,7 @@
     },
     "uptime_kuma": {
       "service_name": "uptime-kuma",
-      "owning_vm": "runtime-general",
+      "owning_vm": "runtime-general-lv3",
       "role": "uptime_kuma_runtime",
       "verify_file": "roles/uptime_kuma_runtime/tasks/verify.yml",
       "liveness": {
@@ -3729,7 +3729,7 @@
     },
     "vaultwarden": {
       "service_name": "vaultwarden",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "vaultwarden_runtime",
       "verify_file": "roles/vaultwarden_runtime/tasks/verify.yml",
       "liveness": {
@@ -3777,7 +3777,7 @@
     },
     "windmill": {
       "service_name": "windmill",
-      "owning_vm": "runtime-control",
+      "owning_vm": "runtime-control-lv3",
       "role": "windmill_runtime",
       "verify_file": "roles/windmill_runtime/tasks/verify.yml",
       "liveness": {
@@ -3823,7 +3823,7 @@
     },
     "woodpecker": {
       "service_name": "woodpecker",
-      "owning_vm": "docker-runtime",
+      "owning_vm": "docker-runtime-lv3",
       "role": "woodpecker_runtime",
       "verify_file": "roles/woodpecker_runtime/tasks/verify.yml",
       "liveness": {
