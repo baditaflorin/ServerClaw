@@ -42,6 +42,7 @@ from validation_toolkit import require_list, require_mapping, require_str
 REPO_ROOT = Path(__file__).resolve().parents[1]
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 HOSTS_YML_PATH = REPO_ROOT / "inventory" / "hosts.yml"
+PLATFORM_YML_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform.yml"
 
 GENERATED_HEADER_BASE = """\
 # =============================================================================
@@ -552,6 +553,18 @@ def main() -> None:
                 "# ADR 0437 — overlay-aware bootstrap.\n"
                 "# =============================================================================\n"
             )
+            # Enrich platform_service_topology with urls from the generated platform.yml
+            # (group_vars). host_vars override group_vars in Ansible, so the topology
+            # dict here would otherwise shadow the urls that generate_platform_vars.py
+            # computes — causing platform_service_url() filter failures at runtime.
+            if PLATFORM_YML_PATH.exists():
+                with open(PLATFORM_YML_PATH) as _pf:
+                    platform_group_vars = yaml.safe_load(_pf) or {}
+                platform_topo = platform_group_vars.get("platform_service_topology", {})
+                overlay_topo = host_vars.get("platform_service_topology", {})
+                for svc_id, svc_data in overlay_topo.items():
+                    if not svc_data.get("urls") and platform_topo.get(svc_id, {}).get("urls"):
+                        svc_data["urls"] = platform_topo[svc_id]["urls"]
             merged_host_vars_path.write_text(
                 merged_header + yaml.safe_dump(host_vars, sort_keys=False, default_flow_style=False)
             )
