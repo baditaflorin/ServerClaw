@@ -32,6 +32,7 @@
         that:
           - ansible_distribution == "Debian"
         fail_msg: "This playbook only supports Debian guests."
+      when: ansible_distribution is defined
 
   roles:
     - role: lv3.platform.linux_guest_firewall

@@ -92,6 +92,7 @@
     fail_msg: "This playbook only supports Debian targets."
   when:
     - playbook_execution_require_debian | default(false) | bool
+    - ansible_distribution is defined
 
 - name: Stat the mutation audit helper
   ansible.builtin.stat:
