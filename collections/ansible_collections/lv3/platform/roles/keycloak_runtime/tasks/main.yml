@@ -1551,7 +1551,9 @@
   retries: "{{ keycloak_admin_reconciliation_retries }}"
   delay: "{{ keycloak_admin_reconciliation_delay }}"
   until: keycloak_mail_submission_host_lookup.rc == 0
-  when: keycloak_mail_platform_submission_recovery_enabled
+  when:
+    - keycloak_mail_platform_submission_recovery_enabled
+    - keycloak_mail_platform_compose_dir_stat.stat.exists | default(false)
 
 - name: Verify Keycloak reaches the internal mail-platform submission listener
   ansible.builtin.shell: >-
@@ -1564,7 +1566,9 @@
   retries: "{{ keycloak_admin_reconciliation_retries }}"
   delay: "{{ keycloak_admin_reconciliation_delay }}"
   until: keycloak_mail_submission_probe.rc == 0
-  when: keycloak_mail_platform_submission_recovery_enabled
+  when:
+    - keycloak_mail_platform_submission_recovery_enabled
+    - keycloak_mail_platform_compose_dir_stat.stat.exists | default(false)
 
 - name: Converge Keycloak realm objects
   module_defaults:
