@@ -278,6 +278,15 @@
               Certificate renewal completed!
               Check: openssl x509 -in /etc/letsencrypt/live/{{ fix_edge_cert_name }}/cert.pem -text -noout | grep -A5 "Subject Alternative Name"
 
+      rescue:
+        - name: Warn about certbot failure — manual intervention may be needed
+          ansible.builtin.debug:
+            msg: >-
+              WARNING: certbot failed to renew the {{ fix_edge_cert_name }} certificate.
+              This is non-fatal for bootstrap. Possible causes: DNS provider not Hetzner,
+              wrong API token, or rate limit. Fix manually with:
+              certbot certonly --authenticator dns-hetzner ...
+
     - name: If no missing domains, run standard nginx converge
       when: missing_domains | length == 0
       block:
