@@ -307,6 +307,18 @@ def evaluate_condition(
             except Exception as exc:
                 return ConditionResult(cid, False, f"tls error: {exc}")
 
+        if ctype == "tcp":
+            import socket
+            host = condition.get("host", "")
+            port = int(condition.get("port", 80))
+            timeout = condition.get("timeout_s", 5)
+            try:
+                with socket.create_connection((host, port), timeout=timeout):
+                    pass
+                return ConditionResult(cid, True, f"tcp:{host}:{port} reachable")
+            except Exception as exc:
+                return ConditionResult(cid, False, f"tcp:{host}:{port} unreachable: {exc}")
+
         return ConditionResult(cid, False, f"unknown condition type: {ctype!r}")
 
     except Exception as exc:  # noqa: BLE001
