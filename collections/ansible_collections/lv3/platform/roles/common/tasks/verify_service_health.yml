@@ -30,6 +30,7 @@
   when:
     - (common_verify_health_url | default('')) | length > 0
     - (common_verify_health_assertions | default([])) | length > 0
+    - "'content' in common_verify_health_response"
 
 - name: Verify extra service endpoints
   ansible.builtin.include_tasks: verify_service_health_extra.yml
