@@ -15,6 +15,6 @@
 
 - name: Restart Prometheus
   ansible.builtin.systemd:
-    name: lv3-prometheus
+    name: "{{ monitoring_prometheus_service_name | default(platform_identity.config_prefix ~ '-prometheus') }}"
     state: restarted
     daemon_reload: true
