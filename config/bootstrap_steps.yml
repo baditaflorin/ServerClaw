@@ -314,6 +314,39 @@ steps:
     timeout_s: 600
     retries: 2
 
+  - id: "8a-converge-step-ca"
+    title: "Bootstrap internal PKI (step-ca)"
+    make_target: converge-step-ca
+    description: |
+      Deploys the step-ca internal certificate authority on runtime-control,
+      creates the root and intermediate CA, and distributes the root certificate
+      to all provisioned guests. OpenBao (step 9) requires the step-ca root cert
+      for its TLS listener; this step must run before openbao.
+    preconditions:
+      - id: runtime-control.ssh-reachable
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
+          -i .local/ssh/bootstrap.id_ed25519
+          -o IdentitiesOnly=yes
+          ops@{provider_host} "nc -z 10.10.10.92 22"
+        expect_exit: 0
+        timeout_s: 15
+    postconditions:
+      - id: step-ca.root-cert-present
+        type: command
+        command: >-
+          ssh -o BatchMode=yes -o ConnectTimeout=15
+          -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
+          -o IdentitiesOnly=yes -i .local/ssh/bootstrap.id_ed25519
+          -o "ProxyCommand=ssh -W %h:%p -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null ops@{provider_host}"
+          ops@10.10.10.92 "test -f /opt/step-ca/home/certs/root_ca.crt"
+        expect_exit: 0
+        timeout_s: 40
+        critical: true
+    timeout_s: 600
+    retries: 2
+
   - id: "9-converge-openbao"
     title: "Bootstrap OpenBao secret store"
     make_target: converge-openbao
