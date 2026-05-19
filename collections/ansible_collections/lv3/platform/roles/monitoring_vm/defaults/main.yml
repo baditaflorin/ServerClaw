@@ -163,7 +163,7 @@ monitoring_postgres_audit_metrics_job_name: postgres-audit-alloy
 monitoring_postgres_audit_metrics_port: 12345
 monitoring_postgres_audit_metrics_target: >-
   {{
-    hostvars[groups['proxmox_hosts'][0]].platform_guest_catalog.by_name[
+    hostvars[groups['proxmox_hosts'][0]].platform_guest_catalog.by_role[
       'postgres-staging' if inventory_hostname == 'monitoring-staging' else 'postgres'
     ].ipv4
   }}:{{ monitoring_postgres_audit_metrics_port }}

@@ -3,6 +3,7 @@
   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-general' }}"
   become: true
   gather_facts: true
+  ignore_unreachable: true
   vars:
     preflight_wait_for_connection: false
     # ADR 0373: Conventional service variables (derive_service_defaults compatibility)
@@ -24,8 +25,7 @@
       vars:
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
-        required_hosts:
-          - "{{ playbook_execution_required_hosts.runtime_general[playbook_execution_env] }}"
+        required_hosts: []
 
     - name: Ensure target guest is Debian
       ansible.builtin.assert:

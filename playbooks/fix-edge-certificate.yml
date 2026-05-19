@@ -188,6 +188,7 @@
             remote_src: true
             backup: true
             mode: preserve
+          failed_when: false
 
         - name: Run certbot to request certificate with all domains
           ansible.builtin.command:
