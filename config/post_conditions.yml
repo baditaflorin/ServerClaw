@@ -196,14 +196,16 @@ post_conditions:
     after_step: converge-postgres-vm
     tags: [bootstrap]
     type: command
-    # Postgres is on the internal bridge — check via SSH jump through the provider host.
+    # Postgres port is firewalled to internal clients only — reach the VM via SSH
+    # ProxyJump through the provider host and run pg_isready locally.
     command: >-
-      ssh -o BatchMode=yes -o ConnectTimeout=10
+      ssh -o BatchMode=yes -o ConnectTimeout=15
       -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
-      -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes
-      ops@{provider_host} "nc -z 10.10.10.50 5432"
+      -o IdentitiesOnly=yes -i .local/ssh/bootstrap.id_ed25519
+      -o "ProxyCommand=ssh -W %h:%p -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null ops@{provider_host}"
+      ops@10.10.10.50 "pg_isready -h 127.0.0.1 -p 5432"
     expect_exit: 0
-    timeout_s: 20
+    timeout_s: 40
     critical: true
 
   # --- Platform services ----------------------------------------------
