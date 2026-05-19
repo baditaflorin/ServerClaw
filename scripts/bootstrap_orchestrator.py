@@ -51,6 +51,7 @@ LOCAL_ROOT = REPO_ROOT / ".local"
 IDENTITY_PATH = LOCAL_ROOT / "identity.yml"
 MANIFEST_PATH = LOCAL_ROOT / "manifest.yml"
 STEPS_PATH = REPO_ROOT / "config" / "bootstrap_steps.yml"
+POST_CONDITIONS_PATH = REPO_ROOT / "config" / "post_conditions.yml"
 RECEIPTS_DIR = REPO_ROOT / "receipts" / "bootstrap"
 
 
@@ -253,6 +254,59 @@ def evaluate_condition(
             observed = (result.stdout.strip() or result.stderr.strip() or f"exit {result.returncode}")[:200]
             return ConditionResult(cid, ok, observed)
 
+        if ctype == "http":
+            import ssl
+            import urllib.error
+            import urllib.request
+            url = condition.get("url", "")
+            expect = condition.get("expect_status", 200)
+            timeout = condition.get("timeout_s", 10)
+            # Don't follow redirects — the check is for the status code itself
+            # (e.g. 308 redirect). Also disable cert verification so self-signed
+            # certs used during bootstrap don't cause false failures.
+            ctx_ssl = ssl.create_default_context()
+            ctx_ssl.check_hostname = False
+            ctx_ssl.verify_mode = ssl.CERT_NONE
+
+            class _NoRedirect(urllib.request.HTTPRedirectHandler):
+                def redirect_request(self, req, fp, code, msg, headers, newurl):
+                    return None
+
+            opener = urllib.request.build_opener(_NoRedirect, urllib.request.HTTPSHandler(context=ctx_ssl))
+            try:
+                with opener.open(url, timeout=timeout) as resp:
+                    code = resp.status
+            except urllib.error.HTTPError as e:
+                code = e.code
+            except Exception as exc:
+                return ConditionResult(cid, False, f"http error: {exc}")
+            ok = code == expect
+            return ConditionResult(cid, ok, f"HTTP {code} (expected {expect})")
+
+        if ctype == "tls":
+            import datetime
+            import socket
+            import ssl
+            host = condition.get("host", "")
+            port = condition.get("port", 443)
+            expect_days = condition.get("expect_days_remaining", 0)
+            timeout = condition.get("timeout_s", 10)
+            try:
+                ctx_ssl = ssl.create_default_context()
+                ctx_ssl.check_hostname = False
+                ctx_ssl.verify_mode = ssl.CERT_NONE
+                with socket.create_connection((host, port), timeout=timeout) as raw:
+                    with ctx_ssl.wrap_socket(raw, server_hostname=host) as s:
+                        cert = s.getpeercert()
+                if not cert:
+                    return ConditionResult(cid, False, "tls: no certificate presented")
+                not_after = datetime.datetime.strptime(cert["notAfter"], "%b %d %H:%M:%S %Y %Z")
+                days_left = (not_after - datetime.datetime.utcnow()).days
+                ok = days_left >= expect_days
+                return ConditionResult(cid, ok, f"cert expires in {days_left}d (need ≥{expect_days}d)")
+            except Exception as exc:
+                return ConditionResult(cid, False, f"tls error: {exc}")
+
         return ConditionResult(cid, False, f"unknown condition type: {ctype!r}")
 
     except Exception as exc:  # noqa: BLE001
@@ -312,6 +366,19 @@ def _run_make(
         return 127, "", "make: command not found"
 
 
+def _resolve_condition(
+    raw: dict[str, Any],
+    catalog: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """If raw has post_condition_ref, merge the catalog entry (raw overrides catalog)."""
+    ref = raw.get("post_condition_ref")
+    if ref and ref in catalog:
+        merged = {**catalog[ref], **raw}
+        merged.pop("post_condition_ref", None)
+        return merged
+    return raw
+
+
 def run_step(
     step: dict[str, Any],
     *,
@@ -320,6 +387,7 @@ def run_step(
     timeout_s: int = 1800,
     dry_run: bool = False,
     repo_root: Path = REPO_ROOT,
+    post_conditions_catalog: dict[str, dict[str, Any]] | None = None,
 ) -> StepResult:
     """Execute one step: check preconditions, run make target, check postconditions.
 
@@ -331,10 +399,12 @@ def run_step(
     timeout = step.get("timeout_s", timeout_s)
 
     result = StepResult(step_id=step_id, make_target=make_target, status="error")
+    catalog = post_conditions_catalog or {}
 
     # Evaluate preconditions.
     for raw_cond in step.get("preconditions") or []:
-        cond = expand_templates(ctx, raw_cond)
+        resolved = _resolve_condition(raw_cond, catalog)
+        cond = expand_templates(ctx, resolved)
         cr = evaluate_condition(cond, repo_root=repo_root)
         result.precondition_results.append(cr)
     if result.failed_preconditions():
@@ -373,11 +443,18 @@ def run_step(
         return result
 
     # Evaluate postconditions.
+    # A condition with critical: false is recorded but does not fail the step.
+    # This allows steps whose TLS/HTTP checks are deferred (e.g. cert not yet
+    # issued) to still be marked passed so the bootstrap chain continues.
+    critical_failure = False
     for raw_cond in step.get("postconditions") or []:
-        cond = expand_templates(ctx, raw_cond)
+        resolved = _resolve_condition(raw_cond, catalog)
+        cond = expand_templates(ctx, resolved)
         cr = evaluate_condition(cond, repo_root=repo_root)
         result.postcondition_results.append(cr)
-    if result.failed_postconditions():
+        if not cr.ok and cond.get("critical", True):
+            critical_failure = True
+    if critical_failure:
         result.status = "failed"
     else:
         result.status = "passed"
@@ -455,6 +532,7 @@ def orchestrate(
         resume_from=resume_from,
     )
 
+    post_conditions_catalog = _load_post_conditions()
     steps_to_run = select_steps(steps, resume_from=resume_from)
     skipped_count = len(steps) - len(steps_to_run)
     receipt.steps_skipped = skipped_count
@@ -484,6 +562,7 @@ def orchestrate(
             timeout_s=step_timeout_s,
             dry_run=dry_run,
             repo_root=repo_root,
+            post_conditions_catalog=post_conditions_catalog,
         )
         receipt.step_results.append(sr)
         receipt.steps_attempted += 1
@@ -547,6 +626,22 @@ def _load_steps() -> list[dict[str, Any]]:
     with STEPS_PATH.open() as fh:
         data = yaml.safe_load(fh) or {}
     return data.get("steps") or []
+
+
+def _load_post_conditions() -> dict[str, dict[str, Any]]:
+    """Load config/post_conditions.yml and return a dict keyed by condition id."""
+    if not POST_CONDITIONS_PATH.is_file():
+        return {}
+    try:
+        with POST_CONDITIONS_PATH.open() as fh:
+            data = yaml.safe_load(fh) or {}
+        catalog = {}
+        for cond in data.get("conditions") or data.get("post_conditions") or []:
+            if "id" in cond:
+                catalog[cond["id"]] = cond
+        return catalog
+    except Exception:  # noqa: BLE001
+        return {}
 
 
 def _load_gates() -> dict[str, Any]:
