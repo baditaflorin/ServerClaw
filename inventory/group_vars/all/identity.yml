@@ -32,6 +32,9 @@ _platform_pve_safe_slug: >-
   {{ 'op-' ~ _platform_identity_slug
      if (_platform_identity_slug | regex_search('^[0-9]'))
      else _platform_identity_slug }}
+# SQL identifiers (PostgreSQL roles, usernames) must start with a letter.
+# Strip any leading digits/hyphens so "0mpc" becomes "mpc", "example" stays "example".
+platform_sql_prefix: "{{ _platform_identity_slug | regex_replace('^[^a-z_]+', '') }}"
 platform_identity:
   config_prefix: "{{ _platform_identity_slug }}"
   unix_prefix: "{{ _platform_identity_slug }}"
