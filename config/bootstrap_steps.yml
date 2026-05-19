@@ -376,7 +376,7 @@ steps:
           -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
           -o IdentitiesOnly=yes -i .local/ssh/bootstrap.id_ed25519
           -o "ProxyCommand=ssh -W %h:%p -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null ops@{provider_host}"
-          ops@10.10.10.92 "curl -sf http://localhost:8200/v1/sys/health | grep -v sealed"
+          ops@10.10.10.92 "curl -sf http://localhost:8201/v1/sys/health"
         type: command
         expect_exit: 0
         timeout_s: 30
@@ -398,7 +398,7 @@ steps:
           -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
           -o IdentitiesOnly=yes -i .local/ssh/bootstrap.id_ed25519
           -o "ProxyCommand=ssh -W %h:%p -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null ops@{provider_host}"
-          ops@10.10.10.92 "curl -sf http://localhost:8200/v1/sys/health"
+          ops@10.10.10.92 "curl -sf http://localhost:8201/v1/sys/health"
         expect_exit: 0
         timeout_s: 40
       - id: postgres.reachable
@@ -449,7 +449,7 @@ steps:
           -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
           -o IdentitiesOnly=yes -i .local/ssh/bootstrap.id_ed25519
           -o "ProxyCommand=ssh -W %h:%p -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null ops@{provider_host}"
-          ops@10.10.10.92 "curl -sf http://localhost:8200/v1/sys/health | grep -v sealed"
+          ops@10.10.10.92 "curl -sf http://localhost:8201/v1/sys/health"
         type: command
         expect_exit: 0
         timeout_s: 30
