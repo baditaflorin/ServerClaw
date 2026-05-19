@@ -36,6 +36,7 @@
     --metadata "{{ postgres_client_password_local_file | dirname }}/.masked-secret"
   args:
     executable: /bin/bash
+    chdir: "{{ playbook_dir | dirname }}"
   delegate_to: localhost
   become: false
   register: postgres_client_password_generation
