@@ -116,7 +116,7 @@
       - 473
       - 501
       - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_api_health
   retries: 48
@@ -138,7 +138,7 @@
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
     return_content: true
     status_code: 200
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_unsealed_status
   retries: 12
@@ -166,7 +166,7 @@
       - 429
       - 472
       - 473
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_health
   retries: 48
@@ -213,7 +213,7 @@
       - 500
       - 502
       - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_current_secret_probe
   changed_when: false
@@ -227,7 +227,7 @@
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
     return_content: true
     status_code: 200
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_secret_recovery_seal_status
   retries: 12
@@ -246,7 +246,7 @@
       key: "{{ item }}"
     status_code: 200
   loop: "{{ common_openbao_compose_env_init_payload.keys_base64[: (openbao_init_key_threshold | default(2) | int)] }}"
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_secret_recovery_unseal
   retries: 6
@@ -267,7 +267,7 @@
       - 429
       - 472
       - 473
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_secret_recovery_health
   retries: 24
@@ -290,7 +290,7 @@
       - 500
       - 502
       - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_current_secret
   retries: "{{ common_openbao_api_operation_retries }}"
@@ -310,7 +310,7 @@
     body:
       data: "{{ common_openbao_compose_env_secret_payload }}"
     status_code: 200
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_secret_upsert
   retries: "{{ common_openbao_api_operation_retries }}"
@@ -335,7 +335,7 @@
       - 500
       - 502
       - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_current_policy
   retries: "{{ common_openbao_api_operation_retries }}"
@@ -355,7 +355,7 @@
     body:
       policy: "{{ common_openbao_compose_env_policy_rules }}"
     status_code: 204
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_policy_upsert
   retries: "{{ common_openbao_api_operation_retries }}"
@@ -382,7 +382,7 @@
       secret_id_ttl: 0
       secret_id_num_uses: 0
     status_code: 204
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_approle_upsert
   retries: "{{ common_openbao_api_operation_retries }}"
@@ -403,7 +403,7 @@
       - 500
       - 502
       - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_role_id
   retries: "{{ common_openbao_api_operation_retries }}"
@@ -442,7 +442,7 @@
       - 500
       - 502
       - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_secret_id
   retries: "{{ common_openbao_api_operation_retries }}"
