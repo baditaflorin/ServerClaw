@@ -40,6 +40,8 @@ step_ca_provisioners:
     password_file: "{{ step_ca_services_password_file }}"
   - name: hosts
     password_file: "{{ step_ca_hosts_password_file }}"
+step_ca_provisioner_max_tls_cert_durations:
+  services: "96h0m0s"
 step_ca_server_names:
   - localhost
   - 127.0.0.1
