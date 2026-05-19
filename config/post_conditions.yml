@@ -195,10 +195,15 @@ post_conditions:
     description: postgres VM accepts TCP connections on 5432
     after_step: converge-postgres-vm
     tags: [bootstrap]
-    type: tcp
-    host: "10.10.10.50"   # TODO: derive from topology in a follow-up
-    port: 5432
-    timeout_s: 5
+    type: command
+    # Postgres is on the internal bridge — check via SSH jump through the provider host.
+    command: >-
+      ssh -o BatchMode=yes -o ConnectTimeout=10
+      -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
+      -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes
+      ops@{provider_host} "nc -z 10.10.10.50 5432"
+    expect_exit: 0
+    timeout_s: 20
     critical: true
 
   # --- Platform services ----------------------------------------------
