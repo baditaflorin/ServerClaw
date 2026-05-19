@@ -2411,6 +2411,8 @@ platform_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ gitea_controller_url }}"
+    urls:
+      public: https://git.{{ platform_domain }}
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime-lv3
