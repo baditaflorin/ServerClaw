@@ -47,8 +47,7 @@
 
 - name: Generate Plane OIDC client secret if needed
   ansible.builtin.command:
-    cmd: # ADR 0480: Manual migration needed for: openssl rand -hex 32
-                # Replace with: {{ "keycloak" | secret }}
+    cmd: openssl rand -hex 32
   register: plane_oidc_client_secret_gen
   when: not plane_client_exists
   no_log: true

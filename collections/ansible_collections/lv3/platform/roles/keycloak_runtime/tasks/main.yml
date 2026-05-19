@@ -2537,6 +2537,9 @@
   no_log: true
 
 - name: Reconcile the Plane OIDC client
+  when: >-
+    platform_service_topology is defined and
+    platform_service_topology.plane is defined
   block:
     # BEGIN SERVICE: plane
     - name: Acquire a fresh Keycloak admin token for Plane OIDC client reconciliation
