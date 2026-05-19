@@ -63,6 +63,7 @@
     docker_runtime_missing_prereq_packages: >-
       {{
         docker_runtime_prereq_package_status.results
+        | selectattr("stdout", "defined")
         | rejectattr("stdout", "equalto", "install ok installed")
         | map(attribute="item")
         | list
@@ -151,6 +152,7 @@
     docker_runtime_missing_engine_packages: >-
       {{
         docker_runtime_engine_package_status.results
+        | selectattr("stdout", "defined")
         | rejectattr("stdout", "equalto", "install ok installed")
         | map(attribute="item")
         | list
