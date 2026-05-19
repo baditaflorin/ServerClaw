@@ -59,8 +59,9 @@
     or 'Downloaded newer image' in common_dcc_pull.stdout
     or 'Pull complete' in common_dcc_pull.stdout
   when: >-
-    common_dcc_images_check.rc != 0
-    or common_dcc_images_check.stdout | trim | length == 0
+    ('rc' not in common_dcc_images_check)
+    or (common_dcc_images_check.rc != 0)
+    or (common_dcc_images_check.stdout | default('') | trim | length == 0)
     or (common_docker_compose_converge_force_pull | default(false) | bool)
 
 - name: "Check Docker NAT chain before {{ common_docker_compose_converge_service_name }} startup"
