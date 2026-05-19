@@ -99,7 +99,15 @@
   no_log: true
   when: alertmanager_runtime_pgaudit_relay_enabled | bool
 
-- name: Load controller-local Mattermost webhook manifest
+- name: Stat controller-local Mattermost webhook manifest
+  ansible.builtin.stat:
+    path: "{{ alertmanager_runtime_mattermost_webhook_manifest_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: _alertmanager_mattermost_manifest_stat
+  changed_when: false
+
+- name: Load controller-local Mattermost webhook manifest (present)
   ansible.builtin.set_fact:
     alertmanager_runtime_ntfy_password: "{{ alertmanager_runtime_ntfy_password_raw.content | b64decode | trim }}"
     alertmanager_runtime_mattermost_webhooks: "{{ lookup('ansible.builtin.file', alertmanager_runtime_mattermost_webhook_manifest_local_file) | from_json }}"
@@ -110,6 +118,29 @@
         else ''
       }}
   no_log: true
+  when: _alertmanager_mattermost_manifest_stat.stat.exists
+
+- name: Load controller-local secrets (Mattermost manifest absent — minimal deployment)
+  ansible.builtin.set_fact:
+    alertmanager_runtime_ntfy_password: "{{ alertmanager_runtime_ntfy_password_raw.content | b64decode | trim }}"
+    alertmanager_runtime_mattermost_webhooks: >-
+      {{
+        {
+          'webhooks': {
+            'alerts_critical': {'internal_url': 'http://127.0.0.1:9999/mattermost-not-configured'},
+            'alerts': {'internal_url': 'http://127.0.0.1:9999/mattermost-not-configured'},
+            'ops': {'internal_url': 'http://127.0.0.1:9999/mattermost-not-configured'}
+          }
+        }
+      }}
+    alertmanager_runtime_pgaudit_relay_nats_password: >-
+      {{
+        (alertmanager_runtime_pgaudit_relay_nats_password_raw.content | b64decode | trim)
+        if alertmanager_runtime_pgaudit_relay_enabled | bool
+        else ''
+      }}
+  no_log: true
+  when: not _alertmanager_mattermost_manifest_stat.stat.exists
 
 - name: Persist Alertmanager ntfy password
   ansible.builtin.copy:
