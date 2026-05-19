@@ -380,7 +380,7 @@ steps:
         type: command
         expect_exit: 0
         timeout_s: 30
-    timeout_s: 600
+    timeout_s: 2400
     retries: 2
 
   - id: "10-converge-keycloak"
