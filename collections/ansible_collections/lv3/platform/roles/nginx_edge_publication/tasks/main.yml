@@ -250,6 +250,20 @@
           )
       }}
 
+- name: Derive wildcard-coverage pattern from shared certificate SANs
+  ansible.builtin.set_fact:
+    _public_edge_wildcard_apex_pattern: >-
+      {{
+        '^[^.]+\.(' + (
+          public_edge_current_certificate_domains
+          | select('match', '^\*\.')
+          | map('regex_replace', '^\*\.', '')
+          | join('|')
+        ) + ')$'
+        if (public_edge_current_certificate_domains | select('match', '^\*\.') | list | length > 0)
+        else '^$'
+      }}
+
 - name: Initialize the site-local certificate request catalog
   ansible.builtin.set_fact:
     public_edge_site_certificate_requests: []
@@ -286,6 +300,8 @@
         ([item.hostname] + (item.aliases | default([])))
       )
       | difference(public_edge_current_certificate_domains)
+      | reject('match', _public_edge_wildcard_apex_pattern)
+      | list
     ) | length > 0
 
 - name: Render NGINX public edge configuration
