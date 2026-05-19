@@ -424,14 +424,20 @@ steps:
       - id: postgres.reachable
         post_condition_ref: postgres.tcp-reachable
     postconditions:
+      # Harbor/Outline/Ntfy are not in the core profile; mark non-critical so
+      # deployments that don't enable them still pass step 11.
       - id: harbor.registry.public-ping
         post_condition_ref: harbor.registry.public-ping
+        critical: false
       - id: harbor.containers.nginx-running
         post_condition_ref: harbor.containers.nginx-running
+        critical: false
       - id: outline.public-200
         post_condition_ref: outline.public-200
+        critical: false
       - id: ntfy.public-200
         post_condition_ref: ntfy.public-200
+        critical: false
     timeout_s: 7200
     retries: 1
 

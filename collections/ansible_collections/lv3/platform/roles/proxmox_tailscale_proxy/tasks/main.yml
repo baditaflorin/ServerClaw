@@ -55,6 +55,16 @@
 - name: Flush Proxmox Tailscale proxy systemd handlers
   ansible.builtin.meta: flush_handlers
 
+- name: Detect whether Tailscale has an IPv4 address assigned (proxy sockets require it)
+  ansible.builtin.command: ip -4 addr show tailscale0
+  register: proxmox_tailscale_ipv4_check
+  changed_when: false
+  failed_when: false
+
+- name: Set proxmox_tailscale_connected fact
+  ansible.builtin.set_fact:
+    proxmox_tailscale_connected: "{{ 'inet ' in (proxmox_tailscale_ipv4_check.stdout | default('')) }}"
+
 - name: Read current Proxmox Tailscale proxy unit states
   ansible.builtin.shell: |
     set -euo pipefail
@@ -103,7 +113,9 @@
         | first
         | default('')
       }}
-  when: proxmox_tailscale_service_active_state != 'active'
+  when:
+    - proxmox_tailscale_connected | bool
+    - proxmox_tailscale_service_active_state != 'active'
 - name: Read active Proxmox Tailscale proxy service command lines
   ansible.builtin.shell: |
     set -euo pipefail
@@ -388,6 +400,7 @@
   loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
   loop_control:
     label: "{{ item.name }}"
+  when: proxmox_tailscale_connected | bool
   vars:
     proxmox_tailscale_proxy_unit_state_lines: >-
       {{
