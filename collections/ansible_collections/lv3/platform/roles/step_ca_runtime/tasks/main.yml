@@ -61,8 +61,7 @@
     set -euo pipefail
     if [ ! -s "{{ item }}" ]; then
       umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -base64 33 > "{{ item }}"
-                # Replace with: {{ "step_ca" | secret }}
+      openssl rand -base64 33 > "{{ item }}"
       echo changed
     fi
   args:
