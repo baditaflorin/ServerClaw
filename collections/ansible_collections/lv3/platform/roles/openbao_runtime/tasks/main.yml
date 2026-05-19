@@ -51,8 +51,7 @@
     set -euo pipefail
     if [ ! -s "{{ item.path }}" ]; then
       umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ item.path }}"
-                # Replace with: {{ "openbao" | secret }}
+      openssl rand -base64 24 > "{{ item.path }}"
       echo changed
     fi
   args:
