@@ -326,12 +326,13 @@ steps:
       - id: postgres.reachable
         type: command
         command: >-
-          ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
-          -i .local/ssh/bootstrap.id_ed25519
-          -o IdentitiesOnly=yes
-          ops@{provider_host} "nc -z 10.10.10.50 5432"
+          ssh -o BatchMode=yes -o ConnectTimeout=15
+          -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
+          -o IdentitiesOnly=yes -i .local/ssh/bootstrap.id_ed25519
+          -o "ProxyCommand=ssh -W %h:%p -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null ops@{provider_host}"
+          ops@10.10.10.50 "pg_isready -h 127.0.0.1 -p 5432"
         expect_exit: 0
-        timeout_s: 15
+        timeout_s: 40
     postconditions:
       - id: openbao.unsealed
         post_condition_ref: openbao.unsealed
@@ -349,21 +350,23 @@ steps:
       - id: openbao.reachable
         type: command
         command: >-
-          ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
-          -i .local/ssh/bootstrap.id_ed25519
-          -o IdentitiesOnly=yes
-          ops@{provider_host} "nc -z 10.10.10.92 8200"
+          ssh -o BatchMode=yes -o ConnectTimeout=15
+          -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
+          -o IdentitiesOnly=yes -i .local/ssh/bootstrap.id_ed25519
+          -o "ProxyCommand=ssh -W %h:%p -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null ops@{provider_host}"
+          ops@10.10.10.92 "curl -sf http://localhost:8200/v1/sys/health"
         expect_exit: 0
-        timeout_s: 15
+        timeout_s: 40
       - id: postgres.reachable
         type: command
         command: >-
-          ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
-          -i .local/ssh/bootstrap.id_ed25519
-          -o IdentitiesOnly=yes
-          ops@{provider_host} "nc -z 10.10.10.50 5432"
+          ssh -o BatchMode=yes -o ConnectTimeout=15
+          -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null
+          -o IdentitiesOnly=yes -i .local/ssh/bootstrap.id_ed25519
+          -o "ProxyCommand=ssh -W %h:%p -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null ops@{provider_host}"
+          ops@10.10.10.50 "pg_isready -h 127.0.0.1 -p 5432"
         expect_exit: 0
-        timeout_s: 15
+        timeout_s: 40
     postconditions:
       - id: keycloak.realm-discovery
         post_condition_ref: keycloak.realm-discovery
