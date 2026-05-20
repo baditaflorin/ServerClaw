@@ -88,7 +88,9 @@
   ansible.builtin.shell: bash -lc 'command -v docker'
   register: docker_build_observability_docker_path
   changed_when: false
-  failed_when: docker_build_observability_docker_path.stdout | trim != docker_build_observability_docker_wrapper_path
+  failed_when: >-
+    (docker_build_observability_docker_path.rc is defined)
+    and (docker_build_observability_docker_path.stdout | default('') | trim != docker_build_observability_docker_wrapper_path)
 
 - name: Verify Telegraf socket listener configuration is rendered
   ansible.builtin.command:

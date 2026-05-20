@@ -9,4 +9,6 @@
   ansible.builtin.command: "systemctl is-active {{ guest_observability_telegraf_service_name }}"
   register: guest_observability_telegraf_status
   changed_when: false
-  failed_when: guest_observability_telegraf_status.stdout | trim != "active"
+  failed_when: >-
+    (guest_observability_telegraf_status.rc is defined)
+    and (guest_observability_telegraf_status.stdout | default('') | trim != "active")
