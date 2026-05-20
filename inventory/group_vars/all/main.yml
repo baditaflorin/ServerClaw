@@ -99,11 +99,13 @@ proxmox_host_ssh_hardening_file: "/etc/ssh/sshd_config.d/90-{{ platform_config_p
 proxmox_breakglass_ssh_port: 2222
 proxmox_acme_account_name: default
 proxmox_acme_directory: https://acme-v02.api.letsencrypt.org/directory
-# ADR 0438: plugin ID is a Proxmox storage identifier (config scope, not
-# a SQL role). Use config_prefix, not sql_prefix — otherwise a domain
-# whose first label starts with a digit would silently lose the leading
-# digit from its plugin name.
-proxmox_acme_plugin_id: "{{ platform_identity.config_prefix }}-hetzner-dns"
+# PVE configuration identifiers (ACME plugins, notification endpoints,
+# storage IDs, automation users, token roles) must start with a letter.
+# Apex slugs beginning with a digit (e.g. '0fork', '1blu') would be
+# rejected by `pvesh` with "invalid configuration ID". Use the
+# sanitized `pve_prefix` so identifiers stay valid across all
+# alphanumeric apex domains.
+proxmox_acme_plugin_id: "{{ platform_identity.pve_prefix }}-hetzner-dns"
 proxmox_acme_validation_delay: 30
 proxmox_tfa_description: Primary TOTP
 # ADR 0438: PVE user names must match `^[A-Za-z]`. Use pve_prefix, not
@@ -185,7 +187,7 @@ monitoring_loki_push_api_url: >-
 platform_log_dir: /var/log/platform
 mutation_audit_log_file: "{{ platform_log_dir }}/mutation-audit.jsonl"
 openbao_host_audit_log_file: /opt/openbao/logs/audit.log
-hetzner_dns_api_url: https://api.hetzner.cloud/v1
+hetzner_dns_api_url: https://dns.hetzner.com/api/v1
 hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
 
 mail_platform_mailbox_localpart: server
@@ -386,7 +388,13 @@ playbook_execution_correlation_id: >-
     if (platform_trace_id | trim | length > 0)
     else 'playbook:' ~ playbook_execution_env ~ ':' ~ (lookup('ansible.builtin.env', 'USER') | default('unknown', true))
   }}
-playbook_execution_controller_secret_manifest_path: "{{ inventory_dir | dirname }}/config/controller-local-secrets.json"
+# Resolve to the secret manifest path. With overlay inventories
+# (`-i inventory/hosts.yml -i .local/inventory/hosts.yml`), Ansible's
+# `inventory_dir` points at whichever inventory it last loaded — usually
+# the overlay's `.local/inventory/`, so `inventory_dir | dirname` lands
+# in `.local/` rather than the repo root. Try both, preferring the
+# canonical committed file at the repo root.
+playbook_execution_controller_secret_manifest_path: "{{ lookup('first_found', [playbook_dir | dirname ~ '/config/controller-local-secrets.json', inventory_dir | dirname ~ '/config/controller-local-secrets.json']) }}"
 playbook_execution_health_probe_catalog_path: "{{ inventory_dir | dirname }}/config/health-probe-catalog.json"
 playbook_execution_mutation_audit_script: "{{ inventory_dir | dirname }}/scripts/mutation_audit.py"
 playbook_execution_ntfy_publish_script: "{{ inventory_dir | dirname }}/scripts/ntfy_publish.py"
@@ -419,53 +427,53 @@ playbook_execution_host_patterns:
     staging: "backup_guests:&staging"
     clone: "backup_guests:&production"
   coolify:
-    production: coolify
+    production: coolify-lv3
     staging: coolify-staging
-    clone: coolify
+    clone: coolify-lv3
   coolify_apps:
-    production: coolify-apps
+    production: coolify-apps-lv3
     staging: coolify-apps-staging
-    clone: coolify-apps
+    clone: coolify-apps-lv3
   nginx_edge:
-    production: nginx
+    production: nginx-lv3
     staging: nginx-staging
-    clone: nginx
+    clone: nginx-lv3
   docker_runtime:
-    production: docker-runtime
+    production: docker-runtime-lv3
     staging: docker-runtime-staging
-    clone: docker-runtime
+    clone: docker-runtime-lv3
   runtime_ai:
-    production: runtime-ai
+    production: runtime-ai-lv3
     staging: docker-runtime-staging
-    clone: runtime-ai
+    clone: runtime-ai-lv3
   runtime_control:
-    production: runtime-control
+    production: runtime-control-lv3
     staging: docker-runtime-staging
-    clone: runtime-control
+    clone: runtime-control-lv3
   runtime_general:
-    production: runtime-general
+    production: runtime-general-lv3
     staging: docker-runtime-staging
-    clone: runtime-general
+    clone: runtime-general-lv3
   runtime_comms:
-    production: runtime-comms
+    production: runtime-comms-lv3
     staging: docker-runtime-staging
-    clone: runtime-comms
+    clone: runtime-comms-lv3
   docker_build:
-    production: docker-build
+    production: docker-build-lv3
     staging: docker-build-staging
-    clone: docker-build
+    clone: docker-build-lv3
   monitoring:
-    production: monitoring
+    production: monitoring-lv3
     staging: monitoring-staging
-    clone: monitoring
+    clone: monitoring-lv3
   postgres:
-    production: postgres
+    production: postgres-lv3
     staging: postgres-staging
-    clone: postgres
+    clone: postgres-lv3
   backup:
-    production: backup
+    production: backup-lv3
     staging: backup-staging
-    clone: backup
+    clone: backup-lv3
 playbook_execution_required_hosts:
   # ADR 0430 — `clone` entries mirror `production` (fork deployments share service names).
   proxmox_hosts:
@@ -477,50 +485,50 @@ playbook_execution_required_hosts:
     staging: "lv3_guests:&staging"
     clone: "lv3_guests:&production"
   nginx_edge:
-    production: nginx
+    production: nginx-lv3
     staging: nginx-staging
-    clone: nginx
+    clone: nginx-lv3
   docker_runtime:
-    production: docker-runtime
+    production: docker-runtime-lv3
     staging: docker-runtime-staging
-    clone: docker-runtime
+    clone: docker-runtime-lv3
   runtime_control:
-    production: runtime-control
+    production: runtime-control-lv3
     staging: docker-runtime-staging
-    clone: runtime-control
+    clone: runtime-control-lv3
   docker_build:
-    production: docker-build
+    production: docker-build-lv3
     staging: docker-build-staging
-    clone: docker-build
+    clone: docker-build-lv3
   runtime_ai:
-    production: runtime-ai
+    production: runtime-ai-lv3
     staging: docker-runtime-staging
-    clone: runtime-ai
+    clone: runtime-ai-lv3
   runtime_general:
-    production: runtime-general
+    production: runtime-general-lv3
     staging: docker-runtime-staging
-    clone: runtime-general
+    clone: runtime-general-lv3
   runtime_comms:
-    production: runtime-comms
+    production: runtime-comms-lv3
     staging: docker-runtime-staging
-    clone: runtime-comms
+    clone: runtime-comms-lv3
   monitoring:
-    production: monitoring
+    production: monitoring-lv3
     staging: monitoring-staging
-    clone: monitoring
+    clone: monitoring-lv3
   postgres:
-    production: postgres
+    production: postgres-lv3
     staging: postgres-staging
-    clone: postgres
+    clone: postgres-lv3
   backup:
-    production: backup
+    production: backup-lv3
     staging: backup-staging
-    clone: backup
+    clone: backup-lv3
   coolify:
-    production: coolify
+    production: coolify-lv3
     staging: coolify-staging
-    clone: coolify
+    clone: coolify-lv3
   coolify_apps:
-    production: coolify-apps
+    production: coolify-apps-lv3
     staging: coolify-apps-staging
-    clone: coolify-apps
+    clone: coolify-apps-lv3

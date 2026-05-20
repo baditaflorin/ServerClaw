@@ -85,8 +85,10 @@
       {%- for user_id, user in ntfy_runtime_topic_registry.users.items() -%}
       {%- set password_secret_id = user.password_secret_id | default('') -%}
       {%- set token_secret_id = user.token_secret_id | default('') -%}
-      {%- set password_path = ntfy_runtime_secret_manifest.secrets[password_secret_id].path if password_secret_id else '' -%}
-      {%- set token_path = ntfy_runtime_secret_manifest.secrets[token_secret_id].path if token_secret_id else '' -%}
+      {%- set _pw_rel = ntfy_runtime_secret_manifest.secrets[password_secret_id].path if password_secret_id else '' -%}
+      {%- set _tk_rel = ntfy_runtime_secret_manifest.secrets[token_secret_id].path if token_secret_id else '' -%}
+      {%- set password_path = ((repo_shared_root ~ '/' ~ _pw_rel) if (_pw_rel and not _pw_rel.startswith('/')) else _pw_rel) -%}
+      {%- set token_path = ((repo_shared_root ~ '/' ~ _tk_rel) if (_tk_rel and not _tk_rel.startswith('/')) else _tk_rel) -%}
       {%- set _ = resolved.append(
             {
               'user_id': user_id,

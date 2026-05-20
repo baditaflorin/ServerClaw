@@ -1023,7 +1023,7 @@ def build_platform_session_authority(service_topology: dict[str, Any], host_vars
             "platform_service_topology.ops_portal.public_hostname",
         ),
         "ops_portal_client_id": "ops-portal-oauth",
-        "keycloak_logout_url": f"{keycloak_public_url}/realms/lv3/protocol/openid-connect/logout",
+        "keycloak_logout_url": f"{keycloak_public_url}/realms/{host_vars['platform_domain'].split('.')[0]}/protocol/openid-connect/logout",
         "oauth2_proxy_sign_out_url": f"{ops_portal_public_url}/oauth2/sign_out",
         "shared_logout_path": SESSION_AUTHORITY_SHARED_LOGOUT_PATH,
         "shared_logout_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_LOGOUT_PATH}",
