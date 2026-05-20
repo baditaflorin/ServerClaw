@@ -55,7 +55,7 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
-  loop: "{{ _docker_build_obs_all_configs.files }}"
+  loop: "{{ _docker_build_obs_all_configs.files | default([]) }}"
   when: item.path != docker_build_observability_telegraf_config_file
   notify: Restart Telegraf
 
