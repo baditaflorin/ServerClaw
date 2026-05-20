@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-05-20'
 facet: concern
 concern: identity
 total_adrs: 9
@@ -167,9 +167,9 @@ adrs:
     path: docs/adr/0425-retrospective-420-adr-platform-build.md
   - adr: '0440'
     title: Per-Deployment Identity & Artifact Isolation
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: identity
     keywords:

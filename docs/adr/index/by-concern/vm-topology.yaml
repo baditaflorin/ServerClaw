@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-05-20'
 facet: concern
 concern: vm-topology
 total_adrs: 48
@@ -879,7 +879,7 @@ adrs:
     path: docs/adr/0435-topology-derived-health-probe-urls.md
   - adr: '0443'
     title: Continuous Topology Reconciler & Drift Detection
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-27'
@@ -898,7 +898,7 @@ adrs:
     path: docs/adr/0443-continuous-topology-reconciler.md
   - adr: '0462'
     title: Topology Pre-Commit Schema Hook
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'

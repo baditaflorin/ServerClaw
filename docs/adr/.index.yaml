@@ -6,24 +6,24 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-05-20'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 510
+total_adrs: 512
 adr_number_range:
   first: '0001'
-  last: 0485
-  next_available: 0486
+  last: 0489
+  next_available: 0490
 implementation_status_summary:
   Implemented: 377
   Partial: 4
   Not Implemented: 33
-  Deprecated: 5
-  Accepted: 32
-  Proposed: 59
-decision_status_summary:
-  Accepted: 379
-  Proposed: 66
   Deprecated: 14
+  Accepted: 31
+  Proposed: 53
+decision_status_summary:
+  Accepted: 370
+  Proposed: 60
+  Deprecated: 31
   Implemented: 51
 facets:
   by_range:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 78
+      count: 80
       first_adr: '0400'
-      last_adr: 0485
+      last_adr: 0489
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -88,13 +88,13 @@ facets:
       count: 34
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 154
+      count: 155
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
     - concern: resilience
       path: docs/adr/index/by-concern/resilience.yaml
-      count: 9
+      count: 10
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
       count: 48
@@ -123,22 +123,34 @@ facets:
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
-      count: 5
+      count: 14
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 32
+      count: 31
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 59
+      count: 53
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0486
+  next_available_adr: 0490
 latest_adrs:
+  - adr: 0489
+    title: Netplan MAC Mismatch — Root Cause and Self-Healing Recovery Model
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: platform
+    path: docs/adr/0489-netplan-mac-mismatch-recovery.md
+  - adr: 0488
+    title: Single Deployment Per Repo Checkout — Generic-By-Default, Envelope-Sized
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: resilience
+    path: docs/adr/0488-single-deployment-per-repo-checkout.md
   - adr: 0485
     title: Convergence Idempotency Tests
     implementation_status: Proposed
@@ -187,18 +199,6 @@ latest_adrs:
     currently_describes: current_state
     concern: security
     path: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
-  - adr: '0475'
-    title: Workstream-Surfaces Validator Cleanup
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: ci-cd
-    path: docs/adr/0475-workstream-surfaces-cleanup.md
-  - adr: '0474'
-    title: Phase 12 — Receipt Mass-Refresh + `make heal-receipts`
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: platform
-    path: docs/adr/0474-phase12-receipt-mass-refresh.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

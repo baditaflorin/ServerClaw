@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-05-20'
 facet: concern
 concern: platform
-total_adrs: 154
+total_adrs: 155
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2752,9 +2752,9 @@ adrs:
     path: docs/adr/0431-0fork-full-day-deployment.md
   - adr: '0441'
     title: Deployment-Scoped Service Subsetting via Service Profiles
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: platform
     keywords:
@@ -2789,7 +2789,7 @@ adrs:
     path: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
   - adr: 0448
     title: Per-Deployment Connection Registry & Wrapper
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-28'
@@ -2808,7 +2808,7 @@ adrs:
     path: docs/adr/0448-deployment-connection-registry-and-wrapper.md
   - adr: 0459
     title: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'
@@ -2828,9 +2828,9 @@ adrs:
     path: docs/adr/0459-deployment-lifecycle-cli-parity.md
   - adr: '0460'
     title: Phase 8 — Cross-Deployment Doctor + Advisory Auto-Promotion
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-29'
     concern: platform
     keywords:
@@ -2911,3 +2911,23 @@ adrs:
     summary: 'Every check is one entry in config/postconditions.yml (committed):'
     filename: 0484-self-verification-contracts.md
     path: docs/adr/0484-self-verification-contracts.md
+  - adr: 0489
+    title: Netplan MAC Mismatch — Root Cause and Self-Healing Recovery Model
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - netplan
+      - mac
+      - mismatch
+      - root
+      - cause
+      - self-healing
+      - recovery
+      - model
+    summary: 'When VMs have lost network due to a stale netplan MAC (interface is DOWN after reboot), follow these steps from
+      the Proxmox host:'
+    filename: 0489-netplan-mac-mismatch-recovery.md
+    path: docs/adr/0489-netplan-mac-mismatch-recovery.md

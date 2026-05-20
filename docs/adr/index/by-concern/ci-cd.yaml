@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-05-20'
 facet: concern
 concern: ci-cd
 total_adrs: 52
@@ -947,7 +947,7 @@ adrs:
     path: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
   - adr: '0470'
     title: Per-Deployment Fixture Inventory + Matrix CI
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'

@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-05-20'
 facet: concern
 concern: security
 total_adrs: 48
@@ -809,9 +809,9 @@ adrs:
     path: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
   - adr: '0445'
     title: Phase 1 Multi-Deployment Hardening (0fork.com + example.com)
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-28'
     concern: security
     keywords:
@@ -824,15 +824,15 @@ adrs:
       - hardening
       - fork
       - com
-      - lv3
+      - example
     summary: Phase 1 = six items. Items 1 and 2 are already in flight (ws-0438,
     filename: 0445-phase1-multi-deployment-hardening.md
     path: docs/adr/0445-phase1-multi-deployment-hardening.md
   - adr: '0446'
     title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-28'
     concern: security
     keywords:
@@ -849,7 +849,7 @@ adrs:
     path: docs/adr/0446-phase2-multi-deployment-hardening.md
   - adr: '0456'
     title: Deployment-Aware Certificate Validation
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-28'
@@ -867,7 +867,7 @@ adrs:
     path: docs/adr/0456-deployment-aware-certificate-validation.md
   - adr: 0458
     title: Cert-Validator Multi-Deployment Mode (Auto-Detect)
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'
