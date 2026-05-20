@@ -16,6 +16,7 @@
         playbook_execution_require_debian: true
         playbook_execution_audit_action: playbook.start.guest-log-shipping
         playbook_execution_audit_target: guest-log-shipping
+        playbook_execution_check_connectivity: false  # ADR 0371 — guests may be temporarily unavailable
         required_hosts:
           - "{{ playbook_execution_required_hosts.lv3_guests[playbook_execution_env] }}"
 

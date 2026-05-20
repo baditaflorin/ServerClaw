@@ -15,6 +15,7 @@
       vars:
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
+        playbook_execution_check_connectivity: false  # ADR 0371 — build VM may be temporarily unavailable
         required_hosts:
           - "{{ playbook_execution_required_hosts.docker_build[playbook_execution_env] }}"
 
