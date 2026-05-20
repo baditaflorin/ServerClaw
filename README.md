@@ -31,7 +31,7 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.43` |
+| Repository version | `0.179.45` |
 | Platform version | `0.178.222` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -44,13 +44,13 @@ monitored, and recoverable from a single repository.
 | Managed guest count | 17 |
 | Running guest count | 10 |
 | Template VM present | `true` |
-| Declared services | 71 |
-| Publicly published services | 47 |
+| Declared services | 70 |
+| Publicly published services | 46 |
 
 ### Service Exposure Summary
 | Exposure Model | Services |
 | --- | --- |
-| `edge-published` | 38 |
+| `edge-published` | 37 |
 | `edge-static` | 1 |
 | `informational-only` | 4 |
 | `private-only` | 28 |
@@ -89,12 +89,12 @@ Showing 20 of 187 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.43` |
+| Repository version | `0.179.45` |
 | Platform version | `0.178.222` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
-| Declared services | 71 |
+| Declared services | 70 |
 <!-- END GENERATED: version-summary -->
 
 ## Quick Start
