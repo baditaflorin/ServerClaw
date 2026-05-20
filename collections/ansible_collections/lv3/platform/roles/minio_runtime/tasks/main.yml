@@ -120,8 +120,7 @@
     set -euo pipefail
     if [ ! -s "{{ minio_root_password_remote_file }}" ]; then
       umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -hex 20 > "{{ minio_root_password_remote_file }}"
-                # Replace with: {{ "minio" | secret }}
+      openssl rand -hex 20 > "{{ minio_root_password_remote_file }}"
       echo changed
     fi
   args:
@@ -135,8 +134,7 @@
     set -euo pipefail
     if [ ! -s "{{ item.secret_key_remote_file }}" ]; then
       umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -hex 20 > "{{ item.secret_key_remote_file }}"
-                # Replace with: {{ "minio" | secret }}
+      openssl rand -hex 20 > "{{ item.secret_key_remote_file }}"
       echo changed
     fi
   args:
@@ -247,6 +245,16 @@
     common_openbao_compose_env_image: "{{ minio_openbao_agent_image }}"
     common_openbao_compose_env_legacy_env_files:
       - "{{ minio_legacy_env_file }}"
+    # OpenBao runs on runtime-control-lv3, not on the same VM as MinIO.
+    # Point the compose-env helper at the platform-wide OpenBao instance and
+    # disable local-runtime recovery (there is no local OpenBao to recover).
+    common_openbao_compose_env_openbao_address: >-
+      {{
+        minio_openbao_api_url
+        | default('http://' ~ (hostvars[platform_topology_host].platform_service_topology.openbao.private_ip)
+                  ~ ':' ~ (openbao_http_port | string), true)
+      }}
+    common_openbao_compose_env_manage_local_openbao_runtime: false
   no_log: true
 
 - name: Render the MinIO environment file
