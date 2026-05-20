@@ -31,7 +31,7 @@ plan-capacity:  ## (ADR 0482 + 0488) Plan-only: show what the resolver would wri
 # ADR 0484 — self-verification contracts
 # -----------------------------------------------------------------------------
 
-.PHONY: self-check self-check-strict self-check-json self-check-final-smoke lint-bootstrap-coverage
+.PHONY: self-check self-check-strict self-check-json self-check-final-smoke lint-bootstrap-coverage write-bootstrap-receipt
 
 self-check:  ## Run all post-conditions for the deployment (reads .local/identity.yml).
 	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/self_check.py $(if $(step),--step $(step),) $(if $(tag),--tag $(tag),) $(if $(id),--id $(id),)
@@ -47,6 +47,9 @@ self-check-json:  ## Emit machine-readable JSON only.
 
 lint-bootstrap-coverage:  ## (ADR 0484 §5) Verify every bootstrap step has ≥1 post-condition in post_conditions.yml.
 	@uv run --with pyyaml python $(REPO_ROOT)/scripts/lint_bootstrap_coverage.py
+
+write-bootstrap-receipt:  ## Write the bootstrap completion receipt to receipts/live-applies/ (bootstrap step 13).
+	@uv run --with pyyaml python $(REPO_ROOT)/scripts/write_bootstrap_receipt.py
 
 # -----------------------------------------------------------------------------
 # ADR 0483 — hands-off bootstrap orchestrator
