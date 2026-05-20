@@ -104,7 +104,7 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
-  loop: "{{ _guest_obs_all_base_configs.files }}"
+  loop: "{{ _guest_obs_all_base_configs.files | default([]) }}"
   when: item.path != guest_observability_base_inputs_config_file
   notify: Restart Telegraf
 
