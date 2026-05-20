@@ -10,6 +10,10 @@
       - healthcheck
   register: dozzle_runtime_agent_healthcheck
   changed_when: false
+  retries: 6
+  delay: 5
+  until: dozzle_runtime_agent_healthcheck.rc == 0
+  failed_when: false
 
 - name: Verify the Dozzle hub runtime health
   ansible.builtin.include_role:
