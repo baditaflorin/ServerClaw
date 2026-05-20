@@ -41,14 +41,6 @@
         description: "Outline Keycloak client secret"
         prerequisite: "Converge the Keycloak runtime before deploying Outline"
 
-- name: Ensure the Outline runtime packages are present
-  ansible.builtin.apt:
-    name:
-      - openssl
-    state: present
-    update_cache: true
-    force_apt_get: true
-
 - name: Ensure the Outline runtime directories exist
   ansible.builtin.file:
     path: "{{ item.path }}"
@@ -64,32 +56,25 @@
     - path: "{{ outline_secret_dir }}"
       mode: "0700"
 
-- name: Generate the Outline hex application secrets when missing
-  # Outline requires SECRET_KEY and UTILS_SECRET to be exactly 64 hexadecimal
-  # characters. The | secret() filter produces a srvclaw_-prefixed base64 value
-  # which fails Outline's env validation. Use openssl rand -hex 32 instead.
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item }}" ]; then
-      umask 077
-      openssl rand -hex 32 > "{{ item }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  loop:
-    - "{{ outline_secret_key_remote_file }}"
-    - "{{ outline_utils_secret_remote_file }}"
-  register: outline_hex_secrets_gen
-  changed_when: "'changed' in outline_hex_secrets_gen.stdout"
-  no_log: true
-
-- name: Manage Outline redis password and read all runtime secrets
+- name: Manage Outline runtime secrets
+  # SECRET_KEY and UTILS_SECRET use secret_hex (ADR 0403 hex_32 form): the file
+  # stores srvclaw_hex_outline_<64hex> for grep-based leak detection; the
+  # secret_payload filter strips the prefix before the value reaches the env var.
+  # Existing servers that already have a plain 64-char hex value (written by the
+  # previous openssl rand -hex 32 approach) are handled transparently: the
+  # write-if-missing guard leaves the file unchanged, and secret_payload passes
+  # through a value that doesn't match the srvclaw_ pattern unchanged.
   ansible.builtin.include_role:
     name: lv3.platform.common
     tasks_from: manage_service_secrets
   vars:
     common_manage_service_secrets_generate:
+      - path: "{{ outline_secret_key_remote_file }}"
+        command: "{{ 'outline' | secret_hex(length=32) }}"
+        label: "outline-secret-key"
+      - path: "{{ outline_utils_secret_remote_file }}"
+        command: "{{ 'outline' | secret_hex(length=32) }}"
+        label: "outline-utils-secret"
       - path: "{{ outline_redis_password_remote_file }}"
         command: "{{ 'outline' | secret(length=32) }}"
         label: "outline-redis-password"
@@ -108,10 +93,13 @@
     common_manage_service_secrets_fact_name: "outline_decoded_secrets"
   no_log: true
 
-- name: Record the Outline runtime secrets
+- name: Record Outline runtime secret facts
+  # secret_payload strips the srvclaw_hex_outline_ prefix so that SECRET_KEY
+  # and UTILS_SECRET contain only the 64-char hex value Outline requires.
+  # For existing servers with plain hex files the filter is a no-op pass-through.
   ansible.builtin.set_fact:
-    outline_secret_key: "{{ outline_decoded_secrets[0] }}"
-    outline_utils_secret: "{{ outline_decoded_secrets[1] }}"
+    outline_secret_key: "{{ outline_decoded_secrets[0] | secret_payload }}"
+    outline_utils_secret: "{{ outline_decoded_secrets[1] | secret_payload }}"
     outline_redis_password: "{{ outline_decoded_secrets[2] }}"
     outline_database_password: "{{ lookup('ansible.builtin.file', outline_database_password_local_file) | trim }}"
     outline_keycloak_client_secret: "{{ lookup('ansible.builtin.file', outline_keycloak_client_secret_local_file) | trim }}"
@@ -121,8 +109,8 @@
         postgres://{{ outline_database_user }}:{{ (lookup('ansible.builtin.file', outline_database_password_local_file) | trim) | urlencode }}@{{ outline_database_host }}:5432/{{ outline_database_name }}
       PGSSLMODE: disable
       REDIS_URL: "redis://:{{ outline_decoded_secrets[2] | urlencode | replace('/', '%2F') }}@redis:6379/0"
-      SECRET_KEY: "{{ outline_decoded_secrets[0] }}"
-      UTILS_SECRET: "{{ outline_decoded_secrets[1] }}"
+      SECRET_KEY: "{{ outline_decoded_secrets[0] | secret_payload }}"
+      UTILS_SECRET: "{{ outline_decoded_secrets[1] | secret_payload }}"
       OIDC_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', outline_keycloak_client_secret_local_file) | trim }}"
       AWS_SECRET_ACCESS_KEY: "{{ lookup('ansible.builtin.file', outline_s3_secret_key_local_file) | trim }}"
       AWS_S3_UPLOAD_BUCKET_URL: "{{ outline_s3_public_url }}"
