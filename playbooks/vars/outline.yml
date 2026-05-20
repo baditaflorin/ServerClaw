@@ -5,9 +5,14 @@ service_postgres_role: lv3.platform.outline_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime
   - lv3.platform.outline_runtime
-service_needs_dns: true
+service_needs_dns: false
 service_needs_postgres: true
 service_needs_nginx_edge: true
+
+# OpenBao lives on runtime-control (10.10.10.92), NOT on docker-runtime.
+# Skip the local-OpenBao probe so outline_runtime reaches OpenBao via the
+# platform topology's remote URL rather than localhost:8201 (ADR 0281).
+common_openbao_compose_env_manage_local_openbao_runtime: false
 
 # The following variables must be pre-set here so the outline_runtime arg spec
 # validator can evaluate defaults/main.yml values that reference them before
