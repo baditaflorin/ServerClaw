@@ -317,7 +317,7 @@ workstreams:
   conflicts_with: []
   owner: claude
   deployment: 0fork
-  branch: unassigned/ws-0484-self-verification-contracts
+  branch: codex/ws-0484-self-verification-contracts
   worktree_path: unassigned/ws-0484-self-verification-contracts
   doc: docs/adr/0484-self-verification-contracts.md
   depends_on:
@@ -493,7 +493,7 @@ workstreams:
   conflicts_with: []
   owner: claude
   deployment: 0fork
-  branch: unassigned/ws-0483-capacity-aware-dynamic-sizing
+  branch: codex/ws-0483-capacity-aware-dynamic-sizing
   worktree_path: unassigned/ws-0483-capacity-aware-dynamic-sizing
   doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
   depends_on:
@@ -577,7 +577,7 @@ workstreams:
   conflicts_with: []
   owner: unassigned
   deployment: 0fork
-  branch: unassigned/ws-0482-0fork-platform-not-bootstrapped
+  branch: codex/ws-0482-0fork-platform-not-bootstrapped
   worktree_path: unassigned/ws-0482-0fork-platform-not-bootstrapped
   doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
   depends_on:

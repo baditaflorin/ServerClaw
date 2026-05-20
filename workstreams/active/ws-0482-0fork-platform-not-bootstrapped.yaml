@@ -7,7 +7,7 @@ live_applied: false
 conflicts_with: []
 owner: unassigned
 deployment: 0fork
-branch: unassigned/ws-0482-0fork-platform-not-bootstrapped
+branch: codex/ws-0482-0fork-platform-not-bootstrapped
 worktree_path: unassigned/ws-0482-0fork-platform-not-bootstrapped
 doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
 depends_on:

@@ -7,7 +7,7 @@ live_applied: false
 conflicts_with: []
 owner: claude
 deployment: 0fork
-branch: unassigned/ws-0483-capacity-aware-dynamic-sizing
+branch: codex/ws-0483-capacity-aware-dynamic-sizing
 worktree_path: unassigned/ws-0483-capacity-aware-dynamic-sizing
 doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
 depends_on:

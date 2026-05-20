@@ -7,7 +7,7 @@ live_applied: false
 conflicts_with: []
 owner: claude
 deployment: 0fork
-branch: unassigned/ws-0484-self-verification-contracts
+branch: codex/ws-0484-self-verification-contracts
 worktree_path: unassigned/ws-0484-self-verification-contracts
 doc: docs/adr/0484-self-verification-contracts.md
 depends_on:
