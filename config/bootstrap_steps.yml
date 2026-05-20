@@ -488,7 +488,7 @@ steps:
           uv run --with pyyaml --with jsonschema
           python scripts/self_check.py --tag final-smoke
         expect_exit: 0
-        timeout_s: 120
+        timeout_s: 600  # ADR 0371 — non-critical checks retry up to 3×10s each; need >120s on minimal deploys
     timeout_s: 300
     retries: 1
 
