@@ -131,13 +131,22 @@
   vars:
     monitoring_stack_postgres_audit_host: >-
       {{ 'postgres-staging' if (env | default('production')) == 'staging' else 'postgres' }}
+    monitoring_stack_postgres_in_catalog: >-
+      {{
+        monitoring_stack_postgres_audit_host
+        in hostvars[groups['proxmox_hosts'][0]].platform_guest_catalog.by_name
+      }}
     monitoring_stack_postgres_audit_metrics_job_name: postgres-audit-alloy
     monitoring_stack_postgres_audit_metrics_port: 12345
     monitoring_stack_postgres_audit_metrics_target: >-
       {{
-        hostvars[groups['proxmox_hosts'][0]].platform_guest_catalog.by_name[
-          monitoring_stack_postgres_audit_host
-        ].ipv4
+        (
+          hostvars[groups['proxmox_hosts'][0]].platform_guest_catalog.by_name[
+            monitoring_stack_postgres_audit_host
+          ].ipv4
+          if monitoring_stack_postgres_audit_host in hostvars[groups['proxmox_hosts'][0]].platform_guest_catalog.by_name
+          else ''
+        )
       }}:{{ monitoring_stack_postgres_audit_metrics_port }}
     monitoring_stack_postgres_audit_metrics_probe_role: guest_log_shipping_metrics_probe
 
@@ -166,6 +175,7 @@
         or (monitoring_stack_verify_postgres_audit_scrape.json.data.result | length) == 0
         or (monitoring_stack_verify_postgres_audit_scrape.json.data.result[0].metric.instance | default('')) != monitoring_stack_postgres_audit_metrics_target
         or ((monitoring_stack_verify_postgres_audit_scrape.json.data.result[0].value[1] | float) < 1)
+      when: monitoring_stack_postgres_in_catalog | bool
 
     - name: Seed deterministic PostgreSQL audit lines after guest log shipping
       ansible.builtin.command:
@@ -183,6 +193,7 @@
       become: true
       become_user: postgres
       changed_when: false
+      when: monitoring_stack_postgres_in_catalog | bool
 
     - name: Verify the PostgreSQL audit Alloy endpoint exposes the expected metric families after guest log shipping
       ansible.builtin.command:
@@ -219,3 +230,4 @@
       until: monitoring_stack_verify_postgres_audit_metrics_endpoint.rc == 0
       changed_when: false
       failed_when: monitoring_stack_verify_postgres_audit_metrics_endpoint.rc != 0
+      when: monitoring_stack_postgres_in_catalog | bool
