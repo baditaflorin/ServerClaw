@@ -3,6 +3,7 @@
   hosts: "{{ 'docker-build-staging' if (env | default('production')) == 'staging' else 'docker-build' }}"
   become: true
   gather_facts: true
+  ignore_unreachable: true  # ADR 0371 — tolerate temporarily unavailable build VM
   tags:
     - tier-2
     - observability

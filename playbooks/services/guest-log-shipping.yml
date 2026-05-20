@@ -3,6 +3,7 @@
   hosts: "{{ 'lv3_guests:&staging' if (env | default('production')) == 'staging' else 'lv3_guests:&production' }}"
   become: true
   gather_facts: true
+  ignore_unreachable: true  # ADR 0371 — tolerate temporarily unavailable guests
   tags:
     - tier-2
     - observability
