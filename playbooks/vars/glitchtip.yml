@@ -9,12 +9,6 @@ service_needs_dns: false
 service_needs_postgres: true
 service_needs_nginx_edge: true
 
-# OpenBao lives on runtime-control-lv3 (10.10.10.92), NOT on docker-runtime-lv3.
-# Skip the local-OpenBao probe in ensure_local_openbao_runtime so that
-# keycloak_runtime can reach OpenBao via common_openbao_compose_env_openbao_address
-# (the platform topology's remote URL) rather than localhost:8201.
-common_openbao_compose_env_manage_local_openbao_runtime: false
-
 # glitchtip_internal_port and glitchtip_internal_base_url are required by the
 # arg spec validator before derive_service_defaults runs (ADR 0373).
 glitchtip_internal_port: 3005

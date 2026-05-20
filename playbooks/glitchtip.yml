@@ -15,6 +15,33 @@
 - import_playbook: _includes/postgres_preparation.yml
   when: service_needs_postgres | default(false)
 
+# --- Register GlitchTip OIDC client on runtime-control where Keycloak lives ---
+# keycloak_runtime MUST run on runtime-control (where Keycloak and OpenBao reside),
+# NOT on docker-runtime. Running it on docker-runtime causes startup probe failures
+# because the role probes 127.0.0.1:19000 for a Keycloak instance that isn't there.
+# This matches the gitea.yml and openfga.yml pattern (ADR 0281).
+
+- name: Register GlitchTip OIDC client on the Keycloak host
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
+  become: true
+  gather_facts: true
+  vars:
+    keycloak_secret_dir: /etc/{{ platform_identity.unix_prefix }}/keycloak
+    keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.keycloak_runtime
+
 # --- GlitchTip-specific docker runtime play (requires linux_guest_firewall_recover_missing_docker_bridge_chains) ---
 
 - name: Converge GlitchTip on the Docker runtime VM
@@ -23,6 +50,10 @@
   gather_facts: true
   vars:
     linux_guest_firewall_recover_missing_docker_bridge_chains: true
+    # OpenBao lives on runtime-control-lv3 (10.10.10.92), NOT on docker-runtime-lv3.
+    # Skip the local-OpenBao probe so glitchtip_runtime reaches OpenBao via the
+    # platform topology's remote URL rather than localhost:8201.
+    common_openbao_compose_env_manage_local_openbao_runtime: false
 
   pre_tasks:
     - name: Run shared preflight checks
@@ -37,7 +68,6 @@
   roles:
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.docker_runtime
-    - role: lv3.platform.keycloak_runtime
     - role: lv3.platform.glitchtip_runtime
 
 - import_playbook: _includes/nginx_edge_publication.yml
