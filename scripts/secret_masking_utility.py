@@ -93,6 +93,28 @@ def generate_real_secret(length: int = 32, service_name: str = "", with_prefix: 
     return f"srvclaw_{random_part}"
 
 
+def generate_real_secret_hex(service_name: str = "", length: int = 32) -> str:
+    """Generate a hex secret with srvclaw_hex_ greppable prefix.
+
+    Produces: srvclaw_hex_<service>_<2*length hex chars>
+    The payload is pure [0-9a-f], meeting ADR 0403 hex_32 requirements
+    (Outline SECRET_KEY, UTILS_SECRET, etc.).
+    The srvclaw_hex_ prefix is a leak-detection marker: grep for it in logs,
+    configs, and git diffs to catch accidental exposure.
+
+    Args:
+        service_name: Service identifier (e.g., 'outline')
+        length: Byte length of random portion (default 32 = 64 hex chars)
+
+    Returns:
+        srvclaw_hex_<service>_<hex> or srvclaw_hex_<hex> if no service name
+    """
+    hex_payload = secrets.token_hex(length)
+    if service_name:
+        return f"srvclaw_hex_{service_name}_{hex_payload}"
+    return f"srvclaw_hex_{hex_payload}"
+
+
 def is_masked_secret(value: str) -> bool:
     """Check if a string looks like a masked secret."""
     return value.startswith("srvclaw_") or value.startswith("srvclaw_api_")
