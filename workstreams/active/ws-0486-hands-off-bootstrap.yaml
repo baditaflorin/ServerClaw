@@ -4,6 +4,7 @@ title: Hands-off bootstrap — single declarative input → verified-running pla
 status: in_progress
 ready_to_merge: false
 live_applied: false
+conflicts_with: []
 owner: claude
 deployment: 0fork
 branch: claude/happy-maxwell-b79396

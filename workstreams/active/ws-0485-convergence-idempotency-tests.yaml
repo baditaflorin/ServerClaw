@@ -4,6 +4,7 @@ title: Convergence idempotency tests — running twice = no-op; drift always det
 status: in_progress
 ready_to_merge: false
 live_applied: false
+conflicts_with: []
 owner: claude
 deployment: 0fork
 branch: claude/happy-maxwell-b79396

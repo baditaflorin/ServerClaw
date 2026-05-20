@@ -4,6 +4,7 @@ title: Make deployment selection explicit and agent-checkable (no implicit ident
 status: in_progress
 ready_to_merge: false
 live_applied: false
+conflicts_with: []
 owner: claude
 branch: claude/condescending-pascal-021248
 worktree_path: .claude/worktrees/condescending-pascal-021248

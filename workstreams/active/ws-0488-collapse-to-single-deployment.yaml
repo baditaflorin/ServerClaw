@@ -4,6 +4,7 @@ title: Collapse to single-deployment-per-repo + envelope-aware sizing
 status: in_progress
 ready_to_merge: true
 live_applied: false
+conflicts_with: []
 owner: claude
 branch: claude/ws-0488-wave-3
 worktree_path: .claude/worktrees/agitated-saha-a10fa8

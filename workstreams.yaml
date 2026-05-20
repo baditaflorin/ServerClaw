@@ -27,6 +27,7 @@ workstreams:
   status: in_progress
   ready_to_merge: true
   live_applied: false
+  conflicts_with: []
   owner: claude
   branch: claude/ws-0488-wave-3
   worktree_path: .claude/worktrees/agitated-saha-a10fa8
@@ -226,6 +227,7 @@ workstreams:
   status: in_progress
   ready_to_merge: false
   live_applied: false
+  conflicts_with: []
   owner: claude
   deployment: 0fork
   branch: claude/happy-maxwell-b79396
@@ -312,6 +314,7 @@ workstreams:
   status: in_progress
   ready_to_merge: false
   live_applied: false
+  conflicts_with: []
   owner: claude
   deployment: 0fork
   branch: unassigned/ws-0484-self-verification-contracts
@@ -398,6 +401,7 @@ workstreams:
   status: in_progress
   ready_to_merge: false
   live_applied: false
+  conflicts_with: []
   owner: claude
   deployment: 0fork
   branch: claude/happy-maxwell-b79396
@@ -486,6 +490,7 @@ workstreams:
   status: in_progress
   ready_to_merge: false
   live_applied: false
+  conflicts_with: []
   owner: claude
   deployment: 0fork
   branch: unassigned/ws-0483-capacity-aware-dynamic-sizing
@@ -569,6 +574,7 @@ workstreams:
   status: planned
   ready_to_merge: false
   live_applied: false
+  conflicts_with: []
   owner: unassigned
   deployment: 0fork
   branch: unassigned/ws-0482-0fork-platform-not-bootstrapped
@@ -630,6 +636,7 @@ workstreams:
   status: in_progress
   ready_to_merge: false
   live_applied: false
+  conflicts_with: []
   owner: claude
   branch: claude/condescending-pascal-021248
   worktree_path: .claude/worktrees/condescending-pascal-021248
@@ -3007,8 +3014,8 @@ workstreams:
     \ all\n   have their `adr:` field quoted now (YAML octal-int parser was\n   coercing\
     \ 0447 -> 295). Don't revert.\n2. receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json\n\
     \   was reconstructed because PR #71 referenced it but never committed\n   the\
-    \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n \
-    \  now serves 0fork.com after yesterday's recovery).\n\nPlus follow-ups not in\
+    \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n\
+    \   now serves 0fork.com after yesterday's recovery).\n\nPlus follow-ups not in\
     \ ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n - Deployment-aware\
     \ cert validation.\n - `make new-deployment` / `make use-deployment` (ADR 0442)\
     \ \u2014 the\n   `run_with_deployment.sh` wrapper is the leaf they would invoke.\n"
@@ -4230,8 +4237,7 @@ workstreams:
   progress:
     completed_2026_04_21:
     - Hetzner DNS API token verified against zone 0fork.com (id RmJf7JFvpQNfWdEZmhAeEK)
-    - SSH access to 65.109.84.223 confirmed with llm-agents@platform_server
-      key
+    - SSH access to 65.109.84.223 confirmed with llm-agents@platform_server key
     - Host key fingerprint pinned (ED25519 9xWVsKZxKXoBR3O9369Ixj/Ke/qwiLQ5SBDli/STwVk)
     - Hardware inventory captured (Ryzen 3600, 62 GiB, 2x476 GB NVMe, /dev/kvm present)
     - ADR 0424 drafted
@@ -4420,8 +4426,8 @@ workstreams:
       - playbooks/platform-service-watchdog.yml
       mode: exclusive
   notes: 'Service health audit: 73 services, 5 VMs without watchdog coverage. SSH
-    to servers unavailable at time of audit (connection timeout to 203.0.113.1).
-    All service probe URLs derived from config/health-probe-catalog.json. Deploy with:
+    to servers unavailable at time of audit (connection timeout to 203.0.113.1). All
+    service probe URLs derived from config/health-probe-catalog.json. Deploy with:
     make converge-platform-watchdog env=production Or per-VM: ansible-playbook playbooks/platform-service-watchdog.yml
     -e env=production -e watchdog_vm=docker-runtime
 

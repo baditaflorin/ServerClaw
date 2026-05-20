@@ -3,8 +3,8 @@
 import sys
 from pathlib import Path
 
-# Import shared utility from scripts/
-sys.path.insert(0, str(Path(__file__).parents[5] / "scripts"))
+# Import shared utility from scripts/ (repo_root = parents[6]: filter/plugins/platform/lv3/ansible_collections/collections/repo_root)
+sys.path.insert(0, str(Path(__file__).parents[6] / "scripts"))
 from secret_masking_utility import generate_real_secret
 
 

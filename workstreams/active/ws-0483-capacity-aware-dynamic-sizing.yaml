@@ -4,6 +4,7 @@ title: Capacity-aware dynamic VM sizing — make `make new-deployment` actually 
 status: in_progress
 ready_to_merge: false
 live_applied: false
+conflicts_with: []
 owner: claude
 deployment: 0fork
 branch: unassigned/ws-0483-capacity-aware-dynamic-sizing

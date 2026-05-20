@@ -4,6 +4,7 @@ title: 0fork.com platform deployment never landed — registry.0fork.com 502 + o
 status: planned
 ready_to_merge: false
 live_applied: false
+conflicts_with: []
 owner: unassigned
 deployment: 0fork
 branch: unassigned/ws-0482-0fork-platform-not-bootstrapped
