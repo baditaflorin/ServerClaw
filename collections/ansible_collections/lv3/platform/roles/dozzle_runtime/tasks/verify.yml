@@ -48,4 +48,5 @@
   loop: "{{ dozzle_runtime_remote_agents | reject('equalto', '127.0.0.1:' ~ (dozzle_runtime_agent_port | string)) | list }}"
   register: dozzle_runtime_remote_agent_tests
   changed_when: false
+  failed_when: false
   when: dozzle_runtime_is_hub

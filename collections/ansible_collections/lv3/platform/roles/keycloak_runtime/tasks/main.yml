@@ -1457,6 +1457,12 @@
   failed_when: (keycloak_admin_realm_probe_confirmed.status | default(0)) == 403
   no_log: true
 
+- name: Check whether the mail-platform compose directory exists before relay recovery
+  ansible.builtin.stat:
+    path: "{{ keycloak_mail_platform_compose_file | dirname }}"
+  register: keycloak_mail_platform_compose_dir_stat
+  when: keycloak_mail_platform_submission_recovery_enabled
+
 - name: Verify Keycloak resolves the internal mail-platform relay host
   ansible.builtin.command:
     argv:
@@ -1489,6 +1495,7 @@
   changed_when: "'changed' in keycloak_mail_platform_network_label_cleanup.stdout"
   when:
     - keycloak_mail_platform_submission_recovery_enabled
+    - keycloak_mail_platform_compose_dir_stat.stat.exists | default(false)
     - keycloak_mail_submission_host_lookup_initial.rc != 0
 
 - name: Recover the internal mail-platform submission relay before Keycloak SMTP verification
@@ -1516,6 +1523,7 @@
   until: keycloak_mail_submission_dependency_up.rc == 0
   when:
     - keycloak_mail_platform_submission_recovery_enabled
+    - keycloak_mail_platform_compose_dir_stat.stat.exists | default(false)
     - keycloak_mail_submission_host_lookup_initial.rc != 0
 
 - name: Wait for the internal mail-platform submission listener after dependency recovery
@@ -1526,6 +1534,7 @@
     timeout: 120
   when:
     - keycloak_mail_platform_submission_recovery_enabled
+    - keycloak_mail_platform_compose_dir_stat.stat.exists | default(false)
     - keycloak_mail_submission_host_lookup_initial.rc != 0
 
 - name: Verify Keycloak resolves the internal mail-platform relay host
@@ -2537,6 +2546,9 @@
   no_log: true
 
 - name: Reconcile the Plane OIDC client
+  when: >-
+    platform_service_topology is defined and
+    platform_service_topology.plane is defined
   block:
     # BEGIN SERVICE: plane
     - name: Acquire a fresh Keycloak admin token for Plane OIDC client reconciliation
