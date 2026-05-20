@@ -514,9 +514,14 @@ def main() -> int:
             f"{s.failed_critical} critical fail, {s.failed_warning} warning, {s.errors} errors\n"
         )
 
-    if report.failed_critical or report.errors:
+    # Only count errors from critical checks as blocking failures.
+    # Non-critical checks that throw exceptions (e.g. DNS failure, timeout on
+    # undeployed services) should be treated as warnings, not hard failures.
+    # ADR 0371 — minimal deployments tolerate absent services.
+    critical_errors = sum(1 for r in report.results if r.result == "error" and r.critical)
+    if report.failed_critical or critical_errors:
         return 1
-    if args.strict and report.failed_warning:
+    if args.strict and (report.failed_warning or report.errors):
         return 1
     return 0
 
