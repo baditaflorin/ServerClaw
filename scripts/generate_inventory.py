@@ -553,18 +553,30 @@ def main() -> None:
                 "# ADR 0437 — overlay-aware bootstrap.\n"
                 "# =============================================================================\n"
             )
-            # Enrich platform_service_topology with urls from the generated platform.yml
-            # (group_vars). host_vars override group_vars in Ansible, so the topology
-            # dict here would otherwise shadow the urls that generate_platform_vars.py
-            # computes — causing platform_service_url() filter failures at runtime.
+            # Enrich platform_service_topology with computed fields from the generated
+            # platform.yml (group_vars). host_vars override group_vars in Ansible, so
+            # the topology dict here would otherwise shadow urls, ports, and other fields
+            # that generate_platform_vars.py computes — causing platform_service_url()
+            # and platform_service_port() filter failures at runtime.
+            _TOPOLOGY_ENRICH_KEYS = (
+                "urls",
+                "ports",
+                "service_id",
+                "runtime_pool",
+                "deployment_surface",
+                "restart_domain",
+                "api_contract_ref",
+                "mobility_tier",
+            )
             if PLATFORM_YML_PATH.exists():
                 with open(PLATFORM_YML_PATH) as _pf:
                     platform_group_vars = yaml.safe_load(_pf) or {}
                 platform_topo = platform_group_vars.get("platform_service_topology", {})
                 overlay_topo = host_vars.get("platform_service_topology", {})
                 for svc_id, svc_data in overlay_topo.items():
-                    if not svc_data.get("urls") and platform_topo.get(svc_id, {}).get("urls"):
-                        svc_data["urls"] = platform_topo[svc_id]["urls"]
+                    for _key in _TOPOLOGY_ENRICH_KEYS:
+                        if not svc_data.get(_key) and platform_topo.get(svc_id, {}).get(_key):
+                            svc_data[_key] = platform_topo[svc_id][_key]
             merged_host_vars_path.write_text(
                 merged_header + yaml.safe_dump(host_vars, sort_keys=False, default_flow_style=False)
             )

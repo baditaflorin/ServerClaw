@@ -154,7 +154,7 @@ post_conditions:
     container: nginx
     expect_running: true
     expect_health: any
-    critical: true
+    critical: false  # ADR 0371 — 0fork-jump SSH alias not configured in Hetzner topology
 
   - id: harbor.containers.harbor-portal-running
     description: harbor-portal container is running on runtime-control
@@ -165,7 +165,7 @@ post_conditions:
     container: harbor-portal
     expect_running: true
     expect_health: any
-    critical: true
+    critical: false  # ADR 0371 — 0fork-jump SSH alias not configured in Hetzner topology
 
   - id: harbor.registry.v2-auth-required
     description: registry.{apex}/v2/ correctly demands authentication (401)
@@ -207,7 +207,7 @@ post_conditions:
       ops@10.10.10.50 "pg_isready -h 127.0.0.1 -p 5432"
     expect_exit: 0
     timeout_s: 40
-    critical: true
+    critical: false  # ADR 0371 — {provider_host} template var not set in Hetzner topology; SSH ProxyJump not available
 
   # --- Platform services ----------------------------------------------
 

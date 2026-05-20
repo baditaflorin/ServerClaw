@@ -3063,9 +3063,9 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
     urls:
-      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
       public: https://sso.{{ platform_domain }}
   harbor:
     service_name: harbor
@@ -3192,6 +3192,11 @@ platform_service_topology:
       proxy_request_buffering: false
       proxy_read_timeout_seconds: 900
       proxy_send_timeout_seconds: 900
+    ports:
+      internal: "{{ platform_port_assignments.ntfy_port }}"
+    urls:
+      public: "https://ntfy.{{ platform_domain }}"
+      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.ntfy_port }}"
   ntopng:
     service_name: ntopng
     owning_vm: proxmox-host
