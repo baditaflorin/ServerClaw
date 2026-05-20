@@ -5,6 +5,10 @@
   when:
     - preflight_wait_for_connection | bool
     - ansible_connection | default("ssh") != "local"
+    # Skip when the host was unreachable (ignore_unreachable=true): gather_facts
+    # failed so ansible_distribution is undefined, meaning the host is not
+    # reachable and wait_for_connection would just timeout.
+    - ansible_distribution is defined
 
 - name: Assert the target distribution is supported
   ansible.builtin.assert:
@@ -15,7 +19,9 @@
       Unsupported target {{ ansible_distribution }} {{ ansible_distribution_major_version }}.
       Expected one of {{ preflight_allowed_distributions | join(", ") }} major versions
       {{ preflight_allowed_major_versions | join(", ") }}.
-  when: not preflight_skip_distribution_check | bool
+  when:
+    - not preflight_skip_distribution_check | bool
+    - ansible_distribution is defined
 
 - name: Assert required preflight variables are present
   ansible.builtin.assert:

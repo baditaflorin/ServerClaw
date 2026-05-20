@@ -12,7 +12,7 @@
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
     return_content: true
     status_code: 200
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_unseal_status
   retries: 12
@@ -40,7 +40,7 @@
     validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
     return_content: true
     status_code: 200
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_unsealed_status
   retries: 12

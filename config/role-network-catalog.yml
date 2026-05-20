@@ -1,0 +1,33 @@
+# Role → vmid / IPv4-offset catalog. Read by scripts/resolve_topology.py
+# to assign vmid + ipv4 to each enabled VM per the topology schema.
+#
+# Convention (ADR 0488 era): vmid = 100 + ipv4_last_octet. The IPv4 address
+# itself is formed from `identity.platform_guest_network_cidr` (first three
+# octets) + the role's `ipv4_last_octet` (last octet). For a /24 like
+# 10.10.10.0/24, nginx with ipv4_last_octet=10 resolves to 10.10.10.10
+# and vmid=110.
+#
+# Add a new role by appending an entry. Last-octet must be unique across
+# all roles. vmids should stay within [100, 999] to avoid clashing with
+# Proxmox-reserved ranges.
+
+schema_version: 1
+# template_key references an entry in `proxmox_vm_templates`
+# (inventory/group_vars/all/main.yml). Valid values today:
+#   debian-base, docker-host, postgres-host, ops-base
+roles:
+  nginx:            {ipv4_last_octet: 10, template_key: debian-base}
+  docker-runtime:   {ipv4_last_octet: 20, template_key: docker-host}
+  docker-build:     {ipv4_last_octet: 30, template_key: docker-host}
+  monitoring:       {ipv4_last_octet: 40, template_key: debian-base}
+  postgres:         {ipv4_last_octet: 50, template_key: postgres-host}
+  postgres-replica: {ipv4_last_octet: 51, template_key: postgres-host}
+  postgres-apps:    {ipv4_last_octet: 52, template_key: postgres-host}
+  postgres-data:    {ipv4_last_octet: 54, template_key: postgres-host}
+  backup:           {ipv4_last_octet: 60, template_key: ops-base}
+  coolify:          {ipv4_last_octet: 70, template_key: docker-host}
+  coolify-apps:     {ipv4_last_octet: 71, template_key: docker-host}
+  artifact-cache:   {ipv4_last_octet: 80, template_key: docker-host}
+  runtime-ai:       {ipv4_last_octet: 90, template_key: docker-host}
+  runtime-general:  {ipv4_last_octet: 91, template_key: docker-host}
+  runtime-control:  {ipv4_last_octet: 92, template_key: docker-host}

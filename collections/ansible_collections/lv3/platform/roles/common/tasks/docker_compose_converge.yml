@@ -53,14 +53,15 @@
   register: common_dcc_pull
   retries: "{{ common_docker_compose_converge_pull_retries }}"
   delay: "{{ common_docker_compose_converge_pull_delay }}"
-  until: common_dcc_pull.rc == 0
+  until: ('rc' in common_dcc_pull) and (common_dcc_pull.rc == 0)
   changed_when: >-
-    'Pulling' in common_dcc_pull.stdout
-    or 'Downloaded newer image' in common_dcc_pull.stdout
-    or 'Pull complete' in common_dcc_pull.stdout
+    'Pulling' in (common_dcc_pull.stdout | default(''))
+    or 'Downloaded newer image' in (common_dcc_pull.stdout | default(''))
+    or 'Pull complete' in (common_dcc_pull.stdout | default(''))
   when: >-
-    common_dcc_images_check.rc != 0
-    or common_dcc_images_check.stdout | trim | length == 0
+    ('rc' not in common_dcc_images_check)
+    or (common_dcc_images_check.rc != 0)
+    or (common_dcc_images_check.stdout | default('') | trim | length == 0)
     or (common_docker_compose_converge_force_pull | default(false) | bool)
 
 - name: "Check Docker NAT chain before {{ common_docker_compose_converge_service_name }} startup"
@@ -79,7 +80,9 @@
   ansible.builtin.service:
     name: docker
     state: restarted
-  when: common_dcc_nat_chain.rc != 0
+  when: >-
+    ('rc' not in common_dcc_nat_chain)
+    or (common_dcc_nat_chain.rc != 0)
 
 - name: Recheck Docker NAT chain after recovery
   ansible.builtin.command:
@@ -91,11 +94,15 @@
       - DOCKER
   register: common_dcc_nat_chain_recheck
   changed_when: false
-  failed_when: common_dcc_nat_chain_recheck.rc not in [0, 1]
+  failed_when: >-
+    ('rc' in common_dcc_nat_chain_recheck)
+    and (common_dcc_nat_chain_recheck.rc not in [0, 1])
   retries: 10
   delay: 2
-  until: common_dcc_nat_chain_recheck.rc == 0
-  when: common_dcc_nat_chain.rc != 0
+  until: ('rc' in common_dcc_nat_chain_recheck) and (common_dcc_nat_chain_recheck.rc == 0)
+  when: >-
+    ('rc' not in common_dcc_nat_chain)
+    or (common_dcc_nat_chain.rc != 0)
 
 - name: Wait for Docker daemon after networking recovery
   ansible.builtin.command:
@@ -108,14 +115,20 @@
   changed_when: false
   retries: 10
   delay: 2
-  until: common_dcc_docker_info.rc == 0
-  when: common_dcc_nat_chain.rc != 0
+  until: ('rc' in common_dcc_docker_info) and (common_dcc_docker_info.rc == 0)
+  when: >-
+    ('rc' not in common_dcc_nat_chain)
+    or (common_dcc_nat_chain.rc != 0)
 
 - name: Assert Docker NAT chain is present
   ansible.builtin.assert:
     that:
-      - common_dcc_nat_chain.rc == 0 or (common_dcc_nat_chain_recheck.rc | default(1)) == 0
+      - >-
+        ('rc' not in common_dcc_nat_chain)
+        or (common_dcc_nat_chain.rc == 0)
+        or ((common_dcc_nat_chain_recheck.rc | default(1)) == 0)
     fail_msg: "Docker is running but the NAT DOCKER chain is missing; published ports will fail."
+  when: "'rc' in common_dcc_nat_chain"
 
 - name: "Check {{ common_docker_compose_converge_service_name }} local port before startup"
   ansible.builtin.wait_for:
@@ -142,7 +155,7 @@
   ansible.builtin.set_fact:
     common_dcc_force_recreate: >-
       {{
-        common_dcc_nat_chain.rc != 0
+        (('rc' not in common_dcc_nat_chain) or (common_dcc_nat_chain.rc != 0))
         or (common_docker_compose_converge_template_results | selectattr('changed', 'defined') | selectattr('changed') | list | length > 0)
         or (common_dcc_pull.changed | default(false))
         or (common_dcc_port_probe.failed | default(false))

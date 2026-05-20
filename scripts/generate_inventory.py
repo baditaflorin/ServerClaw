@@ -42,6 +42,7 @@ from validation_toolkit import require_list, require_mapping, require_str
 REPO_ROOT = Path(__file__).resolve().parents[1]
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 HOSTS_YML_PATH = REPO_ROOT / "inventory" / "hosts.yml"
+PLATFORM_YML_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform.yml"
 
 GENERATED_HEADER_BASE = """\
 # =============================================================================
@@ -85,22 +86,22 @@ _EXECUTION_HOST_PATTERNS: dict[str, dict[str, str]] = {
         "staging": "backup_guests:&staging",
     },
     # Hosts with dedicated staging VMs
-    "coolify": {"production": "coolify", "staging": "coolify-staging"},
-    "coolify_apps": {"production": "coolify-apps", "staging": "coolify-apps-staging"},
-    "nginx_edge": {"production": "nginx", "staging": "nginx-staging"},
-    "docker_runtime": {"production": "docker-runtime", "staging": "docker-runtime-staging"},
-    "docker_build": {"production": "docker-build", "staging": "docker-build-staging"},
-    "monitoring": {"production": "monitoring", "staging": "monitoring-staging"},
-    "postgres": {"production": "postgres", "staging": "postgres-staging"},
-    "backup": {"production": "backup", "staging": "backup-staging"},
+    "coolify": {"production": "coolify-lv3", "staging": "coolify-staging"},
+    "coolify_apps": {"production": "coolify-apps-lv3", "staging": "coolify-apps-staging"},
+    "nginx_edge": {"production": "nginx-lv3", "staging": "nginx-staging"},
+    "docker_runtime": {"production": "docker-runtime-lv3", "staging": "docker-runtime-staging"},
+    "docker_build": {"production": "docker-build-lv3", "staging": "docker-build-staging"},
+    "monitoring": {"production": "monitoring-lv3", "staging": "monitoring-staging"},
+    "postgres": {"production": "postgres-lv3", "staging": "postgres-staging"},
+    "backup": {"production": "backup-lv3", "staging": "backup-staging"},
     # Hosts without dedicated staging VMs — fall back to shared staging VM
-    "runtime_ai": {"production": "runtime-ai", "staging": "docker-runtime-staging"},
-    "runtime_control": {"production": "runtime-control", "staging": "docker-runtime-staging"},
-    "runtime_general": {"production": "runtime-general", "staging": "docker-runtime-staging"},
-    "runtime_comms": {"production": "runtime-comms", "staging": "docker-runtime-staging"},
-    "runtime_apps": {"production": "runtime-apps", "staging": "docker-runtime-staging"},
-    "postgres_apps": {"production": "postgres-apps", "staging": "postgres-staging"},
-    "postgres_data": {"production": "postgres-data", "staging": "postgres-staging"},
+    "runtime_ai": {"production": "runtime-ai-lv3", "staging": "docker-runtime-staging"},
+    "runtime_control": {"production": "runtime-control-lv3", "staging": "docker-runtime-staging"},
+    "runtime_general": {"production": "runtime-general-lv3", "staging": "docker-runtime-staging"},
+    "runtime_comms": {"production": "runtime-comms-lv3", "staging": "docker-runtime-staging"},
+    "runtime_apps": {"production": "runtime-apps-lv3", "staging": "docker-runtime-staging"},
+    "postgres_apps": {"production": "postgres-apps-lv3", "staging": "postgres-staging"},
+    "postgres_data": {"production": "postgres-data-lv3", "staging": "postgres-staging"},
 }
 
 
@@ -552,6 +553,30 @@ def main() -> None:
                 "# ADR 0437 — overlay-aware bootstrap.\n"
                 "# =============================================================================\n"
             )
+            # Enrich platform_service_topology with computed fields from the generated
+            # platform.yml (group_vars). host_vars override group_vars in Ansible, so
+            # the topology dict here would otherwise shadow urls, ports, and other fields
+            # that generate_platform_vars.py computes — causing platform_service_url()
+            # and platform_service_port() filter failures at runtime.
+            _TOPOLOGY_ENRICH_KEYS = (
+                "urls",
+                "ports",
+                "service_id",
+                "runtime_pool",
+                "deployment_surface",
+                "restart_domain",
+                "api_contract_ref",
+                "mobility_tier",
+            )
+            if PLATFORM_YML_PATH.exists():
+                with open(PLATFORM_YML_PATH) as _pf:
+                    platform_group_vars = yaml.safe_load(_pf) or {}
+                platform_topo = platform_group_vars.get("platform_service_topology", {})
+                overlay_topo = host_vars.get("platform_service_topology", {})
+                for svc_id, svc_data in overlay_topo.items():
+                    for _key in _TOPOLOGY_ENRICH_KEYS:
+                        if not svc_data.get(_key) and platform_topo.get(svc_id, {}).get(_key):
+                            svc_data[_key] = platform_topo[svc_id][_key]
             merged_host_vars_path.write_text(
                 merged_header + yaml.safe_dump(host_vars, sort_keys=False, default_flow_style=False)
             )

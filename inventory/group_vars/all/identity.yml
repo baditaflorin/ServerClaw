@@ -13,6 +13,34 @@ platform_operator_email: operator@example.com
 platform_operator_name: "Platform Operator"
 platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
 
+# Derived identity prefixes used throughout the platform for filenames,
+# unix paths, and Proxmox object names. All forms derive from the apex
+# slug unless an operator overrides them in .local/identity.yml.
+_platform_identity_slug: "{{ platform_domain | split('.') | first }}"
+# Proxmox VE rejects configuration IDs (notification endpoints, matchers,
+# storage IDs, automation users, token roles, ACME plugin IDs) that don't
+# start with a letter. When the apex slug begins with a digit (e.g.
+# '0fork', '1blu', '9zen'), prepend a neutral letter so the resulting
+# identifiers stay valid. The user-facing display names and comments
+# continue to use the raw slug.
+#
+# IMPORTANT: do NOT use 'pve-' / 'pve' as the prefix — PVE reserves the
+# case-insensitive `PVE` namespace for built-in role IDs (`pveum role add`
+# rejects `Pve-...`). We use `op-` ("operator"), which is short,
+# semantically descriptive, and outside any PVE-reserved namespace.
+_platform_pve_safe_slug: >-
+  {{ 'op-' ~ _platform_identity_slug
+     if (_platform_identity_slug | regex_search('^[0-9]'))
+     else _platform_identity_slug }}
+# SQL identifiers (PostgreSQL roles, usernames) must start with a letter.
+# Strip any leading digits/hyphens so "0mpc" becomes "mpc", "example" stays "example".
+platform_sql_prefix: "{{ _platform_identity_slug | regex_replace('^[^a-z_]+', '') }}"
+platform_identity:
+  config_prefix: "{{ _platform_identity_slug }}"
+  unix_prefix: "{{ _platform_identity_slug }}"
+  pve_prefix: "{{ _platform_pve_safe_slug | trim }}"
+
+
 # ---------------------------------------------------------------------------
 # Keycloak SSO identity — ADR 0388
 # ---------------------------------------------------------------------------
@@ -31,9 +59,9 @@ keycloak_oidc_discovery_url: "{{ keycloak_oidc_issuer_url }}/.well-known/openid-
 proxmox_host_admin_comment: "{{ platform_operator_name }} Operations"
 proxmox_notification_email: "{{ platform_operator_email }}"
 proxmox_notification_author: "Proxmox {{ platform_domain | split('.') | first | upper }}"
-proxmox_notification_endpoint_name: "{{ platform_domain | split('.') | first }}-ops-email"
+proxmox_notification_endpoint_name: "{{ platform_identity.pve_prefix }}-ops-email"
 proxmox_notification_endpoint_comment: "{{ platform_domain | split('.') | first | upper }} operations mailbox"
-proxmox_notification_matcher_name: "{{ platform_domain | split('.') | first }}-all-events"
+proxmox_notification_matcher_name: "{{ platform_identity.pve_prefix }}-all-events"
 proxmox_notification_matcher_comment: "Send all Proxmox notifications to {{ platform_domain | split('.') | first | upper }} operations"
 proxmox_acme_contact_email: "{{ platform_operator_email }}"
 proxmox_acme_domain: "proxmox.{{ platform_domain }}"

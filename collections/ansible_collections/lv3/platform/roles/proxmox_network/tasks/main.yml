@@ -132,6 +132,59 @@
   when: proxmox_nftables.changed
   changed_when: true
 
+# Deadman-switch wrapper around `ifreload -a`. When the host transitions
+# from "<iface> owns the IP directly" to "<bridge> owns the IP and
+# enslaves <iface>", a misconfigured stanza (commonly an invalid IPv6
+# link-local `gateway` directive, or a missed up/down route hook) leaves
+# the management link in a half-applied state and bricks the box. The
+# template `validate: ifquery -i %s -l` hook checks syntax, not semantics,
+# so this slips through. We've also seen the box come back from
+# `ifreload` fine but boot-time `ifup -a` fail on the next kernel reboot
+# in a later role, which still bricks the host.
+#
+# Defense: snapshot the working /etc/network/interfaces, schedule a
+# one-shot revert via `at` 4 minutes into the future, then apply the new
+# config. If Ansible's wait_for_connection reaches the host afterwards
+# the at job is cancelled. If wait_for_connection times out (or anything
+# else goes wrong), the at job fires unattended, restores the good
+# config, and re-applies — so operators don't need IPMI / Robot rescue
+# to recover from a config bug.
+- name: Ensure `at` is installed (deadman-switch dependency)
+  ansible.builtin.apt:
+    name: at
+    state: present
+  when: proxmox_interfaces.changed
+
+- name: Snapshot the current /etc/network/interfaces for rollback
+  ansible.builtin.copy:
+    src: /etc/network/interfaces
+    dest: /etc/network/interfaces.last-known-good
+    remote_src: true
+    mode: "0644"
+  when: proxmox_interfaces.changed
+
+# Use a flag-file pattern (rather than cancel-by-job-ID): the at job is
+# always scheduled, but checks for the flag at fire time. If the disarm
+# task ran (= network came back fine), the flag is gone and the revert
+# is a no-op. Avoids races where `atrm` can't find the job (file write
+# timing, awk parse failure, etc.) and the revert fires unwanted.
+- name: Arm deadman-switch flag (revert fires in 240 s if flag still present)
+  ansible.builtin.shell: |
+    set -eu
+    systemctl start atd 2>/dev/null || true
+    : > /run/proxmox-network-revert.armed
+    at now + 4 minutes <<'EOF'
+    if [ -e /run/proxmox-network-revert.armed ]; then
+      cp /etc/network/interfaces.last-known-good /etc/network/interfaces
+      ifreload -a
+      rm -f /run/proxmox-network-revert.armed
+    fi
+    EOF
+  args:
+    executable: /bin/bash
+  changed_when: true
+  when: proxmox_interfaces.changed
+
 - name: Apply network changes with ifreload
   ansible.builtin.command: ifreload -a
   when: proxmox_interfaces.changed
@@ -139,9 +192,15 @@
 
 - name: Wait for SSH after network reload
   ansible.builtin.wait_for_connection:
-    timeout: 120
+    timeout: 180
     connect_timeout: 5
     sleep: 2
+  when: proxmox_interfaces.changed
+
+- name: Disarm deadman-switch (clear the flag so the scheduled at job no-ops)
+  ansible.builtin.file:
+    path: /run/proxmox-network-revert.armed
+    state: absent
   when: proxmox_interfaces.changed
 
 - name: Refresh facts after network changes

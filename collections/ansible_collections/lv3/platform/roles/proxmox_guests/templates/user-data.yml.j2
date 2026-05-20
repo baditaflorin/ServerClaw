@@ -24,7 +24,7 @@ packages:
   - curl
   - ca-certificates
   - jq
-{% for package in item.packages %}
+{% for package in (item.packages | default([])) %}
   - {{ package }}
 {% endfor %}
 

@@ -36,6 +36,16 @@
       - docker_runtime_apt_repo_uri
     common_assert_vars_fail_msg: "docker_runtime requires package, repository, and admin user inputs."
 
+# When ignore_unreachable=true is set on a play, gather_facts fails silently
+# for unreachable hosts, leaving ansible_distribution undefined.  All
+# subsequent tasks that touch the remote host would return UNREACHABLE, and
+# set_fact tasks that reference .stdout/.results on those UNREACHABLE returns
+# will crash at finalization.  Short-circuit the role here for hosts that
+# never came up.
+- name: Skip docker runtime for unreachable hosts (facts not gathered)
+  ansible.builtin.meta: end_role
+  when: ansible_distribution is not defined
+
 - name: Inspect Docker repository prerequisite package status
   ansible.builtin.command:
     argv:
@@ -53,6 +63,7 @@
     docker_runtime_missing_prereq_packages: >-
       {{
         docker_runtime_prereq_package_status.results
+        | selectattr("stdout", "defined")
         | rejectattr("stdout", "equalto", "install ok installed")
         | map(attribute="item")
         | list
@@ -141,6 +152,7 @@
     docker_runtime_missing_engine_packages: >-
       {{
         docker_runtime_engine_package_status.results
+        | selectattr("stdout", "defined")
         | rejectattr("stdout", "equalto", "install ok installed")
         | map(attribute="item")
         | list

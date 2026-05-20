@@ -58,7 +58,65 @@ CAPACITY_PATH = LOCAL_ROOT / "capacity.yml"
 PROFILE_PATH = LOCAL_ROOT / "profile.yml"
 TOPOLOGY_PATH = LOCAL_ROOT / "topology.yml"
 POLICY_PATH = CODE_ROOT / "config" / "sizing-policy.yml"
+ROLE_NETMAP_PATH = CODE_ROOT / "config" / "role-network-catalog.yml"
+IDENTITY_PATH = LOCAL_ROOT / "identity.yml"
 INVENTORY_FRAGMENT_PATH = CODE_ROOT / "inventory" / "host_vars" / "proxmox-host.generated.yml"
+
+
+def _load_role_netmap() -> dict[str, dict[str, int]]:
+    """Read config/role-network-catalog.yml — role → ipv4_last_octet."""
+    if not ROLE_NETMAP_PATH.is_file():
+        sys.exit(f"ERROR: {ROLE_NETMAP_PATH} not found.")
+    data = yaml.safe_load(ROLE_NETMAP_PATH.read_text()) or {}
+    return data.get("roles") or {}
+
+
+def _guest_network() -> tuple[str, int]:
+    """Return (prefix, cidr_int) parsed from identity.platform_guest_network_cidr.
+
+    e.g. '10.10.10.0/24' -> ('10.10.10', 24). Defaults to ('10.10.10', 24)
+    if identity.yml is absent or doesn't carry the CIDR.
+    """
+    if IDENTITY_PATH.is_file():
+        identity = yaml.safe_load(IDENTITY_PATH.read_text()) or {}
+        cidr_str = identity.get("platform_guest_network_cidr", "10.10.10.0/24")
+    else:
+        cidr_str = "10.10.10.0/24"
+    addr, _, bits = cidr_str.partition("/")
+    prefix = ".".join(addr.split(".")[:3])
+    return prefix, int(bits) if bits else 24
+
+
+def _guest_network_prefix() -> str:
+    """Back-compat shim: returns just the dotted-octet prefix."""
+    return _guest_network()[0]
+
+
+def _resolve_network_fields(role: str, netmap: dict[str, dict[str, Any]], prefix: str, cidr_bits: int) -> dict[str, Any]:
+    entry = netmap.get(role)
+    if not entry:
+        sys.exit(
+            f"ERROR: role {role!r} has no entry in {ROLE_NETMAP_PATH.relative_to(CODE_ROOT)}. "
+            "Add an `ipv4_last_octet` and `template_key` for this role before re-running."
+        )
+    last = int(entry["ipv4_last_octet"])
+    template_key = entry.get("template_key")
+    if not template_key:
+        sys.exit(
+            f"ERROR: role {role!r} in {ROLE_NETMAP_PATH.relative_to(CODE_ROOT)} is missing "
+            "`template_key`. Set it to one of the entries in `proxmox_vm_templates` "
+            "(typically debian-base / docker-host / postgres-host / ops-base)."
+        )
+    return {
+        "vmid": 100 + last,
+        "ipv4": f"{prefix}.{last}",
+        "cidr": cidr_bits,
+        # The guest gateway is the Proxmox host's internal bridge IP,
+        # conventionally `<prefix>.1` (matches `proxmox_internal_ipv4`
+        # in inventory/host_vars/proxmox-host.yml).
+        "gateway4": f"{prefix}.1",
+        "template_key": template_key,
+    }
 
 
 def _hash(obj: Any) -> str:
@@ -190,13 +248,30 @@ def resolve(inputs: Inputs, strict: bool = False) -> tuple[dict[str, Any], list[
                 if resolved_dict[c] < preferred:
                     sys.exit(f"--strict: {c}.{field} resolved to {resolved_dict[c]} < preferred {preferred}")
 
+    netmap = _load_role_netmap()
+    prefix, cidr_bits = _guest_network()
     proxmox_guests = []
     for c in enabled:
         ram_mb = ram[c]
+        net = _resolve_network_fields(c, netmap, prefix, cidr_bits)
+        # NOTE: the committed inventory/host_vars/proxmox-host.yml carries
+        # `network_policy.guests.<role>-lv3` and `owning_vm: <role>-lv3`
+        # entries (legacy operator slug). Renaming all of those committed
+        # references is a larger refactor (separate workstream); for now
+        # we keep `-lv3` as the VM name suffix so the committed policy
+        # entries match every guest's inventory_hostname. This will be
+        # cleaned up to derive from `platform_identity.config_prefix` in
+        # a follow-up PR.
+        guest_name = f"{c}-lv3"
         proxmox_guests.append(
             {
-                "name": c,
+                "name": guest_name,
+                "vmid": net["vmid"],
+                "ipv4": net["ipv4"],
+                "cidr": net["cidr"],
+                "gateway4": net["gateway4"],
                 "role": c,
+                "template_key": net["template_key"],
                 "memory_mb": ram_mb,
                 "balloon_mb": int(ram_mb * 0.4),
                 "cores": cpu[c],

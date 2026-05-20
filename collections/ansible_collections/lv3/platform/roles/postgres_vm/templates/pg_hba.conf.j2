@@ -1,7 +1,7 @@
 # Managed by Ansible — ADR 0359 + ADR 0416. Do not edit by hand.
 # Source: inventory/group_vars/platform_postgres.yml (platform_postgres_clients)
 #         inventory/group_vars/all/platform_services.yml (platform_service_registry)
-# IP derivation: platform_service_registry[service].host_group → platform_guest_catalog.by_name[host].ipv4
+# IP derivation: platform_service_registry[service].host_group → platform_guest_catalog.by_role[host].ipv4
 # source_vm is intentionally absent from platform_postgres_clients — derived here (ADR 0416 Phase 2).
 local   all             postgres                                peer
 local   all             {{ postgres_vm_admin_role }}            peer
@@ -17,8 +17,12 @@ host    all             all             ::1/128                 scram-sha-256
 host    {{ client.database }}  {{ client.user }}  {{ client_ip }}  scram-sha-256  # LEGACY: source_vm={{ client.source_vm }}
 {% elif platform_service_registry[client.service] is defined %}
 {% set host_group = platform_service_registry[client.service].host_group %}
-{% set client_ip = platform_guest_catalog.by_name[host_group].ipv4 + '/32' %}
+{% if platform_guest_catalog.by_role[host_group] is defined %}
+{% set client_ip = platform_guest_catalog.by_role[host_group].ipv4 + '/32' %}
 host    {{ client.database }}  {{ client.user }}  {{ client_ip }}  scram-sha-256
+{% else %}
+# WARNING: No by_role entry for host_group={{ host_group }} (service={{ client.service }}) — skipping!
+{% endif %}
 {% else %}
 # WARNING: No platform_service_registry entry for {{ client.service }} — skipping pg_hba entry!
 {% endif %}

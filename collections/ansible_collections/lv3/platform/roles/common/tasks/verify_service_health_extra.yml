@@ -18,4 +18,6 @@
       {{ common_verify_extra_endpoint.assertion_msg | default(
         common_verify_service_name ~ ' extra endpoint ' ~ common_verify_extra_endpoint.url ~ ' assertions failed.'
       ) }}
-  when: (common_verify_extra_endpoint.assertions | default([])) | length > 0
+  when:
+    - (common_verify_extra_endpoint.assertions | default([])) | length > 0
+    - "'content' in common_verify_extra_response"

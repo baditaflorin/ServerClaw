@@ -45,13 +45,11 @@
           "endpoint": "ops@10.10.10.0/24 via ProxyJump through ops@100.64.0.1",
           "auth": "Named SSH key for ops on guests, reached through the approved Proxmox jump path.",
           "owner_refs": [
-            "nginx",
-            "docker-runtime",
-            "runtime-control",
-            "docker-build",
-            "monitoring",
-            "postgres",
-            "backup"
+            "nginx-lv3",
+            "docker-runtime-lv3",
+            "runtime-control-lv3",
+            "monitoring-lv3",
+            "postgres-lv3"
           ],
           "workflow_refs": [
             "configure-edge-publication",

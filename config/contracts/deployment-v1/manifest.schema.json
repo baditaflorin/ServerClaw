@@ -175,6 +175,11 @@
     "notes": {
       "type": "string",
       "description": "Free-text operator notes. Not interpreted by the bootstrap chain; appears in receipts and status output."
+    },
+    "extra_vars": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Free-form Ansible variable overrides merged into the derived `.local/identity.yml`. Use this when an operator needs to override a role default that doesn't have a first-class manifest field — for example, disabling a provider-specific subflow that doesn't apply to this deployment (e.g. `proxmox_security_manage_acme: false` when the apex domain is managed by a DNS provider the role's ACME plugin doesn't support). Keys must be valid Ansible variable names; values can be any JSON-representable type. Keys clashing with derived identity fields are rejected at derive time."
     }
   },
   "examples": [

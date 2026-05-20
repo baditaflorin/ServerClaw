@@ -70,6 +70,7 @@
   when:
     - dozzle_runtime_is_hub
     - item != inventory_hostname
+    - item in ansible_play_hosts
 
 - name: Render the Dozzle compose file
   ansible.builtin.template:

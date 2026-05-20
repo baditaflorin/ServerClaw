@@ -1,4 +1,13 @@
 ---
+- name: Check whether Grafana is installed and responding before configuring SSO
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/login
+    method: GET
+    status_code: 200
+  register: grafana_sso_ini_stat
+  failed_when: false
+  changed_when: false
+
 - name: Validate Grafana SSO inputs
   ansible.builtin.assert:
     that:
@@ -8,6 +17,7 @@
       - grafana_sso_service_topology.public_hostname | length > 0
       - grafana_sso_keycloak_service_topology.public_hostname | length > 0
     fail_msg: "grafana_sso requires a client id, client secret, realm, and public hostnames."
+  when: grafana_sso_ini_stat.status | default(-1) == 200
 
 - name: Ensure Grafana knows its public root URL
   community.general.ini_file:
@@ -17,6 +27,7 @@
     value: "{{ grafana_sso_root_url }}"
     mode: "0640"
   notify: Restart Grafana
+  when: grafana_sso_ini_stat.status | default(-1) == 200
 
 - name: Enable Generic OAuth in Grafana
   community.general.ini_file:
@@ -62,11 +73,13 @@
     label: "{{ item.option }}"
   notify: Restart Grafana
   no_log: true
+  when: grafana_sso_ini_stat.status | default(-1) == 200
 
 - name: Flush Grafana SSO handlers
   ansible.builtin.meta: flush_handlers
+  when: grafana_sso_ini_stat.status | default(-1) == 200
 
-- name: Wait for Grafana to answer locally
+- name: Wait for Grafana to answer locally after SSO config restart
   ansible.builtin.uri:
     url: http://127.0.0.1:3000/login
     method: GET
@@ -76,6 +89,7 @@
   delay: 3
   until: grafana_sso_login_page.status == 200
   changed_when: false
+  when: grafana_sso_ini_stat.status | default(-1) == 200
 
 - name: Verify Grafana redirects the OAuth login to Keycloak
   ansible.builtin.uri:
@@ -85,6 +99,7 @@
     status_code: 302
   register: grafana_sso_redirect
   changed_when: false
+  when: grafana_sso_ini_stat.status | default(-1) == 200
 
 - name: Assert the Grafana OAuth redirect is wired to Keycloak
   ansible.builtin.assert:
@@ -94,3 +109,4 @@
         in grafana_sso_redirect.location
       - ('client_id=' ~ grafana_sso_client_id) in grafana_sso_redirect.location
     fail_msg: "Grafana is not redirecting the generic OAuth login path to the expected Keycloak client."
+  when: grafana_sso_ini_stat.status | default(-1) == 200

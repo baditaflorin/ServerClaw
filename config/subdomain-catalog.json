@@ -852,23 +852,6 @@
       "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
     },
     {
-      "fqdn": "repo-intake.example.com",
-      "service_id": "repo_intake",
-      "environment": "production",
-      "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "edge_oidc",
-      "target": "203.0.113.1",
-      "target_port": 443,
-      "owner_adr": "0373",
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
-      },
-      "notes": "Repo intake webhook service. Published through the shared NGINX edge and gated behind Keycloak oauth2-proxy."
-    },
-    {
       "fqdn": "repowise.example.com",
       "service_id": "repowise",
       "environment": "production",

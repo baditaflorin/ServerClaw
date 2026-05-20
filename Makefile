@@ -9,7 +9,16 @@ DEPLOYMENT_ARG :=
 # When PLATFORM_IDENTITY_OVERLAY is set, rewire inventory, SSH key, env and
 # ansible extras so `make bootstrap` works for forks off a single env var.
 # Production (no env var) is byte-identical to the pre-ADR-0437 Makefile.
+#
+# ADR 0488: single-deployment-per-checkout. When `.local/identity.yml` exists
+# and the operator hasn't explicitly set PLATFORM_IDENTITY_OVERLAY, default
+# it to that file so the overlay machinery activates automatically.
 PLATFORM_IDENTITY_OVERLAY ?=
+ifeq ($(strip $(PLATFORM_IDENTITY_OVERLAY)),)
+ifneq ($(wildcard $(LOCAL_OVERLAY_ROOT)/identity.yml),)
+PLATFORM_IDENTITY_OVERLAY := $(LOCAL_OVERLAY_ROOT)/identity.yml
+endif
+endif
 # Agents often invoke `make bootstrap` from inside a .claude/worktrees/ copy
 # whose CWD has no `.local/` (per CLAUDE.md: "worktrees intentionally lack
 # .local/"). Relative PLATFORM_IDENTITY_OVERLAY paths like
@@ -28,15 +37,25 @@ BOOTSTRAP_OVERLAY_INVENTORY ?= $(LOCAL_OVERLAY_ROOT)/inventory/hosts.yml
 # init-remote has created the ops sudoer. Provider-supplied root access is
 # only used for the init-remote step via BOOTSTRAP_OVERLAY_ROOT_KEY below.
 BOOTSTRAP_OVERLAY_SSH_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519
-BOOTSTRAP_OVERLAY_ENV ?= clone
-BOOTSTRAP_OVERLAY_HOST_ADDR ?= $(shell awk -F': *' '/^management_ipv4:/ {gsub(/["'"'"' ]/,"",$$2); print $$2; exit}' $(PLATFORM_IDENTITY_OVERLAY) 2>/dev/null)
+BOOTSTRAP_OVERLAY_ENV ?= production
+# management_ipv4 lives in host_vars (the host-level network config),
+# not in identity.yml (the deployment-level identity). ADR 0488 split
+# the two; we read from the host_vars overlay first and fall back to
+# PLATFORM_IDENTITY_OVERLAY for legacy multi-deployment overlays that
+# still bundle host config into one file.
+BOOTSTRAP_OVERLAY_HOST_ADDR ?= $(shell awk -F': *' '/^management_ipv4:/ {gsub(/["'"'"' ]/,"",$$2); print $$2; exit}' $(BOOTSTRAP_OVERLAY_HOST_VARS) 2>/dev/null || awk -F': *' '/^management_ipv4:/ {gsub(/["'"'"' ]/,"",$$2); print $$2; exit}' $(PLATFORM_IDENTITY_OVERLAY) 2>/dev/null)
 BOOTSTRAP_OVERLAY_ROOT_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/hetzner_llm_agents_ed25519
 BOOTSTRAP_OVERLAY_ROOT_USER ?= root
 BOOTSTRAP_OVERLAY_OPS_USER ?= ops
 BOOTSTRAP_OVERLAY_OPS_PUBKEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519.pub
 # Multi-inventory: committed inventory supplies group_vars/host_vars defaults
-# (so everything in inventory/group_vars/all/main.yml loads), while the
-# overlay inventory wins on host-level data it redefines.
+# from inventory/group_vars/ and inventory/host_vars/ (ansible auto-loads
+# them from the directory containing the inventory file). The overlay
+# inventory at $(BOOTSTRAP_OVERLAY_INVENTORY) wins on host-level data it
+# redefines and adds the real hosts. ADR 0488: the committed inventory must
+# carry no concrete host entries — only group definitions — so that the
+# placeholder names in the public mirror do not show up alongside the
+# operator's real hosts and become "unreachable" failures.
 ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml -i $(BOOTSTRAP_OVERLAY_INVENTORY)
 BOOTSTRAP_KEY := $(BOOTSTRAP_OVERLAY_SSH_KEY)
 env := $(BOOTSTRAP_OVERLAY_ENV)
@@ -146,7 +165,7 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info capability-contracts capability-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness managed-image-gate sbom-refresh upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status atlas-validate atlas-lint atlas-refresh-snapshots atlas-drift-check
 .PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
 .PHONY: syntax-check-ollama syntax-check-piper syntax-check-n8n syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit list-services diff-services list-service-deployments security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
-.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-site-parallel converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-repo-intake converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-piper converge-label-studio converge-n8n converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
+.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-all-services converge-site-parallel converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-repo-intake converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-piper converge-label-studio converge-n8n converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server apply-gate-tools syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
@@ -578,11 +597,8 @@ install-cli:
 
 update-cli: install-cli
 
-init-remote: ## Create the ops sudoer on a fresh remote host (overlay-mode prerequisite for Stage 2)
-ifneq ($(BOOTSTRAP_OVERLAY_MODE),1)
-	@echo "init-remote is overlay-mode only; set PLATFORM_IDENTITY_OVERLAY to use it." >&2
-	@exit 1
-endif
+init-remote: ## Create the ops sudoer on a fresh remote host (reads .local/connection.yml; overlay vars still honored if set)
+ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
 	@if [ -z "$(strip $(BOOTSTRAP_OVERLAY_HOST_ADDR))" ]; then \
 		echo "init-remote: could not derive host address from $(PLATFORM_IDENTITY_OVERLAY) (need management_ipv4:)" >&2; \
 		exit 1; \
@@ -594,6 +610,9 @@ endif
 	OPS_PUBKEY_PATH=$(BOOTSTRAP_OVERLAY_OPS_PUBKEY) \
 	OPS_PROBE_KEY=$(BOOTSTRAP_KEY) \
 	$(REPO_ROOT)/scripts/init_remote_ops_user.sh
+else
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/init_remote_from_connection.py
+endif
 
 generate-inventory: ## Regenerate inventory/hosts.yml from proxmox_guests in host_vars/platform-host.yml
 ifeq ($(BOOTSTRAP_OVERLAY_MODE),1)
@@ -622,7 +641,7 @@ validate-generated-readme: ## Exit 1 if README.md is out of sync with docs/templ
 
 generate-platform-vars:
 	$(MAKE) generate-cross-cutting-artifacts
-	PYTHONPATH=$(REPO_ROOT) python3 $(REPO_ROOT)/scripts/generate_platform_vars.py --write $(DEPLOYMENT_ARG)
+	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_platform_vars.py --write $(DEPLOYMENT_ARG)
 
 generate-slo-rules:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --write
@@ -1208,7 +1227,14 @@ configure-edge-publication:
 	$(MAKE) preflight WORKFLOW=configure-edge-publication
 	$(MAKE) generate-platform-vars
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --write-registry --validate
-	$(MAKE) generate-changelog-portal docs
+	# Portal generation is best-effort during the initial bootstrap:
+	# changelog-portal / docs / ops-portal validate platform data models
+	# that are still being seeded (capacity-model status, service-catalog
+	# alignment, edge_oidc-protected subdomains, etc.). They are not
+	# load-bearing for the NGINX route apply that follows. A fresh-host
+	# bootstrap can finish step 7 with the portals empty; the operator
+	# regenerates them after the rest of the chain converges.
+	$(MAKE) generate-changelog-portal docs || echo "WARN: portal generation incomplete; routes still apply"
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/public-edge.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
 	$(MAKE) validate-certificates
 
@@ -1247,7 +1273,13 @@ harden-access:
 
 harden-guest-access:
 	$(MAKE) preflight WORKFLOW=harden-guest-access
-	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/guest-access.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY)
+	# Guest VMs sit on the internal 10.10.10.0/24 bridge and are only
+	# reachable from the controller via SSH ProxyJump through the
+	# Proxmox host. Other ANSIBLE_SCOPED_RUN targets pass the
+	# `proxmox_guest_ssh_connection_mode=proxmox_host_jump` extra-var
+	# explicitly; do the same here so the gather_facts step doesn't try
+	# to dial 10.10.10.x directly from the controller and time out.
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/guest-access.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 harden-security:
 	$(MAKE) preflight WORKFLOW=harden-security
@@ -2148,6 +2180,9 @@ converge-site: ## Full site convergence (all services)
 	# wrappers on a steady-state platform; for fresh-host bootstrap we want
 	# the simplest possible converge-everything path.
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_OVERLAY_EXTRA) $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
+converge-all-services: ## Converge all services in the active deployment profile (called by bootstrap step 11)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/converge_profile_services.py --env $(env)
 
 converge-site-parallel: ## Parallel site convergence — dependency-wave execution (~40-50% faster)
 	$(MAKE) preflight WORKFLOW=converge-site

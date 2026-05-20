@@ -19,9 +19,20 @@ iface {{ proxmox_wan_bridge }} inet static
     up route add -net {{ hetzner_ipv4_route_network }} netmask {{ hetzner_ipv4_route_netmask }} gw {{ management_gateway4 }} dev {{ proxmox_wan_bridge }} || true
     down route del -net {{ hetzner_ipv4_route_network }} netmask {{ hetzner_ipv4_route_netmask }} gw {{ management_gateway4 }} dev {{ proxmox_wan_bridge }} || true
 
+{% if management_ipv6 is defined and (management_ipv6 | default('') | length) > 0 %}
 iface {{ proxmox_wan_bridge }} inet6 static
     address {{ management_ipv6 }}/{{ management_ipv6_cidr }}
+{%   if (management_gateway6 | default('')) | regex_search('^fe[89ab][0-9a-f]:') %}
+    # Link-local default gateway (typical Hetzner setup). ifupdown's
+    # `gateway` directive cannot disambiguate a link-local address
+    # without an explicit device, so use the `up`/`down` route-add
+    # pattern. `|| true` keeps reload-time idempotency.
+    up   ip -6 route add default via {{ management_gateway6 }} dev {{ proxmox_wan_bridge }} || true
+    down ip -6 route del default via {{ management_gateway6 }} dev {{ proxmox_wan_bridge }} || true
+{%   elif (management_gateway6 | default('') | length) > 0 %}
     gateway {{ management_gateway6 }}
+{%   endif %}
+{% endif %}
 
 auto {{ proxmox_internal_bridge }}
 iface {{ proxmox_internal_bridge }} inet static

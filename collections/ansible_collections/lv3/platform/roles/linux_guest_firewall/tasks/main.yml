@@ -25,6 +25,16 @@
       | map(attribute='name') | list
     )
 
+# When ignore_unreachable=true is set on a play, gather_facts fails silently
+# for unreachable hosts, leaving ansible_distribution undefined.  All
+# subsequent tasks that touch the remote host would return UNREACHABLE and
+# leave registered variables as bare dicts (no .stdout/.rc/.etc), which
+# causes finalization errors in set_fact tasks.  Short-circuit the role here
+# so the rest of the tasks are skipped for hosts that never came up.
+- name: Skip guest firewall for unreachable hosts (facts not gathered)
+  ansible.builtin.meta: end_role
+  when: ansible_distribution is not defined
+
 - name: Validate guest network policy inputs
   ansible.builtin.assert:
     that:

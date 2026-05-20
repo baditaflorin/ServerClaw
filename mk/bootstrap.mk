@@ -10,7 +10,13 @@
 # ADR 0482 — capacity-aware dynamic VM sizing
 # -----------------------------------------------------------------------------
 
-.PHONY: probe-capacity resolve-topology plan-capacity
+.PHONY: derive-deployment-files derive-host-vars probe-capacity resolve-topology plan-capacity
+
+derive-deployment-files:  ## (ADR 0483 §3 step 0) Emit identity.yml/connection.yml/profile.yml from .local/manifest.yml.
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/derive_deployment_files.py
+
+derive-host-vars:  ## (ADR 0488) Probe the Proxmox host's network config and write .local/host_vars/proxmox-host.yml.
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/derive_host_vars.py --write
 
 probe-capacity:  ## (ADR 0482 + 0488) Probe Proxmox host (from .local/identity.yml) and write .local/capacity.yml.
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/capacity_probe.py --write
@@ -25,10 +31,13 @@ plan-capacity:  ## (ADR 0482 + 0488) Plan-only: show what the resolver would wri
 # ADR 0484 — self-verification contracts
 # -----------------------------------------------------------------------------
 
-.PHONY: self-check self-check-strict self-check-json lint-bootstrap-coverage
+.PHONY: self-check self-check-strict self-check-json self-check-final-smoke lint-bootstrap-coverage write-bootstrap-receipt
 
 self-check:  ## Run all post-conditions for the deployment (reads .local/identity.yml).
 	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/self_check.py $(if $(step),--step $(step),) $(if $(tag),--tag $(tag),) $(if $(id),--id $(id),)
+
+self-check-final-smoke:  ## Run only final-smoke tagged post-conditions (used by bootstrap step 12).
+	@$(MAKE) self-check tag=final-smoke
 
 self-check-strict:  ## Same as self-check, but non-critical failures also exit non-zero.
 	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/self_check.py --strict $(if $(step),--step $(step),) $(if $(tag),--tag $(tag),)
@@ -38,6 +47,9 @@ self-check-json:  ## Emit machine-readable JSON only.
 
 lint-bootstrap-coverage:  ## (ADR 0484 §5) Verify every bootstrap step has ≥1 post-condition in post_conditions.yml.
 	@uv run --with pyyaml python $(REPO_ROOT)/scripts/lint_bootstrap_coverage.py
+
+write-bootstrap-receipt:  ## Write the bootstrap completion receipt to receipts/live-applies/ (bootstrap step 13).
+	@uv run --with pyyaml python $(REPO_ROOT)/scripts/write_bootstrap_receipt.py
 
 # -----------------------------------------------------------------------------
 # ADR 0483 — hands-off bootstrap orchestrator

@@ -3,6 +3,6 @@ service_audit_name: ntfy
 service_dns_fqdn: ntfy.{{ platform_domain }}
 service_runtime_roles:
   - lv3.platform.ntfy_runtime
-service_needs_dns: true
+service_needs_dns: false  # DNS records managed via Hetzner Robot, not Cloud DNS API
 service_needs_postgres: false
 service_needs_nginx_edge: true

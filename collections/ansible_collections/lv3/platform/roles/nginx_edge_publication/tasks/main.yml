@@ -9,19 +9,23 @@
   ansible.builtin.set_fact:
     public_edge_certificate_domains: >-
       {{
-        (
-          (public_edge_service_topology | service_topology_edge_certificate_domains)
-          + (public_edge_extra_sites | map(attribute='hostname') | list)
-          + public_edge_additional_certificate_domains
-        ) | unique
-        | reject('match', '\*\.') | list
-        if public_edge_acme_challenge_method == 'webroot'
-        else
-        (
-          (public_edge_service_topology | service_topology_edge_certificate_domains)
-          + (public_edge_extra_sites | map(attribute='hostname') | list)
-          + public_edge_additional_certificate_domains
-        ) | unique
+        public_edge_certificate_domains_override
+        if (public_edge_certificate_domains_override | default([]) | length > 0)
+        else (
+          (
+            (public_edge_service_topology | service_topology_edge_certificate_domains)
+            + (public_edge_extra_sites | map(attribute='hostname') | list)
+            + public_edge_additional_certificate_domains
+          ) | unique
+          | reject('match', '\*\.') | list
+          if public_edge_acme_challenge_method == 'webroot'
+          else
+          (
+            (public_edge_service_topology | service_topology_edge_certificate_domains)
+            + (public_edge_extra_sites | map(attribute='hostname') | list)
+            + public_edge_additional_certificate_domains
+          ) | unique
+        )
       }}
     # ^ HTTP-01 (webroot) cannot validate wildcard SANs — Let's Encrypt requires
     # DNS-01 for any domain starting with '*.'. When the acme_challenge_method is
@@ -55,7 +59,7 @@
       {{
         ['nginx', 'certbot', 'rsync']
         + (
-          ['python3-venv']
+          ['python3-venv', 'python3-packaging', 'python3-pip']
           if public_edge_acme_challenge_method == 'dns-hetzner'
           else []
         )
@@ -246,6 +250,20 @@
           )
       }}
 
+- name: Derive wildcard-coverage pattern from shared certificate SANs
+  ansible.builtin.set_fact:
+    _public_edge_wildcard_apex_pattern: >-
+      {{
+        '^[^.]+\.(' + (
+          public_edge_current_certificate_domains
+          | select('match', '^\*\.')
+          | map('regex_replace', '^\*\.', '')
+          | join('|')
+        ) + ')$'
+        if (public_edge_current_certificate_domains | select('match', '^\*\.') | list | length > 0)
+        else '^$'
+      }}
+
 - name: Initialize the site-local certificate request catalog
   ansible.builtin.set_fact:
     public_edge_site_certificate_requests: []
@@ -282,6 +300,8 @@
         ([item.hostname] + (item.aliases | default([])))
       )
       | difference(public_edge_current_certificate_domains)
+      | reject('match', _public_edge_wildcard_apex_pattern)
+      | list
     ) | length > 0
 
 - name: Render NGINX public edge configuration

@@ -82,8 +82,7 @@
     set -euo pipefail
     if [ ! -s "{{ ops_portal_session_secret_file }}" ]; then
       umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ ops_portal_session_secret_file }}"
-                # Replace with: {{ "ops_portal" | secret }}
+      openssl rand -hex 32 > "{{ ops_portal_session_secret_file }}"
       echo changed
     fi
   args:

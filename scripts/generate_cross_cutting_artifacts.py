@@ -797,7 +797,15 @@ def generate_hairpin(
     platform_domain = identity.get("platform_domain", CATALOG_PLATFORM_DOMAIN)
 
     if platform_domain != CATALOG_PLATFORM_DOMAIN:
-        nginx_ip = _resolve_catalog_ip("nginx", guest_catalog, "health-probe-catalog hairpin")
+        # The nginx VM name varies by deployment naming convention — try the
+        # canonical role name first, then the legacy `<role>-lv3` suffix used
+        # by the committed inventory snapshot. Future: resolve via
+        # platform_service_topology.nginx_edge.owning_vm so any rename is a
+        # one-file change.
+        try:
+            nginx_ip = _resolve_catalog_ip("nginx", guest_catalog, "health-probe-catalog hairpin")
+        except (KeyError, ValueError):
+            nginx_ip = _resolve_catalog_ip("nginx-lv3", guest_catalog, "health-probe-catalog hairpin")
         for hostname in _extract_catalog_hairpin_hostnames(
             platform_domain,
             catalog_path=repo_root / "config" / "health-probe-catalog.json",
