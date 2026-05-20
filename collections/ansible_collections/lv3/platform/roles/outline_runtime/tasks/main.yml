@@ -64,18 +64,32 @@
     - path: "{{ outline_secret_dir }}"
       mode: "0700"
 
-- name: Manage Outline runtime secrets
+- name: Generate the Outline hex application secrets when missing
+  # Outline requires SECRET_KEY and UTILS_SECRET to be exactly 64 hexadecimal
+  # characters. The | secret() filter produces a srvclaw_-prefixed base64 value
+  # which fails Outline's env validation. Use openssl rand -hex 32 instead.
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ item }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - "{{ outline_secret_key_remote_file }}"
+    - "{{ outline_utils_secret_remote_file }}"
+  register: outline_hex_secrets_gen
+  changed_when: "'changed' in outline_hex_secrets_gen.stdout"
+  no_log: true
+
+- name: Manage Outline redis password and read all runtime secrets
   ansible.builtin.include_role:
     name: lv3.platform.common
     tasks_from: manage_service_secrets
   vars:
     common_manage_service_secrets_generate:
-      - path: "{{ outline_secret_key_remote_file }}"
-        command: "{{ 'outline' | secret(length=32) }}"
-        label: "outline-secret-key"
-      - path: "{{ outline_utils_secret_remote_file }}"
-        command: "{{ 'outline' | secret(length=32) }}"
-        label: "outline-utils-secret"
       - path: "{{ outline_redis_password_remote_file }}"
         command: "{{ 'outline' | secret(length=32) }}"
         label: "outline-redis-password"
