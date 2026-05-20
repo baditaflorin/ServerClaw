@@ -78,41 +78,29 @@
     - path: "{{ glitchtip_secret_dir }}"
       mode: "0700"
 
-- name: Generate the GlitchTip runtime secrets
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item.path }}" ]; then
-      umask 077
-      {{ item.command }} > "{{ item.path }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  loop:
-    - path: "{{ glitchtip_secret_key_remote_file }}"
-      command: "{{ 'glitchtip' | secret(length=32) }}"
-    - path: "{{ glitchtip_valkey_password_remote_file }}"
-      command: "{{ 'glitchtip' | secret(length=32) }}"
-  register: glitchtip_secret_generation
-  changed_when: "'changed' in glitchtip_secret_generation.stdout"
+- name: Manage GlitchTip runtime secrets
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: manage_service_secrets
+  vars:
+    common_manage_service_secrets_generate:
+      - path: "{{ glitchtip_secret_key_remote_file }}"
+        command: "{{ 'glitchtip' | secret(length=32) }}"
+        label: "glitchtip-secret-key"
+      - path: "{{ glitchtip_valkey_password_remote_file }}"
+        command: "{{ 'glitchtip' | secret(length=32) }}"
+        label: "glitchtip-valkey-password"
+    common_manage_service_secrets_read:
+      - "{{ glitchtip_secret_key_remote_file }}"
+      - "{{ glitchtip_valkey_password_remote_file }}"
+    common_manage_service_secrets_mirror:
+      - dest: "{{ glitchtip_secret_key_local_file }}"
+        content_index: 0
+      - dest: "{{ glitchtip_valkey_password_local_file }}"
+        content_index: 1
+    common_manage_service_secrets_local_artifact_dir: "{{ glitchtip_local_artifact_dir }}"
+    common_manage_service_secrets_fact_name: "glitchtip_decoded_secrets"
   no_log: true
-
-- name: Read the GlitchTip runtime secrets
-  ansible.builtin.slurp:
-    src: "{{ item }}"
-  register: glitchtip_secret_reads
-  loop:
-    - "{{ glitchtip_secret_key_remote_file }}"
-    - "{{ glitchtip_valkey_password_remote_file }}"
-  no_log: true
-
-- name: Ensure the local GlitchTip artifact directory exists
-  ansible.builtin.file:
-    path: "{{ glitchtip_local_artifact_dir }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
 
 - name: Generate the local GlitchTip break-glass admin password when missing
   ansible.builtin.shell: |
@@ -174,8 +162,8 @@
 
 - name: Record the GlitchTip runtime and bootstrap secrets
   ansible.builtin.set_fact:
-    glitchtip_secret_key: "{{ glitchtip_secret_reads.results[0].content | b64decode | trim }}"
-    glitchtip_valkey_password: "{{ glitchtip_secret_reads.results[1].content | b64decode | trim }}"
+    glitchtip_secret_key: "{{ glitchtip_decoded_secrets[0] }}"
+    glitchtip_valkey_password: "{{ glitchtip_decoded_secrets[1] }}"
     glitchtip_database_password: "{{ lookup('ansible.builtin.file', glitchtip_database_password_local_file) | trim }}"
     glitchtip_keycloak_client_secret: "{{ lookup('ansible.builtin.file', glitchtip_keycloak_client_secret_local_file) | trim }}"
     glitchtip_mail_submission_password: "{{ lookup('ansible.builtin.file', glitchtip_mail_submission_password_local_file) | trim }}"
@@ -202,8 +190,8 @@
     glitchtip_runtime_secret_payload:
       DATABASE_URL: >-
         postgresql://{{ glitchtip_database_user }}:{{ (lookup('ansible.builtin.file', glitchtip_database_password_local_file) | trim) | urlencode }}@{{ glitchtip_database_host }}:5432/{{ glitchtip_database_name }}
-      VALKEY_URL: "redis://:{{ glitchtip_secret_reads.results[1].content | b64decode | trim | urlencode | replace('/', '%2F') }}@valkey:6379/0"
-      SECRET_KEY: "{{ glitchtip_secret_reads.results[0].content | b64decode | trim }}"
+      VALKEY_URL: "redis://:{{ glitchtip_decoded_secrets[1] | urlencode | replace('/', '%2F') }}@valkey:6379/0"
+      SECRET_KEY: "{{ glitchtip_decoded_secrets[0] }}"
       GLITCHTIP_DOMAIN: "{{ glitchtip_public_base_url }}"
       PORT: "8000"
       ENABLE_USER_REGISTRATION: "false"
@@ -215,20 +203,6 @@
         {{ glitchtip_mail_url_scheme }}://{{ glitchtip_mail_username | urlencode | replace('/', '%2F') }}:{{ (lookup('ansible.builtin.file', glitchtip_mail_submission_password_local_file) | trim) | urlencode | replace('/', '%2F') }}@{{ glitchtip_mail_host }}:{{ glitchtip_mail_port }}
       GLITCHTIP_INSTANCE_NAME: "{{ glitchtip_instance_name }}"
       MEDIA_ROOT: /code/uploads
-  no_log: true
-
-- name: Mirror the GlitchTip runtime secrets to the control machine
-  ansible.builtin.copy:
-    dest: "{{ item.dest }}"
-    content: "{{ item.content }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  loop:
-    - dest: "{{ glitchtip_secret_key_local_file }}"
-      content: "{{ glitchtip_secret_key }}"
-    - dest: "{{ glitchtip_valkey_password_local_file }}"
-      content: "{{ glitchtip_valkey_password }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for GlitchTip
