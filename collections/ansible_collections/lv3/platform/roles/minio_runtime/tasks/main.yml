@@ -86,6 +86,13 @@
         bucket_name: "{{ minio_platform_context_bucket_name }}"
         policy_name: "{{ minio_platform_context_policy_name }}"
         policy_document: "{{ minio_platform_context_policy_document }}"
+      - name: outline
+        access_key_id: "{{ minio_outline_access_key_id }}"
+        secret_key_remote_file: "{{ minio_outline_secret_key_remote_file }}"
+        secret_key_local_file: "{{ minio_outline_secret_key_local_file }}"
+        bucket_name: "{{ minio_outline_bucket_name }}"
+        policy_name: "{{ minio_outline_policy_name }}"
+        policy_document: "{{ minio_outline_policy_document }}"
 
 - name: Ensure the MinIO runtime directories exist
   ansible.builtin.file:

@@ -1,14 +1,14 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.45",
+  "repo_version": "0.179.46",
   "platform_version": "0.178.222",
-  "generated_at": "2026-05-13T00:02:22Z",
-  "next_refresh_at": "2026-05-13T01:02:22Z",
+  "generated_at": "2026-05-20T18:29:21Z",
+  "next_refresh_at": "2026-05-20T19:29:21Z",
   "environment": "production",
   "identity": {
-    "platform_name": "0fork.com",
-    "operator": "0fork Clone Operator",
+    "platform_name": "0mpc.com",
+    "operator": "0mpc Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -37,7 +37,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://api.example.com",
-        "last_live_apply": "2026-04-21T00:00:00Z"
+        "last_live_apply": "2026-04-27T00:00:00Z"
       },
       "backup_pbs": {
         "service_name": "Proxmox Backup Server",
@@ -302,7 +302,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://home.example.com",
-        "last_live_apply": "2026-04-14T00:00:00Z",
+        "last_live_apply": "2026-04-15T00:00:00Z",
         "slo_status": "unknown"
       },
       "keycloak": {
@@ -693,7 +693,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.example.com",
-        "last_live_apply": "2026-04-27T00:00:00Z"
+        "last_live_apply": "2026-04-21T00:00:00Z"
       },
       "redpanda": {
         "service_name": "Redpanda",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.44",
-    "deployed_at": "2026-05-13",
-    "summary": "**ADR 0483 \u2014 bootstrap orchestrator** (`scripts/bootstrap_orchestrator.py`): drives the 14-step gated bootstrap chain; evaluates preconditions/postconditions per step; honors `gates.fail_fast` and per-step `retries`; writes success/failure receipts to `receipts/bootstrap/`; supports `--resume-from <step-id>` and `--resume-last` (reads last failure receipt automatically) **Makefile targets**: `make bootstrap`, `make bootstrap-resume`, `make bootstrap-status`, `make bootstrap-dry-run` \u2014 all require `_require-deployment`",
-    "release_notes_url": "docs/release-notes/0.179.45.md"
+    "last_version": "0.179.45",
+    "deployed_at": "2026-05-20",
+    "summary": "No changelog notes were present in `## Unreleased` at release time.",
+    "release_notes_url": "docs/release-notes/0.179.46.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6373,17 +6373,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.0fork.com",
+        "endpoint": "https://ops.0mpc.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.0fork.com",
+        "endpoint": "https://windmill.0mpc.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.0fork.com",
+        "endpoint": "https://api.0mpc.com",
         "adr": "0092"
       }
     ],

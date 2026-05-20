@@ -723,7 +723,10 @@ def ensure_collection(client: OutlineClient, spec: CollectionSpec, *, dry_run: b
 
 def sync(repo_root: Path, base_url: str, api_token_file: Path, *, dry_run: bool) -> int:
     client = OutlineClient(base_url, api_token=load_api_token(api_token_file))
-    outcomes = cleanup_bootstrap_collections(client) if not dry_run else []
+    # Platform collections are created first so that cleanup_bootstrap_collections
+    # can delete the Outline-default "Welcome" collection without hitting the
+    # "Cannot delete last collection" guard (ADR 0373).
+    outcomes: list[str] = []
     for spec, markdown in landing_docs(repo_root):
         collection_id, collection_outcome = ensure_collection(client, spec, dry_run=dry_run)
         outcomes.append(f"{spec.name} collection {collection_outcome}")
@@ -739,6 +742,8 @@ def sync(repo_root: Path, base_url: str, api_token_file: Path, *, dry_run: bool)
             )
         outcomes.append(f"{spec.landing_title} {document_outcome}")
         time.sleep(0.1)
+    if not dry_run:
+        outcomes.extend(cleanup_bootstrap_collections(client))
     print("\n".join(outcomes))
     return 0
 
