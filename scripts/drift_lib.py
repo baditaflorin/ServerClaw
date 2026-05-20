@@ -110,6 +110,8 @@ def load_controller_context() -> dict[str, Any]:
     )
     host_port = os.environ.get("LV3_PROXMOX_HOST_PORT", "").strip() or "22"
     guests = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
+    # Also index by role (short name) so callers can use "docker-runtime" or "docker-runtime-lv3"
+    guests.update({guest["role"]: guest["ipv4"] for guest in host_vars["proxmox_guests"] if guest.get("role")})
     return {
         "host_vars": host_vars,
         "group_vars": group_vars,
