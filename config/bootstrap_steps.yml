@@ -475,7 +475,7 @@ steps:
 
   - id: "12-final-smoke"
     title: "Run every check tagged final-smoke"
-    make_target: self-check
+    make_target: self-check-final-smoke
     description: |
       Runs scripts/self_check.py --tag final-smoke. Every critical check in
       config/post_conditions.yml tagged 'final-smoke' must pass. Non-critical

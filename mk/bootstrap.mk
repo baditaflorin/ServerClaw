@@ -31,10 +31,13 @@ plan-capacity:  ## (ADR 0482 + 0488) Plan-only: show what the resolver would wri
 # ADR 0484 — self-verification contracts
 # -----------------------------------------------------------------------------
 
-.PHONY: self-check self-check-strict self-check-json lint-bootstrap-coverage
+.PHONY: self-check self-check-strict self-check-json self-check-final-smoke lint-bootstrap-coverage
 
 self-check:  ## Run all post-conditions for the deployment (reads .local/identity.yml).
 	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/self_check.py $(if $(step),--step $(step),) $(if $(tag),--tag $(tag),) $(if $(id),--id $(id),)
+
+self-check-final-smoke:  ## Run only final-smoke tagged post-conditions (used by bootstrap step 12).
+	@$(MAKE) self-check tag=final-smoke
 
 self-check-strict:  ## Same as self-check, but non-critical failures also exit non-zero.
 	@uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/self_check.py --strict $(if $(step),--step $(step),) $(if $(tag),--tag $(tag),)
