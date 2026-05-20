@@ -3,8 +3,11 @@
 import sys
 from pathlib import Path
 
-# Import shared utility from scripts/ (repo_root = parents[6]: filter/plugins/platform/lv3/ansible_collections/collections/repo_root)
-sys.path.insert(0, str(Path(__file__).parents[6] / "scripts"))
+# Import shared utility from scripts/.
+# Use .resolve() so this works whether loaded directly (collections/…/filter/, parents[6])
+# or via the filter_plugins/ symlink (__file__ = symlink path, 2 levels deep).
+# After resolving, the real path is always 7 levels deep from repo_root.
+sys.path.insert(0, str(Path(__file__).resolve().parents[6] / "scripts"))
 from secret_masking_utility import generate_real_secret
 
 

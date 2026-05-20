@@ -194,6 +194,18 @@ def remote_file_exists(
     return completed.returncode == 0
 
 
+def _expand_template_vars(value: str, context: dict[str, str], max_depth: int = 10) -> str:
+    """Expand {{ var_name }} references from context dict iteratively (no Jinja2 required)."""
+    for _ in range(max_depth):
+        expanded = value
+        for k, v in context.items():
+            expanded = expanded.replace("{{ " + k + " }}", str(v))
+        if expanded == value:
+            break
+        value = expanded
+    return value
+
+
 def resolve_openbao_init_local_file() -> Path:
     candidate_paths = (
         LOCAL_REPO_ROOT / "inventory" / "group_vars" / "all" / "main.yml",
@@ -203,11 +215,21 @@ def resolve_openbao_init_local_file() -> Path:
         if not group_vars.is_file():
             continue
         payload = yaml.safe_load(group_vars.read_text(encoding="utf-8")) or {}
+        # Build a str-valued context so we can expand {{ var }} chains without Jinja2.
+        # Seed repo_shared_local_root → .local (the canonical mapping used elsewhere).
+        str_context: dict[str, str] = {k: str(v) for k, v in payload.items() if isinstance(v, str)}
+        str_context["repo_shared_local_root"] = str(LOCAL_REPO_ROOT / ".local")
         init_path = str(payload.get("openbao_init_local_file") or "").strip()
         if init_path:
-            shared_local_root_prefix = "{{ repo_shared_local_root }}/"
+            init_path = _expand_template_vars(init_path, str_context)
+            shared_local_root_prefix = str(LOCAL_REPO_ROOT / ".local") + "/"
             if init_path.startswith(shared_local_root_prefix):
                 repo_relative_local_path = Path(".local") / init_path.removeprefix(shared_local_root_prefix)
+                return resolve_repo_local_path(repo_relative_local_path, repo_root=LOCAL_REPO_ROOT)
+            # Legacy: literal {{ repo_shared_local_root }}/ prefix (unexpanded)
+            legacy_prefix = "{{ repo_shared_local_root }}/"
+            if init_path.startswith(legacy_prefix):
+                repo_relative_local_path = Path(".local") / init_path.removeprefix(legacy_prefix)
                 return resolve_repo_local_path(repo_relative_local_path, repo_root=LOCAL_REPO_ROOT)
             return resolve_repo_local_path(init_path, repo_root=LOCAL_REPO_ROOT)
 
