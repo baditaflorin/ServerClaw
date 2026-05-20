@@ -7246,3 +7246,30 @@ tika_port: 9998
 tesseract_ocr_port: 3008
 keycloak_internal_http_port: 8091
 mail_platform_internal_submission_port: 1587
+# ---------------------------------------------------------------------------
+# Neko multi-instance browser sessions
+# ---------------------------------------------------------------------------
+# Each entry provisions an isolated browser container on runtime-comms
+# and a Keycloak user in the lv3 realm. Removing an entry destroys the
+# container and the Keycloak user on the next converge.
+#
+# Key         = instance name (container name: neko-<key>, data dir: /opt/neko/instances/<key>)
+# email       = Keycloak user email and routing key for NGINX → container mapping
+# port        = TCP port the Neko signalling server binds on (must be unique per instance)
+# udp_range   = Ephemeral UDP port range for WebRTC media (must be unique per instance)
+#
+# Example:
+#   neko_instances:
+#     florin:
+#       email: florin@localhost
+#       port: 8080
+#       udp_range: "50000-50999"
+#     alice:
+#       email: alice@localhost
+#       port: 8081
+#       udp_range: "51000-51999"
+neko_instances:
+  operator:
+    email: operator@0mpc.com
+    port: 8080
+    udp_range: "50000-50999"

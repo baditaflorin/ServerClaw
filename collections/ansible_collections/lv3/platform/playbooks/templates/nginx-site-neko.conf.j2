@@ -15,7 +15,7 @@ map $http_upgrade $connection_upgrade {
 # after auth), which is caught by error_page 500 = @neko_no_session below.
 map $auth_email $neko_backend {
 {% for name, inst in neko_instances.items() %}
-    "{{ inst.email }}"  "http://{{ hostvars['runtime-comms'].ansible_host }}:{{ inst.port }}";
+    "{{ inst.email }}"  "http://{{ hostvars['runtime-comms-lv3'].ansible_host }}:{{ inst.port }}";
 {% endfor %}
     default  "";
 }
@@ -31,8 +31,8 @@ server {
     http2 on;
     server_name browser.{{ platform_domain }};
 
-    ssl_certificate     /etc/letsencrypt/live/browser.{{ platform_domain }}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/browser.{{ platform_domain }}/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/{{ public_edge_effective_cert_name }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ public_edge_effective_cert_name }}/privkey.pem;
     ssl_protocols       TLSv1.2 TLSv1.3;
     ssl_ciphers         HIGH:!aNULL:!MD5;
     ssl_session_cache   shared:SSL:10m;
