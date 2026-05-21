@@ -299,6 +299,12 @@ public_edge_extra_sites:
   - hostname: docs.{{ platform_domain }}
     kind: static_dir
     source_dir: docs-portal
+  - hostname: database.{{ platform_domain }}
+    kind: proxy
+    upstream: "http://{{ hostvars['runtime-general-lv3'].ansible_host }}:8082"
+    client_max_body_size: 0
+    proxy_read_timeout_seconds: 60
+    proxy_send_timeout_seconds: 60
 public_edge_authenticated_sites:
   annotate.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
@@ -339,6 +345,8 @@ public_edge_authenticated_sites:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_prefix_paths:
       - /api/public/
+  database.{{ platform_domain }}:
+    auth_proxy_upstream: http://127.0.0.1:4180
   minio-console.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
   tasks.{{ platform_domain }}:

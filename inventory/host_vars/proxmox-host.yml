@@ -1312,6 +1312,12 @@ network_policy:
             - 8098
             - 8201
           description: Gitea Actions runner access plus OpenBao automation access from docker-build-lv3
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
+            - 3003
+            - 8201
+          description: Gitea API access for Woodpecker OAuth token exchange and OpenBao secret delivery from docker-runtime-lv3
         - source: nginx-lv3
           protocol: tcp
           ports:
