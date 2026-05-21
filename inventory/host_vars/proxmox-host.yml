@@ -1315,8 +1315,9 @@ network_policy:
         - source: docker-runtime-lv3
           protocol: tcp
           ports:
+            - 3003
             - 8201
-          description: OpenBao secret delivery access from docker-runtime-lv3 services (plausible, outline, etc.)
+          description: Gitea API access for Woodpecker OAuth token exchange and OpenBao secret delivery from docker-runtime-lv3
         - source: nginx-lv3
           protocol: tcp
           ports:
