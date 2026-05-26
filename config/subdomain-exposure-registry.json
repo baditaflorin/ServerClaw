@@ -1225,39 +1225,39 @@
       "status": "active",
       "owner_adr": "0026",
       "publication": {
-        "delivery_model": "private-network",
-        "access_model": "private-network",
-        "audience": "private-network"
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
       },
       "assertions": {
-        "publication_class": "private-only",
+        "publication_class": "edge-published",
         "environment": "production",
-        "audience": "private-network",
-        "auth_requirement": "private_network",
+        "audience": "operator",
+        "auth_requirement": "edge_oidc",
         "route_target": {
           "service_id": "postgres",
-          "kind": "dns-only",
-          "source": "dns-only",
-          "target": "100.64.0.1",
-          "target_port": 5432
+          "kind": "proxy",
+          "source": "public_edge_extra_sites",
+          "target": "http://{{ hostvars['runtime-general-lv3'].ansible_host }}:8082",
+          "target_port": 443
         }
       },
       "evidence_plan": {
         "dns_resolution": true,
         "dns_zone": true,
-        "http_auth": false,
-        "private_route": true,
-        "tls": false
+        "http_auth": true,
+        "private_route": false,
+        "tls": true
       },
       "adapter": {
         "dns": {
-          "target": "100.64.0.1",
-          "target_port": 5432,
+          "target": "203.0.113.1",
+          "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "100.64.0.1"
+              "value": "203.0.113.1"
             }
           ],
           "managed": true,
@@ -1265,24 +1265,30 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "dns-only",
-          "source": "dns-only",
-          "kind": null
+          "mode": "edge",
+          "source": "public_edge_extra_sites",
+          "kind": "proxy"
         },
         "edge_auth": {
-          "provider": "none",
+          "provider": "oauth2_proxy",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
         "repo_route_service_id": null,
-        "repo_route_metadata": {},
+        "repo_route_metadata": {
+          "upstream": "http://{{ hostvars['runtime-general-lv3'].ansible_host }}:8082",
+          "client_max_body_size": 0,
+          "proxy_read_timeout_seconds": 60,
+          "proxy_send_timeout_seconds": 60
+        },
         "tls": {
-          "provider": "none",
-          "auto_renew": false
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
         }
       },
-      "live_tracking_expected": false,
-      "notes": "Tailnet-only TCP proxy through the Proxmox host."
+      "live_tracking_expected": true,
+      "notes": "Adminer database web UI (runtime-general-lv3:8082), published through the shared NGINX edge and gated behind Keycloak oauth2-proxy."
     },
     {
       "fqdn": "docker.0mpc.com",
@@ -4102,10 +4108,10 @@
   "summary": {
     "catalog_total": 56,
     "active_total": 52,
-    "active_public_total": 46,
-    "active_private_total": 6,
+    "active_public_total": 47,
+    "active_private_total": 5,
     "planned_total": 4,
-    "shared_edge_total": 45,
-    "platform_sso_total": 17
+    "shared_edge_total": 46,
+    "platform_sso_total": 18
   }
 }

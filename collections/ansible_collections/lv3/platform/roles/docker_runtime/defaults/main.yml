@@ -57,13 +57,24 @@ docker_runtime_public_edge_ipv4: >-
 docker_runtime_public_edge_host_aliases: >-
   {{
     (
-      platform_service_topology | default({})
-      | dict2items
-      | selectattr('value.edge.enabled', 'defined')
-      | selectattr('value.edge.enabled')
-      | map(attribute='value.public_hostname')
-      | reject('equalto', none)
-      | list
+      (
+        platform_service_topology | default({})
+        | dict2items
+        | selectattr('value.edge.enabled', 'defined')
+        | selectattr('value.edge.enabled')
+        | map(attribute='value.public_hostname')
+        | reject('equalto', none)
+        | list
+      ) + (
+        public_edge_extra_sites | default([])
+        | map(attribute='hostname')
+        | reject('equalto', none)
+        | list
+      ) + (
+        [public_edge_apex_hostname]
+        if public_edge_apex_hostname | default('') | length > 0
+        else []
+      )
     ) | unique | sort
   }}
 
