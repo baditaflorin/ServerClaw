@@ -70,6 +70,10 @@ mail_platform_dkim_selector: mail
 mail_platform_dkim_private_key_local_file: "{{ repo_shared_local_root }}/mail-platform/dkim-private.pem"
 mail_platform_dkim_private_key_host_path: "{{ mail_platform_stalwart_dir }}/etc/dkim-private.pem"
 mail_platform_dkim_private_key_container_path: /opt/stalwart/etc/dkim-private.pem
+# Public key (base64, no PEM headers) — read from .local at runtime.
+# lookup() returns '' when the file is absent so a missing key becomes a visible empty record.
+mail_platform_dkim_public_key: >-
+  {{ lookup('ansible.builtin.file', repo_shared_local_root ~ '/mail-platform/dkim-public-key.txt', errors='ignore') | default('', true) | trim }}
 mail_platform_gateway_uvicorn_workers: 1
 mail_platform_gateway_api_user: mail-platform
 mail_platform_notification_profiles:
