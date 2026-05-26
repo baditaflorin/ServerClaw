@@ -80,3 +80,17 @@ events = {{ mail_platform_webhook_events | to_json }}
 timeout = "10s"
 throttle = "1s"
 lossy = false
+{% if mail_platform_dkim_enabled | default(false) %}
+
+[signature."rsa-{{ mail_platform_dkim_selector }}"]
+private-key = "file://{{ mail_platform_dkim_private_key_container_path }}"
+algorithm = "rsa-sha256"
+domain = "{{ mail_platform_domain }}"
+selector = "{{ mail_platform_dkim_selector }}"
+headers.sign = ["From", "To", "Date", "Message-ID", "Subject", "MIME-Version", "Content-Type"]
+headers.oversign = ["From"]
+expiration = "7d"
+
+[queue.outbound.signing]
+sign = [{ else = ["rsa-{{ mail_platform_dkim_selector }}"] }]
+{% endif %}

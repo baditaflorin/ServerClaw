@@ -383,6 +383,16 @@
   become: false
   no_log: true
 
+- name: Deploy the DKIM private key for Stalwart outbound signing
+  ansible.builtin.copy:
+    src: "{{ mail_platform_dkim_private_key_local_file }}"
+    dest: "{{ mail_platform_dkim_private_key_host_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: mail_platform_dkim_enabled | default(false)
+  no_log: true
+
 - name: Render the Stalwart configuration file
   ansible.builtin.template:
     src: stalwart-config.toml.j2

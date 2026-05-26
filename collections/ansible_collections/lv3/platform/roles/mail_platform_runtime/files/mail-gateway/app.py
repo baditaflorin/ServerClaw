@@ -73,6 +73,7 @@ def load_notification_profiles() -> dict[str, dict[str, Any]]:
         api_key = str(item.get("gateway_api_key", "")).strip()
         mailbox_address = str(item.get("mailbox_address", "")).strip()
         mailbox_localpart = str(item.get("mailbox_localpart", "")).strip()
+        mailbox_password = str(item.get("mailbox_password", "")).strip()
         description = str(item.get("description", "")).strip()
         owner = str(item.get("owner", "")).strip()
         credential_scope = str(item.get("credential_scope", "")).strip()
@@ -106,6 +107,7 @@ def load_notification_profiles() -> dict[str, dict[str, Any]]:
             "id": profile_id,
             "mailbox_localpart": mailbox_localpart,
             "mailbox_address": mailbox_address,
+            "mailbox_password": mailbox_password,
             "sender_email": sender_email,
             "sender_name": sender_name,
             "reply_to": reply_to,
@@ -373,10 +375,14 @@ def send_via_local_smtp(payload: SendRequest, profile: dict[str, Any]) -> None:
         message.set_content(payload.text or "")
 
     context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE  # local Stalwart uses self-signed cert
     with smtplib.SMTP(LOCAL_SMTP_HOST, LOCAL_SMTP_PORT, timeout=20) as client:
         client.starttls(context=context)
-        if LOCAL_SMTP_USERNAME and LOCAL_SMTP_PASSWORD:
-            client.login(LOCAL_SMTP_USERNAME, LOCAL_SMTP_PASSWORD)
+        smtp_username = profile.get("mailbox_localpart") or LOCAL_SMTP_USERNAME
+        smtp_password = profile.get("mailbox_password") or LOCAL_SMTP_PASSWORD
+        if smtp_username and smtp_password:
+            client.login(smtp_username, smtp_password)
         client.send_message(message)
 
 

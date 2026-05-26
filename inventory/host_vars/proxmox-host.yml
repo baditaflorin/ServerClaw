@@ -1973,28 +1973,39 @@ mail_platform_dns_records:
     ttl: 300
   - name: "@"
     type: TXT
-    value: '"v=spf1 mx include:spf.brevo.com -all"'
+    value: '"v=spf1 mx ~all"'
     value_match_regex: '^"v=spf1 '
     ttl: 300
   - name: _dmarc
     type: TXT
     value: "\"v=DMARC1; p=quarantine; rua=mailto:{{ platform_operator_email }}\""
     ttl: 300
+  - name: "mail._domainkey"
+    type: TXT
+    # DKIM key exceeds 255 chars per DNS string; split into two quoted chunks.
+    # mail_platform_dkim_dns_value is computed in role defaults from dkim-public-key.txt.
+    value: "{{ mail_platform_dkim_dns_value }}"
+    value_match_regex: '^"v=DKIM1; k=rsa; p='
+    ttl: 300
+  # Retire Brevo-specific records — mail is now delivered via local Stalwart SMTP
   - name: brevo1._domainkey
     type: CNAME
     value: b1.lv3-org.dkim.brevo.com.
     value_match_regex: '^b1\\.lv3-org\\.dkim\\.brevo\\.com\\.?$'
     ttl: 300
+    state: absent
   - name: brevo2._domainkey
     type: CNAME
     value: b2.lv3-org.dkim.brevo.com.
     value_match_regex: '^b2\\.lv3-org\\.dkim\\.brevo\\.com\\.?$'
     ttl: 300
+    state: absent
   - name: "@"
     type: TXT
     value: '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"'
     value_match_regex: '^"brevo-code:'
     ttl: 300
+    state: absent
 
 route_dns_assertion_extra_records:
   - name: "@"
