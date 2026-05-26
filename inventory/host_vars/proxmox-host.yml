@@ -1982,7 +1982,9 @@ mail_platform_dns_records:
     ttl: 300
   - name: "mail._domainkey"
     type: TXT
-    value: "\"v=DKIM1; k=rsa; p={{ mail_platform_dkim_public_key }}\""
+    # DKIM key exceeds 255 chars per DNS string; split into two quoted chunks.
+    # mail_platform_dkim_dns_value is computed in role defaults from dkim-public-key.txt.
+    value: "{{ mail_platform_dkim_dns_value }}"
     value_match_regex: '^"v=DKIM1; k=rsa; p='
     ttl: 300
   # Retire Brevo-specific records — mail is now delivered via local Stalwart SMTP
