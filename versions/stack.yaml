@@ -131,7 +131,7 @@ live_apply_evidence:
     nomad_scheduler: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
     serverclaw: 2026-04-01-adr-0294-one-api-mainline-live-apply
     serverclaw_memory: 2026-03-29-adr-0263-serverclaw-memory-substrate-mainline-live-apply
-    route_dns_assertion_ledger: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
+    route_dns_assertion_ledger: 2026-05-26-route-dns-assertion-ledger-live-apply
     session_logout_authority: 2026-03-29-adr-0248-session-logout-authority-mainline-live-apply
     restore_verification: 2026-03-29-adr-0272-restore-readiness-mainline-live-apply
     public_endpoint_admission_control: 2026-03-29-adr-0273-public-endpoint-admission-control-mainline-live-apply
@@ -192,6 +192,7 @@ live_apply_evidence:
     repowise: 2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply
     repo_intake: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
     platform_ops: 2026-04-21-adr-0391-cpu-only-operational-automation-live-apply
+    platform_service_watchdog: 2026-05-26-platform-service-watchdog-live-apply
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
