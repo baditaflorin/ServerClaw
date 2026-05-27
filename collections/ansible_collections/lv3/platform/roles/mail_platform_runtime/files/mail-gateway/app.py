@@ -26,6 +26,10 @@ STATE_FILE = Path(os.getenv("STATE_FILE", "/data/state.json"))
 PROFILES_FILE = Path(os.getenv("NOTIFICATION_PROFILES_FILE", "/config/notification-profiles.json"))
 BREVO_API_KEY = os.environ["BREVO_API_KEY"]
 BREVO_API_URL = os.getenv("BREVO_API_URL", "https://api.brevo.com/v3/smtp/email")
+# BREVO_FROM_EMAIL overrides the per-profile sender for Brevo sends.
+# Set this to a verified Brevo sender address; falls back to DEFAULT_FROM_EMAIL.
+BREVO_FROM_EMAIL = os.getenv("BREVO_FROM_EMAIL")
+BREVO_FROM_NAME = os.getenv("BREVO_FROM_NAME")
 DEFAULT_FROM_EMAIL = os.environ["DEFAULT_FROM_EMAIL"]
 DEFAULT_FROM_NAME = os.getenv("DEFAULT_FROM_NAME", "LV3 Mail Gateway")
 DEFAULT_REPLY_TO_EMAIL = os.getenv("DEFAULT_REPLY_TO_EMAIL")
@@ -387,10 +391,15 @@ def send_via_local_smtp(payload: SendRequest, profile: dict[str, Any]) -> None:
 
 
 async def send_via_brevo(payload: SendRequest, profile: dict[str, Any]) -> dict[str, Any]:
+    # When BREVO_FROM_EMAIL is set, use it as the Brevo sender (it must be a
+    # verified Brevo sender address).  The profile's sender_email becomes the
+    # Reply-To so replies still land in the right mailbox.
+    brevo_from_email = BREVO_FROM_EMAIL or profile["sender_email"] or DEFAULT_FROM_EMAIL
+    brevo_from_name = BREVO_FROM_NAME or profile["sender_name"] or DEFAULT_FROM_NAME
     body: dict[str, Any] = {
         "sender": {
-            "name": profile["sender_name"] or DEFAULT_FROM_NAME,
-            "email": profile["sender_email"] or DEFAULT_FROM_EMAIL,
+            "name": brevo_from_name,
+            "email": brevo_from_email,
         },
         "to": [{"email": address} for address in payload.to],
         "subject": payload.subject,
@@ -399,7 +408,9 @@ async def send_via_brevo(payload: SendRequest, profile: dict[str, Any]) -> dict[
         body["textContent"] = payload.text
     if payload.html:
         body["htmlContent"] = payload.html
-    reply_to = profile["reply_to"] or DEFAULT_REPLY_TO_EMAIL
+    # Use profile reply_to, or fall back to profile sender_email so replies
+    # reach the intended mailbox even when the From is the Brevo relay address.
+    reply_to = profile["reply_to"] or profile["sender_email"] or DEFAULT_REPLY_TO_EMAIL
     if reply_to:
         body["replyTo"] = {"email": reply_to}
 
