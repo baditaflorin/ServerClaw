@@ -128,6 +128,7 @@
     status_code:
       - 200
       - 201
+      - 409
       - 429
       - 500
       - 502
@@ -140,9 +141,10 @@
     - dns_provider_boundary_matching_records | length == 0
   retries: 5
   delay: 2
-  until: hetzner_dns_record_create_response.status in [200, 201]
-  failed_when: hetzner_dns_record_create_response.status not in [200, 201]
-  changed_when: true
+  until: hetzner_dns_record_create_response.status in [200, 201, 409]
+  failed_when: hetzner_dns_record_create_response.status not in [200, 201, 409]
+  # 409 = record already exists at provider; treat as no change needed
+  changed_when: hetzner_dns_record_create_response.status in [200, 201]
   no_log: true
 
 # Update path on the new Hetzner Console API:
