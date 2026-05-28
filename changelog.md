@@ -12,7 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- Deploy Woodpecker CI (ci.0mpc.com): fix OpenBao remote address for docker-runtime, add port 3003 Proxmox firewall rule for docker-runtime → runtime-control, bootstrap Gitea OAuth and seed repository
+- Deploy Woodpecker CI (ci.0mcp.com): fix OpenBao remote address for docker-runtime, add port 3003 Proxmox firewall rule for docker-runtime → runtime-control, bootstrap Gitea OAuth and seed repository
 
 ## Latest Release
 

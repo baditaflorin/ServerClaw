@@ -7,8 +7,8 @@
   "next_refresh_at": "2026-05-21T19:52:52Z",
   "environment": "production",
   "identity": {
-    "platform_name": "0mpc.com",
-    "operator": "0mpc Operator",
+    "platform_name": "0mcp.com",
+    "operator": "0mcp Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -6360,7 +6360,7 @@
   "recent_changes": {
     "last_version": "0.179.46",
     "deployed_at": "2026-05-21",
-    "summary": "Deploy Woodpecker CI (ci.0mpc.com): fix OpenBao remote address for docker-runtime, add port 3003 Proxmox firewall rule for docker-runtime \u2192 runtime-control, bootstrap Gitea OAuth and seed repository",
+    "summary": "Deploy Woodpecker CI (ci.0mcp.com): fix OpenBao remote address for docker-runtime, add port 3003 Proxmox firewall rule for docker-runtime \u2192 runtime-control, bootstrap Gitea OAuth and seed repository",
     "release_notes_url": "docs/release-notes/0.179.47.md"
   },
   "agentic_architecture": {
@@ -6373,17 +6373,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.0mpc.com",
+        "endpoint": "https://ops.0mcp.com",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.0mpc.com",
+        "endpoint": "https://windmill.0mcp.com",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.0mpc.com",
+        "endpoint": "https://api.0mcp.com",
         "adr": "0092"
       }
     ],

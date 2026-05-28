@@ -35,7 +35,7 @@
   },
   "publications": [
     {
-      "fqdn": "0mpc.com",
+      "fqdn": "0mcp.com",
       "service_id": "nginx_edge",
       "environment": "production",
       "status": "active",
@@ -54,7 +54,7 @@
           "service_id": "nginx_edge",
           "kind": "redirect",
           "source": "public_edge_apex",
-          "target": "nginx.0mpc.com",
+          "target": "nginx.0mcp.com",
           "target_port": 443
         }
       },
@@ -92,7 +92,7 @@
         },
         "repo_route_service_id": "nginx_edge",
         "repo_route_metadata": {
-          "redirect_target_hostname": "nginx.0mpc.com"
+          "redirect_target_hostname": "nginx.0mcp.com"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -104,7 +104,7 @@
       "notes": "The apex hostname is governed as a crawl-suppressed informational redirect to the shared NGINX edge entrypoint."
     },
     {
-      "fqdn": "agents.0mpc.com",
+      "fqdn": "agents.0mcp.com",
       "service_id": "dify",
       "environment": "production",
       "status": "active",
@@ -178,7 +178,7 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "analytics.0mpc.com",
+      "fqdn": "analytics.0mcp.com",
       "service_id": "plausible",
       "environment": "production",
       "status": "active",
@@ -260,7 +260,7 @@
       "notes": "The dashboard is protected by the shared edge oauth2-proxy and Keycloak flow while /js/, /api/event, and health endpoints stay public for tracker delivery and probe traffic."
     },
     {
-      "fqdn": "annotate.0mpc.com",
+      "fqdn": "annotate.0mcp.com",
       "service_id": "label_studio",
       "environment": "production",
       "status": "active",
@@ -332,7 +332,7 @@
       "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Keycloak boundary; repo-managed Label Studio tokens remain the current app-local automation path."
     },
     {
-      "fqdn": "api.0mpc.com",
+      "fqdn": "api.0mcp.com",
       "service_id": "api_gateway",
       "environment": "production",
       "status": "active",
@@ -403,7 +403,7 @@
       "notes": "Published publicly through the shared NGINX edge and verified live from current main."
     },
     {
-      "fqdn": "apps.0mpc.com",
+      "fqdn": "apps.0mcp.com",
       "service_id": "coolify_apps",
       "environment": "production",
       "status": "active",
@@ -477,7 +477,7 @@
       "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps (10.10.10.71) \u2014 ADR 0340."
     },
     {
-      "fqdn": "bi.0mpc.com",
+      "fqdn": "bi.0mcp.com",
       "service_id": "superset",
       "environment": "production",
       "status": "active",
@@ -549,7 +549,7 @@
       "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Keycloak OIDC client."
     },
     {
-      "fqdn": "billing.0mpc.com",
+      "fqdn": "billing.0mcp.com",
       "service_id": "lago",
       "environment": "production",
       "status": "active",
@@ -627,7 +627,7 @@
       "notes": "The shared edge protects the Lago browser UI while `/api/health` and `/api/v1/events` intentionally stay reachable for probes and governed producer ingest through the API gateway adapter."
     },
     {
-      "fqdn": "browser.0mpc.com",
+      "fqdn": "browser.0mcp.com",
       "service_id": "neko",
       "environment": "production",
       "status": "active",
@@ -698,7 +698,7 @@
       "notes": "Published through the shared NGINX edge for operator-only access via Tailscale headscale management network. WebRTC media streams direct from Proxmox host (UDP 50000-60000) bypass TLS proxy for latency optimization."
     },
     {
-      "fqdn": "build.0mpc.com",
+      "fqdn": "build.0mcp.com",
       "service_id": "docker_build",
       "environment": "production",
       "status": "active",
@@ -772,7 +772,7 @@
       "notes": null
     },
     {
-      "fqdn": "changelog.0mpc.com",
+      "fqdn": "changelog.0mcp.com",
       "service_id": "changelog_portal",
       "environment": "production",
       "status": "active",
@@ -841,7 +841,7 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "chat.0mpc.com",
+      "fqdn": "chat.0mcp.com",
       "service_id": "librechat",
       "environment": "production",
       "status": "active",
@@ -913,7 +913,7 @@
       "notes": "LibreChat is published through the shared NGINX edge and carries the interactive ServerClaw chat surface plus its in-app Keycloak OIDC flow."
     },
     {
-      "fqdn": "ci.0mpc.com",
+      "fqdn": "ci.0mcp.com",
       "service_id": "woodpecker",
       "environment": "production",
       "status": "active",
@@ -985,7 +985,7 @@
       "notes": "Published through the shared NGINX edge and authenticated through Woodpecker's delegated Gitea OAuth flow."
     },
     {
-      "fqdn": "cloud.0mpc.com",
+      "fqdn": "cloud.0mcp.com",
       "service_id": "nextcloud",
       "environment": "production",
       "status": "active",
@@ -1075,7 +1075,7 @@
       "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects."
     },
     {
-      "fqdn": "coolify.0mpc.com",
+      "fqdn": "coolify.0mcp.com",
       "service_id": "coolify",
       "environment": "production",
       "status": "active",
@@ -1147,7 +1147,7 @@
       "notes": "Coolify dashboard published through the shared authenticated NGINX edge with the private controller API proxied on the management tailnet."
     },
     {
-      "fqdn": "data.0mpc.com",
+      "fqdn": "data.0mcp.com",
       "service_id": "directus",
       "environment": "production",
       "status": "active",
@@ -1216,10 +1216,10 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "The shared NGINX edge publishes data.0mpc.com directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
+      "notes": "The shared NGINX edge publishes data.0mcp.com directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
     },
     {
-      "fqdn": "database.0mpc.com",
+      "fqdn": "database.0mcp.com",
       "service_id": "postgres",
       "environment": "production",
       "status": "active",
@@ -1291,7 +1291,7 @@
       "notes": "Adminer database web UI (runtime-general-lv3:8082), published through the shared NGINX edge and gated behind Keycloak oauth2-proxy."
     },
     {
-      "fqdn": "docker.0mpc.com",
+      "fqdn": "docker.0mcp.com",
       "service_id": "docker_runtime",
       "environment": "production",
       "status": "active",
@@ -1365,7 +1365,7 @@
       "notes": null
     },
     {
-      "fqdn": "docs.0mpc.com",
+      "fqdn": "docs.0mcp.com",
       "service_id": "docs_portal",
       "environment": "production",
       "status": "active",
@@ -1434,7 +1434,7 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "draw.0mpc.com",
+      "fqdn": "draw.0mcp.com",
       "service_id": "excalidraw",
       "environment": "production",
       "status": "active",
@@ -1511,7 +1511,7 @@
       "notes": "Private Excalidraw publication for repo-generated architecture scenes through the shared authenticated NGINX edge."
     },
     {
-      "fqdn": "errors.0mpc.com",
+      "fqdn": "errors.0mcp.com",
       "service_id": "glitchtip",
       "environment": "production",
       "status": "active",
@@ -1583,7 +1583,7 @@
       "notes": "Published through the shared NGINX edge while GlitchTip itself delegates browser sign-in to the repo-managed Keycloak OIDC flow; health and DSN ingestion remain intentionally reachable for probes and SDK traffic."
     },
     {
-      "fqdn": "files.0mpc.com",
+      "fqdn": "files.0mcp.com",
       "service_id": "sftpgo",
       "environment": "production",
       "status": "active",
@@ -1649,7 +1649,7 @@
       "notes": "SFTPGo web-based file manager. Published through the shared NGINX edge."
     },
     {
-      "fqdn": "flags.0mpc.com",
+      "fqdn": "flags.0mcp.com",
       "service_id": "flagsmith",
       "environment": "production",
       "status": "active",
@@ -1723,7 +1723,7 @@
       "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Keycloak."
     },
     {
-      "fqdn": "git.0mpc.com",
+      "fqdn": "git.0mcp.com",
       "service_id": "gitea",
       "environment": "production",
       "status": "active",
@@ -1789,7 +1789,7 @@
       "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime."
     },
     {
-      "fqdn": "grafana.0mpc.com",
+      "fqdn": "grafana.0mcp.com",
       "service_id": "grafana",
       "environment": "production",
       "status": "active",
@@ -1871,7 +1871,7 @@
       "notes": null
     },
     {
-      "fqdn": "grafana.staging.0mpc.com",
+      "fqdn": "grafana.staging.0mcp.com",
       "service_id": "grafana",
       "environment": "staging",
       "status": "planned",
@@ -1938,7 +1938,7 @@
       "notes": "Planned staging hostname on the shared NGINX edge."
     },
     {
-      "fqdn": "grist.0mpc.com",
+      "fqdn": "grist.0mcp.com",
       "service_id": "grist",
       "environment": "production",
       "status": "active",
@@ -2010,7 +2010,7 @@
       "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Keycloak OIDC client."
     },
     {
-      "fqdn": "headscale.0mpc.com",
+      "fqdn": "headscale.0mcp.com",
       "service_id": "headscale",
       "environment": "production",
       "status": "active",
@@ -2081,7 +2081,7 @@
       "notes": "Published through the shared NGINX edge and proxied to the Proxmox host Headscale listener on 10.10.10.1:8080."
     },
     {
-      "fqdn": "home.0mpc.com",
+      "fqdn": "home.0mcp.com",
       "service_id": "homepage",
       "environment": "production",
       "status": "active",
@@ -2152,7 +2152,7 @@
       "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "langfuse.0mpc.com",
+      "fqdn": "langfuse.0mcp.com",
       "service_id": "langfuse",
       "environment": "production",
       "status": "active",
@@ -2226,7 +2226,7 @@
       "notes": null
     },
     {
-      "fqdn": "livekit.0mpc.com",
+      "fqdn": "livekit.0mcp.com",
       "service_id": "livekit",
       "environment": "production",
       "status": "active",
@@ -2297,10 +2297,10 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "The shared NGINX edge proxies signalling at https://livekit.0mpc.com while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime for WebRTC media."
+      "notes": "The shared NGINX edge proxies signalling at https://livekit.0mcp.com while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime for WebRTC media."
     },
     {
-      "fqdn": "logs.0mpc.com",
+      "fqdn": "logs.0mcp.com",
       "service_id": "dozzle",
       "environment": "production",
       "status": "active",
@@ -2372,7 +2372,7 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "mail.0mpc.com",
+      "fqdn": "mail.0mcp.com",
       "service_id": "mail_platform",
       "environment": "production",
       "status": "active",
@@ -2446,7 +2446,7 @@
       "notes": "Published as an informational HTTPS surface on the shared edge while the live mail service itself is reached over SMTP submission and IMAPS."
     },
     {
-      "fqdn": "matrix.0mpc.com",
+      "fqdn": "matrix.0mcp.com",
       "service_id": "matrix_synapse",
       "environment": "production",
       "status": "active",
@@ -2518,7 +2518,7 @@
       "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR."
     },
     {
-      "fqdn": "minio-console.0mpc.com",
+      "fqdn": "minio-console.0mcp.com",
       "service_id": "minio",
       "environment": "production",
       "status": "active",
@@ -2594,7 +2594,7 @@
       "notes": "The MinIO browser console is published through the shared authenticated edge path and proxied to the docker-runtime guest listener on port 9011."
     },
     {
-      "fqdn": "minio.0mpc.com",
+      "fqdn": "minio.0mcp.com",
       "service_id": "minio",
       "environment": "production",
       "status": "active",
@@ -2673,7 +2673,7 @@
       "notes": "The public MinIO S3-compatible API is published through the shared NGINX edge and proxies to the docker-runtime guest listener on port 9010."
     },
     {
-      "fqdn": "n8n.0mpc.com",
+      "fqdn": "n8n.0mcp.com",
       "service_id": "n8n",
       "environment": "production",
       "status": "active",
@@ -2750,7 +2750,7 @@
       "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
     },
     {
-      "fqdn": "nginx.0mpc.com",
+      "fqdn": "nginx.0mcp.com",
       "service_id": "nginx_edge",
       "environment": "production",
       "status": "active",
@@ -2811,7 +2811,7 @@
           "tls": true,
           "slug": "nginx",
           "title": "LV3 Edge",
-          "description": "NGINX is the public edge for published 0mpc.com services on this platform.",
+          "description": "NGINX is the public edge for published 0mcp.com services on this platform.",
           "meta": "Use the named subdomains for the actual service entry points exposed at the edge."
         },
         "tls": {
@@ -2824,7 +2824,7 @@
       "notes": null
     },
     {
-      "fqdn": "ntfy.0mpc.com",
+      "fqdn": "ntfy.0mcp.com",
       "service_id": "ntfy",
       "environment": "production",
       "status": "active",
@@ -2899,7 +2899,7 @@
       "notes": "Published through the shared NGINX edge; ntfy itself enforces repo-managed topic authentication for governed operator push delivery."
     },
     {
-      "fqdn": "ops.0mpc.com",
+      "fqdn": "ops.0mcp.com",
       "service_id": "ops_portal",
       "environment": "production",
       "status": "active",
@@ -2974,7 +2974,7 @@
       "notes": "Interactive runtime is live behind oauth2-proxy and Keycloak on the shared NGINX edge."
     },
     {
-      "fqdn": "ops.staging.0mpc.com",
+      "fqdn": "ops.staging.0mcp.com",
       "service_id": "ops_portal",
       "environment": "staging",
       "status": "planned",
@@ -3041,7 +3041,7 @@
       "notes": "Planned staging portal generated from the canonical service and environment catalogs."
     },
     {
-      "fqdn": "paperless.0mpc.com",
+      "fqdn": "paperless.0mcp.com",
       "service_id": "paperless",
       "environment": "production",
       "status": "active",
@@ -3116,10 +3116,10 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge; docs.0mpc.com remains reserved for the developer portal from ADR 0094."
+      "notes": "Published through the shared NGINX edge; docs.0mcp.com remains reserved for the developer portal from ADR 0094."
     },
     {
-      "fqdn": "proxmox.0mpc.com",
+      "fqdn": "proxmox.0mcp.com",
       "service_id": "proxmox_ui",
       "environment": "production",
       "status": "active",
@@ -3195,7 +3195,7 @@
       "notes": null
     },
     {
-      "fqdn": "registry.0mpc.com",
+      "fqdn": "registry.0mcp.com",
       "service_id": "harbor",
       "environment": "production",
       "status": "active",
@@ -3271,7 +3271,7 @@
       "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
     },
     {
-      "fqdn": "repowise.0mpc.com",
+      "fqdn": "repowise.0mcp.com",
       "service_id": "repowise",
       "environment": "production",
       "status": "active",
@@ -3342,7 +3342,7 @@
       "notes": "Local semantic code search over the repository using Ollama embeddings and Qdrant vector storage. No third-party APIs required."
     },
     {
-      "fqdn": "s3.0mpc.com",
+      "fqdn": "s3.0mcp.com",
       "service_id": "minio",
       "environment": "production",
       "status": "active",
@@ -3408,7 +3408,7 @@
       "notes": "MinIO S3-compatible object storage API endpoint."
     },
     {
-      "fqdn": "scheduler.0mpc.com",
+      "fqdn": "scheduler.0mcp.com",
       "service_id": "nomad",
       "environment": "production",
       "status": "active",
@@ -3472,7 +3472,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/scheduler.0mpc.com/",
+          "cert_path": "/etc/letsencrypt/live/scheduler.0mcp.com/",
           "auto_renew": true
         }
       },
@@ -3480,7 +3480,7 @@
       "notes": "Published through the shared NGINX edge with Nomad native OIDC auth (no oauth2-proxy)."
     },
     {
-      "fqdn": "search.0mpc.com",
+      "fqdn": "search.0mcp.com",
       "service_id": "searxng",
       "environment": "production",
       "status": "active",
@@ -3546,7 +3546,7 @@
       "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime."
     },
     {
-      "fqdn": "sso.0mpc.com",
+      "fqdn": "sso.0mcp.com",
       "service_id": "keycloak",
       "environment": "production",
       "status": "active",
@@ -3617,7 +3617,7 @@
       "notes": null
     },
     {
-      "fqdn": "sso.staging.0mpc.com",
+      "fqdn": "sso.staging.0mcp.com",
       "service_id": "keycloak",
       "environment": "staging",
       "status": "planned",
@@ -3684,7 +3684,7 @@
       "notes": "Planned staging identity hostname on the shared NGINX edge."
     },
     {
-      "fqdn": "status.0mpc.com",
+      "fqdn": "status.0mcp.com",
       "service_id": "status_page",
       "environment": "production",
       "status": "active",
@@ -3756,7 +3756,7 @@
       "notes": null
     },
     {
-      "fqdn": "tasks.0mpc.com",
+      "fqdn": "tasks.0mcp.com",
       "service_id": "plane",
       "environment": "production",
       "status": "active",
@@ -3828,7 +3828,7 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
-      "fqdn": "uptime.0mpc.com",
+      "fqdn": "uptime.0mcp.com",
       "service_id": "uptime_kuma",
       "environment": "production",
       "status": "active",
@@ -3899,7 +3899,7 @@
       "notes": null
     },
     {
-      "fqdn": "uptime.staging.0mpc.com",
+      "fqdn": "uptime.staging.0mcp.com",
       "service_id": "uptime_kuma",
       "environment": "staging",
       "status": "planned",
@@ -3966,7 +3966,7 @@
       "notes": "Planned staged monitoring hostname on the shared NGINX edge."
     },
     {
-      "fqdn": "vault.0mpc.com",
+      "fqdn": "vault.0mcp.com",
       "service_id": "vaultwarden",
       "environment": "production",
       "status": "active",
@@ -4033,7 +4033,7 @@
       "notes": "Tailnet-only HTTPS publication through the Proxmox host using an LV3 internal CA certificate."
     },
     {
-      "fqdn": "wiki.0mpc.com",
+      "fqdn": "wiki.0mcp.com",
       "service_id": "outline",
       "environment": "production",
       "status": "active",

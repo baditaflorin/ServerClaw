@@ -15,7 +15,7 @@ the allowed contexts.
 Blocklist:
 - `example.com`              — retired operator apex
 - `0fork.com`            — retired operator apex
-- `0mpc.com`             — current operator apex (must stay in .local/)
+- `0mcp.com`             — current operator apex (must stay in .local/)
 - `65.109.84.223`        — 0fork host IPv4
 - `203.0.113.1`        — lv3 host IPv4
 - `2a01:4f9:6b:4b47`     — operator IPv6 prefix
@@ -49,7 +49,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 BLOCKED_STRINGS: tuple[str, ...] = (
     "example.com",
     "0fork.com",
-    "0mpc.com",
+    "0mcp.com",
     "65.109.84.223",
     "203.0.113.1",
     "2a01:4f9:6b:4b47",
