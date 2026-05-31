@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-05-28'
 facet: status
 implementation_status: Deprecated
 slug: deprecated
-total_adrs: 5
+total_adrs: 14
 adrs:
   - adr: '0061'
     title: GlitchTip For Application Exceptions And Task Failures
@@ -110,3 +110,184 @@ adrs:
     summary: 'config/llm-model-registry.yaml declares all permitted models and their properties:'
     filename: 0356-llm-inference-routing-and-model-registry.md
     path: docs/adr/0356-llm-inference-routing-and-model-registry.md
+  - adr: '0437'
+    title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
+    date: '2026-04-22'
+    concern: bootstrap
+    keywords:
+      - bootstrap
+      - overlay
+      - fork-clone
+      - adr-0386-extension
+      - adr-0431-consolidation
+      - overlay-aware
+      - make
+      - single
+      - command
+      - any
+    summary: make bootstrap becomes overlay-aware. The single environment variable
+    filename: 0437-overlay-aware-bootstrap.md
+    path: docs/adr/0437-overlay-aware-bootstrap.md
+  - adr: 0439
+    title: Deployment Profiles — Subset-of-Services Selection for Forks
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
+    date: '2026-04-27'
+    concern: networking
+    keywords:
+      - profiles
+      - fork-clone
+      - subset-selection
+      - ansible-native
+      - adr-0410-complement
+      - adr-0438-prerequisite
+      - deployment
+      - subset-of-services
+      - selection
+      - forks
+    summary: Reuse Ansible's existing primitives. Do not invent a new DSL.
+    filename: 0439-deployment-profiles-subset-selection.md
+    path: docs/adr/0439-deployment-profiles-subset-selection.md
+  - adr: 0439
+    title: Multi-Deployment Repo Architecture — N Independent Servers from One Checkout
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
+    date: '2026-04-27'
+    concern: networking
+    keywords:
+      - multi-deployment
+      - deployments
+      - parallel-converge
+      - agent-coordination
+      - refactor
+      - repo
+      - architecture
+      - independent
+      - servers
+      - from
+    summary: Introduce deployments as a first-class concept in this repo. A
+    filename: 0439-multi-deployment-repo-architecture.md
+    path: docs/adr/0439-multi-deployment-repo-architecture.md
+  - adr: '0440'
+    title: Per-Deployment Identity & Artifact Isolation
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
+    date: '2026-04-27'
+    concern: identity
+    keywords:
+      - multi-deployment
+      - generated-artifacts
+      - identity
+      - inventory
+      - refactor
+      - per-deployment
+      - artifact
+      - isolation
+    summary: ''
+    filename: 0440-per-deployment-identity-and-artifact-isolation.md
+    path: docs/adr/0440-per-deployment-identity-and-artifact-isolation.md
+  - adr: '0441'
+    title: Deployment-Scoped Service Subsetting via Service Profiles
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
+    date: '2026-04-27'
+    concern: platform
+    keywords:
+      - multi-deployment
+      - service-profile
+      - allowlist
+      - registry
+      - refactor
+      - deployment-scoped
+      - service
+      - subsetting
+      - profiles
+    summary: Each deployment owns a profile.yml under
+    filename: 0441-deployment-scoped-service-subsetting.md
+    path: docs/adr/0441-deployment-scoped-service-subsetting.md
+  - adr: '0442'
+    title: Multi-Deployment Make Interface & Agent Worktree Binding
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
+    date: '2026-04-27'
+    concern: agent-discovery
+    keywords:
+      - multi-deployment
+      - makefile
+      - worktrees
+      - workstreams
+      - agents
+      - make
+      - interface
+      - agent
+      - worktree
+      - binding
+    summary: Every Make target that today accepts env= accepts deployment=.
+    filename: 0442-multi-deployment-make-interface-and-worktree-binding.md
+    path: docs/adr/0442-multi-deployment-make-interface-and-worktree-binding.md
+  - adr: '0445'
+    title: Phase 1 Multi-Deployment Hardening (0fork.com + example.com)
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - multi-deployment
+      - ci
+      - lint
+      - generic-by-construction
+      - programmatic-deploy
+      - phase
+      - hardening
+      - fork
+      - com
+      - example
+    summary: Phase 1 = six items. Items 1 and 2 are already in flight (ws-0438,
+    filename: 0445-phase1-multi-deployment-hardening.md
+    path: docs/adr/0445-phase1-multi-deployment-hardening.md
+  - adr: '0446'
+    title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
+    date: '2026-04-28'
+    concern: security
+    keywords:
+      - multi-deployment
+      - receipts
+      - molecule
+      - programmatic-deploy
+      - phase
+      - hardening
+      - receipt
+      - freshness
+    summary: 'Three deliverables, in order:'
+    filename: 0446-phase2-multi-deployment-hardening.md
+    path: docs/adr/0446-phase2-multi-deployment-hardening.md
+  - adr: '0460'
+    title: Phase 8 — Cross-Deployment Doctor + Advisory Auto-Promotion
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
+    date: '2026-04-29'
+    concern: platform
+    keywords:
+      - doctor
+      - cross-deployment
+      - advisory
+      - promotion
+      - auto-graduation
+      - phase
+      - auto-promotion
+    summary: 'A new receipts/gate-runs/ ledger captures per-run gate outcomes:'
+    filename: 0460-phase8-cross-deploy-and-auto-promote.md
+    path: docs/adr/0460-phase8-cross-deploy-and-auto-promote.md

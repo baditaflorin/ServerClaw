@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.47",
-  "platform_version": "0.179.46",
-  "generated_at": "2026-05-21T18:52:52Z",
-  "next_refresh_at": "2026-05-21T19:52:52Z",
+  "repo_version": "0.179.48",
+  "platform_version": "0.179.47",
+  "generated_at": "2026-05-31T11:46:00Z",
+  "next_refresh_at": "2026-05-31T12:46:00Z",
   "environment": "production",
   "identity": {
     "platform_name": "0mcp.com",
@@ -6358,10 +6358,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.46",
-    "deployed_at": "2026-05-21",
-    "summary": "Deploy Woodpecker CI (ci.0mcp.com): fix OpenBao remote address for docker-runtime, add port 3003 Proxmox firewall rule for docker-runtime \u2192 runtime-control, bootstrap Gitea OAuth and seed repository",
-    "release_notes_url": "docs/release-notes/0.179.47.md"
+    "last_version": "0.179.47",
+    "deployed_at": "2026-05-31",
+    "summary": "Complete the 0mpc.com \u2192 0mcp.com operator-apex migration: regenerate platform.yml and discovery artifacts against the renamed domain, update the sanitization BLOCKED list, and refresh the subdomain exposure registry Add the `lv3.platform.uptime_kuma_provision` role (monitors + public status page) with a `provision-uptime-kuma` Make target and playbook wiring",
+    "release_notes_url": "docs/release-notes/0.179.48.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

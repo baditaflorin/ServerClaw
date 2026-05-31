@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-05-28'
 facet: concern
 concern: agent-discovery
 total_adrs: 27
@@ -504,9 +504,9 @@ adrs:
     path: docs/adr/0395-agent-interface-abstraction-layer.md
   - adr: '0442'
     title: Multi-Deployment Make Interface & Agent Worktree Binding
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: agent-discovery
     keywords:
