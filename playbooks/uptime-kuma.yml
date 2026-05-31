@@ -56,3 +56,18 @@
   roles:
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.nginx_edge_publication
+
+- name: Provision Uptime Kuma monitors and the public status page
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-general' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - observability
+    - service-uptime-kuma
+    - service-uptime-kuma-provision
+
+  roles:
+    - role: lv3.platform.uptime_kuma_provision

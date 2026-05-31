@@ -3744,7 +3744,7 @@
           "enabled": true,
           "tls": true,
           "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:3001",
-          "root_proxy_path": "/status/lv3-platform"
+          "root_proxy_path": "/status/{{ platform_domain | split('.') | first }}-platform"
         },
         "tls": {
           "provider": "letsencrypt",

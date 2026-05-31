@@ -1,0 +1,55 @@
+---
+# Purpose: Default inputs for generic, registry-driven Uptime Kuma provisioning.
+# Use case: Consumed by the uptime_kuma_provision role to bootstrap the admin
+#           account, reconcile monitors from the health-probe catalog, and
+#           publish the public status page — all derived from inventory truth so
+#           the playbook is generic across deployments (ADR 0373).
+#
+# Inputs (required, generated/inventory):
+#   - platform_service_topology (generated): port assignment for `uptime_kuma`.
+#   - platform_domain (identity): deployment domain used for monitor URLs and
+#     the status page (e.g. 0mcp.com).
+#   - repo_shared_root / repo_shared_local_root (generated): controller repo
+#     paths for the source catalog and the returned admin-session artifact.
+#
+# Inputs (optional):
+#   - uptime_kuma_provision_keycloak_realm: Keycloak realm used in OIDC monitor
+#     URLs. Defaults to keycloak_realm_name (derived from the domain). Override
+#     when the live realm name differs from the domain's first label.
+#
+# Idempotency: Fully idempotent — declares defaults only.
+# Related ADRs: 0165, 0373
+# Author: LV3 Platform
+# Last Updated: 2026-05-31
+uptime_kuma_provision_service_topology: "{{ platform_service_topology | platform_service('uptime_kuma') }}"
+uptime_kuma_provision_port: "{{ uptime_kuma_provision_service_topology.ports.internal }}"
+
+# Base URL is auto-derived: the agent runs ON the Uptime Kuma VM, so the API is
+# always reachable at localhost + the registry-assigned internal port. No IP is
+# ever hardcoded.
+uptime_kuma_provision_base_url: "http://127.0.0.1:{{ uptime_kuma_provision_port }}"
+uptime_kuma_provision_public_base_url: "https://{{ uptime_kuma_provision_service_topology.public_hostname }}"
+
+# Service identification is auto-derived from the health-probe catalog: every
+# service with uptime_kuma.enabled == true becomes a monitor.
+uptime_kuma_provision_platform_domain: "{{ platform_domain }}"
+uptime_kuma_provision_keycloak_realm: "{{ keycloak_realm_name }}"
+uptime_kuma_provision_status_slug: "{{ platform_domain | split('.') | first }}-platform"
+
+# On-VM working layout.
+uptime_kuma_provision_site_dir: /opt/uptime-kuma
+uptime_kuma_provision_dir: "{{ uptime_kuma_provision_site_dir }}/provision"
+uptime_kuma_provision_venv: "{{ uptime_kuma_provision_dir }}/venv"
+uptime_kuma_provision_agent_remote: "{{ uptime_kuma_provision_dir }}/uptime_kuma_agent.py"
+uptime_kuma_provision_catalog_remote: "{{ uptime_kuma_provision_dir }}/health-probe-catalog.json"
+uptime_kuma_provision_auth_remote: "{{ uptime_kuma_provision_dir }}/admin-session.json"
+
+# Controller-side source + returned artifact.
+uptime_kuma_provision_catalog_src: "{{ repo_shared_root }}/config/health-probe-catalog.json"
+uptime_kuma_provision_requirements_src: "{{ repo_shared_root }}/requirements/uptime-kuma-client.txt"
+uptime_kuma_provision_local_auth_file: "{{ repo_shared_local_root }}/uptime-kuma/admin-session.json"
+
+# Python client dependencies (mirrors requirements/uptime-kuma-client.txt).
+uptime_kuma_provision_pip_packages:
+  - "requests>=2,<3"
+  - "python-socketio[client]>=5,<6"
