@@ -21,8 +21,15 @@ argument_specs:
       public_edge_acme_challenge_method:
         type: str
         required: false
+        choices:
+          - webroot
+          - dns-hetzner
+          - dns-hetzner-cloud
         description:
-          - ACME challenge method for the shared edge certificate (`webroot` or `dns-hetzner`).
+          - ACME challenge method for the shared edge certificate.
+          - The `webroot` method serves HTTP-01 challenges from the ACME web root.
+          - The `dns-hetzner` method uses the certbot Hetzner DNS plugin (legacy standalone DNS API) for DNS-01 wildcard issuance.
+          - The `dns-hetzner-cloud` method uses a self-contained certbot manual hook that talks to the Hetzner Cloud API (api.hetzner.cloud/v1) for DNS-01 wildcard issuance, mirroring the hetzner_dns_records role.
       public_edge_update_apt_cache:
         type: bool
         required: false
@@ -84,6 +91,22 @@ argument_specs:
         required: false
         description:
           - Seconds Certbot waits before verifying DNS-01 records through Hetzner DNS.
+      public_edge_dns_hetzner_cloud_credentials_file:
+        type: str
+        required: false
+        description:
+          - Path to the Hetzner Cloud DNS credentials file written on the edge host for the dns-hetzner-cloud method.
+          - Contains a single line `hetzner_cloud_dns_api_token = <TOKEN>`.
+      public_edge_dns_hetzner_cloud_hook_path:
+        type: str
+        required: false
+        description:
+          - Filesystem path where the self-contained Hetzner Cloud DNS-01 certbot manual hook script is installed on the edge host.
+      public_edge_dns_hetzner_cloud_propagation_seconds:
+        type: int
+        required: false
+        description:
+          - Seconds the Hetzner Cloud DNS-01 auth hook waits for DNS propagation before returning control to certbot.
       public_edge_certificate_domains:
         type: list
         elements: str
