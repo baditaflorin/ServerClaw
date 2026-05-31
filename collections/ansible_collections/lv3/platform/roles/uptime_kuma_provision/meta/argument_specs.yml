@@ -1,0 +1,70 @@
+---
+argument_specs:
+  main:
+    short_description: Provision Uptime Kuma monitors and the public status page.
+    description:
+      - Runs on the Uptime Kuma VM and reconciles monitors and the status page
+        from the health-probe catalog, deriving the API base URL from the
+        service registry (localhost + internal port) and service URLs from the
+        deployment domain.
+    options:
+      uptime_kuma_provision_port:
+        type: int
+        required: true
+        description:
+          - Local TCP port exposed by the Uptime Kuma runtime (registry-derived).
+      uptime_kuma_provision_base_url:
+        type: str
+        required: false
+        description:
+          - Local socket.io API base URL the agent connects to on the VM.
+      uptime_kuma_provision_public_base_url:
+        type: str
+        required: false
+        description:
+          - Public base URL stored in Uptime Kuma settings (primaryBaseURL).
+      uptime_kuma_provision_platform_domain:
+        type: str
+        required: true
+        description:
+          - Deployment domain substituted into catalog monitor URLs and the
+            status page (e.g. 0mcp.com).
+      uptime_kuma_provision_keycloak_realm:
+        type: str
+        required: false
+        description:
+          - Keycloak realm name used in OIDC monitor URLs. Defaults to the
+            inventory keycloak_realm_name; override when the live realm name
+            differs from the domain's first label.
+      uptime_kuma_provision_status_slug:
+        type: str
+        required: false
+        description:
+          - Slug identifier for the managed public status page.
+      uptime_kuma_provision_dir:
+        type: path
+        required: false
+        description:
+          - On-VM working directory for the provisioning venv, agent, and catalog.
+      uptime_kuma_provision_venv:
+        type: path
+        required: false
+        description:
+          - Virtualenv path for the provisioning client dependencies.
+      uptime_kuma_provision_catalog_src:
+        type: path
+        required: false
+        description:
+          - Controller-side path to the health-probe catalog source of truth.
+      uptime_kuma_provision_local_auth_file:
+        type: path
+        required: false
+        description:
+          - Controller-side admin-session artifact (seeded to and fetched from
+            the VM so the admin token persists across runs).
+      uptime_kuma_provision_pip_packages:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Python client dependencies installed into the provisioning venv.

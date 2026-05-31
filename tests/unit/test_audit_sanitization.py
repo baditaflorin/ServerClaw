@@ -28,10 +28,10 @@ spec.loader.exec_module(audit_sanitization)
 
 
 def test_blocks_operator_string_outside_allowed_context(tmp_path):
-    """A committed file outside docs/adr/ etc. with 0mpc.com must fail."""
+    """A committed file outside docs/adr/ etc. with 0mcp.com must fail."""
     leaky = tmp_path / "playbooks" / "vars" / "production.yml"
     leaky.parent.mkdir(parents=True)
-    leaky.write_text("platform_domain: 0mpc.com\n")
+    leaky.write_text("platform_domain: 0mcp.com\n")
 
     hits = audit_sanitization.audit(
         repo_root=tmp_path,
@@ -39,19 +39,19 @@ def test_blocks_operator_string_outside_allowed_context(tmp_path):
     )
     assert len(hits) == 1
     assert hits[0].path == "playbooks/vars/production.yml"
-    assert hits[0].blocked == "0mpc.com"
+    assert hits[0].blocked == "0mcp.com"
     assert hits[0].line_no == 1
 
 
 def test_passes_operator_string_inside_allowed_context(tmp_path):
-    """The same 0mpc.com string inside an allowed-context path must pass."""
+    """The same 0mcp.com string inside an allowed-context path must pass."""
     adr = tmp_path / "docs" / "adr" / "0488-test.md"
     adr.parent.mkdir(parents=True)
-    adr.write_text("Historical record: deployment used 0mpc.com.\n")
+    adr.write_text("Historical record: deployment used 0mcp.com.\n")
 
     runbook = tmp_path / "docs" / "runbooks" / "ops.md"
     runbook.parent.mkdir(parents=True)
-    runbook.write_text("Operator apex: 0mpc.com.\n")
+    runbook.write_text("Operator apex: 0mcp.com.\n")
 
     receipt = tmp_path / "receipts" / "live-applies" / "r.yml"
     receipt.parent.mkdir(parents=True)
@@ -92,7 +92,7 @@ def test_self_exempt_files_pass(tmp_path):
     """The audit script itself names the blocked strings — must be exempt."""
     p = tmp_path / "scripts" / "audit_sanitization.py"
     p.parent.mkdir(parents=True)
-    p.write_text('BLOCKED = ("example.com", "0mpc.com")\n')
+    p.write_text('BLOCKED = ("example.com", "0mcp.com")\n')
 
     hits = audit_sanitization.audit(
         repo_root=tmp_path,

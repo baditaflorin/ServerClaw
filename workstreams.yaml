@@ -211,7 +211,7 @@ workstreams:
       in committed files outside docs/adr/
     status: completed
   - id: t18-audit-sanitization
-    title: "Wave 4 \u2014 scripts/audit_sanitization.py blocks example.com/0fork.com/0mpc.com/65.109.84.223/203.0.113.1/2a01:4f9:6b:4b47\
+    title: "Wave 4 \u2014 scripts/audit_sanitization.py blocks example.com/0fork.com/0mcp.com/65.109.84.223/203.0.113.1/2a01:4f9:6b:4b47\
       \ in committed files outside the allowed contexts (docs/adr/, docs/release-notes/,\
       \ docs/runbooks/, changelog.md, receipts/, workstreams/, workstreams.yaml, build/,\
       \ RELEASE.md) + tests/unit/test_audit_sanitization.py"

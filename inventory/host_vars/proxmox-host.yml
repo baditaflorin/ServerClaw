@@ -2260,7 +2260,11 @@ platform_service_topology:
       tls: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general-lv3') | map(attribute='ipv4') | first) }}:3001"
-      root_proxy_path: /status/lv3-platform
+      # Bare-root https://status.<domain>/ proxies to the published status page.
+      # Derive the slug the same way uptime_kuma_provision does
+      # (uptime_kuma_provision_status_slug = "<domain-first-label>-platform") so it
+      # tracks the platform domain instead of drifting to a stale literal.
+      root_proxy_path: "/status/{{ platform_domain | split('.') | first }}-platform"
   mail_platform:
     service_name: mail-platform
     owning_vm: runtime-control-lv3

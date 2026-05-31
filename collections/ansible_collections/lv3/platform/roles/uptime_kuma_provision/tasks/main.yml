@@ -1,0 +1,155 @@
+---
+# Purpose: Generic, registry-driven provisioning of Uptime Kuma monitors and the
+#          public status page. Runs ON the Uptime Kuma VM and talks to the local
+#          socket.io API at 127.0.0.1:<registry-port>, so no IP/port is hardcoded
+#          and the SSO-gated public edge is bypassed entirely.
+# Use case: Run after the uptime_kuma_runtime converge to make the live monitor
+#           set and status page match repo truth (the health-probe catalog).
+#
+# Idempotency: Fully idempotent — the agent reconciles live state toward the
+#              catalog-derived desired state and reuses the stored admin token.
+#
+# Related ADRs: 0165, 0373
+# Author: LV3 Platform
+# Last Updated: 2026-05-31
+- name: Derive Uptime Kuma conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: uptime_kuma
+
+- name: Validate Uptime Kuma provisioning inputs
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - uptime_kuma_provision_port
+      - uptime_kuma_provision_platform_domain
+      - uptime_kuma_provision_status_slug
+    common_assert_vars_expressions:
+      - uptime_kuma_provision_port | int > 0
+    common_assert_vars_fail_msg: >-
+      uptime_kuma_provision requires the registry-derived internal port and a
+      platform domain.
+
+- name: Ensure the Uptime Kuma provisioning directory exists
+  ansible.builtin.file:
+    path: "{{ uptime_kuma_provision_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Ensure python venv tooling is present
+  ansible.builtin.apt:
+    name:
+      - python3-venv
+      - python3-pip
+    state: present
+    update_cache: true
+
+- name: Install the Uptime Kuma client dependencies into a dedicated venv
+  ansible.builtin.pip:
+    name: "{{ uptime_kuma_provision_pip_packages }}"
+    virtualenv: "{{ uptime_kuma_provision_venv }}"
+    virtualenv_command: python3 -m venv
+    state: present
+
+- name: Copy the self-contained provisioning agent to the VM
+  ansible.builtin.copy:
+    src: uptime_kuma_agent.py
+    dest: "{{ uptime_kuma_provision_agent_remote }}"
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Copy the health-probe catalog (service source of truth) to the VM
+  ansible.builtin.copy:
+    src: "{{ uptime_kuma_provision_catalog_src }}"
+    dest: "{{ uptime_kuma_provision_catalog_remote }}"
+    owner: root
+    group: root
+    mode: "0640"
+
+- name: Check whether a controller-side admin session already exists
+  ansible.builtin.stat:
+    path: "{{ uptime_kuma_provision_local_auth_file }}"
+  delegate_to: localhost
+  become: false
+  register: uptime_kuma_provision_local_auth_stat
+
+- name: Read the controller-side admin session to decide whether it is usable
+  ansible.builtin.slurp:
+    src: "{{ uptime_kuma_provision_local_auth_file }}"
+  delegate_to: localhost
+  become: false
+  register: uptime_kuma_provision_local_auth_slurp
+  when: uptime_kuma_provision_local_auth_stat.stat.exists | default(false)
+  no_log: true
+
+- name: Determine whether the stored session carries a usable token
+  ansible.builtin.set_fact:
+    uptime_kuma_provision_local_auth_has_token: >-
+      {{ ((uptime_kuma_provision_local_auth_slurp.content | default('') | b64decode | from_json).token
+          | default('') | string | length) > 0 }}
+  when:
+    - uptime_kuma_provision_local_auth_stat.stat.exists | default(false)
+    - uptime_kuma_provision_local_auth_slurp.content is defined
+  no_log: true
+
+# Only seed the VM from the controller when the stored session actually carries
+# a token. An empty `{}` placeholder (3 bytes) must never clobber a freshly
+# bootstrapped session that a prior partial run already saved on the VM.
+- name: Seed the VM with the existing admin session (reuse stored token)
+  ansible.builtin.copy:
+    src: "{{ uptime_kuma_provision_local_auth_file }}"
+    dest: "{{ uptime_kuma_provision_auth_remote }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: uptime_kuma_provision_local_auth_has_token | default(false) | bool
+  no_log: true
+
+- name: Provision Uptime Kuma monitors and the public status page
+  ansible.builtin.command:
+    argv:
+      - "{{ uptime_kuma_provision_venv }}/bin/python"
+      - "{{ uptime_kuma_provision_agent_remote }}"
+      - provision
+      - --base-url
+      - "{{ uptime_kuma_provision_base_url }}"
+      - --auth-file
+      - "{{ uptime_kuma_provision_auth_remote }}"
+      - --catalog
+      - "{{ uptime_kuma_provision_catalog_remote }}"
+      - --platform-domain
+      - "{{ uptime_kuma_provision_platform_domain }}"
+      - --keycloak-realm
+      - "{{ uptime_kuma_provision_keycloak_realm }}"
+      - --status-slug
+      - "{{ uptime_kuma_provision_status_slug }}"
+      - --primary-base-url
+      - "{{ uptime_kuma_provision_public_base_url }}"
+  register: uptime_kuma_provision_result
+  changed_when: "'created=0 updated=0' not in uptime_kuma_provision_result.stdout"
+
+- name: Show the provisioning summary
+  ansible.builtin.debug:
+    var: uptime_kuma_provision_result.stdout_lines
+
+- name: Ensure the controller-side artifact directory exists
+  ansible.builtin.file:
+    path: "{{ uptime_kuma_provision_local_auth_file | dirname }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Return the admin session to the controller for follow-up operations
+  ansible.builtin.fetch:
+    src: "{{ uptime_kuma_provision_auth_remote }}"
+    dest: "{{ uptime_kuma_provision_local_auth_file }}"
+    flat: true
+  no_log: true

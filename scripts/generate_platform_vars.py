@@ -320,6 +320,24 @@ def service_url(scheme: str, host: str, port: int, suffix: str = "") -> str:
     return f"{scheme}://{host}:{port}{suffix}"
 
 
+def compute_mail_dkim_dns_value() -> str:
+    """Mirror roles/mail_platform_runtime/defaults/main.yml.
+
+    The mail DKIM DNS TXT value is computed in that role's defaults from the
+    public key in .local. The generator does not load role defaults, so it
+    recomputes the value here to resolve host_vars.mail_platform_dns_records.
+    The DKIM *public* key is non-secret (it is published in DNS), so baking it
+    into platform.yml is safe. A missing key yields a visible empty record,
+    matching the role's `errors='ignore' | default('')` behaviour.
+    """
+    local_identity = resolve_local_identity_override_path()
+    local_root = local_identity.parent if local_identity is not None else (REPO_ROOT / ".local")
+    key_file = local_root / "mail-platform" / "dkim-public-key.txt"
+    public_key = key_file.read_text().strip() if key_file.is_file() else ""
+    full = "v=DKIM1; k=rsa; p=" + public_key
+    return f'"{full[:255]}" "{full[255:]}"'
+
+
 def load_sources(skip_local_override: bool = False) -> tuple[dict[str, Any], dict[str, Any]]:
     stack = require_mapping(load_yaml(STACK_PATH), str(STACK_PATH))
     # ADR 0430: apply `.local/host_vars/proxmox-host.yml` overlay if present
@@ -366,6 +384,11 @@ def load_sources(skip_local_override: bool = False) -> tuple[dict[str, Any], dic
                 # Skip Jinja2 templates (e.g. derived URLs that reference other vars).
                 if isinstance(val, (str, int, bool)) and "{{" not in str(val):
                     host_vars[key] = val
+    # Provide the DKIM DNS TXT value (computed in mail_platform_runtime role
+    # defaults, which the generator does not load) so build_dns_records can
+    # resolve host_vars.mail_platform_dns_records without raising.
+    if "mail_platform_dkim_dns_value" not in host_vars:
+        host_vars["mail_platform_dkim_dns_value"] = compute_mail_dkim_dns_value()
     return stack, host_vars
 
 
