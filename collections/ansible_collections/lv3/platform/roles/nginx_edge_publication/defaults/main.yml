@@ -57,6 +57,12 @@ public_edge_dns_hetzner_plugin_version: 4.0.0
 public_edge_dns_hetzner_credentials_file: /etc/letsencrypt/hetzner.ini
 public_edge_dns_hetzner_propagation_seconds: 120
 public_edge_dns_hetzner_virtualenv: /opt/certbot-dns-hetzner
+# Opt-in DNS-01 via the Hetzner Cloud API (api.hetzner.cloud/v1), used when
+# public_edge_acme_challenge_method == 'dns-hetzner-cloud'. Mirrors the sibling
+# hetzner_dns_records role and a self-contained certbot manual hook (no plugin).
+public_edge_dns_hetzner_cloud_credentials_file: /etc/letsencrypt/hetzner-cloud.ini
+public_edge_dns_hetzner_cloud_hook_path: /usr/local/lib/{{ platform_identity.config_prefix }}-edge/hetzner_cloud_acme_hook.py
+public_edge_dns_hetzner_cloud_propagation_seconds: 60
 public_edge_certbot_plugin_path: >-
   {{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages
 public_edge_apex_hostname: "{{ platform_domain }}"

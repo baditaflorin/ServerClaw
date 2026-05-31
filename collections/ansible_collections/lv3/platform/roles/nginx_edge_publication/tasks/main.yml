@@ -45,7 +45,7 @@
     that:
       - public_edge_certbot_email | length > 0
       - public_edge_cert_name | length > 0
-      - public_edge_acme_challenge_method in ['webroot', 'dns-hetzner']
+      - public_edge_acme_challenge_method in ['webroot', 'dns-hetzner', 'dns-hetzner-cloud']
       - public_edge_static_root | length > 0
       - public_edge_acme_root | length > 0
       - public_edge_certificate_domains | length > 0
@@ -119,6 +119,45 @@
       public_edge_acme_challenge_method=dns-hetzner requires either HETZNER_DNS_API_TOKEN on the controller
       or an existing {{ public_edge_dns_hetzner_credentials_file }} on the edge host.
   when: public_edge_acme_challenge_method == 'dns-hetzner'
+
+- name: Ensure the Hetzner Cloud DNS-01 hook directory exists
+  ansible.builtin.file:
+    path: "{{ public_edge_dns_hetzner_cloud_hook_path | dirname }}"
+    state: directory
+    mode: "0755"
+  when: public_edge_acme_challenge_method == 'dns-hetzner-cloud'
+
+- name: Install the self-contained Hetzner Cloud DNS-01 certbot hook
+  ansible.builtin.copy:
+    src: hetzner_cloud_acme_hook.py
+    dest: "{{ public_edge_dns_hetzner_cloud_hook_path }}"
+    mode: "0755"
+  when: public_edge_acme_challenge_method == 'dns-hetzner-cloud'
+
+- name: Write the Hetzner Cloud DNS credential file when a controller token is present
+  ansible.builtin.copy:
+    dest: "{{ public_edge_dns_hetzner_cloud_credentials_file }}"
+    mode: "0600"
+    content: "hetzner_cloud_dns_api_token = {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}\n"
+  when:
+    - public_edge_acme_challenge_method == 'dns-hetzner-cloud'
+    - (lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim | length) > 0
+  no_log: true
+
+- name: Check the Hetzner Cloud DNS credential file
+  ansible.builtin.stat:
+    path: "{{ public_edge_dns_hetzner_cloud_credentials_file }}"
+  register: public_edge_dns_hetzner_cloud_credentials_after
+  when: public_edge_acme_challenge_method == 'dns-hetzner-cloud'
+
+- name: Assert the Hetzner Cloud DNS credential file is available when Cloud DNS-01 is enabled
+  ansible.builtin.assert:
+    that:
+      - public_edge_dns_hetzner_cloud_credentials_after.stat.exists
+    fail_msg: >-
+      public_edge_acme_challenge_method=dns-hetzner-cloud requires either HETZNER_DNS_API_TOKEN on the controller
+      or an existing {{ public_edge_dns_hetzner_cloud_credentials_file }} on the edge host.
+  when: public_edge_acme_challenge_method == 'dns-hetzner-cloud'
 
 - name: Render static pages for published informational hostnames
   ansible.builtin.template:
@@ -343,6 +382,12 @@
           ['--webroot', '-w', public_edge_acme_root]
           if public_edge_acme_challenge_method == 'webroot'
           else [
+            '--manual', '--preferred-challenges', 'dns',
+            '--manual-auth-hook', (public_edge_dns_hetzner_cloud_hook_path ~ ' auth'),
+            '--manual-cleanup-hook', (public_edge_dns_hetzner_cloud_hook_path ~ ' cleanup')
+          ]
+          if public_edge_acme_challenge_method == 'dns-hetzner-cloud'
+          else [
             '--authenticator', 'dns-hetzner',
             '--dns-hetzner-credentials', public_edge_dns_hetzner_credentials_file,
             '--dns-hetzner-propagation-seconds', public_edge_dns_hetzner_propagation_seconds | string
@@ -354,6 +399,12 @@
     {{
       {'CERTBOT_PLUGIN_PATH': public_edge_certbot_plugin_path}
       if public_edge_acme_challenge_method == 'dns-hetzner'
+      else {
+        'HETZNER_CLOUD_DNS_CREDENTIALS_FILE': public_edge_dns_hetzner_cloud_credentials_file,
+        'HETZNER_DNS_API_TOKEN': lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | default('', true),
+        'HETZNER_CLOUD_DNS_PROPAGATION_SECONDS': public_edge_dns_hetzner_cloud_propagation_seconds | string
+      }
+      if public_edge_acme_challenge_method == 'dns-hetzner-cloud'
       else {}
     }}
   register: public_edge_certbot_issue
@@ -446,6 +497,12 @@
           ['--webroot', '-w', public_edge_acme_root]
           if public_edge_acme_challenge_method == 'webroot'
           else [
+            '--manual', '--preferred-challenges', 'dns',
+            '--manual-auth-hook', (public_edge_dns_hetzner_cloud_hook_path ~ ' auth'),
+            '--manual-cleanup-hook', (public_edge_dns_hetzner_cloud_hook_path ~ ' cleanup')
+          ]
+          if public_edge_acme_challenge_method == 'dns-hetzner-cloud'
+          else [
             '--authenticator', 'dns-hetzner',
             '--dns-hetzner-credentials', public_edge_dns_hetzner_credentials_file,
             '--dns-hetzner-propagation-seconds', public_edge_dns_hetzner_propagation_seconds | string
@@ -457,6 +514,12 @@
     {{
       {'CERTBOT_PLUGIN_PATH': public_edge_certbot_plugin_path}
       if public_edge_acme_challenge_method == 'dns-hetzner'
+      else {
+        'HETZNER_CLOUD_DNS_CREDENTIALS_FILE': public_edge_dns_hetzner_cloud_credentials_file,
+        'HETZNER_DNS_API_TOKEN': lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | default('', true),
+        'HETZNER_CLOUD_DNS_PROPAGATION_SECONDS': public_edge_dns_hetzner_cloud_propagation_seconds | string
+      }
+      if public_edge_acme_challenge_method == 'dns-hetzner-cloud'
       else {}
     }}
   loop: "{{ public_edge_site_certificate_requirements | default([]) }}"
