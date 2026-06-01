@@ -54,32 +54,54 @@
   ansible.builtin.set_fact:
     dns_provider_boundary_zone: "{{ dns_provider_boundary_zone_candidates[0] }}"
 
-# Pull all rrsets for the zone in one request. per_page=100 is the maximum
-# the new Console API accepts; that covers any realistic single zone (e.g.
-# example.com has 67 rrsets as of 2026-04-28). The assert below catches the
-# day a zone outgrows a single page so we don't silently miss records and
-# infer false drift / spurious deletes; when that happens, extend this
-# task with a manual page-walk loop.
-- name: Read current Hetzner DNS rrsets for the zone
+# Pull all rrsets for the zone. per_page=100 is the maximum the new Console
+# API accepts; a zone that outgrows a single page (e.g. a busy apex with many
+# subdomains) is walked page-by-page below so we never silently miss records
+# and infer false drift / spurious deletes. The Console pagination object
+# exposes `last_page` and `total_entries`, which drive the walk and the
+# completeness assert.
+- name: Read the first page of Hetzner DNS rrsets for the zone
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets?per_page=100"
+    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets?per_page=100&page=1"
     method: GET
     headers:
       Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
     return_content: true
-  register: hetzner_dns_records_lookup
+  register: hetzner_dns_rrsets_first_page
   changed_when: false
   no_log: true
 
-- name: Assert the rrset listing fits in a single 100-entry page
+- name: Read any remaining pages of Hetzner DNS rrsets for the zone
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets?per_page=100&page={{ item }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    return_content: true
+  register: hetzner_dns_rrsets_more_pages
+  changed_when: false
+  no_log: true
+  loop: "{{ range(2, (hetzner_dns_rrsets_first_page.json.meta.pagination.last_page | default(1) | int) + 1) | list }}"
+
+- name: Combine all Hetzner DNS rrset pages into a single listing
+  ansible.builtin.set_fact:
+    hetzner_dns_all_rrsets: >-
+      {{ (hetzner_dns_rrsets_first_page.json.rrsets | default([]))
+         + (hetzner_dns_rrsets_more_pages.results | default([])
+            | map(attribute='json.rrsets') | map('default', []) | flatten(levels=1)) }}
+
+- name: Assert every Hetzner DNS rrset was retrieved across all pages
   ansible.builtin.assert:
     that:
       - >-
-        (hetzner_dns_records_lookup.json.meta.pagination.next_page | default(None)) is none
+        (hetzner_dns_all_rrsets | length)
+        == (hetzner_dns_rrsets_first_page.json.meta.pagination.total_entries
+            | default(hetzner_dns_all_rrsets | length) | int)
     fail_msg: >-
-      Hetzner zone {{ hetzner_dns_zone_name }} has more than 100 rrsets
-      (next_page={{ hetzner_dns_records_lookup.json.meta.pagination.next_page | default('?') }}).
-      Add a manual page-walk loop to this task before proceeding.
+      Retrieved {{ hetzner_dns_all_rrsets | length }} rrsets for zone
+      {{ hetzner_dns_zone_name }} but the provider reports
+      {{ hetzner_dns_rrsets_first_page.json.meta.pagination.total_entries | default('?') }}
+      total; the page-walk is incomplete.
 
 # Each Hetzner Console rrset groups all values for one (name,type) pair.
 # Flatten each rrset.records[].value into a separate canonical record so the
@@ -92,7 +114,7 @@
   ansible.builtin.set_fact:
     dns_provider_boundary_existing_records: >-
       {%- set items = [] -%}
-      {%- for rrset in hetzner_dns_records_lookup.json.rrsets | default([]) -%}
+      {%- for rrset in hetzner_dns_all_rrsets | default([]) -%}
       {%- for entry in rrset.records | default([]) -%}
       {%- set _ = items.append({
         "record_ref": "dns-record:" ~ (rrset.type | default("unknown")) ~ ":" ~ (rrset.name | default("")),
