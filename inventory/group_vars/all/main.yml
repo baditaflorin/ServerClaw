@@ -207,7 +207,11 @@ mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
 mail_platform_brevo_from_email: server@lv3.org
 mail_platform_brevo_from_name: LV3 Platform
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
-smtp_host: lv3-mail-stalwart
+# Must track the Stalwart container name (mail_platform_stalwart_container_name),
+# which is domain-prefixed (config_prefix), not a fixed "lv3-" literal — otherwise
+# every mail client resolves a non-existent host and falls through to the public
+# search domain. See roles/mail_platform_runtime/defaults/main.yml.
+smtp_host: "{{ platform_identity.config_prefix }}-mail-stalwart"
 smtp_port: "{{ hostvars[platform_topology_host].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
 smtp_starttls: false
 smtp_auth_enabled: true

@@ -221,10 +221,46 @@
   retries: "{{ keycloak_image_pull_retries }}"
   delay: "{{ keycloak_image_pull_delay_seconds }}"
   until: keycloak_pull.rc == 0
+  # A registry outage (e.g. a quay.io 5xx) must not block the converge when the
+  # required images are already on the host. Tolerate a failed pull here and
+  # assert image presence below instead, so a genuinely missing image still
+  # fails loudly while a transient registry hiccup does not.
+  failed_when: false
   changed_when: >-
     'Pulling' in keycloak_pull.stdout
     or 'Downloaded newer image' in keycloak_pull.stdout
     or 'Pull complete' in keycloak_pull.stdout
+
+- name: List the images the Keycloak compose stack requires
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ keycloak_compose_file }}"
+      - config
+      - --images
+  args:
+    chdir: "{{ keycloak_site_dir }}"
+  register: keycloak_required_images
+  changed_when: false
+  when: keycloak_pull.rc != 0
+
+- name: Require every Keycloak compose image to be present locally when the pull did not succeed
+  ansible.builtin.command:
+    argv:
+      - docker
+      - image
+      - inspect
+      - "{{ item }}"
+  args:
+    chdir: "{{ keycloak_site_dir }}"
+  loop: "{{ keycloak_required_images.stdout_lines | default([]) | select | list }}"
+  loop_control:
+    label: "{{ item }}"
+  changed_when: false
+  register: keycloak_image_presence
+  when: keycloak_pull.rc != 0
 
 - name: Ensure the shared mail-platform Docker network exists with correct compose labels before Keycloak startup
   ansible.builtin.shell: |

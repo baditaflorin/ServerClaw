@@ -4,7 +4,9 @@ grafana_sso_keycloak_service_topology: "{{ hostvars[platform_topology_host].plat
 grafana_sso_session_authority: "{{ platform_session_authority }}"
 grafana_sso_client_id: grafana-oauth
 grafana_sso_client_secret: ""
-grafana_sso_realm_name: lv3
+# Must match the live Keycloak realm (domain-derived), not a fixed "lv3" literal —
+# otherwise Grafana's generic_oauth points at a non-existent realm.
+grafana_sso_realm_name: "{{ keycloak_realm_name }}"
 grafana_sso_login_groups:
   - grafana-admins
   - grafana-viewers
