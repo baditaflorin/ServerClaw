@@ -1,6 +1,39 @@
 {
   "schema_version": "1.0.0",
   "workflows": {
+    "converge-repo-intake": {
+      "description": "Converge the dedicated repo-intake runtime on docker-runtime and verify its authenticated shared-edge route.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-repo-intake",
+        "command": "make converge-repo-intake"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/repo-intake.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/repo-intake.yml",
+        "collections/ansible_collections/lv3/platform/roles/repo_intake_runtime/tasks/main.yml",
+        "docs/runbooks/repo-intake.md"
+      ],
+      "outputs": [
+        "The repo-intake runtime on docker-runtime with its authenticated shared-edge route."
+      ],
+      "verification_commands": [
+        "make converge-repo-intake env=production"
+      ],
+      "execution_class": "mutation"
+    },
     "converge-plausible": {
       "description": "Converge Plausible on docker-runtime, publish analytics.example.com through the shared edge, and verify public tracker injection plus synthetic event ingestion.",
       "lifecycle_status": "active",

@@ -26,16 +26,30 @@
     quiet: true
 
 - name: "Check if images exist locally for {{ common_docker_compose_converge_service_name }}"
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ common_docker_compose_converge_compose_file }}"
-      - images
-      - --quiet
+  # `docker compose images` only reports images for services that already have
+  # containers, so it returns empty on a first deploy even when the image exists
+  # locally (e.g. a locally-built image like lv3/browser-runner). Resolve the
+  # required images from the compose CONFIG and inspect each, emitting the list
+  # only when EVERY image is already present — so empty stdout reliably means
+  # "pull needed" for the downstream guard.
+  ansible.builtin.shell: |
+    set -o pipefail
+    images="$(docker compose --file {{ common_docker_compose_converge_compose_file | quote }} config --images)"
+    missing=0
+    present=""
+    for img in $images; do
+      if docker image inspect "$img" >/dev/null 2>&1; then
+        present="${present} ${img}"
+      else
+        missing=1
+      fi
+    done
+    if [ "$missing" -eq 0 ] && [ -n "$present" ]; then
+      printf '%s\n' "$present"
+    fi
   args:
     chdir: "{{ common_docker_compose_converge_site_dir }}"
+    executable: /bin/bash
   register: common_dcc_images_check
   changed_when: false
   failed_when: false

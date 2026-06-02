@@ -129,15 +129,27 @@
         or repo_intake_bootstrap_key.changed
       }}
 
+# Use the raw docker compose CLI (the platform-wide convention) instead of
+# community.docker.docker_compose_v2, which is not installed in the scoped
+# Ansible runtime. Mirrors the original semantics: always build the local
+# image, never pull it, and force-recreate only when inputs changed.
 - name: Deploy repo-intake container via Docker Compose
-  community.docker.docker_compose_v2:
-    project_src: "{{ repo_intake_compose_file | dirname }}"
-    state: present
-    build: always
-    pull: never
-    recreate: "{{ 'always' if repo_intake_runtime_recreate else 'auto' }}"
-  environment:
-    DOCKER_HOST: "unix:///var/run/docker.sock"
+  ansible.builtin.command:
+    argv: >-
+      {{
+        ['docker', 'compose', '--file', repo_intake_compose_file, 'up', '-d', '--build', '--pull', 'never']
+        + (['--force-recreate'] if repo_intake_runtime_recreate else [])
+      }}
+  args:
+    chdir: "{{ repo_intake_compose_file | dirname }}"
+  register: repo_intake_compose_up
+  changed_when: >-
+    repo_intake_runtime_recreate
+    or 'Creating' in (repo_intake_compose_up.stderr | default(''))
+    or 'Recreating' in (repo_intake_compose_up.stderr | default(''))
+    or 'Started' in (repo_intake_compose_up.stderr | default(''))
+    or 'Building' in (repo_intake_compose_up.stderr | default(''))
+    or 'Built' in (repo_intake_compose_up.stderr | default(''))
 
 - name: Wait for repo-intake to be ready
   ansible.builtin.uri:
