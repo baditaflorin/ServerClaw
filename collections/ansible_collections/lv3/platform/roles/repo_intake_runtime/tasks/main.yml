@@ -57,7 +57,7 @@
     rsync_opts: >-
       {{
         repo_intake_repo_sync_excludes
-        | map('regex_replace', '^(.*)$', '--exclude=\\1')
+        | map('regex_replace', '^', '--exclude=')
         | list
       }}
   delegate_to: localhost
