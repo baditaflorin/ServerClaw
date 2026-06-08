@@ -1,0 +1,35 @@
+id: ws-provision-operator-localize
+adr: '0318'
+title: Localize provision_operator.py to derive identity generically
+status: ready
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/provision-operator-localize
+worktree_path: .claude/worktrees/provision-operator-localize
+doc: docs/workstreams/ws-provision-operator-localize.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - scripts/provision_operator.py
+ownership_manifest:
+  owned_surfaces:
+    - id: provision_operator_script
+      paths:
+        - scripts/provision_operator.py
+        - docs/workstreams/ws-provision-operator-localize.md
+      mode: exclusive
+description: |
+  provision_operator.py (ADR 0318) still carries pre-migration generic
+  constants (Keycloak realm "lv3", *.localhost endpoints, a stale hardcoded
+  email service list, and a fixed SMTP relay). Against the live deployment the
+  realm/endpoints/admin identifiers are derived from platform_domain, so the
+  script targets a non-existent realm and unreachable hosts.
+
+  Localize it the ADR-0407 way: derive realm, config prefix, admin client/user
+  ids, and all service endpoints from inventory + the .local identity overlay
+  (via scripts/identity_yaml.load_identity_vars), build the welcome-email
+  service list from config/service-capability-catalog.json with domain
+  substitution, and send through the documented mail-gateway HTTP API. No
+  deployment-specific literals enter the committed script, so the public mirror
+  diff stays minimal.
