@@ -5,3 +5,14 @@ linux_access_admin_shell: /bin/bash
 linux_access_sudo_group: sudo
 linux_access_ssh_hardening_file: "/etc/ssh/sshd_config.d/90-{{ platform_config_prefix }}-hardening.conf"
 linux_access_permit_root_login: "no"
+
+# Additional admin users to provision alongside the primary
+# linux_access_admin_user. Each entry mirrors the primary admin: a sudo-group
+# member with passwordless sudo and a key-only login. Empty by default so the
+# access baseline is byte-identical until a deployment opts in
+# (see ws-claude-ops-admin). Each item:
+#   - name: claude-ops
+#     comment: "claude-ops AI automation admin"
+#     authorized_key_path: "/abs/path/key.pub"   # read from the controller
+#     shell: /bin/bash                            # optional
+linux_access_extra_admins: []

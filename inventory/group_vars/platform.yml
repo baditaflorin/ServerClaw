@@ -7,7 +7,7 @@ platform_generation:
   host_vars_source: inventory/host_vars/proxmox-host.yml
 platform_host:
   id: proxmox-host
-  public_hostname: 0mpc-proxmox
+  public_hostname: 0mcp-proxmox
   management:
     interface: vmbr0
     ipv4: 65.108.75.123

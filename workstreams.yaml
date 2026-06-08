@@ -5256,6 +5256,64 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 26a30662-ed8e-4d3d-9f07-154522ff67cd
+- id: ws-claude-ops-admin
+  title: claude-ops dedicated AI-automation admin identity
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/claude-ops-admin
+  worktree_path: .
+  doc: ''
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/linux_access
+  - collections/ansible_collections/lv3/platform/roles/proxmox_access
+  - collections/ansible_collections/lv3/platform/roles/proxmox_api_access
+  - playbooks/proxmox-install.yml
+  - inventory/group_vars/all/main.yml
+  ownership_manifest:
+    owned_surfaces:
+    - id: claude_ops_extra_admins
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/linux_access/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/linux_access/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_access/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_access/defaults/main.yml
+      mode: shared_contract
+      contract: linux-access-baseline-v1
+    - id: claude_ops_api_token
+      paths:
+      - playbooks/proxmox-install.yml
+      mode: shared_contract
+      contract: proxmox-api-access-v1
+    - id: claude_ops_groupvars
+      paths:
+      - inventory/group_vars/all/main.yml
+      mode: shared_contract
+      contract: platform-groupvars-v1
+    - id: ws_claude_ops_admin_workstream
+      paths:
+      - workstreams/active/ws-claude-ops-admin.yaml
+      mode: exclusive
+  notes: 'Adds a dedicated permanent admin identity `claude-ops` for AI automation
+
+    (Claude Code SSH sessions): a Linux admin user with passwordless sudo +
+
+    key-only login across the Proxmox host and all lv3_guests, a Proxmox
+
+    `claude-ops@pam` user with PVEAdmin, and a privilege-separated Proxmox API
+
+    token (`claude-ops-automation@pve`). Reuses linux_access / proxmox_access /
+
+    proxmox_api_access via additive, empty-by-default extensions. Dedicated key
+
+    at .local/ssh/claude-ops.id_ed25519. Scope: SSH + sudo + Proxmox only (no
+
+    Keycloak SSO / Tailscale / step-ca).
+
+    '
 surface_ownership:
   global_mutable_paths:
   - receipts/gate-bypasses/*

@@ -56,3 +56,47 @@
     name: ssh
     state: reloaded
   when: linux_access_ssh_hardening_dropin.changed
+
+# --- Additional admin users (additive; no-op when the list is empty) ---------
+- name: Validate additional admin inputs
+  ansible.builtin.assert:
+    that:
+      - item.name | default('') | length > 0
+      - item.authorized_key_path | default('') | length > 0
+    fail_msg: "Each linux_access_extra_admins entry needs 'name' and 'authorized_key_path'."
+  loop: "{{ linux_access_extra_admins }}"
+  loop_control:
+    label: "{{ item.name | default('<unnamed>') }}"
+
+- name: Ensure additional admin users exist
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default(item.name ~ ' automation admin') }}"
+    shell: "{{ item.shell | default(linux_access_admin_shell) }}"
+    groups: "{{ linux_access_sudo_group }}"
+    append: true
+    create_home: true
+    password_lock: true
+    state: present
+  loop: "{{ linux_access_extra_admins }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Install authorized key for additional admin users
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    state: present
+    key: "{{ lookup('file', item.authorized_key_path) | trim }}"
+  loop: "{{ linux_access_extra_admins }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Allow passwordless sudo for additional admin users
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/90-{{ item.name }}"
+    mode: "0440"
+    content: "{{ item.name }} ALL=(ALL) NOPASSWD:ALL\n"
+    validate: "/usr/sbin/visudo -cf %s"
+  loop: "{{ linux_access_extra_admins }}"
+  loop_control:
+    label: "{{ item.name }}"
