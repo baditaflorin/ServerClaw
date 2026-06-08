@@ -191,6 +191,19 @@
     tasks_from: openbao_compose_env
   vars:
     common_openbao_compose_env_service_name: plane
+    # Plane runs on docker-runtime, which has no local OpenBao runtime to
+    # recover; point the agent at central OpenBao and disable local-runtime
+    # management, matching its docker-runtime neighbours (woodpecker, minio).
+    # Without this, the manage_local_openbao_runtime default (true) drives the
+    # ensure_local_openbao_runtime recovery path, which fails because
+    # /opt/openbao/docker-compose.yml does not exist on docker-runtime.
+    common_openbao_compose_env_openbao_address: >-
+      {{
+        plane_openbao_api_url
+        | default('http://' ~ (hostvars[platform_topology_host].platform_service_topology.openbao.private_ip)
+                  ~ ':' ~ (openbao_http_port | string), true)
+      }}
+    common_openbao_compose_env_manage_local_openbao_runtime: false
     common_openbao_compose_env_agent_dir: "{{ plane_openbao_agent_dir }}"
     common_openbao_compose_env_runtime_dir: "{{ plane_env_file | dirname }}"
     common_openbao_compose_env_env_file: "{{ plane_env_file }}"
