@@ -84,14 +84,64 @@ def test_read_keycloak_bootstrap_password_prefers_env_override(monkeypatch: pyte
     assert provision_operator.read_keycloak_bootstrap_password() == "live-runtime-password"
 
 
-def test_read_platform_smtp_password_prefers_env_override(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    smtp_file = tmp_path / "platform-transactional-mailbox-password.txt"
-    smtp_file.write_text("stale-file-password\n", encoding="utf-8")
+def test_read_mail_gateway_api_key_prefers_env_override(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    key_file = tmp_path / "platform-transactional-gateway-api-key.txt"
+    key_file.write_text("stale-file-key\n", encoding="utf-8")
 
-    monkeypatch.setattr(provision_operator, "SMTP_PASS_FILE", smtp_file)
-    monkeypatch.setenv("LV3_PLATFORM_SMTP_PASSWORD", "live-runtime-password")
+    monkeypatch.setattr(provision_operator, "MAIL_GATEWAY_KEY_FILE", key_file)
+    monkeypatch.setenv("LV3_MAIL_GATEWAY_API_KEY", "live-runtime-key")
 
-    assert provision_operator.read_platform_smtp_password() == "live-runtime-password"
+    assert provision_operator.read_mail_gateway_api_key() == "live-runtime-key"
+
+
+def test_resolve_identity_env_override_drives_realm_and_prefix(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PLATFORM_DOMAIN", "acme.example")
+    monkeypatch.delenv("LV3_KEYCLOAK_REALM", raising=False)
+    domain, prefix, realm = provision_operator._resolve_identity()
+    assert domain == "acme.example"
+    assert prefix == "acme"
+    assert realm == "acme"
+
+
+def test_render_service_lines_substitutes_domain(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    catalog = tmp_path / "service-capability-catalog.json"
+    catalog.write_text(
+        '{"services": ['
+        '{"id": "keycloak", "name": "Keycloak", "category": "access", "public_url": "https://sso.example.com"},'
+        '{"id": "nginx_edge", "name": "NGINX", "category": "access", "public_url": "https://nginx.example.com"},'
+        '{"id": "ollama", "name": "Ollama", "category": "automation", "public_url": null}'
+        ']}',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(provision_operator, "SERVICE_CATALOG_PATH", catalog)
+    rendered = provision_operator.render_service_lines("acme.example")
+    assert "https://sso.acme.example" in rendered
+    assert "example.com" not in rendered  # generic placeholder substituted
+    assert "NGINX" not in rendered  # infra id skipped
+    assert "Ollama" not in rendered  # no public_url omitted
+
+
+def test_build_email_payload_uses_derived_urls(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(provision_operator, "PLATFORM_DOMAIN", "acme.example")
+    monkeypatch.setattr(provision_operator, "REALM", "acme")
+    monkeypatch.setattr(provision_operator, "DEFAULT_KEYCLOAK_URL", "https://sso.acme.example")
+    monkeypatch.setattr(provision_operator, "render_service_lines", lambda _domain: "  Keycloak  https://sso.acme.example")
+    payload = provision_operator.build_email_payload(
+        to_email="new@example.com",
+        cc_email="ops@example.com",
+        first_name="New",
+        username="new.user",
+        password="secret",
+        role="admin",
+        expiry="2026-09-06T00:00:00Z",
+        requester_email="ops@example.com",
+        headscale_authkey="hskey-xyz",
+        ca_fingerprint="abc123",
+    )
+    assert payload["to"] == ["new@example.com"]
+    assert payload["cc"] == ["ops@example.com"]
+    assert "https://sso.acme.example/realms/acme/account/" in payload["text"]
+    assert "acme.example" in payload["subject"]
 
 
 def test_provision_skip_email_verifies_existing_assignments(
@@ -108,8 +158,8 @@ def test_provision_skip_email_verifies_existing_assignments(
     monkeypatch.setattr(provision_operator, "PASSWORD_DIR", password_dir)
     monkeypatch.setattr(
         provision_operator,
-        "SMTP_PASS_FILE",
-        tmp_path / ".local" / "mail-platform" / "profiles" / "platform-transactional-mailbox-password.txt",
+        "MAIL_GATEWAY_KEY_FILE",
+        tmp_path / ".local" / "mail-platform" / "profiles" / "platform-transactional-gateway-api-key.txt",
     )
     monkeypatch.setattr(
         provision_operator,
@@ -160,7 +210,7 @@ def test_provision_skip_email_verifies_existing_assignments(
     def fake_send_email(*args, **kwargs) -> None:  # noqa: ANN002, ANN003
         email_calls.append((args, kwargs))
 
-    monkeypatch.setattr(provision_operator, "send_email_via_ssh_proxy", fake_send_email)
+    monkeypatch.setattr(provision_operator, "send_email_via_gateway", fake_send_email)
 
     args = argparse.Namespace(
         id="viewer-example-001",
