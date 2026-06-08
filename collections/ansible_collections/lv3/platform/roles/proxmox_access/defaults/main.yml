@@ -1,2 +1,10 @@
 ---
 proxmox_access_linux_access_permit_root_login: prohibit-password
+
+# Additional Proxmox PAM admins to provision alongside the primary host admin.
+# Their Linux account + sudo are created by the linux_access include (via
+# linux_access_extra_admins); this list only adds the PVE PAM identity and the
+# PVEAdmin ACL. Empty by default (see ws-claude-ops-admin). Each item:
+#   - user: claude-ops
+#     comment: "claude-ops AI automation admin"
+proxmox_access_extra_pam_admins: []

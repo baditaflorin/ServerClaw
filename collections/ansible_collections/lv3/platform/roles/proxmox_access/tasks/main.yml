@@ -30,3 +30,24 @@
   ansible.builtin.command: "pveum acl modify / --users {{ proxmox_host_admin_user }}@pam --roles PVEAdmin"
   register: pveum_acl_modify
   changed_when: pveum_acl_modify.rc == 0
+
+# --- Additional PAM admins (additive; no-op when the list is empty) ----------
+# Their Linux account + passwordless sudo are created by the linux_access
+# include above, driven by the global linux_access_extra_admins list. This block
+# only adds the PVE PAM identity and the PVEAdmin ACL.
+- name: Ensure additional Proxmox PAM users exist
+  ansible.builtin.command: "pveum user add {{ item.user }}@pam --comment '{{ item.comment | default(item.user ~ ' automation admin') }}' --enable 1"
+  loop: "{{ proxmox_access_extra_pam_admins }}"
+  loop_control:
+    label: "{{ item.user }}"
+  register: pveum_extra_user_add
+  failed_when: pveum_extra_user_add.rc != 0 and ('already exists' not in (pveum_extra_user_add.stderr | default('')))
+  changed_when: pveum_extra_user_add.rc == 0
+
+- name: Grant Proxmox PVEAdmin role to additional PAM identities
+  ansible.builtin.command: "pveum acl modify / --users {{ item.user }}@pam --roles PVEAdmin"
+  loop: "{{ proxmox_access_extra_pam_admins }}"
+  loop_control:
+    label: "{{ item.user }}"
+  register: pveum_extra_acl_modify
+  changed_when: pveum_extra_acl_modify.rc == 0

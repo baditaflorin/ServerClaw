@@ -168,6 +168,41 @@ proxmox_api_token_local_dir: "{{ repo_shared_local_root }}/proxmox-api"
 proxmox_api_token_local_file: "{{ repo_shared_local_root }}/proxmox-api/{{ platform_config_prefix }}-automation-primary.json"
 proxmox_tool_topology_file: "{{ repo_shared_local_root }}/proxmox-api/topology.yaml"
 
+# --- claude-ops: dedicated AI-automation admin identity (ws-claude-ops-admin) -
+# A permanent admin account for Claude Code / AI-automation SSH sessions:
+# passwordless sudo + key-only login on the Proxmox host and every lv3 guest, a
+# Proxmox PVEAdmin PAM user, and a privilege-separated PVE API token. The
+# dedicated key lives under .local/ssh/ so the identity is independently
+# auditable and revocable, separate from the shared 'ops' automation account.
+claude_ops_user: claude-ops
+claude_ops_authorized_key_path: >-
+  {{ lookup('env', 'CLAUDE_OPS_SSH_PUBLIC_KEY') | default(repo_shared_local_root ~ '/ssh/claude-ops.id_ed25519.pub', true) }}
+
+# Provisioned wherever the linux_access baseline runs (all lv3_guests via
+# guest-access.yml; the Proxmox host via proxmox_access).
+linux_access_extra_admins:
+  - name: "{{ claude_ops_user }}"
+    comment: "claude-ops AI automation admin"
+    authorized_key_path: "{{ claude_ops_authorized_key_path }}"
+
+# Proxmox PAM identity + PVEAdmin grant (the Linux account is created by the
+# linux_access_extra_admins entry above).
+proxmox_access_extra_pam_admins:
+  - user: "{{ claude_ops_user }}"
+    comment: "claude-ops AI automation admin"
+
+# Dedicated privilege-separated PVE API token for claude-ops. Reuses the managed
+# automation role created by the primary proxmox_api_access invocation, so
+# role_manage is false here (no duplicate role management). Same derivation as
+# proxmox_api_token_role to avoid a self-referential lookup.
+claude_ops_pve_provision_api_token: true
+claude_ops_pve_automation_user: claude-ops-automation@pve
+claude_ops_pve_automation_comment: "claude-ops AI automation identity"
+claude_ops_pve_token_id: primary
+claude_ops_pve_token_role: "{{ platform_identity.pve_prefix | capitalize }}Automation"
+claude_ops_pve_token_role_manage: false
+claude_ops_pve_token_local_file: "{{ repo_shared_local_root }}/proxmox-api/claude-ops-automation-primary.json"
+
 hetzner_dns_api_base_url: https://api.hetzner.cloud/v1
 
 monitoring_local_artifact_dir: "{{ repo_shared_local_root }}/monitoring"
