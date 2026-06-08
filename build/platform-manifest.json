@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.48",
-  "platform_version": "0.179.47",
-  "generated_at": "2026-05-31T11:46:00Z",
-  "next_refresh_at": "2026-05-31T12:46:00Z",
+  "repo_version": "0.179.49",
+  "platform_version": "0.179.48",
+  "generated_at": "2026-06-08T21:29:22Z",
+  "next_refresh_at": "2026-06-08T22:29:22Z",
   "environment": "production",
   "identity": {
     "platform_name": "0mcp.com",
@@ -2758,6 +2758,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-redpanda.md"
+      },
+      {
+        "id": "converge-repo-intake",
+        "description": "Converge the dedicated repo-intake runtime on docker-runtime and verify its authenticated shared-edge route.",
+        "tags": [
+          "converge-repo-intake",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 600,
+          "max_steps": 200,
+          "max_concurrent_instances": 3,
+          "max_touched_hosts": 10,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/repo-intake.md"
       },
       {
         "id": "converge-restic-config-backup",
@@ -6069,6 +6095,16 @@
         ]
       },
       {
+        "id": "repo-intake",
+        "title": "Repo Intake",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/repo-intake.md",
+        "workflow_ids": [
+          "converge-repo-intake"
+        ]
+      },
+      {
         "id": "restic-config-backups",
         "title": "Restic Config Backups",
         "agent_trust_required": "T3",
@@ -6358,10 +6394,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.47",
-    "deployed_at": "2026-05-31",
-    "summary": "Complete the 0mpc.com \u2192 0mcp.com operator-apex migration: regenerate platform.yml and discovery artifacts against the renamed domain, update the sanitization BLOCKED list, and refresh the subdomain exposure registry Add the `lv3.platform.uptime_kuma_provision` role (monitors + public status page) with a `provision-uptime-kuma` Make target and playbook wiring",
-    "release_notes_url": "docs/release-notes/0.179.48.md"
+    "last_version": "0.179.48",
+    "deployed_at": "2026-06-08",
+    "summary": "Add `claude-ops` dedicated AI-automation admin identity: passwordless sudo + key-only SSH on the Proxmox host and all 18 lv3 guest VMs, `claude-ops@pam` with PVEAdmin, and a privilege-separated Proxmox API token (`claude-ops-automation@pve`) \u2014 independently auditable and revocable from the shared `ops` account Complete the 0mpc.com \u2192 0mcp.com operator-apex migration: regenerate platform.yml and discovery artifacts against the renamed domain, update the sanitization BLOCKED list, and refresh the subdomain exposure registry",
+    "release_notes_url": "docs/release-notes/0.179.49.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

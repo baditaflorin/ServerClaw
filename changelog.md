@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- Add `claude-ops` dedicated AI-automation admin identity: passwordless sudo + key-only SSH on the Proxmox host and all 18 lv3 guest VMs, `claude-ops@pam` with PVEAdmin, and a privilege-separated Proxmox API token (`claude-ops-automation@pve`) — independently auditable and revocable from the shared `ops` account
 - Complete the 0mpc.com → 0mcp.com operator-apex migration: regenerate platform.yml and discovery artifacts against the renamed domain, update the sanitization BLOCKED list, and refresh the subdomain exposure registry
 - Add the `lv3.platform.uptime_kuma_provision` role (monitors + public status page) with a `provision-uptime-kuma` Make target and playbook wiring
 - Fix the bare-root `https://status.<domain>/` 404 by deriving the edge `root_proxy_path` status slug from `platform_domain` instead of a stale literal
@@ -19,10 +20,11 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.179.48 release notes](docs/release-notes/0.179.48.md)
+- [0.179.49 release notes](docs/release-notes/0.179.49.md)
 
 ## Previous Releases
 
+- [0.179.48 release notes](docs/release-notes/0.179.48.md)
 - [0.179.47 release notes](docs/release-notes/0.179.47.md)
 - [0.179.46 release notes](docs/release-notes/0.179.46.md)
 - [0.179.45 release notes](docs/release-notes/0.179.45.md)
@@ -34,7 +36,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.39 release notes](docs/release-notes/0.179.39.md)
 - [0.179.38 release notes](docs/release-notes/0.179.38.md)
 - [0.179.37 release notes](docs/release-notes/0.179.37.md)
-- [0.179.36 release notes](docs/release-notes/0.179.36.md)
 - [0.179.31 release notes](docs/release-notes/0.179.31.md)
 - [0.179.30 release notes](docs/release-notes/0.179.30.md)
 - [0.179.29 release notes](docs/release-notes/0.179.29.md)
@@ -43,4 +44,4 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (559 releases)](docs/release-notes/index/2026.md)
+- [2026 (560 releases)](docs/release-notes/index/2026.md)
