@@ -33,6 +33,66 @@ def test_keycloak_adapter_inventory_translates_provider_payloads() -> None:
     assert calls[0].endswith("/realms/master/protocol/openid-connect/token")
 
 
+def test_keycloak_adapter_prefers_client_credentials_when_configured() -> None:
+    grants: list[str] = []
+
+    def fake_request(url: str, **kwargs):
+        if url.endswith("/realms/master/protocol/openid-connect/token"):
+            grants.append(kwargs["form"]["grant_type"])
+            return {"access_token": "cc-token"}
+        if "users?username=alice&exact=true" in url:
+            return [{"id": "user-1", "username": "alice", "enabled": True, "email": "alice@example.com"}]
+        raise AssertionError(f"unexpected request: {url} {kwargs}")
+
+    adapter = KeycloakAdminAdapter(
+        base_url="https://sso.example.test",
+        realm="acme",
+        bootstrap_admin="acme-bootstrap-admin",
+        bootstrap_password_loader=lambda: (_ for _ in ()).throw(AssertionError("password grant must not run")),
+        admin_client_id="acme-admin-runtime",
+        admin_client_secret_loader=lambda: "client-secret",
+        request=fake_request,
+    )
+
+    adapter.inventory_user("alice", email_fallback="fallback@example.com")
+    assert grants == ["client_credentials"]
+
+
+def test_keycloak_adapter_falls_back_to_password_grant() -> None:
+    grants: list[str] = []
+
+    def fake_request(url: str, **kwargs):
+        if url.endswith("/realms/master/protocol/openid-connect/token"):
+            grant = kwargs["form"]["grant_type"]
+            grants.append(grant)
+            if grant == "client_credentials":
+                raise RuntimeError("invalid_client")
+            return {"access_token": "pw-token"}
+        if "users?username=alice&exact=true" in url:
+            return [{"id": "user-1", "username": "alice", "enabled": True, "email": "alice@example.com"}]
+        raise AssertionError(f"unexpected request: {url} {kwargs}")
+
+    adapter = KeycloakAdminAdapter(
+        base_url="https://sso.example.test",
+        realm="acme",
+        bootstrap_admin="acme-bootstrap-admin",
+        bootstrap_password_loader=lambda: "secret",
+        admin_client_id="acme-admin-runtime",
+        admin_client_secret_loader=lambda: "stale-secret",
+        request=fake_request,
+    )
+
+    adapter.inventory_user("alice", email_fallback="fallback@example.com")
+    assert grants == ["client_credentials", "password"]
+
+
+def test_operator_manager_resolve_identity_env_override(monkeypatch) -> None:
+    monkeypatch.setenv("PLATFORM_DOMAIN", "acme.example")
+    monkeypatch.delenv("LV3_KEYCLOAK_REALM", raising=False)
+    domain, prefix, realm = operator_manager._resolve_identity()
+    assert (domain, prefix, realm) == ("acme.example", "acme", "acme")
+
+
 def test_openbao_adapter_inventory_translates_provider_payloads() -> None:
     def fake_request(url: str, **kwargs):
         assert url.endswith("/v1/identity/entity/name/alice")
