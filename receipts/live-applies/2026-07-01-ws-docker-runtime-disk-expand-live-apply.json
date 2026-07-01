@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-07-01-ws-docker-runtime-disk-expand-live-apply",
+  "environment": "production",
+  "applied_on": "2026-07-01",
+  "recorded_on": "2026-07-01",
+  "recorded_at": "2026-07-01T14:08:58Z",
+  "recorded_by": "codex",
+  "workflow_id": "provision-guests",
+  "workstream": "ws-docker-runtime-disk-expand",
+  "source_branch": "codex/docker-runtime-disk-expand",
+  "source_commit": "748839f4e48874b8b909fa972fe0aed9e1fd5708",
+  "repo_version_context": "0.179.49",
+  "platform_version_context": "0.178.222",
+  "result": "pass",
+  "summary": "Expanded the live docker-runtime-lv3 root disk by resizing Proxmox VMID 120 scsi0 from 128G to 256G, then growing guest partition /dev/sda1 and its ext4 filesystem online. Root filesystem capacity increased from 126G with about 1.2G free to 252G with about 122G free.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "disk": "scsi0",
+      "partition": "/dev/sda1",
+      "filesystem": "ext4"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Proxmox disk resize",
+      "result": "pass",
+      "observed": "Before resize, `qm config 120` reported `scsi0: local:120/vm-120-disk-0.qcow2,size=128G`; after `qm resize 120 scsi0 256G`, it reported `scsi0: local:120/vm-120-disk-0.qcow2,size=256G`."
+    },
+    {
+      "check": "Guest partition growth",
+      "result": "pass",
+      "observed": "`growpart /dev/sda 1` changed partition 1 from size 268173279 sectors to 536608735 sectors."
+    },
+    {
+      "check": "Guest filesystem growth",
+      "result": "pass",
+      "observed": "`resize2fs /dev/sda1` completed online and resized the filesystem to 67076091 4k blocks."
+    },
+    {
+      "check": "Root filesystem capacity",
+      "result": "pass",
+      "observed": "Before growth, `df -h /` showed `/dev/sda1` size 126G, used 120G, available 1.2G, use 100%. After growth, it showed size 252G, used 120G, available 122G, use 50%."
+    },
+    {
+      "check": "Runtime health",
+      "result": "pass",
+      "observed": "`systemctl is-active docker` returned `active`; `sudo docker info` reported Docker 29.5.1 using overlayfs with 40 containers and 40 running."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-docker-runtime-disk-expand.md",
+    "workstreams/active/ws-docker-runtime-disk-expand.yaml",
+    "inventory/host_vars/proxmox-host.yml"
+  ],
+  "notes": [
+    "The receipt uses workflow_id `provision-guests` because the repository workflow catalog does not have a dedicated manual Proxmox disk-resize workflow; the live action itself was the explicit Proxmox `qm resize` plus guest `growpart` and `resize2fs` procedure described in the verification entries.",
+    "The resize target is 256G because the current repository-declared desired disk size for docker-runtime-lv3 is already 256G, satisfying the requested 200GB+ expansion without changing topology files owned by another active workstream.",
+    "The operator's earlier `growpart` attempt ran on the Proxmox host shell, where `growpart` was unavailable. The successful partition and filesystem growth ran inside the docker-runtime-lv3 guest.",
+    "Plane sync was skipped from the isolated worktree to avoid creating copied `.local/plane` credential state there; the workstream YAML and this receipt are the durable fallback trail."
+  ]
+}

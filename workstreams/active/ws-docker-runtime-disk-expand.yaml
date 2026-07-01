@@ -1,0 +1,46 @@
+id: ws-docker-runtime-disk-expand
+title: "docker-runtime-lv3 root disk expansion"
+status: in_progress
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/docker-runtime-disk-expand
+worktree_path: .worktrees/codex-docker-runtime-disk-expand
+doc: docs/workstreams/ws-docker-runtime-disk-expand.md
+depends_on: []
+conflicts_with:
+  - ws-pm-tools-deploy
+shared_surfaces:
+  - receipts/live-applies/
+  - docs/workstreams/ws-docker-runtime-disk-expand.md
+  - workstreams/active/ws-docker-runtime-disk-expand.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_docker_runtime_disk_expand_receipt
+      paths:
+        - receipts/live-applies/2026-07-01-ws-docker-runtime-disk-expand-live-apply.json
+      mode: exclusive
+    - id: ws_docker_runtime_disk_expand_doc
+      paths:
+        - docs/workstreams/ws-docker-runtime-disk-expand.md
+      mode: exclusive
+    - id: ws_docker_runtime_disk_expand_manifest
+      paths:
+        - workstreams/active/ws-docker-runtime-disk-expand.yaml
+      mode: exclusive
+notes: |
+  Live operations only: resize Proxmox VMID 120 (`docker-runtime-lv3`) from the
+  observed 128G virtual disk / 126G root filesystem to the repo-declared 256G
+  disk target, then grow `/dev/sda1` with `growpart` and `resize2fs`.
+
+  Plane sync was intentionally skipped from the isolated worktree because
+  scripts/sync_plane_agent_issues.py writes `.local/plane/aw-auth.json` under
+  the current worktree. Worktrees must not receive copied credential state.
+
+  Completed 2026-07-01: Proxmox `scsi0` now reports 256G, guest `/dev/sda1`
+  now reports a 252G ext4 root filesystem with about 122G available, and Docker
+  remained active with 40/40 containers running.
+
+  PR #32 opened as a draft against main. GitHub Actions did not run because the
+  GitHub account is locked due to a billing issue; both `release-readiness` and
+  `validate` failed at job startup with that platform-level blocker.
