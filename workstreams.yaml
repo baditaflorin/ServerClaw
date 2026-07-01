@@ -5340,9 +5340,24 @@ workstreams:
 
     services to 0.0.0.0. Workstation verification returns Planka 200,
 
-    Focalboard 200, and Kan 307 -> /login. The other seven tools still lack
+    Focalboard 200, and Kan 307 -> /login.
 
-    running backend listeners and remain deployment-completion work.
+
+    2026-07-01 Codex follow-up: Huly''s front-only placeholder compose rendered,
+
+    but the container crashed with "Please provide server secret" and never opened
+
+    port 8112. Live state now runs the full Huly self-host stack under /opt/huly,
+
+    with generated secrets persisted in /etc/lv3/huly, internal nginx bound on
+
+    0.0.0.0:8112, and workstation verification returning HTTP 200 at
+
+    huly.0mcp.com. The Huly runtime role now renders the full stack, .env, and
+
+    internal nginx config. The other six tools still lack running backend
+
+    listeners and remain deployment-completion work.
 
     '
 - id: ws-claude-ops-admin
