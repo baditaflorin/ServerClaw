@@ -3,9 +3,9 @@
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ kan_internal_port }}/"
     method: GET
-    status_code: [200, 301, 302]
+    status_code: [200, 301, 302, 307]
   register: kan_verify_response
   retries: 12
   delay: 5
-  until: kan_verify_response.status in [200, 301, 302]
+  until: kan_verify_response.status in [200, 301, 302, 307]
   changed_when: false

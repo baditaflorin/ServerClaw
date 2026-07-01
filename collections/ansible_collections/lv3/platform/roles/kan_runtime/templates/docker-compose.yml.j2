@@ -27,9 +27,9 @@ services:
     ports:
       - "127.0.0.1:{{ kan_internal_port }}:3000"
     environment:
-      DATABASE_URL: "postgresql://kan:{{ kan_db_password }}@kan-db/kan?sslmode=disable"
-      NEXTAUTH_SECRET: "{{ kan_nextauth_secret }}"
-      NEXTAUTH_URL: "{{ kan_public_base_url }}"
+      POSTGRES_URL: "postgresql://kan:{{ kan_db_password }}@kan-db/kan?sslmode=disable"
+      BETTER_AUTH_SECRET: "{{ kan_nextauth_secret }}"
+      BETTER_AUTH_URL: "{{ kan_public_base_url }}"
 
 volumes:
   kan-db-data:
