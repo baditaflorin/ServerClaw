@@ -121,6 +121,7 @@
     common_docker_compose_converge_compose_file: "{{ planka_compose_file }}"
     common_docker_compose_converge_site_dir: "{{ planka_site_dir }}"
     common_docker_compose_converge_service_name: planka
+    common_docker_compose_converge_force_recreate_entire_stack: true
     common_docker_compose_converge_template_results:
       - "{{ planka_compose_template }}"
 

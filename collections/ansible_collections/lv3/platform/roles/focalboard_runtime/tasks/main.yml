@@ -56,6 +56,7 @@
     common_docker_compose_converge_compose_file: "{{ focalboard_compose_file }}"
     common_docker_compose_converge_site_dir: "{{ focalboard_site_dir }}"
     common_docker_compose_converge_service_name: focalboard
+    common_docker_compose_converge_force_recreate_entire_stack: true
     common_docker_compose_converge_template_results:
       - "{{ focalboard_compose_template }}"
 

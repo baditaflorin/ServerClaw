@@ -119,6 +119,7 @@
     common_docker_compose_converge_compose_file: "{{ leantime_compose_file }}"
     common_docker_compose_converge_site_dir: "{{ leantime_site_dir }}"
     common_docker_compose_converge_service_name: leantime
+    common_docker_compose_converge_force_recreate_entire_stack: true
     common_docker_compose_converge_template_results:
       - "{{ leantime_compose_template }}"
 

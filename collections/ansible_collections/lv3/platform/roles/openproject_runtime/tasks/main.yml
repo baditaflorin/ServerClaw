@@ -119,6 +119,7 @@
     common_docker_compose_converge_compose_file: "{{ openproject_compose_file }}"
     common_docker_compose_converge_site_dir: "{{ openproject_site_dir }}"
     common_docker_compose_converge_service_name: openproject
+    common_docker_compose_converge_force_recreate_entire_stack: true
     common_docker_compose_converge_template_results:
       - "{{ openproject_compose_template }}"
 

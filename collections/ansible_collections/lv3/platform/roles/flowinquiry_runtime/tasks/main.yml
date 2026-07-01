@@ -106,6 +106,7 @@
     common_docker_compose_converge_compose_file: "{{ flowinquiry_compose_file }}"
     common_docker_compose_converge_site_dir: "{{ flowinquiry_site_dir }}"
     common_docker_compose_converge_service_name: flowinquiry
+    common_docker_compose_converge_force_recreate_entire_stack: true
     common_docker_compose_converge_template_results:
       - "{{ flowinquiry_compose_template }}"
 

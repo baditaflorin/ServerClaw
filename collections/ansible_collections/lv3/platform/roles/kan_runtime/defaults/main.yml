@@ -1,5 +1,5 @@
 ---
-kan_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('kan') }}"
+kan_service_topology: "{{ platform_service_topology | service_topology_get('kan') }}"
 kan_public_base_url: "https://{{ kan_service_topology.public_hostname }}"
 kan_image: ghcr.io/kanbn/kan:latest
 kan_db_image: postgres:16-alpine

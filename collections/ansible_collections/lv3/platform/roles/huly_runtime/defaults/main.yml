@@ -1,5 +1,5 @@
 ---
-huly_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('huly') }}"
+huly_service_topology: "{{ platform_service_topology | service_topology_get('huly') }}"
 huly_public_base_url: "https://{{ huly_service_topology.public_hostname }}"
 # Simplified deployment: Huly frontend only.
 # Full Huly requires additional backend services (account, transactor, collaborator,

@@ -56,6 +56,7 @@
     common_docker_compose_converge_compose_file: "{{ huly_compose_file }}"
     common_docker_compose_converge_site_dir: "{{ huly_site_dir }}"
     common_docker_compose_converge_service_name: huly
+    common_docker_compose_converge_force_recreate_entire_stack: true
     common_docker_compose_converge_template_results:
       - "{{ huly_compose_template }}"
 

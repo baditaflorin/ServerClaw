@@ -1,5 +1,5 @@
 ---
-flowinquiry_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('flowinquiry') }}"
+flowinquiry_service_topology: "{{ platform_service_topology | service_topology_get('flowinquiry') }}"
 flowinquiry_public_base_url: "https://{{ flowinquiry_service_topology.public_hostname }}"
 flowinquiry_image: ghcr.io/flowinquiry/flowinquiry-server:latest
 flowinquiry_db_image: postgres:16-alpine

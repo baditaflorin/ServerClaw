@@ -1,5 +1,5 @@
 ---
-taiga_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('taiga') }}"
+taiga_service_topology: "{{ platform_service_topology | service_topology_get('taiga') }}"
 taiga_public_base_url: "https://{{ taiga_service_topology.public_hostname }}"
 taiga_front_image: taigaio/taiga-front:latest
 taiga_back_image: taigaio/taiga-back:latest
