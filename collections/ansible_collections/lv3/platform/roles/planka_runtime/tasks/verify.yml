@@ -1,0 +1,11 @@
+---
+- name: Verify Planka responds on local port
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ planka_internal_port }}/"
+    method: GET
+    status_code: [200, 301, 302]
+  register: planka_verify_response
+  retries: 12
+  delay: 5
+  until: planka_verify_response.status in [200, 301, 302]
+  changed_when: false

@@ -1258,6 +1258,8 @@ platform_service_registry:
       upstream_port: 8093
       upstream_host: docker-runtime-lv3
       public_fqdn: tasks.{{ platform_domain }}
+      aliases:
+        - plane.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       websocket: true               # Plane uses WebSockets for real-time updates
   # END SERVICE: plane
@@ -1842,6 +1844,118 @@ platform_service_registry:
       data: /var/cache/nginx
       secrets: "/etc/{{ platform_identity.unix_prefix }}/nginx"
   # END SERVICE: nginx_runtime
+
+  # ---------------------------------------------------------------------------
+  # PM Tools (ws-pm-tools-deploy)
+  # ---------------------------------------------------------------------------
+
+  # BEGIN SERVICE: focalboard
+  focalboard:
+    service_type: docker_compose
+    image_catalog_key: ""
+    internal_port: 8111
+    host_group: docker-runtime
+    site_dir: /opt/focalboard
+    container_name: focalboard
+    needs_openbao: false
+    needs_postgres: false
+  # END SERVICE: focalboard
+
+  # BEGIN SERVICE: huly
+  huly:
+    service_type: docker_compose
+    image_catalog_key: ""
+    internal_port: 8112
+    host_group: docker-runtime
+    site_dir: /opt/huly
+    container_name: huly-front
+    needs_openbao: false
+    needs_postgres: false
+  # END SERVICE: huly
+
+  # BEGIN SERVICE: kan
+  kan:
+    service_type: docker_compose
+    image_catalog_key: ""
+    internal_port: 8113
+    host_group: docker-runtime
+    site_dir: /opt/kan
+    container_name: kan
+    needs_openbao: false
+    needs_postgres: true
+  # END SERVICE: kan
+
+  # BEGIN SERVICE: leantime
+  leantime:
+    service_type: docker_compose
+    image_catalog_key: ""
+    internal_port: 8114
+    host_group: docker-runtime
+    site_dir: /opt/leantime
+    container_name: leantime
+    needs_openbao: false
+    needs_postgres: false
+  # END SERVICE: leantime
+
+  # BEGIN SERVICE: openproject
+  openproject:
+    service_type: docker_compose
+    image_catalog_key: ""
+    internal_port: 8115
+    host_group: docker-runtime
+    site_dir: /opt/openproject
+    container_name: openproject-web
+    needs_openbao: false
+    needs_postgres: true
+  # END SERVICE: openproject
+
+  # BEGIN SERVICE: planka
+  planka:
+    service_type: docker_compose
+    image_catalog_key: ""
+    internal_port: 8116
+    host_group: docker-runtime
+    site_dir: /opt/planka
+    container_name: planka
+    needs_openbao: false
+    needs_postgres: true
+  # END SERVICE: planka
+
+  # BEGIN SERVICE: taiga
+  taiga:
+    service_type: docker_compose
+    image_catalog_key: ""
+    internal_port: 8117
+    host_group: docker-runtime
+    site_dir: /opt/taiga
+    container_name: taiga-front
+    needs_openbao: false
+    needs_postgres: true
+  # END SERVICE: taiga
+
+  # BEGIN SERVICE: tiki
+  tiki:
+    service_type: docker_compose
+    image_catalog_key: ""
+    internal_port: 8118
+    host_group: docker-runtime
+    site_dir: /opt/tiki
+    container_name: tiki
+    needs_openbao: false
+    needs_postgres: false
+  # END SERVICE: tiki
+
+  # BEGIN SERVICE: flowinquiry
+  flowinquiry:
+    service_type: docker_compose
+    image_catalog_key: ""
+    internal_port: 8119
+    host_group: docker-runtime
+    site_dir: /opt/flowinquiry
+    container_name: flowinquiry-server
+    needs_openbao: false
+    needs_postgres: true
+  # END SERVICE: flowinquiry
 
   # BEGIN SERVICE: runtime_pool_substrate
   runtime_pool_substrate:

@@ -1,0 +1,62 @@
+{
+  "receipt_id": "2026-07-01-ws-pm-tools-huly-full-stack-live-apply",
+  "workstream": "ws-pm-tools-deploy",
+  "applied_at_utc": "2026-07-01T15:09:51Z",
+  "applied_by": "codex",
+  "target": {
+    "vm": "docker-runtime-lv3",
+    "service": "huly",
+    "site_dir": "/opt/huly",
+    "public_url": "https://huly.0mcp.com"
+  },
+  "problem": {
+    "symptom": "/opt/huly/docker-compose.yml existed, but there were no usable Huly containers and port 8112 was closed.",
+    "observed_failure": "Starting the front-only placeholder produced a restart loop with: Please provide server secret.",
+    "root_cause": "The Huly frontend image is not a standalone deployment; it requires shared secrets and backend services from the self-host stack."
+  },
+  "changes": [
+    "Backed up the previous /opt/huly/docker-compose.yml and any existing Huly env/nginx files.",
+    "Generated persistent Huly, CockroachDB, and Redpanda secrets under /etc/lv3/huly/.",
+    "Rendered /opt/huly/.env for the Huly project.",
+    "Rendered /opt/huly/.huly.nginx as the internal Huly route fanout.",
+    "Replaced /opt/huly/docker-compose.yml with a full Huly self-host compose stack.",
+    "Pulled required images and ran docker compose up -d --force-recreate --remove-orphans.",
+    "Removed the orphaned front-only huly-front placeholder container.",
+    "Corrected the Redpanda healthcheck to use the non-SASL internal listener.",
+    "Updated the huly_runtime role to make the full stack reproducible."
+  ],
+  "verification": [
+    {
+      "check": "docker compose ps",
+      "result": "Full Huly stack is up, including nginx, front, account, transactor, collaborator, workspace, fulltext, stats, kvs, cockroach, redpanda, minio, elastic, and rekoni."
+    },
+    {
+      "check": "dependency health",
+      "result": "MinIO, Elasticsearch, and Redpanda healthchecks are healthy."
+    },
+    {
+      "check": "docker-runtime listener",
+      "result": "0.0.0.0:8112 is listening via docker-proxy for huly-nginx-1."
+    },
+    {
+      "check": "nginx VM to docker-runtime",
+      "result": "nc to 10.10.10.20:8112 succeeded; HTTP GET returned 200 from nginx/1.21.3."
+    },
+    {
+      "check": "workstation public HTTPS",
+      "result": "curl -I https://huly.0mcp.com/ returned HTTP/2 200."
+    }
+  ],
+  "files_changed": [
+    "collections/ansible_collections/lv3/platform/roles/huly_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/huly_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/huly_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/huly_runtime/templates/huly.env.j2",
+    "collections/ansible_collections/lv3/platform/roles/huly_runtime/templates/huly.nginx.conf.j2",
+    "docs/workstreams/ws-pm-tools-deploy.md",
+    "workstreams/active/ws-pm-tools-deploy.yaml"
+  ],
+  "follow_up": [
+    "Finish the remaining PM tool runtime listeners: Leantime, OpenProject, Taiga, Tiki, Vikunja, and FlowInquiry."
+  ]
+}

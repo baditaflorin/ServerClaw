@@ -1,0 +1,9 @@
+---
+openproject_service_topology: "{{ platform_service_topology | service_topology_get('openproject') }}"
+openproject_public_base_url: "https://{{ openproject_service_topology.public_hostname }}"
+openproject_image: openproject/openproject:15-slim
+openproject_db_image: postgres:16-alpine
+openproject_db_password_local_file: "{{ openproject_local_artifact_dir }}/db-password.txt"
+openproject_secret_key_local_file: "{{ openproject_local_artifact_dir }}/secret-key.txt"
+openproject_db_password_remote_file: "{{ openproject_secret_dir }}/db-password.txt"
+openproject_secret_key_remote_file: "{{ openproject_secret_dir }}/secret-key.txt"

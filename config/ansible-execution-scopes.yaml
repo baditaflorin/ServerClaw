@@ -889,3 +889,58 @@ playbooks:
     shared_surfaces:
       - service:repo-intake
       - inventory/host_vars/proxmox-host.yml
+  # PM Tools (ws-pm-tools-deploy)
+  playbooks/planka.yml:
+    playbook_id: planka
+    mutation_scope: platform
+    shared_surfaces:
+      - service:planka
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/focalboard.yml:
+    playbook_id: focalboard
+    mutation_scope: platform
+    shared_surfaces:
+      - service:focalboard
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/kan.yml:
+    playbook_id: kan
+    mutation_scope: platform
+    shared_surfaces:
+      - service:kan
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/leantime.yml:
+    playbook_id: leantime
+    mutation_scope: platform
+    shared_surfaces:
+      - service:leantime
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/openproject.yml:
+    playbook_id: openproject
+    mutation_scope: platform
+    shared_surfaces:
+      - service:openproject
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/taiga.yml:
+    playbook_id: taiga
+    mutation_scope: platform
+    shared_surfaces:
+      - service:taiga
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/tiki.yml:
+    playbook_id: tiki
+    mutation_scope: platform
+    shared_surfaces:
+      - service:tiki
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/huly.yml:
+    playbook_id: huly
+    mutation_scope: platform
+    shared_surfaces:
+      - service:huly
+      - inventory/host_vars/proxmox-host.yml
+  playbooks/flowinquiry.yml:
+    playbook_id: flowinquiry
+    mutation_scope: platform
+    shared_surfaces:
+      - service:flowinquiry
+      - inventory/host_vars/proxmox-host.yml

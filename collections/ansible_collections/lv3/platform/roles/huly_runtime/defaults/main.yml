@@ -1,0 +1,22 @@
+---
+huly_service_topology: "{{ platform_service_topology | service_topology_get('huly') }}"
+huly_public_base_url: "https://{{ huly_service_topology.public_hostname }}"
+huly_external_host: "{{ huly_service_topology.public_hostname }}"
+huly_project_name: huly
+huly_version: v0.7.423
+huly_desktop_channel: "0.7.423"
+huly_title: Huly
+huly_default_language: en
+huly_last_name_first: "true"
+huly_cockroach_database: defaultdb
+huly_cockroach_username: selfhost
+huly_redpanda_admin_user: superadmin
+huly_http_bind: "0.0.0.0"
+huly_nginx_file: "{{ huly_site_dir }}/.huly.nginx"
+huly_env_file_project: "{{ huly_site_dir }}/.env"
+huly_huly_secret_remote_file: "{{ huly_secret_dir }}/huly-secret"
+huly_cockroach_secret_remote_file: "{{ huly_secret_dir }}/cockroach-secret"
+huly_redpanda_secret_remote_file: "{{ huly_secret_dir }}/redpanda-secret"
+huly_huly_secret_local_file: "{{ huly_local_artifact_dir }}/huly-secret"
+huly_cockroach_secret_local_file: "{{ huly_local_artifact_dir }}/cockroach-secret"
+huly_redpanda_secret_local_file: "{{ huly_local_artifact_dir }}/redpanda-secret"

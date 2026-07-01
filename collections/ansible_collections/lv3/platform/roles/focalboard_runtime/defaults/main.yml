@@ -1,0 +1,4 @@
+---
+focalboard_service_topology: "{{ platform_service_topology | service_topology_get('focalboard') }}"
+focalboard_public_base_url: "https://{{ focalboard_service_topology.public_hostname }}"
+focalboard_image: mattermost/focalboard:latest

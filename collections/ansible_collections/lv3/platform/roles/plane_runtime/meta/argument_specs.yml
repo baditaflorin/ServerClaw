@@ -32,7 +32,7 @@
 # Related Runbooks: docs/runbooks/configure-plane.md
 #
 # Author: LV3 Platform
-# Last Updated: 2026-03-28
+# Last Updated: 2026-07-01
 argument_specs:
   main:
     short_description: Converge the Plane runtime on docker-runtime.
@@ -53,7 +53,7 @@ argument_specs:
       plane_internal_port:
         type: int
         required: false
-        default: 8000
+        default: 8093
       plane_internal_base_url:
         type: str
         required: false

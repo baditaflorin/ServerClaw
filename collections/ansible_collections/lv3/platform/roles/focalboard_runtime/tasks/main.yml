@@ -1,0 +1,71 @@
+---
+- name: Derive Focalboard conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: focalboard
+
+- name: Validate Focalboard runtime inputs
+  ansible.builtin.assert:
+    that:
+      - focalboard_site_dir | length > 0
+      - focalboard_secret_dir | length > 0
+      - focalboard_compose_file | length > 0
+      - focalboard_internal_port | int > 0
+      - focalboard_public_base_url | length > 0
+    fail_msg: "focalboard_runtime requires site_dir, secret_dir, compose_file, port, and public URL."
+
+- name: Ensure Focalboard directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ focalboard_site_dir }}"
+      mode: "0755"
+    - path: "{{ focalboard_secret_dir }}"
+      mode: "0700"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Ensure Focalboard local artifact directory exists
+  ansible.builtin.file:
+    path: "{{ focalboard_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Render the Focalboard compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ focalboard_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: focalboard_compose_template
+
+- name: Converge the Focalboard runtime stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ focalboard_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ focalboard_site_dir }}"
+    common_docker_compose_converge_service_name: focalboard
+    common_docker_compose_converge_force_recreate_entire_stack: true
+    common_docker_compose_converge_template_results:
+      - "{{ focalboard_compose_template }}"
+
+- name: Wait for Focalboard to listen
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ focalboard_internal_port }}"
+    delay: 5
+    timeout: 300
+
+- name: Verify Focalboard runtime
+  ansible.builtin.import_tasks: verify.yml

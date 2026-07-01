@@ -1,0 +1,16 @@
+# Managed by Ansible — do not edit by hand. Role: lv3.platform.focalboard_runtime
+---
+services:
+  focalboard:
+    image: {{ focalboard_image }}
+    container_name: {{ focalboard_container_name }}
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:{{ focalboard_internal_port }}:8000"
+    environment:
+      FOCALBOARD_SERVER_ADDRESS: "0.0.0.0:8000"
+    volumes:
+      - focalboard-data:/data
+
+volumes:
+  focalboard-data:

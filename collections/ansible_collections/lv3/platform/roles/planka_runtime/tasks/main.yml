@@ -1,0 +1,136 @@
+---
+- name: Derive Planka conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: planka
+
+- name: Validate Planka runtime inputs
+  ansible.builtin.assert:
+    that:
+      - planka_site_dir | length > 0
+      - planka_secret_dir | length > 0
+      - planka_compose_file | length > 0
+      - planka_internal_port | int > 0
+      - planka_public_base_url | length > 0
+    fail_msg: "planka_runtime requires site_dir, secret_dir, compose_file, port, and public URL."
+
+- name: Ensure Planka directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ planka_site_dir }}"
+      mode: "0755"
+    - path: "{{ planka_secret_dir }}"
+      mode: "0700"
+    - path: "{{ planka_local_artifact_dir }}"
+      mode: "0700"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Ensure Planka local artifact directory exists
+  ansible.builtin.file:
+    path: "{{ planka_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate Planka database password
+  ansible.builtin.command:
+    argv: [openssl, rand, -hex, 32]
+  register: planka_db_password_raw
+  changed_when: false
+  no_log: true
+
+- name: Generate Planka secret key
+  ansible.builtin.command:
+    argv: [openssl, rand, -hex, 64]
+  register: planka_secret_key_raw
+  changed_when: false
+  no_log: true
+
+- name: Persist Planka secrets on guest (once-only)
+  ansible.builtin.copy:
+    dest: "{{ item.path }}"
+    content: "{{ item.content }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+    force: false
+  loop:
+    - path: "{{ planka_db_password_remote_file }}"
+      content: "{{ planka_db_password_raw.stdout | trim }}"
+    - path: "{{ planka_secret_key_remote_file }}"
+      content: "{{ planka_secret_key_raw.stdout | trim }}"
+  loop_control:
+    label: "{{ item.path }}"
+  no_log: true
+
+- name: Read Planka secrets from guest
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ planka_db_password_remote_file }}"
+    - "{{ planka_secret_key_remote_file }}"
+  register: planka_secrets_raw
+  no_log: true
+
+- name: Decode Planka secrets
+  ansible.builtin.set_fact:
+    planka_db_password: "{{ planka_secrets_raw.results[0].content | b64decode | trim }}"
+    planka_secret_key: "{{ planka_secrets_raw.results[1].content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror Planka secrets to control machine
+  ansible.builtin.copy:
+    dest: "{{ item.path }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+    force: false
+  delegate_to: localhost
+  become: false
+  loop:
+    - path: "{{ planka_db_password_local_file }}"
+      content: "{{ planka_db_password }}"
+    - path: "{{ planka_secret_key_local_file }}"
+      content: "{{ planka_secret_key }}"
+  loop_control:
+    label: "{{ item.path }}"
+  no_log: true
+
+- name: Render the Planka compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ planka_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: planka_compose_template
+
+- name: Converge the Planka runtime stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ planka_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ planka_site_dir }}"
+    common_docker_compose_converge_service_name: planka
+    common_docker_compose_converge_force_recreate_entire_stack: true
+    common_docker_compose_converge_template_results:
+      - "{{ planka_compose_template }}"
+
+- name: Wait for Planka to listen
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ planka_internal_port }}"
+    delay: 5
+    timeout: 300
+
+- name: Verify Planka runtime
+  ansible.builtin.import_tasks: verify.yml

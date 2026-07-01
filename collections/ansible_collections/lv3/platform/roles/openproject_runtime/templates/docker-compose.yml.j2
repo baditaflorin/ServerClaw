@@ -1,0 +1,41 @@
+# Managed by Ansible — do not edit by hand. Role: lv3.platform.openproject_runtime
+---
+services:
+  openproject-db:
+    image: {{ openproject_db_image }}
+    container_name: openproject-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: openproject
+      POSTGRES_USER: openproject
+      POSTGRES_PASSWORD: "{{ openproject_db_password }}"
+    volumes:
+      - openproject-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openproject"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  openproject:
+    image: {{ openproject_image }}
+    container_name: {{ openproject_container_name }}
+    restart: unless-stopped
+    depends_on:
+      openproject-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:{{ openproject_internal_port }}:8080"
+    environment:
+      OPENPROJECT_HOST__NAME: "{{ openproject_service_topology.public_hostname }}"
+      OPENPROJECT_HTTPS: "true"
+      DATABASE_URL: "postgresql://openproject:{{ openproject_db_password }}@openproject-db/openproject"
+      OPENPROJECT_SECRET_KEY_BASE: "{{ openproject_secret_key }}"
+    volumes:
+      - openproject-assets:/app/public/assets
+      - openproject-pgdata:/var/openproject/pgdata
+
+volumes:
+  openproject-db-data:
+  openproject-assets:
+  openproject-pgdata:

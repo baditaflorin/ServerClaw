@@ -164,6 +164,17 @@ PORT_KEYS = (
     "vaultwarden_https_port",
     "keycloak_internal_http_port",
     "mail_platform_internal_submission_port",
+    # PM Tools (ws-pm-tools-deploy)
+    "focalboard_port",
+    "huly_port",
+    "kan_port",
+    "leantime_port",
+    "openproject_port",
+    "planka_port",
+    "taiga_port",
+    "tiki_port",
+    "flowinquiry_port",
+    "vikunja_port",
 )
 
 MANAGEMENT_IPV4_TOKEN = "{{ management_ipv4 }}"

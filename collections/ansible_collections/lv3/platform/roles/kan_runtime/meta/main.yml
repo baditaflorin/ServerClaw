@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  role_name: kan_runtime
+  author: lv3
+  description: Kan project management runtime (Docker Compose)
+  min_ansible_version: "2.14"
+dependencies: []

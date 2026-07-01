@@ -17,20 +17,20 @@ def test_plane_runtime_defaults_list_trusted_proxies() -> None:
     assert defaults["plane_healthcheck_path"] == "/api/instances/"
     assert defaults["plane_trusted_proxies"] == [
         "127.0.0.1",
-        "10.10.10.10",
+        "{{ hostvars[playbook_execution_host_patterns.nginx_edge[playbook_execution_env]].ansible_host }}",
         "100.64.0.1",
     ]
     assert (
         defaults["plane_internal_port"]
-        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_port('plane', 'internal') }}"
+        == "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('plane', 'internal') }}"
     )
     assert (
         defaults["plane_internal_base_url"]
-        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('plane', 'internal') }}"
+        == "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('plane', 'internal') }}"
     )
     assert (
         defaults["plane_controller_url"]
-        == "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('plane', 'controller') }}"
+        == "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('plane', 'controller') }}"
     )
 
 

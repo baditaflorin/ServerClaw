@@ -1,0 +1,173 @@
+---
+- name: Derive Huly conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: huly
+
+- name: Validate Huly runtime inputs
+  ansible.builtin.assert:
+    that:
+      - huly_site_dir | length > 0
+      - huly_secret_dir | length > 0
+      - huly_compose_file | length > 0
+      - huly_env_file_project | length > 0
+      - huly_nginx_file | length > 0
+      - huly_internal_port | int > 0
+      - huly_public_base_url | length > 0
+      - huly_external_host | length > 0
+      - huly_version | length > 0
+      - huly_desktop_channel | length > 0
+    fail_msg: "huly_runtime requires site_dir, secret_dir, compose/env/nginx files, port, public URL, host, and version."
+
+- name: Ensure Huly directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ huly_site_dir }}"
+      mode: "0755"
+    - path: "{{ huly_secret_dir }}"
+      mode: "0700"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Ensure Huly local artifact directory exists
+  ansible.builtin.file:
+    path: "{{ huly_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate Huly application secret
+  ansible.builtin.command:
+    argv: [openssl, rand, -hex, 32]
+  register: huly_secret_raw
+  changed_when: false
+  no_log: true
+
+- name: Generate Huly CockroachDB password
+  ansible.builtin.command:
+    argv: [openssl, rand, -hex, 32]
+  register: huly_cockroach_secret_raw
+  changed_when: false
+  no_log: true
+
+- name: Generate Huly Redpanda password
+  ansible.builtin.command:
+    argv: [openssl, rand, -hex, 32]
+  register: huly_redpanda_secret_raw
+  changed_when: false
+  no_log: true
+
+- name: Persist Huly secrets on guest (once-only)
+  ansible.builtin.copy:
+    dest: "{{ item.path }}"
+    content: "{{ item.content }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+    force: false
+  loop:
+    - path: "{{ huly_huly_secret_remote_file }}"
+      content: "{{ huly_secret_raw.stdout | trim }}"
+    - path: "{{ huly_cockroach_secret_remote_file }}"
+      content: "{{ huly_cockroach_secret_raw.stdout | trim }}"
+    - path: "{{ huly_redpanda_secret_remote_file }}"
+      content: "{{ huly_redpanda_secret_raw.stdout | trim }}"
+  loop_control:
+    label: "{{ item.path }}"
+  no_log: true
+
+- name: Read Huly secrets from guest
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ huly_huly_secret_remote_file }}"
+    - "{{ huly_cockroach_secret_remote_file }}"
+    - "{{ huly_redpanda_secret_remote_file }}"
+  register: huly_secrets_raw
+  no_log: true
+
+- name: Decode Huly secrets
+  ansible.builtin.set_fact:
+    huly_secret: "{{ huly_secrets_raw.results[0].content | b64decode | trim }}"
+    huly_cockroach_secret: "{{ huly_secrets_raw.results[1].content | b64decode | trim }}"
+    huly_redpanda_secret: "{{ huly_secrets_raw.results[2].content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror Huly secrets to control machine
+  ansible.builtin.copy:
+    dest: "{{ item.path }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+    force: false
+  delegate_to: localhost
+  become: false
+  loop:
+    - path: "{{ huly_huly_secret_local_file }}"
+      content: "{{ huly_secret }}"
+    - path: "{{ huly_cockroach_secret_local_file }}"
+      content: "{{ huly_cockroach_secret }}"
+    - path: "{{ huly_redpanda_secret_local_file }}"
+      content: "{{ huly_redpanda_secret }}"
+  loop_control:
+    label: "{{ item.path }}"
+  no_log: true
+
+- name: Render the Huly project environment file
+  ansible.builtin.template:
+    src: huly.env.j2
+    dest: "{{ huly_env_file_project }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: huly_env_template
+  no_log: true
+
+- name: Render the Huly internal nginx config
+  ansible.builtin.template:
+    src: huly.nginx.conf.j2
+    dest: "{{ huly_nginx_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: huly_nginx_template
+
+- name: Render the Huly compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ huly_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: huly_compose_template
+
+- name: Converge the Huly runtime stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ huly_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ huly_site_dir }}"
+    common_docker_compose_converge_service_name: huly
+    common_docker_compose_converge_force_recreate_entire_stack: true
+    common_docker_compose_converge_template_results:
+      - "{{ huly_env_template }}"
+      - "{{ huly_nginx_template }}"
+      - "{{ huly_compose_template }}"
+
+- name: Wait for Huly to listen
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ huly_internal_port }}"
+    delay: 5
+    timeout: 300
+
+- name: Verify Huly runtime
+  ansible.builtin.import_tasks: verify.yml

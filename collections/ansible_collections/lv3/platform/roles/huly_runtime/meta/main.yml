@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  role_name: huly_runtime
+  author: lv3
+  description: Huly project management runtime (Docker Compose, simplified frontend-only)
+  min_ansible_version: "2.14"
+dependencies: []

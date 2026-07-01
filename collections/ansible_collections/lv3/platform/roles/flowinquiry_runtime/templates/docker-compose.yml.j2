@@ -1,0 +1,36 @@
+# Managed by Ansible — do not edit by hand. Role: lv3.platform.flowinquiry_runtime
+---
+services:
+  flowinquiry-db:
+    image: {{ flowinquiry_db_image }}
+    container_name: flowinquiry-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: flowinquiry
+      POSTGRES_USER: flowinquiry
+      POSTGRES_PASSWORD: "{{ flowinquiry_db_password }}"
+    volumes:
+      - flowinquiry-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowinquiry"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  flowinquiry-server:
+    image: {{ flowinquiry_image }}
+    container_name: {{ flowinquiry_container_name }}
+    restart: unless-stopped
+    depends_on:
+      flowinquiry-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:{{ flowinquiry_internal_port }}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://flowinquiry-db:5432/flowinquiry"
+      SPRING_DATASOURCE_USERNAME: flowinquiry
+      SPRING_DATASOURCE_PASSWORD: "{{ flowinquiry_db_password }}"
+      FLOWINQUIRY_BASE_URL: "{{ flowinquiry_public_base_url }}"
+
+volumes:
+  flowinquiry-db-data:

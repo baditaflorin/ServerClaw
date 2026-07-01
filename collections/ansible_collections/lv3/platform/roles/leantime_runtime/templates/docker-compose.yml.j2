@@ -1,0 +1,44 @@
+# Managed by Ansible — do not edit by hand. Role: lv3.platform.leantime_runtime
+---
+services:
+  leantime-db:
+    image: {{ leantime_db_image }}
+    container_name: leantime-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "{{ leantime_db_password }}"
+      MYSQL_DATABASE: leantime
+      MYSQL_USER: leantime
+      MYSQL_PASSWORD: "{{ leantime_db_password }}"
+    volumes:
+      - leantime-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  leantime:
+    image: {{ leantime_image }}
+    container_name: {{ leantime_container_name }}
+    restart: unless-stopped
+    depends_on:
+      leantime-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:{{ leantime_internal_port }}:80"
+    environment:
+      LEAN_DB_HOST: leantime-db
+      LEAN_DB_USER: leantime
+      LEAN_DB_PASSWORD: "{{ leantime_db_password }}"
+      LEAN_DB_DATABASE: leantime
+      LEAN_SESSION_PASSWORD: "{{ leantime_session_password }}"
+      LEAN_APP_URL: "{{ leantime_public_base_url }}"
+    volumes:
+      - leantime-public-userfiles:/var/www/html/public/userfiles
+      - leantime-public-uploads:/var/www/html/public/uploads
+
+volumes:
+  leantime-db-data:
+  leantime-public-userfiles:
+  leantime-public-uploads:

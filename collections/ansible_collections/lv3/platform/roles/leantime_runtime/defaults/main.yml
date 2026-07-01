@@ -1,0 +1,9 @@
+---
+leantime_service_topology: "{{ platform_service_topology | service_topology_get('leantime') }}"
+leantime_public_base_url: "https://{{ leantime_service_topology.public_hostname }}"
+leantime_image: leantime/leantime:latest
+leantime_db_image: mariadb:10.11
+leantime_db_password_local_file: "{{ leantime_local_artifact_dir }}/db-password.txt"
+leantime_session_password_local_file: "{{ leantime_local_artifact_dir }}/session-password.txt"
+leantime_db_password_remote_file: "{{ leantime_secret_dir }}/db-password.txt"
+leantime_session_password_remote_file: "{{ leantime_secret_dir }}/session-password.txt"

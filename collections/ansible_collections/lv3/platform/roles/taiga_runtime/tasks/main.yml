@@ -1,0 +1,147 @@
+---
+- name: Derive Taiga conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: taiga
+
+- name: Validate Taiga runtime inputs
+  ansible.builtin.assert:
+    that:
+      - taiga_site_dir | length > 0
+      - taiga_secret_dir | length > 0
+      - taiga_compose_file | length > 0
+      - taiga_internal_port | int > 0
+      - taiga_public_base_url | length > 0
+    fail_msg: "taiga_runtime requires site_dir, secret_dir, compose_file, port, and public URL."
+
+- name: Ensure Taiga directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ taiga_site_dir }}"
+      mode: "0755"
+    - path: "{{ taiga_secret_dir }}"
+      mode: "0700"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Ensure Taiga local artifact directory exists
+  ansible.builtin.file:
+    path: "{{ taiga_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate Taiga database password
+  ansible.builtin.command:
+    argv: [openssl, rand, -hex, 32]
+  register: taiga_db_password_raw
+  changed_when: false
+  no_log: true
+
+- name: Generate Taiga secret key
+  ansible.builtin.command:
+    argv: [openssl, rand, -hex, 32]
+  register: taiga_secret_key_raw
+  changed_when: false
+  no_log: true
+
+- name: Generate Taiga RabbitMQ password
+  ansible.builtin.command:
+    argv: [openssl, rand, -hex, 32]
+  register: taiga_rabbit_password_raw
+  changed_when: false
+  no_log: true
+
+- name: Persist Taiga secrets on guest (once-only)
+  ansible.builtin.copy:
+    dest: "{{ item.path }}"
+    content: "{{ item.content }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+    force: false
+  loop:
+    - path: "{{ taiga_db_password_remote_file }}"
+      content: "{{ taiga_db_password_raw.stdout | trim }}"
+    - path: "{{ taiga_secret_key_remote_file }}"
+      content: "{{ taiga_secret_key_raw.stdout | trim }}"
+    - path: "{{ taiga_rabbit_password_remote_file }}"
+      content: "{{ taiga_rabbit_password_raw.stdout | trim }}"
+  loop_control:
+    label: "{{ item.path }}"
+  no_log: true
+
+- name: Read Taiga secrets from guest
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ taiga_db_password_remote_file }}"
+    - "{{ taiga_secret_key_remote_file }}"
+    - "{{ taiga_rabbit_password_remote_file }}"
+  register: taiga_secrets_raw
+  no_log: true
+
+- name: Decode Taiga secrets
+  ansible.builtin.set_fact:
+    taiga_db_password: "{{ taiga_secrets_raw.results[0].content | b64decode | trim }}"
+    taiga_secret_key: "{{ taiga_secrets_raw.results[1].content | b64decode | trim }}"
+    taiga_rabbit_password: "{{ taiga_secrets_raw.results[2].content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror Taiga secrets to control machine
+  ansible.builtin.copy:
+    dest: "{{ item.path }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+    force: false
+  delegate_to: localhost
+  become: false
+  loop:
+    - path: "{{ taiga_db_password_local_file }}"
+      content: "{{ taiga_db_password }}"
+    - path: "{{ taiga_secret_key_local_file }}"
+      content: "{{ taiga_secret_key }}"
+    - path: "{{ taiga_rabbit_password_local_file }}"
+      content: "{{ taiga_rabbit_password }}"
+  loop_control:
+    label: "{{ item.path }}"
+  no_log: true
+
+- name: Render the Taiga compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ taiga_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: taiga_compose_template
+
+- name: Converge the Taiga runtime stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ taiga_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ taiga_site_dir }}"
+    common_docker_compose_converge_service_name: taiga
+    common_docker_compose_converge_force_recreate_entire_stack: true
+    common_docker_compose_converge_template_results:
+      - "{{ taiga_compose_template }}"
+
+- name: Wait for Taiga frontend to listen
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ taiga_internal_port }}"
+    delay: 10
+    timeout: 300
+
+- name: Verify Taiga runtime
+  ansible.builtin.import_tasks: verify.yml

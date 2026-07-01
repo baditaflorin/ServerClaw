@@ -1,0 +1,9 @@
+---
+kan_service_topology: "{{ platform_service_topology | service_topology_get('kan') }}"
+kan_public_base_url: "https://{{ kan_service_topology.public_hostname }}"
+kan_image: ghcr.io/kanbn/kan:latest
+kan_db_image: postgres:16-alpine
+kan_db_password_local_file: "{{ kan_local_artifact_dir }}/db-password.txt"
+kan_nextauth_secret_local_file: "{{ kan_local_artifact_dir }}/nextauth-secret.txt"
+kan_db_password_remote_file: "{{ kan_secret_dir }}/db-password.txt"
+kan_nextauth_secret_remote_file: "{{ kan_secret_dir }}/nextauth-secret.txt"

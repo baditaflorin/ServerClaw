@@ -5256,6 +5256,110 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 26a30662-ed8e-4d3d-9f07-154522ff67cd
+- id: ws-pm-tools-deploy
+  title: "10 project management tools \u2014 install, DNS, admin users"
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/pm-tools-deploy
+  worktree_path: .claude/worktrees/pm-tools-deploy
+  doc: docs/workstreams/ws-pm-tools-deploy.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - inventory/host_vars/proxmox-host.yml
+  - inventory/group_vars/all/platform_services.yml
+  - collections/ansible_collections/lv3/platform/roles
+  - playbooks/services
+  ownership_manifest:
+    owned_surfaces:
+    - id: pm_tools_service_registry
+      paths:
+      - inventory/group_vars/all/platform_services.yml
+      mode: shared_contract
+      contract: pm-tools-additive-service-registry-v1
+    - id: pm_tools_topology
+      paths:
+      - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: pm-tools-additive-topology-v1
+    - id: pm_tools_runtime_roles
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/focalboard_runtime
+      - collections/ansible_collections/lv3/platform/roles/huly_runtime
+      - collections/ansible_collections/lv3/platform/roles/kan_runtime
+      - collections/ansible_collections/lv3/platform/roles/leantime_runtime
+      - collections/ansible_collections/lv3/platform/roles/openproject_runtime
+      - collections/ansible_collections/lv3/platform/roles/planka_runtime
+      - collections/ansible_collections/lv3/platform/roles/taiga_runtime
+      - collections/ansible_collections/lv3/platform/roles/tiki_runtime
+      - collections/ansible_collections/lv3/platform/roles/flowinquiry_runtime
+      mode: exclusive
+    - id: pm_tools_playbooks
+      paths:
+      - playbooks/services/focalboard.yml
+      - playbooks/services/huly.yml
+      - playbooks/services/kan.yml
+      - playbooks/services/leantime.yml
+      - playbooks/services/openproject.yml
+      - playbooks/services/planka.yml
+      - playbooks/services/taiga.yml
+      - playbooks/services/tiki.yml
+      - playbooks/services/vikunja-new.yml
+      - playbooks/services/flowinquiry.yml
+      mode: exclusive
+    - id: ws_pm_tools_workstream
+      paths:
+      - workstreams/active/ws-pm-tools-deploy.yaml
+      mode: exclusive
+  notes: 'Installs 10 project management tools on the platform:
+
+    Focalboard, Huly, Kan, Leantime, OpenProject, Planka, Taiga, Tiki,
+
+    Vikunja, and FlowInquiry. DNS A records at <tool>.0mcp.com already
+
+    created (2026-07-01). Each tool gets an nginx edge proxy, TLS via
+
+    step-ca, and admin users for baditaflorin@gmail.com and
+
+    alexander@knibo-invest.de. Simple tools run single-container Docker
+
+    Compose on docker-runtime-lv3; tools needing PostgreSQL get a database
+
+    on postgres-vm. Huly and Taiga use multi-container stacks.
+
+
+    2026-07-01 Codex follow-up: Planka, Focalboard, and Kan were healthy on
+
+    docker-runtime loopback but unreachable through the public edge because their
+
+    Docker published ports were bound to 127.0.0.1 while nginx-edge proxies to
+
+    10.10.10.20. Live compose files and role templates now bind those three
+
+    services to 0.0.0.0. Workstation verification returns Planka 200,
+
+    Focalboard 200, and Kan 307 -> /login.
+
+
+    2026-07-01 Codex follow-up: Huly''s front-only placeholder compose rendered,
+
+    but the container crashed with "Please provide server secret" and never opened
+
+    port 8112. Live state now runs the full Huly self-host stack under /opt/huly,
+
+    with generated secrets persisted in /etc/lv3/huly, internal nginx bound on
+
+    0.0.0.0:8112, and workstation verification returning HTTP 200 at
+
+    huly.0mcp.com. The Huly runtime role now renders the full stack, .env, and
+
+    internal nginx config. The other six tools still lack running backend
+
+    listeners and remain deployment-completion work.
+
+    '
 - id: ws-docker-runtime-disk-expand
   title: docker-runtime-lv3 root disk expansion
   status: in_progress

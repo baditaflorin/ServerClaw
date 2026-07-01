@@ -1,0 +1,32 @@
+---
+- name: Converge OpenProject on the Docker runtime VM
+  hosts: docker-runtime
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/vars/openproject.yml"
+  vars:
+    preflight_wait_for_connection: false
+  tags: [tier-2, service-openproject]
+  pre_tasks:
+    - ansible.builtin.assert:
+        that: ansible_distribution == "Debian"
+        fail_msg: "Debian required."
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.openproject_runtime
+
+- name: Publish OpenProject on the shared NGINX edge
+  hosts: nginx
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
+  vars:
+    preflight_wait_for_connection: false
+    public_edge_sync_generated_static_dirs: false
+  tags: [tier-1, service-openproject]
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.nginx_edge_publication
