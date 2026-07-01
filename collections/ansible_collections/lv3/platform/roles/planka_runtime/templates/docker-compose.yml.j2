@@ -25,7 +25,7 @@ services:
       planka-db:
         condition: service_healthy
     ports:
-      - "127.0.0.1:{{ planka_internal_port }}:1337"
+      - "0.0.0.0:{{ planka_internal_port }}:1337"
     environment:
       BASE_URL: "{{ planka_public_base_url }}"
       DATABASE_URL: "postgresql://planka:{{ planka_db_password }}@planka-db/planka?sslmode=disable"

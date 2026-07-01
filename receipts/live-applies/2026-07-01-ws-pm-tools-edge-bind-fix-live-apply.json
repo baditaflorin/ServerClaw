@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-07-01-ws-pm-tools-edge-bind-fix-live-apply",
+  "environment": "production",
+  "applied_on": "2026-07-01",
+  "recorded_on": "2026-07-01",
+  "recorded_at": "2026-07-01T14:55:30Z",
+  "recorded_by": "codex",
+  "workflow_id": "live-apply-service",
+  "workstream": "ws-pm-tools-deploy",
+  "source_branch": "claude/pm-tools-deploy",
+  "source_commit": "45e3dafd942e3248fdea1f2601abfedc194f207d",
+  "repo_version_context": "0.179.49",
+  "platform_version_context": "0.179.48",
+  "result": "pass",
+  "summary": "Restored workstation and public-edge reachability for the three running project-management tools by changing Focalboard, Kan, and Planka Docker port bindings from loopback-only to externally reachable VM bindings, then recreating only those compose services.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-runtime-lv3",
+      "address": "10.10.10.20",
+      "services": ["focalboard", "kan", "planka"]
+    },
+    {
+      "kind": "vm",
+      "name": "nginx-lv3",
+      "address": "10.10.10.10"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Root cause",
+      "result": "pass",
+      "observed": "Nginx logged upstream connection timeouts to 10.10.10.20:8111, :8113, and :8116 while the containers were published only as 127.0.0.1:<port> on docker-runtime-lv3."
+    },
+    {
+      "check": "Live port bindings",
+      "result": "pass",
+      "observed": "`docker ps` now reports focalboard on 0.0.0.0:8111->8000, kan on 0.0.0.0:8113->3000, and planka on 0.0.0.0:8116->1337."
+    },
+    {
+      "check": "Workstation HTTP verification",
+      "result": "pass",
+      "observed": "From the workstation, Planka returned HTTP 200, Focalboard returned HTTP 200, and Kan returned HTTP 307 with redirect https://kan.0mcp.com/login."
+    },
+    {
+      "check": "Remaining PM tools",
+      "result": "partial",
+      "observed": "The other seven PM tools still have public Nginx routes but no running backend listeners; they remain deployment-completion work for ws-pm-tools-deploy."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-pm-tools-deploy.md",
+    "workstreams/active/ws-pm-tools-deploy.yaml",
+    "collections/ansible_collections/lv3/platform/roles/focalboard_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/kan_runtime/templates/docker-compose.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/planka_runtime/templates/docker-compose.yml.j2"
+  ],
+  "notes": [
+    "The live mutation was intentionally narrow: only the three already-running stacks were recreated.",
+    "The template changes prevent the next converge from reverting the working edge reachability fix."
+  ]
+}

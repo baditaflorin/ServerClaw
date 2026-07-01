@@ -6,7 +6,7 @@ live_applied: false
 owner: claude
 branch: claude/pm-tools-deploy
 worktree_path: .claude/worktrees/pm-tools-deploy
-doc: ""
+doc: docs/workstreams/ws-pm-tools-deploy.md
 depends_on: []
 conflicts_with: []
 shared_surfaces:
@@ -19,11 +19,13 @@ ownership_manifest:
   - id: pm_tools_service_registry
     paths:
     - inventory/group_vars/all/platform_services.yml
-    mode: additive
+    mode: shared_contract
+    contract: pm-tools-additive-service-registry-v1
   - id: pm_tools_topology
     paths:
     - inventory/host_vars/proxmox-host.yml
-    mode: additive
+    mode: shared_contract
+    contract: pm-tools-additive-topology-v1
   - id: pm_tools_runtime_roles
     paths:
     - collections/ansible_collections/lv3/platform/roles/focalboard_runtime
@@ -62,3 +64,11 @@ notes: |
   alexander@knibo-invest.de. Simple tools run single-container Docker
   Compose on docker-runtime-lv3; tools needing PostgreSQL get a database
   on postgres-vm. Huly and Taiga use multi-container stacks.
+
+  2026-07-01 Codex follow-up: Planka, Focalboard, and Kan were healthy on
+  docker-runtime loopback but unreachable through the public edge because their
+  Docker published ports were bound to 127.0.0.1 while nginx-edge proxies to
+  10.10.10.20. Live compose files and role templates now bind those three
+  services to 0.0.0.0. Workstation verification returns Planka 200,
+  Focalboard 200, and Kan 307 -> /login. The other seven tools still lack
+  running backend listeners and remain deployment-completion work.

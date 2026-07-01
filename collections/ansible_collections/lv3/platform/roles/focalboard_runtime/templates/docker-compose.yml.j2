@@ -6,7 +6,7 @@ services:
     container_name: {{ focalboard_container_name }}
     restart: unless-stopped
     ports:
-      - "127.0.0.1:{{ focalboard_internal_port }}:8000"
+      - "0.0.0.0:{{ focalboard_internal_port }}:8000"
     environment:
       FOCALBOARD_SERVER_ADDRESS: "0.0.0.0:8000"
     volumes:

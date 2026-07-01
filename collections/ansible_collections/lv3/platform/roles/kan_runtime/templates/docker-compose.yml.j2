@@ -25,7 +25,7 @@ services:
       kan-db:
         condition: service_healthy
     ports:
-      - "127.0.0.1:{{ kan_internal_port }}:3000"
+      - "0.0.0.0:{{ kan_internal_port }}:3000"
     environment:
       POSTGRES_URL: "postgresql://kan:{{ kan_db_password }}@kan-db/kan?sslmode=disable"
       BETTER_AUTH_SECRET: "{{ kan_nextauth_secret }}"
