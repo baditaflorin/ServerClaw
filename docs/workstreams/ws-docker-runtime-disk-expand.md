@@ -52,3 +52,15 @@ Completed on 2026-07-01.
 
 Receipt:
 `receipts/live-applies/2026-07-01-ws-docker-runtime-disk-expand-live-apply.json`
+
+## PR And CI
+
+Draft PR: `https://github.com/baditaflorin/ServerClaw/pull/32`
+
+GitHub Actions run `28524046655` did not execute the checks. Both
+`release-readiness` and `validate` failed at job startup with:
+
+> The job was not started because your account is locked due to a billing issue.
+
+This is an external GitHub account/billing blocker, not a branch validation
+failure.

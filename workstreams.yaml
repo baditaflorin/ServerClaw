@@ -5307,6 +5307,13 @@ workstreams:
 
     remained active with 40/40 containers running.
 
+
+    PR #32 opened as a draft against main. GitHub Actions did not run because the
+
+    GitHub account is locked due to a billing issue; both `release-readiness` and
+
+    `validate` failed at job startup with that platform-level blocker.
+
     '
 - id: ws-claude-ops-admin
   title: claude-ops dedicated AI-automation admin identity

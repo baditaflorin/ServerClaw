@@ -40,3 +40,7 @@ notes: |
   Completed 2026-07-01: Proxmox `scsi0` now reports 256G, guest `/dev/sda1`
   now reports a 252G ext4 root filesystem with about 122G available, and Docker
   remained active with 40/40 containers running.
+
+  PR #32 opened as a draft against main. GitHub Actions did not run because the
+  GitHub account is locked due to a billing issue; both `release-readiness` and
+  `validate` failed at job startup with that platform-level blocker.
