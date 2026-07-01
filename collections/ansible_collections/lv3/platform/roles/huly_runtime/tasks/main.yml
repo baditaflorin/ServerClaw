@@ -1,0 +1,70 @@
+---
+- name: Derive Huly conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: huly
+
+- name: Validate Huly runtime inputs
+  ansible.builtin.assert:
+    that:
+      - huly_site_dir | length > 0
+      - huly_secret_dir | length > 0
+      - huly_compose_file | length > 0
+      - huly_internal_port | int > 0
+      - huly_public_base_url | length > 0
+    fail_msg: "huly_runtime requires site_dir, secret_dir, compose_file, port, and public URL."
+
+- name: Ensure Huly directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ huly_site_dir }}"
+      mode: "0755"
+    - path: "{{ huly_secret_dir }}"
+      mode: "0700"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Ensure Huly local artifact directory exists
+  ansible.builtin.file:
+    path: "{{ huly_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Render the Huly compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ huly_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: huly_compose_template
+
+- name: Converge the Huly runtime stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ huly_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ huly_site_dir }}"
+    common_docker_compose_converge_service_name: huly
+    common_docker_compose_converge_template_results:
+      - "{{ huly_compose_template }}"
+
+- name: Wait for Huly to listen
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ huly_internal_port }}"
+    delay: 5
+    timeout: 300
+
+- name: Verify Huly runtime
+  ansible.builtin.import_tasks: verify.yml

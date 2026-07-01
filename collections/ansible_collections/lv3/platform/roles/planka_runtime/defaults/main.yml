@@ -1,0 +1,9 @@
+---
+planka_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('planka') }}"
+planka_public_base_url: "https://{{ planka_service_topology.public_hostname }}"
+planka_db_password_local_file: "{{ planka_local_artifact_dir }}/db-password.txt"
+planka_secret_key_local_file: "{{ planka_local_artifact_dir }}/secret-key.txt"
+planka_db_password_remote_file: "{{ planka_secret_dir }}/db-password.txt"
+planka_secret_key_remote_file: "{{ planka_secret_dir }}/secret-key.txt"
+planka_image: ghcr.io/plankanban/planka:latest
+planka_db_image: postgres:16-alpine

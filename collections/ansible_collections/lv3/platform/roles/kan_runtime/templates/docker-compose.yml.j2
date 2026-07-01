@@ -1,0 +1,35 @@
+# Managed by Ansible — do not edit by hand. Role: lv3.platform.kan_runtime
+---
+services:
+  kan-db:
+    image: {{ kan_db_image }}
+    container_name: kan-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kan
+      POSTGRES_USER: kan
+      POSTGRES_PASSWORD: "{{ kan_db_password }}"
+    volumes:
+      - kan-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kan"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kan:
+    image: {{ kan_image }}
+    container_name: {{ kan_container_name }}
+    restart: unless-stopped
+    depends_on:
+      kan-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:{{ kan_internal_port }}:3000"
+    environment:
+      DATABASE_URL: "postgresql://kan:{{ kan_db_password }}@kan-db/kan?sslmode=disable"
+      NEXTAUTH_SECRET: "{{ kan_nextauth_secret }}"
+      NEXTAUTH_URL: "{{ kan_public_base_url }}"
+
+volumes:
+  kan-db-data:

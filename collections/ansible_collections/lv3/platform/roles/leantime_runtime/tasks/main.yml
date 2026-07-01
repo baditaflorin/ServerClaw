@@ -1,0 +1,133 @@
+---
+- name: Derive Leantime conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: leantime
+
+- name: Validate Leantime runtime inputs
+  ansible.builtin.assert:
+    that:
+      - leantime_site_dir | length > 0
+      - leantime_secret_dir | length > 0
+      - leantime_compose_file | length > 0
+      - leantime_internal_port | int > 0
+      - leantime_public_base_url | length > 0
+    fail_msg: "leantime_runtime requires site_dir, secret_dir, compose_file, port, and public URL."
+
+- name: Ensure Leantime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ leantime_site_dir }}"
+      mode: "0755"
+    - path: "{{ leantime_secret_dir }}"
+      mode: "0700"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Ensure Leantime local artifact directory exists
+  ansible.builtin.file:
+    path: "{{ leantime_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate Leantime database password
+  ansible.builtin.command:
+    argv: [openssl, rand, -hex, 32]
+  register: leantime_db_password_raw
+  changed_when: false
+  no_log: true
+
+- name: Generate Leantime session password
+  ansible.builtin.command:
+    argv: [openssl, rand, -hex, 32]
+  register: leantime_session_password_raw
+  changed_when: false
+  no_log: true
+
+- name: Persist Leantime secrets on guest (once-only)
+  ansible.builtin.copy:
+    dest: "{{ item.path }}"
+    content: "{{ item.content }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+    force: false
+  loop:
+    - path: "{{ leantime_db_password_remote_file }}"
+      content: "{{ leantime_db_password_raw.stdout | trim }}"
+    - path: "{{ leantime_session_password_remote_file }}"
+      content: "{{ leantime_session_password_raw.stdout | trim }}"
+  loop_control:
+    label: "{{ item.path }}"
+  no_log: true
+
+- name: Read Leantime secrets from guest
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ leantime_db_password_remote_file }}"
+    - "{{ leantime_session_password_remote_file }}"
+  register: leantime_secrets_raw
+  no_log: true
+
+- name: Decode Leantime secrets
+  ansible.builtin.set_fact:
+    leantime_db_password: "{{ leantime_secrets_raw.results[0].content | b64decode | trim }}"
+    leantime_session_password: "{{ leantime_secrets_raw.results[1].content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror Leantime secrets to control machine
+  ansible.builtin.copy:
+    dest: "{{ item.path }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+    force: false
+  delegate_to: localhost
+  become: false
+  loop:
+    - path: "{{ leantime_db_password_local_file }}"
+      content: "{{ leantime_db_password }}"
+    - path: "{{ leantime_session_password_local_file }}"
+      content: "{{ leantime_session_password }}"
+  loop_control:
+    label: "{{ item.path }}"
+  no_log: true
+
+- name: Render the Leantime compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ leantime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: leantime_compose_template
+
+- name: Converge the Leantime runtime stack
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ leantime_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ leantime_site_dir }}"
+    common_docker_compose_converge_service_name: leantime
+    common_docker_compose_converge_template_results:
+      - "{{ leantime_compose_template }}"
+
+- name: Wait for Leantime to listen
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ leantime_internal_port }}"
+    delay: 5
+    timeout: 300
+
+- name: Verify Leantime runtime
+  ansible.builtin.import_tasks: verify.yml

@@ -1,0 +1,7 @@
+---
+tiki_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('tiki') }}"
+tiki_public_base_url: "https://{{ tiki_service_topology.public_hostname }}"
+tiki_image: tikiwiki/tikiwiki:latest
+tiki_db_image: mariadb:10.11
+tiki_db_password_local_file: "{{ tiki_local_artifact_dir }}/db-password.txt"
+tiki_db_password_remote_file: "{{ tiki_secret_dir }}/db-password.txt"

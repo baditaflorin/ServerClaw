@@ -1,0 +1,43 @@
+# Managed by Ansible — do not edit by hand. Role: lv3.platform.planka_runtime
+---
+services:
+  planka-db:
+    image: {{ planka_db_image }}
+    container_name: planka-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: planka
+      POSTGRES_USER: planka
+      POSTGRES_PASSWORD: "{{ planka_db_password }}"
+    volumes:
+      - planka-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U planka"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  planka:
+    image: {{ planka_image }}
+    container_name: {{ planka_container_name }}
+    restart: unless-stopped
+    depends_on:
+      planka-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:{{ planka_internal_port }}:1337"
+    environment:
+      BASE_URL: "{{ planka_public_base_url }}"
+      DATABASE_URL: "postgresql://planka:{{ planka_db_password }}@planka-db/planka?sslmode=disable"
+      SECRET_KEY: "{{ planka_secret_key }}"
+      TRUST_PROXY: "1"
+    volumes:
+      - planka-user-avatars:/app/public/user-avatars
+      - planka-project-background-images:/app/public/project-background-images
+      - planka-attachments:/app/private/attachments
+
+volumes:
+  planka-db-data:
+  planka-user-avatars:
+  planka-project-background-images:
+  planka-attachments:

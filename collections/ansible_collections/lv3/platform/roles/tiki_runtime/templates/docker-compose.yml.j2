@@ -1,0 +1,40 @@
+# Managed by Ansible — do not edit by hand. Role: lv3.platform.tiki_runtime
+---
+services:
+  tiki-db:
+    image: {{ tiki_db_image }}
+    container_name: tiki-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "{{ tiki_db_password }}"
+      MYSQL_DATABASE: tiki
+      MYSQL_USER: tiki
+      MYSQL_PASSWORD: "{{ tiki_db_password }}"
+    volumes:
+      - tiki-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  tiki:
+    image: {{ tiki_image }}
+    container_name: {{ tiki_container_name }}
+    restart: unless-stopped
+    depends_on:
+      tiki-db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:{{ tiki_internal_port }}:80"
+    environment:
+      db_host: tiki-db
+      db_user: tiki
+      db_pass: "{{ tiki_db_password }}"
+      db_name: tiki
+    volumes:
+      - tiki-data:/var/www/html
+
+volumes:
+  tiki-db-data:
+  tiki-data:

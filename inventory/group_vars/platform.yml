@@ -256,6 +256,16 @@ platform_ports:
   vaultwarden_https_port: 8222
   keycloak_internal_http_port: 8091
   mail_platform_internal_submission_port: 1587
+  focalboard_port: 8111
+  huly_port: 8112
+  kan_port: 8113
+  leantime_port: 8114
+  openproject_port: 8115
+  planka_port: 8116
+  taiga_port: 8117
+  tiki_port: 8118
+  flowinquiry_port: 8119
+  vikunja_port: 3456
 platform_port_assignments:
   alertmanager_port: 9093
   monitoring_grafana_port: 3000
@@ -356,6 +366,16 @@ platform_port_assignments:
   vaultwarden_https_port: 8222
   keycloak_internal_http_port: 8091
   mail_platform_internal_submission_port: 1587
+  focalboard_port: 8111
+  huly_port: 8112
+  kan_port: 8113
+  leantime_port: 8114
+  openproject_port: 8115
+  planka_port: 8116
+  taiga_port: 8117
+  tiki_port: 8118
+  flowinquiry_port: 8119
+  vikunja_port: 3456
 platform_guest_catalog:
   list:
     - vmid: 110
@@ -3753,6 +3773,256 @@ platform_service_topology:
     ports: {}
     urls:
       public: https://browser.0mcp.com
+  focalboard:
+    service_name: focalboard
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: focalboard.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: focalboard
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8111
+    service_id: focalboard
+    ports: {}
+    urls:
+      public: https://focalboard.0mcp.com
+  huly:
+    service_name: huly
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: huly.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: huly
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8112
+    service_id: huly
+    ports: {}
+    urls:
+      public: https://huly.0mcp.com
+  kan:
+    service_name: kan
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: kan.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: kan
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8113
+    service_id: kan
+    ports: {}
+    urls:
+      public: https://kan.0mcp.com
+  leantime:
+    service_name: leantime
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: leantime.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: leantime
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8114
+    service_id: leantime
+    ports: {}
+    urls:
+      public: https://leantime.0mcp.com
+  openproject:
+    service_name: openproject
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: openproject.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: openproject
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8115
+    service_id: openproject
+    ports: {}
+    urls:
+      public: https://openproject.0mcp.com
+  planka:
+    service_name: planka
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: planka.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: planka
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8116
+    service_id: planka
+    ports: {}
+    urls:
+      public: https://planka.0mcp.com
+  taiga:
+    service_name: taiga
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: taiga.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: taiga
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8117
+    service_id: taiga
+    ports: {}
+    urls:
+      public: https://taiga.0mcp.com
+  tiki:
+    service_name: tiki
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: tiki.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: tiki
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8118
+    service_id: tiki
+    ports: {}
+    urls:
+      public: https://tiki.0mcp.com
+  vikunja:
+    service_name: vikunja
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: vikunja.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: vikunja
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:3456
+    service_id: vikunja
+    ports: {}
+    urls:
+      public: https://vikunja.0mcp.com
+  flowinquiry:
+    service_name: flowinquiry
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: flowinquiry.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: flowinquiry
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8119
+    service_id: flowinquiry
+    ports: {}
+    urls:
+      public: https://flowinquiry.0mcp.com
 platform_session_authority:
   authority_hostname: ops.0mcp.com
   ops_portal_client_id: ops-portal-oauth
@@ -3945,6 +4215,46 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: browser
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: focalboard
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: huly
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: kan
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: leantime
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: openproject
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: planka
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: taiga
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: tiki
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: vikunja
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: flowinquiry
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -7061,6 +7371,256 @@ public_edge_service_topology:
     ports: {}
     urls:
       public: https://browser.0mcp.com
+  focalboard:
+    service_name: focalboard
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: focalboard.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: focalboard
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8111
+    service_id: focalboard
+    ports: {}
+    urls:
+      public: https://focalboard.0mcp.com
+  huly:
+    service_name: huly
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: huly.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: huly
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8112
+    service_id: huly
+    ports: {}
+    urls:
+      public: https://huly.0mcp.com
+  kan:
+    service_name: kan
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: kan.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: kan
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8113
+    service_id: kan
+    ports: {}
+    urls:
+      public: https://kan.0mcp.com
+  leantime:
+    service_name: leantime
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: leantime.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: leantime
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8114
+    service_id: leantime
+    ports: {}
+    urls:
+      public: https://leantime.0mcp.com
+  openproject:
+    service_name: openproject
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: openproject.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: openproject
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8115
+    service_id: openproject
+    ports: {}
+    urls:
+      public: https://openproject.0mcp.com
+  planka:
+    service_name: planka
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: planka.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: planka
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8116
+    service_id: planka
+    ports: {}
+    urls:
+      public: https://planka.0mcp.com
+  taiga:
+    service_name: taiga
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: taiga.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: taiga
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8117
+    service_id: taiga
+    ports: {}
+    urls:
+      public: https://taiga.0mcp.com
+  tiki:
+    service_name: tiki
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: tiki.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: tiki
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8118
+    service_id: tiki
+    ports: {}
+    urls:
+      public: https://tiki.0mcp.com
+  vikunja:
+    service_name: vikunja
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: vikunja.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: vikunja
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:3456
+    service_id: vikunja
+    ports: {}
+    urls:
+      public: https://vikunja.0mcp.com
+  flowinquiry:
+    service_name: flowinquiry
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: flowinquiry.0mcp.com
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: flowinquiry
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8119
+    service_id: flowinquiry
+    ports: {}
+    urls:
+      public: https://flowinquiry.0mcp.com
 uptime_kuma_service_topology:
   service_name: uptime-kuma
   owning_vm: runtime-general-lv3
@@ -7251,3 +7811,13 @@ tika_port: 9998
 tesseract_ocr_port: 3008
 keycloak_internal_http_port: 8091
 mail_platform_internal_submission_port: 1587
+focalboard_port: 8111
+huly_port: 8112
+kan_port: 8113
+leantime_port: 8114
+openproject_port: 8115
+planka_port: 8116
+taiga_port: 8117
+tiki_port: 8118
+flowinquiry_port: 8119
+vikunja_port: 3456

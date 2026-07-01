@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  role_name: planka_runtime
+  author: lv3
+  description: Planka kanban board runtime (Docker Compose)
+  min_ansible_version: "2.14"
+dependencies: []

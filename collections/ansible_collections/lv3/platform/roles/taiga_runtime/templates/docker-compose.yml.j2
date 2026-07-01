@@ -1,0 +1,90 @@
+# Managed by Ansible — do not edit by hand. Role: lv3.platform.taiga_runtime
+---
+services:
+  taiga-db:
+    image: {{ taiga_db_image }}
+    container_name: taiga-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: taiga
+      POSTGRES_USER: taiga
+      POSTGRES_PASSWORD: "{{ taiga_db_password }}"
+    volumes:
+      - taiga-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taiga"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  taiga-rabbitmq:
+    image: {{ taiga_rabbitmq_image }}
+    container_name: taiga-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: taiga
+      RABBITMQ_DEFAULT_PASS: "{{ taiga_rabbit_password }}"
+      RABBITMQ_DEFAULT_VHOST: taiga
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  taiga-back:
+    image: {{ taiga_back_image }}
+    container_name: taiga-back
+    restart: unless-stopped
+    depends_on:
+      taiga-db:
+        condition: service_healthy
+      taiga-rabbitmq:
+        condition: service_healthy
+    environment:
+      DJANGO_DB_HOST: taiga-db
+      DJANGO_DB_NAME: taiga
+      DJANGO_DB_USER: taiga
+      DJANGO_DB_PASSWORD: "{{ taiga_db_password }}"
+      TAIGA_SECRET_KEY: "{{ taiga_secret_key }}"
+      TAIGA_BACKEND_HOST: "http://taiga-back:8000"
+      TAIGA_FRONTEND_URL: "{{ taiga_public_base_url }}"
+      RABBITMQ_USER: taiga
+      RABBITMQ_PASS: "{{ taiga_rabbit_password }}"
+      RABBITMQ_VHOST: taiga
+      RABBITMQ_URL: "amqp://taiga:{{ taiga_rabbit_password }}@taiga-rabbitmq:5672/taiga"
+
+  taiga-async:
+    image: {{ taiga_async_image }}
+    container_name: taiga-async
+    restart: unless-stopped
+    depends_on:
+      taiga-db:
+        condition: service_healthy
+      taiga-rabbitmq:
+        condition: service_healthy
+    environment:
+      DJANGO_DB_HOST: taiga-db
+      DJANGO_DB_NAME: taiga
+      DJANGO_DB_USER: taiga
+      DJANGO_DB_PASSWORD: "{{ taiga_db_password }}"
+      TAIGA_SECRET_KEY: "{{ taiga_secret_key }}"
+      TAIGA_FRONTEND_URL: "{{ taiga_public_base_url }}"
+      RABBITMQ_USER: taiga
+      RABBITMQ_PASS: "{{ taiga_rabbit_password }}"
+      RABBITMQ_VHOST: taiga
+      RABBITMQ_URL: "amqp://taiga:{{ taiga_rabbit_password }}@taiga-rabbitmq:5672/taiga"
+
+  taiga-front:
+    image: {{ taiga_front_image }}
+    container_name: {{ taiga_container_name }}
+    restart: unless-stopped
+    depends_on:
+      - taiga-back
+    ports:
+      - "127.0.0.1:{{ taiga_internal_port }}:80"
+    environment:
+      TAIGA_URL: "{{ taiga_public_base_url }}"
+      TAIGA_WEBSOCKETS_URL: "wss://{{ taiga_service_topology.public_hostname }}/events/"
+
+volumes:
+  taiga-db-data:

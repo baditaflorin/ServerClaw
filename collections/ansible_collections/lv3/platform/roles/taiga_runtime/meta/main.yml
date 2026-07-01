@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  role_name: taiga_runtime
+  author: lv3
+  description: Taiga project management runtime (Docker Compose)
+  min_ansible_version: "2.14"
+dependencies: []

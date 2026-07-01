@@ -1,0 +1,14 @@
+---
+taiga_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('taiga') }}"
+taiga_public_base_url: "https://{{ taiga_service_topology.public_hostname }}"
+taiga_front_image: taigaio/taiga-front:latest
+taiga_back_image: taigaio/taiga-back:latest
+taiga_async_image: taigaio/taiga-async:latest
+taiga_rabbitmq_image: rabbitmq:3-management-alpine
+taiga_db_image: postgres:15-alpine
+taiga_db_password_local_file: "{{ taiga_local_artifact_dir }}/db-password.txt"
+taiga_secret_key_local_file: "{{ taiga_local_artifact_dir }}/secret-key.txt"
+taiga_rabbit_password_local_file: "{{ taiga_local_artifact_dir }}/rabbit-password.txt"
+taiga_db_password_remote_file: "{{ taiga_secret_dir }}/db-password.txt"
+taiga_secret_key_remote_file: "{{ taiga_secret_dir }}/secret-key.txt"
+taiga_rabbit_password_remote_file: "{{ taiga_secret_dir }}/rabbit-password.txt"

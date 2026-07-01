@@ -1,0 +1,11 @@
+---
+- name: Verify OpenProject responds on local port
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openproject_internal_port }}/"
+    method: GET
+    status_code: [200, 301, 302]
+  register: openproject_verify_response
+  retries: 12
+  delay: 10
+  until: openproject_verify_response.status in [200, 301, 302]
+  changed_when: false
