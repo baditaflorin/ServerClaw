@@ -2715,6 +2715,8 @@ platform_service_topology:
       tls: true
       noindex: true
       kind: proxy
+      aliases:
+        - plane.{{ platform_domain }}
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plane_port }}"
     access:
       kind: tailscale-tcp-proxy

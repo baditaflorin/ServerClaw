@@ -2679,6 +2679,8 @@ platform_service_topology:
       tls: true
       noindex: true
       kind: proxy
+      aliases:
+        - plane.0mcp.com
       upstream: http://10.10.10.20:8093
     access:
       kind: tailscale-tcp-proxy
@@ -4123,6 +4125,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: tasks
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: plane
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -6277,6 +6283,8 @@ public_edge_service_topology:
       tls: true
       noindex: true
       kind: proxy
+      aliases:
+        - plane.0mcp.com
       upstream: http://10.10.10.20:8093
     access:
       kind: tailscale-tcp-proxy

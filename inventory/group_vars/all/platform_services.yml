@@ -1258,6 +1258,8 @@ platform_service_registry:
       upstream_port: 8093
       upstream_host: docker-runtime-lv3
       public_fqdn: tasks.{{ platform_domain }}
+      aliases:
+        - plane.{{ platform_domain }}
       auth_proxy: true              # gated behind shared oauth2-proxy
       websocket: true               # Plane uses WebSockets for real-time updates
   # END SERVICE: plane

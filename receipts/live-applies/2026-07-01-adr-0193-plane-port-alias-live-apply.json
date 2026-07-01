@@ -1,0 +1,61 @@
+{
+  "receipt_id": "2026-07-01-adr-0193-plane-port-alias-live-apply",
+  "adr": "0193",
+  "applied_at_utc": "2026-07-01T16:20:00Z",
+  "applied_by": "codex",
+  "environment": "production",
+  "target": {
+    "vm": "docker-runtime-lv3",
+    "service": "plane",
+    "site_dir": "/opt/plane",
+    "canonical_public_url": "https://tasks.0mcp.com",
+    "alias_public_url": "https://plane.0mcp.com"
+  },
+  "problem": {
+    "symptom": "Plane containers were already running, but the runtime proxy published port 8000 while the repo-managed service registry and edge topology declare port 8093.",
+    "impact": "The existing tasks hostname reached oauth2-proxy, but authenticated traffic would route to a closed upstream port after the shared edge handoff. The newly-created plane hostname needed the same authenticated edge publication.",
+    "root_cause": "The plane_runtime role default still pinned plane_internal_port to 8000, overriding the registry-derived 8093 service contract."
+  },
+  "changes": [
+    "Backed up /opt/plane/docker-compose.yml on docker-runtime.",
+    "Changed the live Plane proxy publish mapping from 8000:80 to 8093:80.",
+    "Recreated only the Plane proxy container with docker compose up -d --force-recreate --no-deps proxy.",
+    "Added plane.0mcp.com as an NGINX edge server_name alias for the existing tasks.0mcp.com Plane vhost.",
+    "Moved a temporary NGINX backup out of sites-enabled before validation to avoid duplicate default_server definitions.",
+    "Validated and reloaded NGINX.",
+    "Updated repo-managed Plane defaults and topology aliases so the next converge preserves the live repair."
+  ],
+  "verification": [
+    {
+      "check": "docker-runtime listener",
+      "result": "plane-proxy publishes 0.0.0.0:8093->80/tcp."
+    },
+    {
+      "check": "nginx VM to docker-runtime upstream",
+      "result": "curl -I http://10.10.10.20:8093/ from nginx-lv3 returned HTTP 200 with Plane frontend headers."
+    },
+    {
+      "check": "canonical public HTTPS",
+      "result": "curl -k -I https://tasks.0mcp.com/ returned HTTP/2 302 to /oauth2/sign_in."
+    },
+    {
+      "check": "alias public HTTPS",
+      "result": "curl -k -I https://plane.0mcp.com/ returned HTTP/2 302 to /oauth2/sign_in."
+    },
+    {
+      "check": "nginx configuration",
+      "result": "nginx -t passed and systemctl reload nginx completed successfully."
+    }
+  ],
+  "files_changed": [
+    "collections/ansible_collections/lv3/platform/roles/plane_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/plane_runtime/meta/argument_specs.yml",
+    "docs/runbooks/configure-plane.md",
+    "inventory/group_vars/all/platform_services.yml",
+    "inventory/group_vars/platform.yml",
+    "inventory/host_vars/proxmox-host.yml"
+  ],
+  "follow_up": [
+    "Keep tasks.0mcp.com as the canonical Plane hostname unless a later workstream intentionally migrates the Plane app domain, SSO callbacks, and generated client configuration to plane.0mcp.com."
+  ]
+}

@@ -4,7 +4,7 @@
 
 This runbook defines the repo-managed Plane runtime for the LV3 task board and ADR synchronization workflow on `docker-runtime`.
 
-Plane is public on this platform at `tasks.example.com`, but browser access is gated by the shared Keycloak-backed edge auth flow. The private controller path remains available through the Proxmox host Tailscale TCP proxy for governed bootstrap and API automation.
+Plane is public on this platform at `tasks.example.com`, with `plane.example.com` as a convenience alias, but browser access is gated by the shared Keycloak-backed edge auth flow. The private controller path remains available through the Proxmox host Tailscale TCP proxy for governed bootstrap and API automation.
 
 The shared edge certificate now expands through the repo-managed NGINX `webroot` ACME path on `nginx-edge`. Hetzner DNS still governs the public A records, but routine Plane edge certificate expansion no longer depends on DNS-01 propagation.
 
@@ -19,6 +19,7 @@ The shared edge certificate now expands through the repo-managed NGINX `webroot`
 ## Access Model
 
 - public browser surface: `https://tasks.example.com`
+- public browser alias: `https://plane.example.com`
 - private controller path: `http://100.64.0.1:8011`
 - public access is protected by the shared oauth2-proxy and Keycloak edge flow
 - controller-local auth artifacts are mirrored under `.local/plane/`
@@ -89,9 +90,10 @@ After a converge:
 5. `make plane-manage ACTION=list-issues PLANE_ARGS='--workspace lv3-platform --project ADR'`
 6. `make plane-manage ACTION=sync-adrs`
 7. `curl -I https://tasks.example.com/`
-8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/plane/docker-compose.yml ps && sudo ls -l /run/lv3-secrets/plane /etc/lv3/plane /opt/plane/data'`
+8. `curl -I https://plane.example.com/`
+9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/plane/docker-compose.yml ps && sudo ls -l /run/lv3-secrets/plane /etc/lv3/plane /opt/plane/data'`
 
-If step 7 returns `302` to `/oauth2/sign_in`, treat that as the expected authenticated public entrypoint. A second probe to the quoted sign-in URL should then return `302` into `https://sso.example.com/...`.
+If steps 7 and 8 return `302` to `/oauth2/sign_in`, treat that as the expected authenticated public entrypoint. A second probe to the quoted sign-in URL should then return `302` into `https://sso.example.com/...`.
 
 If step 7 returns `308` to `https://nginx.example.com/`, treat that as a shared NGINX publication blocker rather than a Plane runtime failure. The controller path at `http://100.64.0.1:8011` remains the authoritative automation surface until the edge publication lane is reconciled.
 
