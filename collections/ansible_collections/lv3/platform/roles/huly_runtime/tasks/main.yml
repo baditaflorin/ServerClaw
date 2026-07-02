@@ -243,6 +243,33 @@
   no_log: true
   when: _huly_telegram_creds_stat.stat.exists
 
+- name: Check for GitHub App credentials file
+  ansible.builtin.stat:
+    path: "{{ huly_github_credentials_file }}"
+  register: _huly_github_creds_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read GitHub App credentials from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_github_credentials_file }}"
+  register: _huly_github_creds_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: _huly_github_creds_stat.stat.exists
+
+- name: Set GitHub App credential facts
+  ansible.builtin.set_fact:
+    huly_github_app_name: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).app_name }}"
+    huly_github_app_id: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).app_id | string }}"
+    huly_github_client_id: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).client_id }}"
+    huly_github_client_secret: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).client_secret }}"
+    huly_github_private_key: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).private_key | trim }}"
+    huly_github_installation_url: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).installation_url }}"
+  no_log: true
+  when: _huly_github_creds_stat.stat.exists
+
 - name: Render the Huly project environment file
   ansible.builtin.template:
     src: huly.env.j2
