@@ -283,10 +283,21 @@ services:
 {% endif %}
 
 {% if huly_telegram_bot_token and huly_telegram_api_id and huly_telegram_mongo_uri %}
+  # MongoDB — session store for Telegram MTProto (activated alongside telegram service)
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - huly_net
+
   # Telegram integration (activated: BOT_TOKEN + MTProto API credentials + MONGO_URI are set)
   telegram:
     image: hardcoreeng/telegram:${HULY_VERSION}
     restart: unless-stopped
+    depends_on:
+      - mongo
     environment:
       - TELEGRAM_PORT=8086
       - SECRET=${SECRET}
@@ -327,6 +338,9 @@ volumes:
   cr_data:
   cr_certs:
   redpanda:
+{% if huly_telegram_bot_token and huly_telegram_api_id and huly_telegram_mongo_uri %}
+  mongo_data:
+{% endif %}
 
 networks:
   huly_net:
