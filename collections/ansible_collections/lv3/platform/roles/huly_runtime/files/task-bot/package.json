@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@hcengineering/api-client": "0.7.423",
+    "@hcengineering/chunter": "0.7.423",
+    "@hcengineering/contact": "0.7.423",
     "@hcengineering/core": "0.7.423",
     "@hcengineering/rank": "0.7.423",
     "@hcengineering/tracker": "0.7.423",

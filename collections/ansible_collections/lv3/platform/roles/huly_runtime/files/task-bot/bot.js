@@ -1,12 +1,17 @@
 // Telegram command bot for Huly Tracker.
 //
 // /tasks              -> lists the 10 most recently updated issues
-// /task <ID>          -> full details for one issue (e.g. /task HULY-42)
+// /task <ID>          -> full details + quick-action buttons (Done, High
+//                        priority, Delete) so common actions don't need typing
+// /find <keyword>     -> search issue titles in the project
 // /add <text>         -> creates a new issue, then follows up with an
 //                        inline-keyboard category suggestion (tap one to
 //                        file it under that component and prefix the title)
 // /status <ID> <name> -> set status (backlog/todo/in progress/done/cancelled)
 // /priority <ID> <name> -> set priority (urgent/high/medium/low/none)
+// /assign <ID> <name> -> assign to a workspace member by name (substring match)
+// /due <ID> <date>    -> set due date (today, tomorrow, or YYYY-MM-DD)
+// /comment <ID> <text> -> add a comment without touching the title/description
 // /delete <ID>        -> delete an issue
 // Anything else       -> short help message
 //
@@ -25,6 +30,8 @@ const { generateId, SortingOrder } = core
 const { makeRank } = require('@hcengineering/rank')
 const tracker = mergeDefault(require('@hcengineering/tracker'))
 const { IssuePriority } = tracker
+const contact = mergeDefault(require('@hcengineering/contact'))
+const chunter = mergeDefault(require('@hcengineering/chunter'))
 
 const HULY_URL = required('HULY_URL')
 const HULY_TOKEN = required('HULY_TOKEN')
@@ -61,8 +68,8 @@ function sendMessage (chatId, text, extra) {
   return tgCall('sendMessage', { chat_id: chatId, text, disable_web_page_preview: true, ...extra })
 }
 
-function editMessageText (chatId, messageId, text) {
-  return tgCall('editMessageText', { chat_id: chatId, message_id: messageId, text })
+function editMessageText (chatId, messageId, text, extra) {
+  return tgCall('editMessageText', { chat_id: chatId, message_id: messageId, text, ...extra })
 }
 
 function answerCallbackQuery (id, text) {
@@ -94,6 +101,18 @@ async function findIssueByIdentifier (client, identifier) {
   return issue
 }
 
+function taskActionButtons (identifier) {
+  return {
+    reply_markup: {
+      inline_keyboard: [[
+        { text: 'Mark Done', callback_data: `done:${identifier}` },
+        { text: 'High Priority', callback_data: `highpri:${identifier}` },
+        { text: 'Delete', callback_data: `delask:${identifier}` }
+      ]]
+    }
+  }
+}
+
 async function listRecentIssues () {
   const client = await getHulyClient()
   const project = await getProject(client)
@@ -112,6 +131,27 @@ async function listRecentIssues () {
   return lines.join('\n')
 }
 
+async function findIssues (keyword) {
+  const client = await getHulyClient()
+  const project = await getProject(client)
+  const issues = await client.findAll(tracker.class.Issue, { space: project._id })
+
+  const needle = keyword.toLowerCase()
+  const matches = issues.filter((i) => i.title.toLowerCase().includes(needle))
+  if (matches.length === 0) return `No issues matching "${keyword}".`
+
+  const lines = await Promise.all(matches.slice(0, 15).map(async (issue) => {
+    const status = await client.findOne(tracker.class.IssueStatus, { _id: issue.status })
+    return `${issue.identifier}  [${status?.name ?? 'unknown'}]  ${issue.title}`
+  }))
+  return lines.join('\n')
+}
+
+function formatDueDate (ts) {
+  if (ts === null || ts === undefined) return '(none)'
+  return new Date(ts).toISOString().slice(0, 10)
+}
+
 async function getIssueDetails (identifier) {
   const client = await getHulyClient()
   const issue = await findIssueByIdentifier(client, identifier)
@@ -121,20 +161,30 @@ async function getIssueDetails (identifier) {
   const component = issue.component !== null
     ? await client.findOne(tracker.class.Component, { _id: issue.component })
     : undefined
+  const assignee = issue.assignee !== null
+    ? await client.findOne(contact.class.Person, { _id: issue.assignee })
+    : undefined
   const description = issue.description
     ? await client.fetchMarkup(issue._class, issue._id, 'description', issue.description, 'markdown')
     : ''
+  const comments = await client.findAll(chunter.class.ChatMessage, { attachedTo: issue._id })
 
   const lines = [
     `${issue.identifier}: ${issue.title}`,
     `status: ${status?.name ?? 'unknown'}`,
     `priority: ${priorityName ?? 'unknown'}`,
-    `category: ${component?.label ?? '(none)'}`
+    `category: ${component?.label ?? '(none)'}`,
+    `assignee: ${assignee?.name ?? '(unassigned)'}`,
+    `due: ${formatDueDate(issue.dueDate)}`
   ]
   if (description.trim().length > 0) {
     lines.push('', description.trim())
   }
-  return lines.join('\n')
+  if (comments.length > 0) {
+    lines.push('', `${comments.length} comment(s):`)
+    for (const c of comments.slice(-5)) lines.push(`- ${c.message}`)
+  }
+  return { text: lines.join('\n'), identifier: issue.identifier }
 }
 
 const DEFAULT_CATEGORIES = ['Bug', 'Feature', 'Chore', 'Research']
@@ -236,6 +286,52 @@ async function setPriority (identifier, name) {
   await client.updateDoc(tracker.class.Issue, issue.space, issue._id, { priority: IssuePriority[match] })
 }
 
+async function assignIssue (identifier, name) {
+  const client = await getHulyClient()
+  const issue = await findIssueByIdentifier(client, identifier)
+
+  const people = await client.findAll(contact.class.Person, {})
+  const needle = name.trim().toLowerCase()
+  const matches = people.filter((p) => (p.name ?? '').toLowerCase().includes(needle))
+
+  if (matches.length === 0) throw new Error(`no workspace member matching "${name}"`)
+  if (matches.length > 1) {
+    const names = matches.map((p) => p.name).join(', ')
+    throw new Error(`multiple members match "${name}": ${names} — be more specific`)
+  }
+
+  await client.updateDoc(tracker.class.Issue, issue.space, issue._id, { assignee: matches[0]._id })
+  return matches[0].name
+}
+
+function parseDueDate (input) {
+  const key = input.trim().toLowerCase()
+  const now = new Date()
+  if (key === 'today') return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  if (key === 'tomorrow') return new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime()
+  const parsed = Date.parse(input.trim())
+  if (isNaN(parsed)) throw new Error(`unrecognized date "${input}" — try: today, tomorrow, or YYYY-MM-DD`)
+  return parsed
+}
+
+async function setDueDate (identifier, dateStr) {
+  const client = await getHulyClient()
+  const issue = await findIssueByIdentifier(client, identifier)
+  const ts = parseDueDate(dateStr)
+  await client.updateDoc(tracker.class.Issue, issue.space, issue._id, { dueDate: ts })
+  return formatDueDate(ts)
+}
+
+async function addComment (identifier, text) {
+  const client = await getHulyClient()
+  const issue = await findIssueByIdentifier(client, identifier)
+  const commentId = generateId()
+  await client.addCollection(
+    chunter.class.ChatMessage, issue.space, issue._id, issue._class, 'comments',
+    { message: text }, commentId
+  )
+}
+
 async function deleteIssue (identifier) {
   const client = await getHulyClient()
   const issue = await findIssueByIdentifier(client, identifier)
@@ -308,15 +404,78 @@ async function handleCallbackQuery (query) {
       console.error(err)
       await answerCallbackQuery(query.id, `Failed: ${err.message}`)
     }
+    return
+  }
+
+  if (data.startsWith('done:')) {
+    const identifier = data.slice('done:'.length)
+    try {
+      await setStatus(identifier, 'done')
+      await answerCallbackQuery(query.id, `${identifier} marked Done`)
+      if (chatId !== undefined) await editMessageText(chatId, messageId, `${identifier} marked Done.`)
+    } catch (err) {
+      await answerCallbackQuery(query.id, `Failed: ${err.message}`)
+    }
+    return
+  }
+
+  if (data.startsWith('highpri:')) {
+    const identifier = data.slice('highpri:'.length)
+    try {
+      await setPriority(identifier, 'high')
+      await answerCallbackQuery(query.id, `${identifier} set to High priority`)
+      if (chatId !== undefined) await editMessageText(chatId, messageId, `${identifier} set to High priority.`)
+    } catch (err) {
+      await answerCallbackQuery(query.id, `Failed: ${err.message}`)
+    }
+    return
+  }
+
+  if (data.startsWith('delask:')) {
+    const identifier = data.slice('delask:'.length)
+    await answerCallbackQuery(query.id)
+    if (chatId !== undefined) {
+      await editMessageText(chatId, messageId, `Delete ${identifier}? This can't be undone.`, {
+        reply_markup: {
+          inline_keyboard: [[
+            { text: 'Confirm Delete', callback_data: `delyes:${identifier}` },
+            { text: 'Cancel', callback_data: `delno:${identifier}` }
+          ]]
+        }
+      })
+    }
+    return
+  }
+
+  if (data.startsWith('delyes:')) {
+    const identifier = data.slice('delyes:'.length)
+    try {
+      await deleteIssue(identifier)
+      await answerCallbackQuery(query.id, `${identifier} deleted`)
+      if (chatId !== undefined) await editMessageText(chatId, messageId, `${identifier} deleted.`)
+    } catch (err) {
+      await answerCallbackQuery(query.id, `Failed: ${err.message}`)
+    }
+    return
+  }
+
+  if (data.startsWith('delno:')) {
+    const identifier = data.slice('delno:'.length)
+    await answerCallbackQuery(query.id, 'Cancelled')
+    if (chatId !== undefined) await editMessageText(chatId, messageId, `Delete cancelled for ${identifier}.`)
   }
 }
 
 const HELP_TEXT = [
   '/tasks - list the 10 most recently updated issues',
-  '/task <ID> - show full details (e.g. /task HULY-42)',
+  '/find <keyword> - search issue titles',
+  '/task <ID> - full details + quick-action buttons',
   '/add <text> - create a new issue, then suggests a category',
   '/status <ID> <name> - backlog | todo | in progress | done | cancelled',
   '/priority <ID> <name> - urgent | high | medium | low | none',
+  '/assign <ID> <name> - assign to a workspace member',
+  '/due <ID> <date> - today | tomorrow | YYYY-MM-DD',
+  '/comment <ID> <text> - add a comment',
   '/delete <ID> - delete an issue'
 ].join('\n')
 
@@ -345,10 +504,22 @@ async function handleMessage (message) {
     return
   }
 
+  if (text.startsWith('/find ')) {
+    const keyword = text.slice('/find '.length).trim()
+    try {
+      await sendMessage(chatId, await findIssues(keyword))
+    } catch (err) {
+      console.error(err)
+      await sendMessage(chatId, `failed to search: ${err.message}`)
+    }
+    return
+  }
+
   if (text.startsWith('/task ')) {
     const identifier = text.slice('/task '.length).trim()
     try {
-      await sendMessage(chatId, await getIssueDetails(identifier))
+      const { text: details } = await getIssueDetails(identifier)
+      await sendMessage(chatId, details, taskActionButtons(identifier))
     } catch (err) {
       console.error(err)
       await sendMessage(chatId, `failed to get task: ${err.message}`)
@@ -395,6 +566,60 @@ async function handleMessage (message) {
     } catch (err) {
       console.error(err)
       await sendMessage(chatId, `failed to set priority: ${err.message}`)
+    }
+    return
+  }
+
+  if (text.startsWith('/assign ')) {
+    const rest = text.slice('/assign '.length).trim()
+    const [identifier, ...nameParts] = rest.split(' ')
+    const name = nameParts.join(' ')
+    if (name.length === 0) {
+      await sendMessage(chatId, 'usage: /assign <ID> <name>')
+      return
+    }
+    try {
+      const assignedName = await assignIssue(identifier, name)
+      await sendMessage(chatId, `assigned ${identifier} to ${assignedName}`)
+    } catch (err) {
+      console.error(err)
+      await sendMessage(chatId, `failed to assign: ${err.message}`)
+    }
+    return
+  }
+
+  if (text.startsWith('/due ')) {
+    const rest = text.slice('/due '.length).trim()
+    const [identifier, ...dateParts] = rest.split(' ')
+    const dateStr = dateParts.join(' ')
+    if (dateStr.length === 0) {
+      await sendMessage(chatId, 'usage: /due <ID> <today|tomorrow|YYYY-MM-DD>')
+      return
+    }
+    try {
+      const formatted = await setDueDate(identifier, dateStr)
+      await sendMessage(chatId, `set ${identifier} due date to ${formatted}`)
+    } catch (err) {
+      console.error(err)
+      await sendMessage(chatId, `failed to set due date: ${err.message}`)
+    }
+    return
+  }
+
+  if (text.startsWith('/comment ')) {
+    const rest = text.slice('/comment '.length).trim()
+    const [identifier, ...commentParts] = rest.split(' ')
+    const comment = commentParts.join(' ')
+    if (comment.length === 0) {
+      await sendMessage(chatId, 'usage: /comment <ID> <text>')
+      return
+    }
+    try {
+      await addComment(identifier, comment)
+      await sendMessage(chatId, `added comment to ${identifier}`)
+    } catch (err) {
+      console.error(err)
+      await sendMessage(chatId, `failed to add comment: ${err.message}`)
     }
     return
   }
