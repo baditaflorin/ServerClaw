@@ -1,0 +1,17 @@
+{
+  "name": "huly-task-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram bot: /tasks lists recent Huly issues, /add creates one",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "@hcengineering/api-client": "^0.7.3",
+    "@hcengineering/core": "^0.7.4",
+    "@hcengineering/rank": "^0.7.3",
+    "@hcengineering/tracker": "^0.7.0",
+    "ws": "^8.16.0"
+  }
+}
