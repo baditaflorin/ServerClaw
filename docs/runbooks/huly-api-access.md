@@ -32,31 +32,21 @@ TypeScript/Node.js package with a WebSocket client (`connect`) and a REST
 client (`connectRest`), authenticating as a Huly account (email/password or a
 signed token) against a specific workspace.
 
-### 2a. npm auth
+### 2a. Install
 
-The package is published to **GitHub Packages**, not npmjs.org:
-
-```bash
-gh auth refresh -h github.com -s read:packages
-gh auth token   # use as the PAT below
-```
-
-`.npmrc`:
-```
-//npm.pkg.github.com/:_authToken=<GITHUB_PAT>
-@hcengineering:registry=https://npm.pkg.github.com
-```
-
-### 2b. Install
+All `@hcengineering/*` packages (including `api-client`) are published to the
+public npmjs.org registry — no special registry config or token needed.
 
 ```bash
-npm install @hcengineering/api-client @hcengineering/core @hcengineering/tracker @hcengineering/rank ws
+npm install @hcengineering/api-client@0.7.423 @hcengineering/core@0.7.423 \
+            @hcengineering/tracker@0.7.423 @hcengineering/rank@0.7.423 ws
 ```
 
-Pin close to the deployed `huly_version` (see role defaults) — this repo runs
-the `v0.7.423` line.
+Pin the exact version to match the deployed `huly_version` (see role
+defaults) — this repo runs the `v0.7.423` line. A caret range (`^0.7.3`) can
+silently resolve to a newer client version than the server speaks.
 
-### 2c. Connect with a token (preferred — see §3)
+### 2b. Connect with a token (preferred — see §3)
 
 ```ts
 import { connect, NodeWebSocketFactory, type ConnectOptions } from '@hcengineering/api-client'
@@ -69,7 +59,7 @@ const client = await connect('https://huly.example.com', {
 } satisfies ConnectOptions)
 ```
 
-### 2d. Create a task (Tracker issue)
+### 2c. Create a task (Tracker issue)
 
 ```ts
 import core, { generateId, SortingOrder, type Ref } from '@hcengineering/core'
@@ -184,8 +174,9 @@ Restrict to an allow-listed Telegram user ID (yours) so randoms can't file
 issues into your tracker.
 
 See `collections/ansible_collections/lv3/platform/roles/huly_runtime/files/task-bot/`
-for the implementation, activated by `huly_telegram_automation_bot_token` /
-`.local/huly/telegram-automation-bot-token`.
+for the implementation, activated by `.local/huly/task-bot-credentials.yml`
+(`telegram_bot_token`, `allowed_user_id`, `project_identifier`) together with
+`.local/huly/automation-credentials.yml` (`token`, `workspace`).
 
 ---
 

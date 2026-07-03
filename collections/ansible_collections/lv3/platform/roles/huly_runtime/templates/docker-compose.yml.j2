@@ -340,7 +340,7 @@ services:
     image: node:20-alpine
     restart: unless-stopped
     working_dir: /app
-    command: sh -c "npm ci --omit=dev && node bot.js"
+    command: sh -c "npm install --omit=dev && node bot.js"
     volumes:
       - ./task-bot:/app
     environment:
@@ -361,7 +361,7 @@ services:
     image: node:20-alpine
     restart: unless-stopped
     working_dir: /app
-    command: sh -c "npm ci --omit=dev && node watcher.js"
+    command: sh -c "npm install --omit=dev && node watcher.js"
     volumes:
       - ./gmail-task-watcher:/app
       - gmail_watcher_state:/data

@@ -11,10 +11,10 @@
   "dependencies": {
     "@google-cloud/pubsub": "^4.9.0",
     "googleapis": "^144.0.0",
-    "@hcengineering/api-client": "^0.7.3",
-    "@hcengineering/core": "^0.7.4",
-    "@hcengineering/rank": "^0.7.3",
-    "@hcengineering/tracker": "^0.7.0",
+    "@hcengineering/api-client": "0.7.423",
+    "@hcengineering/core": "0.7.423",
+    "@hcengineering/rank": "0.7.423",
+    "@hcengineering/tracker": "0.7.423",
     "ws": "^8.16.0"
   }
 }

@@ -53,11 +53,6 @@ huly_automation_token: ""
 huly_automation_workspace: ""
 huly_automation_credentials_file: "{{ repo_shared_local_root }}/huly/automation-credentials.yml"
 
-# GitHub Packages PAT (read:packages) used by task-bot/gmail-task-watcher
-# containers to npm-install @hcengineering/* at startup.
-huly_npm_github_token: ""
-huly_npm_github_token_file: "{{ repo_shared_local_root }}/huly/npm-github-token"
-
 # Telegram task-bot — /tasks lists issues, /add creates one. Uses its OWN
 # bot token (never huly_telegram_bot_token) so it can't steal updates from
 # the MTProto sync bot.

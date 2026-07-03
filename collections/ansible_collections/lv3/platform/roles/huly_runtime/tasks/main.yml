@@ -313,28 +313,6 @@
   no_log: true
   when: _huly_automation_creds_stat.stat.exists
 
-- name: Check for npm GitHub Packages token file
-  ansible.builtin.stat:
-    path: "{{ huly_npm_github_token_file }}"
-  register: _huly_npm_token_stat
-  delegate_to: localhost
-  become: false
-
-- name: Read npm GitHub Packages token from local file
-  ansible.builtin.slurp:
-    src: "{{ huly_npm_github_token_file }}"
-  register: _huly_npm_token_raw
-  delegate_to: localhost
-  become: false
-  no_log: true
-  when: _huly_npm_token_stat.stat.exists
-
-- name: Set npm GitHub Packages token fact
-  ansible.builtin.set_fact:
-    huly_npm_github_token: "{{ _huly_npm_token_raw.content | b64decode | trim }}"
-  no_log: true
-  when: _huly_npm_token_stat.stat.exists
-
 - name: Check for task-bot credentials file
   ansible.builtin.stat:
     path: "{{ huly_task_bot_credentials_file }}"
@@ -465,14 +443,6 @@
     - package.json
   when: huly_automation_token | length > 0 and huly_task_bot_telegram_token | length > 0
 
-- name: Render task-bot .npmrc
-  ansible.builtin.template:
-    src: npmrc.j2
-    dest: "{{ huly_site_dir }}/task-bot/.npmrc"
-    mode: "0600"
-  no_log: true
-  when: huly_automation_token | length > 0 and huly_task_bot_telegram_token | length > 0
-
 - name: Ensure gmail-task-watcher directory exists
   ansible.builtin.file:
     path: "{{ huly_site_dir }}/gmail-task-watcher"
@@ -489,14 +459,6 @@
     - watcher.js
     - authorize.js
     - package.json
-  when: huly_gmail_watcher_active
-
-- name: Render gmail-task-watcher .npmrc
-  ansible.builtin.template:
-    src: npmrc.j2
-    dest: "{{ huly_site_dir }}/gmail-task-watcher/.npmrc"
-    mode: "0600"
-  no_log: true
   when: huly_gmail_watcher_active
 
 - name: Copy Gmail watcher service account key to guest
