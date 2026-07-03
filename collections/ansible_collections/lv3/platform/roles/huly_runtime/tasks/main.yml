@@ -290,6 +290,191 @@
   no_log: true
   when: _huly_github_creds_stat.stat.exists
 
+- name: Check for automation credentials file
+  ansible.builtin.stat:
+    path: "{{ huly_automation_credentials_file }}"
+  register: _huly_automation_creds_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read automation credentials from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_automation_credentials_file }}"
+  register: _huly_automation_creds_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: _huly_automation_creds_stat.stat.exists
+
+- name: Set automation credential facts
+  ansible.builtin.set_fact:
+    huly_automation_token: "{{ (_huly_automation_creds_raw.content | b64decode | from_yaml).token }}"
+    huly_automation_workspace: "{{ (_huly_automation_creds_raw.content | b64decode | from_yaml).workspace }}"
+  no_log: true
+  when: _huly_automation_creds_stat.stat.exists
+
+- name: Check for task-bot credentials file
+  ansible.builtin.stat:
+    path: "{{ huly_task_bot_credentials_file }}"
+  register: _huly_task_bot_creds_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read task-bot credentials from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_task_bot_credentials_file }}"
+  register: _huly_task_bot_creds_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: _huly_task_bot_creds_stat.stat.exists
+
+- name: Set task-bot credential facts
+  ansible.builtin.set_fact:
+    huly_task_bot_telegram_token: "{{ (_huly_task_bot_creds_raw.content | b64decode | from_yaml).telegram_bot_token }}"
+    huly_task_bot_allowed_user_id: "{{ (_huly_task_bot_creds_raw.content | b64decode | from_yaml).allowed_user_id | string }}"
+    huly_task_bot_project_identifier: "{{ (_huly_task_bot_creds_raw.content | b64decode | from_yaml).project_identifier }}"
+  no_log: true
+  when: _huly_task_bot_creds_stat.stat.exists
+
+- name: Check for Gmail watcher OAuth client file
+  ansible.builtin.stat:
+    path: "{{ huly_gmail_watcher_oauth_client_file }}"
+  register: _huly_gmail_watcher_oauth_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read Gmail watcher OAuth client from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_gmail_watcher_oauth_client_file }}"
+  register: _huly_gmail_watcher_oauth_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: _huly_gmail_watcher_oauth_stat.stat.exists
+
+- name: Set Gmail watcher OAuth client facts
+  ansible.builtin.set_fact:
+    huly_gmail_watcher_client_id: "{{ (_huly_gmail_watcher_oauth_raw.content | b64decode | from_json).installed.client_id }}"
+    huly_gmail_watcher_client_secret: "{{ (_huly_gmail_watcher_oauth_raw.content | b64decode | from_json).installed.client_secret }}"
+  no_log: true
+  when: _huly_gmail_watcher_oauth_stat.stat.exists
+
+- name: Check for Gmail watcher refresh token file
+  ansible.builtin.stat:
+    path: "{{ huly_gmail_watcher_refresh_token_file }}"
+  register: _huly_gmail_watcher_refresh_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read Gmail watcher refresh token from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_gmail_watcher_refresh_token_file }}"
+  register: _huly_gmail_watcher_refresh_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: _huly_gmail_watcher_refresh_stat.stat.exists
+
+- name: Set Gmail watcher refresh token fact
+  ansible.builtin.set_fact:
+    huly_gmail_watcher_refresh_token: "{{ _huly_gmail_watcher_refresh_raw.content | b64decode | trim }}"
+  no_log: true
+  when: _huly_gmail_watcher_refresh_stat.stat.exists
+
+- name: Check for Gmail watcher GCP project file
+  ansible.builtin.stat:
+    path: "{{ huly_gmail_watcher_gcp_project_file }}"
+  register: _huly_gmail_watcher_gcp_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read Gmail watcher GCP project from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_gmail_watcher_gcp_project_file }}"
+  register: _huly_gmail_watcher_gcp_raw
+  delegate_to: localhost
+  become: false
+  when: _huly_gmail_watcher_gcp_stat.stat.exists
+
+- name: Set Gmail watcher GCP project fact
+  ansible.builtin.set_fact:
+    huly_gmail_watcher_gcp_project_id: "{{ _huly_gmail_watcher_gcp_raw.content | b64decode | trim }}"
+  when: _huly_gmail_watcher_gcp_stat.stat.exists
+
+- name: Check for Gmail watcher service account key file
+  ansible.builtin.stat:
+    path: "{{ huly_gmail_watcher_service_account_file }}"
+  register: _huly_gmail_watcher_sa_stat
+  delegate_to: localhost
+  become: false
+
+- name: Check for Gmail watcher task rules file
+  ansible.builtin.stat:
+    path: "{{ huly_gmail_watcher_rules_file }}"
+  register: _huly_gmail_watcher_rules_stat
+  delegate_to: localhost
+  become: false
+
+- name: Set Gmail watcher activation fact
+  ansible.builtin.set_fact:
+    huly_gmail_watcher_active: >-
+      {{ huly_automation_token | length > 0
+         and huly_gmail_watcher_client_id | length > 0
+         and huly_gmail_watcher_refresh_token | length > 0
+         and huly_gmail_watcher_gcp_project_id | length > 0
+         and _huly_gmail_watcher_sa_stat.stat.exists
+         and _huly_gmail_watcher_rules_stat.stat.exists }}
+
+- name: Ensure task-bot directory exists
+  ansible.builtin.file:
+    path: "{{ huly_site_dir }}/task-bot"
+    state: directory
+    mode: "0755"
+  when: huly_automation_token | length > 0 and huly_task_bot_telegram_token | length > 0
+
+- name: Sync task-bot source files
+  ansible.builtin.copy:
+    src: "task-bot/{{ item }}"
+    dest: "{{ huly_site_dir }}/task-bot/{{ item }}"
+    mode: "0644"
+  loop:
+    - bot.js
+    - package.json
+  when: huly_automation_token | length > 0 and huly_task_bot_telegram_token | length > 0
+
+- name: Ensure gmail-task-watcher directory exists
+  ansible.builtin.file:
+    path: "{{ huly_site_dir }}/gmail-task-watcher"
+    state: directory
+    mode: "0755"
+  when: huly_gmail_watcher_active
+
+- name: Sync gmail-task-watcher source files
+  ansible.builtin.copy:
+    src: "gmail-task-watcher/{{ item }}"
+    dest: "{{ huly_site_dir }}/gmail-task-watcher/{{ item }}"
+    mode: "0644"
+  loop:
+    - watcher.js
+    - authorize.js
+    - package.json
+  when: huly_gmail_watcher_active
+
+- name: Copy Gmail watcher service account key to guest
+  ansible.builtin.copy:
+    src: "{{ huly_gmail_watcher_service_account_file }}"
+    dest: "{{ huly_site_dir }}/gmail-task-watcher/service-account.json"
+    mode: "0600"
+  when: huly_gmail_watcher_active
+
+- name: Copy Gmail watcher task rules to guest
+  ansible.builtin.copy:
+    src: "{{ huly_gmail_watcher_rules_file }}"
+    dest: "{{ huly_site_dir }}/gmail-task-watcher/rules.json"
+    mode: "0644"
+  when: huly_gmail_watcher_active
+
 - name: Render the Huly project environment file
   ansible.builtin.template:
     src: huly.env.j2
