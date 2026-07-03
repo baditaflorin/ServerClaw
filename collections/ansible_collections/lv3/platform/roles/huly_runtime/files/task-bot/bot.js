@@ -1,7 +1,14 @@
 // Telegram command bot for Huly Tracker.
-// /tasks            -> lists the 10 most recently updated issues in the project
-// /add <text>       -> creates a new issue titled <text>
-// Anything else     -> short help message
+//
+// /tasks              -> lists the 10 most recently updated issues
+// /task <ID>          -> full details for one issue (e.g. /task HULY-42)
+// /add <text>         -> creates a new issue, then follows up with an
+//                        inline-keyboard category suggestion (tap one to
+//                        file it under that component and prefix the title)
+// /status <ID> <name> -> set status (backlog/todo/in progress/done/cancelled)
+// /priority <ID> <name> -> set priority (urgent/high/medium/low/none)
+// /delete <ID>        -> delete an issue
+// Anything else       -> short help message
 //
 // Uses its OWN Telegram bot (separate from huly-telegram-1's MTProto sync
 // bot) so long-polling here never competes for updates. Restricted to a
@@ -50,8 +57,16 @@ async function tgCall (method, body) {
   return data
 }
 
-function sendMessage (chatId, text) {
-  return tgCall('sendMessage', { chat_id: chatId, text, disable_web_page_preview: true })
+function sendMessage (chatId, text, extra) {
+  return tgCall('sendMessage', { chat_id: chatId, text, disable_web_page_preview: true, ...extra })
+}
+
+function editMessageText (chatId, messageId, text) {
+  return tgCall('editMessageText', { chat_id: chatId, message_id: messageId, text })
+}
+
+function answerCallbackQuery (id, text) {
+  return tgCall('answerCallbackQuery', { callback_query_id: id, text })
 }
 
 let hulyClient
@@ -67,10 +82,21 @@ async function getHulyClient () {
   return hulyClient
 }
 
-async function listRecentIssues () {
-  const client = await getHulyClient()
+async function getProject (client) {
   const project = await client.findOne(tracker.class.Project, { identifier: HULY_PROJECT_IDENTIFIER })
   if (project === undefined) throw new Error(`project ${HULY_PROJECT_IDENTIFIER} not found`)
+  return project
+}
+
+async function findIssueByIdentifier (client, identifier) {
+  const issue = await client.findOne(tracker.class.Issue, { identifier })
+  if (issue === undefined) throw new Error(`issue ${identifier} not found`)
+  return issue
+}
+
+async function listRecentIssues () {
+  const client = await getHulyClient()
+  const project = await getProject(client)
 
   const issues = await client.findAll(
     tracker.class.Issue,
@@ -86,10 +112,55 @@ async function listRecentIssues () {
   return lines.join('\n')
 }
 
+async function getIssueDetails (identifier) {
+  const client = await getHulyClient()
+  const issue = await findIssueByIdentifier(client, identifier)
+
+  const status = await client.findOne(tracker.class.IssueStatus, { _id: issue.status })
+  const priorityName = Object.entries(IssuePriority).find(([k, v]) => v === issue.priority && isNaN(Number(k)))?.[0]
+  const component = issue.component !== null
+    ? await client.findOne(tracker.class.Component, { _id: issue.component })
+    : undefined
+  const description = issue.description
+    ? await client.fetchMarkup(issue._class, issue._id, 'description', issue.description, 'markdown')
+    : ''
+
+  const lines = [
+    `${issue.identifier}: ${issue.title}`,
+    `status: ${status?.name ?? 'unknown'}`,
+    `priority: ${priorityName ?? 'unknown'}`,
+    `category: ${component?.label ?? '(none)'}`
+  ]
+  if (description.trim().length > 0) {
+    lines.push('', description.trim())
+  }
+  return lines.join('\n')
+}
+
+const DEFAULT_CATEGORIES = ['Bug', 'Feature', 'Chore', 'Research']
+
+async function ensureCategories (client, project) {
+  const existing = await client.findAll(tracker.class.Component, { space: project._id })
+  if (existing.length > 0) return existing.slice(0, 4)
+
+  const created = []
+  for (const label of DEFAULT_CATEGORIES) {
+    const id = generateId()
+    await client.createDoc(tracker.class.Component, project._id, {
+      label,
+      description: '',
+      lead: null,
+      comments: 0,
+      attachments: 0
+    }, id)
+    created.push({ _id: id, label })
+  }
+  return created
+}
+
 async function createIssue (title) {
   const client = await getHulyClient()
-  const project = await client.findOne(tracker.class.Project, { identifier: HULY_PROJECT_IDENTIFIER })
-  if (project === undefined) throw new Error(`project ${HULY_PROJECT_IDENTIFIER} not found`)
+  const project = await getProject(client)
 
   const issueId = generateId()
   const inc = await client.updateDoc(
@@ -102,6 +173,7 @@ async function createIssue (title) {
   )
 
   const description = await client.uploadMarkup(tracker.class.Issue, issueId, 'description', '', 'markdown')
+  const identifier = `${project.identifier}-${sequence}`
 
   await client.addCollection(
     tracker.class.Issue, project._id, project._id, project._class, 'issues',
@@ -111,7 +183,7 @@ async function createIssue (title) {
       status: project.defaultIssueStatus,
       number: sequence,
       kind: tracker.taskTypes.Issue,
-      identifier: `${project.identifier}-${sequence}`,
+      identifier,
       priority: IssuePriority.NoPriority,
       assignee: null,
       component: null,
@@ -127,12 +199,125 @@ async function createIssue (title) {
     },
     issueId
   )
-  return `${project.identifier}-${sequence}`
+  return { issueId, identifier, project }
+}
+
+async function setStatus (identifier, name) {
+  const client = await getHulyClient()
+  const issue = await findIssueByIdentifier(client, identifier)
+
+  const aliases = {
+    backlog: tracker.status.Backlog,
+    todo: tracker.status.Todo,
+    'in progress': tracker.status.InProgress,
+    inprogress: tracker.status.InProgress,
+    done: tracker.status.Done,
+    cancelled: tracker.status.Canceled,
+    canceled: tracker.status.Canceled
+  }
+  const statusRef = aliases[name.trim().toLowerCase()]
+  if (statusRef === undefined) {
+    throw new Error(`unknown status "${name}" — try: backlog, todo, in progress, done, cancelled`)
+  }
+  await client.updateDoc(tracker.class.Issue, issue.space, issue._id, { status: statusRef })
+}
+
+async function setPriority (identifier, name) {
+  const client = await getHulyClient()
+  const issue = await findIssueByIdentifier(client, identifier)
+
+  const key = name.trim().toLowerCase()
+  const match = Object.keys(IssuePriority).find(
+    (k) => isNaN(Number(k)) && k.toLowerCase() === (key === 'none' ? 'nopriority' : key)
+  )
+  if (match === undefined) {
+    throw new Error(`unknown priority "${name}" — try: urgent, high, medium, low, none`)
+  }
+  await client.updateDoc(tracker.class.Issue, issue.space, issue._id, { priority: IssuePriority[match] })
+}
+
+async function deleteIssue (identifier) {
+  const client = await getHulyClient()
+  const issue = await findIssueByIdentifier(client, identifier)
+  await client.removeDoc(tracker.class.Issue, issue.space, issue._id)
+}
+
+// In-memory: short callback keys -> pending categorization context. Lost on
+// restart, which just means an in-flight suggestion has to be redone — low
+// stakes for a personal tool.
+const pendingCategorization = new Map()
+
+async function suggestCategories (chatId, issueId, identifier, title) {
+  const client = await getHulyClient()
+  const project = await getProject(client)
+  const categories = await ensureCategories(client, project)
+
+  const key = generateId().slice(0, 10)
+  pendingCategorization.set(key, { issueId, projectSpace: project._id })
+
+  const buttons = categories.map((c, i) => ([{ text: c.label, callback_data: `cat:${key}:${i}` }]))
+  buttons.push([{ text: 'Skip', callback_data: `skip:${key}` }])
+  pendingCategorization.get(key).options = categories
+
+  await sendMessage(chatId, `Pick a category for ${identifier}: ${title}`, {
+    reply_markup: { inline_keyboard: buttons }
+  })
+}
+
+async function handleCallbackQuery (query) {
+  const userId = query.from?.id
+  if (String(userId) !== String(TELEGRAM_ALLOWED_USER_ID)) {
+    console.warn(`ignoring callback from unauthorized user id ${userId}`)
+    return
+  }
+
+  const data = query.data ?? ''
+  const chatId = query.message?.chat?.id
+  const messageId = query.message?.message_id
+
+  if (data.startsWith('skip:')) {
+    const key = data.slice('skip:'.length)
+    pendingCategorization.delete(key)
+    await answerCallbackQuery(query.id, 'Skipped')
+    if (chatId !== undefined) await editMessageText(chatId, messageId, 'Skipped categorization.')
+    return
+  }
+
+  if (data.startsWith('cat:')) {
+    const [, key, indexStr] = data.split(':')
+    const pending = pendingCategorization.get(key)
+    if (pending === undefined) {
+      await answerCallbackQuery(query.id, 'This suggestion expired')
+      return
+    }
+    const category = pending.options[Number(indexStr)]
+    try {
+      const client = await getHulyClient()
+      const issue = await client.findOne(tracker.class.Issue, { _id: pending.issueId })
+      if (issue === undefined) throw new Error('issue no longer exists')
+      await client.updateDoc(tracker.class.Issue, pending.projectSpace, issue._id, {
+        component: category._id,
+        title: `[${category.label}] ${issue.title}`
+      })
+      pendingCategorization.delete(key)
+      await answerCallbackQuery(query.id, `Categorized as ${category.label}`)
+      if (chatId !== undefined) {
+        await editMessageText(chatId, messageId, `Categorized ${issue.identifier} as ${category.label}.`)
+      }
+    } catch (err) {
+      console.error(err)
+      await answerCallbackQuery(query.id, `Failed: ${err.message}`)
+    }
+  }
 }
 
 const HELP_TEXT = [
   '/tasks - list the 10 most recently updated issues',
-  '/add <text> - create a new issue titled <text>'
+  '/task <ID> - show full details (e.g. /task HULY-42)',
+  '/add <text> - create a new issue, then suggests a category',
+  '/status <ID> <name> - backlog | todo | in progress | done | cancelled',
+  '/priority <ID> <name> - urgent | high | medium | low | none',
+  '/delete <ID> - delete an issue'
 ].join('\n')
 
 async function handleMessage (message) {
@@ -152,11 +337,21 @@ async function handleMessage (message) {
 
   if (text === '/tasks') {
     try {
-      const listing = await listRecentIssues()
-      await sendMessage(chatId, listing)
+      await sendMessage(chatId, await listRecentIssues())
     } catch (err) {
       console.error(err)
       await sendMessage(chatId, `failed to list issues: ${err.message}`)
+    }
+    return
+  }
+
+  if (text.startsWith('/task ')) {
+    const identifier = text.slice('/task '.length).trim()
+    try {
+      await sendMessage(chatId, await getIssueDetails(identifier))
+    } catch (err) {
+      console.error(err)
+      await sendMessage(chatId, `failed to get task: ${err.message}`)
     }
     return
   }
@@ -168,11 +363,50 @@ async function handleMessage (message) {
       return
     }
     try {
-      const identifier = await createIssue(title)
+      const { issueId, identifier } = await createIssue(title)
       await sendMessage(chatId, `created ${identifier}: ${title}`)
+      await suggestCategories(chatId, issueId, identifier, title)
     } catch (err) {
       console.error(err)
       await sendMessage(chatId, `failed to create issue: ${err.message}`)
+    }
+    return
+  }
+
+  if (text.startsWith('/status ')) {
+    const rest = text.slice('/status '.length).trim()
+    const [identifier, ...nameParts] = rest.split(' ')
+    try {
+      await setStatus(identifier, nameParts.join(' '))
+      await sendMessage(chatId, `updated ${identifier} status`)
+    } catch (err) {
+      console.error(err)
+      await sendMessage(chatId, `failed to set status: ${err.message}`)
+    }
+    return
+  }
+
+  if (text.startsWith('/priority ')) {
+    const rest = text.slice('/priority '.length).trim()
+    const [identifier, ...nameParts] = rest.split(' ')
+    try {
+      await setPriority(identifier, nameParts.join(' '))
+      await sendMessage(chatId, `updated ${identifier} priority`)
+    } catch (err) {
+      console.error(err)
+      await sendMessage(chatId, `failed to set priority: ${err.message}`)
+    }
+    return
+  }
+
+  if (text.startsWith('/delete ')) {
+    const identifier = text.slice('/delete '.length).trim()
+    try {
+      await deleteIssue(identifier)
+      await sendMessage(chatId, `deleted ${identifier}`)
+    } catch (err) {
+      console.error(err)
+      await sendMessage(chatId, `failed to delete: ${err.message}`)
     }
     return
   }
@@ -197,6 +431,8 @@ async function pollLoop () {
       offset = update.update_id + 1
       if (update.message !== undefined) {
         await handleMessage(update.message).catch((err) => console.error('handleMessage error:', err))
+      } else if (update.callback_query !== undefined) {
+        await handleCallbackQuery(update.callback_query).catch((err) => console.error('handleCallbackQuery error:', err))
       }
     }
   }
