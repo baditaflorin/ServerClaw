@@ -73,49 +73,4 @@ server {
         rewrite ^/_stats(/.*)$ $1 break;
         proxy_pass http://stats:4900/;
     }
-
-    # Integration routes — resolver defers DNS lookup to request time so nginx
-    # starts even when the integration container isn't running yet (returns 502
-    # until the corresponding make converge-huly run activates the service).
-    resolver 127.0.0.11 valid=30s ipv6=off;
-
-    location /_calendar {
-        set $cal_backend http://calendar:8095;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        rewrite ^/_calendar(/.*)$ $1 break;
-        proxy_pass $cal_backend;
-    }
-
-    location /_gmail {
-        set $gmail_backend http://gmail:8088;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        rewrite ^/_gmail(/.*)$ $1 break;
-        proxy_pass $gmail_backend;
-    }
-
-    location /_telegram {
-        set $tg_backend http://telegram:8086;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        rewrite ^/_telegram(/.*)$ $1 break;
-        proxy_pass $tg_backend;
-    }
-
-    location /_github {
-        set $gh_backend http://github:8083;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-        rewrite ^/_github(/.*)$ $1 break;
-        proxy_pass $gh_backend;
-    }
 }

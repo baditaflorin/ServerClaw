@@ -1,6 +1,6 @@
-# Release 0.179.50
+# Release 0.179.49
 
-- Date: 2026-07-02
+- Date: 2026-06-09
 
 ## Summary
 - Add `claude-ops` dedicated AI-automation admin identity: passwordless sudo + key-only SSH on the Proxmox host and all 18 lv3 guest VMs, `claude-ops@pam` with PVEAdmin, and a privilege-separated Proxmox API token (`claude-ops-automation@pve`) — independently auditable and revocable from the shared `ops` account
@@ -8,7 +8,6 @@
 - Add the `lv3.platform.uptime_kuma_provision` role (monitors + public status page) with a `provision-uptime-kuma` Make target and playbook wiring
 - Fix the bare-root `https://status.<domain>/` 404 by deriving the edge `root_proxy_path` status slug from `platform_domain` instead of a stale literal
 - Deploy Woodpecker CI (ci.0mcp.com): fix OpenBao remote address for docker-runtime, add port 3003 Proxmox firewall rule for docker-runtime → runtime-control, bootstrap Gitea OAuth and seed repository
-- Deploy PM tools: Planka (kanban), Focalboard (project board), Kan (issue tracker), and Huly (all-in-one workspace) — each with Ansible role, secret management, nginx edge publication, and DNS subdomain on the platform domain; fix Kan env var names (BETTER_AUTH_SECRET, POSTGRES_URL) and force-recreate for multi-container stacks
 
 ## Platform Impact
 - no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
