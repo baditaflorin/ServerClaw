@@ -1,9 +1,10 @@
 // Telegram command bot for Huly Tracker.
 //
-// /tasks              -> lists the 10 most recently updated issues
+// /tasks              -> lists the 10 most recently updated issues, each
+//                        row tappable to jump straight to full detail
 // /task <ID>          -> full details + quick-action buttons (Done, High
 //                        priority, Delete) so common actions don't need typing
-// /find <keyword>     -> search issue titles in the project
+// /find <keyword>     -> search issue titles in the project (tappable rows)
 // /add <text>         -> creates a new issue, then follows up with an
 //                        inline-keyboard category suggestion (tap one to
 //                        file it under that component and prefix the title)
@@ -68,12 +69,44 @@ function sendMessage (chatId, text, extra) {
   return tgCall('sendMessage', { chat_id: chatId, text, disable_web_page_preview: true, ...extra })
 }
 
+function sendHtml (chatId, text, extra) {
+  return sendMessage(chatId, text, { parse_mode: 'HTML', ...extra })
+}
+
 function editMessageText (chatId, messageId, text, extra) {
   return tgCall('editMessageText', { chat_id: chatId, message_id: messageId, text, ...extra })
 }
 
 function answerCallbackQuery (id, text) {
   return tgCall('answerCallbackQuery', { callback_query_id: id, text })
+}
+
+function showTyping (chatId) {
+  return tgCall('sendChatAction', { chat_id: chatId, action: 'typing' })
+}
+
+function escapeHtml (s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+const QUICK_KEYBOARD = {
+  reply_markup: {
+    keyboard: [['/tasks', '/find '], ['/help']],
+    resize_keyboard: true,
+    is_persistent: true
+  }
+}
+
+const STATUS_EMOJI = {
+  Backlog: '📋', Todo: '📝', 'In Progress': '🔄', Done: '✅', Cancelled: '❌', Canceled: '❌'
+}
+
+const PRIORITY_EMOJI = {
+  NoPriority: '⚪', Urgent: '🔴', High: '🟠', Medium: '🟡', Low: '🔵'
+}
+
+function priorityName (value) {
+  return Object.entries(IssuePriority).find(([k, v]) => v === value && isNaN(Number(k)))?.[0] ?? 'NoPriority'
 }
 
 let hulyClient
@@ -105,12 +138,28 @@ function taskActionButtons (identifier) {
   return {
     reply_markup: {
       inline_keyboard: [[
-        { text: 'Mark Done', callback_data: `done:${identifier}` },
-        { text: 'High Priority', callback_data: `highpri:${identifier}` },
-        { text: 'Delete', callback_data: `delask:${identifier}` }
+        { text: '✅ Done', callback_data: `done:${identifier}` },
+        { text: '🔴 High Priority', callback_data: `highpri:${identifier}` },
+        { text: '🗑 Delete', callback_data: `delask:${identifier}` }
       ]]
     }
   }
+}
+
+function issueRowsKeyboard (issues) {
+  return {
+    reply_markup: {
+      inline_keyboard: issues.map((i) => ([{ text: `${i.identifier}  ${i.title}`, callback_data: `view:${i.identifier}` }]))
+    }
+  }
+}
+
+async function formatIssueRow (client, issue) {
+  const status = await client.findOne(tracker.class.IssueStatus, { _id: issue.status })
+  const statusName = status?.name ?? 'unknown'
+  const statusIcon = STATUS_EMOJI[statusName] ?? '❔'
+  const priorityIcon = PRIORITY_EMOJI[priorityName(issue.priority)]
+  return `${priorityIcon} <b>${escapeHtml(issue.identifier)}</b> ${statusIcon} ${escapeHtml(statusName)} — ${escapeHtml(issue.title)}`
 }
 
 async function listRecentIssues () {
@@ -122,29 +171,23 @@ async function listRecentIssues () {
     { space: project._id },
     { limit: 10, sort: { modifiedOn: SortingOrder.Descending } }
   )
-  if (issues.length === 0) return 'No issues yet.'
+  if (issues.length === 0) return { text: 'No issues yet.', issues: [] }
 
-  const lines = await Promise.all(issues.map(async (issue) => {
-    const status = await client.findOne(tracker.class.IssueStatus, { _id: issue.status })
-    return `${issue.identifier}  [${status?.name ?? 'unknown'}]  ${issue.title}`
-  }))
-  return lines.join('\n')
+  const lines = await Promise.all(issues.map((issue) => formatIssueRow(client, issue)))
+  return { text: lines.join('\n'), issues }
 }
 
 async function findIssues (keyword) {
   const client = await getHulyClient()
   const project = await getProject(client)
-  const issues = await client.findAll(tracker.class.Issue, { space: project._id })
+  const all = await client.findAll(tracker.class.Issue, { space: project._id })
 
   const needle = keyword.toLowerCase()
-  const matches = issues.filter((i) => i.title.toLowerCase().includes(needle))
-  if (matches.length === 0) return `No issues matching "${keyword}".`
+  const matches = all.filter((i) => i.title.toLowerCase().includes(needle)).slice(0, 15)
+  if (matches.length === 0) return { text: `No issues matching "${escapeHtml(keyword)}".`, issues: [] }
 
-  const lines = await Promise.all(matches.slice(0, 15).map(async (issue) => {
-    const status = await client.findOne(tracker.class.IssueStatus, { _id: issue.status })
-    return `${issue.identifier}  [${status?.name ?? 'unknown'}]  ${issue.title}`
-  }))
-  return lines.join('\n')
+  const lines = await Promise.all(matches.map((issue) => formatIssueRow(client, issue)))
+  return { text: lines.join('\n'), issues: matches }
 }
 
 function formatDueDate (ts) {
@@ -157,7 +200,8 @@ async function getIssueDetails (identifier) {
   const issue = await findIssueByIdentifier(client, identifier)
 
   const status = await client.findOne(tracker.class.IssueStatus, { _id: issue.status })
-  const priorityName = Object.entries(IssuePriority).find(([k, v]) => v === issue.priority && isNaN(Number(k)))?.[0]
+  const statusName = status?.name ?? 'unknown'
+  const prName = priorityName(issue.priority)
   const component = issue.component !== null
     ? await client.findOne(tracker.class.Component, { _id: issue.component })
     : undefined
@@ -170,19 +214,19 @@ async function getIssueDetails (identifier) {
   const comments = await client.findAll(chunter.class.ChatMessage, { attachedTo: issue._id })
 
   const lines = [
-    `${issue.identifier}: ${issue.title}`,
-    `status: ${status?.name ?? 'unknown'}`,
-    `priority: ${priorityName ?? 'unknown'}`,
-    `category: ${component?.label ?? '(none)'}`,
-    `assignee: ${assignee?.name ?? '(unassigned)'}`,
-    `due: ${formatDueDate(issue.dueDate)}`
+    `${PRIORITY_EMOJI[prName]} <b>${escapeHtml(issue.identifier)}</b>: ${escapeHtml(issue.title)}`,
+    `${STATUS_EMOJI[statusName] ?? '❔'} status: ${escapeHtml(statusName)}`,
+    `${PRIORITY_EMOJI[prName]} priority: ${escapeHtml(prName)}`,
+    `🏷 category: ${escapeHtml(component?.label ?? '(none)')}`,
+    `👤 assignee: ${escapeHtml(assignee?.name ?? '(unassigned)')}`,
+    `📅 due: ${formatDueDate(issue.dueDate)}`
   ]
   if (description.trim().length > 0) {
-    lines.push('', description.trim())
+    lines.push('', escapeHtml(description.trim()))
   }
   if (comments.length > 0) {
-    lines.push('', `${comments.length} comment(s):`)
-    for (const c of comments.slice(-5)) lines.push(`- ${c.message}`)
+    lines.push('', `💬 ${comments.length} comment(s):`)
+    for (const c of comments.slice(-5)) lines.push(`- ${escapeHtml(c.message)}`)
   }
   return { text: lines.join('\n'), identifier: issue.identifier }
 }
@@ -360,6 +404,15 @@ async function suggestCategories (chatId, issueId, identifier, title) {
   })
 }
 
+async function showIssueDetails (chatId, identifier, messageId) {
+  const { text } = await getIssueDetails(identifier)
+  if (messageId !== undefined) {
+    await editMessageText(chatId, messageId, text, { parse_mode: 'HTML', ...taskActionButtons(identifier) })
+  } else {
+    await sendHtml(chatId, text, taskActionButtons(identifier))
+  }
+}
+
 async function handleCallbackQuery (query) {
   const userId = query.from?.id
   if (String(userId) !== String(TELEGRAM_ALLOWED_USER_ID)) {
@@ -370,6 +423,17 @@ async function handleCallbackQuery (query) {
   const data = query.data ?? ''
   const chatId = query.message?.chat?.id
   const messageId = query.message?.message_id
+
+  if (data.startsWith('view:')) {
+    const identifier = data.slice('view:'.length)
+    try {
+      await answerCallbackQuery(query.id)
+      if (chatId !== undefined) await showIssueDetails(chatId, identifier)
+    } catch (err) {
+      await answerCallbackQuery(query.id, `Failed: ${err.message}`)
+    }
+    return
+  }
 
   if (data.startsWith('skip:')) {
     const key = data.slice('skip:'.length)
@@ -412,7 +476,7 @@ async function handleCallbackQuery (query) {
     try {
       await setStatus(identifier, 'done')
       await answerCallbackQuery(query.id, `${identifier} marked Done`)
-      if (chatId !== undefined) await editMessageText(chatId, messageId, `${identifier} marked Done.`)
+      if (chatId !== undefined) await showIssueDetails(chatId, identifier, messageId)
     } catch (err) {
       await answerCallbackQuery(query.id, `Failed: ${err.message}`)
     }
@@ -424,7 +488,7 @@ async function handleCallbackQuery (query) {
     try {
       await setPriority(identifier, 'high')
       await answerCallbackQuery(query.id, `${identifier} set to High priority`)
-      if (chatId !== undefined) await editMessageText(chatId, messageId, `${identifier} set to High priority.`)
+      if (chatId !== undefined) await showIssueDetails(chatId, identifier, messageId)
     } catch (err) {
       await answerCallbackQuery(query.id, `Failed: ${err.message}`)
     }
@@ -467,8 +531,8 @@ async function handleCallbackQuery (query) {
 }
 
 const HELP_TEXT = [
-  '/tasks - list the 10 most recently updated issues',
-  '/find <keyword> - search issue titles',
+  '/tasks - list the 10 most recently updated issues (tap a row for details)',
+  '/find <keyword> - search issue titles (tap a row for details)',
   '/task <ID> - full details + quick-action buttons',
   '/add <text> - create a new issue, then suggests a category',
   '/status <ID> <name> - backlog | todo | in progress | done | cancelled',
@@ -488,15 +552,17 @@ async function handleMessage (message) {
   }
 
   const text = (message.text ?? '').trim()
+  await showTyping(chatId)
 
   if (text === '/start' || text === '/help') {
-    await sendMessage(chatId, HELP_TEXT)
+    await sendMessage(chatId, HELP_TEXT, QUICK_KEYBOARD)
     return
   }
 
   if (text === '/tasks') {
     try {
-      await sendMessage(chatId, await listRecentIssues())
+      const { text: listing, issues } = await listRecentIssues()
+      await sendHtml(chatId, listing, issues.length > 0 ? issueRowsKeyboard(issues) : undefined)
     } catch (err) {
       console.error(err)
       await sendMessage(chatId, `failed to list issues: ${err.message}`)
@@ -507,7 +573,8 @@ async function handleMessage (message) {
   if (text.startsWith('/find ')) {
     const keyword = text.slice('/find '.length).trim()
     try {
-      await sendMessage(chatId, await findIssues(keyword))
+      const { text: listing, issues } = await findIssues(keyword)
+      await sendHtml(chatId, listing, issues.length > 0 ? issueRowsKeyboard(issues) : undefined)
     } catch (err) {
       console.error(err)
       await sendMessage(chatId, `failed to search: ${err.message}`)
@@ -518,8 +585,7 @@ async function handleMessage (message) {
   if (text.startsWith('/task ')) {
     const identifier = text.slice('/task '.length).trim()
     try {
-      const { text: details } = await getIssueDetails(identifier)
-      await sendMessage(chatId, details, taskActionButtons(identifier))
+      await showIssueDetails(chatId, identifier)
     } catch (err) {
       console.error(err)
       await sendMessage(chatId, `failed to get task: ${err.message}`)
@@ -535,7 +601,7 @@ async function handleMessage (message) {
     }
     try {
       const { issueId, identifier } = await createIssue(title)
-      await sendMessage(chatId, `created ${identifier}: ${title}`)
+      await sendMessage(chatId, `✅ created ${identifier}: ${title}`)
       await suggestCategories(chatId, issueId, identifier, title)
     } catch (err) {
       console.error(err)
@@ -636,12 +702,29 @@ async function handleMessage (message) {
     return
   }
 
-  await sendMessage(chatId, HELP_TEXT)
+  await sendMessage(chatId, HELP_TEXT, QUICK_KEYBOARD)
 }
 
 async function pollLoop () {
   let offset = 0
   console.log('huly-task-bot: starting long poll')
+
+  await tgCall('setMyCommands', {
+    commands: [
+      { command: 'tasks', description: 'List recent issues' },
+      { command: 'find', description: 'Search issue titles' },
+      { command: 'task', description: 'Show full details for one issue' },
+      { command: 'add', description: 'Create a new issue' },
+      { command: 'status', description: 'Set an issue’s status' },
+      { command: 'priority', description: 'Set an issue’s priority' },
+      { command: 'assign', description: 'Assign an issue to a member' },
+      { command: 'due', description: 'Set an issue’s due date' },
+      { command: 'comment', description: 'Add a comment to an issue' },
+      { command: 'delete', description: 'Delete an issue' },
+      { command: 'help', description: 'Show all commands' }
+    ]
+  }).catch((err) => console.error('setMyCommands failed:', err))
+
   while (true) {
     let updates
     try {
