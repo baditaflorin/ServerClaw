@@ -9,10 +9,14 @@
 'use strict'
 
 const { connect, NodeWebSocketFactory } = require('@hcengineering/api-client')
-const core = require('@hcengineering/core')
+// These packages' CJS builds put namespace objects (space, class, taskTypes)
+// under .default while some named exports (generateId, IssuePriority) stay
+// top-level — merge both so either access pattern works.
+const mergeDefault = (mod) => ({ ...(mod.default ?? {}), ...mod })
+const core = mergeDefault(require('@hcengineering/core'))
 const { generateId, SortingOrder } = core
 const { makeRank } = require('@hcengineering/rank')
-const tracker = require('@hcengineering/tracker')
+const tracker = mergeDefault(require('@hcengineering/tracker'))
 const { IssuePriority } = tracker
 
 const HULY_URL = required('HULY_URL')
