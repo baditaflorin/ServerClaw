@@ -189,6 +189,7 @@ services:
       - CALENDAR_URL=${PUBLIC_URL}/_calendar
       - GMAIL_URL=${PUBLIC_URL}/_gmail
       - TELEGRAM_URL=${PUBLIC_URL}/_telegram
+      - GITHUB_APP=${GITHUB_APP}
       - STATS_URL=${PUBLIC_URL}/_stats
       - UPLOAD_URL=/files
       - ELASTIC_URL=http://elastic:9200
@@ -240,12 +241,107 @@ services:
     networks:
       - huly_net
 
+{% if huly_google_client_id and huly_google_credentials %}
+  # Google Calendar integration (activated: GOOGLE_CLIENT_ID + GOOGLE_CREDENTIALS are set)
+  calendar:
+    image: hardcoreeng/calendar:${HULY_VERSION}
+    restart: unless-stopped
+    environment:
+      - CALENDAR_PORT=8095
+      - SECRET=${SECRET}
+      - ACCOUNTS_URL=http://account:3000
+      - DB_URL=${CR_DB_URL}
+      - COLLABORATOR_URL=http://collaborator:3078
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - Credentials=${GOOGLE_CREDENTIALS}
+      - WATCH_URL=${CALENDAR_WATCH_URL}
+      - KVS_URL=${KVS_URL}
+    networks:
+      - huly_net
+{% endif %}
+
+{% if huly_google_client_id and huly_google_credentials and huly_gmail_watch_topic %}
+  # Gmail integration (activated: GOOGLE_CREDENTIALS + GMAIL_WATCH_TOPIC_NAME are set)
+  gmail:
+    image: hardcoreeng/gmail:${HULY_VERSION}
+    restart: unless-stopped
+    environment:
+      - GMAIL_PORT=8088
+      - SECRET=${SECRET}
+      - ACCOUNTS_URL=http://account:3000
+      - DB_URL=${CR_DB_URL}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - Credentials=${GOOGLE_CREDENTIALS}
+      - WATCH_URL=${CALENDAR_WATCH_URL}
+      - KVS_URL=${KVS_URL}
+      - WATCH_TOPIC_NAME=${GMAIL_WATCH_TOPIC_NAME}
+      - STORAGE_CONFIG=minio|minio?accessKey=minioadmin&secretKey=minioadmin
+    networks:
+      - huly_net
+{% endif %}
+
+{% if huly_telegram_bot_token and huly_telegram_api_id and huly_telegram_mongo_uri %}
+  # MongoDB — session store for Telegram MTProto (activated alongside telegram service)
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - huly_net
+
+  # Telegram integration (activated: BOT_TOKEN + MTProto API credentials + MONGO_URI are set)
+  telegram:
+    image: hardcoreeng/telegram:${HULY_VERSION}
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      - TELEGRAM_PORT=8086
+      - SECRET=${SECRET}
+      - ACCOUNTS_URL=http://account:3000
+      - DB_URL=${CR_DB_URL}
+      - BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_API_ID=${TELEGRAM_API_ID}
+      - TELEGRAM_API_HASH=${TELEGRAM_API_HASH}
+      - MONGO_URI=${MONGO_URI}
+      - STORAGE_CONFIG=minio|minio?accessKey=minioadmin&secretKey=minioadmin
+    networks:
+      - huly_net
+{% endif %}
+
+{% if huly_github_app_id %}
+  # GitHub integration (activated: GITHUB_APP_ID is set)
+  github:
+    image: hardcoreeng/github:${HULY_VERSION}
+    restart: unless-stopped
+    environment:
+      - GITHUB_PORT=8083
+      - SERVER_SECRET=${SECRET}
+      - ACCOUNTS_URL=http://account:3000
+      - DB_URL=${CR_DB_URL}
+      - COLLABORATOR_URL=http://collaborator:3078
+      - APP_ID=${GITHUB_APP_ID}
+      - CLIENT_ID=${GITHUB_CLIENT_ID}
+      - CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - PRIVATE_KEY=${GITHUB_PRIVATE_KEY}
+      - INSTALLATION_URL=${GITHUB_INSTALLATION_URL}
+      - STORAGE_CONFIG=minio|minio?accessKey=minioadmin&secretKey=minioadmin
+    networks:
+      - huly_net
+{% endif %}
+
 volumes:
   elastic:
   files:
   cr_data:
   cr_certs:
   redpanda:
+{% if huly_telegram_bot_token and huly_telegram_api_id and huly_telegram_mongo_uri %}
+  mongo_data:
+{% endif %}
 
 networks:
   huly_net:

@@ -101,6 +101,35 @@
     huly_redpanda_secret: "{{ huly_secrets_raw.results[2].content | b64decode | trim }}"
   no_log: true
 
+- name: Check if CockroachDB container is already running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ huly_project_name }}-cockroach-1"
+      - --filter
+      - status=running
+      - -q
+  register: _huly_cr_running
+  changed_when: false
+
+- name: Sync CockroachDB selfhost password to current secret (migration safety)
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ huly_project_name }}-cockroach-1"
+      - ./cockroach
+      - sql
+      - "--url=postgres://{{ huly_cockroach_username }}:{{ huly_cockroach_secret }}@localhost:26257/{{ huly_cockroach_database }}?sslmode=disable"
+      - "-e"
+      - "ALTER USER {{ huly_cockroach_username }} WITH PASSWORD '{{ huly_cockroach_secret }}';"
+  changed_when: false
+  failed_when: false
+  no_log: true
+  when: _huly_cr_running.stdout | trim | length > 0
+
 - name: Mirror Huly secrets to control machine
   ansible.builtin.copy:
     dest: "{{ item.path }}"
@@ -119,6 +148,147 @@
   loop_control:
     label: "{{ item.path }}"
   no_log: true
+
+- name: Check for Google OAuth credential file
+  ansible.builtin.stat:
+    path: "{{ huly_google_client_id_file }}"
+  register: _huly_google_id_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read Google OAuth credentials from local files
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ huly_google_client_id_file }}"
+    - "{{ huly_google_client_secret_file }}"
+  register: _huly_google_creds_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: _huly_google_id_stat.stat.exists
+
+- name: Set Google OAuth credential facts
+  ansible.builtin.set_fact:
+    huly_google_client_id: "{{ _huly_google_creds_raw.results[0].content | b64decode | trim }}"
+    huly_google_client_secret: "{{ _huly_google_creds_raw.results[1].content | b64decode | trim }}"
+  no_log: true
+  when: _huly_google_id_stat.stat.exists
+
+- name: Check for Gmail watch topic file
+  ansible.builtin.stat:
+    path: "{{ huly_gmail_watch_topic_file }}"
+  register: _huly_gmail_watch_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read Gmail watch topic from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_gmail_watch_topic_file }}"
+  register: _huly_gmail_watch_raw
+  delegate_to: localhost
+  become: false
+  when: _huly_gmail_watch_stat.stat.exists
+
+- name: Set Gmail watch topic fact
+  ansible.builtin.set_fact:
+    huly_gmail_watch_topic: "{{ _huly_gmail_watch_raw.content | b64decode | trim }}"
+  when: _huly_gmail_watch_stat.stat.exists
+
+- name: Check for Telegram Bot token file
+  ansible.builtin.stat:
+    path: "{{ huly_telegram_bot_token_file }}"
+  register: _huly_telegram_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read Telegram Bot token from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_telegram_bot_token_file }}"
+  register: _huly_telegram_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: _huly_telegram_stat.stat.exists
+
+- name: Set Telegram Bot token fact
+  ansible.builtin.set_fact:
+    huly_telegram_bot_token: "{{ _huly_telegram_raw.content | b64decode | trim }}"
+  no_log: true
+  when: _huly_telegram_stat.stat.exists
+
+- name: Check for Google OAuth credentials JSON file
+  ansible.builtin.stat:
+    path: "{{ huly_google_credentials_file }}"
+  register: _huly_google_creds_json_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read Google OAuth credentials JSON from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_google_credentials_file }}"
+  register: _huly_google_creds_json_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: _huly_google_creds_json_stat.stat.exists
+
+- name: Set Google OAuth credentials JSON fact
+  ansible.builtin.set_fact:
+    huly_google_credentials: "{{ _huly_google_creds_json_raw.content | b64decode | trim }}"
+  no_log: true
+  when: _huly_google_creds_json_stat.stat.exists
+
+- name: Check for Telegram credentials file
+  ansible.builtin.stat:
+    path: "{{ huly_telegram_credentials_file }}"
+  register: _huly_telegram_creds_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read Telegram credentials from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_telegram_credentials_file }}"
+  register: _huly_telegram_creds_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: _huly_telegram_creds_stat.stat.exists
+
+- name: Set Telegram credentials facts
+  ansible.builtin.set_fact:
+    huly_telegram_api_id: "{{ (_huly_telegram_creds_raw.content | b64decode | from_yaml).api_id | string }}"
+    huly_telegram_api_hash: "{{ (_huly_telegram_creds_raw.content | b64decode | from_yaml).api_hash }}"
+    huly_telegram_mongo_uri: "{{ (_huly_telegram_creds_raw.content | b64decode | from_yaml).mongo_uri }}"
+  no_log: true
+  when: _huly_telegram_creds_stat.stat.exists
+
+- name: Check for GitHub App credentials file
+  ansible.builtin.stat:
+    path: "{{ huly_github_credentials_file }}"
+  register: _huly_github_creds_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read GitHub App credentials from local file
+  ansible.builtin.slurp:
+    src: "{{ huly_github_credentials_file }}"
+  register: _huly_github_creds_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+  when: _huly_github_creds_stat.stat.exists
+
+- name: Set GitHub App credential facts
+  ansible.builtin.set_fact:
+    huly_github_app_name: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).app_name }}"
+    huly_github_app_id: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).app_id | string }}"
+    huly_github_client_id: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).client_id }}"
+    huly_github_client_secret: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).client_secret }}"
+    huly_github_private_key: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).private_key | trim }}"
+    huly_github_installation_url: "{{ (_huly_github_creds_raw.content | b64decode | from_yaml).installation_url }}"
+  no_log: true
+  when: _huly_github_creds_stat.stat.exists
 
 - name: Render the Huly project environment file
   ansible.builtin.template:
