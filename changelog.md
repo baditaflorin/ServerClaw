@@ -17,13 +17,15 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - Add the `lv3.platform.uptime_kuma_provision` role (monitors + public status page) with a `provision-uptime-kuma` Make target and playbook wiring
 - Fix the bare-root `https://status.<domain>/` 404 by deriving the edge `root_proxy_path` status slug from `platform_domain` instead of a stale literal
 - Deploy Woodpecker CI (ci.0mcp.com): fix OpenBao remote address for docker-runtime, add port 3003 Proxmox firewall rule for docker-runtime → runtime-control, bootstrap Gitea OAuth and seed repository
+- Deploy PM tools: Planka (kanban), Focalboard (project board), Kan (issue tracker), and Huly (all-in-one workspace) — each with Ansible role, secret management, nginx edge publication, and DNS subdomain on the platform domain; fix Kan env var names (BETTER_AUTH_SECRET, POSTGRES_URL) and force-recreate for multi-container stacks
 
 ## Latest Release
 
-- [0.179.49 release notes](docs/release-notes/0.179.49.md)
+- [0.179.50 release notes](docs/release-notes/0.179.50.md)
 
 ## Previous Releases
 
+- [0.179.49 release notes](docs/release-notes/0.179.49.md)
 - [0.179.48 release notes](docs/release-notes/0.179.48.md)
 - [0.179.47 release notes](docs/release-notes/0.179.47.md)
 - [0.179.46 release notes](docs/release-notes/0.179.46.md)
@@ -35,7 +37,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.40 release notes](docs/release-notes/0.179.40.md)
 - [0.179.39 release notes](docs/release-notes/0.179.39.md)
 - [0.179.38 release notes](docs/release-notes/0.179.38.md)
-- [0.179.37 release notes](docs/release-notes/0.179.37.md)
 - [0.179.31 release notes](docs/release-notes/0.179.31.md)
 - [0.179.30 release notes](docs/release-notes/0.179.30.md)
 - [0.179.29 release notes](docs/release-notes/0.179.29.md)
@@ -44,4 +45,4 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (560 releases)](docs/release-notes/index/2026.md)
+- [2026 (561 releases)](docs/release-notes/index/2026.md)
