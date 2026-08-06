@@ -9,7 +9,7 @@
   "source_id": "receipts",
   "snapshot_id": "99e58d2809f40c11c73bf065adb0cabdc553eaea2788859564555f5b2e0f29c7",
   "snapshot_recorded_at": "2026-04-14T08:47:41Z",
-  "restore_path": "/var/lib/lv3/restic-config-backup/restore-verification/20260414T085430Z/restore/srv/proxmox_florin_server/receipts",
+  "restore_path": "/var/lib/lv3/restic-config-backup/restore-verification/20260414T085430Z/restore/srv/platform_server/receipts",
   "restored_file_count": 4642,
   "expected_minimum_files": 1
 }

@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,7 +40,7 @@
     {
       "kind": "service_endpoint",
       "name": "Directus public data API",
-      "address": "https://data.lv3.org"
+      "address": "https://data.example.com"
     }
   ],
   "verification": [
@@ -62,7 +62,7 @@
     {
       "check": "Public Directus verification",
       "result": "pass",
-      "observed": "The public publication checks preserved in receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-dns-r1-0.177.109.txt, receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-public-health-r1-0.177.109.txt, receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-verify-public-r1-0.177.109.txt, and receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-openapi-r1-0.177.109.json confirm data.lv3.org resolves to 65.108.75.123, public health returns {\"status\":\"ok\"}, and the token-authenticated REST plus GraphQL verification returned status ok with one expected service_registry item."
+      "observed": "The public publication checks preserved in receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-dns-r1-0.177.109.txt, receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-public-health-r1-0.177.109.txt, receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-verify-public-r1-0.177.109.txt, and receipts/live-applies/evidence/2026-03-30-adr-0289-directus-mainline-openapi-r1-0.177.109.json confirm data.example.com resolves to 203.0.113.1, public health returns {\"status\":\"ok\"}, and the token-authenticated REST plus GraphQL verification returned status ok with one expected service_registry item."
     },
     {
       "check": "Protected exact-main status surfaces refresh",

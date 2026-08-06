@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schemas/deployment-v1/profile.json",
+  "$id": "https://example.com/schemas/deployment-v1/profile.json",
   "title": "Deployment Service Profile",
   "description": "Per-deployment service selection. Lives at .local/deployments/<slug>/profile.yml. Composes named profiles from inventory/group_vars/all/service_profiles.yml plus per-deployment opt-ins, opt-outs, and overrides. ADR 0441.",
   "type": "object",

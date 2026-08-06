@@ -2,7 +2,7 @@
 """
 Generate deployment-specific certificate-catalog.json from template and .local/identity.yml.
 
-This allows switching domains (e.g., from lv3.org → newdomain.com) without code changes.
+This allows switching domains (e.g., from example.com → newdomain.com) without code changes.
 The template uses {{ platform_domain }} placeholders which are filled at deployment time.
 
 ADR 0480 Phase 4: Domain-agnostic infrastructure as code (IaC)

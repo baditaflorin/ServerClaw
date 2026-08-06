@@ -111,10 +111,10 @@
             "runbook": "docs/runbooks/configure-api-gateway.md",
             "adr": "0092",
             "exposure": "edge-published",
-            "primary_url": "https://api.lv3.org",
+            "primary_url": "https://api.example.com",
             "publications": [
                 {
-                    "fqdn": "api.lv3.org",
+                    "fqdn": "api.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "upstream-auth",
                     "audience": "operator"
@@ -141,7 +141,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for api.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for api.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -446,10 +446,10 @@
             "runbook": "docs/runbooks/deployment-history-portal.md",
             "adr": "0081",
             "exposure": "edge-published",
-            "primary_url": "https://changelog.lv3.org",
+            "primary_url": "https://changelog.example.com",
             "publications": [
                 {
-                    "fqdn": "changelog.lv3.org",
+                    "fqdn": "changelog.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -476,7 +476,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for changelog.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for changelog.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -535,10 +535,10 @@
             "runbook": "docs/runbooks/configure-coolify.md",
             "adr": "0194",
             "exposure": "edge-published",
-            "primary_url": "https://coolify.lv3.org",
+            "primary_url": "https://coolify.example.com",
             "publications": [
                 {
-                    "fqdn": "coolify.lv3.org",
+                    "fqdn": "coolify.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -565,7 +565,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for coolify.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for coolify.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -624,10 +624,10 @@
             "runbook": "docs/runbooks/configure-coolify.md",
             "adr": "0194",
             "exposure": "edge-published",
-            "primary_url": "https://apps.lv3.org",
+            "primary_url": "https://apps.example.com",
             "publications": [
                 {
-                    "fqdn": "apps.lv3.org",
+                    "fqdn": "apps.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "open",
                     "audience": "public"
@@ -654,7 +654,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for apps.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for apps.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -713,10 +713,10 @@
             "runbook": "docs/runbooks/configure-dify.md",
             "adr": "0197",
             "exposure": "edge-published",
-            "primary_url": "https://agents.lv3.org",
+            "primary_url": "https://agents.example.com",
             "publications": [
                 {
-                    "fqdn": "agents.lv3.org",
+                    "fqdn": "agents.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -743,7 +743,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for agents.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for agents.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -802,10 +802,10 @@
             "runbook": "docs/runbooks/configure-docker-build-vm.md",
             "adr": "0028",
             "exposure": "informational-only",
-            "primary_url": "https://build.lv3.org",
+            "primary_url": "https://build.example.com",
             "publications": [
                 {
-                    "fqdn": "build.lv3.org",
+                    "fqdn": "build.example.com",
                     "delivery_model": "informational-edge",
                     "access_model": "open",
                     "audience": "public"
@@ -832,7 +832,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "degraded",
-                    "reason": "The route build.lv3.org is declared and resolves to the correct surface, but the live path is degraded.",
+                    "reason": "The route build.example.com is declared and resolves to the correct surface, but the live path is degraded.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -891,10 +891,10 @@
             "runbook": "docs/runbooks/configure-docker-runtime.md",
             "adr": "0023",
             "exposure": "informational-only",
-            "primary_url": "https://docker.lv3.org",
+            "primary_url": "https://docker.example.com",
             "publications": [
                 {
-                    "fqdn": "docker.lv3.org",
+                    "fqdn": "docker.example.com",
                     "delivery_model": "informational-edge",
                     "access_model": "open",
                     "audience": "public"
@@ -921,7 +921,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for docker.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for docker.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -980,10 +980,10 @@
             "runbook": "docs/runbooks/developer-portal.md",
             "adr": "0094",
             "exposure": "edge-published",
-            "primary_url": "https://docs.lv3.org",
+            "primary_url": "https://docs.example.com",
             "publications": [
                 {
-                    "fqdn": "docs.lv3.org",
+                    "fqdn": "docs.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -1010,7 +1010,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for docs.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for docs.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -1069,10 +1069,10 @@
             "runbook": "docs/runbooks/configure-dozzle.md",
             "adr": "0150",
             "exposure": "edge-published",
-            "primary_url": "https://logs.lv3.org",
+            "primary_url": "https://logs.example.com",
             "publications": [
                 {
-                    "fqdn": "logs.lv3.org",
+                    "fqdn": "logs.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -1099,7 +1099,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for logs.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for logs.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -1158,10 +1158,10 @@
             "runbook": "docs/runbooks/configure-excalidraw.md",
             "adr": "0202",
             "exposure": "edge-published",
-            "primary_url": "https://draw.lv3.org",
+            "primary_url": "https://draw.example.com",
             "publications": [
                 {
-                    "fqdn": "draw.lv3.org",
+                    "fqdn": "draw.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -1188,7 +1188,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for draw.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for draw.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -1250,7 +1250,7 @@
             "primary_url": "http://100.64.0.1:3009",
             "publications": [
                 {
-                    "fqdn": "git.lv3.org",
+                    "fqdn": "git.example.com",
                     "delivery_model": "private-network",
                     "access_model": "private-network",
                     "audience": "private-network"
@@ -1277,7 +1277,7 @@
                     "id": "route",
                     "class": "best_effort",
                     "status": "pass",
-                    "reason": "The active publication for git.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for git.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -1418,10 +1418,10 @@
             "runbook": "docs/runbooks/monitoring-stack.md",
             "adr": "0011",
             "exposure": "edge-published",
-            "primary_url": "https://grafana.lv3.org",
+            "primary_url": "https://grafana.example.com",
             "publications": [
                 {
-                    "fqdn": "grafana.lv3.org",
+                    "fqdn": "grafana.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "upstream-auth",
                     "audience": "operator"
@@ -1448,7 +1448,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "degraded",
-                    "reason": "The route grafana.lv3.org is declared and resolves to the correct surface, but the live path is degraded.",
+                    "reason": "The route grafana.example.com is declared and resolves to the correct surface, but the live path is degraded.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -1507,10 +1507,10 @@
             "runbook": "docs/runbooks/configure-harbor.md",
             "adr": "0201",
             "exposure": "edge-published",
-            "primary_url": "https://registry.lv3.org",
+            "primary_url": "https://registry.example.com",
             "publications": [
                 {
-                    "fqdn": "registry.lv3.org",
+                    "fqdn": "registry.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "open",
                     "audience": "public"
@@ -1537,7 +1537,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for registry.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for registry.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -1591,15 +1591,15 @@
                 "failed": 0,
                 "unknown": 0
             },
-            "vm": "proxmox_florin",
+            "vm": "proxmox-host",
             "vmid": null,
             "runbook": "docs/runbooks/configure-headscale.md",
             "adr": "0144",
             "exposure": "edge-published",
-            "primary_url": "https://headscale.lv3.org",
+            "primary_url": "https://headscale.example.com",
             "publications": [
                 {
-                    "fqdn": "headscale.lv3.org",
+                    "fqdn": "headscale.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "upstream-auth",
                     "audience": "operator"
@@ -1626,7 +1626,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "degraded",
-                    "reason": "The route headscale.lv3.org is declared and resolves to the correct surface, but the live path is degraded.",
+                    "reason": "The route headscale.example.com is declared and resolves to the correct surface, but the live path is degraded.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -1685,10 +1685,10 @@
             "runbook": "docs/runbooks/configure-homepage.md",
             "adr": "0152",
             "exposure": "edge-published",
-            "primary_url": "https://home.lv3.org",
+            "primary_url": "https://home.example.com",
             "publications": [
                 {
-                    "fqdn": "home.lv3.org",
+                    "fqdn": "home.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -1715,7 +1715,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for home.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for home.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -1774,10 +1774,10 @@
             "runbook": null,
             "adr": "0056",
             "exposure": "edge-published",
-            "primary_url": "https://sso.lv3.org",
+            "primary_url": "https://sso.example.com",
             "publications": [
                 {
-                    "fqdn": "sso.lv3.org",
+                    "fqdn": "sso.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "upstream-auth",
                     "audience": "operator"
@@ -1804,7 +1804,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for sso.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for sso.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -1863,10 +1863,10 @@
             "runbook": "docs/runbooks/configure-langfuse.md",
             "adr": "0146",
             "exposure": "edge-published",
-            "primary_url": "https://langfuse.lv3.org",
+            "primary_url": "https://langfuse.example.com",
             "publications": [
                 {
-                    "fqdn": "langfuse.lv3.org",
+                    "fqdn": "langfuse.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -1893,7 +1893,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "degraded",
-                    "reason": "The route langfuse.lv3.org is declared and resolves to the correct surface, but the live path is degraded.",
+                    "reason": "The route langfuse.example.com is declared and resolves to the correct surface, but the live path is degraded.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -1952,10 +1952,10 @@
             "runbook": "docs/runbooks/configure-mail-platform.md",
             "adr": "0041",
             "exposure": "informational-only",
-            "primary_url": "https://mail.lv3.org",
+            "primary_url": "https://mail.example.com",
             "publications": [
                 {
-                    "fqdn": "mail.lv3.org",
+                    "fqdn": "mail.example.com",
                     "delivery_model": "informational-edge",
                     "access_model": "open",
                     "audience": "public"
@@ -1982,7 +1982,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for mail.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for mail.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -2123,10 +2123,10 @@
             "runbook": "docs/runbooks/configure-matrix-synapse.md",
             "adr": "0255",
             "exposure": "edge-published",
-            "primary_url": "https://matrix.lv3.org",
+            "primary_url": "https://matrix.example.com",
             "publications": [
                 {
-                    "fqdn": "matrix.lv3.org",
+                    "fqdn": "matrix.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "upstream-auth",
                     "audience": "operator"
@@ -2153,7 +2153,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for matrix.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for matrix.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -2294,10 +2294,10 @@
             "runbook": "docs/runbooks/configure-n8n.md",
             "adr": "0151",
             "exposure": "edge-published",
-            "primary_url": "https://n8n.lv3.org",
+            "primary_url": "https://n8n.example.com",
             "publications": [
                 {
-                    "fqdn": "n8n.lv3.org",
+                    "fqdn": "n8n.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -2324,7 +2324,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "degraded",
-                    "reason": "The route n8n.lv3.org is declared and resolves to the correct surface, but the live path is degraded.",
+                    "reason": "The route n8n.example.com is declared and resolves to the correct surface, but the live path is degraded.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -2547,10 +2547,10 @@
             "runbook": "docs/runbooks/configure-nextcloud.md",
             "adr": "0260",
             "exposure": "edge-published",
-            "primary_url": "https://cloud.lv3.org",
+            "primary_url": "https://cloud.example.com",
             "publications": [
                 {
-                    "fqdn": "cloud.lv3.org",
+                    "fqdn": "cloud.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "upstream-auth",
                     "audience": "operator"
@@ -2577,7 +2577,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for cloud.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for cloud.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -2636,16 +2636,16 @@
             "runbook": "docs/runbooks/configure-edge-publication.md",
             "adr": "0021",
             "exposure": "edge-static",
-            "primary_url": "https://nginx.lv3.org",
+            "primary_url": "https://nginx.example.com",
             "publications": [
                 {
-                    "fqdn": "lv3.org",
+                    "fqdn": "example.com",
                     "delivery_model": "informational-edge",
                     "access_model": "open",
                     "audience": "public"
                 },
                 {
-                    "fqdn": "nginx.lv3.org",
+                    "fqdn": "nginx.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "open",
                     "audience": "public"
@@ -2672,7 +2672,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "degraded",
-                    "reason": "The route nginx.lv3.org is declared and resolves to the correct surface, but the live path is degraded.",
+                    "reason": "The route nginx.example.com is declared and resolves to the correct surface, but the live path is degraded.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -2890,7 +2890,7 @@
                 "failed": 0,
                 "unknown": 0
             },
-            "vm": "proxmox_florin",
+            "vm": "proxmox-host",
             "vmid": null,
             "runbook": "docs/runbooks/configure-ntopng.md",
             "adr": "0059",
@@ -3305,10 +3305,10 @@
             "runbook": "docs/runbooks/ops-portal-down.md",
             "adr": "0093",
             "exposure": "edge-published",
-            "primary_url": "https://ops.lv3.org",
+            "primary_url": "https://ops.example.com",
             "publications": [
                 {
-                    "fqdn": "ops.lv3.org",
+                    "fqdn": "ops.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -3335,7 +3335,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for ops.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for ops.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -3394,10 +3394,10 @@
             "runbook": "docs/runbooks/configure-outline.md",
             "adr": "0199",
             "exposure": "edge-published",
-            "primary_url": "https://wiki.lv3.org",
+            "primary_url": "https://wiki.example.com",
             "publications": [
                 {
-                    "fqdn": "wiki.lv3.org",
+                    "fqdn": "wiki.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "upstream-auth",
                     "audience": "operator"
@@ -3424,7 +3424,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for wiki.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for wiki.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -3483,10 +3483,10 @@
             "runbook": "docs/runbooks/configure-plane.md",
             "adr": "0193",
             "exposure": "edge-published",
-            "primary_url": "https://tasks.lv3.org",
+            "primary_url": "https://tasks.example.com",
             "publications": [
                 {
-                    "fqdn": "tasks.lv3.org",
+                    "fqdn": "tasks.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -3513,7 +3513,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for tasks.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for tasks.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -3654,10 +3654,10 @@
             "runbook": "docs/runbooks/configure-plausible.md",
             "adr": "0283",
             "exposure": "edge-published",
-            "primary_url": "https://analytics.lv3.org",
+            "primary_url": "https://analytics.example.com",
             "publications": [
                 {
-                    "fqdn": "analytics.lv3.org",
+                    "fqdn": "analytics.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -3684,7 +3684,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for analytics.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for analytics.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -3825,10 +3825,10 @@
             "runbook": "docs/runbooks/postgres-failover.md",
             "adr": "0098",
             "exposure": "private-only",
-            "primary_url": "postgres://database.lv3.org:5432",
+            "primary_url": "postgres://database.example.com:5432",
             "publications": [
                 {
-                    "fqdn": "database.lv3.org",
+                    "fqdn": "database.example.com",
                     "delivery_model": "private-network",
                     "access_model": "private-network",
                     "audience": "private-network"
@@ -3909,15 +3909,15 @@
                 "failed": 0,
                 "unknown": 0
             },
-            "vm": "proxmox_florin",
+            "vm": "proxmox-host",
             "vmid": null,
             "runbook": "docs/runbooks/initial-access.md",
             "adr": "0004",
             "exposure": "informational-only",
-            "primary_url": "https://proxmox.lv3.org",
+            "primary_url": "https://proxmox.example.com",
             "publications": [
                 {
-                    "fqdn": "proxmox.lv3.org",
+                    "fqdn": "proxmox.example.com",
                     "delivery_model": "informational-edge",
                     "access_model": "upstream-auth",
                     "audience": "operator"
@@ -3944,7 +3944,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "degraded",
-                    "reason": "The route proxmox.lv3.org is declared and resolves to the correct surface, but the live path is degraded.",
+                    "reason": "The route proxmox.example.com is declared and resolves to the correct surface, but the live path is degraded.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -4003,10 +4003,10 @@
             "runbook": "docs/runbooks/configure-netdata.md",
             "adr": "0196",
             "exposure": "edge-published",
-            "primary_url": "https://realtime.lv3.org",
+            "primary_url": "https://realtime.example.com",
             "publications": [
                 {
-                    "fqdn": "realtime.lv3.org",
+                    "fqdn": "realtime.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "platform-sso",
                     "audience": "operator"
@@ -4033,7 +4033,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for realtime.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for realtime.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -4092,10 +4092,10 @@
             "runbook": "docs/runbooks/configure-searxng.md",
             "adr": "0148",
             "exposure": "private-only",
-            "primary_url": "http://search.lv3.org",
+            "primary_url": "http://search.example.com",
             "publications": [
                 {
-                    "fqdn": "search.lv3.org",
+                    "fqdn": "search.example.com",
                     "delivery_model": "private-network",
                     "access_model": "private-network",
                     "audience": "private-network"
@@ -4122,7 +4122,7 @@
                     "id": "route",
                     "class": "best_effort",
                     "status": "pass",
-                    "reason": "The active publication for search.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for search.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -4263,10 +4263,10 @@
             "runbook": "docs/runbooks/configure-serverclaw.md",
             "adr": "0254",
             "exposure": "edge-published",
-            "primary_url": "https://chat.lv3.org",
+            "primary_url": "https://chat.example.com",
             "publications": [
                 {
-                    "fqdn": "chat.lv3.org",
+                    "fqdn": "chat.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "upstream-auth",
                     "audience": "operator"
@@ -4293,7 +4293,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for chat.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for chat.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -4352,10 +4352,10 @@
             "runbook": "docs/runbooks/public-status-page.md",
             "adr": "0109",
             "exposure": "edge-published",
-            "primary_url": "https://status.lv3.org",
+            "primary_url": "https://status.example.com",
             "publications": [
                 {
-                    "fqdn": "status.lv3.org",
+                    "fqdn": "status.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "open",
                     "audience": "public"
@@ -4382,7 +4382,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "degraded",
-                    "reason": "The route status.lv3.org is declared and resolves to the correct surface, but the live path is degraded.",
+                    "reason": "The route status.example.com is declared and resolves to the correct surface, but the live path is degraded.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -4523,10 +4523,10 @@
             "runbook": "docs/runbooks/deploy-uptime-kuma.md",
             "adr": "0027",
             "exposure": "edge-published",
-            "primary_url": "https://uptime.lv3.org",
+            "primary_url": "https://uptime.example.com",
             "publications": [
                 {
-                    "fqdn": "uptime.lv3.org",
+                    "fqdn": "uptime.example.com",
                     "delivery_model": "shared-edge",
                     "access_model": "upstream-auth",
                     "audience": "operator"
@@ -4553,7 +4553,7 @@
                     "id": "route",
                     "class": "required",
                     "status": "pass",
-                    "reason": "The active publication for uptime.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for uptime.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },
@@ -4612,10 +4612,10 @@
             "runbook": "docs/runbooks/configure-vaultwarden.md",
             "adr": "0147",
             "exposure": "private-only",
-            "primary_url": "https://vault.lv3.org",
+            "primary_url": "https://vault.example.com",
             "publications": [
                 {
-                    "fqdn": "vault.lv3.org",
+                    "fqdn": "vault.example.com",
                     "delivery_model": "private-network",
                     "access_model": "private-network",
                     "audience": "private-network"
@@ -4642,7 +4642,7 @@
                     "id": "route",
                     "class": "best_effort",
                     "status": "pass",
-                    "reason": "The active publication for vault.lv3.org matches the declared environment and is currently reachable.",
+                    "reason": "The active publication for vault.example.com matches the declared environment and is currently reachable.",
                     "last_verified": "2026-03-30T10:58:35Z",
                     "title": "Route truth"
                 },

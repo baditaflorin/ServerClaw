@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -46,22 +46,22 @@
     {
       "kind": "service_endpoint",
       "name": "Dozzle",
-      "address": "https://logs.lv3.org"
+      "address": "https://logs.example.com"
     },
     {
       "kind": "service_endpoint",
       "name": "MinIO API",
-      "address": "https://minio.lv3.org"
+      "address": "https://minio.example.com"
     },
     {
       "kind": "service_endpoint",
       "name": "MinIO console",
-      "address": "https://minio-console.lv3.org"
+      "address": "https://minio-console.example.com"
     },
     {
       "kind": "service_endpoint",
       "name": "SearXNG tailnet hostname",
-      "address": "http://search.lv3.org/search?q=proxmox%20ve&format=json"
+      "address": "http://search.example.com/search?q=proxmox%20ve&format=json"
     }
   ],
   "verification": [
@@ -73,17 +73,17 @@
     {
       "check": "MinIO runtime and public edge replay",
       "result": "pass",
-      "observed": "After a fresh-worktree `make generate-edge-static-sites` and a bounded resume past the already-satisfied `nftables` step on the memory-pressured runtime host, the MinIO runtime replay converged successfully and `https://minio.lv3.org/minio/health/live` returned `200` while `https://minio-console.lv3.org/` returned the expected `302` authentication redirect."
+      "observed": "After a fresh-worktree `make generate-edge-static-sites` and a bounded resume past the already-satisfied `nftables` step on the memory-pressured runtime host, the MinIO runtime replay converged successfully and `https://minio.example.com/minio/health/live` returned `200` while `https://minio-console.example.com/` returned the expected `302` authentication redirect."
     },
     {
       "check": "Dozzle runtime, remote agents, and authenticated edge",
       "result": "pass",
-      "observed": "The final Dozzle proof set verified the local hub healthcheck, the local agent, and remote agent reachability for `10.10.10.30:7007` and `10.10.10.40:7007`; explicit edge checks also confirmed `https://logs.lv3.org/` and the local host-header path both returned `HTTP/2 302` into the shared OIDC flow."
+      "observed": "The final Dozzle proof set verified the local hub healthcheck, the local agent, and remote agent reachability for `10.10.10.30:7007` and `10.10.10.40:7007`; explicit edge checks also confirmed `https://logs.example.com/` and the local host-header path both returned `HTTP/2 302` into the shared OIDC flow."
     },
     {
       "check": "SearXNG runtime, host proxy, DNS publication, and Open WebUI search wiring",
       "result": "pass",
-      "observed": "The bounded runtime replay succeeded through the SearXNG service verification tasks, and the final explicit checks confirmed the local compose services were up, `http://100.64.0.1/search?q=proxmox%20ve&format=json` and `http://search.lv3.org/search?q=proxmox%20ve&format=json` returned structured JSON, `dig +short @1.1.1.1 search.lv3.org` returned `100.64.0.1`, and the Open WebUI environment still declares `WEB_SEARCH_ENGINE=searxng` with the managed query URL."
+      "observed": "The bounded runtime replay succeeded through the SearXNG service verification tasks, and the final explicit checks confirmed the local compose services were up, `http://100.64.0.1/search?q=proxmox%20ve&format=json` and `http://search.example.com/search?q=proxmox%20ve&format=json` returned structured JSON, `dig +short @1.1.1.1 search.example.com` returned `100.64.0.1`, and the Open WebUI environment still declares `WEB_SEARCH_ENGINE=searxng` with the managed query URL."
     }
   ],
   "evidence_refs": [

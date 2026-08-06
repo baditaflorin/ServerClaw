@@ -60,7 +60,7 @@
     {
       "check": "Published artifact parity and public redirects",
       "result": "pass",
-      "observed": "The generated docs and changelog `index.html` digests match `/var/www/lv3-generated/docs-portal/index.html` and `/var/www/lv3-generated/changelog-portal/index.html`, while `https://ops.lv3.org/`, `https://docs.lv3.org/`, and `https://changelog.lv3.org/` all return unauthenticated `302` redirects to `/oauth2/sign_in`."
+      "observed": "The generated docs and changelog `index.html` digests match `/var/www/lv3-generated/docs-portal/index.html` and `/var/www/lv3-generated/changelog-portal/index.html`, while `https://ops.example.com/`, `https://docs.example.com/`, and `https://changelog.example.com/` all return unauthenticated `302` redirects to `/oauth2/sign_in`."
     },
     {
       "check": "Branch-local validation bundle",

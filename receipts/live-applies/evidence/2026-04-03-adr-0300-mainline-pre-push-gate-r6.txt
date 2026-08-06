@@ -1,7 +1,7 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/scripts/remote_exec.sh pre-push-gate --local-fallback
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/scripts/remote_exec.sh pre-push-gate --local-fallback
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-rsync: [receiver] write failed on "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0300-live-apply-dbe6595910/repo/.lv3-snapshots/01ac9ccdd4abd1113e0791723c5316773b170668e430b2faadcd3bd434f2ce4e.tar.gz": No space left on device (28)
+rsync: [receiver] write failed on "/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0300-live-apply-dbe6595910/repo/.lv3-snapshots/01ac9ccdd4abd1113e0791723c5316773b170668e430b2faadcd3bd434f2ce4e.tar.gz": No space left on device (28)
 rsync error: error in file IO (code 11) at receiver.c(381) [receiver=3.4.1]
 rsync(47225): error: unexpected end of file
 remote_exec: snapshot upload failed, falling back locally for pre-push-gate

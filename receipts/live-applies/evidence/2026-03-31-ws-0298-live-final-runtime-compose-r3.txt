@@ -20,7 +20,7 @@ docker-runtime-lv3 | CHANGED | rc=0 >>
         condition: service_started
     volumes:
       - /var/log/platform:/var/log/platform
-      - /srv/proxmox_florin_server:/srv/proxmox_florin_server
+      - /srv/platform_server:/srv/platform_server
       - worker_logs:/tmp/windmill/logs
 
   windmill_extra:

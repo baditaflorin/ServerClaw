@@ -80,12 +80,12 @@ notes: "Replay ADR 0373 from the latest realistic origin/main baseline after mai
   \ tests/test_repo_intake_runtime_role.py\n  tests/test_environment_topology.py tests/test_interface_contracts.py\n\
   \  tests/test_validate_service_registry.py\n  tests/test_validate_service_completeness.py\n\
   \  tests/test_ansible_execution_scopes.py\n- make preflight WORKFLOW=live-apply-service\n\
-  - LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make\n  converge-restic-config-backup\
+  - LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make\n  converge-restic-config-backup\
   \ env=production\n- python3 scripts/trigger_restic_live_apply.py --env production\
   \ --mode backup\n  --triggered-by ws-0373-live-apply --live-apply-trigger\n- refreshed\
   \ the repo_intake host security posture gate with receipts/security-reports/20260421T110457Z.json\n\
   - ANSIBLE_COLLECTIONS_PATH=\"$PWD/collections:$PWD/.ansible/validation/collections\"\
-  \n  LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make\n  live-apply-service\
+  \n  LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make\n  live-apply-service\
   \ service=repo_intake env=production\n  ALLOW_IN_PLACE_MUTATION=true\n- runtime\
   \ and edge curl verification for repo-intake\n\nReplay fixes carried by this branch:\n\
   - repo_intake_runtime now uses ansible.builtin.uri timeout instead of the\n  unsupported\

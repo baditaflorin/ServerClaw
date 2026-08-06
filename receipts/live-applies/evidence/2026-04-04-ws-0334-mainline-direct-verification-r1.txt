@@ -1,19 +1,19 @@
 == keycloak-discovery ==
 {
   "status": 200,
-  "issuer": "https://sso.lv3.org/realms/lv3",
-  "authorization_endpoint": "https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth"
+  "issuer": "https://sso.example.com/realms/lv3",
+  "authorization_endpoint": "https://sso.example.com/realms/lv3/protocol/openid-connect/auth"
 }
 
 == oidc-redirect ==
 {
   "status": 302,
-  "location": "https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?response_type=code&client_id=open-webui&redirect_uri=http%3A%2F%2F100.64.0.1%3A8008%2Foauth%2Foidc%2Fcallback&scope=openid+email+profile&state=jN85027jnJdvSoLAvedGj3RS1myCy1&nonce=dY7VpNEHEDezJqc5Euk5"
+  "location": "https://sso.example.com/realms/lv3/protocol/openid-connect/auth?response_type=code&client_id=open-webui&redirect_uri=http%3A%2F%2F100.64.0.1%3A8008%2Foauth%2Foidc%2Fcallback&scope=openid+email+profile&state=jN85027jnJdvSoLAvedGj3RS1myCy1&nonce=dY7VpNEHEDezJqc5Euk5"
 }
 
 == break-glass-signin ==
 {
   "status": 200,
-  "email": "ops@lv3.org",
+  "email": "ops@example.com",
   "role": "admin"
 }

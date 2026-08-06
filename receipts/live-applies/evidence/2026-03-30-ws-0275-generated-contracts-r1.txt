@@ -1,2 +1,2 @@
-uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-live-apply-r2/scripts/generate_slo_rules.py --check
-python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0275-live-apply-r2/scripts/uptime_contract.py --check
+uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0275-live-apply-r2/scripts/generate_slo_rules.py --check
+python3 /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0275-live-apply-r2/scripts/uptime_contract.py --check

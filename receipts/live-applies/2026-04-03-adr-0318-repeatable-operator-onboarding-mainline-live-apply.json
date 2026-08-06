@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,12 +40,12 @@
     {
       "check": "Exact-main Keycloak-only replay without duplicate email",
       "result": "pass",
-      "observed": "`python3 scripts/provision_operator.py --id florin-tmp-002 --name 'Florin Badita Temporary' --email baditaflorin+tmp002@gmail.com --username florin.badita-tmp-002 --role admin --expires 2026-04-10T00:00:00Z --requester baditaflorin@gmail.com --skip-email` succeeded from the rebased exact-main branch after injecting the live Keycloak bootstrap password ephemerally and forwarding the healthy `docker-runtime-lv3` fallback lane, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-mainline-provision-operator-r1.txt`."
+      "observed": "`python3 scripts/provision_operator.py --id florin-tmp-002 --name 'Platform Operator Temporary' --email operator@example.com --username florin.badita-tmp-002 --role admin --expires 2026-04-10T00:00:00Z --requester operator@example.com --skip-email` succeeded from the rebased exact-main branch after injecting the live Keycloak bootstrap password ephemerally and forwarding the healthy `docker-runtime-lv3` fallback lane, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0318-mainline-provision-operator-r1.txt`."
     },
     {
       "check": "Earlier dedicated-worktree full onboarding proof",
       "result": "pass",
-      "observed": "The full live onboarding path had already succeeded from the dedicated `ws-0318` worktree, including Keycloak role/group verification, Headscale authkey reuse, and requester-CC onboarding mail delivery to `baditaflorin+tmp002@gmail.com` and `baditaflorin@gmail.com`, preserved in `receipts/live-applies/2026-04-03-adr-0318-repeatable-operator-onboarding-live-apply.json` and `receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r7.txt`."
+      "observed": "The full live onboarding path had already succeeded from the dedicated `ws-0318` worktree, including Keycloak role/group verification, Headscale authkey reuse, and requester-CC onboarding mail delivery to `operator@example.com` and `operator@example.com`, preserved in `receipts/live-applies/2026-04-03-adr-0318-repeatable-operator-onboarding-live-apply.json` and `receipts/live-applies/evidence/2026-04-03-ws-0318-provision-operator-r7.txt`."
     },
     {
       "check": "Exact-main release readiness snapshot",

@@ -1,6 +1,6 @@
 {
   "active_failure_domains": [
-    "host:proxmox_florin"
+    "host:proxmox-host"
   ],
   "environments": [
     {
@@ -13,7 +13,7 @@
             "scope": "failure_domain"
           }
         ],
-        "failure_domain": "host:proxmox_florin",
+        "failure_domain": "host:proxmox-host",
         "placement_class": "preview",
         "reserved_capacity_exclusions": [
           "standby",
@@ -30,16 +30,16 @@
       "status": "planned"
     },
     {
-      "id": "host:proxmox_florin",
+      "id": "host:proxmox-host",
       "kind": "host",
-      "live_label": "fd-host-proxmox-florin",
+      "live_label": "fd-host-proxmox-host",
       "status": "active"
     }
   ],
   "guests": [
     {
       "live_tags": [
-        "fd-host-proxmox-florin",
+        "fd-host-proxmox-host",
         "pc-recovery",
         "aag-control-plane-recovery",
         "exc-same-domain"
@@ -53,14 +53,14 @@
             "scope": "failure_domain"
           }
         ],
-        "failure_domain": "host:proxmox_florin",
+        "failure_domain": "host:proxmox-host",
         "placement_class": "recovery"
       },
       "vmid": 160
     },
     {
       "live_tags": [
-        "fd-host-proxmox-florin",
+        "fd-host-proxmox-host",
         "pc-primary",
         "aag-build-jobs"
       ],
@@ -68,14 +68,14 @@
       "placement": {
         "anti_affinity_group": "build-jobs",
         "co_location_exceptions": [],
-        "failure_domain": "host:proxmox_florin",
+        "failure_domain": "host:proxmox-host",
         "placement_class": "primary"
       },
       "vmid": 130
     },
     {
       "live_tags": [
-        "fd-host-proxmox-florin",
+        "fd-host-proxmox-host",
         "pc-primary",
         "aag-runtime-shared"
       ],
@@ -83,14 +83,14 @@
       "placement": {
         "anti_affinity_group": "runtime-shared",
         "co_location_exceptions": [],
-        "failure_domain": "host:proxmox_florin",
+        "failure_domain": "host:proxmox-host",
         "placement_class": "primary"
       },
       "vmid": 120
     },
     {
       "live_tags": [
-        "fd-host-proxmox-florin",
+        "fd-host-proxmox-host",
         "pc-primary",
         "aag-observability-core"
       ],
@@ -98,14 +98,14 @@
       "placement": {
         "anti_affinity_group": "observability-core",
         "co_location_exceptions": [],
-        "failure_domain": "host:proxmox_florin",
+        "failure_domain": "host:proxmox-host",
         "placement_class": "primary"
       },
       "vmid": 140
     },
     {
       "live_tags": [
-        "fd-host-proxmox-florin",
+        "fd-host-proxmox-host",
         "pc-primary",
         "aag-edge-publication"
       ],
@@ -113,14 +113,14 @@
       "placement": {
         "anti_affinity_group": "edge-publication",
         "co_location_exceptions": [],
-        "failure_domain": "host:proxmox_florin",
+        "failure_domain": "host:proxmox-host",
         "placement_class": "primary"
       },
       "vmid": 110
     },
     {
       "live_tags": [
-        "fd-host-proxmox-florin",
+        "fd-host-proxmox-host",
         "pc-primary",
         "aag-postgres-ha"
       ],
@@ -128,14 +128,14 @@
       "placement": {
         "anti_affinity_group": "postgres-ha",
         "co_location_exceptions": [],
-        "failure_domain": "host:proxmox_florin",
+        "failure_domain": "host:proxmox-host",
         "placement_class": "primary"
       },
       "vmid": 150
     },
     {
       "live_tags": [
-        "fd-host-proxmox-florin",
+        "fd-host-proxmox-host",
         "pc-standby",
         "aag-postgres-ha",
         "exc-same-domain"
@@ -149,7 +149,7 @@
             "scope": "failure_domain"
           }
         ],
-        "failure_domain": "host:proxmox_florin",
+        "failure_domain": "host:proxmox-host",
         "placement_class": "standby"
       },
       "vmid": 151
@@ -158,10 +158,10 @@
   "standby_pairs": [
     {
       "anti_affinity_group": "postgres-ha",
-      "primary_failure_domain": "host:proxmox_florin",
+      "primary_failure_domain": "host:proxmox-host",
       "primary_vm": "postgres-lv3",
       "service_id": "postgres",
-      "standby_failure_domain": "host:proxmox_florin",
+      "standby_failure_domain": "host:proxmox-host",
       "standby_vm": "postgres-replica-lv3"
     }
   ]

@@ -1,9 +1,9 @@
 Preflight workflow: converge-plausible
-Description: Converge Plausible on docker-runtime-lv3, publish analytics.lv3.org through the shared edge, and verify public tracker injection plus synthetic event ingestion.
+Description: Converge Plausible on docker-runtime-lv3, publish analytics.example.com through the shared edge, and verify public tracker injection plus synthetic event ingestion.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
 PASS env hetzner_dns_api_token: HETZNER_DNS_API_TOKEN is set
-INFO generated plausible_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plausible/database-password.txt
-INFO generated plausible_secret_key_base: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plausible/secret-key-base.txt
-INFO generated plausible_bootstrap_user_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plausible/bootstrap-user-password.txt
+INFO generated plausible_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/plausible/database-password.txt
+INFO generated plausible_secret_key_base: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/plausible/secret-key-base.txt
+INFO generated plausible_bootstrap_user_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/plausible/bootstrap-user-password.txt
 Result: PASS (converge-plausible)

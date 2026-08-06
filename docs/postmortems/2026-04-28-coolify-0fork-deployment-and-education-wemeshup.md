@@ -24,7 +24,7 @@ Deploying Coolify to the 0fork Hetzner server took 10 converge iterations (16–
 | 21 | `/api/v1/teams/current` → 404 | `User::create()` skips the Coolify wizard; no `teams` row exists for `team_id=0` |
 | 22 | `/api/v1/servers` → empty array | Intermediate fix created team `id=34` but set token `team_id=34`; servers have `team_id=0` |
 | 23 | `ModuleNotFoundError: validation_toolkit` | Only the main script was deployed to guests; `validation_toolkit.py` wasn't copied alongside |
-| 24 | `cp: cannot create .../Debian-trixie-latest-amd64-base/host.fw` | Stale Ansible fact cache (`s1_proxmox-host`) had LV3 hostname; proxmox_security used `{{ ansible_hostname }}` in path |
+| 24 | `cp: cannot create .../debian-base-template/host.fw` | Stale Ansible fact cache (`s1_proxmox-host`) had LV3 hostname; proxmox_security used `{{ ansible_hostname }}` in path |
 | 25 | **`ok=216 failed=0`** | All fixes merged |
 
 ### Key fixes committed
@@ -157,7 +157,7 @@ The tunnel approach is cleaner (no persistent whitelist change) and matches the 
 
 #### 8. admin-auth.json is stale after 0fork clone
 
-**Problem:** `.local/coolify/admin-auth.json` retained LV3 values (`apps_public_url: https://apps.lv3.org`, `ssh_tunnel_host: 65.108.75.123`) after the 0fork identity overlay was applied. The converge role does not update this file on re-runs.
+**Problem:** `.local/coolify/admin-auth.json` retained LV3 values (`apps_public_url: https://apps.example.com`, `ssh_tunnel_host: 203.0.113.1`) after the 0fork identity overlay was applied. The converge role does not update this file on re-runs.
 
 **Fix needed:** `coolify_runtime` post-deploy task should regenerate `admin-auth.json` from template using `platform_domain`, `management_ipv4`, and `coolify_api_token_name`.
 

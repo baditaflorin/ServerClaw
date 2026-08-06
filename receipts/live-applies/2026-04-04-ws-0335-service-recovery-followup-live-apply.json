@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.98",
   "workflow_id": "live-apply-service",
   "adr": "0319",
-  "summary": "Recovered the remaining degraded public services after the runtime-pool stabilization work by restoring missing OpenBao-backed runtime env material on `docker-runtime-lv3`, rebuilding the local JupyterHub images, correcting the stale Vaultwarden Tailscale proxy target on `proxmox_florin`, identifying and fixing a branch-local `docker.socket` change that restarted Docker on `runtime-control-lv3`, and replaying Harbor after that control-plane Docker restart left only `harbor-log` running.",
+  "summary": "Recovered the remaining degraded public services after the runtime-pool stabilization work by restoring missing OpenBao-backed runtime env material on `docker-runtime-lv3`, rebuilding the local JupyterHub images, correcting the stale Vaultwarden Tailscale proxy target on `proxmox-host`, identifying and fixing a branch-local `docker.socket` change that restarted Docker on `runtime-control-lv3`, and replaying Harbor after that control-plane Docker restart left only `harbor-log` running.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,12 +34,12 @@
     {
       "kind": "service_endpoint",
       "name": "Harbor edge route",
-      "address": "https://registry.lv3.org/api/v2.0/ping"
+      "address": "https://registry.example.com/api/v2.0/ping"
     },
     {
       "kind": "service_endpoint",
       "name": "Vaultwarden liveness route",
-      "address": "https://vault.lv3.org/alive"
+      "address": "https://vault.example.com/alive"
     }
   ],
   "verification": [
@@ -51,24 +51,24 @@
     {
       "check": "Vaultwarden proxy recovery on runtime-control and the Proxmox host",
       "result": "pass",
-      "observed": "The replay preserved in `receipts/live-applies/evidence/2026-04-04-ws-0335-vaultwarden-proxy-recovery-r1.txt` completed successfully with recap `proxmox_florin ok=42 changed=6 failed=0` and `runtime-control-lv3 ok=150 changed=5 failed=0`, and `https://vault.lv3.org/alive` returned `HTTP 200` afterward."
+      "observed": "The replay preserved in `receipts/live-applies/evidence/2026-04-04-ws-0335-vaultwarden-proxy-recovery-r1.txt` completed successfully with recap `proxmox-host ok=42 changed=6 failed=0` and `runtime-control-lv3 ok=150 changed=5 failed=0`, and `https://vault.example.com/alive` returned `HTTP 200` afterward."
     },
     {
       "check": "Harbor control-plane recovery after the runtime-control Docker restart",
       "result": "pass",
-      "observed": "The Docker journal captured a `docker.service` restart on `runtime-control-lv3` at `2026-04-04T00:25:30Z`, and the subsequent Harbor replay in `receipts/live-applies/evidence/2026-04-04-ws-0335-harbor-recovery-r3.txt` restored the full Harbor compose stack; `https://registry.lv3.org/api/v2.0/ping` returned `HTTP 200` afterward."
+      "observed": "The Docker journal captured a `docker.service` restart on `runtime-control-lv3` at `2026-04-04T00:25:30Z`, and the subsequent Harbor replay in `receipts/live-applies/evidence/2026-04-04-ws-0335-harbor-recovery-r3.txt` restored the full Harbor compose stack; `https://registry.example.com/api/v2.0/ping` returned `HTTP 200` afterward."
     },
     {
-      "check": "Public lv3.org SLO sweep after the recoveries",
+      "check": "Public example.com SLO sweep after the recoveries",
       "result": "pass",
-      "observed": "The final concurrent sweep of all public `lv3.org` SLO targets returned `200` for every route except the expected Woodpecker `204`, including Directus, Harbor, Matrix Synapse, Outline, JupyterHub, Paperless, Plausible, Vaultwarden, and the remaining public edge contracts."
+      "observed": "The final concurrent sweep of all public `example.com` SLO targets returned `200` for every route except the expected Woodpecker `204`, including Directus, Harbor, Matrix Synapse, Outline, JupyterHub, Paperless, Plausible, Vaultwarden, and the remaining public edge contracts."
     }
   ],
   "evidence_refs": [
     "collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml",
     "docs/workstreams/ws-0335-service-recovery-followup.md",
     "inventory/group_vars/platform.yml",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "receipts/live-applies/evidence/2026-04-04-ws-0335-directus-runtime-start-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0335-harbor-recovery-r1.txt",
     "receipts/live-applies/evidence/2026-04-04-ws-0335-harbor-recovery-r2.txt",
@@ -93,7 +93,7 @@
     "loop_id": "2026-04-04-ws-0335-service-recovery-followup",
     "surface": "remaining degraded public services after runtime-pool stabilization",
     "diagnosis": "contract_drift",
-    "repair_action": "Restored missing OpenBao-backed runtime env files on `docker-runtime-lv3`, rebuilt and replayed JupyterHub locally, corrected the Vaultwarden proxy drift on `proxmox_florin`, patched the Docker runtime role to stop disabling `docker.socket` by stopping a live Docker daemon, and replayed Harbor after the control-plane Docker restart left the stack partially down.",
-    "verification": "The final public `lv3.org` sweep returned healthy responses for every public target, with `registry.lv3.org` at `HTTP 200` and `vault.lv3.org` at `HTTP 200`."
+    "repair_action": "Restored missing OpenBao-backed runtime env files on `docker-runtime-lv3`, rebuilt and replayed JupyterHub locally, corrected the Vaultwarden proxy drift on `proxmox-host`, patched the Docker runtime role to stop disabling `docker.socket` by stopping a live Docker daemon, and replayed Harbor after the control-plane Docker restart left the stack partially down.",
+    "verification": "The final public `example.com` sweep returned healthy responses for every public target, with `registry.example.com` at `HTTP 200` and `vault.example.com` at `HTTP 200`."
   }
 }

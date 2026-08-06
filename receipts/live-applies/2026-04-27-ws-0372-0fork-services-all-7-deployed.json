@@ -54,7 +54,7 @@
     {
       "check": "JWT token created",
       "result": "pass",
-      "observed": "JWT token issued for ops/proxmox_florin_server repo activation."
+      "observed": "JWT token issued for ops/platform_server repo activation."
     }
   ],
   "evidence_refs": [

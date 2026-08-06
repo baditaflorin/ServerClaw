@@ -1,18 +1,18 @@
 Recorded at 2026-03-29T21:52:34Z
-Worktree: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0254-main-merge
+Worktree: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0254-main-merge
 Branch HEAD: dc1db990c5ff532d5be69d63eb0a64a08f1bce6b
 Latest origin/main: bae420263872e079fdc34f7f755a6984a3cd5949
 Repo version on latest origin/main: 0.177.87
 Platform version on latest origin/main: 0.130.59
 
-git diff --stat origin/main -- inventory/group_vars/platform.yml inventory/host_vars/proxmox_florin.yml playbooks/serverclaw.yml docs/runbooks/configure-serverclaw.md collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2 collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml
+git diff --stat origin/main -- inventory/group_vars/platform.yml inventory/host_vars/proxmox-host.yml playbooks/serverclaw.yml docs/runbooks/configure-serverclaw.md collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2 collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml
 
 .../templates/nftables.conf.j2                     |   2 +-
 .../roles/nginx_edge_publication/defaults/main.yml |   7 +
 .../roles/nginx_edge_publication/tasks/main.yml    |  19 ++
 docs/runbooks/configure-serverclaw.md              |  85 +++++++++
 inventory/group_vars/platform.yml                  |  63 +++++++
-inventory/host_vars/proxmox_florin.yml             |  24 +++
+inventory/host_vars/proxmox-host.yml             |  24 +++
 playbooks/serverclaw.yml                           | 210 +++++++++++++++++++++
 7 files changed, 409 insertions(+), 1 deletion(-)
 
@@ -22,6 +22,6 @@ Interpretation:
 - latest origin/main still does not carry the dedicated ServerClaw playbook or
   runbook
 - latest origin/main still does not carry the guest-firewall and nginx-edge
-  publication changes required for chat.lv3.org
+  publication changes required for chat.example.com
 - until those surfaces merge to main, server-resident reconciliation can
   overwrite branch-local live recovery

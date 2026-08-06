@@ -22,7 +22,7 @@
       "uv run pytest tests/test_edge_publication_makefile.py -q",
       "uv run pytest tests/test_ansible_execution_scopes.py -q"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-15",
     "remediation_ref": "ws-0417-main-merge-edge-cert-and-sftpgo"
   }

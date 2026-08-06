@@ -1,1 +1,1 @@
-Receipt: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0300-live-apply/receipts/security-reports/20260403T090506Z.json
+Receipt: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0300-live-apply/receipts/security-reports/20260403T090506Z.json

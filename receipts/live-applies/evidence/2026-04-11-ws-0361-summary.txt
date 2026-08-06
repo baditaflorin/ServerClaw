@@ -43,7 +43,7 @@ Live apply attempt
 
 Environment reachability probes
 - ssh ops@100.64.0.1: timeout
-- ssh ops@65.108.75.123: timeout
+- ssh ops@203.0.113.1: timeout
 - ssh ops@100.118.189.95: connection refused
 - ssh -p 2222 ops@100.118.189.95: connection refused
 - tailscale ping 100.64.0.1: timeout
@@ -52,7 +52,7 @@ Environment reachability probes
 - curl http://100.64.0.1:8020/api/ping: timeout
 - curl http://100.118.189.95:8020/api/ping: connection refused
 - curl https://100.64.0.1:8006/api2/json/: timeout
-- tailscale status --json: proxmox-florin-subnet-router listed online at 100.64.0.1, but local client health warned that it had not received a fresh network map from the coordination server
+- tailscale status --json: proxmox-host-subnet-router listed online at 100.64.0.1, but local client health warned that it had not received a fresh network map from the coordination server
 - tailscale ssh fallback: unavailable on this macOS App Store/TestFlight Tailscale build
 
 Current controller-local Semaphore auth artifact

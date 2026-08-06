@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -44,7 +44,7 @@
     {
       "check": "Monitoring live replay",
       "result": "pass",
-      "observed": "`make converge-monitoring` completed successfully with final recap `backup-lv3 ok=14 changed=0 failed=0`, `coolify-lv3 ok=15 changed=7 failed=0`, `docker-build-lv3 ok=47 changed=2 failed=0`, `docker-runtime-lv3 ok=70 changed=2 failed=0`, `monitoring-lv3 ok=379 changed=6 failed=0`, `nginx-lv3 ok=150 changed=4 failed=0`, `postgres-lv3 ok=38 changed=0 failed=0`, and `proxmox_florin ok=100 changed=3 failed=0`."
+      "observed": "`make converge-monitoring` completed successfully with final recap `backup-lv3 ok=14 changed=0 failed=0`, `coolify-lv3 ok=15 changed=7 failed=0`, `docker-build-lv3 ok=47 changed=2 failed=0`, `docker-runtime-lv3 ok=70 changed=2 failed=0`, `monitoring-lv3 ok=379 changed=6 failed=0`, `nginx-lv3 ok=150 changed=4 failed=0`, `postgres-lv3 ok=38 changed=0 failed=0`, and `proxmox-host ok=100 changed=3 failed=0`."
     },
     {
       "check": "Monitoring service and Prometheus verification",

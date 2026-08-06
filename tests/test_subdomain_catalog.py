@@ -264,7 +264,7 @@ class SubdomainCatalogTests(unittest.TestCase):
                 "validate_subdomain_catalog",
                 side_effect=lambda _catalog, resolved_service_catalog, *_args: self.assertEqual(
                     resolved_service_catalog["services"][0]["environments"]["production"]["url"],
-                    "https://api.lv3.org",
+                    "https://api.example.com",
                 ),
             ),
         ):
@@ -273,7 +273,7 @@ class SubdomainCatalogTests(unittest.TestCase):
 
 def _replace_example_domain(value):
     if isinstance(value, str):
-        return value.replace("example.com", "lv3.org")
+        return value.replace("example.com", "example.com")
     if isinstance(value, list):
         return [_replace_example_domain(item) for item in value]
     if isinstance(value, dict):

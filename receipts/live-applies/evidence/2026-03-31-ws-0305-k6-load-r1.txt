@@ -1,5 +1,5 @@
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-rsync: [receiver] write failed on "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-snapshots/c94222282ec1ec3157e99e664717b9938623f5efb42c59f78af34cee4d99f842.tar.gz": No space left on device (28)
+rsync: [receiver] write failed on "/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-snapshots/c94222282ec1ec3157e99e664717b9938623f5efb42c59f78af34cee4d99f842.tar.gz": No space left on device (28)
 rsync error: error in file IO (code 11) at receiver.c(381) [receiver=3.4.1]
 rsync(61015): error: unexpected end of file

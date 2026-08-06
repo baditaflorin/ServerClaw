@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -35,7 +35,7 @@
     {
       "kind": "service_endpoint",
       "name": "keycloak",
-      "address": "https://keycloak.lv3.org"
+      "address": "https://keycloak.example.com"
     }
   ],
   "verification": [
@@ -63,7 +63,7 @@
   ],
   "notes": [
     "The limited `playbooks/windmill.yml` replay synced the released repo checkout and runtime dependencies onto docker-runtime-lv3 but failed later in the unrelated raw-app export path with `password authentication failed for user \"windmill_admin\"`.",
-    "Because the `f/lv3/fault-injection` path was still missing after that partial replay, the script was seeded directly through the guest-local Windmill API using `/srv/proxmox_florin_server/config/windmill/scripts/fault-injection.py` and the local superadmin token before rerunning the official `make fault-injection` entrypoint.",
+    "Because the `f/lv3/fault-injection` path was still missing after that partial replay, the script was seeded directly through the guest-local Windmill API using `/srv/platform_server/config/windmill/scripts/fault-injection.py` and the local superadmin token before rerunning the official `make fault-injection` entrypoint.",
     "The production OpenBao scenario intentionally uses pause/unpause rather than stop/start so the singleton secret authority keeps its seal state intact during routine resilience validation."
   ]
 }

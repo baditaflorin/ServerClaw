@@ -3,7 +3,7 @@
 Migrate all openssl rand credential generation to | secret Jinja2 filter (ADR 0480).
 
 This script performs a multi-repo, multi-deployment migration:
-- Updates 54 Ansible role files across lv3.org and 0fork.com deployments
+- Updates 54 Ansible role files across example.com and 0fork.com deployments
 - Replaces 136+ instances of openssl rand with {{ service | secret }} filter
 - Maintains deployment-agnostic approach (works on both domains)
 - Automatically derives service names from role directories

@@ -1,4 +1,4 @@
-Debian-trixie-latest-amd64-base
+debian-base-template
 6.17.13-2-pve
 active
 active

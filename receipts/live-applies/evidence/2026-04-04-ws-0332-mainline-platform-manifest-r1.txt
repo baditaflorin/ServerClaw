@@ -1,5 +1,5 @@
 Using CPython 3.13.7
 Creating virtual environment at: .venv
-   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-main-integration-r2
-      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0332-main-integration-r2
+   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-main-integration-r2
+      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0332-main-integration-r2
 Installed 2 packages in 14ms

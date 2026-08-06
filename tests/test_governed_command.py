@@ -148,13 +148,13 @@ def test_build_host_ssh_command_honors_breakglass_port() -> None:
         {
             "bootstrap_key": Path("/tmp/bootstrap.id_ed25519"),
             "host_user": "ops",
-            "host_addr": "65.108.75.123",
+            "host_addr": "203.0.113.1",
             "host_port": "2222",
         },
         "hostname",
     )
 
-    assert command_argv[-2:] == ["ops@65.108.75.123", "hostname"]
+    assert command_argv[-2:] == ["ops@203.0.113.1", "hostname"]
     assert "-p" in command_argv
     assert command_argv[command_argv.index("-p") + 1] == "2222"
 
@@ -164,7 +164,7 @@ def test_build_guest_ssh_command_honors_breakglass_port() -> None:
         {
             "bootstrap_key": Path("/tmp/bootstrap.id_ed25519"),
             "host_user": "ops",
-            "host_addr": "65.108.75.123",
+            "host_addr": "203.0.113.1",
             "host_port": "2222",
             "guests": {"docker-runtime": "10.10.10.20"},
         },

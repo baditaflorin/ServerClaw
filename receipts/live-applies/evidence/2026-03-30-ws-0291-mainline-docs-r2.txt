@@ -1,4 +1,4 @@
-uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/scripts/build_docs_portal.py
+uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/requirements/docs.txt python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/scripts/build_docs_portal.py
 
 [31m │  ⚠  Warning from the Material for MkDocs team[0m
 [31m │[0m
@@ -16,32 +16,32 @@ uv run --with-requirements /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_
 [31m │[0m  [4mhttps://squidfunk.github.io/mkdocs-material/blog/2026/02/18/mkdocs-2.0/[0m
 [0m
 INFO    -  Cleaning site directory
-INFO    -  Building documentation to directory: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/build/docs-portal
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/scripts/platform_observation_tool.py', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/platform-observation/latest', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/open-webui/platform-findings-daily.md', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/health-probe-catalog.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/secret-catalog.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/image-catalog.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/schema/platform-finding.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/controller-local-secrets.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/control-plane-lanes.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/api-publication.json', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/defaults/main.yml', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/tasks/main.yml', it was left as is.
-INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/runbooks/agent-observation-loop.md', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/platform/graph', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/migrations/0012_graph_schema.sql', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/config/dependency-graph.yaml', it was left as is.
-INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-dependency-graph/config/windmill/scripts/graph', it was left as is.
-INFO    -  Doc file 'runbooks/cert-expired.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-certificate-lifecycle/config/certificate-catalog.json', it was left as is.
-INFO    -  Doc file 'runbooks/scaffold-new-service.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-extension-model/docs/runbooks/add-a-new-service.md', it was left as is.
+INFO    -  Building documentation to directory: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/build/docs-portal
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/scripts/platform_observation_tool.py', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/.local/platform-observation/latest', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/.local/open-webui/platform-findings-daily.md', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/health-probe-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/secret-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/image-catalog.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/docs/schema/platform-finding.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/controller-local-secrets.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/control-plane-lanes.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/config/api-publication.json', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/roles/windmill_runtime/defaults/main.yml', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/roles/windmill_runtime/tasks/main.yml', it was left as is.
+INFO    -  Doc file 'architecture/decisions/0071-agent-observation-loop-and-drift-detection.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-agent-observation-loop/docs/runbooks/agent-observation-loop.md', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/platform/graph', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/migrations/0012_graph_schema.sql', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/config/dependency-graph.yaml', it was left as is.
+INFO    -  Doc file 'releases/0.117.0.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-dependency-graph/config/windmill/scripts/graph', it was left as is.
+INFO    -  Doc file 'runbooks/cert-expired.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-certificate-lifecycle/config/certificate-catalog.json', it was left as is.
+INFO    -  Doc file 'runbooks/scaffold-new-service.md' contains an absolute link '/Users/live/Documents/GITHUB_PROJECTS/platform_server-extension-model/docs/runbooks/add-a-new-service.md', it was left as is.
 INFO    -  mkdocs_swagger_ui_tag: Processing file 'api/openapi.md'
 INFO    -  mkdocs_swagger_ui_tag: Copying swagger ui assets.
 INFO    -  Documentation built in 6.94 seconds
 
 Running Pagefind v1.4.0 (Extended)
-Running from: "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge"
+Running from: "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge"
 Source:       "build/docs-portal"
 Output:       "build/docs-portal/pagefind"
 
@@ -65,4 +65,4 @@ Total:
 
 Finished in 2.811 seconds
 Published artifact secret scan passed: 1554 file(s) checked with builtin.
-Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/build/docs-portal
+Built docs portal with Pagefind: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/build/docs-portal

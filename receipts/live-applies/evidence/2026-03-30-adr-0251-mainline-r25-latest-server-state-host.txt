@@ -1,6 +1,6 @@
-Debian-trixie-latest-amd64-base
+debian-base-template
 2026-03-30T12:23:14+02:00
-Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve #1 SMP PREEMPT_DYNAMIC PMX 6.17.13-2 (2026-03-13T08:06Z) x86_64 GNU/Linux
+Linux debian-base-template 6.17.13-2-pve #1 SMP PREEMPT_DYNAMIC PMX 6.17.13-2 (2026-03-13T08:06Z) x86_64 GNU/Linux
 pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)
 
 VMs

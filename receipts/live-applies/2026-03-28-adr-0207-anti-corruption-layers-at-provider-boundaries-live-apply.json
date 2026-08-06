@@ -15,7 +15,7 @@
     {
       "kind": "controller_artifacts",
       "name": "ws-0207-live-apply-worktree",
-      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-live-apply"
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0207-live-apply"
     },
     {
       "kind": "provider",
@@ -24,8 +24,8 @@
     },
     {
       "kind": "hostname",
-      "name": "ops.lv3.org",
-      "address": "65.108.75.123"
+      "name": "ops.example.com",
+      "address": "203.0.113.1"
     }
   ],
   "verification": [
@@ -47,22 +47,22 @@
     {
       "check": "Worker-safe repository validation and provider-boundary fallback",
       "result": "pass",
-      "observed": "python3 /srv/proxmox_florin_server/config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server returned status ok on docker-runtime-lv3 after ./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals returned 0 and uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate returned 0. The captured primary gate output still records the separate registry runner image failure on docker-runtime-lv3, so the worker-safe fallback remains the live proof while build-server remote validation stays the authoritative full-manifest path."
+      "observed": "python3 /srv/platform_server/config/windmill/scripts/post-merge-gate.py --repo-path /srv/platform_server returned status ok on docker-runtime-lv3 after ./scripts/validate_repo.sh generated-vars role-argument-specs json alert-rules generated-docs generated-portals returned 0 and uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate returned 0. The captured primary gate output still records the separate registry runner image failure on docker-runtime-lv3, so the worker-safe fallback remains the live proof while build-server remote validation stays the authoritative full-manifest path."
     },
     {
       "check": "Windmill worker mirror replay from the integration worktree",
       "result": "pass",
-      "observed": "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_REMOTE_TEMP=/tmp ./scripts/run_with_namespace.sh uvx --from pyyaml python ./scripts/ansible_scope_runner.py run --inventory ./inventory/hosts.yml --playbook ./playbooks/windmill.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0207-main-recut --limit docker-runtime-lv3 finished docker-runtime-lv3 : ok=220 changed=39 unreachable=0 failed=0 skipped=32."
+      "observed": "ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_REMOTE_TEMP=/tmp ./scripts/run_with_namespace.sh uvx --from pyyaml python ./scripts/ansible_scope_runner.py run --inventory ./inventory/hosts.yml --playbook ./playbooks/windmill.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0207-main-recut --limit docker-runtime-lv3 finished docker-runtime-lv3 : ok=220 changed=39 unreachable=0 failed=0 skipped=32."
     },
     {
       "check": "Stale immutable worker files pruned",
       "result": "pass",
-      "observed": "The worktree-pinned worker replay removed stale immutable files from /srv/proxmox_florin_server and the obsolete docs/workstreams/ws-0204-live-apply.md plus docs/workstreams/ws-0209-live-apply.md entries were no longer present on docker-runtime-lv3 afterwards."
+      "observed": "The worktree-pinned worker replay removed stale immutable files from /srv/platform_server and the obsolete docs/workstreams/ws-0204-live-apply.md plus docs/workstreams/ws-0209-live-apply.md entries were no longer present on docker-runtime-lv3 afterwards."
     },
     {
       "check": "Live Hetzner DNS boundary reconcile",
       "result": "pass",
-      "observed": "The catalog-backed playbooks/provision-subdomain.yml flow was run through scripts/ansible_scope_runner.py for ops.lv3.org; the live Hetzner DNS role translated the raw zone and record payloads into canonical facts, selected one canonical managed match, skipped both create and update, and finished ok=19 changed=0 skipped=2 failed=0."
+      "observed": "The catalog-backed playbooks/provision-subdomain.yml flow was run through scripts/ansible_scope_runner.py for ops.example.com; the live Hetzner DNS role translated the raw zone and record payloads into canonical facts, selected one canonical managed match, skipped both create and update, and finished ok=19 changed=0 skipped=2 failed=0."
     }
   ],
   "evidence_refs": [
@@ -102,6 +102,6 @@
     "During the mainline re-verification, the worker replay had to pin windmill_worker_checkout_repo_root_local_dir to the active worktree because the default controller path otherwise mirrored the shared top-level checkout instead of the branch under test.",
     "The authoritative merged-tree build-server validation pass printed one transient remote git object lookup failure before continuing, but make remote-validate still exited 0 after the full manifest sweep so it was treated as non-blocking remote workspace ancestry noise rather than a release failure.",
     "When the final 0.177.42 recut reran make remote-validate, rsync could not set mtimes under build/docs-portal/* on the build-server workspace, so scripts/remote_exec.sh fell back locally; the hardened login-shell fallback still completed the full validation manifest and exited 0.",
-    "An earlier database.lv3.org reconcile reached the canonical translation and match-selection steps but exposed that the record was absent in the live Hetzner zone, so the idempotent evidence path was re-run against the already-governed ops.lv3.org hostname instead of mixing ADR 0207 proof with a separate DNS create-policy question."
+    "An earlier database.example.com reconcile reached the canonical translation and match-selection steps but exposed that the record was absent in the live Hetzner zone, so the idempotent evidence path was re-run against the already-governed ops.example.com hostname instead of mixing ADR 0207 proof with a separate DNS create-policy question."
   ]
 }

@@ -1,1 +1,1 @@
-Updated diagrams in /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1/docs/diagrams
+Updated diagrams in /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-label-studio-live-apply-r1/docs/diagrams

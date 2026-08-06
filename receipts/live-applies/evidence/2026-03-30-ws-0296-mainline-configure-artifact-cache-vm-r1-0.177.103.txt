@@ -2,38 +2,38 @@
 Preflight workflow: configure-artifact-cache-vm
 Description: Provision the dedicated artifact-cache VM, converge the private cache-plane runtime on it, and leave build-host consumer adoption to the governed service replay.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
 Result: PASS (configure-artifact-cache-vm)
-ANSIBLE_HOST_KEY_CHECKING=False LV3_RUN_ID=ddd4b8859aef4f6bae7f7bb5a9a1f5f7 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/inventory/hosts.yml --run-id ad94d1270d6a46dabd15dfa08dcc35e0 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0296-live-apply/playbooks/artifact-cache-vm.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+ANSIBLE_HOST_KEY_CHECKING=False LV3_RUN_ID=ddd4b8859aef4f6bae7f7bb5a9a1f5f7 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0296-live-apply/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0296-live-apply/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0296-live-apply/inventory/hosts.yml --run-id ad94d1270d6a46dabd15dfa08dcc35e0 --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0296-live-apply/playbooks/artifact-cache-vm.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
 
 PLAY [Ensure the artifact cache VM is provisioned on the Proxmox host] *********
 
 TASK [Gathering Facts] *********************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Gathering Facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:24.018Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.038Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Gathering Facts","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.038Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:27.045Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.077Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validating arguments against arg spec 'main' - Proxmox guests role inputs.","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.077Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:27.086Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => {
+ok: [proxmox-host] => {
     "changed": false,
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.117Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate Proxmox guest provisioning inputs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.117Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Ensure snippets directory exists] **********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:27.124Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.580Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Ensure snippets directory exists","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.580Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Validate each guest references a declared template] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:27.588Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=artifact-cache-lv3) => {
+ok: [proxmox-host] => (item=artifact-cache-lv3) => {
     "ansible_loop_var": "item",
     "changed": false,
     "item": {
@@ -51,7 +51,7 @@ ok: [proxmox_florin] => (item=artifact-cache-lv3) => {
         "placement": {
             "anti_affinity_group": "artifact-cache-plane",
             "co_location_exceptions": [],
-            "failure_domain": "host:proxmox_florin",
+            "failure_domain": "host:proxmox-host",
             "placement_class": "primary"
         },
         "role": "artifact-cache",
@@ -66,69 +66,69 @@ ok: [proxmox_florin] => (item=artifact-cache-lv3) => {
     },
     "msg": "All assertions passed"
 }
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.621Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Validate each guest references a declared template","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.621Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Build failure-domain live label map] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:27.628Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin]
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.659Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host]
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Build failure-domain live label map","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:27.659Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:27.670Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:28.844Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Render cloud-init user-data snippets for guests","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:28.844Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Check which guest VMs already exist] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:28.853Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:29.905Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Check which guest VMs already exist","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:29.905Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Read current guest configurations] *********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:29.913Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:30.933Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Read current guest configurations","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:30.933Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Clone guest VMs from template] *************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:30.940Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T13:28:30.965Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Clone guest VMs from template","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T13:28:30.965Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Resize guest disks on first clone] *********
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Resize guest disks on first clone","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:30.973Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin] => (item=artifact-cache-lv3)
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Resize guest disks on first clone","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T13:28:31.010Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host] => (item=artifact-cache-lv3)
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Resize guest disks on first clone","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T13:28:31.010Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:31.017Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin] => (item=artifact-cache-lv3)
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:33.075Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Apply guest hardware and cloud-init settings","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:33.075Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Attach additional guest disks when declared] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Attach additional guest disks when declared","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:33.082Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [proxmox_florin]
-{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Attach additional guest disks when declared","service_id":"ansible","target":"proxmox_florin","task_status":"skipped","trace_id":"background","ts":"2026-03-30T13:28:33.104Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+skipping: [proxmox-host]
+{"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.proxmox_guests : Attach additional guest disks when declared","service_id":"ansible","target":"proxmox-host","task_status":"skipped","trace_id":"background","ts":"2026-03-30T13:28:33.104Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:33.111Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin] => (item=artifact-cache-lv3)
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:35.205Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host] => (item=artifact-cache-lv3)
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Refresh cloud-init seed data after guest config changes","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:35.205Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.proxmox_guests : Start guest VMs] ***************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.proxmox_guests : Start guest VMs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:35.214Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [proxmox_florin] => (item=artifact-cache-lv3)
-{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Start guest VMs","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:36.211Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+ok: [proxmox-host] => (item=artifact-cache-lv3)
+{"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.proxmox_guests : Start guest VMs","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:36.211Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Stop the artifact cache VM from Proxmox after qm set changes] ************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Stop the artifact cache VM from Proxmox after qm set changes","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:36.224Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Stop the artifact cache VM from Proxmox after qm set changes","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:37.432Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Stop the artifact cache VM from Proxmox after qm set changes","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:37.432Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 TASK [Start the artifact cache VM from Proxmox after the forced stop] **********
 {"component":"ansible.task","level":"INFO","msg":"Task start: Start the artifact cache VM from Proxmox after the forced stop","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:28:37.439Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [proxmox_florin]
-{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Start the artifact cache VM from Proxmox after the forced stop","service_id":"ansible","target":"proxmox_florin","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:39.411Z","vm":"proxmox_florin","workflow_id":"ansible-playbook"}
+changed: [proxmox-host]
+{"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: Start the artifact cache VM from Proxmox after the forced stop","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:28:39.411Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
 
 PLAY [Converge the dedicated artifact cache guest] *****************************
 
@@ -552,34 +552,34 @@ ok: [artifact-cache-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T13:29:28.631Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [artifact-cache-lv3] => (item=agents.lv3.org)
-changed: [artifact-cache-lv3] => (item=analytics.lv3.org)
-changed: [artifact-cache-lv3] => (item=api.lv3.org)
-changed: [artifact-cache-lv3] => (item=apps.lv3.org)
-changed: [artifact-cache-lv3] => (item=build.lv3.org)
-changed: [artifact-cache-lv3] => (item=chat.lv3.org)
-changed: [artifact-cache-lv3] => (item=cloud.lv3.org)
-changed: [artifact-cache-lv3] => (item=coolify.lv3.org)
-changed: [artifact-cache-lv3] => (item=docker.lv3.org)
-changed: [artifact-cache-lv3] => (item=draw.lv3.org)
-changed: [artifact-cache-lv3] => (item=grafana.lv3.org)
-changed: [artifact-cache-lv3] => (item=headscale.lv3.org)
-changed: [artifact-cache-lv3] => (item=home.lv3.org)
-changed: [artifact-cache-lv3] => (item=langfuse.lv3.org)
-changed: [artifact-cache-lv3] => (item=logs.lv3.org)
-changed: [artifact-cache-lv3] => (item=mail.lv3.org)
-changed: [artifact-cache-lv3] => (item=matrix.lv3.org)
-changed: [artifact-cache-lv3] => (item=n8n.lv3.org)
-changed: [artifact-cache-lv3] => (item=nginx.lv3.org)
-changed: [artifact-cache-lv3] => (item=ops.lv3.org)
-changed: [artifact-cache-lv3] => (item=proxmox.lv3.org)
-changed: [artifact-cache-lv3] => (item=realtime.lv3.org)
-changed: [artifact-cache-lv3] => (item=registry.lv3.org)
-changed: [artifact-cache-lv3] => (item=sso.lv3.org)
-changed: [artifact-cache-lv3] => (item=status.lv3.org)
-changed: [artifact-cache-lv3] => (item=tasks.lv3.org)
-changed: [artifact-cache-lv3] => (item=uptime.lv3.org)
-changed: [artifact-cache-lv3] => (item=wiki.lv3.org)
+changed: [artifact-cache-lv3] => (item=agents.example.com)
+changed: [artifact-cache-lv3] => (item=analytics.example.com)
+changed: [artifact-cache-lv3] => (item=api.example.com)
+changed: [artifact-cache-lv3] => (item=apps.example.com)
+changed: [artifact-cache-lv3] => (item=build.example.com)
+changed: [artifact-cache-lv3] => (item=chat.example.com)
+changed: [artifact-cache-lv3] => (item=cloud.example.com)
+changed: [artifact-cache-lv3] => (item=coolify.example.com)
+changed: [artifact-cache-lv3] => (item=docker.example.com)
+changed: [artifact-cache-lv3] => (item=draw.example.com)
+changed: [artifact-cache-lv3] => (item=grafana.example.com)
+changed: [artifact-cache-lv3] => (item=headscale.example.com)
+changed: [artifact-cache-lv3] => (item=home.example.com)
+changed: [artifact-cache-lv3] => (item=langfuse.example.com)
+changed: [artifact-cache-lv3] => (item=logs.example.com)
+changed: [artifact-cache-lv3] => (item=mail.example.com)
+changed: [artifact-cache-lv3] => (item=matrix.example.com)
+changed: [artifact-cache-lv3] => (item=n8n.example.com)
+changed: [artifact-cache-lv3] => (item=nginx.example.com)
+changed: [artifact-cache-lv3] => (item=ops.example.com)
+changed: [artifact-cache-lv3] => (item=proxmox.example.com)
+changed: [artifact-cache-lv3] => (item=realtime.example.com)
+changed: [artifact-cache-lv3] => (item=registry.example.com)
+changed: [artifact-cache-lv3] => (item=sso.example.com)
+changed: [artifact-cache-lv3] => (item=status.example.com)
+changed: [artifact-cache-lv3] => (item=tasks.example.com)
+changed: [artifact-cache-lv3] => (item=uptime.example.com)
+changed: [artifact-cache-lv3] => (item=wiki.example.com)
 {"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"artifact-cache-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T13:29:42.502Z","vm":"artifact-cache-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Render Docker daemon configuration] ********
@@ -944,4 +944,4 @@ ok: [artifact-cache-lv3] => {
 
 PLAY RECAP *********************************************************************
 artifact-cache-lv3         : ok=118  changed=8    unreachable=0    failed=0    skipped=7    rescued=0    ignored=0
-proxmox_florin             : ok=14   changed=4    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+proxmox-host             : ok=14   changed=4    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0

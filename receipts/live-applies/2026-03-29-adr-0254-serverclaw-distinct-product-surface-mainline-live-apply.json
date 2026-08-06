@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.59",
   "workflow_id": "adr-0254-serverclaw-distinct-product-surface-mainline-live-apply",
   "adr": "0254",
-  "summary": "Revalidated ADR 0254 against the latest origin/main commit bae420263872e079fdc34f7f755a6984a3cd5949 and confirmed the branch implementation is correct but exact-main durability is still partial: Proxmox still exposes the 8096 host firewall lane, coolify-lv3 still serves ServerClaw locally and accepts bootstrap admin sign-in, yet current mainline truth still lacks the ServerClaw topology so the coolify guest firewall has drifted back to {80,443,8000} for nginx-lv3 and public https://chat.lv3.org/ currently redirects to https://nginx.lv3.org/ until merge-to-main and replay from merged main.",
+  "summary": "Revalidated ADR 0254 against the latest origin/main commit bae420263872e079fdc34f7f755a6984a3cd5949 and confirmed the branch implementation is correct but exact-main durability is still partial: Proxmox still exposes the 8096 host firewall lane, coolify-lv3 still serves ServerClaw locally and accepts bootstrap admin sign-in, yet current mainline truth still lacks the ServerClaw topology so the coolify guest firewall has drifted back to {80,443,8000} for nginx-lv3 and public https://chat.example.com/ currently redirects to https://nginx.example.com/ until merge-to-main and replay from merged main.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,14 +40,14 @@
     {
       "kind": "service_endpoint",
       "name": "serverclaw",
-      "address": "https://chat.lv3.org/"
+      "address": "https://chat.example.com/"
     }
   ],
   "verification": [
     {
       "check": "Latest origin/main contract gap",
       "result": "pass",
-      "observed": "`git diff --stat origin/main -- inventory/group_vars/platform.yml inventory/host_vars/proxmox_florin.yml playbooks/serverclaw.yml docs/runbooks/configure-serverclaw.md collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2 collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml` shows current `origin/main` still lacks the ADR 0254 topology, playbook, runbook, guest-firewall, and public-edge publication surfaces that keep `chat.lv3.org` durable under server-resident reconciliation."
+      "observed": "`git diff --stat origin/main -- inventory/group_vars/platform.yml inventory/host_vars/proxmox-host.yml playbooks/serverclaw.yml docs/runbooks/configure-serverclaw.md collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2 collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml` shows current `origin/main` still lacks the ADR 0254 topology, playbook, runbook, guest-firewall, and public-edge publication surfaces that keep `chat.example.com` durable under server-resident reconciliation."
     },
     {
       "check": "Focused ADR 0254 validation and generated truth refresh",
@@ -57,12 +57,12 @@
     {
       "check": "Host firewall lane remains declared",
       "result": "pass",
-      "observed": "A fresh host probe on `proxmox_florin` still returned `PRETTY_NAME=Debian GNU/Linux 13 (trixie)`, kernel `6.17.13-2-pve`, `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and `/etc/pve/firewall/170.fw` line `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096`."
+      "observed": "A fresh host probe on `proxmox-host` still returned `PRETTY_NAME=Debian GNU/Linux 13 (trixie)`, kernel `6.17.13-2-pve`, `pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)`, and `/etc/pve/firewall/170.fw` line `17:IN ACCEPT -source 10.10.10.10/32 -p tcp -dport 8096`."
     },
     {
       "check": "Guest-local ServerClaw runtime and bootstrap auth",
       "result": "pass",
-      "observed": "Fresh `coolify-lv3` checks still returned `WEBUI_URL=https://chat.lv3.org`, `CORS_ALLOW_ORIGIN=https://chat.lv3.org`, the expected OIDC, Ollama, and SearXNG endpoints in `/run/lv3-secrets/serverclaw/runtime.env`, a healthy `serverclaw` container on `0.0.0.0:8096->8080`, local `HTTP/1.1 200 OK` from `http://127.0.0.1:8096/`, and JSON for `ops@lv3.org` with `role\":\"admin\"` plus a bearer token from `http://127.0.0.1:8096/api/v1/auths/signin`."
+      "observed": "Fresh `coolify-lv3` checks still returned `WEBUI_URL=https://chat.example.com`, `CORS_ALLOW_ORIGIN=https://chat.example.com`, the expected OIDC, Ollama, and SearXNG endpoints in `/run/lv3-secrets/serverclaw/runtime.env`, a healthy `serverclaw` container on `0.0.0.0:8096->8080`, local `HTTP/1.1 200 OK` from `http://127.0.0.1:8096/`, and JSON for `ops@example.com` with `role\":\"admin\"` plus a bearer token from `http://127.0.0.1:8096/api/v1/auths/signin`."
     },
     {
       "check": "Internal nginx-to-coolify edge lane",
@@ -72,7 +72,7 @@
     {
       "check": "Public ServerClaw edge verification",
       "result": "partial",
-      "observed": "Fresh public probes now return `HTTP/1.1 308 Permanent Redirect` on `http://chat.lv3.org/` and `HTTP/2 308` with `location: https://nginx.lv3.org/` on `https://chat.lv3.org/`; the public hostname is therefore still falling back to the generic edge redirect instead of the dedicated ServerClaw app."
+      "observed": "Fresh public probes now return `HTTP/1.1 308 Permanent Redirect` on `http://chat.example.com/` and `HTTP/2 308` with `location: https://nginx.example.com/` on `https://chat.example.com/`; the public hostname is therefore still falling back to the generic edge redirect instead of the dedicated ServerClaw app."
     },
     {
       "check": "Repo automation carry-forward fixes",
@@ -105,7 +105,7 @@
   "notes": [
     "This receipt now records the latest exact-main candidate state before merge; it is intentionally not a final merged-main pass receipt yet.",
     "The earlier branch-local receipt remains preserved as the first latest-main candidate replay that initially proved the dedicated ServerClaw surface.",
-    "Durable repair remains: merge ADR 0254 to main, cut the next patch release, replay `make converge-serverclaw` from merged main, then update shared release files plus `versions/stack.yaml` only after `chat.lv3.org` serves the app again.",
+    "Durable repair remains: merge ADR 0254 to main, cut the next patch release, replay `make converge-serverclaw` from merged main, then update shared release files plus `versions/stack.yaml` only after `chat.example.com` serves the app again.",
     "Targeted coolify and nginx slice replays can temporarily restore the path before merge, but server-resident reconciliation following current main can still revert it until the topology merges."
   ]
 }

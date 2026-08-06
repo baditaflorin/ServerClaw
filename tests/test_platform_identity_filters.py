@@ -69,7 +69,7 @@ def plugin():
     "domain,expected",
     [
         (
-            "lv3.org",
+            "example.com",
             {
                 "config_prefix": "lv3",
                 "sql_prefix": "lv3",
@@ -237,7 +237,7 @@ def test_sql_lowercases(plugin):
 
 def test_production_invariant_lv3(plugin):
     """On the author's production deployment, all five flavors must equal 'lv3'."""
-    identity = plugin.platform_identity("lv3.org")
+    identity = plugin.platform_identity("example.com")
     assert identity["config_prefix"] == "lv3"
     assert identity["sql_prefix"] == "lv3"
     assert identity["pve_prefix"] == "lv3"

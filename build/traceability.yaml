@@ -348,7 +348,7 @@ workstreams:
     total: 15
     present_on_disk: 15
   adr:
-    title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+    title: Phase 1 Multi-Deployment Hardening (0fork.com + example.com)
     implementation_status: Proposed
     currently_describes: goal_state
     concern: security

@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -33,12 +33,12 @@
     {
       "kind": "service_endpoint",
       "name": "ops portal public URL",
-      "address": "https://ops.lv3.org"
+      "address": "https://ops.example.com"
     },
     {
       "kind": "service_endpoint",
       "name": "keycloak launcher target",
-      "address": "https://sso.lv3.org"
+      "address": "https://sso.example.com"
     }
   ],
   "verification": [
@@ -50,12 +50,12 @@
     {
       "check": "Exact-main ops portal replay",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-main-merge-r3'` completed successfully with final recap `docker-runtime-lv3 ok=129 changed=15 failed=0 skipped=14`, and the run passed both `Verify the application launcher partial renders locally` and `Assert the application launcher is present` from the hardened runtime replay."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0235-main-merge-r3'` completed successfully with final recap `docker-runtime-lv3 ok=129 changed=15 failed=0 skipped=14`, and the run passed both `Verify the application launcher partial renders locally` and `Assert the application launcher is present` from the hardened runtime replay."
     },
     {
       "check": "Launcher endpoint, session, and public-edge proof",
       "result": "pass",
-      "observed": "`receipts/live-applies/evidence/2026-03-29-adr-0235-mainline-internal-endpoints.txt` recorded `/health`, `/`, `/partials/overview`, and `/partials/launcher` all returning `200`; `receipts/live-applies/evidence/2026-03-29-adr-0235-mainline-launcher-session-check.txt` recorded `favorite_response_remove_keycloak=2`, `after_remove_keycloak=3`, `after_recents_section=1`, and `redirect_code=303` with `redirect_location=https://sso.lv3.org`; and `receipts/live-applies/evidence/2026-03-29-adr-0235-mainline-public-edge-check.txt` confirmed `https://ops.lv3.org/health -> 200 {\"status\":\"ok\"}` while `https://ops.lv3.org/` preserved the expected oauth sign-in redirect."
+      "observed": "`receipts/live-applies/evidence/2026-03-29-adr-0235-mainline-internal-endpoints.txt` recorded `/health`, `/`, `/partials/overview`, and `/partials/launcher` all returning `200`; `receipts/live-applies/evidence/2026-03-29-adr-0235-mainline-launcher-session-check.txt` recorded `favorite_response_remove_keycloak=2`, `after_remove_keycloak=3`, `after_recents_section=1`, and `redirect_code=303` with `redirect_location=https://sso.example.com`; and `receipts/live-applies/evidence/2026-03-29-adr-0235-mainline-public-edge-check.txt` confirmed `https://ops.example.com/health -> 200 {\"status\":\"ok\"}` while `https://ops.example.com/` preserved the expected oauth sign-in redirect."
     },
     {
       "check": "Deployed runtime hash and route proof",

@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -106,7 +106,7 @@
     "docs/runbooks/configure-redpanda.md",
     "docs/workstreams/ws-0290-live-apply.md",
     "docs/site-generated/architecture/dependency-graph.md",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "inventory/group_vars/platform.yml",
     "playbooks/redpanda.yml",
     "playbooks/services/redpanda.yml",

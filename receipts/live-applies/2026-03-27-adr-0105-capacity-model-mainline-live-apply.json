@@ -13,8 +13,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -24,8 +24,8 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "grafana.lv3.org",
-      "address": "https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview"
+      "name": "grafana.example.com",
+      "address": "https://grafana.example.com/d/lv3-capacity-overview/lv3-capacity-overview"
     }
   ],
   "verification": [
@@ -47,12 +47,12 @@
     {
       "check": "Mainline monitoring replay",
       "result": "pass",
-      "observed": "The official replay `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'` completed cleanly from the separate latest-main worktree with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`."
+      "observed": "The official replay `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'` completed cleanly from the separate latest-main worktree with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`."
     },
     {
       "check": "Published Grafana dashboard path",
       "result": "pass",
-      "observed": "The public dashboard route `https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview` returned `HTTP/2 302` to `/login`, confirming the live route for dashboard uid `lv3-capacity-overview` while unauthenticated viewers remain gated."
+      "observed": "The public dashboard route `https://grafana.example.com/d/lv3-capacity-overview/lv3-capacity-overview` returned `HTTP/2 302` to `/login`, confirming the live route for dashboard uid `lv3-capacity-overview` while unauthenticated viewers remain gated."
     }
   ],
   "evidence_refs": [

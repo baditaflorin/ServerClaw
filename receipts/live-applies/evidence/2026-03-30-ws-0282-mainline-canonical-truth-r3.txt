@@ -1,7 +1,7 @@
 Using CPython 3.13.7 interpreter at: /opt/homebrew/opt/python@3.13/bin/python3.13
 Creating virtual environment at: .venv
-   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-final
-      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-final
+   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0282-main-final
+      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0282-main-final
 Installed 2 packages in 6ms
 Updated canonical truth:
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0282-main-final/README.md
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0282-main-final/README.md

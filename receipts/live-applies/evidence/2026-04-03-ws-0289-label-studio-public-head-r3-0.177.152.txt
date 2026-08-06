@@ -1,10 +1,10 @@
-$ curl -sSI https://annotate.lv3.org/
+$ curl -sSI https://annotate.example.com/
 HTTP/2 302
 server: nginx
 date: Fri, 03 Apr 2026 10:02:26 GMT
 content-type: text/html
 content-length: 138
-location: https://annotate.lv3.org/oauth2/sign_in?rd=https://annotate.lv3.org/
+location: https://annotate.example.com/oauth2/sign_in?rd=https://annotate.example.com/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin
@@ -12,17 +12,17 @@ x-content-type-options: nosniff
 x-frame-options: DENY
 referrer-policy: strict-origin-when-cross-origin
 permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
-content-security-policy: default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://annotate.lv3.org https://sso.lv3.org wss://annotate.lv3.org; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+content-security-policy: default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://annotate.example.com https://sso.example.com wss://annotate.example.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
 x-robots-tag: noindex, nofollow
 
 
-$ curl -sSI https://annotate.lv3.org/api/projects
+$ curl -sSI https://annotate.example.com/api/projects
 HTTP/2 302
 server: nginx
 date: Fri, 03 Apr 2026 10:02:27 GMT
 content-type: text/html
 content-length: 138
-location: https://annotate.lv3.org/oauth2/sign_in?rd=https://annotate.lv3.org/api/projects
+location: https://annotate.example.com/oauth2/sign_in?rd=https://annotate.example.com/api/projects
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin
@@ -30,5 +30,5 @@ x-content-type-options: nosniff
 x-frame-options: DENY
 referrer-policy: strict-origin-when-cross-origin
 permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
-content-security-policy: default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://annotate.lv3.org https://sso.lv3.org wss://annotate.lv3.org; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+content-security-policy: default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://annotate.example.com https://sso.example.com wss://annotate.example.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
 x-robots-tag: noindex, nofollow

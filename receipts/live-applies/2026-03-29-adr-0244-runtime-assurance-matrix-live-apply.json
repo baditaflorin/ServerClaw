@@ -36,8 +36,8 @@
     },
     {
       "kind": "public_surface",
-      "name": "ops.lv3.org",
-      "address": "https://ops.lv3.org"
+      "name": "ops.example.com",
+      "address": "https://ops.example.com"
     }
   ],
   "verification": [
@@ -64,7 +64,7 @@
     {
       "check": "Published edge auth path",
       "result": "pass",
-      "observed": "`curl -k -I https://ops.lv3.org` returned `HTTP 302` to `https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/` and preserved the expected hardening headers after the live replay."
+      "observed": "`curl -k -I https://ops.example.com` returned `HTTP 302` to `https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/` and preserved the expected hardening headers after the live replay."
     },
     {
       "check": "Concurrent drift and disk-pressure recovery",

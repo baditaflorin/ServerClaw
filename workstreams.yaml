@@ -206,11 +206,11 @@ workstreams:
       proxmox-host.generated.yml so provisioning sees envelope-resolved sizes
     status: completed
   - id: t16-sanitization-enforce
-    title: Extend scripts/audit_sanitization.py to block lv3.org/0fork.com/65.109.84.223/65.108.75.123
+    title: Extend scripts/audit_sanitization.py to block example.com/0fork.com/65.109.84.223/203.0.113.1
       in committed files outside docs/adr/
     status: completed
   - id: t18-audit-sanitization
-    title: "Wave 4 \u2014 scripts/audit_sanitization.py blocks lv3.org/0fork.com/0mpc.com/65.109.84.223/65.108.75.123/2a01:4f9:6b:4b47\
+    title: "Wave 4 \u2014 scripts/audit_sanitization.py blocks example.com/0fork.com/0mpc.com/65.109.84.223/203.0.113.1/2a01:4f9:6b:4b47\
       \ in committed files outside the allowed contexts (docs/adr/, docs/release-notes/,\
       \ docs/runbooks/, changelog.md, receipts/, workstreams/, workstreams.yaml, build/,\
       \ RELEASE.md) + tests/unit/test_audit_sanitization.py"
@@ -861,7 +861,7 @@ workstreams:
 
     all credential generation in the platform. Enables pre-commit detection of real
 
-    secrets and maintains deployment-agnostic code across lv3.org and 0fork.com.
+    secrets and maintains deployment-agnostic code across example.com and 0fork.com.
 
     '
   objectives:
@@ -3007,7 +3007,7 @@ workstreams:
     \ all\n   have their `adr:` field quoted now (YAML octal-int parser was\n   coercing\
     \ 0447 -> 295). Don't revert.\n2. receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json\n\
     \   was reconstructed because PR #71 referenced it but never committed\n   the\
-    \ file.\n3. Pre-existing cert-validation drift on lv3.org domains (the box\n \
+    \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n \
     \  now serves 0fork.com after yesterday's recovery).\n\nPlus follow-ups not in\
     \ ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n - Deployment-aware\
     \ cert validation.\n - `make new-deployment` / `make use-deployment` (ADR 0442)\
@@ -4230,7 +4230,7 @@ workstreams:
   progress:
     completed_2026_04_21:
     - Hetzner DNS API token verified against zone 0fork.com (id RmJf7JFvpQNfWdEZmhAeEK)
-    - SSH access to 65.109.84.223 confirmed with llm-agents@proxmox_florin_server
+    - SSH access to 65.109.84.223 confirmed with llm-agents@platform_server
       key
     - Host key fingerprint pinned (ED25519 9xWVsKZxKXoBR3O9369Ixj/Ke/qwiLQ5SBDli/STwVk)
     - Hardware inventory captured (Ryzen 3600, 62 GiB, 2x476 GB NVMe, /dev/kvm present)
@@ -4276,7 +4276,7 @@ workstreams:
     - Create DNS records on 0fork.com (wildcard already covers them; blocked on API
       brownout)
     - Provision operator@0fork.com mailbox
-    - Send confirmation email from operator@0fork.com to baditaflorin@gmail.com
+    - Send confirmation email from operator@0fork.com to operator@example.com
     - Capture live-apply evidence and close workstream
   notes: "This workstream was started while the operator was AFK. Destructive actions\
     \ performed with explicit operator authorization (apex wipe). A RAID1 near-miss\
@@ -4420,7 +4420,7 @@ workstreams:
       - playbooks/platform-service-watchdog.yml
       mode: exclusive
   notes: 'Service health audit: 73 services, 5 VMs without watchdog coverage. SSH
-    to servers unavailable at time of audit (connection timeout to 65.108.75.123).
+    to servers unavailable at time of audit (connection timeout to 203.0.113.1).
     All service probe URLs derived from config/health-probe-catalog.json. Deploy with:
     make converge-platform-watchdog env=production Or per-VM: ansible-playbook playbooks/platform-service-watchdog.yml
     -e env=production -e watchdog_vm=docker-runtime

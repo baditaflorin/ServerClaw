@@ -27,7 +27,7 @@
       "integration-tests",
       "semgrep-sast)"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-28",
     "remediation_ref": "ws-0439-deployment-profiles"
   }

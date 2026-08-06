@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -39,7 +39,7 @@
     {
       "kind": "service_endpoint",
       "name": "n8n",
-      "address": "https://n8n.lv3.org/"
+      "address": "https://n8n.example.com/"
     }
   ],
   "verification": [
@@ -56,12 +56,12 @@
     {
       "check": "External public edge verification",
       "result": "pass",
-      "observed": "`curl -fsS https://n8n.lv3.org/healthz` returned `{\"status\":\"ok\"}`; `curl -fsSI https://n8n.lv3.org/` returned `HTTP/2 302` with `location: https://n8n.lv3.org/oauth2/sign_in?rd=https://n8n.lv3.org/`; and `curl -sSI https://n8n.lv3.org/webhook-test/serverclaw-connector-smoke` returned `HTTP/2 404` from the application without an oauth redirect, preserving the public webhook ingress contract."
+      "observed": "`curl -fsS https://n8n.example.com/healthz` returned `{\"status\":\"ok\"}`; `curl -fsSI https://n8n.example.com/` returned `HTTP/2 302` with `location: https://n8n.example.com/oauth2/sign_in?rd=https://n8n.example.com/`; and `curl -sSI https://n8n.example.com/webhook-test/serverclaw-connector-smoke` returned `HTTP/2 404` from the application without an oauth redirect, preserving the public webhook ingress contract."
     },
     {
       "check": "Guest-local readiness, login, and runtime state",
       "result": "pass",
-      "observed": "A guest-local verification playbook on `docker-runtime-lv3` returned `readiness_status: 200`, `readiness_body: ok`, `login_email: ops@lv3.org`, and `login_role: global:owner`. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'sudo docker ps | grep -w n8n' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519` showed `docker.n8n.io/n8nio/n8n:2.2.6` and `openbao/openbao:2.5.1` both running."
+      "observed": "A guest-local verification playbook on `docker-runtime-lv3` returned `readiness_status: 200`, `readiness_body: ok`, `login_email: ops@example.com`, and `login_role: global:owner`. `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'sudo docker ps | grep -w n8n' --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519` showed `docker.n8n.io/n8nio/n8n:2.2.6` and `openbao/openbao:2.5.1` both running."
     }
   ],
   "evidence_refs": [

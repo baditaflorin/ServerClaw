@@ -2,9 +2,9 @@
 2026-03-30T20:06:45.8470013Z workflow prepared
 2026-03-30T20:06:45.8470613Z evaluating expression 'success()'
 2026-03-30T20:06:45.8471212Z expression 'success()' evaluated to 'true'
-2026-03-30T20:06:45.8471366Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
-2026-03-30T20:06:45.8544447Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb platform= username= forcePull=false
-2026-03-30T20:06:45.8544620Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
+2026-03-30T20:06:45.8471366Z 🚀  Start image=registry.example.com/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
+2026-03-30T20:06:45.8544447Z   🐳  docker pull image=registry.example.com/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb platform= username= forcePull=false
+2026-03-30T20:06:45.8544620Z   🐳  docker pull registry.example.com/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb
 2026-03-30T20:06:45.8551488Z Image exists? false
-2026-03-30T20:06:45.8551760Z pulling image 'registry.lv3.org/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb' ()
+2026-03-30T20:06:45.8551760Z pulling image 'registry.example.com/check-runner/python:3.12.10@sha256:46d20437274843950b96491eecd061156f8e23cba5e4514bfec336b64d913acb' ()
 2026-03-30T20:06:45.8700580Z Error response from daemon: received unexpected HTTP status: 502 Bad Gateway

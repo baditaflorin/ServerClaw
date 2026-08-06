@@ -1,6 +1,6 @@
 Current version: 0.178.1
 Next version: 0.178.2
 Unreleased notes: 1
-- repairs the runtime-general Homepage and Uptime Kuma recovery path by restoring migrated Uptime Kuma state, aligning Docker guest public-edge host alias pinning, teaching the Uptime Kuma role to use the Compose plugin contract, and binding Homepage on loopback so Traefik and the shared edge can re-verify home.lv3.org safely
+- repairs the runtime-general Homepage and Uptime Kuma recovery path by restoring migrated Uptime Kuma state, aligning Docker guest public-edge host alias pinning, teaching the Uptime Kuma role to use the Compose plugin contract, and binding Homepage on loopback so Traefik and the shared edge can re-verify home.example.com safely
 Marked workstreams released: ws-0332-homepage-triage
 Generated truth refresh: complete

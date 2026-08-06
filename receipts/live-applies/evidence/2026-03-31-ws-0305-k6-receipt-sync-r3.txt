@@ -1,4 +1,4 @@
-syncing remote load receipts from /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T105710Z-7bc8bbe7a379/repo
+syncing remote load receipts from /home/ops/builds/platform_server/.lv3-session-workspaces/ws-0305-live-apply-c03e2f1533/repo/.lv3-runs/20260331T105710Z-7bc8bbe7a379/repo
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 ---
 receipts/k6/.gitkeep

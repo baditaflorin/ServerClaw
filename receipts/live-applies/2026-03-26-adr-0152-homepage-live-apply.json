@@ -9,11 +9,11 @@
   "repo_version_context": "0.169.0",
   "workflow_id": "converge-homepage",
   "adr": "0152",
-  "summary": "Converged the repo-generated Homepage runtime on docker-runtime-lv3, refreshed the shared NGINX edge publication for home.lv3.org, expanded the shared edge certificate to include the new hostname, and verified the public oauth2-proxy redirect path from main.",
+  "summary": "Converged the repo-generated Homepage runtime on docker-runtime-lv3, refreshed the shared NGINX edge publication for home.example.com, expanded the shared edge certificate to include the new hostname, and verified the public oauth2-proxy redirect path from main.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -30,8 +30,8 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "home.lv3.org",
-      "address": "https://home.lv3.org"
+      "name": "home.example.com",
+      "address": "https://home.example.com"
     }
   ],
   "verification": [
@@ -48,7 +48,7 @@
     {
       "check": "Public edge authentication path",
       "result": "pass",
-      "observed": "`dig +short home.lv3.org @1.1.1.1` returned `65.108.75.123`, and `curl -skI https://home.lv3.org` returned `HTTP/2 302` to `/oauth2/sign_in` with the expected shared edge security headers."
+      "observed": "`dig +short home.example.com @1.1.1.1` returned `203.0.113.1`, and `curl -skI https://home.example.com` returned `HTTP/2 302` to `/oauth2/sign_in` with the expected shared edge security headers."
     },
     {
       "check": "Focused repository validation",
@@ -65,7 +65,7 @@
     "versions/stack.yaml"
   ],
   "notes": [
-    "The shared edge certificate already existed on nginx-lv3 and was expanded in place to add `home.lv3.org` during the mainline converge.",
+    "The shared edge certificate already existed on nginx-lv3 and was expanded in place to add `home.example.com` during the mainline converge.",
     "The final merge push used `git push --no-verify` only after the slow pre-push gate had already passed once and repeated direct validation on the rebased mainline commit confirmed the same repository checks locally."
   ]
 }

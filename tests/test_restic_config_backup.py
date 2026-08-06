@@ -246,7 +246,7 @@ def test_run_restore_verification_resolves_snapshot_paths_from_legacy_repo_root(
         "id": "snap-receipts",
         "time": "2026-04-14T08:47:41Z",
         "hostname": "docker-runtime",
-        "paths": ["/srv/proxmox_florin_server/receipts"],
+        "paths": ["/srv/platform_server/receipts"],
         "tags": ["source:receipts", "source-label:receipts"],
         "summary": {"total_files_processed": 1},
         "_parsed_time": datetime(2026, 4, 14, 8, 47, 41, tzinfo=UTC),
@@ -258,7 +258,7 @@ def test_run_restore_verification_resolves_snapshot_paths_from_legacy_repo_root(
     def fake_restic_call(argv, **kwargs):
         assert argv[0] == "restore"
         target = Path(argv[argv.index("--target") + 1])
-        restored_dir = target / "srv" / "proxmox_florin_server" / "receipts"
+        restored_dir = target / "srv" / "platform_server" / "receipts"
         restored_dir.mkdir(parents=True, exist_ok=True)
         (restored_dir / "proof.json").write_text("{}\n", encoding="utf-8")
         return types.SimpleNamespace(returncode=0, stdout="", stderr="")
@@ -278,7 +278,7 @@ def test_run_restore_verification_resolves_snapshot_paths_from_legacy_repo_root(
 
     assert receipt["result"] == "pass"
     assert receipt["restored_file_count"] == 1
-    assert receipt["restore_path"].endswith("/restore/srv/proxmox_florin_server/receipts")
+    assert receipt["restore_path"].endswith("/restore/srv/platform_server/receipts")
     assert receipt_path.exists()
 
 

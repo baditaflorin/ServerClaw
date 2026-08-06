@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.46",
   "workflow_id": "adr-0240-operator-visualization-panels-mainline-live-apply",
   "adr": "0240",
-  "summary": "Integrated ADR 0240 on top of repo release 0.177.64 by refreshing the protected release surfaces after Harbor advanced the prior mainline to 0.177.63, mirroring the exact repo-managed interactive ops portal service and data payload onto docker-runtime-lv3, rebuilding the ops-portal container, and re-verifying both the guest-local Apache ECharts panels and the authenticated public edge on ops.lv3.org.",
+  "summary": "Integrated ADR 0240 on top of repo release 0.177.64 by refreshing the protected release surfaces after Harbor advanced the prior mainline to 0.177.63, mirroring the exact repo-managed interactive ops portal service and data payload onto docker-runtime-lv3, rebuilding the ops-portal container, and re-verifying both the guest-local Apache ECharts panels and the authenticated public edge on ops.example.com.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -28,7 +28,7 @@
     {
       "kind": "service_endpoint",
       "name": "Operations portal",
-      "address": "https://ops.lv3.org/"
+      "address": "https://ops.example.com/"
     }
   ],
   "verification": [
@@ -55,7 +55,7 @@
     {
       "check": "Authenticated public edge verification",
       "result": "pass",
-      "observed": "`curl -ks https://ops.lv3.org/health` returned `{\"status\":\"ok\"}` and `curl -k -I https://ops.lv3.org` returned `HTTP/2 302` to `/oauth2/sign_in?rd=https://ops.lv3.org/` while preserving the CSP allowance for `https://unpkg.com`."
+      "observed": "`curl -ks https://ops.example.com/health` returned `{\"status\":\"ok\"}` and `curl -k -I https://ops.example.com` returned `HTTP/2 302` to `/oauth2/sign_in?rd=https://ops.example.com/` while preserving the CSP allowance for `https://unpkg.com`."
     }
   ],
   "evidence_refs": [

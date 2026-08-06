@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.58",
   "workflow_id": "adr-0260-nextcloud-personal-data-plane-mainline-live-apply",
   "adr": "0260",
-  "summary": "Re-verified ADR 0260 from the latest realistic origin/main baseline by replaying the repo-managed Nextcloud runtime on docker-runtime-lv3, its dedicated PostgreSQL backend on postgres-lv3, and the shared-edge cloud.lv3.org publication from the merged ADR 0251-aware mainline snapshot.",
+  "summary": "Re-verified ADR 0260 from the latest realistic origin/main baseline by replaying the repo-managed Nextcloud runtime on docker-runtime-lv3, its dedicated PostgreSQL backend on postgres-lv3, and the shared-edge cloud.example.com publication from the merged ADR 0251-aware mainline snapshot.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,12 +40,12 @@
     {
       "kind": "service_endpoint",
       "name": "Nextcloud public status",
-      "address": "https://cloud.lv3.org/status.php"
+      "address": "https://cloud.example.com/status.php"
     },
     {
       "kind": "service_endpoint",
       "name": "Nextcloud DAV",
-      "address": "https://cloud.lv3.org/remote.php/dav/"
+      "address": "https://cloud.example.com/remote.php/dav/"
     }
   ],
   "verification": [
@@ -57,17 +57,17 @@
     {
       "check": "Latest-main Nextcloud converge replay",
       "result": "pass",
-      "observed": "`make converge-nextcloud` completed successfully from the merged snapshot with `docker-runtime-lv3 : ok=145 changed=3 failed=0 skipped=26`, `nginx-lv3 : ok=38 changed=3 failed=0 skipped=7`, `postgres-lv3 : ok=52 changed=0 failed=0 skipped=14`, and `localhost : ok=18 changed=0 failed=0 skipped=3`; the replay regenerated the shared docs and changelog portals, re-published `cloud.lv3.org`, and re-verified the Nextcloud startup, liveness, and readiness probes."
+      "observed": "`make converge-nextcloud` completed successfully from the merged snapshot with `docker-runtime-lv3 : ok=145 changed=3 failed=0 skipped=26`, `nginx-lv3 : ok=38 changed=3 failed=0 skipped=7`, `postgres-lv3 : ok=52 changed=0 failed=0 skipped=14`, and `localhost : ok=18 changed=0 failed=0 skipped=3`; the replay regenerated the shared docs and changelog portals, re-published `cloud.example.com`, and re-verified the Nextcloud startup, liveness, and readiness probes."
     },
     {
       "check": "Public Nextcloud status and DAV redirects",
       "result": "pass",
-      "observed": "`curl -fsS https://cloud.lv3.org/status.php` returned `{\"installed\":true,\"maintenance\":false,\"versionstring\":\"33.0.1\"...}`, and `curl -fsSI https://cloud.lv3.org/.well-known/caldav` plus `curl -fsSI https://cloud.lv3.org/.well-known/carddav` both returned `HTTP/2 301` with `location: https://cloud.lv3.org/remote.php/dav/`."
+      "observed": "`curl -fsS https://cloud.example.com/status.php` returned `{\"installed\":true,\"maintenance\":false,\"versionstring\":\"33.0.1\"...}`, and `curl -fsSI https://cloud.example.com/.well-known/caldav` plus `curl -fsSI https://cloud.example.com/.well-known/carddav` both returned `HTTP/2 301` with `location: https://cloud.example.com/remote.php/dav/`."
     },
     {
       "check": "Guest-local Nextcloud state",
       "result": "pass",
-      "observed": "Using the same Proxmox jump path as the managed playbook, `ansible docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'curl -fsS http://127.0.0.1:8084/status.php'` returned `installed=true`, `maintenance=false`, and `versionstring=33.0.1`; the matching `occ config:app:get core backgroundjobs_mode` query returned `cron`; and `occ user:info ops --output=json` reported `cloud_id=ops@cloud.lv3.org`, `enabled=true`, and `groups=[\"admin\"]`."
+      "observed": "Using the same Proxmox jump path as the managed playbook, `ansible docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -m shell -a 'curl -fsS http://127.0.0.1:8084/status.php'` returned `installed=true`, `maintenance=false`, and `versionstring=33.0.1`; the matching `occ config:app:get core backgroundjobs_mode` query returned `cron`; and `occ user:info ops --output=json` reported `cloud_id=ops@cloud.example.com`, `enabled=true`, and `groups=[\"admin\"]`."
     },
     {
       "check": "Live-apply contract and policy checks",

@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -33,7 +33,7 @@
     {
       "kind": "service_endpoint",
       "name": "Runtime assurance API",
-      "address": "https://api.lv3.org/v1/platform/runtime-assurance"
+      "address": "https://api.example.com/v1/platform/runtime-assurance"
     }
   ],
   "verification": [
@@ -45,7 +45,7 @@
     {
       "check": "Exact-main step-ca replay",
       "result": "pass",
-      "observed": "`make converge-step-ca env=production` succeeded from the same committed source, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r44-converge-step-ca-0.177.101.txt` and final recap `docker-runtime-lv3 : ok=112 changed=3`, `proxmox_florin : ok=54 changed=4`, and all declared SSH-trust guests returning `failed=0`."
+      "observed": "`make converge-step-ca env=production` succeeded from the same committed source, with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r44-converge-step-ca-0.177.101.txt` and final recap `docker-runtime-lv3 : ok=112 changed=3`, `proxmox-host : ok=54 changed=4`, and all declared SSH-trust guests returning `failed=0`."
     },
     {
       "check": "Exact-main OpenBao replay",
@@ -55,12 +55,12 @@
     {
       "check": "Exact-main Windmill replay and worker checkout parity",
       "result": "pass",
-      "observed": "`make converge-windmill env=production` succeeded with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r46-converge-windmill-0.177.101.txt` and final recap `docker-runtime-lv3 : ok=283 changed=45 unreachable=0 failed=0 skipped=43`, `postgres-lv3 : ok=68 changed=0 unreachable=0 failed=0 skipped=15`, and `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`; the six sentinels in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r54-worker-checkout-parity-0.177.101.txt` matched exactly between the active worktree and `/srv/proxmox_florin_server`."
+      "observed": "`make converge-windmill env=production` succeeded with evidence in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r46-converge-windmill-0.177.101.txt` and final recap `docker-runtime-lv3 : ok=283 changed=45 unreachable=0 failed=0 skipped=43`, `postgres-lv3 : ok=68 changed=0 unreachable=0 failed=0 skipped=15`, and `proxmox-host : ok=41 changed=4 unreachable=0 failed=0 skipped=16`; the six sentinels in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r54-worker-checkout-parity-0.177.101.txt` matched exactly between the active worktree and `/srv/platform_server`."
     },
     {
       "check": "Worker post-merge gate and live gate-status",
       "result": "pass",
-      "observed": "The worker-side `make post-merge-gate` replay completed successfully from `/srv/proxmox_florin_server`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r47-post-merge-gate-0.177.101.txt`; the live `f/lv3/gate-status` wrapper then returned top-level `status: ok` and `post_merge_run.status: passed` with `requested_checks: [\"local-fallback\"]`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r48-gate-status-0.177.101.json`, confirming the intended worker-local fallback path stayed healthy even while registry-backed runner pulls remained unavailable on the worker."
+      "observed": "The worker-side `make post-merge-gate` replay completed successfully from `/srv/platform_server`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r47-post-merge-gate-0.177.101.txt`; the live `f/lv3/gate-status` wrapper then returned top-level `status: ok` and `post_merge_run.status: passed` with `requested_checks: [\"local-fallback\"]`, recorded in `receipts/live-applies/evidence/2026-03-30-adr-0251-mainline-r48-gate-status-0.177.101.json`, confirming the intended worker-local fallback path stayed healthy even while registry-backed runner pulls remained unavailable on the worker."
     },
     {
       "check": "Live stage-smoke suite replay",

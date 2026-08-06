@@ -1,10 +1,11 @@
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host errors.lv3.org:443 was resolved.
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host errors.example.com:443 was resolved.
 * IPv6: (none)
-* IPv4: 65.108.75.123
-*   Trying 65.108.75.123:443...
-* Connected to errors.lv3.org (65.108.75.123) port 443
+* IPv4: 203.0.113.1
+*   Trying 203.0.113.1:443...
+* Connected to errors.example.com (203.0.113.1) port 443
 * ALPN: curl offers h2,http/1.1
 * (304) (OUT), TLS handshake, Client hello (1):
 } [319 bytes data]
@@ -23,21 +24,21 @@
 * SSL connection using TLSv1.3 / AEAD-CHACHA20-POLY1305-SHA256 / [blank] / UNDEF
 * ALPN: server accepted h2
 * Server certificate:
-*  subject: CN=errors.lv3.org
+*  subject: CN=errors.example.com
 *  start date: Mar 31 04:41:34 2026 GMT
 *  expire date: Jun 29 04:41:33 2026 GMT
 *  issuer: C=US; O=Let's Encrypt; CN=E8
 *  SSL certificate verify ok.
 * using HTTP/2
-* [HTTP/2] [1] OPENED stream for https://errors.lv3.org/api/0/internal/health/
+* [HTTP/2] [1] OPENED stream for https://errors.example.com/api/0/internal/health/
 * [HTTP/2] [1] [:method: HEAD]
 * [HTTP/2] [1] [:scheme: https]
-* [HTTP/2] [1] [:authority: errors.lv3.org]
+* [HTTP/2] [1] [:authority: errors.example.com]
 * [HTTP/2] [1] [:path: /api/0/internal/health/]
 * [HTTP/2] [1] [user-agent: curl/8.7.1]
 * [HTTP/2] [1] [accept: */*]
 > HEAD /api/0/internal/health/ HTTP/2
-> Host: errors.lv3.org
+> Host: errors.example.com
 > User-Agent: curl/8.7.1
 > Accept: */*
 >
@@ -61,8 +62,9 @@
 < x-robots-tag: noindex, nofollow
 <
 { [0 bytes data]
-  0    31    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-* Connection #0 to host errors.lv3.org left intact
+
+  0    31    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+* Connection #0 to host errors.example.com left intact
 HTTP/2 200
 server: nginx
 date: Fri, 03 Apr 2026 00:49:51 GMT

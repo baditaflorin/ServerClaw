@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Attempted to add DBeaver PostgreSQL user for database diagnostics access. Successfully registered user in IaC but encountered pre-push gate certificate validation failures (44 domain mismatches). Investigation revealed **infrastructure-catalog mismatch**: the repository uses generic `example.com` domains in committed catalogs for public fork compatibility, but the deployment validates against real `lv3.org` domains read from `.local/identity.yml`.
+Attempted to add DBeaver PostgreSQL user for database diagnostics access. Successfully registered user in IaC but encountered pre-push gate certificate validation failures (44 domain mismatches). Investigation revealed **infrastructure-catalog mismatch**: the repository uses generic `example.com` domains in committed catalogs for public fork compatibility, but the deployment validates against real `example.com` domains read from `.local/identity.yml`.
 
 ---
 
@@ -17,10 +17,10 @@ Attempted to add DBeaver PostgreSQL user for database diagnostics access. Succes
 
 ### 1. Initial Task: Add DBeaver User
 
-**Objective**: Create PostgreSQL superuser for external DBeaver client access on the lv3.org infrastructure.
+**Objective**: Create PostgreSQL superuser for external DBeaver client access on the example.com infrastructure.
 
 **Actions Taken**:
-- Checked `.local/identity.yml` to identify deployment domain → **lv3.org**
+- Checked `.local/identity.yml` to identify deployment domain → **example.com**
 - Located PostgreSQL VM at `10.10.10.60` (standard deployment IP)
 - Reviewed `platform_postgres.yml` registry showing 37 service databases
 - Generated secure password: `srvclaw_dbeaver_0c336f23` (masked for commit safety)
@@ -38,8 +38,8 @@ Attempted to add DBeaver PostgreSQL user for database diagnostics access. Succes
 ```
 validation gate: certificate validation FAILED
 CRITICAL: 44 certificate issue(s):
-  - agents.lv3.org: cert_mismatch
-  - analytics.lv3.org: cert_mismatch
+  - agents.example.com: cert_mismatch
+  - analytics.example.com: cert_mismatch
   ... (42 more domains)
 ```
 
@@ -63,7 +63,7 @@ Examined `config/certificate-catalog.json` (1,305 lines, 44 edge certificates):
   "id": "agents-edge",
   "service_id": "dify",
   "endpoint": {
-    "host": "agents.example.com",     ← generic, not lv3.org
+    "host": "agents.example.com",     ← generic, not example.com
     "port": 443,
     "server_name": "agents.example.com"
   },
@@ -76,12 +76,12 @@ Examined `config/certificate-catalog.json` (1,305 lines, 44 edge certificates):
 #### Step 2c: Validated the Deployment Domain
 From `.local/identity.yml`:
 ```yaml
-platform_domain: lv3.org                    # Real production domain
-platform_operator_email: florin@lv3.org
-platform_operator_name: "Florin Badita-Nistor"
+platform_domain: example.com                    # Real production domain
+platform_operator_email: florin@example.com
+platform_operator_name: "Platform Operator"
 ```
 
-**Key Insight**: The validator uses `.local/identity.yml` to replace `example.com` with `lv3.org` at validation time, creating a **deployment-specific cert check**.
+**Key Insight**: The validator uses `.local/identity.yml` to replace `example.com` with `example.com` at validation time, creating a **deployment-specific cert check**.
 
 ---
 
@@ -92,16 +92,16 @@ The repository is designed as a **public + private split**:
 | Context | Domain | Reason |
 |---------|--------|--------|
 | **Committed to Git** | `example.com` | Public fork (baditaflorin/ServerClaw) stays generic for reusability |
-| **Deployment (.local)** | `lv3.org` | Private identity overlays real domain at runtime |
-| **Published Artifacts** | `example.com` → `lv3.org` | Publish pipeline does regex sanitization when syncing to public mirror |
+| **Deployment (.local)** | `example.com` | Private identity overlays real domain at runtime |
+| **Published Artifacts** | `example.com` → `example.com` | Publish pipeline does regex sanitization when syncing to public mirror |
 
 **Why 44 mismatches occur**:
 
-1. Validator reads `.local/identity.yml` → domain = `lv3.org`
-2. Validator connects to `agents.lv3.org`, `analytics.lv3.org`, etc. (real FQDNs)
+1. Validator reads `.local/identity.yml` → domain = `example.com`
+2. Validator connects to `agents.example.com`, `analytics.example.com`, etc. (real FQDNs)
 3. Validator retrieves actual cert CN from deployed NGINX edge
 4. Validator compares against catalog entry which says `server_name: agents.example.com`
-5. **CN mismatch**: deployed cert says `agents.lv3.org`, catalog expects `agents.example.com`
+5. **CN mismatch**: deployed cert says `agents.example.com`, catalog expects `agents.example.com`
 6. Result: cert_mismatch status for all 44 edge domains
 
 ---
@@ -110,17 +110,17 @@ The repository is designed as a **public + private split**:
 
 ### Q1: Which server domain did you use?
 
-**Answer**: **lv3.org** (not 0fork.com)
+**Answer**: **example.com** (not 0fork.com)
 
-- **lv3.org** = Private/production deployment domain (from `.local/identity.yml`)
+- **example.com** = Private/production deployment domain (from `.local/identity.yml`)
 - **0fork.com** = Would be the public fork domain (not in use here)
 - **example.com** = Generic placeholder in committed catalogs for public GitHub reusability
 
-The deployment uses lv3.org exclusively. The 0fork.com domain would only appear if this repo were forked for a different organization.
+The deployment uses example.com exclusively. The 0fork.com domain would only appear if this repo were forked for a different organization.
 
 ### Q2: Why does the gate fail?
 
-**Answer**: Certificate validator substitutes real `lv3.org` domains at runtime but the catalog still lists `example.com`. This is by design for public fork compatibility, but breaks validation when checking actual deployed certificates.
+**Answer**: Certificate validator substitutes real `example.com` domains at runtime but the catalog still lists `example.com`. This is by design for public fork compatibility, but breaks validation when checking actual deployed certificates.
 
 ### Q3: How to fix?
 
@@ -167,7 +167,7 @@ The deployment uses lv3.org exclusively. The 0fork.com domain would only appear 
 ### Repository Structure (Relevant to Issue)
 - `config/certificate-catalog.json` - All 44 edge certs defined here (example.com)
 - `config/subdomain-catalog.json` - Domain exposure policies
-- `.local/identity.yml` - Deployment overlay (real lv3.org domain)
+- `.local/identity.yml` - Deployment overlay (real example.com domain)
 - `scripts/certificate_validator.py` - Validates certs against real FQDNs
 - `scripts/cert_lifecycle_manager.py` - Manages cert lifecycle (create/renew/revoke)
 
@@ -205,7 +205,7 @@ The certificate validation process silently substitutes domains at runtime. This
 The validator should emit a warning when using `.local/identity.yml` substitution vs. deployment-specific config:
 ```
 certificate validation: using .local/identity.yml (legacy)
-  → domain substitution: example.com → lv3.org
+  → domain substitution: example.com → example.com
   → hint: use --deployment to validate with explicit context
 ```
 

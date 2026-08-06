@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schemas/deployment-v1/sizing-policy.json",
+  "$id": "https://example.com/schemas/deployment-v1/sizing-policy.json",
   "title": "Sizing Policy",
   "description": "Per-service-class resource allocation rules used by scripts/resolve_topology.py to compute per-VM allocations from host capacity. Committed at config/sizing-policy.yml. ADR 0482.",
   "type": "object",

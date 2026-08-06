@@ -1,13 +1,13 @@
 Commands:
-- ansible -i inventory/hosts.yml nginx-lv3 -m shell -a 'timeout 7 nc -vz -w 5 10.10.10.70 8096 || true; echo ---; curl -sk --max-time 10 -D - https://127.0.0.1/ -H "Host: chat.lv3.org" -o /dev/null | egrep "HTTP/|location:"; echo ---; sudo nginx -T 2>/dev/null | grep -n "chat.lv3.org" || true' --private-key .local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
-- curl -I --max-time 15 http://chat.lv3.org/
-- curl -I --max-time 15 https://chat.lv3.org/
+- ansible -i inventory/hosts.yml nginx-lv3 -m shell -a 'timeout 7 nc -vz -w 5 10.10.10.70 8096 || true; echo ---; curl -sk --max-time 10 -D - https://127.0.0.1/ -H "Host: chat.example.com" -o /dev/null | egrep "HTTP/|location:"; echo ---; sudo nginx -T 2>/dev/null | grep -n "chat.example.com" || true' --private-key .local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+- curl -I --max-time 15 http://chat.example.com/
+- curl -I --max-time 15 https://chat.example.com/
 
 Observed on 2026-03-29:
 
 ---
 HTTP/2 308
-location: https://nginx.lv3.org/
+location: https://nginx.example.com/
 ---
 nc: connect to 10.10.10.70 port 8096 (tcp) timed out: Operation now in progress
 
@@ -17,9 +17,9 @@ HTTP/1.1 308 Permanent Redirect
 HTTPS
 HTTP/2 308
 content-type: text/html
-location: https://nginx.lv3.org/
+location: https://nginx.example.com/
 
 Interpretation:
 - nginx-lv3 currently cannot reach coolify-lv3:8096 over the private edge lane
-- the effective public chat.lv3.org edge is still falling back to the generic
-  nginx.lv3.org redirect instead of the dedicated ServerClaw app
+- the effective public chat.example.com edge is still falling back to the generic
+  nginx.example.com redirect instead of the dedicated ServerClaw app

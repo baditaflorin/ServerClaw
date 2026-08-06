@@ -48,12 +48,12 @@
     {
       "exists": true,
       "name": "open-webui",
-      "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/provider.env"
+      "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/open-webui/provider.env"
     },
     {
       "exists": true,
       "name": "serverclaw",
-      "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/serverclaw/provider.env"
+      "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/serverclaw/provider.env"
     }
   ],
   "schema_version": "1.0.0",

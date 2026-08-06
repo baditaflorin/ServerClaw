@@ -790,7 +790,7 @@
         "argv": [
           "test",
           "-x",
-          "/opt/gitea/data/git/repositories/ops/proxmox_florin_server.git/custom_hooks/pre-receive"
+          "/opt/gitea/data/git/repositories/ops/platform_server.git/custom_hooks/pre-receive"
         ],
         "success_rc": 0,
         "docker_publication": {

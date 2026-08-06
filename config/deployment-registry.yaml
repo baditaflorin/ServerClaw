@@ -21,11 +21,11 @@
 #   here for traceability; the actual runtime values live in overrides_file.
 
 schema_version: "1.0.0"
-primary_deployment: lv3.org
+primary_deployment: example.com
 
 deployments:
-  lv3.org:
-    platform_domain: lv3.org
+  example.com:
+    platform_domain: example.com
     environment: production
     infrastructure:
       provider: proxmox
@@ -36,7 +36,7 @@ deployments:
   0fork.com:
     platform_domain: 0fork.com
     environment: production
-    forked_from: lv3.org
+    forked_from: example.com
     infrastructure:
       provider: hetzner
       description: "Hetzner AX41-NVMe #2952989 (fork viability test, ADR 0424)"

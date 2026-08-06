@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -25,12 +25,12 @@
     {
       "kind": "service_endpoint",
       "name": "api_gateway_degradations",
-      "address": "https://api.lv3.org/v1/platform/degradations"
+      "address": "https://api.example.com/v1/platform/degradations"
     },
     {
       "kind": "service_endpoint",
       "name": "api_gateway_services",
-      "address": "https://api.lv3.org/v1/platform/services"
+      "address": "https://api.example.com/v1/platform/services"
     }
   ],
   "verification": [
@@ -42,12 +42,12 @@
     {
       "check": "Public degradation endpoint",
       "result": "pass",
-      "observed": "`curl https://api.lv3.org/v1/platform/degradations` with a fresh Keycloak client-credentials bearer token returned `{\"degradation_count\":0,\"services\":{}}` after the replay."
+      "observed": "`curl https://api.example.com/v1/platform/degradations` with a fresh Keycloak client-credentials bearer token returned `{\"degradation_count\":0,\"services\":{}}` after the replay."
     },
     {
       "check": "Public platform services endpoint",
       "result": "pass",
-      "observed": "`curl https://api.lv3.org/v1/platform/services` with the same bearer token reported `api_gateway.active_degradations: []` with a service count of `32`."
+      "observed": "`curl https://api.example.com/v1/platform/services` with the same bearer token reported `api_gateway.active_degradations: []` with a service count of `32`."
     },
     {
       "check": "Guest degradation-state file",
@@ -69,7 +69,7 @@
     "versions/stack.yaml"
   ],
   "notes": [
-    "The final live apply used Tailscale host access to `ops@100.64.0.1` and the governed Proxmox guest jump because the public SSH path to `65.108.75.123:22` remained unavailable from this controller.",
+    "The final live apply used Tailscale host access to `ops@100.64.0.1` and the governed Proxmox guest jump because the public SSH path to `203.0.113.1:22` remained unavailable from this controller.",
     "This receipt supersedes the previous API gateway live-state reference from ADR 0166 for the degraded-state surfaces because ADR 0167 is the first rollout that declares and verifies `/v1/platform/degradations` directly."
   ]
 }

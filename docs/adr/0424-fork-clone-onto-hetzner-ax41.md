@@ -21,7 +21,7 @@ The platform has been built over ~420 ADRs as an interactive pair-programming
 session between one operator and an LLM agent. The central question this
 ADR answers: **is the platform actually forkable?** Can a second operator
 (or a disaster-recovery clone of the existing operator) stand up a semantic
-equivalent of `lv3.org` on a new domain, on a new server, from the committed
+equivalent of `example.com` on a new domain, on a new server, from the committed
 code plus the two overlay files (`.local/identity.yml`,
 `inventory/host_vars/proxmox-host.yml`), without hidden chat context?
 
@@ -41,7 +41,7 @@ core) and ADR 0407 (generic-by-default). It was never exercised end-to-end.
   - RAM: 62 GiB
   - Storage: 2 × 476.9 GB Samsung NVMe (raw, no RAID configured at provisioning)
   - OS: Debian 13 trixie (English)
-- **Access**: SSH ed25519 key `llm-agents@proxmox_florin_server`
+- **Access**: SSH ed25519 key `llm-agents@platform_server`
   (MD5 `31:31:ba:17:cf:95:c6:90:81:a8:d6:41:9c:d2:02:a3`, SHA256
   `+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ`)
 - **Host key pinned in `known_hosts`** (ed25519
@@ -49,7 +49,7 @@ core) and ADR 0407 (generic-by-default). It was never exercised end-to-end.
 
 ### Prod vs clone resource envelope
 
-| Resource | Prod (65.108.75.123) | Clone (65.109.84.223) | Ratio |
+| Resource | Prod (203.0.113.1) | Clone (65.109.84.223) | Ratio |
 |----------|----------------------|------------------------|-------|
 | Physical cores / threads | Unknown / likely 16–32 | 6c / 12t | ≈ 40 % |
 | RAM | ≈ 128 GiB | 62 GiB | ≈ 48 % |
@@ -125,7 +125,7 @@ restoration is a single-script replay of that JSON if reversal is ever needed.
 - `SOA  0fork.com     → ns1.your-server.de.` (preserved)
 
 Service identities land on `sso.0fork.com`, `chat.0fork.com`, `ops.0fork.com`,
-`proxmox.0fork.com`, etc. — a semantic 1:1 mapping of the prod `*.lv3.org`
+`proxmox.0fork.com`, etc. — a semantic 1:1 mapping of the prod `*.example.com`
 hostnames under the clone apex.
 
 MX / DKIM / SPF / DMARC are intentionally **not** re-created at wipe time —
@@ -167,7 +167,7 @@ Full overlay at `.local/identity.yml.0fork` (main worktree, not committed).
 ### 5. Email path for this ADR's "confirmation email" deliverable
 
 The operator asked for a confirmation email from a newly-created address on
-the clone to `baditaflorin@gmail.com`. The clone uses the **same mail path as
+the clone to `operator@example.com`. The clone uses the **same mail path as
 prod**: Stalwart mail stack on `mail-platform` VM as primary outbound, Brevo
 API bridge (`.local/mail-platform/brevo-api-key.txt`) as the delivery transport
 that actually hits Gmail (new Hetzner IP reputation is poor for direct SMTP to
@@ -259,7 +259,7 @@ deployed**. It is not a one-liner.
 - `curl -H "Auth-API-Token: $TOKEN" https://dns.hetzner.com/api/v1/zones`
   returns `0fork.com` with id `RmJf7JFvpQNfWdEZmhAeEK` — ✅ verified 2026-04-21
 - `ssh -i .local/ssh/hetzner_llm_agents_ed25519 root@65.109.84.223 hostname`
-  returns `Debian-trixie-latest-amd64-base` — ✅ verified 2026-04-21
+  returns `debian-base-template` — ✅ verified 2026-04-21
 - `/dev/kvm` present on target host — ✅ verified 2026-04-21 (nested virt viable)
 - No existing DNS records on `clone.0fork.com` — ✅ verified (zone dump shows
   only apex, www, and default Hetzner mail records)

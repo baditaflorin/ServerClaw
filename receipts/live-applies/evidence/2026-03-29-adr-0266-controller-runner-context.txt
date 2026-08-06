@@ -56,7 +56,7 @@
       "cleanup_guarantee": "controller-local workspace state remains isolated beneath .local and may be cleared between runs",
       "exists": true,
       "free_bytes": 1786675200,
-      "workspace": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0266-validation-runner-capability-contracts"
+      "workspace": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0266-validation-runner-capability-contracts"
     },
     "tooling": {
       "docker": {

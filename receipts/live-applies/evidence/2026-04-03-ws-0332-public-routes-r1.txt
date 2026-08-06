@@ -1,10 +1,10 @@
-# home.lv3.org
+# home.example.com
 HTTP/2 302
 server: nginx
 date: Fri, 03 Apr 2026 16:27:10 GMT
 content-type: text/html
 content-length: 138
-location: https://home.lv3.org/oauth2/sign_in?rd=https://home.lv3.org/
+location: https://home.example.com/oauth2/sign_in?rd=https://home.example.com/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin
@@ -16,7 +16,7 @@ content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'
 x-robots-tag: noindex, nofollow
 
 
-# uptime.lv3.org
+# uptime.example.com
 HTTP/2 302
 server: nginx
 date: Fri, 03 Apr 2026 16:27:11 GMT
@@ -31,14 +31,14 @@ x-content-type-options: nosniff
 x-frame-options: DENY
 referrer-policy: strict-origin-when-cross-origin
 permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
-content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src https://analytics.lv3.org 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src https://analytics.lv3.org 'self' https://uptime.lv3.org ws://uptime.lv3.org wss://uptime.lv3.org; manifest-src 'self'
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src https://analytics.example.com 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src https://analytics.example.com 'self' https://uptime.example.com ws://uptime.example.com wss://uptime.example.com; manifest-src 'self'
 x-robots-tag: noindex, nofollow
 
 
-# uptime.lv3.org/dashboard
-200 https://uptime.lv3.org/dashboard
+# uptime.example.com/dashboard
+200 https://uptime.example.com/dashboard
 
-# status.lv3.org
+# status.example.com
 HTTP/2 200
 server: nginx
 date: Fri, 03 Apr 2026 16:27:11 GMT
@@ -50,5 +50,5 @@ x-content-type-options: nosniff
 x-frame-options: DENY
 referrer-policy: strict-origin-when-cross-origin
 permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
-content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src https://analytics.lv3.org 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src https://analytics.lv3.org 'self' https://status.lv3.org ws://status.lv3.org wss://status.lv3.org; manifest-src 'self'
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src https://analytics.example.com 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src https://analytics.example.com 'self' https://status.example.com ws://status.example.com wss://status.example.com; manifest-src 'self'
 x-robots-tag: noindex, nofollow

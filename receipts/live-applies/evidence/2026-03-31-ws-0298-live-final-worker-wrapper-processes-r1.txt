@@ -1,13 +1,13 @@
 docker-runtime-lv3 | CHANGED | rc=0 >>
-  25919       05:05 /bin/sh -c docker exec windmill-windmill_worker-1 bash -lc "cd /srv/proxmox_florin_server && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server"
-  25920       05:05 docker exec windmill-windmill_worker-1 bash -lc cd /srv/proxmox_florin_server && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server
-  25940       05:05 python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server
-  25952       05:05 uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-  26034       05:05 /tmp/windmill/cache/uv/builds-v0/.tmpUs7rWC/bin/python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+  25919       05:05 /bin/sh -c docker exec windmill-windmill_worker-1 bash -lc "cd /srv/platform_server && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/platform_server"
+  25920       05:05 docker exec windmill-windmill_worker-1 bash -lc cd /srv/platform_server && python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/platform_server
+  25940       05:05 python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/platform_server
+  25952       05:05 uv run --with nats-py --with pyyaml python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+  26034       05:05 /tmp/windmill/cache/uv/builds-v0/.tmpUs7rWC/bin/python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
   57455       00:02 docker run --rm --network host -v /var/tmp/lv3-syft-cache:/syft-cache -e SYFT_CACHE_DIR=/syft-cache -e SYFT_REGISTRY_INSECURE_USE_HTTP=true docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f scan --from registry 10.10.10.80:5001/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5 --source-name docker.io/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5 --platform linux/amd64 -o cyclonedx-json
   57495       00:01 /syft scan --from registry 10.10.10.80:5001/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5 --source-name docker.io/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5 --platform linux/amd64 -o cyclonedx-json
 ---
-  19793       05:06 python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/proxmox_florin_server
-  19801       05:05 uv run --with nats-py --with pyyaml python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
-  19820       05:05 /tmp/windmill/cache/uv/builds-v0/.tmpUs7rWC/bin/python /srv/proxmox_florin_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+  19793       05:06 python3 config/windmill/scripts/sbom-refresh.py --repo-path /srv/platform_server
+  19801       05:05 uv run --with nats-py --with pyyaml python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
+  19820       05:05 /tmp/windmill/cache/uv/builds-v0/.tmpUs7rWC/bin/python /srv/platform_server/scripts/sbom_refresh.py --publish-nats --send-ntfy-alerts --print-report-json
   21487       00:02 docker run --rm --network host -v /var/tmp/lv3-syft-cache:/syft-cache -e SYFT_CACHE_DIR=/syft-cache -e SYFT_REGISTRY_INSECURE_USE_HTTP=true docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f scan --from registry 10.10.10.80:5001/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5 --source-name docker.io/gotenberg/gotenberg:8.29.0@sha256:1c04b80fa1e1f42123258a3fe28e2260d52e267dec77c0da5eab4143540172d5 --platform linux/amd64 -o cyclonedx-json

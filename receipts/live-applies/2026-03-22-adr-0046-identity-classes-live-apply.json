@@ -12,7 +12,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.118.189.95"
     },
     {
@@ -24,7 +24,7 @@
     {
       "kind": "service_endpoint",
       "name": "proxmox-api",
-      "address": "proxmox.lv3.org:8006"
+      "address": "proxmox.example.com:8006"
     }
   ],
   "verification": [
@@ -41,7 +41,7 @@
     {
       "check": "Service identity",
       "result": "pass",
-      "observed": "The private mail gateway mailbox inventory still includes server@lv3.org as the managed service mailbox on docker-runtime-lv3."
+      "observed": "The private mail gateway mailbox inventory still includes server@example.com as the managed service mailbox on docker-runtime-lv3."
     },
     {
       "check": "Break-glass identity",

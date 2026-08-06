@@ -1,7 +1,7 @@
 2026-03-30T15:03:34Z
 
-[proxmox_florin]
-proxmox_florin | CHANGED | rc=0 >>
+[proxmox-host]
+proxmox-host | CHANGED | rc=0 >>
 10:IN ACCEPT -source 10.10.10.20/32 -p tcp -dport 5001
 11:IN ACCEPT -source 10.10.10.20/32 -p tcp -dport 5002
 12:IN ACCEPT -source 10.10.10.20/32 -p tcp -dport 5003

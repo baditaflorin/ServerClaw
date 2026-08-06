@@ -1,6 +1,6 @@
 $ date -u +%Y-%m-%dT%H:%M:%SZ
 2026-04-01T13:37:18Z
-$ python3 scripts/glitchtip_event_smoke.py --base-url https://errors.lv3.org --organization-slug lv3 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip/api-token.txt --dsn-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/glitchtip/platform-findings-event-url.txt --timeout-seconds 300 --request-timeout-seconds 60
+$ python3 scripts/glitchtip_event_smoke.py --base-url https://errors.example.com --organization-slug lv3 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/glitchtip/api-token.txt --dsn-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/glitchtip/platform-findings-event-url.txt --timeout-seconds 300 --request-timeout-seconds 60
 {
   "event_id": "dcddc4c934064775b3aad2f01b293aec",
   "issue": {
@@ -16,7 +16,7 @@ $ python3 scripts/glitchtip_event_smoke.py --base-url https://errors.lv3.org --o
     "matchingEventId": null,
     "metadata": {},
     "numComments": 0,
-    "permalink": "https://errors.lv3.org/platform-findings/issues/7",
+    "permalink": "https://errors.example.com/platform-findings/issues/7",
     "project": {
       "id": "3",
       "name": "Platform Findings",

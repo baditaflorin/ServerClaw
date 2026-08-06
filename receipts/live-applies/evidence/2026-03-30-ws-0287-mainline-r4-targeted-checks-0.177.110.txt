@@ -12,7 +12,7 @@ self = <test_validate_service_catalog.ValidateServiceCatalogTest testMethod=test
 tests/test_validate_service_catalog.py:19:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-catalog = {'$schema': 'docs/schema/service-capability-catalog.schema.json', 'schema_version': '1.0.0', 'services': [{'adr': '009...{'production': {'status': 'active', 'subdomain': 'changelog.lv3.org', 'url': 'https://changelog.lv3.org'}}, ...}, ...]}
+catalog = {'$schema': 'docs/schema/service-capability-catalog.schema.json', 'schema_version': '1.0.0', 'services': [{'adr': '009...{'production': {'status': 'active', 'subdomain': 'changelog.example.com', 'url': 'https://changelog.example.com'}}, ...}, ...]}
 
     def validate_service_catalog(catalog: dict[str, Any]) -> None:
         from standby_capacity import validate_catalog_standby_policies
@@ -167,7 +167,7 @@ config = {'roles': {'_template': {'policy': 'exempt', 'reason': 'Service scaffol
             if extra:
                 details.append(f"unknown roles: {', '.join(extra)}")
 >           raise ValueError(f"{path} does not match the role tree: {'; '.join(details)}")
-E           ValueError: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-mainline-final/config/ansible-role-idempotency.yml does not match the role tree: missing roles: directus_postgres, directus_runtime
+E           ValueError: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0287-mainline-final/config/ansible-role-idempotency.yml does not match the role tree: missing roles: directus_postgres, directus_runtime
 
 scripts/ansible_role_idempotency.py:66: ValueError
 =========================== short test summary info ============================

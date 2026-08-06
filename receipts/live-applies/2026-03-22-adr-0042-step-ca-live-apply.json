@@ -18,8 +18,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "ca_endpoint",
@@ -41,7 +41,7 @@
     {
       "check": "Human SSH certificate login",
       "result": "pass",
-      "observed": "A locally issued ops SSH certificate successfully logged into Debian-trixie-latest-amd64-base over Tailscale and docker-runtime-lv3 through the Proxmox jump path."
+      "observed": "A locally issued ops SSH certificate successfully logged into debian-base-template over Tailscale and docker-runtime-lv3 through the Proxmox jump path."
     },
     {
       "check": "Proxied X.509 issuance",

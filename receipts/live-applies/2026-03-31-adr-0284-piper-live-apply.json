@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -75,7 +75,7 @@
     {
       "check": "Host-path text-to-speech verification",
       "result": "pass",
-      "observed": "The host-path verification in `receipts/live-applies/evidence/2026-03-31-ws-0284-piper-host-path-tts-r1.txt` called `http://10.10.10.20:8100/api/tts?...` from `proxmox_florin` and returned the valid WAV summary `{\"content_type\":\"audio/wav\",\"riff\":\"RIFF\",\"wave\":\"WAVE\",\"bytes\":104492}`."
+      "observed": "The host-path verification in `receipts/live-applies/evidence/2026-03-31-ws-0284-piper-host-path-tts-r1.txt` called `http://10.10.10.20:8100/api/tts?...` from `proxmox-host` and returned the valid WAV summary `{\"content_type\":\"audio/wav\",\"riff\":\"RIFF\",\"wave\":\"WAVE\",\"bytes\":104492}`."
     },
     {
       "check": "Governed wrapper canonical-truth stop on the workstream branch",
@@ -87,7 +87,7 @@
     "docs/adr/0284-piper-tts-as-the-cpu-neural-text-to-speech-service.md",
     "docs/workstreams/ws-0284-live-apply.md",
     "docs/runbooks/configure-piper.md",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "inventory/group_vars/platform.yml",
     "playbooks/piper.yml",
     "playbooks/services/piper.yml",

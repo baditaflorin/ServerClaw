@@ -25,13 +25,13 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "controller_archive",
       "name": "control-metadata-witness",
-      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-metadata-witness/archive"
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/control-metadata-witness/archive"
     }
   ],
   "verification": [
@@ -58,7 +58,7 @@
     {
       "check": "Durable witness receipt",
       "result": "pass",
-      "observed": "A top-level witness sync from merged `main` wrote `receipts/witness-replication/20260327T103801Z-dca744432518-control-metadata-witness.json`, and `python3 scripts/control_metadata_witness.py verify --archive-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-metadata-witness/archive` confirmed the latest generation `20260327T103801Z-dca744432518`."
+      "observed": "A top-level witness sync from merged `main` wrote `receipts/witness-replication/20260327T103801Z-dca744432518-control-metadata-witness.json`, and `python3 scripts/control_metadata_witness.py verify --archive-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/control-metadata-witness/archive` confirmed the latest generation `20260327T103801Z-dca744432518`."
     }
   ],
   "evidence_refs": [

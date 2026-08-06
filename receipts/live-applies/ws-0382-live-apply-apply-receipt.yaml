@@ -34,6 +34,6 @@ notes:
   receipts/restic-snapshots-latest.json.
 - >-
   Restore verification first exposed a false-negative path-resolution bug for
-  historical /srv/proxmox_florin_server snapshots, then passed after the fix and
+  historical /srv/platform_server snapshots, then passed after the fix and
   synced receipts/restic-restore-verifications/20260415T070524Z.json with 4652
   restored files.

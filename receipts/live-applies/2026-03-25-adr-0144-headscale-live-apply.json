@@ -8,11 +8,11 @@
   "repo_version_context": "0.111.0",
   "workflow_id": "converge-headscale",
   "adr": "0144",
-  "summary": "Deployed the repo-managed Headscale control plane on the Proxmox host, published headscale.lv3.org through the shared NGINX edge, migrated the Proxmox host and one operator workstation to the new mesh, and verified the approved 10.10.10.0/24 subnet route over the Headscale-managed network.",
+  "summary": "Deployed the repo-managed Headscale control plane on the Proxmox host, published headscale.example.com through the shared NGINX edge, migrated the Proxmox host and one operator workstation to the new mesh, and verified the approved 10.10.10.0/24 subnet route over the Headscale-managed network.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -23,19 +23,19 @@
     },
     {
       "kind": "public_hostname",
-      "name": "headscale.lv3.org"
+      "name": "headscale.example.com"
     }
   ],
   "verification": [
     {
       "check": "Headscale public health endpoint",
       "result": "pass",
-      "observed": "`curl -sk https://headscale.lv3.org/health` returned `{\\\"status\\\":\\\"pass\\\"}`."
+      "observed": "`curl -sk https://headscale.example.com/health` returned `{\\\"status\\\":\\\"pass\\\"}`."
     },
     {
       "check": "Mesh node enrollment",
       "result": "pass",
-      "observed": "`headscale nodes list -o json` on `proxmox_florin` showed the `ops@` nodes `proxmox-florin-subnet-router` (`100.64.0.1`) and `florins-macbook-pro` (`100.64.0.3`)."
+      "observed": "`headscale nodes list -o json` on `proxmox-host` showed the `ops@` nodes `proxmox-host-subnet-router` (`100.64.0.1`) and `florins-macbook-pro` (`100.64.0.3`)."
     },
     {
       "check": "Host SSH and Proxmox API over the new mesh IP",
@@ -45,7 +45,7 @@
     {
       "check": "Approved subnet route to the private guest network",
       "result": "pass",
-      "observed": "The operator workstation netmap showed `10.10.10.0/24` as the `PrimaryRoutes` entry for `proxmox-florin-subnet-router`, and `curl -skI https://10.10.10.10/ -H 'Host: nginx.lv3.org'` returned `HTTP/2 200` over the routed guest path."
+      "observed": "The operator workstation netmap showed `10.10.10.0/24` as the `PrimaryRoutes` entry for `proxmox-host-subnet-router`, and `curl -skI https://10.10.10.10/ -H 'Host: nginx.example.com'` returned `HTTP/2 200` over the routed guest path."
     }
   ],
   "evidence_refs": [

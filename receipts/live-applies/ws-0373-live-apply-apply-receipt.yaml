@@ -20,5 +20,5 @@ notes:
 - The replay fixed repo_intake readiness polling to use ansible.builtin.uri timeout and updated the restic runtime support bundle plus trigger bundle to sync scripts/outline_client.py.
 - Governed restic receipts refreshed at receipts/restic-backups/20260421T105958Z.json, receipts/restic-backups/20260421T111230Z.json, and receipts/restic-snapshots-latest.json.
 - The repo_intake vulnerability budget gate was refreshed by receipts/security-reports/20260421T110457Z.json before the service live apply.
-- Runtime health on http://127.0.0.1:8101/health returned {"status":"ok"} and nginx edge verification returned the expected OAuth redirect for repo-intake.lv3.org.
+- Runtime health on http://127.0.0.1:8101/health returned {"status":"ok"} and nginx edge verification returned the expected OAuth redirect for repo-intake.example.com.
 - Supporting evidence is captured under receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-*.txt and the integrated receipt receipts/live-applies/2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply.json.

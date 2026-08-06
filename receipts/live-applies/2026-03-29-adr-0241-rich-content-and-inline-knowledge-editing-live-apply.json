@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -50,17 +50,17 @@
     {
       "check": "Latest-origin/main Windmill converge replay",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0241-live-apply` with final recap `docker-runtime-lv3 ok=231 changed=43 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`."
+      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0241-live-apply` with final recap `docker-runtime-lv3 ok=231 changed=43 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`."
     },
     {
       "check": "Worker checkout mirrors the ADR 0241 worktree",
       "result": "pass",
-      "observed": "`receipts/live-applies/evidence/2026-03-29-adr-0241-worker-checkout-hashes.txt` showed `/srv/proxmox_florin_server/scripts/operator_manager.py` at `8c48a528d200389ec106dad7ef99d59d5fb1ff6891aa957c3503cf4f4359a77d` and `/srv/proxmox_florin_server/config/windmill/scripts/operator-update-notes.py` at `7937e0fe94600789f75d777241ec50bb0b87cf81eca04e1454a84a09d870e5a8`, matching source commit `f71c3b2e3d9fc5ba32f42dc8052e78419fbecbfa`, and confirmed `config/windmill/apps/wmill-lock.yaml` on the worker checkout."
+      "observed": "`receipts/live-applies/evidence/2026-03-29-adr-0241-worker-checkout-hashes.txt` showed `/srv/platform_server/scripts/operator_manager.py` at `8c48a528d200389ec106dad7ef99d59d5fb1ff6891aa957c3503cf4f4359a77d` and `/srv/platform_server/config/windmill/scripts/operator-update-notes.py` at `7937e0fe94600789f75d777241ec50bb0b87cf81eca04e1454a84a09d870e5a8`, matching source commit `f71c3b2e3d9fc5ba32f42dc8052e78419fbecbfa`, and confirmed `config/windmill/apps/wmill-lock.yaml` on the worker checkout."
     },
     {
       "check": "Governed operator note update and restore",
       "result": "pass",
-      "observed": "A live `f/lv3/operator_update_notes` run updated operator `florin-badita` with the Tiptap-authored markdown, returning `changed: true`, `status: ok`, `note_length: 231`, and `roster_path: /srv/proxmox_florin_server/config/operators.yaml`; a second live run restored the original note string with `note_length: 65` and the same governed mutation path."
+      "observed": "A live `f/lv3/operator_update_notes` run updated operator `florin-badita` with the Tiptap-authored markdown, returning `changed: true`, `status: ok`, `note_length: 231`, and `roster_path: /srv/platform_server/config/operators.yaml`; a second live run restored the original note string with `note_length: 65` and the same governed mutation path."
     }
   ],
   "evidence_refs": [

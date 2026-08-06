@@ -12,7 +12,7 @@
 
 ## Context
 
-PR [#71](https://github.com/baditaflorin/proxmox_florin_server/pull/71)
+PR [#71](https://github.com/baditaflorin/platform_server/pull/71)
 (`coolify_runtime deployed on 0fork`) added `latest_receipts.coolify_runtime`
 to `versions/stack.yaml` but never committed the corresponding
 `receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json`
@@ -114,5 +114,5 @@ during the operator-action window.
 ## References
 
 - [ADR 0446 — Phase 2 Multi-Deployment Hardening](0446-phase2-multi-deployment-hardening.md) — baseline receipt-freshness check.
-- [PR #71](https://github.com/baditaflorin/proxmox_florin_server/pull/71) — the dangling-receipt incident this ADR closes.
+- [PR #71](https://github.com/baditaflorin/platform_server/pull/71) — the dangling-receipt incident this ADR closes.
 - [ws-0448 postmortem](../postmortems/2026-04-28-ws-0448-deployment-connection-registry.md) — the recovery that surfaced the gap.

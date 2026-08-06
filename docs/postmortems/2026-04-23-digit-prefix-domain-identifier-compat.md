@@ -104,7 +104,7 @@ has no restriction on leading digits:
 
 ## Why It Wasn't Caught Earlier
 
-1. **The lv3.org production deployment never hit it.** `lv3` starts with a
+1. **The example.com production deployment never hit it.** `lv3` starts with a
    letter. All CI and convergence testing was against that identity.
 
 2. **No unit test for identifier grammar.** The platform's `validate_repository_data_models.py`
@@ -121,12 +121,12 @@ has no restriction on leading digits:
 
 ## Impact
 
-No production impact (production is `lv3.org`). The `0fork.com` fork clone
+No production impact (production is `example.com`). The `0fork.com` fork clone
 was in Stage-5 validation mode and not serving live traffic.
 
 Any operator forking this platform with a domain whose first label starts
 with a digit would have hit this in convergence. The fix is backward-compatible:
-for `lv3.org`, `platform_sql_prefix = "lv3"` (unchanged). For `0fork.com`,
+for `example.com`, `platform_sql_prefix = "lv3"` (unchanged). For `0fork.com`,
 `platform_sql_prefix = "fork"`.
 
 ---

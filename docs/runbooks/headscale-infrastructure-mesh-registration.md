@@ -254,7 +254,7 @@ tailscale up --login-server=https://headscale.0fork.com
 
 ---
 
-## Multi-Deployment Setup (lv3.org vs 0fork.com)
+## Multi-Deployment Setup (example.com vs 0fork.com)
 
 If managing multiple Proxmox deployments:
 

@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -62,7 +62,7 @@
     {
       "check": "Restore fixture cleanup",
       "result": "pass",
-      "observed": "`ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 'sudo qm list | egrep \"VMID| 900 | 901 | 902 \" || true'` returned only the table header, confirming the temporary restore VMIDs were gone after the replay."
+      "observed": "`ssh -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 'sudo qm list | egrep \"VMID| 900 | 901 | 902 \" || true'` returned only the table header, confirming the temporary restore VMIDs were gone after the replay."
     }
   ],
   "evidence_refs": [

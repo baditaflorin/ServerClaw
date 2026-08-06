@@ -10,12 +10,12 @@
   "platform_version_context": "0.130.35",
   "workflow_id": "adr-0193-plane-mainline-live-apply",
   "adr": "0193",
-  "summary": "Replayed ADR 0193 from the latest merged `origin/main`, preserved the topology-safe Plane controller defaults, reconverged the private controller lane and ADR-sync path, and then completed the authenticated public `tasks.lv3.org` publication after regenerating the shared edge artifacts required by NGINX.",
+  "summary": "Replayed ADR 0193 from the latest merged `origin/main`, preserved the topology-safe Plane controller defaults, reconverged the private controller lane and ADR-sync path, and then completed the authenticated public `tasks.example.com` publication after regenerating the shared edge artifacts required by NGINX.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -38,7 +38,7 @@
     {
       "kind": "controller_artifacts",
       "name": "plane-local-auth",
-      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane"
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/plane"
     }
   ],
   "verification": [
@@ -60,7 +60,7 @@
     {
       "check": "Private controller lane and bootstrap identity",
       "result": "pass",
-      "observed": "`make plane-manage ACTION=whoami` reported controller URL `http://100.64.0.1:8011`, display name `ops`, email `ops@lv3.org`, workspace `lv3-platform`, and project identifier `ADR`."
+      "observed": "`make plane-manage ACTION=whoami` reported controller URL `http://100.64.0.1:8011`, display name `ops`, email `ops@example.com`, workspace `lv3-platform`, and project identifier `ADR`."
     },
     {
       "check": "ADR synchronization state",
@@ -70,7 +70,7 @@
     {
       "check": "Public edge verification",
       "result": "pass",
-      "observed": "`curl -k -I https://tasks.lv3.org/` returned `HTTP/2 302` with `location: https://tasks.lv3.org/oauth2/sign_in?rd=https://tasks.lv3.org/`, while `curl http://100.64.0.1:8011/api/instances/` returned `200` for the private controller lane."
+      "observed": "`curl -k -I https://tasks.example.com/` returned `HTTP/2 302` with `location: https://tasks.example.com/oauth2/sign_in?rd=https://tasks.example.com/`, while `curl http://100.64.0.1:8011/api/instances/` returned `200` for the private controller lane."
     }
   ],
   "evidence_refs": [
@@ -96,7 +96,7 @@
   ],
   "notes": [
     "This receipt supersedes the branch-local `2026-03-27-adr-0193-plane-live-apply` receipt as the canonical merged-main Plane replay evidence and will become the `versions/stack.yaml` receipt of record once the mainline platform version bump is written.",
-    "The shared Hetzner DNS lane was unblocked by repairing the provider-side `coolify.lv3.org` and `apps.lv3.org` A records to match the repo-declared topology before the final edge replay.",
+    "The shared Hetzner DNS lane was unblocked by repairing the provider-side `coolify.example.com` and `apps.example.com` A records to match the repo-declared topology before the final edge replay.",
     "The first merged-main Plane replay surfaced a transient OpenBao sealed-state dependency during runtime secret injection; the final replay only proceeded after the local OpenBao API again reported `sealed: false`.",
     "The Plane service itself was healthy before the shared edge replay finished; the last blocker was the missing `build/changelog-portal` and `build/docs-portal` publication artifacts needed by `nginx_edge_publication`."
   ]

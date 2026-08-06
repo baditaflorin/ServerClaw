@@ -134,7 +134,7 @@ ADR 0373 implementation across all planned phases (1-6) is **code-complete and l
 - Targeted regression coverage passed after the latest-main replay fixes:
   - `uv run --with pytest --with pyyaml --with jsonschema --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_restic_config_backup.py tests/test_repo_intake_runtime_role.py tests/test_environment_topology.py tests/test_interface_contracts.py tests/test_validate_service_registry.py tests/test_validate_service_completeness.py tests/test_ansible_execution_scopes.py`
 - Governed backup path passed after syncing `outline_client.py` into the restic runtime support bundle:
-  - `LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production`
+  - `LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production`
   - `python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger`
   - receipts: `receipts/restic-backups/20260421T105958Z.json`, `receipts/restic-backups/20260421T111230Z.json`, `receipts/restic-snapshots-latest.json`
 - Host security posture freshness passed after refreshing the production Lynis receipt:
@@ -142,9 +142,9 @@ ADR 0373 implementation across all planned phases (1-6) is **code-complete and l
   - `python3 scripts/vulnerability_budget.py --service repo_intake`
   - receipt: `receipts/security-reports/20260421T110457Z.json`
 - Representative service replay passed after the readiness compatibility fix:
-  - `ANSIBLE_COLLECTIONS_PATH="$PWD/collections:$PWD/.ansible/validation/collections" LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
+  - `ANSIBLE_COLLECTIONS_PATH="$PWD/collections:$PWD/.ansible/validation/collections" LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
   - runtime health: `curl http://127.0.0.1:8101/health` returned `{"status":"ok"}`
-  - edge verification from `nginx` returned the expected OAuth redirect for `repo-intake.lv3.org`
+  - edge verification from `nginx` returned the expected OAuth redirect for `repo-intake.example.com`
 
 ---
 

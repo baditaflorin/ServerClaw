@@ -14,7 +14,7 @@ that together caused 7 of 17 services to be unavailable or broken.
 
 ### Bug Class 1 — SSO Redirect URI Mismatch (LibreChat / serverclaw client)
 
-When a user clicked "Login with Keycloak" on LibreChat (`chat.lv3.org`), Keycloak returned:
+When a user clicked "Login with Keycloak" on LibreChat (`chat.example.com`), Keycloak returned:
 
 ```
 We are sorry... An internal server error has occurred
@@ -53,22 +53,22 @@ play time, causing template rendering to silently fail or produce empty port num
 
 | Service | URL | Symptom | Broken variable |
 |---------|-----|---------|----------------|
-| Directus | data.lv3.org | 502 Bad Gateway | `directus_container_port` |
-| Paperless | paperless.lv3.org | 502 Bad Gateway | `paperless_service_topology` |
-| Coolify | coolify.lv3.org | 502 Bad Gateway | `coolify_dashboard_port` |
-| GlitchTip | errors.lv3.org | TLS + dead code | `glitchtip_internal_port` (dead code) |
+| Directus | data.example.com | 502 Bad Gateway | `directus_container_port` |
+| Paperless | paperless.example.com | 502 Bad Gateway | `paperless_service_topology` |
+| Coolify | coolify.example.com | 502 Bad Gateway | `coolify_dashboard_port` |
+| GlitchTip | errors.example.com | TLS + dead code | `glitchtip_internal_port` (dead code) |
 
 **Services with latent bugs (currently alive from old deployment):**
 
 | Service | URL | Broken variable | Risk |
 |---------|-----|----------------|------|
-| Dify | agents.lv3.org | `dify_port`, `dify_internal_base_url`, `dify_ollama_base_url` | Next converge would break port mapping |
+| Dify | agents.example.com | `dify_port`, `dify_internal_base_url`, `dify_ollama_base_url` | Next converge would break port mapping |
 
 **Services with TLS cert gaps (separate from above):**
 
 The nginx edge certificate `lv3-edge` was missing SANs for five subdomains that were
 added to the service topology after the last cert issuance:
-`grist.lv3.org`, `errors.lv3.org`, `bi.lv3.org`, `paperless.lv3.org`, `scheduler.lv3.org`.
+`grist.example.com`, `errors.example.com`, `bi.example.com`, `paperless.example.com`, `scheduler.example.com`.
 
 This causes hard TLS errors in browsers even when the backend containers are running.
 Fix: run `make converge-nginx-edge env=production` which will invoke certbot DNS-01
@@ -86,7 +86,7 @@ All other references (Keycloak client registration, service registry, tests)
 must match this value. The path `/oauth/openid/callback` is correct.
 
 **Immediate live fix:** Updated the Keycloak `serverclaw` client via the admin API
-on the live platform to register `https://chat.lv3.org/oauth/openid/callback`.
+on the live platform to register `https://chat.example.com/oauth/openid/callback`.
 This fix is reflected in code so the next `make converge-keycloak` is idempotent.
 
 ### 2. Eliminate all `platform_service_topology` references in role defaults
@@ -119,10 +119,10 @@ per ADR 0412).
 | Action | Command | Required for |
 |--------|---------|--------------|
 | Reissue TLS cert | `make converge-nginx-edge env=production` | grist, errors, bi, paperless, scheduler TLS |
-| Redeploy Directus | `make converge-directus env=production` | data.lv3.org 502 fix |
-| Redeploy Paperless | `make converge-paperless env=production` | paperless.lv3.org 502 fix |
-| Redeploy Coolify | `make converge-coolify env=production` | coolify.lv3.org 502 fix |
-| Investigate Superset | SSH to docker-runtime, `docker ps | grep superset` | bi.lv3.org — port chain correct, container may be stopped |
+| Redeploy Directus | `make converge-directus env=production` | data.example.com 502 fix |
+| Redeploy Paperless | `make converge-paperless env=production` | paperless.example.com 502 fix |
+| Redeploy Coolify | `make converge-coolify env=production` | coolify.example.com 502 fix |
+| Investigate Superset | SSH to docker-runtime, `docker ps | grep superset` | bi.example.com — port chain correct, container may be stopped |
 | Re-converge Keycloak | `make converge-keycloak env=production` | Pick up serverclaw redirect_uri fix |
 
 ---
@@ -142,7 +142,7 @@ per ADR 0412).
 - Four services (Directus, Paperless, Coolify, Superset) require a manual re-convergence
   to actually recover from 502. The code fix alone is not sufficient.
 - TLS cert expansion also requires a manual `make converge-nginx-edge` run.
-- Nomad scheduler (`scheduler.lv3.org`) has both a TLS cert gap and a backend timeout
+- Nomad scheduler (`scheduler.example.com`) has both a TLS cert gap and a backend timeout
   and requires separate investigation.
 
 ### Neutral

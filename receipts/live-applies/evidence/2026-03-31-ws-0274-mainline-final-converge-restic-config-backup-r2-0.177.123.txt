@@ -2,13 +2,13 @@
 Preflight workflow: converge-restic-config-backup
 Description: Converge the ADR 0302 Restic-backed file-level backup runtime on docker-runtime-lv3, including runtime credentials, MinIO repository bootstrap, and the scheduled systemd timer.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
-PASS file outline_minio_root_password: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/outline/minio-root-password.txt
-PASS file nats_jetstream_admin_password: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt
-PASS file ntfy_alertmanager_password: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/alertmanager-password.txt
-INFO generated restic_config_backup_repository_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/restic-config-backup/repository-password.txt
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
+PASS file outline_minio_root_password: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/outline/minio-root-password.txt
+PASS file nats_jetstream_admin_password: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/nats/jetstream-admin-password.txt
+PASS file ntfy_alertmanager_password: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ntfy/alertmanager-password.txt
+INFO generated restic_config_backup_repository_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/restic-config-backup/repository-password.txt
 Result: PASS (converge-restic-config-backup)
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=668e2b48fa8d4f0bbd6dc4aef137b63c ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/inventory/hosts.yml --run-id f2ff32e0cbe74fd68b32bc02304119ab --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/restic-config-backup.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=da48cacaefc243f7b42101ba08ae1990
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=668e2b48fa8d4f0bbd6dc4aef137b63c ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/inventory/hosts.yml --run-id f2ff32e0cbe74fd68b32bc02304119ab --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/restic-config-backup.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=da48cacaefc243f7b42101ba08ae1990
 
 PLAY [Converge Restic config backup on the Docker runtime VM] ******************
 
@@ -419,40 +419,40 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T21:09:47.674Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=analytics.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=chat.lv3.org)
-ok: [docker-runtime-lv3] => (item=ci.lv3.org)
-ok: [docker-runtime-lv3] => (item=cloud.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=data.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=flags.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=minio.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=notebooks.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=paperless.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=analytics.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=chat.example.com)
+ok: [docker-runtime-lv3] => (item=ci.example.com)
+ok: [docker-runtime-lv3] => (item=cloud.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=data.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=flags.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=minio.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=notebooks.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=paperless.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T21:10:03.688Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Check whether the current Docker daemon config exists] ***

@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.70",
   "workflow_id": "adr-0279-grist-mainline-live-apply",
   "adr": "0279",
-  "summary": "Verified ADR 0279 from the latest-main integration worktree on top of the synchronized 0.177.104 / 0.130.69 baseline. The exact-main replay exposed and fixed the Docker bridge-chain helper regression, preserved the broader Keycloak and mail-platform recovery hardening, reran the Grist service live apply successfully in r5, re-expanded the shared edge certificate to include grist.lv3.org, and refreshed the integrated platform baseline to 0.130.70 while preserving the earlier first-live Grist proof on 0.130.60.",
+  "summary": "Verified ADR 0279 from the latest-main integration worktree on top of the synchronized 0.177.104 / 0.130.69 baseline. The exact-main replay exposed and fixed the Docker bridge-chain helper regression, preserved the broader Keycloak and mail-platform recovery hardening, reran the Grist service live apply successfully in r5, re-expanded the shared edge certificate to include grist.example.com, and refreshed the integrated platform baseline to 0.130.70 while preserving the earlier first-live Grist proof on 0.130.60.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,12 +34,12 @@
     {
       "kind": "service_endpoint",
       "name": "grist-status",
-      "address": "https://grist.lv3.org/status"
+      "address": "https://grist.example.com/status"
     },
     {
       "kind": "service_endpoint",
       "name": "grist-docs",
-      "address": "https://grist.lv3.org/o/docs/"
+      "address": "https://grist.example.com/o/docs/"
     }
   ],
   "verification": [
@@ -66,12 +66,12 @@
     {
       "check": "Current public probes and TLS",
       "result": "pass",
-      "observed": "Fresh public probes in `receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-public-probes-r2.txt` show `https://grist.lv3.org/status` returning `Grist server(home,docs,static) is alive.`, `https://grist.lv3.org/o/docs/` returning `HTTP/2 302` into the Keycloak auth flow, `https://docs.lv3.org/` and `https://changelog.lv3.org/` continuing to redirect into their oauth2-proxy sign-in flow, and the active Let's Encrypt certificate SAN set containing `grist.lv3.org`, `docs.lv3.org`, `changelog.lv3.org`, and `ops.lv3.org`."
+      "observed": "Fresh public probes in `receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-public-probes-r2.txt` show `https://grist.example.com/status` returning `Grist server(home,docs,static) is alive.`, `https://grist.example.com/o/docs/` returning `HTTP/2 302` into the Keycloak auth flow, `https://docs.example.com/` and `https://changelog.example.com/` continuing to redirect into their oauth2-proxy sign-in flow, and the active Let's Encrypt certificate SAN set containing `grist.example.com`, `docs.example.com`, `changelog.example.com`, and `ops.example.com`."
     },
     {
       "check": "Current host and runtime state",
       "result": "pass",
-      "observed": "Fresh host and guest snapshots in `receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-host-state-r2.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-runtime-state-r2.txt` reconfirm `Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, `pve-manager/9.1.6`, the guest-local `http://127.0.0.1:8484/status` endpoint answering the canonical alive string, and the live env split where `/opt/grist/grist.env` carries only static OIDC settings while `/run/lv3-secrets/grist/runtime.env` carries the session secret and OIDC client secret."
+      "observed": "Fresh host and guest snapshots in `receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-host-state-r2.txt` and `receipts/live-applies/evidence/2026-03-30-ws-0279-mainline-runtime-state-r2.txt` reconfirm `debian-base-template`, kernel `6.17.13-2-pve`, `pve-manager/9.1.6`, the guest-local `http://127.0.0.1:8484/status` endpoint answering the canonical alive string, and the live env split where `/opt/grist/grist.env` carries only static OIDC settings while `/run/lv3-secrets/grist/runtime.env` carries the session secret and OIDC client secret."
     },
     {
       "check": "Service redundancy rehearsal gate remains unproven",

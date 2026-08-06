@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.85",
   "workflow_id": "adr-0294-one-api-mainline-live-apply",
   "adr": "0294",
-  "summary": "Cut repository release 0.177.135 from the exact-main ADR 0294 replay source commit fa5e9ead212cf7f16535e3787ee38f7693b6f78d on top of origin/main commit b7dde631d290474de3200886846217e688e0c16e, re-converged the governed One-API lane across docker-runtime-lv3, postgres-lv3, proxmox_florin, coolify-lv3, and nginx-lv3, and re-verified the Open WebUI, ServerClaw, and platform-context consumer paths end to end. The canonical replay keeps One-API as the private unified OpenAI-compatible proxy in front of Ollama, moves the governed Open WebUI and ServerClaw runtimes onto repo-managed One-API provider contracts, documents the transient docker-runtime disk-pressure recovery that the synchronized ServerClaw replay surfaced, and advances the tracked platform baseline to 0.130.85.",
+  "summary": "Cut repository release 0.177.135 from the exact-main ADR 0294 replay source commit fa5e9ead212cf7f16535e3787ee38f7693b6f78d on top of origin/main commit b7dde631d290474de3200886846217e688e0c16e, re-converged the governed One-API lane across docker-runtime-lv3, postgres-lv3, proxmox-host, coolify-lv3, and nginx-lv3, and re-verified the Open WebUI, ServerClaw, and platform-context consumer paths end to end. The canonical replay keeps One-API as the private unified OpenAI-compatible proxy in front of Ollama, moves the governed Open WebUI and ServerClaw runtimes onto repo-managed One-API provider contracts, documents the transient docker-runtime disk-pressure recovery that the synchronized ServerClaw replay surfaced, and advances the tracked platform baseline to 0.130.85.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -56,7 +56,7 @@
     {
       "kind": "service_endpoint",
       "name": "ServerClaw public edge",
-      "address": "https://chat.lv3.org"
+      "address": "https://chat.example.com"
     },
     {
       "kind": "service_endpoint",
@@ -88,17 +88,17 @@
     {
       "check": "Exact-main One-API converge and bootstrap verification",
       "result": "pass",
-      "observed": "make converge-one-api env=production completed successfully with final recap docker-runtime-lv3 ok=223 changed=4 failed=0, localhost ok=3 changed=0 failed=0, postgres-lv3 ok=73 changed=5 failed=0, and proxmox_florin ok=41 changed=4 failed=0. The controller-side bootstrap verification reported verification_passed=true, exposed the governed chat and embedding aliases, returned chat probe excerpt READY, and kept both downstream provider env files present."
+      "observed": "make converge-one-api env=production completed successfully with final recap docker-runtime-lv3 ok=223 changed=4 failed=0, localhost ok=3 changed=0 failed=0, postgres-lv3 ok=73 changed=5 failed=0, and proxmox-host ok=41 changed=4 failed=0. The controller-side bootstrap verification reported verification_passed=true, exposed the governed chat and embedding aliases, returned chat probe excerpt READY, and kept both downstream provider env files present."
     },
     {
       "check": "Exact-main Open WebUI and ServerClaw consumer verification",
       "result": "pass",
-      "observed": "make converge-open-webui env=production completed successfully with final recap docker-runtime-lv3 ok=151 changed=2 failed=0 and proxmox_florin ok=41 changed=4 failed=0, including the admin sign-in verification path. The first make converge-serverclaw env=production replay failed because docker-runtime-lv3 exhausted free space during apt-get update; after the documented docker image prune -af plus docker builder prune -af recovery and a clean apt-get update, the second replay passed with coolify-lv3 ok=87 changed=4 failed=0, docker-runtime-lv3 ok=89 changed=0 failed=0, nginx-lv3 ok=45 changed=4 failed=0, and proxmox_florin ok=360 changed=0 failed=0. Post-replay probes returned HTTP 200 for the Open WebUI controller path and HTTP/2 200 with the expected hardening headers for https://chat.lv3.org, while the rendered runtime env files showed OPENAI_API_BASE_URL pointing at One-API and ENABLE_OLLAMA_API=False for both governed consumers."
+      "observed": "make converge-open-webui env=production completed successfully with final recap docker-runtime-lv3 ok=151 changed=2 failed=0 and proxmox-host ok=41 changed=4 failed=0, including the admin sign-in verification path. The first make converge-serverclaw env=production replay failed because docker-runtime-lv3 exhausted free space during apt-get update; after the documented docker image prune -af plus docker builder prune -af recovery and a clean apt-get update, the second replay passed with coolify-lv3 ok=87 changed=4 failed=0, docker-runtime-lv3 ok=89 changed=0 failed=0, nginx-lv3 ok=45 changed=4 failed=0, and proxmox-host ok=360 changed=0 failed=0. Post-replay probes returned HTTP 200 for the Open WebUI controller path and HTTP/2 200 with the expected hardening headers for https://chat.example.com, while the rendered runtime env files showed OPENAI_API_BASE_URL pointing at One-API and ENABLE_OLLAMA_API=False for both governed consumers."
     },
     {
       "check": "Exact-main platform-context and ServerClaw memory verification",
       "result": "pass",
-      "observed": "make converge-rag-context env=production completed successfully with final recap docker-runtime-lv3 ok=182 changed=21 failed=0 and proxmox_florin ok=41 changed=4 failed=0. The replay verified cited platform-context query results and the ServerClaw memory smoke round-tripped through both semantic and keyword recall."
+      "observed": "make converge-rag-context env=production completed successfully with final recap docker-runtime-lv3 ok=182 changed=21 failed=0 and proxmox-host ok=41 changed=4 failed=0. The replay verified cited platform-context query results and the ServerClaw memory smoke round-tripped through both semantic and keyword recall."
     }
   ],
   "evidence_refs": [

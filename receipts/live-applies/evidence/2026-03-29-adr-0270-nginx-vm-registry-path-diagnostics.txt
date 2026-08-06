@@ -8,7 +8,7 @@ Date: Sun, 29 Mar 2026 21:32:51 GMT
 Content-Type: text/html
 Content-Length: 164
 Connection: keep-alive
-Location: https://nginx.lv3.org/api/v2.0/ping
+Location: https://nginx.example.com/api/v2.0/ping
 X-Robots-Tag: noindex, nofollow
 
 <html>

@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.69",
   "workflow_id": "adr-0267-gate-bypass-waivers-live-apply",
   "adr": "0267",
-  "summary": "Replayed ADR 0267 from the refreshed exact-main tip `d17509656cb97986062852127a6e6ae00deaab27` at repository version `0.177.104` and platform version `0.130.69`, reran the authoritative Windmill converge on `docker-runtime-lv3` with the `postgres-lv3` and `proxmox_florin` prerequisites, and re-verified the governed waiver summary, verification-script integrity mirror, and current host/runtime state on the live platform. This exact-main replay supersedes the earlier `f20b44a` and `a01ea4ec6` proofs, preserves the repo-root Docker helper plus apt-lock repairs, and fixes the latest-main nftables forward-compat regression before the final protected merge bump to repository version `0.177.105` plus platform version `0.130.70`.",
+  "summary": "Replayed ADR 0267 from the refreshed exact-main tip `d17509656cb97986062852127a6e6ae00deaab27` at repository version `0.177.104` and platform version `0.130.69`, reran the authoritative Windmill converge on `docker-runtime-lv3` with the `postgres-lv3` and `proxmox-host` prerequisites, and re-verified the governed waiver summary, verification-script integrity mirror, and current host/runtime state on the live platform. This exact-main replay supersedes the earlier `f20b44a` and `a01ea4ec6` proofs, preserves the repo-root Docker helper plus apt-lock repairs, and fixes the latest-main nftables forward-compat regression before the final protected merge bump to repository version `0.177.105` plus platform version `0.130.70`.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -46,7 +46,7 @@
     {
       "check": "Authoritative exact-main Windmill replay",
       "result": "pass",
-      "observed": "`make converge-windmill` succeeded from the refreshed exact-main workspace with final recap `docker-runtime-lv3 : ok=295 changed=46 unreachable=0 failed=0 skipped=61`, `postgres-lv3 : ok=68 changed=0 unreachable=0 failed=0 skipped=20`, and `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`."
+      "observed": "`make converge-windmill` succeeded from the refreshed exact-main workspace with final recap `docker-runtime-lv3 : ok=295 changed=46 unreachable=0 failed=0 skipped=61`, `postgres-lv3 : ok=68 changed=0 unreachable=0 failed=0 skipped=20`, and `proxmox-host : ok=41 changed=4 unreachable=0 failed=0 skipped=16`."
     },
     {
       "check": "Governed waiver summary live on the refreshed main tip",
@@ -61,7 +61,7 @@
     {
       "check": "Current host and runtime state",
       "result": "pass",
-      "observed": "A fresh host and runtime probe confirmed hostname `Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, active `pveproxy` and `tailscaled`, listeners on `0.0.0.0:2222`, `100.64.0.1%tailscale0:8005`, and `*:8006`, `sudo qm status 120` returning `status: running`, and Windmill answering `CE v1.662.0`."
+      "observed": "A fresh host and runtime probe confirmed hostname `debian-base-template`, kernel `6.17.13-2-pve`, active `pveproxy` and `tailscaled`, listeners on `0.0.0.0:2222`, `100.64.0.1%tailscale0:8005`, and `*:8006`, `sudo qm status 120` returning `status: running`, and Windmill answering `CE v1.662.0`."
     },
     {
       "check": "Branch-local repository and receipt validation",

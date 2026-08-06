@@ -58,7 +58,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:45.152Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:06:45.163Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0287-live-apply/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:06:45.222Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -364,7 +364,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:16.347Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:16.358Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0287-live-apply/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:16.411Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -548,11 +548,11 @@ skipping: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:29.837Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.lv3.org', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
-ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.lv3.org', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
-ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.lv3.org', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
-ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.lv3.org', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published lv3.org services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
-ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.lv3.org', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
+ok: [nginx-lv3] => (item={'slug': 'build', 'hostname': 'build.example.com', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
+ok: [nginx-lv3] => (item={'slug': 'docker', 'hostname': 'docker.example.com', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
+ok: [nginx-lv3] => (item={'slug': 'mail', 'hostname': 'mail.example.com', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
+ok: [nginx-lv3] => (item={'slug': 'nginx', 'hostname': 'nginx.example.com', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published example.com services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
+ok: [nginx-lv3] => (item={'slug': 'proxmox', 'hostname': 'proxmox.example.com', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:38.095Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt] ***
@@ -562,8 +562,8 @@ ok: [nginx-lv3]
 
 TASK [lv3.platform.nginx_edge_publication : Publish generated static site directories] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-30T20:07:39.505Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [nginx-lv3 -> localhost] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-changed: [nginx-lv3 -> localhost] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+changed: [nginx-lv3 -> localhost] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+changed: [nginx-lv3 -> localhost] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
 {"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"nginx-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-30T20:07:46.617Z","vm":"nginx-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Check whether the public edge certificate exists] ***

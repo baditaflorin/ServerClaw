@@ -3,7 +3,7 @@ server: nginx
 date: Mon, 30 Mar 2026 00:50:06 GMT
 content-type: text/html
 content-length: 162
-location: https://cloud.lv3.org/remote.php/dav/
+location: https://cloud.example.com/remote.php/dav/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin

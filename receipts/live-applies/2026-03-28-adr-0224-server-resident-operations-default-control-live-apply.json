@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.42",
   "workflow_id": "adr-0224-server-resident-operations-default-control-live-apply",
   "adr": "0224",
-  "summary": "Verified ADR 0224 from the latest-origin-main integration candidate by proving validated source commit `14143f58` through the private Gitea branch gate, publishing that exact tree into the host-trusted private Gitea `main` as snapshot `9f988bf5`, replaying the server-resident ansible-pull service on proxmox_florin, and re-verifying the ADR 0226 host control-loop timer, path trigger, and manual one-shot service without any controller-side mutate loop.",
+  "summary": "Verified ADR 0224 from the latest-origin-main integration candidate by proving validated source commit `14143f58` through the private Gitea branch gate, publishing that exact tree into the host-trusted private Gitea `main` as snapshot `9f988bf5`, replaying the server-resident ansible-pull service on proxmox-host, and re-verifying the ADR 0226 host control-loop timer, path trigger, and manual one-shot service without any controller-side mutate loop.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
@@ -27,7 +27,7 @@
     {
       "kind": "managed_path",
       "name": "Server-resident checkout",
-      "address": "/srv/proxmox_florin_server"
+      "address": "/srv/platform_server"
     },
     {
       "kind": "systemd_unit",
@@ -65,7 +65,7 @@
     {
       "check": "Exact-main host-local ansible-pull replay",
       "result": "pass",
-      "observed": "On `2026-03-28T21:12:55Z`, `sudo systemctl start lv3-server-resident-reconciliation.service` completed successfully on `proxmox_florin`; `/srv/proxmox_florin_server` checked out `9f988bf58f6f02c4add3c6292c65fbed929edac9`, the working tree stayed clean, and `/var/lib/lv3/server-resident-reconciliation/receipts/latest.json` recorded `status: ok`, `exit_code: 0`, `duration_seconds: 12`, `repo_branch: main`, `started_at: 2026-03-28T21:12:55Z`, `finished_at: 2026-03-28T21:13:07Z`, and `source_commit: 9f988bf58f6f02c4add3c6292c65fbed929edac9`."
+      "observed": "On `2026-03-28T21:12:55Z`, `sudo systemctl start lv3-server-resident-reconciliation.service` completed successfully on `proxmox-host`; `/srv/platform_server` checked out `9f988bf58f6f02c4add3c6292c65fbed929edac9`, the working tree stayed clean, and `/var/lib/lv3/server-resident-reconciliation/receipts/latest.json` recorded `status: ok`, `exit_code: 0`, `duration_seconds: 12`, `repo_branch: main`, `started_at: 2026-03-28T21:12:55Z`, `finished_at: 2026-03-28T21:13:07Z`, and `source_commit: 9f988bf58f6f02c4add3c6292c65fbed929edac9`."
     },
     {
       "check": "Server-resident reconcile supervisor state",

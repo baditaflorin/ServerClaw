@@ -13,8 +13,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -39,8 +39,8 @@
     },
     {
       "kind": "service_endpoint",
-      "name": "api.lv3.org",
-      "address": "https://api.lv3.org"
+      "name": "api.example.com",
+      "address": "https://api.example.com"
     }
   ],
   "verification": [
@@ -57,12 +57,12 @@
     {
       "check": "OpenFGA live apply",
       "result": "pass",
-      "observed": "`make converge-openfga env=production` completed successfully with final recap `docker-runtime-lv3 ok=236 changed=7 failed=0`, `localhost ok=2 changed=1 failed=0`, `postgres-lv3 ok=47 changed=0 failed=0`, and `proxmox_florin ok=38 changed=7 failed=0`, while the runtime contract pinned the internal HTTP listener to `127.0.0.1:8098` to avoid the existing `browser-runner` use of `8096`."
+      "observed": "`make converge-openfga env=production` completed successfully with final recap `docker-runtime-lv3 ok=236 changed=7 failed=0`, `localhost ok=2 changed=1 failed=0`, `postgres-lv3 ok=47 changed=0 failed=0`, and `proxmox-host ok=38 changed=7 failed=0`, while the runtime contract pinned the internal HTTP listener to `127.0.0.1:8098` to avoid the existing `browser-runner` use of `8096`."
     },
     {
       "check": "Delegated authorization bootstrap and verification",
       "result": "pass",
-      "observed": "`curl -fsS -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores` returned the `serverclaw-authz` store, and `python3 scripts/serverclaw_authz.py verify --config config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091` returned `verification_passed: true` with the declared tuples and checks satisfied."
+      "observed": "`curl -fsS -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores` returned the `serverclaw-authz` store, and `python3 scripts/serverclaw_authz.py verify --config config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openfga/preshared-key.txt --keycloak-url http://10.10.10.20:8091` returned `verification_passed: true` with the declared tuples and checks satisfied."
     },
     {
       "check": "API gateway follow-up converge",
@@ -72,7 +72,7 @@
     {
       "check": "Public gateway verification for OpenFGA registration",
       "result": "pass",
-      "observed": "`curl -fsS https://api.lv3.org/healthz` returned `{\"status\":\"ok\"}`; the authenticated `https://api.lv3.org/v1/platform/services` response listed the `openfga` service with `gateway_prefix: /v1/openfga` and internal URL `http://100.64.0.1:8014`; and `https://api.lv3.org/v1/openfga/healthz` returned the canonical `AUTH_INSUFFICIENT_ROLE` envelope for the `lv3-agent-hub` bearer token, proving the route is live and protected by the expected role gate."
+      "observed": "`curl -fsS https://api.example.com/healthz` returned `{\"status\":\"ok\"}`; the authenticated `https://api.example.com/v1/platform/services` response listed the `openfga` service with `gateway_prefix: /v1/openfga` and internal URL `http://100.64.0.1:8014`; and `https://api.example.com/v1/openfga/healthz` returned the canonical `AUTH_INSUFFICIENT_ROLE` envelope for the `lv3-agent-hub` bearer token, proving the route is live and protected by the expected role gate."
     }
   ],
   "evidence_refs": [
@@ -88,7 +88,7 @@
     "config/api-gateway-catalog.json",
     "config/health-probe-catalog.json",
     "config/workflow-catalog.json",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "inventory/group_vars/platform.yml",
     "scripts/serverclaw_authz.py",
     "tests/test_api_gateway_runtime_role.py",
@@ -100,7 +100,7 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "This receipt records the branch-local live apply from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0262-openfga-keycloak-live-apply` on branch `codex/ws-0262-openfga-keycloak-live-apply` before the exact-main replay and protected-file integration step.",
+    "This receipt records the branch-local live apply from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0262-openfga-keycloak-live-apply` on branch `codex/ws-0262-openfga-keycloak-live-apply` before the exact-main replay and protected-file integration step.",
     "The workstream changed the OpenFGA internal listener from `8096` to `8098` because the separate `browser-runner` runtime already uses `8096` on `docker-runtime-lv3`.",
     "The API gateway sync helper now expands controller-built archives with `tar --no-same-owner --no-same-permissions` so Docker builds on the guest do not inherit controller-specific ownership metadata.",
     "Protected integration files (`VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`) intentionally remain pending until the exact-main merge and replay."

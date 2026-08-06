@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -49,12 +49,12 @@
     {
       "check": "Monitoring live replay",
       "result": "pass",
-      "observed": "`make converge-monitoring` completed successfully with final recap `backup-lv3 ok=14 changed=0 failed=0`, `coolify-lv3 ok=14 changed=0 failed=0`, `docker-build-lv3 ok=46 changed=0 failed=0`, `docker-runtime-lv3 ok=72 changed=2 failed=0`, `monitoring-lv3 ok=396 changed=0 failed=0`, `nginx-lv3 ok=150 changed=4 failed=0`, `postgres-lv3 ok=38 changed=0 failed=0`, and `proxmox_florin ok=100 changed=0 failed=0`."
+      "observed": "`make converge-monitoring` completed successfully with final recap `backup-lv3 ok=14 changed=0 failed=0`, `coolify-lv3 ok=14 changed=0 failed=0`, `docker-build-lv3 ok=46 changed=0 failed=0`, `docker-runtime-lv3 ok=72 changed=2 failed=0`, `monitoring-lv3 ok=396 changed=0 failed=0`, `nginx-lv3 ok=150 changed=4 failed=0`, `postgres-lv3 ok=38 changed=0 failed=0`, and `proxmox-host ok=100 changed=0 failed=0`."
     },
     {
       "check": "Host and monitoring verification",
       "result": "pass",
-      "observed": "SSH verification recorded `hostname=Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, and `pve-manager/9.1.6/71482d1833ded40a`; `monitoring-lv3` reported active `influxdb`, `grafana-server`, `loki`, `alloy`, `tempo`, `otelcol-contrib`, `lv3-prometheus`, `prometheus-alertmanager`, and `prometheus-blackbox-exporter`; `/etc/prometheus/file_sd/https-tls-targets.yml` and `/etc/prometheus/rules/https-tls-alerts.yml` were present; the Prometheus API reported 33 active `https-tls-blackbox` targets; and rule group `https_tls_assurance` loaded 99 rules."
+      "observed": "SSH verification recorded `hostname=debian-base-template`, kernel `6.17.13-2-pve`, and `pve-manager/9.1.6/71482d1833ded40a`; `monitoring-lv3` reported active `influxdb`, `grafana-server`, `loki`, `alloy`, `tempo`, `otelcol-contrib`, `lv3-prometheus`, `prometheus-alertmanager`, and `prometheus-blackbox-exporter`; `/etc/prometheus/file_sd/https-tls-targets.yml` and `/etc/prometheus/rules/https-tls-alerts.yml` were present; the Prometheus API reported 33 active `https-tls-blackbox` targets; and rule group `https_tls_assurance` loaded 99 rules."
     },
     {
       "check": "Repo-side HTTPS/TLS discovery parity",

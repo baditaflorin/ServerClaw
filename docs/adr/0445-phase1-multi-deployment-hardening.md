@@ -1,4 +1,4 @@
-# ADR 0445: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+# ADR 0445: Phase 1 Multi-Deployment Hardening (0fork.com + example.com)
 
 > **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
 
@@ -111,7 +111,7 @@ case. Lint rule:
 
 - Allow: `default(omit)`, `default(undef())`, `default(<jinja-derived
   value>)`, `default(<value-from-platform_*>)`
-- Deny: `default('10.10.10.X')`, `default('lv3.org')`,
+- Deny: `default('10.10.10.X')`, `default('example.com')`,
   `default('runtime-control')`, any literal that is a known
   `proxmox_guests` IP / a known `platform_domain`.
 

@@ -1,4 +1,4 @@
 Warning: Permanently added '100.64.0.1' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-RENOVATE_GIT_CLONE_HOST=git.lv3.org
+RENOVATE_GIT_CLONE_HOST=git.example.com
 RENOVATE_GIT_CLONE_HOST_ADDRESS=10.10.10.20
