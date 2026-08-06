@@ -34,6 +34,10 @@ string_replacements:
   # Domain
   - pattern: "lv3\\.org"
     replacement: "example.com"
+  - pattern: "0mcp\\.com"
+    replacement: "example.org"
+  - pattern: "0docker\\.com"
+    replacement: "example.net"
   # VM/host names
   - pattern: "proxmox[_-]florin"
     replacement: "proxmox-host"
@@ -42,6 +46,8 @@ string_replacements:
   # Real public IPs
   - pattern: "65\\.108\\.75\\.123"
     replacement: "203.0.113.1"
+  - pattern: "176\\.9\\.123\\.221"
+    replacement: "203.0.113.2"
   - pattern: "65\\.108\\.75\\.65"
     replacement: "203.0.113.65"
   - pattern: "65\\.108\\.75\\.64"
@@ -82,12 +88,20 @@ delete_paths:
   - "DEPLOYMENT_STATUS.md"
   - "SEMAPHORE-SETUP-QUICK-START.md"
   - "WS-0362-FINAL-SUMMARY.md"
+  # Stale leftover from before this file was added to exclude_paths — this
+  # file lists real sensitive values (that's its whole purpose), so it must
+  # never exist in the public tree. exclude_paths only stops future copies;
+  # this actively removes the pre-existing stale one.
+  - "config/publication-sanitization.yaml"
 
 # --- Leak markers ---
 # If any of these appear in the sanitized output, abort the push.
 leak_markers:
   - "lv3.org"
+  - "0mcp.com"
+  - "0docker.com"
   - "65.108.75.123"
+  - "176.9.123.221"
   - "baditaflorin@gmail.com"
   - "busui.matei1994@gmail.com"
   - "florin@badita.org"
