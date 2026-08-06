@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-07-30'
 facet: status
 implementation_status: Implemented
 slug: implemented
@@ -7088,7 +7088,7 @@ adrs:
     path: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   - adr: '0443'
     title: Continuous Topology Reconciler & Drift Detection
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-27'
@@ -7127,7 +7127,7 @@ adrs:
     path: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
   - adr: 0448
     title: Per-Deployment Connection Registry & Wrapper
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-28'
@@ -7146,7 +7146,7 @@ adrs:
     path: docs/adr/0448-deployment-connection-registry-and-wrapper.md
   - adr: '0456'
     title: Deployment-Aware Certificate Validation
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-28'
@@ -7164,7 +7164,7 @@ adrs:
     path: docs/adr/0456-deployment-aware-certificate-validation.md
   - adr: '0457'
     title: Host-Pinning via `proxmox_guests[*].deployment_owner`
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-28'
@@ -7184,7 +7184,7 @@ adrs:
     path: docs/adr/0457-host-pinning-deployment-owner.md
   - adr: 0458
     title: Cert-Validator Multi-Deployment Mode (Auto-Detect)
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'
@@ -7201,7 +7201,7 @@ adrs:
     path: docs/adr/0458-cert-validator-multi-deployment.md
   - adr: 0459
     title: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'
@@ -7240,7 +7240,7 @@ adrs:
     path: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
   - adr: '0462'
     title: Topology Pre-Commit Schema Hook
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'
@@ -7363,7 +7363,7 @@ adrs:
     path: docs/adr/0469-connection-yml-vault-key-pull.md
   - adr: '0470'
     title: Per-Deployment Fixture Inventory + Matrix CI
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'

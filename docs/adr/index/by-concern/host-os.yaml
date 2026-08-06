@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-07-30'
 facet: concern
 concern: host-os
 total_adrs: 11
@@ -203,7 +203,7 @@ adrs:
     path: docs/adr/0430-topology-host-vars-local-overlay.md
   - adr: '0457'
     title: Host-Pinning via `proxmox_guests[*].deployment_owner`
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-28'

@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-07-30'
 facet: concern
 concern: testing
-total_adrs: 5
+total_adrs: 6
 adrs:
   - adr: '0111'
     title: End-to-End Integration Test Suite
@@ -83,6 +83,26 @@ adrs:
     summary: Replace the hardcoded 10.10.10.0/24 with a configurable subnet that avoids
     filename: 0410-docker-isolation-testing-and-ioc-completion.md
     path: docs/adr/0410-docker-isolation-testing-and-ioc-completion.md
+  - adr: 0481
+    title: Migrate ethical-pentest microservice fleet from 0docker to 0mcp/florin via Coolify
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: testing
+    keywords:
+      - migrate
+      - ethical-pentest
+      - microservice
+      - fleet
+      - from
+      - docker
+      - mcp
+      - florin
+      - coolify
+    summary: '- Fixed the Match Address value in'
+    filename: 0481-pentest-fleet-coolify-migration.md
+    path: docs/adr/0481-pentest-fleet-coolify-migration.md
   - adr: 0485
     title: Convergence Idempotency Tests
     status: Proposed

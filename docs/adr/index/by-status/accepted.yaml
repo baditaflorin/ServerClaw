@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-07-30'
 facet: status
 implementation_status: Accepted
 slug: accepted
-total_adrs: 32
+total_adrs: 31
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
@@ -582,24 +582,3 @@ adrs:
     summary: Ship a single orchestrator target — make deploy-0fork — that chains the
     filename: 0431-0fork-full-day-deployment.md
     path: docs/adr/0431-0fork-full-day-deployment.md
-  - adr: '0437'
-    title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
-    status: Accepted
-    implementation_status: Accepted
-    currently_describes: current_state
-    date: '2026-04-22'
-    concern: bootstrap
-    keywords:
-      - bootstrap
-      - overlay
-      - fork-clone
-      - adr-0386-extension
-      - adr-0431-consolidation
-      - overlay-aware
-      - make
-      - single
-      - command
-      - any
-    summary: make bootstrap becomes overlay-aware. The single environment variable
-    filename: 0437-overlay-aware-bootstrap.md
-    path: docs/adr/0437-overlay-aware-bootstrap.md

@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-07-30'
 facet: concern
 concern: platform
 total_adrs: 154
@@ -2752,9 +2752,9 @@ adrs:
     path: docs/adr/0431-0fork-full-day-deployment.md
   - adr: '0441'
     title: Deployment-Scoped Service Subsetting via Service Profiles
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: platform
     keywords:
@@ -2789,7 +2789,7 @@ adrs:
     path: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
   - adr: 0448
     title: Per-Deployment Connection Registry & Wrapper
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-28'
@@ -2808,7 +2808,7 @@ adrs:
     path: docs/adr/0448-deployment-connection-registry-and-wrapper.md
   - adr: 0459
     title: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'
@@ -2828,9 +2828,9 @@ adrs:
     path: docs/adr/0459-deployment-lifecycle-cli-parity.md
   - adr: '0460'
     title: Phase 8 — Cross-Deployment Doctor + Advisory Auto-Promotion
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-29'
     concern: platform
     keywords:

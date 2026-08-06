@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-07-30'
 facet: concern
 concern: resilience
-total_adrs: 9
+total_adrs: 10
 adrs:
   - adr: '0163'
     title: Platform-Wide Retry Taxonomy and Exponential Backoff
@@ -177,3 +177,22 @@ adrs:
     summary: 'scripts/sshwithretry.py:'
     filename: 0464-ssh-retry-with-classification.md
     path: docs/adr/0464-ssh-retry-with-classification.md
+  - adr: 0488
+    title: Single Deployment Per Repo Checkout — Generic-By-Default, Envelope-Sized
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: resilience
+    keywords:
+      - single
+      - deployment
+      - per
+      - repo
+      - checkout
+      - generic-by-default
+      - envelope-sized
+    summary: A clone of this repo is configured for exactly one deployment. The operator edits .local/identity.yml (the file
+      from ADR 0385) and runs make bootstrap. There is
+    filename: 0488-single-deployment-per-repo-checkout.md
+    path: docs/adr/0488-single-deployment-per-repo-checkout.md

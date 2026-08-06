@@ -6,13 +6,13 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-07-30'
 facet: range
 label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 78
+total_adrs: 80
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -569,9 +569,9 @@ adrs:
     path: docs/adr/0435-topology-derived-health-probe-urls.md
   - adr: '0437'
     title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
-    status: Accepted
-    implementation_status: Accepted
-    currently_describes: current_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-22'
     concern: bootstrap
     keywords:
@@ -610,9 +610,9 @@ adrs:
     path: docs/adr/0438-generic-by-construction.md
   - adr: 0439
     title: Deployment Profiles — Subset-of-Services Selection for Forks
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: networking
     keywords:
@@ -631,9 +631,9 @@ adrs:
     path: docs/adr/0439-deployment-profiles-subset-selection.md
   - adr: 0439
     title: Multi-Deployment Repo Architecture — N Independent Servers from One Checkout
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: networking
     keywords:
@@ -652,9 +652,9 @@ adrs:
     path: docs/adr/0439-multi-deployment-repo-architecture.md
   - adr: '0440'
     title: Per-Deployment Identity & Artifact Isolation
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: identity
     keywords:
@@ -671,9 +671,9 @@ adrs:
     path: docs/adr/0440-per-deployment-identity-and-artifact-isolation.md
   - adr: '0441'
     title: Deployment-Scoped Service Subsetting via Service Profiles
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: platform
     keywords:
@@ -691,9 +691,9 @@ adrs:
     path: docs/adr/0441-deployment-scoped-service-subsetting.md
   - adr: '0442'
     title: Multi-Deployment Make Interface & Agent Worktree Binding
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: agent-discovery
     keywords:
@@ -712,7 +712,7 @@ adrs:
     path: docs/adr/0442-multi-deployment-make-interface-and-worktree-binding.md
   - adr: '0443'
     title: Continuous Topology Reconciler & Drift Detection
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-27'
@@ -751,9 +751,9 @@ adrs:
     path: docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
   - adr: '0445'
     title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-28'
     concern: security
     keywords:
@@ -772,9 +772,9 @@ adrs:
     path: docs/adr/0445-phase1-multi-deployment-hardening.md
   - adr: '0446'
     title: Phase 2 Multi-Deployment Hardening (receipt freshness + Molecule)
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-28'
     concern: security
     keywords:
@@ -808,7 +808,7 @@ adrs:
     path: docs/adr/0447-phase3-llm-ergonomics-and-traceability.md
   - adr: 0448
     title: Per-Deployment Connection Registry & Wrapper
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-28'
@@ -953,7 +953,7 @@ adrs:
     path: docs/adr/0455-phase7-drive-doctor-to-zero.md
   - adr: '0456'
     title: Deployment-Aware Certificate Validation
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-28'
@@ -971,7 +971,7 @@ adrs:
     path: docs/adr/0456-deployment-aware-certificate-validation.md
   - adr: '0457'
     title: Host-Pinning via `proxmox_guests[*].deployment_owner`
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-28'
@@ -991,7 +991,7 @@ adrs:
     path: docs/adr/0457-host-pinning-deployment-owner.md
   - adr: 0458
     title: Cert-Validator Multi-Deployment Mode (Auto-Detect)
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'
@@ -1008,7 +1008,7 @@ adrs:
     path: docs/adr/0458-cert-validator-multi-deployment.md
   - adr: 0459
     title: Deployment Lifecycle CLI Parity (`use`/`new`/`bind`)
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'
@@ -1028,9 +1028,9 @@ adrs:
     path: docs/adr/0459-deployment-lifecycle-cli-parity.md
   - adr: '0460'
     title: Phase 8 — Cross-Deployment Doctor + Advisory Auto-Promotion
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-29'
     concern: platform
     keywords:
@@ -1065,7 +1065,7 @@ adrs:
     path: docs/adr/0461-atomic-receipt-write-and-dangling-check.md
   - adr: '0462'
     title: Topology Pre-Commit Schema Hook
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'
@@ -1208,7 +1208,7 @@ adrs:
     path: docs/adr/0469-connection-yml-vault-key-pull.md
   - adr: '0470'
     title: Per-Deployment Fixture Inventory + Matrix CI
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-29'
@@ -1391,6 +1391,26 @@ adrs:
     summary: Deployment selection becomes mandatory, explicit, and observable in one command.
     filename: 0481-explicit-deployment-context.md
     path: docs/adr/0481-explicit-deployment-context.md
+  - adr: 0481
+    title: Migrate ethical-pentest microservice fleet from 0docker to 0mcp/florin via Coolify
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: testing
+    keywords:
+      - migrate
+      - ethical-pentest
+      - microservice
+      - fleet
+      - from
+      - docker
+      - mcp
+      - florin
+      - coolify
+    summary: '- Fixed the Match Address value in'
+    filename: 0481-pentest-fleet-coolify-migration.md
+    path: docs/adr/0481-pentest-fleet-coolify-migration.md
   - adr: 0482
     title: Capacity-Aware Dynamic VM Sizing
     status: Proposed
@@ -1449,3 +1469,22 @@ adrs:
       The test:'
     filename: 0485-convergence-idempotency-tests.md
     path: docs/adr/0485-convergence-idempotency-tests.md
+  - adr: 0488
+    title: Single Deployment Per Repo Checkout — Generic-By-Default, Envelope-Sized
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: resilience
+    keywords:
+      - single
+      - deployment
+      - per
+      - repo
+      - checkout
+      - generic-by-default
+      - envelope-sized
+    summary: A clone of this repo is configured for exactly one deployment. The operator edits .local/identity.yml (the file
+      from ADR 0385) and runs make bootstrap. There is
+    filename: 0488-single-deployment-per-repo-checkout.md
+    path: docs/adr/0488-single-deployment-per-repo-checkout.md

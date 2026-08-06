@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-07-30'
 facet: concern
 concern: networking
 total_adrs: 34
@@ -607,9 +607,9 @@ adrs:
     path: docs/adr/0412-keycloak-native-account-expiry.md
   - adr: 0439
     title: Deployment Profiles — Subset-of-Services Selection for Forks
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: networking
     keywords:
@@ -628,9 +628,9 @@ adrs:
     path: docs/adr/0439-deployment-profiles-subset-selection.md
   - adr: 0439
     title: Multi-Deployment Repo Architecture — N Independent Servers from One Checkout
-    status: Proposed
-    implementation_status: Proposed
-    currently_describes: goal_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-27'
     concern: networking
     keywords:

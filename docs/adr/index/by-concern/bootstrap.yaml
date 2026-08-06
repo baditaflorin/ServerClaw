@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-05-12'
+generated: '2026-07-30'
 facet: concern
 concern: bootstrap
 total_adrs: 11
@@ -168,9 +168,9 @@ adrs:
     path: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   - adr: '0437'
     title: Overlay-Aware `make bootstrap` — Single Command for Any Fork
-    status: Accepted
-    implementation_status: Accepted
-    currently_describes: current_state
+    status: Deprecated
+    implementation_status: Deprecated
+    currently_describes: historical
     date: '2026-04-22'
     concern: bootstrap
     keywords:
