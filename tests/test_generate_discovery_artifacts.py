@@ -95,3 +95,17 @@ def test_render_outputs_use_one_utc_generated_date(monkeypatch) -> None:
     assert repo_payload["generated"] == "2026-04-03"
     assert config_payload["generated"] == "2026-04-03"
     assert pack_payload["generated"] == "2026-04-03"
+
+
+def test_generated_date_preserves_artifact_date_in_shallow_clone(monkeypatch, tmp_path: Path) -> None:
+    output = tmp_path / ".repo-structure.yaml"
+    output.write_text("generated: '2026-04-14'\n", encoding="utf-8")
+    monkeypatch.setattr(generator, "REPO_STRUCTURE_OUTPUT", output)
+    monkeypatch.setattr(generator, "CONFIG_LOCATIONS_OUTPUT", tmp_path / ".config-locations.yaml")
+    monkeypatch.setattr(
+        generator.subprocess,
+        "run",
+        lambda *args, **kwargs: generator.subprocess.CompletedProcess(args[0], 0, stdout="", stderr=""),
+    )
+
+    assert generator.generated_date() == "2026-04-14"
