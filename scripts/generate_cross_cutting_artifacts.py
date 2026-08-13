@@ -675,7 +675,7 @@ def _extract_catalog_hairpin_hostnames(
 
 
 def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
-    """Return platform_guest_catalog.by_name (inventory_hostname -> {ipv4, ...}).
+    """Return guest entries addressable by inventory name or stable role.
 
     Fresh worktrees intentionally do not carry the ignored generated
     inventory/group_vars/platform.yml. Fall back to the tracked topology source
@@ -687,7 +687,9 @@ def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
         with platform_path.open() as f:
             data = yaml.safe_load(f)
         catalog = data.get("platform_guest_catalog", {})
-        by_name = catalog.get("by_name", {})
+        by_name = dict(catalog.get("by_name", {}))
+        for role, entry in catalog.get("by_role", {}).items():
+            by_name.setdefault(role, entry)
         if by_name:
             return by_name
 
@@ -703,8 +705,10 @@ def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
     for idx, guest in enumerate(guests_raw):
         guest = require_mapping(guest, f"host_vars.proxmox_guests[{idx}]")
         name = require_str(guest.get("name"), f"host_vars.proxmox_guests[{idx}].name")
+        role = require_str(guest.get("role") or name, f"host_vars.proxmox_guests[{idx}].role")
         ipv4 = require_str(guest.get("ipv4"), f"host_vars.proxmox_guests[{idx}].ipv4")
         by_name[name] = {"ipv4": ipv4}
+        by_name.setdefault(role, {"ipv4": ipv4})
 
     if not by_name:
         raise ValueError(
@@ -715,11 +719,11 @@ def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
 
 
 def _resolve_catalog_ip(address_host: str, catalog: dict, context: str) -> str:
-    """Resolve an inventory hostname to its IPv4 address via platform_guest_catalog."""
+    """Resolve an inventory hostname or role alias to its IPv4 address."""
     if address_host not in catalog:
         raise ValueError(
             f"{context}: address_host '{address_host}' is not in "
-            f"platform_guest_catalog.by_name. "
+            f"platform_guest_catalog by name or role. "
             f"Available hosts: {', '.join(sorted(catalog))}"
         )
     entry = catalog[address_host]

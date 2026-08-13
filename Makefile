@@ -622,7 +622,7 @@ validate-generated-readme: ## Exit 1 if README.md is out of sync with docs/templ
 
 generate-platform-vars:
 	$(MAKE) generate-cross-cutting-artifacts
-	PYTHONPATH=$(REPO_ROOT) python3 $(REPO_ROOT)/scripts/generate_platform_vars.py --write $(DEPLOYMENT_ARG)
+	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --write $(DEPLOYMENT_ARG)
 
 generate-slo-rules:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --write

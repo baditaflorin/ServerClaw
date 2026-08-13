@@ -16,7 +16,9 @@ def test_load_guest_catalog_falls_back_to_topology_host_vars() -> None:
     catalog = generate_cross_cutting_artifacts._load_guest_catalog(REPO_ROOT)
 
     assert catalog["nginx"]["ipv4"] == "10.10.10.10"
+    assert catalog["nginx-lv3"]["ipv4"] == catalog["nginx"]["ipv4"]
     assert catalog["coolify"]["ipv4"] == "10.10.10.70"
+    assert catalog["runtime-control"]["ipv4"] == "10.10.10.92"
 
 
 def test_generate_nginx_upstreams_matches_live_librechat_surface() -> None:

@@ -2100,7 +2100,7 @@ platform_service_topology:
           status: 404
   headscale:
     service_name: headscale
-    owning_vm: proxmox_florin
+    owning_vm: proxmox-host
     private_ip: "{{ hostvars[platform_topology_host].proxmox_internal_ipv4 }}"
     public_hostname: headscale.{{ platform_domain }}
     exposure_model: edge-published
@@ -2129,7 +2129,7 @@ platform_service_topology:
       service_telemetry: false
   proxmox_ui:
     service_name: proxmox-ui
-    owning_vm: proxmox_florin
+    owning_vm: proxmox-host
     private_ip: "{{ management_tailscale_ipv4 }}"
     public_hostname: proxmox.{{ platform_domain }}
     exposure_model: informational-only
@@ -3192,7 +3192,7 @@ platform_service_topology:
       proxy_send_timeout_seconds: 900
   ntopng:
     service_name: ntopng
-    owning_vm: proxmox_florin
+    owning_vm: proxmox-host
     private_ip: "{{ management_tailscale_ipv4 }}"
     exposure_model: private-only
     observability:
