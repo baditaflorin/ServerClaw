@@ -16,6 +16,8 @@ steps:
       - python3 --version
       - uv --version
       - test -n "$LV3_WOODPECKER_SECRET_SMOKE"
+      - make generate-platform-vars
+      - git diff --exit-code -- inventory/group_vars/platform.yml inventory/group_vars/platform_tls_certs.yml
       - make validate-generated-vars
       - make syntax-check-woodpecker
       - ./scripts/validate_repo.sh json health-probes agent-standards
