@@ -139,6 +139,17 @@ handle_unhealthy() {
         return 0
     fi
 
+    if [[ ! -d "${compose_dir}" ]]; then
+        log_error "${svc}: compose directory ${compose_dir} does not exist; refusing restart"
+        if [[ "${failures}" -eq "${FAILURE_THRESHOLD}" ]]; then
+            send_ntfy \
+                "${NTFY_TITLE} — ${svc} unmanaged" \
+                "${svc} on ${HOSTNAME} failed ${failures} consecutive probes, but ${compose_dir} does not exist. Auto-restart was skipped." \
+                "rotating_light,no_entry"
+        fi
+        return 0
+    fi
+
     restarts_this_hour="$(get_restart_count_this_hour "${svc}")"
 
     if [[ "${restarts_this_hour}" -lt "${MAX_RESTARTS_PER_HOUR}" ]]; then
@@ -150,6 +161,8 @@ handle_unhealthy() {
 
         if restart_service "${svc}" "${compose_dir}" "${compose_service}" "${restart_args}"; then
             increment_restart_count "${svc}"
+            # Give the restarted service a complete failure window to become ready.
+            set_failure_count "${svc}" 0
         fi
     else
         log_error "${svc}: restart rate limit reached (${MAX_RESTARTS_PER_HOUR}/hour). Manual intervention required."
