@@ -244,6 +244,19 @@ def generated_date() -> str:
             generated_on = result.stdout.strip()
             if generated_on:
                 return generated_on
+
+    # Shallow CI clones may not contain the commit that last changed the source
+    # paths. Preserve the committed artifact date instead of replacing it with
+    # the current date and reporting every generated file as stale.
+    for output_path in (REPO_STRUCTURE_OUTPUT, CONFIG_LOCATIONS_OUTPUT):
+        if not output_path.exists():
+            continue
+        try:
+            generated_on = yaml.safe_load(output_path.read_text(encoding="utf-8")).get("generated")
+        except (AttributeError, OSError, yaml.YAMLError):
+            continue
+        if isinstance(generated_on, str) and generated_on:
+            return generated_on
     return dt.datetime.now(dt.UTC).date().isoformat()
 
 
