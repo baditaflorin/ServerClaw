@@ -329,7 +329,7 @@
             compose_dir: /opt/woodpecker
             compose_service: woodpecker-server
             health_url: "http://127.0.0.1:8102/healthz"
-            expected_status: "200"
+            expected_status: "204"
 
   post_tasks:
     - name: Verify docker-runtime service watchdog
