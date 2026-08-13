@@ -105,7 +105,7 @@ def test_generated_date_preserves_artifact_date_in_shallow_clone(monkeypatch, tm
     monkeypatch.setattr(
         generator.subprocess,
         "run",
-        lambda *args, **kwargs: generator.subprocess.CompletedProcess(args[0], 0, stdout="", stderr=""),
+        lambda *args, **kwargs: generator.subprocess.CompletedProcess(args[0], 0, stdout="true\n", stderr=""),
     )
 
     assert generator.generated_date() == "2026-04-14"
