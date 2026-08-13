@@ -90,8 +90,8 @@ def test_build_platform_vars_includes_livekit_publication_topology() -> None:
     assert livekit["ports"]["media_tcp"] == 7881
     assert livekit["ports"]["media_udp"] == 7882
     assert livekit["urls"]["public"] == "https://livekit.example.com"
-    assert livekit["urls"]["internal"] == "http://10.10.10.21:7880"
-    assert livekit["owning_vm"] == "runtime-comms"
+    assert livekit["urls"]["internal"] == "http://10.10.10.20:7880"
+    assert livekit["owning_vm"] == "docker-runtime-lv3"
     assert livekit["edge"]["noindex"] is True
     assert livekit["edge"]["kind"] == "proxy"
 
@@ -378,7 +378,7 @@ def test_build_platform_vars_projects_control_and_dedicated_pool_metadata() -> N
     keycloak = platform_vars["platform_service_topology"]["keycloak"]
     grafana = platform_vars["platform_service_topology"]["grafana"]
 
-    assert keycloak["owning_vm"] == "runtime-control"
+    assert keycloak["owning_vm"] == "runtime-control-lv3"
     assert keycloak["private_ip"] == "10.10.10.92"
     assert keycloak["edge"]["upstream"] == "http://10.10.10.92:8091"
     assert keycloak["runtime_pool"] == "runtime-control"
@@ -483,14 +483,14 @@ def test_build_platform_vars_moves_support_surfaces_to_runtime_general() -> None
     status_page = platform_vars["platform_service_topology"]["status_page"]
     uptime_kuma = platform_vars["platform_service_topology"]["uptime_kuma"]
 
-    assert homepage["owning_vm"] == "runtime-general"
+    assert homepage["owning_vm"] == "runtime-general-lv3"
     assert homepage["urls"]["internal"] == "http://10.10.10.91:3090"
     assert homepage["edge"]["upstream"] == homepage["urls"]["internal"]
-    assert mailpit["owning_vm"] == "runtime-general"
+    assert mailpit["owning_vm"] == "runtime-general-lv3"
     assert mailpit["urls"]["internal"] == "http://10.10.10.91:8025"
-    assert status_page["owning_vm"] == "runtime-general"
+    assert status_page["owning_vm"] == "runtime-general-lv3"
     assert status_page["edge"]["upstream"] == "http://10.10.10.91:3001"
-    assert uptime_kuma["owning_vm"] == "runtime-general"
+    assert uptime_kuma["owning_vm"] == "runtime-general-lv3"
     assert uptime_kuma["urls"]["internal"] == "http://10.10.10.91:3001"
 
 
@@ -618,7 +618,7 @@ def test_build_platform_vars_renders_service_topology_without_unresolved_templat
 
 def test_tika_network_policy_allows_proxmox_host_private_probe() -> None:
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text(encoding="utf-8"))
-    allowed_inbound = host_vars["network_policy"]["guests"]["runtime-ai"]["allowed_inbound"]
+    allowed_inbound = host_vars["network_policy"]["guests"]["runtime-ai-lv3"]["allowed_inbound"]
 
     assert any(rule["source"] == "host" and 9998 in rule["ports"] for rule in allowed_inbound)
 
@@ -649,10 +649,10 @@ def test_build_platform_vars_includes_woodpecker_publication_topology() -> None:
 
 def test_woodpecker_network_policy_allows_host_and_edge_access() -> None:
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text(encoding="utf-8"))
-    allowed_inbound = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
+    allowed_inbound = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
 
     assert any(rule["source"] == "host" and 8102 in rule["ports"] for rule in allowed_inbound)
-    assert any(rule["source"] == "nginx" and 8102 in rule["ports"] for rule in allowed_inbound)
+    assert any(rule["source"] == "nginx-lv3" and 8102 in rule["ports"] for rule in allowed_inbound)
 
 
 def test_build_platform_vars_uses_loopback_for_guest_local_platform_context_verification() -> None:

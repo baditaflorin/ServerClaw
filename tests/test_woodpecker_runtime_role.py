@@ -15,12 +15,12 @@ VERIFY_FILE = REPO_ROOT / "roles" / "woodpecker_runtime" / "tasks" / "verify.yml
 def test_woodpecker_runtime_defaults_bind_generated_topology_and_artifacts() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
 
-    assert defaults["woodpecker_http_port"] == "{{ woodpecker_service_topology.ports.internal }}"
+    assert "woodpecker_http_port" not in defaults
     assert defaults["woodpecker_host_proxy_port"] == "{{ woodpecker_service_topology.ports.controller }}"
     assert defaults["woodpecker_public_url"] == "{{ woodpecker_service_topology.urls.public }}"
     assert defaults["woodpecker_controller_url"] == "{{ woodpecker_service_topology.urls.controller }}"
     assert defaults["woodpecker_gitea_runtime_url"] == "{{ gitea_private_base_url }}"
-    assert defaults["woodpecker_local_artifact_dir"].endswith("/.local/woodpecker")
+    assert defaults["woodpecker_agent_secret_local_file"].endswith("/woodpecker/agent-secret.txt")
     assert defaults["woodpecker_seed_repo_full_name"] == "ops/platform"
 
 
@@ -60,14 +60,13 @@ def test_woodpecker_runtime_tasks_prepare_oauth_and_render_bootstrap_spec() -> N
     local_health_task = next(
         task for task in task_data if task["name"] == "Wait for the Woodpecker local health endpoint"
     )
-    verify_health_task = next(
-        task for task in verify_data if task["name"] == "Verify the Woodpecker local health endpoint"
-    )
+    verify_health_task = next(task for task in verify_data if task["name"] == "Verify the Woodpecker runtime health")
 
     assert gitea_wait_task["ansible.builtin.uri"]["url"] == "{{ woodpecker_gitea_runtime_url }}/user/login"
     assert gitea_wait_task["retries"] == 48
     assert gitea_wait_task["until"] == "woodpecker_gitea_login_page.status == 200"
     assert local_health_task["ansible.builtin.uri"]["status_code"] == [200, 204]
     assert local_health_task["until"] == "woodpecker_health.status in [200, 204]"
-    assert verify_health_task["ansible.builtin.uri"]["status_code"] == [200, 204]
-    assert verify_health_task["until"] == "woodpecker_verify_health.status in [200, 204]"
+    assert verify_health_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
+    assert verify_health_task["ansible.builtin.include_role"]["tasks_from"] == "verify_service_health"
+    assert verify_health_task["vars"]["common_verify_health_status_code"] == 204

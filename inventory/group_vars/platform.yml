@@ -3256,7 +3256,7 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8091
+      upstream: http://10.10.10.92:8091
     urls:
       public: https://sso.example.com
       internal: http://10.10.10.92:8091
@@ -6517,7 +6517,7 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:8091
+      upstream: http://10.10.10.92:8091
     urls:
       public: https://sso.example.com
       internal: http://10.10.10.92:8091

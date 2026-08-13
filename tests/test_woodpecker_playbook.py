@@ -14,27 +14,31 @@ COLLECTION_PLAYBOOK = (
 def test_woodpecker_root_playbook_converges_proxy_postgres_runtime_and_edge() -> None:
     plays = yaml.safe_load(ROOT_PLAYBOOK.read_text())
 
-    assert plays[0]["roles"][0]["role"] == "lv3.platform.proxmox_tailscale_proxy"
-    assert plays[2]["roles"] == [
+    assert plays[0] == {
+        "import_playbook": "_includes/service_enabled_guard.yml",
+        "vars": {"service_enabled_guard_name": "woodpecker"},
+    }
+    assert plays[1]["roles"][0]["role"] == "lv3.platform.proxmox_tailscale_proxy"
+    assert plays[3]["roles"] == [
         {"role": "lv3.platform.linux_guest_firewall"},
         {"role": "lv3.platform.postgres_vm"},
         {"role": "lv3.platform.woodpecker_postgres"},
     ]
-    assert plays[3]["roles"] == [
+    assert plays[4]["roles"] == [
         {"role": "lv3.platform.linux_guest_firewall"},
         {"role": "lv3.platform.docker_runtime"},
         {"role": "lv3.platform.woodpecker_runtime"},
     ]
-    verify = next(task for task in plays[3]["post_tasks"] if task["name"] == "Verify Woodpecker health probes")
-    post_verify = next(task for task in plays[3]["post_tasks"] if task["name"] == "Run shared post-verify checks")
+    verify = next(task for task in plays[4]["post_tasks"] if task["name"] == "Verify Woodpecker health probes")
+    post_verify = next(task for task in plays[4]["post_tasks"] if task["name"] == "Run shared post-verify checks")
     assert verify["ansible.builtin.include_role"]["name"] == "lv3.platform.woodpecker_runtime"
     assert post_verify["vars"]["playbook_execution_verify_readiness"] is False
-    assert plays[4]["roles"] == [{"role": "lv3.platform.nginx_edge_publication"}]
+    assert plays[5]["roles"] == [{"role": "lv3.platform.nginx_edge_publication"}]
 
 
 def test_woodpecker_root_playbook_bootstraps_controller_artifacts_and_seed_repo() -> None:
     plays = yaml.safe_load(ROOT_PLAYBOOK.read_text())
-    bootstrap_play = plays[5]
+    bootstrap_play = plays[6]
     public_health_task = next(
         task
         for task in bootstrap_play["tasks"]
