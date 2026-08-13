@@ -12,7 +12,7 @@ steps:
     commands:
       - apt-get update
       - apt-get install -y --no-install-recommends bash git make ca-certificates
-      - python3 -m pip install --no-cache-dir uv
+      - python3 -m pip install --no-cache-dir uv ansible-core
       - python3 --version
       - uv --version
       - test -n "$LV3_WOODPECKER_SECRET_SMOKE"
