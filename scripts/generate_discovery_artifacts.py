@@ -223,7 +223,34 @@ def _serialize_section(section: DiscoverySection) -> dict[str, Any]:
     }
 
 
+def _committed_generated_date() -> str | None:
+    for output_path in (REPO_STRUCTURE_OUTPUT, CONFIG_LOCATIONS_OUTPUT):
+        if not output_path.exists():
+            continue
+        try:
+            generated_on = yaml.safe_load(output_path.read_text(encoding="utf-8")).get("generated")
+        except (AttributeError, OSError, yaml.YAMLError):
+            continue
+        if isinstance(generated_on, str) and generated_on:
+            return generated_on
+    return None
+
+
 def generated_date() -> str:
+    try:
+        shallow = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "rev-parse", "--is-shallow-repository"],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (FileNotFoundError, OSError, subprocess.CalledProcessError):
+        shallow = "false"
+    if shallow == "true":
+        generated_on = _committed_generated_date()
+        if generated_on:
+            return generated_on
+
     source_paths = [
         PACK_MANIFEST_PATH,
         REPO_STRUCTURE_SOURCE_DIR,
@@ -248,15 +275,9 @@ def generated_date() -> str:
     # Shallow CI clones may not contain the commit that last changed the source
     # paths. Preserve the committed artifact date instead of replacing it with
     # the current date and reporting every generated file as stale.
-    for output_path in (REPO_STRUCTURE_OUTPUT, CONFIG_LOCATIONS_OUTPUT):
-        if not output_path.exists():
-            continue
-        try:
-            generated_on = yaml.safe_load(output_path.read_text(encoding="utf-8")).get("generated")
-        except (AttributeError, OSError, yaml.YAMLError):
-            continue
-        if isinstance(generated_on, str) and generated_on:
-            return generated_on
+    generated_on = _committed_generated_date()
+    if generated_on:
+        return generated_on
     return dt.datetime.now(dt.UTC).date().isoformat()
 
 
