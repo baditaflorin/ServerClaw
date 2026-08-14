@@ -1,3 +1,5 @@
+
+
 <!-- =============================================================================
      GENERATED — do not edit README.md directly.
 
@@ -229,14 +231,14 @@ make docker-dev-down         # Cleanup
 ```
 Proxmox VE Host (Debian 13, bare metal)
   |
-  +-- nginx-edge        (10.0.0.10)  Reverse proxy, TLS termination
-  +-- docker-runtime    (10.0.0.20)  Primary application runtime
-  +-- docker-build      (10.0.0.30)  CI/CD build server
-  +-- monitoring        (10.0.0.40)  Grafana, Prometheus, Alertmanager
-  +-- postgres          (10.0.0.50)  Shared PostgreSQL 16
-  +-- backup            (10.0.0.60)  Proxmox Backup Server
-  +-- runtime-control   (10.0.0.92)  API gateway, agent tools
-  +-- runtime-ai        (10.0.0.90)  GPU workloads (Ollama, inference)
+  +-- nginx-edge        (10.10.10.10)  Reverse proxy, TLS termination
+  +-- docker-runtime    (10.10.10.20)  Primary application runtime
+  +-- docker-build      (10.10.10.30)  CI/CD build server
+  +-- monitoring        (10.10.10.40)  Grafana, Prometheus, Alertmanager
+  +-- postgres          (10.10.10.50)  Shared PostgreSQL 16
+  +-- backup            (10.10.10.60)  Proxmox Backup Server
+  +-- runtime-control   (10.10.10.92)  API gateway, agent tools
+  +-- runtime-ai        (10.10.10.90)  GPU workloads (Ollama, inference)
   +-- [additional VMs per topology]
 ```
 
