@@ -5419,6 +5419,54 @@ workstreams:
   - serverclaw/main HEAD no longer contains the leaked file
   related_adrs:
   - "ADR 0409 \u2014 Generalize committed code to eliminate publication sanitization"
+- id: fix-readme-topology-example-ips
+  title: Fix README architecture diagram example IP octet
+  status: ready
+  ready_to_merge: true
+  live_applied: false
+  depends_on: []
+  conflicts_with: []
+  owner: claude-agent
+  branch: fix-readme-topology-example-ips
+  doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: fix-readme-topology-example-ips-code
+      paths:
+      - docs/templates/README.md.j2
+      - README.md
+      - workstreams/active/fix-readme-topology-example-ips.yaml
+      - workstreams.yaml
+      mode: exclusive
+  description: 'ServerClaw PR #43 (external contributor webbrain-one) pointed out
+    that the
+
+    README''s architecture diagram used the wrong example IP octet (10.0.0.x)
+
+    -- inconsistent with the 10.10.10.x convention used everywhere else in the
+
+    repo''s docs/scripts. The PR itself was unmergeable (ServerClaw''s force-push
+
+    snapshot publish model means any PR predating the latest publish diffs
+
+    against hundreds of unrelated files and can never merge cleanly), so the
+
+    fix was extracted and reapplied at the source: docs/templates/README.md.j2
+
+    (README.md is a generated file, regenerated via
+
+    scripts/generate_readme.py --write, which also refreshed the stale
+
+    platform-status block as a side effect).
+
+    '
+  objectives:
+  - Fix the example IP octet in docs/templates/README.md.j2
+  - Regenerate README.md
+  completion_metrics:
+  - README.md architecture diagram uses 10.10.10.x
+  - ServerClaw PR
+  related_adrs: []
 surface_ownership:
   global_mutable_paths:
   - receipts/gate-bypasses/*
