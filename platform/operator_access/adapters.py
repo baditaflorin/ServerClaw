@@ -25,24 +25,64 @@ class KeycloakAdminAdapter:
         realm: str,
         bootstrap_admin: str,
         bootstrap_password_loader: Callable[[], str | None],
+        admin_client_id: str | None = None,
+        admin_client_secret_loader: Callable[[], str | None] | None = None,
         request: RequestFunc = request_json,
     ):
         self.base_url = base_url.rstrip("/")
         self.realm = realm
         self.bootstrap_admin = bootstrap_admin
         self._bootstrap_password_loader = bootstrap_password_loader
+        self._admin_client_id = admin_client_id
+        self._admin_client_secret_loader = admin_client_secret_loader
         self._request = request
         self._token: str | None = None
         self._user_cache: dict[str, dict[str, Any]] = {}
 
+    def _token_endpoint(self) -> str:
+        return f"{self.base_url}/realms/master/protocol/openid-connect/token"
+
+    def _client_credentials_token(self) -> str | None:
+        """Try the repo-managed admin client (client-credentials grant).
+
+        Preferred over the bootstrap-admin password grant because it keeps
+        working when the bootstrap password has been rotated. Returns None on
+        any failure so the caller can fall back to the password grant.
+        """
+        if not (self._admin_client_id and self._admin_client_secret_loader):
+            return None
+        secret = self._admin_client_secret_loader()
+        if not secret:
+            return None
+        try:
+            payload = self._request(
+                self._token_endpoint(),
+                method="POST",
+                form={
+                    "grant_type": "client_credentials",
+                    "client_id": self._admin_client_id,
+                    "client_secret": secret,
+                },
+            )
+        except Exception:  # noqa: BLE001 — best-effort; fall back to password grant
+            return None
+        access_token = payload.get("access_token") if isinstance(payload, dict) else None
+        return access_token if isinstance(access_token, str) and access_token else None
+
     def _admin_token(self) -> str:
         if self._token is not None:
             return self._token
+        token = self._client_credentials_token()
+        if token:
+            self._token = token
+            return token
         password = self._bootstrap_password_loader()
         if not password:
-            raise RuntimeError("Keycloak bootstrap admin password is not configured.")
+            raise RuntimeError(
+                "Keycloak admin auth failed: no admin client secret and no bootstrap admin password configured."
+            )
         payload = self._request(
-            f"{self.base_url}/realms/master/protocol/openid-connect/token",
+            self._token_endpoint(),
             method="POST",
             form={
                 "grant_type": "password",

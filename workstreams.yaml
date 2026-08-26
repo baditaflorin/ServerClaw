@@ -5308,6 +5308,65 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 26a30662-ed8e-4d3d-9f07-154522ff67cd
+- id: revive-provision-operator-identity-fix
+  title: Revive provision_operator/operator_manager identity-derivation fix from stale
+    ServerClaw PR
+  status: ready
+  ready_to_merge: true
+  live_applied: false
+  depends_on: []
+  conflicts_with: []
+  owner: claude-agent
+  branch: revive-provision-operator-identity-fix
+  doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: revive-provision-operator-identity-fix-code
+      paths:
+      - scripts/provision_operator.py
+      - scripts/operator_manager.py
+      - workstreams/active/revive-provision-operator-identity-fix.yaml
+      - workstreams.yaml
+      mode: exclusive
+  description: 'ServerClaw PR #25 (opened 2026-06-08, author baditaflorin) fixed
+
+    provision_operator.py and operator_manager.py to derive Keycloak
+
+    realm/endpoints/admin identifiers from platform_domain via
+
+    scripts/identity_yaml.load_identity_vars() instead of hardcoded
+
+    pre-migration constants (realm "lv3", *.localhost endpoints,
+
+    lv3-bootstrap-admin). Against the live deployment these targeted a
+
+    non-existent Keycloak realm and unreachable hosts.
+
+
+    The PR itself is unmergeable (ServerClaw''s force-push snapshot publish
+
+    model means any PR predating the latest publish diffs against hundreds
+
+    of unrelated files). Confirmed the underlying bug is still present in the
+
+    current private repo (provision_operator.py still hardcoded ADMIN_USER =
+
+    "lv3-bootstrap-admin" and LV3_KEYCLOAK_BOOTSTRAP_PASSWORD), and its two
+
+    commits cherry-picked cleanly with zero conflicts against current main.
+
+    '
+  objectives:
+  - Land the ADR-0407 identity-derivation fix for provision_operator.py
+  - Land the matching operator_manager.py realm/admin-client fix
+  completion_metrics:
+  - provision_operator.py derives realm/endpoints from load_identity_vars()
+  - operator_manager.py supports client-credentials auth with bootstrap-admin fallback
+  - tests/test_provision_operator.py and tests/test_operator_manager.py pass (except
+    the pre-existing, unrelated test_repo_operator_roster_validates failure -- confirmed
+    failing on clean main before this branch existed)
+  related_adrs:
+  - "ADR 0407 \u2014 Generic by default local overlay architecture"
 - id: fix-serverclaw-publish-cicd-deadlock
   title: Fix ServerClaw publish CI/branch-protection deadlock
   status: ready

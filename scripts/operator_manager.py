@@ -46,12 +46,40 @@ ROSTER_SCHEMA_PATH = repo_path("config", "schemas", "operators.schema.json")
 POLICY_DIR = repo_path("config", "openbao", "policies")
 STATE_DIR = repo_path(".local", "state", "operator-access")
 KEYCLOAK_BOOTSTRAP_PASSWORD_PATH = repo_path(".local", "keycloak", "bootstrap-admin-password.txt")
+KEYCLOAK_ADMIN_CLIENT_SECRET_PATH = repo_path(".local", "keycloak", "admin-client-secret.txt")
 OPENBAO_INIT_PATH = repo_path(".local", "openbao", "init.json")
 TAILSCALE_API_KEY_PATH = repo_path(".local", "tailscale", "api-key.txt")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 
-KEYCLOAK_REALM = "lv3"
-KEYCLOAK_BOOTSTRAP_ADMIN = "lv3-bootstrap-admin"
+
+def _resolve_identity() -> tuple[str, str, str]:
+    """Return (platform_domain, config_prefix, keycloak_realm).
+
+    Derived from inventory + the .local identity overlay (ADR 0385 / ADR 0407)
+    so the committed module carries no deployment-specific realm or prefix. An
+    explicit PLATFORM_DOMAIN env override takes precedence and drives both the
+    prefix and the realm; LV3_KEYCLOAK_REALM overrides the realm alone.
+    """
+    domain = os.environ.get("PLATFORM_DOMAIN", "").strip()
+    prefix = ""
+    if not domain:
+        try:
+            from identity_yaml import load_identity_vars
+
+            identity_vars = load_identity_vars()
+            domain = identity_vars.get("platform_domain", "").strip()
+            prefix = identity_vars.get("platform_config_prefix", "").strip()
+        except Exception:
+            pass
+    domain = domain or "example.com"
+    prefix = prefix or domain.split(".")[0]
+    realm = os.environ.get("LV3_KEYCLOAK_REALM", "").strip() or domain.split(".")[0]
+    return domain, prefix, realm
+
+
+PLATFORM_DOMAIN, CONFIG_PREFIX, KEYCLOAK_REALM = _resolve_identity()
+KEYCLOAK_BOOTSTRAP_ADMIN = f"{CONFIG_PREFIX}-bootstrap-admin"
+KEYCLOAK_ADMIN_CLIENT_ID = f"{CONFIG_PREFIX}-admin-runtime"
 ROLE_NAMES = {"admin", "operator", "viewer"}
 STATUS_NAMES = {"active", "inactive"}
 ISO8601_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
@@ -233,6 +261,13 @@ def load_keycloak_bootstrap_password() -> str | None:
     if value:
         return value
     return load_text_if_exists(KEYCLOAK_BOOTSTRAP_PASSWORD_PATH)
+
+
+def load_keycloak_admin_client_secret() -> str | None:
+    value = os.environ.get("LV3_KEYCLOAK_ADMIN_CLIENT_SECRET", "").strip()
+    if value:
+        return value
+    return load_text_if_exists(KEYCLOAK_ADMIN_CLIENT_SECRET_PATH)
 
 
 def load_openbao_init_payload() -> dict[str, Any]:
@@ -635,6 +670,8 @@ def build_live_backend_ports() -> tuple[
             realm=KEYCLOAK_REALM,
             bootstrap_admin=KEYCLOAK_BOOTSTRAP_ADMIN,
             bootstrap_password_loader=load_keycloak_bootstrap_password,
+            admin_client_id=KEYCLOAK_ADMIN_CLIENT_ID,
+            admin_client_secret_loader=load_keycloak_admin_client_secret,
         ),
         OpenBaoIdentityAdapter(
             base_url=service_url("openbao"),

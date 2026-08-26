@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-provision_operator.py — Canonical operator onboarding script for localhost platform.
+provision_operator.py — Canonical operator onboarding script for the platform.
 
 Implements ADR 0318: repeatable, code-first operator provisioning with audit-trail CC.
 Wraps the Keycloak direct-API procedure from ADR 0317 and adds Headscale VPN +
@@ -35,13 +35,12 @@ import argparse
 import json
 import os
 import secrets
+import shlex
 import ssl
 import subprocess
 import urllib.error
 import urllib.parse
 import urllib.request
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Any
 
@@ -128,36 +127,69 @@ def read_keycloak_bootstrap_password() -> str:
     return read_required_text(BOOTSTRAP_PASS_FILE, "Keycloak bootstrap password")
 
 
-def read_platform_smtp_password() -> str:
-    override = os.environ.get("LV3_PLATFORM_SMTP_PASSWORD", "").strip()
+def read_mail_gateway_api_key() -> str:
+    override = os.environ.get("LV3_MAIL_GATEWAY_API_KEY", "").strip()
     if override:
         return override
-    return read_required_text(SMTP_PASS_FILE, "platform transactional mailbox password")
+    return read_required_text(MAIL_GATEWAY_KEY_FILE, "platform transactional mail-gateway API key")
 
+
+# ---------------------------------------------------------------------------
+# Identity resolution (ADR 0385 / ADR 0407)
+# Derive the realm, config prefix, and endpoints from inventory + the .local
+# identity overlay rather than hardcoding one deployment. This keeps the
+# committed script generic (no deployment-specific literals); real values come
+# from .local/identity.yml at runtime. Env vars override for ad-hoc runs.
+# ---------------------------------------------------------------------------
+def _resolve_identity() -> tuple[str, str, str]:
+    """Return (platform_domain, config_prefix, keycloak_realm).
+
+    An explicit PLATFORM_DOMAIN env override takes full precedence: the prefix
+    and realm are then derived from it rather than from the .local overlay, so
+    domain and prefix can never disagree. Otherwise both come from the overlay
+    (with the prefix falling back to the domain's first label).
+    """
+    domain = os.environ.get("PLATFORM_DOMAIN", "").strip()
+    prefix = ""
+    if not domain:
+        try:
+            from identity_yaml import load_identity_vars
+
+            identity_vars = load_identity_vars()
+            domain = identity_vars.get("platform_domain", "").strip()
+            prefix = identity_vars.get("platform_config_prefix", "").strip()
+        except Exception:
+            pass
+    domain = domain or "example.com"
+    prefix = prefix or domain.split(".")[0]
+    realm = os.environ.get("LV3_KEYCLOAK_REALM", "").strip() or domain.split(".")[0]
+    return domain, prefix, realm
+
+
+PLATFORM_DOMAIN, CONFIG_PREFIX, REALM = _resolve_identity()
 
 # Keycloak
-DEFAULT_KEYCLOAK_URL = "https://sso.localhost"
-REALM = "lv3"
-ADMIN_USER = "lv3-bootstrap-admin"
+DEFAULT_KEYCLOAK_URL = f"https://sso.{PLATFORM_DOMAIN}"
+ADMIN_USER = f"{CONFIG_PREFIX}-bootstrap-admin"
 BOOTSTRAP_PASS_FILE = repo_path(".local", "keycloak", "bootstrap-admin-password.txt")
 PASSWORD_DIR = repo_path(".local", "keycloak")
 
-# SMTP (internal — relay via SSH proxy)
-SMTP_HOST = "10.10.10.20"
-SMTP_PORT = 587
-SMTP_USER = "platform"
-SMTP_FROM = "LV3 Platform <platform@localhost>"
-SMTP_PASS_FILE = repo_path(".local", "mail-platform", "profiles", "platform-transactional-mailbox-password.txt")
+# Mail delivery — the platform mail-gateway HTTP API. It listens on the internal
+# network only, so we reach it through the SSH proxy. The transactional profile
+# fixes the sender identity, so no From/SMTP credentials are configured here.
+MAIL_GATEWAY_KEY_FILE = repo_path(
+    ".local", "mail-platform", "profiles", "platform-transactional-gateway-api-key.txt"
+)
 SSH_KEY_FILE = repo_path(".local", "ssh", "bootstrap.id_ed25519")
-SSH_PROXY = "ops@100.64.0.1"
+SSH_PROXY = os.environ.get("LV3_SSH_PROXY", "").strip() or "ops@100.64.0.1"
 
 # Headscale (self-hosted Tailscale control server)
-DEFAULT_HEADSCALE_URL = "https://headscale.localhost"
+DEFAULT_HEADSCALE_URL = f"https://headscale.{PLATFORM_DOMAIN}"
 HEADSCALE_API_KEY_FILE = repo_path(".local", "headscale", "api-key.txt")
 HEADSCALE_AUTHKEY_DIR = repo_path(".local", "headscale")
 
 # step-ca
-STEP_CA_URL = "https://ca.localhost"
+STEP_CA_URL = os.environ.get("LV3_STEP_CA_URL", "").strip() or f"https://ca.{PLATFORM_DOMAIN}"
 STEP_CA_ROOT_CERT = repo_path(".local", "step-ca", "certs", "root_ca.crt")
 
 # Role → (realm_roles, groups, openbao_policies)
@@ -185,16 +217,16 @@ def configured_url(env_var: str, default: str) -> str:
     return default
 
 
-ADMIN_CLIENT_ID = "lv3-admin-runtime"
+ADMIN_CLIENT_ID = f"{CONFIG_PREFIX}-admin-runtime"
 ADMIN_CLIENT_SECRET_FILE = repo_path(".local", "keycloak", "admin-client-secret.txt")
 
 
 def get_token(bootstrap_pass: str) -> str:
     """Acquire an admin token from the Keycloak master realm.
 
-    Tries client-credentials grant with lv3-admin-runtime first (more reliable
-    when the bootstrap admin password has been rotated).  Falls back to the
-    legacy password grant with lv3-bootstrap-admin.
+    Tries the client-credentials grant with the <prefix>-admin-runtime client
+    first (more reliable when the bootstrap admin password has been rotated).
+    Falls back to the password grant with the <prefix>-bootstrap-admin user.
     """
     keycloak_url = configured_url("LV3_KEYCLOAK_URL", DEFAULT_KEYCLOAK_URL)
     token_url = f"{keycloak_url}/realms/master/protocol/openid-connect/token"
@@ -350,33 +382,72 @@ def get_ca_fingerprint() -> str:
     return raw.lower().replace(":", "")
 
 
+SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
+
+# Categories surfaced to a new operator, in display order. Catalog entries in
+# other categories (raw infrastructure surfaces) are omitted from the welcome
+# mail, as are the explicitly-skipped infra ids below.
+_SERVICE_CATEGORY_ORDER = [
+    ("access", "Access & identity"),
+    ("automation", "Automation & apps"),
+    ("data", "Data & storage"),
+    ("observability", "Monitoring & logs"),
+    ("communication", "Communication"),
+    ("security", "Security"),
+]
+_SERVICE_SKIP_IDS = {"docker_runtime", "docker_build", "nginx_edge", "proxmox_ui"}
+
+
+def render_service_lines(domain: str) -> str:
+    """Build the welcome-email service list from the capability catalog.
+
+    Public services only, with the generic ``example.com`` substituted for the
+    live domain and grouped by catalog category. Falls back to a single SSO line
+    if the catalog is unavailable, so a missing catalog never blocks a send.
+    """
+    try:
+        payload = json.loads(SERVICE_CATALOG_PATH.read_text(encoding="utf-8"))
+        services = [s for s in payload.get("services", []) if isinstance(s, dict)]
+    except (OSError, json.JSONDecodeError):
+        return f"  SSO portal                 https://sso.{domain}"
+    by_category: dict[str, list[tuple[str, str]]] = {}
+    for service in services:
+        url = service.get("public_url")
+        if not url or service.get("id") in _SERVICE_SKIP_IDS:
+            continue
+        url = url.replace("example.com", domain)
+        name = service.get("name") or service.get("id", "")
+        by_category.setdefault(service.get("category", "other"), []).append((name, url))
+    lines: list[str] = []
+    for category_key, category_label in _SERVICE_CATEGORY_ORDER:
+        entries = sorted(by_category.get(category_key, []))
+        if not entries:
+            continue
+        lines.append(f"  {category_label}:")
+        lines.extend(f"    {name:<26} {url}" for name, url in entries)
+    return "\n".join(lines) if lines else f"  SSO portal                 https://sso.{domain}"
+
+
 PLAIN_TEMPLATE = """\
 Hi {first_name},
 
-Welcome to the localhost homelab platform! {requester_name} has provisioned you
+Welcome to the {domain} platform! {requester_name} has provisioned you
 a {role} account valid until {expiry}.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  YOUR SSO CREDENTIALS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Login portal : https://sso.localhost
+  Login portal : {keycloak_url}
   Username     : {username}
   Password     : {password}
   Expires      : {expiry}
 
-Change your password: https://sso.localhost/realms/lv3/account/
+Change your password: {account_url}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  PLATFORM SERVICES  (all use SSO)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Grafana  (metrics)       https://grafana.localhost
-  Gitea    (source code)   https://gitea.localhost
-  Outline  (docs/wiki)     https://outline.localhost
-  Vikunja  (tasks)         https://vikunja.localhost
-  ServerClaw (AI)          https://chat.localhost
-  Mattermost (chat)        https://mattermost.localhost
-  Harbor (registry)        https://harbor.localhost
-  Windmill (workflows)     https://windmill.localhost
+{services_block}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  VPN ACCESS (Tailscale / Headscale)
@@ -389,7 +460,7 @@ The platform uses a self-hosted Tailscale control server (Headscale).
 
   # 2. Connect (pre-auth key valid until {expiry})
   sudo tailscale up \\
-    --login-server https://headscale.localhost \\
+    --login-server {headscale_url} \\
     --authkey {headscale_authkey} \\
     --hostname {username}-laptop
 
@@ -404,7 +475,7 @@ The platform uses a self-hosted Tailscale control server (Headscale).
 
   # 2. Bootstrap the CA (one-time)
   step ca bootstrap \\
-    --ca-url https://ca.localhost \\
+    --ca-url {ca_url} \\
     --fingerprint {ca_fingerprint}
 
   # 3. Follow the operator onboarding runbook for your first SSH cert
@@ -421,36 +492,33 @@ Platform hosts once on VPN:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  CODEBASE TOUR
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Repo: https://gitea.localhost/platform/platform_server
+Repo: {git_url}
 
   config/                   operators.yaml, schemas, service catalog
   docs/adr/                 Architecture Decision Records — READ FIRST
-  collections/...roles/     Ansible roles for all ~40 services
+  collections/...roles/     Ansible roles for all platform services
   scripts/                  Operator tooling (this script lives here)
   workstreams.yaml          Active in-progress changes
-
-CI/CD: every push runs 22 validation checks before landing on main.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  QUICK CHECKLIST
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  □ Log in at https://sso.localhost and change your password
-  □ sudo tailscale up --login-server https://headscale.localhost --authkey <above>
-  □ step ca bootstrap --ca-url https://ca.localhost --fingerprint {ca_fingerprint}
-  □ Review docs/runbooks/operator-onboarding.md for SSH setup
-  □ ssh {username}@100.64.0.1
-  □ Browse https://grafana.localhost for platform dashboards
+  [ ] Log in at {keycloak_url} and change your password
+  [ ] sudo tailscale up --login-server {headscale_url} --authkey <above>
+  [ ] step ca bootstrap --ca-url {ca_url} --fingerprint {ca_fingerprint}
+  [ ] Review docs/runbooks/operator-onboarding.md for SSH setup
+  [ ] ssh {username}@100.64.0.1
 
 Account expires {expiry}.
 
 Welcome aboard,
-localhost platform (provisioned by Codex agent per ADR 0318)
+{domain} platform (provisioned per ADR 0318)
 ---
 CC: {cc_email} — audit record per ADR 0318.
 """
 
 
-def build_email(
+def build_email_payload(
     to_email: str,
     cc_email: str,
     first_name: str,
@@ -461,8 +529,9 @@ def build_email(
     requester_email: str,
     headscale_authkey: str,
     ca_fingerprint: str,
-) -> MIMEMultipart:
+) -> dict[str, Any]:
     requester_name = requester_email.split("@", 1)[0].replace(".", " ").title()
+    keycloak_url = configured_url("LV3_KEYCLOAK_URL", DEFAULT_KEYCLOAK_URL)
     plain = PLAIN_TEMPLATE.format(
         first_name=first_name,
         requester_name=requester_name,
@@ -473,45 +542,60 @@ def build_email(
         cc_email=cc_email,
         headscale_authkey=headscale_authkey,
         ca_fingerprint=ca_fingerprint,
+        domain=PLATFORM_DOMAIN,
+        keycloak_url=keycloak_url,
+        account_url=f"{keycloak_url}/realms/{REALM}/account/",
+        headscale_url=configured_url("LV3_HEADSCALE_URL", DEFAULT_HEADSCALE_URL),
+        ca_url=STEP_CA_URL,
+        git_url=f"https://git.{PLATFORM_DOMAIN}",
+        services_block=render_service_lines(PLATFORM_DOMAIN),
     )
     expiry_short = expiry[:10]
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"[localhost] Platform access — {first_name} — expires {expiry_short}"
-    msg["From"] = SMTP_FROM
-    msg["To"] = to_email
-    msg["Cc"] = cc_email
-    msg["Reply-To"] = requester_email
-    msg.attach(MIMEText(plain, "plain"))
-    return msg
+    payload: dict[str, Any] = {
+        "to": [to_email],
+        "subject": f"[{PLATFORM_DOMAIN}] Platform access — {first_name} — expires {expiry_short}",
+        "text": plain,
+    }
+    if cc_email and cc_email != to_email:
+        payload["cc"] = [cc_email]
+    return payload
 
 
-def send_email_via_ssh_proxy(
-    smtp_pass: str,
-    ssh_key: Path,
-    msg: MIMEMultipart,
-    recipients: list[str],
-) -> None:
-    """Send email through the SSH proxy host (SMTP is on the internal network)."""
-    script = f"""
-import smtplib
-msg_str = {msg.as_string()!r}
-with smtplib.SMTP("{SMTP_HOST}", {SMTP_PORT}, timeout=15) as s:
-    s.ehlo()
-    if s.has_extn("STARTTLS"):
-        s.starttls(); s.ehlo()
-    s.login("{SMTP_USER}", {smtp_pass!r})
-    s.sendmail("platform@localhost", {recipients!r}, msg_str)
-    print("sent")
-"""
+def mail_gateway_send_endpoint() -> str:
+    """Resolve the mail-gateway /send URL from the service catalog.
+
+    Honors the LV3_MAIL_PLATFORM_URL override (handled inside service_url).
+    """
+    from operator_manager import service_url
+
+    return service_url("mail_platform").rstrip("/") + "/send"
+
+
+def send_email_via_gateway(payload: dict[str, Any], api_key: str, ssh_key: Path) -> None:
+    """POST the message to the mail-gateway /send API via the SSH proxy.
+
+    The gateway listens on the internal network only, so curl runs on the proxy
+    host. The transactional profile (selected by the API key) fixes the sender.
+    """
+    endpoint = mail_gateway_send_endpoint()
+    remote_cmd = (
+        "curl -sS -X POST "
+        f"-H {shlex.quote('X-API-Key: ' + api_key)} "
+        "-H 'Content-Type: application/json' --data-binary @- "
+        f"{shlex.quote(endpoint)}"
+    )
     result = subprocess.run(
-        ["ssh", "-i", str(ssh_key), "-o", "StrictHostKeyChecking=accept-new", SSH_PROXY, "python3"],
-        input=script.encode("utf-8"),
+        ["ssh", "-i", str(ssh_key), "-o", "StrictHostKeyChecking=accept-new", SSH_PROXY, remote_cmd],
+        input=json.dumps(payload).encode("utf-8"),
         capture_output=True,
         timeout=30,
     )
     if result.returncode != 0:
-        raise RuntimeError(f"SSH/SMTP failed: {result.stderr.decode('utf-8', errors='replace')}")
-    print(f"Email sent to {', '.join(recipients)}")
+        raise RuntimeError(
+            f"Mail gateway send failed: {result.stderr.decode('utf-8', errors='replace')}"
+        )
+    recipients = list(payload.get("to", [])) + list(payload.get("cc", []))
+    print(f"Email sent via mail gateway to {', '.join(recipients)}")
 
 
 def _fetch_keycloak_user(username: str, bootstrap_pass: str) -> tuple[str | None, bool]:
@@ -574,7 +658,23 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
             print("[dry-run] Would stop after Keycloak provisioning and assignment verification")
         else:
             print(f"[dry-run] Would create or reuse Headscale authkey under {HEADSCALE_AUTHKEY_DIR}")
-            print(f"[dry-run] Would send onboarding email via {SMTP_HOST}:{SMTP_PORT} using {SSH_PROXY}")
+            print(f"[dry-run] Resolved realm={REALM} domain={PLATFORM_DOMAIN} keycloak={DEFAULT_KEYCLOAK_URL}")
+            print(f"[dry-run] Would send onboarding email via mail gateway using proxy {SSH_PROXY}")
+            print("[dry-run] Rendered welcome email below:\n")
+            print(
+                build_email_payload(
+                    to_email=args.email,
+                    cc_email=args.requester,
+                    first_name=args.name.split()[0],
+                    username=args.username,
+                    password=password,
+                    role=args.role,
+                    expiry=args.expires,
+                    requester_email=args.requester,
+                    headscale_authkey="<generated-at-send-time>",
+                    ca_fingerprint="<computed-from-step-ca-root>",
+                )["text"]
+            )
         return
 
     bootstrap_pass = read_keycloak_bootstrap_password()
@@ -653,7 +753,7 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
         return
 
     hs_api_key = read_required_text(HEADSCALE_API_KEY_FILE, "Headscale API key")
-    smtp_pass = read_platform_smtp_password()
+    gateway_api_key = read_mail_gateway_api_key()
     ca_fingerprint = get_ca_fingerprint()
     print(f"[6] CA fingerprint: {ca_fingerprint}")
 
@@ -661,7 +761,7 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
     headscale_authkey = headscale_provision(hs_username, args.expires, hs_api_key, dry_run=False)
 
     first_name = args.name.split()[0]
-    msg = build_email(
+    payload = build_email_payload(
         to_email=args.email,
         cc_email=args.requester,
         first_name=first_name,
@@ -673,7 +773,7 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
         headscale_authkey=headscale_authkey,
         ca_fingerprint=ca_fingerprint,
     )
-    send_email_via_ssh_proxy(smtp_pass, SSH_KEY_FILE, msg, [args.email, args.requester])
+    send_email_via_gateway(payload, gateway_api_key, SSH_KEY_FILE)
 
     print(f"\n✓ Operator '{args.name}' fully provisioned.")
     print(f"  Keycloak username  : {args.username}")
@@ -688,7 +788,7 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Provision a new operator account on localhost (ADR 0318).",
+        description="Provision a new operator account on the platform (ADR 0318).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
