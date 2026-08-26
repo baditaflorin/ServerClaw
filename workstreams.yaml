@@ -5366,6 +5366,59 @@ workstreams:
   - publish_to_serverclaw.py --branch pushes to a named branch instead of main
   - ServerClaw ruleset 20788667 bypass_actors reverted to [] after the publish
   related_adrs: []
+- id: fix-serverclaw-pii-leak-check-leaks-gap
+  title: Fix ServerClaw publish leak-check gap that let real PII through
+  status: ready
+  ready_to_merge: true
+  live_applied: false
+  depends_on: []
+  conflicts_with: []
+  owner: claude-agent
+  branch: fix-serverclaw-pii-leak-check-leaks-gap
+  doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: fix-serverclaw-pii-leak-check-leaks-gap-code
+      paths:
+      - scripts/publish_to_serverclaw.py
+      - config/publication-sanitization.yaml
+      - docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+      - workstreams/active/fix-serverclaw-pii-leak-check-leaks-gap.yaml
+      - workstreams.yaml
+      mode: exclusive
+  description: 'Post-publish verification of the 2026-08-26 ServerClaw sanitized snapshot
+
+    found a real leak: scripts/one-time/adr-0409-generalize-committed-code.py
+
+    (exempt from Tier C rewriting because it documents the real values it once
+
+    replaced) was published verbatim, exposing the operator''s real name and
+
+    email/domain/IP patterns. check_leaks() in publish_to_serverclaw.py was
+
+    reusing config["exclude_paths"] -- meant only to skip regex rewriting -- to
+
+    also skip leak-marker scanning, silencing the one safety net that should
+
+    have caught this. Fixed check_leaks() to scan everything except binary
+
+    files and already-deleted paths, added the specific leaking file to
+
+    delete_paths, verified the fix catches the leak when reverted in isolation,
+
+    and re-published to overwrite the leaking commit on serverclaw/main.
+
+    '
+  objectives:
+  - Decouple leak-marker scanning from the Tier C rewrite exclusion list
+  - Remove the leaking one-time migration script from the publish output
+  - Re-publish to purge the leaked commit from serverclaw/main
+  completion_metrics:
+  - check_leaks() no longer skips exclude_paths
+  - scripts/one-time/adr-0409-generalize-committed-code.py is in delete_paths
+  - serverclaw/main HEAD no longer contains the leaked file
+  related_adrs:
+  - "ADR 0409 \u2014 Generalize committed code to eliminate publication sanitization"
 surface_ownership:
   global_mutable_paths:
   - receipts/gate-bypasses/*

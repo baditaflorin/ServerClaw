@@ -77,6 +77,47 @@ Fix, in two parts:
 
 PR #44 was closed without merging (superseded by the direct push).
 
+## Issue 4: real PII leaked via `check_leaks()`'s `exclude_paths` reuse
+
+Post-publish verification (checking out `serverclaw/main` fresh and grepping
+it against the full `leak_markers` list, independent of the publish script's
+own worktree) found a real leak: `scripts/one-time/adr-0409-generalize-committed-code.py`
+contained the operator's real full name (`Florin Badita-Nistor`) plus several
+real email/domain/IP patterns in escaped-regex form, published verbatim to
+`serverclaw/main@560ff564d`.
+
+Root cause: `check_leaks()` skipped any path matching `config["exclude_paths"]`
+— the same list used to decide "don't run Tier C regex rewriting here". That
+list includes `scripts/one-time/`, exempted from rewriting *because* those
+scripts intentionally document the real values they once replaced (their
+entire purpose). The two meanings of "exclude" got conflated: exempt-from-
+rewriting silently became exempt-from-leak-detection too, disabling the
+safety net exactly where it mattered most.
+
+Fix:
+1. `check_leaks()` in `scripts/publish_to_serverclaw.py` no longer skips
+   `exclude_paths` — it scans everything remaining in the worktree except
+   binary extensions (files in `delete_paths` are already physically gone by
+   the time it runs, so no special-casing needed there).
+2. Added `scripts/one-time/adr-0409-generalize-committed-code.py` — an
+   already-executed, one-time migration script with zero ongoing value to
+   the public mirror — to `delete_paths`.
+3. Verified both ways: reverting fix #2 alone now makes the leak check
+   correctly `ABORT` on this exact file/line; with both fixes applied, the
+   publish passes clean.
+4. Re-published immediately (force-push, same as always) to overwrite the
+   leaking commit on `serverclaw/main` with a clean one. The exposure window
+   was roughly [publish time] to [re-publish time] on 2026-08-26 — a personal
+   name/email is not a pattern GitHub's secret scanning flags, and the repo
+   sees no meaningful external clone traffic, but the commit is no longer
+   reachable via `main` after the re-push.
+
+`scripts/audit_sanitization_coverage.py` (same `exclude_paths` entry, same
+"references real values" comment) was checked and does **not** hardcode any
+real values directly — it derives them dynamically from other files at
+runtime. `scripts/one-time/adr-0408-rename-inventory-hostnames.py` was also
+checked; it only touches internal `-lv3` hostname suffixes, no PII/secrets.
+
 ## Follow-ups (not done here, out of scope for this fix)
 
 - `.local/hetzner/dns.env`'s documented token was *also* stale (resolved

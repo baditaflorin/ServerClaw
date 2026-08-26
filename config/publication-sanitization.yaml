@@ -115,6 +115,12 @@ delete_paths:
   # never exist in the public tree. exclude_paths only stops future copies;
   # this actively removes the pre-existing stale one.
   - "config/publication-sanitization.yaml"
+  # Already-executed one-time migration script (ADR 0409). It is exempt from
+  # Tier C rewriting BECAUSE it documents the real values that were once
+  # replaced -- meaning it must never reach the public tree at all. Leaked
+  # real PII (operator name + email patterns) to serverclaw/main on
+  # 2026-08-26 before this was caught; see docs/postmortems/2026-08-26-serverclaw-publish-blockers.md.
+  - "scripts/one-time/adr-0409-generalize-committed-code.py"
 
 # --- Leak markers ---
 # If any of these appear in the sanitized output, abort the push.

@@ -188,17 +188,26 @@ def delete_paths(worktree: Path, config: dict) -> int:
 
 
 def check_leaks(worktree: Path, config: dict) -> list[str]:
-    """Scan for leak markers in the sanitized tree."""
+    """Scan for leak markers in the sanitized tree.
+
+    Deliberately does NOT skip config["exclude_paths"] here. exclude_paths only
+    means "don't run Tier C regex rewriting on this path" (e.g. because its
+    content is already generic by design, like publication/templates/) -- it
+    is not a statement that the path is safe to skip for leak detection too.
+    Conflating the two let a real PII leak (scripts/one-time/adr-0409-*.py,
+    which is exempt from rewriting specifically because it documents real
+    values) through undetected on 2026-08-26. delete_paths entries are fine
+    to not special-case here since delete_paths() already runs before this
+    and physically removes them from the worktree.
+    """
     markers = config.get("leak_markers", [])
     if not markers:
         return []
 
     violations = []
-    exclude_paths = set(config.get("exclude_paths", []))
 
     for root, dirs, files in os.walk(worktree):
         root_path = Path(root)
-        rel_root = root_path.relative_to(worktree)
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
 
         for fname in files:
@@ -206,8 +215,6 @@ def check_leaks(worktree: Path, config: dict) -> list[str]:
             rel_path = fpath.relative_to(worktree)
 
             if fpath.suffix.lower() in BINARY_EXTENSIONS:
-                continue
-            if any(str(rel_path).startswith(ep.rstrip("/")) for ep in exclude_paths):
                 continue
 
             try:
