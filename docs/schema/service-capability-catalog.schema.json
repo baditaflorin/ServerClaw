@@ -158,6 +158,15 @@
             "type": "string",
             "minLength": 1
           },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9_-]*$"
+            },
+            "uniqueItems": true,
+            "description": "Declared cross-service dependencies (ids from this catalog). ADR 0489: scripts/firewall_drift.py diffs this against network_policy in inventory/host_vars/proxmox-host.yml and flags a dependency with no matching firewall allow-rule between the two services' vm hosts. Optional; absence means 'no declared deps yet' — backfill organically, same convention as services-registry's owner field."
+          },
           "tags": {
             "type": "array",
             "items": {

@@ -21,6 +21,8 @@ import uuid
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
 from dns_drift import collect_drift as collect_dns_drift
 from docker_image_drift import collect_drift as collect_docker_image_drift
+from firewall_drift import collect_dependency_gaps as collect_firewall_dependency_gaps
+from firewall_drift import collect_drift as collect_firewall_drift
 from drift_lib import (
     drift_event_topic,
     isoformat,
@@ -372,6 +374,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--skip-docker", action="store_true")
     parser.add_argument("--skip-dns", action="store_true")
     parser.add_argument("--skip-tls", action="store_true")
+    parser.add_argument("--skip-firewall", action="store_true")
     parser.add_argument("--publish-nats", action="store_true")
     parser.add_argument("--print-report-json", action="store_true")
     return parser
@@ -395,6 +398,10 @@ def main(argv: list[str] | None = None) -> int:
             records.extend(collect_dns_drift())
         if not args.skip_tls:
             records.extend(collect_tls_drift())
+        if not args.skip_firewall:
+            context = context or load_controller_context()
+            records.extend(collect_firewall_drift(context))
+            records.extend(collect_firewall_dependency_gaps(context["host_vars"]))
 
         service_map = load_service_map()
         health_probes = load_health_probe_catalog()

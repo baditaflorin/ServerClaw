@@ -69,6 +69,10 @@ Query the internal DNS server for each subdomain in `config/subdomain-catalog.js
 
 Check TLS certificate expiry for every service URL. Certificates expiring within 14 days are `warn`; within 7 days are `critical`. This complements the existing alert but adds a source-of-truth comparison against the expected issuer (step-ca vs Let's Encrypt vs self-signed).
 
+#### 6. Firewall drift and dependency gaps
+
+**Implemented 2026-08-26, see ADR 0489.** This section originally named "network routes or firewall rules changed during an incident" as a drift source (Context, above) but never implemented it — a gap that caused a real production outage (gitea's MinIO LFS backend, port 9010, unreachable) before it was filled. `scripts/firewall_drift.py` diffs declared `network_policy` against live guest nftables and Proxmox `.fw` state, and separately cross-references `config/service-capability-catalog.json`'s `depends_on` field against declared rules to catch a missing rule before it causes an outage, not after.
+
 ### Drift classification
 
 | Class | Meaning | Action |

@@ -701,6 +701,15 @@ proxmox_guests:
       - postgresql
       - postgresql-contrib
 
+# Per-rule `provenance` is OPTIONAL (ADR 0489). Backfill organically, same as
+# services-registry's `owner` field — do not big-bang migrate existing rules.
+# Shape (see docs/schema/network-policy-rule-provenance.md):
+#   provenance:
+#     owner: <email>                # who to ask if this rule looks wrong
+#     added_on: "<YYYY-MM-DD>"
+#     workstream: <ADR/workstream id, or omit>
+#     reconciled_from_live: <bool>  # true if this rule was discovered live
+#                                   # (drift) before being declared here
 network_policy:
   guest_management_sources:
     - 100.64.0.0/10
@@ -1134,6 +1143,33 @@ network_policy:
           ports:
             - 4647
           description: Nomad server RPC to docker-runtime
+        - source: docker-build
+          protocol: tcp
+          ports:
+            - 9000
+          description: Woodpecker agent gRPC dispatch to the docker-runtime CI server (dual-host CI dispatch)
+          provenance:
+            owner: baditaflorin@gmail.com
+            added_on: "2026-08-26"
+            reconciled_from_live: true
+        - source: monitoring
+          protocol: tcp
+          ports:
+            - 9100
+          description: Prometheus node_exporter metrics scrape access
+          provenance:
+            owner: baditaflorin@gmail.com
+            added_on: "2026-08-26"
+            reconciled_from_live: true
+        - source: runtime-control
+          protocol: tcp
+          ports:
+            - 9010
+          description: Gitea LFS access to the MinIO S3 API
+          provenance:
+            owner: baditaflorin@gmail.com
+            added_on: "2026-08-26"
+            reconciled_from_live: false
         - source: management
           protocol: tcp
           ports:

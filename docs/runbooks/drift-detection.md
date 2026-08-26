@@ -53,6 +53,16 @@ Each record includes the detector `source`, the impacted `service` or `resource`
 - What it checks: certificate expiry and issuer from each HTTPS service URL
 - Typical fix: renew the certificate on the owning service or edge publication path, then verify the issuer matches the declared provider
 
+### Firewall
+
+- Source id: `firewall` (declared-vs-live diff) and `firewall-dependency` (declared-vs-declared gap check)
+- What it checks: `network_policy` in `inventory/host_vars/proxmox-host.yml` against live guest nftables (`nft list ruleset`) and the Proxmox-level `<vmid>.fw`, plus `config/service-capability-catalog.json`'s `depends_on` field against declared rules
+- Typical fix for `firewall` critical (live rule with no declaration): either declare it in `network_policy` with a `provenance` block if it's legitimate, or remove it live if it isn't
+- Typical fix for `firewall` warn (declared but not live): apply is pending — run the owning playbook against the guest
+- Typical fix for `firewall-dependency` critical (a service's `depends_on` has no matching rule): add the missing `network_policy` rule on the dependency's guest, then rerun
+- Ad-hoc query: `make firewall-explain TARGET=<guest> PORT=<port> SOURCE=<guest-or-CIDR>` answers "can X reach Y on port P, and why" against the declared source of truth — see ADR 0489
+- Note: rules inside a `# BEGIN <name>` / `# END <name>` marked block in a `.fw` file are treated as externally managed (`warn`, not `critical`) rather than raw drift — see ADR 0489's discussion of the still-unlocated `fleet-pool-fw` mechanism
+
 ## Severity
 
 - `warn`: drift exists but the service still appears healthy after the detector backoff probe
@@ -88,6 +98,7 @@ The dashboard reads the `platform_drift_summary` measurement and exposes:
 
 ## Verification
 
-- `python3 -m py_compile scripts/drift_detector.py scripts/parse_ansible_drift.py scripts/docker_image_drift.py scripts/dns_drift.py scripts/tls_cert_drift.py`
+- `python3 -m py_compile scripts/drift_detector.py scripts/parse_ansible_drift.py scripts/docker_image_drift.py scripts/dns_drift.py scripts/tls_cert_drift.py scripts/firewall_drift.py`
 - `echo '' | python3 scripts/parse_ansible_drift.py`
+- `make firewall-deps-report` (no SSH required — static declared-vs-declared check)
 - `python3 scripts/drift_detector.py --help`

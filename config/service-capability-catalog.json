@@ -677,6 +677,7 @@
       "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "http://100.64.0.1:3009",
+      "depends_on": ["minio"],
       "subdomain": "git.example.com",
       "exposure": "private-only",
       "uptime_monitor_name": "Gitea Private",

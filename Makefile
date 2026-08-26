@@ -1104,6 +1104,15 @@ drift-report:
 	@test -n "$(ENV)" || (echo "set ENV=<production|staging>"; exit 1)
 	uv run --with pyyaml --with dnspython --with nats-py python $(REPO_ROOT)/scripts/drift_detector.py --env "$(ENV)"
 
+firewall-explain:
+	@test -n "$(TARGET)" || (echo "set TARGET=<guest> PORT=<port> SOURCE=<guest-or-CIDR>"; exit 1)
+	@test -n "$(PORT)" || (echo "set TARGET=<guest> PORT=<port> SOURCE=<guest-or-CIDR>"; exit 1)
+	@test -n "$(SOURCE)" || (echo "set TARGET=<guest> PORT=<port> SOURCE=<guest-or-CIDR>"; exit 1)
+	uv run --with pyyaml --with dnspython --with nats-py python $(REPO_ROOT)/scripts/firewall_drift.py explain "$(TARGET)" "$(PORT)" "$(SOURCE)"
+
+firewall-deps-report:
+	uv run --with pyyaml --with dnspython --with nats-py python $(REPO_ROOT)/scripts/firewall_drift.py deps
+
 security-posture-report:
 	@test -n "$(ENV)" || (echo "set ENV=<production|staging>"; exit 1)
 	uv run --with ansible-core --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/security_posture_report.py --env "$(ENV)"
