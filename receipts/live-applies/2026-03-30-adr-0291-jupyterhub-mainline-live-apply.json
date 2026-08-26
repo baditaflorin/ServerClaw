@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.73",
   "workflow_id": "adr-0291-jupyterhub-mainline-live-apply",
   "adr": "0291",
-  "summary": "Replayed ADR 0291 from the released 0.177.111 exact-main tip on top of the current 0.130.73 mainline platform baseline, recovered Docker bridge-chain drift on docker-runtime-lv3, revalidated the smoke-user notebook contract end to end, verified the public notebooks.lv3.org and Keycloak OIDC path, and finalized the JupyterHub integration on main without an additional platform-version bump because the notebook capability was already live before this synchronized replay.",
+  "summary": "Replayed ADR 0291 from the released 0.177.111 exact-main tip on top of the current 0.130.73 mainline platform baseline, recovered Docker bridge-chain drift on docker-runtime-lv3, revalidated the smoke-user notebook contract end to end, verified the public notebooks.example.com and Keycloak OIDC path, and finalized the JupyterHub integration on main without an additional platform-version bump because the notebook capability was already live before this synchronized replay.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,12 +34,12 @@
     {
       "kind": "service_endpoint",
       "name": "JupyterHub public notebook surface",
-      "address": "https://notebooks.lv3.org/hub/health"
+      "address": "https://notebooks.example.com/hub/health"
     },
     {
       "kind": "service_endpoint",
       "name": "JupyterHub public OIDC handoff",
-      "address": "https://notebooks.lv3.org/hub/oauth_login"
+      "address": "https://notebooks.example.com/hub/oauth_login"
     },
     {
       "kind": "service_endpoint",
@@ -71,7 +71,7 @@
     {
       "check": "Fresh public and runtime verification",
       "result": "pass",
-      "observed": "Fresh controller probes confirmed the public health endpoint, the Keycloak OIDC redirect with `client_id=jupyterhub`, the shared edge certificate SAN set including `DNS:notebooks.lv3.org` and `DNS:flags.lv3.org`, and the local `docker-runtime-lv3` dependency probes for `http://127.0.0.1:11434/api/version`, `http://127.0.0.1:8010/healthz`, and `http://127.0.0.1:8097/hub/health`; the transcript is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r5.txt`."
+      "observed": "Fresh controller probes confirmed the public health endpoint, the Keycloak OIDC redirect with `client_id=jupyterhub`, the shared edge certificate SAN set including `DNS:notebooks.example.com` and `DNS:flags.example.com`, and the local `docker-runtime-lv3` dependency probes for `http://127.0.0.1:11434/api/version`, `http://127.0.0.1:8010/healthz`, and `http://127.0.0.1:8097/hub/health`; the transcript is preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-mainline-direct-verification-r5.txt`."
     },
     {
       "check": "Repo automation and validation gates",
@@ -104,7 +104,7 @@
     "config/subdomain-exposure-registry.json",
     "config/workflow-catalog.json",
     "inventory/group_vars/platform.yml",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "scripts/tofu_exec.sh",
     "tests/test_nginx_edge_publication_role.py",
     "versions/stack.yaml",

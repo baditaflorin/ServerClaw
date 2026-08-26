@@ -1,4 +1,4 @@
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply/scripts/validate_renovate_contract.py", line 9, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0297-live-apply/scripts/validate_renovate_contract.py", line 9, in <module>
     import yaml
 ModuleNotFoundError: No module named 'yaml'

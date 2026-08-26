@@ -21,7 +21,7 @@
     },
     "deployments": {
       "type": "object",
-      "description": "Per-deployment metadata. Keys are platform_domain values (e.g. lv3.org, 0fork.com).",
+      "description": "Per-deployment metadata. Keys are platform_domain values (e.g. example.com, example.org).",
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,

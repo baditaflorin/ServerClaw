@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -27,7 +27,7 @@
     {
       "kind": "service_endpoint",
       "name": "Ops portal public URL",
-      "address": "https://ops.lv3.org"
+      "address": "https://ops.example.com"
     }
   ],
   "verification": [
@@ -44,7 +44,7 @@
     {
       "check": "Exact worktree sync override",
       "result": "pass",
-      "observed": "The scoped replay required `-e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0234-live-apply-r2`. A replay without that override read from the top-level checkout and failed on missing controller-side inputs including `scripts/ops_portal/runtime_assurance.py`, `scripts/ops_portal/static/portal.js`, and `scripts/ops_portal/templates/partials/launcher.html`."
+      "observed": "The scoped replay required `-e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0234-live-apply-r2`. A replay without that override read from the top-level checkout and failed on missing controller-side inputs including `scripts/ops_portal/runtime_assurance.py`, `scripts/ops_portal/static/portal.js`, and `scripts/ops_portal/templates/partials/launcher.html`."
     },
     {
       "check": "Governed ops-portal and public-edge replays",

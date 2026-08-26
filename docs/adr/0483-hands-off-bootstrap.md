@@ -69,7 +69,7 @@ operator:
   email: ops@mycorp.com
 provider:
   kind: hetzner
-  host: 65.109.84.223
+  host: 203.0.113.3
   port: 22
   initial_user: root
   initial_key_path: .local/ssh/hetzner_llm_agents_ed25519
@@ -208,7 +208,7 @@ Once the draft is reviewed and committed (or symlinked), the deployment is hands
 
 ### Positive
 
-- **Wipe-and-reinstall is one command.** The "fresh Proxmox, give me 0fork.com" flow becomes `gh repo clone … && cd … && operator drops manifest.yml && make bootstrap deployment=0fork`. No keystrokes between then and verified-up.
+- **Wipe-and-reinstall is one command.** The "fresh Proxmox, give me example.org" flow becomes `gh repo clone … && cd … && operator drops manifest.yml && make bootstrap deployment=0fork`. No keystrokes between then and verified-up.
 - **Failures are resumable.** Steps 1–13 are idempotent and gated by post-conditions; an interrupted run picks up where it left off.
 - **Two agents can hand off work.** Receipts encode where the chain is, why it stopped, and what unblocks it. No chat-log archaeology.
 - **The platform tests itself.** Every step's post-condition is a test. `make self-check` is "does the deployment match what its manifest says it should be." `make doctor` (which already exists) aggregates these signals.

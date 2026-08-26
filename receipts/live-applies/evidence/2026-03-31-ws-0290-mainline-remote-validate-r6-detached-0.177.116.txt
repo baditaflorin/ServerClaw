@@ -1,7 +1,7 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0290-mainline/scripts/remote_exec.sh remote-validate --local-fallback
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0290-mainline/scripts/remote_exec.sh remote-validate --local-fallback
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-rsync: [receiver] write failed on "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0290-mainline-0a958f5f77/repo/.lv3-snapshots/bf428bacec63c52d27ea924a03377f68e936eeca37583643cf6c2e5eff99fb3f.tar.gz": No space left on device (28)
+rsync: [receiver] write failed on "/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0290-mainline-0a958f5f77/repo/.lv3-snapshots/bf428bacec63c52d27ea924a03377f68e936eeca37583643cf6c2e5eff99fb3f.tar.gz": No space left on device (28)
 rsync error: error in file IO (code 11) at receiver.c(381) [receiver=3.4.1]
 rsync(70621): error: unexpected end of file
 remote_exec: snapshot upload failed, falling back locally for remote-validate

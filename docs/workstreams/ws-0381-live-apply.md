@@ -8,7 +8,7 @@
 - Implemented On: 2026-04-12
 - Live Applied On: 2026-04-12
 - Workstream Branch: `codex/ws-0381-origin-main`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main`
 - Owner: codex
 - Depends On: `adr-0248`, `adr-0376`, `adr-0381`
 - Conflicts With: none
@@ -78,13 +78,13 @@
 - The first exact-main `make configure-edge-publication env=production` attempt stopped because the active subdomain catalog still expected `librechat.example.com` while the repo-managed shared edge route remained `chat.example.com`. Restoring `config/subdomain-catalog.json` and regenerating `config/subdomain-exposure-registry.json` cleared that shared-edge drift and the immediate rerun completed successfully.
 - The first generated-doc validation attempt on the fresh worktree also exposed a latest-main repo automation bug: `scripts/control_plane_lanes.py` imported `platform.repo` before bootstrapping the repo root onto `sys.path`, which broke `scripts/generate_status_docs.py` with `ModuleNotFoundError` until the CLI import path was corrected and covered by `tests/test_generate_status_docs.py`.
 - End-to-end auth verification succeeded:
-  `https://ops.lv3.org/` and `https://tasks.lv3.org/` both return `302` to `/oauth2/sign_in`, and their sign-in endpoints return `302` to the shared Keycloak authorize flow with `client_id=ops-portal-oauth`.
+  `https://ops.example.com/` and `https://tasks.example.com/` both return `302` to `/oauth2/sign_in`, and their sign-in endpoints return `302` to the shared Keycloak authorize flow with `client_id=ops-portal-oauth`.
 - Live edge/runtime verification succeeded:
   `lv3-ops-portal-oauth2-proxy-watchdog.timer` and `lv3-identity-watchdog.timer` are both active;
   `_lv3_ops_portal_proxy_csrf` occurs 16 times in the live edge config on 2026-04-12;
   `@oauth2_stale_session_reset` is present; and no `oauth2/sign_in&client_id` redirect drift remains.
 - Certificate validation now works from the worktree via the shared `.local` overlay:
-  `make validate-certificates` reported 46 valid domains and one unrelated `vault.lv3.org` connection reset against `100.64.0.1:443`.
+  `make validate-certificates` reported 46 valid domains and one unrelated `vault.example.com` connection reset against `100.64.0.1:443`.
 - Exact-main auth verification is recorded in `receipts/live-applies/evidence/2026-04-12-ws-0381-main-auth-verification-r1.txt`, and the canonical mainline receipt is `receipts/live-applies/2026-04-12-adr-0381-login-service-contracts-mainline-live-apply.json`.
 
 ## Merge Criteria
@@ -102,4 +102,4 @@
 - The exact-main live replay ran against `18dfb4ea01cd6c3787a61eaa5cceff7cfd496543`, the latest realistic mainline revision at apply time. While the closeout was being integrated, `origin/main` advanced to `9afc6d691a9b99e40e8af1cdb2b61005ae8e266c`, so the final merge was rebased onto that newer commit and revalidated without adding further ADR 0381 runtime changes.
 - The archived workstream carries canonical-truth metadata for `keycloak`, `public_edge_publication`, `ops_portal`, and `identity_core_watchdog`, allowing the merged registry to advertise the new canonical receipt safely.
 - The exact-main replay and follow-on validation repair also cleared five latest-main drifts that would otherwise have blocked truthful live apply or repo automation from a fresh worktree: the missing compose macro loader, the Plane OIDC client reconciliation path, the shared-edge `librechat` versus `chat` catalog mismatch, certificate validation resolving `.local` from worktrees, and the `control_plane_lanes.py` import bootstrap needed by `generate_status_docs.py`.
-- The only runtime anomaly that remained after the replay was outside ADR 0381 itself: `vault.lv3.org` still reset TLS connections against `100.64.0.1:443` during the certificate sweep.
+- The only runtime anomaly that remained after the replay was outside ADR 0381 itself: `vault.example.com` still reset TLS connections against `100.64.0.1:443` during the certificate sweep.

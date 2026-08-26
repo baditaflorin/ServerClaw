@@ -57,7 +57,7 @@
     {
       "check": "Repowise exact-main replay and public health verification",
       "result": "pass",
-      "observed": "The governed `service=repowise` replay completed on docker-runtime, the container reported healthy locally, and `https://repowise.lv3.org/health` returned `HTTP 200` with the Repowise JSON health payload after startup stabilized."
+      "observed": "The governed `service=repowise` replay completed on docker-runtime, the container reported healthy locally, and `https://repowise.example.com/health` returned `HTTP 200` with the Repowise JSON health payload after startup stabilized."
     },
     {
       "check": "LiteLLM exact-main replay and private liveliness verification",
@@ -67,7 +67,7 @@
     {
       "check": "LibreChat exact-main replay and public edge verification",
       "result": "pass",
-      "observed": "The governed `service=librechat` replay completed successfully across proxmox-host, coolify, and nginx, and `https://chat.lv3.org/` returned `HTTP 200` with the LibreChat HTML shell."
+      "observed": "The governed `service=librechat` replay completed successfully across proxmox-host, coolify, and nginx, and `https://chat.example.com/` returned `HTTP 200` with the LibreChat HTML shell."
     }
   ],
   "evidence_refs": [

@@ -13,17 +13,17 @@
 A single agent session executed three phases of platform hardening based on
 a 20-change platform-maturity review (also produced this session). The review
 catalogued gaps in multi-deployment safety, drift detection, and LLM
-ergonomics across the lv3.org + 0fork.com dual deployment. Three umbrella
+ergonomics across the example.com + example.org dual deployment. Three umbrella
 ADRs were opened, four release PRs landed on main, and 110 new tests were
 added. Two live drift signals previously invisible to operators are now
 surfaced by the gate.
 
 | Release | PR | ADR | Theme | Tests | Live signal |
 |---|---|---|---|---|---|
-| 0.179.6 | [#68](https://github.com/baditaflorin/proxmox_florin_server/pull/68) | 0445 | Phase 1 — fork-shape fixtures + dry-run + late-bound lint | 42 | Fork-shape matrix wired into pre-push |
-| 0.179.7 | [#69](https://github.com/baditaflorin/proxmox_florin_server/pull/69) | 0446 | Phase 2 — receipt freshness | 21 | **72/186 receipts stale** at 30d window |
-| 0.179.9 | [#72](https://github.com/baditaflorin/proxmox_florin_server/pull/72) | 0447 | Phase 3 — currently_describes + traceability | 36 | **22/22 ADRs resolved, 10 dangling surfaces** |
-| 0.179.10 | [#73](https://github.com/baditaflorin/proxmox_florin_server/pull/73) | 0447 (follow-up) | Traceability false-positive cleanup | 11 | 10 → 3 dangling (3 real, 7 false positive) |
+| 0.179.6 | [#68](https://github.com/baditaflorin/platform_server/pull/68) | 0445 | Phase 1 — fork-shape fixtures + dry-run + late-bound lint | 42 | Fork-shape matrix wired into pre-push |
+| 0.179.7 | [#69](https://github.com/baditaflorin/platform_server/pull/69) | 0446 | Phase 2 — receipt freshness | 21 | **72/186 receipts stale** at 30d window |
+| 0.179.9 | [#72](https://github.com/baditaflorin/platform_server/pull/72) | 0447 | Phase 3 — currently_describes + traceability | 36 | **22/22 ADRs resolved, 10 dangling surfaces** |
+| 0.179.10 | [#73](https://github.com/baditaflorin/platform_server/pull/73) | 0447 (follow-up) | Traceability false-positive cleanup | 11 | 10 → 3 dangling (3 real, 7 false positive) |
 
 (0.179.5 / 0.179.8 were unrelated releases that landed concurrently from
 other agents during this session and required mid-session rebase.)

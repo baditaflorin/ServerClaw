@@ -186,7 +186,7 @@ def check_B1_public_fqdns_in_exposure_registry(tier0: dict) -> list[Finding]:
     """B1: every proxy.public_fqdn in service_registry has a subdomain in subdomain-exposure-registry.
 
     The service registry stores template FQDNs like `sso.{{ platform_domain }}`;
-    the exposure registry stores resolved FQDNs like `sso.lv3.org`. We compare
+    the exposure registry stores resolved FQDNs like `sso.example.com`. We compare
     by subdomain label (the part before the first `.{{ platform_domain }}`) to
     handle both template and resolved forms.
     """

@@ -127,6 +127,6 @@ per-VM override files that the `coolify_runtime` role applies if present.
 - [ ] `make converge-*` fallback path when Tailscale is unreachable (direct SSH)
 - [ ] `docs/runbooks/coolify-runtime-recovery.md` (full step-by-step runbook)
 - [ ] Karakeep `worker` service (background bookmark crawler) — not yet confirmed running
-- [ ] DNS entry for `karakeep.apps.0fork.com` — confirmed live via `*.apps.0fork.com` wildcard
-- [ ] nginx proxy for `*.apps.0fork.com` — manually patched to `https://10.10.10.70:443`; needs `make converge-nginx` to persist via Ansible (upstream in `platform.yml` should be `https://10.10.10.70:443` not `https://10.10.10.71:443`)
+- [ ] DNS entry for `karakeep.apps.example.org` — confirmed live via `*.apps.example.org` wildcard
+- [ ] nginx proxy for `*.apps.example.org` — manually patched to `https://10.10.10.70:443`; needs `make converge-nginx` to persist via Ansible (upstream in `platform.yml` should be `https://10.10.10.70:443` not `https://10.10.10.71:443`)
 - [ ] Double SSL termination root cause — nginx Ansible config references `10.10.10.71` (coolify-apps VM, not provisioned); wrong in `platform.yml`; needs correction before next converge

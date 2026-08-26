@@ -17,7 +17,7 @@ Exact-main replay
 
 Replay recap
 - docker-runtime-lv3 : ok=119 changed=19 unreachable=0 failed=0 skipped=21 rescued=0 ignored=0
-- proxmox_florin : ok=42 changed=7 unreachable=0 failed=0 skipped=15 rescued=0 ignored=0
+- proxmox-host : ok=42 changed=7 unreachable=0 failed=0 skipped=15 rescued=0 ignored=0
 - The replay passed the built-in platform-context verification path, including cited context query results plus create/query/delete smoke coverage for the ServerClaw memory substrate with both semantic and keyword recall.
 
 Post-apply external verification through the Tailscale proxy

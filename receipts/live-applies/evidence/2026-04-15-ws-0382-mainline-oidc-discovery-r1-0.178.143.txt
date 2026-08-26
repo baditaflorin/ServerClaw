@@ -1,7 +1,7 @@
-oidc_discovery_url=https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+oidc_discovery_url=https://sso.example.com/realms/lv3/.well-known/openid-configuration
 oidc_discovery_http=200
-issuer=https://sso.lv3.org/realms/lv3
-authorization_endpoint=https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth
-token_endpoint=https://sso.lv3.org/realms/lv3/protocol/openid-connect/token
-end_session_endpoint=https://sso.lv3.org/realms/lv3/protocol/openid-connect/logout
-jwks_uri=https://sso.lv3.org/realms/lv3/protocol/openid-connect/certs
+issuer=https://sso.example.com/realms/lv3
+authorization_endpoint=https://sso.example.com/realms/lv3/protocol/openid-connect/auth
+token_endpoint=https://sso.example.com/realms/lv3/protocol/openid-connect/token
+end_session_endpoint=https://sso.example.com/realms/lv3/protocol/openid-connect/logout
+jwks_uri=https://sso.example.com/realms/lv3/protocol/openid-connect/certs

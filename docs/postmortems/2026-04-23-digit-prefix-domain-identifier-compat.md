@@ -3,7 +3,7 @@
 **Date:** 2026-04-23
 **Severity:** High (blocks full convergence on any `0xxx.com`-class domain)
 **Affected versions:** All versions prior to the `platform_sql_prefix` fix
-**Discovered by:** Stage-5 convergence validation on 0fork.com (Hetzner AX41-NVMe)
+**Discovered by:** Stage-5 convergence validation on example.org (Hetzner AX41-NVMe)
 **Fixed in:** PRs #47, #48
 
 ---
@@ -11,7 +11,7 @@
 ## Summary
 
 `platform_config_prefix` is derived as the first DNS label of `platform_domain`
-(`0fork.com → "0fork"`). When an operator's domain starts with a digit, this
+(`example.org → "0fork"`). When an operator's domain starts with a digit, this
 prefix is injected verbatim into six different identifier namespaces — PostgreSQL
 role names, PVE user/role names, POSIX system usernames, Proxmox ACME plugin IDs,
 and Proxmox storage IDs — all of which prohibit identifiers that begin with a
@@ -41,7 +41,7 @@ The variable `platform_config_prefix` was designed for use in **file names and
 human-readable labels**, where leading digits are fine. It was never audited
 against the identifier grammars of the systems it was injected into.
 
-Domain names with a digit-leading TLD-1 label (`0fork.com`, `1x.io`, `3ops.dev`)
+Domain names with a digit-leading TLD-1 label (`example.org`, `1x.io`, `3ops.dev`)
 are valid per RFC 1123 (which relaxed RFC 952's alpha-only first-char rule for
 host labels). They are increasingly common in the `0xxx.com` / `1xxx.com`
 namespace for tech companies and projects. The platform must support them.
@@ -104,7 +104,7 @@ has no restriction on leading digits:
 
 ## Why It Wasn't Caught Earlier
 
-1. **The lv3.org production deployment never hit it.** `lv3` starts with a
+1. **The example.com production deployment never hit it.** `lv3` starts with a
    letter. All CI and convergence testing was against that identity.
 
 2. **No unit test for identifier grammar.** The platform's `validate_repository_data_models.py`
@@ -121,12 +121,12 @@ has no restriction on leading digits:
 
 ## Impact
 
-No production impact (production is `lv3.org`). The `0fork.com` fork clone
+No production impact (production is `example.com`). The `example.org` fork clone
 was in Stage-5 validation mode and not serving live traffic.
 
 Any operator forking this platform with a domain whose first label starts
 with a digit would have hit this in convergence. The fix is backward-compatible:
-for `lv3.org`, `platform_sql_prefix = "lv3"` (unchanged). For `0fork.com`,
+for `example.com`, `platform_sql_prefix = "lv3"` (unchanged). For `example.org`,
 `platform_sql_prefix = "fork"`.
 
 ---

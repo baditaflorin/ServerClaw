@@ -6,19 +6,19 @@
 2026-03-31T00:28:06.4398440Z No steps found
 2026-03-31T00:28:06.4403546Z evaluating expression 'success()'
 2026-03-31T00:28:06.4404287Z expression 'success()' evaluated to 'true'
-2026-03-31T00:28:06.4404485Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-31T00:28:06.4471779Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
-2026-03-31T00:28:06.4472151Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-31T00:28:06.4404485Z 🚀  Start image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-31T00:28:06.4471779Z   🐳  docker pull image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
+2026-03-31T00:28:06.4472151Z   🐳  docker pull registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
 2026-03-31T00:28:06.4483525Z Image exists? true
-2026-03-31T00:28:06.4512636Z   🐳  docker create image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-31T00:28:06.4512636Z   🐳  docker create image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-31T00:28:06.4577766Z Custom container.Config from options ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image: Volumes:map[] WorkingDir: Entrypoint:[] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-31T00:28:06.4578224Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/proxmox_florin_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
+2026-03-31T00:28:06.4578224Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/platform_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
 2026-03-31T00:28:06.4578629Z Custom container.HostConfig from options ==> &{Binds:[] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:false VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc000374948 OomKillDisable:0xc000374843 PidsLimit:0xc0003749a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
 2026-03-31T00:28:06.4578999Z --network and --net in the options will be ignored.
-2026-03-31T00:28:06.4579350Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc000374948 OomKillDisable:0xc000374843 PidsLimit:0xc0003749a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-159_WORKFLOW-release-bundle_JOB-verify-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-159_WORKFLOW-release-bundle_JOB-verify Target:/workspace/ops/proxmox_florin_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-31T00:28:06.4804738Z Created container name=GITEA-ACTIONS-TASK-159_WORKFLOW-release-bundle_JOB-verify id=30ed80e528e4f268e418e4c26eea30036c3cbf03cf48b573e4ae0a4fa79523b3 from image registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
+2026-03-31T00:28:06.4579350Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc000374948 OomKillDisable:0xc000374843 PidsLimit:0xc0003749a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-159_WORKFLOW-release-bundle_JOB-verify-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-159_WORKFLOW-release-bundle_JOB-verify Target:/workspace/ops/platform_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
+2026-03-31T00:28:06.4804738Z Created container name=GITEA-ACTIONS-TASK-159_WORKFLOW-release-bundle_JOB-verify id=30ed80e528e4f268e418e4c26eea30036c3cbf03cf48b573e4ae0a4fa79523b3 from image registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
 2026-03-31T00:28:06.4805307Z ENV ==> [RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8]
-2026-03-31T00:28:06.4805433Z   🐳  docker run image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-31T00:28:06.4805433Z   🐳  docker run image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-31T00:28:06.4805571Z Starting container: 30ed80e528e4f268e418e4c26eea30036c3cbf03cf48b573e4ae0a4fa79523b3
 2026-03-31T00:28:06.5928034Z Started container: 30ed80e528e4f268e418e4c26eea30036c3cbf03cf48b573e4ae0a4fa79523b3
 2026-03-31T00:28:06.6869871Z Writing entry to tarball workflow/event.json len:8840
@@ -32,7 +32,7 @@
 2026-03-31T00:28:06.7005364Z expression 'format('{0}', github.sha)' evaluated to '%!t(string=605332a68cba1a3edd5297666d9d6f79eb375900)'
 2026-03-31T00:28:06.7005469Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
 2026-03-31T00:28:06.7005548Z evaluating expression 'format('{0}', github.repository)'
-2026-03-31T00:28:06.7005677Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
+2026-03-31T00:28:06.7005677Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/platform_server)'
 2026-03-31T00:28:06.7005785Z expression '${{ github.token }}' rewritten to 'format('{0}', github.token)'
 2026-03-31T00:28:06.7005854Z evaluating expression 'format('{0}', github.token)'
 2026-03-31T00:28:06.7006000Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
@@ -53,7 +53,7 @@
 2026-03-31T00:28:06.7284758Z Extracting content to '/var/run/act'
 2026-03-31T00:28:06.7297174Z   🐳  docker exec cmd=[sh -e /var/run/act/workflow/0.sh] user= workdir=
 2026-03-31T00:28:06.7297482Z Exec command '[sh -e /var/run/act/workflow/0.sh]'
-2026-03-31T00:28:06.7297807Z Working directory '/workspace/ops/proxmox_florin_server'
+2026-03-31T00:28:06.7297807Z Working directory '/workspace/ops/platform_server'
 2026-03-31T00:28:06.8055663Z hint: Using 'master' as the name for the initial branch. This default branch name
 2026-03-31T00:28:06.8056254Z hint: is subject to change. To configure the initial branch name to use in all
 2026-03-31T00:28:06.8056359Z hint: of your new repositories, which will suppress this warning, call:
@@ -64,8 +64,8 @@
 2026-03-31T00:28:06.8058089Z hint: 'development'. The just-created branch can be renamed via this command:
 2026-03-31T00:28:06.8058181Z hint:
 2026-03-31T00:28:06.8058276Z hint: 	git branch -m <name>
-2026-03-31T00:28:06.8058662Z Initialized empty Git repository in /workspace/ops/proxmox_florin_server/.git/
-2026-03-31T00:28:11.3016556Z From http://10.10.10.20:3003/ops/proxmox_florin_server
+2026-03-31T00:28:06.8058662Z Initialized empty Git repository in /workspace/ops/platform_server/.git/
+2026-03-31T00:28:11.3016556Z From http://10.10.10.20:3003/ops/platform_server
 2026-03-31T00:28:11.3017406Z  * branch            codex/ws-0297-live-apply -> FETCH_HEAD
 2026-03-31T00:28:11.3017564Z  * [new branch]      codex/ws-0297-live-apply -> origin/codex/ws-0297-live-apply
 2026-03-31T00:28:12.2355654Z Note: switching to '605332a68cba1a3edd5297666d9d6f79eb375900'.
@@ -88,14 +88,14 @@
 2026-03-31T00:28:12.2358385Z HEAD is now at 605332a [renovate] Re-bootstrap Docker inside the workflow job
 2026-03-31T00:28:16.2969222Z {
 2026-03-31T00:28:16.2970280Z   "release_tag": "bundle-branch-codex-ws-0297-live-apply-605332a68cba",
-2026-03-31T00:28:16.2970488Z   "release_url": "http://git.lv3.org:3009/ops/proxmox_florin_server/releases/tag/bundle-branch-codex-ws-0297-live-apply-605332a68cba",
-2026-03-31T00:28:16.2970938Z   "bundle_path": "/workspace/ops/proxmox_florin_server/.tmp/release-verify/lv3-control-bundle-branch-codex-ws-0297-live-apply-605332a68cba.tar.gz",
+2026-03-31T00:28:16.2970488Z   "release_url": "http://git.example.com:3009/ops/platform_server/releases/tag/bundle-branch-codex-ws-0297-live-apply-605332a68cba",
+2026-03-31T00:28:16.2970938Z   "bundle_path": "/workspace/ops/platform_server/.tmp/release-verify/lv3-control-bundle-branch-codex-ws-0297-live-apply-605332a68cba.tar.gz",
 2026-03-31T00:28:16.2971126Z   "signature_path": "",
-2026-03-31T00:28:16.2971244Z   "sigstore_bundle_path": "/workspace/ops/proxmox_florin_server/.tmp/release-verify/lv3-control-bundle-branch-codex-ws-0297-live-apply-605332a68cba.tar.gz.sigstore.json",
-2026-03-31T00:28:16.2971570Z   "sha256_path": "/workspace/ops/proxmox_florin_server/.tmp/release-verify/lv3-control-bundle-branch-codex-ws-0297-live-apply-605332a68cba.tar.gz.sha256",
+2026-03-31T00:28:16.2971244Z   "sigstore_bundle_path": "/workspace/ops/platform_server/.tmp/release-verify/lv3-control-bundle-branch-codex-ws-0297-live-apply-605332a68cba.tar.gz.sigstore.json",
+2026-03-31T00:28:16.2971570Z   "sha256_path": "/workspace/ops/platform_server/.tmp/release-verify/lv3-control-bundle-branch-codex-ws-0297-live-apply-605332a68cba.tar.gz.sha256",
 2026-03-31T00:28:16.2971753Z   "bundle_sha256": "debd08b64b791cf69ecf0185a3c1b128462b5bb7f5c831ca78c4cbebeecc12c0",
 2026-03-31T00:28:16.2971889Z   "manifest": {
-2026-03-31T00:28:16.2972032Z     "repository": "ops/proxmox_florin_server",
+2026-03-31T00:28:16.2972032Z     "repository": "ops/platform_server",
 2026-03-31T00:28:16.2972154Z     "ref_name": "codex/ws-0297-live-apply",
 2026-03-31T00:28:16.2972446Z     "ref_type": "branch",
 2026-03-31T00:28:16.2972571Z     "commit": "605332a68cba1a3edd5297666d9d6f79eb375900",

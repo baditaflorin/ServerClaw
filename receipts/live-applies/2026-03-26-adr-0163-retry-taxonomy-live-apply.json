@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -25,7 +25,7 @@
     {
       "kind": "service_endpoint",
       "name": "api_gateway_public",
-      "address": "https://api.lv3.org"
+      "address": "https://api.example.com"
     }
   ],
   "verification": [
@@ -37,7 +37,7 @@
     {
       "check": "Public gateway health and protected aggregate health behavior",
       "result": "pass",
-      "observed": "`curl https://api.lv3.org/healthz` returned HTTP `200` with `{\"status\":\"ok\"}`, and `https://api.lv3.org/v1/health` returned HTTP `401` with the canonical `AUTH_TOKEN_MISSING` envelope after the replay."
+      "observed": "`curl https://api.example.com/healthz` returned HTTP `200` with `{\"status\":\"ok\"}`, and `https://api.example.com/v1/health` returned HTTP `401` with the canonical `AUTH_TOKEN_MISSING` envelope after the replay."
     },
     {
       "check": "Guest-local gateway health and protected aggregate health behavior",
@@ -59,7 +59,7 @@
     "versions/stack.yaml"
   ],
   "notes": [
-    "The controller used the steady-state Tailscale host path to `ops@100.64.0.1` plus the governed Proxmox guest jump for `docker-runtime-lv3`; direct public SSH to `65.108.75.123:22` was still not the reliable management path during this replay.",
+    "The controller used the steady-state Tailscale host path to `ops@100.64.0.1` plus the governed Proxmox guest jump for `docker-runtime-lv3`; direct public SSH to `203.0.113.1:22` was still not the reliable management path during this replay.",
     "The first replay attempt after merging `origin/main` into the live-apply branch hit a transient Ansible SSH transport drop during the no-op `docker_runtime` section. A follow-up connectivity check (`ansible -m ping`) succeeded immediately, and the second replay completed cleanly from the same merged tree.",
     "The live verification intentionally did not inject transient upstream or NATS faults into production. The production evidence for ADR 0163 is the successful replay plus confirmation that the running gateway is loading the repo-managed retry-policy bundle that controls the safe-read retry behavior."
   ]

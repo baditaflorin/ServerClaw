@@ -15,7 +15,7 @@
 
 ## Context
 
-The 2026-04-28 ops.0fork.com recovery surfaced a class of bug we have no shift-left signal for. `.local/deployments/0fork/topology.yml` was committed with bare `{name, vmid, ipv4}` entries and no `role` field. The deployment loader (`scripts/generate_platform_vars.py:411`) treats `role` as required and fails at converge time, ~30 minutes deep into a multi-VM run, with `host_vars.proxmox_guests[0].role must be a non-empty string`. ws-0448 patched the loader to default `role` to `name`, but that hides the original schema violation rather than catching it.
+The 2026-04-28 ops.example.org recovery surfaced a class of bug we have no shift-left signal for. `.local/deployments/0fork/topology.yml` was committed with bare `{name, vmid, ipv4}` entries and no `role` field. The deployment loader (`scripts/generate_platform_vars.py:411`) treats `role` as required and fails at converge time, ~30 minutes deep into a multi-VM run, with `host_vars.proxmox_guests[0].role must be a non-empty string`. ws-0448 patched the loader to default `role` to `name`, but that hides the original schema violation rather than catching it.
 
 Today's static signals on topology files:
 

@@ -18,13 +18,13 @@ REMOTE_MARKERS_OK /var/www/lv3-generated/changelog-portal/index.html
 REMOTE_MARKERS_OK /var/www/lv3-generated/changelog-portal/service/ops_portal/index.html
 remote-generated-portals-ok
 remote-digests-match-local
-PUBLIC https://ops.lv3.org/ status=302
-PUBLIC https://ops.lv3.org/ location=https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/
-PUBLIC https://ops.lv3.org/ x-robots-tag=noindex, nofollow
-PUBLIC https://docs.lv3.org/ status=302
-PUBLIC https://docs.lv3.org/ location=https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/
-PUBLIC https://docs.lv3.org/ x-robots-tag=noindex, nofollow
-PUBLIC https://changelog.lv3.org/ status=302
-PUBLIC https://changelog.lv3.org/ location=https://changelog.lv3.org/oauth2/sign_in?rd=https://changelog.lv3.org/
-PUBLIC https://changelog.lv3.org/ x-robots-tag=noindex, nofollow
+PUBLIC https://ops.example.com/ status=302
+PUBLIC https://ops.example.com/ location=https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/
+PUBLIC https://ops.example.com/ x-robots-tag=noindex, nofollow
+PUBLIC https://docs.example.com/ status=302
+PUBLIC https://docs.example.com/ location=https://docs.example.com/oauth2/sign_in?rd=https://docs.example.com/
+PUBLIC https://docs.example.com/ x-robots-tag=noindex, nofollow
+PUBLIC https://changelog.example.com/ status=302
+PUBLIC https://changelog.example.com/ location=https://changelog.example.com/oauth2/sign_in?rd=https://changelog.example.com/
+PUBLIC https://changelog.example.com/ x-robots-tag=noindex, nofollow
 public-portals-auth-gate-ok

@@ -15,7 +15,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -27,7 +27,7 @@
     {
       "kind": "service_endpoint",
       "name": "Platform health API",
-      "address": "https://api.lv3.org/v1/platform/health"
+      "address": "https://api.example.com/v1/platform/health"
     }
   ],
   "verification": [
@@ -54,12 +54,12 @@
     {
       "check": "Public platform-health API semantics",
       "result": "pass",
-      "observed": "Authenticated queries to `https://api.lv3.org/v1/platform/health/{api_gateway,platform_context_api,windmill}` each returned `status=healthy`, `composite_status=healthy`, `safe_to_act=true`, and a `health_probe` signal with `value=ready`; `https://api.lv3.org/healthz` returned `{ \"status\": \"ok\" }`."
+      "observed": "Authenticated queries to `https://api.example.com/v1/platform/health/{api_gateway,platform_context_api,windmill}` each returned `status=healthy`, `composite_status=healthy`, `safe_to_act=true`, and a `health_probe` signal with `value=ready`; `https://api.example.com/healthz` returned `{ \"status\": \"ok\" }`."
     },
     {
       "check": "Latest host and guest state snapshot",
       "result": "pass",
-      "observed": "`ops@100.64.0.1` reported hostname `Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, and `pve-manager/9.1.6/71482d1833ded40a`. On `docker-runtime-lv3`, direct container inspection and `docker ps` confirmed `api-gateway` running after the replay, `platform-context-api` running, and the Windmill server plus workers present."
+      "observed": "`ops@100.64.0.1` reported hostname `debian-base-template`, kernel `6.17.13-2-pve`, and `pve-manager/9.1.6/71482d1833ded40a`. On `docker-runtime-lv3`, direct container inspection and `docker ps` confirmed `api-gateway` running after the replay, `platform-context-api` running, and the Windmill server plus workers present."
     }
   ],
   "evidence_refs": [

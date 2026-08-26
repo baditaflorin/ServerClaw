@@ -2,11 +2,11 @@
 Preflight workflow: converge-identity-core-watchdog
 Description: Deploy the identity-core health watchdog on runtime-control: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
 Result: PASS (converge-identity-core-watchdog)
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=0b99e8a356a94d6cb044de4487cd7170 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/inventory/hosts.yml --run-id 3580336f886f4b69a9ef0de1b5e8a62b --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/playbooks/identity-core-watchdog.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/playbooks/identity-core-watchdog.yml (env=production)
-Running scoped playbook: playbooks/identity-core-watchdog.yml limit=runtime-control shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/.ansible/shards/3580336f886f4b69a9ef0de1b5e8a62b/identity-core-watchdog-production.json
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=0b99e8a356a94d6cb044de4487cd7170 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/inventory/hosts.yml --run-id 3580336f886f4b69a9ef0de1b5e8a62b --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/playbooks/identity-core-watchdog.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/playbooks/identity-core-watchdog.yml (env=production)
+Running scoped playbook: playbooks/identity-core-watchdog.yml limit=runtime-control shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/.ansible/shards/3580336f886f4b69a9ef0de1b5e8a62b/identity-core-watchdog-production.json
 
 PLAY [Converge identity-core watchdog on runtime-control] **********************
 
@@ -65,7 +65,7 @@ TASK [Ensure the current target is Debian when required] ***********************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Ensure the current target is Debian when required","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:43:42.422Z","vm":"controller","workflow_id":"ansible-playbook"}
 [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/playbooks/tasks/preflight.yml:89:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/playbooks/tasks/preflight.yml:89:9
 
 87   ansible.builtin.assert:
 88     that:
@@ -167,7 +167,7 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Skip systemd management — systemd not available on this host] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Skip systemd management \u2014 systemd not available on this host","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:03.291Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:12:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:12:9
 
 10   ansible.builtin.debug:
 11     msg: "Skipping systemd unit management for {{ common_systemd_unit_name }} — ansible_service_mgr={{ ansible_ser...
@@ -182,7 +182,7 @@ skipping: [runtime-control]
 TASK [lv3.platform.common : Ensure the managed systemd unit matches the requested state] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the managed systemd unit matches the requested state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:03.313Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:20:9
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:20:9
 
 18     state: "{{ common_systemd_unit_state }}"
 19     daemon_reload: "{{ common_systemd_unit_daemon_reload }}"
@@ -197,7 +197,7 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Verify the managed systemd unit active state] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Verify the managed systemd unit active state","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-12T18:44:04.631Z","vm":"controller","workflow_id":"ansible-playbook"}
 [DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
-Origin: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:33:7
+Origin: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/collections/ansible_collections/lv3/platform/roles/common/tasks/systemd_unit.yml:33:7
 
 31   when:
 32     - common_systemd_unit_verify_active | bool

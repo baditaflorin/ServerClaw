@@ -40,7 +40,7 @@
     {
       "check": "Repo automation and validation gates from the isolated worktree",
       "result": "pass",
-      "observed": "`make syntax-check-windmill`, `./scripts/validate_repo.sh agent-standards`, and `./scripts/validate_repo.sh data-models` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0228-live-apply` while the workstream remained active in `workstreams.yaml`."
+      "observed": "`make syntax-check-windmill`, `./scripts/validate_repo.sh agent-standards`, and `./scripts/validate_repo.sh data-models` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0228-live-apply` while the workstream remained active in `workstreams.yaml`."
     },
     {
       "check": "Full repo validation path",
@@ -50,7 +50,7 @@
     {
       "check": "Rebased live Windmill converges",
       "result": "pass",
-      "observed": "After rebasing onto `origin/main` commit `cc80b12d`, `make converge-windmill` completed successfully twice from this worktree: first from branch head `8d9b6c10` to prove the seeded default-surface contract and then again from branch head `a3de885c` after hardening the token lifecycle wrappers. The final replay log `.local/ws-0228/converge-windmill-token-wrapper.log` finished with `docker-runtime-lv3 ok=236 changed=43`, `postgres-lv3 ok=63 changed=1`, and `proxmox_florin ok=37 changed=7`, and it included both `Verify the Windmill default operations scripts are seeded` and `Assert the Windmill default operations scripts exist`."
+      "observed": "After rebasing onto `origin/main` commit `cc80b12d`, `make converge-windmill` completed successfully twice from this worktree: first from branch head `8d9b6c10` to prove the seeded default-surface contract and then again from branch head `a3de885c` after hardening the token lifecycle wrappers. The final replay log `.local/ws-0228/converge-windmill-token-wrapper.log` finished with `docker-runtime-lv3 ok=236 changed=43`, `postgres-lv3 ok=63 changed=1`, and `proxmox-host ok=37 changed=7`, and it included both `Verify the Windmill default operations scripts are seeded` and `Assert the Windmill default operations scripts exist`."
     },
     {
       "check": "Live Windmill metadata surface",

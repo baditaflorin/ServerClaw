@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.85",
   "workflow_id": "adr-0317-keycloak-direct-api-live-apply",
   "adr": "0317",
-  "summary": "Recovered and re-verified ADR 0317 from the dedicated live-apply worktree by restoring the repo-managed Keycloak runtime, proving fresh master-realm admin-token issuance and existing operator assignment lookups against `sso.lv3.org`, and hardening `scripts/provision_operator.py` so the direct-API fallback reuses the shared `.local/` secrets tree correctly from `.worktrees/` while supporting an email-free replay path for exact-main verification.",
+  "summary": "Recovered and re-verified ADR 0317 from the dedicated live-apply worktree by restoring the repo-managed Keycloak runtime, proving fresh master-realm admin-token issuance and existing operator assignment lookups against `sso.example.com`, and hardening `scripts/provision_operator.py` so the direct-API fallback reuses the shared `.local/` secrets tree correctly from `.worktrees/` while supporting an email-free replay path for exact-main verification.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,12 +40,12 @@
     {
       "kind": "service_endpoint",
       "name": "Keycloak realm discovery",
-      "address": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
+      "address": "https://sso.example.com/realms/lv3/.well-known/openid-configuration"
     },
     {
       "kind": "service_endpoint",
       "name": "Keycloak master token endpoint",
-      "address": "https://sso.lv3.org/realms/master/protocol/openid-connect/token"
+      "address": "https://sso.example.com/realms/master/protocol/openid-connect/token"
     },
     {
       "kind": "identity",
@@ -62,7 +62,7 @@
     {
       "check": "Governed Keycloak recovery replay",
       "result": "pass",
-      "observed": "`make converge-keycloak` restored the absent Keycloak/OpenBao runtime and its dependent shared publications, finishing with recap `docker-runtime-lv3 : ok=258 changed=10 failed=0`, `monitoring-lv3 : ok=18 changed=2 failed=0`, `nginx-lv3 : ok=46 changed=5 failed=0`, `postgres-lv3 : ok=70 changed=0 failed=0`, and `proxmox_florin : ok=338 changed=0 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0317-converge-keycloak-r1.txt`."
+      "observed": "`make converge-keycloak` restored the absent Keycloak/OpenBao runtime and its dependent shared publications, finishing with recap `docker-runtime-lv3 : ok=258 changed=10 failed=0`, `monitoring-lv3 : ok=18 changed=2 failed=0`, `nginx-lv3 : ok=46 changed=5 failed=0`, `postgres-lv3 : ok=70 changed=0 failed=0`, and `proxmox-host : ok=338 changed=0 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-02-ws-0317-converge-keycloak-r1.txt`."
     },
     {
       "check": "Direct API verification against the recovered realm",
@@ -72,7 +72,7 @@
     {
       "check": "Dedicated-worktree provisioning fallback replay",
       "result": "pass",
-      "observed": "After correcting the shared `.local/` resolver, `python3 scripts/provision_operator.py --id matei-busui-tmp-001 --name 'Matei Busui' --email busui.matei1994@gmail.com --username matei.busui-tmp --role admin --expires 2026-04-08T00:00:00Z --requester florin@badita.org --skip-email` succeeded from the dedicated worktree, reused the shared password file, and reverified the live role/group assignments without resending credentials; the successful transcript is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0317-worktree-provision-operator-r2.txt`."
+      "observed": "After correcting the shared `.local/` resolver, `python3 scripts/provision_operator.py --id matei-busui-tmp-001 --name 'Matei Busui' --email operator@example.com --username matei.busui-tmp --role admin --expires 2026-04-08T00:00:00Z --requester operator@example.com --skip-email` succeeded from the dedicated worktree, reused the shared password file, and reverified the live role/group assignments without resending credentials; the successful transcript is preserved in `receipts/live-applies/evidence/2026-04-02-ws-0317-worktree-provision-operator-r2.txt`."
     },
     {
       "check": "Focused regression coverage and branch governance gates",

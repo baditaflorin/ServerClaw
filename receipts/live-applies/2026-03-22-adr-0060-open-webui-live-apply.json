@@ -18,8 +18,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
@@ -41,7 +41,7 @@
     {
       "check": "Bootstrap admin sign-in",
       "result": "pass",
-      "observed": "POST to /api/v1/auths/signin returned the repo-managed ops@lv3.org admin identity with role=admin."
+      "observed": "POST to /api/v1/auths/signin returned the repo-managed ops@example.com admin identity with role=admin."
     },
     {
       "check": "Restricted feature posture",

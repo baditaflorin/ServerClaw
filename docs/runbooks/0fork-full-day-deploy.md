@@ -22,7 +22,7 @@ Before the one-command deploy, you must have:
 1. **Hetzner server provisioned** with SSH access. Follow
    [hetzner-bare-metal-bootstrap.md](hetzner-bare-metal-bootstrap.md)
    through step 3 (host key pinned, hostname set, `/dev/kvm` present).
-2. **Hetzner DNS zone** for the fork domain (e.g. `0fork.com`) with the apex
+2. **Hetzner DNS zone** for the fork domain (e.g. `example.org`) with the apex
    wipe + A/AAAA/wildcard records in place (see ADR 0424 §3).
 3. **Four overlay files** in `.local/` on the control workstation:
 

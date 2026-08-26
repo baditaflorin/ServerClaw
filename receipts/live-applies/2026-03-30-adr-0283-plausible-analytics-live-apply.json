@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.64",
   "workflow_id": "adr-0283-plausible-analytics-live-apply",
   "adr": "0283",
-  "summary": "Live-applied ADR 0283 from the synchronized latest origin/main lineage by bringing Plausible Analytics under repo-managed automation on docker-runtime-lv3, publishing analytics.lv3.org through the shared NGINX edge with a public tracker and OIDC-gated dashboard, correcting the fresh-worktree edge-publication and certificate-admission gaps that surfaced during replay, and re-verifying bootstrap, public health, tracker injection, and synthetic analytics ingestion end to end.",
+  "summary": "Live-applied ADR 0283 from the synchronized latest origin/main lineage by bringing Plausible Analytics under repo-managed automation on docker-runtime-lv3, publishing analytics.example.com through the shared NGINX edge with a public tracker and OIDC-gated dashboard, correcting the fresh-worktree edge-publication and certificate-admission gaps that surfaced during replay, and re-verifying bootstrap, public health, tracker injection, and synthetic analytics ingestion end to end.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,7 +34,7 @@
     {
       "kind": "service_endpoint",
       "name": "Plausible public edge",
-      "address": "https://analytics.lv3.org"
+      "address": "https://analytics.example.com"
     },
     {
       "kind": "service_endpoint",
@@ -71,12 +71,12 @@
     {
       "check": "Public edge verification",
       "result": "pass",
-      "observed": "`https://analytics.lv3.org/api/system/health/ready` returned `{\"sessions\":\"ok\",\"postgres\":\"ok\",\"clickhouse\":\"ok\",\"sites_cache\":\"ok\"}`, `https://nginx.lv3.org/` included the `https://analytics.lv3.org/js/script.js` tracker snippet, `curl -sSI https://analytics.lv3.org/` returned `HTTP/2 302` to the oauth2 sign-in path with `x-robots-tag: noindex, nofollow`, and public DNS resolved `analytics.lv3.org` to `65.108.75.123`."
+      "observed": "`https://analytics.example.com/api/system/health/ready` returned `{\"sessions\":\"ok\",\"postgres\":\"ok\",\"clickhouse\":\"ok\",\"sites_cache\":\"ok\"}`, `https://nginx.example.com/` included the `https://analytics.example.com/js/script.js` tracker snippet, `curl -sSI https://analytics.example.com/` returned `HTTP/2 302` to the oauth2 sign-in path with `x-robots-tag: noindex, nofollow`, and public DNS resolved `analytics.example.com` to `203.0.113.1`."
     },
     {
       "check": "Public end-to-end event ingestion",
       "result": "pass",
-      "observed": "A synthetic POST to `https://analytics.lv3.org/api/event` returned `202 Accepted`, and the path `/plausible-e2e-1774861457` became visible in Plausible on poll attempt `2`."
+      "observed": "A synthetic POST to `https://analytics.example.com/api/event` returned `202 Accepted`, and the path `/plausible-e2e-1774861457` became visible in Plausible on poll attempt `2`."
     }
   ],
   "evidence_refs": [
@@ -111,16 +111,16 @@
   ],
   "notes": [
     "This receipt records the synchronized branch-local latest-main proof before the protected release, README, and canonical platform-truth surfaces are updated.",
-    "The first synchronized replay needed a manual provider bridge because the Hetzner DNS create task did not create the `analytics` A record; the record was created through the provider API with zone `qCw975uU3fTKT4KX66twh`, record `5184e68f92a5685cf566cdd884f3b57e`, value `65.108.75.123`, and ttl `60`, after which later governed replays observed the canonical state.",
+    "The first synchronized replay needed a manual provider bridge because the Hetzner DNS create task did not create the `analytics` A record; the record was created through the provider API with zone `qCw975uU3fTKT4KX66twh`, record `5184e68f92a5685cf566cdd884f3b57e`, value `203.0.113.1`, and ttl `60`, after which later governed replays observed the canonical state.",
     "The next synchronized replay exposed that a fresh worktree must regenerate the shared edge static portals before `lv3.platform.nginx_edge_publication` republishes them, so `make converge-plausible` now runs `generate-edge-static-sites` and declares the `shared-edge-generated-portals` bootstrap manifest.",
-    "A follow-up replay then surfaced the public-endpoint admission gap for `analytics.lv3.org`; adding the `analytics-edge` certificate-catalog entry let the exposure audit pass and allowed the shared edge certificate expansion to complete cleanly.",
+    "A follow-up replay then surfaced the public-endpoint admission gap for `analytics.example.com`; adding the `analytics-edge` certificate-catalog entry let the exposure audit pass and allowed the shared edge certificate expansion to complete cleanly.",
     "VERSION, release sections in `changelog.md`, `versions/stack.yaml` platform version, `build/platform-manifest.json`, the integrated `README.md` status summary, and the canonical exact-main receipt still remain for the final integration step on `main`."
   ],
   "correction_loop": {
     "loop_id": "2026-03-30-adr-0283-plausible-dns-and-edge-correction",
-    "surface": "Hetzner DNS zone lv3.org and the shared NGINX edge publication bootstrap contract",
-    "repair_action": "Created the missing `analytics` A record manually through the provider API, then fixed the fresh-worktree replay path by regenerating shared edge static portals before publication and admitting `analytics.lv3.org` into `config/certificate-catalog.json`.",
-    "verification": "Subsequent preflight and converge replays passed, the public ready endpoint returned `ok`, tracker injection appeared on `nginx.lv3.org`, the dashboard stayed OIDC-gated with the expected crawl guards, and a synthetic public event reached Plausible on poll attempt `2`.",
+    "surface": "Hetzner DNS zone example.com and the shared NGINX edge publication bootstrap contract",
+    "repair_action": "Created the missing `analytics` A record manually through the provider API, then fixed the fresh-worktree replay path by regenerating shared edge static portals before publication and admitting `analytics.example.com` into `config/certificate-catalog.json`.",
+    "verification": "Subsequent preflight and converge replays passed, the public ready endpoint returned `ok`, tracker injection appeared on `nginx.example.com`, the dashboard stayed OIDC-gated with the expected crawl guards, and a synthetic public event reached Plausible on poll attempt `2`.",
     "diagnosis": "contract_drift"
   }
 }

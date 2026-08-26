@@ -12,11 +12,11 @@
 2026-03-30T16:44:46.9394356Z ⭐ Run Main Checkout
 2026-03-30T16:44:46.9396428Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
 2026-03-30T16:44:46.9396542Z evaluating expression 'format('{0}', github.repository)'
-2026-03-30T16:44:46.9396760Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
+2026-03-30T16:44:46.9396760Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/platform_server)'
 2026-03-30T16:44:46.9397105Z expression '${{ github.token }}' rewritten to 'format('{0}', github.token)'
 2026-03-30T16:44:46.9397178Z evaluating expression 'format('{0}', github.token)'
 2026-03-30T16:44:46.9397327Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
-2026-03-30T16:44:46.9397473Z type=remote-action actionDir=/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab actionPath= workdir=/workspace/ops/proxmox_florin_server actionCacheDir=/root/.cache/act actionName=c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab containerActionDir=/root/.cache/act/c1e620fd9bffdd19/act/actions/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab
+2026-03-30T16:44:46.9397473Z type=remote-action actionDir=/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab actionPath= workdir=/workspace/ops/platform_server actionCacheDir=/root/.cache/act actionName=c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab containerActionDir=/root/.cache/act/c1e620fd9bffdd19/act/actions/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab
 2026-03-30T16:44:46.9397595Z /root/.cache/act/c1e620fd9bffdd19/act/actions/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab
 2026-03-30T16:44:46.9397721Z Removing /root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/.gitignore before docker cp
 2026-03-30T16:44:46.9398018Z Stripping prefix:/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/ src:/root/.cache/act/c3fe249fe73091a17d6638fe1341e7bd0bcc3466ce52323c0688e83e2463a4ab/

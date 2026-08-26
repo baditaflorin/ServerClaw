@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0301-main-integration/scripts/remote_exec.sh pre-push-gate --local-fallback
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0301-main-integration/scripts/remote_exec.sh pre-push-gate --local-fallback
 Validation lane selection
   mode: primary_branch
   branch: HEAD

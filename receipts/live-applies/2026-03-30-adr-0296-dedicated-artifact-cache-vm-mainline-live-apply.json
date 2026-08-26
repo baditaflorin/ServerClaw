@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -66,7 +66,7 @@
     {
       "check": "Exact-main dedicated cache VM replay",
       "result": "pass",
-      "observed": "`make configure-artifact-cache-vm env=production` succeeded from repo version `0.177.103`, finishing with final recap `artifact-cache-lv3 : ok=118 changed=8 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0` and `proxmox_florin : ok=14 changed=4 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`."
+      "observed": "`make configure-artifact-cache-vm env=production` succeeded from repo version `0.177.103`, finishing with final recap `artifact-cache-lv3 : ok=118 changed=8 unreachable=0 failed=0 skipped=7 rescued=0 ignored=0` and `proxmox-host : ok=14 changed=4 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0`."
     },
     {
       "check": "Exact-main governed build-host cutover",

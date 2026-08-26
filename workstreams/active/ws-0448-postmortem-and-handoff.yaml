@@ -58,8 +58,8 @@ notes: |
   2. receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json
      was reconstructed because PR #71 referenced it but never committed
      the file.
-  3. Pre-existing cert-validation drift on lv3.org domains (the box
-     now serves 0fork.com after yesterday's recovery).
+  3. Pre-existing cert-validation drift on example.com domains (the box
+     now serves example.org after yesterday's recovery).
 
   Plus follow-ups not in ws-0448 scope:
    - Host-pinning per VM (Slice D in the original plan).

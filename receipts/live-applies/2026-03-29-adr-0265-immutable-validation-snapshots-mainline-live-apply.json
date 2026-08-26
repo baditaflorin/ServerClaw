@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -35,12 +35,12 @@
     {
       "check": "Immutable snapshot dry-run upload",
       "result": "pass",
-      "observed": "`LV3_SESSION_ID=adr-0265-main-race REMOTE_EXEC_VERBOSE=1 make check-build-server` passed from commit `768ab550`, built snapshot `de22562164d38fb57a8f2dcfb8ab8c58a49094fbed15643b73df2ccf3b52fce0`, and verified dry-run upload plus fresh run namespace `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/adr-0265-main-race/repo/.lv3-runs/20260329T130452Z-de22562164d3/repo`."
+      "observed": "`LV3_SESSION_ID=adr-0265-main-race REMOTE_EXEC_VERBOSE=1 make check-build-server` passed from commit `768ab550`, built snapshot `de22562164d38fb57a8f2dcfb8ab8c58a49094fbed15643b73df2ccf3b52fce0`, and verified dry-run upload plus fresh run namespace `/home/ops/builds/platform_server/.lv3-session-workspaces/adr-0265-main-race/repo/.lv3-runs/20260329T130452Z-de22562164d3/repo`."
     },
     {
       "check": "Newest exact-main remote validation",
       "result": "pass",
-      "observed": "`LV3_SESSION_ID=adr-0265-main-race REMOTE_EXEC_VERBOSE=1 make remote-validate` passed remotely from snapshot `de22562164d38fb57a8f2dcfb8ab8c58a49094fbed15643b73df2ccf3b52fce0`; `alert-rule-validation`, `ansible-syntax`, `dependency-graph`, `policy-validation`, `schema-validation`, and `type-check` all passed from `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/adr-0265-main-race/repo/.lv3-runs/20260329T130506Z-de22562164d3/repo`."
+      "observed": "`LV3_SESSION_ID=adr-0265-main-race REMOTE_EXEC_VERBOSE=1 make remote-validate` passed remotely from snapshot `de22562164d38fb57a8f2dcfb8ab8c58a49094fbed15643b73df2ccf3b52fce0`; `alert-rule-validation`, `ansible-syntax`, `dependency-graph`, `policy-validation`, `schema-validation`, and `type-check` all passed from `/home/ops/builds/platform_server/.lv3-session-workspaces/adr-0265-main-race/repo/.lv3-runs/20260329T130506Z-de22562164d3/repo`."
     }
   ],
   "evidence_refs": [

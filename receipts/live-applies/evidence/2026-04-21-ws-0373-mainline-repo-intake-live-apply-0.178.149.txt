@@ -3,31 +3,31 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
-PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
-INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/.local/packer-plugin-cache
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519.pub
+INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/.local/packer-plugin-cache
 Bootstrap manifest: live-apply-generated-artifacts
 Bootstrap description: Generated repo surfaces and ignored controller-local scaffolding required by fresh-worktree live-apply wrappers.
-PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/gate-bypasses/.gitkeep
-PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/config/prometheus/rules/https_tls_alerts.yml
-PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/image-scans
-PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/drift-reports
-PASS bootstrap artifact image_scan_sboms: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/sbom
-PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/inventory/group_vars/platform.yml
-PASS bootstrap artifact security_reports: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/security-reports
-PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/config/prometheus/file_sd/https_tls_targets.yml
-PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/config/uptime-kuma/monitors.json
-PASS bootstrap artifact image_scan_cves: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/cve
+PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/gate-bypasses/.gitkeep
+PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/config/prometheus/rules/https_tls_alerts.yml
+PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/image-scans
+PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/drift-reports
+PASS bootstrap artifact image_scan_sboms: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/sbom
+PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/inventory/group_vars/platform.yml
+PASS bootstrap artifact security_reports: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/security-reports
+PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/config/prometheus/file_sd/https_tls_targets.yml
+PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/config/uptime-kuma/monitors.json
+PASS bootstrap artifact image_scan_cves: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/cve
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/build/ops-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/build/changelog-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/build/docs-portal
 Result: PASS (live-apply-service)
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/scripts/interface_contracts.py --check-live-apply "service:repo_intake"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/scripts/interface_contracts.py --check-live-apply "service:repo_intake"
 Live apply contract OK: service:repo_intake -> playbooks/services/repo_intake.yml
 Vulnerability budget gate for repo_intake: approved
 Service: repo_intake
@@ -37,8 +37,8 @@ Decision: approved
 repo_intake: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@docker-runtime
   rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.
 override: repo_intake remains governed by immutable guest replacement on docker-runtime (preview_guest, rollback 180m); ALLOW_IN_PLACE_MUTATION=true was supplied for this run.
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/playbooks/services/repo_intake.yml (env=production)
-Running scoped playbook: playbooks/services/repo_intake.yml limit=docker-runtime shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/.ansible/shards/424749ad892f43fb944b8d4505a31218/repo_intake-production.json
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/playbooks/services/repo_intake.yml (env=production)
+Running scoped playbook: playbooks/services/repo_intake.yml limit=docker-runtime shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/.ansible/shards/424749ad892f43fb944b8d4505a31218/repo_intake-production.json
 
 PLAY [Converge the repository intake application on the Docker runtime VM] *****
 
@@ -1102,7 +1102,7 @@ ok: [docker-runtime]
 TASK [Run startup verification] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run startup verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T11:08:36.873Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run startup verification","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-21T11:08:36.890Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/playbooks/services/../tasks/verify-probe.yml for docker-runtime
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/playbooks/services/../tasks/verify-probe.yml for docker-runtime
 
 TASK [Run HTTP probe startup] **************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe startup","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T11:08:36.939Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1127,7 +1127,7 @@ skipping: [docker-runtime]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T11:08:38.215Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-21T11:08:38.226Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/playbooks/services/../tasks/verify-probe.yml for docker-runtime
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/playbooks/services/../tasks/verify-probe.yml for docker-runtime
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T11:08:38.272Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1157,7 +1157,7 @@ skipping: [docker-runtime]
 TASK [Run readiness verification] **********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T11:08:39.646Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-21T11:08:39.661Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/playbooks/services/../tasks/verify-probe.yml for docker-runtime
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/playbooks/services/../tasks/verify-probe.yml for docker-runtime
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T11:08:39.708Z","vm":"controller","workflow_id":"ansible-playbook"}

@@ -99,7 +99,7 @@ Per ADR 0420 (receipt schema), every receipt already lists "what was applied." T
   {
     "check_id": "harbor.registry.public-ping",
     "result": "pass",
-    "observed": "https://registry.0fork.com/api/v2.0/ping -> 200 'Pong' in 0.18s",
+    "observed": "https://registry.example.org/api/v2.0/ping -> 200 'Pong' in 0.18s",
     "ran_at": "2026-05-12T09:14:33Z"
   }
 ]
@@ -122,7 +122,7 @@ A first installment of `config/post_conditions.yml` covering the load-bearing se
 - `harbor.registry.public-ping` — would have caught the 2026-05-06 incident on day one
 - `harbor.containers.nginx-running` — would have caught it at the container layer too
 - `keycloak.realm-discovery-endpoint`
-- `nginx-edge.tls-san-coverage` — covers the s3.0fork.com SAN mismatch
+- `nginx-edge.tls-san-coverage` — covers the s3.example.org SAN mismatch
 - `postgres.tcp-reachable`
 - `openbao.unsealed`
 - `outline.public-200`

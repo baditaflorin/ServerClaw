@@ -10,7 +10,7 @@ alongside the existing (universal, freeform) `description` field:
   ports: [9100]
   description: Prometheus node_exporter metrics scrape access
   provenance:
-    owner: baditaflorin@gmail.com     # who to ask if this rule looks wrong
+    owner: operator@example.com     # who to ask if this rule looks wrong
     added_on: "2026-08-26"            # ISO date the rule was declared here
     reconciled_from_live: true        # true if discovered live (drift) before
                                        # being declared here; false/omitted for

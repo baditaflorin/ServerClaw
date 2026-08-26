@@ -19,7 +19,7 @@
       "uv run --with pytest --with pyyaml --with jsonschema --with jinja2 python -m pytest -q tests/test_service_live_apply_wrappers.py tests/test_validation_gate.py",
       "receipts/live-applies/2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply.json"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-15",
     "remediation_ref": "ws-0371-live-apply"
   }

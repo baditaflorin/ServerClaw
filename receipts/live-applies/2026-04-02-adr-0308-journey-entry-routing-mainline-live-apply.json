@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -28,7 +28,7 @@
     {
       "kind": "service_endpoint",
       "name": "Ops portal public entry route",
-      "address": "https://ops.lv3.org/entry"
+      "address": "https://ops.example.com/entry"
     },
     {
       "kind": "service_endpoint",
@@ -60,7 +60,7 @@
     {
       "check": "Public auth-gated edge",
       "result": "pass",
-      "observed": "The public `https://ops.lv3.org/entry` edge returned `HTTP/2 302` with `location: https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/entry`, preserving the unauthenticated oauth2-proxy gate."
+      "observed": "The public `https://ops.example.com/entry` edge returned `HTTP/2 302` with `location: https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/entry`, preserving the unauthenticated oauth2-proxy gate."
     },
     {
       "check": "Governed backup and evidence refresh after the platform-version bump",

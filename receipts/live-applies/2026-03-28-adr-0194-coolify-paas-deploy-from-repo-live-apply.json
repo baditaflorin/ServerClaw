@@ -9,7 +9,7 @@
   "repo_version_context": "0.177.12",
   "workflow_id": "converge-coolify",
   "adr": "0194",
-  "summary": "Live-applied ADR 0194 from `codex/ws-0194-live-apply`, converged the dedicated Coolify guest plus shared edge publication, restored the private controller registration flow, brought up the guest-side `coolify-proxy`, and re-verified repo-backed deployment through `repo-smoke.apps.lv3.org`.",
+  "summary": "Live-applied ADR 0194 from `codex/ws-0194-live-apply`, converged the dedicated Coolify guest plus shared edge publication, restored the private controller registration flow, brought up the guest-side `coolify-proxy`, and re-verified repo-backed deployment through `repo-smoke.apps.example.com`.",
   "targets": [
     {
       "kind": "guest",
@@ -25,13 +25,13 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "controller_artifacts",
       "name": "coolify-local-auth",
-      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/coolify"
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/coolify"
     }
   ],
   "verification": [
@@ -43,12 +43,12 @@
     {
       "check": "Governed live apply workflow",
       "result": "pass",
-      "observed": "`make converge-coolify` completed successfully on 2026-03-28 and converged `proxmox_florin`, `coolify-lv3`, and `nginx-lv3` without failures."
+      "observed": "`make converge-coolify` completed successfully on 2026-03-28 and converged `proxmox-host`, `coolify-lv3`, and `nginx-lv3` without failures."
     },
     {
       "check": "Private controller registration and auth artifacts",
       "result": "pass",
-      "observed": "`python3 scripts/coolify_tool.py whoami` reported controller URL `http://100.64.0.1:8012`, public URL `https://coolify.lv3.org`, apps URL `https://apps.lv3.org`, version `4.0.0-beta.470`, team `Root Team`, and local server `coolify-lv3` as reachable plus usable."
+      "observed": "`python3 scripts/coolify_tool.py whoami` reported controller URL `http://100.64.0.1:8012`, public URL `https://coolify.example.com`, apps URL `https://apps.example.com`, version `4.0.0-beta.470`, team `Root Team`, and local server `coolify-lv3` as reachable plus usable."
     },
     {
       "check": "Guest proxy runtime",
@@ -63,7 +63,7 @@
     {
       "check": "Public edge verification",
       "result": "pass",
-      "observed": "Direct probes against `65.108.75.123` using `--resolve` returned `302` for `https://coolify.lv3.org/`, `200` for `https://repo-smoke.apps.lv3.org/`, and `404` for `https://apps.lv3.org/` while no apex app is assigned. Fetching `https://repo-smoke.apps.lv3.org/` returned the expected Coolify example page content."
+      "observed": "Direct probes against `203.0.113.1` using `--resolve` returned `302` for `https://coolify.example.com/`, `200` for `https://repo-smoke.apps.example.com/`, and `404` for `https://apps.example.com/` while no apex app is assigned. Fetching `https://repo-smoke.apps.example.com/` returned the expected Coolify example page content."
     },
     {
       "check": "Workstream-safe validation paths",
@@ -90,7 +90,7 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "At verification time, `dig +short` from the controller returned no public answers for `coolify.lv3.org`, `apps.lv3.org`, or `repo-smoke.apps.lv3.org`, so this receipt records successful direct edge verification with `curl --resolve ... 65.108.75.123` separately from DNS visibility.",
+    "At verification time, `dig +short` from the controller returned no public answers for `coolify.example.com`, `apps.example.com`, or `repo-smoke.apps.example.com`, so this receipt records successful direct edge verification with `curl --resolve ... 203.0.113.1` separately from DNS visibility.",
     "This workstream branch intentionally does not update `VERSION`, release sections in `changelog.md`, the top-level integrated status summary in `README.md`, or `versions/stack.yaml`. Those shared integration updates remain for the final merge-to-main step.",
     "The worktree carried `build/docs-portal` and `build/changelog-portal` artifacts copied from the main workspace so edge publication could converge without prematurely changing the canonical generated-state workflow on this branch. Regenerate those portals from merged `main` during final integration."
   ]

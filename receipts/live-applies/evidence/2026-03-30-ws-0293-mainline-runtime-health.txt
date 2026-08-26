@@ -10,7 +10,7 @@ SERVING
   NamespaceInfo.Name                    lv3
   NamespaceInfo.Id                      203b2bfd-f32c-40d3-b160-5164028ed107
   NamespaceInfo.Description
-  NamespaceInfo.OwnerEmail              ops@lv3.org
+  NamespaceInfo.OwnerEmail              ops@example.com
   NamespaceInfo.State                   Registered
   NamespaceInfo.Data                    map[]
   Config.WorkflowExecutionRetentionTtl  168h0m0s

@@ -53,7 +53,7 @@
     {
       "check": "Repo automation and validation paths",
       "result": "pass",
-      "observed": "`make check-build-server`, `make remote-validate`, and `make pre-push-gate` all passed on the released candidate. The remote pre-push lane truthfully recorded transient `502 Bad Gateway` pulls for `registry.lv3.org/check-runner/infra:2026.03.23`, then `run_gate_fallback` reran only `packer-validate` and `tofu-validate` locally and merged the passing result back into `.local/validation-gate/last-run.json`."
+      "observed": "`make check-build-server`, `make remote-validate`, and `make pre-push-gate` all passed on the released candidate. The remote pre-push lane truthfully recorded transient `502 Bad Gateway` pulls for `registry.example.com/check-runner/infra:2026.03.23`, then `run_gate_fallback` reran only `packer-validate` and `tofu-validate` locally and merged the passing result back into `.local/validation-gate/last-run.json`."
     }
   ],
   "evidence_refs": [

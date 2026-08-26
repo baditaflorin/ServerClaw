@@ -28,7 +28,7 @@ windmill-windmill_worker_native-1   ghcr.io/windmill-labs/windmill:1.662.0@sha25
         condition: service_started
     volumes:
       - /var/log/platform:/var/log/platform
-      - /srv/proxmox_florin_server:/srv/proxmox_florin_server
+      - /srv/platform_server:/srv/platform_server
       - worker_logs:/tmp/windmill/logs
 
   windmill_extra:

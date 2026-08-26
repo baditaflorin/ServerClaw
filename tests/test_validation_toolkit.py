@@ -44,7 +44,7 @@ overlay_path = repo / ".local" / "identity.yml"
 identity_path.parent.mkdir(parents=True)
 overlay_path.parent.mkdir(parents=True)
 identity_path.write_text("platform_domain: example.com\\n", encoding="utf-8")
-overlay_path.write_text("platform_domain: lv3.org\\n", encoding="utf-8")
+overlay_path.write_text("platform_domain: example.com\\n", encoding="utf-8")
 
 with patch.object(validation_toolkit, "_find_identity_path", return_value=identity_path):
     print(validation_toolkit.load_identity_vars()["platform_domain"])
@@ -59,7 +59,7 @@ with patch.object(validation_toolkit, "_find_identity_path", return_value=identi
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.strip(), "lv3.org")
+        self.assertEqual(result.stdout.strip(), "example.com")
 
     def test_load_yaml_with_identity_uses_shared_local_overlay_values(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="validation-toolkit-"))
@@ -76,7 +76,7 @@ with patch.object(validation_toolkit, "_find_identity_path", return_value=identi
                 encoding="utf-8",
             )
             overlay_path.write_text(
-                "platform_domain: lv3.org\nplatform_operator_name: Live Operator\n",
+                "platform_domain: example.com\nplatform_operator_name: Live Operator\n",
                 encoding="utf-8",
             )
             host_vars_path.write_text(
@@ -87,7 +87,7 @@ with patch.object(validation_toolkit, "_find_identity_path", return_value=identi
             with patch.object(validation_toolkit, "_find_identity_path", return_value=identity_path):
                 rendered = validation_toolkit.load_yaml_with_identity(host_vars_path)
 
-            self.assertEqual(rendered["public_hostname"], "agents.lv3.org")
+            self.assertEqual(rendered["public_hostname"], "agents.example.com")
             self.assertEqual(rendered["operator_name"], "Live Operator")
         finally:
             for child in sorted(temp_dir.rglob("*"), reverse=True):
@@ -105,7 +105,7 @@ with patch.object(validation_toolkit, "_find_identity_path", return_value=identi
             identity_path.parent.mkdir(parents=True)
             overlay_path.parent.mkdir(parents=True)
             identity_path.write_text("platform_domain: example.com\n", encoding="utf-8")
-            overlay_path.write_text("platform_domain: lv3.org\n", encoding="utf-8")
+            overlay_path.write_text("platform_domain: example.com\n", encoding="utf-8")
 
             payload = {
                 "url": "https://api.example.com",
@@ -115,8 +115,8 @@ with patch.object(validation_toolkit, "_find_identity_path", return_value=identi
             with patch.object(validation_toolkit, "_find_identity_path", return_value=identity_path):
                 resolved = validation_toolkit.resolve_public_domain_placeholders(payload)
 
-            self.assertEqual(resolved["url"], "https://api.lv3.org")
-            self.assertEqual(resolved["nested"][0]["fqdn"], "chat.lv3.org")
+            self.assertEqual(resolved["url"], "https://api.example.com")
+            self.assertEqual(resolved["nested"][0]["fqdn"], "chat.example.com")
             self.assertEqual(resolved["nested"][1]["label"], "unchanged")
         finally:
             for child in sorted(temp_dir.rglob("*"), reverse=True):

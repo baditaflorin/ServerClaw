@@ -26,13 +26,13 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "controller_artifacts",
       "name": "coolify-local-auth",
-      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/coolify"
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/coolify"
     }
   ],
   "verification": [
@@ -44,12 +44,12 @@
     {
       "check": "Merged-main Coolify live apply",
       "result": "pass",
-      "observed": "`make converge-coolify` completed successfully from merged `origin/main` commit `093af353` with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`."
+      "observed": "`make converge-coolify` completed successfully from merged `origin/main` commit `093af353` with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox-host ok=43 changed=5 failed=0`."
     },
     {
       "check": "Private controller registration and auth artifacts",
       "result": "pass",
-      "observed": "`python3 scripts/coolify_tool.py whoami` reported controller URL `http://100.64.0.1:8012`, public URL `https://coolify.lv3.org`, apps URL `https://apps.lv3.org`, version `4.0.0-beta.470`, team `Root Team`, and local server `coolify-lv3` as reachable plus usable."
+      "observed": "`python3 scripts/coolify_tool.py whoami` reported controller URL `http://100.64.0.1:8012`, public URL `https://coolify.example.com`, apps URL `https://apps.example.com`, version `4.0.0-beta.470`, team `Root Team`, and local server `coolify-lv3` as reachable plus usable."
     },
     {
       "check": "Repo-backed deployment automation",
@@ -59,7 +59,7 @@
     {
       "check": "Public edge verification",
       "result": "pass",
-      "observed": "Direct probes against `65.108.75.123` using `--resolve` returned `302` for `https://coolify.lv3.org/`, `200` for `https://repo-smoke.apps.lv3.org/`, and `404` for `https://apps.lv3.org/` while no apex app is assigned. Fetching `https://repo-smoke.apps.lv3.org/` returned the expected Coolify example page content beginning with `Laravel Meetup` and `It works. Really? But for real?`."
+      "observed": "Direct probes against `203.0.113.1` using `--resolve` returned `302` for `https://coolify.example.com/`, `200` for `https://repo-smoke.apps.example.com/`, and `404` for `https://apps.example.com/` while no apex app is assigned. Fetching `https://repo-smoke.apps.example.com/` returned the expected Coolify example page content beginning with `Laravel Meetup` and `It works. Really? But for real?`."
     },
     {
       "check": "Mainline validation gates",
@@ -97,6 +97,6 @@
   "notes": [
     "This mainline receipt supersedes the branch-local `2026-03-28-adr-0194-coolify-paas-deploy-from-repo-live-apply` receipt as the canonical platform-version bump evidence and records the final merged-main replay from commit `093af353`.",
     "The merged-main replay preserved the replay-safety fixes added after the first workstream apply: explicit platform vars loading in `playbooks/coolify.yml` and topology-independent URL defaults in `coolify_runtime`.",
-    "The wildcard application lane is verified through `repo-smoke.apps.lv3.org`; `apps.lv3.org` intentionally remains `404` until an apex application is assigned."
+    "The wildcard application lane is verified through `repo-smoke.apps.example.com`; `apps.example.com` intentionally remains `404` until an apex application is assigned."
   ]
 }

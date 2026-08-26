@@ -36,10 +36,10 @@ workstream-surfaces   passed 4.13
 yaml-lint             passed 16.33
 remote:
 remote: Create a pull request for 'codex/ws-0297-live-apply' on GitHub by visiting:
-remote:      https://github.com/baditaflorin/proxmox_florin_server/pull/new/codex/ws-0297-live-apply
+remote:      https://github.com/baditaflorin/platform_server/pull/new/codex/ws-0297-live-apply
 remote:
-remote: GitHub found 7 vulnerabilities on baditaflorin/proxmox_florin_server's default branch (5 high, 1 moderate, 1 low). To find out more, visit:
-remote:      https://github.com/baditaflorin/proxmox_florin_server/security/dependabot
+remote: GitHub found 7 vulnerabilities on baditaflorin/platform_server's default branch (5 high, 1 moderate, 1 low). To find out more, visit:
+remote:      https://github.com/baditaflorin/platform_server/security/dependabot
 remote:
-To github.com:baditaflorin/proxmox_florin_server.git
+To github.com:baditaflorin/platform_server.git
  * [new branch]          HEAD -> codex/ws-0297-live-apply

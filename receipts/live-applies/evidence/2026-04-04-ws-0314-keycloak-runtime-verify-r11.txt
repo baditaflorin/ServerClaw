@@ -19,4 +19,4 @@ total 4
 legacy_env_absent=true
 
 ## local mirrored admin client secret artifact
--rw-------@ 1 live  staff  33 Apr  4 00:28 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/admin-client-secret.txt
+-rw-------@ 1 live  staff  33 Apr  4 00:28 /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/admin-client-secret.txt

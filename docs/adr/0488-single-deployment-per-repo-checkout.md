@@ -10,19 +10,19 @@
 
 ### What the multi-deployment substrate set out to do
 
-ADRs 0437-0481 built a layer on top of the generic-by-default platform (ADR 0407) so that a single repo checkout could simultaneously host two deployments — `lv3.org` (operator's primary) and `0fork.com` (public clone) — without one polluting the other. The mechanism: a slug per deployment, `.local/deployments/<slug>/` for everything deployment-specific, `make whoami` to identify, `_require-deployment` Make prereqs to enforce, `host_pinning_guard` Ansible role to fail loud if you ran a play against the wrong host.
+ADRs 0437-0481 built a layer on top of the generic-by-default platform (ADR 0407) so that a single repo checkout could simultaneously host two deployments — `example.com` (operator's primary) and `example.org` (public clone) — without one polluting the other. The mechanism: a slug per deployment, `.local/deployments/<slug>/` for everything deployment-specific, `make whoami` to identify, `_require-deployment` Make prereqs to enforce, `host_pinning_guard` Ansible role to fail loud if you ran a play against the wrong host.
 
 ### Why we are unwinding it
 
 The substrate works as designed. The problem is that the design was wrong for this codebase's actual usage.
 
-1. **Two physical servers, not two virtual deployments on one checkout.** `0fork.com` lives on Hetzner `65.109.84.223`. `lv3.org` lives on Hetzner `65.108.75.123`. They were never co-located. The substrate solved "two slugs in one repo" but the real shape was "two boxes, each with their own repo checkout would be fine."
+1. **Two physical servers, not two virtual deployments on one checkout.** `example.org` lives on Hetzner `203.0.113.3`. `example.com` lives on Hetzner `203.0.113.1`. They were never co-located. The substrate solved "two slugs in one repo" but the real shape was "two boxes, each with their own repo checkout would be fine."
 
 2. **The cost of the abstraction was paid every operation.** Every `make converge-*` carries `_require-deployment`. Every script has a `--deployment <slug>` arg or reads `.deployment` markers. CLAUDE.md opens with a deployment-context check before anything else. New agents spend their first turn on `make whoami` instead of working.
 
 3. **The 2026-05-15 0fork outage was caused by drift the substrate could not see.** The 0fork host filled its root filesystem; 16 of 18 VMs paused with `io-error`; the public edge went dark for 48 hours. None of `whoami`, `host_pinning_guard`, the cert validator, or the per-deployment receipts noticed. They were all checking that *operations went to the right deployment*. None of them were checking that *the deployment was alive*. That is ADR 0484's job (self-verification contracts) — which works fine without a slug.
 
-4. **DNS drift went undetected for the same reason.** `lv3.org` A-record had been mistakenly pointed at the dead 0fork box. The substrate had no opinion on which IP a domain *should* resolve to — it only validated certificates after assuming the IP was right. So `lv3.org` was dark in DNS for an unknown number of days while the substrate happily said "your deployment is correctly identified."
+4. **DNS drift went undetected for the same reason.** `example.com` A-record had been mistakenly pointed at the dead 0fork box. The substrate had no opinion on which IP a domain *should* resolve to — it only validated certificates after assuming the IP was right. So `example.com` was dark in DNS for an unknown number of days while the substrate happily said "your deployment is correctly identified."
 
 5. **Forkability is the real goal, and forkability already lives in `.local/identity.yml`.** ADR 0385 established that operators rebrand the platform by editing one file: `.local/identity.yml`. ADR 0407 made the committed code generic. Both of those work *better* without the multi-deployment layer, because there is exactly one file to edit, not a `.local/deployments/<slug>/identity.yml` and a worktree marker and a CLI flag and an env var to remember.
 
@@ -32,7 +32,7 @@ Two things that the multi-deployment substrate hid, and that we want surfaced af
 
 - **Capacity-aware sizing must drive provisioning.** Today `scripts/resolve_topology.py` writes a per-deployment `topology.yml` that the provisioner does not read. `qm create` still pulls from `inventory/host_vars/proxmox-host.yml` (which carries hand-tuned VM sizes that were correct on prod hardware in 2024 and are wrong on a fresh box with different RAM/disk). The collapse is the right moment to wire the resolver's output into the canonical inventory.
 
-- **Public-mirror genericity tightens.** ServerClaw is the public mirror. Today the committed codebase already uses `example.com` in docs and `{{ platform_domain }}` in templates (ADR 0407). After the collapse, the *one* deployment that exists in the committed repo is the canonical example — and it must read fully from `.local/identity.yml`. There must be no path where `lv3.org`, `0fork.com`, `65.109.84.223`, or `65.108.75.123` appear in committed code outside ADR archives.
+- **Public-mirror genericity tightens.** ServerClaw is the public mirror. Today the committed codebase already uses `example.com` in docs and `{{ platform_domain }}` in templates (ADR 0407). After the collapse, the *one* deployment that exists in the committed repo is the canonical example — and it must read fully from `.local/identity.yml`. There must be no path where `example.com`, `example.org`, `203.0.113.3`, or `203.0.113.1` appear in committed code outside ADR archives.
 
 ---
 
@@ -42,7 +42,7 @@ Two things that the multi-deployment substrate hid, and that we want surfaced af
 
 A clone of this repo is configured for exactly one deployment. The operator edits `.local/identity.yml` (the file from ADR 0385) and runs `make bootstrap`. There is no concept of "active deployment" because there is no other deployment to be inactive against.
 
-The reference deployment in the committed codebase is `0fork.com` (the surviving box; lv3 is decommissioned per separate decision). All committed examples, fixtures, and documentation use `example.com` and `203.0.113.x` placeholders per ADR 0407. The publish-to-ServerClaw pipeline (which sanitises `lv3.org → example.com` today) is simplified — its only job becomes sanitising whatever real values may have crept into committed files, not maintaining a private↔public diff of identity scaffolding.
+The reference deployment in the committed codebase is `example.org` (the surviving box; lv3 is decommissioned per separate decision). All committed examples, fixtures, and documentation use `example.com` and `203.0.113.x` placeholders per ADR 0407. The publish-to-ServerClaw pipeline (which sanitises `example.com → example.com` today) is simplified — its only job becomes sanitising whatever real values may have crept into committed files, not maintaining a private↔public diff of identity scaffolding.
 
 ### 2. The substrate is removed, not soft-disabled
 
@@ -85,7 +85,7 @@ A fresh clone on a new Hetzner box with 64 GB RAM and a single 1 TB NVMe produce
 
 ADR 0407 said "use `example.com` in docs, `{{ platform_domain }}` in templates." This ADR upgrades that from convention to enforcement:
 
-- A pre-commit hook (extending `scripts/audit_sanitization.py`) blocks commits where committed files outside `docs/adr/` mention `lv3.org`, `0fork.com`, `65.109.84.223`, `65.108.75.123`, or any operator-specific identity.
+- A pre-commit hook (extending `scripts/audit_sanitization.py`) blocks commits where committed files outside `docs/adr/` mention `example.com`, `example.org`, `203.0.113.3`, `203.0.113.1`, or any operator-specific identity.
 - All identity values resolve through `.local/identity.yml` (`platform_domain`, `platform_operator_email`, etc.). A converge target with no `.local/identity.yml` exits with `error: edit .local/identity.yml to configure your deployment (see docs/getting-started.md)` — not with a half-baked converge against placeholder values.
 - The `reference-deployments/` directory is removed; the *committed code itself* is the reference deployment template. To fork: clone, fill in `.local/identity.yml`, `make bootstrap`.
 
@@ -108,7 +108,7 @@ ADR 0407 said "use `example.com` in docs, `{{ platform_domain }}` in templates."
 ### Negative
 
 - **No more two-deployments-per-checkout.** If we ever genuinely want to run two parallel deployments off one repo again, we re-introduce the substrate. The 17 superseded ADRs remain as the design notebook for that day.
-- **lv3.org is end-of-life as a deployment.** Its box at 65.108.75.123 either gets repurposed or wiped. The committed code no longer carries lv3-specific topology.
+- **example.com is end-of-life as a deployment.** Its box at 203.0.113.1 either gets repurposed or wiped. The committed code no longer carries lv3-specific topology.
 - **`make bootstrap` against an existing deployment must be idempotent.** ADR 0485 (convergence idempotency tests) becomes load-bearing rather than aspirational; we must implement it in this release.
 - **Operators with multiple Proxmox boxes maintain one checkout per box.** This matches how every other Ansible-managed infrastructure project at this scale operates, but it is a change from the substrate's promise.
 
@@ -126,7 +126,7 @@ This ADR is delivered in one branch, mergeable in stages if review prefers:
 
 - Decommissioning the lv3 box (operational task, separate change ticket).
 - Rebuilding the 0fork box from scratch on the simplified branch (operational task — uses this branch but is not part of it).
-- DNS flip for `lv3.org` (registrar change, not a repo change).
+- DNS flip for `example.com` (registrar change, not a repo change).
 
 ---
 

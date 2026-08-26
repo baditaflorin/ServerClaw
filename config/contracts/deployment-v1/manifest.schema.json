@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schemas/deployment-v1/manifest.json",
+  "$id": "https://example.com/schemas/deployment-v1/manifest.json",
   "title": "Deployment Manifest",
   "description": "Single declarative input that drives hands-off bootstrap (ADR 0483). An operator authors this one file; everything else — identity.yml, connection.yml, topology.yml, profile.yml — is derived from it plus the probe results.",
   "type": "object",
@@ -28,7 +28,7 @@
       "type": "string",
       "pattern": "^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$",
       "minLength": 3,
-      "description": "Apex domain for this deployment (e.g. 0fork.com). Must be DNS-controlled by the operator."
+      "description": "Apex domain for this deployment (e.g. example.org). Must be DNS-controlled by the operator."
     },
     "operator": {
       "type": "object",
@@ -188,7 +188,7 @@
       },
       "provider": {
         "kind": "hetzner",
-        "host": "65.109.84.223",
+        "host": "203.0.113.3",
         "port": 2222,
         "initial_user": "root",
         "initial_key_path": "hetzner_llm_agents_ed25519"

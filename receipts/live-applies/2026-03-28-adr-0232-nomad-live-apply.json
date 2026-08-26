@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -46,17 +46,17 @@
     {
       "check": "Focused Nomad regression and syntax slice",
       "result": "pass",
-      "observed": "`uv run --with pytest --with pyyaml pytest tests/test_nomad_cluster_roles.py tests/test_nomad_playbook.py -q` returned `14 passed in 0.11s`, and `ANSIBLE_CONFIG=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0232-live-apply/ansible.cfg ANSIBLE_COLLECTIONS_PATH=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0232-live-apply/collections uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/nomad.yml --syntax-check` passed."
+      "observed": "`uv run --with pytest --with pyyaml pytest tests/test_nomad_cluster_roles.py tests/test_nomad_playbook.py -q` returned `14 passed in 0.11s`, and `ANSIBLE_CONFIG=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0232-live-apply/ansible.cfg ANSIBLE_COLLECTIONS_PATH=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0232-live-apply/collections uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/nomad.yml --syntax-check` passed."
     },
     {
       "check": "Full Nomad converge from the isolated worktree",
       "result": "pass",
-      "observed": "`make converge-nomad` completed successfully on 2026-03-28 with final recap `docker-build-lv3 ok=82 changed=5 failed=0`, `docker-runtime-lv3 ok=90 changed=1 failed=0`, `localhost ok=12 changed=0 failed=0`, `monitoring-lv3 ok=98 changed=6 failed=0`, and `proxmox_florin ok=50 changed=1 failed=0`."
+      "observed": "`make converge-nomad` completed successfully on 2026-03-28 with final recap `docker-build-lv3 ok=82 changed=5 failed=0`, `docker-runtime-lv3 ok=90 changed=1 failed=0`, `localhost ok=12 changed=0 failed=0`, `monitoring-lv3 ok=98 changed=6 failed=0`, and `proxmox-host ok=50 changed=1 failed=0`."
     },
     {
       "check": "Controller proxy and cluster readiness",
       "result": "pass",
-      "observed": "`curl -sS https://100.64.0.1:8013/v1/status/leader --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nomad/tls/nomad-agent-ca.pem -H \"X-Nomad-Token: ...\"` returned `\"10.10.10.40:4647\"`, and `/v1/nodes` through the same proxy reported `docker-runtime-lv3 ready runtime` plus `docker-build-lv3 ready build`."
+      "observed": "`curl -sS https://100.64.0.1:8013/v1/status/leader --cacert /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/nomad/tls/nomad-agent-ca.pem -H \"X-Nomad-Token: ...\"` returned `\"10.10.10.40:4647\"`, and `/v1/nodes` through the same proxy reported `docker-runtime-lv3 ready runtime` plus `docker-build-lv3 ready build`."
     },
     {
       "check": "Smoke service placement and content",
@@ -71,7 +71,7 @@
     {
       "check": "Repo-wide validation and guarded live-apply wrapper on the workstream branch",
       "result": "pass",
-      "observed": "`make validate` and `make live-apply-service service=nomad env=production` were both exercised after the successful converge. Each run stopped only at the expected protected canonical-truth gate, reporting `Canonical truth is stale` for main-only file `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0232-live-apply/versions/stack.yaml`."
+      "observed": "`make validate` and `make live-apply-service service=nomad env=production` were both exercised after the successful converge. Each run stopped only at the expected protected canonical-truth gate, reporting `Canonical truth is stale` for main-only file `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0232-live-apply/versions/stack.yaml`."
     }
   ],
   "evidence_refs": [

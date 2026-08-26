@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -28,7 +28,7 @@
     {
       "kind": "service_endpoint",
       "name": "runtime-assurance-api",
-      "address": "https://api.lv3.org/v1/platform/runtime-assurance"
+      "address": "https://api.example.com/v1/platform/runtime-assurance"
     },
     {
       "kind": "service_endpoint",
@@ -45,22 +45,22 @@
     {
       "check": "Current Proxmox host baseline",
       "result": "pass",
-      "observed": "SSH verification on 2026-03-29 returned hostname `Debian-trixie-latest-amd64-base`, `pve-manager/9.1.6/71482d1833ded40a`, and kernel `6.17.13-2-pve`."
+      "observed": "SSH verification on 2026-03-29 returned hostname `debian-base-template`, `pve-manager/9.1.6/71482d1833ded40a`, and kernel `6.17.13-2-pve`."
     },
     {
       "check": "Authenticated runtime-assurance API snapshot",
       "result": "pass",
-      "observed": "Using the repo-local platform-context token, `https://api.lv3.org/v1/platform/runtime-assurance` returned `status 200` with `generated_at: 2026-03-29T20:35:32Z`, `total: 47`, `pass: 28`, `degraded: 19`, `failed: 0`, and `unknown: 0`."
+      "observed": "Using the repo-local platform-context token, `https://api.example.com/v1/platform/runtime-assurance` returned `status 200` with `generated_at: 2026-03-29T20:35:32Z`, `total: 47`, `pass: 28`, `degraded: 19`, `failed: 0`, and `unknown: 0`."
     },
     {
       "check": "Live worker checkout keeps the stage-smoke helper durable",
       "result": "pass",
-      "observed": "Guest-local verification on `docker-runtime-lv3` confirmed `/srv/proxmox_florin_server/scripts/stage_smoke.py` exists, `scripts/promotion_pipeline.py` imports `stage_smoke`, and `scripts/ops_portal/runtime_assurance.py` imports the same helper."
+      "observed": "Guest-local verification on `docker-runtime-lv3` confirmed `/srv/platform_server/scripts/stage_smoke.py` exists, `scripts/promotion_pipeline.py` imports `stage_smoke`, and `scripts/ops_portal/runtime_assurance.py` imports the same helper."
     },
     {
       "check": "Worker-local gate-status remains healthy",
       "result": "pass",
-      "observed": "`python3 /srv/proxmox_florin_server/config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server` returned `status: \"ok\"`, and the embedded `post_merge_run` stayed `passed` with `executed_at: \"2026-03-29T19:37:24.365664+00:00\"`."
+      "observed": "`python3 /srv/platform_server/config/windmill/scripts/gate-status.py --repo-path /srv/platform_server` returned `status: \"ok\"`, and the embedded `post_merge_run` stayed `passed` with `executed_at: \"2026-03-29T19:37:24.365664+00:00\"`."
     },
     {
       "check": "Guest-local ops-portal partials stay aligned",
@@ -70,7 +70,7 @@
     {
       "check": "Governed promotion gate still rejects the stale staged Grafana receipt",
       "result": "pass",
-      "observed": "Running `/srv/proxmox_florin_server/scripts/run_python_with_packages.sh pyyaml -- /srv/proxmox_florin_server/scripts/promotion_pipeline.py --check-gate --service grafana --staging-receipt /srv/proxmox_florin_server/receipts/live-applies/staging/2026-03-27-adr-0183-staging-live-apply.json` on `docker-runtime-lv3` returned exit code `1`; the current reasons were Prometheus SLO query timeouts, projected vCPU commitment `36.0` exceeding target `22.5`, and the stale receipt age, while the returned `stage_smoke_gate` payload stayed `enforced=false` with `required_suite_ids=[]` and `observed_suites=[]`."
+      "observed": "Running `/srv/platform_server/scripts/run_python_with_packages.sh pyyaml -- /srv/platform_server/scripts/promotion_pipeline.py --check-gate --service grafana --staging-receipt /srv/platform_server/receipts/live-applies/staging/2026-03-27-adr-0183-staging-live-apply.json` on `docker-runtime-lv3` returned exit code `1`; the current reasons were Prometheus SLO query timeouts, projected vCPU commitment `36.0` exceeding target `22.5`, and the stale receipt age, while the returned `stage_smoke_gate` payload stayed `enforced=false` with `required_suite_ids=[]` and `observed_suites=[]`."
     }
   ],
   "evidence_refs": [

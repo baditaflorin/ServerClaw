@@ -1,6 +1,6 @@
 # 0fork-shape — fixture identity overlay (ADR 0444 item 12)
 #
-# Mirrors the 0fork.com fork deployment shape. First DNS label is `0fork`,
+# Mirrors the example.org fork deployment shape. First DNS label is `0fork`,
 # which forces the platform_identity flavors to diverge:
 #
 #   config_prefix = "0fork"   (DNS-label shape, no restrictions)
@@ -14,7 +14,7 @@
 # will pass against lv3-shape but fail here — that's the value.
 #
 # This file is publishable — uses 0fork.example.invalid rather than the real
-# 0fork.com domain so the fixture can stay in-repo without leaking deployment
+# example.org domain so the fixture can stay in-repo without leaking deployment
 # detail. See tests/fixtures/inventories/README.md for the full contract.
 
 platform_domain: 0fork.example.invalid

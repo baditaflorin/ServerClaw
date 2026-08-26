@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/validate_repo.sh
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/validate_repo.sh
 Generated platform vars validation
 Syntax check: playbooks/api-gateway.yml
 Syntax check: playbooks/artifact-cache-vm.yml
@@ -163,9 +163,9 @@ Shell lint
 JSON validation
 Semgrep SAST and secret-pattern validation
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/semgrep_gate.py", line 21, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/semgrep_gate.py", line 21, in <module>
     from mutation_audit import build_event, emit_event_best_effort  # type: ignore[import-not-found]
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/mutation_audit.py", line 165, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/mutation_audit.py", line 165, in <module>
     correlation_id: str | None = None,
 TypeError: unsupported operand type(s) for |: 'type' and 'NoneType'
 make: *** [validate] Error 1

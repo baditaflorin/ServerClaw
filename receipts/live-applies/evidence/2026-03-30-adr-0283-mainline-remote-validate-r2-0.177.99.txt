@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0283-main/scripts/remote_exec.sh remote-validate --local-fallback
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0283-main/scripts/remote_exec.sh remote-validate --local-fallback
 Validation lane selection
   mode: explicit_checks
   branch: HEAD

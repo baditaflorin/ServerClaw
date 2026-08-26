@@ -1,3 +1,3 @@
 WARN Broken interpreter cache entry at /Users/live/.cache/uv/interpreter-v4/690e8bc5fc3a5e7e/db96087e7e6677f4.msgpack, removing: array had incorrect length, expected 16
-verified shared edge logout via https://home.lv3.org/
-verified Outline logout via https://wiki.lv3.org/auth/oidc
+verified shared edge logout via https://home.example.com/
+verified Outline logout via https://wiki.example.com/auth/oidc

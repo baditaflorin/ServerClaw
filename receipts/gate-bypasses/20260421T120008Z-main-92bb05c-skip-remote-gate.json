@@ -25,7 +25,7 @@
       "runtime health check",
       "and edge OAuth/header verification evidence committed under receipts/live-applies/evidence/2026-04-21-ws-0373-*"
     ],
-    "owner": "baditaflorin@gmail.com",
+    "owner": "operator@example.com",
     "expires_on": "2026-04-22",
     "remediation_ref": "docs/runbooks/validation-gate.md"
   }

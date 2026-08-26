@@ -34,17 +34,17 @@
     {
       "check": "Worker converge replay from the isolated worktree",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0227-live-apply` with final recap `docker-runtime-lv3 ok=221 changed=35 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`."
+      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0227-live-apply` with final recap `docker-runtime-lv3 ok=221 changed=35 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`."
     },
     {
       "check": "Governed command transient-unit execution",
       "result": "pass",
-      "observed": "After extending the runtime mutable-file contract and repairing the pre-existing execution-lane registry file modes, `python3 scripts/governed_command.py --command network-impairment-matrix --requester-class human_operator --approver-classes human_operator --preflight-passed --validation-passed --receipt-planned --param 'NETWORK_IMPAIRMENT_MATRIX_ARGS=target_class=staging --approve-risk'` returned `executed: true`, `returncode: 0`, unit `lv3-governed-network-impairment-matrix-79b10a86f237`, and receipt `/srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json`."
+      "observed": "After extending the runtime mutable-file contract and repairing the pre-existing execution-lane registry file modes, `python3 scripts/governed_command.py --command network-impairment-matrix --requester-class human_operator --approver-classes human_operator --preflight-passed --validation-passed --receipt-planned --param 'NETWORK_IMPAIRMENT_MATRIX_ARGS=target_class=staging --approve-risk'` returned `executed: true`, `returncode: 0`, unit `lv3-governed-network-impairment-matrix-79b10a86f237`, and receipt `/srv/platform_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-79b10a86f237.json`."
     },
     {
       "check": "End-to-end governed runtime output",
       "result": "pass",
-      "observed": "The successful runtime receipt recorded staged paths for the SSH key, Windmill superadmin secret, and NATS admin password; the stdout log showed the guest-local Windmill route `http://127.0.0.1:8000/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fnetwork-impairment-matrix`; and `/srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json` reported `status: planned`, `target_class: staging`, and `entry_count: 4`."
+      "observed": "The successful runtime receipt recorded staged paths for the SSH key, Windmill superadmin secret, and NATS admin password; the stdout log showed the guest-local Windmill route `http://127.0.0.1:8000/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fnetwork-impairment-matrix`; and `/srv/platform_server/.local/network-impairment-matrix/latest.json` reported `status: planned`, `target_class: staging`, and `entry_count: 4`."
     }
   ],
   "evidence_refs": [
@@ -69,8 +69,8 @@
     "workstreams.yaml"
   ],
   "notes": [
-    "The first governed replay proved the new `systemd-run` envelope, repo-local secret staging, and guest-local Windmill override, but failed on the pre-existing runtime files `/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json` and `.lock` because they were still root-owned `0644` files from before the repository declared them mutable.",
-    "A one-time live repair was required on `docker-runtime-lv3`: `sudo chmod 0666 /srv/proxmox_florin_server/.local/state/execution-lanes/registry.json /srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock`. The committed role change now codifies those files as worker-mutable so future converges keep the correct write contract without manual chmod repair.",
+    "The first governed replay proved the new `systemd-run` envelope, repo-local secret staging, and guest-local Windmill override, but failed on the pre-existing runtime files `/srv/platform_server/.local/state/execution-lanes/registry.json` and `.lock` because they were still root-owned `0644` files from before the repository declared them mutable.",
+    "A one-time live repair was required on `docker-runtime-lv3`: `sudo chmod 0666 /srv/platform_server/.local/state/execution-lanes/registry.json /srv/platform_server/.local/state/execution-lanes/registry.lock`. The committed role change now codifies those files as worker-mutable so future converges keep the correct write contract without manual chmod repair.",
     "Protected integration files still remain for the final merge-to-main step on top of this live-applied branch state: `VERSION`, `changelog.md`, the top-level integrated `README.md` summaries, `docs/release-notes/*`, and `versions/stack.yaml`."
   ]
 }

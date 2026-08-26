@@ -12,13 +12,13 @@ Syntax check: playbooks/data-retention.yml
 Syntax check: playbooks/database-dns.yml
 Syntax check: playbooks/dify.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/directus.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -28,7 +28,7 @@ Syntax check: playbooks/dozzle.yml
 Syntax check: playbooks/excalidraw.yml
 Syntax check: playbooks/flagsmith.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -37,14 +37,14 @@ Syntax check: playbooks/gotenberg.yml
 Syntax check: playbooks/groups/access.yml
 Syntax check: playbooks/groups/automation.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/groups/communication.yml
 Syntax check: playbooks/groups/data.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -52,7 +52,7 @@ Syntax check: playbooks/groups/observability.yml
 Syntax check: playbooks/groups/platform-apps.yml
 Syntax check: playbooks/groups/security.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -64,19 +64,19 @@ Syntax check: playbooks/homepage.yml
 Syntax check: playbooks/jupyterhub.yml
 Syntax check: playbooks/keycloak.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/lago.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/langfuse.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -89,13 +89,13 @@ Syntax check: playbooks/mail-platform.yml
 Syntax check: playbooks/mailpit.yml
 Syntax check: playbooks/matrix-synapse.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/mattermost.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -103,20 +103,20 @@ Syntax check: playbooks/minio.yml
 Syntax check: playbooks/monitoring-stack.yml
 Syntax check: playbooks/n8n.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/nats-jetstream.yml
 Syntax check: playbooks/netbox.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/nextcloud.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -126,40 +126,40 @@ Syntax check: playbooks/ntopng.yml
 Syntax check: playbooks/ollama.yml
 Syntax check: playbooks/one-api.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/open-webui.yml
 Syntax check: playbooks/openbao.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/openfga.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/ops-portal.yml
 Syntax check: playbooks/outline.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/paperless.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/piper.yml
 Syntax check: playbooks/plane.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -167,7 +167,7 @@ Syntax check: playbooks/plausible.yml
 Syntax check: playbooks/portainer.yml
 Syntax check: playbooks/postgres-vm.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -185,7 +185,7 @@ Syntax check: playbooks/secret-rotation.yml
 Syntax check: playbooks/semaphore-self.yml
 Syntax check: playbooks/semaphore.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -200,13 +200,13 @@ Syntax check: playbooks/services/coolify.yml
 Syntax check: playbooks/services/crawl4ai.yml
 Syntax check: playbooks/services/dify.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/directus.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -216,7 +216,7 @@ Syntax check: playbooks/services/dozzle.yml
 Syntax check: playbooks/services/excalidraw.yml
 Syntax check: playbooks/services/flagsmith.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -231,13 +231,13 @@ Syntax check: playbooks/services/homepage.yml
 Syntax check: playbooks/services/jupyterhub.yml
 Syntax check: playbooks/services/lago.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/langfuse.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -246,21 +246,21 @@ Syntax check: playbooks/services/mail-platform.yml
 Syntax check: playbooks/services/mailpit.yml
 Syntax check: playbooks/services/matrix-synapse.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/minio.yml
 Syntax check: playbooks/services/n8n.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/nats-jetstream.yml
 Syntax check: playbooks/services/nextcloud.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -269,19 +269,19 @@ Syntax check: playbooks/services/nomad.yml
 Syntax check: playbooks/services/ollama.yml
 Syntax check: playbooks/services/one-api.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/openbao.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/openfga.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -289,27 +289,27 @@ Syntax check: playbooks/services/ops-portal.yml
 Syntax check: playbooks/services/ops_portal.yml
 Syntax check: playbooks/services/outline.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/paperless.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/piper.yml
 Syntax check: playbooks/services/plane.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/plausible.yml
 Syntax check: playbooks/services/postgres-vm.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -321,26 +321,26 @@ Syntax check: playbooks/services/realtime.yml
 Syntax check: playbooks/services/redpanda.yml
 Syntax check: playbooks/services/semaphore.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/sftpgo.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/step-ca.yml
 Syntax check: playbooks/services/superset.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/temporal.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -350,50 +350,50 @@ Syntax check: playbooks/services/typesense.yml
 Syntax check: playbooks/services/uptime-kuma.yml
 Syntax check: playbooks/services/vaultwarden.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/vikunja.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/windmill.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/services/woodpecker.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/sftpgo.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/site.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/step-ca.yml
 Syntax check: playbooks/superset.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/temporal.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
@@ -403,25 +403,25 @@ Syntax check: playbooks/typesense.yml
 Syntax check: playbooks/uptime-kuma.yml
 Syntax check: playbooks/vaultwarden.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/vikunja.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/windmill.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.
 Syntax check: playbooks/woodpecker.yml
 [WARNING]: While constructing a mapping from /Users/live/Documents/GITHUB_PROJE
-CTS/proxmox_florin_server/.worktrees/ws-0294-main-integration/collections/ansib
+CTS/platform_server/.worktrees/ws-0294-main-integration/collections/ansib
 le_collections/lv3/platform/roles/postgres_vm/defaults/main.yml, line 2, column
 1, found a duplicate dict key (postgres_vm_shared_preload_libraries). Using
 last defined value only.

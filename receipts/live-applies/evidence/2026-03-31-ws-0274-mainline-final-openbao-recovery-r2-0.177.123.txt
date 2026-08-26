@@ -3,18 +3,18 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/.local/packer-plugin-cache
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/.local/packer-plugin-cache
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/build/ops-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/build/changelog-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/build/docs-portal
 Result: PASS (live-apply-service)
 /Applications/Xcode.app/Contents/Developer/usr/bin/make check-canonical-truth
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/interface_contracts.py --check-live-apply "service:openbao"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/interface_contracts.py --check-live-apply "service:openbao"
 Live apply contract OK: service:openbao -> playbooks/services/openbao.yml
 Vulnerability budget gate for openbao: rejected
 - image scan for openbao_runtime is 9 days old, beyond the 7 day freshness window
@@ -25,7 +25,7 @@ Decision: approved
 openbao: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_only) standby=cold@docker-runtime-lv3
   rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.
 override: openbao remains governed by immutable guest replacement on docker-runtime-lv3 (preview_guest, rollback 180m); ALLOW_IN_PLACE_MUTATION=true was supplied for this run.
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=1dca0f6055664aa594e1769f26582fcb ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/inventory/hosts.yml --run-id f660912ea18f417aa3e9d6771890f502 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/services/openbao.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=ffa29b30df594efab4688134f4bc6ae6
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=1dca0f6055664aa594e1769f26582fcb ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/inventory/hosts.yml --run-id f660912ea18f417aa3e9d6771890f502 --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/services/openbao.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=ffa29b30df594efab4688134f4bc6ae6
 
 PLAY [Prepare PostgreSQL for OpenBao dynamic credentials] **********************
 
@@ -1271,7 +1271,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.openbao_runtime : Ensure OpenBao is unsealed after bootstrap or restart] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.openbao_runtime : Ensure OpenBao is unsealed after bootstrap or restart","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:51:22.077Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.openbao_runtime : Ensure OpenBao is unsealed after bootstrap or restart","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T20:51:22.088Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml for docker-runtime-lv3
 
 TASK [lv3.platform.openbao_runtime : Read OpenBao seal status before bootstrap or restart recovery] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.openbao_runtime : Read OpenBao seal status before bootstrap or restart recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:51:22.142Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1286,9 +1286,9 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.openbao_runtime : Submit OpenBao recovery keys until the instance becomes unsealed during bootstrap or restart recovery] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.openbao_runtime : Submit OpenBao recovery keys until the instance becomes unsealed during bootstrap or restart recovery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:51:23.211Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.openbao_runtime : Submit OpenBao recovery keys until the instance becomes unsealed during bootstrap or restart recovery","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T20:51:23.223Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
 
 TASK [lv3.platform.openbao_runtime : Submit OpenBao recovery key bootstrap or restart recovery #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.openbao_runtime : Submit OpenBao recovery key bootstrap or restart recovery #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:51:23.270Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1606,7 +1606,7 @@ changed: [docker-runtime-lv3 -> localhost]
 TASK [lv3.platform.openbao_runtime : Ensure OpenBao remains unsealed before authentication verification] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.openbao_runtime : Ensure OpenBao remains unsealed before authentication verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:28.673Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.openbao_runtime : Ensure OpenBao remains unsealed before authentication verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T20:52:28.694Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/ensure_unsealed.yml for docker-runtime-lv3
 
 TASK [lv3.platform.openbao_runtime : Read OpenBao seal status before authentication verification] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.openbao_runtime : Read OpenBao seal status before authentication verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:28.745Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1621,9 +1621,9 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.openbao_runtime : Submit OpenBao recovery keys until the instance becomes unsealed during authentication verification] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.openbao_runtime : Submit OpenBao recovery keys until the instance becomes unsealed during authentication verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:29.856Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.openbao_runtime : Submit OpenBao recovery keys until the instance becomes unsealed during authentication verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T20:52:29.870Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/unseal_key.yml for docker-runtime-lv3 => (item=(censored due to no_log))
 
 TASK [lv3.platform.openbao_runtime : Submit OpenBao recovery key authentication verification #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.openbao_runtime : Submit OpenBao recovery key authentication verification #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:29.922Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1843,7 +1843,7 @@ ok: [docker-runtime-lv3]
 TASK [Run startup verification] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run startup verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:48.893Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run startup verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T20:52:48.909Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/services/../tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/services/../tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe startup] **************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe startup","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:48.954Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1868,7 +1868,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:50.114Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T20:52:50.127Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/services/../tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/services/../tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:50.172Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1893,7 +1893,7 @@ skipping: [docker-runtime-lv3]
 TASK [Repair Docker publication before readiness verification] *****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Repair Docker publication before readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:51.330Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Repair Docker publication before readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T20:52:51.348Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/services/../tasks/docker-publication-assert.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/services/../tasks/docker-publication-assert.yml for docker-runtime-lv3
 
 TASK [Assert the Docker publication contract is defined] ***********************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Assert the Docker publication contract is defined","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:51.395Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1936,7 +1936,7 @@ ok: [docker-runtime-lv3]
 TASK [Run readiness verification] **********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:55.656Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T20:52:55.672Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/services/../tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0274-mainline-refresh-v6/playbooks/services/../tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T20:52:55.721Z","vm":"controller","workflow_id":"ansible-playbook"}

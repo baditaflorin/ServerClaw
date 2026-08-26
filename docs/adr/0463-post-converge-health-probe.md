@@ -19,11 +19,11 @@ a `health.liveness` block (HTTP/TCP probe with timeout, retries, and
 expected status codes). That block exists for ADR 0205 documentation
 purposes but isn't run from any continuous-verification loop today.
 
-The 2026-04-28 ops.0fork.com 500 incident is the canonical case: the
+The 2026-04-28 ops.example.org 500 incident is the canonical case: the
 v0.179.5 nginx converge wrote the new `proxy_buffer_size 64k` block,
 but nginx wasn't reloaded and the value didn't take effect. The
 operator only noticed when the URL stayed broken in a browser. A
-post-converge HTTP probe against `https://ops.0fork.com/` would have
+post-converge HTTP probe against `https://ops.example.org/` would have
 caught it within seconds.
 
 Today's continuous-verification surfaces are:
@@ -105,5 +105,5 @@ with the existing receipt-search tooling.
 - [ADR 0205 — Capability contracts before product selection](0205-capability-contracts-before-product-selection.md) — defines `health.liveness`.
 - [ADR 0446 — Receipt freshness](0446-phase2-multi-deployment-hardening.md)
 - [ADR 0461 — Atomic receipt write](0461-atomic-receipt-write-and-dangling-check.md)
-- 2026-04-28 ops.0fork.com 500 incident — the failure mode this ADR
+- 2026-04-28 ops.example.org 500 incident — the failure mode this ADR
   closes.

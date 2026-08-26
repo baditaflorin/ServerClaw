@@ -1,3 +1,3 @@
-proxmox_florin | CHANGED | rc=0 >>
----Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/180.conf' does not exist
-Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/180.conf' does not exist
+proxmox-host | CHANGED | rc=0 >>
+---Configuration file 'nodes/debian-base-template/qemu-server/180.conf' does not exist
+Configuration file 'nodes/debian-base-template/qemu-server/180.conf' does not exist

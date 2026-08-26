@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -38,7 +38,7 @@
     {
       "check": "Latest-main Windmill converge replay",
       "result": "pass",
-      "observed": "Two `make converge-windmill` replays from the latest mainline completed successfully; the final replay reported `docker-runtime-lv3 : ok=195 changed=34 unreachable=0 failed=0`, `postgres-lv3 : ok=63 changed=1 failed=0`, and `proxmox_florin : ok=36 changed=4 failed=0`."
+      "observed": "Two `make converge-windmill` replays from the latest mainline completed successfully; the final replay reported `docker-runtime-lv3 : ok=195 changed=34 unreachable=0 failed=0`, `postgres-lv3 : ok=63 changed=1 failed=0`, and `proxmox-host : ok=36 changed=4 failed=0`."
     },
     {
       "check": "Managed host dependencies for world-state",

@@ -356,11 +356,11 @@ If a role's migration breaks, the fix is to temporarily re-add the removed defau
   - `python3 scripts/interface_contracts.py --list`
   - `uv run --with pytest --with pyyaml --with jsonschema --with fastapi --with jinja2 --with python-multipart --with itsdangerous --with httpx python -m pytest -q tests/test_restic_config_backup.py tests/test_repo_intake_runtime_role.py tests/test_environment_topology.py tests/test_interface_contracts.py tests/test_validate_service_registry.py tests/test_validate_service_completeness.py tests/test_ansible_execution_scopes.py`
   - `make preflight WORKFLOW=live-apply-service`
-  - `LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production`
+  - `LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production`
   - `python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger`
   - `uv run --with ansible-core --with pyyaml --with nats-py python scripts/security_posture_report.py --env production --skip-trivy --audit-surface manual --print-report-json`
   - `python3 scripts/vulnerability_budget.py --service repo_intake`
-  - `ANSIBLE_COLLECTIONS_PATH="$PWD/collections:$PWD/.ansible/validation/collections" LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
+  - `ANSIBLE_COLLECTIONS_PATH="$PWD/collections:$PWD/.ansible/validation/collections" LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
 - The 2026-04-21 replay exposed and repaired two latest-main regressions before
   the final rerun:
   - `repo_intake_runtime` readiness used the unsupported `connect_timeout`
@@ -375,7 +375,7 @@ If a role's migration breaks, the fix is to temporarily re-add the removed defau
     `0.178.148` base and the integrated `0.178.149` tree
   - direct health checks on `http://127.0.0.1:8101/health` returned `{"status":"ok"}`
   - edge verification from the `nginx` guest returned the expected OAuth redirect
-    for `https://repo-intake.lv3.org/`
+    for `https://repo-intake.example.com/`
   - the systemd-backed restic runtime converged successfully after syncing
     `outline_client.py`, and the governed trigger refreshed
     `receipts/restic-backups/20260421T105958Z.json`,

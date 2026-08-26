@@ -6,14 +6,14 @@
 - Concern: forkability, deployment-specific values, generic-by-default
 - Tags: forkability, overlay, iac, adr-0407-extension, adr-0424-unblock
 - Relates to: ADR 0407 (`.local/` deployment values), ADR 0376 (`.local/` is sacred),
-  ADR 0424 (0fork.com clone), ADR 0425 (420-ADR retrospective)
+  ADR 0424 (example.org clone), ADR 0425 (420-ADR retrospective)
 
 ---
 
 ## Context
 
 ADR 0425 identified that the platform is **forkable for domain + identity, not
-yet forkable for the full substrate**. The 0fork.com clone attempt exposed the
+yet forkable for the full substrate**. The example.org clone attempt exposed the
 concrete shape of the gap: `inventory/host_vars/proxmox-host.yml` hardcodes
 prod-specific IPs, VMIDs, and hostnames into its `proxmox_guests` list. A fork
 operator cannot reuse the committed file as-is — the fork has the same service
@@ -149,5 +149,5 @@ on the committed file (test fixtures stay deterministic across forks).
 - ADR 0376 — `.local/` is sacred (never commit, pre-commit hook enforcement)
 - ADR 0407 — Generic-by-default `.local/` deployment values (scalar overlay)
 - ADR 0409 — Host-specific overrides (Ansible-time extra-vars merge)
-- ADR 0424 — 0fork.com clone plan
+- ADR 0424 — example.org clone plan
 - ADR 0425 — 420-ADR retrospective (identified this gap)

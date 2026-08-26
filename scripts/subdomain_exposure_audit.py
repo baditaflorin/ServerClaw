@@ -391,7 +391,7 @@ def build_registry(
     }
 
     dep_registry = _load_deployment_registry()
-    primary = dep_registry.get("primary_deployment", "lv3.org")
+    primary = dep_registry.get("primary_deployment", "example.com")
     deployments = dep_registry.get("deployments", {})
 
     return {

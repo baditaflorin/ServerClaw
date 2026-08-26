@@ -1,6 +1,6 @@
 ## public
 harbor_public=Pong
-keycloak_public_issuer=https://sso.lv3.org/realms/lv3
+keycloak_public_issuer=https://sso.example.com/realms/lv3
 outline_public=OK
 ## docker-runtime-lv3-local
 harbor_local=Pong
@@ -9,7 +9,7 @@ keycloak_live={
     "checks": [
     ]
 }
-keycloak_local_issuer=https://sso.lv3.org/realms/lv3
+keycloak_local_issuer=https://sso.example.com/realms/lv3
 openbao_local={"initialized":true,"sealed":false,"standby":false,"performance_standby":false,"replication_performance_mode":"primary","replication_dr_mode":"disabled","server_time_utc":1774832119,"version":"2.5.1","cluster_name":"vault-cluster-0a1cd33d","cluster_id":"64f388be-6224-ad5f-c9f2-bef4c7b7791b"}
 
 outline_local=OK

@@ -65,7 +65,7 @@ converge-nginx-edge:
 The current `prod` deployment under `.local/deployments/prod/` is
 missing `connection.yml` and references VM 110 (nginx @ 10.10.10.40)
 in `topology.yml` — that VM is not present on the live proxmox host
-(`fork-pve-01`). Either the lv3 prod nginx was decommissioned or the
+(`debian-base-template`). Either the lv3 prod nginx was decommissioned or the
 deployment was migrated and the registry is stale. Operator action
 required: regenerate `prod` connection.yml + update topology.yml with
 the actual live VM list (`qm list` on the proxmox host) before the

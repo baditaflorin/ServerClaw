@@ -1,6 +1,6 @@
 id: ws-0482-0fork-platform-not-bootstrapped
 adr: "0482"
-title: 0fork.com platform deployment never landed — registry.0fork.com 502 + others are catch-all illusions
+title: example.org platform deployment never landed — registry.example.org 502 + others are catch-all illusions
 status: planned
 ready_to_merge: false
 live_applied: false
@@ -37,5 +37,5 @@ findings:
   - 2026-05-11 status check found 0fork docker-runtime (10.10.10.20) hosts 78 personal-app /opt projects (wemeshup, badita_org, 0exec_com, scrapetheworld, …) but ZERO platform services (no /opt/harbor, /opt/outline, /opt/librechat, /opt/plausible, /opt/glitchtip, /opt/woodpecker, /opt/ntfy).
   - The 2026-04-27 receipt receipts/live-applies/2026-04-27-ws-0372-0fork-services-all-7-deployed.json claims all 7 services were deployed and verified UP. That claim is incorrect for the current host state — either the receipt was aspirational, the converge silently failed but reported pass, or the deployment was rolled back manually.
   - "On 0fork the Proxmox host only runs 3 VMs (ubuntu-24-04 = 10.10.10.20, nginx-proxy-manager VM, stopped DNS VM). The runtime-control VM (10.10.10.92) that the committed service registry assigns Harbor + Keycloak + others to does not exist. The collapsed-topology pattern (ADR 0424) intended docker-runtime to be the only runtime, but the inventory still names the host runtime-control, and the harbor playbook hardcodes `hosts: runtime-control`."
-  - Symptoms visible from outside: registry.0fork.com returns 502 (nginx vhost upstream unreachable). chat / wiki / analytics / errors / ntfy / ci return 200/302 from the nginx catch-all but no real backend exists.
+  - Symptoms visible from outside: registry.example.org returns 502 (nginx vhost upstream unreachable). chat / wiki / analytics / errors / ntfy / ci return 200/302 from the nginx catch-all but no real backend exists.
   - This is not a "fix Harbor in 20 minutes" job. It is a "bootstrap 0fork's platform from scratch" job.

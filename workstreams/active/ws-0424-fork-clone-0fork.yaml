@@ -1,6 +1,6 @@
 id: ws-0424-fork-clone-0fork
 adr: '0424'
-title: 'ADR 0424 — 0fork.com Clone onto Hetzner AX41-NVMe'
+title: 'ADR 0424 — example.org Clone onto Hetzner AX41-NVMe'
 status: in_progress
 ready_to_merge: false
 live_applied: false
@@ -25,13 +25,13 @@ shared_surfaces:
 started: '2026-04-21'
 priority: p1
 surfaces:
-  - 0fork.com (full apex scope, apex wiped and repointed 2026-04-21)
-  - Hetzner AX41-NVMe #2952989 (65.109.84.223, 2a01:4f9:3051:52d5::2)
+  - example.org (full apex scope, apex wiped and repointed 2026-04-21)
+  - Hetzner AX41-NVMe #0000000 (203.0.113.3, 2001:db8::4)
   - .local/identity.yml.0fork (new, not committed)
   - .local/hetzner/dns.env (new, not committed)
 summary: >
   First real fork-viability test. Stands up a collapsed nested-Proxmox topology
-  on a Hetzner AX41-NVMe using 0fork.com (full apex) as the identity. Drives
+  on a Hetzner AX41-NVMe using example.org (full apex) as the identity. Drives
   ADR 0385 (identity core) and ADR 0407 (generic-by-default) to their limits.
   Also produces ADR 0425 — a retrospective on the 420-ADR build process and
   what the clone attempt revealed about gaps in the platform's forkability
@@ -206,16 +206,16 @@ ownership_manifest:
       mode: exclusive
 progress:
   completed_2026_04_21:
-    - Hetzner DNS API token verified against zone 0fork.com (id RmJf7JFvpQNfWdEZmhAeEK)
-    - SSH access to 65.109.84.223 confirmed with llm-agents@proxmox_florin_server key
+    - Hetzner DNS API token verified against zone example.org (id EXAMPLE0ZoneId00000000)
+    - SSH access to 203.0.113.3 confirmed with llm-agents@platform_server key
     - Host key fingerprint pinned (ED25519 9xWVsKZxKXoBR3O9369Ixj/Ke/qwiLQ5SBDli/STwVk)
     - Hardware inventory captured (Ryzen 3600, 62 GiB, 2x476 GB NVMe, /dev/kvm present)
     - ADR 0424 drafted
     - ADR 0425 retrospective drafted
     - Bootstrap runbook drafted
     - Identity overlay .local/identity.yml.0fork written (apex scope confirmed)
-    - 0fork.com apex DNS wiped and repointed at 65.109.84.223 (backup saved)
-    - Hostname set to fork-pve-01.0fork.com on box
+    - example.org apex DNS wiped and repointed at 203.0.113.3 (backup saved)
+    - Hostname set to debian-base-template.example.org on box
     - PVE repo + GPG key installed (pve-no-subscription trixie)
     - proxmox-default-kernel installed, reboot into 6.17.13-3-pve successful
     - proxmox-ve userland installed (pve-manager/9.1.8/a8e257e1ad64dd92)
@@ -232,7 +232,7 @@ progress:
   blocked_pending_operator:
     - Configure Hetzner WAN bridge vmbr0 (risk of lockout; needs Robot KVM standby)
     - Deploy Headscale inside clone and enroll workstation
-    - Set rDNS on 65.109.84.223 via Hetzner Robot (no API path)
+    - Set rDNS on 203.0.113.3 via Hetzner Robot (no API path)
     - Rotate the DNS token shared in chat on 2026-04-21
     - Verify Hetzner account name "Mr. Raabe" (non-blocking)
     - Retry Hetzner DNS writes once brownout lifts (or migrate zone pre-2026-05-20 shutdown)
@@ -240,9 +240,9 @@ progress:
     - Configure vmbr0 Hetzner WAN bridge (after operator KVM standby)
     - Converge runtime-control (Keycloak + step-ca + OpenBao + Headscale)
     - Converge postgres, mail-platform, runtime-apps, monitoring, nginx-edge
-    - Create DNS records on 0fork.com (wildcard already covers them; blocked on API brownout)
-    - Provision operator@0fork.com mailbox
-    - Send confirmation email from operator@0fork.com to baditaflorin@gmail.com
+    - Create DNS records on example.org (wildcard already covers them; blocked on API brownout)
+    - Provision operator@example.org mailbox
+    - Send confirmation email from operator@example.org to operator@example.com
     - Capture live-apply evidence and close workstream
 notes: >
   This workstream was started while the operator was AFK. Destructive actions

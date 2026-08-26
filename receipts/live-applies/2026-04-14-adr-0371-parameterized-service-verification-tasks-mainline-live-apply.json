@@ -64,7 +64,7 @@
     {
       "check": "Exact-main service replays and direct endpoint verification",
       "result": "pass",
-      "observed": "`repowise`, `litellm`, and `librechat` all completed their governed exact-main replays, and direct verification returned `HTTP 200` for `https://repowise.lv3.org/health`, `http://10.10.10.20:4000/health/liveliness`, and `https://chat.lv3.org/`; evidence: the matching `2026-04-14-ws-0371-mainline-*-live-apply-*.txt` transcripts plus `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-direct-verification-r1-0.178.142.txt`."
+      "observed": "`repowise`, `litellm`, and `librechat` all completed their governed exact-main replays, and direct verification returned `HTTP 200` for `https://repowise.example.com/health`, `http://10.10.10.20:4000/health/liveliness`, and `https://chat.example.com/`; evidence: the matching `2026-04-14-ws-0371-mainline-*-live-apply-*.txt` transcripts plus `receipts/live-applies/evidence/2026-04-14-ws-0371-mainline-direct-verification-r1-0.178.142.txt`."
     },
     {
       "check": "Live-apply receipt validation and whitespace diff check",

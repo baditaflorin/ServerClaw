@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schemas/deployment-v1/topology.json",
+  "$id": "https://example.com/schemas/deployment-v1/topology.json",
   "title": "Deployment Topology",
   "description": "Per-deployment infrastructure topology. Lives at .local/deployments/<slug>/topology.yml. Defines proxmox guests, network bridges, host IPs. Replaces inventory/host_vars/proxmox-host.yml. ADR 0440.",
   "type": "object",

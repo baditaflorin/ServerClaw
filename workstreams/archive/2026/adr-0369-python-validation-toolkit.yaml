@@ -103,7 +103,7 @@ notes: |
 
   Main promotion note:
   - The final origin/main push used a governed skip_remote_gate waiver because
-    repo-intake.lv3.org still reported a pre-existing certificate mismatch on
+    repo-intake.example.com still reported a pre-existing certificate mismatch on
     origin/main that was unrelated to ADR 0369. Receipt:
     receipts/gate-bypasses/20260414T081512Z-codex-adr-0369-main-promotion-r2-3509526-skip-remote-gate.json
 

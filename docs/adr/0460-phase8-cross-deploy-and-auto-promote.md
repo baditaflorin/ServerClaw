@@ -26,7 +26,7 @@ Two structural follow-ups remain, both addressed here:
 
 **Option B — Cross-deployment doctor (multi-deployment visibility).**
 Right now `make doctor` only inspects the local checkout. Two
-deployments (lv3.org + 0fork.com) sharing one codebase but diverging
+deployments (example.com + example.org) sharing one codebase but diverging
 in `live_apply_evidence` and per-deployment overlays are invisible to
 the gate. ADR 0456 (deployment-aware cert validation) and ADR 0459
 (deployment-lifecycle CLI parity) shipped per-deployment infra

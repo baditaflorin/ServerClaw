@@ -37,7 +37,7 @@
         "bypass": "skip_remote_gate",
         "reason_code": "controller_dependency_gap",
         "reason_summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
-        "owner": "baditaflorin@gmail.com",
+        "owner": "operator@example.com",
         "expires_on": "2026-04-06",
         "remediation_ref": "local-controller-missing-uv"
       },
@@ -47,7 +47,7 @@
         "bypass": "skip_remote_gate",
         "reason_code": "controller_dependency_gap",
         "reason_summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
-        "owner": "baditaflorin@gmail.com",
+        "owner": "operator@example.com",
         "expires_on": "2026-04-06",
         "remediation_ref": "local-controller-missing-uv"
       },
@@ -57,7 +57,7 @@
         "bypass": "skip_remote_gate",
         "reason_code": "controller_dependency_gap",
         "reason_summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
-        "owner": "baditaflorin@gmail.com",
+        "owner": "operator@example.com",
         "expires_on": "2026-04-06",
         "remediation_ref": "local-controller-missing-uv"
       }

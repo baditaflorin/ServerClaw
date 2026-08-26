@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-final-r3/scripts/remote_exec.sh pre-push-gate --local-fallback
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-final-r3/scripts/remote_exec.sh pre-push-gate --local-fallback
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
@@ -33,17 +33,17 @@ workstream-surfaces   passed             3.95
 yaml-lint             passed             15.64
 
 [packer-validate] docker command
-docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0298-main-final-r3-fbca9c5097/repo/.lv3-runs/20260331T130402Z-39c148783541/repo:/workspace -v /opt/builds/.packer.d:/root/.packer.d -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=39c14878354195eea45c998ec20774e532ce20745498c166d1574458aed2fe22 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T13:03:48.995266+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=7e74e1de8f7ef946fa743a159042bd71a130883c -e LV3_SNAPSHOT_BRANCH=HEAD -e PACKER_CACHE_ROOT=/root/.packer.d -e PACKER_PLUGIN_PATH=/root/.packer.d/plugins -w /workspace registry.lv3.org/check-runner/infra:2026.03.23 sh -c ./scripts/validate_packer_templates.sh
+docker run --rm --cpus=4 -v /home/ops/builds/platform_server/.lv3-session-workspaces/ws-0298-main-final-r3-fbca9c5097/repo/.lv3-runs/20260331T130402Z-39c148783541/repo:/workspace -v /opt/builds/.packer.d:/root/.packer.d -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=39c14878354195eea45c998ec20774e532ce20745498c166d1574458aed2fe22 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T13:03:48.995266+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=7e74e1de8f7ef946fa743a159042bd71a130883c -e LV3_SNAPSHOT_BRANCH=HEAD -e PACKER_CACHE_ROOT=/root/.packer.d -e PACKER_PLUGIN_PATH=/root/.packer.d/plugins -w /workspace registry.example.com/check-runner/infra:2026.03.23 sh -c ./scripts/validate_packer_templates.sh
 [packer-validate] stderr
-Unable to find image 'registry.lv3.org/check-runner/infra:2026.03.23' locally
+Unable to find image 'registry.example.com/check-runner/infra:2026.03.23' locally
 docker: Error response from daemon: received unexpected HTTP status: 502 Bad Gateway
 
 Run 'docker run --help' for more information
 
 [tofu-validate] docker command
-docker run --rm --cpus=4 -v /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0298-main-final-r3-fbca9c5097/repo/.lv3-runs/20260331T130402Z-39c148783541/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=39c14878354195eea45c998ec20774e532ce20745498c166d1574458aed2fe22 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T13:03:48.995266+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=7e74e1de8f7ef946fa743a159042bd71a130883c -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.lv3.org/check-runner/infra:2026.03.23 sh -c if [ -d tofu ]; then tofu -chdir=tofu validate; else echo 'No tofu configuration present'; fi
+docker run --rm --cpus=4 -v /home/ops/builds/platform_server/.lv3-session-workspaces/ws-0298-main-final-r3-fbca9c5097/repo/.lv3-runs/20260331T130402Z-39c148783541/repo:/workspace -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=39c14878354195eea45c998ec20774e532ce20745498c166d1574458aed2fe22 -e LV3_SNAPSHOT_GENERATED_AT=2026-03-31T13:03:48.995266+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=7e74e1de8f7ef946fa743a159042bd71a130883c -e LV3_SNAPSHOT_BRANCH=HEAD -w /workspace registry.example.com/check-runner/infra:2026.03.23 sh -c if [ -d tofu ]; then tofu -chdir=tofu validate; else echo 'No tofu configuration present'; fi
 [tofu-validate] stderr
-Unable to find image 'registry.lv3.org/check-runner/infra:2026.03.23' locally
+Unable to find image 'registry.example.com/check-runner/infra:2026.03.23' locally
 docker: Error response from daemon: received unexpected HTTP status: 502 Bad Gateway
 
 Run 'docker run --help' for more information

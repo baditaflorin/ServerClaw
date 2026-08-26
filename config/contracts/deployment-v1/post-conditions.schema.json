@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schemas/deployment-v1/post-conditions.json",
+  "$id": "https://example.com/schemas/deployment-v1/post-conditions.json",
   "title": "Post-Conditions Registry",
   "description": "Machine-checkable post-conditions consumed by scripts/self_check.py. Committed at config/post_conditions.yml. ADR 0484.",
   "type": "object",

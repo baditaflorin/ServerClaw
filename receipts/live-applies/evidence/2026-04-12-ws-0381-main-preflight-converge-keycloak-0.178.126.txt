@@ -2,14 +2,14 @@ Preflight workflow: converge-keycloak
 Description: Converge Keycloak on docker-runtime, provision its PostgreSQL backend on postgres, publish it at sso.example.com, and wire Grafana through the shared SSO broker.
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact changelog_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/changelog-portal via `make generate-changelog-portal`
-PASS bootstrap artifact docs_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/docs-portal via `make docs`
-PASS bootstrap artifact ops_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0381-origin-main/build/ops-portal via `make generate-ops-portal`
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
+PASS bootstrap artifact changelog_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/build/changelog-portal via `make generate-changelog-portal`
+PASS bootstrap artifact docs_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/build/docs-portal via `make docs`
+PASS bootstrap artifact ops_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0381-origin-main/build/ops-portal via `make generate-ops-portal`
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
 PASS env hetzner_dns_api_token: HETZNER_DNS_API_TOKEN is set
-INFO generated keycloak_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/database-password.txt
-INFO generated keycloak_bootstrap_admin_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt
-INFO generated keycloak_operator_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt
-INFO generated keycloak_grafana_client_secret: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grafana-client-secret.txt
-INFO generated keycloak_agent_client_secret: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
+INFO generated keycloak_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/database-password.txt
+INFO generated keycloak_bootstrap_admin_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/bootstrap-admin-password.txt
+INFO generated keycloak_operator_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/florin.badita-password.txt
+INFO generated keycloak_grafana_client_secret: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/grafana-client-secret.txt
+INFO generated keycloak_agent_client_secret: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/lv3-agent-hub-client-secret.txt
 Result: PASS (converge-keycloak)

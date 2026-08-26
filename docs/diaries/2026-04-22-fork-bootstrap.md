@@ -2,7 +2,7 @@
 
 **Author:** claude (session on branch `claude/gallant-chebyshev-b0def1`)
 **Context:** installing ServerClaw on a freshly reinstalled Debian 13
-Hetzner AX41-NVMe, using the 0fork.com identity, under the documented
+Hetzner AX41-NVMe, using the example.org identity, under the documented
 `make bootstrap` one-command path.
 
 > This diary exists because the operator asked for it explicitly:
@@ -99,7 +99,7 @@ ones hide.
 
 ## Successor prompt (for the next agent)
 
-> You are continuing the fork-bootstrap validation on 0fork.com. Read
+> You are continuing the fork-bootstrap validation on example.org. Read
 > ADR 0437, the 2026-04-22 postmortem, and this diary entry first. The
 > code changes are in place but end-to-end live-apply is unvalidated.
 > Run `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork
@@ -114,7 +114,7 @@ ones hide.
 ## 2026-04-22 (later that evening) — 7 more gaps closed, Stages 2-4 now green
 
 Picked up the baton from the earlier session. Ran `make bootstrap`
-twelve times against 65.109.84.223 with fork-pve-01 in clean-slate
+twelve times against 203.0.113.3 with debian-base-template in clean-slate
 state. Each failure was a distinct root-cause; each fix was a single
 commit to the committed repo (never a `.local/` patch). PR #31 merged
 to `main` with the accumulated fixes.
@@ -123,7 +123,7 @@ Gaps closed in order of discovery:
 
 1. **`proxmox_api_access` rejected self-signed pveproxy cert.**
    During Hetzner DNS brownout (read-only until 2026-05-20) ACME
-   cannot issue a real cert for `proxmox.0fork.com`, so PVE stays
+   cannot issue a real cert for `proxmox.example.org`, so PVE stays
    on its default self-signed `pveproxy-ssl.pem`. The token-probe
    was hard-coded to `validate_certs: true`. Fix: added
    `proxmox_api_validate_certs` default. Overlays that set
@@ -178,7 +178,7 @@ Gaps closed in order of discovery:
 
 End state after PR #31: `make bootstrap` goes cleanly through Stage 2
 (install-proxmox), Stage 3 (configure-network, harden-access), and
-Stage 4 (provision-guests). On a fresh fork-pve-01 all 17 guests
+Stage 4 (provision-guests). On a fresh debian-base-template all 17 guests
 clone from template 9000, boot, and reach cloud-init-complete.
 
 Stage 5 (converge-site) is untested. Expect more gaps there —
@@ -205,10 +205,10 @@ still the single-command self-replicating repo.
 
 ## 2026-04-23 — Stage 5 service convergences: 9 gaps closed, Coolify path clear
 
-Continuing parallel service convergences against the live 0fork.com deployment.
+Continuing parallel service convergences against the live example.org deployment.
 Today's session goal: get every service to `failed=0` so we can do the
 end-to-end wipe and prove `make bootstrap` works fully. The user's success
-criterion is `status.0fork.com` showing 100% green in Uptime Kuma.
+criterion is `status.example.org` showing 100% green in Uptime Kuma.
 
 ### What passed clean first time
 
@@ -234,16 +234,16 @@ role — `step_ca_runtime` uses `/opt/step-ca/secrets/hosts-password.txt`.
 Fix: new task in `step_ca_ssh_trust/tasks/main.yml` that copies the password
 from the controller's `.local/` onto the delegate before signing. PR #46.
 
-**3. `platform.yml` gate-reject because it had 0fork.com baked in**
+**3. `platform.yml` gate-reject because it had example.org baked in**
 The schema-validation gate generates `platform.yml` with
 `skip_local_override=True` (generic domains) and compares to committed.
-Committed had `0fork.com` from a generator run with the overlay active.
+Committed had `example.org` from a generator run with the overlay active.
 Fix: regenerated with the correct `skip_local_override=True` path so
 committed file uses `example.com` domains but retains real IPs from the
 topology overlay. PR #44.
 
 **4. `platform_config_prefix` produces digit-leading identifiers**
-`0fork.com → platform_config_prefix = "0fork"` → multiple identifiers
+`example.org → platform_config_prefix = "0fork"` → multiple identifiers
 built from it violated their respective naming rules:
 - PostgreSQL role `0fork_openbao_connect_all` → `CREATEUSER` fails
 - PVE role `0forkAutomation` → PVE validation rejected
@@ -279,12 +279,12 @@ calls `hetzner_dns_records` to create/update A/MX/TXT records fails.
 Status: **external blocker, not a code bug**. Workaround in place:
 running converge with `hetzner_dns_records` tasks skipped via
 `converge-mail-platform env=production` after the brownout lifts.
-DNS A records for `*.0fork.com → 65.109.84.223` were set manually
+DNS A records for `*.example.org → 203.0.113.3` were set manually
 on 2026-04-21 and are live.
 
 **8. Proxmox proxmox-host unreachable via default Tailscale IP**
 The fork clone has no Tailscale enrollment. `ansible_host` defaults to
-`100.64.0.1` (Tailscale). Fix: `LV3_PROXMOX_HOST_ADDR=65.109.84.223`
+`100.64.0.1` (Tailscale). Fix: `LV3_PROXMOX_HOST_ADDR=203.0.113.3`
 env var overrides the host address. Already documented in ADR 0430/0437.
 
 **9. ACME: DNS plugin creation blocked during brownout**
@@ -292,18 +292,18 @@ env var overrides the host address. Already documented in ADR 0430/0437.
 create the ACME DNS plugin. Fails during brownout. Fix:
 `EXTRA_ARGS="-e proxmox_security_manage_acme=false"` to skip until
 DNS API recovers. nginx-edge uses HTTP-01 challenge (webroot) since
-`*.0fork.com` A record is already live.
+`*.example.org` A record is already live.
 
 ### Coolify status
 
 Coolify converged `ok=19, changed=3, failed=0` in the first parallel run.
 The container is running on `coolify-apps` (10.10.10.71). Once nginx-edge
-converges with a valid TLS cert for `coolify.0fork.com` (HTTP-01, DNS is
-live), Coolify will be accessible at `https://coolify.0fork.com`.
+converges with a valid TLS cert for `coolify.example.org` (HTTP-01, DNS is
+live), Coolify will be accessible at `https://coolify.example.org`.
 
 From Coolify you can deploy any Git repo to a subdomain:
-1. Connect your repo (Gitea at `git.0fork.com` or GitHub)
-2. Add a service → choose subdomain (e.g. `myapp.0fork.com`)
+1. Connect your repo (Gitea at `git.example.org` or GitHub)
+2. Add a service → choose subdomain (e.g. `myapp.example.org`)
 3. Coolify handles container builds, reverse proxy config, and TLS renewal
    automatically via the nginx-edge integration
 
@@ -331,7 +331,7 @@ No manual configuration needed after initial TLS cert issuance.
 2. After platform_sql_prefix PRs merge, run `converge-openbao env=production`
 3. Run `converge-nginx env=production` — HTTP-01 cert should issue cleanly
 4. After all green: run `make converge-site env=production` and verify
-   `status.0fork.com` in Uptime Kuma
+   `status.example.org` in Uptime Kuma
 5. Once 100% green: wipe all VMs and run `make bootstrap` end-to-end
    to prove the self-replicating repo claim
 

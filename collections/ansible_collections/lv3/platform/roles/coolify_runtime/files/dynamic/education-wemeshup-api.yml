@@ -2,7 +2,7 @@
 # Routes /api/ requests to catalog-api (Go backend) with higher priority
 # than the catch-all catalog-web router so the frontend can reach the API.
 #
-# catalog-web Traefik label: Host(`education-wemeshup.apps.0fork.com`) && PathPrefix(`/`)
+# catalog-web Traefik label: Host(`education-wemeshup.apps.example.org`) && PathPrefix(`/`)
 # Without this file, ALL traffic (including /api/v1/) goes to the Vite frontend.
 #
 # IMPORTANT: Traefik v3 file provider requires double-quote syntax for matcher args.
@@ -20,7 +20,7 @@
 http:
   routers:
     api-education-wemeshup:
-      rule: 'Host("education-wemeshup.apps.0fork.com") && PathPrefix("/api/")'
+      rule: 'Host("education-wemeshup.apps.example.org") && PathPrefix("/api/")'
       entryPoints:
         - http
         - https

@@ -10,7 +10,7 @@ self = <test_subdomain_catalog.SubdomainCatalogTests testMethod=test_edge_oidc_r
 
     def test_edge_oidc_requires_authenticated_edge_site(self) -> None:
         broken_defaults = copy.deepcopy(self.public_edge_defaults)
-        del broken_defaults["public_edge_authenticated_sites"]["docs.lv3.org"]
+        del broken_defaults["public_edge_authenticated_sites"]["docs.example.com"]
 
 >       with self.assertRaisesRegex(
             ValueError,
@@ -31,7 +31,7 @@ self = <test_subdomain_catalog.SubdomainCatalogTests testMethod=test_missing_edg
         broken_catalog["subdomains"] = [
             entry
             for entry in broken_catalog["subdomains"]
-            if entry["fqdn"] != "grafana.lv3.org"
+            if entry["fqdn"] != "grafana.example.com"
         ]
 
 >       with self.assertRaisesRegex(
@@ -50,7 +50,7 @@ self = <test_subdomain_catalog.SubdomainCatalogTests testMethod=test_private_onl
 
     def test_private_only_requires_private_network_auth(self) -> None:
         broken_catalog = copy.deepcopy(self.catalog)
-        entry = subdomain_catalog.get_subdomain_entry(broken_catalog, "database.lv3.org")
+        entry = subdomain_catalog.get_subdomain_entry(broken_catalog, "database.example.com")
         entry["auth_requirement"] = "upstream_auth"
 
 >       with self.assertRaisesRegex(
@@ -75,9 +75,9 @@ self = <test_subdomain_catalog.SubdomainCatalogTests testMethod=test_repo_catalo
 tests/test_subdomain_catalog.py:24:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-catalog = {'reserved_prefixes': [{'allowed_fqdns': ['ops.lv3.org', 'ops.staging.lv3.org'], 'notes': 'Reserved for the generated ...ment': 'edge_oidc', 'environment': 'production', 'exposure': 'edge-published', 'fqdn': 'changelog.lv3.org', ...}, ...]}
-service_catalog = {'$schema': 'docs/schema/service-capability-catalog.schema.json', 'schema_version': '1.0.0', 'services': [{'adr': '009...{'production': {'status': 'active', 'subdomain': 'changelog.lv3.org', 'url': 'https://changelog.lv3.org'}}, ...}, ...]}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+catalog = {'reserved_prefixes': [{'allowed_fqdns': ['ops.example.com', 'ops.staging.example.com'], 'notes': 'Reserved for the generated ...ment': 'edge_oidc', 'environment': 'production', 'exposure': 'edge-published', 'fqdn': 'changelog.example.com', ...}, ...]}
+service_catalog = {'$schema': 'docs/schema/service-capability-catalog.schema.json', 'schema_version': '1.0.0', 'services': [{'adr': '009...{'production': {'status': 'active', 'subdomain': 'changelog.example.com', 'url': 'https://changelog.example.com'}}, ...}, ...]}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 public_edge_defaults = {'management_tailscale_ipv4': '{{ hostvars[public_edge_control_plane_host].management_tailscale_ipv4 }}', 'platform_po...ol_plane_host].postgres_ha }}', 'proxmox_guests': '{{ hostvars[public_edge_control_plane_host].proxmox_guests }}', ...}
 
     def validate_subdomain_catalog(
@@ -216,7 +216,7 @@ config = {'roles': {'_template': {'policy': 'exempt', 'reason': 'Service scaffol
             if extra:
                 details.append(f"unknown roles: {', '.join(extra)}")
 >           raise ValueError(f"{path} does not match the role tree: {'; '.join(details)}")
-E           ValueError: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0287-mainline-final/config/ansible-role-idempotency.yml does not match the role tree: missing roles: directus_postgres, directus_runtime
+E           ValueError: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0287-mainline-final/config/ansible-role-idempotency.yml does not match the role tree: missing roles: directus_postgres, directus_runtime
 
 scripts/ansible_role_idempotency.py:66: ValueError
 ____ SubdomainExposureAuditTests.test_repo_registry_tracks_known_hostnames _____
@@ -233,9 +233,9 @@ scripts/subdomain_exposure_audit.py:348: in build_registry
     subdomain_catalog.validate_subdomain_catalog(catalog, service_catalog, host_vars, public_edge_defaults)
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-catalog = {'reserved_prefixes': [{'allowed_fqdns': ['ops.lv3.org', 'ops.staging.lv3.org'], 'notes': 'Reserved for the generated ...ment': 'edge_oidc', 'environment': 'production', 'exposure': 'edge-published', 'fqdn': 'changelog.lv3.org', ...}, ...]}
-service_catalog = {'$schema': 'docs/schema/service-capability-catalog.schema.json', 'schema_version': '1.0.0', 'services': [{'adr': '009...{'production': {'status': 'active', 'subdomain': 'changelog.lv3.org', 'url': 'https://changelog.lv3.org'}}, ...}, ...]}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+catalog = {'reserved_prefixes': [{'allowed_fqdns': ['ops.example.com', 'ops.staging.example.com'], 'notes': 'Reserved for the generated ...ment': 'edge_oidc', 'environment': 'production', 'exposure': 'edge-published', 'fqdn': 'changelog.example.com', ...}, ...]}
+service_catalog = {'$schema': 'docs/schema/service-capability-catalog.schema.json', 'schema_version': '1.0.0', 'services': [{'adr': '009...{'production': {'status': 'active', 'subdomain': 'changelog.example.com', 'url': 'https://changelog.example.com'}}, ...}, ...]}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 public_edge_defaults = {'management_tailscale_ipv4': '{{ hostvars[public_edge_control_plane_host].management_tailscale_ipv4 }}', 'platform_po...ol_plane_host].postgres_ha }}', 'proxmox_guests': '{{ hostvars[public_edge_control_plane_host].proxmox_guests }}', ...}
 
     def validate_subdomain_catalog(

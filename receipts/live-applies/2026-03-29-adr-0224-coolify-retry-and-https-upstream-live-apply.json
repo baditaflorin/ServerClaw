@@ -10,7 +10,7 @@
   "platform_version_context": "0.130.35",
   "workflow_id": "adr-0224-coolify-retry-and-https-upstream-live-apply",
   "adr": "0224",
-  "summary": "Hardened the governed Coolify repo-deploy wrapper with bounded retries for transient registry failures, corrected the generated Coolify app edge upstream to HTTPS `443`, replayed the NGINX edge and scoped guest-network policy, and restored healthy public reachability for `education-wemeshup.apps.lv3.org` while recording that fresh rebuilds from upstream `main` still fail on repeated Docker Hub token timeouts.",
+  "summary": "Hardened the governed Coolify repo-deploy wrapper with bounded retries for transient registry failures, corrected the generated Coolify app edge upstream to HTTPS `443`, replayed the NGINX edge and scoped guest-network policy, and restored healthy public reachability for `education-wemeshup.apps.example.com` while recording that fresh rebuilds from upstream `main` still fail on repeated Docker Hub token timeouts.",
   "targets": [
     {
       "kind": "guest",
@@ -26,13 +26,13 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "application",
-      "name": "education-wemeshup.apps.lv3.org",
-      "address": "https://education-wemeshup.apps.lv3.org"
+      "name": "education-wemeshup.apps.example.com",
+      "address": "https://education-wemeshup.apps.example.com"
     }
   ],
   "verification": [
@@ -54,7 +54,7 @@
     {
       "check": "Governed deployment retry behavior",
       "result": "partial",
-      "observed": "`python3 scripts/coolify_tool.py deploy-repo --repo git@github.com:baditaflorin/education_wemeshup.git --branch main --source private-deploy-key --app-name education-wemeshup --project 'LV3 Apps' --environment production --build-pack dockercompose --docker-compose-location compose.yaml --compose-domain catalog-web=education-wemeshup.apps.lv3.org --ports 80 --description 'education_wemeshup production update to latest main' --force --wait --timeout 1800 --max-deploy-attempts 5 --retry-delay 5` retried five times and exposed the same classified failure on every attempt: `docker-registry-auth-timeout` while fetching Docker Hub tokens for base images such as `alpine`, `node`, and `nginxinc/nginx-unprivileged`."
+      "observed": "`python3 scripts/coolify_tool.py deploy-repo --repo git@github.com:baditaflorin/education_wemeshup.git --branch main --source private-deploy-key --app-name education-wemeshup --project 'LV3 Apps' --environment production --build-pack dockercompose --docker-compose-location compose.yaml --compose-domain catalog-web=education-wemeshup.apps.example.com --ports 80 --description 'education_wemeshup production update to latest main' --force --wait --timeout 1800 --max-deploy-attempts 5 --retry-delay 5` retried five times and exposed the same classified failure on every attempt: `docker-registry-auth-timeout` while fetching Docker Hub tokens for base images such as `alpine`, `node`, and `nginxinc/nginx-unprivileged`."
     },
     {
       "check": "Generated edge upstream correction",
@@ -69,19 +69,19 @@
     {
       "check": "Scoped guest-network replay for Coolify HTTPS ingress",
       "result": "pass",
-      "observed": "A scoped `playbooks/guest-network-policy.yml` replay for `proxmox_florin,coolify-lv3` completed with `proxmox_florin ok=22 changed=3 failed=0` and `coolify-lv3 ok=13 changed=0 failed=0`, reinstating the Proxmox guest-firewall path used by `nginx-lv3` to reach Coolify on TCP `443`."
+      "observed": "A scoped `playbooks/guest-network-policy.yml` replay for `proxmox-host,coolify-lv3` completed with `proxmox-host ok=22 changed=3 failed=0` and `coolify-lv3 ok=13 changed=0 failed=0`, reinstating the Proxmox guest-firewall path used by `nginx-lv3` to reach Coolify on TCP `443`."
     },
     {
       "check": "Public application reachability after edge and firewall replay",
       "result": "pass",
-      "observed": "`curl -ksSI --max-time 10 --resolve education-wemeshup.apps.lv3.org:443:65.108.75.123 https://education-wemeshup.apps.lv3.org/` returned `HTTP/2 200`, and `curl -ksS --max-time 10 --resolve education-wemeshup.apps.lv3.org:443:65.108.75.123 https://education-wemeshup.apps.lv3.org/api/v1/catalog/taxonomy | jq '.meta.apiVersion, .meta.categoryCount, .meta.activityCount'` returned `\"v1\"`, `2`, and `6`."
+      "observed": "`curl -ksSI --max-time 10 --resolve education-wemeshup.apps.example.com:443:203.0.113.1 https://education-wemeshup.apps.example.com/` returned `HTTP/2 200`, and `curl -ksS --max-time 10 --resolve education-wemeshup.apps.example.com:443:203.0.113.1 https://education-wemeshup.apps.example.com/api/v1/catalog/taxonomy | jq '.meta.apiVersion, .meta.categoryCount, .meta.activityCount'` returned `\"v1\"`, `2`, and `6`."
     }
   ],
   "evidence_refs": [
     "docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md",
     "docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md",
     "docs/runbooks/configure-coolify.md",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "inventory/group_vars/platform.yml",
     "scripts/coolify_tool.py",
     "scripts/generate_platform_vars.py",

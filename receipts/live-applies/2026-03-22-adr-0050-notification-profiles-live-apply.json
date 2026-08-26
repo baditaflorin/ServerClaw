@@ -40,7 +40,7 @@
     {
       "check": "Per-profile outbound delivery",
       "result": "pass",
-      "observed": "Live sends through the gateway returned HTTP 200 via the Brevo API for alerts@lv3.org, platform@lv3.org, and agents@lv3.org."
+      "observed": "Live sends through the gateway returned HTTP 200 via the Brevo API for alerts@example.com, platform@example.com, and agents@example.com."
     },
     {
       "check": "Per-profile gateway counters",

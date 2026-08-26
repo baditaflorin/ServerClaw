@@ -13,7 +13,7 @@
     "matchingEventId": null,
     "metadata": {},
     "numComments": 0,
-    "permalink": "https://errors.lv3.org/platform-findings/issues/11",
+    "permalink": "https://errors.example.com/platform-findings/issues/11",
     "project": {
       "id": "3",
       "name": "Platform Findings",

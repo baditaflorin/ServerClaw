@@ -77,4 +77,4 @@ Receipt schema:
 
 - [ADR 0461 — Atomic Receipt Write](0461-atomic-receipt-write-and-dangling-check.md)
 - [ADR 0463 — Health-Probe Runner](0463-post-converge-health-probe.md)
-- 2026-04-28 ops.0fork.com 500 incident — the failure mode this ADR closes.
+- 2026-04-28 ops.example.org 500 incident — the failure mode this ADR closes.

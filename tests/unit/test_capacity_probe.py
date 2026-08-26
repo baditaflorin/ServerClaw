@@ -47,7 +47,7 @@ storage=local|zfs|1024|800
 storage=local-lvm|lvm|2048|1500
 cap=nvme
 cap=gpu
-public_ipv4=65.109.84.223
+public_ipv4=203.0.113.3
 """
     result = probe._parse_probe_output(raw)
     h = result["host"]
@@ -55,7 +55,7 @@ public_ipv4=65.109.84.223
     assert h["cores"] == 16
     assert h["threads"] == 32
     assert h["capabilities"] == ["nvme", "gpu"]
-    assert h["networks"]["public_ipv4"] == "65.109.84.223"
+    assert h["networks"]["public_ipv4"] == "203.0.113.3"
     assert len(h["storage"]) == 2
     assert h["storage"][0] == {"name": "local", "type": "zfs", "total_gb": 1024, "free_gb": 800}
     assert h["storage"][1] == {"name": "local-lvm", "type": "lvm", "total_gb": 2048, "free_gb": 1500}

@@ -124,8 +124,8 @@ notes: |
   - uv run --with pyyaml python scripts/generate_cross_cutting_artifacts.py --check
   - uv run --with pytest --with pyyaml pytest tests/test_keycloak_playbook.py tests/test_session_logout_verify.py tests/test_nginx_edge_publication_role.py tests/test_restic_config_backup.py -q
   - ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=keycloak env=production
-  - curl https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
-  - uv run --with playwright python scripts/session_logout_verify.py --password-file .local/keycloak/outline.automation-password.txt --edge-url https://home.lv3.org/ --edge-logout-url https://home.lv3.org/.well-known/lv3/session/logout --outline-oidc-url https://wiki.lv3.org/auth/oidc --outline-logout-url https://wiki.lv3.org/logout --logged-out-url https://ops.lv3.org/.well-known/lv3/session/logged-out --timeout-seconds 90
+  - curl https://sso.example.com/realms/lv3/.well-known/openid-configuration
+  - uv run --with playwright python scripts/session_logout_verify.py --password-file .local/keycloak/outline.automation-password.txt --edge-url https://home.example.com/ --edge-logout-url https://home.example.com/.well-known/lv3/session/logout --outline-oidc-url https://wiki.example.com/auth/oidc --outline-logout-url https://wiki.example.com/logout --logged-out-url https://ops.example.com/.well-known/lv3/session/logged-out --timeout-seconds 90
   - python scripts/trigger_restic_live_apply.py --env production --mode restore-verify --triggered-by ws-0382-mainline-restore-verify
 
   Branch-local outcome:

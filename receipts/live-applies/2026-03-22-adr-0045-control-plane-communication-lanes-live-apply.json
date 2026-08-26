@@ -12,7 +12,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.118.189.95"
     },
     {
@@ -51,7 +51,7 @@
     {
       "check": "Message and event lanes",
       "result": "pass",
-      "observed": "docker-runtime-lv3 is listening on TCP 587, the Proxmox sendmail endpoint remains lv3-ops-email to baditaflorin@gmail.com, and the mail gateway OpenAPI contract still includes /webhooks/stalwart as the governed event sink."
+      "observed": "docker-runtime-lv3 is listening on TCP 587, the Proxmox sendmail endpoint remains lv3-ops-email to operator@example.com, and the mail gateway OpenAPI contract still includes /webhooks/stalwart as the governed event sink."
     }
   ],
   "evidence_refs": [

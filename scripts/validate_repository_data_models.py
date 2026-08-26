@@ -3222,7 +3222,7 @@ def validate_replaceability_review_data() -> None:
 # TODO(ADR-0424): validate_identity_prefixes()
 #
 # Postmortem 2026-04-23-digit-prefix-domain-identifier-compat.md describes a
-# class of breakage where a digit-leading platform_domain (e.g. "0fork.com")
+# class of breakage where a digit-leading platform_domain (e.g. "example.org")
 # causes platform_config_prefix = "0fork", which is injected into identifier
 # namespaces (PostgreSQL roles, PVE users/roles, POSIX usernames, Proxmox ACME
 # plugin IDs, Proxmox storage IDs) that all require a letter-leading value.
@@ -3255,7 +3255,7 @@ def validate_replaceability_review_data() -> None:
 #               f"platform_sql_prefix '{rendered}' does not match ^[a-z_][a-z0-9_]*$ "
 #               f"(PostgreSQL role / Proxmox ID grammar)"
 #           )
-#       # Spot-check derived identifiers that caused convergence failures on 0fork.com
+#       # Spot-check derived identifiers that caused convergence failures on example.org
 #       # (see postmortem for full list)
 #       main_vars = require_mapping(load_yaml(GLOBAL_VARS_PATH_CANDIDATES[1]), "main.yml")
 #       for key in (

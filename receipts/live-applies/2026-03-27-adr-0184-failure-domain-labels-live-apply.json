@@ -13,8 +13,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -72,7 +72,7 @@
     {
       "check": "Ansible syntax validation",
       "result": "pass",
-      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/proxmox-install.yml --syntax-check --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519` passed."
+      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False uvx --from ansible-core ansible-playbook -i inventory/hosts.yml playbooks/proxmox-install.yml --syntax-check --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519` passed."
     },
     {
       "check": "Initial full guest converge",
@@ -82,24 +82,24 @@
     {
       "check": "Scoped guest label replay",
       "result": "pass",
-      "observed": "`LV3_RUN_ID=ws0184labels ./scripts/run_with_namespace.sh ansible-playbook -i inventory/hosts.yml playbooks/site.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 --tags guests -e @.local/ws-0184-proxmox-guests-active.json` completed successfully against the existing guest set `110/120/130/140/150/160`."
+      "observed": "`LV3_RUN_ID=ws0184labels ./scripts/run_with_namespace.sh ansible-playbook -i inventory/hosts.yml playbooks/site.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 --tags guests -e @.local/ws-0184-proxmox-guests-active.json` completed successfully against the existing guest set `110/120/130/140/150/160`."
     },
     {
       "check": "Live Proxmox tag verification",
       "result": "pass",
-      "observed": "The final `qm config` tag snapshot confirms ADR 0184 labels on `110/120/130/140/150/160`, including `aag-*`, `fd-host-proxmox-florin`, `pc-*`, and the recovery waiver tag on `backup-lv3`."
+      "observed": "The final `qm config` tag snapshot confirms ADR 0184 labels on `110/120/130/140/150/160`, including `aag-*`, `fd-host-proxmox-host`, `pc-*`, and the recovery waiver tag on `backup-lv3`."
     },
     {
       "check": "PostgreSQL standby live drift",
       "result": "partial",
-      "observed": "`qm list` still shows no `151`, and `qm status 151` returns `Configuration file 'nodes/Debian-trixie-latest-amd64-base/qemu-server/151.conf' does not exist`."
+      "observed": "`qm list` still shows no `151`, and `qm status 151` returns `Configuration file 'nodes/debian-base-template/qemu-server/151.conf' does not exist`."
     }
   ],
   "evidence_refs": [
     "docs/adr/0184-failure-domain-labels-and-anti-affinity-policy.md",
     "docs/runbooks/failure-domain-policy.md",
     "docs/workstreams/ws-0184-live-apply.md",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "config/environment-topology.json",
     "scripts/failure_domain_policy.py",
     "scripts/validate_repository_data_models.py",

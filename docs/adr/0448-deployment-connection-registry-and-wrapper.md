@@ -28,11 +28,11 @@ opt-in Makefile shim (`MULTI_DEPLOYMENT_ENABLED=1` resolves
 generators).
 
 Two ergonomics gaps remain before "I want to converge ops-portal on the
-0fork.com server" is a one-line operator command:
+example.org server" is a one-line operator command:
 
 1. **SSH connection metadata is not per-deployment data.** Today an
    operator running anything against the 0fork box has to remember:
-   `LV3_PROXMOX_HOST_ADDR=65.109.84.223`, `LV3_PROXMOX_HOST_PORT=2222`,
+   `LV3_PROXMOX_HOST_ADDR=203.0.113.3`, `LV3_PROXMOX_HOST_PORT=2222`,
    `LV3_BOOTSTRAP_SSH_PRIVATE_KEY=.local/ssh/bootstrap.id_ed25519` (the
    ops-on-VM key, *not* the Hetzner-host root key). Forgetting any one
    of those produces an opaque `Connection to UNKNOWN port 65535 timed
@@ -67,7 +67,7 @@ to reach the deployment's Proxmox host and its guest VMs:
 schema_version: 1
 
 proxmox_host:
-  addr: 65.109.84.223           # public address of the Proxmox host
+  addr: 203.0.113.3           # public address of the Proxmox host
   port: 2222                    # SSH port (Hetzner default 22, hardened to 2222 here)
   user: ops                     # admin user on the Proxmox host
   key: bootstrap.id_ed25519     # path under .local/ssh/ — key for SSH'ing root@<proxmox>
@@ -100,7 +100,7 @@ formats:
 
 ```bash
 $ python3 scripts/deployment.py connection --slug 0fork --format=env
-LV3_PROXMOX_HOST_ADDR=65.109.84.223
+LV3_PROXMOX_HOST_ADDR=203.0.113.3
 LV3_PROXMOX_HOST_PORT=2222
 LV3_PROXMOX_HOST_USER=ops
 LV3_BOOTSTRAP_SSH_PRIVATE_KEY=/abs/path/.local/ssh/bootstrap.id_ed25519
@@ -174,5 +174,5 @@ has soaked.
 - [ADR 0440 — Per-Deployment Identity & Artifact Isolation](0440-per-deployment-identity-and-artifact-isolation.md)
 - [ADR 0442 — Multi-Deployment Make Interface](0442-multi-deployment-make-interface-and-worktree-binding.md)
 - [ADR 0445 — Phase 1 Multi-Deployment Hardening](0445-phase1-multi-deployment-hardening.md)
-- 2026-04-28 ops.0fork.com recovery (v0.179.5 release notes) — the
+- 2026-04-28 ops.example.org recovery (v0.179.5 release notes) — the
   ~30-minute SSH diagnostic that motivated this ADR.

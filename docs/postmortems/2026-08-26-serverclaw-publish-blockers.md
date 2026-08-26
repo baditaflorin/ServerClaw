@@ -9,10 +9,10 @@ unrelated certificate-validation failure on push. Neither issue was
 introduced by the change being published; both were latent drift the
 respective gates correctly caught.
 
-## Issue 1: sanitization coverage gap (0fork.com)
+## Issue 1: sanitization coverage gap (example.org)
 
 `scripts/audit_sanitization_coverage.py` found 3 CRITICAL gaps: the
-`0fork.com` domain and two PII strings from an old identity overlay
+`example.org` domain and two PII strings from an old identity overlay
 were never added to `config/publication-sanitization.yaml`'s Tier C
 rules, meaning `docs/adr/0424` and several workstream files carrying the
 real domain, operator PII, the real public IP/IPv6, Hetzner DNS zone ID,
@@ -20,12 +20,12 @@ and Hetzner server order number would have leaked to the public
 ServerClaw repo on next publish.
 
 Fix: added Tier C `string_replacements` + `leak_markers` for all of the
-above, mirroring the existing `lv3.org`/prod treatment.
+above, mirroring the existing `example.com`/prod treatment.
 
 ## Issue 2: changelog/docs/headscale cert_mismatch
 
 The pre-push cert validation gate (ADR 0375) flagged
-`changelog.lv3.org`, `docs.lv3.org`, `headscale.lv3.org` as
+`changelog.example.com`, `docs.example.com`, `headscale.example.com` as
 `cert_mismatch`. Root cause was two-fold:
 
 1. **Live**: `certbot-dns-hetzner` was missing entirely on the
@@ -34,12 +34,12 @@ The pre-push cert validation gate (ADR 0375) flagged
    old API is now fully retired — it 301-redirects to a login page).
    Fixed live: plugin installed, credentials corrected to a
    project-scoped Hetzner Cloud API token, `0mcp-edge` and
-   `apps.0mcp.com` certs renewed (`0mcp-edge` had ~5 hours left at time
+   `apps.example.org` certs renewed (`0mcp-edge` had ~5 hours left at time
    of fix).
 2. **Declared**: `config/certificate-catalog.json` still listed these
-   three services under their pre-rename `.lv3.org` names and the old
+   three services under their pre-rename `.example.com` names and the old
    `lv3-edge` bundle path, even though the live nginx vhosts have used
-   `changelog.0mcp.com` / `docs.0mcp.com` / `headscale.0mcp.com` and the
+   `changelog.example.org` / `docs.example.org` / `headscale.example.org` and the
    `0mcp-edge` bundle for some time. The gate was correctly detecting
    real drift between declared and live state — the declared state was
    just stale. Fixed: updated the three catalog entries to match live
@@ -54,9 +54,9 @@ The pre-push cert validation gate (ADR 0375) flagged
   sharing the same stale `lv3-edge` bundle path; only the 3 that were
   actively failing validation were corrected here. Worth a dedicated
   audit pass rather than a blind bulk find-replace, since some services
-  may have their own dedicated cert bundles (as `apps.0mcp.com` does)
+  may have their own dedicated cert bundles (as `apps.example.org` does)
   rather than the shared wildcard.
-- A `0mpc.com` domain (transposed from `0mcp.com`) has ~25 certificates,
-  all already expired or failing renewal, mirroring `0mcp.com`'s entire
+- A `0mpc.com` domain (transposed from `example.org`) has ~25 certificates,
+  all already expired or failing renewal, mirroring `example.org`'s entire
   subdomain structure. Not investigated — unclear if it's active,
   abandoned, or a historical typo artifact.

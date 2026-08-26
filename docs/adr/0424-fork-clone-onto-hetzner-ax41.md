@@ -1,4 +1,4 @@
-# ADR 0424: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at 0fork.com
+# ADR 0424: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at example.org
 
 - Status: Proposed
 - Implementation Status: Pending provisioning (server delivered; no host-level changes yet)
@@ -21,7 +21,7 @@ The platform has been built over ~420 ADRs as an interactive pair-programming
 session between one operator and an LLM agent. The central question this
 ADR answers: **is the platform actually forkable?** Can a second operator
 (or a disaster-recovery clone of the existing operator) stand up a semantic
-equivalent of `lv3.org` on a new domain, on a new server, from the committed
+equivalent of `example.com` on a new domain, on a new server, from the committed
 code plus the two overlay files (`.local/identity.yml`,
 `inventory/host_vars/proxmox-host.yml`), without hidden chat context?
 
@@ -30,18 +30,18 @@ core) and ADR 0407 (generic-by-default). It was never exercised end-to-end.
 
 ### The test deployment
 
-- **New domain**: `0fork.com` (test zone, Hetzner DNS, already exists in the
+- **New domain**: `example.org` (test zone, Hetzner DNS, already exists in the
   operator's Hetzner account with 15 default records pointing at an unrelated
   host at `88.198.219.246`)
-- **New server**: Hetzner AX41-NVMe #2952989
-  - IPv4: `65.109.84.223/26`, gateway derivable via Hetzner subnet math
-  - IPv6: `2a01:4f9:3051:52d5::2/64`
+- **New server**: Hetzner AX41-NVMe #0000000
+  - IPv4: `203.0.113.3/26`, gateway derivable via Hetzner subnet math
+  - IPv6: `2001:db8::4/64`
   - Region: Helsinki (HEL1) — same region as prod, different rack
   - CPU: AMD Ryzen 5 3600, 6c/12t, SVM enabled (`/dev/kvm` present, 12 virt flags)
   - RAM: 62 GiB
   - Storage: 2 × 476.9 GB Samsung NVMe (raw, no RAID configured at provisioning)
   - OS: Debian 13 trixie (English)
-- **Access**: SSH ed25519 key `llm-agents@proxmox_florin_server`
+- **Access**: SSH ed25519 key `llm-agents@platform_server`
   (MD5 `31:31:ba:17:cf:95:c6:90:81:a8:d6:41:9c:d2:02:a3`, SHA256
   `+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ`)
 - **Host key pinned in `known_hosts`** (ed25519
@@ -49,7 +49,7 @@ core) and ADR 0407 (generic-by-default). It was never exercised end-to-end.
 
 ### Prod vs clone resource envelope
 
-| Resource | Prod (65.108.75.123) | Clone (65.109.84.223) | Ratio |
+| Resource | Prod (203.0.113.1) | Clone (203.0.113.3) | Ratio |
 |----------|----------------------|------------------------|-------|
 | Physical cores / threads | Unknown / likely 16–32 | 6c / 12t | ≈ 40 % |
 | RAM | ≈ 128 GiB | 62 GiB | ≈ 48 % |
@@ -108,7 +108,7 @@ clone. ADR must not claim otherwise.
 
 ### 3. Domain & DNS scope — apex takeover (confirmed 2026-04-21)
 
-The operator explicitly authorised wiping the `0fork.com` apex. The previous
+The operator explicitly authorised wiping the `example.org` apex. The previous
 deployment at `88.198.219.246` (default Hetzner `your-server.de` mail infra,
 autoconfig, SRV records) was **destroyed** to free the apex. A full zone dump
 was captured first at
@@ -117,15 +117,15 @@ restoration is a single-script replay of that JSON if reversal is ever needed.
 
 **Apex records after wipe** (confirmed live at 2026-04-21):
 
-- `A    0fork.com     → 65.109.84.223`
-- `AAAA 0fork.com     → 2a01:4f9:3051:52d5::2`
-- `A    *.0fork.com   → 65.109.84.223`   (wildcard for service subdomains)
-- `AAAA *.0fork.com   → 2a01:4f9:3051:52d5::2`
-- `NS   0fork.com     → ns1.your-server.de. / ns.second-ns.com. / ns3.second-ns.de.` (preserved)
-- `SOA  0fork.com     → ns1.your-server.de.` (preserved)
+- `A    example.org     → 203.0.113.3`
+- `AAAA example.org     → 2001:db8::4`
+- `A    *.example.org   → 203.0.113.3`   (wildcard for service subdomains)
+- `AAAA *.example.org   → 2001:db8::4`
+- `NS   example.org     → ns1.your-server.de. / ns.second-ns.com. / ns3.second-ns.de.` (preserved)
+- `SOA  example.org     → ns1.your-server.de.` (preserved)
 
-Service identities land on `sso.0fork.com`, `chat.0fork.com`, `ops.0fork.com`,
-`proxmox.0fork.com`, etc. — a semantic 1:1 mapping of the prod `*.lv3.org`
+Service identities land on `sso.example.org`, `chat.example.org`, `ops.example.org`,
+`proxmox.example.org`, etc. — a semantic 1:1 mapping of the prod `*.example.com`
 hostnames under the clone apex.
 
 MX / DKIM / SPF / DMARC are intentionally **not** re-created at wipe time —
@@ -146,18 +146,18 @@ make converge-<service> env=clone
 Values overridden for the clone (apex scope):
 
 ```yaml
-platform_domain: 0fork.com
-platform_operator_email: operator@0fork.com
-platform_operator_name: "0fork Clone Operator"
-hetzner_dns_zone_name: 0fork.com
-hetzner_dns_zone_id: RmJf7JFvpQNfWdEZmhAeEK
-management_ipv4: 65.109.84.223
-management_gateway4: 65.109.84.193       # verified via `ip route` on host
-management_ipv6: "2a01:4f9:3051:52d5::2"
-hetzner_ipv4_route_network: 65.109.84.192  # /26 network base
+platform_domain: example.org
+platform_operator_email: operator@example.org
+platform_operator_name: "Platform Operator"
+hetzner_dns_zone_name: example.org
+hetzner_dns_zone_id: EXAMPLE0ZoneId00000000
+management_ipv4: 203.0.113.3
+management_gateway4: 203.0.113.66       # verified via `ip route` on host
+management_ipv6: "2001:db8::4"
+hetzner_ipv4_route_network: 203.0.113.192  # /26 network base
 management_interface: enp41s0
-host_public_hostname: fork-pve-01
-proxmox_node_name: fork-pve-01
+host_public_hostname: debian-base-template
+proxmox_node_name: debian-base-template
 platform_guest_network_cidr: 10.20.10.0/24   # different from prod's 10.10.10.0/24
 platform_tailscale_tailnet_name: 0fork-clone  # new, isolated from prod tailnet
 ```
@@ -167,16 +167,16 @@ Full overlay at `.local/identity.yml.0fork` (main worktree, not committed).
 ### 5. Email path for this ADR's "confirmation email" deliverable
 
 The operator asked for a confirmation email from a newly-created address on
-the clone to `baditaflorin@gmail.com`. The clone uses the **same mail path as
+the clone to `operator@example.com`. The clone uses the **same mail path as
 prod**: Stalwart mail stack on `mail-platform` VM as primary outbound, Brevo
 API bridge (`.local/mail-platform/brevo-api-key.txt`) as the delivery transport
 that actually hits Gmail (new Hetzner IP reputation is poor for direct SMTP to
 Gmail, as documented in ADR 0041).
 
 Concrete flow:
-1. Stalwart hosts the mailbox `operator@clone.0fork.com`
-2. DKIM/SPF/DMARC TXT records published on `clone.0fork.com` via Hetzner DNS API
-3. rDNS set on `65.109.84.223` → `mail.clone.0fork.com` via Hetzner Robot
+1. Stalwart hosts the mailbox `operator@clone.example.org`
+2. DKIM/SPF/DMARC TXT records published on `clone.example.org` via Hetzner DNS API
+3. rDNS set on `203.0.113.3` → `mail.clone.example.org` via Hetzner Robot
    (requires manual step — no API for rDNS in Hetzner Robot for dedicated
    servers on the legacy API; flag for operator)
 4. Outbound submission via Stalwart → Brevo bridge → Gmail
@@ -187,7 +187,7 @@ deployed**. It is not a one-liner.
 ### 6. Execution order (strict)
 
 1. ✅ **DONE**: DNS token + SSH access verified (this session)
-2. ⏳ Operator decides: subdomain (`clone.0fork.com`) vs full apex takeover
+2. ⏳ Operator decides: subdomain (`clone.example.org`) vs full apex takeover
 3. ⏳ Bootstrap host: hostname, Tailscale join, base hardening
    (see `docs/runbooks/hetzner-bare-metal-bootstrap.md`)
 4. ⏳ mdadm RAID1, install Proxmox VE
@@ -197,7 +197,7 @@ deployed**. It is not a one-liner.
 7. ⏳ Converge `runtime-control` (Keycloak first — identity anchor)
 8. ⏳ Converge `postgres`, `mail-platform`, `runtime-apps`, `monitoring`
 9. ⏳ Converge `nginx-edge` + public DNS records (subdomain scope only)
-10. ⏳ Provision `operator@clone.0fork.com` mailbox, send confirmation email
+10. ⏳ Provision `operator@clone.example.org` mailbox, send confirmation email
 11. ⏳ Write live-apply evidence + close workstream
 
 ---
@@ -216,7 +216,7 @@ deployed**. It is not a one-liner.
 - Running nested Proxmox on 12 threads / 62 GiB RAM is tight — expect
   noisy-neighbor-style slowdowns during converge storms.
 - rDNS cannot be set via API — manual Robot step is a gate (flagged in runbook).
-- `0fork.com` apex already serves something else; the clone is scoped to a
+- `example.org` apex already serves something else; the clone is scoped to a
   subdomain. Any future apex takeover is a separate, destructive decision.
 
 ### Neutral
@@ -232,7 +232,7 @@ deployed**. It is not a one-liner.
   include the substrate.
 - **LXC-on-Debian without Proxmox**: similar objection.
 - **Matching prod 1:1**: does not fit 62 GiB / 12 threads.
-- **Apex takeover of 0fork.com**: destructive, rejected pending explicit
+- **Apex takeover of example.org**: destructive, rejected pending explicit
   operator confirmation.
 - **Send confirmation email via Brevo directly (no Stalwart)**: sidesteps the
   mail stack and defeats the point of proving the clone's mail path works.
@@ -242,9 +242,9 @@ deployed**. It is not a one-liner.
 ## Operator decisions — resolution log
 
 1. ✅ **Apex vs subdomain**: APEX. Wipe completed 2026-04-21 with backup.
-2. ✅ **Hostname**: `fork-pve-01`.
-3. ✅ **Gateway**: `65.109.84.193`, `/26` subnet base `65.109.84.192`
-   (verified via `ssh root@65.109.84.223 'ip route'` on 2026-04-21).
+2. ✅ **Hostname**: `debian-base-template`.
+3. ✅ **Gateway**: `203.0.113.66`, `/26` subnet base `203.0.113.192`
+   (verified via `ssh root@203.0.113.3 'ip route'` on 2026-04-21).
 4. ✅ **RAID1** via mdadm before Proxmox install.
 5. ✅ **Tailscale**: new isolated tailnet `0fork-clone`, separate from prod.
 6. ⏳ **Account-holder name "Mr. Raabe"** on Hetzner emails — non-blocking
@@ -257,9 +257,9 @@ deployed**. It is not a one-liner.
 ## Verification
 
 - `curl -H "Auth-API-Token: $TOKEN" https://dns.hetzner.com/api/v1/zones`
-  returns `0fork.com` with id `RmJf7JFvpQNfWdEZmhAeEK` — ✅ verified 2026-04-21
-- `ssh -i .local/ssh/hetzner_llm_agents_ed25519 root@65.109.84.223 hostname`
-  returns `Debian-trixie-latest-amd64-base` — ✅ verified 2026-04-21
+  returns `example.org` with id `EXAMPLE0ZoneId00000000` — ✅ verified 2026-04-21
+- `ssh -i .local/ssh/hetzner_llm_agents_ed25519 root@203.0.113.3 hostname`
+  returns `debian-base-template` — ✅ verified 2026-04-21
 - `/dev/kvm` present on target host — ✅ verified 2026-04-21 (nested virt viable)
-- No existing DNS records on `clone.0fork.com` — ✅ verified (zone dump shows
+- No existing DNS records on `clone.example.org` — ✅ verified (zone dump shows
   only apex, www, and default Hetzner mail records)

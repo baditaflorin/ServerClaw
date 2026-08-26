@@ -2,7 +2,7 @@
 **Date:** 2026-04-28
 **Duration:** ~4 hours across multiple sessions (converges 16–25, then app deployment)
 **Author:** Claude (gallant-chebyshev-b0def1 worktree)
-**Status:** Resolved — app live at https://education-wemeshup.apps.0fork.com/
+**Status:** Resolved — app live at https://education-wemeshup.apps.example.org/
 
 ---
 
@@ -24,7 +24,7 @@ Deploying Coolify to the 0fork Hetzner server took 10 converge iterations (16–
 | 21 | `/api/v1/teams/current` → 404 | `User::create()` skips the Coolify wizard; no `teams` row exists for `team_id=0` |
 | 22 | `/api/v1/servers` → empty array | Intermediate fix created team `id=34` but set token `team_id=34`; servers have `team_id=0` |
 | 23 | `ModuleNotFoundError: validation_toolkit` | Only the main script was deployed to guests; `validation_toolkit.py` wasn't copied alongside |
-| 24 | `cp: cannot create .../Debian-trixie-latest-amd64-base/host.fw` | Stale Ansible fact cache (`s1_proxmox-host`) had LV3 hostname; proxmox_security used `{{ ansible_hostname }}` in path |
+| 24 | `cp: cannot create .../debian-base-template/host.fw` | Stale Ansible fact cache (`s1_proxmox-host`) had LV3 hostname; proxmox_security used `{{ ansible_hostname }}` in path |
 | 25 | **`ok=216 failed=0`** | All fixes merged |
 
 ### Key fixes committed
@@ -33,7 +33,7 @@ Deploying Coolify to the 0fork Hetzner server took 10 converge iterations (16–
 
 2. **`repo_deploy_image_cache/tasks/main.yml`** — Added task to copy `validation_toolkit.py` alongside the main helper script on guests.
 
-3. **Fact cache invalidation** — Deleted `.ansible/fact_cache/s1_proxmox-host` to force fresh facts from 65.109.84.223 (`fork-pve-01`).
+3. **Fact cache invalidation** — Deleted `.ansible/fact_cache/s1_proxmox-host` to force fresh facts from 203.0.113.3 (`debian-base-template`).
 
 4. **tmpfs directory creation** — Added explicit `file` task to create the tmpfs mount point before `derive_service_defaults` runs.
 
@@ -43,7 +43,7 @@ Deploying Coolify to the 0fork Hetzner server took 10 converge iterations (16–
 
 ## Part 2: education_wemeshup App Deployment
 
-After Coolify was running, deploying `https://github.com/baditaflorin/education_wemeshup` (Go backend + Vite frontend + Postgres, Docker Compose) to `https://education-wemeshup.apps.0fork.com/` required the following manual steps.
+After Coolify was running, deploying `https://github.com/baditaflorin/education_wemeshup` (Go backend + Vite frontend + Postgres, Docker Compose) to `https://education-wemeshup.apps.example.org/` required the following manual steps.
 
 ### Step-by-step (what was actually done)
 
@@ -51,17 +51,17 @@ After Coolify was running, deploying `https://github.com/baditaflorin/education_
 
 2. **Created Coolify project + environment** via `POST /api/v1/projects` and environment auto-created.
 
-3. **Registered application** via `POST /api/v1/applications/private-deploy-key` with `build_pack: dockercompose`, `docker_compose_location: /compose.yaml`, and initial domain `http://education-wemeshup.apps.0fork.com`.
+3. **Registered application** via `POST /api/v1/applications/private-deploy-key` with `build_pack: dockercompose`, `docker_compose_location: /compose.yaml`, and initial domain `http://education-wemeshup.apps.example.org`.
 
 4. **Triggered deploy** via `POST /api/v1/applications/{uuid}/start` — deployment queued, containers built and started (`postgres → catalog-api → catalog-web` in dependency order).
 
-5. **Patched nginx** on the nginx VM (VM 110) to proxy `*.apps.0fork.com` from `https://10.10.10.71:443` (coolify-apps VM, empty) to `http://10.10.10.70:80` (Coolify Traefik, running).
+5. **Patched nginx** on the nginx VM (VM 110) to proxy `*.apps.example.org` from `https://10.10.10.71:443` (coolify-apps VM, empty) to `http://10.10.10.70:80` (Coolify Traefik, running).
 
-6. **Fixed domain TLD** — initial deployment used `.0fork.org` (wrong); patched via API PATCH and redeployed to get `.0fork.com` Traefik labels.
+6. **Fixed domain TLD** — initial deployment used `.0fork.org` (wrong); patched via API PATCH and redeployed to get `.example.org` Traefik labels.
 
 7. **Switched to http:// domain** — Coolify's default `https://` domain makes Traefik try HTTP-01 ACME cert validation. Since nginx redirects port 80 → 443, the challenge always 404s and Traefik hangs the HTTPS entrypoint. Switching to `http://` makes Traefik serve on the HTTP entrypoint without TLS; nginx handles TLS externally.
 
-**Result:** `https://education-wemeshup.apps.0fork.com/` returns HTTP 200, serving the Vite frontend.
+**Result:** `https://education-wemeshup.apps.example.org/` returns HTTP 200, serving the Vite frontend.
 
 ---
 
@@ -99,7 +99,7 @@ coolify_traefik_cert_resolver: dns   # dns or http
 coolify_hetzner_dns_api_token_vault_path: "secret/hetzner/dns-api-token"
 ```
 
-With DNS-01, Traefik on coolify-apps gets real certs for `*.apps.0fork.com` without any dependency on nginx port-80 routing. No manual domain-scheme switching required.
+With DNS-01, Traefik on coolify-apps gets real certs for `*.apps.example.org` without any dependency on nginx port-80 routing. No manual domain-scheme switching required.
 
 **The `coolify_smoke_domain: http://apps.{{ platform_domain }}`** pattern in defaults/main.yml already shows the correct intent — internal domains use `http://` because nginx handles TLS externally. The `coolify_app_deploy` role must derive domains from `platform_domain` with `http://` scheme for the same reason.
 
@@ -135,7 +135,7 @@ This is a one-time bootstrap that the `coolify_runtime` role should handle when 
 
 #### 6. Coolify API IP whitelist
 
-**Problem:** The Coolify API allows only `127.0.0.1,172.20.0.1,65.109.84.223`. The Ansible controller (10.10.10.x) is not in the list, so all API calls during automation had to be relayed through `qm guest exec` (slow, fragile, shell-quoting nightmare).
+**Problem:** The Coolify API allows only `127.0.0.1,172.20.0.1,203.0.113.3`. The Ansible controller (10.10.10.x) is not in the list, so all API calls during automation had to be relayed through `qm guest exec` (slow, fragile, shell-quoting nightmare).
 
 **Fix needed:** Either:
 - Add the controller's IP to `allowed_ips` in the bootstrap tinker script, OR
@@ -157,7 +157,7 @@ The tunnel approach is cleaner (no persistent whitelist change) and matches the 
 
 #### 8. admin-auth.json is stale after 0fork clone
 
-**Problem:** `.local/coolify/admin-auth.json` retained LV3 values (`apps_public_url: https://apps.lv3.org`, `ssh_tunnel_host: 65.108.75.123`) after the 0fork identity overlay was applied. The converge role does not update this file on re-runs.
+**Problem:** `.local/coolify/admin-auth.json` retained LV3 values (`apps_public_url: https://apps.example.com`, `ssh_tunnel_host: 203.0.113.1`) after the 0fork identity overlay was applied. The converge role does not update this file on re-runs.
 
 **Fix needed:** `coolify_runtime` post-deploy task should regenerate `admin-auth.json` from template using `platform_domain`, `management_ipv4`, and `coolify_api_token_name`.
 

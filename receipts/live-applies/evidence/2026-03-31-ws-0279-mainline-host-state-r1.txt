@@ -1,6 +1,6 @@
 # Host state
 captured_at=2026-03-31T06:53:57Z
 
-Debian-trixie-latest-amd64-base
+debian-base-template
 6.17.13-2-pve
 pve-manager/9.1.6/71482d1833ded40a (running kernel: 6.17.13-2-pve)

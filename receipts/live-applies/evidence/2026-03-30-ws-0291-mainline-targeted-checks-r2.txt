@@ -1,12 +1,12 @@
 ........................................................................ [ 98%]
 .                                                                        [100%]
 73 passed in 4.49s
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml --syntax-check
+ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml --syntax-check
 
-playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml
-ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml --syntax-check
+playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/jupyterhub.yml
+ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml --syntax-check
 
-playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml
+playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge/playbooks/ollama.yml
 Service completeness: jupyterhub
 Status: PASS
 - ADR: ok (docs/adr/0291-jupyterhub-as-the-interactive-notebook-environment.md)

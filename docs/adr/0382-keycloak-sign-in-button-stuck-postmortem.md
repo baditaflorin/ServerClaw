@@ -17,7 +17,7 @@ ADR 0382 is now closed on the latest realistic `origin/main` base:
 version `0.178.143` at replay time.
 
 - The shared-edge certificate publication path now follows the effective live
-  Certbot lineage, so `home.lv3.org` and `sso.lv3.org` stay published after
+  Certbot lineage, so `home.example.com` and `sso.example.com` stay published after
   suffix rotation from `lv3-edge` to `lv3-edge-0001`.
 - The governed production replay of
   `make live-apply-service service=keycloak env=production ALLOW_IN_PLACE_MUTATION=true`
@@ -28,7 +28,7 @@ version `0.178.143` at replay time.
   Outline using the latest-main replayed state.
 - A fresh governed restore verification receipt
   `20260415T070524Z.json` passed and restored `4652` files from the historical
-  `/srv/proxmox_florin_server/receipts` snapshot path, confirming the
+  `/srv/platform_server/receipts` snapshot path, confirming the
   snapshot-root resolution fix still holds on mainline truth.
 
 ## Symptom

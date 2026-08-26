@@ -83,7 +83,7 @@
   - `scripts/trigger_restic_live_apply.py`
   - `tests/test_restic_config_backup.py`
 - Restic replay:
-  - `LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production`
+  - `LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make converge-restic-config-backup env=production`
     completed successfully on the rebased base after syncing `outline_client.py`
   - `python3 scripts/trigger_restic_live_apply.py --env production --mode backup --triggered-by ws-0373-live-apply --live-apply-trigger`
     returned `status=ok`
@@ -100,7 +100,7 @@
   - evidence:
     `receipts/live-applies/evidence/2026-04-21-ws-0373-mainline-vulnerability-budget-repo-intake-0.178.149.txt`
 - `repo_intake` replay:
-  - `ANSIBLE_COLLECTIONS_PATH="$PWD/collections:$PWD/.ansible/validation/collections" LV3_PROXMOX_HOST_ADDR=65.108.75.123 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
+  - `ANSIBLE_COLLECTIONS_PATH="$PWD/collections:$PWD/.ansible/validation/collections" LV3_PROXMOX_HOST_ADDR=203.0.113.1 LV3_PROXMOX_HOST_PORT=2222 make live-apply-service service=repo_intake env=production ALLOW_IN_PLACE_MUTATION=true`
     completed with `failed=0`
   - the live-apply wrapper's automatic post-apply restic trigger also returned
     `status=ok`
@@ -109,9 +109,9 @@
     - `curl http://127.0.0.1:8101/health` returned `{"status":"ok"}`
     - the root page served the expected `Repo Intake — LV3` HTML
   - edge verification from `nginx`:
-    - `curl -ksS --resolve repo-intake.lv3.org:443:127.0.0.1 https://repo-intake.lv3.org/health`
+    - `curl -ksS --resolve repo-intake.example.com:443:127.0.0.1 https://repo-intake.example.com/health`
       returned the expected `HTTP/2 302` OAuth redirect
-    - `curl -ksS --resolve repo-intake.lv3.org:443:127.0.0.1 https://repo-intake.lv3.org/`
+    - `curl -ksS --resolve repo-intake.example.com:443:127.0.0.1 https://repo-intake.example.com/`
       returned the same authenticated edge behavior
 - Integrated closeout receipt:
   - `receipts/live-applies/2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply.json`

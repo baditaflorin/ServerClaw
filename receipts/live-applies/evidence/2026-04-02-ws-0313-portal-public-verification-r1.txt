@@ -7,16 +7,19 @@ LOCAL changelog-portal/index.html 1e16dcc933225dba1f1861fdf72f1313ff628cc767d913
 REMOTE /var/www/lv3-generated/docs-portal/index.html 11b050c09ca5d1d4be5e8b1c6aa2a36f111d7787c568fc324967885a4f7546df
 REMOTE /var/www/lv3-generated/changelog-portal/index.html 1e16dcc933225dba1f1861fdf72f1313ff628cc767d9139f9f29a6fbbc4e8188
 REMOTE_HASH_PARITY_OK
-URL https://ops.lv3.org/
+URL https://ops.example.com/
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   138    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0   138    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
 HTTP/2 302
 server: nginx
 date: Thu, 02 Apr 2026 01:13:50 GMT
 content-type: text/html
 content-length: 138
-location: https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/
+location: https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin
@@ -28,16 +31,18 @@ content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'
 x-robots-tag: noindex, nofollow
 
 
-URL https://docs.lv3.org/
+URL https://docs.example.com/
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   138    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0   138    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
 HTTP/2 302
 server: nginx
 date: Thu, 02 Apr 2026 01:13:50 GMT
 content-type: text/html
 content-length: 138
-location: https://docs.lv3.org/oauth2/sign_in?rd=https://docs.lv3.org/
+location: https://docs.example.com/oauth2/sign_in?rd=https://docs.example.com/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin
@@ -49,16 +54,19 @@ content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'
 x-robots-tag: noindex, nofollow
 
 
-URL https://changelog.lv3.org/
+URL https://changelog.example.com/
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   138    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0   138    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
 HTTP/2 302
 server: nginx
 date: Thu, 02 Apr 2026 01:13:50 GMT
 content-type: text/html
 content-length: 138
-location: https://changelog.lv3.org/oauth2/sign_in?rd=https://changelog.lv3.org/
+location: https://changelog.example.com/oauth2/sign_in?rd=https://changelog.example.com/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin

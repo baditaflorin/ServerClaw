@@ -19,11 +19,11 @@
     },
     {
       "kind": "public_hostname",
-      "name": "changelog.lv3.org"
+      "name": "changelog.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "docs.lv3.org"
+      "name": "docs.example.com"
     }
   ],
   "verification": [
@@ -35,7 +35,7 @@
     {
       "check": "Shared edge publication converge from latest main",
       "result": "pass",
-      "observed": "Replaying `make docs`, `make generate-changelog-portal`, and `make configure-edge-publication` from the latest-main worktree completed successfully with `nginx-lv3 : ok=64 changed=4 unreachable=0 failed=0 skipped=11`, including the generated static-site rsync step for both `changelog.lv3.org` and `docs.lv3.org`."
+      "observed": "Replaying `make docs`, `make generate-changelog-portal`, and `make configure-edge-publication` from the latest-main worktree completed successfully with `nginx-lv3 : ok=64 changed=4 unreachable=0 failed=0 skipped=11`, including the generated static-site rsync step for both `changelog.example.com` and `docs.example.com`."
     },
     {
       "check": "Deployed portal artifact parity and redaction markers",
@@ -45,7 +45,7 @@
     {
       "check": "Authenticated public edge probes after publication",
       "result": "pass",
-      "observed": "`curl -Ik https://changelog.lv3.org/` and `curl -Ik https://docs.lv3.org/` both returned HTTP `302` to the shared `/oauth2/sign_in` flow with the expected HSTS, CORP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, CSP, and `X-Robots-Tag` headers."
+      "observed": "`curl -Ik https://changelog.example.com/` and `curl -Ik https://docs.example.com/` both returned HTTP `302` to the shared `/oauth2/sign_in` flow with the expected HSTS, CORP, X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, CSP, and `X-Robots-Tag` headers."
     }
   ],
   "evidence_refs": [

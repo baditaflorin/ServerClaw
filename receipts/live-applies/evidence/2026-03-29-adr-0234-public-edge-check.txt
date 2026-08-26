@@ -3,7 +3,7 @@ server: nginx
 date: Sun, 29 Mar 2026 10:55:12 GMT
 content-type: text/html
 content-length: 138
-location: https://ops.lv3.org/oauth2/sign_in?rd=https://ops.lv3.org/
+location: https://ops.example.com/oauth2/sign_in?rd=https://ops.example.com/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin

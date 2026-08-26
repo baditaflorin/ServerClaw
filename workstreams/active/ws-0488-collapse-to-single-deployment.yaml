@@ -173,10 +173,10 @@ tasks:
     status: completed
   # ---- Wave 4 (separate branch — enforcement) ----
   - id: t16-sanitization-enforce
-    title: Extend scripts/audit_sanitization.py to block lv3.org/0fork.com/65.109.84.223/65.108.75.123 in committed files outside docs/adr/
+    title: Extend scripts/audit_sanitization.py to block example.com/example.org/203.0.113.3/203.0.113.1 in committed files outside docs/adr/
     status: completed
   - id: t18-audit-sanitization
-    title: Wave 4 — scripts/audit_sanitization.py blocks lv3.org/0fork.com/0mpc.com/65.109.84.223/65.108.75.123/2a01:4f9:6b:4b47 in committed files outside the allowed contexts (docs/adr/, docs/release-notes/, docs/runbooks/, changelog.md, receipts/, workstreams/, workstreams.yaml, build/, RELEASE.md) + tests/unit/test_audit_sanitization.py
+    title: Wave 4 — scripts/audit_sanitization.py blocks example.com/example.org/0mpc.com/203.0.113.3/203.0.113.1/2a01:4f9:6b:4b47 in committed files outside the allowed contexts (docs/adr/, docs/release-notes/, docs/runbooks/, changelog.md, receipts/, workstreams/, workstreams.yaml, build/, RELEASE.md) + tests/unit/test_audit_sanitization.py
     status: completed
   # ---- Wave N (final integration) ----
   - id: t17-pre-push-gate

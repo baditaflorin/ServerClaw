@@ -12,7 +12,7 @@
 
 ## Context
 
-The pre-push gate validates committed state but cannot see live drift: DNS records pointed at the wrong IP, certs whose SANs don't cover the FQDN, hosts not actually reachable. The 2026-04-28 ops.0fork.com 500 incident is the canonical case — the operator only learned the cert mismatch existed when nginx returned 500 to the browser.
+The pre-push gate validates committed state but cannot see live drift: DNS records pointed at the wrong IP, certs whose SANs don't cover the FQDN, hosts not actually reachable. The 2026-04-28 ops.example.org 500 incident is the canonical case — the operator only learned the cert mismatch existed when nginx returned 500 to the browser.
 
 `scripts/converge_dry_run.py` (ws-0445) gives `ansible-playbook --check --diff` coverage but not live-state coverage.
 
@@ -30,7 +30,7 @@ CLI:
 
 ```bash
 python3 scripts/preconverge_live_check.py --service ops_portal
-python3 scripts/preconverge_live_check.py --all --expected-ip 65.109.84.223 --json
+python3 scripts/preconverge_live_check.py --all --expected-ip 203.0.113.3 --json
 ```
 
 ## Consequences

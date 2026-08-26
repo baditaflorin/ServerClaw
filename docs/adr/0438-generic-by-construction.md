@@ -15,7 +15,7 @@
     (`lv3-*` SQL role names, systemd unit names, container names, policy
     names).** 0409 fixed the Public/Private sanitization axis; 0438 fixes
     the Per-Fork Customization axis.
-  - ADR 0424 (0fork.com clone) — surfaces the concrete failure modes this
+  - ADR 0424 (example.org clone) — surfaces the concrete failure modes this
     ADR prevents
   - ADR 0437 (overlay-aware `make bootstrap`) — operator contract layer;
     this ADR is the content-correctness layer underneath it
@@ -66,12 +66,12 @@ place, every derived artefact updates coherently, and the pipeline
 refuses to proceed if any tier fails its schema / cross-reference /
 contract checks.
 
-### The 0fork.com Hetzner box is the acceptance test
+### The example.org Hetzner box is the acceptance test
 
 The fork clone isn't just a nice-to-have second environment. It is the
 end-to-end test that validates the entire cascade. "Green on 0fork from
-`git clone` to `status.0fork.com` all-green" is the binary acceptance
-signal. Any code path that passes locally against `lv3.org` but breaks
+`git clone` to `status.example.org` all-green" is the binary acceptance
+signal. Any code path that passes locally against `example.com` but breaks
 on 0fork is evidence of a generic-by-construction hole — and the
 lint/contract layer must grow until it catches the hole *before* the
 code ships.
@@ -208,7 +208,7 @@ Introduce `platform_identity` as a typed dict with **five** flavors:
 
 ```yaml
 platform_identity:
-  domain:        "{{ platform_domain }}"                     # 0fork.com
+  domain:        "{{ platform_domain }}"                     # example.org
   config_prefix: "{{ platform_domain | split('.') | first }}"  # 0fork
   sql_prefix:    "{{ config_prefix | regex_replace('^[^a-z_]+','') }}"  # fork
   pve_prefix:    "{{ config_prefix | regex_replace('^[0-9]+','') }}"    # fork (strip LEADING digits only)
@@ -226,8 +226,8 @@ Flavor invariants:
 - `dns_label` = RFC 1123 label (happens to equal config_prefix today but
   diverges if we ever allow uppercase in domain).
 
-For `lv3.org`, all five flavors equal `"lv3"` — production callsites
-unchanged. For `0fork.com`: `config_prefix="0fork"`, `sql_prefix="fork"`,
+For `example.com`, all five flavors equal `"lv3"` — production callsites
+unchanged. For `example.org`: `config_prefix="0fork"`, `sql_prefix="fork"`,
 `pve_prefix="fork"`, `unix_prefix="0fork"`, `dns_label="0fork"`.
 
 Derivation lives in a filter plugin
@@ -486,7 +486,7 @@ acceptance:
 5. **0fork end-to-end green (the acceptance test)**:
    `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make bootstrap`
    on the Hetzner AX41-NVMe from a fresh wipe produces an all-green
-   `status.0fork.com` Uptime Kuma board — **without** any `lv3_*` /
+   `status.example.org` Uptime Kuma board — **without** any `lv3_*` /
    prefix / credential-path workaround in
    `playbooks/vars/fork-overrides.yml`. The overrides file may retain
    topology-level decisions (`openbao_legacy_restore_enabled: false`,

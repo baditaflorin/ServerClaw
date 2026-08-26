@@ -886,7 +886,7 @@
     policy_critical: '14'
     policy_unit: days
     policy_warn: '21'
-    probe_hostname: proxmox.lv3.org
+    probe_hostname: proxmox.example.com
     probe_module: http_2xx_follow_redirects
     scope: internal
     service_id: proxmox_ui

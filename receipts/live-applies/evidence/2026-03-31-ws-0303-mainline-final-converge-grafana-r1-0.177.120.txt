@@ -161,7 +161,7 @@ ok: [monitoring-lv3]
 TASK [lv3.platform.monitoring_vm : Include tracing infrastructure tasks] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Include tracing infrastructure tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T17:44:42.699Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.monitoring_vm : Include tracing infrastructure tasks","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T17:44:42.710Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/tracing.yml for monitoring-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/tracing.yml for monitoring-lv3
 
 TASK [lv3.platform.monitoring_vm : Download Tempo Debian package] **************
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.monitoring_vm : Download Tempo Debian package","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T17:44:42.738Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1161,7 +1161,7 @@ skipping: [monitoring-lv3]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T17:48:11.172Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T17:48:11.184Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T17:48:11.197Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1191,7 +1191,7 @@ skipping: [monitoring-lv3]
 TASK [Run readiness verification] **********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T17:48:12.360Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T17:48:12.374Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T17:48:12.387Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1294,7 +1294,7 @@ skipping: [monitoring-lv3]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T17:50:07.413Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T17:50:07.425Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T17:50:07.437Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1324,7 +1324,7 @@ skipping: [monitoring-lv3]
 TASK [Run readiness verification] **********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T17:50:08.602Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"monitoring-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T17:50:08.615Z","vm":"monitoring-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/.worktrees/ws-0303-main-final/playbooks/services/../tasks/verify-probe.yml for monitoring-lv3
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T17:50:08.628Z","vm":"controller","workflow_id":"ansible-playbook"}

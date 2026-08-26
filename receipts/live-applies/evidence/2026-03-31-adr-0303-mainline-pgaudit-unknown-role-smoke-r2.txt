@@ -24,11 +24,11 @@ Traceback (most recent call last):
   File "/tmp/adr0303_smoke.py", line 71, in last_subject_message
     nc = await connect_nats(f'nats://127.0.0.1:{local_port}', credentials)
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/scripts/drift_lib.py", line 358, in connect_nats
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/scripts/drift_lib.py", line 358, in connect_nats
     await async_with_retry(
     ...<3 lines>...
     )
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0303-main-integration/platform/retry/policy.py", line 179, in async_with_retry
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0303-main-integration/platform/retry/policy.py", line 179, in async_with_retry
     return await fn()
            ^^^^^^^^^^
   File "/Users/live/.cache/uv/archive-v0/NuiKTQWn27AXIXK0QKiv3/lib/python3.13/site-packages/nats/aio/client.py", line 569, in connect

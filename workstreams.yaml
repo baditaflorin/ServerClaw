@@ -206,11 +206,11 @@ workstreams:
       proxmox-host.generated.yml so provisioning sees envelope-resolved sizes
     status: completed
   - id: t16-sanitization-enforce
-    title: Extend scripts/audit_sanitization.py to block lv3.org/0fork.com/65.109.84.223/65.108.75.123
+    title: Extend scripts/audit_sanitization.py to block example.com/example.org/203.0.113.3/203.0.113.1
       in committed files outside docs/adr/
     status: completed
   - id: t18-audit-sanitization
-    title: "Wave 4 \u2014 scripts/audit_sanitization.py blocks lv3.org/0fork.com/0mpc.com/65.109.84.223/65.108.75.123/2a01:4f9:6b:4b47\
+    title: "Wave 4 \u2014 scripts/audit_sanitization.py blocks example.com/example.org/0mpc.com/203.0.113.3/203.0.113.1/2a01:4f9:6b:4b47\
       \ in committed files outside the allowed contexts (docs/adr/, docs/release-notes/,\
       \ docs/runbooks/, changelog.md, receipts/, workstreams/, workstreams.yaml, build/,\
       \ RELEASE.md) + tests/unit/test_audit_sanitization.py"
@@ -564,7 +564,7 @@ workstreams:
     will be ballooning-enabled from creation.
 - id: ws-0482-0fork-platform-not-bootstrapped
   adr: 0482
-  title: "0fork.com platform deployment never landed \u2014 registry.0fork.com 502\
+  title: "example.org platform deployment never landed \u2014 registry.example.org 502\
     \ + others are catch-all illusions"
   status: planned
   ready_to_merge: false
@@ -618,7 +618,7 @@ workstreams:
     pattern (ADR 0424) intended docker-runtime to be the only runtime, but the inventory
     still names the host runtime-control, and the harbor playbook hardcodes `hosts:
     runtime-control`.'
-  - Symptoms visible from outside: registry.0fork.com returns 502 (nginx vhost upstream
+  - Symptoms visible from outside: registry.example.org returns 502 (nginx vhost upstream
       unreachable). chat / wiki / analytics / errors / ntfy / ci return 200/302 from
       the nginx catch-all but no real backend exists.
   - This is not a "fix Harbor in 20 minutes" job. It is a "bootstrap 0fork's platform
@@ -645,8 +645,8 @@ workstreams:
       - workstreams/active/ws-0481-pentest-fleet-migration.yaml
       mode: exclusive
   description: 'Move the ~100 security/recon-tagged microservices (0crawl.com / 0exec.com,
-    ghcr.io/baditaflorin/*) currently hosted on 0docker.com (176.9.123.221) to this
-    platform (0mcp.com / florin, 65.108.75.123) via the existing Coolify instance,
+    ghcr.io/baditaflorin/*) currently hosted on example.net (203.0.113.2) to this
+    platform (example.org / florin, 203.0.113.1) via the existing Coolify instance,
     excluding the 10 services built for the domainscope enricher pipeline. DNS (0crawl.com/0exec.com
     A records) is repointed per-service only after Coolify deployment is verified
     healthy.
@@ -919,7 +919,7 @@ workstreams:
 
     all credential generation in the platform. Enables pre-commit detection of real
 
-    secrets and maintains deployment-agnostic code across lv3.org and 0fork.com.
+    secrets and maintains deployment-agnostic code across example.com and example.org.
 
     '
   objectives:
@@ -3065,8 +3065,8 @@ workstreams:
     \ all\n   have their `adr:` field quoted now (YAML octal-int parser was\n   coercing\
     \ 0447 -> 295). Don't revert.\n2. receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json\n\
     \   was reconstructed because PR #71 referenced it but never committed\n   the\
-    \ file.\n3. Pre-existing cert-validation drift on lv3.org domains (the box\n \
-    \  now serves 0fork.com after yesterday's recovery).\n\nPlus follow-ups not in\
+    \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n \
+    \  now serves example.org after yesterday's recovery).\n\nPlus follow-ups not in\
     \ ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n - Deployment-aware\
     \ cert validation.\n - `make new-deployment` / `make use-deployment` (ADR 0442)\
     \ \u2014 the\n   `run_with_deployment.sh` wrapper is the leaf they would invoke.\n"
@@ -3247,7 +3247,7 @@ workstreams:
     \ \"secret/hetzner/dns-api-token\"\n\nWhen coolify_traefik_cert_resolver == dns:\n\
     \  - Render the dnschallenge lines instead of httpchallenge in docker-compose.yml.j2\n\
     \  - Inject HETZNER_API_KEY into the proxy container env\n\nThis makes Traefik\
-    \ on coolify-apps get real certs for *.apps.0fork.com via\nDNS TXT records \u2014\
+    \ on coolify-apps get real certs for *.apps.example.org via\nDNS TXT records \u2014\
     \ no dependency on nginx port-80 routing whatsoever.\n\n## 3. coolify_app_deploy\
     \ role: idempotent app registration via Coolify API\n\nA new role that, given:\n\
     \  - repo_url, branch, compose_file\n  - domain (derived from platform_domain\
@@ -4090,7 +4090,7 @@ workstreams:
     '
 - id: ws-0424-fork-clone-0fork
   adr: '0424'
-  title: "ADR 0424 \u2014 0fork.com Clone onto Hetzner AX41-NVMe"
+  title: "ADR 0424 \u2014 example.org Clone onto Hetzner AX41-NVMe"
   status: in_progress
   ready_to_merge: false
   live_applied: false
@@ -4115,12 +4115,12 @@ workstreams:
   started: '2026-04-21'
   priority: p1
   surfaces:
-  - 0fork.com (full apex scope, apex wiped and repointed 2026-04-21)
+  - example.org (full apex scope, apex wiped and repointed 2026-04-21)
   - Hetzner AX41-NVMe
   - .local/identity.yml.0fork (new, not committed)
   - .local/hetzner/dns.env (new, not committed)
   summary: "First real fork-viability test. Stands up a collapsed nested-Proxmox topology\
-    \ on a Hetzner AX41-NVMe using 0fork.com (full apex) as the identity. Drives ADR\
+    \ on a Hetzner AX41-NVMe using example.org (full apex) as the identity. Drives ADR\
     \ 0385 (identity core) and ADR 0407 (generic-by-default) to their limits. Also\
     \ produces ADR 0425 \u2014 a retrospective on the 420-ADR build process and what\
     \ the clone attempt revealed about gaps in the platform's forkability claim. ADR\
@@ -4287,8 +4287,8 @@ workstreams:
       mode: exclusive
   progress:
     completed_2026_04_21:
-    - Hetzner DNS API token verified against zone 0fork.com (id RmJf7JFvpQNfWdEZmhAeEK)
-    - SSH access to 65.109.84.223 confirmed with llm-agents@proxmox_florin_server
+    - Hetzner DNS API token verified against zone example.org (id EXAMPLE0ZoneId00000000)
+    - SSH access to 203.0.113.3 confirmed with llm-agents@platform_server
       key
     - Host key fingerprint pinned (ED25519 9xWVsKZxKXoBR3O9369Ixj/Ke/qwiLQ5SBDli/STwVk)
     - Hardware inventory captured (Ryzen 3600, 62 GiB, 2x476 GB NVMe, /dev/kvm present)
@@ -4296,8 +4296,8 @@ workstreams:
     - ADR 0425 retrospective drafted
     - Bootstrap runbook drafted
     - Identity overlay .local/identity.yml.0fork written (apex scope confirmed)
-    - 0fork.com apex DNS wiped and repointed at 65.109.84.223 (backup saved)
-    - Hostname set to fork-pve-01.0fork.com on box
+    - example.org apex DNS wiped and repointed at 203.0.113.3 (backup saved)
+    - Hostname set to debian-base-template.example.org on box
     - PVE repo + GPG key installed (pve-no-subscription trixie)
     - proxmox-default-kernel installed, reboot into 6.17.13-3-pve successful
     - proxmox-ve userland installed (pve-manager/9.1.8/a8e257e1ad64dd92)
@@ -4322,7 +4322,7 @@ workstreams:
     blocked_pending_operator:
     - Configure Hetzner WAN bridge vmbr0 (risk of lockout; needs Robot KVM standby)
     - Deploy Headscale inside clone and enroll workstation
-    - Set rDNS on 65.109.84.223 via Hetzner Robot (no API path)
+    - Set rDNS on 203.0.113.3 via Hetzner Robot (no API path)
     - Rotate the DNS token shared in chat on 2026-04-21
     - Verify Hetzner account name "Mr. Raabe" (non-blocking)
     - Retry Hetzner DNS writes once brownout lifts (or migrate zone pre-2026-05-20
@@ -4331,10 +4331,10 @@ workstreams:
     - Configure vmbr0 Hetzner WAN bridge (after operator KVM standby)
     - Converge runtime-control (Keycloak + step-ca + OpenBao + Headscale)
     - Converge postgres, mail-platform, runtime-apps, monitoring, nginx-edge
-    - Create DNS records on 0fork.com (wildcard already covers them; blocked on API
+    - Create DNS records on example.org (wildcard already covers them; blocked on API
       brownout)
-    - Provision operator@0fork.com mailbox
-    - Send confirmation email from operator@0fork.com to baditaflorin@gmail.com
+    - Provision operator@example.org mailbox
+    - Send confirmation email from operator@example.org to operator@example.com
     - Capture live-apply evidence and close workstream
   notes: "This workstream was started while the operator was AFK. Destructive actions\
     \ performed with explicit operator authorization (apex wipe). A RAID1 near-miss\
@@ -4478,7 +4478,7 @@ workstreams:
       - playbooks/platform-service-watchdog.yml
       mode: exclusive
   notes: 'Service health audit: 73 services, 5 VMs without watchdog coverage. SSH
-    to servers unavailable at time of audit (connection timeout to 65.108.75.123).
+    to servers unavailable at time of audit (connection timeout to 203.0.113.1).
     All service probe URLs derived from config/health-probe-catalog.json. Deploy with:
     make converge-platform-watchdog env=production Or per-VM: ansible-playbook playbooks/platform-service-watchdog.yml
     -e env=production -e watchdog_vm=docker-runtime
@@ -5333,7 +5333,7 @@ workstreams:
       - workstreams/active/adr-0480-secret-masking.yaml
   description: 'Two unrelated fixes needed to unblock make publish-serverclaw-push:
 
-    closing a real sanitization coverage gap (0fork.com domain/PII/IPs/
+    closing a real sanitization coverage gap (example.org domain/PII/IPs/
 
     Hetzner zone ID were never covered by Tier C) found by
 
@@ -5341,18 +5341,18 @@ workstreams:
 
     certificate-catalog.json entries (changelog/docs/headscale) that
 
-    still referenced pre-rename .lv3.org names and the retired lv3-edge
+    still referenced pre-rename .example.com names and the retired lv3-edge
 
-    cert bundle path instead of the live .0mcp.com / 0mcp-edge state.
+    cert bundle path instead of the live .example.org / 0mcp-edge state.
 
     '
   objectives:
-  - Add Tier C string_replacements + leak_markers for the 0fork.com gap
+  - Add Tier C string_replacements + leak_markers for the example.org gap
   - Correct the three stale certificate-catalog.json entries to match live nginx config
   deliverables:
-  - "config/publication-sanitization.yaml \u2014 0fork.com domain/PII/IP/zone-id coverage"
+  - "config/publication-sanitization.yaml \u2014 example.org domain/PII/IP/zone-id coverage"
   - "config/certificate-catalog.json \u2014 changelog/docs/headscale corrected to\
-    \ .0mcp.com"
+    \ .example.org"
   completion_metrics:
   - scripts/audit_sanitization_coverage.py reports 0 CRITICAL gaps
   - make publish-serverclaw dry-run leak check passes

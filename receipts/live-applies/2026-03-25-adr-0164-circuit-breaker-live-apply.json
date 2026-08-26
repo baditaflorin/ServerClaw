@@ -43,7 +43,7 @@
     "versions/stack.yaml"
   ],
   "notes": [
-    "The first controller-side `ansible-playbook playbooks/api-gateway.yml` attempt on current `main` failed because the inventory still points `proxmox_florin` at the stale Tailscale IP `100.118.189.95`; the live converge used the working Proxmox jump path through `ops@100.64.0.1` instead.",
+    "The first controller-side `ansible-playbook playbooks/api-gateway.yml` attempt on current `main` failed because the inventory still points `proxmox-host` at the stale Tailscale IP `100.118.189.95`; the live converge used the working Proxmox jump path through `ops@100.64.0.1` instead.",
     "Repeated full-role reruns over the jump path dropped SSH during the large recursive `platform/` sync, so the final live apply completed by streaming the exact repo-managed gateway files from the worktree into `/opt/api-gateway/service` and rebuilding the compose-managed `api-gateway` container in place.",
     "The live runtime packaging fix had three parts: resolve repo root correctly inside the container layout, expose the repo config tree at both `/config` and `/app/config`, and bake the full repo `scripts/` tree into the image so transitive imports such as `maintenance_window_tool` and `mutation_audit` resolve at startup."
   ]

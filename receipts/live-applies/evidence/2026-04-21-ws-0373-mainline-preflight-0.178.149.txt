@@ -2,25 +2,25 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
-PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
-INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/.local/packer-plugin-cache
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519.pub
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
+INFO bootstrap cache ansible_validation_cache: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/.local/packer-plugin-cache
 Bootstrap manifest: live-apply-generated-artifacts
 Bootstrap description: Generated repo surfaces and ignored controller-local scaffolding required by fresh-worktree live-apply wrappers.
-PASS bootstrap artifact image_scan_sboms: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/sbom
-PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/gate-bypasses/.gitkeep
-PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/image-scans
-PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/drift-reports
-PASS bootstrap artifact image_scan_cves: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/cve
-PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/inventory/group_vars/platform.yml
-PASS bootstrap artifact security_reports: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/receipts/security-reports
-PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/config/prometheus/file_sd/https_tls_targets.yml
-PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/config/prometheus/rules/https_tls_alerts.yml
-PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/config/uptime-kuma/monitors.json
+PASS bootstrap artifact image_scan_sboms: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/sbom
+PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/gate-bypasses/.gitkeep
+PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/image-scans
+PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/drift-reports
+PASS bootstrap artifact image_scan_cves: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/cve
+PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/inventory/group_vars/platform.yml
+PASS bootstrap artifact security_reports: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/receipts/security-reports
+PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/config/prometheus/file_sd/https_tls_targets.yml
+PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/config/prometheus/rules/https_tls_alerts.yml
+PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/config/uptime-kuma/monitors.json
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/build/ops-portal
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/build/changelog-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/build/docs-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/build/ops-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/build/changelog-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/build/docs-portal
 Result: PASS (live-apply-service)

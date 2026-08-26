@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -65,7 +65,7 @@
     {
       "check": "Exact-main host-path WAV synthesis verification",
       "result": "pass",
-      "observed": "`receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-host-path-tts-r1.txt` called `http://10.10.10.20:8100/api/tts?...` from `proxmox_florin` and returned the valid WAV summary `{\"content_type\":\"audio/wav\",\"riff\":\"RIFF\",\"wave\":\"WAVE\",\"bytes\":109612}`."
+      "observed": "`receipts/live-applies/evidence/2026-03-31-ws-0284-mainline-host-path-tts-r1.txt` called `http://10.10.10.20:8100/api/tts?...` from `proxmox-host` and returned the valid WAV summary `{\"content_type\":\"audio/wav\",\"riff\":\"RIFF\",\"wave\":\"WAVE\",\"bytes\":109612}`."
     },
     {
       "check": "Branch-local audit trail for the repaired latest-main defects",
@@ -107,7 +107,7 @@
     "docs/workstreams/ws-0284-main-merge.md",
     "docs/workstreams/ws-0284-live-apply.md",
     "docs/site-generated/architecture/dependency-graph.md",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "inventory/group_vars/platform.yml",
     "collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py",
     "collections/ansible_collections/lv3/platform/roles/piper_runtime/tasks/main.yml",

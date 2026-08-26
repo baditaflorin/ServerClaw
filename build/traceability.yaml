@@ -240,7 +240,7 @@ workstreams:
     concern: platform
     path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
 - workstream_id: ws-0424-fork-clone-0fork
-  title: "ADR 0424 \u2014 0fork.com Clone onto Hetzner AX41-NVMe"
+  title: "ADR 0424 \u2014 example.org Clone onto Hetzner AX41-NVMe"
   status: in_progress
   ready_to_merge: false
   primary_adr: '0424'
@@ -253,7 +253,7 @@ workstreams:
     total: 5
     present_on_disk: 5
   adr:
-    title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at 0fork.com
+    title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at example.org
     implementation_status: Implemented
     currently_describes: current_state
     concern: bootstrap
@@ -348,7 +348,7 @@ workstreams:
     total: 15
     present_on_disk: 15
   adr:
-    title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+    title: Phase 1 Multi-Deployment Hardening (example.org + example.com)
     implementation_status: Proposed
     currently_describes: goal_state
     concern: security

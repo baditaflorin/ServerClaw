@@ -7,7 +7,7 @@
 - Tags: 0fork, fork-clone, full-day-deploy, iac, orchestrator, adr-0424-extension
 - Relates to:
   - ADR 0407 (`.local/` deployment values — scalar overlay)
-  - ADR 0424 (0fork.com clone on Hetzner AX41-NVMe)
+  - ADR 0424 (example.org clone on Hetzner AX41-NVMe)
   - ADR 0425 (420-ADR retrospective — forkability gap)
   - ADR 0430 (`.local/host_vars/proxmox-host.yml` overlay)
 
@@ -57,7 +57,7 @@ the fork overlay files from `.local/`. No new substrate; only a wrapper.
 | `make deploy-0fork` | End-to-end: preflight → install-proxmox → site converge → smoke mail |
 | `make converge-0fork-chain` | Re-run just the service converge chain (idempotent replays after overlay edits) |
 | `make preflight-0fork` | Dry-run validation (DNS token, SSH key, overlay presence, kvm support) |
-| `make smoke-0fork-mail` | Standalone acceptance test — sends operator@0fork.com → baditaflorin@gmail.com |
+| `make smoke-0fork-mail` | Standalone acceptance test — sends operator@example.org → operator@example.com |
 | `make rotate-hetzner-dns-token` | Token rotation (ADR 0424 resolution item 7) |
 
 All targets are thin Makefile shims around `playbooks/0fork-full-day.yml`
@@ -156,7 +156,7 @@ This is intentional — a green `deploy-0fork` is load-bearing evidence.
   `.local/hetzner/dns.env`, and `.local/ssh/hetzner_llm_agents_ed25519`
   are all present and valid.
 - `make smoke-0fork-mail` on a fully-deployed clone delivers an email to
-  `baditaflorin@gmail.com` (observed in the operator's Gmail inbox).
+  `operator@example.com` (observed in the operator's Gmail inbox).
 - The orchestrator playbook `ansible-playbook --syntax-check` passes.
 - `playbooks/0fork-full-day.yml` is listed in
   `playbook_execution_allowed_envs` registry and picked up by

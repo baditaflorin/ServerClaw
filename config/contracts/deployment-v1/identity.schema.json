@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schemas/deployment-v1/identity.json",
+  "$id": "https://example.com/schemas/deployment-v1/identity.json",
   "title": "Deployment Identity",
   "description": "Per-deployment operator identity. Lives at .local/deployments/<slug>/identity.yml. Defines the apex domain, operator, DNS provider, and network anchors. ADR 0440.",
   "type": "object",

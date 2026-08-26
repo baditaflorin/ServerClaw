@@ -1,6 +1,6 @@
 Ansible lint
 WARNING  /Users/live/.cache/uv/archive-v0/nZbiyLBJesc1GsqCW5-Oz/lib/python3.10/site-packages/ansible/parsing/yaml/constructor.py:74 AnsibleWarning While constructing a mapping from <unicode string>, line 357, column 3, found a duplicate dict key (when). Using last defined value only.
-WARNING  /Users/live/.cache/uv/archive-v0/nZbiyLBJesc1GsqCW5-Oz/lib/python3.10/site-packages/ansible/parsing/yaml/constructor.py:74 AnsibleWarning While constructing a mapping from /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration-r2/collections/ansible_collections/lv3/platform/roles/paperless_runtime/tasks/main.yml, line 357, column 3, found a duplicate dict key (when). Using last defined value only.
+WARNING  /Users/live/.cache/uv/archive-v0/nZbiyLBJesc1GsqCW5-Oz/lib/python3.10/site-packages/ansible/parsing/yaml/constructor.py:74 AnsibleWarning While constructing a mapping from /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0285-main-integration-r2/collections/ansible_collections/lv3/platform/roles/paperless_runtime/tasks/main.yml, line 357, column 3, found a duplicate dict key (when). Using last defined value only.
 WARNING  Listing 3 violation(s) marked as ignored, likely already known
 WARNING  Listing 3 violation(s) that are fatal
 Read documentation for instructions on how to ignore specific rule violations.

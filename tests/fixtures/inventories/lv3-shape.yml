@@ -1,6 +1,6 @@
 # lv3-shape — fixture identity overlay (ADR 0444 item 12)
 #
-# Mirrors the production lv3.org deployment shape. First DNS label is `lv3`,
+# Mirrors the production example.com deployment shape. First DNS label is `lv3`,
 # which is already safe across all five platform_identity flavors:
 #
 #   config_prefix == sql_prefix == pve_prefix == unix_prefix == dns_label == "lv3"
