@@ -12,7 +12,7 @@
   - ADR 0386 (`make bootstrap` staged bootstrap contract) — this ADR extends
     that contract with overlay awareness
   - ADR 0407 (generic-by-default / `.local/` overlay)
-  - ADR 0424 (0fork.com clone on Hetzner AX41-NVMe)
+  - ADR 0424 (example.org clone on Hetzner AX41-NVMe)
   - ADR 0430 (`.local/host_vars/proxmox-host.yml` overlay)
   - ADR 0431 (0fork full-day deployment wrapper) — subsumed into `make
     bootstrap`; the fork-specific `deploy-0fork` / `converge-0fork-chain` /
@@ -36,7 +36,7 @@ make bootstrap
 That contract is what lets a new operator `git clone` → working deployment
 without reading 400 ADRs first.
 
-While bootstrapping the 0fork.com clone on a Hetzner AX41-NVMe we discovered
+While bootstrapping the example.org clone on a Hetzner AX41-NVMe we discovered
 that the contract is **broken for forks**. Four concrete gaps surfaced when
 trying to run `make bootstrap` against a host that wasn't the author's
 production Proxmox:
@@ -187,7 +187,7 @@ the default path.
   shows `ANSIBLE_INVENTORY=.local/inventory/hosts.yml`,
   `BOOTSTRAP_KEY=.local/ssh/hetzner_llm_agents_ed25519`, `env=clone`,
   `ANSIBLE_OVERLAY_EXTRA=-e env=clone -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`,
-  `LV3_PROXMOX_HOST_ADDR=65.109.84.223`.
+  `LV3_PROXMOX_HOST_ADDR=203.0.113.3`.
 - `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make generate-inventory`
   produces a `.local/inventory/hosts.yml` whose 17 guest entries resolve
   to 10.20.10.X on the fork's internal bridge.

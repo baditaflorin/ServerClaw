@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.42",
   "workflow_id": "adr-0226-host-control-loops-mainline-live-apply",
   "adr": "0226",
-  "summary": "Integrated ADR 0226 on top of repo release 0.177.51 by replaying `make configure-host-control-loops` from the latest origin/main merged candidate, confirming the host-resident systemd service, timer, and path units stayed idempotent, and re-verifying both manual and path-triggered reconcile runs end to end on proxmox_florin.",
+  "summary": "Integrated ADR 0226 on top of repo release 0.177.51 by replaying `make configure-host-control-loops` from the latest origin/main merged candidate, confirming the host-resident systemd service, timer, and path units stayed idempotent, and re-verifying both manual and path-triggered reconcile runs end to end on proxmox-host.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "systemd_unit",
@@ -41,12 +41,12 @@
     {
       "check": "Merged-main-equivalent host replay",
       "result": "pass",
-      "observed": "`make configure-host-control-loops` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0226-main-merge` with final recap `proxmox_florin ok=33 changed=0 failed=0`, proving the repo-managed host control-loop baseline remained idempotent after rebasing onto the latest origin/main baseline."
+      "observed": "`make configure-host-control-loops` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0226-main-merge` with final recap `proxmox-host ok=33 changed=0 failed=0`, proving the repo-managed host control-loop baseline remained idempotent after rebasing onto the latest origin/main baseline."
     },
     {
       "check": "Live systemd state after merged-main replay",
       "result": "pass",
-      "observed": "`systemctl show` on `proxmox_florin` reported `lv3-host-control-loop-reconcile.service Result=success ActiveState=inactive SubState=dead UnitFileState=static`, the timer as `active/waiting` with `NextElapseUSecRealtime=Sat 2026-03-28 22:30:59 CET` and `LastTriggerUSec=Sat 2026-03-28 22:01:21 CET`, and the path unit as `active/waiting` with `Triggers=lv3-host-control-loop-reconcile.service`."
+      "observed": "`systemctl show` on `proxmox-host` reported `lv3-host-control-loop-reconcile.service Result=success ActiveState=inactive SubState=dead UnitFileState=static`, the timer as `active/waiting` with `NextElapseUSecRealtime=Sat 2026-03-28 22:30:59 CET` and `LastTriggerUSec=Sat 2026-03-28 22:01:21 CET`, and the path unit as `active/waiting` with `Triggers=lv3-host-control-loop-reconcile.service`."
     },
     {
       "check": "Explicit one-shot reconcile replay from the integrated candidate",

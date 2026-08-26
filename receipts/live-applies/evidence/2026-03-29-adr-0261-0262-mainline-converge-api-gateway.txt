@@ -1,11 +1,11 @@
 /Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=converge-api-gateway
 Preflight workflow: converge-api-gateway
-Description: Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org through the shared NGINX edge.
+Description: Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.example.com through the shared NGINX edge.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
-PASS file keycloak_agent_client_secret: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
+PASS file keycloak_agent_client_secret: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/lv3-agent-hub-client-secret.txt
 Result: PASS (converge-api-gateway)
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=875e98f3aecd43d4a17d844e581e5517 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/inventory/hosts.yml --run-id f4317b1c17db4a2dbf6d71c65b221be0 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/playbooks/api-gateway.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e api_gateway_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish -e platform_trace_id=0f1765df6a4b4a46bc168a6df3c16859
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=875e98f3aecd43d4a17d844e581e5517 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/inventory/hosts.yml --run-id f4317b1c17db4a2dbf6d71c65b221be0 --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/playbooks/api-gateway.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e api_gateway_repo_root=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish -e platform_trace_id=0f1765df6a4b4a46bc168a6df3c16859
 
 PLAY [Converge the unified platform API gateway on the Docker runtime VM] ******
 
@@ -302,31 +302,31 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T21:35:49.186Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T21:36:01.383Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Render Docker daemon configuration] ********
@@ -526,7 +526,7 @@ ok: [docker-runtime-lv3] => (item=runtime_assurance.py)
 ok: [docker-runtime-lv3] => (item=api_gateway/__init__.py)
 ok: [docker-runtime-lv3] => (item=api_gateway/main.py)
 ok: [docker-runtime-lv3] => (item=requirements.txt)
-changed: [docker-runtime-lv3] => (item=inventory/host_vars/proxmox_florin.yml)
+changed: [docker-runtime-lv3] => (item=inventory/host_vars/proxmox-host.yml)
 changed: [docker-runtime-lv3] => (item=versions/stack.yaml)
 changed: [docker-runtime-lv3] => (item=workstreams.yaml)
 {"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.api_gateway_runtime : Sync the API gateway application sources","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T21:37:02.642Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
@@ -534,24 +534,24 @@ changed: [docker-runtime-lv3] => (item=workstreams.yaml)
 TASK [lv3.platform.api_gateway_runtime : Sync the staged repo trees required by the API gateway runtime] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.api_gateway_runtime : Sync the staged repo trees required by the API gateway runtime","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T21:37:02.652Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.api_gateway_runtime : Sync the staged repo trees required by the API gateway runtime","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T21:37:02.734Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=gitea workflow tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ansible collection tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=inventory tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=migrations tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=molecule tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=packer tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=platform package for gateway graph support)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=playbooks tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared search fabric package for gateway search routes)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared scripts tree required by packaged platform modules)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared repo config tree required by packaged platform modules)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo documentation tree required by the local search fabric)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo receipts tree required by the local search fabric)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=requirements tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=roles tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tests tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tofu tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=windmill tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=gitea workflow tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ansible collection tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=inventory tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=migrations tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=molecule tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=packer tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=platform package for gateway graph support)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=playbooks tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared search fabric package for gateway search routes)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared scripts tree required by packaged platform modules)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared repo config tree required by packaged platform modules)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo documentation tree required by the local search fabric)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo receipts tree required by the local search fabric)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=requirements tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=roles tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tests tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tofu tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=windmill tree required by packaged workflow implementation refs)
 
 TASK [lv3.platform.api_gateway_runtime : Create a local staging archive path for the gitea workflow tree required by packaged workflow implementation refs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.api_gateway_runtime : Create a local staging archive path for the gitea workflow tree required by packaged workflow implementation refs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T21:37:02.833Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1597,7 +1597,7 @@ ok: [docker-runtime-lv3]
 TASK [Run startup verification] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run startup verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T21:39:59.832Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run startup verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T21:39:59.848Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe startup] **************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe startup","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T21:39:59.873Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1622,7 +1622,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T21:40:00.996Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T21:40:01.008Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T21:40:01.031Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1647,7 +1647,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run readiness verification] **********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T21:40:02.152Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-29T21:40:02.167Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0261-main-finish/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0261-main-finish/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-29T21:40:02.196Z","vm":"controller","workflow_id":"ansible-playbook"}

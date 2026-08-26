@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -51,12 +51,12 @@
     {
       "check": "Authoritative exact-main Windmill replay",
       "result": "pass",
-      "observed": "`make converge-windmill` succeeded from the exact-main workspace that is now committed as `e4ce03ba3375d1ba3d41b65c65e44ea5fe2235be`, with final recap `docker-runtime-lv3 : ok=295 changed=46 unreachable=0 failed=0 skipped=61`, `postgres-lv3 : ok=68 changed=0 unreachable=0 failed=0 skipped=20`, and `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`."
+      "observed": "`make converge-windmill` succeeded from the exact-main workspace that is now committed as `e4ce03ba3375d1ba3d41b65c65e44ea5fe2235be`, with final recap `docker-runtime-lv3 : ok=295 changed=46 unreachable=0 failed=0 skipped=61`, `postgres-lv3 : ok=68 changed=0 unreachable=0 failed=0 skipped=20`, and `proxmox-host : ok=41 changed=4 unreachable=0 failed=0 skipped=16`."
     },
     {
       "check": "Governed waiver summary and current host/runtime state",
       "result": "pass",
-      "observed": "`make gate-status` reported `Waiver summary: 0 open, 63 legacy, 0 warnings, 0 release blockers`, while fresh host and runtime probes reconfirmed hostname `Debian-trixie-latest-amd64-base`, kernel `6.17.13-2-pve`, active `pveproxy` and `tailscaled`, listeners on `2222`, `8005`, and `8006`, `sudo qm status 120 => status: running`, and Windmill answering `CE v1.662.0`."
+      "observed": "`make gate-status` reported `Waiver summary: 0 open, 63 legacy, 0 warnings, 0 release blockers`, while fresh host and runtime probes reconfirmed hostname `debian-base-template`, kernel `6.17.13-2-pve`, active `pveproxy` and `tailscaled`, listeners on `2222`, `8005`, and `8006`, `sudo qm status 120 => status: running`, and Windmill answering `CE v1.662.0`."
     },
     {
       "check": "Merged-tree validation and automation wrappers",

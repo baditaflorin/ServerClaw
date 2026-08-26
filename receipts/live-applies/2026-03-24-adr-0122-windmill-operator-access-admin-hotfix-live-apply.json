@@ -41,7 +41,7 @@
     {
       "check": "Operator inventory wrapper",
       "result": "partial",
-      "observed": "The inventory wrapper now executes from the worker checkout with uv and PYTHONPATH, but the live call still returns an error because controller-local Keycloak bootstrap secrets are not projected into /srv/proxmox_florin_server/.local on the worker host."
+      "observed": "The inventory wrapper now executes from the worker checkout with uv and PYTHONPATH, but the live call still returns an error because controller-local Keycloak bootstrap secrets are not projected into /srv/platform_server/.local on the worker host."
     }
   ],
   "evidence_refs": [

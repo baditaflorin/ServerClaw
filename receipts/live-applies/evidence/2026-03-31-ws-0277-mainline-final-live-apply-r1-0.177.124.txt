@@ -1,24 +1,24 @@
 /Applications/Xcode.app/Contents/Developer/usr/bin/make preflight WORKFLOW=live-apply-service
 Using CPython 3.13.7 interpreter at: /opt/homebrew/opt/python@3.13/bin/python3.13
 Creating virtual environment at: .venv
-   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout
-      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout
+   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0277-main-closeout
+      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0277-main-closeout
 Installed 2 packages in 3ms
 Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout/.local/packer-plugin-cache
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0277-main-closeout/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0277-main-closeout/.local/packer-plugin-cache
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact ops_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout/build/ops-portal via `make generate-ops-portal`
-PASS bootstrap artifact changelog_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout/build/changelog-portal via `make generate-changelog-portal`
-PASS bootstrap artifact docs_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout/build/docs-portal via `make docs`
+PASS bootstrap artifact ops_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0277-main-closeout/build/ops-portal via `make generate-ops-portal`
+PASS bootstrap artifact changelog_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0277-main-closeout/build/changelog-portal via `make generate-changelog-portal`
+PASS bootstrap artifact docs_portal: materialized directory at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0277-main-closeout/build/docs-portal via `make docs`
 Result: PASS (live-apply-service)
 /Applications/Xcode.app/Contents/Developer/usr/bin/make check-canonical-truth
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0277-main-closeout/scripts/canonical_truth.py --check
 Canonical truth is stale. Run `uvx --from pyyaml python scripts/canonical_truth.py --write`.
-- /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0277-main-closeout/README.md
+- /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0277-main-closeout/README.md
 make[1]: *** [check-canonical-truth] Error 2
 make: *** [live-apply-service] Error 2

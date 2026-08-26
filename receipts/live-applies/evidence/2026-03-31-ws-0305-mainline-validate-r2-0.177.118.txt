@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/scripts/validate_repo.sh
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/scripts/validate_repo.sh
 Generated platform vars validation
 Syntax check: playbooks/api-gateway.yml
 Syntax check: playbooks/artifact-cache-vm.yml
@@ -183,9 +183,9 @@ Shell lint
 JSON validation
 Semgrep SAST and secret-pattern validation
 Semgrep gate summary
-  repo: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final
+  repo: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final
   source sha: 0d6e8c9eb5d9d086e74cf92d8165248295baa076
-  sarif: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/receipts/sast/0d6e8c9eb5d9d086e74cf92d8165248295baa076.sarif.json
+  sarif: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/receipts/sast/0d6e8c9eb5d9d086e74cf92d8165248295baa076.sarif.json
   findings: error=0 warning=2 note=0 total=2
 Compose runtime env guard
 Retry guard
@@ -242,20 +242,20 @@ ConnectionResetError: [Errno 54] Connection reset by peer
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/scripts/policy_checks.py", line 131, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/scripts/policy_checks.py", line 131, in <module>
     raise SystemExit(main())
                      ~~~~^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/scripts/policy_checks.py", line 125, in main
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/scripts/policy_checks.py", line 125, in main
     validate_repository_policies(repo_root)
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/scripts/policy_checks.py", line 94, in validate_repository_policies
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/scripts/policy_checks.py", line 94, in validate_repository_policies
     effective_toolchain = toolchain or ensure_policy_toolchain(repo_root=repo_root)
                                        ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/platform/policy/toolchain.py", line 241, in ensure_policy_toolchain
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/platform/policy/toolchain.py", line 241, in ensure_policy_toolchain
     opa = _ensure_opa(effective_root)
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/platform/policy/toolchain.py", line 186, in _ensure_opa
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/platform/policy/toolchain.py", line 186, in _ensure_opa
     payload = _download_bytes(f"{OPA_RELEASE_BASE}/{asset_name}")
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/platform/policy/toolchain.py", line 49, in _download_bytes
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/platform/policy/toolchain.py", line 49, in _download_bytes
     with urllib.request.urlopen(_request(url), timeout=120) as response:
          ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 189, in urlopen

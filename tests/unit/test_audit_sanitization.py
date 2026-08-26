@@ -55,13 +55,13 @@ def test_passes_operator_string_inside_allowed_context(tmp_path):
 
     receipt = tmp_path / "receipts" / "live-applies" / "r.yml"
     receipt.parent.mkdir(parents=True)
-    receipt.write_text("host: 65.108.75.123\n")
+    receipt.write_text("host: 203.0.113.1\n")
 
     changelog = tmp_path / "changelog.md"
-    changelog.write_text("- 0fork.com migrated\n")
+    changelog.write_text("- example.org migrated\n")
 
     workstreams_root = tmp_path / "workstreams.yaml"
-    workstreams_root.write_text("- title: lv3.org retirement\n")
+    workstreams_root.write_text("- title: example.com retirement\n")
 
     files = [
         "docs/adr/0488-test.md",
@@ -85,14 +85,14 @@ def test_case_insensitive_match(tmp_path):
         files=["config/thing.yml"],
     )
     assert len(hits) == 1
-    assert hits[0].blocked == "lv3.org"
+    assert hits[0].blocked == "example.com"
 
 
 def test_self_exempt_files_pass(tmp_path):
     """The audit script itself names the blocked strings — must be exempt."""
     p = tmp_path / "scripts" / "audit_sanitization.py"
     p.parent.mkdir(parents=True)
-    p.write_text('BLOCKED = ("lv3.org", "0mpc.com")\n')
+    p.write_text('BLOCKED = ("example.com", "0mpc.com")\n')
 
     hits = audit_sanitization.audit(
         repo_root=tmp_path,

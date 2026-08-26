@@ -32,7 +32,7 @@ Status: PASS
 - Runbook: ok (docs/runbooks/configure-grist.md)
 
 ## canonical truth
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0279-main-publish-r1/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0279-main-publish-r1/scripts/canonical_truth.py --check
 Canonical truth OK
 
 ## validate repo
@@ -68,7 +68,7 @@ Repository data model validation
         "bypass": "skip_remote_gate",
         "reason_code": "controller_dependency_gap",
         "reason_summary": "The controller environment was temporarily missing a documented dependency or bootstrap artifact needed to execute the full gate.",
-        "owner": "baditaflorin@gmail.com",
+        "owner": "operator@example.com",
         "expires_on": "2026-04-02",
         "remediation_ref": "ws-0286-live-apply"
       }

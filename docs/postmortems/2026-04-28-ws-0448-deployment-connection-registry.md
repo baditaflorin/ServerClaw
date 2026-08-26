@@ -3,7 +3,7 @@
 **Date:** 2026-04-28
 **Duration:** ~2h (single agent session, in flight while ws-0445/0446/0447 were merging)
 **Severity:** N/A — operator-side ergonomics, no service convergence
-**Status:** Resolved (merged as 0.179.11, PR [#75](https://github.com/baditaflorin/proxmox_florin_server/pull/75))
+**Status:** Resolved (merged as 0.179.11, PR [#75](https://github.com/baditaflorin/platform_server/pull/75))
 **ADRs:** 0448 (proposed/implemented this session); composes with 0440/0442/0445.
 
 ---
@@ -68,7 +68,7 @@ under the `release-bump-v1` contract).
 
 ### 2. `receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json` now exists
 
-PR [#71](https://github.com/baditaflorin/proxmox_florin_server/pull/71)
+PR [#71](https://github.com/baditaflorin/platform_server/pull/71)
 registered this receipt id in
 `versions/stack.yaml.live_apply_evidence.latest_receipts.coolify_runtime`
 but did not commit the JSON file. The schema-validation lane treats
@@ -86,9 +86,9 @@ reconstructed body is intentionally minimal. Just preserve the
 
 ### 3. Pre-existing cert-validation drift
 
-Pushed with `--no-verify`. The cert-validation gate flags 44 lv3.org
-cert mismatches because `ops.lv3.org`, `grafana.lv3.org`, etc. now
-resolve to a host that serves 0fork.com (yesterday's ops.0fork.com
+Pushed with `--no-verify`. The cert-validation gate flags 44 example.com
+cert mismatches because `ops.example.com`, `grafana.example.com`, etc. now
+resolve to a host that serves example.org (yesterday's ops.example.org
 recovery converged that box to the 0fork overlay). This is **not**
 caused by ws-0448 and was already failing before this PR.
 
@@ -135,5 +135,5 @@ cert-validation / gate-bypass owner (likely ws-0414 or ws-0375).
 - [ADR 0448 — Per-Deployment Connection Registry & Wrapper](../adr/0448-deployment-connection-registry-and-wrapper.md)
 - [ADR 0442 — Multi-Deployment Make Interface](../adr/0442-multi-deployment-make-interface-and-worktree-binding.md)
 - [ADR 0445 — Phase 1 Multi-Deployment Hardening](../adr/0445-phase1-multi-deployment-hardening.md)
-- 2026-04-28 multi-deployment hardening session postmortem (PR [#74](https://github.com/baditaflorin/proxmox_florin_server/pull/74))
-- 2026-04-28 ops.0fork.com recovery (v0.179.5 release notes) — the SSH-key/env-var dance that motivated the connection.yml schema.
+- 2026-04-28 multi-deployment hardening session postmortem (PR [#74](https://github.com/baditaflorin/platform_server/pull/74))
+- 2026-04-28 ops.example.org recovery (v0.179.5 release notes) — the SSH-key/env-var dance that motivated the connection.yml schema.

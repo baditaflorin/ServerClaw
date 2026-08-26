@@ -7066,7 +7066,7 @@ adrs:
     filename: 0414-cert-lifecycle-agent-tools-and-cron-sync.md
     path: docs/adr/0414-cert-lifecycle-agent-tools-and-cron-sync.md
   - adr: '0424'
-    title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at 0fork.com
+    title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at example.org
     status: Proposed
     implementation_status: Implemented
     currently_describes: current_state

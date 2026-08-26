@@ -14,9 +14,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -32,12 +32,12 @@
     {
       "kind": "service_endpoint",
       "name": "browser-runner-gateway",
-      "address": "https://api.lv3.org/v1/browser-runner"
+      "address": "https://api.example.com/v1/browser-runner"
     },
     {
       "kind": "service_endpoint",
       "name": "dify-browser-run-session",
-      "address": "https://api.lv3.org/v1/dify-tools/browser-run-session"
+      "address": "https://api.example.com/v1/dify-tools/browser-run-session"
     }
   ],
   "verification": [
@@ -64,12 +64,12 @@
     {
       "check": "Private, operator, and Dify browser-runner proofs",
       "result": "pass",
-      "observed": "The private browser-runner `/healthz` and smoke flow succeeded through a local tunnel, the operator route at `https://api.lv3.org/v1/browser-runner` returned `{\"status\":\"ok\",\"artifact_root\":\"/data/artifacts\"}` and a successful smoke session for the platform-context bearer token, and the governed Dify route `https://api.lv3.org/v1/dify-tools/browser-run-session` returned HTTP 200 with heading `LV3 Browser Runner Smoke`, result `BROWSER RUNNER`, plus screenshot and PDF artifacts."
+      "observed": "The private browser-runner `/healthz` and smoke flow succeeded through a local tunnel, the operator route at `https://api.example.com/v1/browser-runner` returned `{\"status\":\"ok\",\"artifact_root\":\"/data/artifacts\"}` and a successful smoke session for the platform-context bearer token, and the governed Dify route `https://api.example.com/v1/dify-tools/browser-run-session` returned HTTP 200 with heading `LV3 Browser Runner Smoke`, result `BROWSER RUNNER`, plus screenshot and PDF artifacts."
     },
     {
       "check": "Synchronized main-promotion verification and gate replay",
       "result": "pass",
-      "observed": "`curl -fsS https://api.lv3.org/healthz` returned `{\"status\":\"ok\"}`; `https://api.lv3.org/v1/platform/services` listed `browser_runner` with `gateway_prefix: /v1/browser-runner`, internal URL `http://10.10.10.20:8096`, and ADR `0261`; guest-local `curl http://127.0.0.1:8096/healthz` plus a smoke `POST /sessions` succeeded through the Proxmox jump path; `uv run --with-requirements requirements/browser-runner.txt python scripts/browser_runner_smoke.py --base-url https://api.lv3.org/v1/browser-runner --bearer-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt` returned the expected heading, uppercase result, and two artifacts; the governed Dify `browser-run-session` POST returned HTTP 200 with screenshot and PDF artifacts via `X-LV3-Dify-Api-Key`; and `make pre-push-gate` passed on the synchronized promotion tree."
+      "observed": "`curl -fsS https://api.example.com/healthz` returned `{\"status\":\"ok\"}`; `https://api.example.com/v1/platform/services` listed `browser_runner` with `gateway_prefix: /v1/browser-runner`, internal URL `http://10.10.10.20:8096`, and ADR `0261`; guest-local `curl http://127.0.0.1:8096/healthz` plus a smoke `POST /sessions` succeeded through the Proxmox jump path; `uv run --with-requirements requirements/browser-runner.txt python scripts/browser_runner_smoke.py --base-url https://api.example.com/v1/browser-runner --bearer-token-file /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/platform-context/api-token.txt` returned the expected heading, uppercase result, and two artifacts; the governed Dify `browser-run-session` POST returned HTTP 200 with screenshot and PDF artifacts via `X-LV3-Dify-Api-Key`; and `make pre-push-gate` passed on the synchronized promotion tree."
     }
   ],
   "evidence_refs": [

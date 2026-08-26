@@ -8,7 +8,7 @@
   "repo_version_context": "0.105.0",
   "workflow_id": "provision-subdomain",
   "adr": "0094",
-  "summary": "Published the developer portal at docs.lv3.org through the shared NGINX edge, reconciled the public DNS record, and verified live HTTPS responses for the generated documentation site.",
+  "summary": "Published the developer portal at docs.example.com through the shared NGINX edge, reconciled the public DNS record, and verified live HTTPS responses for the generated documentation site.",
   "targets": [
     {
       "kind": "guest",
@@ -18,24 +18,24 @@
     },
     {
       "kind": "public_hostname",
-      "name": "docs.lv3.org"
+      "name": "docs.example.com"
     }
   ],
   "verification": [
     {
       "check": "Public DNS publication",
       "result": "pass",
-      "observed": "Direct `dig` lookups against `1.1.1.1`, `8.8.8.8`, and `ns1.your-server.de` all resolved `docs.lv3.org` to `65.108.75.123`."
+      "observed": "Direct `dig` lookups against `1.1.1.1`, `8.8.8.8`, and `ns1.your-server.de` all resolved `docs.example.com` to `203.0.113.1`."
     },
     {
       "check": "Developer portal landing page over HTTPS",
       "result": "pass",
-      "observed": "A `curl --resolve docs.lv3.org:443:65.108.75.123 https://docs.lv3.org` probe returned `HTTP/2 200` with `X-Robots-Tag: noindex, nofollow, noarchive`."
+      "observed": "A `curl --resolve docs.example.com:443:203.0.113.1 https://docs.example.com` probe returned `HTTP/2 200` with `X-Robots-Tag: noindex, nofollow, noarchive`."
     },
     {
       "check": "Generated service page over HTTPS",
       "result": "pass",
-      "observed": "A `curl --resolve docs.lv3.org:443:65.108.75.123 https://docs.lv3.org/services/keycloak/` probe returned `HTTP/2 200` from the live edge."
+      "observed": "A `curl --resolve docs.example.com:443:203.0.113.1 https://docs.example.com/services/keycloak/` probe returned `HTTP/2 200` from the live edge."
     }
   ],
   "evidence_refs": [

@@ -7,8 +7,8 @@
   "next_refresh_at": "2026-05-13T01:02:22Z",
   "environment": "production",
   "identity": {
-    "platform_name": "0fork.com",
-    "operator": "0fork Clone Operator",
+    "platform_name": "example.org",
+    "operator": "Platform Operator",
     "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
     "host_id": "proxmox-host",
     "provider": "hetzner-dedicated"
@@ -6373,17 +6373,17 @@
       },
       {
         "component": "Ops portal",
-        "endpoint": "https://ops.0fork.com",
+        "endpoint": "https://ops.example.org",
         "adr": "0093"
       },
       {
         "component": "Windmill workflows",
-        "endpoint": "https://windmill.0fork.com",
+        "endpoint": "https://windmill.example.org",
         "adr": "0044"
       },
       {
         "component": "API gateway",
-        "endpoint": "https://api.0fork.com",
+        "endpoint": "https://api.example.org",
         "adr": "0092"
       }
     ],

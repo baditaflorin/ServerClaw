@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lv3.org/schemas/deployment/v1/connection.schema.json",
+  "$id": "https://example.com/schemas/deployment/v1/connection.schema.json",
   "title": "Per-Deployment Connection Registry",
   "description": "ADR 0448 — describes how to reach the Proxmox host and its guest VMs for a given deployment. Lives at .local/deployments/<slug>/connection.yml (gitignored).",
   "type": "object",

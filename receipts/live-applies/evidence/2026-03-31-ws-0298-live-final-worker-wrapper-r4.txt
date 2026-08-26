@@ -3,9 +3,9 @@ docker-runtime-lv3 | CHANGED | rc=0 >>
   "status": "blocked",
   "reason": "SBOM refresh worker checkout is missing required repo paths",
   "missing_paths": [
-    "/srv/proxmox_florin_server/config/sbom-scanner.json",
-    "/srv/proxmox_florin_server/receipts/sbom",
-    "/srv/proxmox_florin_server/receipts/cve"
+    "/srv/platform_server/config/sbom-scanner.json",
+    "/srv/platform_server/receipts/sbom",
+    "/srv/platform_server/receipts/cve"
   ],
-  "expected_repo_path": "/srv/proxmox_florin_server"
+  "expected_repo_path": "/srv/platform_server"
 }

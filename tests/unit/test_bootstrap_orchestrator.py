@@ -75,8 +75,8 @@ class TestSelectSteps:
 
 class TestBuildTemplateCtx:
     def test_apex(self):
-        ctx = build_template_ctx({"platform_domain": "0fork.com"})
-        assert ctx["apex"] == "0fork.com"
+        ctx = build_template_ctx({"platform_domain": "example.org"})
+        assert ctx["apex"] == "example.org"
         assert ctx["apex_slug"] == "0fork"
 
     def test_empty_identity(self):
@@ -96,7 +96,7 @@ class TestBuildTemplateCtx:
 
 class TestExpandTemplates:
     def test_replaces_slug(self):
-        ctx = {"slug": "0fork", "apex": "0fork.com"}
+        ctx = {"slug": "0fork", "apex": "example.org"}
         assert expand_templates(ctx, "{slug}/manifest.yml") == "0fork/manifest.yml"
 
     def test_replaces_in_list(self):
@@ -105,9 +105,9 @@ class TestExpandTemplates:
         assert result == ["0fork.yml", "other"]
 
     def test_replaces_in_dict(self):
-        ctx = {"apex": "0fork.com"}
+        ctx = {"apex": "example.org"}
         result = expand_templates(ctx, {"path": ".local/{apex}/x"})
-        assert result["path"] == ".local/0fork.com/x"
+        assert result["path"] == ".local/example.org/x"
 
     def test_leaves_unknown_placeholder(self):
         ctx = {}
@@ -252,7 +252,7 @@ class TestStepStatus:
 class TestFormatStatus:
     def test_success_receipt(self):
         receipt = {
-            "deployment": "0fork.com",
+            "deployment": "example.org",
             "outcome": "success",
             "ran_at": "2026-05-13T00:00:00Z",
             "steps_passed": 14,
@@ -268,7 +268,7 @@ class TestFormatStatus:
 
     def test_failure_receipt(self):
         receipt = {
-            "deployment": "0fork.com",
+            "deployment": "example.org",
             "outcome": "failure",
             "ran_at": "2026-05-13T00:00:00Z",
             "steps_passed": 3,
@@ -332,7 +332,7 @@ class TestOrchestrate:
         receipt = orchestrate(
             steps,
             "0fork",
-            ctx={"apex": "0fork.com", "apex_slug": "0fork"},
+            ctx={"apex": "example.org", "apex_slug": "0fork"},
             gates={"fail_fast": True, "max_retries_per_step": 0},
             dry_run=True,
             write_receipt=False,
@@ -346,7 +346,7 @@ class TestOrchestrate:
         receipt = orchestrate(
             steps,
             "0fork",
-            ctx={"apex": "0fork.com", "apex_slug": "0fork"},
+            ctx={"apex": "example.org", "apex_slug": "0fork"},
             gates={"fail_fast": True},
             resume_from="2-step",
             dry_run=True,
@@ -367,7 +367,7 @@ class TestOrchestrate:
         receipt = orchestrate(
             steps,
             "0fork",
-            ctx={"apex": "0fork.com", "apex_slug": "0fork"},
+            ctx={"apex": "example.org", "apex_slug": "0fork"},
             gates={"fail_fast": True},
             dry_run=False,
             write_receipt=False,
@@ -391,7 +391,7 @@ class TestOrchestrate:
         receipt = orchestrate(
             steps,
             "0fork",
-            ctx={"apex": "0fork.com", "apex_slug": "0fork"},
+            ctx={"apex": "example.org", "apex_slug": "0fork"},
             gates={"fail_fast": True},
             dry_run=False,
             write_receipt=False,
@@ -414,7 +414,7 @@ class TestOrchestrate:
         receipt = orchestrate(
             steps,
             "0fork",
-            ctx={"apex": "0fork.com", "apex_slug": "0fork"},
+            ctx={"apex": "example.org", "apex_slug": "0fork"},
             gates={"fail_fast": False},
             dry_run=True,
             write_receipt=False,
@@ -431,7 +431,7 @@ class TestOrchestrate:
         receipt = orchestrate(
             steps,
             "0fork",
-            ctx={"apex": "0fork.com", "apex_slug": "0fork"},
+            ctx={"apex": "example.org", "apex_slug": "0fork"},
             gates={},
             dry_run=True,
             write_receipt=True,
@@ -454,7 +454,7 @@ class TestOrchestrate:
         receipt = orchestrate(
             steps,
             "0fork",
-            ctx={"apex": "0fork.com", "apex_slug": "0fork"},
+            ctx={"apex": "example.org", "apex_slug": "0fork"},
             gates={"fail_fast": True},
             dry_run=False,
             write_receipt=True,

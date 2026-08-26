@@ -2,11 +2,11 @@
 Preflight workflow: converge-windmill
 Description: Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
-INFO generated windmill_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/database-password.txt
-INFO generated windmill_superadmin_secret: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519
+INFO generated windmill_database_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/windmill/database-password.txt
+INFO generated windmill_superadmin_secret: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/windmill/superadmin-secret.txt
 Result: PASS (converge-windmill)
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=609b485147134078891330c77a9975b9 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/inventory/hosts.yml --run-id 4b2fe6ee1a54486bab23a7616681005d --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/playbooks/windmill.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2 --limit docker-runtime-lv3
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=609b485147134078891330c77a9975b9 ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/run_with_namespace.sh uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/inventory/hosts.yml --run-id 4b2fe6ee1a54486bab23a7616681005d --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/playbooks/windmill.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e windmill_worker_checkout_repo_root_local_dir=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2 --limit docker-runtime-lv3
 
 PLAY [Converge the Tailscale operator proxy for Windmill] **********************
 skipping: no hosts matched
@@ -399,38 +399,38 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:10:35.259Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=analytics.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=chat.lv3.org)
-ok: [docker-runtime-lv3] => (item=ci.lv3.org)
-ok: [docker-runtime-lv3] => (item=cloud.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=data.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=flags.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=notebooks.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=analytics.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=chat.example.com)
+ok: [docker-runtime-lv3] => (item=ci.example.com)
+ok: [docker-runtime-lv3] => (item=cloud.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=data.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=flags.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=notebooks.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T08:10:53.009Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Render Docker daemon configuration] ********
@@ -774,7 +774,7 @@ TASK [lv3.platform.common : Ensure managed directory tree entries exist] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:11:42.785Z","vm":"controller","workflow_id":"ansible-playbook"}
 ok: [docker-runtime-lv3] => (item={'path': '/opt/windmill', 'mode': '0755'})
 ok: [docker-runtime-lv3] => (item={'path': '/etc/lv3/windmill', 'mode': '0700'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server', 'mode': '0755'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server', 'mode': '0755'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T08:11:44.334Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Ensure the integration test runner password exists on the control machine] ***
@@ -869,7 +869,7 @@ ok: [docker-runtime-lv3] => (item=Makefile) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/Makefile"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/Makefile"
             }
         },
         "item": "Makefile",
@@ -905,7 +905,7 @@ ok: [docker-runtime-lv3] => (item=Makefile) => {
             "mode": "0644",
             "mtime": 1774943354.3961475,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/Makefile",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/Makefile",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -939,7 +939,7 @@ ok: [docker-runtime-lv3] => (item=config/validation-gate.json) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/config/validation-gate.json"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/config/validation-gate.json"
             }
         },
         "item": "config/validation-gate.json",
@@ -975,7 +975,7 @@ ok: [docker-runtime-lv3] => (item=config/validation-gate.json) => {
             "mode": "0644",
             "mtime": 1774943323.2000637,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/config/validation-gate.json",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/config/validation-gate.json",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1009,7 +1009,7 @@ ok: [docker-runtime-lv3] => (item=config/validation-lanes.yaml) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/config/validation-lanes.yaml"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/config/validation-lanes.yaml"
             }
         },
         "item": "config/validation-lanes.yaml",
@@ -1045,7 +1045,7 @@ ok: [docker-runtime-lv3] => (item=config/validation-lanes.yaml) => {
             "mode": "0644",
             "mtime": 1774943323.200169,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/config/validation-lanes.yaml",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/config/validation-lanes.yaml",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1079,7 +1079,7 @@ ok: [docker-runtime-lv3] => (item=config/gate-bypass-waiver-catalog.json) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/config/gate-bypass-waiver-catalog.json"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/config/gate-bypass-waiver-catalog.json"
             }
         },
         "item": "config/gate-bypass-waiver-catalog.json",
@@ -1115,7 +1115,7 @@ ok: [docker-runtime-lv3] => (item=config/gate-bypass-waiver-catalog.json) => {
             "mode": "0644",
             "mtime": 1774943323.1646316,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/config/gate-bypass-waiver-catalog.json",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/config/gate-bypass-waiver-catalog.json",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1149,7 +1149,7 @@ ok: [docker-runtime-lv3] => (item=scripts/__init__.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/__init__.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/__init__.py"
             }
         },
         "item": "scripts/__init__.py",
@@ -1185,7 +1185,7 @@ ok: [docker-runtime-lv3] => (item=scripts/__init__.py) => {
             "mode": "0644",
             "mtime": 1774943325.9356878,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/__init__.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/__init__.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1219,7 +1219,7 @@ ok: [docker-runtime-lv3] => (item=scripts/policy_checks.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/policy_checks.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/policy_checks.py"
             }
         },
         "item": "scripts/policy_checks.py",
@@ -1255,7 +1255,7 @@ ok: [docker-runtime-lv3] => (item=scripts/policy_checks.py) => {
             "mode": "0644",
             "mtime": 1774943326.0552096,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/policy_checks.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/policy_checks.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1289,7 +1289,7 @@ ok: [docker-runtime-lv3] => (item=scripts/policy_toolchain.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/policy_toolchain.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/policy_toolchain.py"
             }
         },
         "item": "scripts/policy_toolchain.py",
@@ -1325,7 +1325,7 @@ ok: [docker-runtime-lv3] => (item=scripts/policy_toolchain.py) => {
             "mode": "0644",
             "mtime": 1774943326.0553083,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/policy_toolchain.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/policy_toolchain.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1359,7 +1359,7 @@ ok: [docker-runtime-lv3] => (item=scripts/command_catalog.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/command_catalog.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/command_catalog.py"
             }
         },
         "item": "scripts/command_catalog.py",
@@ -1395,7 +1395,7 @@ ok: [docker-runtime-lv3] => (item=scripts/command_catalog.py) => {
             "mode": "0755",
             "mtime": 1774943325.9423807,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/command_catalog.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/command_catalog.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1429,7 +1429,7 @@ ok: [docker-runtime-lv3] => (item=scripts/controller_automation_toolkit.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/controller_automation_toolkit.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/controller_automation_toolkit.py"
             }
         },
         "item": "scripts/controller_automation_toolkit.py",
@@ -1465,7 +1465,7 @@ ok: [docker-runtime-lv3] => (item=scripts/controller_automation_toolkit.py) => {
             "mode": "0644",
             "mtime": 1774943325.957571,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/controller_automation_toolkit.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/controller_automation_toolkit.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1499,7 +1499,7 @@ ok: [docker-runtime-lv3] => (item=scripts/gate_bypass_waivers.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/gate_bypass_waivers.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/gate_bypass_waivers.py"
             }
         },
         "item": "scripts/gate_bypass_waivers.py",
@@ -1535,7 +1535,7 @@ ok: [docker-runtime-lv3] => (item=scripts/gate_bypass_waivers.py) => {
             "mode": "0644",
             "mtime": 1774943325.9783242,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/gate_bypass_waivers.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/gate_bypass_waivers.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1569,7 +1569,7 @@ ok: [docker-runtime-lv3] => (item=scripts/gate_status.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/gate_status.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/gate_status.py"
             }
         },
         "item": "scripts/gate_status.py",
@@ -1605,7 +1605,7 @@ ok: [docker-runtime-lv3] => (item=scripts/gate_status.py) => {
             "mode": "0644",
             "mtime": 1774943325.9785073,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/gate_status.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/gate_status.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1639,7 +1639,7 @@ ok: [docker-runtime-lv3] => (item=scripts/stage_smoke_suites.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/stage_smoke_suites.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/stage_smoke_suites.py"
             }
         },
         "item": "scripts/stage_smoke_suites.py",
@@ -1675,7 +1675,7 @@ ok: [docker-runtime-lv3] => (item=scripts/stage_smoke_suites.py) => {
             "mode": "0644",
             "mtime": 1774943326.083972,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/stage_smoke_suites.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/stage_smoke_suites.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1709,7 +1709,7 @@ ok: [docker-runtime-lv3] => (item=scripts/validation_lanes.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/validation_lanes.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/validation_lanes.py"
             }
         },
         "item": "scripts/validation_lanes.py",
@@ -1745,7 +1745,7 @@ ok: [docker-runtime-lv3] => (item=scripts/validation_lanes.py) => {
             "mode": "0644",
             "mtime": 1774943326.1049647,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/validation_lanes.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/validation_lanes.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1779,7 +1779,7 @@ ok: [docker-runtime-lv3] => (item=scripts/run_python_with_packages.sh) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/run_python_with_packages.sh"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/run_python_with_packages.sh"
             }
         },
         "item": "scripts/run_python_with_packages.sh",
@@ -1815,7 +1815,7 @@ ok: [docker-runtime-lv3] => (item=scripts/run_python_with_packages.sh) => {
             "mode": "0755",
             "mtime": 1774943326.0686576,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/run_python_with_packages.sh",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/run_python_with_packages.sh",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1849,7 +1849,7 @@ ok: [docker-runtime-lv3] => (item=config/windmill/scripts/gate-status.py) => {
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/config/windmill/scripts/gate-status.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/config/windmill/scripts/gate-status.py"
             }
         },
         "item": "config/windmill/scripts/gate-status.py",
@@ -1885,7 +1885,7 @@ ok: [docker-runtime-lv3] => (item=config/windmill/scripts/gate-status.py) => {
             "mode": "0644",
             "mtime": 1774943323.2094176,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/config/windmill/scripts/gate-status.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/config/windmill/scripts/gate-status.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1919,7 +1919,7 @@ ok: [docker-runtime-lv3] => (item=collections/ansible_collections/lv3/platform/r
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
             }
         },
         "item": "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
@@ -1955,7 +1955,7 @@ ok: [docker-runtime-lv3] => (item=collections/ansible_collections/lv3/platform/r
             "mode": "0644",
             "mtime": 1774943354.402367,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -1989,7 +1989,7 @@ ok: [docker-runtime-lv3] => (item=config/windmill/scripts/stage-smoke-suites.py)
                 "get_attributes": true,
                 "get_checksum": true,
                 "get_mime": true,
-                "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/config/windmill/scripts/stage-smoke-suites.py"
+                "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/config/windmill/scripts/stage-smoke-suites.py"
             }
         },
         "item": "config/windmill/scripts/stage-smoke-suites.py",
@@ -2025,7 +2025,7 @@ ok: [docker-runtime-lv3] => (item=config/windmill/scripts/stage-smoke-suites.py)
             "mode": "0644",
             "mtime": 1774943323.2125564,
             "nlink": 1,
-            "path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/config/windmill/scripts/stage-smoke-suites.py",
+            "path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/config/windmill/scripts/stage-smoke-suites.py",
             "pw_name": "live",
             "readable": true,
             "rgrp": true,
@@ -2389,68 +2389,68 @@ ok: [docker-runtime-lv3]
 
 TASK [lv3.platform.common : Ensure managed directory tree entries exist] *******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:13:53.834Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/receipts/fixtures', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/receipts/sbom', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/receipts/cve', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local', 'mode': '0755'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fixtures', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fixtures/reaper-runs', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fixtures/runtime', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fixtures/archive', 'mode': '1777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fixtures/locks', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/receipts/fixtures', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/receipts/sbom', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/receipts/cve', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local', 'mode': '0755'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fixtures', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fixtures/reaper-runs', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fixtures/runtime', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fixtures/archive', 'mode': '1777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fixtures/locks', 'mode': '1777'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure managed directory tree entries exist","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T08:13:58.413Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable directories exist with write access] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable directories exist with write access","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:13:58.506Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/operator-access', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/idempotency', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/scheduler', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/fault-injection', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/network-impairment-matrix', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/integration-tests', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/stage-smoke-suites', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/governed-command/logs', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/governed-command/receipts', 'mode': '0777'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/token-lifecycle', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/operator-access', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/idempotency', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/execution-lanes', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/scheduler', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/fault-injection', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/network-impairment-matrix', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/integration-tests', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/stage-smoke-suites', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/governed-command/logs', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/governed-command/receipts', 'mode': '0777'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/token-lifecycle', 'mode': '0777'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable directories exist with write access","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T08:14:04.653Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Collect controller-side bootstrap sources for Windmill worker mutable files] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Collect controller-side bootstrap sources for Windmill worker mutable files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:14:04.681Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/proxmox_florin_server/config/operators.yaml', 'mode': '0666'})
-ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
-ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
+ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/platform_server/config/operators.yaml', 'mode': '0666'})
+ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
+ok: [docker-runtime-lv3 -> localhost] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.windmill_runtime : Collect controller-side bootstrap sources for Windmill worker mutable files","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T08:14:06.454Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Collect guest-side presence for Windmill worker mutable files] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Collect guest-side presence for Windmill worker mutable files","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:14:06.491Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/config/operators.yaml', 'mode': '0666'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/config/operators.yaml', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.windmill_runtime : Collect guest-side presence for Windmill worker mutable files","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T08:14:07.956Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Bootstrap missing Windmill worker mutable files from the controller checkout when available] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Bootstrap missing Windmill worker mutable files from the controller checkout when available","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:14:07.982Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/config/operators.yaml)
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json)
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/config/operators.yaml)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/.local/state/execution-lanes/registry.json)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/.local/state/execution-lanes/registry.lock)
 skipping: [docker-runtime-lv3]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.windmill_runtime : Bootstrap missing Windmill worker mutable files from the controller checkout when available","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T08:14:08.023Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Create missing Windmill worker mutable file placeholders when no controller bootstrap file exists] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Create missing Windmill worker mutable file placeholders when no controller bootstrap file exists","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:14:08.169Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/config/operators.yaml)
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json)
-skipping: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/config/operators.yaml)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/.local/state/execution-lanes/registry.json)
+skipping: [docker-runtime-lv3] => (item=/srv/platform_server/.local/state/execution-lanes/registry.lock)
 skipping: [docker-runtime-lv3]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.windmill_runtime : Create missing Windmill worker mutable file placeholders when no controller bootstrap file exists","service_id":"ansible","target":"docker-runtime-lv3","task_status":"skipped","trace_id":"background","ts":"2026-03-31T08:14:08.256Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:14:08.305Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/config/operators.yaml', 'mode': '0666'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
-ok: [docker-runtime-lv3] => (item={'path': '/srv/proxmox_florin_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/config/operators.yaml', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.json', 'mode': '0666'})
+ok: [docker-runtime-lv3] => (item={'path': '/srv/platform_server/.local/state/execution-lanes/registry.lock', 'mode': '0666'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.windmill_runtime : Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T08:14:09.787Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Ensure the controller-style compatibility parent exists for the worker checkout] ***
@@ -2534,11 +2534,11 @@ skipping: [docker-runtime-lv3]
 
 TASK [lv3.platform.windmill_runtime : Remove stale packaging metadata from the Windmill worker checkout] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Remove stale packaging metadata from the Windmill worker checkout","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:14:19.274Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/.venv)
-ok: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/pyproject.toml)
-ok: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/setup.py)
-ok: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/setup.cfg)
-ok: [docker-runtime-lv3] => (item=/srv/proxmox_florin_server/lv3_platform_cli.egg-info)
+ok: [docker-runtime-lv3] => (item=/srv/platform_server/.venv)
+ok: [docker-runtime-lv3] => (item=/srv/platform_server/pyproject.toml)
+ok: [docker-runtime-lv3] => (item=/srv/platform_server/setup.py)
+ok: [docker-runtime-lv3] => (item=/srv/platform_server/setup.cfg)
+ok: [docker-runtime-lv3] => (item=/srv/platform_server/lv3_platform_cli.egg-info)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.windmill_runtime : Remove stale packaging metadata from the Windmill worker checkout","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T08:14:21.701Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.windmill_runtime : Remove the local staging archive for the Windmill worker checkout] ***
@@ -2673,7 +2673,7 @@ ok: [docker-runtime-lv3]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:14:42.237Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T08:14:42.271Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime-lv3
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:14:42.402Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -3205,7 +3205,7 @@ changed: [docker-runtime-lv3 -> localhost]
 
 TASK [lv3.platform.windmill_runtime : Sync repo-managed Windmill scripts] ******
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.windmill_runtime : Sync repo-managed Windmill scripts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T08:16:15.374Z","vm":"controller","workflow_id":"ansible-playbook"}
-fatal: [docker-runtime-lv3 -> localhost]: FAILED! => {"changed": false, "cmd": ["uv", "run", "--no-project", "--with", "pyyaml", "python3", "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0298-main-publish-r2/scripts/sync_windmill_seed_scripts.py", "--base-url", "http://100.64.0.1:8005", "--workspace", "lv3", "--manifest", "/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/ansible.7vyvto1w.json", "--max-attempts", "20", "--settle-interval", "2.0"], "delta": "0:03:04.530041", "end": "2026-03-31 11:19:20.340790", "msg": "non-zero return code", "rc": 1, "start": "2026-03-31 11:16:15.810749", "stderr": "{\n  \"error\": \"failed to sync f/lv3/world_state/refresh_opentofu_drift after 20 attempts: exhausted 20 attempts for windmill seed sync for f/lv3/world_state/refresh_opentofu_drift; last error: POST scripts/delete/p/f%2Flv3%2Fworld_state%2Frefresh_opentofu_drift transport error: Remote end closed connection without response\",\n  \"failed_path\": \"f/lv3/world_state/refresh_opentofu_drift\",\n  \"results\": [\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/gate-status\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/windmill_healthcheck\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/stage-smoke-suites\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/scheduler_watchdog_loop\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/platform_observation_loop\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/lane_scheduler\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/scheduler_watchdog\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/platform_findings_daily_digest\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/config_merge/merge_config_changes\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/rebuild_rag_index\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/rebuild_search_index\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/upgrade_container_image\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/deploy_and_promote\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/mutation_audit_emit\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/warm_build_cache\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/build_cache_maintenance\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/post_merge_gate\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/nightly_integration_tests\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/run_triage\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/runbook_executor\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/calibrate_triage_rules\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/continuous_drift_detection\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/subdomain_exposure_audit\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/restore_verification\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/security_posture_scan\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/weekly_https_tls_assurance\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/sbom_refresh\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/weekly_security_scan\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/audit_token_inventory\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/token_exposure_response\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/weekly_capacity_report\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/collection_publish\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/packer_template_rebuild\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/fixture_expiry_reaper\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/maintenance_window\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/ephemeral_vm_reaper\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/ephemeral_pool_reconciler\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/fault-injection\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/network-impairment-matrix\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/disaster_recovery_runbook\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/backup_coverage_ledger\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/operator_onboard\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/operator_offboard\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/sync_operators\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/quarterly_access_review\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/operator_roster\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/operator_inventory\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/operator_update_notes\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_proxmox_vms\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_service_health\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_container_inventory\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_netbox_topology\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_dns_records\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_tls_certs\",\n      \"status\": \"synced\"\n    }\n  ],\n  \"status\": \"error\"\n}", "stderr_lines": ["{", "  \"error\": \"failed to sync f/lv3/world_state/refresh_opentofu_drift after 20 attempts: exhausted 20 attempts for windmill seed sync for f/lv3/world_state/refresh_opentofu_drift; last error: POST scripts/delete/p/f%2Flv3%2Fworld_state%2Frefresh_opentofu_drift transport error: Remote end closed connection without response\",", "  \"failed_path\": \"f/lv3/world_state/refresh_opentofu_drift\",", "  \"results\": [", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/gate-status\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/windmill_healthcheck\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/stage-smoke-suites\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/scheduler_watchdog_loop\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/platform_observation_loop\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/lane_scheduler\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/scheduler_watchdog\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/platform_findings_daily_digest\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/config_merge/merge_config_changes\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/rebuild_rag_index\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/rebuild_search_index\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/upgrade_container_image\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/deploy_and_promote\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/mutation_audit_emit\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/warm_build_cache\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/build_cache_maintenance\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/post_merge_gate\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/nightly_integration_tests\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/run_triage\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/runbook_executor\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/calibrate_triage_rules\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/continuous_drift_detection\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/subdomain_exposure_audit\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/restore_verification\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/security_posture_scan\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/weekly_https_tls_assurance\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/sbom_refresh\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/weekly_security_scan\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/audit_token_inventory\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/token_exposure_response\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/weekly_capacity_report\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/collection_publish\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/packer_template_rebuild\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/fixture_expiry_reaper\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/maintenance_window\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/ephemeral_vm_reaper\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/ephemeral_pool_reconciler\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/fault-injection\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/network-impairment-matrix\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/disaster_recovery_runbook\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/backup_coverage_ledger\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/operator_onboard\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/operator_offboard\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/sync_operators\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/quarterly_access_review\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/operator_roster\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/operator_inventory\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/operator_update_notes\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_proxmox_vms\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_service_health\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_container_inventory\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_netbox_topology\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_dns_records\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_tls_certs\",", "      \"status\": \"synced\"", "    }", "  ],", "  \"status\": \"error\"", "}"], "stdout": "", "stdout_lines": []}
+fatal: [docker-runtime-lv3 -> localhost]: FAILED! => {"changed": false, "cmd": ["uv", "run", "--no-project", "--with", "pyyaml", "python3", "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0298-main-publish-r2/scripts/sync_windmill_seed_scripts.py", "--base-url", "http://100.64.0.1:8005", "--workspace", "lv3", "--manifest", "/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/ansible.7vyvto1w.json", "--max-attempts", "20", "--settle-interval", "2.0"], "delta": "0:03:04.530041", "end": "2026-03-31 11:19:20.340790", "msg": "non-zero return code", "rc": 1, "start": "2026-03-31 11:16:15.810749", "stderr": "{\n  \"error\": \"failed to sync f/lv3/world_state/refresh_opentofu_drift after 20 attempts: exhausted 20 attempts for windmill seed sync for f/lv3/world_state/refresh_opentofu_drift; last error: POST scripts/delete/p/f%2Flv3%2Fworld_state%2Frefresh_opentofu_drift transport error: Remote end closed connection without response\",\n  \"failed_path\": \"f/lv3/world_state/refresh_opentofu_drift\",\n  \"results\": [\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/gate-status\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/windmill_healthcheck\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/stage-smoke-suites\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/scheduler_watchdog_loop\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/platform_observation_loop\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/lane_scheduler\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/scheduler_watchdog\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/platform_findings_daily_digest\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/config_merge/merge_config_changes\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/rebuild_rag_index\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/rebuild_search_index\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/upgrade_container_image\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/deploy_and_promote\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/mutation_audit_emit\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/warm_build_cache\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/build_cache_maintenance\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/post_merge_gate\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/nightly_integration_tests\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/run_triage\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/runbook_executor\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/calibrate_triage_rules\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/continuous_drift_detection\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/subdomain_exposure_audit\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/restore_verification\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/security_posture_scan\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/weekly_https_tls_assurance\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/sbom_refresh\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/weekly_security_scan\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/audit_token_inventory\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/token_exposure_response\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/weekly_capacity_report\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/collection_publish\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/packer_template_rebuild\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/fixture_expiry_reaper\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/maintenance_window\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/ephemeral_vm_reaper\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/ephemeral_pool_reconciler\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/fault-injection\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/network-impairment-matrix\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/disaster_recovery_runbook\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/backup_coverage_ledger\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/operator_onboard\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/operator_offboard\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/sync_operators\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/quarterly_access_review\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/operator_roster\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/operator_inventory\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/operator_update_notes\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_proxmox_vms\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_service_health\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_container_inventory\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_netbox_topology\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_dns_records\",\n      \"status\": \"synced\"\n    },\n    {\n      \"attempts\": 1,\n      \"path\": \"f/lv3/world_state/refresh_tls_certs\",\n      \"status\": \"synced\"\n    }\n  ],\n  \"status\": \"error\"\n}", "stderr_lines": ["{", "  \"error\": \"failed to sync f/lv3/world_state/refresh_opentofu_drift after 20 attempts: exhausted 20 attempts for windmill seed sync for f/lv3/world_state/refresh_opentofu_drift; last error: POST scripts/delete/p/f%2Flv3%2Fworld_state%2Frefresh_opentofu_drift transport error: Remote end closed connection without response\",", "  \"failed_path\": \"f/lv3/world_state/refresh_opentofu_drift\",", "  \"results\": [", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/gate-status\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/windmill_healthcheck\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/stage-smoke-suites\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/scheduler_watchdog_loop\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/platform_observation_loop\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/lane_scheduler\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/scheduler_watchdog\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/platform_findings_daily_digest\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/config_merge/merge_config_changes\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/rebuild_rag_index\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/rebuild_search_index\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/upgrade_container_image\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/deploy_and_promote\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/mutation_audit_emit\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/warm_build_cache\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/build_cache_maintenance\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/post_merge_gate\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/nightly_integration_tests\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/run_triage\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/runbook_executor\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/calibrate_triage_rules\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/continuous_drift_detection\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/subdomain_exposure_audit\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/restore_verification\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/security_posture_scan\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/weekly_https_tls_assurance\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/sbom_refresh\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/weekly_security_scan\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/audit_token_inventory\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/token_exposure_response\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/weekly_capacity_report\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/collection_publish\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/packer_template_rebuild\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/fixture_expiry_reaper\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/maintenance_window\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/ephemeral_vm_reaper\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/ephemeral_pool_reconciler\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/fault-injection\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/network-impairment-matrix\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/disaster_recovery_runbook\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/backup_coverage_ledger\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/operator_onboard\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/operator_offboard\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/sync_operators\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/quarterly_access_review\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/operator_roster\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/operator_inventory\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/operator_update_notes\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_proxmox_vms\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_service_health\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_container_inventory\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_netbox_topology\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_dns_records\",", "      \"status\": \"synced\"", "    },", "    {", "      \"attempts\": 1,", "      \"path\": \"f/lv3/world_state/refresh_tls_certs\",", "      \"status\": \"synced\"", "    }", "  ],", "  \"status\": \"error\"", "}"], "stdout": "", "stdout_lines": []}
 {"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"non-zero return code","ignored":false,"level":"ERROR","msg":"Task failed: lv3.platform.windmill_runtime : Sync repo-managed Windmill scripts","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-31T08:19:20.439Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 PLAY RECAP *********************************************************************

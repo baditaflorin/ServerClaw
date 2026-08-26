@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -54,7 +54,7 @@
     {
       "check": "Host-side private endpoint verification after live apply",
       "result": "pass",
-      "observed": "`ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 ops@100.64.0.1` returned `tcp_connect=ok` for `10.10.10.20:9998`; `GET /version` returned `Apache Tika 3.2.3`; `PUT /tika` with `Accept: text/plain` and `Content-Type: text/plain; charset=utf-8` returned `Hello from Apache Tika.`; and `PUT /meta` with the same payload returned `Content-Type: text/plain; charset=UTF-8` plus `X-TIKA:Parsed-By` containing `DefaultParser` and `TextAndCSVParser`."
+      "observed": "`ssh -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 ops@100.64.0.1` returned `tcp_connect=ok` for `10.10.10.20:9998`; `GET /version` returned `Apache Tika 3.2.3`; `PUT /tika` with `Accept: text/plain` and `Content-Type: text/plain; charset=utf-8` returned `Hello from Apache Tika.`; and `PUT /meta` with the same payload returned `Content-Type: text/plain; charset=UTF-8` plus `X-TIKA:Parsed-By` containing `DefaultParser` and `TextAndCSVParser`."
     },
     {
       "check": "Guest-local verification after live apply",
@@ -82,7 +82,7 @@
     "collections/ansible_collections/lv3/platform/roles/tika_runtime/tasks/verify.yml",
     "config/health-probe-catalog.json",
     "config/image-catalog.json",
-    "inventory/host_vars/proxmox_florin.yml",
+    "inventory/host_vars/proxmox-host.yml",
     "receipts/image-scans/2026-03-30-tika-runtime.json",
     "receipts/image-scans/2026-03-30-tika-runtime.trivy.json",
     "receipts/live-applies/evidence/2026-03-30-adr-0275-apache-tika-live-apply.txt",

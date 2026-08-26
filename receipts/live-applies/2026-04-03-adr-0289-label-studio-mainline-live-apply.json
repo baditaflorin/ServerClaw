@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.97",
   "workflow_id": "adr-0289-label-studio-mainline-live-apply",
   "adr": "0289",
-  "summary": "Promoted ADR 0289 into canonical mainline truth as repository version `0.177.153` and platform version `0.130.97` after replaying Label Studio from the latest realistic `origin/main` baseline on source commit `cb7a375c784347f600f136a73ed91991808fb828`, preserving the earlier rebased exact-main success on `0.177.152` / `0.130.95`, repairing shared Coolify apps truth drift exposed by the rebase, and re-verifying the public oauth2-proxy redirect boundary at `annotate.lv3.org`.",
+  "summary": "Promoted ADR 0289 into canonical mainline truth as repository version `0.177.153` and platform version `0.130.97` after replaying Label Studio from the latest realistic `origin/main` baseline on source commit `cb7a375c784347f600f136a73ed91991808fb828`, preserving the earlier rebased exact-main success on `0.177.152` / `0.130.95`, repairing shared Coolify apps truth drift exposed by the rebase, and re-verifying the public oauth2-proxy redirect boundary at `annotate.example.com`.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,7 +40,7 @@
     {
       "kind": "service_endpoint",
       "name": "Label Studio public edge",
-      "address": "https://annotate.lv3.org"
+      "address": "https://annotate.example.com"
     }
   ],
   "verification": [
@@ -57,7 +57,7 @@
     {
       "check": "Public shared-edge redirect verification",
       "result": "pass",
-      "observed": "Standalone curl verification preserved in `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-public-head-r4-0.177.153.txt` confirms both `https://annotate.lv3.org/` and `https://annotate.lv3.org/api/projects` return `302` redirects into `https://annotate.lv3.org/oauth2/sign_in`, preserving the shared oauth2-proxy and Keycloak browser boundary."
+      "observed": "Standalone curl verification preserved in `receipts/live-applies/evidence/2026-04-03-ws-0289-label-studio-public-head-r4-0.177.153.txt` confirms both `https://annotate.example.com/` and `https://annotate.example.com/api/projects` return `302` redirects into `https://annotate.example.com/oauth2/sign_in`, preserving the shared oauth2-proxy and Keycloak browser boundary."
     },
     {
       "check": "Protected truth refresh and workstream validation",

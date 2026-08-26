@@ -7,12 +7,12 @@
     "service": "keycloak",
     "vm": "runtime-control",
     "realm": "0mcp",
-    "user": "plane-test@0mcp.com"
+    "user": "plane-test@example.org"
   },
   "summary": "Created a minimal Keycloak SSO test user so the operator can pass oauth2-proxy before testing the Plane local account.",
   "changes": [
     "Authenticated to the live Keycloak admin CLI on runtime-control using the existing bootstrap admin recovery secret.",
-    "Created or updated the Keycloak user plane-test / plane-test@0mcp.com in realm 0mcp.",
+    "Created or updated the Keycloak user plane-test / plane-test@example.org in realm 0mcp.",
     "Set the user as enabled and email-verified with no required actions for temporary testing.",
     "Set a non-temporary password matching the Plane local test account password.",
     "Mapped the user to the grafana-viewers group and platform-read realm role."
@@ -20,7 +20,7 @@
   "verification": [
     {
       "check": "Keycloak user mapping",
-      "result": "plane-test@0mcp.com is present in realm 0mcp, belongs to grafana-viewers, and has platform-read plus default realm roles."
+      "result": "plane-test@example.org is present in realm 0mcp, belongs to grafana-viewers, and has platform-read plus default realm roles."
     },
     {
       "check": "Keycloak credential verification",
@@ -28,7 +28,7 @@
     },
     {
       "check": "Plane edge gate",
-      "result": "https://plane.0mcp.com/ returns HTTP/2 302 to oauth2-proxy sign-in, confirming the public Plane hostname is still protected by SSO."
+      "result": "https://plane.example.org/ returns HTTP/2 302 to oauth2-proxy sign-in, confirming the public Plane hostname is still protected by SSO."
     }
   ],
   "sensitive_material": "The temporary password was returned only to the operator in chat and is intentionally not recorded in this receipt."

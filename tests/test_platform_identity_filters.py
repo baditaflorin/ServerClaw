@@ -69,7 +69,7 @@ def plugin():
     "domain,expected",
     [
         (
-            "lv3.org",
+            "example.com",
             {
                 "config_prefix": "lv3",
                 "sql_prefix": "lv3",
@@ -79,7 +79,7 @@ def plugin():
             },
         ),
         (
-            "0fork.com",
+            "example.org",
             {
                 "config_prefix": "0fork",
                 "sql_prefix": "fork",  # leading digit stripped
@@ -138,7 +138,7 @@ def test_leading_underscore_sql_unix_accept_pve_rejects(plugin):
 
 
 def test_dict_shape(plugin):
-    identity = plugin.platform_identity("0fork.com")
+    identity = plugin.platform_identity("example.org")
     assert set(identity.keys()) == {
         "domain",
         "config_prefix",
@@ -150,11 +150,11 @@ def test_dict_shape(plugin):
 
 
 def test_individual_flavor_filters(plugin):
-    assert plugin.platform_identity_config_prefix("0fork.com") == "0fork"
-    assert plugin.platform_identity_sql_prefix("0fork.com") == "fork"
-    assert plugin.platform_identity_pve_prefix("0fork.com") == "fork"
-    assert plugin.platform_identity_unix_prefix("0fork.com") == "fork"
-    assert plugin.platform_identity_dns_label("0fork.com") == "0fork"
+    assert plugin.platform_identity_config_prefix("example.org") == "0fork"
+    assert plugin.platform_identity_sql_prefix("example.org") == "fork"
+    assert plugin.platform_identity_pve_prefix("example.org") == "fork"
+    assert plugin.platform_identity_unix_prefix("example.org") == "fork"
+    assert plugin.platform_identity_dns_label("example.org") == "0fork"
 
 
 def test_filter_module_exposes_all_filters(plugin):
@@ -169,7 +169,7 @@ def test_filter_module_exposes_all_filters(plugin):
     }
     # Sanity: every advertised callable actually executes.
     for name, fn in filters.items():
-        result = fn("0fork.com")
+        result = fn("example.org")
         assert result is not None, f"filter {name!r} returned None"
 
 
@@ -237,7 +237,7 @@ def test_sql_lowercases(plugin):
 
 def test_production_invariant_lv3(plugin):
     """On the author's production deployment, all five flavors must equal 'lv3'."""
-    identity = plugin.platform_identity("lv3.org")
+    identity = plugin.platform_identity("example.com")
     assert identity["config_prefix"] == "lv3"
     assert identity["sql_prefix"] == "lv3"
     assert identity["pve_prefix"] == "lv3"
@@ -247,7 +247,7 @@ def test_production_invariant_lv3(plugin):
 
 def test_fork_flavor_divergence(plugin):
     """On the 0fork clone, config/dns keep '0fork' while sql/pve/unix strip digit."""
-    identity = plugin.platform_identity("0fork.com")
+    identity = plugin.platform_identity("example.org")
     assert identity["config_prefix"] == "0fork"
     assert identity["dns_label"] == "0fork"
     assert identity["sql_prefix"] == "fork"

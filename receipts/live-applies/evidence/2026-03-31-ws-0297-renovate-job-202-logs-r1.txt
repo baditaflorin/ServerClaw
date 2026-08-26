@@ -2,19 +2,19 @@
 2026-03-31T03:29:12.1849437Z workflow prepared
 2026-03-31T03:29:12.1850345Z evaluating expression 'success()'
 2026-03-31T03:29:12.1851067Z expression 'success()' evaluated to 'true'
-2026-03-31T03:29:12.1851315Z 🚀  Start image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
-2026-03-31T03:29:12.1925475Z   🐳  docker pull image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
-2026-03-31T03:29:12.1925821Z   🐳  docker pull registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-31T03:29:12.1851315Z 🚀  Start image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
+2026-03-31T03:29:12.1925475Z   🐳  docker pull image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= username= forcePull=false
+2026-03-31T03:29:12.1925821Z   🐳  docker pull registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff
 2026-03-31T03:29:12.1938098Z Image exists? true
-2026-03-31T03:29:12.1983159Z   🐳  docker create image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-31T03:29:12.1983159Z   🐳  docker create image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-31T03:29:12.2062683Z Custom container.Config from options ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image: Volumes:map[] WorkingDir: Entrypoint:[] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
-2026-03-31T03:29:12.2063284Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/proxmox_florin_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
+2026-03-31T03:29:12.2063284Z Merged container.Config ==> &{Hostname: Domainname: User: AttachStdin:false AttachStdout:true AttachStderr:true ExposedPorts:map[] Tty:false OpenStdin:false StdinOnce:false Env:[RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8] Cmd:[] Healthcheck:<nil> ArgsEscaped:false Image:registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff Volumes:map[] WorkingDir:/workspace/ops/platform_server Entrypoint:[/bin/sleep 10800] NetworkDisabled:false MacAddress: OnBuild:[] Labels:map[] StopSignal: StopTimeout:<nil> Shell:[]}
 2026-03-31T03:29:12.2063902Z Custom container.HostConfig from options ==> &{Binds:[] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:false VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038d448 OomKillDisable:0xc00038d343 PidsLimit:0xc00038d4a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
 2026-03-31T03:29:12.2064620Z --network and --net in the options will be ignored.
-2026-03-31T03:29:12.2065076Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038d448 OomKillDisable:0xc00038d343 PidsLimit:0xc00038d4a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-189_WORKFLOW-renovate_JOB-renovate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-189_WORKFLOW-renovate_JOB-renovate Target:/workspace/ops/proxmox_florin_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
-2026-03-31T03:29:12.2318395Z Created container name=GITEA-ACTIONS-TASK-189_WORKFLOW-renovate_JOB-renovate id=bb7419d57fa9ee703666dc4f519dc9de41baea333591fe8f0a9a40f5ffb4db50 from image registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
+2026-03-31T03:29:12.2065076Z Merged container.HostConfig ==> &{Binds:[/var/run/docker.sock:/var/run/docker.sock] ContainerIDFile: LogConfig:{Type: Config:map[]} NetworkMode:host PortBindings:map[] RestartPolicy:{Name:no MaximumRetryCount:0} AutoRemove:true VolumeDriver: VolumesFrom:[] ConsoleSize:[0 0] Annotations:map[] CapAdd:[] CapDrop:[] CgroupnsMode: DNS:[] DNSOptions:[] DNSSearch:[] ExtraHosts:[] GroupAdd:[] IpcMode: Cgroup: Links:[] OomScoreAdj:0 PidMode: Privileged:false PublishAllPorts:false ReadonlyRootfs:false SecurityOpt:[] StorageOpt:map[] Tmpfs:map[] UTSMode: UsernsMode: ShmSize:0 Sysctls:map[] Runtime: Isolation: Resources:{CPUShares:0 Memory:0 NanoCPUs:0 CgroupParent: BlkioWeight:0 BlkioWeightDevice:[] BlkioDeviceReadBps:[] BlkioDeviceWriteBps:[] BlkioDeviceReadIOps:[] BlkioDeviceWriteIOps:[] CPUPeriod:0 CPUQuota:0 CPURealtimePeriod:0 CPURealtimeRuntime:0 CpusetCpus: CpusetMems: Devices:[] DeviceCgroupRules:[] DeviceRequests:[] KernelMemory:0 KernelMemoryTCP:0 MemoryReservation:0 MemorySwap:0 MemorySwappiness:0xc00038d448 OomKillDisable:0xc00038d343 PidsLimit:0xc00038d4a8 Ulimits:[] CPUCount:0 CPUPercent:0 IOMaximumIOps:0 IOMaximumBandwidth:0} Mounts:[{Type:volume Source:act-toolcache Target:/opt/hostedtoolcache ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-189_WORKFLOW-renovate_JOB-renovate-env Target:/var/run/act ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>} {Type:volume Source:GITEA-ACTIONS-TASK-189_WORKFLOW-renovate_JOB-renovate Target:/workspace/ops/platform_server ReadOnly:false Consistency: BindOptions:<nil> VolumeOptions:<nil> TmpfsOptions:<nil> ClusterOptions:<nil>}] MaskedPaths:[] ReadonlyPaths:[] Init:<nil>}
+2026-03-31T03:29:12.2318395Z Created container name=GITEA-ACTIONS-TASK-189_WORKFLOW-renovate_JOB-renovate id=bb7419d57fa9ee703666dc4f519dc9de41baea333591fe8f0a9a40f5ffb4db50 from image registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff (platform: )
 2026-03-31T03:29:12.2318946Z ENV ==> [RUNNER_TOOL_CACHE=/opt/hostedtoolcache RUNNER_OS=Linux RUNNER_ARCH=X64 RUNNER_TEMP=/tmp LANG=C.UTF-8]
-2026-03-31T03:29:12.2319103Z   🐳  docker run image=registry.lv3.org/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
+2026-03-31T03:29:12.2319103Z   🐳  docker run image=registry.example.com/check-runner/python:3.12.10@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff platform= entrypoint=["/bin/sleep" "10800"] cmd=[] network="host"
 2026-03-31T03:29:12.2319259Z Starting container: bb7419d57fa9ee703666dc4f519dc9de41baea333591fe8f0a9a40f5ffb4db50
 2026-03-31T03:29:12.3605795Z Started container: bb7419d57fa9ee703666dc4f519dc9de41baea333591fe8f0a9a40f5ffb4db50
 2026-03-31T03:29:12.5132501Z Writing entry to tarball workflow/event.json len:2924
@@ -25,7 +25,7 @@
 2026-03-31T03:29:12.5318595Z expression 'format('{0}', github.token)' evaluated to '%!t(string=***)'
 2026-03-31T03:29:12.5318817Z expression '${{ github.repository }}' rewritten to 'format('{0}', github.repository)'
 2026-03-31T03:29:12.5318942Z evaluating expression 'format('{0}', github.repository)'
-2026-03-31T03:29:12.5319247Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/proxmox_florin_server)'
+2026-03-31T03:29:12.5319247Z expression 'format('{0}', github.repository)' evaluated to '%!t(string=ops/platform_server)'
 2026-03-31T03:29:12.5319437Z expression '${{ github.sha }}' rewritten to 'format('{0}', github.sha)'
 2026-03-31T03:29:12.5319533Z evaluating expression 'format('{0}', github.sha)'
 2026-03-31T03:29:12.5319816Z expression 'format('{0}', github.sha)' evaluated to '%!t(string=df70847880669553abd8fa8825f4ee6df4d1b13d)'
@@ -49,7 +49,7 @@
 2026-03-31T03:29:12.5710138Z Extracting content to '/var/run/act'
 2026-03-31T03:29:12.5729772Z   🐳  docker exec cmd=[sh -e /var/run/act/workflow/0.sh] user= workdir=
 2026-03-31T03:29:12.5730110Z Exec command '[sh -e /var/run/act/workflow/0.sh]'
-2026-03-31T03:29:12.5730508Z Working directory '/workspace/ops/proxmox_florin_server'
+2026-03-31T03:29:12.5730508Z Working directory '/workspace/ops/platform_server'
 2026-03-31T03:29:12.6486604Z hint: Using 'master' as the name for the initial branch. This default branch name
 2026-03-31T03:29:12.6487355Z hint: is subject to change. To configure the initial branch name to use in all
 2026-03-31T03:29:12.6487517Z hint: of your new repositories, which will suppress this warning, call:
@@ -60,8 +60,8 @@
 2026-03-31T03:29:12.6488186Z hint: 'development'. The just-created branch can be renamed via this command:
 2026-03-31T03:29:12.6488314Z hint:
 2026-03-31T03:29:12.6488433Z hint: 	git branch -m <name>
-2026-03-31T03:29:12.6488799Z Initialized empty Git repository in /workspace/ops/proxmox_florin_server/.git/
-2026-03-31T03:29:17.1059509Z From http://10.10.10.20:3003/ops/proxmox_florin_server
+2026-03-31T03:29:12.6488799Z Initialized empty Git repository in /workspace/ops/platform_server/.git/
+2026-03-31T03:29:17.1059509Z From http://10.10.10.20:3003/ops/platform_server
 2026-03-31T03:29:17.1059891Z  * branch            codex/ws-0297-live-apply -> FETCH_HEAD
 2026-03-31T03:29:17.1063630Z  * [new branch]      codex/ws-0297-live-apply -> origin/codex/ws-0297-live-apply
 2026-03-31T03:29:17.5814356Z Note: switching to 'df70847880669553abd8fa8825f4ee6df4d1b13d'.
@@ -105,17 +105,38 @@
 2026-03-31T03:29:20.8354122Z Get:1 http://deb.debian.org/debian trixie/main amd64 docker-cli amd64 26.1.5+dfsg1-9+b12 [7338 kB]
 2026-03-31T03:29:21.7619642Z Fetched 7338 kB in 0s (44.9 MB/s)
 2026-03-31T03:29:21.7776333Z Selecting previously unselected package docker-cli.
-2026-03-31T03:29:21.7824092Z (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 9191 files and directories currently installed.)
+2026-03-31T03:29:21.7824092Z (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 9191 files and directories currently installed.)
 2026-03-31T03:29:21.7827176Z Preparing to unpack .../docker-cli_26.1.5+dfsg1-9+b12_amd64.deb ...
 2026-03-31T03:29:21.7845496Z Unpacking docker-cli (26.1.5+dfsg1-9+b12) ...
 2026-03-31T03:29:22.1076415Z Setting up docker-cli (26.1.5+dfsg1-9+b12) ...
-2026-03-31T03:29:23.1524903Z registry.lv3.org/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d: Pulling from check-runner/renovate
+2026-03-31T03:29:23.1524903Z registry.example.com/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d: Pulling from check-runner/renovate
 2026-03-31T03:29:23.1543852Z Digest: sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
-2026-03-31T03:29:23.1544427Z Status: Image is up to date for registry.lv3.org/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
-2026-03-31T03:29:23.1566228Z registry.lv3.org/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
+2026-03-31T03:29:23.1544427Z Status: Image is up to date for registry.example.com/check-runner/renovate@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
+2026-03-31T03:29:23.1566228Z registry.example.com/check-runner/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d
 2026-03-31T03:29:25.7841997Z (node:9) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
 2026-03-31T03:29:25.7842718Z (Use `node --trace-deprecation ...` to show where the warning was created)
-2026-03-31T03:29:25.8184130Z  INFO: Repository started (repository=ops/proxmox_florin_server)
+2026-03-31T03:29:25.8184130Z  INFO: Repository started (repository=ops/platform_server)
 2026-03-31T03:29:25.8184651Z        "renovateVersion": "42.76.4"
 2026-03-31T03:29:27.9237269Z ----------------------------------------
 2026-03-31T03:29:27.9237778Z Exception occurred during processing of request from ('127.0.0.1', 57504)
@@ -141,7 +162,7 @@
 2026-03-31T03:29:27.9300674Z   File "<stdin>", line 32, in handle
 2026-03-31T03:29:27.9300870Z BlockingIOError: [Errno 11] Resource temporarily unavailable
 2026-03-31T03:29:27.9301145Z ----------------------------------------
-2026-03-31T03:29:28.4151489Z  WARN: Host error (repository=ops/proxmox_florin_server)
+2026-03-31T03:29:28.4151489Z  WARN: Host error (repository=ops/platform_server)
 2026-03-31T03:29:28.4151995Z        "hostType": "git",
 2026-03-31T03:29:28.4152217Z        "packageName": undefined,
 2026-03-31T03:29:28.4152363Z        "err": {
@@ -151,7 +172,7 @@
 2026-03-31T03:29:28.4152885Z              "-b",
 2026-03-31T03:29:28.4153009Z              "main",
 2026-03-31T03:29:28.4153163Z              "--filter=blob:none",
-2026-03-31T03:29:28.4153293Z              "http://**redacted**@git.lv3.org:3009/ops/proxmox_florin_server.git",
+2026-03-31T03:29:28.4153293Z              "http://**redacted**@git.example.com:3009/ops/platform_server.git",
 2026-03-31T03:29:28.4153439Z              "."
 2026-03-31T03:29:28.4153570Z            ],
 2026-03-31T03:29:28.4153693Z            "format": "utf-8",
@@ -160,13 +181,13 @@
 2026-03-31T03:29:28.4154200Z          "message": "Cloning into '.'...\nerror: RPC failed; curl 52 Empty reply from server\nfatal: expected 'packfile'\nfatal: could not fetch a8e8c0229123925396dcf8317d7c9a271c221198 from promisor remote\nwarning: Clone succeeded, but checkout failed.\nYou can inspect what was checked out with 'git status'\nand retry with 'git restore --source=HEAD :/'\n\n",
 2026-03-31T03:29:28.4154441Z          "stack": "Error: Cloning into '.'...\nerror: RPC failed; curl 52 Empty reply from server\nfatal: expected 'packfile'\nfatal: could not fetch a8e8c0229123925396dcf8317d7c9a271c221198 from promisor remote\nwarning: Clone succeeded, but checkout failed.\nYou can inspect what was checked out with 'git status'\nand retry with 'git restore --source=HEAD :/'\n\n\n    at Object.action (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/plugins/error-detection.plugin.ts:42:29)\n    at PluginStore.exec (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/plugins/plugin-store.ts:54:29)\n    at /usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:124:42\n    at new Promise (<anonymous>)\n    at GitExecutorChain.handleTaskData (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:121:14)\n    at GitExecutorChain.attemptRemoteTask (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:97:40)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at GitExecutorChain.attemptTask (/usr/local/renovate/node_modules/.pnpm/simple-git@3.30.0/node_modules/simple-git/src/lib/runners/git-executor-chain.ts:61:18)"
 2026-03-31T03:29:28.4155032Z        }
-2026-03-31T03:29:28.4155172Z  INFO: External host error causing abort - skipping (repository=ops/proxmox_florin_server)
-2026-03-31T03:29:28.4208176Z ERROR: Repository has unknown error (repository=ops/proxmox_florin_server)
+2026-03-31T03:29:28.4155172Z  INFO: External host error causing abort - skipping (repository=ops/platform_server)
+2026-03-31T03:29:28.4208176Z ERROR: Repository has unknown error (repository=ops/platform_server)
 2026-03-31T03:29:28.4208958Z        "err": {
 2026-03-31T03:29:28.4209118Z          "message": "external-host-error",
 2026-03-31T03:29:28.4209323Z          "stack": "Error: external-host-error\n    at Object.renovateRepository (/usr/local/renovate/lib/workers/repository/index.ts:110:13)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at attributes (/usr/local/renovate/lib/workers/global/index.ts:198:11)\n    at start (/usr/local/renovate/lib/workers/global/index.ts:183:7)\n    at /usr/local/renovate/lib/renovate.ts:19:22"
 2026-03-31T03:29:28.4209558Z        }
-2026-03-31T03:29:28.4292853Z  INFO: Repository finished (repository=ops/proxmox_florin_server)
+2026-03-31T03:29:28.4292853Z  INFO: Repository finished (repository=ops/platform_server)
 2026-03-31T03:29:28.4293463Z        "cloned": true,
 2026-03-31T03:29:28.4293598Z        "durationMs": 2616,
 2026-03-31T03:29:28.4293733Z        "result": "unknown-error",
@@ -180,7 +201,7 @@
 2026-03-31T03:29:28.4347257Z            "name": "renovate",
 2026-03-31T03:29:28.4347361Z            "level": 50,
 2026-03-31T03:29:28.4347479Z            "logContext": "lHBOEw_UHCqUod4ILUIhY",
-2026-03-31T03:29:28.4347610Z            "repository": "ops/proxmox_florin_server",
+2026-03-31T03:29:28.4347610Z            "repository": "ops/platform_server",
 2026-03-31T03:29:28.4347754Z            "err": {
 2026-03-31T03:29:28.4347867Z              "message": "external-host-error",
 2026-03-31T03:29:28.4348002Z              "stack": "Error: external-host-error\n    at Object.renovateRepository (/usr/local/renovate/lib/workers/repository/index.ts:110:13)\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at attributes (/usr/local/renovate/lib/workers/global/index.ts:198:11)\n    at start (/usr/local/renovate/lib/workers/global/index.ts:183:7)\n    at /usr/local/renovate/lib/renovate.ts:19:22"

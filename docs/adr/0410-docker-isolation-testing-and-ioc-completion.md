@@ -295,7 +295,7 @@ step-ca.docker-dev.local → step-ca container (172.30.10.99)
 ```
 
 This enables services to resolve each other by FQDN, matching production
-behavior where all services use `*.lv3.org`.
+behavior where all services use `*.example.com`.
 
 ### Phase 5: Test Scenarios and Timing (P2)
 

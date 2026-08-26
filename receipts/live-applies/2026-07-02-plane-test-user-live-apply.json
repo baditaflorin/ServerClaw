@@ -6,30 +6,30 @@
   "target": {
     "service": "plane",
     "vm": "docker-runtime-lv3",
-    "public_url": "https://plane.0mcp.com",
-    "canonical_public_url": "https://tasks.0mcp.com"
+    "public_url": "https://plane.example.org",
+    "canonical_public_url": "https://tasks.example.org"
   },
   "summary": "Initialized the live Plane instance through the repo-managed bootstrap path and created a temporary member account for operator testing.",
   "changes": [
     "Opened a temporary SSH tunnel from the controller workstation to docker-runtime-lv3 port 8093.",
     "Ran scripts/plane_bootstrap.py against the tunneled Plane endpoint using the existing .local/plane bootstrap spec and password files.",
-    "Created the normal Plane user plane-test@0mcp.com through the live Plane Django ORM.",
-    "Added plane-test@0mcp.com to workspace 0mcp-platform as role 15.",
-    "Added plane-test@0mcp.com to project ADR as role 15.",
+    "Created the normal Plane user plane-test@example.org through the live Plane Django ORM.",
+    "Added plane-test@example.org to workspace 0mcp-platform as role 15.",
+    "Added plane-test@example.org to project ADR as role 15.",
     "Closed the temporary SSH tunnel."
   ],
   "verification": [
     {
       "check": "Plane bootstrap state",
-      "result": "Plane contains admin ops@0mcp.com, workspace 0mcp-platform, and project ADR."
+      "result": "Plane contains admin ops@example.org, workspace 0mcp-platform, and project ADR."
     },
     {
       "check": "Plane test user membership",
-      "result": "plane-test@0mcp.com is an active member of workspace 0mcp-platform and project ADR with role 15."
+      "result": "plane-test@example.org is an active member of workspace 0mcp-platform and project ADR with role 15."
     },
     {
       "check": "Plane credential verification",
-      "result": "Plane email/password sign-in for plane-test@0mcp.com succeeded through the tunneled Plane endpoint and returned workspace 0mcp-platform."
+      "result": "Plane email/password sign-in for plane-test@example.org succeeded through the tunneled Plane endpoint and returned workspace 0mcp-platform."
     }
   ],
   "sensitive_material": "The temporary password was returned only to the operator in chat and is intentionally not recorded in this receipt."

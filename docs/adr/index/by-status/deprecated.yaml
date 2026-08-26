@@ -234,7 +234,7 @@ adrs:
     filename: 0442-multi-deployment-make-interface-and-worktree-binding.md
     path: docs/adr/0442-multi-deployment-make-interface-and-worktree-binding.md
   - adr: '0445'
-    title: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+    title: Phase 1 Multi-Deployment Hardening (example.org + example.com)
     status: Deprecated
     implementation_status: Deprecated
     currently_describes: historical

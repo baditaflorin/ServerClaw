@@ -146,7 +146,7 @@ adrs:
     path: docs/adr/0406-automated-dns-propagation-from-single-ip-source-of-truth.md
     implemented_on: '2026-04-11'
   - adr: '0424'
-    title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at 0fork.com
+    title: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at example.org
     status: Proposed
     implementation_status: Implemented
     currently_describes: current_state

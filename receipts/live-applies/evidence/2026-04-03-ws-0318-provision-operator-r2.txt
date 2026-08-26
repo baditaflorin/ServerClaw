@@ -1,17 +1,17 @@
-[0] Will write a new password to /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-tmp-002-password.txt after Keycloak user creation
+[0] Will write a new password to /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/florin.badita-tmp-002-password.txt after Keycloak user creation
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 684, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 684, in <module>
     main()
     ~~~~^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 680, in main
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 680, in main
     provision(args, dry_run=args.dry_run)
     ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 533, in provision
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 533, in provision
     user_id, user_exists = _fetch_keycloak_user(args.username, bootstrap_pass)
                            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 468, in _fetch_keycloak_user
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 468, in _fetch_keycloak_user
     token = get_token(bootstrap_pass)
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 190, in get_token
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0318-live-apply/scripts/provision_operator.py", line 190, in get_token
     with urllib.request.urlopen(req, context=_ssl_ctx()) as response:
          ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/opt/homebrew/Cellar/python@3.13/3.13.7/Frameworks/Python.framework/Versions/3.13/lib/python3.13/urllib/request.py", line 189, in urlopen

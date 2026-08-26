@@ -24,8 +24,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
@@ -57,7 +57,7 @@
     {
       "check": "Windmill runtime database route",
       "result": "pass",
-      "observed": "The rendered /run/lv3-secrets/windmill/runtime.env on docker-runtime-lv3 now points DATABASE_URL at 10.10.10.50:5432 instead of database.lv3.org."
+      "observed": "The rendered /run/lv3-secrets/windmill/runtime.env on docker-runtime-lv3 now points DATABASE_URL at 10.10.10.50:5432 instead of database.example.com."
     }
   ],
   "evidence_refs": [

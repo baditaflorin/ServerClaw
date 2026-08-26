@@ -1,14 +1,14 @@
 ADR 0291 exact-main direct verification
 Recorded on: 2026-03-31T00:14:07Z
-Worktree: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0291-main-merge
+Worktree: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0291-main-merge
 Source commit context: 89639b54194fcdd8713a4676bb53d961475afb91
 
 Public health probe
-- Command: curl -fsS https://notebooks.lv3.org/hub/health
+- Command: curl -fsS https://notebooks.example.com/hub/health
 - Result: success (empty 200 response body)
 
 Public OIDC handoff probe
-- Command: curl -fsS -o /dev/null -D - https://notebooks.lv3.org/hub/oauth_login
+- Command: curl -fsS -o /dev/null -D - https://notebooks.example.com/hub/oauth_login
 - Result:
   HTTP/2 302
   server: nginx
@@ -17,7 +17,7 @@ Public OIDC handoff probe
   content-length: 0
   x-jupyterhub-version: 5.4.4
   access-control-allow-headers: accept, content-type, authorization
-  location: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?response_type=code&redirect_uri=https%3A%2F%2Fnotebooks.lv3.org%2Fhub%2Foauth_callback&client_id=jupyterhub&code_challenge=DEbz3FvYMwjcnnbMTvC4mEyG0HU1KTkSiJlLRORxMp0&code_challenge_method=S256&state=eyJzdGF0ZV9pZCI6ICJlZjFjYjA5ZjU5N2I0MTZiYjA0ZWRhMWE4ZjliZDE5NyJ9&scope=openid+profile+email
+  location: https://sso.example.com/realms/lv3/protocol/openid-connect/auth?response_type=code&redirect_uri=https%3A%2F%2Fnotebooks.example.com%2Fhub%2Foauth_callback&client_id=jupyterhub&code_challenge=DEbz3FvYMwjcnnbMTvC4mEyG0HU1KTkSiJlLRORxMp0&code_challenge_method=S256&state=eyJzdGF0ZV9pZCI6ICJlZjFjYjA5ZjU5N2I0MTZiYjA0ZWRhMWE4ZjliZDE5NyJ9&scope=openid+profile+email
   set-cookie: oauthenticator-state="2|1:0|10:1774916048|20:oauthenticator-state|236:ZXlKemRHRjBaVjlwWkNJNklDSmxaakZqWWpBNVpqVTVOMkkwTVRaaVlqQTBaV1JoTVdFNFpqbGlaREU1TnlJc0lDSnVaWGgwWDNWeWJDSTZJRzUxYkd3c0lDSmpiMlJsWDNabGNtbG1hV1Z5SWpvZ0ltaEZRUzFxT0dkQk5tSXdjMDlwVlV4cmJqQXhSR3RpZVdSb05XOTJRMWhaWjNOSmFIaG9jekI2VFhjaWZRPT0=|b768bbaec5064c60a534c8596a33efddf2fc01cd7671ad576c654d895c4639c4"; expires=Wed, 01 Apr 2026 00:14:08 GMT; HttpOnly; Path=/
   x-robots-tag: noindex, nofollow
   strict-transport-security: max-age=63072000; includeSubDomains; preload
@@ -26,26 +26,26 @@ Public OIDC handoff probe
   x-frame-options: DENY
   referrer-policy: strict-origin-when-cross-origin
   permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
-  content-security-policy: default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://notebooks.lv3.org wss://notebooks.lv3.org https://sso.lv3.org; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  content-security-policy: default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://notebooks.example.com wss://notebooks.example.com https://sso.example.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
   x-robots-tag: noindex, nofollow
 
 
 Edge certificate probe
-- Command: openssl s_client -connect notebooks.lv3.org:443 -servername notebooks.lv3.org </dev/null 2>/dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName
+- Command: openssl s_client -connect notebooks.example.com:443 -servername notebooks.example.com </dev/null 2>/dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName
 - Result:
-  subject=CN=nginx.lv3.org
+  subject=CN=nginx.example.com
   issuer=C=US, O=Let's Encrypt, CN=E7
   X509v3 Subject Alternative Name:
-      DNS:*.apps.lv3.org, DNS:agents.lv3.org, DNS:analytics.lv3.org, DNS:api.lv3.org, DNS:apps.lv3.org, DNS:build.lv3.org, DNS:changelog.lv3.org, DNS:chat.lv3.org, DNS:cloud.lv3.org, DNS:coolify.lv3.org, DNS:data.lv3.org, DNS:docker.lv3.org, DNS:docs.lv3.org, DNS:draw.lv3.org, DNS:flags.lv3.org, DNS:grafana.lv3.org, DNS:headscale.lv3.org, DNS:home.lv3.org, DNS:langfuse.lv3.org, DNS:logs.lv3.org, DNS:lv3.org, DNS:mail.lv3.org, DNS:matrix.lv3.org, DNS:n8n.lv3.org, DNS:nginx.lv3.org, DNS:notebooks.lv3.org, DNS:ops.lv3.org, DNS:proxmox.lv3.org, DNS:realtime.lv3.org, DNS:registry.lv3.org, DNS:sso.lv3.org, DNS:status.lv3.org, DNS:tasks.lv3.org, DNS:uptime.lv3.org, DNS:wiki.lv3.org
+      DNS:*.apps.example.com, DNS:agents.example.com, DNS:analytics.example.com, DNS:api.example.com, DNS:apps.example.com, DNS:build.example.com, DNS:changelog.example.com, DNS:chat.example.com, DNS:cloud.example.com, DNS:coolify.example.com, DNS:data.example.com, DNS:docker.example.com, DNS:docs.example.com, DNS:draw.example.com, DNS:flags.example.com, DNS:grafana.example.com, DNS:headscale.example.com, DNS:home.example.com, DNS:langfuse.example.com, DNS:logs.example.com, DNS:example.com, DNS:mail.example.com, DNS:matrix.example.com, DNS:n8n.example.com, DNS:nginx.example.com, DNS:notebooks.example.com, DNS:ops.example.com, DNS:proxmox.example.com, DNS:realtime.example.com, DNS:registry.example.com, DNS:sso.example.com, DNS:status.example.com, DNS:tasks.example.com, DNS:uptime.example.com, DNS:wiki.example.com
 
 Docker runtime dependency probes
 - Command: ansible docker-runtime-lv3 -i inventory/hosts.yml -m shell -a 'curl -fsS http://127.0.0.1:11434/api/version && printf "
-" && curl -fsS http://127.0.0.1:8010/healthz' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+" && curl -fsS http://127.0.0.1:8010/healthz' --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 - Result:
   docker-runtime-lv3 | CHANGED | rc=0 >>
   {"version":"0.18.2"}
   {"status":"ok","collection":"platform_context","memory_collection":"serverclaw_memory","memory_enabled":true}
 
 Docker runtime JupyterHub local probe
-- Command: ansible docker-runtime-lv3 -i inventory/hosts.yml -m shell -a 'curl -fsS http://127.0.0.1:8097/hub/health' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+- Command: ansible docker-runtime-lv3 -i inventory/hosts.yml -m shell -a 'curl -fsS http://127.0.0.1:8097/hub/health' --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 - Result: success (empty 200 response body)

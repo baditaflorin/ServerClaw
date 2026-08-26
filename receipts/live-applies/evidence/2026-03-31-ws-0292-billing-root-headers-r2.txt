@@ -3,7 +3,7 @@ server: nginx
 date: Tue, 31 Mar 2026 08:46:33 GMT
 content-type: text/html
 content-length: 138
-location: https://billing.lv3.org/oauth2/sign_in?rd=https://billing.lv3.org/
+location: https://billing.example.com/oauth2/sign_in?rd=https://billing.example.com/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin

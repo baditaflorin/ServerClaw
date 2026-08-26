@@ -374,7 +374,7 @@ playbook_execution_env: "{{ env | default('production') }}"
 playbook_execution_allowed_envs:
   - production
   - staging
-  - clone  # ADR 0430 — fork deployments (0fork.com etc.); same service names, different IPs via .local/host_vars overlay
+  - clone  # ADR 0430 — fork deployments (example.org etc.); same service names, different IPs via .local/host_vars overlay
 platform_trace_id: "{{ lookup('ansible.builtin.env', 'PLATFORM_TRACE_ID') | default('', true) }}"
 platform_intent_id: "{{ lookup('ansible.builtin.env', 'PLATFORM_INTENT_ID') | default('', true) }}"
 playbook_execution_preflight_connection_timeout: 30

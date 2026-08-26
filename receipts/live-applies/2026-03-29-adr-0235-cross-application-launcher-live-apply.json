@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -27,7 +27,7 @@
     {
       "kind": "service_endpoint",
       "name": "Ops portal public URL",
-      "address": "https://ops.lv3.org"
+      "address": "https://ops.example.com"
     }
   ],
   "verification": [
@@ -39,7 +39,7 @@
     {
       "check": "Immutable guest guard enforcement",
       "result": "pass",
-      "observed": "The first governed replay `make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-live-apply'` failed closed before mutation and instructed the operator to use immutable replacement or rerun with `ALLOW_IN_PLACE_MUTATION=true`; `make immutable-guest-replacement-plan service=ops_portal` confirmed the narrow exception rule for this governed `docker-runtime-lv3` service."
+      "observed": "The first governed replay `make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0235-live-apply'` failed closed before mutation and instructed the operator to use immutable replacement or rerun with `ALLOW_IN_PLACE_MUTATION=true`; `make immutable-guest-replacement-plan service=ops_portal` confirmed the narrow exception rule for this governed `docker-runtime-lv3` service."
     },
     {
       "check": "Concurrent replay clobber diagnosis",
@@ -49,7 +49,7 @@
     {
       "check": "Governed latest-origin/main live replay",
       "result": "pass",
-      "observed": "After obtaining an uncontended portal replay window, `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0235-live-apply'` completed successfully with final recap `docker-runtime-lv3 ok=126 changed=22 failed=0 skipped=17`, and the play passed `Verify the application launcher partial renders locally` plus `Assert the application launcher is present`."
+      "observed": "After obtaining an uncontended portal replay window, `ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0235-live-apply'` completed successfully with final recap `docker-runtime-lv3 ok=126 changed=22 failed=0 skipped=17`, and the play passed `Verify the application launcher partial renders locally` plus `Assert the application launcher is present`."
     },
     {
       "check": "Guest hash and route proof",
@@ -59,7 +59,7 @@
     {
       "check": "Internal launcher interaction and public edge",
       "result": "pass",
-      "observed": "Internal checks in `receipts/live-applies/evidence/2026-03-29-adr-0235-internal-endpoints.txt` showed `/health`, `/`, `/partials/overview`, and `/partials/launcher` all returning `200`, while `receipts/live-applies/evidence/2026-03-29-adr-0235-launcher-session-check.txt` recorded `before_favorites=1`, `before_recents=0`, `favorite_response_contains_favorites=1`, `after_favorites=1`, `after_recents=1`, `after_keycloak_mentions=7`, and `redirect_code=303` for `service:keycloak`. Public-edge proof in `receipts/live-applies/evidence/2026-03-29-adr-0235-public-edge-check.txt` confirmed `https://ops.lv3.org/health` returned `200` with `{\"status\":\"ok\"}` and `https://ops.lv3.org/` preserved the expected oauth sign-in redirect."
+      "observed": "Internal checks in `receipts/live-applies/evidence/2026-03-29-adr-0235-internal-endpoints.txt` showed `/health`, `/`, `/partials/overview`, and `/partials/launcher` all returning `200`, while `receipts/live-applies/evidence/2026-03-29-adr-0235-launcher-session-check.txt` recorded `before_favorites=1`, `before_recents=0`, `favorite_response_contains_favorites=1`, `after_favorites=1`, `after_recents=1`, `after_keycloak_mentions=7`, and `redirect_code=303` for `service:keycloak`. Public-edge proof in `receipts/live-applies/evidence/2026-03-29-adr-0235-public-edge-check.txt` confirmed `https://ops.example.com/health` returned `200` with `{\"status\":\"ok\"}` and `https://ops.example.com/` preserved the expected oauth sign-in redirect."
     }
   ],
   "evidence_refs": [

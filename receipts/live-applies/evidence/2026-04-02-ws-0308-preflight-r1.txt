@@ -1,8 +1,8 @@
 Preflight workflow: operator-onboard
 Description: Apply one ADR 0108 human-operator onboarding change across the repo-authoritative roster, Keycloak, OpenBao, step-ca, Tailscale, and Mattermost.
 INFO no bootstrap manifest configured for this workflow
-PASS file keycloak_bootstrap_admin_password: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt
-PASS file openbao_init_payload: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/init.json
+PASS file keycloak_bootstrap_admin_password: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/bootstrap-admin-password.txt
+PASS file openbao_init_payload: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/openbao/init.json
 PASS health check keycloak_public_discovery: Keycloak realm discovery responds through the shared public SSO edge.
 PASS health check openbao_private_mtls_listener: The private OpenBao listener on the Proxmox host answers a TLS handshake with the managed step-ca trust root.
 PASS health check windmill_private_api: The private Windmill API version endpoint responds on the Proxmox host proxy surface.

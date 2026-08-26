@@ -12,7 +12,7 @@ content-type: text/plain; charset=utf-8
 content-length: 344
 x-powered-by: Express
 content-language: en
-location: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?client_id=grist&scope=openid%20profile%20email&response_type=code&redirect_uri=https%3A%2F%2Fgrist.lv3.org%2Foauth2%2Fcallback&state=h1K4hSGnI5m3zT9N98yMNGIvB0gjzsYWox7VthCaWJs&code_challenge=8xyZbkY-sLBs8MDJBORMcGdQ9QkvEpd6h4HlPG0KKGk&code_challenge_method=S256
+location: https://sso.example.com/realms/lv3/protocol/openid-connect/auth?client_id=grist&scope=openid%20profile%20email&response_type=code&redirect_uri=https%3A%2F%2Fgrist.example.com%2Foauth2%2Fcallback&state=h1K4hSGnI5m3zT9N98yMNGIvB0gjzsYWox7VthCaWJs&code_challenge=8xyZbkY-sLBs8MDJBORMcGdQ9QkvEpd6h4HlPG0KKGk&code_challenge_method=S256
 vary: Accept
 set-cookie: grist_core=s%3Ag-b1410b43adff82c79d8694dec51d769eba20168c896d4db276088b6490d577f7.STvJS1P5ZbY8DMiXHghGHfZq8HmyLtIRmjBSnltizUQ; Path=/; HttpOnly; SameSite=Lax
 x-robots-tag: noindex, nofollow
@@ -27,5 +27,5 @@ x-robots-tag: noindex, nofollow
 
 
 [keycloak_discovery]
-https://sso.lv3.org/realms/lv3
-https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth
+https://sso.example.com/realms/lv3
+https://sso.example.com/realms/lv3/protocol/openid-connect/auth

@@ -15,8 +15,8 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -45,17 +45,17 @@
     {
       "check": "Merged-main-equivalent Windmill replay",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0227-live-apply` with final recap `docker-runtime-lv3 ok=230 changed=41 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox_florin ok=36 changed=4 failed=0`."
+      "observed": "`make converge-windmill` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0227-live-apply` with final recap `docker-runtime-lv3 ok=230 changed=41 failed=0`, `postgres-lv3 ok=63 changed=1 failed=0`, and `proxmox-host ok=36 changed=4 failed=0`."
     },
     {
       "check": "Governed command transient-unit replay from the integrated candidate",
       "result": "pass",
-      "observed": "`uv run --with pyyaml python scripts/governed_command.py --command network-impairment-matrix --requester-class human_operator --approver-classes human_operator --preflight-passed --validation-passed --receipt-planned --param 'NETWORK_IMPAIRMENT_MATRIX_ARGS=target_class=staging --approve-risk'` returned `executed: true`, `returncode: 0`, unit `lv3-governed-network-impairment-matrix-9dbb73e9a6e9`, and receipt `/srv/proxmox_florin_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-9dbb73e9a6e9.json`."
+      "observed": "`uv run --with pyyaml python scripts/governed_command.py --command network-impairment-matrix --requester-class human_operator --approver-classes human_operator --preflight-passed --validation-passed --receipt-planned --param 'NETWORK_IMPAIRMENT_MATRIX_ARGS=target_class=staging --approve-risk'` returned `executed: true`, `returncode: 0`, unit `lv3-governed-network-impairment-matrix-9dbb73e9a6e9`, and receipt `/srv/platform_server/.local/governed-command/receipts/lv3-governed-network-impairment-matrix-9dbb73e9a6e9.json`."
     },
     {
       "check": "Guest-local Windmill path and rendered report",
       "result": "pass",
-      "observed": "The governed runtime receipt recorded `status: ok`, `started_at: 2026-03-28T18:47:08Z`, `finished_at: 2026-03-28T18:47:10Z`, and staged paths for the SSH key, Windmill superadmin secret, and NATS admin password. The stdout log showed `uv run --with pyyaml --with nats-py python /srv/proxmox_florin_server/scripts/lv3_cli.py run network-impairment-matrix --args target_class=staging --approve-risk` and the guest-local route `http://127.0.0.1:8000/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fnetwork-impairment-matrix`. `/srv/proxmox_florin_server/.local/network-impairment-matrix/latest.json` reported `status: planned`, `target_class: staging`, and `entry_count: 4`."
+      "observed": "The governed runtime receipt recorded `status: ok`, `started_at: 2026-03-28T18:47:08Z`, `finished_at: 2026-03-28T18:47:10Z`, and staged paths for the SSH key, Windmill superadmin secret, and NATS admin password. The stdout log showed `uv run --with pyyaml --with nats-py python /srv/platform_server/scripts/lv3_cli.py run network-impairment-matrix --args target_class=staging --approve-risk` and the guest-local route `http://127.0.0.1:8000/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fnetwork-impairment-matrix`. `/srv/platform_server/.local/network-impairment-matrix/latest.json` reported `status: planned`, `target_class: staging`, and `entry_count: 4`."
     }
   ],
   "evidence_refs": [
@@ -87,7 +87,7 @@
   ],
   "notes": [
     "The earlier branch-local live-apply receipt remains preserved as the first isolated-worktree replay, but this merged-main-equivalent receipt is the canonical source for the release and platform bump that follow from the rebased candidate.",
-    "The first branch replay required a one-time chmod repair on `/srv/proxmox_florin_server/.local/state/execution-lanes/registry.json` and `.lock`. The current merged-main-equivalent converge and replay proved that the repository contract now keeps those files writable at `0666` without a manual follow-up.",
+    "The first branch replay required a one-time chmod repair on `/srv/platform_server/.local/state/execution-lanes/registry.json` and `.lock`. The current merged-main-equivalent converge and replay proved that the repository contract now keeps those files writable at `0666` without a manual follow-up.",
     "The integrated release step that follows this receipt updates `VERSION`, `RELEASE.md`, `changelog.md`, `docs/release-notes/*`, `README.md`, `build/platform-manifest.json`, `versions/stack.yaml`, and the workstream metadata to record ADR 0227 in repo version 0.177.46 and platform version 0.130.41."
   ]
 }

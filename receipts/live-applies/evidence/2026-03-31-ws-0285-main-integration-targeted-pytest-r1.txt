@@ -1,6 +1,6 @@
 ============================= test session starts ==============================
 platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
-rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0285-main-integration
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0285-main-integration
 configfile: pytest.ini
 collected 79 items
 
@@ -18,12 +18,12 @@ ______ test_runbook_documents_public_archive_contract_and_hostname_choice ______
     def test_runbook_documents_public_archive_contract_and_hostname_choice() -> None:
         runbook = (REPO_ROOT / "docs" / "runbooks" / "configure-paperless.md").read_text(encoding="utf-8")
 
-        assert "docs.lv3.org remains the developer portal" in runbook
-        assert "paperless.lv3.org" in runbook
+        assert "docs.example.com remains the developer portal" in runbook
+        assert "paperless.example.com" in runbook
         assert "OpenBao" in runbook
         assert "smoke-upload-report.json" in runbook
 >       assert "ops@100.64.0.1" in runbook
-E       AssertionError: assert 'ops@100.64.0.1' in '# Configure Paperless\n\nThis runbook covers the repo-managed Paperless-ngx deployment introduced by [ADR 0285](../ad...` or send `Host: paperless.lv3.org`; direct\nHTTP requests to `10.10.10.20:8018` return `400 Bad Request` by design.\n'
+E       AssertionError: assert 'ops@100.64.0.1' in '# Configure Paperless\n\nThis runbook covers the repo-managed Paperless-ngx deployment introduced by [ADR 0285](../ad...` or send `Host: paperless.example.com`; direct\nHTTP requests to `10.10.10.20:8018` return `400 Bad Request` by design.\n'
 
 tests/test_paperless_metadata.py:21: AssertionError
 =========================== short test summary info ============================

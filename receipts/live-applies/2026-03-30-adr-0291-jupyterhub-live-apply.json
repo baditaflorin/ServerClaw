@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.71",
   "workflow_id": "adr-0291-jupyterhub-live-apply",
   "adr": "0291",
-  "summary": "Live-applied ADR 0291 from the latest realistic origin/main worktree by converging the JupyterHub runtime on docker-runtime-lv3, publishing notebooks.lv3.org through the shared NGINX edge, repairing the fresh-worktree publication preflight plus the dependent OpenBao, Ollama, and Keycloak recovery paths needed for replay stability, and verifying the public OIDC handoff and notebook dependency contract against current platform services.",
+  "summary": "Live-applied ADR 0291 from the latest realistic origin/main worktree by converging the JupyterHub runtime on docker-runtime-lv3, publishing notebooks.example.com through the shared NGINX edge, repairing the fresh-worktree publication preflight plus the dependent OpenBao, Ollama, and Keycloak recovery paths needed for replay stability, and verifying the public OIDC handoff and notebook dependency contract against current platform services.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,12 +34,12 @@
     {
       "kind": "service_endpoint",
       "name": "JupyterHub public notebook surface",
-      "address": "https://notebooks.lv3.org/hub/health"
+      "address": "https://notebooks.example.com/hub/health"
     },
     {
       "kind": "service_endpoint",
       "name": "JupyterHub public OIDC handoff",
-      "address": "https://notebooks.lv3.org/hub/oauth_login"
+      "address": "https://notebooks.example.com/hub/oauth_login"
     },
     {
       "kind": "service_endpoint",
@@ -66,7 +66,7 @@
     {
       "check": "Public notebook surface and OIDC handoff",
       "result": "pass",
-      "observed": "Direct controller probes confirmed `curl -fsS https://notebooks.lv3.org/hub/health` returned success, `curl -fsS -o /dev/null -D - https://notebooks.lv3.org/hub/oauth_login` returned `HTTP/2 302` to `https://sso.lv3.org/realms/lv3/...&client_id=jupyterhub`, and the live edge certificate SAN set includes `DNS:notebooks.lv3.org`, preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-direct-verification.txt`."
+      "observed": "Direct controller probes confirmed `curl -fsS https://notebooks.example.com/hub/health` returned success, `curl -fsS -o /dev/null -D - https://notebooks.example.com/hub/oauth_login` returned `HTTP/2 302` to `https://sso.example.com/realms/lv3/...&client_id=jupyterhub`, and the live edge certificate SAN set includes `DNS:notebooks.example.com`, preserved in `receipts/live-applies/evidence/2026-03-30-ws-0291-direct-verification.txt`."
     },
     {
       "check": "Notebook dependency contract probes",
@@ -104,7 +104,7 @@
   ],
   "notes": [
     "This receipt captures the branch-local ADR 0291 proof on top of repository version 0.177.108 and current live platform version 0.130.71 before the exact-main integration step.",
-    "Two narrow manual prerequisites were required during the branch-local apply: an OpenBao AppRole bootstrap for `jupyterhub-runtime` using the controller-local root token and a Hetzner DNS correction for the `notebooks` A record to `65.108.75.123` in zone `qCw975uU3fTKT4KX66twh`.",
+    "Two narrow manual prerequisites were required during the branch-local apply: an OpenBao AppRole bootstrap for `jupyterhub-runtime` using the controller-local root token and a Hetzner DNS correction for the `notebooks` A record to `203.0.113.1` in zone `qCw975uU3fTKT4KX66twh`.",
     "Merge-to-main still needs to rerun or reverify the JupyterHub replay from the latest origin/main lineage, refresh the protected `README.md`, `VERSION`, `changelog.md`, `versions/stack.yaml`, and `build/platform-manifest.json` surfaces, and cut a canonical exact-main receipt."
   ]
 }

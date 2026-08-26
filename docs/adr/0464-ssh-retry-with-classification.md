@@ -20,7 +20,7 @@ post-reboot banner-exchange race fails the entire converge after one
 30-second timeout. There is no retry, no backoff, and no signal that
 the failure was *transient* vs *configuration-rooted*.
 
-The 2026-04-28 ops.0fork.com diagnostic spent ~30 minutes
+The 2026-04-28 ops.example.org diagnostic spent ~30 minutes
 distinguishing `Connection to UNKNOWN port 65535 timed out` (a banner
 issue caused by a wrong jump host) from `Permission denied`
 (authentication, real config bug). Both look identical from the

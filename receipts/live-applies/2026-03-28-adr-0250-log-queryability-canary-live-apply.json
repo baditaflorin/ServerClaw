@@ -32,7 +32,7 @@
     {
       "kind": "service_endpoint",
       "name": "Grafana public dashboard route",
-      "address": "https://grafana.lv3.org/d/lv3-log-canary-overview/lv3-log-canary-overview"
+      "address": "https://grafana.example.com/d/lv3-log-canary-overview/lv3-log-canary-overview"
     }
   ],
   "verification": [
@@ -44,7 +44,7 @@
     {
       "check": "Managed live replay from the main integration worktree",
       "result": "pass",
-      "observed": "`BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0250-main-integration-v2` with final recap `monitoring-lv3 : ok=191 changed=8 failed=0`. The replay used the documented ADR 0191 narrow in-place mutation exception because `monitoring-lv3` remains governed by immutable guest replacement."
+      "observed": "`BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/hetzner_llm_agents_ed25519 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'` completed successfully from `/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0250-main-integration-v2` with final recap `monitoring-lv3 : ok=191 changed=8 failed=0`. The replay used the documented ADR 0191 narrow in-place mutation exception because `monitoring-lv3` remains governed by immutable guest replacement."
     },
     {
       "check": "Monitoring service and Alertmanager readiness",
@@ -64,7 +64,7 @@
     {
       "check": "Grafana dashboard availability and public redirect",
       "result": "pass",
-      "observed": "Guest-local Grafana API lookup with the managed admin secret returned dashboard title `LV3 Log Canary` for UID `lv3-log-canary-overview`, and `curl -k -I -sS https://grafana.lv3.org/d/lv3-log-canary-overview/lv3-log-canary-overview` returned `HTTP/2 302` with `location: /login?redirectTo=%2Fd%2Flv3-log-canary-overview%2Flv3-log-canary-overview`."
+      "observed": "Guest-local Grafana API lookup with the managed admin secret returned dashboard title `LV3 Log Canary` for UID `lv3-log-canary-overview`, and `curl -k -I -sS https://grafana.example.com/d/lv3-log-canary-overview/lv3-log-canary-overview` returned `HTTP/2 302` with `location: /login?redirectTo=%2Fd%2Flv3-log-canary-overview%2Flv3-log-canary-overview`."
     }
   ],
   "evidence_refs": [

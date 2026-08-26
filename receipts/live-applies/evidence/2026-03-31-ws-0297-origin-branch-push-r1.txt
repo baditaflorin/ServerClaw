@@ -35,8 +35,8 @@ type-check            passed 3.79
 workstream-surfaces   passed 4.72
 yaml-lint             passed 15.06
 remote:
-remote: GitHub found 7 vulnerabilities on baditaflorin/proxmox_florin_server's default branch (5 high, 1 moderate, 1 low). To find out more, visit:
-remote:      https://github.com/baditaflorin/proxmox_florin_server/security/dependabot
+remote: GitHub found 7 vulnerabilities on baditaflorin/platform_server's default branch (5 high, 1 moderate, 1 low). To find out more, visit:
+remote:      https://github.com/baditaflorin/platform_server/security/dependabot
 remote:
-To github.com:baditaflorin/proxmox_florin_server.git
+To github.com:baditaflorin/platform_server.git
    b07b31b54..66ddb5d6e  HEAD -> codex/ws-0297-live-apply

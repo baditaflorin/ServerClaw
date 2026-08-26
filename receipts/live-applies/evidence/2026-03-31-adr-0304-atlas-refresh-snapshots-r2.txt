@@ -1,6 +1,6 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/scripts/run_python_with_packages.sh docker pyyaml -- scripts/atlas_schema.py snapshot --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline --write
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0304-mainline/scripts/run_python_with_packages.sh docker pyyaml -- scripts/atlas_schema.py snapshot --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0304-mainline --write
 {
-  "catalog_path": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0304-mainline/config/atlas/catalog.json",
+  "catalog_path": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0304-mainline/config/atlas/catalog.json",
   "snapshots": [
     {
       "database": "dify",

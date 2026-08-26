@@ -19,13 +19,13 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
       "name": "headscale-control-plane",
-      "address": "https://headscale.lv3.org/health"
+      "address": "https://headscale.example.com/health"
     },
     {
       "kind": "service_endpoint",
@@ -37,12 +37,12 @@
     {
       "check": "Headscale build-server route",
       "result": "pass",
-      "observed": "On 2026-03-26 the controller rejoined the Headscale mesh as `100.64.0.3`, `https://headscale.lv3.org/health` returned HTTP 200, and `LV3_SESSION_ID=adr-0156-live make check-build-server` succeeded against `ops@10.10.10.30` through the `ops@100.64.0.1` jump path."
+      "observed": "On 2026-03-26 the controller rejoined the Headscale mesh as `100.64.0.3`, `https://headscale.example.com/health` returned HTTP 200, and `LV3_SESSION_ID=adr-0156-live make check-build-server` succeeded against `ops@10.10.10.30` through the `ops@100.64.0.1` jump path."
     },
     {
       "check": "Session-scoped remote workspace",
       "result": "pass",
-      "observed": "A direct remote probe returned `true`, `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/adr-0156-live/repo/.git-remote/worktree`, and `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/adr-0156-live/repo` for `git rev-parse --is-inside-work-tree && git rev-parse --git-dir && pwd`."
+      "observed": "A direct remote probe returned `true`, `/home/ops/builds/platform_server/.lv3-session-workspaces/adr-0156-live/repo/.git-remote/worktree`, and `/home/ops/builds/platform_server/.lv3-session-workspaces/adr-0156-live/repo` for `git rev-parse --is-inside-work-tree && git rev-parse --git-dir && pwd`."
     },
     {
       "check": "Remote lint gate",

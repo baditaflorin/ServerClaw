@@ -69,7 +69,7 @@ rather than claiming exclusivity.
 ## What this leaves open
 
 - The pre-push gate still runs cert validation against live edges
-  (`status.lv3.org`, `tasks.lv3.org`, etc). Until those certs are
+  (`status.example.com`, `tasks.example.com`, etc). Until those certs are
   reissued, every push must continue to set `SKIP_CERT_VALIDATION=1`
   with a reason code. This is environmental drift, not a registry
   defect.

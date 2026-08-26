@@ -12,7 +12,7 @@
 #
 # Template variables in url / record / etc. are expanded against the active
 # deployment's identity.yml:
-#   {apex}       -> platform_domain  (e.g. 0fork.com)
+#   {apex}       -> platform_domain  (e.g. example.org)
 #   {apex_slug}  -> first label of apex (e.g. 0fork)
 #   {operator_email}, {operator_name}
 
@@ -297,7 +297,7 @@ post_conditions:
     port: 443
     timeout_s: 10
     retries: 3
-    critical: false   # s3.0fork.com has known cert SAN gap — non-critical until fixed
+    critical: false   # s3.example.org has known cert SAN gap — non-critical until fixed
 
   # --- Ops portal -----------------------------------------------------
 

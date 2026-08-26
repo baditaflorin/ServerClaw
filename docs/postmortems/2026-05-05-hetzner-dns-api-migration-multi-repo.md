@@ -3,13 +3,13 @@
 **Date**: 2026-05-05
 **Duration**: 3 sessions (April 30 — May 5)
 **Status**: ✅ RESOLVED
-**Impact**: Critical infrastructure; DNS records for all services (headscale.lv3.org, etc.)
+**Impact**: Critical infrastructure; DNS records for all services (headscale.example.com, etc.)
 
 ---
 
 ## Executive Summary
 
-Successfully migrated Hetzner DNS operations from the **deprecated DNS API** (dns.hetzner.com/api/v1) to the **new Cloud API** (api.hetzner.cloud/v1) before the May 2026 deprecation deadline. This work revealed and solved critical issues in multi-repo deployment patterns where identical infrastructure code must work across both `lv3.org` (private) and `0fork.com` (public fork) deployments with different domains and certificates.
+Successfully migrated Hetzner DNS operations from the **deprecated DNS API** (dns.hetzner.com/api/v1) to the **new Cloud API** (api.hetzner.cloud/v1) before the May 2026 deprecation deadline. This work revealed and solved critical issues in multi-repo deployment patterns where identical infrastructure code must work across both `example.com` (private) and `example.org` (public fork) deployments with different domains and certificates.
 
 ### Key Outcomes
 - ✅ All DNS operations now use Cloud API (RRSet-based architecture)
@@ -28,17 +28,17 @@ Successfully migrated Hetzner DNS operations from the **deprecated DNS API** (dn
 Hetzner announced (Q1 2026):
 > "The DNS Console and DNS API are deprecated and will be shut down in May 2026..."
 
-**Impact**: This deployment relies entirely on Hetzner DNS for service publication. Every record (headscale.lv3.org, api.lv3.org, etc.) is managed by our `hetzner_dns_record` Ansible role. The old API endpoint would become non-functional, blocking all DNS record convergence.
+**Impact**: This deployment relies entirely on Hetzner DNS for service publication. Every record (headscale.example.com, api.example.com, etc.) is managed by our `hetzner_dns_record` Ansible role. The old API endpoint would become non-functional, blocking all DNS record convergence.
 
 ### The Complication: Multi-Repo Deployment Pattern
 
 This infrastructure is designed to be:
 1. **A portable template** (`baditaflorin/ServerClaw` on GitHub)
 2. **Forkable by other organizations** with different domains
-3. **Supporting multiple concurrent deployments** (lv3.org private + 0fork.com public fork)
+3. **Supporting multiple concurrent deployments** (example.com private + example.org public fork)
 
 The DNS role is **shared across all deployments** but each deployment has:
-- Different zone names (lv3.org vs 0fork.com)
+- Different zone names (example.com vs example.org)
 - Different deployment contexts (private vs public)
 - Different certificate requirements (Let's Encrypt for public, custom CA for private)
 
@@ -98,7 +98,7 @@ The new API returns nested RRSets:
 {
   "rrsets": [
     {
-      "name": "api.lv3.org",
+      "name": "api.example.com",
       "type": "A",
       "ttl": 60,
       "records": [
@@ -194,7 +194,7 @@ Both deployments share:
 - `playbooks/headscale.yml` (same structure)
 
 But diverge in:
-- **Zones**: `lv3.org` vs `0fork.com`
+- **Zones**: `example.com` vs `example.org`
 - **Certificates**: Custom CA vs Let's Encrypt
 - **Deployment context**: Private vs Public
 
@@ -226,17 +226,17 @@ The **public repository** (baditaflorin/ServerClaw) contains:
 - Example domain names (example.com)
 - Shared Ansible roles using `{{ platform_domain }}` variables
 
-The **private repository** (Florin's lv3.org deployment) contains:
+The **private repository** (Florin's example.com deployment) contains:
 - `.local/` directory with real IPs and domains (gitignored)
 - Deployment-specific overrides in `.local/identity.yml`
-- Multi-deployment support for testing 0fork.com patterns
+- Multi-deployment support for testing example.org patterns
 
 This pattern enables:
 ```
 Public repo (generic)  → Template code
      ↓
 Fork to customer.com  → Same code, new .local/ values
-Fork to 0fork.com    → Same code, different .local/ values
+Fork to example.org    → Same code, different .local/ values
 ```
 
 ---
@@ -245,29 +245,29 @@ Fork to 0fork.com    → Same code, different .local/ values
 
 The old DNS API managed individual records:
 ```
-Zone: lv3.org
+Zone: example.com
 Records:
   - api (A): 10.10.10.92
   - headscale (A): 10.10.10.92
-  - mail (MX): mail.lv3.org
+  - mail (MX): mail.example.com
 ```
 
 The new Cloud API groups by **RRSet** (Resource Record Set):
 ```
-Zone: lv3.org
+Zone: example.com
 RRSets:
-  - name: api.lv3.org, type: A, ttl: 60
+  - name: api.example.com, type: A, ttl: 60
     records:
       - value: 10.10.10.92
-  - name: headscale.lv3.org, type: A, ttl: 60
+  - name: headscale.example.com, type: A, ttl: 60
     records:
       - value: 10.10.10.92
 ```
 
 **Why?** RRSets are the **DNS standard** (RFC 1035). Each record name+type combination is atomic. This prevents split-brain scenarios where:
-- API call 1 creates `api.lv3.org A 10.10.10.92`
+- API call 1 creates `api.example.com A 10.10.10.92`
 - Network interrupt
-- API call 2 creates `api.lv3.org A 10.10.10.93`
+- API call 2 creates `api.example.com A 10.10.10.93`
 - Resolution returns both IPs (undefined behavior)
 
 RRSet-based operations are **all-or-nothing**: you replace the entire RRSet or none of it.
@@ -387,7 +387,7 @@ When managing shared infrastructure templates:
 - **Don't hardcode provider endpoints** — use inventory variables
 - **Version all external APIs** — track deprecation timelines
 - **Test migrations in isolated branches** — catch parsing errors early
-- **Validate across all deployments** — lv3.org and 0fork.com patterns
+- **Validate across all deployments** — example.com and example.org patterns
 
 ### 2. RRSet-Based DNS Is the Industry Standard
 
@@ -452,7 +452,7 @@ The `srvclaw_` prefix approach works because:
 - [x] Old DNS API endpoints replaced with Cloud API
 - [x] All authentication headers updated to Bearer format
 - [x] Jinja2 templates parse RRSet structure correctly
-- [x] DNS records created successfully (headscale.lv3.org, etc.)
+- [x] DNS records created successfully (headscale.example.com, etc.)
 - [x] Headscale VPN operational (100.64.0.0/10 mesh network)
 - [x] PostgreSQL accessible via DBeaver through VPN
 - [x] Secret detection integrated into pre-push gate

@@ -14,7 +14,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -38,7 +38,7 @@
     {
       "kind": "controller_artifacts",
       "name": "gitea-local-auth",
-      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea"
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/gitea"
     }
   ],
   "verification": [
@@ -50,7 +50,7 @@
     {
       "check": "Merged-main Gitea replay",
       "result": "pass",
-      "observed": "The `make converge-gitea` replay completed successfully from current branch head `65d4ed15` with `proxmox_florin ok=36 changed=4 failed=0`, `postgres-lv3 ok=24 changed=0 failed=0`, `docker-runtime-lv3 ok=224 changed=0 failed=0`, and `docker-build-lv3 ok=100 changed=5 failed=0`."
+      "observed": "The `make converge-gitea` replay completed successfully from current branch head `65d4ed15` with `proxmox-host ok=36 changed=4 failed=0`, `postgres-lv3 ok=24 changed=0 failed=0`, `docker-runtime-lv3 ok=224 changed=0 failed=0`, and `docker-build-lv3 ok=100 changed=5 failed=0`."
     },
     {
       "check": "Transient Keycloak admin recovery history",
@@ -65,7 +65,7 @@
     {
       "check": "Private Gitea git push gate",
       "result": "pass",
-      "observed": "The push of branch head `65d4ed15` to `http://100.64.0.1:3009/ops/proxmox_florin_server.git` using the mirrored `ops-gitea` admin token over HTTP basic auth was accepted only after the server-side gate passed `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-direction`, `dependency-graph`, `integration-tests`, `packer-validate`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, and `yaml-lint`."
+      "observed": "The push of branch head `65d4ed15` to `http://100.64.0.1:3009/ops/platform_server.git` using the mirrored `ops-gitea` admin token over HTTP basic auth was accepted only after the server-side gate passed `alert-rule-validation`, `ansible-lint`, `ansible-syntax`, `artifact-secret-scan`, `dependency-direction`, `dependency-graph`, `integration-tests`, `packer-validate`, `schema-validation`, `security-scan`, `service-completeness`, `tofu-validate`, `type-check`, and `yaml-lint`."
     },
     {
       "check": "Runner-backed branch workflow",

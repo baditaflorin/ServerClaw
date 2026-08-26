@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -61,7 +61,7 @@
     {
       "check": "Worker mirror and post-merge fallback verification",
       "result": "pass",
-      "observed": "`docker-runtime-lv3` keeps `/srv/proxmox_florin_server` as a mirrored runtime checkout rather than a git repository, so the exact-main worker proof synced `config/windmill/scripts/gate-status.py` directly into that mirror, refreshed `python3 scripts/generate_dependency_diagram.py --write`, `uvx --from pyyaml python scripts/canonical_truth.py --write`, and `python3 scripts/generate_diagrams.py --write`, then reran the live worker wrappers. `python3 /srv/proxmox_florin_server/config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server` returned `status: ok`, and `python3 /srv/proxmox_florin_server/config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server` returned `status: ok` while writing `post-merge-last-run.json` with `status=passed`, `source=windmill-post-merge-local-fallback`, `executed_at=2026-03-29T22:24:37.498783+00:00`, and both bounded fallback commands returning `0`."
+      "observed": "`docker-runtime-lv3` keeps `/srv/platform_server` as a mirrored runtime checkout rather than a git repository, so the exact-main worker proof synced `config/windmill/scripts/gate-status.py` directly into that mirror, refreshed `python3 scripts/generate_dependency_diagram.py --write`, `uvx --from pyyaml python scripts/canonical_truth.py --write`, and `python3 scripts/generate_diagrams.py --write`, then reran the live worker wrappers. `python3 /srv/platform_server/config/windmill/scripts/gate-status.py --repo-path /srv/platform_server` returned `status: ok`, and `python3 /srv/platform_server/config/windmill/scripts/post-merge-gate.py --repo-path /srv/platform_server` returned `status: ok` while writing `post-merge-last-run.json` with `status=passed`, `source=windmill-post-merge-local-fallback`, `executed_at=2026-03-29T22:24:37.498783+00:00`, and both bounded fallback commands returning `0`."
     }
   ],
   "evidence_refs": [
@@ -131,7 +131,7 @@
   "notes": [
     "This receipt supersedes the earlier branch-local receipt `2026-03-29-adr-0266-validation-runner-capability-contracts-live-apply` as the canonical source for the ADR 0266 first-implemented repository version `0.177.88` and first live platform version `0.130.60`.",
     "Latest `origin/main` has since advanced to repository version `0.177.90`; this closeout merges the ADR 0266 live-apply truth onto that newer release line without changing the original exact-main replay source commit or first-implemented version metadata.",
-    "Because `/srv/proxmox_florin_server` on the worker is a mirrored runtime checkout instead of a git repository, the authoritative worker replay uses direct mirrored-script verification plus generated-artifact refreshes instead of `git pull` on the VM.",
+    "Because `/srv/platform_server` on the worker is a mirrored runtime checkout instead of a git repository, the authoritative worker replay uses direct mirrored-script verification plus generated-artifact refreshes instead of `git pull` on the VM.",
     "No further merge-to-main action remains for ADR 0266 after this receipt closeout."
   ]
 }

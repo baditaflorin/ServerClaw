@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.84",
   "workflow_id": "adr-0279-grist-mainline-live-apply",
   "adr": "0279",
-  "summary": "Verified ADR 0279 from the latest realistic `origin/main` baseline at `0.177.133 / 0.130.83`, repaired the malformed Grist shared-edge OIDC discovery gate surfaced during the April 1 replay chronology, and completed a successful exact-main `r4` live apply that advanced the integrated platform baseline to `0.130.84` while leaving `grist.lv3.org` healthy and Keycloak login-gated.",
+  "summary": "Verified ADR 0279 from the latest realistic `origin/main` baseline at `0.177.133 / 0.130.83`, repaired the malformed Grist shared-edge OIDC discovery gate surfaced during the April 1 replay chronology, and completed a successful exact-main `r4` live apply that advanced the integrated platform baseline to `0.130.84` while leaving `grist.example.com` healthy and Keycloak login-gated.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,17 +34,17 @@
     {
       "kind": "service_endpoint",
       "name": "grist-status",
-      "address": "https://grist.lv3.org/status"
+      "address": "https://grist.example.com/status"
     },
     {
       "kind": "service_endpoint",
       "name": "grist-docs",
-      "address": "https://grist.lv3.org/o/docs/"
+      "address": "https://grist.example.com/o/docs/"
     },
     {
       "kind": "service_endpoint",
       "name": "keycloak-discovery",
-      "address": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
+      "address": "https://sso.example.com/realms/lv3/.well-known/openid-configuration"
     }
   ],
   "verification": [
@@ -66,7 +66,7 @@
     {
       "check": "Current public probes and in-container auth mode",
       "result": "pass",
-      "observed": "Fresh post-success probes confirmed `curl -ksS https://grist.lv3.org/status` returns `Grist server(home,docs,static) is alive.`, `curl -ksS -D - -o /dev/null https://grist.lv3.org/o/docs/` returns `HTTP/2 302` to `https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth?...client_id=grist...`, and `sudo docker logs --tail 200 grist 2>&1 | egrep 'OIDCConfig|loginMiddlewareComment' | tail -n 20` reports `OIDCConfig: initialized with issuer https://sso.lv3.org/realms/lv3` plus `loginMiddlewareComment: oidc`."
+      "observed": "Fresh post-success probes confirmed `curl -ksS https://grist.example.com/status` returns `Grist server(home,docs,static) is alive.`, `curl -ksS -D - -o /dev/null https://grist.example.com/o/docs/` returns `HTTP/2 302` to `https://sso.example.com/realms/lv3/protocol/openid-connect/auth?...client_id=grist...`, and `sudo docker logs --tail 200 grist 2>&1 | egrep 'OIDCConfig|loginMiddlewareComment' | tail -n 20` reports `OIDCConfig: initialized with issuer https://sso.example.com/realms/lv3` plus `loginMiddlewareComment: oidc`."
     },
     {
       "check": "Shared Restic follow-up trigger",

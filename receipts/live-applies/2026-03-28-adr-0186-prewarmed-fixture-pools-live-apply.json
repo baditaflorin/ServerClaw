@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -48,7 +48,7 @@
     {
       "check": "Live Windmill wrapper sync",
       "result": "pass",
-      "observed": "The worker checkout file `/srv/proxmox_florin_server/config/windmill/scripts/ephemeral-pool-reconciler.py` and the Windmill API body for `f/lv3/ephemeral_pool_reconciler` both matched the branch-local wrapper contract, including file-path loading of `fixture_manager.py`, sibling-import-safe `sys.path` setup, and the worker-local bootstrap key fallback."
+      "observed": "The worker checkout file `/srv/platform_server/config/windmill/scripts/ephemeral-pool-reconciler.py` and the Windmill API body for `f/lv3/ephemeral_pool_reconciler` both matched the branch-local wrapper contract, including file-path loading of `fixture_manager.py`, sibling-import-safe `sys.path` setup, and the worker-local bootstrap key fallback."
     },
     {
       "check": "Warm prewarm and lease handoff",

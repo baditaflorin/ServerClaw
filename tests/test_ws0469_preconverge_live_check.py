@@ -25,12 +25,12 @@ def _load_module():
 @pytest.mark.parametrize(
     "fqdn,sans,expected",
     [
-        ("ops.0fork.com", ["ops.0fork.com"], True),
-        ("ops.0fork.com", ["*.0fork.com"], True),
-        ("nested.api.0fork.com", ["*.0fork.com"], False),  # wildcard one-level only
-        ("ops.0fork.com", ["other.example"], False),
-        ("Ops.0Fork.com", ["ops.0fork.com"], True),  # case-insensitive
-        ("ops.0fork.com", [], False),
+        ("ops.example.org", ["ops.example.org"], True),
+        ("ops.example.org", ["*.example.org"], True),
+        ("nested.api.example.org", ["*.example.org"], False),  # wildcard one-level only
+        ("ops.example.org", ["other.example"], False),
+        ("Ops.0Fork.com", ["ops.example.org"], True),  # case-insensitive
+        ("ops.example.org", [], False),
     ],
 )
 def test_san_covers(fqdn, sans, expected):

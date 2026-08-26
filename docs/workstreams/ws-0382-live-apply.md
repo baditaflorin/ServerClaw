@@ -47,7 +47,7 @@
   automation now verifies cleanly again.
 - Repo automation verification also exposed a false-negative restore-verify bug:
   the restic verifier assumed the current runtime repo root and could not follow
-  historical `/srv/proxmox_florin_server/...` snapshot paths. The verifier now
+  historical `/srv/platform_server/...` snapshot paths. The verifier now
   resolves restored content from the snapshot’s recorded paths, and the managed
   production restore verification passes again.
 
@@ -66,15 +66,15 @@
 - Public-path verification passed:
   - OIDC discovery returned `HTTP 200`
   - `uv run --with playwright python scripts/session_logout_verify.py ...`
-    returned `verified shared edge logout via https://home.lv3.org/` and
-    `verified Outline logout via https://wiki.lv3.org/auth/oidc`
+    returned `verified shared edge logout via https://home.example.com/` and
+    `verified Outline logout via https://wiki.example.com/auth/oidc`
 - Governed restic automation passed:
   - the live-apply wrapper synced `receipts/restic-backups/20260415T070357Z.json`
     plus `receipts/restic-snapshots-latest.json`
   - `python scripts/trigger_restic_live_apply.py --env production --mode restore-verify --triggered-by ws-0382-mainline-restore-verify`
     synced `receipts/restic-restore-verifications/20260415T070524Z.json` and
     restored `4652` receipt files from the historical
-    `/srv/proxmox_florin_server/receipts` snapshot root
+    `/srv/platform_server/receipts` snapshot root
 
 ## Live Evidence
 

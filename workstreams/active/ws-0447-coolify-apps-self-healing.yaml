@@ -94,7 +94,7 @@ design: |
     - Render the dnschallenge lines instead of httpchallenge in docker-compose.yml.j2
     - Inject HETZNER_API_KEY into the proxy container env
 
-  This makes Traefik on coolify-apps get real certs for *.apps.0fork.com via
+  This makes Traefik on coolify-apps get real certs for *.apps.example.org via
   DNS TXT records — no dependency on nginx port-80 routing whatsoever.
 
   ## 3. coolify_app_deploy role: idempotent app registration via Coolify API

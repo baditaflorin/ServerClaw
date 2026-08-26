@@ -9,15 +9,15 @@ Usage:
   python3 scripts/list_services.py [OPTIONS]
 
 Listing services for a single deployment:
-  python3 scripts/list_services.py                           # primary (lv3.org)
-  python3 scripts/list_services.py --deployment 0fork.com    # fork
+  python3 scripts/list_services.py                           # primary (example.com)
+  python3 scripts/list_services.py --deployment example.org    # fork
   python3 scripts/list_services.py --status active           # filter by status
   python3 scripts/list_services.py --format json             # JSON output
   python3 scripts/list_services.py --format csv              # CSV output
 
 Cross-deployment diff:
-  python3 scripts/list_services.py --diff lv3.org 0fork.com  # compare two
-  python3 scripts/list_services.py --diff lv3.org 0fork.com --format json
+  python3 scripts/list_services.py --diff example.com example.org  # compare two
+  python3 scripts/list_services.py --diff example.com example.org --format json
 
 List known deployments:
   python3 scripts/list_services.py --list-deployments
@@ -138,7 +138,7 @@ def _deployment_meta(slug: str, raw: dict[str, Any]) -> DeploymentMeta:
 def list_deployments(registry: dict[str, Any]) -> list[DeploymentMeta]:
     """Return all known deployments in registry order (primary first)."""
     raw_deployments: dict[str, Any] = registry.get("deployments", {})
-    primary = registry.get("primary_deployment", "lv3.org")
+    primary = registry.get("primary_deployment", "example.com")
     metas: list[DeploymentMeta] = []
     # primary first, then others in insertion order
     for slug in sorted(raw_deployments, key=lambda s: (s != primary, s)):
@@ -189,7 +189,7 @@ def get_view(registry: dict[str, Any], slug: str) -> DeploymentView:
     """Build a DeploymentView for slug, deriving fork entries from the primary."""
     _require_v3(registry)
     raw_deployments: dict[str, Any] = registry.get("deployments", {})
-    primary_slug = registry.get("primary_deployment", "lv3.org")
+    primary_slug = registry.get("primary_deployment", "example.com")
 
     if slug not in raw_deployments:
         known = ", ".join(sorted(raw_deployments))
@@ -233,7 +233,7 @@ def _best_entry_by_service_id(services: list[ServiceEntry]) -> dict[str, Service
     A service_id may appear multiple times when the same service has both a
     production and a staging publication. We want the production/active entry
     to represent the service in diff output so that "grafana" shows
-    grafana.lv3.org (active) rather than grafana.staging.lv3.org (planned).
+    grafana.example.com (active) rather than grafana.staging.example.com (planned).
     """
     STATUS_RANK = {"active": 0, "planned": 1, "retiring": 2, "reserved": 3}
     ENV_RANK = {"production": 0, "staging": 1}
@@ -466,7 +466,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--diff",
         nargs=2,
         metavar=("LEFT", "RIGHT"),
-        help="Show what differs between two deployments (e.g. --diff lv3.org 0fork.com).",
+        help="Show what differs between two deployments (e.g. --diff example.com example.org).",
     )
     parser.add_argument(
         "--deployment",
@@ -514,7 +514,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     # Default: list a single deployment
-    slug = args.deployment or registry.get("primary_deployment", "lv3.org")
+    slug = args.deployment or registry.get("primary_deployment", "example.com")
     try:
         view = get_view(registry, slug)
     except SystemExit as exc:

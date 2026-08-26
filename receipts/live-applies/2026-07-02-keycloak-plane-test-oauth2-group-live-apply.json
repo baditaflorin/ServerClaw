@@ -7,22 +7,22 @@
     "service": "keycloak",
     "vm": "runtime-control",
     "realm": "0mcp",
-    "user": "plane-test@0mcp.com",
+    "user": "plane-test@example.org",
     "edge_auth_service": "0mpc-ops-portal-oauth2-proxy"
   },
   "summary": "Added the Plane test SSO user to the Keycloak group required by the shared oauth2-proxy edge gate.",
   "problem": {
-    "symptom": "After a successful Keycloak login, the oauth2-proxy callback returned 403 Forbidden for tasks.0mcp.com.",
+    "symptom": "After a successful Keycloak login, the oauth2-proxy callback returned 403 Forbidden for tasks.example.org.",
     "root_cause": "The running oauth2-proxy configuration allows only the /0mcp-platform-admins group, while the temporary test user initially had only platform-read and grafana-viewers access."
   },
   "changes": [
-    "Added plane-test@0mcp.com to Keycloak group /0mcp-platform-admins in realm 0mcp.",
+    "Added plane-test@example.org to Keycloak group /0mcp-platform-admins in realm 0mcp.",
     "Left the Plane local test account unchanged."
   ],
   "verification": [
     {
       "check": "Keycloak group mapping",
-      "result": "plane-test@0mcp.com now belongs to /0mcp-platform-admins and /grafana-viewers."
+      "result": "plane-test@example.org now belongs to /0mcp-platform-admins and /grafana-viewers."
     },
     {
       "check": "Keycloak credential verification",

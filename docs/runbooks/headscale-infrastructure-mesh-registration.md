@@ -44,7 +44,7 @@ Proxmox Hosts & VMs (100.64.x.x)
 If you have Headscale admin access:
 ```bash
 # SSH to headscale server
-ssh headscale.0fork.com
+ssh headscale.example.org
 
 # Generate a new registration key
 headscale preauthkeys create --user default --reusable --expiration 24h
@@ -124,7 +124,7 @@ headscale nodes register \
 
 ```bash
 # SSH to Headscale server
-ssh headscale.0fork.com
+ssh headscale.example.org
 
 # List all registered nodes
 headscale nodes list
@@ -141,10 +141,10 @@ headscale nodes list
 
 ```bash
 # On your MacBook
-tailscale up --login-server=https://headscale.0fork.com
+tailscale up --login-server=https://headscale.example.org
 
 # Follow the browser link to authenticate:
-# https://headscale.0fork.com/register/YOUR-KEY
+# https://headscale.example.org/register/YOUR-KEY
 ```
 
 **Step 3B: Verify mesh connectivity**
@@ -200,7 +200,7 @@ Ansible will SSH through the Headscale mesh to reach infrastructure.
 **Fix**:
 ```bash
 # On the infrastructure node, verify Headscale is reachable
-curl -I https://headscale.0fork.com/
+curl -I https://headscale.example.org/
 # Should return HTTP 200
 
 # If DNS fails, check:
@@ -225,7 +225,7 @@ systemctl enable tailscale
 systemctl start tailscale
 
 # Join mesh with registration key
-tailscale up --login-server=https://headscale.0fork.com \
+tailscale up --login-server=https://headscale.example.org \
   --auth-key JQb6Y-VqYZn7zzFVWhkxZlvp
 ```
 
@@ -243,7 +243,7 @@ tailscale status
 # 100.64.0.3    runtime-control      Derp(...)
 
 # If offline, reconnect:
-tailscale up --login-server=https://headscale.0fork.com
+tailscale up --login-server=https://headscale.example.org
 ```
 
 ### Registration key expired
@@ -254,7 +254,7 @@ tailscale up --login-server=https://headscale.0fork.com
 
 ---
 
-## Multi-Deployment Setup (lv3.org vs 0fork.com)
+## Multi-Deployment Setup (example.com vs example.org)
 
 If managing multiple Proxmox deployments:
 
@@ -305,8 +305,8 @@ headscale nodes list
 # Shows: example-host | 100.64.0.5 | 30 seconds ago
 
 # 4. On your client: Authenticate to Headscale
-tailscale up --login-server=https://headscale.0fork.com
-# Visit: https://headscale.0fork.com/register/YOUR-KEY
+tailscale up --login-server=https://headscale.example.org
+# Visit: https://headscale.example.org/register/YOUR-KEY
 
 # 5. On your client: Verify connectivity
 tailscale status
@@ -329,4 +329,4 @@ make converge-nginx-edge env=production  # Uses SSH through mesh
 
 ## Version History
 
-- **2026-05-06**: Initial runbook creation with 0fork.com Headscale integration
+- **2026-05-06**: Initial runbook creation with example.org Headscale integration

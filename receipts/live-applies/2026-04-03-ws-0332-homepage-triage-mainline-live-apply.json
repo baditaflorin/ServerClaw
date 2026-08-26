@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.98",
   "workflow_id": "adr-0152-homepage-mainline-live-apply",
   "adr": "0152",
-  "summary": "Promoted the runtime-general Homepage and Uptime Kuma recovery into canonical mainline truth as repository version `0.178.2` and platform version `0.130.98` after replaying `runtime-general-pool` from the latest realistic `origin/main` baseline at `0.178.1` / `0.130.97`, restoring migrated Uptime Kuma state, repairing the Compose-plugin and preflight contract drift, pinning Docker guest public-edge aliases, binding Homepage on loopback for same-guest Traefik, and re-verifying the authenticated `home.lv3.org` plus uptime/status routes while preserving the unrelated `controller_dependency_gap x3` release-manager blocker transparently.",
+  "summary": "Promoted the runtime-general Homepage and Uptime Kuma recovery into canonical mainline truth as repository version `0.178.2` and platform version `0.130.98` after replaying `runtime-general-pool` from the latest realistic `origin/main` baseline at `0.178.1` / `0.130.97`, restoring migrated Uptime Kuma state, repairing the Compose-plugin and preflight contract drift, pinning Docker guest public-edge aliases, binding Homepage on loopback for same-guest Traefik, and re-verifying the authenticated `home.example.com` plus uptime/status routes while preserving the unrelated `controller_dependency_gap x3` release-manager blocker transparently.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,17 +40,17 @@
     {
       "kind": "service_endpoint",
       "name": "Homepage edge route",
-      "address": "https://home.lv3.org"
+      "address": "https://home.example.com"
     },
     {
       "kind": "service_endpoint",
       "name": "Uptime Kuma edge route",
-      "address": "https://uptime.lv3.org/dashboard"
+      "address": "https://uptime.example.com/dashboard"
     },
     {
       "kind": "service_endpoint",
       "name": "Public status page",
-      "address": "https://status.lv3.org"
+      "address": "https://status.example.com"
     }
   ],
   "verification": [
@@ -62,12 +62,12 @@
     {
       "check": "Exact-main runtime-general replay and governed backup refresh",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=runtime-general-pool env=production EXTRA_ARGS='-e bypass_promotion=true'` completed successfully with recap `docker-runtime-lv3 : ok=4 changed=0 failed=0`, `monitoring-lv3 : ok=38 changed=0 failed=0`, `nginx-lv3 : ok=71 changed=5 failed=0`, `proxmox_florin : ok=41 changed=10 failed=0`, and `runtime-general-lv3 : ok=322 changed=7 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0332-mainline-live-apply-r1.txt`; the same replay refreshed `receipts/restic-backups/20260403T162652Z.json` and `receipts/restic-snapshots-latest.json`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=runtime-general-pool env=production EXTRA_ARGS='-e bypass_promotion=true'` completed successfully with recap `docker-runtime-lv3 : ok=4 changed=0 failed=0`, `monitoring-lv3 : ok=38 changed=0 failed=0`, `nginx-lv3 : ok=71 changed=5 failed=0`, `proxmox-host : ok=41 changed=10 failed=0`, and `runtime-general-lv3 : ok=322 changed=7 failed=0`, preserved in `receipts/live-applies/evidence/2026-04-03-ws-0332-mainline-live-apply-r1.txt`; the same replay refreshed `receipts/restic-backups/20260403T162652Z.json` and `receipts/restic-snapshots-latest.json`."
     },
     {
       "check": "Public Homepage, Uptime Kuma, and status routes after the replay",
       "result": "pass",
-      "observed": "External verification preserved in `receipts/live-applies/evidence/2026-04-03-ws-0332-public-routes-r1.txt` confirmed `https://home.lv3.org` returns the expected oauth2-proxy `302`, `https://uptime.lv3.org` returns `302` to `/dashboard`, `https://uptime.lv3.org/dashboard` returns `200`, and `https://status.lv3.org` returns `200`."
+      "observed": "External verification preserved in `receipts/live-applies/evidence/2026-04-03-ws-0332-public-routes-r1.txt` confirmed `https://home.example.com` returns the expected oauth2-proxy `302`, `https://uptime.example.com` returns `302` to `/dashboard`, `https://uptime.example.com/dashboard` returns `200`, and `https://status.example.com` returns `200`."
     },
     {
       "check": "Focused runtime-general repository regression slice",

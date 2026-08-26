@@ -3,7 +3,7 @@
 
 The local `scripts/doctor.py` inspects one repo's view of drift.
 Today's platform runs the same codebase against two deployments
-(lv3.org + 0fork.com), and Phase 5–7's drift surfaces were blind to
+(example.com + example.org), and Phase 5–7's drift surfaces were blind to
 divergence BETWEEN those deployments. A receipt that's fresh on lv3
 but 3 months old on 0fork looks fine to the local doctor.
 

@@ -1,14 +1,14 @@
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/scripts/capability_contracts.py", line 12, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/scripts/capability_contracts.py", line 12, in <module>
     import jsonschema
 ModuleNotFoundError: No module named 'jsonschema'
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/scripts/platform_manifest.py", line 13, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/scripts/platform_manifest.py", line 13, in <module>
     from capability_contracts import load_capability_contract_catalog, summarize_capability_contracts
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/scripts/capability_contracts.py", line 14, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/scripts/capability_contracts.py", line 14, in <module>
     raise RuntimeError(
         "Missing dependency: jsonschema. Run via 'uv run --with pyyaml --with jsonschema python ...'."
     ) from exc

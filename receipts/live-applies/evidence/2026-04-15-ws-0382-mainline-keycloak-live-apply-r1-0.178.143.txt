@@ -3,31 +3,31 @@ Preflight workflow: live-apply-service
 Description: Run one service-scoped ADR 0079 live-apply wrapper after the fresh-worktree bootstrap preflight has restored any required generated artifacts.
 Bootstrap manifest: controller-local-base
 Bootstrap description: Baseline isolated-worktree bootstrap that reports reusable controller-side caches before governed automation starts.
-PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519.pub
-PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
-INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/.ansible/validation
-INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/.local/packer-plugin-cache
+PASS bootstrap artifact bootstrap_public_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519.pub
+PASS bootstrap artifact bootstrap_private_key_alias: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
+INFO bootstrap cache ansible_validation_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/.ansible/validation
+INFO bootstrap cache packer_plugin_cache: absent at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/.local/packer-plugin-cache
 Bootstrap manifest: live-apply-generated-artifacts
 Bootstrap description: Generated repo surfaces and ignored controller-local scaffolding required by fresh-worktree live-apply wrappers.
-PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/receipts/gate-bypasses/.gitkeep
-PASS bootstrap artifact security_reports: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/receipts/security-reports
-PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/receipts/image-scans
-PASS bootstrap artifact image_scan_cves: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/receipts/cve
-PASS bootstrap artifact image_scan_sboms: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/receipts/sbom
-PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/inventory/group_vars/platform.yml
-PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/receipts/drift-reports
-PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/config/prometheus/file_sd/https_tls_targets.yml
-PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/config/prometheus/rules/https_tls_alerts.yml
-PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/config/uptime-kuma/monitors.json
+PASS bootstrap artifact gate_bypass_keep: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/receipts/gate-bypasses/.gitkeep
+PASS bootstrap artifact security_reports: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/receipts/security-reports
+PASS bootstrap artifact image_scan_receipts: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/receipts/image-scans
+PASS bootstrap artifact image_scan_cves: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/receipts/cve
+PASS bootstrap artifact image_scan_sboms: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/receipts/sbom
+PASS bootstrap artifact platform_vars: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/inventory/group_vars/platform.yml
+PASS bootstrap artifact drift_reports_dir: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/receipts/drift-reports
+PASS bootstrap artifact https_tls_targets: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/config/prometheus/file_sd/https_tls_targets.yml
+PASS bootstrap artifact https_tls_alerts: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/config/prometheus/rules/https_tls_alerts.yml
+PASS bootstrap artifact uptime_kuma_monitors: file present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/config/uptime-kuma/monitors.json
 Bootstrap manifest: shared-edge-generated-portals
 Bootstrap description: Generated portal directories that the shared NGINX edge publication role republishes alongside service routes.
-PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/build/changelog-portal
-PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/build/ops-portal
-PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/build/docs-portal
+PASS bootstrap artifact changelog_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/build/changelog-portal
+PASS bootstrap artifact ops_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/build/ops-portal
+PASS bootstrap artifact docs_portal: directory present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/build/docs-portal
 Result: PASS (live-apply-service)
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/scripts/canonical_truth.py --check
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/scripts/canonical_truth.py --check
 Canonical truth OK
-uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/scripts/interface_contracts.py --check-live-apply "service:keycloak"
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/scripts/interface_contracts.py --check-live-apply "service:keycloak"
 Live apply contract OK: service:keycloak -> playbooks/services/keycloak.yml
 Vulnerability budget gate for keycloak: approved
 Service: keycloak
@@ -38,8 +38,8 @@ keycloak: declared R1 -> platform R1 -> implemented R0 [gate=unproven] (primary_
   rehearsal: No recorded R1 rehearsal proof keeps the implemented claim above R0.
 No ADR 0191 immutable guest replacement policy blocks the requested live apply for keycloak.
 INFO live-apply-service: loading playbook descriptor playbooks/vars/keycloak.yml
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/playbooks/services/keycloak.yml (env=production)
-Running scoped playbook: playbooks/services/keycloak.yml limit=proxmox-host,postgres,runtime-control,nginx,monitoring shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/.ansible/shards/56aaa0c6477d4892aab8a989b24d2ff4/keycloak-production.json
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/playbooks/services/keycloak.yml (env=production)
+Running scoped playbook: playbooks/services/keycloak.yml limit=proxmox-host,postgres,runtime-control,nginx,monitoring shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/.ansible/shards/56aaa0c6477d4892aab8a989b24d2ff4/keycloak-production.json
 
 PLAY [Ensure Hetzner DNS publication for Keycloak] *****************************
 
@@ -97,58 +97,58 @@ ok: [proxmox-host -> localhost]
 TASK [lv3.platform.hetzner_dns_records : Ensure desired Hetzner DNS records are present] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Ensure desired Hetzner DNS records are present","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:54:04.623Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.hetzner_dns_records : Ensure desired Hetzner DNS records are present","service_id":"ansible","target":"proxmox-host","task_status":"ok","trace_id":"background","ts":"2026-04-15T06:54:04.741Z","vm":"proxmox-host","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'nginx', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'grafana', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'headscale', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'proxmox', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'docker', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'build', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'uptime', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'status', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'mail', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'livekit', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'scheduler', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'matrix', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'langfuse', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'flags', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'analytics', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'minio', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'minio-console', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'errors', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'billing', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'agents', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'tasks', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'ci', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'wiki', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'grist', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'paperless', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'logs', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'draw', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'chat', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'n8n', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'cloud', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'coolify', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'apps', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '*.apps', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'api', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'sso', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'registry', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'ops', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'repo-intake', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'home', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'ntfy', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'data', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'annotate', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'bi', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'repowise', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'browser', 'ttl': 60, 'type': 'A', 'value': '65.108.75.123'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'ttl': 300, 'type': 'MX', 'value': '10 mail.lv3.org.'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'ttl': 300, 'type': 'TXT', 'value': '"v=spf1 mx include:spf.brevo.com -all"'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '_dmarc', 'ttl': 300, 'type': 'TXT', 'value': '"v=DMARC1; p=quarantine; rua=mailto:florin@lv3.org"'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'brevo1._domainkey', 'ttl': 300, 'type': 'CNAME', 'value': 'b1.lv3-org.dkim.brevo.com.'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'brevo2._domainkey', 'ttl': 300, 'type': 'CNAME', 'value': 'b2.lv3-org.dkim.brevo.com.'})
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'ttl': 300, 'type': 'TXT', 'value': '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'nginx', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'grafana', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'headscale', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'proxmox', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'docker', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'build', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'uptime', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'status', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'mail', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'livekit', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'scheduler', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'matrix', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'langfuse', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'flags', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'analytics', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'minio', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'minio-console', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'errors', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'billing', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'agents', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'tasks', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'ci', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'wiki', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'grist', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'paperless', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'logs', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'draw', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'chat', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'n8n', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'cloud', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'coolify', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'apps', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '*.apps', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'api', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'sso', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'registry', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'ops', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'repo-intake', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'home', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'ntfy', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'data', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'annotate', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'bi', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'repowise', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'browser', 'ttl': 60, 'type': 'A', 'value': '203.0.113.1'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'ttl': 300, 'type': 'MX', 'value': '10 mail.example.com.'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'ttl': 300, 'type': 'TXT', 'value': '"v=spf1 mx include:spf.brevo.com -all"'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '_dmarc', 'ttl': 300, 'type': 'TXT', 'value': '"v=DMARC1; p=quarantine; rua=mailto:florin@example.com"'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'brevo1._domainkey', 'ttl': 300, 'type': 'CNAME', 'value': 'b1.lv3-org.dkim.brevo.com.'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': 'brevo2._domainkey', 'ttl': 300, 'type': 'CNAME', 'value': 'b2.lv3-org.dkim.brevo.com.'})
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/tasks/record.yml for proxmox-host => (item={'name': '@', 'ttl': 300, 'type': 'TXT', 'value': '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"'})
 
 TASK [lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.hetzner_dns_records : Select existing canonical DNS records with the same name and type","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:54:04.987Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -4603,7 +4603,7 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:56:55.937Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-15T06:56:55.950Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for runtime-control
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:56:55.983Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -4738,7 +4738,7 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Ensure the configured OpenBao API is unsealed before runtime secret injection] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the configured OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:56:59.991Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the configured OpenBao API is unsealed before runtime secret injection","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-15T06:57:00.006Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for runtime-control
 
 TASK [lv3.platform.common : Read OpenBao seal status before runtime secret injection for keycloak] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read OpenBao seal status before runtime secret injection for keycloak","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:57:00.059Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -4753,9 +4753,9 @@ ok: [runtime-control]
 TASK [lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for keycloak] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for keycloak","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:57:01.212Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during runtime secret injection for keycloak","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-15T06:57:01.232Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for runtime-control => (item=(censored due to no_log))
 
 TASK [lv3.platform.common : Submit OpenBao recovery key runtime secret injection for keycloak #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery key runtime secret injection for keycloak #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:57:01.264Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -5318,7 +5318,7 @@ ok: [runtime-control]
 TASK [lv3.platform.keycloak_runtime : Run the Plane OIDC client reconciliation tasks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Run the Plane OIDC client reconciliation tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:58:19.997Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.keycloak_runtime : Run the Plane OIDC client reconciliation tasks","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-15T06:58:20.011Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/plane_client.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/plane_client.yml for runtime-control
 
 TASK [lv3.platform.keycloak_runtime : Set Plane OIDC client configuration facts] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Set Plane OIDC client configuration facts","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:58:20.044Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -5377,10 +5377,10 @@ ok: [runtime-control] => {
         "Plane OIDC Client Configuration:",
         "Client ID: lv3-plane-oidc",
         "Client Secret: ****************************************************************",
-        "Public URL: https://tasks.lv3.org",
+        "Public URL: https://tasks.example.com",
         "Keycloak URL: http://127.0.0.1:18080",
         "Realm: lv3",
-        "Secret artifact: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/plane-oidc-client-secret.txt"
+        "Secret artifact: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/keycloak/plane-oidc-client-secret.txt"
     ]
 }
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.keycloak_runtime : Display Plane OIDC client configuration","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-15T06:58:23.959Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
@@ -5478,7 +5478,7 @@ ok: [runtime-control -> localhost]
 TASK [lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:58:32.144Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.keycloak_runtime : Run the repo-managed Keycloak user reconciliation tasks","service_id":"ansible","target":"runtime-control","task_status":"ok","trace_id":"background","ts":"2026-04-15T06:58:32.156Z","vm":"runtime-control","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for runtime-control
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0382-main/collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/reconcile_repo_managed_users.yml for runtime-control
 
 TASK [lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.keycloak_runtime : Request a Keycloak admin token for repo-managed user reconciliation","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:58:32.192Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -5813,11 +5813,11 @@ skipping: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:59:09.848Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [nginx] => (item={'slug': 'nginx', 'hostname': 'nginx.lv3.org', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published lv3.org services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
-ok: [nginx] => (item={'slug': 'proxmox', 'hostname': 'proxmox.lv3.org', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
-ok: [nginx] => (item={'slug': 'docker', 'hostname': 'docker.lv3.org', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
-ok: [nginx] => (item={'slug': 'build', 'hostname': 'build.lv3.org', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
-ok: [nginx] => (item={'slug': 'mail', 'hostname': 'mail.lv3.org', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
+ok: [nginx] => (item={'slug': 'nginx', 'hostname': 'nginx.example.com', 'title': 'LV3 Edge', 'description': 'NGINX is the public edge for published example.com services on this platform.', 'meta': 'Use the named subdomains for the actual service entry points exposed at the edge.'})
+ok: [nginx] => (item={'slug': 'proxmox', 'hostname': 'proxmox.example.com', 'title': 'Proxmox Administration', 'description': 'Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.', 'meta': 'Use Tailscale host access for routine Proxmox administration.', 'action_url': 'https://100.64.0.1:8006/', 'action_label': 'Open Private Proxmox UI'})
+ok: [nginx] => (item={'slug': 'docker', 'hostname': 'docker.example.com', 'title': 'Docker Runtime VM', 'description': 'The Docker runtime VM does not currently publish a public web service at this hostname.', 'meta': 'Public application endpoints should be published deliberately through the NGINX edge when needed.'})
+ok: [nginx] => (item={'slug': 'build', 'hostname': 'build.example.com', 'title': 'Docker Build VM', 'description': 'The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.', 'meta': 'Reach the build VM through the approved operator access path rather than the public edge.'})
+ok: [nginx] => (item={'slug': 'mail', 'hostname': 'mail.example.com', 'title': 'LV3 Mail', 'description': 'The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.', 'meta': 'Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Render static pages for published informational hostnames","service_id":"ansible","target":"nginx","task_status":"ok","trace_id":"background","ts":"2026-04-15T06:59:17.432Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Render the crawl policy robots.txt] ***
@@ -5827,8 +5827,8 @@ ok: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Publish generated static site directories] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:59:18.904Z","vm":"controller","workflow_id":"ansible-playbook"}
-changed: [nginx -> localhost] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-changed: [nginx -> localhost] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+changed: [nginx -> localhost] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+changed: [nginx -> localhost] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
 {"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.nginx_edge_publication : Publish generated static site directories","service_id":"ansible","target":"nginx","task_status":"ok","trace_id":"background","ts":"2026-04-15T06:59:27.588Z","vm":"nginx","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.nginx_edge_publication : Discover existing public edge certificate lineages] ***
@@ -5863,51 +5863,51 @@ ok: [nginx]
 
 TASK [lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-15T06:59:29.273Z","vm":"controller","workflow_id":"ansible-playbook"}
-skipping: [nginx] => (item={'hostname': 'minio-console.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:9011', 'client_max_body_size': 0, 'chunked_transfer_encoding': True, 'proxy_request_buffering': False, 'proxy_read_timeout_seconds': 900, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False, 'preserve_upstream_security_headers': True})
-skipping: [nginx] => (item={'hostname': 'changelog.lv3.org', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
-skipping: [nginx] => (item={'hostname': 'docs.lv3.org', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
-skipping: [nginx] => (item={'hostname': 'nginx.lv3.org', 'kind': 'static', 'slug': 'nginx'})
-skipping: [nginx] => (item={'hostname': 'grafana.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:3000', 'blocked_exact_paths': [{'path': '/api/health', 'status': 404}], 'proxy_hide_headers': ['X-Grafana-Version', 'Via']})
-skipping: [nginx] => (item={'hostname': 'headscale.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.1:8080'})
-skipping: [nginx] => (item={'hostname': 'proxmox.lv3.org', 'kind': 'static', 'slug': 'proxmox'})
-skipping: [nginx] => (item={'hostname': 'docker.lv3.org', 'kind': 'static', 'slug': 'docker'})
-skipping: [nginx] => (item={'hostname': 'build.lv3.org', 'kind': 'static', 'slug': 'build'})
-skipping: [nginx] => (item={'hostname': 'uptime.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001'})
-skipping: [nginx] => (item={'hostname': 'status.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001', 'root_proxy_path': '/status/lv3-platform'})
-skipping: [nginx] => (item={'hostname': 'mail.lv3.org', 'kind': 'static', 'slug': 'mail'})
-skipping: [nginx] => (item={'hostname': 'livekit.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.21:7880', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
-skipping: [nginx] => (item={'hostname': 'scheduler.lv3.org', 'kind': 'proxy', 'upstream': 'https://10.10.10.40:4646', 'upstream_ssl_verify': False})
-skipping: [nginx] => (item={'hostname': 'matrix.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8008'})
-skipping: [nginx] => (item={'hostname': 'langfuse.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3002'})
-skipping: [nginx] => (item={'hostname': 'flags.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8017'})
-skipping: [nginx] => (item={'hostname': 'analytics.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8016', 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'minio.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:9010', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'crawl_policy_enabled': False, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'errors.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3005'})
-skipping: [nginx] => (item={'hostname': 'billing.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8100', 'prefix_proxy_routes': [{'path': '/api/', 'upstream': 'http://10.10.10.20:8099'}]})
-skipping: [nginx] => (item={'hostname': 'agents.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8094'})
-skipping: [nginx] => (item={'hostname': 'tasks.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8093'})
-skipping: [nginx] => (item={'hostname': 'ci.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8102'})
-skipping: [nginx] => (item={'hostname': 'wiki.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3006'})
-skipping: [nginx] => (item={'hostname': 'grist.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8484'})
-skipping: [nginx] => (item={'hostname': 'paperless.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8018', 'client_max_body_size': '256m', 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'logs.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8089', 'server_sent_events': True})
-skipping: [nginx] => (item={'hostname': 'draw.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3095', 'prefix_proxy_routes': [{'path': '/socket.io/', 'upstream': 'http://10.10.10.20:3096'}]})
-skipping: [nginx] => (item={'hostname': 'chat.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8096'})
-skipping: [nginx] => (item={'hostname': 'n8n.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:5678'})
-skipping: [nginx] => (item={'hostname': 'cloud.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8084', 'client_max_body_size': '16g', 'exact_redirects': [{'path': '/.well-known/carddav', 'location': '/remote.php/dav/', 'status': 301}, {'path': '/.well-known/caldav', 'location': '/remote.php/dav/', 'status': 301}], 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'coolify.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8000'})
-skipping: [nginx] => (item={'hostname': 'apps.lv3.org', 'kind': 'proxy', 'upstream': 'https://10.10.10.71:443', 'aliases': ['*.apps.lv3.org'], 'crawl_policy_enabled': False, 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
-skipping: [nginx] => (item={'hostname': 'api.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8083'})
-skipping: [nginx] => (item={'hostname': 'sso.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8091'})
-skipping: [nginx] => (item={'hostname': 'registry.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8095', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
-skipping: [nginx] => (item={'hostname': 'ops.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8092'})
-skipping: [nginx] => (item={'hostname': 'repo-intake.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8101'})
-skipping: [nginx] => (item={'hostname': 'home.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3090'})
-skipping: [nginx] => (item={'hostname': 'ntfy.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:2586', 'chunked_transfer_encoding': True, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
-skipping: [nginx] => (item={'hostname': 'data.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8055'})
-skipping: [nginx] => (item={'hostname': 'annotate.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8110'})
-skipping: [nginx] => (item={'hostname': 'bi.lv3.org', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8105'})
-skipping: [nginx] => (item={'hostname': 'repowise.lv3.org', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:7070'})
+skipping: [nginx] => (item={'hostname': 'minio-console.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:9011', 'client_max_body_size': 0, 'chunked_transfer_encoding': True, 'proxy_request_buffering': False, 'proxy_read_timeout_seconds': 900, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False, 'preserve_upstream_security_headers': True})
+skipping: [nginx] => (item={'hostname': 'changelog.example.com', 'kind': 'static_dir', 'source_dir': 'changelog-portal'})
+skipping: [nginx] => (item={'hostname': 'docs.example.com', 'kind': 'static_dir', 'source_dir': 'docs-portal'})
+skipping: [nginx] => (item={'hostname': 'nginx.example.com', 'kind': 'static', 'slug': 'nginx'})
+skipping: [nginx] => (item={'hostname': 'grafana.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.40:3000', 'blocked_exact_paths': [{'path': '/api/health', 'status': 404}], 'proxy_hide_headers': ['X-Grafana-Version', 'Via']})
+skipping: [nginx] => (item={'hostname': 'headscale.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.1:8080'})
+skipping: [nginx] => (item={'hostname': 'proxmox.example.com', 'kind': 'static', 'slug': 'proxmox'})
+skipping: [nginx] => (item={'hostname': 'docker.example.com', 'kind': 'static', 'slug': 'docker'})
+skipping: [nginx] => (item={'hostname': 'build.example.com', 'kind': 'static', 'slug': 'build'})
+skipping: [nginx] => (item={'hostname': 'uptime.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001'})
+skipping: [nginx] => (item={'hostname': 'status.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3001', 'root_proxy_path': '/status/lv3-platform'})
+skipping: [nginx] => (item={'hostname': 'mail.example.com', 'kind': 'static', 'slug': 'mail'})
+skipping: [nginx] => (item={'hostname': 'livekit.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.21:7880', 'proxy_read_timeout_seconds': 3600, 'proxy_send_timeout_seconds': 3600})
+skipping: [nginx] => (item={'hostname': 'scheduler.example.com', 'kind': 'proxy', 'upstream': 'https://10.10.10.40:4646', 'upstream_ssl_verify': False})
+skipping: [nginx] => (item={'hostname': 'matrix.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8008'})
+skipping: [nginx] => (item={'hostname': 'langfuse.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3002'})
+skipping: [nginx] => (item={'hostname': 'flags.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8017'})
+skipping: [nginx] => (item={'hostname': 'analytics.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8016', 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'minio.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:9010', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'crawl_policy_enabled': False, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'errors.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3005'})
+skipping: [nginx] => (item={'hostname': 'billing.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8100', 'prefix_proxy_routes': [{'path': '/api/', 'upstream': 'http://10.10.10.20:8099'}]})
+skipping: [nginx] => (item={'hostname': 'agents.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8094'})
+skipping: [nginx] => (item={'hostname': 'tasks.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8093'})
+skipping: [nginx] => (item={'hostname': 'ci.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8102'})
+skipping: [nginx] => (item={'hostname': 'wiki.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:3006'})
+skipping: [nginx] => (item={'hostname': 'grist.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8484'})
+skipping: [nginx] => (item={'hostname': 'paperless.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8018', 'client_max_body_size': '256m', 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'logs.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8089', 'server_sent_events': True})
+skipping: [nginx] => (item={'hostname': 'draw.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:3095', 'prefix_proxy_routes': [{'path': '/socket.io/', 'upstream': 'http://10.10.10.20:3096'}]})
+skipping: [nginx] => (item={'hostname': 'chat.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8096'})
+skipping: [nginx] => (item={'hostname': 'n8n.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:5678'})
+skipping: [nginx] => (item={'hostname': 'cloud.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8084', 'client_max_body_size': '16g', 'exact_redirects': [{'path': '/.well-known/carddav', 'location': '/remote.php/dav/', 'status': 301}, {'path': '/.well-known/caldav', 'location': '/remote.php/dav/', 'status': 301}], 'preserve_upstream_security_headers': True, 'proxy_read_timeout_seconds': 3600, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 3600, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'coolify.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.70:8000'})
+skipping: [nginx] => (item={'hostname': 'apps.example.com', 'kind': 'proxy', 'upstream': 'https://10.10.10.71:443', 'aliases': ['*.apps.example.com'], 'crawl_policy_enabled': False, 'preserve_upstream_security_headers': True, 'security_headers_enabled': False})
+skipping: [nginx] => (item={'hostname': 'api.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8083'})
+skipping: [nginx] => (item={'hostname': 'sso.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8091'})
+skipping: [nginx] => (item={'hostname': 'registry.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.92:8095', 'chunked_transfer_encoding': True, 'client_max_body_size': 0, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
+skipping: [nginx] => (item={'hostname': 'ops.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8092'})
+skipping: [nginx] => (item={'hostname': 'repo-intake.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:8101'})
+skipping: [nginx] => (item={'hostname': 'home.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.91:3090'})
+skipping: [nginx] => (item={'hostname': 'ntfy.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:2586', 'chunked_transfer_encoding': True, 'proxy_read_timeout_seconds': 900, 'proxy_request_buffering': False, 'proxy_send_timeout_seconds': 900})
+skipping: [nginx] => (item={'hostname': 'data.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8055'})
+skipping: [nginx] => (item={'hostname': 'annotate.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8110'})
+skipping: [nginx] => (item={'hostname': 'bi.example.com', 'kind': 'proxy', 'noindex': True, 'upstream': 'http://10.10.10.20:8105'})
+skipping: [nginx] => (item={'hostname': 'repowise.example.com', 'kind': 'proxy', 'upstream': 'http://10.10.10.20:7070'})
 skipping: [nginx]
 {"component":"ansible.task","level":"INFO","msg":"Task skipped: lv3.platform.nginx_edge_publication : Derive site-local certificate requests for hostnames missing from the shared certificate","service_id":"ansible","target":"nginx","task_status":"skipped","trace_id":"background","ts":"2026-04-15T06:59:29.487Z","vm":"nginx","workflow_id":"ansible-playbook"}
 

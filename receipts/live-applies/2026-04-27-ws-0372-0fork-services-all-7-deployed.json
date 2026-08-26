@@ -14,7 +14,7 @@
   "platform_version_context": "0.178.222",
   "integrated_repo_version": "0.178.231",
   "integrated_platform_version": "0.178.222",
-  "summary": "All 7 0fork.com services deployed and verified UP: Harbor Registry (registry.0fork.com), Outline/Wiki (wiki.0fork.com), LibreChat (chat.0fork.com), Plausible Analytics (analytics.0fork.com), GlitchTip (errors.0fork.com), Woodpecker CI (ci.0fork.com), ntfy (ntfy.0fork.com). Woodpecker OAuth bootstrap fixed for private Gitea behind wildcard DNS.",
+  "summary": "All 7 example.org services deployed and verified UP: Harbor Registry (registry.example.org), Outline/Wiki (wiki.example.org), LibreChat (chat.example.org), Plausible Analytics (analytics.example.org), GlitchTip (errors.example.org), Woodpecker CI (ci.example.org), ntfy (ntfy.example.org). Woodpecker OAuth bootstrap fixed for private Gitea behind wildcard DNS.",
   "services": [
     "harbor_registry",
     "outline",
@@ -54,7 +54,7 @@
     {
       "check": "JWT token created",
       "result": "pass",
-      "observed": "JWT token issued for ops/proxmox_florin_server repo activation."
+      "observed": "JWT token issued for ops/platform_server repo activation."
     }
   ],
   "evidence_refs": [

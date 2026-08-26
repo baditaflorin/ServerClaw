@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -39,7 +39,7 @@
     {
       "kind": "service_endpoint",
       "name": "Private Harbor registry",
-      "address": "https://registry.lv3.org"
+      "address": "https://registry.example.com"
     }
   ],
   "verification": [
@@ -61,7 +61,7 @@
     {
       "check": "Hosted branch Renovate replay",
       "result": "pass",
-      "observed": "`renovate.yml` run `165` / job `219` concluded `success` on `codex/ws-0297-live-apply`, created the `Renovate Dashboard` issue (`#3`), and opened governed PRs `#1` and `#2` in the private `ops/proxmox_florin_server` repo."
+      "observed": "`renovate.yml` run `165` / job `219` concluded `success` on `codex/ws-0297-live-apply`, created the `Renovate Dashboard` issue (`#3`), and opened governed PRs `#1` and `#2` in the private `ops/platform_server` repo."
     }
   ],
   "evidence_refs": [

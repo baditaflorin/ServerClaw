@@ -13,7 +13,7 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1"
     },
     {
@@ -42,7 +42,7 @@
     {
       "check": "Integrated Windmill converge plus targeted ADR 0106 refresh",
       "result": "pass",
-      "observed": "The integrated `playbooks/windmill.yml` replay completed worker checkout sync, mirrored `/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json`, refreshed runtime secrets, restarted Windmill, and synced repo-managed scripts before later failing in unrelated raw-app sync for `f/lv3/operator_access_admin` with Docker reporting `unexpected EOF`. The final ADR 0106 reapply therefore used a targeted worker-checkout refresh plus a targeted sync of `f/lv3/ephemeral_vm_reaper`."
+      "observed": "The integrated `playbooks/windmill.yml` replay completed worker checkout sync, mirrored `/srv/platform_server/.local/proxmox-api/lv3-automation-primary.json`, refreshed runtime secrets, restarted Windmill, and synced repo-managed scripts before later failing in unrelated raw-app sync for `f/lv3/operator_access_admin` with Docker reporting `unexpected EOF`. The final ADR 0106 reapply therefore used a targeted worker-checkout refresh plus a targeted sync of `f/lv3/ephemeral_vm_reaper`."
     },
     {
       "check": "Managed schedule update replay",
@@ -57,7 +57,7 @@
     {
       "check": "Manual live reaper sweep and guest receipt",
       "result": "pass",
-      "observed": "A controller-side `run_wait_result` POST to `http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fephemeral_vm_reaper` returned HTTP 200 with `{\"run_at\":\"2026-03-26T17:05:54.633829Z\",\"warned_vmids\":[],\"expired_vmids\":[],\"skipped_vmids\":[],\"retagged_vmids\":[]}`, and guest verification through the inventory-driven Ansible jump path confirmed the mirrored token payload plus receipt `/srv/proxmox_florin_server/.local/fixtures/reaper-runs/reaper-run-20260326T170554Z.json`."
+      "observed": "A controller-side `run_wait_result` POST to `http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fephemeral_vm_reaper` returned HTTP 200 with `{\"run_at\":\"2026-03-26T17:05:54.633829Z\",\"warned_vmids\":[],\"expired_vmids\":[],\"skipped_vmids\":[],\"retagged_vmids\":[]}`, and guest verification through the inventory-driven Ansible jump path confirmed the mirrored token payload plus receipt `/srv/platform_server/.local/fixtures/reaper-runs/reaper-run-20260326T170554Z.json`."
     }
   ],
   "evidence_refs": [

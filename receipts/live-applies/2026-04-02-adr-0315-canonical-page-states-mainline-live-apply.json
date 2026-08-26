@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -46,7 +46,7 @@
     {
       "check": "Exact-main governed Windmill replay",
       "result": "pass",
-      "observed": "`make converge-windmill` completed successfully from the refreshed exact-main worktree with final recap `docker-runtime-lv3 : ok=327 changed=46 unreachable=0 failed=0 skipped=84`, `postgres-lv3 : ok=93 changed=2 unreachable=0 failed=0 skipped=28`, and `proxmox_florin : ok=41 changed=4 unreachable=0 failed=0 skipped=16`."
+      "observed": "`make converge-windmill` completed successfully from the refreshed exact-main worktree with final recap `docker-runtime-lv3 : ok=327 changed=46 unreachable=0 failed=0 skipped=84`, `postgres-lv3 : ok=93 changed=2 unreachable=0 failed=0 skipped=28`, and `proxmox-host : ok=41 changed=4 unreachable=0 failed=0 skipped=16`."
     },
     {
       "check": "Focused ADR 0315 regression slice",

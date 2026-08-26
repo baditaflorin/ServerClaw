@@ -14,7 +14,7 @@ tmp_path = PosixPath('/private/var/folders/9h/rfjwgnr551357jbs9t0tbh4h0000gn/T/p
 
 >       assert completed.returncode == 0
 E       AssertionError: assert 1 == 0
-E        +  where 1 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/...florin_server/.worktrees/ws-0305-mainline-final/scripts/remote_exec.sh: line 331: LV3_SNAPSHOT_ID: unbound variable\n').returncode
+E        +  where 1 = CompletedProcess(args=['/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/...florin_server/.worktrees/ws-0305-mainline-final/scripts/remote_exec.sh: line 331: LV3_SNAPSHOT_ID: unbound variable\n').returncode
 
 tests/test_remote_exec.py:293: AssertionError
 ____ test_remote_exec_preserves_validation_lane_context_for_local_fallback _____

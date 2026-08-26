@@ -18,7 +18,7 @@
 
 ## Context
 
-The 2026-04-28 ops.0fork.com recovery exposed a class of bug the IaC has
+The 2026-04-28 ops.example.org recovery exposed a class of bug the IaC has
 no model for. Both `lv3-ops-portal-oauth2-proxy.service` and
 `0fork-ops-portal-oauth2-proxy.service` were installed on the same nginx
 edge VM, both bound to `127.0.0.1:4180`, and the systemd unit that

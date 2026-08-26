@@ -11,7 +11,7 @@ The documented one-command install path from `CLAUDE.md` and `README.md` —
 `git clone ServerClaw && cd ServerClaw && make init-local && make bootstrap`
 — did not actually work against any machine other than the original author's
 Proxmox host. Four independent gaps had to be fixed before a plain `make
-bootstrap` could stand up an identical deployment on the 0fork.com clone.
+bootstrap` could stand up an identical deployment on the example.org clone.
 
 This undermined the ADR 0407 "generic by default" claim. From the outside,
 the private and public ServerClaw repos looked forkable; in practice the
@@ -155,7 +155,7 @@ Concrete changes:
 ## Follow-ups
 
 - [ ] Run `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make
-  bootstrap` against fork-pve-01 end-to-end; record wall-clock and rc per
+  bootstrap` against debian-base-template end-to-end; record wall-clock and rc per
   stage via `scripts/timed.sh`. Update this postmortem with the timings.
 - [ ] Add a CI check that exercises `make generate-inventory --check`
   under both production and an ephemeral overlay fixture.

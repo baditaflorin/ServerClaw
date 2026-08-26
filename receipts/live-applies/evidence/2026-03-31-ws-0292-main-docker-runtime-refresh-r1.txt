@@ -218,39 +218,39 @@ ok: [docker-runtime-lv3] => (item=ops)
 
 TASK [lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:49:39.595Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime-lv3] => (item=agents.lv3.org)
-ok: [docker-runtime-lv3] => (item=analytics.lv3.org)
-ok: [docker-runtime-lv3] => (item=api.lv3.org)
-ok: [docker-runtime-lv3] => (item=apps.lv3.org)
-ok: [docker-runtime-lv3] => (item=billing.lv3.org)
-ok: [docker-runtime-lv3] => (item=build.lv3.org)
-ok: [docker-runtime-lv3] => (item=chat.lv3.org)
-ok: [docker-runtime-lv3] => (item=ci.lv3.org)
-ok: [docker-runtime-lv3] => (item=cloud.lv3.org)
-ok: [docker-runtime-lv3] => (item=coolify.lv3.org)
-ok: [docker-runtime-lv3] => (item=data.lv3.org)
-ok: [docker-runtime-lv3] => (item=docker.lv3.org)
-ok: [docker-runtime-lv3] => (item=draw.lv3.org)
-ok: [docker-runtime-lv3] => (item=flags.lv3.org)
-ok: [docker-runtime-lv3] => (item=grafana.lv3.org)
-ok: [docker-runtime-lv3] => (item=headscale.lv3.org)
-ok: [docker-runtime-lv3] => (item=home.lv3.org)
-ok: [docker-runtime-lv3] => (item=langfuse.lv3.org)
-ok: [docker-runtime-lv3] => (item=logs.lv3.org)
-ok: [docker-runtime-lv3] => (item=mail.lv3.org)
-ok: [docker-runtime-lv3] => (item=matrix.lv3.org)
-ok: [docker-runtime-lv3] => (item=n8n.lv3.org)
-ok: [docker-runtime-lv3] => (item=nginx.lv3.org)
-ok: [docker-runtime-lv3] => (item=notebooks.lv3.org)
-ok: [docker-runtime-lv3] => (item=ops.lv3.org)
-ok: [docker-runtime-lv3] => (item=proxmox.lv3.org)
-ok: [docker-runtime-lv3] => (item=realtime.lv3.org)
-ok: [docker-runtime-lv3] => (item=registry.lv3.org)
-ok: [docker-runtime-lv3] => (item=sso.lv3.org)
-ok: [docker-runtime-lv3] => (item=status.lv3.org)
-ok: [docker-runtime-lv3] => (item=tasks.lv3.org)
-ok: [docker-runtime-lv3] => (item=uptime.lv3.org)
-ok: [docker-runtime-lv3] => (item=wiki.lv3.org)
+ok: [docker-runtime-lv3] => (item=agents.example.com)
+ok: [docker-runtime-lv3] => (item=analytics.example.com)
+ok: [docker-runtime-lv3] => (item=api.example.com)
+ok: [docker-runtime-lv3] => (item=apps.example.com)
+ok: [docker-runtime-lv3] => (item=billing.example.com)
+ok: [docker-runtime-lv3] => (item=build.example.com)
+ok: [docker-runtime-lv3] => (item=chat.example.com)
+ok: [docker-runtime-lv3] => (item=ci.example.com)
+ok: [docker-runtime-lv3] => (item=cloud.example.com)
+ok: [docker-runtime-lv3] => (item=coolify.example.com)
+ok: [docker-runtime-lv3] => (item=data.example.com)
+ok: [docker-runtime-lv3] => (item=docker.example.com)
+ok: [docker-runtime-lv3] => (item=draw.example.com)
+ok: [docker-runtime-lv3] => (item=flags.example.com)
+ok: [docker-runtime-lv3] => (item=grafana.example.com)
+ok: [docker-runtime-lv3] => (item=headscale.example.com)
+ok: [docker-runtime-lv3] => (item=home.example.com)
+ok: [docker-runtime-lv3] => (item=langfuse.example.com)
+ok: [docker-runtime-lv3] => (item=logs.example.com)
+ok: [docker-runtime-lv3] => (item=mail.example.com)
+ok: [docker-runtime-lv3] => (item=matrix.example.com)
+ok: [docker-runtime-lv3] => (item=n8n.example.com)
+ok: [docker-runtime-lv3] => (item=nginx.example.com)
+ok: [docker-runtime-lv3] => (item=notebooks.example.com)
+ok: [docker-runtime-lv3] => (item=ops.example.com)
+ok: [docker-runtime-lv3] => (item=proxmox.example.com)
+ok: [docker-runtime-lv3] => (item=realtime.example.com)
+ok: [docker-runtime-lv3] => (item=registry.example.com)
+ok: [docker-runtime-lv3] => (item=sso.example.com)
+ok: [docker-runtime-lv3] => (item=status.example.com)
+ok: [docker-runtime-lv3] => (item=tasks.example.com)
+ok: [docker-runtime-lv3] => (item=uptime.example.com)
+ok: [docker-runtime-lv3] => (item=wiki.example.com)
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.docker_runtime : Pin public edge hostnames to the internal edge for Docker guests","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T10:49:55.046Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.docker_runtime : Render Docker daemon configuration] ********
@@ -959,7 +959,7 @@ ok: [docker-runtime-lv3] => (item=runtime_assurance.py)
 ok: [docker-runtime-lv3] => (item=api_gateway/__init__.py)
 changed: [docker-runtime-lv3] => (item=api_gateway/main.py)
 ok: [docker-runtime-lv3] => (item=requirements.txt)
-changed: [docker-runtime-lv3] => (item=inventory/host_vars/proxmox_florin.yml)
+changed: [docker-runtime-lv3] => (item=inventory/host_vars/proxmox-host.yml)
 changed: [docker-runtime-lv3] => (item=versions/stack.yaml)
 changed: [docker-runtime-lv3] => (item=workstreams.yaml)
 {"changed":true,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.api_gateway_runtime : Sync the API gateway application sources","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T10:52:51.502Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
@@ -967,24 +967,24 @@ changed: [docker-runtime-lv3] => (item=workstreams.yaml)
 TASK [lv3.platform.api_gateway_runtime : Sync the staged repo trees required by the API gateway runtime] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.api_gateway_runtime : Sync the staged repo trees required by the API gateway runtime","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:52:51.546Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.api_gateway_runtime : Sync the staged repo trees required by the API gateway runtime","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T10:52:51.608Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=gitea workflow tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ansible collection tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=inventory tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=migrations tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=molecule tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=packer tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=platform package for gateway graph support)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=playbooks tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared search fabric package for gateway search routes)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared scripts tree required by packaged platform modules)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared repo config tree required by packaged platform modules)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo documentation tree required by the local search fabric)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo receipts tree required by the local search fabric)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=requirements tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=roles tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tests tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tofu tree required by packaged workflow implementation refs)
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=windmill tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=gitea workflow tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=ansible collection tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=inventory tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=migrations tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=molecule tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=packer tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=platform package for gateway graph support)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=playbooks tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared search fabric package for gateway search routes)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared scripts tree required by packaged platform modules)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=shared repo config tree required by packaged platform modules)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo documentation tree required by the local search fabric)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=repo receipts tree required by the local search fabric)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=requirements tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=roles tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tests tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=tofu tree required by packaged workflow implementation refs)
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/sync_tree.yml for docker-runtime-lv3 => (item=windmill tree required by packaged workflow implementation refs)
 
 TASK [lv3.platform.api_gateway_runtime : Create a local staging archive path for the gitea workflow tree required by packaged workflow implementation refs] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.api_gateway_runtime : Create a local staging archive path for the gitea workflow tree required by packaged workflow implementation refs","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:52:51.783Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2164,7 +2164,7 @@ ok: [docker-runtime-lv3]
 TASK [Run startup verification] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run startup verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:56:03.575Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run startup verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T10:56:03.591Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/playbooks/../collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/playbooks/../collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe startup] **************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe startup","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:56:03.650Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2189,7 +2189,7 @@ skipping: [docker-runtime-lv3]
 TASK [Run liveness verification] ***********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run liveness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:56:04.793Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run liveness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T10:56:04.804Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/playbooks/../collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/playbooks/../collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe liveness] *************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe liveness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:56:04.861Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2243,7 +2243,7 @@ skipping: [docker-runtime-lv3]
 TASK [Repair Docker publication before readiness verification] *****************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Repair Docker publication before readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:58:58.599Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Repair Docker publication before readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T10:58:58.617Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/playbooks/../collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/playbooks/../collections/ansible_collections/lv3/platform/playbooks/tasks/docker-publication-assert.yml for docker-runtime-lv3
 
 TASK [Assert the Docker publication contract is defined] ***********************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Assert the Docker publication contract is defined","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:58:58.674Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2286,7 +2286,7 @@ ok: [docker-runtime-lv3]
 TASK [Run readiness verification] **********************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run readiness verification","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:59:02.866Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: Run readiness verification","service_id":"ansible","target":"docker-runtime-lv3","task_status":"ok","trace_id":"background","ts":"2026-03-31T10:59:02.881Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0292-live-apply-r2/playbooks/../collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0292-live-apply-r2/playbooks/../collections/ansible_collections/lv3/platform/playbooks/tasks/verify-probe.yml for docker-runtime-lv3
 
 TASK [Run HTTP probe readiness] ************************************************
 {"component":"ansible.task","level":"INFO","msg":"Task start: Run HTTP probe readiness","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-03-31T10:59:02.934Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -2350,8 +2350,8 @@ FAILED - RETRYING: [docker-runtime-lv3]: Run HTTP probe readiness (4 retries lef
 FAILED - RETRYING: [docker-runtime-lv3]: Run HTTP probe readiness (3 retries left).
 FAILED - RETRYING: [docker-runtime-lv3]: Run HTTP probe readiness (2 retries left).
 FAILED - RETRYING: [docker-runtime-lv3]: Run HTTP probe readiness (1 retries left).
-fatal: [docker-runtime-lv3]: FAILED! => {"attempts": 60, "changed": false, "elapsed": 0, "msg": "Status code was -1 and not [200]: Request failed: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'billing.lv3.org'. (_ssl.c:1029)>", "redirected": false, "status": -1, "url": "https://billing.lv3.org/api/health"}
-{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"Status code was -1 and not [200]: Request failed: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'billing.lv3.org'. (_ssl.c:1029)>","ignored":false,"level":"ERROR","msg":"Task failed: Run HTTP probe readiness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-31T11:05:01.251Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
+fatal: [docker-runtime-lv3]: FAILED! => {"attempts": 60, "changed": false, "elapsed": 0, "msg": "Status code was -1 and not [200]: Request failed: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'billing.example.com'. (_ssl.c:1029)>", "redirected": false, "status": -1, "url": "https://billing.example.com/api/health"}
+{"component":"ansible.task","error_code":"ANSIBLE_TASK_FAILED","error_detail":"Status code was -1 and not [200]: Request failed: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'billing.example.com'. (_ssl.c:1029)>","ignored":false,"level":"ERROR","msg":"Task failed: Run HTTP probe readiness","service_id":"ansible","target":"docker-runtime-lv3","task_status":"failed","trace_id":"background","ts":"2026-03-31T11:05:01.251Z","vm":"docker-runtime-lv3","workflow_id":"ansible-playbook"}
 
 PLAY RECAP *********************************************************************
 docker-runtime-lv3         : ok=364  changed=117  unreachable=0    failed=1    skipped=43   rescued=0    ignored=0

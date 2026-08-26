@@ -3,7 +3,7 @@ server: nginx
 date: Mon, 30 Mar 2026 19:56:42 GMT
 content-type: text/html
 content-length: 138
-location: https://flags.lv3.org/oauth2/sign_in?rd=https://flags.lv3.org/api/v1/projects/
+location: https://flags.example.com/oauth2/sign_in?rd=https://flags.example.com/api/v1/projects/
 x-robots-tag: noindex, nofollow
 strict-transport-security: max-age=63072000; includeSubDomains; preload
 cross-origin-resource-policy: same-origin

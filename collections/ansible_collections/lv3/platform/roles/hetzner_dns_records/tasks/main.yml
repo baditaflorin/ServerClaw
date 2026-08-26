@@ -56,7 +56,7 @@
 
 # Pull all rrsets for the zone in one request. per_page=100 is the maximum
 # the new Console API accepts; that covers any realistic single zone (e.g.
-# lv3.org has 67 rrsets as of 2026-04-28). The assert below catches the
+# example.com has 67 rrsets as of 2026-04-28). The assert below catches the
 # day a zone outgrows a single page so we don't silently miss records and
 # infer false drift / spurious deletes; when that happens, extend this
 # task with a manual page-walk loop.

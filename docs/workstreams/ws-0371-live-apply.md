@@ -96,7 +96,7 @@
 - `librechat` completed successfully in
   `receipts/live-applies/evidence/2026-04-13-ws-0371-mainline-librechat-live-apply.txt`,
   including the shared edge publication tail. External verification from the
-  controller returned `HTTP 200` and HTML content for `https://chat.lv3.org/`.
+  controller returned `HTTP 200` and HTML content for `https://chat.example.com/`.
 - Both the successful `litellm` and `librechat` replays ended with the bounded
   Restic post-apply warning introduced on this branch: the live apply itself
   completed, and the final wrapper returned a tolerated `returncode: 124` after
@@ -182,12 +182,12 @@
   - `coolify` returned `librechat-root ok` and `librechat-health OK`
   - `nginx` reached both upstreams directly:
     `http://10.10.10.20:7070/health` and `http://10.10.10.70:8096/health`
-  - `chat.lv3.org/` returned `HTTP 200`
-  - `repowise.lv3.org/health` returned `HTTP 200` with the Repowise JSON
+  - `chat.example.com/` returned `HTTP 200`
+  - `repowise.example.com/health` returned `HTTP 200` with the Repowise JSON
     health payload
 - The latest exact-main rerun on `2026-04-13` added controller-side
   verification against the current production surfaces:
-  - `https://chat.lv3.org/` returned `HTTP 200` and the LibreChat HTML shell
+  - `https://chat.example.com/` returned `HTTP 200` and the LibreChat HTML shell
   - `docker-runtime` returned `{"status":"ok","collection":"repowise",...}`
     from `http://127.0.0.1:7070/health`
   - authenticated LiteLLM `GET http://127.0.0.1:4000/v1/models` returned the
@@ -201,14 +201,14 @@
 - `repowise` converged successfully on `docker-runtime`; the container reported
   healthy locally, `http://127.0.0.1:7070/health` returned the Repowise JSON
   payload, and the public edge stabilized to `HTTP 200` on
-  `https://repowise.lv3.org/health`.
+  `https://repowise.example.com/health`.
 - `litellm` completed the full governed replay across `proxmox-host`,
   `postgres`, and `docker-runtime`, including the Proxmox guest-firewall
   refresh for `docker-runtime`; direct verification returned `HTTP 200` with
   `"I'm alive!"` from `http://10.10.10.20:4000/health/liveliness`.
 - `librechat` completed the full governed replay across `proxmox-host`,
   `coolify`, and `nginx`, and the public surface now returns `HTTP 200` on
-  `https://chat.lv3.org/`.
+  `https://chat.example.com/`.
 
 ## Final Verification
 

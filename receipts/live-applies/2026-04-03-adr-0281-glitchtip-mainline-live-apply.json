@@ -15,13 +15,13 @@
   "result": "pass",
   "workflow_id": "adr-0281-glitchtip-mainline-live-apply",
   "adr": "0281",
-  "summary": "Replayed ADR 0281 from exact-main source commit `55ccb056fd59e6a69c82709d6f11eb6a6a2bd6dd` on immediate predecessor baseline `ef412b0f061517b64920b7328102e23b89b0774d` / `0.177.147`, cleared the controller-local quiet-window gate, reconverged PostgreSQL, Docker-runtime recovery, Keycloak, GlitchTip, and NGINX publication, and reverified the public health, TLS, OIDC, and event-ingest path at `errors.lv3.org`. `origin/main` then advanced to `bdd326164a37f849ca435f5bf32e550f00c5a89b` / `0.177.148` / `0.130.93` with ADR 0309 ops-portal and protected release-surface changes only, so repository release `0.177.149` integrates the GlitchTip exact-main proof while preserving the already-current platform version `0.130.93` instead of bumping it again.",
+  "summary": "Replayed ADR 0281 from exact-main source commit `55ccb056fd59e6a69c82709d6f11eb6a6a2bd6dd` on immediate predecessor baseline `ef412b0f061517b64920b7328102e23b89b0774d` / `0.177.147`, cleared the controller-local quiet-window gate, reconverged PostgreSQL, Docker-runtime recovery, Keycloak, GlitchTip, and NGINX publication, and reverified the public health, TLS, OIDC, and event-ingest path at `errors.example.com`. `origin/main` then advanced to `bdd326164a37f849ca435f5bf32e550f00c5a89b` / `0.177.148` / `0.130.93` with ADR 0309 ops-portal and protected release-surface changes only, so repository release `0.177.149` integrates the GlitchTip exact-main proof while preserving the already-current platform version `0.130.93` instead of bumping it again.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -44,17 +44,17 @@
     {
       "kind": "service_endpoint",
       "name": "GlitchTip public health endpoint",
-      "address": "https://errors.lv3.org/api/0/internal/health/"
+      "address": "https://errors.example.com/api/0/internal/health/"
     },
     {
       "kind": "service_endpoint",
       "name": "GlitchTip public auth configuration",
-      "address": "https://errors.lv3.org/_allauth/browser/v1/config"
+      "address": "https://errors.example.com/_allauth/browser/v1/config"
     },
     {
       "kind": "service_endpoint",
       "name": "GlitchTip platform findings DSN",
-      "address": "https://errors.lv3.org/api/0/projects/platform-findings/platform-findings/store/"
+      "address": "https://errors.example.com/api/0/projects/platform-findings/platform-findings/store/"
     }
   ],
   "verification": [
@@ -76,17 +76,17 @@
     {
       "check": "Public health and TLS verification",
       "result": "pass",
-      "observed": "`receipts/live-applies/evidence/2026-04-03-adr-0281-current-public-surface-r4-0.177.147.txt` shows `HTTP/2 200` for `https://errors.lv3.org/api/0/internal/health/`, and `receipts/live-applies/evidence/2026-04-03-adr-0281-current-public-cert-r4-0.177.147.txt` shows `subject=CN=errors.lv3.org` issued by Let's Encrypt `E8`."
+      "observed": "`receipts/live-applies/evidence/2026-04-03-adr-0281-current-public-surface-r4-0.177.147.txt` shows `HTTP/2 200` for `https://errors.example.com/api/0/internal/health/`, and `receipts/live-applies/evidence/2026-04-03-adr-0281-current-public-cert-r4-0.177.147.txt` shows `subject=CN=errors.example.com` issued by Let's Encrypt `E8`."
     },
     {
       "check": "Public OIDC configuration",
       "result": "pass",
-      "observed": "`receipts/live-applies/evidence/2026-04-03-adr-0281-public-auth-config-r3-0.177.147.json` records `status: 200`, provider `keycloak`, display name `LV3 Keycloak`, and client id `glitchtip` with the `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration` issuer document."
+      "observed": "`receipts/live-applies/evidence/2026-04-03-adr-0281-public-auth-config-r3-0.177.147.json` records `status: 200`, provider `keycloak`, display name `LV3 Keycloak`, and client id `glitchtip` with the `https://sso.example.com/realms/lv3/.well-known/openid-configuration` issuer document."
     },
     {
       "check": "End-to-end event ingestion",
       "result": "pass",
-      "observed": "`receipts/live-applies/evidence/2026-04-03-adr-0281-event-smoke-r4-0.177.147.txt` records `status: ok`, event `58285bc1956f4a90a19fe3ea393f9f38`, and issue `PLATFORM-FINDINGS-B` at `https://errors.lv3.org/platform-findings/issues/11`."
+      "observed": "`receipts/live-applies/evidence/2026-04-03-adr-0281-event-smoke-r4-0.177.147.txt` records `status: ok`, event `58285bc1956f4a90a19fe3ea393f9f38`, and issue `PLATFORM-FINDINGS-B` at `https://errors.example.com/platform-findings/issues/11`."
     },
     {
       "check": "Post-replay mainline delta analysis and protected release integration",

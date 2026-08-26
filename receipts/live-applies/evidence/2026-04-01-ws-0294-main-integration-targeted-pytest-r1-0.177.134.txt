@@ -1,11 +1,11 @@
 Using CPython 3.13.7 interpreter at: /opt/homebrew/opt/python@3.13/bin/python3.13
 Creating virtual environment at: .venv
-   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration
-      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration
+   Building lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0294-main-integration
+      Built lv3-platform-cli @ file:///Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0294-main-integration
 Installed 2 packages in 2ms
 ============================= test session starts ==============================
 platform darwin -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0
-rootdir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0294-main-integration
+rootdir: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0294-main-integration
 configfile: pytest.ini
 collected 169 items
 
@@ -40,7 +40,7 @@ tests/test_generate_platform_vars.py:33:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -85,7 +85,7 @@ tests/test_generate_platform_vars.py:45:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -130,7 +130,7 @@ tests/test_generate_platform_vars.py:67:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -175,7 +175,7 @@ tests/test_generate_platform_vars.py:82:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -220,7 +220,7 @@ tests/test_generate_platform_vars.py:93:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -265,7 +265,7 @@ tests/test_generate_platform_vars.py:103:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -310,7 +310,7 @@ tests/test_generate_platform_vars.py:116:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -355,7 +355,7 @@ tests/test_generate_platform_vars.py:126:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -400,7 +400,7 @@ tests/test_generate_platform_vars.py:141:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -445,7 +445,7 @@ tests/test_generate_platform_vars.py:152:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -490,7 +490,7 @@ tests/test_generate_platform_vars.py:163:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -535,7 +535,7 @@ tests/test_generate_platform_vars.py:173:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -580,7 +580,7 @@ tests/test_generate_platform_vars.py:179:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -625,7 +625,7 @@ tests/test_generate_platform_vars.py:194:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -670,7 +670,7 @@ tests/test_generate_platform_vars.py:207:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -715,7 +715,7 @@ tests/test_generate_platform_vars.py:219:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -760,7 +760,7 @@ tests/test_generate_platform_vars.py:235:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -805,7 +805,7 @@ tests/test_generate_platform_vars.py:244:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -850,7 +850,7 @@ tests/test_generate_platform_vars.py:254:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -895,7 +895,7 @@ tests/test_generate_platform_vars.py:266:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -940,7 +940,7 @@ tests/test_generate_platform_vars.py:279:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -985,7 +985,7 @@ tests/test_generate_platform_vars.py:288:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -1030,7 +1030,7 @@ tests/test_generate_platform_vars.py:304:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -1075,7 +1075,7 @@ tests/test_generate_platform_vars.py:315:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -1120,7 +1120,7 @@ tests/test_generate_platform_vars.py:330:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -1165,7 +1165,7 @@ tests/test_generate_platform_vars.py:553:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -1210,7 +1210,7 @@ tests/test_generate_platform_vars.py:570:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -1255,7 +1255,7 @@ tests/test_generate_platform_vars.py:582:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -1300,7 +1300,7 @@ tests/test_generate_platform_vars.py:602:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -1345,7 +1345,7 @@ tests/test_generate_platform_vars.py:608:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -1390,7 +1390,7 @@ tests/test_generate_platform_vars.py:680:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,
@@ -1469,7 +1469,7 @@ tests/test_openbao_runtime_role.py:87:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 stack = {'desired_state': {'automation_access': {'proxmox_api_privilege_separation': True, 'proxmox_api_role': 'LV3Automation'..._contract': 'configure-network', 'reviewed_at': datetime.date(2026, 3, 22)}, ...}, 'platform_version': '0.130.83', ...}
-host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
+host_vars = {'backup_vm_api_port': 8007, 'backup_vm_api_token_local_file': '/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_s...cal/proxmox-backup/backup-lv3-token.json', 'backup_vm_datastore_name': 'proxmox', 'backup_vm_ipv4': '10.10.10.60', ...}
 
     def build_platform_vars(
         stack: dict[str, Any] | None = None,

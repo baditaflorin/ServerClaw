@@ -7,13 +7,13 @@
 - Tags: retrospective, postmortem, ADR-culture, forkability, lessons-learned
 - Relates to: ADR 0385 (Operator Identity Core), ADR 0407 (Generic-by-default),
   ADR 0376 (`.local/` is Sacred), ADR 0419 (PR-based integration), ADR 0421
-  (Service Watchdog), ADR 0424 (0fork.com Clone)
+  (Service Watchdog), ADR 0424 (example.org Clone)
 
 ---
 
 ## Purpose
 
-The 0fork.com clone attempt (ADR 0424) is the first time an agent has been
+The example.org clone attempt (ADR 0424) is the first time an agent has been
 asked to stand up the full platform from scratch on a new server for a new
 domain, with the current operator unavailable. This retrospective records
 what the 420-ADR process produced that works, what didn't work, and what
@@ -36,12 +36,12 @@ criterion for "forkable" and it held.
 ### 2. Hetzner DNS token flow
 `.local/hetzner/dns.env` → used by `roles/hetzner_dns_record` → creates
 records. The token supplied in this session immediately worked against the
-`0fork.com` zone (ID `RmJf7JFvpQNfWdEZmhAeEK`, 15 records, status verified).
+`example.org` zone (ID `EXAMPLE0ZoneId00000000`, 15 records, status verified).
 No code changes were needed to point the role at a new zone — just a token
 and `hetzner_dns_zone_name` in identity overlay.
 
 ### 3. SSH key provenance
-The `llm-agents@proxmox_florin_server` ed25519 key is stored at
+The `llm-agents@platform_server` ed25519 key is stored at
 `.local/ssh/hetzner_llm_agents_ed25519` on the operator's workstation *and*
 pre-registered in the Hetzner account. The new server was provisioned with
 the key already authorised — zero manual SSH-key-push step.
@@ -88,7 +88,7 @@ informality for a trusted session). There is no documented procedure for
 token in `.local/hetzner/dns.env` has no hint that rotating it requires both
 (a) regenerating in Hetzner Console and (b) updating the env file. Document.
 
-### 4. The 0fork.com zone already had 15 records
+### 4. The example.org zone already had 15 records
 The agent had to do extra work to *avoid* overwriting an unrelated deployment
 on the apex. The default failure mode — if the agent had just run
 `roles/hetzner_dns_records` with `purge=true` — would have been to destroy
@@ -117,7 +117,7 @@ that references ADRs 0041, 0076 (subdomain governance), 0045 (lanes),
 and the `.local/mail-platform/` secret layout in one place.
 
 ### 7. Fork-target account-name mismatch (non-blocking observation)
-The Hetzner order emails address "Mr. Raabe", not "Florin Badita-Nistor". In
+The Hetzner order emails address "Mr. Raabe", not "Platform Operator". In
 a trusted session, this is clearly fine. In a less-trusted handoff, this is
 exactly the kind of signal that should trigger a "is this the right account?"
 confirmation. The session protocol captures the *destructive action* side of
@@ -153,7 +153,7 @@ runbooks and resource planning are not.
 
 ## Live postmortem: near-miss during the clone bootstrap (2026-04-21)
 
-During the 0fork.com clone session the agent (this agent) nearly broke the
+During the example.org clone session the agent (this agent) nearly broke the
 RAID1 mirror on the new Hetzner AX41-NVMe. Sequence:
 
 1. Operator said "fuck raid" — skip RAID1.
@@ -235,4 +235,4 @@ These are low-cost and directly unblock the next fork attempt.
 - ADR 0409 — Host-Specific Overrides
 - ADR 0415 — Cert-mismatch gate-forced `--no-verify` (postmortem)
 - ADR 0421 — Platform-wide service watchdog (postmortem)
-- ADR 0424 — 0fork.com clone plan
+- ADR 0424 — example.org clone plan

@@ -22,7 +22,7 @@
     {
       "kind": "service_endpoint",
       "name": "Keycloak public admin API",
-      "address": "https://sso.lv3.org"
+      "address": "https://sso.example.com"
     },
     {
       "kind": "service_endpoint",
@@ -32,7 +32,7 @@
     {
       "kind": "controller_artifacts",
       "name": "shared controller-local operator secrets",
-      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local"
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.local"
     }
   ],
   "verification": [

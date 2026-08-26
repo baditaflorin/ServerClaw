@@ -3,7 +3,7 @@
   "events": [
     {
       "parsed": {
-        "expected_script_path": "/srv/proxmox_florin_server/scripts/journey_scorecards.py",
+        "expected_script_path": "/srv/platform_server/scripts/journey_scorecards.py",
         "reason": "journey analytics script is missing from the worker checkout",
         "status": "blocked"
       },
@@ -13,7 +13,7 @@
       },
       "returncode": 0,
       "stderr": "",
-      "stdout": "{\"reason\": \"journey analytics script is missing from the worker checkout\", \"status\": \"blocked\", \"expected_script_path\": \"/srv/proxmox_florin_server/scripts/journey_scorecards.py\"}"
+      "stdout": "{\"reason\": \"journey analytics script is missing from the worker checkout\", \"status\": \"blocked\", \"expected_script_path\": \"/srv/platform_server/scripts/journey_scorecards.py\"}"
     }
   ],
   "recorded_at": "2026-04-02T05:38:09Z"

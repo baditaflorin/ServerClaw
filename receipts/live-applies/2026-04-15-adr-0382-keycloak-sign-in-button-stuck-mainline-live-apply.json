@@ -68,12 +68,12 @@
     {
       "check": "Public OIDC discovery and governed logout verification",
       "result": "pass",
-      "observed": "The Keycloak OpenID configuration endpoint returned `HTTP 200`, and `scripts/session_logout_verify.py` reported `verified shared edge logout via https://home.lv3.org/` plus `verified Outline logout via https://wiki.lv3.org/auth/oidc`."
+      "observed": "The Keycloak OpenID configuration endpoint returned `HTTP 200`, and `scripts/session_logout_verify.py` reported `verified shared edge logout via https://home.example.com/` plus `verified Outline logout via https://wiki.example.com/auth/oidc`."
     },
     {
       "check": "Governed restic restore verification",
       "result": "pass",
-      "observed": "`python scripts/trigger_restic_live_apply.py --env production --mode restore-verify --triggered-by ws-0382-mainline-restore-verify` synced `receipts/restic-restore-verifications/20260415T070524Z.json` and restored `4652` files from `/var/lib/lv3/restic-config-backup/restore-verification/20260415T070524Z/restore/srv/proxmox_florin_server/receipts`."
+      "observed": "`python scripts/trigger_restic_live_apply.py --env production --mode restore-verify --triggered-by ws-0382-mainline-restore-verify` synced `receipts/restic-restore-verifications/20260415T070524Z.json` and restored `4652` files from `/var/lib/lv3/restic-config-backup/restore-verification/20260415T070524Z/restore/srv/platform_server/receipts`."
     }
   ],
   "evidence_refs": [
@@ -99,6 +99,6 @@
   "notes": [
     "The latest realistic replay started from origin/main@d86bd43709f5319338def284988a907559ff9f9c, where both repo and platform version were 0.178.143 at apply time.",
     "The integrated closeout updates VERSION, changelog.md, README.md, versions/stack.yaml, the archived ws-0382 workstream metadata, the ADR implementation metadata, and these receipts so repo and platform version 0.178.144 describe the same verified state.",
-    "The fresh backup and restore receipts confirm the historical `/srv/proxmox_florin_server/...` snapshot-root resolution fix still holds on the current mainline truth."
+    "The fresh backup and restore receipts confirm the historical `/srv/platform_server/...` snapshot-root resolution fix still holds on the current mainline truth."
   ]
 }

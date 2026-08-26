@@ -15,4 +15,4 @@ Key replay checks
 PLAY RECAP
 - docker-runtime-lv3 : ok=248 changed=50 unreachable=0 failed=0 skipped=34 rescued=0 ignored=0
 - postgres-lv3 : ok=64 changed=1 unreachable=0 failed=0 skipped=8 rescued=0 ignored=0
-- proxmox_florin : ok=37 changed=4 unreachable=0 failed=0 skipped=15 rescued=0 ignored=0
+- proxmox-host : ok=37 changed=4 unreachable=0 failed=0 skipped=15 rescued=0 ignored=0

@@ -51,7 +51,7 @@ When VMs have lost network due to a stale netplan MAC (interface is DOWN after r
 
 ```bash
 SSH_KEY=".local/ssh/bootstrap.id_ed25519"
-PROXMOX="root@65.108.75.123"
+PROXMOX="root@203.0.113.1"
 
 # Step 1 — verify the stale MAC in netplan
 # (replace VMID and CORRECT_MAC with values from inventory/host_vars/proxmox-host.yml)

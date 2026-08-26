@@ -11,7 +11,7 @@
       "operations",
       "portal"
     ],
-    "summary": "We will deploy a Platform Operations Portal (ops.lv3.org) as a lightweight static web application served from the NGINX edge.",
+    "summary": "We will deploy a Platform Operations Portal (ops.example.com) as a lightweight static web application served from the NGINX edge.",
     "filename": "0074-platform-operations-portal.md",
     "path": "docs/adr/0074-platform-operations-portal.md",
     "implemented_in_repo_version": "0.69.0",
@@ -32,7 +32,7 @@
       "history",
       "portal"
     ],
-    "summary": "We will generate a Deployment History Portal (changelog.lv3.org) as part of the operations portal suite (ADR 0074).",
+    "summary": "We will generate a Deployment History Portal (changelog.example.com) as part of the operations portal suite (ADR 0074).",
     "filename": "0081-platform-changelog-and-deployment-history.md",
     "path": "docs/adr/0081-platform-changelog-and-deployment-history.md",
     "implemented_in_repo_version": "0.81.0",

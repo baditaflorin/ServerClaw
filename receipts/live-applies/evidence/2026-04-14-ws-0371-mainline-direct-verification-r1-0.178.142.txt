@@ -1,9 +1,11 @@
 # 2026-04-14T16:57:41Z
 
-$ curl -i --max-time 20 https://repowise.lv3.org/health
+$ curl -i --max-time 20 https://repowise.example.com/health
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    86  100    86    0     0    383      0 --:--:-- --:--:-- --:--:--   385
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    86  100    86    0     0    383      0 --:--:-- --:--:-- --:--:--   385
 HTTP/2 200
 server: nginx
 date: Tue, 14 Apr 2026 16:57:41 GMT
@@ -23,7 +25,10 @@ x-robots-tag: noindex, nofollow
 $ curl -i --max-time 20 http://10.10.10.20:4000/health/liveliness
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    12  100    12    0     0     78      0 --:--:-- --:--:-- --:--:--    78
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    12  100    12    0     0     78      0 --:--:-- --:--:-- --:--:--    78
 HTTP/1.1 200 OK
 date: Tue, 14 Apr 2026 16:57:41 GMT
 server: uvicorn
@@ -31,10 +36,12 @@ content-length: 12
 content-type: application/json
 
 "I'm alive!"
-$ curl -I --max-time 20 https://chat.lv3.org/
+$ curl -I --max-time 20 https://chat.example.com/
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0  4918    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0  4918    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
 HTTP/2 200
 server: nginx
 date: Tue, 14 Apr 2026 16:57:42 GMT
@@ -53,29 +60,33 @@ x-content-type-options: nosniff
 x-frame-options: DENY
 referrer-policy: strict-origin-when-cross-origin
 permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
-content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://chat.lv3.org ws://chat.lv3.org wss://chat.lv3.org; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+content-security-policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://chat.example.com ws://chat.example.com wss://chat.example.com; worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
 x-robots-tag: noindex, nofollow
 
 
-$ ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519 ops@10.10.10.20 \"docker ps --format '{{.Names}} {{.Status}}' | egrep 'repowise|litellm'; printf '\n# repowise local health\n'; curl -i --max-time 20 http://127.0.0.1:7070/health; printf '\n# litellm local health\n'; curl -i --max-time 20 http://127.0.0.1:4000/health/liveliness\"
+$ ssh -o BatchMode=yes -o StrictHostKeyChecking=no -i /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519 ops@10.10.10.20 \"docker ps --format '{{.Names}} {{.Status}}' | egrep 'repowise|litellm'; printf '\n# repowise local health\n'; curl -i --max-time 20 http://127.0.0.1:7070/health; printf '\n# litellm local health\n'; curl -i --max-time 20 http://127.0.0.1:4000/health/liveliness\"
 repowise Up 28 minutes (healthy)
 litellm Up 29 minutes (healthy)
 
 # repowise local health
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.1 200 OK
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0HTTP/1.1 200 OK
 date: Tue, 14 Apr 2026 16:57:43 GMT
 server: uvicorn
 content-length: 86
 content-type: application/json
 
-{"status":"ok","collection":"repowise","indexed_chunks":64,"model":"nomic-embed-text"}100    86  100    86    0     0  15940      0 --:--:-- --:--:-- --:--:-- 17200
+{"status":"ok","collection":"repowise","indexed_chunks":64,"model":"nomic-embed-text"}
+100    86  100    86    0     0  15940      0 --:--:-- --:--:-- --:--:-- 17200
 
 # litellm local health
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    12  100    12    0     0   1714      0 --:--:-- --:--:-- --:--:--  2000
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    12  100    12    0     0   1714      0 --:--:-- --:--:-- --:--:--  2000
 HTTP/1.1 200 OK
 date: Tue, 14 Apr 2026 16:57:43 GMT
 server: uvicorn

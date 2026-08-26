@@ -18,7 +18,7 @@ Passed
 - git diff --check
 
 Notes
-- The latest-main raw validation bundle needed controller-local `TMPDIR=/tmp`, `ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local`, and `ANSIBLE_REMOTE_TEMP=/tmp` because the default `~/.ansible/tmp` path hit local disk pressure while ansible syntax validation enumerated the full playbook set.
+- The latest-main raw validation bundle needed controller-local `TMPDIR=/tmp`, `ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local`, and `ANSIBLE_REMOTE_TEMP=/tmp` because the default `~/.ansible/tmp` path hit local disk pressure while ansible syntax validation enumerated the full playbook set.
 - `config/subdomain-exposure-registry.json` remains refreshed from `scripts/subdomain_exposure_audit.py --write-registry`.
 
 Known remaining generated-doc blockers
@@ -29,4 +29,4 @@ Known remaining generated-doc blockers
 
 Live-state blockers
 - quiet-window probe `receipts/live-applies/evidence/2026-03-31-adr-0281-quiet-window-blocked-r4-0.177.122.txt` still shows 6-7 conflicting controller-local live applies on the shared hosts
-- public-surface probe `receipts/live-applies/evidence/2026-03-31-adr-0281-current-public-surface-r4-0.177.122.txt` still shows `errors.lv3.org` serving `CN=nginx.lv3.org` and redirecting to `https://nginx.lv3.org/...`
+- public-surface probe `receipts/live-applies/evidence/2026-03-31-adr-0281-current-public-surface-r4-0.177.122.txt` still shows `errors.example.com` serving `CN=nginx.example.com` and redirecting to `https://nginx.example.com/...`

@@ -2,15 +2,15 @@
 Preflight workflow: converge-restic-config-backup
 Description: Converge the ADR 0302 Restic-backed file-level backup runtime on docker-runtime, including runtime credentials, MinIO repository bootstrap, and the scheduled systemd timer.
 INFO no bootstrap manifest configured for this workflow
-PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519
-PASS file nats_jetstream_admin_password: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt
-PASS file minio_root_password: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/minio/root-password.txt
-PASS file ntfy_windmill_token: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy/windmill-token.txt
-INFO generated restic_config_backup_repository_password: present at /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/restic-config-backup/repository-password.txt
+PASS file bootstrap_ssh_private_key: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519
+PASS file nats_jetstream_admin_password: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/nats/jetstream-admin-password.txt
+PASS file minio_root_password: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/minio/root-password.txt
+PASS file ntfy_windmill_token: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ntfy/windmill-token.txt
+INFO generated restic_config_backup_repository_password: present at /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/restic-config-backup/repository-password.txt
 Result: PASS (converge-restic-config-backup)
-ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=5f7ae659a74a493b9800d61600352f8e ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/inventory/hosts.yml --run-id 50b77776daf24496be566cb42ba50121 --playbook /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/playbooks/restic-config-backup.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=6970fa48538d49e998242a8bbf9de148
-Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/playbooks/restic-config-backup.yml (env=production)
-Running scoped playbook: playbooks/restic-config-backup.yml limit=docker-runtime shard=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/.ansible/shards/50b77776daf24496be566cb42ba50121/restic-config-backup-production.json
+ANSIBLE_HOST_KEY_CHECKING=False ANSIBLE_LOCAL_TEMP=/tmp/platform_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp LV3_RUN_ID=5f7ae659a74a493b9800d61600352f8e ANSIBLE_REMOTE_TEMP=/tmp /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/scripts/run_with_namespace.sh uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/scripts/ansible_scope_runner.py run --inventory /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/inventory/hosts.yml --run-id 50b77776daf24496be566cb42ba50121 --playbook /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/playbooks/restic-config-backup.yml --env production -- --private-key /Users/live/Documents/GITHUB_PROJECTS/platform_server/.local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e platform_trace_id=6970fa48538d49e998242a8bbf9de148
+Planning scoped playbook: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/playbooks/restic-config-backup.yml (env=production)
+Running scoped playbook: playbooks/restic-config-backup.yml limit=docker-runtime shard=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/.ansible/shards/50b77776daf24496be566cb42ba50121/restic-config-backup-production.json
 
 PLAY [Converge Restic config backup on the Docker runtime VM] ******************
 
@@ -1068,7 +1068,7 @@ ok: [docker-runtime]
 TASK [lv3.platform.common : Recover the local OpenBao runtime before helper API calls] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T10:55:08.546Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Recover the local OpenBao runtime before helper API calls","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-21T10:55:08.560Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/collections/ansible_collections/lv3/platform/roles/common/tasks/ensure_local_openbao_runtime.yml for docker-runtime
 
 TASK [lv3.platform.common : Record the local OpenBao runtime recovery paths] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Record the local OpenBao runtime recovery paths","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T10:55:08.618Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1198,7 +1198,7 @@ skipping: [docker-runtime]
 TASK [lv3.platform.common : Ensure the configured OpenBao API is unsealed before host-native secret delivery] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Ensure the configured OpenBao API is unsealed before host-native secret delivery","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T10:55:13.253Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Ensure the configured OpenBao API is unsealed before host-native secret delivery","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-21T10:55:13.265Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for docker-runtime
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api.yml for docker-runtime
 
 TASK [lv3.platform.common : Read OpenBao seal status before host-native secret delivery for restic-config-backup] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Read OpenBao seal status before host-native secret delivery for restic-config-backup","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T10:55:13.318Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1213,9 +1213,9 @@ ok: [docker-runtime]
 TASK [lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during host-native secret delivery for restic-config-backup] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during host-native secret delivery for restic-config-backup","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T10:55:14.636Z","vm":"controller","workflow_id":"ansible-playbook"}
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.common : Submit OpenBao recovery keys until the API becomes unsealed during host-native secret delivery for restic-config-backup","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-21T10:55:14.650Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime => (item=(censored due to no_log))
-included: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime => (item=(censored due to no_log))
+included: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/collections/ansible_collections/lv3/platform/roles/common/tasks/unseal_openbao_api_key.yml for docker-runtime => (item=(censored due to no_log))
 
 TASK [lv3.platform.common : Submit OpenBao recovery key host-native secret delivery for restic-config-backup #1] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.common : Submit OpenBao recovery key host-native secret delivery for restic-config-backup #1","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T10:55:14.745Z","vm":"controller","workflow_id":"ansible-playbook"}
@@ -1463,11 +1463,11 @@ ok: [docker-runtime]
 
 TASK [lv3.platform.restic_config_backup : Sync restic runtime support files into the worker checkout] ***
 {"component":"ansible.task","level":"INFO","msg":"Task start: lv3.platform.restic_config_backup : Sync restic runtime support files into the worker checkout","service_id":"ansible","target":"controller","task_status":"start","trace_id":"background","ts":"2026-04-21T10:55:41.225Z","vm":"controller","workflow_id":"ansible-playbook"}
-ok: [docker-runtime] => (item={'src': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/scripts/restic_config_backup.py', 'dest': 'scripts/restic_config_backup.py', 'mode': '0755'})
-ok: [docker-runtime] => (item={'src': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/scripts/outline_client.py', 'dest': 'scripts/outline_client.py', 'mode': '0644'})
-ok: [docker-runtime] => (item={'src': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/scripts/script_bootstrap.py', 'dest': 'scripts/script_bootstrap.py', 'mode': '0644'})
-ok: [docker-runtime] => (item={'src': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/scripts/controller_automation_toolkit.py', 'dest': 'scripts/controller_automation_toolkit.py', 'mode': '0644'})
-ok: [docker-runtime] => (item={'src': '/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0373-main-closeout-r3/config/restic-file-backup-catalog.json', 'dest': 'config/restic-file-backup-catalog.json', 'mode': '0644'})
+ok: [docker-runtime] => (item={'src': '/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/scripts/restic_config_backup.py', 'dest': 'scripts/restic_config_backup.py', 'mode': '0755'})
+ok: [docker-runtime] => (item={'src': '/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/scripts/outline_client.py', 'dest': 'scripts/outline_client.py', 'mode': '0644'})
+ok: [docker-runtime] => (item={'src': '/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/scripts/script_bootstrap.py', 'dest': 'scripts/script_bootstrap.py', 'mode': '0644'})
+ok: [docker-runtime] => (item={'src': '/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/scripts/controller_automation_toolkit.py', 'dest': 'scripts/controller_automation_toolkit.py', 'mode': '0644'})
+ok: [docker-runtime] => (item={'src': '/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0373-main-closeout-r3/config/restic-file-backup-catalog.json', 'dest': 'config/restic-file-backup-catalog.json', 'mode': '0644'})
 {"changed":false,"component":"ansible.task","level":"INFO","msg":"Task OK: lv3.platform.restic_config_backup : Sync restic runtime support files into the worker checkout","service_id":"ansible","target":"docker-runtime","task_status":"ok","trace_id":"background","ts":"2026-04-21T10:55:49.024Z","vm":"docker-runtime","workflow_id":"ansible-playbook"}
 
 TASK [lv3.platform.restic_config_backup : Ensure the MinIO restic bucket exists with object lock] ***

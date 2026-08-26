@@ -1,6 +1,6 @@
-To http://100.64.0.1:3009/ops/proxmox_florin_server.git
+To http://100.64.0.1:3009/ops/platform_server.git
  ! [rejected]            HEAD -> codex/ws-0297-live-apply (non-fast-forward)
-error: failed to push some refs to 'http://100.64.0.1:3009/ops/proxmox_florin_server.git'
+error: failed to push some refs to 'http://100.64.0.1:3009/ops/platform_server.git'
 hint: Updates were rejected because the tip of your current branch is behind
 hint: its remote counterpart. If you want to integrate the remote changes,
 hint: use 'git pull' before pushing again.

@@ -16,7 +16,7 @@
     standard / extended` profiles for the **test loop**. This ADR lifts the
     profile idea into **production deploys**.
   - ADR 0407 (generic-by-default `.local/` overlay) — substrate.
-  - ADR 0424 (0fork.com clone) — first fork; took the full 73-service stack
+  - ADR 0424 (example.org clone) — first fork; took the full 73-service stack
     because no smaller shape was defined.
   - ADR 0431 (0fork full-day deployment) — single-command entry point;
     profiles slot in here as the selector.
@@ -238,6 +238,6 @@ shared data plane is not pulled in.
 - ADR 0223: Canonical HA topology catalog and reusable automation profiles
 - ADR 0407: Generic-by-default `.local/` overlay
 - ADR 0410: Docker isolation testing and IoC completion
-- ADR 0424: 0fork.com clone on Hetzner AX41-NVMe
+- ADR 0424: example.org clone on Hetzner AX41-NVMe
 - ADR 0431: 0fork full-day deployment — single-command IaC entry point
 - ADR 0438: Generic-by-construction — generative cascade IaC

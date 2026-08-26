@@ -1,5 +1,5 @@
 coolify-lv3 | CHANGED | rc=0 >>
-WEBUI_URL=https://chat.lv3.org
+WEBUI_URL=https://chat.example.com
 WEBUI_NAME=ServerClaw
 ENABLE_OPENAI_API=True
 ENABLE_OLLAMA_API=False
@@ -8,5 +8,5 @@ DEFAULT_MODELS=gpt-4o-mini
 DEFAULT_PINNED_MODELS=gpt-4o-mini
 ENABLE_OAUTH_SIGNUP=True
 OAUTH_CLIENT_ID=serverclaw
-OPENID_PROVIDER_URL=https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+OPENID_PROVIDER_URL=https://sso.example.com/realms/lv3/.well-known/openid-configuration
 OPENAI_API_BASE_URL=http://10.10.10.20:8101/v1

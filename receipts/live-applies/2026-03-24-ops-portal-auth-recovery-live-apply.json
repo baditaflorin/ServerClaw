@@ -12,7 +12,7 @@
   "targets": [
     {
       "kind": "proxmox_host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.118.189.95"
     },
     {
@@ -23,23 +23,23 @@
     },
     {
       "kind": "public_hostname",
-      "name": "ops.lv3.org"
+      "name": "ops.example.com"
     },
     {
       "kind": "public_hostname",
-      "name": "sso.lv3.org"
+      "name": "sso.example.com"
     }
   ],
   "verification": [
     {
       "check": "Keycloak discovery endpoint",
       "result": "pass",
-      "observed": "After recovery, `curl -I https://sso.lv3.org/realms/lv3/.well-known/openid-configuration` returned `HTTP/2 200`."
+      "observed": "After recovery, `curl -I https://sso.example.com/realms/lv3/.well-known/openid-configuration` returned `HTTP/2 200`."
     },
     {
       "check": "Ops portal auth redirect",
       "result": "pass",
-      "observed": "After recovery, `curl -I https://ops.lv3.org/oauth2/sign_in` returned a `302` redirect to the Keycloak authorization endpoint instead of a `502`."
+      "observed": "After recovery, `curl -I https://ops.example.com/oauth2/sign_in` returned a `302` redirect to the Keycloak authorization endpoint instead of a `502`."
     },
     {
       "check": "Keycloak form submit behavior",

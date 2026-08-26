@@ -1,11 +1,11 @@
-== docs.lv3.org ==
+== docs.example.com ==
 User-agent: *
 Disallow: /
 
 # This domain is a private homelab infrastructure platform.
 # There is no public content intended for indexing.
 
-== changelog.lv3.org ==
+== changelog.example.com ==
 User-agent: *
 Disallow: /
 

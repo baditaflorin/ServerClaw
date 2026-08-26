@@ -61,7 +61,7 @@ def _pub(
 
 def _registry(
     *pubs,
-    primary: str = "lv3.org",
+    primary: str = "example.com",
     deployments: dict | None = None,
 ) -> dict:
     if deployments is None:
@@ -85,8 +85,8 @@ def _registry(
 
 
 def _fork_deployments(
-    primary: str = "lv3.org",
-    fork: str = "0fork.com",
+    primary: str = "example.com",
+    fork: str = "example.org",
     exclusions: list[str] | None = None,
 ) -> dict:
     return {
@@ -115,13 +115,13 @@ def _fork_deployments(
 
 class TestSchemaValidation:
     def test_rejects_v2_registry(self, ls) -> None:
-        reg = _registry(_pub("api.lv3.org", "api_gateway"))
+        reg = _registry(_pub("api.example.com", "api_gateway"))
         reg["schema_version"] = "2.0.0"
         with pytest.raises(SystemExit):
-            ls.get_view(reg, "lv3.org")
+            ls.get_view(reg, "example.com")
 
     def test_rejects_unknown_deployment(self, ls) -> None:
-        reg = _registry(_pub("api.lv3.org", "api_gateway"))
+        reg = _registry(_pub("api.example.com", "api_gateway"))
         with pytest.raises(SystemExit):
             ls.get_view(reg, "nonexistent.com")
 
@@ -134,27 +134,27 @@ class TestSchemaValidation:
 class TestPrimaryView:
     def test_returns_all_publications(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
-            _pub("git.lv3.org", "gitea"),
+            _pub("api.example.com", "api_gateway"),
+            _pub("git.example.com", "gitea"),
         )
-        view = ls.get_view(reg, "lv3.org")
+        view = ls.get_view(reg, "example.com")
         assert len(view.services) == 2
 
     def test_service_entry_fields(self, ls) -> None:
-        reg = _registry(_pub("api.lv3.org", "api_gateway", audience="public"))
-        view = ls.get_view(reg, "lv3.org")
+        reg = _registry(_pub("api.example.com", "api_gateway", audience="public"))
+        view = ls.get_view(reg, "example.com")
         svc = view.services[0]
-        assert svc.fqdn == "api.lv3.org"
+        assert svc.fqdn == "api.example.com"
         assert svc.service_id == "api_gateway"
         assert svc.audience == "public"
-        assert svc.deployment == "lv3.org"
+        assert svc.deployment == "example.com"
 
     def test_active_filter(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway", status="active"),
-            _pub("future.lv3.org", "future_svc", status="planned"),
+            _pub("api.example.com", "api_gateway", status="active"),
+            _pub("future.example.com", "future_svc", status="planned"),
         )
-        view = ls.get_view(reg, "lv3.org")
+        view = ls.get_view(reg, "example.com")
         assert len(view.active()) == 1
         assert view.active()[0].service_id == "api_gateway"
 
@@ -167,51 +167,51 @@ class TestPrimaryView:
 class TestForkView:
     def test_excludes_disabled_services(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
-            _pub("errors.lv3.org", "glitchtip"),
+            _pub("api.example.com", "api_gateway"),
+            _pub("errors.example.com", "glitchtip"),
             deployments=_fork_deployments(exclusions=["glitchtip"]),
         )
-        view = ls.get_view(reg, "0fork.com")
+        view = ls.get_view(reg, "example.org")
         service_ids = {s.service_id for s in view.services}
         assert "api_gateway" in service_ids
         assert "glitchtip" not in service_ids
 
     def test_rewrites_fqdns_to_fork_domain(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
-            _pub("git.lv3.org", "gitea"),
+            _pub("api.example.com", "api_gateway"),
+            _pub("git.example.com", "gitea"),
             deployments=_fork_deployments(),
         )
-        view = ls.get_view(reg, "0fork.com")
+        view = ls.get_view(reg, "example.org")
         fqdns = {s.fqdn for s in view.services}
-        assert "api.0fork.com" in fqdns
-        assert "git.0fork.com" in fqdns
-        assert "api.lv3.org" not in fqdns
+        assert "api.example.org" in fqdns
+        assert "git.example.org" in fqdns
+        assert "api.example.com" not in fqdns
 
     def test_apex_fqdn_becomes_fork_apex(self, ls) -> None:
         reg = _registry(
-            _pub("lv3.org", "nginx_edge"),
+            _pub("example.com", "nginx_edge"),
             deployments=_fork_deployments(),
         )
-        view = ls.get_view(reg, "0fork.com")
-        assert view.services[0].fqdn == "0fork.com"
+        view = ls.get_view(reg, "example.org")
+        assert view.services[0].fqdn == "example.org"
 
     def test_fork_deployment_slug_on_entries(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
+            _pub("api.example.com", "api_gateway"),
             deployments=_fork_deployments(),
         )
-        view = ls.get_view(reg, "0fork.com")
-        assert all(s.deployment == "0fork.com" for s in view.services)
+        view = ls.get_view(reg, "example.org")
+        assert all(s.deployment == "example.org" for s in view.services)
 
     def test_no_exclusions_returns_all_services(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
-            _pub("git.lv3.org", "gitea"),
+            _pub("api.example.com", "api_gateway"),
+            _pub("git.example.com", "gitea"),
             deployments=_fork_deployments(exclusions=[]),
         )
-        primary_view = ls.get_view(reg, "lv3.org")
-        fork_view = ls.get_view(reg, "0fork.com")
+        primary_view = ls.get_view(reg, "example.com")
+        fork_view = ls.get_view(reg, "example.org")
         assert len(fork_view.services) == len(primary_view.services)
 
 
@@ -223,39 +223,39 @@ class TestForkView:
 class TestDiff:
     def test_only_left_contains_excluded_service(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
-            _pub("errors.lv3.org", "glitchtip"),
+            _pub("api.example.com", "api_gateway"),
+            _pub("errors.example.com", "glitchtip"),
             deployments=_fork_deployments(exclusions=["glitchtip"]),
         )
-        diff = ls.diff_deployments(reg, "lv3.org", "0fork.com")
+        diff = ls.diff_deployments(reg, "example.com", "example.org")
         assert len(diff.only_left) == 1
         assert diff.only_left[0].service_id == "glitchtip"
 
     def test_only_right_empty_for_pure_fork(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
+            _pub("api.example.com", "api_gateway"),
             deployments=_fork_deployments(),
         )
-        diff = ls.diff_deployments(reg, "lv3.org", "0fork.com")
+        diff = ls.diff_deployments(reg, "example.com", "example.org")
         assert diff.only_right == []
 
     def test_both_has_correct_count(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
-            _pub("git.lv3.org", "gitea"),
-            _pub("errors.lv3.org", "glitchtip"),
+            _pub("api.example.com", "api_gateway"),
+            _pub("git.example.com", "gitea"),
+            _pub("errors.example.com", "glitchtip"),
             deployments=_fork_deployments(exclusions=["glitchtip"]),
         )
-        diff = ls.diff_deployments(reg, "lv3.org", "0fork.com")
+        diff = ls.diff_deployments(reg, "example.com", "example.org")
         assert len(diff.both) == 2
         assert len(diff.only_left) == 1
 
     def test_diff_is_symmetric_sides(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
+            _pub("api.example.com", "api_gateway"),
             deployments=_fork_deployments(),
         )
-        diff = ls.diff_deployments(reg, "lv3.org", "0fork.com")
+        diff = ls.diff_deployments(reg, "example.com", "example.org")
         left_ids = {l.service_id for l, _ in diff.both}
         right_ids = {r.service_id for _, r in diff.both}
         assert left_ids == right_ids
@@ -268,61 +268,61 @@ class TestDiff:
 
 class TestFormatList:
     def test_table_format_contains_fqdn(self, ls) -> None:
-        reg = _registry(_pub("api.lv3.org", "api_gateway"))
-        view = ls.get_view(reg, "lv3.org")
+        reg = _registry(_pub("api.example.com", "api_gateway"))
+        view = ls.get_view(reg, "example.com")
         out = ls.format_list(view, status=None, fmt="table")
-        assert "api.lv3.org" in out
+        assert "api.example.com" in out
         assert "api_gateway" in out
 
     def test_json_format_is_valid_json(self, ls) -> None:
-        reg = _registry(_pub("api.lv3.org", "api_gateway"))
-        view = ls.get_view(reg, "lv3.org")
+        reg = _registry(_pub("api.example.com", "api_gateway"))
+        view = ls.get_view(reg, "example.com")
         out = ls.format_list(view, status=None, fmt="json")
         data = json.loads(out)
-        assert data["deployment"] == "lv3.org"
+        assert data["deployment"] == "example.com"
         assert len(data["services"]) == 1
 
     def test_csv_format_has_header(self, ls) -> None:
-        reg = _registry(_pub("api.lv3.org", "api_gateway"))
-        view = ls.get_view(reg, "lv3.org")
+        reg = _registry(_pub("api.example.com", "api_gateway"))
+        view = ls.get_view(reg, "example.com")
         out = ls.format_list(view, status=None, fmt="csv")
         lines = out.splitlines()
         assert "fqdn" in lines[0]
-        assert "api.lv3.org" in lines[1]
+        assert "api.example.com" in lines[1]
 
     def test_status_filter_in_table(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway", status="active"),
-            _pub("beta.lv3.org", "beta_svc", status="planned"),
+            _pub("api.example.com", "api_gateway", status="active"),
+            _pub("beta.example.com", "beta_svc", status="planned"),
         )
-        view = ls.get_view(reg, "lv3.org")
+        view = ls.get_view(reg, "example.com")
         out = ls.format_list(view, status="active", fmt="table")
-        assert "api.lv3.org" in out
-        assert "beta.lv3.org" not in out
+        assert "api.example.com" in out
+        assert "beta.example.com" not in out
 
 
 class TestFormatDiff:
     def test_table_diff_shows_exclusion(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
-            _pub("errors.lv3.org", "glitchtip"),
+            _pub("api.example.com", "api_gateway"),
+            _pub("errors.example.com", "glitchtip"),
             deployments=_fork_deployments(exclusions=["glitchtip"]),
         )
-        diff = ls.diff_deployments(reg, "lv3.org", "0fork.com")
+        diff = ls.diff_deployments(reg, "example.com", "example.org")
         out = ls.format_diff(diff, status=None, fmt="table")
-        assert "only on lv3.org" in out
+        assert "only on example.com" in out
         assert "glitchtip" in out
 
     def test_json_diff_is_valid(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
+            _pub("api.example.com", "api_gateway"),
             deployments=_fork_deployments(),
         )
-        diff = ls.diff_deployments(reg, "lv3.org", "0fork.com")
+        diff = ls.diff_deployments(reg, "example.com", "example.org")
         out = ls.format_diff(diff, status=None, fmt="json")
         data = json.loads(out)
-        assert data["left"] == "lv3.org"
-        assert data["right"] == "0fork.com"
+        assert data["left"] == "example.com"
+        assert data["right"] == "example.org"
         assert "summary" in data
 
 
@@ -334,25 +334,25 @@ class TestFormatDiff:
 class TestListDeployments:
     def test_returns_both_deployments(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
+            _pub("api.example.com", "api_gateway"),
             deployments=_fork_deployments(),
         )
         metas = ls.list_deployments(reg)
         slugs = [m.slug for m in metas]
-        assert "lv3.org" in slugs
-        assert "0fork.com" in slugs
+        assert "example.com" in slugs
+        assert "example.org" in slugs
 
     def test_primary_is_first(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
+            _pub("api.example.com", "api_gateway"),
             deployments=_fork_deployments(),
         )
         metas = ls.list_deployments(reg)
-        assert metas[0].slug == "lv3.org"
+        assert metas[0].slug == "example.com"
 
     def test_format_json(self, ls) -> None:
         reg = _registry(
-            _pub("api.lv3.org", "api_gateway"),
+            _pub("api.example.com", "api_gateway"),
             deployments=_fork_deployments(),
         )
         out = ls.format_list_deployments(reg, fmt="json")
@@ -371,11 +371,11 @@ class TestCLI:
         assert rc == 0
 
     def test_cli_list_fork(self, ls) -> None:
-        rc = ls.main(["--deployment", "0fork.com", "--status", "active"])
+        rc = ls.main(["--deployment", "example.org", "--status", "active"])
         assert rc == 0
 
     def test_cli_diff(self, ls, capsys) -> None:
-        rc = ls.main(["--diff", "lv3.org", "0fork.com"])
+        rc = ls.main(["--diff", "example.com", "example.org"])
         assert rc == 0
         captured = capsys.readouterr()
         assert "summary" in captured.out
@@ -384,18 +384,18 @@ class TestCLI:
         rc = ls.main(["--list-deployments"])
         assert rc == 0
         captured = capsys.readouterr()
-        assert "lv3.org" in captured.out
-        assert "0fork.com" in captured.out
+        assert "example.com" in captured.out
+        assert "example.org" in captured.out
 
     def test_cli_unknown_deployment_returns_2(self, ls) -> None:
         rc = ls.main(["--deployment", "nonexistent.com"])
         assert rc == 2
 
     def test_cli_diff_json_is_parseable(self, ls, capsys) -> None:
-        rc = ls.main(["--diff", "lv3.org", "0fork.com", "--format", "json"])
+        rc = ls.main(["--diff", "example.com", "example.org", "--format", "json"])
         assert rc == 0
         captured = capsys.readouterr()
         data = json.loads(captured.out)
-        assert data["left"] == "lv3.org"
-        assert data["right"] == "0fork.com"
+        assert data["left"] == "example.com"
+        assert data["right"] == "example.org"
         assert data["summary"]["only_left"] >= 1

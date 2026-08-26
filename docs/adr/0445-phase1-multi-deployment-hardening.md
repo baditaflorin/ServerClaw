@@ -1,4 +1,4 @@
-# ADR 0445: Phase 1 Multi-Deployment Hardening (0fork.com + lv3.org)
+# ADR 0445: Phase 1 Multi-Deployment Hardening (example.org + example.com)
 
 > **Superseded by [ADR 0488](0488-single-deployment-per-repo-checkout.md)** (2026-05-17). The multi-deployment substrate is retired; each repo checkout now configures exactly one deployment via `.local/identity.yml`.
 
@@ -25,7 +25,7 @@
 The platform is mid-refactor from "single deployment with a fork variant"
 to "N independent deployments from one checkout". The last 72 hours of
 convergence work (releases 0.178.222 → 0.179.4) burned through eleven
-distinct failure categories during the 0fork.com bootstrap loop, all
+distinct failure categories during the example.org bootstrap loop, all
 documented in ADR 0438. Each was a regression hole the test suite did
 not catch: late-bound IP resolution before overlay, `!unsafe` blocks
 that bypass Jinja, cross-role ordering coupling, hairpin NAT macro
@@ -111,7 +111,7 @@ case. Lint rule:
 
 - Allow: `default(omit)`, `default(undef())`, `default(<jinja-derived
   value>)`, `default(<value-from-platform_*>)`
-- Deny: `default('10.10.10.X')`, `default('lv3.org')`,
+- Deny: `default('10.10.10.X')`, `default('example.com')`,
   `default('runtime-control')`, any literal that is a known
   `proxmox_guests` IP / a known `platform_domain`.
 

@@ -19,8 +19,8 @@
 single shared overlay path: `.local/identity.yml`. In a multi-deployment world
 (ADR 0440), each deployment carries its own identity at
 `.local/deployments/<slug>/identity.yml`. The legacy single-overlay path is
-either stale (ops.0fork.com recovery left `.local/identity.yml` saying
-`lv3.org` while the active host serves 0fork.com) or a forced choice.
+either stale (ops.example.org recovery left `.local/identity.yml` saying
+`example.com` while the active host serves example.org) or a forced choice.
 
 Result: 44 spurious `cert_mismatch` failures on every push between
 2026-04-28 11:00 UTC and 16:00 UTC. The hook printed

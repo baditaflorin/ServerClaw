@@ -58,7 +58,7 @@
 #
 # Practically this lets per-deployment overrides like
 #   coolify_env_file: /opt/coolify/runtime.env
-#   coolify_tunnel_host: 65.108.75.123
+#   coolify_tunnel_host: 203.0.113.1
 # in a deployment overlay actually take effect, instead of being silently
 # replaced by the derived default on every converge.
 - name: "Derive docker_compose defaults for {{ common_derive_service_name }} (with image catalog)"

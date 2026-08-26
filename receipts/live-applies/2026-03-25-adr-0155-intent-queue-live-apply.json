@@ -25,8 +25,8 @@
     },
     {
       "kind": "host",
-      "name": "proxmox_florin",
-      "address": "65.108.75.123"
+      "name": "proxmox-host",
+      "address": "203.0.113.1"
     },
     {
       "kind": "service_endpoint",
@@ -38,7 +38,7 @@
     {
       "check": "Windmill converge",
       "result": "pass",
-      "observed": "The production converge `make live-apply-service service=windmill env=production` finished on 2026-03-25 with `docker-runtime-lv3 : ok=149 changed=14 unreachable=0 failed=0`, `postgres-lv3 : ok=57 changed=5 unreachable=0 failed=0`, and `proxmox_florin : ok=34 changed=4 unreachable=0 failed=0`."
+      "observed": "The production converge `make live-apply-service service=windmill env=production` finished on 2026-03-25 with `docker-runtime-lv3 : ok=149 changed=14 unreachable=0 failed=0`, `postgres-lv3 : ok=57 changed=5 unreachable=0 failed=0`, and `proxmox-host : ok=34 changed=4 unreachable=0 failed=0`."
     },
     {
       "check": "Windmill version",
@@ -58,7 +58,7 @@
     {
       "check": "Worker checkout dispatcher files",
       "result": "pass",
-      "observed": "A remote probe on `docker-runtime-lv3` confirmed `/srv/proxmox_florin_server/scripts/intent_queue_dispatcher.py` and `/srv/proxmox_florin_server/config/windmill/scripts/intent-queue-dispatcher.py` are present in the deployed checkout."
+      "observed": "A remote probe on `docker-runtime-lv3` confirmed `/srv/platform_server/scripts/intent_queue_dispatcher.py` and `/srv/platform_server/config/windmill/scripts/intent-queue-dispatcher.py` are present in the deployed checkout."
     }
   ],
   "evidence_refs": [

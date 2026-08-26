@@ -4,11 +4,11 @@ recorded_at=2026-04-04T09:16:50Z
 
 ## well-known summary
 {
-  "issuer": "https://sso.lv3.org/realms/lv3",
-  "authorization_endpoint": "https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth",
-  "token_endpoint": "https://sso.lv3.org/realms/lv3/protocol/openid-connect/token",
-  "userinfo_endpoint": "https://sso.lv3.org/realms/lv3/protocol/openid-connect/userinfo",
-  "end_session_endpoint": "https://sso.lv3.org/realms/lv3/protocol/openid-connect/logout"
+  "issuer": "https://sso.example.com/realms/lv3",
+  "authorization_endpoint": "https://sso.example.com/realms/lv3/protocol/openid-connect/auth",
+  "token_endpoint": "https://sso.example.com/realms/lv3/protocol/openid-connect/token",
+  "userinfo_endpoint": "https://sso.example.com/realms/lv3/protocol/openid-connect/userinfo",
+  "end_session_endpoint": "https://sso.example.com/realms/lv3/protocol/openid-connect/logout"
 }
 
 ## admin client token and realm query

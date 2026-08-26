@@ -1,4 +1,4 @@
-uv run --with pyyaml --with nats-py python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final/scripts/k6_load_testing.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0305-mainline-final --scenario load --publish-nats --notify-ntfy --service keycloak --service openfga
+uv run --with pyyaml --with nats-py python /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final/scripts/k6_load_testing.py --repo-root /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0305-mainline-final --scenario load --publish-nats --notify-ntfy --service keycloak --service openfga
 k6 receipt warning for keycloak: failed to publish NATS regression event: NATS endpoint unavailable at nats://127.0.0.1:4222: [Errno 61] Connection refused
 k6 receipt warning for keycloak: failed to deliver ntfy warning: <urlopen error timed out>
 k6 receipt warning for openfga: failed to publish NATS regression event: NATS endpoint unavailable at nats://127.0.0.1:4222: [Errno 61] Connection refused

@@ -1,5 +1,5 @@
 {
   "error_type": "URLError",
-  "message": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'errors.lv3.org'. (_ssl.c:1032)>",
+  "message": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'errors.example.com'. (_ssl.c:1032)>",
   "status": "error"
 }

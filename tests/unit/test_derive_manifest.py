@@ -51,7 +51,7 @@ class TestDeriveProvider:
     def test_hetzner_detection_via_key_hint(self):
         conn = {
             "proxmox_host": {
-                "addr": "65.109.84.223",
+                "addr": "203.0.113.3",
                 "port": 22,
                 "user": "root",
                 "key": ".local/ssh/hetzner_llm_agents_ed25519",
@@ -59,14 +59,14 @@ class TestDeriveProvider:
         }
         provider, review = derive_provider(conn)
         assert provider["kind"] == "hetzner"
-        assert provider["host"] == "65.109.84.223"
+        assert provider["host"] == "203.0.113.3"
         assert provider["initial_user"] == "root"
         assert "port" not in provider  # omitted when standard 22
 
     def test_hetzner_detection_via_nonstandard_port(self):
         conn = {
             "proxmox_host": {
-                "addr": "65.109.84.223",
+                "addr": "203.0.113.3",
                 "port": 2222,
                 "user": "root",
                 "key": "some-other-key",
@@ -162,13 +162,13 @@ class TestDeriveSmoke:
 class TestBuildManifest:
     def _make_inputs(self):
         identity = {
-            "platform_domain": "0fork.com",
+            "platform_domain": "example.org",
             "platform_operator_name": "0fork Operator",
-            "platform_operator_email": "ops@0fork.com",
+            "platform_operator_email": "ops@example.org",
         }
         connection = {
             "proxmox_host": {
-                "addr": "65.109.84.223",
+                "addr": "203.0.113.3",
                 "port": 2222,
                 "user": "root",
                 "key": "hetzner_llm_agents_ed25519",
@@ -184,7 +184,7 @@ class TestBuildManifest:
     def test_apex_domain_is_set(self):
         identity, connection, profile = self._make_inputs()
         result = build_manifest(identity, connection, profile)
-        assert result.manifest["apex_domain"] == "0fork.com"
+        assert result.manifest["apex_domain"] == "example.org"
 
     def test_schema_version_is_1(self):
         identity, connection, profile = self._make_inputs()

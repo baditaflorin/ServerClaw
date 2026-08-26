@@ -5,7 +5,7 @@
 #   scripts/subdomain_exposure_audit.py — embeds this into the generated registry JSON
 #
 # Adding a new deployment (fork):
-#   1. Copy the 0fork.com block; change platform_domain and forked_from.
+#   1. Copy the example.org block; change platform_domain and forked_from.
 #   2. Set service_exclusions to the service_id values disabled in your
 #      fork-overrides.yml (keycloak_<service>_enabled: false, etc.).
 #   3. Run: python3 scripts/subdomain_exposure_audit.py --write-registry
@@ -21,11 +21,11 @@
 #   here for traceability; the actual runtime values live in overrides_file.
 
 schema_version: "1.0.0"
-primary_deployment: lv3.org
+primary_deployment: example.com
 
 deployments:
-  lv3.org:
-    platform_domain: lv3.org
+  example.com:
+    platform_domain: example.com
     environment: production
     infrastructure:
       provider: proxmox
@@ -33,15 +33,15 @@ deployments:
     service_exclusions: []
     feature_flags: {}
 
-  0fork.com:
-    platform_domain: 0fork.com
+  example.org:
+    platform_domain: example.org
     environment: production
-    forked_from: lv3.org
+    forked_from: example.com
     infrastructure:
       provider: hetzner
-      description: "Hetzner AX41-NVMe #2952989 (fork viability test, ADR 0424)"
-      apex_ip_v4: "65.109.84.223"
-      apex_ip_v6: "2a01:4f9:3051:52d5::2"
+      description: "Hetzner AX41-NVMe #0000000 (fork viability test, ADR 0424)"
+      apex_ip_v4: "203.0.113.3"
+      apex_ip_v6: "2001:db8::4"
     # service_id values from the primary that are disabled on this fork.
     # glitchtip: keycloak_glitchtip_enabled: false (ADR 0424 / ADR 0435)
     service_exclusions:

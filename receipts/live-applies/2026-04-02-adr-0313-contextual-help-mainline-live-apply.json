@@ -15,9 +15,9 @@
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -34,17 +34,17 @@
     {
       "kind": "service_endpoint",
       "name": "Interactive ops portal",
-      "address": "https://ops.lv3.org/"
+      "address": "https://ops.example.com/"
     },
     {
       "kind": "service_endpoint",
       "name": "Developer portal",
-      "address": "https://docs.lv3.org/"
+      "address": "https://docs.example.com/"
     },
     {
       "kind": "service_endpoint",
       "name": "Deployment history portal",
-      "address": "https://changelog.lv3.org/"
+      "address": "https://changelog.example.com/"
     }
   ],
   "verification": [
@@ -66,7 +66,7 @@
     {
       "check": "Refreshed exact-main ops portal replay",
       "result": "pass",
-      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0313-live-apply'` completed successfully with final recap `docker-runtime-lv3 : ok=189 changed=14 unreachable=0 failed=0 skipped=36`, and the follow-on restic trigger wrote `receipts/restic-backups/20260402T024215Z.json`."
+      "observed": "`ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=ops_portal env=production EXTRA_ARGS='-e bypass_promotion=true -e ops_portal_repo_root=/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0313-live-apply'` completed successfully with final recap `docker-runtime-lv3 : ok=189 changed=14 unreachable=0 failed=0 skipped=36`, and the follow-on restic trigger wrote `receipts/restic-backups/20260402T024215Z.json`."
     },
     {
       "check": "Guest-local interactive runtime contract",
@@ -81,7 +81,7 @@
     {
       "check": "Published artifact parity and public auth-gated edges",
       "result": "pass",
-      "observed": "The final public verification showed the generated docs and changelog portal markers still present locally and on `nginx-lv3`, the deployed `docs-portal/index.html` and `changelog-portal/index.html` digests matching the local build outputs exactly, and unauthenticated requests to `https://ops.lv3.org/`, `https://docs.lv3.org/`, and `https://changelog.lv3.org/` all returning `302` to `/oauth2/sign_in` with `X-Robots-Tag: noindex, nofollow`."
+      "observed": "The final public verification showed the generated docs and changelog portal markers still present locally and on `nginx-lv3`, the deployed `docs-portal/index.html` and `changelog-portal/index.html` digests matching the local build outputs exactly, and unauthenticated requests to `https://ops.example.com/`, `https://docs.example.com/`, and `https://changelog.example.com/` all returning `302` to `/oauth2/sign_in` with `X-Robots-Tag: noindex, nofollow`."
     },
     {
       "check": "Repository automation and validation bundle",

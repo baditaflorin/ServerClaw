@@ -24,20 +24,20 @@ ownership_manifest:
 
 description: |
   Two unrelated fixes needed to unblock make publish-serverclaw-push:
-  closing a real sanitization coverage gap (0fork.com domain/PII/IPs/
+  closing a real sanitization coverage gap (example.org domain/PII/IPs/
   Hetzner zone ID were never covered by Tier C) found by
   scripts/audit_sanitization_coverage.py, and correcting three
   certificate-catalog.json entries (changelog/docs/headscale) that
-  still referenced pre-rename .lv3.org names and the retired lv3-edge
-  cert bundle path instead of the live .0mcp.com / 0mcp-edge state.
+  still referenced pre-rename .example.com names and the retired lv3-edge
+  cert bundle path instead of the live .example.org / 0mcp-edge state.
 
 objectives:
-  - Add Tier C string_replacements + leak_markers for the 0fork.com gap
+  - Add Tier C string_replacements + leak_markers for the example.org gap
   - Correct the three stale certificate-catalog.json entries to match live nginx config
 
 deliverables:
-  - config/publication-sanitization.yaml — 0fork.com domain/PII/IP/zone-id coverage
-  - config/certificate-catalog.json — changelog/docs/headscale corrected to .0mcp.com
+  - config/publication-sanitization.yaml — example.org domain/PII/IP/zone-id coverage
+  - config/certificate-catalog.json — changelog/docs/headscale corrected to .example.org
 
 completion_metrics:
   - scripts/audit_sanitization_coverage.py reports 0 CRITICAL gaps

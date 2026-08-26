@@ -1,3 +1,3 @@
 Repository data model error: versions/stack.yaml.latest_receipts references unknown receipt '2026-04-03-adr-0289-label-studio-mainline-live-apply'
-Live apply receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1/receipts/live-applies
-Promotion receipts OK: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0289-label-studio-live-apply-r1/receipts/promotions (0 file(s))
+Live apply receipts OK: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-label-studio-live-apply-r1/receipts/live-applies
+Promotion receipts OK: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0289-label-studio-live-apply-r1/receipts/promotions (0 file(s))

@@ -4,7 +4,7 @@ Found the following matching certs:
   Certificate Name: lv3-edge
     Serial Number: 6a1ae0ffe8302b24de2d70ee0c022fc4c1c
     Key Type: ECDSA
-    Domains: nginx.lv3.org *.apps.lv3.org agents.lv3.org analytics.lv3.org api.lv3.org apps.lv3.org build.lv3.org changelog.lv3.org chat.lv3.org cloud.lv3.org coolify.lv3.org docker.lv3.org docs.lv3.org draw.lv3.org errors.lv3.org grafana.lv3.org headscale.lv3.org home.lv3.org langfuse.lv3.org logs.lv3.org lv3.org mail.lv3.org matrix.lv3.org n8n.lv3.org ops.lv3.org proxmox.lv3.org realtime.lv3.org registry.lv3.org sso.lv3.org status.lv3.org tasks.lv3.org uptime.lv3.org wiki.lv3.org
+    Domains: nginx.example.com *.apps.example.com agents.example.com analytics.example.com api.example.com apps.example.com build.example.com changelog.example.com chat.example.com cloud.example.com coolify.example.com docker.example.com docs.example.com draw.example.com errors.example.com grafana.example.com headscale.example.com home.example.com langfuse.example.com logs.example.com example.com mail.example.com matrix.example.com n8n.example.com ops.example.com proxmox.example.com realtime.example.com registry.example.com sso.example.com status.example.com tasks.example.com uptime.example.com wiki.example.com
     Expiry Date: 2026-06-28 14:18:57+00:00 (VALID: 89 days)
     Certificate Path: /etc/letsencrypt/live/lv3-edge/fullchain.pem
     Private Key Path: /etc/letsencrypt/live/lv3-edge/privkey.pem
@@ -16,7 +16,7 @@ Found the following matching certs:
       "token": "Ni-D9gsN8ZWE0KZsypBY0-aZNHXw_HyU5icoj0Gtsf4",
       "validationRecord": [
         {
-          "hostname": "wiki.lv3.org",
+          "hostname": "wiki.example.com",
           "addressUsed": ""
         }
       ]
@@ -49,25 +49,25 @@ Replay-Nonce: rZ6rhvMzMEty4LyKDsaIxJpB_k2pa_jGuhTz1x6kKeGDWiX_w68
 
 {
   "type": "urn:ietf:params:acme:error:caa",
-  "detail": "Error finalizing order :: Rechecking CAA for \"draw.lv3.org\" and 1 more identifiers failed. Refer to sub-problems for more information",
+  "detail": "Error finalizing order :: Rechecking CAA for \"draw.example.com\" and 1 more identifiers failed. Refer to sub-problems for more information",
   "status": 403,
   "subproblems": [
     {
       "type": "urn:ietf:params:acme:error:caa",
-      "detail": "Error finalizing order :: rechecking caa: While processing CAA for draw.lv3.org: DNS problem: SERVFAIL looking up CAA for lv3.org - the domain's nameservers may be malfunctioning",
+      "detail": "Error finalizing order :: rechecking caa: While processing CAA for draw.example.com: DNS problem: SERVFAIL looking up CAA for example.com - the domain's nameservers may be malfunctioning",
       "status": 403,
       "identifier": {
         "type": "dns",
-        "value": "draw.lv3.org"
+        "value": "draw.example.com"
       }
     },
     {
       "type": "urn:ietf:params:acme:error:caa",
-      "detail": "Error finalizing order :: rechecking caa: While processing CAA for docs.lv3.org: DNS problem: SERVFAIL looking up CAA for docs.lv3.org - the domain's nameservers may be malfunctioning",
+      "detail": "Error finalizing order :: rechecking caa: While processing CAA for docs.example.com: DNS problem: SERVFAIL looking up CAA for docs.example.com - the domain's nameservers may be malfunctioning",
       "status": 403,
       "identifier": {
         "type": "dns",
-        "value": "docs.lv3.org"
+        "value": "docs.example.com"
       }
     }
   ]
@@ -112,11 +112,11 @@ Traceback (most recent call last):
     response = self._check_response(response, content_type=content_type)
   File "/usr/lib/python3/dist-packages/acme/client.py", line 605, in _check_response
     raise messages.Error.from_json(jobj)
-acme.messages.Error: urn:ietf:params:acme:error:caa :: Certification Authority Authorization (CAA) records forbid the CA from issuing a certificate :: Error finalizing order :: Rechecking CAA for "draw.lv3.org" and 1 more identifiers failed. Refer to sub-problems for more information
-Problem for draw.lv3.org: urn:ietf:params:acme:error:caa :: Certification Authority Authorization (CAA) records forbid the CA from issuing a certificate :: Error finalizing order :: rechecking caa: While processing CAA for draw.lv3.org: DNS problem: SERVFAIL looking up CAA for lv3.org - the domain's nameservers may be malfunctioning
-Problem for docs.lv3.org: urn:ietf:params:acme:error:caa :: Certification Authority Authorization (CAA) records forbid the CA from issuing a certificate :: Error finalizing order :: rechecking caa: While processing CAA for docs.lv3.org: DNS problem: SERVFAIL looking up CAA for docs.lv3.org - the domain's nameservers may be malfunctioning
+acme.messages.Error: urn:ietf:params:acme:error:caa :: Certification Authority Authorization (CAA) records forbid the CA from issuing a certificate :: Error finalizing order :: Rechecking CAA for "draw.example.com" and 1 more identifiers failed. Refer to sub-problems for more information
+Problem for draw.example.com: urn:ietf:params:acme:error:caa :: Certification Authority Authorization (CAA) records forbid the CA from issuing a certificate :: Error finalizing order :: rechecking caa: While processing CAA for draw.example.com: DNS problem: SERVFAIL looking up CAA for example.com - the domain's nameservers may be malfunctioning
+Problem for docs.example.com: urn:ietf:params:acme:error:caa :: Certification Authority Authorization (CAA) records forbid the CA from issuing a certificate :: Error finalizing order :: rechecking caa: While processing CAA for docs.example.com: DNS problem: SERVFAIL looking up CAA for docs.example.com - the domain's nameservers may be malfunctioning
 2026-03-30 16:11:10,080:ERROR:certbot._internal.log:An unexpected error occurred:
-2026-03-30 16:11:10,080:ERROR:certbot._internal.log:Error finalizing order :: Rechecking CAA for "draw.lv3.org" and 1 more identifiers failed. Refer to sub-problems for more information
+2026-03-30 16:11:10,080:ERROR:certbot._internal.log:Error finalizing order :: Rechecking CAA for "draw.example.com" and 1 more identifiers failed. Refer to sub-problems for more information
 2026-03-30 16:11:47,754:DEBUG:certbot._internal.main:certbot version: 4.0.0
 2026-03-30 16:11:47,754:DEBUG:certbot._internal.main:Location of certbot entry point: /usr/bin/certbot
 2026-03-30 16:11:47,754:DEBUG:certbot._internal.main:Arguments: ['--cert-name', 'lv3-edge']
@@ -127,7 +127,7 @@ Problem for docs.lv3.org: urn:ietf:params:acme:error:caa :: Certification Author
   Certificate Name: lv3-edge
     Serial Number: 6a1ae0ffe8302b24de2d70ee0c022fc4c1c
     Key Type: ECDSA
-    Domains: nginx.lv3.org *.apps.lv3.org agents.lv3.org analytics.lv3.org api.lv3.org apps.lv3.org build.lv3.org changelog.lv3.org chat.lv3.org cloud.lv3.org coolify.lv3.org docker.lv3.org docs.lv3.org draw.lv3.org errors.lv3.org grafana.lv3.org headscale.lv3.org home.lv3.org langfuse.lv3.org logs.lv3.org lv3.org mail.lv3.org matrix.lv3.org n8n.lv3.org ops.lv3.org proxmox.lv3.org realtime.lv3.org registry.lv3.org sso.lv3.org status.lv3.org tasks.lv3.org uptime.lv3.org wiki.lv3.org
+    Domains: nginx.example.com *.apps.example.com agents.example.com analytics.example.com api.example.com apps.example.com build.example.com changelog.example.com chat.example.com cloud.example.com coolify.example.com docker.example.com docs.example.com draw.example.com errors.example.com grafana.example.com headscale.example.com home.example.com langfuse.example.com logs.example.com example.com mail.example.com matrix.example.com n8n.example.com ops.example.com proxmox.example.com realtime.example.com registry.example.com sso.example.com status.example.com tasks.example.com uptime.example.com wiki.example.com
     Expiry Date: 2026-06-28 14:18:57+00:00 (VALID: 89 days)
     Certificate Path: /etc/letsencrypt/live/lv3-edge/fullchain.pem
     Private Key Path: /etc/letsencrypt/live/lv3-edge/privkey.pem

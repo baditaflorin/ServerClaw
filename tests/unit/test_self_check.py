@@ -68,12 +68,12 @@ def test_template_context_handles_missing_fields():
 
 
 def test_expand_string():
-    ctx = {"apex": "0fork.com", "apex_slug": "0fork"}
-    assert self_check.expand_templates(ctx, "https://registry.{apex}/v2/") == "https://registry.0fork.com/v2/"
+    ctx = {"apex": "example.org", "apex_slug": "0fork"}
+    assert self_check.expand_templates(ctx, "https://registry.{apex}/v2/") == "https://registry.example.org/v2/"
 
 
 def test_expand_nested_dict_and_list():
-    ctx = {"apex": "0fork.com"}
+    ctx = {"apex": "example.org"}
     value = {
         "url": "https://{apex}/",
         "expect_san": ["{apex}", "wiki.{apex}"],
@@ -81,17 +81,17 @@ def test_expand_nested_dict_and_list():
         "unrelated_int": 200,
     }
     result = self_check.expand_templates(ctx, value)
-    assert result["url"] == "https://0fork.com/"
-    assert result["expect_san"] == ["0fork.com", "wiki.0fork.com"]
-    assert result["nested"]["x"] == "0fork.com-x"
+    assert result["url"] == "https://example.org/"
+    assert result["expect_san"] == ["example.org", "wiki.example.org"]
+    assert result["nested"]["x"] == "example.org-x"
     assert result["unrelated_int"] == 200
 
 
 def test_expand_leaves_unknown_placeholders_literal():
     """Unknown placeholders pass through unchanged — visible in failures."""
-    ctx = {"apex": "0fork.com"}
+    ctx = {"apex": "example.org"}
     s = self_check.expand_templates(ctx, "https://{unknown}/{apex}")
-    assert s == "https://{unknown}/0fork.com"
+    assert s == "https://{unknown}/example.org"
 
 
 # --------------------------------------------------------------------------- #

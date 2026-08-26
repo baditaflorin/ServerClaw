@@ -44,7 +44,7 @@ network_policy:
           ports: [9100]
           description: Prometheus node_exporter metrics scrape access
           provenance:
-            owner: baditaflorin@gmail.com
+            owner: operator@example.com
             added_on: "2026-08-26"
             reconciled_from_live: true    # discovered live before being declared here
             workstream: null              # optional ADR/workstream id
@@ -87,7 +87,7 @@ The gitea/MinIO rule is marked `reconciled_from_live: false` because, unlike the
 
 ## Non-Goals
 
-- **Not applying anything live.** This ADR only changes the declared source of truth (`proxmox_florin_server`, private) and adds detection tooling. Applying the reconciled rules to production hosts, and publishing the schema change to the `ServerClaw` mirror, are separate, deliberate operator actions.
+- **Not applying anything live.** This ADR only changes the declared source of truth (`platform_server`, private) and adds detection tooling. Applying the reconciled rules to production hosts, and publishing the schema change to the `ServerClaw` mirror, are separate, deliberate operator actions.
 - **Not covering the Docker `forward` chain** in the guest-nftables layer (only `input`), or the `output` chain (policy `accept`, out of scope for an inbound-allowlist audit).
 - **Not resolving the `fleet-pool-fw` / `firewall-pools.json` mystery.** The managed-block detection makes the drift detector correctly *tolerant* of it; it does not find or absorb it.
 

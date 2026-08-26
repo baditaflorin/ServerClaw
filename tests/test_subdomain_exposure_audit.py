@@ -29,7 +29,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         catalog = {
             "subdomains": [
                 {
-                    "fqdn": "api.lv3.org",
+                    "fqdn": "api.example.com",
                     "environment": "production",
                     "status": "active",
                     "owner_adr": "0371",
@@ -72,7 +72,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
                 "validate_subdomain_catalog",
                 side_effect=lambda catalog, resolved_service_catalog, *_args: self.assertEqual(
                     resolved_service_catalog["services"][0]["environments"]["production"]["url"],
-                    "https://api.lv3.org",
+                    "https://api.example.com",
                 ),
             ),
         ):
@@ -82,7 +82,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
                 public_edge_defaults=public_edge_defaults,
             )
 
-        self.assertEqual(registry["publications"][0]["fqdn"], "api.lv3.org")
+        self.assertEqual(registry["publications"][0]["fqdn"], "api.example.com")
 
     def test_load_certificate_catalog_resolves_placeholder_domains_for_private_overlay(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="certificate-catalog-"))
@@ -120,7 +120,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
         self.assertEqual(
             certificate_catalog["certificates"][0]["endpoint"]["host"],
-            "docs.lv3.org",
+            "docs.example.com",
         )
 
     def test_repo_registry_tracks_known_hostnames(self) -> None:
@@ -541,7 +541,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
 def _replace_example_domain(value):
     if isinstance(value, str):
-        return value.replace("example.com", "lv3.org")
+        return value.replace("example.com", "example.com")
     if isinstance(value, list):
         return [_replace_example_domain(item) for item in value]
     if isinstance(value, dict):

@@ -509,18 +509,18 @@ subdomain-exposure-audit:
 
 ## Multi-deployment service list and diff (ADR 0481)
 ## Usage:
-##   make list-services                         # list primary deployment (lv3.org)
-##   make list-services DEPLOYMENT=0fork.com    # list a specific deployment
+##   make list-services                         # list primary deployment (example.com)
+##   make list-services DEPLOYMENT=example.org    # list a specific deployment
 ##   make list-services STATUS=active           # filter by status
 ##   make list-services FORMAT=json             # JSON output
-##   make diff-services                         # diff lv3.org vs 0fork.com
-##   make diff-services FROM=lv3.org TO=0fork.com FORMAT=json
+##   make diff-services                         # diff example.com vs example.org
+##   make diff-services FROM=example.com TO=example.org FORMAT=json
 ##   make list-deployments                      # show all known deployments
 list-services:
 	python3 $(REPO_ROOT)/scripts/list_services.py $(if $(DEPLOYMENT),--deployment $(DEPLOYMENT),) $(if $(STATUS),--status $(STATUS),) $(if $(FORMAT),--format $(FORMAT),)
 
 diff-services:
-	python3 $(REPO_ROOT)/scripts/list_services.py --diff $(or $(FROM),lv3.org) $(or $(TO),0fork.com) $(if $(FORMAT),--format $(FORMAT),)
+	python3 $(REPO_ROOT)/scripts/list_services.py --diff $(or $(FROM),example.com) $(or $(TO),example.org) $(if $(FORMAT),--format $(FORMAT),)
 
 list-service-deployments:
 	python3 $(REPO_ROOT)/scripts/list_services.py --list-deployments $(if $(FORMAT),--format $(FORMAT),)

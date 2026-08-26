@@ -83,7 +83,7 @@ host:
       total_gb: 1024
       free_gb: 880
   networks:
-    public_ipv4: 65.109.84.223
+    public_ipv4: 203.0.113.3
     private_bridges: [vmbr1, vmbr10]
 ```
 
@@ -243,6 +243,6 @@ Phase 0 lands with this commit. Phases 1–5 are tracked in ws-0483 and can be p
 - ADR 0440 — Per-deployment directory layout
 - ADR 0441 — Service profiles
 - ADR 0481 — Explicit deployment context
-- Postmortem: 2026-05-11 0fork registry.0fork.com 502 incident
+- Postmortem: 2026-05-11 0fork registry.example.org 502 incident
   - Root cause chain: lv3-sized topology on 64 GB host → memory pressure → swap → host SSH degraded → Harbor `nginx`/`harbor-portal` exit-128 from logging-driver failure → no watchdog → undetected 5 days.
   - This ADR addresses the first link (over-sized topology); ws-0482 addresses the watchdog gap; the logging-driver switch is recorded in ws-0481 t-followup.

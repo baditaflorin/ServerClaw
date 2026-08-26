@@ -1,10 +1,10 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply/scripts/remote_exec.sh pre-push-gate --local-fallback
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0297-live-apply/scripts/remote_exec.sh pre-push-gate --local-fallback
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-mkdir: cannot create directory ‘/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
-mkdir: cannot create directory ‘/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
-mkdir: cannot create directory ‘/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
+mkdir: cannot create directory ‘/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
+mkdir: cannot create directory ‘/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
+mkdir: cannot create directory ‘/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643’: No space left on device
 Warning: Permanently added '10.10.10.30' (ED25519) to the list of known hosts.
-rsync: [Receiver] change_dir#3 "/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643/repo/.lv3-snapshots" failed: No such file or directory (2)
+rsync: [Receiver] change_dir#3 "/home/ops/builds/platform_server/.lv3-session-workspaces/ws-0297-live-apply-6c0f567643/repo/.lv3-snapshots" failed: No such file or directory (2)
 rsync error: errors selecting input/output files, dirs (code 3) at main.c(829) [Receiver=3.4.1]
 rsync(14289): error: unexpected end of file
 remote_exec: snapshot upload failed, falling back locally for pre-push-gate
@@ -40,7 +40,7 @@ workstream-surfaces   failed 27.08
 yaml-lint             passed 45.16
 
 [workstream-surfaces] docker command
-docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0297-live-apply:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0297-live-apply:/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.git/worktrees/ws-0297-live-apply:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=048caa1363f5ba14164bfda67fc6fb5d99dd4e2df5896c53d87879abb8a43c3c -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T15:54:39.308776+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=fda101055488683559311d0a919e1f397050eca5 -e LV3_SNAPSHOT_BRANCH=codex/ws-0297-live-apply -w /workspace registry.lv3.org/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
+docker run --rm --cpus=4 -v /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0297-live-apply:/workspace -v /Users/live/Documents/GITHUB_PROJECTS/platform_server/.git:/Users/live/Documents/GITHUB_PROJECTS/platform_server/.git:ro -v /Users/live/Documents/GITHUB_PROJECTS/platform_server/.git/worktrees/ws-0297-live-apply:/Users/live/Documents/GITHUB_PROJECTS/platform_server/.git/worktrees/ws-0297-live-apply:ro -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/workspace -e LV3_SNAPSHOT_ID=048caa1363f5ba14164bfda67fc6fb5d99dd4e2df5896c53d87879abb8a43c3c -e LV3_SNAPSHOT_GENERATED_AT=2026-03-30T15:54:39.308776+00:00 -e LV3_SNAPSHOT_SOURCE_COMMIT=fda101055488683559311d0a919e1f397050eca5 -e LV3_SNAPSHOT_BRANCH=codex/ws-0297-live-apply -w /workspace registry.example.com/check-runner/python:3.12.10 sh -c ./scripts/validate_repo.sh workstream-surfaces
 [workstream-surfaces] stdout
 Workstream surface ownership validation
 [workstream-surfaces] stderr

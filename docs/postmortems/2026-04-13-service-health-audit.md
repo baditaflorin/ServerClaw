@@ -45,23 +45,23 @@ defaults that were not migrated when ADR 0373 was implemented.
 
 | Service | URL | Status | Root Cause |
 |---------|-----|--------|------------|
-| LibreChat | chat.lv3.org | ✅ Up / ❌ SSO broken | Keycloak redirect_uri mismatch |
-| Dify | agents.lv3.org | ✅ Up | Latent dify_port bug (old deployment still running) |
-| Outline | wiki.lv3.org | ✅ Up | — |
-| Grafana | grafana.lv3.org | ✅ Up | — |
-| Plane | tasks.lv3.org | ✅ Up | — |
-| Langfuse | langfuse.lv3.org | ✅ Up | — |
-| Harbor | registry.lv3.org | ✅ Up | — |
-| Ops Portal | ops.lv3.org | ✅ Up | — |
-| n8n | n8n.lv3.org | ✅ Up | — |
-| Plausible | analytics.lv3.org | ✅ Up | — |
-| Directus | data.lv3.org | ❌ 502 | directus_container_port undefined |
-| Coolify | coolify.lv3.org | ❌ 502 | coolify_dashboard_port undefined |
-| Superset | bi.lv3.org | ❌ TLS + 502 | TLS cert gap + container stopped |
-| Paperless | paperless.lv3.org | ❌ TLS + 502 | TLS cert gap + paperless_service_topology undefined |
-| Grist | grist.lv3.org | ❌ TLS error | TLS cert SAN gap |
-| GlitchTip | errors.lv3.org | ❌ TLS error | TLS cert SAN gap |
-| Nomad | scheduler.lv3.org | ❌ TLS + timeout | TLS cert SAN gap + backend timeout |
+| LibreChat | chat.example.com | ✅ Up / ❌ SSO broken | Keycloak redirect_uri mismatch |
+| Dify | agents.example.com | ✅ Up | Latent dify_port bug (old deployment still running) |
+| Outline | wiki.example.com | ✅ Up | — |
+| Grafana | grafana.example.com | ✅ Up | — |
+| Plane | tasks.example.com | ✅ Up | — |
+| Langfuse | langfuse.example.com | ✅ Up | — |
+| Harbor | registry.example.com | ✅ Up | — |
+| Ops Portal | ops.example.com | ✅ Up | — |
+| n8n | n8n.example.com | ✅ Up | — |
+| Plausible | analytics.example.com | ✅ Up | — |
+| Directus | data.example.com | ❌ 502 | directus_container_port undefined |
+| Coolify | coolify.example.com | ❌ 502 | coolify_dashboard_port undefined |
+| Superset | bi.example.com | ❌ TLS + 502 | TLS cert gap + container stopped |
+| Paperless | paperless.example.com | ❌ TLS + 502 | TLS cert gap + paperless_service_topology undefined |
+| Grist | grist.example.com | ❌ TLS error | TLS cert SAN gap |
+| GlitchTip | errors.example.com | ❌ TLS error | TLS cert SAN gap |
+| Nomad | scheduler.example.com | ❌ TLS + timeout | TLS cert SAN gap + backend timeout |
 
 **Score: 10/17 reachable. 7/17 broken.**
 
@@ -126,7 +126,7 @@ The certbot DNS-01 renewal for the `lv3-edge` shared certificate was not trigger
 the new subdomains without TLS coverage.
 
 The certificate currently covers: *[existing services]* but not:
-`grist.lv3.org`, `errors.lv3.org`, `bi.lv3.org`, `paperless.lv3.org`, `scheduler.lv3.org`.
+`grist.example.com`, `errors.example.com`, `bi.example.com`, `paperless.example.com`, `scheduler.example.com`.
 
 ---
 

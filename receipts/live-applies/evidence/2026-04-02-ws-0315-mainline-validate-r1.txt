@@ -1,4 +1,4 @@
-/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0315-live-apply/scripts/validate_repo.sh
+/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0315-live-apply/scripts/validate_repo.sh
 Generated platform vars validation
 Syntax check: playbooks/api-gateway.yml
 Syntax check: playbooks/artifact-cache-vm.yml
@@ -185,9 +185,9 @@ Shell lint
 JSON validation
 Semgrep SAST and secret-pattern validation
 Semgrep gate summary
-  repo: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0315-live-apply
+  repo: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0315-live-apply
   source sha: f3f564884b22fc3dc855316888d35bf3880202c9
-  sarif: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0315-live-apply/receipts/sast/f3f564884b22fc3dc855316888d35bf3880202c9.sarif.json
+  sarif: /Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0315-live-apply/receipts/sast/f3f564884b22fc3dc855316888d35bf3880202c9.sarif.json
   findings: error=0 warning=3 note=0 total=3
 Compose runtime env guard
 Retry guard

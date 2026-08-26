@@ -12,11 +12,11 @@ base OS, stop and update this runbook — do not guess.
 
 - The SSH private key matching the public key Hetzner has on file, at
   `.local/ssh/hetzner_llm_agents_ed25519` (key comment
-  `llm-agents@proxmox_florin_server`).
+  `llm-agents@platform_server`).
 - Hetzner DNS API token stored at `.local/hetzner/dns.env`:
   ```
   HETZNER_DNS_TOKEN=<token>
-  HETZNER_DNS_ZONE=<zone, e.g. 0fork.com>
+  HETZNER_DNS_ZONE=<zone, e.g. example.org>
   ```
 - The server's public IPv4, IPv6, and host-key fingerprint from the
   provisioning email.
@@ -60,7 +60,7 @@ missing on a nested-Proxmox target, stop — virt extensions are not enabled
 ssh ... root@<IPv4> 'hostnamectl set-hostname <new-hostname>'
 ```
 
-Proposed convention: `fork-pve-01` for the first clone, increment for
+Proposed convention: `debian-base-template` for the first clone, increment for
 subsequent. Update `/etc/hosts` accordingly (the Ansible role
 `base_host_identity` handles this once Ansible is able to reach the box).
 
@@ -109,7 +109,7 @@ system.
 ## 4. Mesh VPN — Headscale, not external Tailscale
 
 This platform runs its own Headscale instance as a platform service (see
-prod `headscale.lv3.org`; clone target `headscale.0fork.com`). There is no
+prod `headscale.example.com`; clone target `headscale.example.org`). There is no
 external Tailscale preauth key.
 
 During bootstrap, operate over **public-IP SSH**. Once the clone's
@@ -125,8 +125,8 @@ headscale preauthkeys create --user <operator> --reusable=false --expiration 1h
 
 # 2. On the bare-metal host:
 curl -fsSL https://tailscale.com/install.sh | sh   # tailscaled client works with headscale
-tailscale up --login-server=https://headscale.0fork.com --authkey=<key> \
-  --hostname=fork-pve-01 --ssh
+tailscale up --login-server=https://headscale.example.org --authkey=<key> \
+  --hostname=debian-base-template --ssh
 ```
 
 Until that point, all SSH uses the public IP. This is fine for bootstrap;
@@ -284,7 +284,7 @@ here because every fork will get bit by at least one of them.
 
 ---
 
-## 11. Live-apply notes from the 0fork.com clone (2026-04-21)
+## 11. Live-apply notes from the example.org clone (2026-04-21)
 
 The 0fork clone was bootstrapped without running the `env=clone` Ansible
 targets (they don't exist yet in the Makefile/inventory). What *did* work,
@@ -338,7 +338,7 @@ curl -fsSL -o /var/lib/vz/template/qcow/debian-13-genericcloud-amd64.qcow2 \
   https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-amd64.qcow2
 
 # Generate a fork-host bootstrap key (used for host→VM SSH)
-ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N "" -C "fork-pve-01-bootstrap"
+ssh-keygen -t ed25519 -f /root/.ssh/id_ed25519 -N "" -C "debian-base-template-bootstrap"
 
 # Write template user-data that installs qemu-guest-agent on first boot +
 # pins the operator's external SSH pubkeys and the fork-host pubkey
@@ -381,7 +381,7 @@ seconds total for all 8 VMs on the AX41-NVMe.
 ### 11d. What didn't work and remains pending operator
 
 - **Direct SMTP to Gmail rejected (550-5.7.1 / 550-5.7.26)** — no PTR on
-  either the IPv4 or IPv6 address, and no SPF/DKIM for `0fork.com`. Both
+  either the IPv4 or IPv6 address, and no SPF/DKIM for `example.org`. Both
   IPv6 and IPv4 paths reject. Operator must set rDNS via Hetzner Robot UI,
   then publish SPF/DKIM records, then mail-platform converge becomes viable.
 - **Hetzner DNS API brownout** — on 2026-04-21 the write API returned HTTP
@@ -394,7 +394,7 @@ seconds total for all 8 VMs on the AX41-NVMe.
   where the operator has Hetzner Robot KVM access to recover from a bad
   ifreload.
 
-### 11e. Actual provisioning receipt (fork-pve-01, 2026-04-21)
+### 11e. Actual provisioning receipt (debian-base-template, 2026-04-21)
 
 | vmid | name            | ipv4         | cores | mem_mb | disk_gb |
 |------|-----------------|--------------|-------|--------|---------|

@@ -1,4 +1,4 @@
 Traceback (most recent call last):
-  File "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0311-live-apply/scripts/validate_repository_data_models.py", line 14, in <module>
+  File "/Users/live/Documents/GITHUB_PROJECTS/platform_server/.worktrees/ws-0311-live-apply/scripts/validate_repository_data_models.py", line 14, in <module>
     import jsonschema
 ModuleNotFoundError: No module named 'jsonschema'

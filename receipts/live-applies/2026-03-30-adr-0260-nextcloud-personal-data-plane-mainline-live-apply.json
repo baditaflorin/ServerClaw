@@ -11,13 +11,13 @@
   "platform_version_context": "0.130.62",
   "workflow_id": "adr-0260-nextcloud-personal-data-plane-mainline-live-apply",
   "adr": "0260",
-  "summary": "Replayed ADR 0260 from the refreshed mainline release 0.177.93 using committed source 2b0787aeac03f143ef50cf3e4f2c17f1a81aa3b0, re-verifying repo-managed Nextcloud on docker-runtime-lv3, its dedicated PostgreSQL backend on postgres-lv3, the shared cloud.lv3.org publication on nginx-lv3, and the synchronized recovery paths for stale compose networks, Docker bridge chains, detached local OpenBao publication, and concurrent Docker interruptions during mutable OCC convergence on top of the ADR 0278-proved 0.130.61 baseline.",
+  "summary": "Replayed ADR 0260 from the refreshed mainline release 0.177.93 using committed source 2b0787aeac03f143ef50cf3e4f2c17f1a81aa3b0, re-verifying repo-managed Nextcloud on docker-runtime-lv3, its dedicated PostgreSQL backend on postgres-lv3, the shared cloud.example.com publication on nginx-lv3, and the synchronized recovery paths for stale compose networks, Docker bridge chains, detached local OpenBao publication, and concurrent Docker interruptions during mutable OCC convergence on top of the ADR 0278-proved 0.130.61 baseline.",
   "targets": [
     {
       "kind": "host",
-      "name": "proxmox_florin",
+      "name": "proxmox-host",
       "address": "100.64.0.1",
-      "public_ipv4": "65.108.75.123"
+      "public_ipv4": "203.0.113.1"
     },
     {
       "kind": "guest",
@@ -40,12 +40,12 @@
     {
       "kind": "service_endpoint",
       "name": "Nextcloud public status",
-      "address": "https://cloud.lv3.org/status.php"
+      "address": "https://cloud.example.com/status.php"
     },
     {
       "kind": "service_endpoint",
       "name": "Nextcloud DAV",
-      "address": "https://cloud.lv3.org/remote.php/dav/"
+      "address": "https://cloud.example.com/remote.php/dav/"
     },
     {
       "kind": "service_endpoint",
@@ -62,12 +62,12 @@
     {
       "check": "Public Nextcloud status and DAV redirects",
       "result": "pass",
-      "observed": "`curl --max-time 20 -fsS https://cloud.lv3.org/status.php` returned `{\"installed\":true,\"maintenance\":false,\"versionstring\":\"33.0.1\"...}`, and `curl --max-time 20 -fsSI https://cloud.lv3.org/.well-known/caldav` plus `curl --max-time 20 -fsSI https://cloud.lv3.org/.well-known/carddav` both returned `HTTP/2 301` with `location: https://cloud.lv3.org/remote.php/dav/`."
+      "observed": "`curl --max-time 20 -fsS https://cloud.example.com/status.php` returned `{\"installed\":true,\"maintenance\":false,\"versionstring\":\"33.0.1\"...}`, and `curl --max-time 20 -fsSI https://cloud.example.com/.well-known/caldav` plus `curl --max-time 20 -fsSI https://cloud.example.com/.well-known/carddav` both returned `HTTP/2 301` with `location: https://cloud.example.com/remote.php/dav/`."
     },
     {
       "check": "Guest-local Nextcloud runtime state",
       "result": "pass",
-      "observed": "Using the managed Proxmox jump path, `curl --max-time 20 -fsS http://10.10.10.20:8084/status.php` returned `installed=true`, `maintenance=false`, and `versionstring=33.0.1`; `docker compose --file /opt/nextcloud/docker-compose.yml ps` kept `nextcloud-app` published on `0.0.0.0:8084->80/tcp`; `occ config:app:get core backgroundjobs_mode` returned `cron`; and `occ user:info ops --output=json` reported `cloud_id=ops@cloud.lv3.org`, `enabled=true`, and `groups=[\"admin\"]`."
+      "observed": "Using the managed Proxmox jump path, `curl --max-time 20 -fsS http://10.10.10.20:8084/status.php` returned `installed=true`, `maintenance=false`, and `versionstring=33.0.1`; `docker compose --file /opt/nextcloud/docker-compose.yml ps` kept `nextcloud-app` published on `0.0.0.0:8084->80/tcp`; `occ config:app:get core backgroundjobs_mode` returned `cron`; and `occ user:info ops --output=json` reported `cloud_id=ops@cloud.example.com`, `enabled=true`, and `groups=[\"admin\"]`."
     },
     {
       "check": "Guest-local sidecar health after replay",

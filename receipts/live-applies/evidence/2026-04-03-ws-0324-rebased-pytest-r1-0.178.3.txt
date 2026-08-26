@@ -221,7 +221,7 @@ catalog = {'$schema': 'docs/schema/service-capability-catalog.schema.json', 'sch
 
             if lifecycle_status == "active":
                 active_service_ids.add(service_id)
-                if vm != "proxmox_florin" and vm not in allowed_service_surfaces:
+                if vm != "proxmox-host" and vm not in allowed_service_surfaces:
                     raise ValueError(
                         f"active service '{service_id}' must reference an observed guest or host surface"
                     )
