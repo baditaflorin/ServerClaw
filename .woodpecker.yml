@@ -2,6 +2,7 @@ when:
   - event: manual
   - event: push
     branch: main
+  - event: pull_request
 
 labels:
   lv3: "true"

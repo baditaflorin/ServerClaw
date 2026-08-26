@@ -223,7 +223,7 @@ def check_leaks(worktree: Path, config: dict) -> list[str]:
     return violations
 
 
-def commit_and_push(worktree: Path, source_sha: str, push: bool) -> None:
+def commit_and_push(worktree: Path, source_sha: str, push: bool, branch: str | None = None) -> None:
     """Commit sanitized changes and optionally push."""
     run(["git", "add", "-A"], cwd=worktree)
 
@@ -259,11 +259,12 @@ def commit_and_push(worktree: Path, source_sha: str, push: bool) -> None:
         # Skip pre-push hooks — the sanitized worktree may not pass the
         # validation gate (changed domains, IPs, etc.)
         run(["git", "remote", "get-url", REMOTE_NAME], cwd=worktree)
+        target_ref = f"HEAD:refs/heads/{branch}" if branch else "HEAD:main"
         run(
-            ["git", "push", "--force", "--no-verify", REMOTE_NAME, "HEAD:main"],
+            ["git", "push", "--force", "--no-verify", REMOTE_NAME, target_ref],
             cwd=worktree,
         )
-        print(f"Pushed to {REMOTE_NAME}/main")
+        print(f"Pushed to {REMOTE_NAME}/{branch or 'main'}")
     else:
         stat = run(["git", "diff", "--stat", "HEAD~1..HEAD"], cwd=worktree)
         print(f"\nDry-run complete. Changes that would be pushed:\n{stat.stdout}")
@@ -273,6 +274,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Publish sanitized repo to ServerClaw")
     parser.add_argument("--push", action="store_true", help="Actually push to serverclaw remote")
     parser.add_argument("--diff", action="store_true", help="Show diff vs current serverclaw/main")
+    parser.add_argument(
+        "--branch",
+        help=(
+            "Push to this branch instead of force-pushing main directly. Required now that "
+            "ServerClaw's main has a required-status-check ruleset (ci/woodpecker/push/woodpecker) "
+            "-- a direct force-push can never satisfy that (the check can't exist for content "
+            "that hasn't landed yet). Push a branch, let Woodpecker run, merge via PR instead."
+        ),
+    )
     args = parser.parse_args()
 
     if not CONFIG_PATH.exists():
@@ -344,7 +354,7 @@ def main() -> int:
         print(f"\nSummary: {n_replaced} files replaced, {n_deleted} deleted, {n_sanitized} files sanitized")
 
         # Commit and optionally push
-        commit_and_push(worktree, source_sha, push=args.push)
+        commit_and_push(worktree, source_sha, push=args.push, branch=args.branch)
 
         return 0
     finally:

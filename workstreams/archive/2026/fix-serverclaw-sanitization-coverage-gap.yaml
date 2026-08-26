@@ -1,6 +1,6 @@
 id: fix-serverclaw-sanitization-coverage-gap
 title: Close ServerClaw sanitization coverage gap and fix stale cert catalog entries
-status: ready
+status: merged
 owner: claude-agent
 branch: fix/serverclaw-sanitization-coverage-gap
 doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
