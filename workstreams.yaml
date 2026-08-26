@@ -5308,6 +5308,59 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 26a30662-ed8e-4d3d-9f07-154522ff67cd
+- id: fix-serverclaw-sanitization-coverage-gap
+  title: Close ServerClaw sanitization coverage gap and fix stale cert catalog entries
+  status: ready
+  owner: claude-agent
+  branch: fix/serverclaw-sanitization-coverage-gap
+  doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: serverclaw-sanitization-coverage
+      mode: exclusive
+      paths:
+      - config/publication-sanitization.yaml
+    - id: certificate-catalog-0mcp-rename-fix
+      mode: exclusive
+      paths:
+      - config/certificate-catalog.json
+    - id: fix-serverclaw-sanitization-coverage-gap-workstream-record
+      mode: exclusive
+      paths:
+      - docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+      - workstreams.yaml
+      - workstreams/active/fix-serverclaw-sanitization-coverage-gap.yaml
+      - workstreams/active/adr-0480-secret-masking.yaml
+  description: 'Two unrelated fixes needed to unblock make publish-serverclaw-push:
+
+    closing a real sanitization coverage gap (0fork.com domain/PII/IPs/
+
+    Hetzner zone ID were never covered by Tier C) found by
+
+    scripts/audit_sanitization_coverage.py, and correcting three
+
+    certificate-catalog.json entries (changelog/docs/headscale) that
+
+    still referenced pre-rename .lv3.org names and the retired lv3-edge
+
+    cert bundle path instead of the live .0mcp.com / 0mcp-edge state.
+
+    '
+  objectives:
+  - Add Tier C string_replacements + leak_markers for the 0fork.com gap
+  - Correct the three stale certificate-catalog.json entries to match live nginx config
+  deliverables:
+  - "config/publication-sanitization.yaml \u2014 0fork.com domain/PII/IP/zone-id coverage"
+  - "config/certificate-catalog.json \u2014 changelog/docs/headscale corrected to\
+    \ .0mcp.com"
+  completion_metrics:
+  - scripts/audit_sanitization_coverage.py reports 0 CRITICAL gaps
+  - make publish-serverclaw dry-run leak check passes
+  - Pre-push ADR 0375 certificate validation gate passes
+  related_adrs:
+  - "ADR 0409 \u2014 Zero-Sanitization Publication"
+  - "ADR 0375 \u2014 Certificate Validation"
+  - "ADR 0414 \u2014 Cert Lifecycle Manager"
 surface_ownership:
   global_mutable_paths:
   - receipts/gate-bypasses/*

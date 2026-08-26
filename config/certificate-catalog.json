@@ -393,12 +393,12 @@
       "id": "changelog-edge",
       "service_id": "changelog_portal",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for changelog.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for changelog.0mcp.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "changelog.lv3.org",
+        "host": "changelog.0mcp.com",
         "port": 443,
-        "server_name": "changelog.lv3.org"
+        "server_name": "changelog.0mcp.com"
       },
       "policy": {
         "warn_days": 21,
@@ -410,7 +410,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
@@ -561,12 +561,12 @@
       "id": "docs-edge",
       "service_id": "docs_portal",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for docs.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for docs.0mcp.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "docs.lv3.org",
+        "host": "docs.0mcp.com",
         "port": 443,
-        "server_name": "docs.lv3.org"
+        "server_name": "docs.0mcp.com"
       },
       "policy": {
         "warn_days": 21,
@@ -578,7 +578,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
@@ -729,12 +729,12 @@
       "id": "headscale-edge",
       "service_id": "headscale",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for headscale.lv3.org.",
+      "summary": "Shared NGINX edge certificate served for headscale.0mcp.com.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "headscale.lv3.org",
+        "host": "headscale.0mcp.com",
         "port": 443,
-        "server_name": "headscale.lv3.org"
+        "server_name": "headscale.0mcp.com"
       },
       "policy": {
         "warn_days": 21,
@@ -746,7 +746,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {

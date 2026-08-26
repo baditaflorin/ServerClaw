@@ -38,12 +38,16 @@ string_replacements:
     replacement: "example.org"
   - pattern: "0docker\\.com"
     replacement: "example.net"
+  - pattern: "0fork\\.com"
+    replacement: "example.org"
   # VM/host names
   - pattern: "proxmox[_-]florin"
     replacement: "proxmox-host"
   - pattern: "Debian-trixie-latest-amd64-base"
     replacement: "debian-base-template"
-  # Real public IPs
+  - pattern: "fork-pve-01"
+    replacement: "debian-base-template"
+  # Real public IPs — prod (lv3.org)
   - pattern: "65\\.108\\.75\\.123"
     replacement: "203.0.113.1"
   - pattern: "176\\.9\\.123\\.221"
@@ -56,6 +60,20 @@ string_replacements:
     replacement: "2001:db8::2"
   - pattern: "2a01:4f8:d0a:27bd::2"
     replacement: "2001:db8::3"
+  # Real public IPs — 0fork.com clone (ADR 0424)
+  - pattern: "65\\.109\\.84\\.223"
+    replacement: "203.0.113.3"
+  - pattern: "65\\.109\\.84\\.193"
+    replacement: "203.0.113.66"
+  - pattern: "65\\.109\\.84\\.192"
+    replacement: "203.0.113.192"
+  - pattern: "2a01:4f9:3051:52d5::2"
+    replacement: "2001:db8::4"
+  # Hetzner account identifiers — 0fork.com clone
+  - pattern: "RmJf7JFvpQNfWdEZmhAeEK"
+    replacement: "EXAMPLE0ZoneId00000000"
+  - pattern: "2952989"
+    replacement: "0000000"
   # Operator PII
   - pattern: "baditaflorin\\+tmp\\d+@gmail\\.com"
     replacement: "operator@example.com"
@@ -69,9 +87,13 @@ string_replacements:
     replacement: "Platform Operator"
   - pattern: "Florin Badita"
     replacement: "Platform Operator"
-  # Management ACL IP
+  - pattern: "0fork Clone Operator"
+    replacement: "Platform Operator"
+  # Management ACL IPs
   - pattern: "90\\.95\\.35\\.115"
     replacement: "203.0.113.100"
+  - pattern: "90\\.95\\.39\\.175"
+    replacement: "203.0.113.101"
 
 # --- Files to exclude from publication (never copied) ---
 exclude_paths:
@@ -100,10 +122,18 @@ leak_markers:
   - "lv3.org"
   - "0mcp.com"
   - "0docker.com"
+  - "florin@lv3.org"
   - "65.108.75.123"
   - "176.9.123.221"
   - "baditaflorin@gmail.com"
   - "busui.matei1994@gmail.com"
   - "florin@badita.org"
+  - "Florin Badita-Nistor"
   - "62r4JXGau0hOjYdSLIPJL4yPNkoejC99"
   - "90.95.35.115"
+  - "90.95.39.175"
+  - "0fork.com"
+  - "operator@0fork.com"
+  - "0fork Clone Operator"
+  - "65.109.84.223"
+  - "RmJf7JFvpQNfWdEZmhAeEK"
