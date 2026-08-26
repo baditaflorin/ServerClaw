@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-07-30'
+generated: '2026-08-26'
 facet: concern
 concern: platform
-total_adrs: 154
+total_adrs: 155
 adrs:
   - adr: 0019
     title: Parallel ADR Delivery With Workstreams
@@ -2911,3 +2911,23 @@ adrs:
     summary: 'Every check is one entry in config/postconditions.yml (committed):'
     filename: 0484-self-verification-contracts.md
     path: docs/adr/0484-self-verification-contracts.md
+  - adr: 0490
+    title: Netplan MAC Mismatch — Root Cause and Self-Healing Recovery Model
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - netplan
+      - mac
+      - mismatch
+      - root
+      - cause
+      - self-healing
+      - recovery
+      - model
+    summary: 'When VMs have lost network due to a stale netplan MAC (interface is DOWN after reboot), follow these steps from
+      the Proxmox host:'
+    filename: 0490-netplan-mac-mismatch-recovery.md
+    path: docs/adr/0490-netplan-mac-mismatch-recovery.md

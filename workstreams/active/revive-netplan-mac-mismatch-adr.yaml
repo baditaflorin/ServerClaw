@@ -1,0 +1,50 @@
+id: revive-netplan-mac-mismatch-adr
+title: Revive netplan MAC mismatch recovery ADR from stale ServerClaw PR
+status: ready
+ready_to_merge: true
+live_applied: false
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: revive-netplan-mac-mismatch-adr
+doc: docs/adr/0490-netplan-mac-mismatch-recovery.md
+ownership_manifest:
+  owned_surfaces:
+    - id: revive-netplan-mac-mismatch-adr-code
+      paths:
+        - docs/adr/0490-netplan-mac-mismatch-recovery.md
+        - docs/adr/.index.yaml
+        - docs/adr/index/
+        - docs/adr/index/reservations.yaml
+        - workstreams/active/revive-netplan-mac-mismatch-adr.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  ServerClaw PR #12 (opened 2026-05-20, author baditaflorin) documented a
+  2026-05-20 incident: provision-guests regenerated cloud-init ISOs with
+  corrected MACs, but running VMs (110, 120, 140, 150) retained stale
+  /etc/netplan/50-cloud-init.yaml on disk, leaving interfaces DOWN after
+  reboot. Recovery was via qm guest exec + netplan apply; the regenerated
+  ISO's new instance-id guarantees self-healing on next reboot regardless.
+
+  The PR itself was authored as ADR 0489, which has since been reassigned
+  to a different, currently-merged ADR (firewall rule provenance and
+  drift-detection, PR #127 earlier this session) -- ADR numbers get reused
+  once a proposal never lands. Reserved a fresh number (0490) via
+  scripts/reserve_adr.py, extracted just the ADR markdown content (not the
+  31-file index diff from the original commit, which reflected May's ADR
+  landscape and would regress the current one), renumbered internal
+  references, and regenerated the ADR index with current tooling --
+  which also happened to fix pre-existing, unrelated staleness in the
+  index (confirmed stale on clean main before this branch existed).
+
+objectives:
+  - Land docs/adr/0490-netplan-mac-mismatch-recovery.md
+  - Regenerate the ADR index/discovery files correctly
+
+completion_metrics:
+  - docs/adr/0490-netplan-mac-mismatch-recovery.md exists with no ADR-number collision
+  - scripts/generate_adr_index.py --check passes
+
+related_adrs: []

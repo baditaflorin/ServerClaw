@@ -6,23 +6,23 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-07-30'
+generated: '2026-08-26'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 512
+total_adrs: 514
 adr_number_range:
   first: '0001'
-  last: 0488
-  next_available: 0489
+  last: 0490
+  next_available: 0491
 implementation_status_summary:
   Implemented: 377
   Partial: 4
   Not Implemented: 33
   Deprecated: 14
   Accepted: 31
-  Proposed: 53
+  Proposed: 55
 decision_status_summary:
   Accepted: 370
-  Proposed: 60
+  Proposed: 62
   Deprecated: 31
   Implemented: 51
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 80
+      count: 82
       first_adr: '0400'
-      last_adr: 0488
+      last_adr: 0490
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -88,7 +88,7 @@ facets:
       count: 34
     - concern: platform
       path: docs/adr/index/by-concern/platform.yaml
-      count: 154
+      count: 155
     - concern: release
       path: docs/adr/index/by-concern/release.yaml
       count: 7
@@ -97,7 +97,7 @@ facets:
       count: 10
     - concern: security
       path: docs/adr/index/by-concern/security.yaml
-      count: 48
+      count: 49
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
       count: 7
@@ -131,14 +131,26 @@ facets:
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
-      count: 53
+      count: 55
 reservation_ledger:
   path: docs/adr/index/reservations.yaml
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0489
+  next_available_adr: 0491
 latest_adrs:
+  - adr: 0490
+    title: Netplan MAC Mismatch — Root Cause and Self-Healing Recovery Model
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: platform
+    path: docs/adr/0490-netplan-mac-mismatch-recovery.md
+  - adr: 0489
+    title: Firewall Rule Provenance and Dependency-Gap Detection
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: security
+    path: docs/adr/0489-firewall-rule-provenance-and-drift-detection.md
   - adr: 0488
     title: Single Deployment Per Repo Checkout — Generic-By-Default, Envelope-Sized
     implementation_status: Proposed
@@ -187,18 +199,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: security
     path: docs/adr/0480-multi-deployment-certificate-validation.md
-  - adr: '0477'
-    title: '— Coolify-apps self-healing bootstrap: SSH access, DNS-01 cert, and app-deploy role'
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: bootstrap
-    path: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
-  - adr: '0476'
-    title: Wire `make converge-nginx-edge` to `fix-edge-certificate.yml`
-    implementation_status: Implemented
-    currently_describes: current_state
-    concern: security
-    path: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

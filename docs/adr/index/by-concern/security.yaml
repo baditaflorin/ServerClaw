@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-07-30'
+generated: '2026-08-26'
 facet: concern
 concern: security
-total_adrs: 48
+total_adrs: 49
 adrs:
   - adr: '0034'
     title: Controller-Local Secret Manifest And Preflight
@@ -935,3 +935,19 @@ adrs:
     summary: 'Implement deployment-aware certificate validation with three tiers:'
     filename: 0480-multi-deployment-certificate-validation.md
     path: docs/adr/0480-multi-deployment-certificate-validation.md
+  - adr: 0489
+    title: Firewall Rule Provenance and Dependency-Gap Detection
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - firewall
+      - rule
+      - provenance
+      - dependency-gap
+      - detection
+    summary: yaml
+    filename: 0489-firewall-rule-provenance-and-drift-detection.md
+    path: docs/adr/0489-firewall-rule-provenance-and-drift-detection.md

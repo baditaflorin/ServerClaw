@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-07-30'
+generated: '2026-08-26'
 facet: status
 implementation_status: Proposed
 slug: proposed
-total_adrs: 53
+total_adrs: 55
 adrs:
   - adr: '0025'
     title: Gap Analysis Matrix
@@ -901,3 +901,39 @@ adrs:
       from ADR 0385) and runs make bootstrap. There is
     filename: 0488-single-deployment-per-repo-checkout.md
     path: docs/adr/0488-single-deployment-per-repo-checkout.md
+  - adr: 0489
+    title: Firewall Rule Provenance and Dependency-Gap Detection
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: security
+    keywords:
+      - firewall
+      - rule
+      - provenance
+      - dependency-gap
+      - detection
+    summary: yaml
+    filename: 0489-firewall-rule-provenance-and-drift-detection.md
+    path: docs/adr/0489-firewall-rule-provenance-and-drift-detection.md
+  - adr: 0490
+    title: Netplan MAC Mismatch — Root Cause and Self-Healing Recovery Model
+    status: Proposed
+    implementation_status: Proposed
+    currently_describes: goal_state
+    date: '2026-03-21'
+    concern: platform
+    keywords:
+      - netplan
+      - mac
+      - mismatch
+      - root
+      - cause
+      - self-healing
+      - recovery
+      - model
+    summary: 'When VMs have lost network due to a stale netplan MAC (interface is DOWN after reboot), follow these steps from
+      the Proxmox host:'
+    filename: 0490-netplan-mac-mismatch-recovery.md
+    path: docs/adr/0490-netplan-mac-mismatch-recovery.md
