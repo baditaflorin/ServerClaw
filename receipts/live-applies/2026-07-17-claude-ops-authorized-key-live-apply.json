@@ -1,0 +1,32 @@
+{
+  "receipt_id": "2026-07-17-claude-ops-authorized-key-live-apply",
+  "applied_at_utc": "2026-07-17T16:01:08Z",
+  "applied_by": "codex",
+  "environment": "production",
+  "target": {
+    "host": "proxmox-host",
+    "account": "claude-ops",
+    "file": "~/.ssh/authorized_keys"
+  },
+  "summary": "Added an operator-provided ED25519 SSH public key to the claude-ops account for Proxmox host access.",
+  "changes": [
+    "Ensured the claude-ops ~/.ssh directory exists with mode 0700.",
+    "Ensured ~/.ssh/authorized_keys exists with mode 0600.",
+    "Appended the operator-provided public key only when it was not already present."
+  ],
+  "verification": [
+    {
+      "check": "SSH target account",
+      "result": "Connected through the repo-managed SSH config as claude-ops on the Proxmox host."
+    },
+    {
+      "check": "authorized_keys contents",
+      "result": "authorized_keys contains the new ED25519 key fingerprint SHA256:iIyk3Yi4ojWW6XaKtIuPseym0sT0veuIOv/mWxg1BYc."
+    },
+    {
+      "check": "permissions",
+      "result": "~/.ssh is mode 0700 and ~/.ssh/authorized_keys is mode 0600."
+    }
+  ],
+  "sensitive_material": "The public key body and workstation-local comment are intentionally not recorded in this receipt."
+}

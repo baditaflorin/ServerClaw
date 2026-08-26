@@ -1,0 +1,37 @@
+{
+  "receipt_id": "2026-07-02-keycloak-plane-test-oauth2-group-live-apply",
+  "applied_at_utc": "2026-07-02T09:54:14Z",
+  "applied_by": "codex",
+  "environment": "production",
+  "target": {
+    "service": "keycloak",
+    "vm": "runtime-control",
+    "realm": "0mcp",
+    "user": "plane-test@0mcp.com",
+    "edge_auth_service": "0mpc-ops-portal-oauth2-proxy"
+  },
+  "summary": "Added the Plane test SSO user to the Keycloak group required by the shared oauth2-proxy edge gate.",
+  "problem": {
+    "symptom": "After a successful Keycloak login, the oauth2-proxy callback returned 403 Forbidden for tasks.0mcp.com.",
+    "root_cause": "The running oauth2-proxy configuration allows only the /0mcp-platform-admins group, while the temporary test user initially had only platform-read and grafana-viewers access."
+  },
+  "changes": [
+    "Added plane-test@0mcp.com to Keycloak group /0mcp-platform-admins in realm 0mcp.",
+    "Left the Plane local test account unchanged."
+  ],
+  "verification": [
+    {
+      "check": "Keycloak group mapping",
+      "result": "plane-test@0mcp.com now belongs to /0mcp-platform-admins and /grafana-viewers."
+    },
+    {
+      "check": "Keycloak credential verification",
+      "result": "The realm token endpoint still accepts the plane-test password and returns access and refresh tokens."
+    },
+    {
+      "check": "oauth2-proxy policy diagnosis",
+      "result": "The running /etc/0mpc/oauth2-proxy/ops-portal.cfg file declares allowed_groups = [\"/0mcp-platform-admins\"]."
+    }
+  ],
+  "sensitive_material": "The temporary password was returned only to the operator in chat and is intentionally not recorded in this receipt."
+}

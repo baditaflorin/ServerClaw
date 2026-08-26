@@ -1,0 +1,40 @@
+id: revive-receipts-ssh-key-plane-test-user
+title: Revive SSH key + Plane test-user receipts from stale ServerClaw PRs
+status: ready
+ready_to_merge: true
+live_applied: false
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: revive-receipts-ssh-key-plane-test-user
+doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+ownership_manifest:
+  owned_surfaces:
+    - id: revive-receipts-ssh-key-plane-test-user-code
+      paths:
+        - receipts/live-applies/2026-07-17-claude-ops-authorized-key-live-apply.json
+        - receipts/live-applies/2026-07-02-plane-test-user-live-apply.json
+        - receipts/live-applies/2026-07-02-keycloak-plane-test-sso-user-live-apply.json
+        - receipts/live-applies/2026-07-02-keycloak-plane-test-oauth2-group-live-apply.json
+        - workstreams/active/revive-receipts-ssh-key-plane-test-user.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  ServerClaw PR #42 (2026-07-17, claude-ops SSH key receipt) and PR #34
+  (2026-07-02, three commits: Plane test-user live apply, Keycloak SSO test
+  user, oauth2-proxy allowed-group fix) were never mergeable there (force-push
+  snapshot publish model). All four are isolated, additive live-apply receipt
+  JSON files under receipts/live-applies/ (381 existing entries, actively
+  used) -- no credential material, just records of live operations already
+  performed. Cherry-picked all four commits cleanly, zero conflicts, valid
+  JSON verified.
+
+objectives:
+  - Land the 4 live-apply receipt files
+
+completion_metrics:
+  - All 4 receipt JSON files present under receipts/live-applies/
+  - Valid JSON, no credential material
+
+related_adrs: []
