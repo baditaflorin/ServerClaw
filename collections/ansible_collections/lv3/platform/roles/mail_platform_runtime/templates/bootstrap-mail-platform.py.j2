@@ -39,8 +39,12 @@ def principal_by_name(principal_type, name):
     return None
 
 
-def fetch_principal(principal_id):
-    return api_request("GET", f"/api/principal/{principal_id}").get("data", {})
+def principal_path(principal_name):
+    return f"/api/principal/{urllib.parse.quote(str(principal_name), safe='')}"
+
+
+def fetch_principal(principal_name):
+    return api_request("GET", principal_path(principal_name)).get("data", {})
 
 
 def ensure_domain():
@@ -104,7 +108,7 @@ def ensure_mailbox(mailbox):
         api_request("POST", "/api/principal", mailbox_payload(mailbox))
         return True
 
-    current = fetch_principal(existing["id"])
+    current = fetch_principal(existing["name"])
     operations = []
     if current.get("description") != mailbox["description"]:
         operations.append({"action": "set", "field": "description", "value": mailbox["description"]})
@@ -119,7 +123,7 @@ def ensure_mailbox(mailbox):
     operations.append({"action": "set", "field": "secrets", "value": [mailbox["password"]]})
 
     if operations:
-        api_request("PATCH", f"/api/principal/{existing['id']}", operations)
+        api_request("PATCH", principal_path(existing["name"]), operations)
         return True
     return False
 

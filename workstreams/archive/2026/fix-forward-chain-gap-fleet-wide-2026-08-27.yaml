@@ -1,0 +1,77 @@
+id: fix-forward-chain-gap-fleet-wide-2026-08-27
+title: Fix fleet-pool-fw forward-chain gap on all 17 guests, not just 2
+status: merged
+ready_to_merge: true
+live_applied: true
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: fix-forward-chain-gap-fleet-wide-2026-08-27
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: fix-forward-chain-gap-fleet-wide-2026-08-27-doc
+      paths:
+        - docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+        - workstreams/active/fix-forward-chain-gap-fleet-wide-2026-08-27.yaml
+        - workstreams/archive/2026/fix-forward-chain-fleet-pool-fw-gap-2026-08-27.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Follow-up audit requested after #140 (which fixed coolify-apps and
+  runtime-control): "check the other guests for the same forward chain
+  gap." That PR's claim that the remaining 15 guests were unaffected was
+  wrong -- auditing all 17 running guests (qm list on the example.org
+  Proxmox host, nft list chain inet filter forward on each) found the
+  identical pattern everywhere: every per-source-IP accept rule in each
+  guest's forward chain still only matched 10.10.10.x, with zero
+  10.10.10.x counterparts. Several guests (docker-runtime-lv3,
+  monitoring-lv3, runtime-ai-lv3, runtime-general-lv3) have dense
+  per-host allow-lists, not just broad-subnet matches as previously
+  assumed.
+
+  Fixed one guest at a time per explicit instruction ("do it with canary
+  where possible and one by one"): docker-build-lv3 first as canary
+  (simplest ruleset, non-customer-facing), then sequentially through
+  artifact-cache-lv3, nginx-lv3, backup-lv3, monitoring-lv3, coolify-lv3,
+  runtime-ai-lv3, runtime-general-lv3, runtime-comms-lv3,
+  runtime-apps-lv3, docker-runtime-lv3 (deduped ~17 unique targets out of
+  a heavily-duplicated existing ruleset, left the pre-existing duplicates
+  alone), and the 4 Postgres nodes last as the highest-risk group
+  (postgres-lv3, postgres-replica-lv3, postgres-apps-lv3,
+  postgres-data-lv3).
+
+  Method, automated identically across all 15 via a small dry-run/--apply
+  Python script (parses live nft output, mirrors each 10.10.10.x rule's
+  exact match conditions to 10.10.10.x, skips anything already present):
+  live nft add rule first, verify, then persist into /etc/nftables.conf
+  (timestamped backup, comment header, nft -c -f syntax check) without
+  reloading live (flush ruleset would wipe Docker's own NAT/isolation
+  chains) -- same non-destructive approach validated on the first two
+  guests in #140.
+
+  Side finding, not fixed here: the 4 Postgres guests' forward chains
+  reference an HA stack (etcd 2379/2380, Patroni REST 8008, keepalived
+  VRRP) that was never actually deployed -- only plain
+  postgresql@17-main is running on any of them, no Patroni/etcd/Docker,
+  every node reports pg_is_in_recovery()=f with empty
+  pg_stat_replication. Flagged as a separate follow-up, not caused by or
+  related to the network migration.
+
+  Verified: a final dry-run sweep of the same script against all 17
+  guests reports zero remaining gaps. External spot-check
+  (app/ci/grafana/n8n.example.org) and Postgres replication-status queries
+  on all 4 DB nodes confirm no regressions.
+
+objectives:
+  - Audit every running example.org guest for the same forward-chain gap found on coolify-apps/runtime-control
+  - Fix any gap found, one guest at a time with a canary first, live + persisted
+  - Correct the postmortem's prior (wrong) claim that only 2 guests were affected
+
+completion_metrics:
+  - All 17 running guests' forward chains have 10.10.10.x mirrors of every existing 10.10.10.x per-source-IP rule
+  - A dry-run of the fix script against all 17 guests reports zero remaining gaps
+  - No regression in external service checks or Postgres replication status
+
+related_adrs: []

@@ -64,7 +64,7 @@ Before any `--apply` run:
 
 1. Run from the integrated checkout that contains the exact code you intend to apply, not from an older or partially merged worktree.
 2. Confirm `make validate`, `make syntax-check-secret-rotation`, and `make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS="--plan"` all pass from that checkout.
-3. Confirm the controller-local prerequisites referenced by `config/controller-local-secrets.json` exist and are readable, especially the SSH key and the OpenBao init payload.
+3. Confirm the controller-local prerequisites referenced by `config/controller-local-secrets.json` exist and are readable, especially the SSH key and the governed OpenBao break-glass password. The workflow must not depend on a bootstrap root token.
 4. Confirm `make converge-openbao` and `make converge-windmill` have been applied successfully on the target platform revision so the dedicated OpenBao paths and the seeded Windmill script exist live.
 5. Confirm the target service is healthy before rotation. For the first live apply, start with `windmill_database_password`, which is the lowest-risk candidate in this catalog.
 6. Confirm rollback posture exists before touching high-risk credentials. At minimum, know how to re-run the same secret id with an explicit value and verify the owning service health.
@@ -72,7 +72,8 @@ Before any `--apply` run:
 
 ## Human And Agent Notes
 
-- `playbooks/secret-rotation.yml` is expected to run from a separate worktree. It resolves the secret catalog and controller-local manifest relative to `playbook_dir`, then reads the actual OpenBao init payload path from the manifest.
+- `playbooks/secret-rotation.yml` is expected to run from a separate worktree. It resolves the secret catalog and controller-local manifest relative to `playbook_dir`, then resolves controller-local credential paths through the shared Git root.
+- Plan mode uses a short-lived break-glass login only for live readback and revokes that token when the plan completes. Apply mode uses break-glass only to mint and verify a fresh `secret-rotation` AppRole credential, revokes the broad token before KV access, and performs OpenBao reads/writes with the least-privilege AppRole token.
 - The playbook mutates the owning service first and OpenBao second. If a run fails after the service change, treat the platform as partially rotated and reconcile by rerunning the same secret deliberately instead of inventing an ad hoc rollback.
 - The committed ADR status means the repo automation exists. It does not mean the live platform metadata is updated. Do not bump `Implemented In Platform Version` until an apply from `main` succeeds and is verified.
 - Mail-platform compatibility mirrors still exist for grouped legacy paths. A successful mail secret rotation must leave both the dedicated secret path and the compatibility bundle consistent.

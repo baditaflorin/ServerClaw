@@ -21,7 +21,7 @@ Today, these scenarios either don't get tested (most common), run against produc
 The platform already has:
 - OpenTofu for VM lifecycle (ADR 0085)
 - Packer templates for fast VM cloning (ADR 0084)
-- A staging VLAN (`vmbr20`, `10.20.10.0/24`) from ADR 0072
+- A staging VLAN (`vmbr20`, `10.10.10.0/24`) from ADR 0072
 - The build server for remote execution (ADR 0082)
 
 What is missing is a simple interface to say "give me a clean VM for 2 hours on the staging network, run these roles against it, then destroy it".
@@ -41,8 +41,8 @@ template: lv3-docker-host         # Packer template (ADR 0084)
 vmid_range: [910, 979]             # VMID pool for ephemeral VMs
 network:
   bridge: vmbr20                   # staging bridge (ADR 0072)
-  ip_cidr: 10.20.10.100/24
-  gateway: 10.20.10.1
+  ip_cidr: 10.10.10.100/24
+  gateway: 10.10.10.1
 resources:
   cores: 2
   memory_mb: 2048
@@ -54,7 +54,7 @@ tags:
 roles_under_test:
   - lv3.platform.docker_runtime
 verify:
-  - url: http://10.20.10.100:9000   # Portainer health check
+  - url: http://10.10.10.100:9000   # Portainer health check
     expected_status: 200
     timeout_seconds: 60
 ```

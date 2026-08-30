@@ -3,6 +3,11 @@
 # Instances: {{ neko_instances | length }}
 # Auth: Keycloak via shared oauth2-proxy (ops-portal-oauth client)
 # Routing: X-Auth-Request-Email header → per-user container
+# TLS: shared edge certificate lineage (same one every other edge vhost uses),
+#      NOT a per-host browser.<domain> lineage — certbot never issues one for
+#      this hostname, so a per-host path renders a vhost nginx cannot load.
+{% set neko_edge_cert_name = public_edge_effective_cert_name
+   | default(public_edge_cert_name | default(platform_identity.config_prefix ~ '-edge', true), true) %}
 
 map $http_upgrade $connection_upgrade {
     default upgrade;
@@ -31,8 +36,8 @@ server {
     http2 on;
     server_name browser.{{ platform_domain }};
 
-    ssl_certificate     /etc/letsencrypt/live/browser.{{ platform_domain }}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/browser.{{ platform_domain }}/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/{{ neko_edge_cert_name }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ neko_edge_cert_name }}/privkey.pem;
     ssl_protocols       TLSv1.2 TLSv1.3;
     ssl_ciphers         HIGH:!aNULL:!MD5;
     ssl_session_cache   shared:SSL:10m;

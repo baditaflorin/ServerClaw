@@ -192,7 +192,7 @@
     label: "{{ item.id }}"
   no_log: true
 
-- name: Record the target secret file paths
+- name: Record the runtime secret file mappings
   ansible.builtin.set_fact:
     mail_platform_rotation_runtime_remote_files:
       stalwart_admin_password: "{{ mail_platform_admin_password_file }}"
@@ -204,6 +204,10 @@
       mailbox_password: "{{ mail_platform_mailbox_password_local_file }}"
       metrics_password: "{{ mail_platform_metrics_password_local_file }}"
       gateway_api_key: "{{ mail_platform_gateway_api_key_local_file }}"
+  no_log: true
+
+- name: Record the target secret file paths
+  ansible.builtin.set_fact:
     mail_platform_rotation_remote_target_file: >-
       {{
         mail_platform_rotation_runtime_remote_files[secret_rotation_selected_secret.apply_field]

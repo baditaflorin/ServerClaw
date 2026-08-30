@@ -10,7 +10,7 @@ MAIN_TASKS = Path("collections/ansible_collections/lv3/platform/roles/hetzner_dn
 def test_missing_live_ttl_defaults_to_desired_ttl() -> None:
     tasks = yaml.safe_load(ROLE_TASKS.read_text())
     update_task = next(
-        task for task in tasks if task["name"] == "Update the canonical DNS record when drift is detected"
+        task for task in tasks if task["name"] == "Update the canonical DNS record TTL when only TTL drift is detected"
     )
     condition = " ".join(str(part) for part in update_task["when"])
 
@@ -23,12 +23,28 @@ def test_multi_record_role_translates_provider_payloads_before_matching() -> Non
     record_tasks = ROLE_TASKS.read_text(encoding="utf-8")
 
     assert "Translate Hetzner DNS zone provider payload into canonical zone facts" in main_tasks
-    assert "Translate Hetzner DNS record provider payload into canonical record facts" in main_tasks
+    assert "Translate Hetzner DNS rrset provider payload into canonical record facts" in main_tasks
     assert main_tasks.count("hetzner_dns_zone_lookup.json.zones") == 1
-    assert main_tasks.count("hetzner_dns_records_lookup.json.records") == 1
+    assert "hetzner_dns_existing_rrsets" in main_tasks
+    assert "rrset.records | default([])" in main_tasks
     assert "dns_provider_boundary_existing_records" in record_tasks
-    assert "hetzner_dns_records_lookup.json.records" not in record_tasks
+    assert "hetzner_dns_existing_rrsets" not in record_tasks
     assert "dns_provider_boundary_matching_records[0].provider_ref" in record_tasks
+
+
+def test_multi_record_role_walks_and_validates_all_rrset_pages() -> None:
+    main_tasks = yaml.safe_load(MAIN_TASKS.read_text())
+    names = {task["name"] for task in main_tasks}
+    main_text = MAIN_TASKS.read_text(encoding="utf-8")
+
+    assert "Read the first page of current Hetzner DNS rrsets for the zone" in names
+    assert "Read the remaining pages of current Hetzner DNS rrsets for the zone" in names
+    assert "Combine all Hetzner DNS rrset pages" in names
+    assert "Assert the paginated Hetzner DNS rrset inventory is complete" in names
+    assert "range(2, (hetzner_dns_rrset_last_page | int) + 1)" in main_text
+    assert "meta.pagination.total_entries" in main_text
+    assert "per_page={{ hetzner_dns_rrsets_per_page | int }}" in main_text
+    assert "fits in a single 100-entry page" not in main_text
 
 
 def test_multi_record_role_supports_absent_state() -> None:
@@ -44,6 +60,10 @@ def test_multi_record_role_updates_same_name_type_drift_instead_of_creating_dupl
 
     assert "dns_provider_boundary_same_name_type_records" in record_tasks
     assert "if (hetzner_dns_record.state | default('present')) == 'present'" in record_tasks
+    assert "Build the reconciled full DNS rrset record list" in record_tasks
+    assert "Append the missing value to an existing canonical DNS rrset" in record_tasks
+    assert "dns_provider_boundary_reconciled_rrset_records" in record_tasks
+    assert "existing.record_comment | default('')" in record_tasks
 
 
 def test_multi_record_role_retries_transient_provider_errors() -> None:
@@ -54,23 +74,26 @@ def test_multi_record_role_retries_transient_provider_errors() -> None:
     assert "429" in record_tasks
     assert "504" in record_tasks
     assert "return_content: true" in record_tasks
-    assert "hetzner_dns_record_create_response.json.error.code" in record_tasks
-    assert "hetzner_dns_record_update_response.json.error.code" in record_tasks
-    assert "hetzner_dns_record_delete_response.json.error.code" in record_tasks
+    assert "hetzner_dns_record_create_response.status in [200, 201]" in record_tasks
+    assert "hetzner_dns_record_append_response.status in [200, 201]" in record_tasks
+    assert "hetzner_dns_record_update_response.status in [200, 201]" in record_tasks
+    assert "hetzner_dns_record_delete_response.status in [200, 201, 204]" in record_tasks
 
 
 def test_multi_record_role_marks_provider_mutations_as_changed() -> None:
     record_tasks = ROLE_TASKS.read_text(encoding="utf-8")
 
-    assert record_tasks.count("changed_when: true") == 3
+    assert record_tasks.count("changed_when: true") == 5
 
 
 def test_multi_record_role_builds_native_json_payload_for_create_and_update() -> None:
     record_tasks = ROLE_TASKS.read_text(encoding="utf-8")
 
-    assert "Build the canonical DNS record provider payload" in record_tasks
+    assert "Build the canonical DNS rrset provider payload" in record_tasks
     assert "'ttl': (hetzner_dns_record.ttl | default(60) | int)" in record_tasks
-    assert record_tasks.count('body: "{{ dns_provider_boundary_desired_record_payload }}"') == 2
+    assert "'records': [" in record_tasks
+    assert record_tasks.count('body: "{{ dns_provider_boundary_desired_record_payload }}"') == 1
+    assert record_tasks.count('records: "{{ dns_provider_boundary_reconciled_rrset_records }}"') == 2
 
 
 def test_brownout_manual_fallback_gates_all_write_operations() -> None:
@@ -83,7 +106,9 @@ def test_brownout_manual_fallback_gates_all_write_operations() -> None:
     for action_name in (
         "Delete the canonical DNS record when it is retired",
         "Create the canonical DNS record when it does not exist",
-        "Update the canonical DNS record when drift is detected",
+        "Append the missing value to an existing canonical DNS rrset",
+        "Update the canonical DNS record values when value drift is detected",
+        "Update the canonical DNS record TTL when only TTL drift is detected",
     ):
         task = next(t for t in record_tasks if t["name"] == action_name)
         conditions = [str(c) for c in task["when"]]

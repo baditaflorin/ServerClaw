@@ -30,7 +30,7 @@ strings** that encode the production LV3 deployment topology. Example
 
 `10.10.10.92` is the LV3 runtime-control guest IP. When a forked deployment
 (ADR 0424) runs the same gitea playbook, the playbook's convergence succeeds
-on the fork's runtime-control (`10.20.10.10`), but the post-verify HTTP
+on the fork's runtime-control (`10.10.10.10`), but the post-verify HTTP
 probe invoked via `playbooks/tasks/verify-probe.yml` dials `10.10.10.92`
 — which does not exist on the fork network. The probe retries 24× with
 5s delay and fails the play, even though the service itself is healthy.

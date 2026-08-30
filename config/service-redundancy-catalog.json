@@ -60,6 +60,23 @@
         "failback_method": "Restore or rebuild runtime-control, then rerun the API gateway converge from git."
       }
     },
+    "authentik": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_192"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "runtime-control",
+        "failover_trigger": "Restore runtime-control's Authentik Postgres database from PBS when Authentik or its dependent runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild the authentik-postgres bind mount from backup, then redeploy the authentik_runtime role and reapply the OAuth client manifest to reconcile providers and applications without rotating secrets."
+      }
+    },
     "backup_pbs": {
       "tier": "R1",
       "recovery_objective": {

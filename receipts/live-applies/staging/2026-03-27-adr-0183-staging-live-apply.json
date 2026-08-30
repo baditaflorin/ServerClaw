@@ -21,20 +21,20 @@
       "kind": "guest",
       "name": "docker-runtime-staging-lv3",
       "vmid": 220,
-      "address": "10.20.10.20"
+      "address": "10.10.10.20"
     },
     {
       "kind": "guest",
       "name": "monitoring-staging-lv3",
       "vmid": 240,
-      "address": "10.20.10.40"
+      "address": "10.10.10.40"
     }
   ],
   "verification": [
     {
       "check": "Staging bridge and Proxmox API role converge",
       "result": "pass",
-      "observed": "`make configure-staging-bridge` left `vmbr20` active on `10.20.10.1/24`, and `make provision-api-access` created the custom `LV3Automation` role plus updated the user and token ACLs on `/` so staged OpenTofu VM creation could proceed on Proxmox VE 9."
+      "observed": "`make configure-staging-bridge` left `vmbr20` active on `10.10.10.1/24`, and `make provision-api-access` created the custom `LV3Automation` role plus updated the user and token ACLs on `/` so staged OpenTofu VM creation could proceed on Proxmox VE 9."
     },
     {
       "check": "Reviewed staging plan and live apply",
@@ -44,7 +44,7 @@
     {
       "check": "Staging VM reachability",
       "result": "pass",
-      "observed": "After converging the staged VM NICs to `firewall=0`, both `docker-runtime-staging-lv3` and `monitoring-staging-lv3` responded to host ping on `10.20.10.20` and `10.20.10.40`, and both accepted SSH as `ops` through the Proxmox jump path."
+      "observed": "After converging the staged VM NICs to `firewall=0`, both `docker-runtime-staging-lv3` and `monitoring-staging-lv3` responded to host ping on `10.10.10.20` and `10.10.10.40`, and both accepted SSH as `ops` through the Proxmox jump path."
     },
     {
       "check": "Non-destructive staging validation",

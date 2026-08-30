@@ -54,15 +54,12 @@
   ansible.builtin.set_fact:
     dns_provider_boundary_zone: "{{ dns_provider_boundary_zone_candidates[0] }}"
 
-# Pull all rrsets for the zone in one request. per_page=100 is the maximum
-# the new Console API accepts; that covers any realistic single zone (e.g.
-# example.com has 67 rrsets as of 2026-04-28). The assert below catches the
-# day a zone outgrows a single page so we don't silently miss records and
-# infer false drift / spurious deletes; when that happens, extend this
-# task with a manual page-walk loop.
-- name: Read current Hetzner DNS rrsets for the zone
+# Fetch page one first so the provider-reported last_page controls a bounded
+# walk.  The Console API caps per_page at 100, and production zones can exceed
+# that as new services are published.
+- name: Read the first page of current Hetzner DNS rrsets for the zone
   ansible.builtin.uri:
-    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets?per_page=100"
+    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets?page=1&per_page={{ hetzner_dns_rrsets_per_page | int }}"
     method: GET
     headers:
       Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
@@ -71,15 +68,71 @@
   changed_when: false
   no_log: true
 
-- name: Assert the rrset listing fits in a single 100-entry page
+- name: Record the Hetzner DNS rrset pagination boundary
+  ansible.builtin.set_fact:
+    hetzner_dns_rrset_last_page: >-
+      {{
+        hetzner_dns_records_lookup.json.meta.pagination.last_page
+        | default(1)
+        | int
+      }}
+
+- name: Read the remaining pages of current Hetzner DNS rrsets for the zone
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets?page={{ item }}&per_page={{ hetzner_dns_rrsets_per_page | int }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    return_content: true
+  loop: "{{ range(2, (hetzner_dns_rrset_last_page | int) + 1) | list }}"
+  loop_control:
+    label: "page {{ item }}"
+  register: hetzner_dns_records_additional_pages
+  changed_when: false
+  no_log: true
+
+- name: Combine all Hetzner DNS rrset pages
+  ansible.builtin.set_fact:
+    hetzner_dns_records_lookup_pages: >-
+      {{
+        [hetzner_dns_records_lookup.json]
+        + (
+          hetzner_dns_records_additional_pages.results
+          | default([])
+          | selectattr('json', 'defined')
+          | map(attribute='json')
+          | list
+        )
+      }}
+
+- name: Flatten the paginated Hetzner DNS rrset inventory
+  ansible.builtin.set_fact:
+    hetzner_dns_existing_rrsets: >-
+      {%- set items = [] -%}
+      {%- for page in hetzner_dns_records_lookup_pages -%}
+      {%- for rrset in page.rrsets | default([]) -%}
+      {%- set _ = items.append(rrset) -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {{ items }}
+
+- name: Assert the paginated Hetzner DNS rrset inventory is complete
   ansible.builtin.assert:
     that:
+      - hetzner_dns_records_lookup_pages | length == hetzner_dns_rrset_last_page | int
       - >-
-        (hetzner_dns_records_lookup.json.meta.pagination.next_page | default(None)) is none
+        hetzner_dns_existing_rrsets | length
+        == (
+          hetzner_dns_records_lookup.json.meta.pagination.total_entries
+          | default(hetzner_dns_existing_rrsets | length)
+          | int
+        )
     fail_msg: >-
-      Hetzner zone {{ hetzner_dns_zone_name }} has more than 100 rrsets
-      (next_page={{ hetzner_dns_records_lookup.json.meta.pagination.next_page | default('?') }}).
-      Add a manual page-walk loop to this task before proceeding.
+      Hetzner zone {{ hetzner_dns_zone_name }} returned an incomplete rrset
+      inventory (pages={{ hetzner_dns_records_lookup_pages | length }}/{{ hetzner_dns_rrset_last_page }},
+      rrsets={{ hetzner_dns_existing_rrsets | length }}/{{
+        hetzner_dns_records_lookup.json.meta.pagination.total_entries | default('?')
+      }}). Refusing to infer drift from a partial provider response.
 
 # Each Hetzner Console rrset groups all values for one (name,type) pair.
 # Flatten each rrset.records[].value into a separate canonical record so the
@@ -92,13 +145,14 @@
   ansible.builtin.set_fact:
     dns_provider_boundary_existing_records: >-
       {%- set items = [] -%}
-      {%- for rrset in hetzner_dns_records_lookup.json.rrsets | default([]) -%}
+      {%- for rrset in hetzner_dns_existing_rrsets -%}
       {%- for entry in rrset.records | default([]) -%}
       {%- set _ = items.append({
         "record_ref": "dns-record:" ~ (rrset.type | default("unknown")) ~ ":" ~ (rrset.name | default("")),
         "record_name": rrset.name | default(""),
         "record_type": rrset.type | default(""),
         "record_value": entry.value | default(""),
+        "record_comment": entry.comment | default(""),
         "record_ttl": rrset.ttl | default(0) | int,
         "provider_ref": rrset.id | default(""),
         "provider": "hetzner_dns"
@@ -106,6 +160,11 @@
       {%- endfor -%}
       {%- endfor -%}
       {{ items }}
+
+- name: Reset the Hetzner DNS brownout pending-record accumulator
+  ansible.builtin.set_fact:
+    hetzner_dns_brownout_pending_records: []
+  when: hetzner_dns_brownout_manual_fallback | bool
 
 - name: Ensure desired Hetzner DNS records are present
   ansible.builtin.include_tasks: record.yml

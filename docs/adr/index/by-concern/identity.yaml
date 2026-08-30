@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-26'
+generated: '2026-08-29'
 facet: concern
 concern: identity
-total_adrs: 9
+total_adrs: 10
 adrs:
   - adr: '0007'
     title: Agent-Oriented Access Model
@@ -184,3 +184,20 @@ adrs:
     summary: ''
     filename: 0440-per-deployment-identity-and-artifact-isolation.md
     path: docs/adr/0440-per-deployment-identity-and-artifact-isolation.md
+  - adr: 0491
+    title: Authentik For Operator And Agent SSO
+    status: Accepted
+    implementation_status: Partial
+    currently_describes: mixed_state
+    date: '2026-08-27'
+    concern: identity
+    keywords:
+      - authentik
+      - operator
+      - agent
+      - sso
+    summary: We will replace Keycloak with Authentik as the shared SSO and identity-broker layer for internal operator-facing
+      and approved agent-facing applications, followi
+    filename: 0491-authentik-for-operator-and-agent-sso.md
+    path: docs/adr/0491-authentik-for-operator-and-agent-sso.md
+    implemented_on: '2026-08-30'

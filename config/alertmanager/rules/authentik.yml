@@ -1,0 +1,12 @@
+groups:
+  - name: authentik-alerts
+    rules:
+      - alert: AUTHENTIKServiceUnhealthy
+        expr: up{job="authentik"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          service: authentik
+        annotations:
+          summary: "Authentik is unhealthy"
+          description: "Authentik's Prometheus scrape target has been down for 5+ minutes -- operator and agent SSO login (id.example.org) is likely unavailable. Check the authentik-server container on runtime-control."

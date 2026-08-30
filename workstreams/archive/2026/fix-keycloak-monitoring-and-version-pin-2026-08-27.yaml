@@ -1,0 +1,73 @@
+id: fix-keycloak-monitoring-and-version-pin-2026-08-27
+title: Add real keycloak monitoring, fix a 6th stale-address instance in nginx, pin the image version
+status: merged
+ready_to_merge: true
+live_applied: true
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: fix-keycloak-monitoring-and-version-pin-2026-08-27
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: fix-keycloak-monitoring-and-version-pin-2026-08-27-doc
+      paths:
+        - docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+        - config/health-probe-catalog.json
+        - workstreams/active/fix-keycloak-monitoring-and-version-pin-2026-08-27.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Operator confirmed keycloak/SSO is a wanted, kept part of the platform
+  and asked for monitoring parity with other services plus the version
+  pin flagged in #147.
+
+  Found a 6th instance of this incident's stale-address pattern while
+  investigating: nginx's own proxy_pass for sso.example.org still said
+  10.10.10.92:8091 (runtime-control's genuinely correct address, but
+  keycloak was relocated to docker-runtime at 10.10.10.20 without nginx
+  being updated to follow it) -- this, not anything keycloak-side, is
+  what actually caused sso.example.org's intermittent 502s. Verified the
+  three other nginx blocks using .92 (billing/api/registry.example.org) are
+  correctly addressed and untouched.
+
+  Fixed config/health-probe-catalog.json's keycloak entry (the real
+  source prometheus.yml.j2 renders from, confirmed via
+  monitoring_health_probe_catalog_path): owning_vm, binding host, realm
+  name (lv3 -> 0mcp), and the uptime_kuma monitor URL. Left
+  service-capability-catalog.json's matching stale entry alone --
+  interlocking fields, unconfirmed live consumer, partial fix risked more
+  inconsistency than it resolved.
+
+  Applied the same fixes live: the real Uptime Kuma monitor (already
+  deployed on runtime-general) had the right domain but wrong realm,
+  fixed via SQL + restart; the live prometheus.yml's keycloak-readiness
+  job fixed and 0mpc-prometheus.service restarted (no reload support).
+
+  Discovered, not caused by and not fixed here: every "Public" Uptime
+  Kuma monitor has been failing since at least 2026-05-30 due to a
+  fleet-wide NAT-reflection gap (can't reach the fleet's own public
+  domains from inside the fleet) -- keycloak's corrected monitor is now
+  exactly as broken as every other service's for the same pre-existing
+  reason, and will start working the moment that gap is fixed.
+
+  Pinned keycloak from the bare tag quay.io/keycloak/keycloak:26.1.0 to
+  the specific version+digest that actually matches what last ran
+  migrations against the database (26.7.2, confirmed via a clean
+  startup afterward with no version-skew warning and no Liquibase
+  checksum error).
+
+objectives:
+  - Give keycloak real, working monitoring matching the pattern other services use
+  - Find and fix whatever was actually still causing sso.example.org's intermittent failures
+  - Pin the keycloak image to stop future version-skew drift
+
+completion_metrics:
+  - sso.example.org and ops.example.org both verified responding correctly after the fix
+  - keycloak's health-probe-catalog and live Uptime Kuma/Prometheus entries use real, correct values
+  - keycloak runs a specific pinned version+digest, confirmed by a clean startup log
+
+related_adrs:
+  - "0056"
+  - "0376"

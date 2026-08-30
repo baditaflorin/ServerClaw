@@ -50,7 +50,10 @@ argument_specs:
       outline_database_password_local_file:
         type: path
         required: true
-      outline_keycloak_client_secret_local_file:
+      outline_oidc_client_secret_local_file:
+        type: path
+        required: true
+      outline_keycloak_rollback_client_secret_local_file:
         type: path
         required: true
       outline_operator_password_local_file:

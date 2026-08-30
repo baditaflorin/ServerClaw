@@ -1,0 +1,64 @@
+id: investigate-postgres-corruption-root-cause-2026-08-27
+title: Investigate Postgres pg_authid corruption root cause -- inconclusive, found a real single-point-of-failure storage risk
+status: merged
+ready_to_merge: true
+live_applied: false
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: investigate-postgres-corruption-root-cause-2026-08-27
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: investigate-postgres-corruption-root-cause-2026-08-27-doc
+      paths:
+        - docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+        - workstreams/active/investigate-postgres-corruption-root-cause-2026-08-27.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Follow-up investigation requested after #143 found real pg_authid_oid_index
+  corruption on 2 of 4 Postgres nodes following a clean, graceful reboot.
+  Systematically ruled out every deterministic explanation checked:
+  fstrim/discard timing (host and all 4 guests last ran 3 days before the
+  incident, nothing trim-related fired near the reboot window), scheduled
+  backups (none configured -- vzdump.cron is empty), Postgres durability
+  settings (identical fsync/full_page_writes/synchronous_commit/
+  wal_sync_method across all 4 nodes), VM/disk configuration (all 4 created
+  in the same batch with identical agent/controller/storage settings), and
+  block-device-level flush failures (0 reported, no dmesg I/O errors).
+
+  Found a real, separate, serious infra risk along the way: the Proxmox
+  host's `local` storage (backing every VM's disk) sits on an mdadm array
+  labeled raid1 but created with Raid Devices: 1, Total Devices: 1 -- a
+  single NVMe drive with zero actual redundancy, not a degraded mirror.
+  This doesn't explain the specific 2-of-4 corruption split (all VMs share
+  this storage equally) but is a standing single point of failure for the
+  entire host's VM fleet.
+
+  Leading theory for the corruption itself (a lost/reordered write during
+  the ACPI-triggered reboot's shutdown checkpoint) is plausible but
+  unproven -- with only 4 samples (2 hit, 2 clean), it could be a
+  deterministic storage-durability gap or an unlucky coincidence. Not
+  resolved.
+
+  Given data_checksums=off on all 4 nodes (a corrupted heap page wouldn't
+  necessarily surface as an error the way the btree metapage did), ran a
+  full amcheck sweep before closing this out: bt_index_check across every
+  btree index in every real database on the primary, verify_heapam across
+  every table in keycloak (the confirmed actively-used database), and the
+  same check on the replica's postgres database. All clean -- no other
+  corruption found beyond what was already fixed in #143.
+
+objectives:
+  - Determine why 2 of 4 Postgres nodes got real corruption from a clean reboot
+  - Rule in or out the deterministic causes that could be checked remotely
+  - Confirm no other silent corruption exists beyond what was already fixed
+
+completion_metrics:
+  - Every checkable deterministic cause (fstrim, backups, config, storage errors) is ruled in or out with evidence
+  - A full amcheck integrity sweep confirms no other corruption on the primary and replica
+  - Any new risk found (the single-device pseudo-RAID1) is documented for follow-up
+
+related_adrs: []

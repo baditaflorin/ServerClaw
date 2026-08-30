@@ -111,6 +111,31 @@ def test_update_catalog_uses_shared_repo_root_for_shared_receipts(monkeypatch, t
     assert updated["images"]["dozzle_runtime"]["scan_receipt"] == "receipts/image-scans/2026-04-14-dozzle-runtime.json"
 
 
+def test_update_catalog_uses_active_worktree_for_materialized_receipts(monkeypatch, tmp_path: Path) -> None:
+    catalog = make_catalog()
+    worktree_root = tmp_path / ".worktrees" / "ws-0370-live-apply"
+    shared_root = tmp_path
+
+    monkeypatch.setattr(tool, "IMAGE_CATALOG_PATH", worktree_root / "config" / "image-catalog.json")
+    monkeypatch.setattr(tool, "shared_repo_root", lambda root: shared_root)
+
+    receipt_path = worktree_root / "receipts" / "image-scans" / "2026-04-14-dozzle-runtime.json"
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+
+    updated = tool.update_catalog(
+        catalog,
+        image_id="dozzle_runtime",
+        tag="v8.13.7",
+        digest=catalog["images"]["dozzle_runtime"]["digest"],
+        scanned_on="2026-04-14",
+        receipt_path=receipt_path,
+        exception=None,
+        preserve_pin=True,
+    )
+
+    assert updated["images"]["dozzle_runtime"]["scan_receipt"] == "receipts/image-scans/2026-04-14-dozzle-runtime.json"
+
+
 def test_main_refresh_scan_only_reuses_current_pin(monkeypatch, tmp_path: Path, capsys) -> None:
     catalog = make_catalog()
     image_catalog_path = tmp_path / "config" / "image-catalog.json"

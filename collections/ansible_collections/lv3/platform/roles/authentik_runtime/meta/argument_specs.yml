@@ -1,0 +1,153 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the OpenBao-backed Authentik identity runtime.
+    options:
+      authentik_service_topology:
+        type: dict
+        required: true
+        description:
+          - Service topology entry for the scaffolded runtime.
+      authentik_secret_bootstrap_mode:
+        type: str
+        required: true
+        choices:
+          - preserve
+          - adopt_legacy
+          - generate
+        description:
+          - Fail-safe source selection for canonical Authentik secrets.
+          - Existing deployments must explicitly adopt the legacy environment.
+      authentik_legacy_env_file:
+        type: path
+        required: true
+        description:
+          - Existing root-owned environment used only during explicit adoption.
+      authentik_legacy_env_backup_file:
+        type: path
+        required: true
+        description:
+          - Recoverable copy retained through the post-adoption verification window.
+      authentik_legacy_compose_backup_file:
+        type: path
+        required: true
+        description:
+          - Root-only rollback copy of the pre-OpenBao compose definition.
+      authentik_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the Authentik compose stack.
+      authentik_secret_dir:
+        type: path
+        required: true
+        description:
+          - Guest-local directory that stores bootstrap secret material.
+      authentik_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the scaffolded runtime.
+      authentik_env_file:
+        type: path
+        required: true
+        description:
+          - Runtime env file rendered for the application container.
+      authentik_image:
+        type: str
+        required: true
+        description:
+          - Container image reference for the scaffolded application.
+      authentik_container_name:
+        type: str
+        required: true
+        description:
+          - Docker container name for the scaffolded application.
+      authentik_internal_port:
+        type: int
+        required: true
+        description:
+          - Host port exposed by the scaffolded runtime.
+      authentik_container_port:
+        type: int
+        required: true
+        description:
+          - Container port exposed by the application image.
+      authentik_healthcheck_path:
+        type: str
+        required: true
+        description:
+          - HTTP path used by the local verify contract.
+      authentik_public_url:
+        type: str
+        required: true
+        description:
+          - Public Authentik authority used by the OAuth reconciler.
+      authentik_bootstrap_admin_token_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file that stores the generated bootstrap admin token.
+      authentik_local_artifact_dir:
+        type: path
+        required: true
+        description:
+          - Controller-local directory that mirrors the bootstrap admin token.
+      authentik_bootstrap_admin_token_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local mirror path for the bootstrap admin token.
+      authentik_postgres_image:
+        type: str
+        required: true
+        description:
+          - Container image reference for Authentik's own PostgreSQL database.
+      authentik_redis_image:
+        type: str
+        required: true
+        description:
+          - Container image reference for Authentik's Redis cache/session store.
+      authentik_secret_key_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file that stores the generated Django SECRET_KEY.
+      authentik_postgres_password_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file that stores the shared Postgres password.
+      authentik_bootstrap_token_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file that stores the generated API bootstrap token
+            (AUTHENTIK_BOOTSTRAP_TOKEN), the surface that makes Authentik
+            agentic/API-drivable per ADR 0491.
+      authentik_oauth_reconcile_enabled:
+        type: bool
+        required: true
+        description:
+          - Reconcile the manifest after local runtime health succeeds.
+      authentik_oauth_manifest_file:
+        type: path
+        required: true
+        description:
+          - Controller-side non-secret OAuth provider/application manifest.
+      authentik_oauth_reconcile_script:
+        type: path
+        required: true
+        description:
+          - Controller-side idempotent Authentik API reconciler.
+      authentik_oauth_reconcile_token_file:
+        type: path
+        required: true
+        description:
+          - Ignored controller-local Authentik API token file.
+      authentik_oauth_reconcile_clients:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Manifest client identifiers reconciled by this converge.

@@ -66,12 +66,9 @@
 #   POST /v1/zones/{zone_id}/rrsets        — body: {name, type, ttl, records}
 #   PUT  /v1/zones/{zone_id}/rrsets/{id}   — same body; records[] REPLACES set
 #   DELETE /v1/zones/{zone_id}/rrsets/{id} — no body
-# `records` is the rrset's full value list. Because this role iterates one
-# desired (name,type,value) at a time, the payload below carries a single-
-# entry records[] — fine for the predominant single-value rrset case.
-# A multi-value rrset (e.g. multiple MX hosts) where two desired records
-# share the same (name,type) would clobber each other on PUT; that's a
-# known limitation tracked by ADR 0430 PR 4 follow-up.
+# `records` is the rrset's full value list. The create payload carries the
+# current desired value; updates and appends use the reconciled full rrset
+# payload built below so existing sibling values are preserved.
 - name: Build the canonical DNS rrset provider payload
   ansible.builtin.set_fact:
     dns_provider_boundary_desired_record_payload: >-
@@ -85,6 +82,29 @@
           ]
         }
       }}
+
+- name: Build the reconciled full DNS rrset record list
+  ansible.builtin.set_fact:
+    dns_provider_boundary_reconciled_rrset_records: >-
+      {%- set reconciled = namespace(records=[]) -%}
+      {%- for existing in dns_provider_boundary_same_name_type_records -%}
+      {%- set replace_existing = (
+            dns_provider_boundary_matching_records | length == 1
+            and existing.record_value == dns_provider_boundary_matching_records[0].record_value
+            and existing.record_value != hetzner_dns_record.value
+          ) -%}
+      {%- set _ = reconciled.records.append({
+            'value': (hetzner_dns_record.value if replace_existing else existing.record_value),
+            'comment': ('' if replace_existing else (existing.record_comment | default('')))
+          }) -%}
+      {%- endfor -%}
+      {%- if (
+            (hetzner_dns_record.state | default('present')) == 'present'
+            and dns_provider_boundary_matching_records | length == 0
+          ) -%}
+      {%- set _ = reconciled.records.append({'value': hetzner_dns_record.value, 'comment': ''}) -%}
+      {%- endif -%}
+      {{ reconciled.records }}
 
 - name: Delete the canonical DNS record when it is retired
   ansible.builtin.uri:
@@ -138,10 +158,42 @@
     - not (hetzner_dns_brownout_manual_fallback | bool)
     - (hetzner_dns_record.state | default('present')) == 'present'
     - dns_provider_boundary_matching_records | length == 0
+    - dns_provider_boundary_same_name_type_records | length == 0
   retries: 5
   delay: 2
   until: hetzner_dns_record_create_response.status in [200, 201]
   failed_when: hetzner_dns_record_create_response.status not in [200, 201]
+  changed_when: true
+  no_log: true
+
+- name: Append the missing value to an existing canonical DNS rrset
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/zones/{{ dns_provider_boundary_zone.provider_ref | urlencode }}/rrsets/{{ dns_provider_boundary_same_name_type_records[0].provider_ref }}/actions/set_records"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    body_format: json
+    return_content: true
+    body:
+      records: "{{ dns_provider_boundary_reconciled_rrset_records }}"
+    status_code:
+      - 200
+      - 201
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+  register: hetzner_dns_record_append_response
+  when:
+    - not (hetzner_dns_brownout_manual_fallback | bool)
+    - (hetzner_dns_record.state | default('present')) == 'present'
+    - dns_provider_boundary_matching_records | length == 0
+    - dns_provider_boundary_same_name_type_records | length > 0
+  retries: 5
+  delay: 2
+  until: hetzner_dns_record_append_response.status in [200, 201]
+  failed_when: hetzner_dns_record_append_response.status not in [200, 201]
   changed_when: true
   no_log: true
 
@@ -163,7 +215,7 @@
     body_format: json
     return_content: true
     body:
-      records: "{{ dns_provider_boundary_desired_record_payload.records }}"
+      records: "{{ dns_provider_boundary_reconciled_rrset_records }}"
     status_code:
       - 200
       - 201

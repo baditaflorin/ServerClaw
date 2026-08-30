@@ -69,6 +69,73 @@
     }
   },
   "commands": {
+    "bootstrap-openbao-runtime-secret-provisioner": {
+      "description": "Reconcile the narrow runtime-service policy and AppRole contracts in the already-running OpenBao instance, then emit verified controller-local provisioner evidence without restarting the runtime.",
+      "workflow_id": "bootstrap-openbao-runtime-secret-provisioner",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "PLATFORM_IDENTITY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile environment",
+          "description": "Explicit deployment identity selector validated against tracked platform-generation facts before any secret or OpenBao API access."
+        },
+        {
+          "name": "PLATFORM_TOPOLOGY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile environment",
+          "description": "Explicit deployment topology selector validated against the tracked OpenBao target host before any secret or OpenBao API access."
+        },
+        {
+          "name": "PLATFORM_INVENTORY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Makefile environment",
+          "description": "Optional inventory overlay; when omitted, the committed private inventory remains authoritative and no shared local inventory is inferred."
+        },
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Mode-0600 private key used by the built-in strict SSH jump to the selector-derived OpenBao guest loopback listener; the key content is never read by the bootstrap or emitted in evidence."
+        },
+        {
+          "name": "openbao_breakglass_password",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Mode-0600 password file for the named break-glass userpass identity; the password value is never accepted on argv or emitted in evidence."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight-openbao-deployment-selection env=production passes before the break-glass password file or OpenBao API is accessed",
+        "make preflight WORKFLOW=bootstrap-openbao-runtime-secret-provisioner passes",
+        "The existing OpenBao instance is initialized, unsealed, and reachable through the built-in SSH forward to the selector-derived guest loopback automation listener",
+        "An operator has approved the bounded break-glass bootstrap; full converge-openbao, init payloads, root tokens, and container restarts are not accepted as substitutes"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, explicit deployment selectors, governed live-apply receipt, and the non-secret runtime-secret-provisioner bootstrap receipt proving provisioner login plus exact allow/deny capability counts. Never record the password, role_id, secret_id, token, or API response bodies."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop before API mutation if deployment selection, OpenBao health/seal state, break-glass login, or exact management-capability preflight fails.",
+          "Stop if the resulting provisioner can reach any unregistered service path, policy-management path, protected AppRole, or other capability outside the generated exact-path plan."
+        ],
+        "rollback_guidance": [
+          "Do not run converge-openbao, restart the container, or fall back to init/root credentials; preserve the prior artifact and inspect the bounded bootstrap result before retrying.",
+          "If a partial policy or AppRole reconcile occurred, rerun the same approved bounded workflow after correcting the selector or authority issue so the exact generated contract is restored and reverified."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 300
+      }
+    },
     "adr-0077-compose-runtime-secrets-live-apply": {
       "description": "Converge the ADR 0077 runtime-secret injection path across the docker-runtime platform applications.",
       "workflow_id": "adr-0077-compose-runtime-secrets-live-apply",
@@ -1192,12 +1259,137 @@
         "timeout_seconds": 1500
       }
     },
+    "converge-authentik": {
+      "description": "Converge the parallel Authentik runtime, preserve its adopted database and signing material, reconcile the declared GlitchTip and Outline OAuth providers, and publish id.example.com without changing Keycloak.",
+      "workflow_id": "converge-authentik",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "PLATFORM_IDENTITY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile environment",
+          "description": "Explicit deployment identity file that must reproduce the tracked platform_generation identity before any live mutation."
+        },
+        {
+          "name": "PLATFORM_TOPOLOGY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile environment",
+          "description": "Explicit deployment topology file that must reproduce the tracked Authentik target hosts before any secret-authority, DNS, or runtime mutation."
+        },
+        {
+          "name": "PLATFORM_INVENTORY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Makefile environment",
+          "description": "Optional inventory overlay for an intentional alternate inventory; when omitted, the committed private inventory remains authoritative."
+        },
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to retain id.example.com on the shared edge certificate and publication path."
+        },
+        {
+          "name": "openbao_runtime_secret_provisioner_approle",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Narrow provisioner artifact generated and policy-verified by the bounded bootstrap-openbao-runtime-secret-provisioner workflow; init and root credentials are not accepted as substitutes."
+        },
+        {
+          "name": "openbao_runtime_secret_provisioner_bootstrap_receipt",
+          "kind": "artifact_ref",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Non-secret receipt emitted only after the bounded bootstrap proves provisioner login and exact allow/deny capabilities without restarting OpenBao."
+        },
+        {
+          "name": "authentik_admin_token",
+          "kind": "controller_secret",
+          "required": false,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local Authentik API token mirrored from the preserved runtime state before OAuth reconciliation."
+        },
+        {
+          "name": "authentik_glitchtip_client_secret",
+          "kind": "controller_secret",
+          "required": false,
+          "source": "config/controller-local-secrets.json",
+          "description": "Stable GlitchTip client material adopted from the existing Authentik provider without rotation."
+        },
+        {
+          "name": "authentik_outline_client_secret",
+          "kind": "controller_secret",
+          "required": false,
+          "source": "config/controller-local-secrets.json",
+          "description": "Stable Outline client material created or adopted for the repo-managed Authentik provider without rotation."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight-authentik-deployment-selection env=production passes before any secret-authority, DNS, or runtime mutation",
+        "The bounded bootstrap-openbao-runtime-secret-provisioner workflow has produced the narrow AppRole artifact and verification evidence without restarting OpenBao",
+        "make preflight WORKFLOW=converge-authentik passes",
+        "make validate passes before the apply",
+        "A verified backup of the existing Authentik PostgreSQL bind mount and the pre-adoption environment file is available",
+        "The existing provider/application identifiers and Keycloak rollback path have been captured before reconciliation"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, verified datastore backup, preserved pre-adoption environment path, immutable image IDs, local and public health results, stable Authentik provider/application identifiers, a second no-change OAuth reconciliation, and a successful Keycloak discovery check."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the datastore backup, OpenBao-rendered environment, Authentik health, OAuth reconciliation, edge publication, or Keycloak rollback check fails.",
+          "Stop if reconciliation would rotate the existing Authentik client secret or replace the provider/application objects instead of adopting them."
+        ],
+        "rollback_guidance": [
+          "Restore the retained pre-adoption environment and last known-good immutable Authentik images, then verify the existing database before retrying.",
+          "Keep Keycloak and both per-client rollback secrets intact; do not advance another client while the Authentik/GlitchTip/Outline slice is unverified."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "converge-glitchtip": {
       "description": "Converge the GlitchTip error-tracking runtime, publish errors.example.com, and verify repo-managed DSN ingestion plus OIDC settings.",
       "workflow_id": "converge-glitchtip",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
       "inputs": [
+        {
+          "name": "PLATFORM_IDENTITY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile environment",
+          "description": "Explicit deployment identity file that must reproduce tracked platform_generation identity facts before any live mutation."
+        },
+        {
+          "name": "PLATFORM_TOPOLOGY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile environment",
+          "description": "Explicit deployment topology file that must reproduce tracked GlitchTip, PostgreSQL, and edge target hosts before any live mutation."
+        },
+        {
+          "name": "PLATFORM_INVENTORY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Makefile environment",
+          "description": "Optional inventory overlay for an intentional alternate inventory; when omitted, the committed private inventory remains authoritative."
+        },
         {
           "name": "bootstrap_ssh_private_key",
           "kind": "controller_secret",
@@ -1211,24 +1403,55 @@
           "required": true,
           "source": "config/controller-local-secrets.json",
           "description": "DNS token used to publish errors.example.com and expand the shared edge certificate."
+        },
+        {
+          "name": "openbao_runtime_secret_provisioner_approle",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Narrow OpenBao AppRole artifact used to provision GlitchTip's registered runtime contract without exposing bootstrap or root authority."
+        },
+        {
+          "name": "openbao_runtime_secret_provisioner_bootstrap_receipt",
+          "kind": "artifact_ref",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Non-secret receipt emitted only after the bounded bootstrap proves provisioner login and exact allow/deny capabilities without restarting OpenBao."
+        },
+        {
+          "name": "authentik_glitchtip_client_secret",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Stable Authentik OAuth client secret consumed by GlitchTip's selected allauth provider."
+        },
+        {
+          "name": "keycloak_glitchtip_client_secret",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Prior Keycloak client secret retained as the per-client rollback artifact; public realm discovery is probed independently by workflow preflight."
         }
       ],
       "expected_preconditions": [
+        "make preflight-glitchtip-deployment-selection env=production proves the explicit identity, topology, and selected inventory target facts before DNS or runtime mutation",
+        "The bounded bootstrap-openbao-runtime-secret-provisioner workflow has produced the narrow AppRole artifact and verification evidence without restarting OpenBao",
         "make preflight WORKFLOW=converge-glitchtip passes",
         "make validate passes before the apply",
-        "The PostgreSQL, Keycloak, shared-edge publication, and first-party producer blast radius is reviewed before rollout"
+        "The Authentik provider/application is reconciled and its discovery endpoint is reachable before GlitchTip changes",
+        "The prior Keycloak client secret remains present and the shared-edge plus first-party producer blast radius is reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, local and public GlitchTip health checks, public settings verification showing Keycloak OIDC, and one successful synthetic event reaching the live project issue list."
+        "notes": "Record the source commit, local and public GlitchTip health checks, public settings verification showing exactly one Authentik allauth provider, a successful headless authorization redirect with the expected issuer/client/callback, confidential-client acceptance at Authentik's token endpoint, an interactive Authentik login followed by an authenticated GlitchTip session and logout, one synthetic event reaching the live project issue list, and a successful retained-Keycloak public realm discovery probe. Outline must remain blocked until the browser-session evidence is present."
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if PostgreSQL, the GlitchTip runtime, the shared edge publication, or the OIDC settings verification fails.",
-          "Stop if the rollout would leave errors.example.com reachable without the documented in-app Keycloak sign-in path or without working DSN ingestion."
+          "Stop if PostgreSQL, the GlitchTip runtime, the shared edge publication, the confidential-client token-endpoint proof, or the OIDC settings verification fails.",
+          "Stop if the rollout would leave errors.example.com reachable without the declared Authentik provider, working headless redirect and DSN ingestion paths, an interactive login/session/logout proof, or the retained Keycloak rollback artifact."
         ],
         "rollback_guidance": [
-          "Restore the last known-good GlitchTip, Keycloak client, and shared edge configuration from version control before retrying.",
+          "Restore the last known-good GlitchTip SocialApp selection and shared edge configuration, using the retained Keycloak client secret for the per-client rollback before retrying.",
           "Do not compensate for a failed rollout by manually creating projects, DSNs, alert recipients, or client secrets outside the repo-managed path."
         ]
       },
@@ -2378,11 +2601,25 @@
       }
     },
     "converge-outline": {
-      "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure MinIO S3 storage, publish it at wiki.example.com, and bootstrap Keycloak OIDC.",
+      "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure shared MinIO S3 storage, publish it at wiki.example.com, and select Authentik OIDC while preserving Keycloak rollback.",
       "workflow_id": "converge-outline",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
       "inputs": [
+        {
+          "name": "PLATFORM_IDENTITY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile environment",
+          "description": "Explicit deployment identity file that must reproduce tracked platform_generation identity facts before any live mutation."
+        },
+        {
+          "name": "PLATFORM_TOPOLOGY_OVERLAY",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile environment",
+          "description": "Explicit deployment topology file that must reproduce tracked Outline, PostgreSQL, and edge target hosts before any live mutation."
+        },
         {
           "name": "bootstrap_ssh_private_key",
           "kind": "controller_secret",
@@ -2396,25 +2633,55 @@
           "required": true,
           "source": "config/controller-local-secrets.json",
           "description": "DNS token used to publish wiki.example.com and expand the shared edge certificate SAN set."
+        },
+        {
+          "name": "openbao_runtime_secret_provisioner_approle",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Narrow OpenBao AppRole artifact used to provision Outline's registered runtime secret contract."
+        },
+        {
+          "name": "authentik_outline_client_secret",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Selected Authentik confidential-client secret consumed by the Outline runtime."
+        },
+        {
+          "name": "keycloak_outline_client_secret",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Prior Keycloak client secret retained as the per-client rollback artifact."
+        },
+        {
+          "name": "outline_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Durable Outline API authority minted before cutover and used to verify living knowledge synchronization after the provider changes."
         }
       ],
       "expected_preconditions": [
+        "make preflight-outline-deployment-selection env=production proves the explicit identity, topology, and selected inventory target facts",
         "make preflight WORKFLOW=converge-outline passes",
         "make validate passes before the apply",
-        "MinIO platform bucket and Keycloak OIDC client are reviewed before rollout"
+        "The Outline Authentik provider/application and selected client secret are reconciled before runtime rollout",
+        "The MinIO platform bucket, durable Outline API token, and Keycloak rollback client are verified before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record Outline container health, MinIO bucket reachability, Keycloak OIDC flow result, and the wiki.example.com /api/auth.config response."
+        "notes": "Record Outline container health, MinIO bucket reachability, Authentik discovery and redirect results, living-collection API verification, authenticated login/session/logout evidence, and retained Keycloak discovery health."
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if Outline fails to start, the S3 bucket is unreachable, or Keycloak OIDC bootstrap fails.",
-          "Stop if the converge would leave the wiki publicly reachable without authentication."
+          "Stop if Outline fails to start, the S3 bucket is unreachable, or the Authentik OIDC redirect/discovery contract fails.",
+          "Stop if the converge would leave the wiki publicly reachable without authentication, lose API sync authority, or remove Keycloak rollback."
         ],
         "rollback_guidance": [
-          "Restore the last known-good Outline runtime state before retrying.",
-          "Do not leave orphaned MinIO buckets or partially-created Keycloak clients after a failed rollout."
+          "Select the preserved Keycloak client variables and restore the last known-good Outline runtime state before retrying.",
+          "Do not delete the Authentik provider, durable Outline API token, MinIO data, or Keycloak rollback client after a failed rollout."
         ]
       },
       "execution": {
@@ -2453,11 +2720,12 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-openbao passes",
         "make validate passes before the apply",
-        "Recovery handling for init payloads and unseal material is reviewed before any live rollout"
+        "Recovery handling for init payloads and unseal material is reviewed before any live rollout",
+        "The runtime-secret-provisioner AppRole remains bound only to the generated narrow provisioner policy and registered runtime-service contracts"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record runtime health, bootstrap artifact generation, auth role verification, and PostgreSQL dynamic-credential checks."
+        "notes": "Record runtime health, bootstrap artifact generation, runtime-secret-provisioner artifact and narrow policy verification, auth role verification, and PostgreSQL dynamic-credential checks."
       },
       "failure_guidance": {
         "stop_conditions": [

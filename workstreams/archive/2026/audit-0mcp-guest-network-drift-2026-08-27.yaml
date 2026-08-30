@@ -1,0 +1,43 @@
+id: audit-0mcp-guest-network-drift-2026-08-27
+title: Audit — example.org fleet-wide guest network identity drift
+status: merged
+ready_to_merge: true
+live_applied: false
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: audit-0mcp-guest-network-drift-2026-08-27
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: audit-0mcp-guest-network-drift-2026-08-27-doc
+      paths:
+        - docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+        - workstreams/active/audit-0mcp-guest-network-drift-2026-08-27.yaml
+        - workstreams/archive/2026/postmortem-0mcp-fleet-network-outage-2026-08-26.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Follow-up to the 2026-08-26 nginx-edge network outage postmortem: audited
+  all 17 declared example.org guests (qm guest exec + qm config against the
+  IaC's declared ipv4/gateway4). Confirmed VMID 110 (nginx) is the ONLY
+  guest migrated to the current 10.10.10.x/example.org identity -- the other
+  16 are all still on the stale 10.10.10.x/0mpc.com addressing and
+  bridge=vmbr20. Also confirmed this is causing other live, previously
+  unnoticed outages: public mail (25/587/993 -> runtime-control, VMID 192)
+  and LiveKit (7881/7882 -> docker-runtime, VMID 120) are both externally
+  unreachable for the same reason nginx-edge was. Read-only audit only --
+  no live changes made to any of the 16 remaining guests, given the
+  materially larger blast radius (mail bounce risk, unchecked inter-guest
+  dependencies) versus the single-guest nginx-edge fix.
+
+objectives:
+  - Determine the full scope of the 10.10.10.x/0mpc.com addressing drift
+  - Identify any other live outages caused by the same root cause
+
+completion_metrics:
+  - All 17 guests' live netplan + bridge checked against declared IaC state
+  - Findings recorded in the existing outage postmortem
+
+related_adrs: []

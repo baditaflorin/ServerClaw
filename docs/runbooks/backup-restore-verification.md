@@ -29,9 +29,9 @@ The current repository implementation verifies three guests:
 
 Each restore uses the staging bridge and IP assignments already defined for the ADR 0088 fixture network:
 
-- `docker-runtime` -> `10.20.10.100/24`
-- `postgres` -> `10.20.10.110/24`
-- `backup` -> `10.20.10.120/24`
+- `docker-runtime` -> `10.10.10.100/24`
+- `postgres` -> `10.10.10.110/24`
+- `backup` -> `10.10.10.120/24`
 
 ## Workflow
 

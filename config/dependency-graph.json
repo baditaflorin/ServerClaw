@@ -21,6 +21,15 @@
       "adr": "0092"
     },
     {
+      "id": "authentik",
+      "service": "authentik",
+      "vm": "runtime-control",
+      "tier": 1,
+      "name": "Authentik",
+      "category": "access",
+      "adr": "0491"
+    },
+    {
       "id": "backup_pbs",
       "service": "backup_pbs",
       "name": "Proxmox Backup Server",
@@ -726,6 +735,12 @@
       "description": "The structured-search endpoints delegate keyword and facet queries to the private Typesense runtime when it is available."
     },
     {
+      "from": "authentik",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Authentik's runtime secrets (SECRET_KEY, database credentials, bootstrap admin token) are provisioned through the OpenBao agent sidecar before startup, matching every other compose-based service in this fleet (ADR 0077)."
+    },
+    {
       "from": "browser_runner",
       "to": "api_gateway",
       "type": "soft",
@@ -973,6 +988,12 @@
     },
     {
       "from": "glitchtip",
+      "to": "authentik",
+      "type": "soft",
+      "description": "GlitchTip delegates browser sign-in to the shared Authentik OIDC broker through a repo-managed confidential client and headless allauth redirect."
+    },
+    {
+      "from": "glitchtip",
       "to": "docker_runtime",
       "type": "hard",
       "description": "The GlitchTip web runtime, project bootstrap flow, and supporting Valkey container run on docker-runtime."
@@ -981,7 +1002,7 @@
       "from": "glitchtip",
       "to": "keycloak",
       "type": "soft",
-      "description": "GlitchTip delegates browser sign-in to the shared Keycloak OIDC broker through a repo-managed confidential client."
+      "description": "The prior Keycloak confidential-client secret is retained only as a per-client rollback path during ADR 0491 migration."
     },
     {
       "from": "glitchtip",
@@ -1459,9 +1480,15 @@
     },
     {
       "from": "outline",
+      "to": "authentik",
+      "type": "soft",
+      "description": "Outline delegates routine browser sign-in to the shared Authentik OIDC broker through a repo-managed confidential client."
+    },
+    {
+      "from": "outline",
       "to": "keycloak",
       "type": "soft",
-      "description": "Outline delegates routine browser sign-in to the shared Keycloak OIDC broker."
+      "description": "The prior Keycloak confidential client and service-account bootstrap credential remain available only for per-client rollback and API-token recovery."
     },
     {
       "from": "outline",

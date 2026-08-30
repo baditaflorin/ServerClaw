@@ -2,8 +2,51 @@
 sensitivity: INTERNAL
 portal_display: full
 tags:
-  - architecture
-  - dependency-graph
+- architecture
+- dependency-graph
+pagefind_section: architecture
+pagefind_audience:
+- contributors
+- operators
+contextual_help:
+  title: Contextual Help
+  summary: Use this page to understand service dependencies and likely blast radius
+    before a rollout or recovery action.
+  audience:
+  - Operators
+  - Contributors
+  glossary:
+  - term: Recovery tier
+    definition: The declared recovery expectation for a service, including the tolerated
+      blast radius and urgency of restoration.
+  - term: Drift
+    definition: A meaningful difference between the committed platform contract and
+      the currently observed runtime state.
+  - term: Handoff
+    definition: Passing the current task, evidence, and blocked state to another operator
+      or agent without relying on hidden chat context.
+  references:
+  - label: Services Directory
+    href: /services/
+    kind: reference
+  - label: Reference Glossary
+    href: /reference/glossary/
+    kind: reference
+  - label: Runbook Index
+    href: /runbooks/
+    kind: runbook
+  - label: Architecture Index
+    href: /architecture/
+    kind: adr
+  escalation:
+    backout: If this page leaves any doubt, stop before making live changes and return
+      to the owning runbook or ops portal.
+    runbook:
+      label: Platform Operations Portal
+      href: /runbooks/platform-operations-portal/
+      kind: runbook
+    handoff: Share the page URL, the question you were trying to answer, and the exact
+      mismatch or failure before handing off.
 ---
 
 !!! note "Sensitivity: INTERNAL"
@@ -17,7 +60,7 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, LiveKit, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
+| `1` | Alertmanager, Authentik, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, LiveKit, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
 | `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LibreChat, LiteLLM Proxy, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Repo Intake, SFTPGo, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
 | `3` | Homepage, Platform API Gateway, Woodpecker CI |
 | `4` | Ops Portal |
@@ -27,6 +70,7 @@ Generated from `config/dependency-graph.json`.
 ```mermaid
 graph TD
     alertmanager["Alertmanager\nTier 1"]
+    authentik["Authentik\nTier 1"]
     coolify["Coolify\nTier 1"]
     docker_build["Docker Build VM\nTier 1"]
     docker_runtime["Docker Runtime VM\nTier 1"]
@@ -108,6 +152,7 @@ graph TD
     api_gateway -->|hard| keycloak
     api_gateway -->|soft| nginx_edge
     api_gateway -->|soft| typesense
+    authentik -->|startup_only| openbao
     browser_runner -->|soft| api_gateway
     browser_runner -->|hard| docker_runtime
     changedetection -->|soft| api_gateway
@@ -149,6 +194,7 @@ graph TD
     gitea -->|soft| ntfy
     gitea -->|startup_only| openbao
     gitea -->|hard| postgres
+    glitchtip -->|soft| authentik
     glitchtip -->|hard| docker_runtime
     glitchtip -->|soft| keycloak
     glitchtip -->|soft| mail_platform

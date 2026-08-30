@@ -1,0 +1,59 @@
+id: regenerate-platform-vars-10-20-addressing
+title: Regenerate platform.yml with corrected 10.10.10.x addressing
+status: merged
+ready_to_merge: true
+live_applied: true
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: regenerate-platform-vars-10-20-addressing
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: regenerate-platform-vars-10-20-addressing-code
+      paths:
+        - inventory/group_vars/platform.yml
+        - workstreams/active/regenerate-platform-vars-10-20-addressing.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Proper follow-up to #137/#138 (which fixed the source-of-truth
+  inventory/host_vars/proxmox-host.yml and identity.yml but left the
+  derived, committed inventory/group_vars/platform.yml stale). Regenerating
+  platform.yml normally on this machine is blocked: this Mac's
+  .local/host_vars/proxmox-host.yml and .local/identity.yml overlay a
+  completely unrelated deployment (example.org), and generate_platform_vars.py
+  has multiple internal paths that merge them unconditionally (some not
+  even gated by --skip-local-override) -- confirmed by temporarily removing
+  .local/ entirely and finding a THIRD leak, this time baked into a
+  committed file (config/subdomain-exposure-registry.json has example.org
+  hardcoded directly -- a separate, pre-existing bug, not fixed here, flagged
+  as a follow-up).
+
+  Given the address-related fields in platform.yml are a well-understood,
+  bounded, mechanical function of the guest list (confirmed: exactly one
+  bidirectional case existed -- tailscale_advertise_routes correctly lists
+  both ranges and must not collapse to one -- everything else is a clean
+  one-way 10.10.10.x -> 10.10.10.x substitution plus one internal_bridge:
+  vmbr10 -> vmbr20 field the IP-pattern substitution couldn't catch), applied
+  that transformation directly to the committed file instead of running the
+  currently-unreliable generator, and verified: valid YAML, guest catalog
+  IPs correct, zero unrelated diff lines.
+
+  Also regenerated (locally, with .local/ fully hidden) the downstream
+  gitignored artifacts -- config/generated/nginx-upstreams.conf/.yaml,
+  dns-declarations.yaml, and inventory/group_vars/platform_hairpin.yml --
+  confirming they now match what was already hand-deployed live to
+  nginx-edge (see the ci.example.org/apps.example.org nginx fix).
+
+objectives:
+  - Get the derived, committed platform.yml in sync with the fixed source files
+  - Confirm downstream generated artifacts match the live nginx fix
+
+completion_metrics:
+  - platform_guest_catalog.by_name entries are 10.10.10.x
+  - internal_bridge is vmbr20
+  - config/generated/nginx-upstreams.conf matches the live nginx config
+
+related_adrs: []

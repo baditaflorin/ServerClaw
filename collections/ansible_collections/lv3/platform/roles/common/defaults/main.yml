@@ -64,9 +64,30 @@ common_openbao_systemd_credentials_container_name: ""
 common_openbao_systemd_credentials_openbao_address: ""
 common_openbao_systemd_credentials_manage_local_openbao_runtime: true
 common_openbao_compose_env_openbao_address: ""
-common_openbao_compose_env_manage_local_openbao_runtime: true
+# Compatibility-only switch retained for existing callers.  The compose helper
+# rejects true and never restarts or unseals the shared OpenBao runtime.
+common_openbao_compose_env_manage_local_openbao_runtime: false
 common_openbao_compose_env_validate_certs: true
 common_openbao_compose_env_api_host: ""
+common_openbao_compose_env_provisioner_credential_file: >-
+  {{
+    openbao_runtime_secret_provisioner_approle_local_file
+    | default(
+        (repo_shared_local_root | default('.local'))
+        ~ '/openbao/runtime-secret-provisioner-approle.json',
+        true
+      )
+  }}
+common_openbao_compose_env_provisioner_approle_name: runtime-secret-provisioner
+common_openbao_compose_env_provisioner_policy_name: >-
+  {{ platform_identity.config_prefix }}-agent-runtime-secret-provisioner
+common_openbao_compose_env_protected_approle_names:
+  - controller-automation
+  - runtime-secret-provisioner
+common_openbao_compose_env_secret_namespace_overrides: >-
+  {{ openbao_runtime_secret_namespace_overrides | default({}) }}
+common_openbao_compose_env_require_fresh_agent_render: true
+common_openbao_compose_env_agent_render_timeout: 120
 common_openbao_systemd_credentials_validate_certs: true
 common_openbao_systemd_credentials_api_host: ""
 common_openbao_api_operation_retries: 36

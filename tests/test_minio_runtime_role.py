@@ -7,10 +7,13 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 ROLE_ROOT = REPO_ROOT / "roles" / "minio_runtime"
 DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
 TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
+MIGRATE_SECRET_PATH = ROLE_ROOT / "tasks" / "migrate_secret.yml"
 VERIFY_PATH = ROLE_ROOT / "tasks" / "verify.yml"
 COMPOSE_TEMPLATE = ROLE_ROOT / "templates" / "docker-compose.yml.j2"
 ENV_TEMPLATE = ROLE_ROOT / "templates" / "runtime.env.j2"
 ENV_CTEMPLATE = ROLE_ROOT / "templates" / "runtime.env.ctmpl.j2"
+MINIO_VARS_PATH = REPO_ROOT / "playbooks" / "vars" / "minio.yml"
+MINIO_SERVICE_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "services" / "minio.yml"
 
 
 def load_yaml(path: Path) -> list[dict]:
@@ -35,19 +38,46 @@ def test_tasks_install_mc_and_manage_buckets_policies_and_lifecycle() -> None:
 
     assert "Install the pinned MinIO client" in names
     assert "Resolve the managed MinIO consumer contracts" in names
-    assert "Generate the MinIO root password when missing" in names
-    assert "Generate the MinIO consumer secret keys when missing" in names
+    assert "Resolve the managed MinIO secret migration contracts" in names
+    assert "Preserve MinIO secrets across the POSIX-safe directory migration" in names
     assert "Wait for the MinIO admin API to respond via the local client alias" in names
     assert "Reconcile the managed MinIO users with their desired secrets" in names
     assert "Render the MinIO bucket policy documents" in names
     assert "Ensure the RAG staging bucket lifecycle rule exists" in names
     assert "Verify the MinIO runtime" in names
     assert "minio_managed_consumers_resolved" in tasks_text
-    assert "minio_consumer_secret_generation.stdout" in tasks_text
     assert "admin\n      - info\n      - local" in tasks_text
     assert 'loop: "{{ minio_managed_consumers_resolved }}"' in tasks_text
     assert "admin\n      - user\n      - add\n      - local" in tasks_text
     assert "when: item.rc != 0" not in tasks_text
+
+
+def test_secret_migration_prefers_existing_remote_authority_without_rotation() -> None:
+    defaults = DEFAULTS_PATH.read_text()
+    tasks = load_yaml(MIGRATE_SECRET_PATH)
+    names = {task["name"] for task in tasks}
+    tasks_text = MIGRATE_SECRET_PATH.read_text()
+
+    assert '"/etc/{{ platform_identity.config_prefix }}/minio"' in defaults
+    assert "Migrate the legacy MinIO secret for {{ minio_secret_contract.name }}" in names
+    assert "Restore the controller-local MinIO secret for {{ minio_secret_contract.name }}" in names
+    assert "Generate a new MinIO secret for {{ minio_secret_contract.name }}" in names
+    assert "remote_src: true" in tasks_text
+    assert "not minio_canonical_secret_stat.stat.exists" in tasks_text
+    assert "minio_selected_legacy_secret_file | length > 0" in tasks_text
+    assert "minio_controller_secret_stat.stat.isreg | default(false)" in tasks_text
+    assert "| secret(length=20)" in tasks_text
+    assert "force: false" in tasks_text
+    assert "no_log: true" in tasks_text
+
+
+def test_playbooks_use_the_registered_minio_openbao_contract() -> None:
+    for path in (MINIO_VARS_PATH, MINIO_SERVICE_PLAYBOOK_PATH):
+        text = path.read_text()
+        assert "minio_openbao_secret_path: services/minio/runtime-env" in text
+        assert 'minio_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-minio-runtime"' in text
+        assert "minio_openbao_approle_name: minio-runtime" in text
+        assert "minio/data/root" not in text
 
 
 def test_tasks_recover_stale_compose_network_during_startup() -> None:

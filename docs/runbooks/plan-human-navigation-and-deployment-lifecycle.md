@@ -41,7 +41,7 @@ ADR 0072 — Staging and Production Environment Topology
        └─ ADR 0080 — Maintenance Window and Change Suppression Protocol
 ```
 
-**ADR 0072** provisions a second internal bridge (`vmbr20`, `10.20.10.0/24`) with a disposable staging environment that mirrors the production VM topology. All playbooks become environment-aware via `--extra-vars "env=staging"`.
+**ADR 0072** provisions a second internal bridge (`vmbr20`, `10.10.10.0/24`) with a disposable staging environment that mirrors the production VM topology. All playbooks become environment-aware via `--extra-vars "env=staging"`.
 
 **ADR 0073** wraps the promotion in a Windmill workflow: validate → stage → health-check → gate → promote → receipt. Every production change requires a staging receipt less than 24 hours old, a clean health-check pass, and an operator approval.
 
@@ -202,7 +202,7 @@ All other staging subdomains (`*.staging.example.com`) resolve via internal DNS 
 
 ## Success Criteria For This Wave
 
-- [ ] `make live-apply env=staging playbook=grafana.yml` succeeds and targets `10.20.10.*`
+- [ ] `make live-apply env=staging playbook=grafana.yml` succeeds and targets `10.10.10.*`
 - [ ] A full staging → production promotion runs through the Windmill pipeline with a promotion receipt
 - [ ] `https://ops.example.com` is live, auth-gated, and shows all services from the capability catalog
 - [ ] `https://changelog.example.com` shows the last 30 live-apply receipts in a human-readable timeline

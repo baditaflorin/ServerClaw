@@ -14,7 +14,7 @@ def test_validate_profile_catalog_accepts_repo_catalog() -> None:
 def test_allocate_preview_ips_skips_active_reservations(tmp_path: Path, monkeypatch) -> None:
     catalog = {
         "network_pool": {
-            "ip_range": ["10.20.10.130", "10.20.10.132"],
+            "ip_range": ["10.10.10.130", "10.10.10.132"],
         }
     }
     active_dir = tmp_path / "active"
@@ -23,14 +23,14 @@ def test_allocate_preview_ips_skips_active_reservations(tmp_path: Path, monkeypa
         json.dumps(
             {
                 "preview_id": "active-preview",
-                "members": [{"ip_address": "10.20.10.130"}],
+                "members": [{"ip_address": "10.10.10.130"}],
             }
         ),
         encoding="utf-8",
     )
     monkeypatch.setattr(preview_environment, "ACTIVE_STATE_DIR", active_dir)
 
-    assert preview_environment.allocate_preview_ips(catalog, 2) == ["10.20.10.131", "10.20.10.132"]
+    assert preview_environment.allocate_preview_ips(catalog, 2) == ["10.10.10.131", "10.10.10.132"]
 
 
 def test_preview_slug_truncates_and_stabilizes() -> None:
@@ -53,8 +53,8 @@ def test_build_member_definition_copies_ansible_vars() -> None:
             "roles_under_test": ["lv3.platform.docker_runtime"],
             "ansible_vars": {"docker_runtime_container_forward_compat_enabled": False},
         },
-        ip_address="10.20.10.130",
-        catalog={"network_pool": {"bridge": "vmbr20", "gateway": "10.20.10.1", "cidr": 24}},
+        ip_address="10.10.10.130",
+        catalog={"network_pool": {"bridge": "vmbr20", "gateway": "10.10.10.1", "cidr": 24}},
         ttl_hours=1,
     )
 
@@ -86,7 +86,7 @@ def test_finalize_preview_evidence_writes_live_apply_receipt(tmp_path: Path, mon
                 "name": "preview-runtime",
                 "member_id": "runtime",
                 "vm_id": 930,
-                "ip_address": "10.20.10.130",
+                "ip_address": "10.10.10.130",
             }
         ],
         "validation": {

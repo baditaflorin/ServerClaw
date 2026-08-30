@@ -81,7 +81,7 @@ code ships.
 | # | Symptom | Root cause | Fix class |
 |---|---------|------------|-----------|
 | 1 | `openbao_postgres_host` defaulted to production's 10.10.10.60 | `hostvars[…initial_primary].ansible_host` resolves via production inventory before overlay | late-bound lookup |
-| 2 | `common_openbao_compose_env_openbao_address` pointed at bootstrap-time IP `10.20.10.10` after re-IP | Bootstrap-phase address baked into env defaults | phase-aware address filter |
+| 2 | `common_openbao_compose_env_openbao_address` pointed at bootstrap-time IP `10.10.10.10` after re-IP | Bootstrap-phase address baked into env defaults | phase-aware address filter |
 | 3 | Two roles used different variable names for the same credential file (`openbao_postgres_admin_password_local_file` vs `openbao_postgres_rotator_password_local_file`) | Writer/reader variable divergence | unified credential naming |
 | 4 | `proxmox_api_automation_user = "{{ platform_sql_prefix }}-automation@pve"` produced `fork-automation@pve` for a `0fork` deployment whose actual user is `0fork-automation@pve` | `platform_sql_prefix` strips leading digit (valid for SQL identifier); PVE user names have no such restriction | explicit prefix flavor |
 | 5 | Dynamic PostgreSQL role `creation_statements` hardcoded `GRANT lv3_openbao_connect_all …` inside `!unsafe` | `!unsafe` disables Jinja; literal prefix unreachable by override | Jinja-escape pattern + lint |

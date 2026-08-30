@@ -22,6 +22,17 @@ playbooks:
     shared_surfaces:
       - service:backup-vm
       - inventory/host_vars/proxmox-host.yml
+  playbooks/authentik.yml:
+    playbook_id: authentik
+    mutation_scope: platform
+    shared_surfaces:
+      - service:authentik
+      - service:glitchtip
+      - service:outline
+      - config/authentik/oauth-clients.yaml
+      - config/integrations/glitchtip--authentik.yaml
+      - config/integrations/outline--authentik.yaml
+      - inventory/host_vars/proxmox-host.yml
   playbooks/artifact-cache-vm.yml:
     playbook_id: artifact-cache-vm
     mutation_scope: platform
@@ -492,6 +503,8 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:glitchtip
+      - service:authentik
+      - config/integrations/glitchtip--authentik.yaml
       - inventory/host_vars/proxmox-host.yml
   playbooks/temporal.yml:
     playbook_id: temporal

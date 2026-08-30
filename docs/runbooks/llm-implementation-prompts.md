@@ -560,7 +560,7 @@ Create exactly these files:
 8. tofu/environments/staging/main.tf
    - Declare the staging VMs from ADR 0072 (docker-runtime-staging,
      postgres-staging) as module blocks
-   - Use bridge = "vmbr20", ip range 10.20.10.x
+   - Use bridge = "vmbr20", ip range 10.10.10.x
 
 9. .terraform.lock.hcl  per environment (create a stub with the bpg/proxmox
    provider version pinned to the latest stable release)
@@ -725,7 +725,7 @@ Create exactly these files:
    - Wraps tofu/modules/proxmox-vm
    - Adds: lifetime_minutes variable (int, required)
    - Adds: vmid_range_start and vmid_range_end variables (defaults 9100, 9199)
-   - Sets bridge = "vmbr20" and ip range from 10.20.10.0/24 as defaults
+   - Sets bridge = "vmbr20" and ip range from 10.10.10.0/24 as defaults
    - lifecycle { prevent_destroy = false }  (fixtures MUST be destroyable)
 
 2. tofu/modules/proxmox-fixture/variables.tf  + outputs.tf
@@ -734,13 +734,13 @@ Create exactly these files:
    fixture_id: docker-host
    template: lv3-docker-host
    vmid_range: [9100, 9199]
-   network: { bridge: vmbr20, ip_cidr: 10.20.10.100/24, gateway: 10.20.10.1 }
+   network: { bridge: vmbr20, ip_cidr: 10.10.10.100/24, gateway: 10.10.10.1 }
    resources: { cores: 2, memory_mb: 2048, disk_gb: 20 }
    lifetime_minutes: 120
    tags: [ephemeral, fixture]
    roles_under_test: [lv3.platform.docker_runtime]
    verify:
-     - url: http://10.20.10.100:9000
+     - url: http://10.10.10.100:9000
        expected_status: 200
        timeout_seconds: 60
 

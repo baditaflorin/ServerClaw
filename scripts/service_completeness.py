@@ -37,7 +37,7 @@ CHECKLIST = [
     ("subdomain", "Subdomain entry"),
     ("api_gateway", "API gateway registration"),
     ("dependency_graph", "Dependency graph node"),
-    ("keycloak_client", "Keycloak client scaffold"),
+    ("keycloak_client", "OIDC client scaffold"),
     ("secret_definition", "Secret definition"),
     ("grafana_dashboard", "Grafana dashboard"),
     ("slo_definition", "SLO definition"),
@@ -184,10 +184,31 @@ def load_context() -> dict[str, Any]:
                 profile.get("alert_rule_file"),
                 f"config/service-completeness.json.services.{service_id}.alert_rule_file",
             )
-        if "keycloak_client_generated" in profile:
-            require_bool(
-                profile.get("keycloak_client_generated"),
-                f"config/service-completeness.json.services.{service_id}.keycloak_client_generated",
+        for provider_field in ("authentik_client_generated", "keycloak_client_generated"):
+            if provider_field in profile:
+                require_bool(
+                    profile.get(provider_field),
+                    f"config/service-completeness.json.services.{service_id}.{provider_field}",
+                )
+        oidc_provider = profile.get("oidc_provider")
+        if oidc_provider is not None:
+            oidc_provider = require_string(
+                oidc_provider,
+                f"config/service-completeness.json.services.{service_id}.oidc_provider",
+            )
+            if oidc_provider not in {"authentik", "keycloak"}:
+                raise ValueError(
+                    f"config/service-completeness.json.services.{service_id}.oidc_provider "
+                    "must be authentik or keycloak"
+                )
+            if not profile["requires_oidc"]:
+                raise ValueError(
+                    f"config/service-completeness.json.services.{service_id}.oidc_provider requires requires_oidc=true"
+                )
+        if profile.get("authentik_client_generated", False) and oidc_provider is None:
+            raise ValueError(
+                f"config/service-completeness.json.services.{service_id}.oidc_provider "
+                "is required for Authentik client evidence"
             )
 
     health_probe_catalog = require_mapping(load_json(HEALTH_PROBE_CATALOG_PATH), str(HEALTH_PROBE_CATALOG_PATH))
@@ -474,10 +495,20 @@ def evaluate_service(
         ),
         item_result(
             "keycloak_client",
-            "Keycloak client scaffold",
+            "OIDC client scaffold",
             required=bool(profile["requires_oidc"]),
-            present=bool(profile.get("keycloak_client_generated", False)),
-            detail="config/service-completeness.json",
+            present=bool(
+                profile.get(f"{profile['oidc_provider']}_client_generated", False)
+                if profile.get("oidc_provider")
+                else (
+                    profile.get("authentik_client_generated", False) or profile.get("keycloak_client_generated", False)
+                )
+            ),
+            detail=(
+                f"selected provider {profile['oidc_provider']} client evidence in config/service-completeness.json"
+                if profile.get("oidc_provider")
+                else "legacy provider client evidence in config/service-completeness.json"
+            ),
             suppressions=suppressions,
             today=today,
         ),

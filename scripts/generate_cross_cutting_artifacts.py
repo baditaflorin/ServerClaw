@@ -23,7 +23,7 @@ Concerns (phases):
     dns      — Hetzner DNS A record declarations
     tls      — certificate-catalog.json domain entries
     proxy    — nginx edge server-block fragments
-    sso      — Keycloak OIDC client declarations
+    sso      — OIDC client declarations
 
 This script MUST NOT:
     - Make live API calls (no Hetzner DNS API, no Keycloak API, no cert issuance)
@@ -35,6 +35,7 @@ This script MUST NOT:
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -51,8 +52,13 @@ if existing_platform is not None and not hasattr(existing_platform, "__path__"):
     del sys.modules["platform"]
 
 import yaml
-from identity_yaml import load_yaml_with_identity
-from platform.repo import load_topology_host_vars
+from identity_yaml import (
+    load_identity_vars,
+    load_tracked_generation_identity_vars,
+    load_yaml_with_identity,
+    resolve_jinja2_vars,
+)
+from platform.repo import load_topology_host_vars, local_overlay_root
 from validation_toolkit import (
     require_bool,
     require_int,
@@ -72,7 +78,7 @@ HEALTH_PROBE_CATALOG_PATH = REPO_ROOT / "config" / "health-probe-catalog.json"
 CATALOG_PLATFORM_DOMAIN = "example.com"
 
 VALID_CONCERNS = ("hairpin", "dns", "tls", "proxy", "sso")
-VALID_SSO_PROVIDERS = {"keycloak", "oauth2-proxy"}
+VALID_SSO_PROVIDERS = {"authentik", "keycloak", "oauth2-proxy"}
 VALID_DNS_TYPES = ("public", "internal")
 
 # FQDN must match this pattern: lowercase labels separated by dots, no leading/trailing hyphens.
@@ -87,8 +93,63 @@ _SENSITIVE_SCOPES = {"roles", "groups", "offline_access"}
 # ---------------------------------------------------------------------------
 
 
-def _load_registry() -> dict:
-    data = load_yaml_with_identity(REGISTRY_PATH)
+def _load_identity_file(path: Path) -> dict[str, str]:
+    """Load scalar identity values from an explicitly selected overlay file."""
+    resolved_path = path.expanduser()
+    if not resolved_path.is_absolute():
+        resolved_path = REPO_ROOT / resolved_path
+    if not resolved_path.is_file():
+        raise ValueError(f"identity file does not exist: {resolved_path}")
+
+    payload = yaml.safe_load(resolved_path.read_text()) or {}
+    payload = require_mapping(payload, str(resolved_path))
+    identity_vars = {
+        key: value
+        for key, value in payload.items()
+        if isinstance(key, str) and isinstance(value, str) and "{{" not in value
+    }
+    require_str(identity_vars.get("platform_domain"), f"{resolved_path}.platform_domain")
+    return identity_vars
+
+
+def _load_platform_identity_snapshot(path: Path | None = None) -> dict[str, str]:
+    """Load non-secret identity inputs embedded in tracked generated facts."""
+
+    path = path or PLATFORM_YML_PATH
+    identity_vars = load_tracked_generation_identity_vars(path)
+    if identity_vars:
+        require_str(
+            identity_vars.get("platform_domain"),
+            f"{path}.platform_generation.identity_overlay.platform_domain",
+        )
+    return identity_vars
+
+
+def _resolve_generation_identity(
+    explicit_path: Path | None,
+    *,
+    prefer_tracked_snapshot: bool,
+) -> dict[str, str]:
+    if explicit_path is not None:
+        return _load_identity_file(explicit_path)
+
+    identity_vars = load_identity_vars()
+    if os.environ.get("LV3_DISABLE_SHARED_LOCAL_IDENTITY", "").lower() in {"1", "true", "yes"}:
+        return identity_vars
+
+    snapshot = _load_platform_identity_snapshot()
+    if prefer_tracked_snapshot and snapshot:
+        return snapshot
+    if (local_overlay_root(REPO_ROOT) / "identity.yml").is_file():
+        return identity_vars
+    return snapshot or identity_vars
+
+
+def _load_registry(identity_vars: dict[str, str] | None = None) -> dict:
+    if identity_vars is None:
+        data = load_yaml_with_identity(REGISTRY_PATH)
+    else:
+        data = yaml.safe_load(resolve_jinja2_vars(REGISTRY_PATH.read_text(), identity_vars))
     registry = require_mapping(data, str(REGISTRY_PATH))
     return require_mapping(registry.get("platform_service_registry", {}), "platform_service_registry")
 
@@ -190,7 +251,7 @@ def generate_dns_declarations(
         out_path = out_dir / "dns-declarations.yaml"
         header = (
             "# GENERATED — do not edit. "
-            "Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only dns\n"
+            "Regenerate through make generate-platform-vars with the intended identity/topology selectors.\n"
         )
         body = yaml.dump(
             {"dns_records": declarations},
@@ -329,8 +390,8 @@ def generate_sso_clients(registry: dict, write: bool = False, repo_root: Path = 
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / "sso-clients.yaml"
         header = (
-            "# GENERATED — do not edit. Regenerate: "
-            "python scripts/generate_cross_cutting_artifacts.py --write --only sso\n"
+            "# GENERATED — do not edit. Regenerate through make generate-platform-vars "
+            "with the intended identity/topology selectors.\n"
         )
         body = yaml.dump({"sso_clients": clients}, default_flow_style=False, sort_keys=True)
         out_path.write_text(header + body)
@@ -448,7 +509,7 @@ def generate_tls_certificates(
         out = repo_root / "inventory" / "group_vars" / "platform_tls_certs.yml"
         header = (
             "# GENERATED — do not edit. "
-            "Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only tls\n"
+            "Regenerate through make generate-platform-vars with the intended identity/topology selectors.\n"
         )
         body = yaml.dump({"platform_tls_certs": certs}, default_flow_style=False, sort_keys=True)
         out.write_text(header + body)
@@ -468,6 +529,7 @@ def generate_nginx_upstreams(
     registry: dict,
     write: bool = False,
     repo_root: Path = REPO_ROOT,
+    topology_path: Path | None = None,
 ) -> list[dict]:
     """Generate nginx upstream definitions from proxy declarations.
 
@@ -481,7 +543,7 @@ def generate_nginx_upstreams(
     """
     upstreams: list[dict] = []
     fqdn_owners: dict[str, str] = {}
-    catalog = _load_guest_catalog(repo_root)
+    catalog = _load_guest_catalog(repo_root, topology_path=topology_path)
 
     for service_name, service_config in sorted(registry.items()):
         service_config = require_mapping(service_config, f"platform_service_registry.{service_name}")
@@ -571,7 +633,7 @@ def generate_nginx_upstreams(
         yaml_out = out_dir / "nginx-upstreams.yaml"
         header = (
             "# GENERATED — do not edit. "
-            "Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only proxy\n"
+            "Regenerate through make generate-platform-vars with the intended identity/topology selectors.\n"
         )
         body = yaml.dump(
             {"platform_nginx_upstreams": upstreams},
@@ -595,7 +657,7 @@ def _write_nginx_upstreams_conf(upstreams: list[dict], out_path: Path) -> None:
     """Write the nginx upstream block conf snippet."""
     lines: list[str] = [
         "# GENERATED by ADR 0374 Phase 4 — do not edit manually\n",
-        "# Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only proxy\n",
+        "# Regenerate through make generate-platform-vars with the intended identity/topology selectors.\n",
         "#\n",
         "# Include from the nginx http block: include /path/to/nginx-upstreams.conf;\n",
         "\n",
@@ -674,7 +736,11 @@ def _extract_catalog_hairpin_hostnames(
     return sorted(set(hostnames))
 
 
-def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
+def _load_guest_catalog(
+    repo_root: Path = REPO_ROOT,
+    *,
+    topology_path: Path | None = None,
+) -> dict:
     """Return platform_guest_catalog.by_name (inventory_hostname -> {ipv4, ...}).
 
     Fresh worktrees intentionally do not carry the ignored generated
@@ -683,7 +749,7 @@ def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
     clean checkout.
     """
     platform_path = repo_root / "inventory" / "group_vars" / "platform.yml"
-    if platform_path.exists():
+    if topology_path is None and platform_path.exists():
         with platform_path.open() as f:
             data = yaml.safe_load(f)
         catalog = data.get("platform_guest_catalog", {})
@@ -691,12 +757,22 @@ def _load_guest_catalog(repo_root: Path = REPO_ROOT) -> dict:
         if by_name:
             return by_name
 
-    # ADR 0430 — overlay-aware; the `proxmox_guests` list the hairpin catalog
-    # falls back to must reflect the operator's fork topology when set.
-    # Identity-resolution isn't needed here because only `name` and `ipv4`
-    # (literal scalars) are read from each guest entry.
-    host_vars = load_topology_host_vars(repo_root)
-    host_vars = require_mapping(host_vars, str(TOPOLOGY_HOST_VARS_PATH))
+    # An explicitly selected topology is authoritative for the whole generation
+    # invocation. Do not read the older tracked platform.yml first: doing so can
+    # pair a new guest catalog with stale hairpin/proxy addresses.
+    if topology_path is not None:
+        selected_path = topology_path.expanduser()
+        if not selected_path.is_absolute():
+            selected_path = repo_root / selected_path
+        selected_path = selected_path.resolve()
+        if not selected_path.is_file():
+            raise ValueError(f"topology file does not exist: {selected_path}")
+        host_vars = yaml.safe_load(selected_path.read_text()) or {}
+        host_vars = require_mapping(host_vars, str(selected_path))
+    else:
+        # ADR 0430 — overlay-aware fallback for the legacy no-selector path.
+        host_vars = load_topology_host_vars(repo_root)
+        host_vars = require_mapping(host_vars, str(TOPOLOGY_HOST_VARS_PATH))
     guests_raw = require_list(host_vars.get("proxmox_guests", []), "host_vars.proxmox_guests", min_length=1)
 
     by_name: dict[str, dict[str, str]] = {}
@@ -736,6 +812,8 @@ def generate_hairpin(
     registry: dict,
     write: bool = False,
     repo_root: Path = REPO_ROOT,
+    identity_vars: dict[str, str] | None = None,
+    topology_path: Path | None = None,
 ) -> list[dict]:
     """Aggregate hairpin entries into platform_hairpin_nat_hosts.
 
@@ -754,9 +832,7 @@ def generate_hairpin(
     Returns the sorted list of {hostname, address} dicts.
     Raises ValueError on any validation or drift error.
     """
-    from identity_yaml import load_identity_vars
-
-    guest_catalog = _load_guest_catalog(repo_root)
+    guest_catalog = _load_guest_catalog(repo_root, topology_path=topology_path)
     seen: dict[str, str] = {}  # hostname -> resolved IP
 
     # --- Source 1: explicit hairpin.publish entries from the service registry ---
@@ -793,7 +869,7 @@ def generate_hairpin(
 
     # --- Source 2: public hostnames from the health-probe catalog (Uptime Kuma) ---
     # All *.{platform_domain} URLs that Uptime Kuma checks must route through nginx.
-    identity = load_identity_vars()
+    identity = identity_vars if identity_vars is not None else load_identity_vars()
     platform_domain = identity.get("platform_domain", CATALOG_PLATFORM_DOMAIN)
 
     if platform_domain != CATALOG_PLATFORM_DOMAIN:
@@ -826,7 +902,7 @@ def _write_hairpin_file(hosts: list[dict], repo_root: Path) -> None:
         "# GENERATED — do not edit by hand.\n"
         "# Sources: platform_service_registry hairpin declarations + health-probe-catalog.json (Uptime Kuma monitors).\n"
         "# ADR 0374 Phase 1.\n"
-        "# Regenerate: python scripts/generate_cross_cutting_artifacts.py --write --only hairpin\n"
+        "# Regenerate through make generate-platform-vars with the intended identity/topology selectors.\n"
         "---\n"
     )
     body = yaml.dump(
@@ -902,11 +978,12 @@ Concerns:
   dns      Hetzner DNS A record declarations (Phase 2)
   tls      certificate-catalog.json domain entries (Phase 3)
   proxy    nginx edge server-block fragments (Phase 4)
-  sso      Keycloak OIDC client declarations (Phase 5)
+  sso      OIDC client declarations (Phase 5)
 
 Examples:
   python scripts/generate_cross_cutting_artifacts.py --check
   python scripts/generate_cross_cutting_artifacts.py --write --only sso
+  python scripts/generate_cross_cutting_artifacts.py --write --only hairpin --identity-file .local/identity.yml
 """,
     )
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -918,6 +995,22 @@ Examples:
         metavar="CONCERN",
         help=f"Process only this concern. One of: {', '.join(VALID_CONCERNS)}",
     )
+    parser.add_argument(
+        "--identity-file",
+        type=Path,
+        help=(
+            "Use this identity overlay for registry interpolation and hairpin "
+            "catalog expansion instead of the shared .local/identity.yml."
+        ),
+    )
+    parser.add_argument(
+        "--topology-file",
+        type=Path,
+        help=(
+            "Use this topology source for hairpin and proxy address resolution "
+            "instead of an existing platform.yml or shared local profile."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -928,7 +1021,11 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"Loading registry from {REGISTRY_PATH.relative_to(REPO_ROOT)} ...")
     try:
-        registry = _load_registry()
+        identity_vars = _resolve_generation_identity(
+            args.identity_file,
+            prefer_tracked_snapshot=not write,
+        )
+        registry = _load_registry(identity_vars)
     except (OSError, yaml.YAMLError, ValueError) as exc:
         print(f"ERROR: Failed to load registry: {exc}", file=sys.stderr)
         return 1
@@ -941,7 +1038,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"\n[{concern.upper()}]")
         try:
             if concern == "hairpin":
-                generate_hairpin(registry, write=write, repo_root=REPO_ROOT)
+                generate_hairpin(
+                    registry,
+                    write=write,
+                    repo_root=REPO_ROOT,
+                    identity_vars=identity_vars,
+                    topology_path=args.topology_file,
+                )
             elif concern == "dns":
                 generate_dns_declarations(registry, write=write, repo_root=REPO_ROOT)
             elif concern == "tls":
@@ -949,7 +1052,12 @@ def main(argv: list[str] | None = None) -> int:
             elif concern == "sso":
                 generate_sso_clients(registry, write=write, repo_root=REPO_ROOT)
             elif concern == "proxy":
-                generate_nginx_upstreams(registry, write=write, repo_root=REPO_ROOT)
+                generate_nginx_upstreams(
+                    registry,
+                    write=write,
+                    repo_root=REPO_ROOT,
+                    topology_path=args.topology_file,
+                )
             else:
                 _concern_not_implemented(concern, write=write)
         except ValueError as exc:

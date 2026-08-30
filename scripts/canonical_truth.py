@@ -94,15 +94,15 @@ def load_workstream_canonical_truth(path: Path | None = None) -> list[Workstream
     for index, workstream in enumerate(workstreams):
         workstream_path = f"workstreams.yaml.workstreams[{index}]"
         workstream_mapping = _require_mapping(workstream, path=workstream_path)
+        canonical_truth = workstream_mapping.get("canonical_truth")
+        if canonical_truth is None:
+            continue
+
         workstream_id = _require_string(workstream_mapping.get("id"), path=f"{workstream_path}.id")
         adr = _require_string(workstream_mapping.get("adr"), path=f"{workstream_path}.adr")
         title = _require_string(workstream_mapping.get("title"), path=f"{workstream_path}.title")
         status = _require_string(workstream_mapping.get("status"), path=f"{workstream_path}.status")
         live_applied = bool(workstream_mapping.get("live_applied", status == LIVE_APPLIED_STATUS))
-
-        canonical_truth = workstream_mapping.get("canonical_truth")
-        if canonical_truth is None:
-            continue
 
         canonical_truth_mapping = _require_mapping(canonical_truth, path=f"{workstream_path}.canonical_truth")
         changelog_entry_value = canonical_truth_mapping.get("changelog_entry")

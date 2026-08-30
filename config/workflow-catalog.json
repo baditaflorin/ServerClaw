@@ -1,6 +1,68 @@
 {
   "schema_version": "1.0.0",
   "workflows": {
+    "bootstrap-openbao-runtime-secret-provisioner": {
+      "description": "Bootstrap and verify the narrow OpenBao runtime-secret provisioner without restarting or reconverging the OpenBao runtime.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "bootstrap-openbao-runtime-secret-provisioner",
+        "command": "PLATFORM_IDENTITY_OVERLAY=/absolute/path/to/identity.yml PLATFORM_TOPOLOGY_OVERLAY=/absolute/path/to/topology.yml make bootstrap-openbao-runtime-secret-provisioner env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "openbao_breakglass_password"
+        ],
+        "generated_secret_ids": [
+          "openbao_runtime_secret_provisioner_approle",
+          "openbao_runtime_secret_provisioner_bootstrap_receipt"
+        ],
+        "health_checks": [
+          {
+            "id": "openbao_deployment_selection",
+            "description": "The explicitly selected identity and topology reproduce the tracked OpenBao endpoint, SSH jump, target guest, and loopback automation-listener facts before any secret or API access.",
+            "command": "make --no-print-directory preflight-openbao-deployment-selection env=production",
+            "timeout_seconds": 120
+          }
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "preflight-openbao-deployment-selection"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-authentik.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/bootstrap_openbao_runtime_secret_provisioner.py",
+        "tests/test_bootstrap_openbao_runtime_secret_provisioner.py",
+        "inventory/group_vars/all/platform_services.yml",
+        "config/controller-local-secrets.json",
+        "config/secret-catalog.json",
+        "docs/runbooks/configure-authentik.md",
+        "docs/runbooks/configure-glitchtip.md"
+      ],
+      "outputs": [
+        "Exact registered runtime-service policies and AppRoles reconciled in the already-running OpenBao instance without a container restart.",
+        "A mode-0600 runtime-secret-provisioner AppRole artifact plus a non-secret bootstrap receipt emitted only after provisioner login and exact allow/deny capability verification."
+      ],
+      "verification_commands": [
+        "make --no-print-directory preflight-openbao-deployment-selection env=production",
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; topology_file=\"${PLATFORM_TOPOLOGY_OVERLAY:?set PLATFORM_TOPOLOGY_OVERLAY to the intended deployment topology file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; case \"${topology_file}\" in /*) ;; .local/*) topology_file=\"${local_root}/${topology_file#.local/}\" ;; *) topology_file=\"${local_root}/${topology_file}\" ;; esac; uv run --with pyyaml python scripts/bootstrap_openbao_runtime_secret_provisioner.py --check --identity-file \"${identity_file}\" --topology-file \"${topology_file}\" --breakglass-password-file \"${local_root}/openbao/breakglass-password.txt\" --output-root \"${local_root}/openbao\" --ssh-private-key-file \"${local_root}/ssh/bootstrap.id_ed25519\""
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 300,
+        "max_steps": 80,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-plausible": {
       "description": "Converge Plausible on docker-runtime, publish analytics.example.com through the shared edge, and verify public tracker injection plus synthetic event ingestion.",
       "lifecycle_status": "active",
@@ -3634,7 +3696,7 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key",
-          "openbao_init_payload"
+          "openbao_breakglass_password"
         ]
       },
       "validation_targets": [
@@ -7836,19 +7898,106 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-authentik": {
+      "description": "Converge the parallel Authentik identity broker, preserve its existing database and signing material, reconcile the declared GlitchTip and Outline OAuth providers, and publish id.example.com without changing Keycloak.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-authentik",
+        "command": "PLATFORM_IDENTITY_OVERLAY=/absolute/path/to/identity.yml PLATFORM_TOPOLOGY_OVERLAY=/absolute/path/to/topology.yml HETZNER_DNS_API_TOKEN=... make converge-authentik env=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token",
+          "openbao_runtime_secret_provisioner_approle",
+          "openbao_runtime_secret_provisioner_bootstrap_receipt"
+        ],
+        "bootstrap_manifest_ids": [
+          "shared-edge-generated-portals"
+        ],
+        "generated_secret_ids": [
+          "authentik_admin_token",
+          "authentik_glitchtip_client_secret",
+          "authentik_outline_client_secret"
+        ],
+        "health_checks": [
+          {
+            "id": "authentik_deployment_selection",
+            "description": "The explicitly selected identity and topology reproduce tracked platform_generation facts and target hosts before any live mutation.",
+            "command": "make --no-print-directory preflight-authentik-deployment-selection env=production",
+            "timeout_seconds": 120
+          },
+          {
+            "id": "keycloak_public_discovery",
+            "description": "The retained Keycloak realm discovery endpoint remains healthy through the deployment-specific public edge before Authentik changes.",
+            "command": "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; keycloak_realm=\"${KEYCLOAK_REALM:-${platform_domain%%.*}}\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://sso.${platform_domain}/realms/${keycloak_realm}/.well-known/openid-configuration\" >/dev/null",
+            "timeout_seconds": 30
+          }
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "preflight-authentik-deployment-selection",
+        "syntax-check-authentik"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-authentik.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/authentik.yml",
+        "playbooks/vars/authentik.yml",
+        "collections/ansible_collections/lv3/platform/roles/authentik_runtime",
+        "config/authentik/oauth-clients.yaml",
+        "config/integrations/glitchtip--authentik.yaml",
+        "config/integrations/outline--authentik.yaml",
+        "config/controller-local-secrets.json",
+        "collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml",
+        "collections/ansible_collections/lv3/platform/roles/openbao_runtime",
+        "scripts/reconcile_authentik_oauth.py",
+        "catalog/services/authentik/service.yaml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/data-catalog.json"
+      ],
+      "outputs": [
+        "A healthy Authentik runtime on runtime-control with its existing database and signing secrets preserved through OpenBao-backed runtime injection, stable repo-declared GlitchTip and Outline providers/applications, and controller-local client material adopted without rotation while Keycloak remains available for rollback."
+      ],
+      "verification_commands": [
+        "make syntax-check-authentik",
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; curl --fail --silent --show-error \"https://id.${platform_domain}/-/health/ready/\" >/dev/null",
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; uv run --no-project --with pyyaml python scripts/reconcile_authentik_oauth.py --base-url \"https://id.${platform_domain}\" --platform-domain \"${platform_domain}\" --token-file \"${local_root}/authentik/bootstrap-token.txt\" --client glitchtip --check --expect-no-change",
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; keycloak_realm=\"${KEYCLOAK_REALM:-${platform_domain%%.*}}\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://sso.${platform_domain}/realms/${keycloak_realm}/.well-known/openid-configuration\" >/dev/null"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 4,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-glitchtip": {
       "description": "Converge GlitchTip on docker-runtime, provision its PostgreSQL backend on postgres, publish it at errors.example.com, and verify public DSN ingestion end to end.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
         "target": "converge-glitchtip",
-        "command": "HETZNER_DNS_API_TOKEN=... make converge-glitchtip"
+        "command": "PLATFORM_IDENTITY_OVERLAY=/absolute/path/to/identity.yml PLATFORM_TOPOLOGY_OVERLAY=/absolute/path/to/topology.yml HETZNER_DNS_API_TOKEN=... make converge-glitchtip env=production"
       },
       "preflight": {
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key",
-          "hetzner_dns_api_token"
+          "hetzner_dns_api_token",
+          "openbao_runtime_secret_provisioner_approle",
+          "openbao_runtime_secret_provisioner_bootstrap_receipt",
+          "authentik_glitchtip_client_secret",
+          "keycloak_glitchtip_client_secret"
         ],
         "bootstrap_manifest_ids": [
           "shared-edge-generated-portals"
@@ -7861,12 +8010,26 @@
           "glitchtip_api_token",
           "glitchtip_mail_gateway_dsn",
           "glitchtip_windmill_jobs_dsn",
-          "glitchtip_platform_findings_event_url",
-          "keycloak_glitchtip_client_secret"
+          "glitchtip_platform_findings_event_url"
+        ],
+        "health_checks": [
+          {
+            "id": "glitchtip_deployment_selection",
+            "description": "The explicitly selected identity and topology reproduce tracked platform_generation facts and the GlitchTip target hosts before any live mutation.",
+            "command": "make --no-print-directory preflight-glitchtip-deployment-selection env=production",
+            "timeout_seconds": 120
+          },
+          {
+            "id": "keycloak_public_discovery",
+            "description": "The retained Keycloak realm discovery endpoint remains healthy through the deployment-specific public edge before the GlitchTip Authentik cutover.",
+            "command": "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; keycloak_realm=\"${KEYCLOAK_REALM:-${platform_domain%%.*}}\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://sso.${platform_domain}/realms/${keycloak_realm}/.well-known/openid-configuration\" >/dev/null",
+            "timeout_seconds": 30
+          }
         ]
       },
       "validation_targets": [
         "validate",
+        "preflight-glitchtip-deployment-selection",
         "syntax-check-glitchtip"
       ],
       "live_impact": "guest_live",
@@ -7875,28 +8038,32 @@
         "Makefile",
         "collections/ansible_collections/lv3/platform/playbooks/glitchtip.yml",
         "collections/ansible_collections/lv3/platform/playbooks/services/glitchtip.yml",
-        "collections/ansible_collections/lv3/platform/playbooks/glitchtip.yml",
-        "collections/ansible_collections/lv3/platform/playbooks/services/glitchtip.yml",
         "collections/ansible_collections/lv3/platform/roles/glitchtip_postgres",
         "collections/ansible_collections/lv3/platform/roles/glitchtip_runtime",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/files/mail-gateway/telemetry.py",
         "inventory/host_vars/proxmox-host.yml",
+        "config/authentik/oauth-clients.yaml",
+        "config/integrations/glitchtip--authentik.yaml",
+        "config/controller-local-secrets.json",
         "scripts/glitchtip_event.py",
         "scripts/glitchtip_event_smoke.py",
+        "scripts/glitchtip_oidc_smoke.py",
         "config/service-capability-catalog.json",
         "config/subdomain-catalog.json",
         "config/health-probe-catalog.json",
         "config/service-completeness.json"
       ],
       "outputs": [
-        "A repo-managed GlitchTip runtime on docker-runtime with PostgreSQL on postgres, Keycloak-backed browser sign-in, mirrored bootstrap credentials, and project-scoped DSNs for first-party producer integrations."
+        "A repo-managed GlitchTip runtime on docker-runtime with PostgreSQL on postgres, Authentik-backed browser sign-in through allauth's headless redirect flow, mirrored bootstrap credentials, project-scoped DSNs, and the prior Keycloak client secret retained as a per-client rollback artifact.",
+        "Before Outline may advance, the live-apply receipt records an interactive Authentik browser login, an authenticated GlitchTip session, and logout back to an unauthenticated state."
       ],
       "verification_commands": [
         "make syntax-check-glitchtip",
-        "curl -fsS https://errors.example.com/api/0/internal/health/",
-        "curl -fsS https://errors.example.com/_allauth/browser/v1/config",
-        "python3 scripts/glitchtip_event_smoke.py --base-url https://errors.example.com --organization-slug lv3 --api-token-file .local/glitchtip/api-token.txt --dsn-file .local/glitchtip/platform-findings-event-url.txt"
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; curl --fail --silent --show-error \"https://errors.${platform_domain}/api/0/internal/health/\" >/dev/null",
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; curl --fail --silent --show-error \"https://errors.${platform_domain}/_allauth/browser/v1/config\" >/dev/null",
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; python3 scripts/glitchtip_oidc_smoke.py --base-url \"https://errors.${platform_domain}\" --provider-id authentik --issuer-url \"https://id.${platform_domain}/application/o/glitchtip\" --expected-client-id glitchtip --callback-url \"https://errors.${platform_domain}/login\" --client-secret-file \"${local_root}/authentik/glitchtip-client-secret.txt\"",
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; python3 scripts/glitchtip_event_smoke.py --base-url \"https://errors.${platform_domain}\" --organization-slug lv3 --api-token-file \"${local_root}/glitchtip/api-token.txt\" --dsn-file \"${local_root}/glitchtip/platform-findings-event-url.txt\"",
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; keycloak_realm=\"${KEYCLOAK_REALM:-${platform_domain%%.*}}\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://sso.${platform_domain}/realms/${keycloak_realm}/.well-known/openid-configuration\" >/dev/null"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -7910,28 +8077,34 @@
       }
     },
     "converge-outline": {
-      "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure MinIO S3 storage, publish it at wiki.example.com, and bootstrap Keycloak OIDC.",
+      "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure shared MinIO S3 storage, publish it at wiki.example.com, and select the repo-managed Authentik OIDC client while retaining Keycloak rollback.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
         "target": "converge-outline",
-        "command": "HETZNER_DNS_API_TOKEN=... make converge-outline"
+        "command": "PLATFORM_IDENTITY_OVERLAY=/absolute/path/to/identity.yml PLATFORM_TOPOLOGY_OVERLAY=/absolute/path/to/topology.yml HETZNER_DNS_API_TOKEN=... make converge-outline env=production"
       },
       "preflight": {
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key",
-          "hetzner_dns_api_token"
+          "hetzner_dns_api_token",
+          "openbao_runtime_secret_provisioner_approle",
+          "authentik_outline_client_secret",
+          "keycloak_outline_client_secret",
+          "outline_api_token"
         ],
         "generated_secret_ids": [
           "outline_database_password",
           "outline_secret_key",
           "outline_utils_secret",
-          "keycloak_outline_client_secret"
+          "outline_redis_password"
         ]
       },
       "validation_targets": [
-        "validate"
+        "validate",
+        "preflight-outline-deployment-selection",
+        "syntax-check-outline"
       ],
       "live_impact": "guest_live",
       "owner_runbook": "docs/runbooks/configure-outline.md",
@@ -7940,13 +8113,17 @@
         "playbooks/outline.yml",
         "playbooks/vars/outline.yml",
         "collections/ansible_collections/lv3/platform/roles/outline_postgres",
-        "collections/ansible_collections/lv3/platform/roles/outline_runtime"
+        "collections/ansible_collections/lv3/platform/roles/outline_runtime",
+        "config/authentik/oauth-clients.yaml",
+        "config/integrations/outline--authentik.yaml"
       ],
       "outputs": [
-        "A repo-managed Outline wiki runtime on docker-runtime with PostgreSQL on postgres, MinIO S3 document storage, Keycloak-backed browser sign-in, and an NGINX edge publication at wiki.example.com."
+        "A repo-managed Outline wiki runtime on docker-runtime with PostgreSQL on postgres, shared MinIO S3 document storage, Authentik-backed browser sign-in, preserved Keycloak rollback material, and an NGINX edge publication at wiki.example.com."
       ],
       "verification_commands": [
-        "curl -fsS https://wiki.example.com/api/auth.config"
+        "curl -fsS https://wiki.example.com/_health",
+        "curl -fsS https://id.example.com/application/o/outline/.well-known/openid-configuration",
+        "python3 scripts/sync_docs_to_outline.py verify --base-url https://wiki.example.com"
       ],
       "execution_class": "mutation",
       "budget": {

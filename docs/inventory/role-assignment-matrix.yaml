@@ -335,7 +335,7 @@ staging:
       count: 1
       nodes:
         - name: postgres
-          ip_address: 10.20.10.50
+          ip_address: 10.10.10.50
           primary_role: state
           description: "Unified staging database (all concerns)"
           technical_debt:
@@ -347,14 +347,14 @@ staging:
       count: 1
       nodes:
         - name: nginx-edge
-          ip_address: 10.20.10.10
+          ip_address: 10.10.10.10
           primary_role: edge
 
     workload:
       count: 1
       nodes:
         - name: docker-runtime
-          ip_address: 10.20.10.20
+          ip_address: 10.10.10.20
           primary_role: workload
           secondary_roles:
             - control: "Runtime-control functions (MULTI-ROLE WAIVER)"
@@ -376,7 +376,7 @@ staging:
       count: 1
       nodes:
         - name: backup
-          ip_address: 10.20.10.60
+          ip_address: 10.10.10.60
           primary_role: recovery
           description: "Staging backup agent (reduced retention, local only)"
 
@@ -384,7 +384,7 @@ staging:
       count: 1
       nodes:
         - name: docker-build
-          ip_address: 10.20.10.30
+          ip_address: 10.10.10.30
           primary_role: build
 
 ---

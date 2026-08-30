@@ -81,7 +81,7 @@ The successful replay verified:
 - `ops` access plus Docker service readiness on the preview guest
 - durable evidence under `receipts/preview-environments/` and `receipts/live-applies/preview/`
 
-The live replay also confirmed that `vmbr20` previews depend on the Proxmox host forwarding and masquerading `10.20.10.0/24`. During bring-up, replaying the staged bridge automation restored the missing host nftables rules that were blocking guest package egress.
+The live replay also confirmed that `vmbr20` previews depend on the Proxmox host forwarding and masquerading `10.10.10.0/24`. During bring-up, replaying the staged bridge automation restored the missing host nftables rules that were blocking guest package egress.
 
 ## Related ADRs
 

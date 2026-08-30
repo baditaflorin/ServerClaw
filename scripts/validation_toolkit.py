@@ -188,29 +188,38 @@ def load_identity_vars() -> dict[str, str]:
     path = _find_identity_path()
     identity_vars = _load_scalar_identity_mapping(path)
 
+    from platform.repo import local_overlay_root, resolve_explicit_overlay_selector
+
+    explicit_overlay = resolve_explicit_overlay_selector(
+        "PLATFORM_IDENTITY_OVERLAY",
+        repo_root=path.parents[3],
+    )
+    if explicit_overlay is not None:
+        identity_vars.update(_load_scalar_identity_mapping(explicit_overlay))
+        return identity_vars
+
     if os.environ.get("LV3_DISABLE_SHARED_LOCAL_IDENTITY", "").lower() in {"1", "true", "yes"}:
         return identity_vars
 
     # Worktrees intentionally do not have their own .local/ directory. Load the
     # shared overlay from the main repo root when available so validation and
     # generator scripts see the real deployment domain/IP facts.
-    from platform.repo import local_overlay_root
-
     overlay_path = local_overlay_root(path.parents[3]) / "identity.yml"
     identity_vars.update(_load_scalar_identity_mapping(overlay_path))
     return identity_vars
 
 
 def resolve_public_domain_placeholders(value: Any) -> Any:
-    """Recursively replace committed ``example.com`` placeholders with the live platform domain."""
+    """Resolve committed public-domain and certificate-lineage placeholders."""
 
     platform_domain = load_identity_vars().get("platform_domain", "example.com")
-    if platform_domain == "example.com":
-        return value
+    platform_config_prefix = platform_domain.split(".", 1)[0]
 
     def _resolve(current: Any) -> Any:
         if isinstance(current, str):
-            return current.replace("example.com", platform_domain)
+            return current.replace("example.com", platform_domain).replace(
+                "{{ platform_config_prefix }}", platform_config_prefix
+            )
         if isinstance(current, list):
             return [_resolve(item) for item in current]
         if isinstance(current, dict):

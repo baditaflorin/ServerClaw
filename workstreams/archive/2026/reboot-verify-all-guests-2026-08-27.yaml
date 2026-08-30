@@ -1,0 +1,78 @@
+id: reboot-verify-all-guests-2026-08-27
+title: Reboot-verify the forward-chain fix on all 17 guests, root-cause the Docker-wipe bug, fix Postgres corruption
+status: merged
+ready_to_merge: true
+live_applied: true
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: reboot-verify-all-guests-2026-08-27
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: reboot-verify-all-guests-2026-08-27-doc
+      paths:
+        - docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+        - workstreams/active/reboot-verify-all-guests-2026-08-27.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Rebooted all 17 running example.org guests one at a time (canary first,
+  Postgres last) per explicit instruction to confirm the #141 forward-chain
+  fix survives a reboot, not just a live nft add rule. Confirmed on all 17
+  via a final zero-gap dry-run sweep.
+
+  Two unrelated, real, pre-existing bugs surfaced and were fixed along the
+  way -- full detail in the postmortem doc's new sections:
+
+  1. cloud-init's package-update-upgrade-install module never completed
+  successfully on some guests (interrupted initial-provisioning dpkg
+  transaction), so it retries the full package list -- including
+  docker.io -- on every boot. Reconfiguring docker.io mid-boot disrupted
+  the freshly-started daemon on docker-runtime (VMID 120), wiping every
+  container and locally-cached image (confirmed identical to an earlier
+  incident on coolify-apps this session). Fixed by completing the
+  interrupted dpkg transaction live on the two affected guests
+  (docker-runtime, coolify), which lets cloud-init's module finally
+  record success and never retry again. Verified runtime-control and
+  coolify-apps were safe to reboot by checking their own completion
+  records first (one already succeeded months ago, the other had already
+  self-cleared); both rebooted afterward with zero container loss (21 and
+  99 containers respectively).
+
+  Recovered docker-runtime's wiped services: rebuilt and pushed
+  mcp-site-service (app.example.org's upstream -- this repo has no CI
+  publish step, image is built/pushed by hand) and browser-runner from
+  their existing source, and fixed keycloak (a compose env_file/depends_on
+  ordering gotcha, a stale 10.10.10.x DB host address in its OpenBao
+  secret template -- same bug class as the original nginx proxy_pass
+  issue, third surface hit by it -- and a missing external docker
+  network).
+
+  2. Two of four Postgres nodes (the primary, which actually backs
+  Keycloak/Outline/GlitchTip/Woodpecker/Gitea/Plane, and the replica)
+  came back from a clean, graceful reboot with a corrupted
+  pg_authid_oid_index, blocking every connection fleet-wide (pg_authid is
+  required for authentication itself). No disk/flush errors found; root
+  cause not identified beyond "reproducible on 2 of 4 nodes in one
+  round." Fixed via the standard documented Postgres repair:
+  ignore_system_indexes bypass, REINDEX SYSTEM on every database, normal
+  restart. Verified clean.
+
+  All findings, exact commands, and open follow-ups are in the
+  postmortem doc -- this was diagnostic and live-remediation work, no
+  further IaC changes needed beyond documentation.
+
+objectives:
+  - Confirm the forward-chain fix survives a reboot on every guest, not just live
+  - Root-cause and fix whatever broke during that verification
+  - Leave the fleet in a known-good, documented state
+
+completion_metrics:
+  - All 17 guests show zero forward-chain gaps in a post-reboot dry-run sweep
+  - app.example.org and all other external services return normal responses
+  - All 4 Postgres nodes accept connections cleanly
+  - Root causes for both new bugs are documented with enough detail to act on later
+
+related_adrs: []

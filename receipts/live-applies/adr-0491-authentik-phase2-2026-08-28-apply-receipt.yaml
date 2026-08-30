@@ -1,0 +1,29 @@
+workstream_id: adr-0491-authentik-phase2-2026-08-28
+state: completed
+schema_version: 1.1.0
+started_at: '2026-08-30T07:58:28Z'
+completed_at: '2026-08-30T10:36:10Z'
+applied_by: codex
+repo_version: c36e40f828103eb96950cdd9364b24d326faaf67
+adr: 0491
+summary: Deploy Authentik 2026.8.0 and validate GlitchTip/Outline OIDC migration.
+targets:
+- service: authentik
+  vmid: '192'
+  host_group: runtime-control
+- service: nginx-edge
+  vmid: '110'
+  host_group: nginx
+- service: dns
+  zone: example.org
+  record: id
+errors: []
+notes:
+- Authentik 2026.8.0 server and worker healthy with zero restarts; public readiness
+  returned HTTP 200.
+- The scoped Authentik edge CSP was converged and the Authentik host header audit
+  passed.
+- GlitchTip Authentik OIDC smoke and Outline managed collection verification passed.
+- A fresh browser credentialed Outline OIDC login reached the protected workspace
+  without browser errors.
+- Keycloak discovery remained healthy as the retained rollback broker.

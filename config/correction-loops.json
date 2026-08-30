@@ -150,6 +150,7 @@
       "description": "Identity and secret workflows repair one named principal or credential contract by replaying the governed sync or rotation path before escalating to a human.",
       "applies_to": {
         "workflow_ids": [
+          "bootstrap-openbao-runtime-secret-provisioner",
           "operator-offboard",
           "operator-onboard",
           "rotate-grafana-service-token",

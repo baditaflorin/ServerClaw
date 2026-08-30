@@ -1,0 +1,69 @@
+# Purpose: Declare the default paths, topology, image, and secret-contract inputs for the Authentik runtime role.
+# Use case: Load during Authentik convergence so compose rendering and OIDC reconciliation use one governed variable set.
+# Inputs: Platform service registry, topology, image catalog, and controller-local secret artifact paths.
+# Outputs: Default variables consumed by the authentik_runtime tasks, templates, and verification steps.
+# Idempotency: Fully idempotent; this file declares desired values only.
+# Dependencies: ADR 0165 metadata standard and ADR 0491 Authentik operator and agent SSO.
+---
+# NOTE (2026-08-27, ADR 0491 Phase 1 live rollout): the actual live deployment
+# on runtime-control currently uses a plain root-owned /opt/authentik/.env
+# file instead of the OpenBao-agent sidecar this role defines -- the fleet's
+# available OpenBao credentials (a stale controller-automation AppRole and a
+# revoked root token) couldn't provision a new secret path at deploy time.
+# This role still describes the *target* design (OpenBao-integrated, matching
+# every other service); wiring the live deployment back to it is tracked as
+# a follow-up once working OpenBao admin access is restored. See
+# docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md.
+authentik_service_topology: >-
+  {{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('authentik') }}
+authentik_site_dir: /opt/authentik
+authentik_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/authentik"
+authentik_compose_file: "{{ authentik_site_dir }}/docker-compose.yml"
+authentik_env_file: "{{ compose_runtime_secret_root }}/authentik/runtime.env"
+authentik_legacy_env_file: "{{ authentik_site_dir }}/.env"
+authentik_legacy_env_backup_file: "{{ authentik_site_dir }}/.env.pre-openbao-adoption"
+authentik_legacy_compose_backup_file: "{{ authentik_compose_file }}.pre-openbao-adoption"
+authentik_secret_bootstrap_mode: preserve
+authentik_openbao_agent_dir: "{{ authentik_site_dir }}/openbao"
+authentik_openbao_agent_image: "{{ openbao_agent_image }}"
+authentik_openbao_agent_container_name: authentik-openbao-agent
+authentik_openbao_secret_path: services/authentik/runtime-env
+authentik_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-authentik-runtime"
+authentik_openbao_approle_name: authentik-runtime
+authentik_image: "{{ container_image_catalog.images.authentik_runtime.ref }}"
+authentik_postgres_image: docker.io/library/postgres:16-alpine@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685
+authentik_redis_image: docker.io/library/redis:7-alpine@sha256:ff02b58f971e7d7d156a1267e283fcbbeee91773b6aa36c49dac28ecfe28eadf
+authentik_container_name: authentik
+authentik_internal_port: "{{ platform_service_registry.authentik.internal_port }}"
+authentik_container_port: 9000
+authentik_healthcheck_path: /-/health/ready/
+authentik_public_url: "https://{{ authentik_service_topology.public_hostname }}"
+authentik_postgres_data_dir: "{{ authentik_site_dir }}/data/postgres"
+authentik_redis_data_dir: "{{ authentik_site_dir }}/data/redis"
+authentik_media_dir: "{{ authentik_site_dir }}/media"
+authentik_templates_dir: "{{ authentik_site_dir }}/templates"
+authentik_local_artifact_dir: "{{ repo_shared_local_root }}/authentik"
+# Django secret key -- required, used for session signing and cookie encryption.
+authentik_secret_key_remote_file: "{{ authentik_secret_dir }}/secret-key"
+authentik_secret_key_local_file: "{{ authentik_local_artifact_dir }}/secret-key.txt"
+# Shared between the postgres container's own POSTGRES_PASSWORD and Authentik's
+# AUTHENTIK_POSTGRESQL__PASSWORD -- must be the identical value on both sides.
+authentik_postgres_password_remote_file: "{{ authentik_secret_dir }}/postgres-password"
+authentik_postgres_password_local_file: "{{ authentik_local_artifact_dir }}/postgres-password.txt"
+# API token minted for the akadmin user on first boot -- this is what makes
+# Authentik "agentic": any automation can authenticate against its REST API
+# with this token instead of needing an interactive browser login.
+authentik_bootstrap_token_remote_file: "{{ authentik_secret_dir }}/bootstrap-token"
+authentik_bootstrap_token_local_file: "{{ authentik_local_artifact_dir }}/bootstrap-token.txt"
+# Password for the akadmin user's own interactive login (break-glass access).
+authentik_bootstrap_admin_token_remote_file: "{{ authentik_secret_dir }}/bootstrap-password"
+authentik_bootstrap_admin_token_local_file: "{{ authentik_local_artifact_dir }}/bootstrap-password.txt"
+authentik_bootstrap_email: "{{ platform_operator_email }}"
+authentik_private_url: "http://127.0.0.1:{{ authentik_internal_port }}"
+authentik_oauth_reconcile_enabled: true
+authentik_oauth_manifest_file: "{{ inventory_dir }}/../config/authentik/oauth-clients.yaml"
+authentik_oauth_reconcile_script: "{{ inventory_dir }}/../scripts/reconcile_authentik_oauth.py"
+authentik_oauth_reconcile_token_file: "{{ authentik_bootstrap_token_local_file }}"
+authentik_oauth_reconcile_clients:
+  - glitchtip
+  - outline

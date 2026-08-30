@@ -5,26 +5,57 @@
   ansible.builtin.assert:
     that:
       - outline_public_base_url | length > 0
+      - outline_oidc_provider == 'authentik'
+      - outline_oidc_issuer | length > 0
+      - outline_oidc_discovery_url | length > 0
+      - outline_oidc_auth_uri | length > 0
       - outline_bootstrap_username | length > 0
       - outline_operator_password_local_file | length > 0
       - outline_api_token_name | length > 0
       - outline_api_token_local_file | length > 0
       - outline_api_token_scopes | length > 0
     fail_msg: >-
-      outline_runtime publication requires the public URL, bootstrap operator
-      credentials, and the controller-local API token path.
+      outline_runtime publication requires the public URL, selected Authentik
+      metadata, bootstrap fallback credentials, and the controller-local API token path.
+
+- name: Check whether the Outline API token already exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ outline_api_token_local_file }}"
+  register: outline_api_token_local
+
+- name: Record whether Outline already has durable API authority
+  ansible.builtin.set_fact:
+    outline_api_token_preexisting: >-
+      {{
+        outline_api_token_local.stat.exists | default(false)
+        and (outline_api_token_local.stat.size | default(0) | int) > 0
+      }}
+
+- name: Require owner-only permissions on the durable Outline API token
+  ansible.builtin.assert:
+    that:
+      - outline_api_token_local.stat.isreg | default(false)
+      - outline_api_token_local.stat.mode == '0600'
+    fail_msg: >-
+      {{ outline_api_token_local_file }} must be a regular owner-only 0600 file.
+      Run bootstrap-token once to normalize an existing token before converging Outline.
+  when: outline_api_token_preexisting
 
 - name: Check whether the Outline operator password exists on the control machine
   ansible.builtin.stat:
     path: "{{ outline_operator_password_local_file }}"
   register: outline_operator_password_local
+  when: not outline_api_token_preexisting
 
 - name: Fail if the Outline operator password is missing locally
   ansible.builtin.fail:
     msg: >-
       {{ outline_operator_password_local_file }} is missing on the control machine.
-      Converge the Keycloak runtime first so the Outline OIDC bootstrap can mint the API token.
-  when: not outline_operator_password_local.stat.exists
+      Restore the Keycloak rollback client and automation credential before attempting
+      first-time Outline API token bootstrap.
+  when:
+    - not outline_api_token_preexisting
+    - not outline_operator_password_local.stat.exists
 
 - name: Wait for the Outline public health endpoint
   ansible.builtin.uri:
@@ -36,6 +67,44 @@
   delay: 5
   until: outline_publish_public_health.status == 200
   changed_when: false
+
+- name: Read the selected Outline OIDC discovery document
+  ansible.builtin.uri:
+    url: "{{ outline_oidc_discovery_url }}"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: outline_oidc_discovery
+  changed_when: false
+
+- name: Assert the selected Outline OIDC discovery contract
+  ansible.builtin.assert:
+    that:
+      - outline_oidc_discovery.json.issuer == outline_oidc_issuer
+      - outline_oidc_discovery.json.authorization_endpoint == outline_oidc_auth_uri
+      - outline_oidc_discovery.json.token_endpoint == outline_oidc_token_uri
+      - outline_oidc_discovery.json.userinfo_endpoint == outline_oidc_userinfo_uri
+      - outline_oidc_discovery.json.end_session_endpoint == outline_oidc_logout_uri
+    fail_msg: "Outline selected OIDC metadata does not match the live Authentik discovery document."
+
+- name: Verify the Outline public login starts at the selected OIDC provider
+  ansible.builtin.uri:
+    url: "{{ outline_public_base_url }}/auth/oidc"
+    method: GET
+    follow_redirects: none
+    status_code:
+      - 302
+      - 303
+  register: outline_public_oidc_redirect
+  changed_when: false
+
+- name: Assert the Outline login redirect selects Authentik
+  ansible.builtin.assert:
+    that:
+      - outline_public_oidc_redirect.location is defined
+      - outline_public_oidc_redirect.location.startswith(outline_oidc_auth_uri)
+      - "'client_id=' ~ (outline_oidc_client_id | urlencode) in outline_public_oidc_redirect.location"
+    fail_msg: "Outline did not redirect its public OIDC login to the selected Authentik client."
 
 - name: Bootstrap the Outline API token when needed
   ansible.builtin.command:
@@ -59,15 +128,29 @@
   register: outline_bootstrap_token
   ignore_errors: true
   no_log: true
+  when: not outline_api_token_preexisting
 
 - name: Warn when Outline API token bootstrap failed
   ansible.builtin.debug:
     msg: >-
       Outline API token bootstrap returned a non-zero exit code (rc={{ outline_bootstrap_token.rc | default('?') }}).
       Doc sync will be skipped this converge. This is non-fatal — the Outline service is running.
-      Common cause on fork deployments: Keycloak OIDC flow not yet initialised for the automation user.
-      Re-run converge after Keycloak is fully settled to create the API token.
-  when: outline_bootstrap_token is failed
+      During an Authentik migration, restore the preserved Keycloak client long enough
+      to mint the durable token through outline.automation, then reapply Authentik.
+  when:
+    - outline_bootstrap_token is defined
+    - outline_bootstrap_token is failed
+
+- name: Record whether Outline API authority is available after bootstrap
+  ansible.builtin.set_fact:
+    outline_api_token_available: >-
+      {{
+        outline_api_token_preexisting
+        or (
+          outline_bootstrap_token is defined
+          and not (outline_bootstrap_token.failed | default(true))
+        )
+      }}
 
 - name: Sync the Outline landing and index documents
   ansible.builtin.command:
@@ -83,7 +166,7 @@
       - "{{ outline_api_token_local_file }}"
   changed_when: "'updated' in outline_sync_docs.stdout or 'created' in outline_sync_docs.stdout"
   register: outline_sync_docs
-  when: outline_bootstrap_token is not failed
+  when: outline_api_token_available
 
 - name: Verify the Outline public living knowledge surface
   ansible.builtin.command:
@@ -99,4 +182,4 @@
       - "{{ outline_api_token_local_file }}"
   register: outline_verify_sync
   changed_when: false
-  when: outline_bootstrap_token is not failed
+  when: outline_api_token_available

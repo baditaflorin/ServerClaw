@@ -65,6 +65,10 @@ curl -fsS https://agents.example.com/healthz
 
 The public hostname verifies the unauthenticated health path, but the bootstrap and app-management APIs remain OAuth-protected at the edge. Run the smoke flow through a local tunnel to `docker-runtime`:
 
+The Ansible role opens this loopback-only SSH forward automatically for its
+idempotent admin and SSO bootstrap. The manual tunnel below is still required
+for the independent workflow/tool-provider smoke test.
+
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -W %h:%p ops@100.64.0.1" \

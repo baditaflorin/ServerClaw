@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- Complete the live-verified Authentik Phase 2 migration for GlitchTip and Outline while retaining Keycloak as the per-client rollback broker.
+
 ## Latest Release
 
 - [0.179.45 release notes](docs/release-notes/0.179.45.md)

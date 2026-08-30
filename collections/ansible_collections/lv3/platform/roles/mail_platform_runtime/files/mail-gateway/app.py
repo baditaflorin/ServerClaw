@@ -7,6 +7,7 @@ from email.message import EmailMessage
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
@@ -195,7 +196,7 @@ def require_send_api_key(
 
 
 def default_profile_counters() -> dict[str, int]:
-    return {key: 0 for key in PROFILE_COUNTER_KEYS}
+    return dict.fromkeys(PROFILE_COUNTER_KEYS, 0)
 
 
 def load_state() -> dict[str, Any]:
@@ -269,17 +270,21 @@ async def get_principal_by_name(principal_type: str, name: str) -> dict[str, Any
     return None
 
 
-async def fetch_principal(principal_id: int | str) -> dict[str, Any]:
-    payload = await stalwart_request("GET", f"/api/principal/{principal_id}")
+def principal_path(principal_name: str) -> str:
+    return f"/api/principal/{quote(principal_name, safe='')}"
+
+
+async def fetch_principal(principal_name: str) -> dict[str, Any]:
+    payload = await stalwart_request("GET", principal_path(principal_name))
     return payload.get("data", {})
 
 
-async def patch_principal(principal_id: int | str, operations: list[dict[str, Any]]) -> None:
-    await stalwart_request("PATCH", f"/api/principal/{principal_id}", operations)
+async def patch_principal(principal_name: str, operations: list[dict[str, Any]]) -> None:
+    await stalwart_request("PATCH", principal_path(principal_name), operations)
 
 
-async def delete_principal(principal_id: int | str) -> None:
-    await stalwart_request("DELETE", f"/api/principal/{principal_id}")
+async def delete_principal(principal_name: str) -> None:
+    await stalwart_request("DELETE", principal_path(principal_name))
 
 
 def principal_emails(principal: dict[str, Any]) -> list[str]:
@@ -439,7 +444,7 @@ async def upsert_domain(
 ) -> dict[str, Any]:
     existing = await get_principal_by_name("domain", domain_name)
     if existing is None:
-        result = await stalwart_request(
+        await stalwart_request(
             "POST",
             "/api/principal",
             {
@@ -459,24 +464,23 @@ async def upsert_domain(
                 "externalMembers": [],
             },
         )
-        principal_id = result.get("data")
-        return {"status": "created", "item": await fetch_principal(principal_id)}
+        return {"status": "created", "item": await fetch_principal(domain_name)}
 
     operations: list[dict[str, Any]] = []
     desired_description = payload.description or existing.get("description") or "Managed mail domain"
     if existing.get("description") != desired_description:
         operations.append({"action": "set", "field": "description", "value": desired_description})
     if operations:
-        await patch_principal(existing["id"], operations)
-        return {"status": "updated", "item": await fetch_principal(existing["id"])}
-    return {"status": "unchanged", "item": await fetch_principal(existing["id"])}
+        await patch_principal(existing["name"], operations)
+        return {"status": "updated", "item": await fetch_principal(existing["name"])}
+    return {"status": "unchanged", "item": await fetch_principal(existing["name"])}
 
 
 @app.delete("/v1/domains/{domain_name}", status_code=204)
 async def remove_domain(domain_name: str, _: str = Depends(require_admin_api_key)) -> Response:
     existing = await get_principal_by_name("domain", domain_name)
     if existing is not None:
-        await delete_principal(existing["id"])
+        await delete_principal(existing["name"])
     return Response(status_code=204)
 
 
@@ -498,9 +502,8 @@ async def upsert_mailbox(
             raise HTTPException(status_code=422, detail="At least one mailbox email is required")
         if not payload.password:
             raise HTTPException(status_code=422, detail="A password is required when creating a mailbox")
-        result = await stalwart_request("POST", "/api/principal", mailbox_payload(localpart, payload))
-        principal_id = result.get("data")
-        return {"status": "created", "item": await fetch_principal(principal_id)}
+        await stalwart_request("POST", "/api/principal", mailbox_payload(localpart, payload))
+        return {"status": "created", "item": await fetch_principal(localpart)}
 
     operations: list[dict[str, Any]] = []
     desired_description = payload.description or existing.get("description") or "LV3 managed mailbox"
@@ -518,16 +521,16 @@ async def upsert_mailbox(
         operations.append({"action": "set", "field": "secrets", "value": [payload.password]})
 
     if operations:
-        await patch_principal(existing["id"], operations)
-        return {"status": "updated", "item": await fetch_principal(existing["id"])}
-    return {"status": "unchanged", "item": await fetch_principal(existing["id"])}
+        await patch_principal(existing["name"], operations)
+        return {"status": "updated", "item": await fetch_principal(existing["name"])}
+    return {"status": "unchanged", "item": await fetch_principal(existing["name"])}
 
 
 @app.delete("/v1/mailboxes/{localpart}", status_code=204)
 async def remove_mailbox(localpart: str, _: str = Depends(require_admin_api_key)) -> Response:
     existing = await get_principal_by_name("individual", localpart)
     if existing is not None:
-        await delete_principal(existing["id"])
+        await delete_principal(existing["name"])
     return Response(status_code=204)
 
 

@@ -20,32 +20,54 @@ def load_yaml(path: Path) -> list[dict] | dict:
 def test_defaults_define_public_oidc_and_local_artifacts() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
     assert defaults["outline_public_base_url"] == "https://{{ outline_service_topology.public_hostname }}"
+    assert defaults["outline_oidc_provider"] == "authentik"
+    assert defaults["outline_oidc_display_name"] == "Authentik"
     assert defaults["outline_session_authority"] == "{{ platform_session_authority }}"
-    assert defaults["outline_public_edge_private_ip"] == "{{ hostvars['proxmox-host'].proxmox_public_edge_ipv4 }}"
+    assert defaults["outline_public_edge_private_ip"] == (
+        "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
+    )
     assert (
         defaults["outline_public_hostname_overrides"][0]["hostname"] == "{{ outline_service_topology.public_hostname }}"
     )
     assert defaults["outline_public_hostname_overrides"][0]["address"] == "{{ outline_public_edge_private_ip }}"
     assert (
         defaults["outline_public_hostname_overrides"][1]["hostname"]
-        == "{{ hostvars['proxmox-host'].platform_service_topology.keycloak.public_hostname }}"
+        == "{{ outline_authentik_service_topology.public_hostname }}"
     )
-    assert defaults["outline_internal_port"] == "{{ hostvars['proxmox-host'].platform_port_assignments.outline_port }}"
+    assert defaults["outline_public_hostname_overrides"][1]["address"] == "{{ outline_public_edge_private_ip }}"
+    assert (
+        defaults["outline_public_hostname_overrides"][2]["hostname"]
+        == "{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}"
+    )
     assert defaults["outline_internal_base_url"] == "http://127.0.0.1:{{ outline_internal_port }}"
     assert (
         defaults["outline_database_host"]
-        == "{{ hostvars[hostvars['proxmox-host'].postgres_ha.initial_primary].ansible_host }}"
+        == "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
     )
-    assert defaults["outline_keycloak_client_id"] == "outline"
-    assert defaults["outline_keycloak_logout_uri"] == (
+    assert defaults["outline_oidc_client_id"] == "outline"
+    assert defaults["outline_oidc_client_secret_local_file"] == (
+        "{{ repo_shared_local_root }}/authentik/outline-client-secret.txt"
+    )
+    assert defaults["outline_oidc_issuer"].endswith("/application/o/outline/")
+    assert defaults["outline_oidc_discovery_url"] == ("{{ outline_oidc_issuer }}.well-known/openid-configuration")
+    assert defaults["outline_oidc_logout_uri"].endswith("/application/o/outline/end-session/")
+    assert defaults["outline_oidc_scopes"] == "openid profile email"
+    assert defaults["outline_keycloak_rollback_client_secret_local_file"] == (
+        "{{ repo_shared_local_root }}/keycloak/outline-client-secret.txt"
+    )
+    assert defaults["outline_keycloak_rollback_logout_uri"] == (
         "{{ outline_session_authority.keycloak_logout_url }}"
-        "?client_id={{ outline_keycloak_client_id }}"
+        "?client_id={{ outline_keycloak_rollback_client_id }}"
         "&post_logout_redirect_uri={{ outline_session_authority.shared_proxy_cleanup_url | urlencode }}"
     )
-    assert defaults["outline_keycloak_scopes"] == "openid profile email"
     assert defaults["outline_bootstrap_username"] == "outline.automation"
-    assert defaults["outline_api_token_local_file"].endswith("/.local/outline/api-token.txt")
-    assert defaults["outline_operator_password_local_file"].endswith("/.local/keycloak/outline.automation-password.txt")
+    assert defaults["outline_api_token_local_file"] == "{{ outline_local_artifact_dir }}/api-token.txt"
+    assert defaults["outline_operator_password_local_file"] == (
+        "{{ repo_shared_local_root }}/keycloak/outline.automation-password.txt"
+    )
+    assert defaults["outline_legacy_secret_dir"] == "/etc/{{ platform_config_prefix }}/outline"
+    assert defaults["outline_legacy_secret_key_remote_file"] == "{{ outline_legacy_secret_dir }}/secret-key.txt"
+    assert defaults["outline_legacy_utils_secret_remote_file"] == "{{ outline_legacy_secret_dir }}/utils-secret.txt"
     assert "collections.delete" in defaults["outline_api_token_scopes"]
     assert "documents.delete" in defaults["outline_api_token_scopes"]
 
@@ -55,16 +77,60 @@ def test_runtime_role_only_requires_runtime_secrets_before_edge_publish() -> Non
     validate_task = next(task for task in tasks if task.get("name") == "Validate Outline runtime inputs")
     package_task = next(task for task in tasks if task.get("name") == "Ensure the Outline runtime packages are present")
     secret_fact = next(task for task in tasks if task.get("name") == "Record the Outline runtime secrets")
+    prerequisite_task = next(
+        task for task in tasks if task.get("name") == "Check Outline prerequisites on the control machine"
+    )
     verify_import = next(task for task in tasks if task.get("name") == "Verify the Outline runtime")
     task_names = {task["name"] for task in tasks}
 
     assert "outline_operator_password_local_file | length > 0" not in validate_task["ansible.builtin.assert"]["that"]
+    assert "outline_oidc_provider == 'authentik'" in validate_task["ansible.builtin.assert"]["that"]
+    prerequisite_files = prerequisite_task["vars"]["common_check_local_secrets_files"]
+    assert {entry["path"] for entry in prerequisite_files} >= {
+        "{{ outline_oidc_client_secret_local_file }}",
+        "{{ outline_keycloak_rollback_client_secret_local_file }}",
+    }
     assert package_task["ansible.builtin.apt"]["name"] == ["openssl"]
     assert (
         "replace('/', '%2F')" in secret_fact["ansible.builtin.set_fact"]["outline_runtime_secret_payload"]["REDIS_URL"]
     )
     assert "Check whether the Outline operator password exists on the control machine" not in task_names
     assert verify_import["ansible.builtin.import_tasks"] == "verify.yml"
+
+
+def test_runtime_role_preserves_compatible_outline_encryption_keys() -> None:
+    tasks = load_yaml(TASKS_PATH)
+    compatible_secret_task = next(
+        task for task in tasks if task.get("name") == "Restore or generate Outline-compatible application secrets"
+    )
+    managed_secret_task = next(task for task in tasks if task.get("name") == "Manage Outline runtime secrets")
+
+    script = compatible_secret_task["ansible.builtin.shell"]
+    assert "grep -Eq '^[0-9a-f]{64}$'" in script
+    assert "openssl rand -hex 32" in script
+    assert "no compatible recovery key is available" in script
+    assert compatible_secret_task["no_log"] is True
+    assert compatible_secret_task["loop"] == [
+        {
+            "label": "outline-secret-key",
+            "canonical": "{{ outline_secret_key_remote_file }}",
+            "legacy": "{{ outline_legacy_secret_key_remote_file }}",
+        },
+        {
+            "label": "outline-utils-secret",
+            "canonical": "{{ outline_utils_secret_remote_file }}",
+            "legacy": "{{ outline_legacy_utils_secret_remote_file }}",
+        },
+    ]
+
+    generated = managed_secret_task["vars"]["common_manage_service_secrets_generate"]
+    assert generated == [
+        {
+            "path": "{{ outline_redis_password_remote_file }}",
+            "value": "{{ 'outline' | secret(length=32) }}",
+            "label": "outline-redis-password",
+        }
+    ]
 
 
 def test_runtime_role_recovers_docker_nat_chain_before_outline_startup() -> None:
@@ -172,8 +238,25 @@ def test_publish_tasks_wait_for_public_health_then_bootstrap_sync_and_verify() -
     verify_task = next(
         task for task in tasks if task.get("name") == "Verify the Outline public living knowledge surface"
     )
+    discovery_task = next(
+        task for task in tasks if task.get("name") == "Read the selected Outline OIDC discovery document"
+    )
+    redirect_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Verify the Outline public login starts at the selected OIDC provider"
+    )
+    token_mode_task = next(
+        task for task in tasks if task.get("name") == "Require owner-only permissions on the durable Outline API token"
+    )
 
     assert health_task["ansible.builtin.uri"]["url"] == "{{ outline_public_base_url }}/_health"
+    assert discovery_task["ansible.builtin.uri"]["url"] == "{{ outline_oidc_discovery_url }}"
+    assert redirect_task["ansible.builtin.uri"]["url"] == "{{ outline_public_base_url }}/auth/oidc"
+    assert redirect_task["ansible.builtin.uri"]["follow_redirects"] == "none"
+    assert "outline_api_token_local.stat.mode == '0600'" in token_mode_task["ansible.builtin.assert"]["that"]
+    assert token_mode_task["when"] == "outline_api_token_preexisting"
+    assert bootstrap_task["when"] == "not outline_api_token_preexisting"
     assert bootstrap_task["ansible.builtin.command"]["argv"] == [
         "python3",
         "{{ inventory_dir }}/../scripts/sync_docs_to_outline.py",
@@ -213,8 +296,12 @@ def test_publish_tasks_wait_for_public_health_then_bootstrap_sync_and_verify() -
 
 def test_verify_task_checks_the_local_health_endpoint() -> None:
     verify = load_yaml(VERIFY_PATH)
-    health_task = next(task for task in verify if task.get("name") == "Verify the Outline local health endpoint")
-    assert health_task["ansible.builtin.uri"]["url"] == "{{ outline_internal_base_url }}/_health"
+    health_task = next(task for task in verify if task.get("name") == "Verify the Outline runtime")
+    assert health_task["ansible.builtin.include_role"] == {
+        "name": "lv3.platform.common",
+        "tasks_from": "verify_service_health",
+    }
+    assert health_task["vars"]["common_verify_health_url"] == "{{ outline_internal_base_url }}/_health"
 
 
 def test_outline_templates_enable_collaboration_and_private_s3_storage() -> None:
@@ -226,15 +313,17 @@ def test_outline_templates_enable_collaboration_and_private_s3_storage() -> None
     assert (
         "REDIS_URL=redis://:{{ outline_redis_password | urlencode | replace('/', '%2F') }}@redis:6379/0" in env_template
     )
-    assert "AWS_S3_UPLOAD_BUCKET_URL=http://minio:9000" in env_template
+    assert "AWS_S3_UPLOAD_BUCKET_URL={{ outline_s3_public_url }}" in env_template
     assert (
         'AWS_S3_UPLOAD_BUCKET_URL=[[ with secret "kv/data/{{ outline_openbao_secret_path }}" ]][[ .Data.data.AWS_S3_UPLOAD_BUCKET_URL ]][[ end ]]'
         in env_ctemplate
     )
-    assert "OIDC_CLIENT_ID={{ outline_keycloak_client_id }}" in env_template
-    assert "OIDC_LOGOUT_URI={{ outline_keycloak_logout_uri }}" in env_template
+    assert "OIDC_DISPLAY_NAME={{ outline_oidc_display_name }}" in env_template
+    assert "OIDC_CLIENT_ID={{ outline_oidc_client_id }}" in env_template
+    assert "OIDC_LOGOUT_URI={{ outline_oidc_logout_uri }}" in env_template
+    assert "OIDC_CLIENT_ID={{ outline_oidc_client_id }}" in env_ctemplate
     assert "redis:" in compose_template
-    assert "minio:" in compose_template
+    assert "minio:" not in compose_template
     assert '      - "{{ ansible_host }}:{{ outline_internal_port }}:3000"' in compose_template
     assert '      - "127.0.0.1:{{ outline_internal_port }}:3000"' in compose_template
-    assert '      - "{{ item.hostname }}:{{ item.address }}"' in compose_template
+    assert "{{ hairpin_hosts() }}" in compose_template

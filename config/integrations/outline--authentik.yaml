@@ -1,0 +1,54 @@
+---
+# ADR 0353: Service Integration Contract Registry
+# managed-by: adr=0491 role=outline_runtime
+schema_version: "1.0.0"
+contract_id: outline--authentik
+consumer: outline_runtime
+provider: authentik_runtime
+integration_type: oidc
+adr: "0491"
+
+connection:
+  issuer_url_var: outline_oidc_issuer
+  discovery_url_var: outline_oidc_discovery_url
+  provider: authentik
+  application_slug: outline
+  client_id: outline
+  client_secret_local_file: .local/authentik/outline-client-secret.txt
+  callback_url: "https://wiki.{{ platform_domain }}/auth/oidc.callback"
+  login_url: "https://wiki.{{ platform_domain }}/auth/oidc"
+  scopes:
+    - openid
+    - profile
+    - email
+
+secrets:
+  - path: .local/authentik/outline-client-secret.txt
+    purpose: selected_oidc_client_secret
+  - path: .local/keycloak/outline-client-secret.txt
+    purpose: keycloak_per_client_rollback
+  - path: .local/outline/api-token.txt
+    purpose: durable_outline_sync_authority
+
+health_check:
+  endpoint: "{{ outline_oidc_discovery_url }}"
+  expected_status: 200
+  timeout_seconds: 10
+
+pre_flight:
+  - check: authentik_application_exists
+    slug: outline
+  - check: authentik_provider_callback_matches
+    callback_url: "https://wiki.{{ platform_domain }}/auth/oidc.callback"
+  - check: outline_api_token_preserved
+    path: .local/outline/api-token.txt
+  - check: keycloak_rollback_secret_preserved
+    path: .local/keycloak/outline-client-secret.txt
+
+post_deployment:
+  - check: outline_oidc_redirect_selects_authentik
+    endpoint: /auth/oidc
+  - check: outline_living_collections_verify
+    script: scripts/sync_docs_to_outline.py
+  - check: keycloak_remains_available
+    reason: per-client rollback during ADR 0491 migration

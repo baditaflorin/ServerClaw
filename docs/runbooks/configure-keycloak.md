@@ -12,7 +12,7 @@ It covers:
 - repo-managed realm, groups, initial named operator account, and confidential clients
 - a repo-managed confidential client for delegated ServerClaw runtime verification
 - repo-managed post-logout redirect URI contracts for `ops-portal-oauth`, `grafana-oauth`, and `outline`
-- repo-managed realm SMTP settings for password resets and required-action mail through `lv3-mail-stalwart:1587` on the shared mail Docker network, with STARTTLS disabled
+- repo-managed realm SMTP settings for password resets and required-action mail through `<config-prefix>-mail-stalwart:1587` on the shared mail Docker network, with STARTTLS disabled
 - Grafana OIDC configuration against the shared Keycloak broker
 - controller-local recovery and client-secret artifacts mirrored under `.local/keycloak/`
 
@@ -39,7 +39,7 @@ The workflow manages these live surfaces:
 - Keycloak runtime under `/opt/keycloak` on `runtime-control`
 - shared SSO hostname `https://sso.example.com`
 - repo-managed realm `lv3`
-- internal Keycloak mail submission endpoint `lv3-mail-stalwart:1587` on the shared mail Docker network
+- internal Keycloak mail submission endpoint `<config-prefix>-mail-stalwart:1587` on the shared mail Docker network
 - named operator account `florin.badita`
 - confidential OIDC client `grafana-oauth`
 - confidential OIDC client `open-webui`
@@ -72,7 +72,7 @@ Run these checks after converge:
 4. `curl -I -L https://home.example.com/`
 5. `curl -I https://grafana.example.com/login/generic_oauth`
 6. `curl -s --data "grant_type=client_credentials&client_id=lv3-agent-hub&client_secret=$(cat .local/keycloak/lv3-agent-hub-client-secret.txt)" https://sso.example.com/realms/lv3/protocol/openid-connect/token`
-7. `ansible -i inventory/hosts.yml runtime-control -m shell -a "docker exec keycloak-keycloak-1 getent ahostsv4 lv3-mail-stalwart && docker exec keycloak-keycloak-1 /bin/bash -lc 'timeout 15 bash -lc \"exec 3<>/dev/tcp/lv3-mail-stalwart/1587\"'" --private-key .local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+7. `ansible -i inventory/hosts.yml runtime-control -m shell -a "docker exec keycloak-keycloak-1 getent ahostsv4 <config-prefix>-mail-stalwart && docker exec keycloak-keycloak-1 /bin/bash -lc 'timeout 15 bash -lc \"exec 3<>/dev/tcp/<config-prefix>-mail-stalwart/1587\"'" --private-key .local/ssh/bootstrap.id_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 8. `uv run --with playwright python scripts/session_logout_verify.py --password-file .local/keycloak/outline.automation-password.txt`
 9. `curl -s --data "grant_type=client_credentials&client_id=serverclaw-runtime&client_secret=$(cat .local/keycloak/serverclaw-runtime-client-secret.txt)" https://sso.example.com/realms/lv3/protocol/openid-connect/token`
 
@@ -145,7 +145,7 @@ The validated recovery sequence from the 2026-04-03 Open WebUI rollout was:
   fails closed before a host-wide Docker restart. Treat
   `common.docker_daemon_restart` failures as a maintenance-window decision or a
   runtime-pool migration gap, not as a signal to keep retrying the same replay.
-- Password resets and required-action mail use `lv3-mail-stalwart:1587` over the shared `mail-platform_default` Docker network. This avoids Docker host-port hairpin failures and avoids STARTTLS certificate mismatch on the internal container DNS name.
+- Password resets and required-action mail use `<config-prefix>-mail-stalwart:1587` over the shared `mail-platform_default` Docker network. This avoids Docker host-port hairpin failures and avoids STARTTLS certificate mismatch on the internal container DNS name.
 - As of the 2026-03-29 ADR 0270 live apply, the repo-managed user reconciliation
   path now force-recreates the Keycloak service and retries once when the local
   admin API fails with transient `500`, JDBC acquisition timeout, or

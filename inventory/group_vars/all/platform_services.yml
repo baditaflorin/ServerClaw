@@ -408,6 +408,12 @@ platform_service_registry:
     container_name: glitchtip
     needs_openbao: true
     needs_postgres: true
+    hairpin:
+      publish:
+        - hostname: "errors.{{ platform_domain }}"
+          address_host: nginx
+        - hostname: "id.{{ platform_domain }}"
+          address_host: nginx
     dns:
       records:
         - fqdn: "errors.{{ platform_domain }}"
@@ -422,11 +428,11 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: glitchtip
-      client_secret_local_file: .local/keycloak/glitchtip-client-secret.txt
+      client_secret_local_file: .local/authentik/glitchtip-client-secret.txt
       redirect_uris:
-        - "https://errors.{{ platform_domain }}/accounts/oidc/keycloak/login/callback/"
+        - "https://errors.{{ platform_domain }}/accounts/oidc/authentik/login/callback/"
       scopes:
         - openid
         - profile
@@ -437,7 +443,7 @@ platform_service_registry:
       upstream_port: 3005
       upstream_host: docker-runtime
       public_fqdn: errors.{{ platform_domain }}
-      auth_proxy: false             # upstream Keycloak OIDC handles auth
+      auth_proxy: false             # upstream Authentik OIDC handles auth
   # END SERVICE: glitchtip
 
   # BEGIN SERVICE: gotenberg
@@ -1129,6 +1135,8 @@ platform_service_registry:
       publish:
         - hostname: "wiki.{{ platform_domain }}"
           address_host: nginx
+        - hostname: "id.{{ platform_domain }}"
+          address_host: nginx
         - hostname: "sso.{{ platform_domain }}"
           address_host: nginx
     dns:
@@ -1145,9 +1153,9 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: outline
-      client_secret_local_file: .local/keycloak/outline-client-secret.txt
+      client_secret_local_file: .local/authentik/outline-client-secret.txt
       redirect_uris:
         - "https://wiki.{{ platform_domain }}/auth/oidc.callback"
       scopes:
@@ -1160,7 +1168,7 @@ platform_service_registry:
       upstream_port: 3006
       upstream_host: docker-runtime
       public_fqdn: wiki.{{ platform_domain }}
-      auth_proxy: false             # Outline OIDC via Keycloak handles auth
+      auth_proxy: false             # Outline OIDC via Authentik handles auth
       websocket: true               # Outline real-time collab uses WebSockets
   # END SERVICE: outline
 
@@ -1856,3 +1864,32 @@ platform_service_registry:
       runtime_pool_provides_traefik: true
       runtime_pool_provides_dapr: true
   # END SERVICE: runtime_pool_substrate
+
+  # BEGIN SERVICE: authentik
+  authentik:
+    service_type: docker_compose
+    image_catalog_key: authentik_runtime
+    internal_port: 9010
+    host_group: runtime-control
+    site_dir: /opt/authentik
+    container_name: authentik
+    needs_openbao: true
+    dns:
+      records:
+        - fqdn: "id.{{ platform_domain }}"
+          type: public
+          target_host: nginx
+          ttl: 60
+    tls:
+      domains:
+        - "id.{{ platform_domain }}"
+      cert_source: letsencrypt
+      wildcard: false
+      cert_validity_days: 90
+    proxy:
+      enabled: true
+      upstream_port: 9010
+      upstream_host: runtime-control
+      public_fqdn: id.{{ platform_domain }}
+      auth_proxy: false             # Authentik is the identity provider
+  # END SERVICE: authentik

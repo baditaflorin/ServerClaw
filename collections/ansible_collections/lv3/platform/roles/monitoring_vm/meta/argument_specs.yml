@@ -95,11 +95,27 @@ argument_specs:
         required: true
         description:
           - Grafana datasource UID used for Tempo traces.
+      monitoring_prometheus_legacy_service_names:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Explicit legacy Prometheus systemd units to stop and disable before starting the canonical unit.
       monitoring_influxdb_url:
         type: str
         required: true
         description:
           - Base URL for the managed InfluxDB instance.
+      monitoring_influxdb_cli_configs_file:
+        type: path
+        required: false
+        description:
+          - Root CLI configuration used only as a validated recovery source for a stale operator-token file.
+      monitoring_influxdb_legacy_org_name:
+        type: str
+        required: false
+        description:
+          - Explicit legacy organization name that may be renamed to monitoring_influxdb_org when the desired organization is absent.
       monitoring_influxdb_org:
         type: str
         required: true

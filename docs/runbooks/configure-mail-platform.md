@@ -10,7 +10,7 @@ It covers:
 - host-side SMTP and IMAPS forwarding on the Proxmox host
 - the Stalwart mail runtime on `runtime-control`
 - a private SMTP submission relay on `10.10.10.92:1587` for VM-local platform workloads that can consume the runtime-control host address directly, with STARTTLS intentionally disabled
-- a shared-Docker-network submission path at `lv3-mail-stalwart:1587` for containerized workloads on `runtime-control`, also with STARTTLS intentionally disabled
+- a shared-Docker-network submission path at `<config-prefix>-mail-stalwart:1587` for containerized workloads on `runtime-control`, also with STARTTLS intentionally disabled
 - the private mail gateway API used by platform services and automation agents
 - profile-scoped sender identities for operator alerts, platform transactional mail, and agent reports
 - Telegraf and Grafana mail telemetry
@@ -35,6 +35,12 @@ Before running the workflow, confirm:
 - preflight: `make preflight WORKFLOW=converge-mail-platform`
 - converge: `HETZNER_DNS_API_TOKEN=... make converge-mail-platform`
 
+The DNS boundary treats `(name, type)` as one provider RRset. When another
+declared value is missing from an existing multi-value RRset (for example an
+apex TXT verification value alongside SPF), convergence uses the provider
+`set_records` action with the full existing value list plus the missing value.
+It must not create a duplicate RRset or replace sibling values.
+
 ## Delivered Surfaces
 
 The workflow manages these live surfaces:
@@ -45,7 +51,7 @@ The workflow manages these live surfaces:
 - Proxmox host NAT forwards for TCP `25`, `587`, and `993` to `runtime-control`
 - Stalwart mail server on `runtime-control`
 - private submission relay on `10.10.10.92:1587` for local platform workloads on `runtime-control`, with STARTTLS intentionally disabled
-- shared-network internal submission relay at `lv3-mail-stalwart:1587` for containerized platform workloads on `runtime-control`, with STARTTLS intentionally disabled
+- shared-network internal submission relay at `<config-prefix>-mail-stalwart:1587` for containerized platform workloads on `runtime-control`, with STARTTLS intentionally disabled
 - private mail gateway API on `runtime-control:8081`
 - scoped notification-profile API keys under `/etc/lv3/mail-platform/profiles/`
 - Telegraf mail telemetry collector on `runtime-control`
@@ -78,9 +84,9 @@ Base URL from the private LV3 network:
 The same converge also publishes a private SMTP submission relay for local platform workloads:
 
 - `10.10.10.92:1587`
-- `lv3-mail-stalwart:1587` from containers attached to `mail-platform_default`
+- `<config-prefix>-mail-stalwart:1587` from containers attached to `mail-platform_default`
 
-The host-address form is intended for VM-local platform workloads that can consume the runtime-control host address directly. The container-DNS form is intended for workloads that share the mail Docker network on `runtime-control`. STARTTLS stays disabled on this listener for plaintext-auth internal consumers. Keycloak uses the shared-network hostname `lv3-mail-stalwart:1587` because both the host-private path and the public hostname path proved unreliable from another container network. Public client submission remains on TCP `587`.
+The host-address form is intended for VM-local platform workloads that can consume the runtime-control host address directly. The container-DNS form is intended for workloads that share the mail Docker network on `runtime-control`. STARTTLS stays disabled on this listener for plaintext-auth internal consumers. Keycloak uses the shared-network hostname `<config-prefix>-mail-stalwart:1587` because both the host-private path and the public hostname path proved unreliable from another container network. Public client submission remains on TCP `587`.
 
 ## Non-Production SMTP Contract
 
@@ -173,7 +179,7 @@ Run these checks after converge:
 - inbound mail for `server@example.com` depends on the public MX record and host NAT being active
 - outbound transactional delivery currently uses the Brevo HTTP API from the mail gateway
 - the private SMTP submission relay on TCP `1587` exists specifically for VM-local platform workloads that need authenticated mail without depending on public STARTTLS certificate trust, so STARTTLS is intentionally disabled on that listener
-- containerized workloads on `runtime-control` should prefer the shared-network hostname `lv3-mail-stalwart:1587` over host-published mail ports when they need authenticated internal submission
+- containerized workloads on `runtime-control` should prefer the shared-network hostname `<config-prefix>-mail-stalwart:1587` over host-published mail ports when they need authenticated internal submission
 - if a replay hits `failed to create endpoint ... network ... does not exist` while recreating the mail-platform containers after Docker networking recovery, treat it as stale compose-network drift: rerun the repo-managed converge and let the role reset the stack with `docker compose down --remove-orphans` before retrying the startup
 - sender governance is enforced through notification-profile-specific mailbox identities and scoped API keys instead of one shared global send credential
 - the first distributed traces for this workflow come from inbound gateway requests plus outbound HTTP calls to Stalwart and Brevo, with `service.namespace=lv3` and `deployment.environment=lv3` exported through `OTEL_RESOURCE_ATTRIBUTES`

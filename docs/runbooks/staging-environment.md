@@ -15,18 +15,18 @@ This runbook covers:
 Current live state on 2026-03-27:
 
 - `vmbr20` is live on the Proxmox host
-- host nftables currently forwards `10.20.10.0/24` and masquerades it out `vmbr0`, which branch-scoped previews also depend on
-- `docker-runtime` (`10.20.10.20`) and `monitoring` (`10.20.10.40`) exist and are reachable over SSH through the Proxmox jump
+- host nftables currently forwards `10.10.10.0/24` and masquerades it out `vmbr0`, which branch-scoped previews also depend on
+- `docker-runtime` (`10.10.10.20`) and `monitoring` (`10.10.10.40`) exist and are reachable over SSH through the Proxmox jump
 - the staged OpenTofu declarations currently keep Proxmox NIC firewall disabled (`firewall=0`) until staged guest-network-policy automation is added
 
 ## Topology
 
 - bridge: `vmbr20`
-- gateway: `10.20.10.1/24`
-- subnet: `10.20.10.0/24`
+- gateway: `10.10.10.1/24`
+- subnet: `10.10.10.0/24`
 - current staged VM declarations:
-  - `docker-runtime` on `10.20.10.20`
-  - `monitoring` on `10.20.10.40`
+  - `docker-runtime` on `10.10.10.20`
+  - `monitoring` on `10.10.10.40`
 
 The host advertises the staging subnet through Tailscale once the network role is applied from `main`.
 
@@ -41,10 +41,10 @@ make configure-staging-bridge
 Expected result:
 
 - `/etc/network/interfaces` contains a managed `vmbr20` stanza
-- `ip -brief addr show vmbr20` reports `10.20.10.1/24`
-- the Tailscale route set includes `10.20.10.0/24`
-- `nft list chain inet filter forward` accepts `ip saddr 10.20.10.0/24`
-- `nft list chain ip nat postrouting` masquerades `ip saddr 10.20.10.0/24 oifname "vmbr0"`
+- `ip -brief addr show vmbr20` reports `10.10.10.1/24`
+- the Tailscale route set includes `10.10.10.0/24`
+- `nft list chain inet filter forward` accepts `ip saddr 10.10.10.0/24`
+- `nft list chain ip nat postrouting` masquerades `ip saddr 10.10.10.0/24 oifname "vmbr0"`
 
 ## Stage The VMs
 

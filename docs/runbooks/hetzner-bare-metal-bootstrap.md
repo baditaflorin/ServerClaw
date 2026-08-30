@@ -300,14 +300,14 @@ private bridge + NAT masquerade as an **additive** change. WAN is untouched:
 cat > /etc/network/interfaces.d/vmbr10.cfg <<'EOF'
 auto vmbr10
 iface vmbr10 inet static
-    address 10.20.10.1/24
+    address 10.10.10.1/24
     bridge-ports none
     bridge-stp off
     bridge-fd 0
     post-up   sysctl -w net.ipv4.ip_forward=1
-    post-up   iptables -t nat -C POSTROUTING -s 10.20.10.0/24 -o enp41s0 -j MASQUERADE 2>/dev/null \
-              || iptables -t nat -A POSTROUTING -s 10.20.10.0/24 -o enp41s0 -j MASQUERADE
-    post-down iptables -t nat -D POSTROUTING -s 10.20.10.0/24 -o enp41s0 -j MASQUERADE || true
+    post-up   iptables -t nat -C POSTROUTING -s 10.10.10.0/24 -o enp41s0 -j MASQUERADE 2>/dev/null \
+              || iptables -t nat -A POSTROUTING -s 10.10.10.0/24 -o enp41s0 -j MASQUERADE
+    post-down iptables -t nat -D POSTROUTING -s 10.10.10.0/24 -o enp41s0 -j MASQUERADE || true
 EOF
 # Persist ip_forward across reboots
 printf 'net.ipv4.ip_forward = 1\nnet.ipv4.conf.all.forwarding = 1\n' > /etc/sysctl.d/99-proxmox-forward.conf
@@ -398,19 +398,19 @@ seconds total for all 8 VMs on the AX41-NVMe.
 
 | vmid | name            | ipv4         | cores | mem_mb | disk_gb |
 |------|-----------------|--------------|-------|--------|---------|
-| 110  | nginx-edge      | 10.20.10.11  | 2     | 2048   | 10      |
-| 122  | runtime-apps    | 10.20.10.12  | 6     | 12288  | 40      |
-| 130  | docker-build    | 10.20.10.14  | 4     | 4096   | 40      |
-| 140  | monitoring      | 10.20.10.15  | 2     | 4096   | 30      |
-| 150  | postgres        | 10.20.10.13  | 4     | 8192   | 60      |
-| 160  | backup          | 10.20.10.16  | 2     | 4096   | 40      |
-| 181  | mail-platform   | 10.20.10.17  | 2     | 4096   | 20      |
-| 192  | runtime-control | 10.20.10.10  | 6     | 16384  | 60      |
-| 9000 | debian13-cloud-template | 10.20.10.254 | 1 | 1024 | 3 (qcow) |
+| 110  | nginx-edge      | 10.10.10.11  | 2     | 2048   | 10      |
+| 122  | runtime-apps    | 10.10.10.12  | 6     | 12288  | 40      |
+| 130  | docker-build    | 10.10.10.14  | 4     | 4096   | 40      |
+| 140  | monitoring      | 10.10.10.15  | 2     | 4096   | 30      |
+| 150  | postgres        | 10.10.10.13  | 4     | 8192   | 60      |
+| 160  | backup          | 10.10.10.16  | 2     | 4096   | 40      |
+| 181  | mail-platform   | 10.10.10.17  | 2     | 4096   | 20      |
+| 192  | runtime-control | 10.10.10.10  | 6     | 16384  | 60      |
+| 9000 | debian13-cloud-template | 10.10.10.254 | 1 | 1024 | 3 (qcow) |
 
 Total allocation: 28 cores (on 12 threads = 2.33× oversub, matches ADR
 0424 plan), 54 GiB RAM (+ ~8 GiB for host), 303 GiB disk.
 
-All 8 service VMs are reachable from the fork host at `root@10.20.10.X`
+All 8 service VMs are reachable from the fork host at `root@10.10.10.X`
 using `/root/.ssh/id_ed25519`. Cloud-init completed cleanly on all of
 them (qemu-guest-agent active, python3 present → Ansible-ready).

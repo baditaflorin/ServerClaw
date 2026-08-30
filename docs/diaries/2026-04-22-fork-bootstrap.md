@@ -75,7 +75,7 @@ ones hide.
   runbook's "known external failure modes" section.
 - I did not run `make bootstrap` end-to-end yet in this session. The
   code changes are validated via `make -np` (variable resolution) and
-  `make generate-inventory` (produces correct 10.20.10.X inventory).
+  `make generate-inventory` (produces correct 10.10.10.X inventory).
   A live-apply run is queued for the next working window.
 
 ## What the operator might want to know if they pick this up tomorrow

@@ -171,6 +171,18 @@
     mode: "0644"
   notify: Restart OpenTelemetry Collector
 
+- name: Gather service state before legacy Prometheus cleanup
+  ansible.builtin.service_facts:
+  when: monitoring_prometheus_legacy_service_names | length > 0
+
+- name: Stop and disable explicitly approved legacy Prometheus units
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  loop: "{{ monitoring_prometheus_legacy_service_names }}"
+  when: (item ~ '.service') in ansible_facts.services
+
 - name: Enable and start Prometheus
   ansible.builtin.systemd:
     name: "{{ monitoring_prometheus_service_name }}"

@@ -1,10 +1,10 @@
 ---
 # Purpose: Deploy GlitchTip and bootstrap the repo-managed org, team, projects, and DSN artifacts.
-# Use case: Run during GlitchTip convergence to reconcile the compose runtime, Keycloak integration, and controller-local DSN mirrors.
-# Inputs: GlitchTip topology, images, secret files, Keycloak client credentials, and bootstrap project definitions.
+# Use case: Run during GlitchTip convergence to reconcile the compose runtime, selected OIDC integration, and controller-local DSN mirrors.
+# Inputs: GlitchTip topology, images, secret files, selected OIDC client credentials, and bootstrap project definitions.
 # Outputs: A running GlitchTip stack, synchronized runtime secrets, and controller-local API token and DSN artifacts for producers.
 # Idempotency: Partially idempotent; reruns reconcile the same runtime and refresh bootstrap artifacts while preserving stable generated secrets.
-# Dependencies: ADR 0165 metadata standard, ADR 0281, docker runtime availability, OpenBao secret injection, and the Keycloak client secret mirror.
+# Dependencies: ADR 0165 metadata standard, ADR 0281, ADR 0491, docker runtime availability, OpenBao secret injection, and the selected OIDC client artifacts.
 
 - name: Derive Glitchtip conventional defaults from the service registry
   ansible.builtin.include_role:
@@ -27,14 +27,36 @@
       - glitchtip_internal_base_url | length > 0
       - glitchtip_public_base_url | length > 0
       - glitchtip_database_password_local_file | length > 0
-      - glitchtip_keycloak_client_secret_local_file | length > 0
+      - glitchtip_oidc_client_secret_local_file | length > 0
+      - glitchtip_keycloak_rollback_client_secret_local_file | length > 0
+      - glitchtip_oidc_provider | length > 0
+      - glitchtip_oidc_provider_id | length > 0
+      - glitchtip_oidc_provider_name | length > 0
+      - glitchtip_oidc_client_id | length > 0
+      - glitchtip_oidc_issuer_url | length > 0
+      - glitchtip_oidc_issuer_url == (glitchtip_oidc_issuer_url | regex_replace('/+$', ''))
+      - glitchtip_oidc_discovery_url == (glitchtip_oidc_issuer_url ~ '/.well-known/openid-configuration')
+      - glitchtip_oidc_frontend_callback_url | length > 0
+      - glitchtip_keycloak_rollback_provider | length > 0
+      - glitchtip_keycloak_rollback_provider_id | length > 0
+      - glitchtip_keycloak_rollback_provider_id != glitchtip_oidc_provider_id
+      - glitchtip_keycloak_rollback_provider_name | length > 0
+      - glitchtip_keycloak_rollback_client_id | length > 0
+      - glitchtip_keycloak_rollback_issuer_url | length > 0
+      - >-
+        glitchtip_keycloak_rollback_issuer_url
+        == (glitchtip_keycloak_rollback_issuer_url | regex_replace('/+$', ''))
+      - >-
+        glitchtip_keycloak_rollback_discovery_url
+        == (glitchtip_keycloak_rollback_issuer_url ~ '/.well-known/openid-configuration')
       - glitchtip_api_token_local_file | length > 0
       - glitchtip_admin_password_local_file | length > 0
       - glitchtip_image | length > 0
       - glitchtip_valkey_image | length > 0
     fail_msg: >-
       glitchtip_runtime requires runtime paths, image refs, database auth,
-      bootstrap artifact paths, and the repo-managed Keycloak client secret.
+      bootstrap artifact paths, normalized OIDC metadata, selected OIDC client
+      artifacts, and the preserved Keycloak rollback secret.
 
 - name: Check GlitchTip prerequisites on the control machine
   ansible.builtin.include_role:
@@ -45,9 +67,12 @@
       - path: "{{ glitchtip_database_password_local_file }}"
         description: "GlitchTip database password"
         prerequisite: "Converge glitchtip_postgres before deploying GlitchTip"
-      - path: "{{ glitchtip_keycloak_client_secret_local_file }}"
-        description: "GlitchTip Keycloak client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying GlitchTip"
+      - path: "{{ glitchtip_oidc_client_secret_local_file }}"
+        description: "GlitchTip selected OIDC client secret"
+        prerequisite: "Provision the GlitchTip Authentik provider and mirror its client secret"
+      - path: "{{ glitchtip_keycloak_rollback_client_secret_local_file }}"
+        description: "GlitchTip Keycloak rollback client secret"
+        prerequisite: "Preserve the prior Keycloak client secret before selecting Authentik"
       - path: "{{ glitchtip_mail_submission_password_local_file }}"
         description: "GlitchTip mail submission password"
         prerequisite: "Converge the mail platform before deploying GlitchTip"
@@ -78,23 +103,26 @@
     - path: "{{ glitchtip_secret_dir }}"
       mode: "0700"
 
-- name: Generate the GlitchTip runtime secrets
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item.path }}" ]; then
-      umask 077
-      {{ item.command }} > "{{ item.path }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
+- name: Inspect the GlitchTip runtime secret files
+  ansible.builtin.stat:
+    path: "{{ item }}"
   loop:
-    - path: "{{ glitchtip_secret_key_remote_file }}"
-      command: "{{ 'glitchtip' | secret(length=32) }}"
-    - path: "{{ glitchtip_valkey_password_remote_file }}"
-      command: "{{ 'glitchtip' | secret(length=32) }}"
-  register: glitchtip_secret_generation
-  changed_when: "'changed' in glitchtip_secret_generation.stdout"
+    - "{{ glitchtip_secret_key_remote_file }}"
+    - "{{ glitchtip_valkey_password_remote_file }}"
+  register: glitchtip_runtime_secret_file_states
+  no_log: true
+
+- name: Generate missing GlitchTip runtime secrets
+  ansible.builtin.copy:
+    dest: "{{ item.item }}"
+    content: "{{ 'glitchtip' | secret(length=32) }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ glitchtip_runtime_secret_file_states.results }}"
+  when: >-
+    not (item.stat.exists | default(false))
+    or (item.stat.size | default(0) | int == 0)
   no_log: true
 
 - name: Read the GlitchTip runtime secrets
@@ -114,21 +142,24 @@
   delegate_to: localhost
   become: false
 
-- name: Generate the local GlitchTip break-glass admin password when missing
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ glitchtip_admin_password_local_file }}" ]; then
-      umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -base64 24 | tr -d '\n' > "{{ glitchtip_admin_password_local_file }}"
-                # Replace with: {{ "glitchtip" | secret }}
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
+- name: Inspect the local GlitchTip break-glass admin password
+  ansible.builtin.stat:
+    path: "{{ glitchtip_admin_password_local_file }}"
   delegate_to: localhost
   become: false
-  register: glitchtip_admin_password_generation
-  changed_when: "'changed' in glitchtip_admin_password_generation.stdout"
+  register: glitchtip_admin_password_local_state
+  no_log: true
+
+- name: Generate the local GlitchTip break-glass admin password when missing
+  ansible.builtin.copy:
+    dest: "{{ glitchtip_admin_password_local_file }}"
+    content: "{{ 'glitchtip' | secret(length=32) }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when: >-
+    not (glitchtip_admin_password_local_state.stat.exists | default(false))
+    or (glitchtip_admin_password_local_state.stat.size | default(0) | int == 0)
   no_log: true
 
 - name: Generate the local GlitchTip API token when missing
@@ -177,7 +208,9 @@
     glitchtip_secret_key: "{{ glitchtip_secret_reads.results[0].content | b64decode | trim }}"
     glitchtip_valkey_password: "{{ glitchtip_secret_reads.results[1].content | b64decode | trim }}"
     glitchtip_database_password: "{{ lookup('ansible.builtin.file', glitchtip_database_password_local_file) | trim }}"
-    glitchtip_keycloak_client_secret: "{{ lookup('ansible.builtin.file', glitchtip_keycloak_client_secret_local_file) | trim }}"
+    glitchtip_oidc_client_secret: "{{ lookup('ansible.builtin.file', glitchtip_oidc_client_secret_local_file) | trim }}"
+    glitchtip_keycloak_rollback_client_secret: >-
+      {{ lookup('ansible.builtin.file', glitchtip_keycloak_rollback_client_secret_local_file) | trim }}
     glitchtip_mail_submission_password: "{{ lookup('ansible.builtin.file', glitchtip_mail_submission_password_local_file) | trim }}"
     glitchtip_admin_password: "{{ glitchtip_local_bootstrap_reads.results[0].content | b64decode | trim }}"
     glitchtip_api_token: "{{ glitchtip_local_bootstrap_reads.results[1].content | b64decode | trim }}"
@@ -264,26 +297,6 @@
     common_openbao_compose_env_image: "{{ glitchtip_openbao_agent_image }}"
     common_openbao_compose_env_legacy_env_files:
       - "{{ glitchtip_legacy_env_file }}"
-  no_log: true
-
-- name: Render the GlitchTip environment file
-  ansible.builtin.template:
-    src: glitchtip.env.j2
-    dest: "{{ glitchtip_env_file }}"
-    owner: root
-    group: root
-    mode: "0600"
-  register: glitchtip_env_template
-  no_log: true
-
-- name: Render the GlitchTip bootstrap script
-  ansible.builtin.template:
-    src: bootstrap-glitchtip.py.j2
-    dest: "{{ glitchtip_bootstrap_script_file }}"
-    owner: root
-    group: root
-    mode: "0600"
-  register: glitchtip_bootstrap_template
   no_log: true
 
 - name: Render the GlitchTip compose file
@@ -439,8 +452,7 @@
       {{
         glitchtip_docker_nat_chain.rc != 0
         or glitchtip_docker_forward_chain.rc != 0
-        or (glitchtip_env_template.changed | default(false))
-        or (glitchtip_bootstrap_template.changed | default(false))
+        or (common_openbao_compose_env_secret_upsert.changed | default(false))
         or (glitchtip_compose_template.changed | default(false))
         or (glitchtip_pull.changed | default(false))
         or (glitchtip_local_port_probe.failed | default(false))
@@ -592,26 +604,40 @@
   changed_when: false
 
 - name: Bootstrap the GlitchTip repo-managed org, team, and project artifacts
-  ansible.builtin.shell: |
-    set -euo pipefail
-    docker exec -i {{ glitchtip_container_name }} python manage.py shell < {{ glitchtip_bootstrap_script_file }}
-  args:
-    executable: /bin/bash
-  register: glitchtip_bootstrap_run
-  changed_when: false
-  no_log: true
+  block:
+    - name: Render the temporary GlitchTip bootstrap script
+      ansible.builtin.template:
+        src: bootstrap-glitchtip.py.j2
+        dest: "{{ glitchtip_bootstrap_script_file }}"
+        owner: root
+        group: root
+        mode: "0600"
 
-- name: Record the GlitchTip bootstrap payload
-  ansible.builtin.set_fact:
-    glitchtip_bootstrap_payload: >-
-      {{
-        (
-          glitchtip_bootstrap_run.stdout_lines
-          | reject('equalto', '')
-          | list
-          | last
-        ) | from_json
-      }}
+    - name: Execute the temporary GlitchTip bootstrap script
+      ansible.builtin.shell: |
+        set -euo pipefail
+        docker exec -i {{ glitchtip_container_name }} python manage.py shell < {{ glitchtip_bootstrap_script_file }}
+      args:
+        executable: /bin/bash
+      register: glitchtip_bootstrap_run
+      changed_when: false
+
+    - name: Record the GlitchTip bootstrap payload
+      ansible.builtin.set_fact:
+        glitchtip_bootstrap_payload: >-
+          {{
+            (
+              glitchtip_bootstrap_run.stdout_lines
+              | reject('equalto', '')
+              | list
+              | last
+            ) | from_json
+          }}
+  always:
+    - name: Remove the plaintext GlitchTip bootstrap script
+      ansible.builtin.file:
+        path: "{{ glitchtip_bootstrap_script_file }}"
+        state: absent
   no_log: true
 
 - name: Mirror the GlitchTip bootstrap artifacts to the control machine

@@ -21,6 +21,13 @@ minio_console_public_url: "{{ hostvars[platform_topology_host].platform_service_
 minio_root_user: minio-root
 minio_root_password_local_file: "{{ minio_local_artifact_dir }}/root-password.txt"
 minio_root_password_remote_file: "{{ minio_secret_dir }}/root-password.txt"
+# Before ADR 0438, deployments whose DNS prefix began with a digit stored
+# MinIO credentials below the raw config prefix (for example
+# /etc/<config-prefix>/minio).  The POSIX-safe unix prefix is now canonical.
+# Keep the legacy path as a read-only migration source so a converge preserves
+# the credential already accepted by MinIO instead of silently rotating it.
+minio_legacy_secret_dirs:
+  - "/etc/{{ platform_identity.config_prefix }}/minio"
 minio_mc_url: https://dl.min.io/client/mc/release/linux-amd64/mc
 minio_mc_checksum: sha256:01f866e9c5f9b87c2b09116fa5d7c06695b106242d829a8bb32990c00312e891
 minio_mc_bin: /usr/local/bin/mc

@@ -13,6 +13,7 @@ outline_env_file: "{{ compose_runtime_secret_root }}/outline/runtime.env"
 outline_image: "{{ container_image_catalog.images.outline_runtime.ref }}"
 
 outline_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('outline') }}"
+outline_authentik_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('authentik') }}"
 outline_session_authority: "{{ platform_session_authority }}"
 outline_internal_base_url: "http://127.0.0.1:{{ outline_internal_port }}"
 outline_public_base_url: "https://{{ outline_service_topology.public_hostname }}"
@@ -25,6 +26,8 @@ outline_s3_internal_url: "{{ minio_private_api_url }}"
 outline_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
 outline_public_hostname_overrides:
   - hostname: "{{ outline_service_topology.public_hostname }}"
+    address: "{{ outline_public_edge_private_ip }}"
+  - hostname: "{{ outline_authentik_service_topology.public_hostname }}"
     address: "{{ outline_public_edge_private_ip }}"
   - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}"
     address: "{{ outline_public_edge_private_ip }}"
@@ -41,21 +44,38 @@ outline_utils_secret_local_file: "{{ outline_local_artifact_dir }}/utils-secret.
 outline_redis_password_local_file: "{{ outline_local_artifact_dir }}/redis-password.txt"
 outline_minio_root_password_local_file: "{{ outline_local_artifact_dir }}/minio-root-password.txt"
 outline_api_token_local_file: "{{ outline_local_artifact_dir }}/api-token.txt"
-outline_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/outline-client-secret.txt"
+outline_oidc_provider: authentik
+outline_oidc_display_name: Authentik
+outline_oidc_client_id: outline
+outline_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/outline-client-secret.txt"
+outline_oidc_issuer: "https://{{ outline_authentik_service_topology.public_hostname }}/application/o/outline/"
+outline_oidc_discovery_url: "{{ outline_oidc_issuer }}.well-known/openid-configuration"
+outline_oidc_auth_uri: "https://{{ outline_authentik_service_topology.public_hostname }}/application/o/authorize/"
+outline_oidc_token_uri: "https://{{ outline_authentik_service_topology.public_hostname }}/application/o/token/"
+outline_oidc_userinfo_uri: "https://{{ outline_authentik_service_topology.public_hostname }}/application/o/userinfo/"
+outline_oidc_logout_uri: "https://{{ outline_authentik_service_topology.public_hostname }}/application/o/outline/end-session/"
+outline_oidc_username_claim: preferred_username
+outline_oidc_scopes: openid profile email
+outline_keycloak_rollback_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/outline-client-secret.txt"
+outline_keycloak_rollback_client_id: outline
+outline_keycloak_rollback_issuer: "{{ keycloak_oidc_issuer_url }}"
+outline_keycloak_rollback_auth_uri: "{{ keycloak_oidc_auth_url }}"
+outline_keycloak_rollback_token_uri: "{{ keycloak_oidc_token_url }}"
+outline_keycloak_rollback_userinfo_uri: "{{ keycloak_oidc_userinfo_url }}"
+outline_keycloak_rollback_logout_uri: >-
+  {{ outline_session_authority.keycloak_logout_url }}?client_id={{ outline_keycloak_rollback_client_id }}&post_logout_redirect_uri={{ outline_session_authority.shared_proxy_cleanup_url | urlencode }}
 outline_operator_password_local_file: "{{ repo_shared_local_root }}/keycloak/outline.automation-password.txt"
 outline_secret_key_remote_file: "{{ outline_secret_dir }}/secret-key.txt"
 outline_utils_secret_remote_file: "{{ outline_secret_dir }}/utils-secret.txt"
+# ADR 0491 recovery: deployments that historically used the unabridged
+# config-prefix retain their original Outline encryption keys here. The current
+# unix-prefix path remains canonical; this path is read only as a compatible
+# recovery source when the canonical key is absent or invalid.
+outline_legacy_secret_dir: "/etc/{{ platform_config_prefix }}/outline"
+outline_legacy_secret_key_remote_file: "{{ outline_legacy_secret_dir }}/secret-key.txt"
+outline_legacy_utils_secret_remote_file: "{{ outline_legacy_secret_dir }}/utils-secret.txt"
 outline_redis_password_remote_file: "{{ outline_secret_dir }}/redis-password.txt"
 outline_minio_root_password_remote_file: "{{ outline_secret_dir }}/minio-root-password.txt"
-outline_keycloak_client_id: outline
-outline_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
-outline_keycloak_auth_uri: "{{ keycloak_oidc_auth_url }}"
-outline_keycloak_token_uri: "{{ keycloak_oidc_token_url }}"
-outline_keycloak_userinfo_uri: "{{ keycloak_oidc_userinfo_url }}"
-outline_keycloak_logout_uri: >-
-  {{ outline_session_authority.keycloak_logout_url }}?client_id={{ outline_keycloak_client_id }}&post_logout_redirect_uri={{ outline_session_authority.shared_proxy_cleanup_url | urlencode }}
-outline_keycloak_username_claim: preferred_username
-outline_keycloak_scopes: openid profile email
 outline_bootstrap_username: outline.automation
 outline_aws_region: eu-central-1
 outline_api_token_name: "{{ platform_identity.config_prefix }}-outline-sync"

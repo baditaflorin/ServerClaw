@@ -36,6 +36,24 @@ def catalog_repo_root() -> Path:
     return shared_repo_root(IMAGE_CATALOG_PATH.parent.parent)
 
 
+def catalog_relative_path(path: Path) -> str:
+    """Return a catalog-safe path for evidence in either kind of worktree.
+
+    Receipt directories may be materialized into a linked worktree for a
+    validation or live-apply run, while the same directories also exist in the
+    shared primary checkout.  Prefer the active catalog checkout so freshly
+    written evidence is immediately valid there; fall back to the shared root
+    for evidence that has not been materialized locally.
+    """
+
+    for root in (IMAGE_CATALOG_PATH.parent.parent, catalog_repo_root()):
+        try:
+            return str(path.relative_to(root))
+        except ValueError:
+            continue
+    raise ValueError(f"{path} is not inside the catalog checkout or its shared repository root")
+
+
 def explicit_exception_requested(args: argparse.Namespace) -> bool:
     return any(
         (
@@ -116,7 +134,7 @@ def update_catalog(
         entry["digest"] = digest
         entry["ref"] = build_ref(entry["registry_ref"], tag, digest)
         entry["pinned_on"] = scanned_on
-    entry["scan_receipt"] = str(receipt_path.relative_to(catalog_repo_root()))
+    entry["scan_receipt"] = catalog_relative_path(receipt_path)
     if exception is None:
         entry["scan_status"] = "pass_no_critical"
         entry.pop("exception", None)

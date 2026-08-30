@@ -1,0 +1,894 @@
+---
+- name: Derive Authentik conventional defaults from the service registry
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: derive_service_defaults
+  vars:
+    common_derive_service_name: authentik
+
+- name: Validate Authentik runtime scaffold inputs
+  ansible.builtin.assert:
+    that:
+      - authentik_site_dir | length > 0
+      - authentik_secret_dir | length > 0
+      - authentik_compose_file | length > 0
+      - authentik_env_file | length > 0
+      - authentik_image | length > 0
+      - authentik_container_name | length > 0
+      - authentik_internal_port | int > 0
+      - authentik_container_port | int > 0
+      - authentik_bootstrap_admin_token_remote_file | length > 0
+      - authentik_bootstrap_admin_token_local_file | length > 0
+    fail_msg: "authentik_runtime requires runtime paths, port metadata, and bootstrap token paths."
+
+- name: Ensure Authentik runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Authentik runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ authentik_site_dir }}"
+      mode: "0755"
+    - path: "{{ authentik_secret_dir }}"
+      mode: "0700"
+
+- name: Validate the Authentik secret bootstrap mode
+  ansible.builtin.assert:
+    that:
+      - authentik_secret_bootstrap_mode in ['preserve', 'adopt_legacy', 'generate']
+    fail_msg: >-
+      authentik_secret_bootstrap_mode must be preserve, adopt_legacy, or
+      generate. Production adoption must be requested explicitly.
+
+- name: Inspect the Authentik legacy environment
+  ansible.builtin.stat:
+    path: "{{ authentik_legacy_env_file }}"
+    follow: false
+    get_checksum: true
+    checksum_algorithm: sha256
+  register: authentik_legacy_env_state
+  no_log: true
+
+- name: Inspect the Authentik PostgreSQL data path
+  ansible.builtin.stat:
+    path: "{{ authentik_postgres_data_dir }}"
+    follow: false
+  register: authentik_postgres_data_state
+  no_log: true
+
+- name: Inspect the canonical Authentik secret files
+  ansible.builtin.stat:
+    path: "{{ item.remote_file }}"
+    follow: false
+  loop:
+    - { name: secret_key, remote_file: "{{ authentik_secret_key_remote_file }}" }
+    - { name: postgres_password, remote_file: "{{ authentik_postgres_password_remote_file }}" }
+    - { name: bootstrap_token, remote_file: "{{ authentik_bootstrap_token_remote_file }}" }
+    - { name: bootstrap_admin_token, remote_file: "{{ authentik_bootstrap_admin_token_remote_file }}" }
+  loop_control:
+    label: "{{ item.name }}"
+  register: authentik_secret_file_states_before
+  no_log: true
+
+- name: Reject unsafe existing Authentik canonical secret files
+  ansible.builtin.assert:
+    that:
+      - item.stat.isreg | default(false)
+      - not (item.stat.islnk | default(false))
+      - item.stat.uid | default(-1) | int == 0
+      - item.stat.gid | default(-1) | int == 0
+      - item.stat.mode | default('') == '0600'
+      - item.stat.size | default(0) | int > 0
+    fail_msg: >-
+      An existing canonical Authentik secret must be a non-empty, root-owned,
+      root-only regular file before convergence can continue.
+  loop: "{{ authentik_secret_file_states_before.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when:
+    - item.stat.exists | default(false) or item.stat.islnk | default(false)
+  no_log: true
+
+- name: Record the Authentik canonical secret-file count
+  ansible.builtin.set_fact:
+    authentik_existing_secret_file_count: >-
+      {{
+        authentik_secret_file_states_before.results
+        | selectattr('stat.exists', 'defined')
+        | selectattr('stat.exists')
+        | list
+        | length
+      }}
+  no_log: true
+
+- name: Reject partial Authentik secret state in preserve mode
+  ansible.builtin.assert:
+    that:
+      - authentik_existing_secret_file_count | int in [0, 4]
+    fail_msg: >-
+      Authentik canonical secret state is partial. Restore all four files from
+      the verified source before convergence; missing values will not be
+      generated over an existing identity database.
+  when: authentik_secret_bootstrap_mode == 'preserve'
+  no_log: true
+
+- name: Require explicit adoption or generation when Authentik secrets are absent
+  ansible.builtin.assert:
+    that:
+      - authentik_existing_secret_file_count | int == 4
+    fail_msg: >-
+      Authentik canonical secret files are absent. Use
+      authentik_secret_bootstrap_mode=adopt_legacy for a verified existing
+      deployment or =generate only for a genuinely new empty deployment.
+  when: authentik_secret_bootstrap_mode == 'preserve'
+  no_log: true
+
+- name: Require a safe Authentik legacy source before adoption
+  ansible.builtin.assert:
+    that:
+      - authentik_legacy_env_state.stat.exists | default(false)
+      - authentik_legacy_env_state.stat.isreg | default(false)
+      - not (authentik_legacy_env_state.stat.islnk | default(false))
+      - authentik_legacy_env_state.stat.uid | default(-1) | int == 0
+      - authentik_legacy_env_state.stat.gid | default(-1) | int == 0
+      - authentik_legacy_env_state.stat.mode | default('') == '0600'
+      - authentik_legacy_env_state.stat.size | default(0) | int > 0
+      - authentik_legacy_env_state.stat.checksum | default('') | length > 0
+    fail_msg: >-
+      Legacy Authentik adoption requires a non-empty, root-owned, root-only
+      regular environment file with a readable checksum.
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Inspect any pre-existing Authentik legacy environment backup
+  ansible.builtin.stat:
+    path: "{{ authentik_legacy_env_backup_file }}"
+    follow: false
+  register: authentik_legacy_env_backup_state_before
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Reject an unsafe pre-existing Authentik legacy environment backup
+  ansible.builtin.assert:
+    that:
+      - authentik_legacy_env_backup_state_before.stat.isreg | default(false)
+      - not (authentik_legacy_env_backup_state_before.stat.islnk | default(false))
+      - authentik_legacy_env_backup_state_before.stat.uid | default(-1) | int == 0
+      - authentik_legacy_env_backup_state_before.stat.gid | default(-1) | int == 0
+      - authentik_legacy_env_backup_state_before.stat.mode | default('') == '0600'
+      - authentik_legacy_env_backup_state_before.stat.size | default(0) | int > 0
+    fail_msg: >-
+      An existing Authentik legacy environment backup is unsafe or empty and
+      will not be followed, replaced, or repaired automatically.
+  when:
+    - authentik_secret_bootstrap_mode == 'adopt_legacy'
+    - >-
+      authentik_legacy_env_backup_state_before.stat.exists | default(false)
+      or authentik_legacy_env_backup_state_before.stat.islnk | default(false)
+  no_log: true
+
+- name: Preserve the Authentik legacy environment before one-time adoption
+  ansible.builtin.copy:
+    src: "{{ authentik_legacy_env_file }}"
+    dest: "{{ authentik_legacy_env_backup_file }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+    force: false
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Inspect the preserved Authentik legacy environment
+  ansible.builtin.stat:
+    path: "{{ authentik_legacy_env_backup_file }}"
+    follow: false
+    get_checksum: true
+    checksum_algorithm: sha256
+  register: authentik_legacy_env_backup_state
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Require an exact protected Authentik legacy backup before adoption
+  ansible.builtin.assert:
+    that:
+      - authentik_legacy_env_backup_state.stat.exists | default(false)
+      - authentik_legacy_env_backup_state.stat.isreg | default(false)
+      - not (authentik_legacy_env_backup_state.stat.islnk | default(false))
+      - authentik_legacy_env_backup_state.stat.uid | default(-1) | int == 0
+      - authentik_legacy_env_backup_state.stat.gid | default(-1) | int == 0
+      - authentik_legacy_env_backup_state.stat.mode | default('') == '0600'
+      - authentik_legacy_env_backup_state.stat.size | default(0) | int > 0
+      - >-
+        authentik_legacy_env_backup_state.stat.size | int
+        == authentik_legacy_env_state.stat.size | int
+      - >-
+        authentik_legacy_env_backup_state.stat.checksum | default('')
+        == authentik_legacy_env_state.stat.checksum | default('')
+    fail_msg: >-
+      The preserved Authentik legacy backup is absent, unsafe, empty, or not
+      byte-identical to the current adoption source. Refusing to overwrite it.
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Inspect the current Authentik compose rollback source
+  ansible.builtin.stat:
+    path: "{{ authentik_compose_file }}"
+    follow: false
+    get_checksum: true
+    checksum_algorithm: sha256
+  register: authentik_legacy_compose_state
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Read the current Authentik compose rollback source safely
+  ansible.builtin.slurp:
+    src: "{{ authentik_compose_file }}"
+  register: authentik_current_compose_raw
+  when:
+    - authentik_secret_bootstrap_mode == 'adopt_legacy'
+    - authentik_legacy_compose_state.stat.isreg | default(false)
+  no_log: true
+
+- name: Identify a compose file already managed by the OpenBao runtime role
+  ansible.builtin.set_fact:
+    authentik_current_compose_is_openbao_managed: >-
+      {{
+        '# managed-by: role=authentik_runtime adr=0491'
+        in (authentik_current_compose_raw.content | default('') | b64decode)
+        and '  openbao-agent:'
+        in (authentik_current_compose_raw.content | default('') | b64decode)
+        and authentik_env_file
+        in (authentik_current_compose_raw.content | default('') | b64decode)
+      }}
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Require a safe Authentik compose rollback source before adoption
+  ansible.builtin.assert:
+    that:
+      - authentik_legacy_compose_state.stat.exists | default(false)
+      - authentik_legacy_compose_state.stat.isreg | default(false)
+      - not (authentik_legacy_compose_state.stat.islnk | default(false))
+      - authentik_legacy_compose_state.stat.uid | default(-1) | int == 0
+      - authentik_legacy_compose_state.stat.gid | default(-1) | int == 0
+      - authentik_legacy_compose_state.stat.mode | default('') in ['0600', '0640', '0644']
+      - authentik_legacy_compose_state.stat.size | default(0) | int > 0
+      - authentik_legacy_compose_state.stat.checksum | default('') | length > 0
+    fail_msg: >-
+      Legacy Authentik adoption requires a non-empty, root-owned regular
+      compose file with a readable checksum for rollback.
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Inspect any pre-existing Authentik compose rollback file
+  ansible.builtin.stat:
+    path: "{{ authentik_legacy_compose_backup_file }}"
+    follow: false
+  register: authentik_legacy_compose_backup_state_before
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Reject an unsafe pre-existing Authentik compose rollback file
+  ansible.builtin.assert:
+    that:
+      - authentik_legacy_compose_backup_state_before.stat.isreg | default(false)
+      - not (authentik_legacy_compose_backup_state_before.stat.islnk | default(false))
+      - authentik_legacy_compose_backup_state_before.stat.uid | default(-1) | int == 0
+      - authentik_legacy_compose_backup_state_before.stat.gid | default(-1) | int == 0
+      - authentik_legacy_compose_backup_state_before.stat.mode | default('') == '0600'
+      - authentik_legacy_compose_backup_state_before.stat.size | default(0) | int > 0
+    fail_msg: >-
+      An existing Authentik compose rollback file is unsafe or empty and will
+      not be followed, replaced, or repaired automatically.
+  when:
+    - authentik_secret_bootstrap_mode == 'adopt_legacy'
+    - >-
+      authentik_legacy_compose_backup_state_before.stat.exists | default(false)
+      or authentik_legacy_compose_backup_state_before.stat.islnk | default(false)
+  no_log: true
+
+- name: Refuse an Authentik adoption resume without its original compose rollback
+  ansible.builtin.assert:
+    that:
+      - authentik_legacy_compose_backup_state_before.stat.exists | default(false)
+      - authentik_legacy_compose_backup_state_before.stat.isreg | default(false)
+      - not (authentik_legacy_compose_backup_state_before.stat.islnk | default(false))
+    fail_msg: >-
+      The live compose file is already OpenBao-managed, but no original regular
+      pre-adoption rollback file exists. Manual recovery is required.
+  when:
+    - authentik_secret_bootstrap_mode == 'adopt_legacy'
+    - authentik_current_compose_is_openbao_managed | default(false) | bool
+  no_log: true
+
+- name: Preserve the Authentik compose file before one-time adoption
+  ansible.builtin.copy:
+    src: "{{ authentik_compose_file }}"
+    dest: "{{ authentik_legacy_compose_backup_file }}"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0600"
+    force: false
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Inspect the preserved Authentik compose rollback file
+  ansible.builtin.stat:
+    path: "{{ authentik_legacy_compose_backup_file }}"
+    follow: false
+    get_checksum: true
+    checksum_algorithm: sha256
+  register: authentik_legacy_compose_backup_state
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Require a protected Authentik compose rollback backup
+  ansible.builtin.assert:
+    that:
+      - authentik_legacy_compose_backup_state.stat.exists | default(false)
+      - authentik_legacy_compose_backup_state.stat.isreg | default(false)
+      - not (authentik_legacy_compose_backup_state.stat.islnk | default(false))
+      - authentik_legacy_compose_backup_state.stat.uid | default(-1) | int == 0
+      - authentik_legacy_compose_backup_state.stat.gid | default(-1) | int == 0
+      - authentik_legacy_compose_backup_state.stat.mode | default('') == '0600'
+      - authentik_legacy_compose_backup_state.stat.size | default(0) | int > 0
+      - authentik_legacy_compose_backup_state.stat.checksum | default('') | length > 0
+    fail_msg: >-
+      The Authentik compose rollback backup is absent, unsafe, or empty.
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Require an exact Authentik compose rollback snapshot before first adoption
+  ansible.builtin.assert:
+    that:
+      - >-
+        authentik_legacy_compose_backup_state.stat.size | int
+        == authentik_legacy_compose_state.stat.size | int
+      - >-
+        authentik_legacy_compose_backup_state.stat.checksum | default('')
+        == authentik_legacy_compose_state.stat.checksum | default('')
+    fail_msg: >-
+      The protected Authentik compose rollback backup is not byte-identical to
+      the live pre-adoption compose source. Refusing to replace the live file.
+  when:
+    - authentik_secret_bootstrap_mode == 'adopt_legacy'
+    - not (authentik_current_compose_is_openbao_managed | default(false) | bool)
+  no_log: true
+
+- name: Adopt and verify the allowlisted Authentik legacy secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    python3 - \
+      "{{ authentik_legacy_env_backup_file }}" \
+      "{{ authentik_secret_key_remote_file }}" \
+      "{{ authentik_postgres_password_remote_file }}" \
+      "{{ authentik_bootstrap_token_remote_file }}" \
+      "{{ authentik_bootstrap_admin_token_remote_file }}" <<'PY'
+    import os
+    import stat
+    import sys
+    from pathlib import Path
+
+    legacy_path = Path(sys.argv[1])
+    destinations = {
+        "AUTHENTIK_SECRET_KEY": Path(sys.argv[2]),
+        "AUTHENTIK_POSTGRESQL__PASSWORD": Path(sys.argv[3]),
+        "AUTHENTIK_BOOTSTRAP_TOKEN": Path(sys.argv[4]),
+        "AUTHENTIK_BOOTSTRAP_PASSWORD": Path(sys.argv[5]),
+    }
+    values = {}
+    for raw_line in legacy_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+            value = value[1:-1]
+        if key in destinations or key == "POSTGRES_PASSWORD":
+            values[key] = value
+
+    missing = sorted(key for key in destinations if not values.get(key))
+    if missing:
+        raise SystemExit("legacy Authentik environment is missing required allowlisted keys")
+    if values.get("POSTGRES_PASSWORD") != values["AUTHENTIK_POSTGRESQL__PASSWORD"]:
+        raise SystemExit("legacy Authentik PostgreSQL password aliases do not match")
+
+    existing_destinations = set()
+    for key, destination in destinations.items():
+        value = values[key]
+        try:
+            metadata = destination.lstat()
+        except FileNotFoundError:
+            continue
+        if not stat.S_ISREG(metadata.st_mode):
+            raise SystemExit("existing canonical Authentik secret is not a regular file")
+        if metadata.st_uid != 0 or metadata.st_gid != 0:
+            raise SystemExit("existing canonical Authentik secret is not root-owned")
+        if stat.S_IMODE(metadata.st_mode) != 0o600 or metadata.st_size <= 0:
+            raise SystemExit("existing canonical Authentik secret is empty or has an unsafe mode")
+        expected = f"{value}\n".encode("utf-8")
+        if destination.read_bytes() != expected:
+            raise SystemExit("canonical Authentik secret differs from legacy source")
+        existing_destinations.add(key)
+
+    changed = 0
+    for key, destination in destinations.items():
+        if key in existing_destinations:
+            continue
+        value = values[key]
+        destination.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        descriptor = os.open(destination, flags, 0o600)
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(f"{value}\n")
+        changed += 1
+    print(changed)
+    PY
+  args:
+    executable: /bin/bash
+  register: authentik_legacy_secret_adoption
+  changed_when: authentik_legacy_secret_adoption.stdout | int > 0
+  when: authentik_secret_bootstrap_mode == 'adopt_legacy'
+  no_log: true
+
+- name: Reject secret generation over a legacy Authentik environment
+  ansible.builtin.assert:
+    that:
+      - not (authentik_legacy_env_state.stat.exists | default(false))
+    fail_msg: >-
+      Refusing to generate Authentik secrets while a legacy environment exists.
+      Use adopt_legacy so the running database and signing key are preserved.
+  when: authentik_secret_bootstrap_mode == 'generate'
+  no_log: true
+
+- name: Require absent PostgreSQL data before new Authentik secret generation
+  ansible.builtin.assert:
+    that:
+      - not (authentik_postgres_data_state.stat.exists | default(false))
+      - not (authentik_postgres_data_state.stat.islnk | default(false))
+    fail_msg: >-
+      Refusing to create or complete a new Authentik secret set while PostgreSQL
+      data exists. Use preserve or verified legacy adoption for that identity.
+  when:
+    - authentik_secret_bootstrap_mode == 'generate'
+    - authentik_existing_secret_file_count | int < 4
+  no_log: true
+
+- name: Validate an interrupted Authentik generated secret set before resuming
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - >-
+        import pathlib, re, sys;
+        value = pathlib.Path(sys.argv[1]).read_bytes();
+        raise SystemExit(0 if re.fullmatch(rb'[0-9a-f]{64}\n', value) else 1)
+      - "{{ item.item.remote_file }}"
+  loop: "{{ authentik_secret_file_states_before.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when:
+    - authentik_secret_bootstrap_mode == 'generate'
+    - authentik_existing_secret_file_count | int > 0
+    - authentik_existing_secret_file_count | int < 4
+    - item.stat.exists | default(false)
+  changed_when: false
+  no_log: true
+
+- name: Generate Authentik secrets only for an explicitly new deployment
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ item.remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - { name: secret_key, remote_file: "{{ authentik_secret_key_remote_file }}" }
+    - { name: postgres_password, remote_file: "{{ authentik_postgres_password_remote_file }}" }
+    - { name: bootstrap_token, remote_file: "{{ authentik_bootstrap_token_remote_file }}" }
+    - { name: bootstrap_admin_token, remote_file: "{{ authentik_bootstrap_admin_token_remote_file }}" }
+  loop_control:
+    label: "{{ item.name }}"
+  register: authentik_secret_generation
+  changed_when: (authentik_secret_generation.stdout | default('') | trim) == 'changed'
+  when: authentik_secret_bootstrap_mode == 'generate'
+  no_log: true
+
+- name: Reinspect the canonical Authentik secret files
+  ansible.builtin.stat:
+    path: "{{ item.remote_file }}"
+    follow: false
+  loop:
+    - { name: secret_key, remote_file: "{{ authentik_secret_key_remote_file }}" }
+    - { name: postgres_password, remote_file: "{{ authentik_postgres_password_remote_file }}" }
+    - { name: bootstrap_token, remote_file: "{{ authentik_bootstrap_token_remote_file }}" }
+    - { name: bootstrap_admin_token, remote_file: "{{ authentik_bootstrap_admin_token_remote_file }}" }
+  loop_control:
+    label: "{{ item.name }}"
+  register: authentik_secret_file_states_after
+  no_log: true
+
+- name: Assert every Authentik canonical secret is present and protected
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists | default(false)
+      - item.stat.isreg | default(false)
+      - not (item.stat.islnk | default(false))
+      - item.stat.size | default(0) | int > 0
+      - item.stat.mode == '0600'
+      - item.stat.uid | default(-1) | int == 0
+      - item.stat.gid | default(-1) | int == 0
+    fail_msg: >-
+      A canonical Authentik secret is absent, empty, non-regular, not root-owned,
+      or has an unsafe mode.
+  loop: "{{ authentik_secret_file_states_after.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  no_log: true
+
+- name: Read the Authentik runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item.remote_file }}"
+  loop:
+    - { name: secret_key, remote_file: "{{ authentik_secret_key_remote_file }}" }
+    - { name: postgres_password, remote_file: "{{ authentik_postgres_password_remote_file }}" }
+    - { name: bootstrap_token, remote_file: "{{ authentik_bootstrap_token_remote_file }}" }
+    - { name: bootstrap_admin_token, remote_file: "{{ authentik_bootstrap_admin_token_remote_file }}" }
+  loop_control:
+    label: "{{ item.name }}"
+  register: authentik_secrets_raw
+  no_log: true
+
+- name: Record the Authentik runtime secrets
+  ansible.builtin.set_fact:
+    authentik_secret_key: "{{ (authentik_secrets_raw.results | selectattr('item.name', 'equalto', 'secret_key') | first).content | b64decode | trim }}"
+    authentik_postgres_password: "{{ (authentik_secrets_raw.results | selectattr('item.name', 'equalto', 'postgres_password') | first).content | b64decode | trim }}"
+    authentik_bootstrap_token: "{{ (authentik_secrets_raw.results | selectattr('item.name', 'equalto', 'bootstrap_token') | first).content | b64decode | trim }}"
+    authentik_bootstrap_admin_token: "{{ (authentik_secrets_raw.results | selectattr('item.name', 'equalto', 'bootstrap_admin_token') | first).content | b64decode | trim }}"
+  no_log: true
+
+- name: Record the Authentik OpenBao secret payload
+  ansible.builtin.set_fact:
+    authentik_runtime_secret_payload:
+      AUTHENTIK_SECRET_KEY: "{{ authentik_secret_key }}"
+      AUTHENTIK_POSTGRESQL__PASSWORD: "{{ authentik_postgres_password }}"
+      AUTHENTIK_BOOTSTRAP_TOKEN: "{{ authentik_bootstrap_token }}"
+      AUTHENTIK_BOOTSTRAP_PASSWORD: "{{ authentik_bootstrap_admin_token }}"
+  no_log: true
+
+- name: Ensure the local Authentik artifact directory exists
+  ansible.builtin.file:
+    path: "{{ authentik_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Record the local Authentik secret mirror contracts
+  ansible.builtin.set_fact:
+    authentik_local_secret_mirror_contracts:
+      - { name: secret_key, dest: "{{ authentik_secret_key_local_file }}", value: "{{ authentik_secret_key }}" }
+      - { name: postgres_password, dest: "{{ authentik_postgres_password_local_file }}", value: "{{ authentik_postgres_password }}" }
+      - { name: bootstrap_token, dest: "{{ authentik_bootstrap_token_local_file }}", value: "{{ authentik_bootstrap_token }}" }
+      - { name: bootstrap_admin_token, dest: "{{ authentik_bootstrap_admin_token_local_file }}", value: "{{ authentik_bootstrap_admin_token }}" }
+  no_log: true
+
+- name: Inspect existing local Authentik secret mirrors
+  ansible.builtin.stat:
+    path: "{{ item.dest }}"
+    follow: false
+  loop: "{{ authentik_local_secret_mirror_contracts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_local_secret_mirror_states_before
+  no_log: true
+
+- name: Reject unsafe existing local Authentik secret mirrors
+  ansible.builtin.assert:
+    that:
+      - item.stat.isreg | default(false)
+      - not (item.stat.islnk | default(false))
+      - item.stat.size | default(0) | int > 0
+      - item.stat.mode | default('') == '0600'
+    fail_msg: >-
+      An existing shared local Authentik artifact is non-regular, empty, or has
+      an unsafe mode. It will not be replaced automatically.
+  loop: "{{ authentik_local_secret_mirror_states_before.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when:
+    - item.stat.exists | default(false) or item.stat.islnk | default(false)
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Read existing local Authentik secret mirrors before any copy
+  ansible.builtin.slurp:
+    src: "{{ item.dest }}"
+  loop: "{{ authentik_local_secret_mirror_contracts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  vars:
+    authentik_local_secret_mirror_state: >-
+      {{
+        authentik_local_secret_mirror_states_before.results
+        | selectattr('item.name', 'equalto', item.name)
+        | first
+      }}
+  when: authentik_local_secret_mirror_state.stat.exists | default(false)
+  delegate_to: localhost
+  become: false
+  register: authentik_existing_local_secret_mirrors_raw
+  no_log: true
+
+- name: Refuse drift in any existing local Authentik secret mirror
+  ansible.builtin.assert:
+    that:
+      - (item.content | b64decode) == (item.item.value ~ '\n')
+    fail_msg: >-
+      An existing shared local Authentik artifact differs from the verified
+      canonical runtime secret. Refusing to overwrite controller-local state.
+  loop: "{{ authentik_existing_local_secret_mirrors_raw.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when: not (item.skipped | default(false))
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the Authentik runtime secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.value }}\n"
+    mode: "0600"
+    force: false
+  loop: "{{ authentik_local_secret_mirror_contracts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Reinspect local Authentik secret mirrors after copy
+  ansible.builtin.stat:
+    path: "{{ item.dest }}"
+    follow: false
+  loop: "{{ authentik_local_secret_mirror_contracts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_local_secret_mirror_states_after
+  no_log: true
+
+- name: Read back local Authentik secret mirrors after copy
+  ansible.builtin.slurp:
+    src: "{{ item.dest }}"
+  loop: "{{ authentik_local_secret_mirror_contracts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_local_secret_mirrors_raw_after
+  no_log: true
+
+- name: Require protected exact local Authentik secret mirrors
+  ansible.builtin.assert:
+    that:
+      - authentik_local_secret_mirror_state.stat.exists | default(false)
+      - authentik_local_secret_mirror_state.stat.isreg | default(false)
+      - not (authentik_local_secret_mirror_state.stat.islnk | default(false))
+      - authentik_local_secret_mirror_state.stat.size | default(0) | int > 0
+      - authentik_local_secret_mirror_state.stat.mode | default('') == '0600'
+      - (item.content | b64decode) == (item.item.value ~ '\n')
+    fail_msg: >-
+      A shared local Authentik artifact failed protected readback verification.
+  loop: "{{ authentik_local_secret_mirrors_raw_after.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  vars:
+    authentik_local_secret_mirror_state: >-
+      {{
+        authentik_local_secret_mirror_states_after.results
+        | selectattr('item.name', 'equalto', item.item.name)
+        | first
+      }}
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Authentik
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: authentik
+    common_openbao_compose_env_agent_dir: "{{ authentik_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ authentik_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ authentik_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ authentik_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ authentik_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ authentik_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ authentik_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ authentik_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ authentik_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ authentik_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ authentik_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: runtime.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ authentik_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ authentik_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ authentik_openbao_agent_image }}"
+  no_log: true
+
+- name: Render the Authentik compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ authentik_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: authentik_compose_template
+
+- name: Pull the Authentik image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ authentik_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ authentik_site_dir }}"
+  register: authentik_pull
+  changed_when: >-
+    'Pulling' in authentik_pull.stdout
+    or 'Downloaded newer image' in authentik_pull.stdout
+    or 'Pull complete' in authentik_pull.stdout
+
+- name: Inspect the Authentik runtime environment before OpenBao refresh
+  ansible.builtin.stat:
+    path: "{{ authentik_env_file }}"
+    follow: false
+    get_checksum: true
+    checksum_algorithm: sha256
+  register: authentik_runtime_env_before_refresh
+  no_log: true
+
+- name: Record the Authentik OpenBao render start time
+  ansible.builtin.command:
+    argv:
+      - date
+      - +%s
+  register: authentik_openbao_render_started_at
+  changed_when: false
+
+- name: Remove the transient Authentik runtime environment before agent verification
+  ansible.builtin.file:
+    path: "{{ authentik_env_file }}"
+    state: absent
+  no_log: true
+
+- name: Force-recreate the Authentik OpenBao agent
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ authentik_compose_file }}"
+      - up
+      - -d
+      - --no-deps
+      - --force-recreate
+      - openbao-agent
+  args:
+    chdir: "{{ authentik_site_dir }}"
+  register: authentik_openbao_agent_up
+  changed_when: >-
+    'Creating' in authentik_openbao_agent_up.stdout
+    or 'Recreating' in authentik_openbao_agent_up.stdout
+    or 'Starting' in authentik_openbao_agent_up.stdout
+
+- name: Wait for a fresh Authentik environment rendered by OpenBao agent
+  ansible.builtin.wait_for:
+    path: "{{ authentik_env_file }}"
+    state: present
+    timeout: 90
+  no_log: true
+
+- name: Inspect the OpenBao-rendered Authentik environment
+  ansible.builtin.stat:
+    path: "{{ authentik_env_file }}"
+    follow: false
+    get_checksum: true
+    checksum_algorithm: sha256
+  register: authentik_rendered_env_state
+  no_log: true
+
+- name: Assert the Authentik environment was freshly and safely rendered
+  ansible.builtin.assert:
+    that:
+      - authentik_rendered_env_state.stat.exists | default(false)
+      - authentik_rendered_env_state.stat.isreg | default(false)
+      - not (authentik_rendered_env_state.stat.islnk | default(false))
+      - authentik_rendered_env_state.stat.size | default(0) | int > 0
+      - authentik_rendered_env_state.stat.mode == '0600'
+      - authentik_rendered_env_state.stat.pw_name == 'root'
+      - authentik_rendered_env_state.stat.gr_name == 'root'
+      - authentik_rendered_env_state.stat.checksum | default('') | length > 0
+      - authentik_rendered_env_state.stat.mtime | int >= authentik_openbao_render_started_at.stdout | int
+    fail_msg: >-
+      Authentik runtime.env was not freshly rendered with mode 0600 by the
+      authenticated OpenBao agent.
+  no_log: true
+
+- name: Decide whether Authentik application services require forced recreation
+  ansible.builtin.set_fact:
+    authentik_force_recreate_required: >-
+      {{
+        authentik_compose_template.changed
+        or (authentik_legacy_secret_adoption.changed | default(false))
+        or (authentik_secret_generation.changed | default(false))
+        or (
+          authentik_runtime_env_before_refresh.stat.checksum | default('')
+          != authentik_rendered_env_state.stat.checksum | default('')
+        )
+      }}
+  no_log: true
+
+- name: Build the Authentik application startup command
+  ansible.builtin.set_fact:
+    authentik_compose_up_argv: >-
+      {{
+        ['docker', 'compose', '--file', authentik_compose_file, 'up', '-d', '--remove-orphans']
+        + (['--force-recreate'] if authentik_force_recreate_required else [])
+        + ['postgres', 'redis', 'authentik', 'authentik-worker']
+      }}
+
+- name: Start the Authentik application services
+  ansible.builtin.command:
+    argv: "{{ authentik_compose_up_argv }}"
+  args:
+    chdir: "{{ authentik_site_dir }}"
+  register: authentik_up
+  changed_when: >-
+    'Creating' in authentik_up.stdout
+    or 'Recreating' in authentik_up.stdout
+    or 'Starting' in authentik_up.stdout
+
+- name: Verify the Authentik runtime
+  ansible.builtin.import_tasks: verify.yml
+
+- name: Reconcile the Authentik OAuth2 providers and applications
+  ansible.builtin.import_tasks: oauth_clients.yml
+  when: authentik_oauth_reconcile_enabled | bool

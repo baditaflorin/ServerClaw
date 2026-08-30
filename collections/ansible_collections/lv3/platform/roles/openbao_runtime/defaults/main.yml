@@ -79,9 +79,23 @@ openbao_legacy_restore_target_snapshot_file: /var/tmp/openbao-runtime-control-le
 openbao_legacy_restore_temp_init_shares: 1
 openbao_legacy_restore_temp_init_threshold: 1
 openbao_controller_approle_local_file: "{{ openbao_local_artifact_dir }}/controller-automation-approle.json"
+openbao_runtime_secret_provisioner_approle_local_file: "{{ openbao_local_artifact_dir }}/runtime-secret-provisioner-approle.json"
 openbao_atlas_approle_local_file: "{{ openbao_local_artifact_dir }}/atlas-approle.json"
 openbao_mail_platform_approle_local_file: "{{ openbao_local_artifact_dir }}/mail-platform-approle.json"
 openbao_secret_rotation_approle_local_file: "{{ openbao_local_artifact_dir }}/secret-rotation-approle.json"
+openbao_runtime_secret_provisioner_approle_name: runtime-secret-provisioner
+openbao_runtime_secret_provisioner_policy_name: >-
+  {{ platform_identity.config_prefix }}-agent-runtime-secret-provisioner
+openbao_runtime_secret_protected_approle_names:
+  - controller-automation
+  - runtime-secret-provisioner
+openbao_runtime_secret_namespace_overrides:
+  rag_context: platform-context
+openbao_runtime_secret_service_contracts: []
+openbao_runtime_service_policies: []
+openbao_runtime_service_approles: []
+openbao_managed_policies: []
+openbao_managed_approles: []
 openbao_secret_catalog_file: "{{ playbook_dir }}/../config/secret-catalog.json"
 openbao_controller_secret_manifest_file: "{{ playbook_dir }}/../config/controller-local-secrets.json"
 openbao_init_key_shares: 3
@@ -106,6 +120,8 @@ openbao_policies:
     src: policy-breakglass.hcl.j2
   - name: "{{ platform_identity.config_prefix }}-agent-controller"
     src: policy-agent-controller.hcl.j2
+  - name: "{{ openbao_runtime_secret_provisioner_policy_name }}"
+    src: policy-agent-runtime-secret-provisioner.hcl.j2
   - name: "{{ platform_identity.config_prefix }}-agent-atlas"
     src: policy-agent-atlas.hcl.j2
   - name: "{{ platform_identity.config_prefix }}-agent-secret-rotation"
@@ -122,6 +138,18 @@ openbao_approles:
     secret_id_ttl: 15m
     secret_id_num_uses: 0
     local_file: "{{ openbao_controller_approle_local_file }}"
+  - name: "{{ openbao_runtime_secret_provisioner_approle_name }}"
+    policies:
+      - "{{ openbao_runtime_secret_provisioner_policy_name }}"
+    token_ttl: 15m
+    token_max_ttl: 1h
+    token_num_uses: 0
+    # Service converges run independently of the OpenBao bootstrap.  Keep the
+    # root-only controller credential reusable while issuing only short-lived,
+    # capability-verified tokens from its narrowly generated policy.
+    secret_id_ttl: 0
+    secret_id_num_uses: 0
+    local_file: "{{ openbao_runtime_secret_provisioner_approle_local_file }}"
   - name: atlas
     policies:
       - "{{ platform_identity.config_prefix }}-agent-atlas"

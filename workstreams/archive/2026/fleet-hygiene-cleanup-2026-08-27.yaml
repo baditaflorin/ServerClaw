@@ -1,0 +1,72 @@
+id: fleet-hygiene-cleanup-2026-08-27
+title: Fleet hygiene cleanup -- one more cloud-init guest fixed, keycloak/SSO fully restored, firewall-pools.json and mail-platform findings
+status: merged
+ready_to_merge: true
+live_applied: true
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: fleet-hygiene-cleanup-2026-08-27
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: fleet-hygiene-cleanup-2026-08-27-doc
+      paths:
+        - docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+        - docs/runbooks/rebuild-manually-built-images.md
+        - workstreams/active/fleet-hygiene-cleanup-2026-08-27.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Follow-up cleanup pass on the smaller open items from #143/#145: audited
+  all 17 guests' cloud-init package-install completion status (not just the
+  guests already known affected), found docker-build-lv3 (VMID 130, the
+  original canary) also had stuck packages and fixed it the same safe way.
+  Also directly re-ran cloud-init's actual boot-time code path
+  (`cloud-init modules --mode final`) on every guest that had shown a FAIL
+  record, confirming SUCCESS without needing another reboot to prove it.
+
+  Re-searched all 318 locally-cloned repos for firewall-pools.json/
+  fleet-pool-fw -- confirmed the existing ADR 0489's conclusion (already
+  exhaustively searched, not found anywhere, likely a personal script on
+  the operator's own machine never checked in) rather than finding
+  anything new. This needs operator input, not further code search.
+
+  Confirmed mail_platform's real declared location is runtime-control
+  (VMID 192) per the service catalog -- the mail-platform_default docker
+  network keycloak references on docker-runtime could never have worked
+  anyway (Docker networks are per-host); the empty placeholder created
+  earlier is harmless and fine to leave.
+
+  The keycloak KC_HOSTNAME staleness flagged earlier turned out to be a
+  live, actually-broken part of ops.example.org's SSO login flow, not just
+  cosmetic staleness -- fixing it uncovered and fixed 4 total independent
+  bugs in sequence: a pg_hba.conf typo (10.10.10.92 instead of .20, unlike
+  every other service's correct entry), the KC_HOSTNAME itself (confirmed
+  wrong via nginx's live config and DNS, not a deliberate legacy choice),
+  a stale oauth2-proxy oidc_jwks_url (10.10.10.92, a fifth instance of
+  this incident's address-staleness pattern), and a Liquibase migration
+  checksum mismatch (image version skew, fixed via the standard
+  documented workaround). Verified sso.example.org and ops.example.org both
+  respond correctly end-to-end afterward.
+
+  Added docs/runbooks/rebuild-manually-built-images.md documenting the
+  manual docker build/push process reconstructed during the #143
+  recovery for mcp-site-service and browser-runner, neither of which has
+  any CI publish step.
+
+objectives:
+  - Audit the full fleet for the cloud-init bug, not just already-known guests
+  - Do what's checkable on the firewall-pools.json mystery without further speculation
+  - Resolve the mail-platform network question with evidence from the service catalog
+  - Fix keycloak/SSO for real if it turns out to be live and broken, not just stale config
+  - Document the manual image rebuild process so it isn't re-derived next time
+
+completion_metrics:
+  - All 17 guests confirmed clean (SUCCESS) for the cloud-init package-install module
+  - sso.example.org and ops.example.org both return correct, non-error responses
+  - A runbook exists for rebuilding docker-runtime's manually-built images
+
+related_adrs:
+  - "0489"

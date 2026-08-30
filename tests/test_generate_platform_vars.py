@@ -1,6 +1,8 @@
 from pathlib import Path
+from typing import Any
 
 import generate_platform_vars
+import platform.repo as platform_repo
 import pytest
 import yaml
 
@@ -10,7 +12,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 @pytest.fixture(autouse=True)
 def disable_local_identity_overlay(monkeypatch) -> None:
+    monkeypatch.setattr(
+        generate_platform_vars,
+        "LOCAL_IDENTITY_VARS_PATH",
+        REPO_ROOT / ".local" / "identity.yml",
+    )
     monkeypatch.setattr(generate_platform_vars, "resolve_local_identity_override_path", lambda: None)
+    monkeypatch.setattr(
+        platform_repo,
+        "_topology_host_vars_overlay_path",
+        lambda repo_root=None: None,
+    )
 
 
 def iter_strings(value):
@@ -33,6 +45,161 @@ def test_resolve_tcp_proxy_port_supports_platform_port_assignments_templates() -
         ports,
     )
     assert resolved == 8010
+
+
+def test_explicit_identity_file_overrides_shared_identity(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    identity_file = tmp_path / "selected-identity.yml"
+    identity_file.write_text(
+        "platform_domain: selected.example.net\nmanagement_ipv4: 198.51.100.42\n",
+        encoding="utf-8",
+    )
+
+    selected = generate_platform_vars._apply_identity_override(identity_file)
+    monkeypatch.setattr(
+        generate_platform_vars,
+        "resolve_local_identity_override_path",
+        lambda: generate_platform_vars.LOCAL_IDENTITY_VARS_PATH,
+    )
+    _, host_vars = generate_platform_vars.load_sources()
+
+    assert selected == identity_file.resolve()
+    assert host_vars["platform_domain"] == "selected.example.net"
+    assert host_vars["management_ipv4"] == "198.51.100.42"
+
+
+def test_main_checks_against_explicit_identity_file(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    identity_file = tmp_path / "selected-identity.yml"
+    identity_file.write_text("platform_domain: selected.example.net\n", encoding="utf-8")
+    captured: dict[str, object] = {}
+
+    def fake_check(
+        output_path: Path,
+        *,
+        use_identity_override: bool = False,
+        use_topology_override: bool = False,
+    ) -> int:
+        captured["output_path"] = output_path
+        captured["use_identity_override"] = use_identity_override
+        captured["use_topology_override"] = use_topology_override
+        captured["identity_path"] = generate_platform_vars.LOCAL_IDENTITY_VARS_PATH
+        return 0
+
+    monkeypatch.setattr(generate_platform_vars, "check_platform_vars", fake_check)
+
+    result = generate_platform_vars.main(["--check", "--identity-file", str(identity_file)])
+
+    assert result == 0
+    assert captured == {
+        "output_path": generate_platform_vars.PLATFORM_VARS_PATH,
+        "use_identity_override": True,
+        "use_topology_override": False,
+        "identity_path": identity_file.resolve(),
+    }
+
+
+def test_explicit_topology_file_avoids_shared_profile(
+    tmp_path: Path,
+) -> None:
+    topology_file = tmp_path / "topology.yml"
+    topology_file.write_text("proxmox_internal_ipv4: 10.77.0.1\n", encoding="utf-8")
+
+    selected = generate_platform_vars._apply_topology_override(topology_file)
+    _, host_vars = generate_platform_vars.load_sources(skip_local_override=True)
+
+    assert selected == topology_file.resolve()
+    assert host_vars["proxmox_internal_ipv4"] == "10.77.0.1"
+
+
+def test_default_check_ignores_untracked_topology_inputs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output_path = tmp_path / "platform.yml"
+    output_path.write_text("sentinel\n", encoding="utf-8")
+    generated_fragment = tmp_path / "proxmox-host.generated.yml"
+    generated_fragment.write_text(
+        "proxmox_guests:\n  - name: contaminated\n    ipv4: 10.99.0.2\n",
+        encoding="utf-8",
+    )
+    calls: dict[str, object] = {}
+
+    def fake_load_sources(
+        skip_local_override: bool = False,
+        *,
+        skip_topology_override: bool = False,
+        skip_generated_topology: bool = False,
+    ):
+        calls.update(
+            skip_local_override=skip_local_override,
+            skip_topology_override=skip_topology_override,
+            skip_generated_topology=skip_generated_topology,
+        )
+        return {}, {"_platform_generation_identity_overlay": {}}
+
+    monkeypatch.setattr(generate_platform_vars, "load_sources", fake_load_sources)
+    monkeypatch.setattr(generate_platform_vars, "_load_generation_identity_overlay", lambda path: {})
+    monkeypatch.setattr(generate_platform_vars, "build_platform_vars", lambda **kwargs: {})
+    monkeypatch.setattr(generate_platform_vars, "render_platform_vars", lambda payload: "sentinel\n")
+
+    assert generate_platform_vars.check_platform_vars(output_path) == 0
+    assert calls == {
+        "skip_local_override": True,
+        "skip_topology_override": True,
+        "skip_generated_topology": True,
+    }
+
+
+def test_default_check_reuses_tracked_identity_snapshot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    output_path = tmp_path / "platform.yml"
+    output_path.write_text(
+        "platform_generation:\n"
+        "  identity_overlay:\n"
+        "    platform_domain: tracked.example.net\n"
+        "    management_ipv4: 198.51.100.42\n",
+        encoding="utf-8",
+    )
+    captured: dict[str, Any] = {}
+
+    def fake_build_platform_vars(*, stack, host_vars):
+        captured.update(host_vars)
+        return {"sentinel": True}
+
+    monkeypatch.setattr(generate_platform_vars, "build_platform_vars", fake_build_platform_vars)
+    monkeypatch.setattr(
+        generate_platform_vars,
+        "render_platform_vars",
+        lambda payload: output_path.read_text(encoding="utf-8"),
+    )
+
+    assert generate_platform_vars.check_platform_vars(output_path) == 0
+    assert captured["platform_domain"] == "tracked.example.net"
+    assert captured["management_ipv4"] == "198.51.100.42"
+
+
+def test_generation_identity_snapshot_rejects_unapproved_local_scalars() -> None:
+    projected = generate_platform_vars._reproducible_identity_overlay(
+        {
+            "platform_domain": "selected.example.net",
+            "management_ipv4": "198.51.100.42",
+            "api_token": "must-not-be-tracked",
+            "database_password": "must-not-be-tracked",
+            "platform_repo_checkout_path": "/operator/private/path",
+        }
+    )
+
+    assert projected == {
+        "platform_domain": "selected.example.net",
+        "management_ipv4": "198.51.100.42",
+    }
 
 
 def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
@@ -737,3 +904,12 @@ def test_build_platform_vars_includes_glitchtip_publication_topology() -> None:
     assert glitchtip["urls"]["internal"] == "http://10.10.10.20:3005"
     assert glitchtip["edge"]["upstream"] == glitchtip["urls"]["internal"]
     assert platform_vars["glitchtip_port"] == 3005
+
+
+def test_build_platform_vars_derives_authentik_port_and_upstream_from_registry() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+    authentik = platform_vars["platform_service_topology"]["authentik"]
+
+    assert authentik["ports"]["internal"] == 9010
+    assert authentik["urls"]["internal"] == "http://10.10.10.92:9010"
+    assert authentik["edge"]["upstream"] == authentik["urls"]["internal"]

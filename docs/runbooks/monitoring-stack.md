@@ -299,6 +299,34 @@ The playbook keeps these secrets on the monitoring VM:
 - `/etc/lv3/monitoring/influxdb-guest-writer.token`
 - `/etc/lv3/monitoring/grafana-reader.token`
 
+Deployments whose config prefix is not a valid POSIX prefix may have older
+copies under `/etc/<config-prefix>/monitoring`. The role checks that legacy
+directory before reading, generating, or reconciling credentials and copies
+existing values into the canonical unix-prefix directory without rotating
+Grafana or InfluxDB authority. Keep the legacy copies until the canonical
+converge and all monitoring probes have passed.
+
+For an initialized InfluxDB runtime, the role also proves that the managed
+operator-token file can enumerate the organization catalog. If that file is
+stale, `/root/.influxdbv2/configs` is considered only as a recovery candidate;
+its active default token must pass the same live API check before the managed
+file is replaced. If neither token authenticates, stop and perform supported
+offline InfluxDB recovery rather than deleting authorization records.
+
+If the accepted token exposes only a historical organization name, set
+`monitoring_influxdb_legacy_org_name` in the deployment-local identity overlay
+after verifying the catalog. The role renames that exact organization only when
+the desired organization is absent, preserving its ID, buckets, and token
+authorizations. It then aligns the root CLI default and binds all bucket and
+authorization reconciliation to the preserved organization ID. An absent or
+ambiguous match stops convergence.
+
+When a deployment retains a Prometheus unit from an earlier config-prefix,
+declare only that verified unit in `monitoring_prometheus_legacy_service_names`
+inside the deployment-local identity overlay. The monitoring role stops and
+disables it before starting the canonical unit, and Alertmanager always restarts
+the canonical service-name variable rather than a hard-coded unit.
+
 The control machine keeps one mirrored token outside git for host-side Proxmox configuration:
 
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/monitoring/proxmox-writer.token`

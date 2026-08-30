@@ -14,6 +14,8 @@ ALERTMANAGER_ENV_TEMPLATE = ROLE_ROOT / "templates" / "prometheus-alertmanager.e
 RELAY_ENV_TEMPLATE = ROLE_ROOT / "templates" / "pgaudit-alert-relay.env.j2"
 RELAY_SERVICE_TEMPLATE = ROLE_ROOT / "templates" / "pgaudit-alert-relay.service.j2"
 RELAY_SCRIPT_TEMPLATE = ROLE_ROOT / "templates" / "pgaudit-alert-relay.py.j2"
+HANDLERS_PATH = ROLE_ROOT / "handlers" / "main.yml"
+SERVICE_REGISTRY_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "platform_services.yml"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -22,15 +24,28 @@ def load_yaml(path: Path) -> list[dict] | dict:
 
 def test_alertmanager_runtime_defaults_define_pgaudit_relay_contract() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
+    registry = load_yaml(SERVICE_REGISTRY_PATH)["platform_service_registry"]
 
-    assert defaults["alertmanager_runtime_env_file"] == "/etc/default/prometheus-alertmanager"
+    assert registry["alertmanager"]["extra_defaults"]["alertmanager_runtime_env_file"] == (
+        "/etc/default/prometheus-alertmanager"
+    )
     assert defaults["alertmanager_runtime_pgaudit_relay_enabled"] is True
     assert defaults["alertmanager_runtime_pgaudit_relay_service_name"] == "pgaudit-alert-relay"
     assert defaults["alertmanager_runtime_pgaudit_relay_nats_subject"] == "platform.security.pgaudit_unknown_role"
-    assert (
-        "/.local/nats/jetstream-admin-password.txt"
-        in defaults["alertmanager_runtime_pgaudit_relay_nats_password_local_file"]
+    assert defaults["alertmanager_runtime_pgaudit_relay_nats_password_local_file"] == (
+        "{{ repo_shared_local_root }}/nats/jetstream-admin-password.txt"
     )
+
+
+def test_alertmanager_restarts_the_canonical_prometheus_service() -> None:
+    defaults = load_yaml(DEFAULTS_PATH)
+    handlers = load_yaml(HANDLERS_PATH)
+    restart = next(handler for handler in handlers if handler.get("name") == "Restart Prometheus")
+
+    assert defaults["alertmanager_runtime_prometheus_service_name"] == (
+        "{{ platform_identity.config_prefix }}-prometheus"
+    )
+    assert restart["ansible.builtin.systemd"]["name"] == "{{ alertmanager_runtime_prometheus_service_name }}"
 
 
 def test_alertmanager_runtime_tasks_render_and_start_pgaudit_relay() -> None:

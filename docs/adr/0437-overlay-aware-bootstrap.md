@@ -45,7 +45,7 @@ production Proxmox:
    reads `inventory/host_vars/proxmox-host.yml` — the committed production
    file. Even with `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork` set,
    the generated `inventory/hosts.yml` still contains 10.10.10.X production
-   IPs instead of the fork's 10.20.10.X CIDR.
+   IPs instead of the fork's 10.10.10.X CIDR.
 2. **`BOOTSTRAP_KEY` is hardcoded** to `.local/ssh/bootstrap.id_ed25519`.
    The 0fork clone uses `hetzner_llm_agents_ed25519`; no override path
    short of editing the Makefile.
@@ -56,7 +56,7 @@ production Proxmox:
    `env=production`, so `playbook_execution_host_patterns` resolves to
    production hosts that don't exist on the fork.
 4. **`proxmox_guest_ssh_connection_mode=proxmox_host_jump` is not set.**
-   Without it, ansible tries to SSH to guests over 10.20.10.X directly
+   Without it, ansible tries to SSH to guests over 10.10.10.X directly
    from the operator workstation — which isn't routable until the mesh
    VPN is live.
 
@@ -190,7 +190,7 @@ the default path.
   `LV3_PROXMOX_HOST_ADDR=203.0.113.3`.
 - `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make generate-inventory`
   produces a `.local/inventory/hosts.yml` whose 17 guest entries resolve
-  to 10.20.10.X on the fork's internal bridge.
+  to 10.10.10.X on the fork's internal bridge.
 
 End-to-end live-apply validation is pending on the 0fork clone (see
 `docs/postmortems/2026-04-22-fork-bootstrap-gap.md`).

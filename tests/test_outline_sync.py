@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import stat
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -43,7 +44,7 @@ class FakeResponse:
     def geturl(self) -> str:
         return self._url
 
-    def __enter__(self) -> "FakeResponse":
+    def __enter__(self) -> FakeResponse:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
@@ -119,6 +120,7 @@ def test_bootstrap_token_uses_oidc_session_cookie_to_create_an_api_token(
 
     assert exit_code == 0
     assert token_file.read_text(encoding="utf-8").strip() == "outline-api-token"
+    assert stat.S_IMODE(token_file.stat().st_mode) == 0o600
     assert len(opener.calls) == 2
     assert calls == [
         (
@@ -129,6 +131,25 @@ def test_bootstrap_token_uses_oidc_session_cookie_to_create_an_api_token(
             "csrf-cookie-value",
         )
     ]
+
+
+def test_bootstrap_token_normalizes_existing_token_permissions(tmp_path: Path) -> None:
+    token_file = tmp_path / "api-token.txt"
+    token_file.write_text("outline-api-token\n", encoding="utf-8")
+    token_file.chmod(0o644)
+
+    exit_code = outline_sync.bootstrap_token(
+        "https://wiki.example",
+        "outline.automation",
+        tmp_path / "unused-password.txt",
+        "lv3-outline-sync",
+        token_file,
+        ["collections.create"],
+    )
+
+    assert exit_code == 0
+    assert token_file.read_text(encoding="utf-8").strip() == "outline-api-token"
+    assert stat.S_IMODE(token_file.stat().st_mode) == 0o600
 
 
 def test_landing_docs_render_repo_indexes_from_canonical_files(tmp_path: Path) -> None:
@@ -215,7 +236,7 @@ def test_ensure_document_updates_existing_collection_landing_page() -> None:
 
     assert outcome == "updated"
     assert calls == [
-        ("documents.list", {"collectionId": "collection-1"}),
+        ("documents.list", {"collectionId": "collection-1", "limit": 100, "offset": 0}),
         (
             "documents.update",
             {

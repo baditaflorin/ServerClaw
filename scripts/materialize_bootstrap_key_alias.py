@@ -59,12 +59,21 @@ def ensure_bootstrap_key_aliases(repo_root: Path) -> list[AliasStatus]:
             )
             continue
 
-        _create_relative_symlink(alias_path, legacy_path)
+        try:
+            _create_relative_symlink(alias_path, legacy_path)
+            status = "materialized"
+        except FileExistsError:
+            # Preflight may request the private and public aliases in parallel.
+            # Either invocation materializes both, so losing the same-path race
+            # is success once the alias now exists.
+            if not (alias_path.exists() or alias_path.is_symlink()):
+                raise
+            status = "present"
         results.append(
             AliasStatus(
                 alias_path=str(alias_path),
                 legacy_path=str(legacy_path),
-                status="materialized",
+                status=status,
             )
         )
 

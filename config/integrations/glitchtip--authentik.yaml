@@ -1,0 +1,57 @@
+---
+# ADR 0353: Service Integration Contract Registry
+# managed-by: adr=0491 role=glitchtip_runtime
+schema_version: "1.0.0"
+contract_id: glitchtip--authentik
+consumer: glitchtip_runtime
+provider: authentik_runtime
+integration_type: oidc
+adr: "0491"
+
+connection:
+  issuer_url_var: glitchtip_oidc_issuer_url
+  discovery_url_var: glitchtip_oidc_discovery_url
+  provider: openid_connect
+  provider_id: authentik
+  application_slug: glitchtip
+  client_id: glitchtip
+  client_secret_local_file: .local/authentik/glitchtip-client-secret.txt
+  callback_url: "https://errors.{{ platform_domain }}/accounts/oidc/authentik/login/callback/"
+  frontend_login_url: "https://errors.{{ platform_domain }}/login"
+  headless_redirect_path: /_allauth/browser/v1/auth/provider/redirect
+  scopes:
+    - openid
+    - profile
+    - email
+
+secrets:
+  - path: .local/authentik/glitchtip-client-secret.txt
+    purpose: selected_oidc_client_secret
+  - path: .local/keycloak/glitchtip-client-secret.txt
+    purpose: keycloak_per_client_rollback
+
+health_check:
+  endpoint: "{{ glitchtip_oidc_discovery_url }}"
+  expected_status: 200
+  timeout_seconds: 10
+
+pre_flight:
+  - check: authentik_application_exists
+    slug: glitchtip
+  - check: authentik_provider_callback_matches
+    callback_url: "https://errors.{{ platform_domain }}/accounts/oidc/authentik/login/callback/"
+  - check: glitchtip_social_app_unique
+    provider_id: authentik
+  - check: keycloak_rollback_secret_preserved
+    path: .local/keycloak/glitchtip-client-secret.txt
+  - check: keycloak_rollback_metadata_reconciled
+    issuer_url_var: keycloak_oidc_issuer_url
+    provider_id: keycloak
+
+post_deployment:
+  - check: allauth_provider_redirect
+    script: scripts/glitchtip_oidc_smoke.py
+  - check: frontend_settings_advertise_selected_and_rollback_providers
+    endpoint: /api/settings/
+  - check: keycloak_remains_available
+    reason: per-client rollback during ADR 0491 migration

@@ -1,9 +1,9 @@
 ---
 # Purpose: Converge the GlitchTip database, runtime, and edge publication.
 # Use case: Run for production live apply of the repo-managed GlitchTip application error tracking surface.
-# Outputs: PostgreSQL role and database, GlitchTip runtime secrets, Keycloak OIDC client, NGINX edge publication, and repo-managed bootstrap artifacts.
+# Outputs: PostgreSQL role and database, GlitchTip runtime secrets, selected OIDC reconciliation, NGINX edge publication, and repo-managed bootstrap artifacts.
 # Idempotency: Partially idempotent; runtime convergence is repeatable, while bootstrap refresh keeps controller-local API and DSN artifacts aligned with the live org, team, and project state.
-# Dependencies: ADR 0281, postgres_vm, keycloak_runtime, glitchtip_postgres, glitchtip_runtime, nginx_edge_publication.
+# Dependencies: ADR 0281, ADR 0491, postgres_vm, a pre-provisioned Authentik client, glitchtip_postgres, glitchtip_runtime, nginx_edge_publication.
 #
 # Invocation: ansible-playbook playbooks/glitchtip.yml -e @playbooks/vars/glitchtip.yml -e env=production
 
@@ -37,7 +37,6 @@
   roles:
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.docker_runtime
-    - role: lv3.platform.keycloak_runtime
     - role: lv3.platform.glitchtip_runtime
 
 - import_playbook: _includes/nginx_edge_publication.yml

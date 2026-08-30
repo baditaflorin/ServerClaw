@@ -5,12 +5,12 @@
   "default_ephemeral_policy": "integration-test",
   "network_pool": {
     "bridge": "vmbr20",
-    "gateway": "10.20.10.1",
+    "gateway": "10.10.10.1",
     "cidr": 24,
-    "network": "10.20.10.0/24",
+    "network": "10.10.10.0/24",
     "ip_range": [
-      "10.20.10.130",
-      "10.20.10.199"
+      "10.10.10.130",
+      "10.10.10.199"
     ]
   },
   "profiles": [

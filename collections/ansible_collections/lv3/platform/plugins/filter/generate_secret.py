@@ -3,8 +3,15 @@
 import sys
 from pathlib import Path
 
-# Import shared utility from scripts/
-sys.path.insert(0, str(Path(__file__).parents[5] / "scripts"))
+# Import the shared utility whether Ansible loads this hard-linked plugin from
+# the repository root or through its collection path.
+plugin_path = Path(__file__).resolve()
+repo_root = next(
+    parent
+    for parent in plugin_path.parents
+    if (parent / "scripts" / "secret_masking_utility.py").is_file()
+)
+sys.path.insert(0, str(repo_root / "scripts"))
 from secret_masking_utility import generate_real_secret
 
 

@@ -25,6 +25,7 @@ ROLE_DEFAULTS_PATH = (
     / "main.yml"
 )
 PLATFORM_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform.yml"
+PLATFORM_DOMAIN_TEMPLATE = "{{ platform_domain }}"
 
 
 @dataclass(frozen=True)
@@ -65,9 +66,38 @@ def derive_edge_hostnames(role_defaults: dict, platform_vars: dict) -> list[str]
     return sorted(hostnames)
 
 
+def resolve_security_headers_override(role_defaults: dict, hostname: str) -> dict[str, str]:
+    """Resolve the role's hostname-keyed header override for one live hostname.
+
+    The role defaults intentionally retain ``{{ platform_domain }}`` so they can
+    be rendered for any deployment.  This standalone auditor reads those YAML
+    defaults directly, so it must resolve that one template variable before
+    comparing a live response.
+    """
+
+    for template_hostname, override in role_defaults["public_edge_security_headers_overrides"].items():
+        if template_hostname == hostname:
+            return dict(override)
+        if PLATFORM_DOMAIN_TEMPLATE not in template_hostname:
+            continue
+
+        prefix, suffix = template_hostname.split(PLATFORM_DOMAIN_TEMPLATE, maxsplit=1)
+        if not hostname.startswith(prefix) or (suffix and not hostname.endswith(suffix)):
+            continue
+        domain_end = len(hostname) - len(suffix) if suffix else len(hostname)
+        platform_domain = hostname[len(prefix) : domain_end]
+        if not platform_domain:
+            continue
+        return {
+            header_name: header_value.replace(PLATFORM_DOMAIN_TEMPLATE, platform_domain)
+            for header_name, header_value in override.items()
+        }
+    return {}
+
+
 def expected_headers_for_host(role_defaults: dict, hostname: str) -> dict[str, str]:
     headers = dict(role_defaults["public_edge_security_headers_default"])
-    headers.update(role_defaults["public_edge_security_headers_overrides"].get(hostname, {}))
+    headers.update(resolve_security_headers_override(role_defaults, hostname))
     return headers
 
 

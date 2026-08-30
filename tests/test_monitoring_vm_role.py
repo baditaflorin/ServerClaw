@@ -7,6 +7,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 ROLE_ROOT = REPO_ROOT / "roles" / "monitoring_vm"
 DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
 TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
+MIGRATE_SECRET_PATH = ROLE_ROOT / "tasks" / "migrate_secret.yml"
 TRACING_TASKS_PATH = ROLE_ROOT / "tasks" / "tracing.yml"
 VERIFY_PATH = ROLE_ROOT / "tasks" / "verify.yml"
 PLATFORM_DASHBOARD_TEMPLATE = ROLE_ROOT / "templates" / "lv3-platform-overview.json.j2"
@@ -46,6 +47,27 @@ def test_defaults_expose_private_prometheus_remote_write_endpoint() -> None:
         "http://{{ hostvars[groups['proxmox_hosts'][0]].platform_service_topology.grafana.private_ip }}:9090/api/v1/write"
     )
     assert "{{ monitoring_prometheus_listen_address }}" in template
+
+
+def test_monitoring_stops_only_explicit_legacy_prometheus_units() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    main_tasks = load_tasks(TASKS_PATH)
+    tracing_tasks = load_tasks(TRACING_TASKS_PATH)
+    cleanup = next(
+        task
+        for task in tracing_tasks
+        if task.get("name") == "Stop and disable explicitly approved legacy Prometheus units"
+    )
+
+    assert defaults["monitoring_prometheus_legacy_service_names"] == []
+    assert cleanup["loop"] == "{{ monitoring_prometheus_legacy_service_names }}"
+    assert cleanup["ansible.builtin.systemd_service"]["enabled"] is False
+    assert cleanup["ansible.builtin.systemd_service"]["state"] == "stopped"
+    validation = next(task for task in main_tasks if task.get("name") == "Validate monitoring VM inputs")
+    assert (
+        "monitoring_prometheus_service_name not in monitoring_prometheus_legacy_service_names"
+        in validation["ansible.builtin.assert"]["that"]
+    )
 
 
 def test_inventory_explicitly_pins_private_prometheus_bind_for_live_k6_replays() -> None:
@@ -106,6 +128,101 @@ def test_main_tasks_require_loki_minio_secret() -> None:
     )
 
 
+def test_monitoring_secrets_migrate_before_generation_without_rotation() -> None:
+    defaults = DEFAULTS_PATH.read_text()
+    main_tasks = load_tasks(TASKS_PATH)
+    migration_tasks = load_tasks(MIGRATE_SECRET_PATH)
+    main_names = {task["name"] for task in main_tasks}
+    migration_text = MIGRATE_SECRET_PATH.read_text()
+
+    assert '"/etc/{{ platform_identity.config_prefix }}/monitoring"' in defaults
+    assert "Resolve monitoring secret path migration contracts" in main_names
+    assert "Preserve monitoring credentials across the POSIX-safe directory migration" in main_names
+    assert any(task["name"].startswith("Migrate the legacy monitoring secret") for task in migration_tasks)
+    assert "remote_src: true" in migration_text
+    assert "not monitoring_canonical_secret_stat.stat.exists" in migration_text
+
+    for task_name in (
+        "Generate Grafana admin password",
+        "Generate InfluxDB admin password",
+        "Generate InfluxDB operator token seed",
+    ):
+        task = next(task for task in main_tasks if task.get("name") == task_name)
+        assert task["ansible.builtin.copy"]["force"] is False
+        assert "| secret(length=" in task["ansible.builtin.copy"]["content"]
+        assert task["no_log"] is True
+
+
+def test_initialized_influxdb_recovers_only_a_validated_cli_operator_token() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks(TASKS_PATH)
+    names = {task["name"] for task in tasks}
+    tasks_text = TASKS_PATH.read_text()
+
+    assert defaults["monitoring_influxdb_cli_configs_file"] == "/root/.influxdbv2/configs"
+    assert "Validate the existing InfluxDB operator token candidate" in names
+    assert "Read the active InfluxDB CLI token as a recovery candidate" in names
+    assert "Validate the InfluxDB CLI recovery token candidate" in names
+    assert "Require one accepted InfluxDB operator token on initialized runtimes" in names
+    assert "Restore the accepted InfluxDB CLI recovery token" in names
+    assert "failed_when: false" in tasks_text
+    assert "tomllib.loads" in tasks_text
+    assert "monitoring_influxdb_operator_token_recovery_check.rc | default(1) == 0" in tasks_text
+
+    recovery_copy = next(
+        task for task in tasks if task.get("name") == "Restore the accepted InfluxDB CLI recovery token"
+    )
+    assert recovery_copy["no_log"] is True
+    assert recovery_copy["ansible.builtin.copy"]["mode"] == "0600"
+
+
+def test_influxdb_org_rename_requires_an_explicit_unambiguous_legacy_name() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    tasks = load_tasks(TASKS_PATH)
+    names = {task["name"] for task in tasks}
+
+    assert defaults["monitoring_influxdb_legacy_org_name"] == ""
+    assert "Read the InfluxDB organization catalog" in names
+    assert "Classify desired and explicitly approved legacy InfluxDB organizations" in names
+    assert "Require one unambiguous InfluxDB organization authority" in names
+    assert "Rename the explicitly approved legacy InfluxDB organization" in names
+
+    rename = next(
+        task for task in tasks if task.get("name") == "Rename the explicitly approved legacy InfluxDB organization"
+    )
+    argv = rename["ansible.builtin.command"]["argv"]
+    assert "--id" in argv
+    assert "{{ monitoring_influxdb_legacy_org_records[0].id }}" in argv
+    assert "--name" in argv
+    assert "{{ monitoring_influxdb_org }}" in argv
+    assert rename["when"] == "monitoring_influxdb_desired_org_records | length == 0"
+    assert rename["no_log"] is True
+
+
+def test_influxdb_post_rename_commands_bind_to_org_id_and_align_cli_config() -> None:
+    tasks = load_tasks(TASKS_PATH)
+    by_name = {task["name"]: task for task in tasks}
+
+    assert "Read the root InfluxDB CLI default organization" in by_name
+    assert "Align the root InfluxDB CLI default organization" in by_name
+    align = by_name["Align the root InfluxDB CLI default organization"]
+    assert "--configs-path" in align["ansible.builtin.command"]["argv"]
+    assert "{{ monitoring_influxdb_cli_configs_file }}" in align["ansible.builtin.command"]["argv"]
+    assert align["no_log"] is True
+
+    id_bound_tasks = (
+        "Read InfluxDB bucket metadata",
+        "Read existing InfluxDB auth records",
+        "Create proxmox writer auth",
+        "Create guest writer auth",
+        "Create Grafana reader auth",
+    )
+    for name in id_bound_tasks:
+        argv = by_name[name]["ansible.builtin.command"]["argv"]
+        assert "--org-id" in argv
+        assert "{{ monitoring_influxdb_org_record.id }}" in argv
+
+
 def test_capacity_dashboard_is_copied_imported_and_verified() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     main_tasks = load_tasks(TASKS_PATH)
@@ -120,7 +237,9 @@ def test_capacity_dashboard_is_copied_imported_and_verified() -> None:
     assert defaults["monitoring_grafana_capacity_dashboard_source_file"] == (
         "{{ monitoring_repo_root }}/config/grafana/dashboards/capacity-overview.json"
     )
-    assert defaults["monitoring_grafana_capacity_dashboard_uid"] == "lv3-capacity-overview"
+    assert defaults["monitoring_grafana_capacity_dashboard_uid"] == (
+        "{{ platform_identity.config_prefix }}-capacity-overview"
+    )
     assert copy_task["ansible.builtin.copy"]["src"] == "{{ monitoring_grafana_capacity_dashboard_source_file }}"
     assert import_task["ansible.builtin.uri"]["body"]["folderUid"] == "{{ monitoring_grafana_folder_uid }}"
     assert verify_task["ansible.builtin.uri"]["url"] == (
@@ -144,7 +263,9 @@ def test_log_canary_dashboard_is_copied_imported_and_verified() -> None:
     assert defaults["monitoring_grafana_log_canary_dashboard_source_file"] == (
         "{{ monitoring_repo_root }}/config/grafana/dashboards/log-canary-overview.json"
     )
-    assert defaults["monitoring_grafana_log_canary_dashboard_uid"] == "lv3-log-canary-overview"
+    assert defaults["monitoring_grafana_log_canary_dashboard_uid"] == (
+        "{{ platform_identity.config_prefix }}-log-canary-overview"
+    )
     assert copy_task["ansible.builtin.copy"]["src"] == "{{ monitoring_grafana_log_canary_dashboard_source_file }}"
     assert import_task["ansible.builtin.uri"]["body"]["folderUid"] == "{{ monitoring_grafana_folder_uid }}"
     assert verify_task["ansible.builtin.uri"]["url"] == (
@@ -209,7 +330,7 @@ def test_tracing_tasks_render_and_wait_for_loki() -> None:
     storage_task = next(task for task in tasks if task.get("name") == "Ensure Loki storage directories exist")
     render_task = next(task for task in tasks if task.get("name") == "Render Loki configuration")
     start_task = next(task for task in tasks if task.get("name") == "Enable and start Loki")
-    wait_task = next(task for task in tasks if task.get("name") == "Wait for Loki readiness")
+    wait_task = next(task for task in tasks if task.get("name") == "Wait for Loki HTTP server to respond")
 
     assert lookup_group_task["ansible.builtin.command"]["argv"] == ["id", "-gn", "loki"]
     assert set_group_task["ansible.builtin.set_fact"]["monitoring_loki_group_name"] == (
@@ -219,17 +340,19 @@ def test_tracing_tasks_render_and_wait_for_loki() -> None:
     assert render_task["ansible.builtin.template"]["src"] == "loki-config.yml.j2"
     assert render_task["ansible.builtin.template"]["group"] == "{{ monitoring_loki_group_name }}"
     assert start_task["ansible.builtin.systemd"]["name"] == "loki"
-    assert wait_task["ansible.builtin.uri"]["url"] == "{{ monitoring_loki_http_url }}/ready"
+    assert wait_task["ansible.builtin.uri"]["url"] == "{{ monitoring_loki_http_url }}/metrics"
 
 
 def test_loki_config_switches_to_s3_storage_on_cutover() -> None:
     template = LOKI_CONFIG_TEMPLATE.read_text()
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
 
     assert "object_store: s3" in template
     assert "bucketnames: {{ monitoring_loki_minio_bucket_name }}" in template
     assert "endpoint: {{ monitoring_loki_minio_endpoint }}" in template
     assert "secret_access_key: {{ monitoring_loki_minio_secret_key }}" in template
-    assert "delete_request_store: s3" in template
+    assert "delete_request_store: {{ monitoring_loki_delete_request_store }}" in template
+    assert defaults["monitoring_loki_delete_request_store"] == "s3"
 
 
 def test_prometheus_template_scrapes_https_tls_blackbox_targets() -> None:

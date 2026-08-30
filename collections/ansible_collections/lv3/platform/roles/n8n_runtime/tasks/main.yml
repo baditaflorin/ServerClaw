@@ -77,10 +77,10 @@
   vars:
     common_manage_service_secrets_generate:
       - path: "{{ n8n_owner_password_remote_file }}"
-        command: "{{ 'n8n' | secret(length=32) }}"
+        value: "{{ 'n8n' | secret(length=32) }}"
         label: "n8n-owner-password"
       - path: "{{ n8n_encryption_key_remote_file }}"
-        command: "{{ 'n8n' | secret(length=32) }}"
+        value: "{{ 'n8n' | secret(length=32) }}"
         label: "n8n-encryption-key"
     common_manage_service_secrets_read:
       - "{{ n8n_owner_password_remote_file }}"

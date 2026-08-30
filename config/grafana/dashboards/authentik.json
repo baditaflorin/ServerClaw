@@ -1,0 +1,36 @@
+{
+  "title": "Authentik Overview",
+  "uid": "authentik-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "timezone": "browser",
+  "tags": ["identity", "authentik"],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Authentik Health",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"authentik\"}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Authentik Request Rate",
+      "description": "Metric name is a django-prometheus default (authentik exposes metrics on a separate port, 9300, per its own docs). Verify the exact exported metric name against the live :9300/metrics output once deployed, before trusting this panel.",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "sum(rate(django_http_requests_total_by_view_transport_method_total{service=\"authentik\"}[5m]))",
+          "refId": "B"
+        }
+      ]
+    }
+  ]
+}

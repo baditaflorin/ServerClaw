@@ -49,6 +49,7 @@
       - monitoring_prometheus_config_file | length > 0
       - monitoring_prometheus_rules_dir | length > 0
       - monitoring_prometheus_file_sd_dir | length > 0
+      - monitoring_prometheus_service_name not in monitoring_prometheus_legacy_service_names
       - monitoring_blackbox_exporter_config_file | length > 0
       - monitoring_blackbox_exporter_env_file | length > 0
       - monitoring_grafana_slo_dashboard_file | length > 0
@@ -131,6 +132,31 @@
     owner: root
     group: root
     mode: "0700"
+
+- name: Resolve monitoring secret path migration contracts
+  ansible.builtin.set_fact:
+    monitoring_secret_migration_contracts: >-
+      {%- set contracts = [] -%}
+      {%- for canonical_file in monitoring_secret_migration_files -%}
+      {%- set legacy_files = [] -%}
+      {%- for legacy_dir in monitoring_legacy_stack_dirs -%}
+      {%- set _ = legacy_files.append(legacy_dir ~ '/' ~ (canonical_file | basename)) -%}
+      {%- endfor -%}
+      {%- set _ = contracts.append({
+        'canonical_file': canonical_file,
+        'legacy_files': legacy_files
+      }) -%}
+      {%- endfor -%}
+      {{ contracts }}
+  no_log: true
+
+- name: Preserve monitoring credentials across the POSIX-safe directory migration
+  ansible.builtin.include_tasks: migrate_secret.yml
+  loop: "{{ monitoring_secret_migration_contracts }}"
+  loop_control:
+    loop_var: monitoring_secret_contract
+    label: "{{ monitoring_secret_contract.canonical_file | basename }}"
+  no_log: true
 
 - name: Check monitoring stack prerequisites on the control machine
   ansible.builtin.include_role:
@@ -254,32 +280,24 @@
   notify: Restart Prometheus
 
 - name: Generate Grafana admin password
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ monitoring_grafana_admin_password_file }}" ]; then
-      umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ monitoring_grafana_admin_password_file }}"
-                # Replace with: {{ "unknown" | secret }}
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: monitoring_grafana_password_generation
-  changed_when: "'changed' in monitoring_grafana_password_generation.stdout"
+  ansible.builtin.copy:
+    dest: "{{ monitoring_grafana_admin_password_file }}"
+    content: "{{ 'monitoring-grafana-admin' | secret(length=24) }}\n"
+    force: false
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
 
 - name: Generate InfluxDB admin password
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ monitoring_influxdb_admin_password_file }}" ]; then
-      umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -base64 24 > "{{ monitoring_influxdb_admin_password_file }}"
-                # Replace with: {{ "unknown" | secret }}
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: monitoring_influx_admin_password_generation
-  changed_when: "'changed' in monitoring_influx_admin_password_generation.stdout"
+  ansible.builtin.copy:
+    dest: "{{ monitoring_influxdb_admin_password_file }}"
+    content: "{{ 'monitoring-influxdb-admin' | secret(length=24) }}\n"
+    force: false
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
 
 - name: Read Grafana admin password
   ansible.builtin.slurp:
@@ -391,30 +409,115 @@
     path: "{{ monitoring_influxdb_operator_token_file }}"
   register: monitoring_influxdb_operator_token_stat
 
-- name: Fail if InfluxDB is initialized without the local operator token
-  ansible.builtin.fail:
-    msg: >-
-      InfluxDB is already initialized on {{ inventory_hostname }}, but
-      {{ monitoring_influxdb_operator_token_file }} is missing. Recover or recreate
-      the operator token on the monitoring VM before rerunning this playbook.
+- name: Read the existing InfluxDB operator token candidate
+  ansible.builtin.slurp:
+    src: "{{ monitoring_influxdb_operator_token_file }}"
+  register: monitoring_influxdb_operator_token_existing_raw
+  when: monitoring_influxdb_operator_token_stat.stat.exists
+  no_log: true
+
+- name: Record the existing InfluxDB operator token candidate
+  ansible.builtin.set_fact:
+    monitoring_influxdb_operator_token_existing: >-
+      {{
+        (monitoring_influxdb_operator_token_existing_raw.content | b64decode | trim)
+        if monitoring_influxdb_operator_token_stat.stat.exists
+        else ''
+      }}
+  no_log: true
+
+- name: Validate the existing InfluxDB operator token candidate
+  ansible.builtin.command:
+    argv:
+      - influx
+      - org
+      - list
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --json
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token_existing }}"
+  register: monitoring_influxdb_operator_token_existing_check
+  changed_when: false
+  failed_when: false
   when:
     - not monitoring_influxdb_setup_status.json.allowed
-    - not monitoring_influxdb_operator_token_stat.stat.exists
+    - monitoring_influxdb_operator_token_existing | length > 0
+  no_log: true
+
+- name: Read the active InfluxDB CLI token as a recovery candidate
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - >-
+        import pathlib, sys, tomllib;
+        data = tomllib.loads(pathlib.Path(sys.argv[1]).read_text());
+        print(str(data.get('default', {}).get('token', '')).strip())
+      - "{{ monitoring_influxdb_cli_configs_file }}"
+  register: monitoring_influxdb_operator_token_recovery_raw
+  changed_when: false
+  failed_when: false
+  when:
+    - not monitoring_influxdb_setup_status.json.allowed
+    - monitoring_influxdb_operator_token_existing_check.rc | default(1) != 0
+  no_log: true
+
+- name: Validate the InfluxDB CLI recovery token candidate
+  ansible.builtin.command:
+    argv:
+      - influx
+      - org
+      - list
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --json
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token_recovery_raw.stdout | default('') | trim }}"
+  register: monitoring_influxdb_operator_token_recovery_check
+  changed_when: false
+  failed_when: false
+  when:
+    - monitoring_influxdb_operator_token_recovery_raw.rc | default(1) == 0
+    - monitoring_influxdb_operator_token_recovery_raw.stdout | default('') | trim | length > 0
+  no_log: true
+
+- name: Require one accepted InfluxDB operator token on initialized runtimes
+  ansible.builtin.assert:
+    that:
+      - >-
+        monitoring_influxdb_operator_token_existing_check.rc | default(1) == 0
+        or monitoring_influxdb_operator_token_recovery_check.rc | default(1) == 0
+    fail_msg: >-
+      InfluxDB is initialized, but neither the managed operator-token file nor
+      the active root CLI configuration contains an accepted token. Follow the
+      offline InfluxDB operator-token recovery procedure before replaying this role.
+  when: not monitoring_influxdb_setup_status.json.allowed
+  no_log: true
+
+- name: Restore the accepted InfluxDB CLI recovery token
+  ansible.builtin.copy:
+    dest: "{{ monitoring_influxdb_operator_token_file }}"
+    content: "{{ monitoring_influxdb_operator_token_recovery_raw.stdout | trim }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - not monitoring_influxdb_setup_status.json.allowed
+    - monitoring_influxdb_operator_token_existing_check.rc | default(1) != 0
+    - monitoring_influxdb_operator_token_recovery_check.rc | default(1) == 0
+  no_log: true
 
 - name: Generate InfluxDB operator token seed
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ monitoring_influxdb_operator_token_file }}" ]; then
-      umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ monitoring_influxdb_operator_token_file }}"
-                # Replace with: {{ "unknown" | secret }}
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: monitoring_influx_operator_token_generation
-  changed_when: "'changed' in monitoring_influx_operator_token_generation.stdout"
-  when: monitoring_influxdb_setup_status.json.allowed or monitoring_influxdb_operator_token_stat.stat.exists
+  ansible.builtin.copy:
+    dest: "{{ monitoring_influxdb_operator_token_file }}"
+    content: "{{ 'monitoring-influxdb-operator' | secret(length=32) }}\n"
+    force: false
+    owner: root
+    group: root
+    mode: "0600"
+  when: monitoring_influxdb_setup_status.json.allowed
+  no_log: true
 
 - name: Read InfluxDB operator token
   ansible.builtin.slurp:
@@ -451,6 +554,75 @@
   changed_when: true
   no_log: true
 
+- name: Read the InfluxDB organization catalog
+  ansible.builtin.command:
+    argv:
+      - influx
+      - org
+      - list
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --json
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  register: monitoring_influxdb_org_catalog
+  changed_when: false
+  no_log: true
+
+- name: Classify desired and explicitly approved legacy InfluxDB organizations
+  ansible.builtin.set_fact:
+    monitoring_influxdb_desired_org_records: >-
+      {{
+        monitoring_influxdb_org_catalog.stdout
+        | from_json
+        | selectattr('name', 'equalto', monitoring_influxdb_org)
+        | list
+      }}
+    monitoring_influxdb_legacy_org_records: >-
+      {{
+        (
+          monitoring_influxdb_org_catalog.stdout
+          | from_json
+          | selectattr('name', 'equalto', monitoring_influxdb_legacy_org_name)
+          | list
+        )
+        if monitoring_influxdb_legacy_org_name | length > 0
+        else []
+      }}
+  no_log: true
+
+- name: Require one unambiguous InfluxDB organization authority
+  ansible.builtin.assert:
+    that:
+      - monitoring_influxdb_desired_org_records | length <= 1
+      - >-
+        monitoring_influxdb_desired_org_records | length == 1
+        or monitoring_influxdb_legacy_org_records | length == 1
+    fail_msg: >-
+      The desired InfluxDB organization is absent or ambiguous, and no single
+      explicitly approved legacy organization can be migrated safely. Set
+      monitoring_influxdb_legacy_org_name in the deployment-local identity
+      overlay only after verifying the live organization catalog.
+  no_log: true
+
+- name: Rename the explicitly approved legacy InfluxDB organization
+  ansible.builtin.command:
+    argv:
+      - influx
+      - org
+      - update
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --id
+      - "{{ monitoring_influxdb_legacy_org_records[0].id }}"
+      - --name
+      - "{{ monitoring_influxdb_org }}"
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  when: monitoring_influxdb_desired_org_records | length == 0
+  changed_when: true
+  no_log: true
+
 - name: Read InfluxDB organization metadata
   ansible.builtin.command:
     argv:
@@ -473,6 +645,41 @@
     monitoring_influxdb_org_record: "{{ (monitoring_influxdb_orgs.stdout | from_json | first) }}"
   no_log: true
 
+- name: Read the root InfluxDB CLI default organization
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - >-
+        import pathlib, sys, tomllib;
+        data = tomllib.loads(pathlib.Path(sys.argv[1]).read_text());
+        section = data.get('default');
+        print(str(section.get('org', '')).strip())
+        if isinstance(section, dict) else sys.exit(2)
+      - "{{ monitoring_influxdb_cli_configs_file }}"
+  register: monitoring_influxdb_cli_org_raw
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Align the root InfluxDB CLI default organization
+  ansible.builtin.command:
+    argv:
+      - influx
+      - config
+      - set
+      - --configs-path
+      - "{{ monitoring_influxdb_cli_configs_file }}"
+      - --config-name
+      - default
+      - --org
+      - "{{ monitoring_influxdb_org }}"
+  when:
+    - monitoring_influxdb_cli_org_raw.rc == 0
+    - monitoring_influxdb_cli_org_raw.stdout | trim != monitoring_influxdb_org
+  changed_when: true
+  no_log: true
+
 - name: Read InfluxDB bucket metadata
   ansible.builtin.command:
     argv:
@@ -481,6 +688,8 @@
       - list
       - --host
       - "{{ monitoring_influxdb_url }}"
+      - --org-id
+      - "{{ monitoring_influxdb_org_record.id }}"
       - --name
       - "{{ monitoring_influxdb_bucket }}"
       - --json
@@ -503,6 +712,8 @@
       - list
       - --host
       - "{{ monitoring_influxdb_url }}"
+      - --org-id
+      - "{{ monitoring_influxdb_org_record.id }}"
       - --json
   environment:
     INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
@@ -572,8 +783,8 @@
       - create
       - --host
       - "{{ monitoring_influxdb_url }}"
-      - --org
-      - "{{ monitoring_influxdb_org }}"
+      - --org-id
+      - "{{ monitoring_influxdb_org_record.id }}"
       - --description
       - "{{ monitoring_influxdb_proxmox_writer_description }}"
       - --write-bucket
@@ -634,8 +845,8 @@
       - create
       - --host
       - "{{ monitoring_influxdb_url }}"
-      - --org
-      - "{{ monitoring_influxdb_org }}"
+      - --org-id
+      - "{{ monitoring_influxdb_org_record.id }}"
       - --description
       - "{{ monitoring_influxdb_guest_writer_description }}"
       - --write-bucket
@@ -686,8 +897,8 @@
       - create
       - --host
       - "{{ monitoring_influxdb_url }}"
-      - --org
-      - "{{ monitoring_influxdb_org }}"
+      - --org-id
+      - "{{ monitoring_influxdb_org_record.id }}"
       - --description
       - "{{ monitoring_influxdb_grafana_reader_description }}"
       - --read-bucket

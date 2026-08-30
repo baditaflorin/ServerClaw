@@ -37,7 +37,7 @@ from generate_inventory import (
 
 MINIMAL_HOST_VARS: dict = {
     "management_tailscale_ipv4": "100.64.0.1",
-    "proxmox_staging_ipv4": "10.20.10.1",
+    "proxmox_staging_ipv4": "10.10.10.1",
     "proxmox_guests": [
         {
             "vmid": 110,
@@ -98,7 +98,7 @@ MINIMAL_HOST_VARS: dict = {
 
 def test_net_prefix_strips_last_octet() -> None:
     assert _net_prefix("10.10.10.1") == "10.10.10."
-    assert _net_prefix("10.20.10.1") == "10.20.10."
+    assert _net_prefix("10.10.10.1") == "10.10.10."
     assert _net_prefix("192.168.1.254") == "192.168.1."
 
 
@@ -157,7 +157,7 @@ def test_staging_hosts_created_for_has_staging_guests() -> None:
 def test_staging_host_ip_uses_staging_prefix() -> None:
     inv = build_inventory(MINIMAL_HOST_VARS)
     lv3 = inv["all"]["children"]["lv3_guests"]["hosts"]
-    staging_pfx = "10.20.10."
+    staging_pfx = "10.10.10."
     for g in MINIMAL_HOST_VARS["proxmox_guests"]:
         if not g.get("has_staging"):
             continue
@@ -443,15 +443,32 @@ def test_load_topology_host_vars_replaces_keys_from_overlay(tmp_path: Path) -> N
     (overlay_dir / "proxmox-host.yml").write_text(
         yaml.safe_dump(
             {
-                "proxmox_guests": [{"name": "fork", "ipv4": "10.20.10.10"}],
+                "proxmox_guests": [{"name": "fork", "ipv4": "10.10.10.10"}],
                 "also_overridden": "after",
             }
         )
     )
     merged = load_topology_host_vars(repo_root=tmp_path)
-    assert merged["proxmox_guests"] == [{"name": "fork", "ipv4": "10.20.10.10"}]
+    assert merged["proxmox_guests"] == [{"name": "fork", "ipv4": "10.10.10.10"}]
     assert merged["preserve_me"] == "kept"  # base key preserved when overlay omits it
     assert merged["also_overridden"] == "after"  # overlay wins
+
+
+def test_load_topology_host_vars_prefers_explicit_selector(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _reset_platform_module()
+    from platform.repo import load_topology_host_vars
+
+    base_dir = tmp_path / "inventory" / "host_vars"
+    base_dir.mkdir(parents=True)
+    (base_dir / "proxmox-host.yml").write_text(yaml.safe_dump({"selected": "committed"}))
+    shared_dir = tmp_path / ".local" / "host_vars"
+    shared_dir.mkdir(parents=True)
+    (shared_dir / "proxmox-host.yml").write_text(yaml.safe_dump({"selected": "shared"}))
+    explicit = tmp_path / "selected-topology.yml"
+    explicit.write_text(yaml.safe_dump({"selected": "explicit"}))
+    monkeypatch.setenv("PLATFORM_TOPOLOGY_OVERLAY", str(explicit))
+
+    assert load_topology_host_vars(repo_root=tmp_path)["selected"] == "explicit"
 
 
 def test_load_topology_host_vars_rejects_non_mapping_overlay(tmp_path: Path) -> None:

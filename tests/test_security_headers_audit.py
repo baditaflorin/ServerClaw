@@ -52,6 +52,23 @@ def test_expected_headers_for_host_merges_override_over_default() -> None:
     }
 
 
+def test_expected_headers_for_host_resolves_platform_domain_template() -> None:
+    role_defaults = {
+        "public_edge_security_headers_default": {
+            "content_security_policy": "default-src 'self'; script-src 'self'",
+        },
+        "public_edge_security_headers_overrides": {
+            "id.{{ platform_domain }}": {
+                "content_security_policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' wss://id.{{ platform_domain }}",
+            }
+        },
+    }
+
+    assert audit.expected_headers_for_host(role_defaults, "id.example.com") == {
+        "content_security_policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' wss://id.example.com",
+    }
+
+
 def test_audit_host_reports_missing_and_mismatched_headers(monkeypatch) -> None:
     role_defaults = {
         "public_edge_security_headers_default": {

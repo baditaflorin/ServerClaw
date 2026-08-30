@@ -1,0 +1,40 @@
+id: ws-0489-neko-vhost-edge-cert-drift
+adr: "0380"
+title: Neko edge vhost must use the shared edge certificate lineage, not a per-host one
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: claude
+branch: claude/fix-neko-vhost-cert-drift-2026-08-29
+worktree_path: .worktrees/fix-neko-vhost-cert-drift
+doc: docs/adr/0380-neko-for-operator-remote-browser-access.md
+depends_on:
+  - adr-0380-neko-remote-desktop
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2
+  - workstreams/active/ws-0489-neko-vhost-edge-cert-drift.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0489_neko_vhost_template
+      paths:
+        - collections/ansible_collections/lv3/platform/playbooks/templates/nginx-site-neko.conf.j2
+      mode: exclusive
+    - id: ws_0489_workstream_shard
+      paths:
+        - workstreams/active/ws-0489-neko-vhost-edge-cert-drift.yaml
+      mode: exclusive
+context: |
+  The generated browser.<domain> vhost pointed ssl_certificate at a per-host
+  Let's Encrypt lineage (/etc/letsencrypt/live/browser.<domain>/) that certbot
+  never issues. Every other vhost on the edge uses the shared lineage that
+  nginx_edge_publication manages (public_edge_cert_name =
+  "<config_prefix>-edge"). The live vhost had been hand-corrected to the shared
+  lineage; the template would have reverted it on the next converge.
+tasks:
+  - id: t1
+    title: Point nginx-site-neko.conf.j2 at the shared edge certificate lineage
+    status: completed
+  - id: t2
+    title: Verify the rendered vhost matches the corrected live file byte-for-byte
+    status: completed

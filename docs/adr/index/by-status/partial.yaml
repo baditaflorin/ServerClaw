@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-26'
+generated: '2026-08-29'
 facet: status
 implementation_status: Partial
 slug: partial
-total_adrs: 4
+total_adrs: 5
 adrs:
   - adr: 0285
     title: Whisper ASR As The CPU Speech-To-Text Service
@@ -89,3 +89,20 @@ adrs:
     summary: Deploy a platformservicewatchdog role to every VM that runs application
     filename: 0421-platform-wide-service-watchdog.md
     path: docs/adr/0421-platform-wide-service-watchdog.md
+  - adr: 0491
+    title: Authentik For Operator And Agent SSO
+    status: Accepted
+    implementation_status: Partial
+    currently_describes: mixed_state
+    date: '2026-08-27'
+    concern: identity
+    keywords:
+      - authentik
+      - operator
+      - agent
+      - sso
+    summary: We will replace Keycloak with Authentik as the shared SSO and identity-broker layer for internal operator-facing
+      and approved agent-facing applications, followi
+    filename: 0491-authentik-for-operator-and-agent-sso.md
+    path: docs/adr/0491-authentik-for-operator-and-agent-sso.md
+    implemented_on: '2026-08-30'

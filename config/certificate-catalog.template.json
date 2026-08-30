@@ -191,7 +191,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -215,7 +215,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -239,7 +239,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -263,7 +263,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -287,7 +287,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -312,7 +312,7 @@
         "notes": "Renewed by Certbot on the shared public edge VM."
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -336,7 +336,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -358,7 +358,7 @@
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
         "host": "nginx",
-        "notes": "Neko uses a dedicated NGINX server block with its own certificate, separate from the shared lv3-edge bundle."
+        "notes": "Neko uses a dedicated NGINX server block with its own certificate, separate from the shared {{ platform_config_prefix }}-edge bundle."
       },
       "material": {
         "bundle_path": "/etc/letsencrypt/live/browser.example.com/fullchain.pem"
@@ -386,7 +386,7 @@
         "notes": "Renewed by Certbot on the shared public edge VM."
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -410,7 +410,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -434,7 +434,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -458,7 +458,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -482,7 +482,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -506,7 +506,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -530,7 +530,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -554,7 +554,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -578,7 +578,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -602,7 +602,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -626,7 +626,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -650,7 +650,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -674,7 +674,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -698,7 +698,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -722,7 +722,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -746,7 +746,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -770,7 +770,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -794,7 +794,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -818,7 +818,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -842,7 +842,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -866,7 +866,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -890,7 +890,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -914,7 +914,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -938,7 +938,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -962,7 +962,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -986,7 +986,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1010,7 +1010,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1034,7 +1034,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1058,7 +1058,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1082,7 +1082,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1106,7 +1106,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1130,7 +1130,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1154,7 +1154,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1182,6 +1182,30 @@
       }
     },
     {
+      "id": "authentik-edge",
+      "service_id": "authentik",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for id.example.com.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "id.example.com",
+        "port": 443,
+        "server_name": "id.example.com"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "keycloak-edge",
       "service_id": "keycloak",
       "status": "active",
@@ -1202,7 +1226,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1226,7 +1250,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1250,7 +1274,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1274,7 +1298,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     },
     {
@@ -1298,7 +1322,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/fullchain.pem"
       }
     }
   ]

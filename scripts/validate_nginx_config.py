@@ -35,7 +35,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import yaml
-from identity_yaml import load_yaml_with_identity
+from identity_yaml import load_tracked_generation_identity_vars, load_yaml_with_identity
 from validation_toolkit import require_int, require_list, require_mapping
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -45,7 +45,10 @@ NGINX_UPSTREAMS_YAML = REPO_ROOT / "config" / "generated" / "nginx-upstreams.yam
 
 
 def _load_registry() -> dict:
-    data = load_yaml_with_identity(REGISTRY_PATH)
+    data = load_yaml_with_identity(
+        REGISTRY_PATH,
+        variables=load_tracked_generation_identity_vars() or None,
+    )
     reg = require_mapping(data, str(REGISTRY_PATH))
     return require_mapping(reg.get("platform_service_registry", {}), "platform_service_registry")
 
@@ -104,7 +107,7 @@ def validate(registry: dict, upstreams: list[dict], subdomain_catalog: dict[str,
         generated_by_service[service_name] = entry
 
         # Collect all FQDNs from this entry
-        all_fqdns = [entry.get("fqdn", "")] + entry.get("extra_fqdns", [])
+        all_fqdns = [entry.get("fqdn", ""), *entry.get("extra_fqdns", [])]
         for fqdn in all_fqdns:
             if not fqdn:
                 continue
@@ -171,13 +174,12 @@ def validate(registry: dict, upstreams: list[dict], subdomain_catalog: dict[str,
     # --- Check 5: path_prefix format ---
     for service_name, expected in expected_upstreams.items():
         path_prefix = expected.get("path_prefix", "/")
-        if path_prefix is not None:
-            if not isinstance(path_prefix, str) or not path_prefix.startswith("/"):
-                issues.append(f"ERROR: '{service_name}'.proxy.path_prefix must start with / (got: {path_prefix!r})")
+        if path_prefix is not None and (not isinstance(path_prefix, str) or not path_prefix.startswith("/")):
+            issues.append(f"ERROR: '{service_name}'.proxy.path_prefix must start with / (got: {path_prefix!r})")
 
     # --- Check 6: Subdomain catalog coverage ---
     for service_name, generated in generated_by_service.items():
-        all_fqdns = [generated.get("fqdn", "")] + generated.get("extra_fqdns", [])
+        all_fqdns = [generated.get("fqdn", ""), *generated.get("extra_fqdns", [])]
         for fqdn in all_fqdns:
             if not fqdn:
                 continue
