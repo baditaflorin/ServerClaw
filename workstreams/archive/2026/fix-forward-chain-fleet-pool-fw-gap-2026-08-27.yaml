@@ -1,0 +1,55 @@
+id: fix-forward-chain-fleet-pool-fw-gap-2026-08-27
+title: Fix apps.example.org root cause -- fleet-pool-fw migration missed forward chains
+status: merged
+ready_to_merge: true
+live_applied: true
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: fix-forward-chain-fleet-pool-fw-gap-2026-08-27
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: fix-forward-chain-fleet-pool-fw-gap-2026-08-27-doc
+      paths:
+        - docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+        - workstreams/active/fix-forward-chain-fleet-pool-fw-gap-2026-08-27.yaml
+        - workstreams/archive/2026/regenerate-platform-vars-10-20-addressing.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Root-caused apps.example.org's persistent failure (survived a container
+  restart, Docker daemon restart, full VM reboot, and bridge FDB cleanup)
+  via nft monitor trace: coolify-apps' guest-level `inet filter forward`
+  chain has its own per-source-IP allow-list, separate from the `input`
+  chain, and the 2026-08-26 fleet-pool-fw auto-migration only updated
+  `input` to 10.10.10.x, never `forward`. Docker-published-port traffic
+  (which routes through `forward`, not `input`) from nginx-edge kept
+  hitting the chain's default-drop policy. Host-bound services like mail
+  (input chain, no source restriction) were unaffected, which is why the
+  earlier pve-firewall restart fixed mail but not this.
+
+  Fixed live (nft add rule, verified) and persisted to
+  /etc/nftables.conf on both affected guests (coolify-apps VMID 171,
+  runtime-control VMID 192 -- the only two with a per-source-IP forward
+  policy; confirmed via nft trace and rule audit that the other 15 guests'
+  forward chains only match broad subnets and were never exposed to this
+  gap). Did not reload from the persisted files live (they start with
+  `flush ruleset`, which would wipe Docker's own dynamically-generated
+  chains) -- takes effect naturally on next boot.
+
+  firewall-pools.json (the source the fleet-pool-fw block is generated
+  from) is still not located anywhere -- same open mystery as
+  project_fleet_firewall_drift_incident from earlier this session.
+
+objectives:
+  - Fix apps.example.org by finding and correcting its true root cause
+  - Audit and fix the same gap on any other affected guest
+
+completion_metrics:
+  - apps.example.org returns a normal HTTP response externally
+  - runtime-control's forward chain has all 17 guest addresses at 10.10.10.x
+  - Fix persisted to /etc/nftables.conf on both guests for reboot durability
+
+related_adrs: []

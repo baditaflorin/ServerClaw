@@ -47,8 +47,8 @@
 - name: Assert the Plausible bootstrap contract and tracker are healthy
   ansible.builtin.assert:
     that:
-      - plausible_verify_health.status == 200
-      - plausible_verify_readiness.status == 200
+      - common_verify_health_response.status == 200
+      - common_verify_extra_response.status == 200
       - plausible_verify_tracker.status == 200
       - (plausible_verify_bootstrap.stdout | trim | from_json).user_exists
       - (plausible_verify_bootstrap.stdout | trim | from_json).password_matches

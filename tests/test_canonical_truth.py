@@ -178,6 +178,32 @@ def test_infer_release_bump_uses_highest_pending_bump(canonical_repo: Path) -> N
     assert canonical_truth.infer_release_bump(workstreams) == "patch"
 
 
+def test_load_ignores_noncanonical_workstream_without_adr(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        canonical_truth,
+        "load_registry_workstreams",
+        lambda **_kwargs: [
+            {"id": "maintenance-note", "status": "ready"},
+            {
+                "id": "adr-0174-canonical-truth-assembly",
+                "adr": "0174",
+                "title": "Canonical truth",
+                "status": "merged",
+                "canonical_truth": {
+                    "changelog_entry": "record canonical truth",
+                    "release_bump": "patch",
+                    "included_in_repo_version": None,
+                    "latest_receipts": {},
+                },
+            },
+        ],
+    )
+
+    workstreams = canonical_truth.load_workstream_canonical_truth()
+
+    assert [item.workstream_id for item in workstreams] == ["adr-0174-canonical-truth-assembly"]
+
+
 def test_assemble_stack_updates_repo_version_and_latest_receipts(canonical_repo: Path) -> None:
     write(canonical_repo / "VERSION", "0.10.1\n")
 

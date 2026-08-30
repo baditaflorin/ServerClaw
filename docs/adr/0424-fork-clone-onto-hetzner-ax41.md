@@ -158,7 +158,7 @@ hetzner_ipv4_route_network: 203.0.113.192  # /26 network base
 management_interface: enp41s0
 host_public_hostname: debian-base-template
 proxmox_node_name: debian-base-template
-platform_guest_network_cidr: 10.20.10.0/24   # different from prod's 10.10.10.0/24
+platform_guest_network_cidr: 10.10.10.0/24   # different from prod's 10.10.10.0/24
 platform_tailscale_tailnet_name: 0fork-clone  # new, isolated from prod tailnet
 ```
 

@@ -1,0 +1,40 @@
+id: postmortem-0mcp-fleet-network-outage-2026-08-26
+title: Postmortem — example.org fleet-wide public HTTPS outage (nginx-edge stale addressing)
+status: merged
+ready_to_merge: true
+live_applied: true
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: postmortem-0mcp-fleet-network-outage-2026-08-26
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: postmortem-0mcp-fleet-network-outage-2026-08-26-doc
+      paths:
+        - docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+        - workstreams/active/postmortem-0mcp-fleet-network-outage-2026-08-26.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Records the live-apply fix for a ~4+ hour fleet-wide public HTTPS outage
+  on example.org. Root cause: nginx-edge (VMID 110) was still running a stale,
+  pre-migration network identity (10.10.10.10/0mpc.com, live netplan +
+  Proxmox cloud-init config + bridge assignment) while the host's own NAT
+  rules and the IaC's declared inventory both expected the current
+  10.10.10.10/example.org addressing. Fixed live via qm guest exec + netplan
+  apply + bridge reassignment + cloud-init config update (for reboot
+  durability). No code changes to this repo were needed for the fix itself
+  -- the IaC already declared the correct target state; the guest VM had
+  simply drifted from it. This workstream exists only to land the
+  postmortem doc.
+
+objectives:
+  - Document the outage, root cause, and live fix for institutional memory
+
+completion_metrics:
+  - docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md merged
+  - headscale.example.org / ci.example.org / apps.example.org confirmed reachable
+
+related_adrs: []

@@ -214,7 +214,10 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(obtain_task["delay"], "{{ public_edge_certbot_delay_seconds }}")
         self.assertEqual(obtain_task["until"], "public_edge_certbot_issue.rc == 0")
         self.assertEqual(site_local_task["loop"], "{{ public_edge_site_certificate_requirements | default([]) }}")
-        self.assertEqual(site_local_task["when"], "item.missing_domains | length > 0")
+        self.assertEqual(
+            site_local_task["when"],
+            ["item.missing_domains | length > 0", "not public_edge_skip_certbot"],
+        )
         check_task = next(
             task for task in self.tasks if task["name"] == "Check whether the public edge certificate exists"
         )
@@ -297,7 +300,9 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("annotate.{{ platform_domain }}", security_overrides)
         self.assertIn("coolify.{{ platform_domain }}", security_overrides)
         self.assertIn("draw.{{ platform_domain }}", security_overrides)
+        self.assertIn("errors.{{ platform_domain }}", security_overrides)
         self.assertIn("grafana.{{ platform_domain }}", security_overrides)
+        self.assertIn("id.{{ platform_domain }}", security_overrides)
         self.assertIn("logs.{{ platform_domain }}", security_overrides)
         self.assertIn("tasks.{{ platform_domain }}", security_overrides)
         self.assertIn(
@@ -309,6 +314,13 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             "wss://draw.{{ platform_domain }}",
             security_overrides["draw.{{ platform_domain }}"]["content_security_policy"],
         )
+        glitchtip_csp = security_overrides["errors.{{ platform_domain }}"]["content_security_policy"]
+        self.assertIn("form-action 'self'", glitchtip_csp)
+        self.assertIn("https://id.{{ platform_domain }}", glitchtip_csp)
+        self.assertIn("https://sso.{{ platform_domain }}", glitchtip_csp)
+        authentik_csp = security_overrides["id.{{ platform_domain }}"]["content_security_policy"]
+        self.assertIn("script-src 'self' 'unsafe-inline'", authentik_csp)
+        self.assertIn("wss://id.{{ platform_domain }}", authentik_csp)
         self.assertIn("'unsafe-eval'", security_overrides["grafana.{{ platform_domain }}"]["content_security_policy"])
         self.assertIn(
             "wss://n8n.{{ platform_domain }}",

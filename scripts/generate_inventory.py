@@ -175,7 +175,7 @@ def build_inventory(host_vars: dict) -> dict:
         host_vars.get("management_tailscale_ipv4", "100.64.0.1"),
         "management_tailscale_ipv4",
     )
-    staging_pfx: str = _net_prefix(host_vars.get("proxmox_staging_ipv4", "10.20.10.1"))
+    staging_pfx: str = _net_prefix(host_vars.get("proxmox_staging_ipv4", "10.10.10.1"))
 
     # --- lv3_guests: production entries ---
     lv3_hosts: dict[str, Any] = {}
@@ -275,7 +275,7 @@ def ansible_list(host_vars: dict) -> dict:
     """Return Ansible --list JSON output from proxmox_guests."""
     inv = build_inventory(host_vars)
     guests: list[dict] = host_vars.get("proxmox_guests", [])
-    staging_pfx = _net_prefix(host_vars.get("proxmox_staging_ipv4", "10.20.10.1"))
+    staging_pfx = _net_prefix(host_vars.get("proxmox_staging_ipv4", "10.10.10.1"))
     ts_ip = host_vars.get("management_tailscale_ipv4", "100.64.0.1")
 
     # Flatten into Ansible's JSON inventory format

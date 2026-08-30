@@ -103,7 +103,7 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
                         "max_concurrent_leases": 2,
                         "allowed_lease_purposes": ["fixture", "preview", "recovery-drill", "load-test"],
                         "allowed_placement_classes": ["fixture", "preview", "recovery"],
-                        "ip_addresses": ["10.20.10.100/24", "10.20.10.101/24", "10.20.10.102/24"],
+                        "ip_addresses": ["10.10.10.100/24", "10.10.10.101/24", "10.10.10.102/24"],
                         "placement_domain": "proxmox-local",
                         "spillover_domain": "hetzner-cloud-burst",
                         "protected_capacity_class": "ephemeral-burst-local",
@@ -135,7 +135,7 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
                 "fixture_id": "docker-host",
                 "template": "lv3-docker-host",
                 "vmid_range": [910, 979],
-                "network": {"bridge": "vmbr20", "ip_cidr": "10.20.10.100/24", "gateway": "10.20.10.1"},
+                "network": {"bridge": "vmbr20", "ip_cidr": "10.10.10.100/24", "gateway": "10.10.10.1"},
                 "resources": {"cores": 2, "memory_mb": 2048, "disk_gb": 20},
                 "lifetime_minutes": 30,
                 "roles_under_test": ["lv3.platform.docker_runtime"],
@@ -298,7 +298,7 @@ def test_fixture_down_archives_and_removes_receipt(fixture_repo: Path, monkeypat
         "ephemeral_tags": ["ephemeral-codex-adr-0106-test-1774261800"],
         "runtime_dir": ".local/fixtures/runtime/docker-host-20260323T100000Z",
         "vm_id": 910,
-        "ip_address": "10.20.10.100",
+        "ip_address": "10.10.10.100",
         "definition": {"ssh_user": "ops"},
         "context": {"ci_user": "ops"},
     }
@@ -367,7 +367,7 @@ def test_reap_expired_only_destroys_expired_receipts(fixture_repo: Path, monkeyp
         "ephemeral_tags": ["ephemeral-codex-expired-1774254600"],
         "runtime_dir": ".local/fixtures/runtime/docker-host-20260323T080000Z",
         "vm_id": 910,
-        "ip_address": "10.20.10.100",
+        "ip_address": "10.10.10.100",
         "definition": {},
         "context": {},
     }
@@ -387,7 +387,7 @@ def test_reap_expired_only_destroys_expired_receipts(fixture_repo: Path, monkeyp
         "ephemeral_tags": ["ephemeral-codex-active-4088510400"],
         "runtime_dir": ".local/fixtures/runtime/docker-host-20990323T120000Z",
         "vm_id": 911,
-        "ip_address": "10.20.10.101",
+        "ip_address": "10.10.10.101",
         "definition": {},
         "context": {},
     }
@@ -442,7 +442,7 @@ def test_build_runtime_main_targets_fixture_module(fixture_repo: Path) -> None:
     assert '"prevent_destroy"' not in rendered
     assert "agent_enabled = false" in rendered
     assert 'agent_timeout = "10s"' in rendered
-    assert 'value = "10.20.10.100"' in rendered
+    assert 'value = "10.10.10.100"' in rendered
 
 
 def test_stage_seed_snapshot_updates_receipt(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -451,7 +451,7 @@ def test_stage_seed_snapshot_updates_receipt(monkeypatch: pytest.MonkeyPatch) ->
         "seed_class": "tiny",
         "context": {"jump_user": "ops", "jump_host": "203.0.113.1", "ci_user": "ops"},
         "definition": {"ssh_user": "ops"},
-        "ip_address": "10.20.10.120",
+        "ip_address": "10.10.10.120",
     }
     monkeypatch.setattr(fixture_manager, "ssh_base_argv", lambda receipt, timeout_seconds=5: ["ssh", "fixture"])
     monkeypatch.setattr(fixture_manager.seed_data_snapshots, "guest_stage_root", lambda: "/var/lib/lv3-seed-data")
@@ -524,7 +524,7 @@ def test_converge_roles_writes_ansible_vars_into_runtime_playbook(
     runtime_dir.mkdir(parents=True)
     receipt = {
         "runtime_dir": ".local/fixtures/runtime/docker-host-20260323T100000Z",
-        "ip_address": "10.20.10.100",
+        "ip_address": "10.10.10.100",
         "context": {"ci_user": "ops", "jump_user": "ops", "jump_host": "100.64.0.1"},
         "definition": {
             "roles_under_test": ["lv3.platform.docker_runtime"],
@@ -606,13 +606,13 @@ def test_select_pool_ip_skips_existing_nonfinal_receipts(fixture_repo: Path) -> 
         "status": "active",
         "created_at": "2026-03-23T10:00:00Z",
         "updated_at": "2026-03-23T10:00:00Z",
-        "definition": {"network": {"ip_cidr": "10.20.10.100/24"}},
+        "definition": {"network": {"ip_cidr": "10.10.10.100/24"}},
         "vm_id": 910,
         "pool_id": "docker-host",
     }
     (fixture_repo / "receipts" / "fixtures" / "docker-host-existing.json").write_text(json.dumps(receipt) + "\n")
 
-    assert fixture_manager.select_pool_ip_address(pool) == "10.20.10.101/24"
+    assert fixture_manager.select_pool_ip_address(pool) == "10.10.10.101/24"
 
 
 def test_resolve_template_vmid_falls_back_to_available_source_template(fixture_repo: Path) -> None:
@@ -648,7 +648,7 @@ def test_reconcile_pools_creates_prewarmed_receipts(fixture_repo: Path, monkeypa
             "pool_id": "docker-host",
             "receipt_id": "docker-host-warm",
             "vm_id": 910,
-            "ip_address": "10.20.10.100",
+            "ip_address": "10.10.10.100",
         }
     ]
     assert payload["status"][0]["pool_id"] == "docker-host"
@@ -672,7 +672,7 @@ def test_fixture_up_prefers_prewarmed_member(fixture_repo: Path, monkeypatch: py
         "ephemeral_tags": ["ephemeral-owner-pool-manager"],
         "runtime_dir": ".local/fixtures/runtime/docker-host-warm",
         "vm_id": 910,
-        "ip_address": "10.20.10.100",
+        "ip_address": "10.10.10.100",
         "mac_address": "BC:24:11:00:03:8E",
         "pool_id": "docker-host",
         "pool_state": "prewarmed",
@@ -714,7 +714,7 @@ def test_fixture_up_prefers_prewarmed_member(fixture_repo: Path, monkeypatch: py
 def test_fixture_up_reports_spillover_when_pool_limit_is_reached(
     fixture_repo: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    for vmid, ip_cidr in ((910, "10.20.10.100/24"), (911, "10.20.10.101/24")):
+    for vmid, ip_cidr in ((910, "10.10.10.100/24"), (911, "10.10.10.101/24")):
         receipt = {
             "receipt_id": f"docker-host-{vmid}",
             "fixture_id": "docker-host",

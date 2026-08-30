@@ -2,6 +2,7 @@ import json
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialApp
+from django.db import transaction
 
 from apps.alerts.constants import RecipientType
 from apps.alerts.models import AlertRecipient, ProjectAlert
@@ -22,11 +23,18 @@ ORG_NAME = {{ glitchtip_organization_name | to_json }}
 ORG_SLUG = {{ glitchtip_organization_slug | to_json }}
 TEAM_SLUG = {{ glitchtip_team_slug | to_json }}
 PUBLIC_URL = {{ glitchtip_public_base_url | to_json }}
-KEYCLOAK_CLIENT_ID = {{ glitchtip_keycloak_client_id | to_json }}
-KEYCLOAK_CLIENT_SECRET = {{ glitchtip_keycloak_client_secret | to_json }}
-KEYCLOAK_PROVIDER = {{ glitchtip_keycloak_provider | to_json }}
-KEYCLOAK_PROVIDER_ID = {{ glitchtip_keycloak_provider_id | to_json }}
-KEYCLOAK_SERVER_URL = {{ glitchtip_keycloak_server_url | to_json }}
+OIDC_CLIENT_ID = {{ glitchtip_oidc_client_id | to_json }}
+OIDC_CLIENT_SECRET = {{ glitchtip_oidc_client_secret | to_json }}
+OIDC_PROVIDER = {{ glitchtip_oidc_provider | to_json }}
+OIDC_PROVIDER_ID = {{ glitchtip_oidc_provider_id | to_json }}
+OIDC_PROVIDER_NAME = {{ glitchtip_oidc_provider_name | to_json }}
+OIDC_SERVER_URL = {{ glitchtip_oidc_issuer_url | regex_replace('/+$', '') | to_json }}
+KEYCLOAK_ROLLBACK_CLIENT_ID = {{ glitchtip_keycloak_rollback_client_id | to_json }}
+KEYCLOAK_ROLLBACK_CLIENT_SECRET = {{ glitchtip_keycloak_rollback_client_secret | to_json }}
+KEYCLOAK_ROLLBACK_PROVIDER = {{ glitchtip_keycloak_rollback_provider | to_json }}
+KEYCLOAK_ROLLBACK_PROVIDER_ID = {{ glitchtip_keycloak_rollback_provider_id | to_json }}
+KEYCLOAK_ROLLBACK_PROVIDER_NAME = {{ glitchtip_keycloak_rollback_provider_name | to_json }}
+KEYCLOAK_ROLLBACK_SERVER_URL = {{ glitchtip_keycloak_rollback_issuer_url | regex_replace('/+$', '') | to_json }}
 MATTERMOST_ALERT_URL = {{ glitchtip_mattermost_alert_url | to_json }}
 NTFY_ALERT_URL = {{ glitchtip_ntfy_alert_url | to_json }}
 PROJECT_SPECS = {{ glitchtip_bootstrap_projects | to_json }}
@@ -92,35 +100,64 @@ def ensure_team(org: Organization, org_user):
     return team
 
 
-def ensure_social_app(org: Organization):
-    app, _ = SocialApp.objects.get_or_create(
-        provider=KEYCLOAK_PROVIDER,
-        provider_id=KEYCLOAK_PROVIDER_ID,
-        defaults={
-            "name": "LV3 Keycloak",
-            "client_id": KEYCLOAK_CLIENT_ID,
-            "secret": KEYCLOAK_CLIENT_SECRET,
-            "settings": {"server_url": KEYCLOAK_SERVER_URL},
-        },
-    )
-    changed = False
-    if app.name != "LV3 Keycloak":
-        app.name = "LV3 Keycloak"
-        changed = True
-    if app.client_id != KEYCLOAK_CLIENT_ID:
-        app.client_id = KEYCLOAK_CLIENT_ID
-        changed = True
-    if app.secret != KEYCLOAK_CLIENT_SECRET:
-        app.secret = KEYCLOAK_CLIENT_SECRET
-        changed = True
-    settings = app.settings or {}
-    if settings.get("server_url") != KEYCLOAK_SERVER_URL:
-        app.settings = {"server_url": KEYCLOAK_SERVER_URL}
-        changed = True
-    if changed:
-        app.save()
-    OrganizationSocialApp.objects.get_or_create(organization=org, social_app=app)
-    return app
+def ensure_social_app(
+    org: Organization,
+    *,
+    provider: str,
+    provider_id: str,
+    provider_name: str,
+    client_id: str,
+    client_secret: str,
+    server_url: str,
+):
+    with transaction.atomic():
+        candidates = list(
+            SocialApp.objects.select_for_update()
+            .filter(provider=provider, provider_id=provider_id)
+            .order_by("id")
+        )
+        matching = [candidate for candidate in candidates if candidate.client_id == client_id]
+        app = matching[0] if matching else (candidates[0] if candidates else None)
+        if app is None:
+            app = SocialApp.objects.create(
+                provider=provider,
+                provider_id=provider_id,
+                name=provider_name,
+                client_id=client_id,
+                secret=client_secret,
+                settings={"server_url": server_url},
+            )
+            candidates = [app]
+
+        update_fields = []
+        desired_fields = {
+            "name": provider_name,
+            "client_id": client_id,
+            "secret": client_secret,
+        }
+        for field, value in desired_fields.items():
+            if getattr(app, field) != value:
+                setattr(app, field, value)
+                update_fields.append(field)
+        settings = dict(app.settings or {})
+        if settings.get("server_url") != server_url:
+            settings["server_url"] = server_url
+            app.settings = settings
+            update_fields.append("settings")
+        if update_fields:
+            app.save(update_fields=update_fields)
+
+        OrganizationSocialApp.objects.get_or_create(organization=org, social_app=app)
+        for duplicate in candidates:
+            if duplicate.pk == app.pk:
+                continue
+            for link in OrganizationSocialApp.objects.filter(social_app=duplicate):
+                OrganizationSocialApp.objects.get_or_create(
+                    organization=link.organization,
+                    social_app=app,
+                )
+            duplicate.delete()
+        return app
 
 
 def ensure_api_token(user: User) -> APIToken:
@@ -208,7 +245,24 @@ def ensure_projects(org: Organization, team: Team):
 user = ensure_admin_user()
 org, org_user = ensure_organization(user)
 team = ensure_team(org, org_user)
-social_app = ensure_social_app(org)
+social_app = ensure_social_app(
+    org,
+    provider=OIDC_PROVIDER,
+    provider_id=OIDC_PROVIDER_ID,
+    provider_name=OIDC_PROVIDER_NAME,
+    client_id=OIDC_CLIENT_ID,
+    client_secret=OIDC_CLIENT_SECRET,
+    server_url=OIDC_SERVER_URL,
+)
+rollback_social_app = ensure_social_app(
+    org,
+    provider=KEYCLOAK_ROLLBACK_PROVIDER,
+    provider_id=KEYCLOAK_ROLLBACK_PROVIDER_ID,
+    provider_name=KEYCLOAK_ROLLBACK_PROVIDER_NAME,
+    client_id=KEYCLOAK_ROLLBACK_CLIENT_ID,
+    client_secret=KEYCLOAK_ROLLBACK_CLIENT_SECRET,
+    server_url=KEYCLOAK_ROLLBACK_SERVER_URL,
+)
 token = ensure_api_token(user)
 projects = ensure_projects(org, team)
 
@@ -223,6 +277,11 @@ print(
                 "name": social_app.name,
                 "provider": social_app.provider,
                 "provider_id": social_app.provider_id,
+            },
+            "rollback_social_app": {
+                "name": rollback_social_app.name,
+                "provider": rollback_social_app.provider,
+                "provider_id": rollback_social_app.provider_id,
             },
             "projects": projects,
         },

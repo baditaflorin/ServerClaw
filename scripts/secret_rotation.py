@@ -11,7 +11,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from controller_automation_toolkit import emit_cli_error, load_json, repo_path, run_command
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path, resolve_repo_local_path, run_command
 
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -215,6 +215,7 @@ def build_playbook_command(
     approve_high_risk: bool,
     new_value: str | None,
     bootstrap_key_path: str,
+    identity_overlay_path: str | None = None,
 ) -> tuple[list[str], dict[str, str]]:
     command = [
         "ansible-playbook",
@@ -236,9 +237,21 @@ def build_playbook_command(
     ]
     if new_value is not None:
         command.extend(["-e", f"secret_rotation_new_value={new_value}"])
+    if identity_overlay_path is not None:
+        command.extend(["-e", f"@{identity_overlay_path}"])
     env = os.environ.copy()
     env["ANSIBLE_HOST_KEY_CHECKING"] = "False"
     return command, env
+
+
+def resolve_identity_overlay_path() -> str | None:
+    raw_path = os.environ.get("PLATFORM_IDENTITY_OVERLAY", "").strip()
+    if not raw_path:
+        return None
+    selected = resolve_repo_local_path(raw_path)
+    if not selected.is_file():
+        raise ValueError(f"PLATFORM_IDENTITY_OVERLAY does not select a regular file: {selected}")
+    return str(selected.resolve())
 
 
 def build_rotation_event(
@@ -377,8 +390,17 @@ def run_rotation(
         approve_high_risk=approve_high_risk,
         new_value=new_value,
         bootstrap_key_path=resolve_bootstrap_key(secret_manifest),
+        identity_overlay_path=resolve_identity_overlay_path(),
     )
-    result = run_command(command, capture_output=True)
+    previous_host_key_checking = os.environ.get("ANSIBLE_HOST_KEY_CHECKING")
+    os.environ["ANSIBLE_HOST_KEY_CHECKING"] = env["ANSIBLE_HOST_KEY_CHECKING"]
+    try:
+        result = run_command(command, capture_output=True)
+    finally:
+        if previous_host_key_checking is None:
+            os.environ.pop("ANSIBLE_HOST_KEY_CHECKING", None)
+        else:
+            os.environ["ANSIBLE_HOST_KEY_CHECKING"] = previous_host_key_checking
     if result.returncode == 0:
         success_event = build_rotation_event(secret_id, secret, status="succeeded", mode=mode, command=command)
         try:

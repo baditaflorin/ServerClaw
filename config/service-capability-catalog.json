@@ -92,6 +92,45 @@
       }
     },
     {
+      "id": "authentik",
+      "name": "Authentik",
+      "description": "Open-source IAM/SSO broker, agentic-first, replaces Keycloak (ADR 0491)",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "runtime-control",
+      "internal_url": "http://10.10.10.92:9010",
+      "exposure": "edge-published",
+      "health_probe_id": "authentik",
+      "image_catalog_ids": [
+        "authentik_runtime"
+      ],
+      "secret_catalog_ids": [
+        "authentik_admin_token",
+        "authentik_glitchtip_client_secret",
+        "authentik_outline_client_secret"
+      ],
+      "adr": "0491",
+      "runbook": "docs/runbooks/configure-authentik.md",
+      "tags": [
+        "identity",
+        "oidc",
+        "saml",
+        "sso",
+        "keycloak-replacement"
+      ],
+      "notes": "Replaces Keycloak per ADR 0491. Deployed at a new subdomain (id.example.com, not sso.example.com) so Keycloak remains fully functional throughout the parallel rollout and staged client migration.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://id.example.com",
+          "subdomain": "id.example.com"
+        }
+      },
+      "vmid": 192,
+      "public_url": "https://id.example.com",
+      "subdomain": "id.example.com"
+    },
+    {
       "id": "backup_pbs",
       "name": "Proxmox Backup Server",
       "description": "Backup datastore and snapshot retention service for the Proxmox estate.",
@@ -677,7 +716,6 @@
       "vm": "runtime-control",
       "vmid": 192,
       "internal_url": "http://100.64.0.1:3009",
-      "depends_on": ["minio"],
       "subdomain": "git.example.com",
       "exposure": "private-only",
       "uptime_monitor_name": "Gitea Private",
@@ -713,7 +751,7 @@
     {
       "id": "glitchtip",
       "name": "GlitchTip",
-      "description": "Sentry-compatible application error tracker with repo-managed projects, DSNs, and Keycloak-backed browser sign-in.",
+      "description": "Sentry-compatible application error tracker with repo-managed projects, DSNs, and Authentik-backed browser sign-in through allauth's headless flow.",
       "category": "observability",
       "lifecycle_status": "active",
       "vm": "docker-runtime",
@@ -742,6 +780,7 @@
         "glitchtip_mail_gateway_dsn",
         "glitchtip_windmill_jobs_dsn",
         "glitchtip_platform_findings_event_url",
+        "authentik_glitchtip_client_secret",
         "keycloak_glitchtip_client_secret",
         "mail_platform_server_mailbox_password"
       ],
@@ -755,13 +794,13 @@
         "oidc",
         "observability"
       ],
-      "notes": "Browser sign-in is delegated to the in-app Keycloak OIDC flow, while the public DSN store path and health endpoint remain reachable for SDK delivery and verification traffic.",
+      "notes": "Browser sign-in is delegated to the in-app Authentik OIDC flow. The prior Keycloak client secret remains a separate rollback artifact, while the public DSN store path and health endpoint remain reachable for SDK delivery and verification traffic.",
       "environments": {
         "production": {
           "status": "active",
           "url": "https://errors.example.com",
           "subdomain": "errors.example.com",
-          "notes": "The public GlitchTip surface is published through the shared NGINX edge, but the application itself owns browser authentication through the repo-managed Keycloak client and project-scoped DSN issuance."
+          "notes": "The public GlitchTip surface is published through the shared NGINX edge, but the application itself owns browser authentication through the repo-managed Authentik client and project-scoped DSN issuance."
         }
       }
     },
@@ -1953,7 +1992,8 @@
       "secret_catalog_ids": [
         "openbao_controller_approle",
         "openbao_atlas_approle",
-        "openbao_mail_platform_approle"
+        "openbao_mail_platform_approle",
+        "openbao_runtime_secret_provisioner_approle"
       ],
       "adr": "0043",
       "runbook": "docs/runbooks/configure-openbao.md",
@@ -2069,7 +2109,7 @@
     {
       "id": "outline",
       "name": "Outline",
-      "description": "Self-hosted living knowledge wiki that publishes repo-managed ADR, runbook, and architecture indexes through Outline.",
+      "description": "Self-hosted living knowledge wiki that publishes repo-managed ADR, runbook, and architecture indexes with Authentik-backed browser sign-in.",
       "category": "access",
       "lifecycle_status": "active",
       "vm": "docker-runtime",
@@ -2092,6 +2132,7 @@
         "outline_redis_password",
         "outline_minio_root_password",
         "outline_api_token",
+        "authentik_outline_client_secret",
         "keycloak_outline_client_secret"
       ],
       "adr": "0199",
@@ -2107,7 +2148,7 @@
         "outline",
         "oidc"
       ],
-      "notes": "Live-apply evidence is tracked on the workstream branch; merge-to-main still must update the integrated README, VERSION, changelog, and versions/stack.yaml surfaces.",
+      "notes": "Browser sign-in is delegated to the repo-managed Authentik confidential client. The Keycloak client and secret remain intact as an explicit per-client rollback path during ADR 0491 migration.",
       "environments": {
         "production": {
           "status": "active",

@@ -85,6 +85,18 @@ PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH = (
     / "seed_rotation_metadata.yml"
 )
 GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
+RUNTIME_SECRET_PROVISIONER_POLICY_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "openbao_runtime"
+    / "templates"
+    / "policy-agent-runtime-secret-provisioner.hcl.j2"
+)
+SERVICE_RUNTIME_POLICY_PATH = RUNTIME_SECRET_PROVISIONER_POLICY_PATH.with_name("policy-service-runtime.hcl.j2")
 
 
 def load_openbao_runtime_tasks() -> list[dict]:
@@ -339,6 +351,44 @@ def test_openbao_runtime_persisted_approles_use_reusable_secret_ids() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
     assert defaults.count("secret_id_num_uses: 0") >= 4
+
+
+def test_openbao_runtime_generates_narrow_registered_service_contracts() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+    seeded_tasks = SEEDED_SECRET_TASKS_PATH.read_text(encoding="utf-8")
+    provisioner_policy = RUNTIME_SECRET_PROVISIONER_POLICY_PATH.read_text(encoding="utf-8")
+    service_policy = SERVICE_RUNTIME_POLICY_PATH.read_text(encoding="utf-8")
+
+    assert "openbao_runtime_secret_provisioner_approle_name: runtime-secret-provisioner" in defaults
+    assert "openbao_runtime_secret_provisioner_approle_local_file:" in defaults
+    assert "policy-agent-runtime-secret-provisioner.hcl.j2" in defaults
+    assert "- platform_service_registry is mapping" in tasks
+    assert "- name: Initialize registered OpenBao runtime-secret contracts" in tasks
+    assert "- name: Derive OpenBao runtime-secret contracts from the service registry" in tasks
+    assert "item.value.needs_openbao | default(true) | bool" in tasks
+    assert "openbao_runtime_secret_namespace_overrides[item.key]" in tasks
+    assert "- name: Validate registered OpenBao runtime-secret contracts" in tasks
+    assert 'openbao_managed_policies: "{{ openbao_policies + openbao_runtime_service_policies }}"' in tasks
+    assert 'openbao_managed_approles: "{{ openbao_approles + openbao_runtime_service_approles }}"' in tasks
+    assert 'loop: "{{ openbao_managed_policies }}"' in tasks
+    assert 'loop: "{{ openbao_managed_approles }}"' in tasks
+
+    assert 'path "kv/data/{{ contract.secret_path }}"' in provisioner_policy
+    assert 'path "auth/approle/role/{{ contract.approle_name }}/role-id"' in provisioner_policy
+    assert 'path "auth/approle/role/{{ contract.approle_name }}/secret-id"' in provisioner_policy
+    assert "sys/policies" not in provisioner_policy
+    assert "auth/approle/role/controller-automation" not in provisioner_policy
+    assert "auth/approle/role/runtime-secret-provisioner" not in provisioner_policy
+    assert 'capabilities = ["create", "read", "update"]' in provisioner_policy
+    assert 'path "kv/data/{{ item.secret_path }}"' in service_policy
+    assert 'capabilities = ["read"]' in service_policy
+    assert "kv/metadata" not in service_policy
+
+    assert "- name: Read the runtime-secret provisioner AppRole artifact" in seeded_tasks
+    assert "- name: Login with the runtime-secret provisioner AppRole" in seeded_tasks
+    assert "- name: Assert the runtime-secret provisioner receives only its narrow policy" in seeded_tasks
+    assert "'root' not in" in seeded_tasks
 
 
 def test_openbao_runtime_pins_a_non_expiring_atlas_secret_id() -> None:

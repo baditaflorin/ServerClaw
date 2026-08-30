@@ -15,6 +15,6 @@
 
 - name: Restart Prometheus
   ansible.builtin.systemd:
-    name: lv3-prometheus
+    name: "{{ alertmanager_runtime_prometheus_service_name }}"
     state: restarted
     daemon_reload: true

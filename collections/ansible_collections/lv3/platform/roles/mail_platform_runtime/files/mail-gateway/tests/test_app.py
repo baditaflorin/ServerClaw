@@ -31,7 +31,7 @@ with NamedTemporaryFile("w", encoding="utf-8", delete=False) as profiles_file:
     )
     os.environ.setdefault("NOTIFICATION_PROFILES_FILE", profiles_file.name)
 
-from app import app
+from app import app, principal_path
 from telemetry import parse_resource_attributes
 
 
@@ -50,6 +50,10 @@ def test_state_requires_api_key():
     response = client.get("/state")
 
     assert response.status_code == 401
+
+
+def test_principal_path_uses_url_escaped_name():
+    assert principal_path("server name") == "/api/principal/server%20name"
 
 
 def test_parse_resource_attributes_ignores_invalid_items():

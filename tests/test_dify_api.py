@@ -13,7 +13,8 @@ class FakeResponse:
     def __init__(self, status_code: int, payload: dict | None = None, text: str | None = None) -> None:
         self.status_code = status_code
         self._payload = payload or {}
-        self.text = text or json.dumps(self._payload)
+        self.text = text if text is not None else json.dumps(self._payload)
+        self.content = self.text.encode("utf-8")
 
     def json(self) -> dict:
         return self._payload
@@ -31,7 +32,7 @@ def test_setup_runs_init_validation_before_bootstrap(monkeypatch) -> None:
         ]
     )
 
-    def fake_request(self, method, url, timeout=None, headers=None, **kwargs):  # noqa: ANN001
+    def fake_request(self, method, url, timeout=None, headers=None, **kwargs):
         calls.append((method, url, kwargs))
         return responses.popleft()
 
@@ -59,7 +60,7 @@ def test_login_request_uses_csrf_token_cookie(monkeypatch) -> None:
     seen_headers: list[dict[str, str]] = []
     seen_payloads: list[dict] = []
 
-    def fake_request(self, method, url, timeout=None, headers=None, **kwargs):  # noqa: ANN001
+    def fake_request(self, method, url, timeout=None, headers=None, **kwargs):
         seen_headers.append(headers or {})
         seen_payloads.append(kwargs.get("json") or {})
         return FakeResponse(200, {"result": "success"})
@@ -86,3 +87,21 @@ def test_http_tunnel_headers_forward_auth_and_cookie_state() -> None:
     assert "__Host-access_token=access-123" in headers["Cookie"]
     assert "__Host-refresh_token=refresh-123" in headers["Cookie"]
     assert "__Host-csrf_token=csrf-123" in headers["Cookie"]
+
+
+def test_configure_sso_accepts_an_empty_success_response(monkeypatch) -> None:
+    client = DifyClient("https://agents.example.com")
+
+    def fake_post(self, url, timeout=None, headers=None, json=None):
+        return FakeResponse(201, text="")
+
+    monkeypatch.setattr(requests.Session, "post", fake_post)
+
+    result = client.configure_sso(
+        enabled=True,
+        client_id="dify",
+        client_secret="secret",
+        issuer_url="https://sso.example.com/realms/platform",
+    )
+
+    assert result == {}

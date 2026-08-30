@@ -104,13 +104,60 @@ def test_missing_dependency_health_gate_blocks_non_grandfathered_service(
     assert any(item.item_id == "dependency_health_gate" for item in result.failing_items)
 
 
+def test_authentik_client_evidence_satisfies_provider_aware_oidc_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    completeness_path = tmp_path / "config" / "service-completeness.json"
+    completeness = json.loads(completeness_path.read_text(encoding="utf-8"))
+    profile = completeness["services"]["test_echo"]
+    profile["requires_oidc"] = True
+    profile["oidc_provider"] = "authentik"
+    profile["authentik_client_generated"] = True
+    profile["keycloak_client_generated"] = False
+    completeness_path.write_text(json.dumps(completeness, indent=2) + "\n", encoding="utf-8")
+
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    result = service_completeness.evaluate_service("test_echo")
+    oidc_item = next(item for item in result.items if item.item_id == "keycloak_client")
+
+    assert oidc_item.label == "OIDC client scaffold"
+    assert oidc_item.required is True
+    assert oidc_item.present is True
+    assert "selected provider authentik" in oidc_item.detail
+
+
+def test_selected_authentik_provider_rejects_unrelated_keycloak_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    completeness_path = tmp_path / "config" / "service-completeness.json"
+    completeness = json.loads(completeness_path.read_text(encoding="utf-8"))
+    profile = completeness["services"]["test_echo"]
+    profile["requires_oidc"] = True
+    profile["oidc_provider"] = "authentik"
+    profile["authentik_client_generated"] = False
+    profile["keycloak_client_generated"] = True
+    completeness_path.write_text(json.dumps(completeness, indent=2) + "\n", encoding="utf-8")
+
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    result = service_completeness.evaluate_service("test_echo")
+    oidc_item = next(item for item in result.items if item.item_id == "keycloak_client")
+
+    assert oidc_item.required is True
+    assert oidc_item.present is False
+    assert oidc_item in result.failing_items
+
+
 def test_legacy_service_uses_grandfathered_suppressions(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     build_repo(tmp_path)
     service_completeness = load_service_completeness(monkeypatch, tmp_path)
     completeness_path = tmp_path / "config" / "service-completeness.json"
     completeness = json.loads(completeness_path.read_text())
     completeness["suppression_presets"] = {
-        "legacy-service": {item_id: "2026-09-23" for item_id in service_completeness.CHECKLIST_IDS}
+        "legacy-service": dict.fromkeys(service_completeness.CHECKLIST_IDS, "2026-09-23")
     }
     completeness["services"]["docker_runtime"]["suppression_preset"] = "legacy-service"
     completeness_path.write_text(json.dumps(completeness, indent=2) + "\n")

@@ -99,10 +99,10 @@
   vars:
     common_manage_service_secrets_generate:
       - path: "{{ superset_secret_key_remote_file }}"
-        command: "{{ 'superset' | secret(length=32) }}"
+        value: "{{ 'superset' | secret(length=32) }}"
         label: "superset-secret-key"
       - path: "{{ superset_admin_password_remote_file }}"
-        command: "{{ 'superset' | secret(length=32) }}"
+        value: "{{ 'superset' | secret(length=32) }}"
         label: "superset-admin-password"
     common_manage_service_secrets_read:
       - "{{ superset_secret_key_remote_file }}"

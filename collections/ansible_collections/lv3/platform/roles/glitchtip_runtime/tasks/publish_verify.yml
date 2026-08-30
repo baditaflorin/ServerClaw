@@ -1,5 +1,5 @@
 ---
-# Purpose: Verify the public GlitchTip publication and end-to-end event ingestion path after the controller has a quiet window.
+# Purpose: Verify the public GlitchTip publication, headless OIDC redirect, and end-to-end event ingestion after the controller has a quiet window.
 
 - name: Wait for the GlitchTip public health endpoint
   ansible.builtin.uri:
@@ -24,27 +24,94 @@
   until: glitchtip_publish_auth_config.status == 200
   changed_when: false
 
-- name: Record the GlitchTip public Keycloak OIDC provider metadata
+- name: Read the GlitchTip frontend settings document
+  ansible.builtin.uri:
+    url: "{{ glitchtip_public_base_url }}/api/settings/"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: glitchtip_publish_frontend_settings
+  retries: 12
+  delay: 5
+  until: glitchtip_publish_frontend_settings.status == 200
+  changed_when: false
+
+- name: Record the GlitchTip public selected OIDC provider metadata
   ansible.builtin.set_fact:
-    glitchtip_publish_keycloak_provider: >-
+    glitchtip_publish_oidc_provider: >-
       {{
         (
           glitchtip_publish_auth_config.json.data.socialaccount.providers
-          | selectattr('id', 'equalto', glitchtip_keycloak_provider_id)
+          | selectattr('id', 'equalto', glitchtip_oidc_provider_id)
+          | list
+          | first
+        ) | default({})
+      }}
+    glitchtip_publish_frontend_selected_provider: >-
+      {{
+        (
+          glitchtip_publish_frontend_settings.json.socialApps
+          | selectattr('provider', 'equalto', glitchtip_oidc_provider_id)
+          | list
+          | first
+        ) | default({})
+      }}
+    glitchtip_publish_frontend_rollback_provider: >-
+      {{
+        (
+          glitchtip_publish_frontend_settings.json.socialApps
+          | selectattr('provider', 'equalto', glitchtip_keycloak_rollback_provider_id)
           | list
           | first
         ) | default({})
       }}
 
-- name: Assert the GlitchTip public auth config advertises the Keycloak OIDC issuer
+- name: Assert the GlitchTip public auth config advertises the selected OIDC issuer
   ansible.builtin.assert:
     that:
-      - glitchtip_publish_keycloak_provider != {}
-      - glitchtip_publish_keycloak_provider.client_id == glitchtip_keycloak_client_id
+      - glitchtip_publish_oidc_provider != {}
+      - glitchtip_publish_oidc_provider.client_id == glitchtip_oidc_client_id
       - >-
-        glitchtip_publish_keycloak_provider.openid_configuration_url
-        == (glitchtip_keycloak_server_url ~ '/.well-known/openid-configuration')
-    fail_msg: "GlitchTip public auth config does not yet expose the expected Keycloak OIDC configuration."
+        glitchtip_publish_oidc_provider.openid_configuration_url
+        == glitchtip_oidc_discovery_url
+    fail_msg: "GlitchTip public auth config does not expose the selected normalized OIDC configuration."
+
+- name: Assert the GlitchTip frontend advertises selected and rollback login providers
+  ansible.builtin.assert:
+    that:
+      - glitchtip_publish_frontend_selected_provider != {}
+      - glitchtip_publish_frontend_selected_provider.client_id == glitchtip_oidc_client_id
+      - glitchtip_publish_frontend_selected_provider.authorize_url | length > 0
+      - glitchtip_publish_frontend_rollback_provider != {}
+      - >-
+        glitchtip_publish_frontend_rollback_provider.client_id
+        == glitchtip_keycloak_rollback_client_id
+      - glitchtip_publish_frontend_rollback_provider.authorize_url | length > 0
+    fail_msg: >-
+      GlitchTip frontend settings do not expose healthy selected and rollback
+      login providers; the interactive login page would hide OIDC choices.
+
+- name: Run the GlitchTip headless OIDC redirect smoke verification
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/glitchtip_oidc_smoke.py"
+      - --base-url
+      - "{{ glitchtip_public_base_url }}"
+      - --provider-id
+      - "{{ glitchtip_oidc_provider_id }}"
+      - --issuer-url
+      - "{{ glitchtip_oidc_issuer_url }}"
+      - --expected-client-id
+      - "{{ glitchtip_oidc_client_id }}"
+      - --callback-url
+      - "{{ glitchtip_oidc_frontend_callback_url }}"
+      - --client-secret-file
+      - "{{ glitchtip_oidc_client_secret_local_file }}"
+      - --request-timeout-seconds
+      - "60"
+  register: glitchtip_publish_oidc_smoke
+  changed_when: false
 
 - name: Run the GlitchTip event smoke verification
   ansible.builtin.command:

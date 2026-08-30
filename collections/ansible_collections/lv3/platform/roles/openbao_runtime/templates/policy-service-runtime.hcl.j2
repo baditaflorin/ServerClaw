@@ -1,0 +1,5 @@
+# managed-by: role=openbao_runtime adr=0491 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator', true) }}
+# Generated service policy for {{ item.registry_key }}.
+path "kv/data/{{ item.secret_path }}" {
+  capabilities = ["read"]
+}

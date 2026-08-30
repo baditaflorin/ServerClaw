@@ -37,6 +37,17 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "authentik": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "dashboard_file": "config/grafana/dashboards/authentik.json",
+      "alert_rule_file": "config/alertmanager/rules/authentik.yml",
+      "keycloak_client_generated": false,
+      "suppressed_checks": {}
+    },
     "backup_pbs": {
       "service_type": "vm-service",
       "requires_subdomain": false,
@@ -207,7 +218,9 @@
       "requires_oidc": true,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "keycloak_client_generated": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
+      "keycloak_client_generated": false,
       "dashboard_file": "config/grafana/dashboards/glitchtip.json",
       "alert_rule_file": "config/alertmanager/rules/glitchtip.yml",
       "suppressed_checks": {
@@ -531,7 +544,9 @@
       "requires_compose_secrets": true,
       "dashboard_file": "config/grafana/dashboards/outline.json",
       "alert_rule_file": "config/alertmanager/rules/outline.yml",
-      "keycloak_client_generated": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
+      "keycloak_client_generated": false,
       "suppressed_checks": {}
     },
     "paperless": {

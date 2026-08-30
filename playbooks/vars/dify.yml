@@ -8,3 +8,11 @@ service_runtime_roles:
 service_needs_dns: true
 service_needs_postgres: true
 service_needs_nginx_edge: true
+playbook_execution_health_probe_overrides:
+  dify:
+    startup:
+      url: "http://{{ ansible_host }}:{{ platform_service_registry.dify.internal_port }}/console/api/setup"
+    liveness:
+      url: "http://{{ ansible_host }}:{{ platform_service_registry.dify.internal_port }}/healthz"
+    readiness:
+      url: "http://{{ ansible_host }}:{{ platform_service_registry.dify.internal_port }}/console/api/setup"

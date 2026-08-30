@@ -99,31 +99,31 @@
   vars:
     common_manage_service_secrets_generate:
       - path: "{{ dify_init_password_remote_file }}"
-        command: "{{ 'dify' | secret }}"
+        value: "{{ 'dify' | secret(length=dify_init_password_random_bytes) }}"
         label: "dify-init-password"
       - path: "{{ dify_admin_password_remote_file }}"
-        command: "{{ 'dify' | secret }}"
+        value: "{{ 'dify' | secret }}"
         label: "dify-admin-password"
       - path: "{{ dify_secret_key_remote_file }}"
-        command: "{{ 'dify' | secret }}"
+        value: "{{ 'dify' | secret }}"
         label: "dify-secret-key"
       - path: "{{ dify_redis_password_remote_file }}"
-        command: "{{ 'dify' | secret(length=32) }}"
+        value: "{{ 'dify' | secret(length=32) }}"
         label: "dify-redis-password"
       - path: "{{ dify_qdrant_api_key_remote_file }}"
-        command: "{{ 'dify' | secret }}"
+        value: "{{ 'dify' | secret }}"
         label: "dify-qdrant-api-key"
       - path: "{{ dify_sandbox_api_key_remote_file }}"
-        command: "{{ 'dify' | secret }}"
+        value: "{{ 'dify' | secret }}"
         label: "dify-sandbox-api-key"
       - path: "{{ dify_plugin_daemon_key_remote_file }}"
-        command: "{{ 'dify' | secret }}"
+        value: "{{ 'dify' | secret }}"
         label: "dify-plugin-daemon-key"
       - path: "{{ dify_plugin_inner_api_key_remote_file }}"
-        command: "{{ 'dify' | secret }}"
+        value: "{{ 'dify' | secret }}"
         label: "dify-plugin-inner-api-key"
       - path: "{{ dify_tools_api_key_remote_file }}"
-        command: "{{ 'dify' | secret }}"
+        value: "{{ 'dify' | secret }}"
         label: "dify-tools-api-key"
     common_manage_service_secrets_read:
       - "{{ dify_init_password_remote_file }}"
@@ -156,6 +156,42 @@
         content_index: 8
     common_manage_service_secrets_local_artifact_dir: "{{ dify_local_artifact_dir }}"
     common_manage_service_secrets_fact_name: "dify_decoded_secrets"
+  no_log: true
+
+- name: Detect a Dify initialization password that exceeds the live API limit
+  ansible.builtin.set_fact:
+    dify_init_password_requires_repair: >-
+      {{ (dify_decoded_secrets[0] | length) > (dify_init_password_max_length | int) }}
+  no_log: true
+
+- name: Generate a compatible replacement Dify initialization password
+  ansible.builtin.set_fact:
+    dify_repaired_init_password: "{{ 'dify' | secret(length=dify_init_password_random_bytes) }}"
+  when: dify_init_password_requires_repair | bool
+  no_log: true
+
+- name: Persist the compatible Dify initialization password on the runtime host
+  ansible.builtin.copy:
+    dest: "{{ dify_init_password_remote_file }}"
+    content: "{{ dify_repaired_init_password }}\n"
+    mode: "0600"
+  when: dify_init_password_requires_repair | bool
+  no_log: true
+
+- name: Mirror the compatible Dify initialization password to the controller
+  ansible.builtin.copy:
+    dest: "{{ dify_init_password_local_file }}"
+    content: "{{ dify_repaired_init_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when: dify_init_password_requires_repair | bool
+  no_log: true
+
+- name: Record the compatible Dify initialization password for this converge
+  ansible.builtin.set_fact:
+    dify_decoded_secrets: "{{ [dify_repaired_init_password] + dify_decoded_secrets[1:] }}"
+  when: dify_init_password_requires_repair | bool
   no_log: true
 
 - name: Record the Dify runtime secrets
@@ -367,23 +403,46 @@
 - name: Bootstrap Dify SSO with Keycloak OIDC
   ansible.builtin.command:
     argv:
-      - python3
+      - uv
+      - run
+      - --with
+      - requests
+      - python
       - "{{ dify_scripts_dir }}/dify_sso_bootstrap.py"
       - --base-url
       - "{{ dify_public_base_url }}"
       - --admin-email
       - "{{ dify_admin_email }}"
+      - --admin-name
+      - "{{ dify_admin_name }}"
       - --admin-password-file
       - "{{ dify_admin_password_local_file }}"
+      - --init-password-file
+      - "{{ dify_init_password_local_file }}"
       - --keycloak-client-id
       - "{{ dify_keycloak_client_id }}"
       - --keycloak-client-secret-file
       - "{{ dify_keycloak_client_secret_local_file }}"
       - --keycloak-issuer-url
       - "{{ dify_keycloak_issuer }}"
+      - --ssh-host
+      - "{{ ansible_host }}"
+      - --ssh-user
+      - "{{ ansible_user | default(proxmox_guest_ci_user) }}"
+      - --ssh-jump-host
+      - "{{ proxmox_guest_ssh_jump_host }}"
+      - --ssh-jump-user
+      - "{{ proxmox_host_admin_user }}"
+      - --ssh-jump-port
+      - "{{ proxmox_guest_ssh_jump_port | string }}"
+      - --ssh-private-key-file
+      - "{{ proxmox_guest_ssh_bootstrap_key_path }}"
+      - --ssh-remote-port
+      - "{{ dify_internal_port | string }}"
   delegate_to: localhost
   become: false
   register: dify_sso_bootstrap
   changed_when: >-
-    (dify_sso_bootstrap.stdout | from_json).action == 'configured'
+    dify_sso_bootstrap.rc == 0
+    and ((dify_sso_bootstrap.stdout | from_json).changed | bool)
   no_log: false

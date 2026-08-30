@@ -1,4 +1,4 @@
-{% from 'compose_macros.j2' import openbao_sidecar, redis_service %}
+{% from 'compose_macros.j2' import hairpin_hosts, openbao_sidecar, redis_service %}
 services:
 {{ openbao_sidecar("glitchtip") }}
 
@@ -26,6 +26,7 @@ services:
         condition: service_healthy
       openbao-agent:
         condition: service_healthy
+{{ hairpin_hosts() }}
     env_file:
       - {{ glitchtip_env_file }}
     ports:

@@ -13,8 +13,8 @@
 ## Scope
 
 - add `environments` block to `versions/stack.yaml` (production + staging definitions)
-- create `inventory/staging/` directory with hosts file pointing to `10.20.10.*` addresses
-- create `vmbr20` bridge on the Proxmox host (`10.20.10.0/24`) — internal-only, NAT disabled
+- create `inventory/staging/` directory with hosts file pointing to `10.10.10.*` addresses
+- create `vmbr20` bridge on the Proxmox host (`10.10.10.0/24`) — internal-only, NAT disabled
 - provision staging intermediate CA in step-ca under `staging-intermediate` issuer
 - create `staging/` mount in OpenBao with a mirrored policy hierarchy
 - update `filter_plugins/platform_facts.py` to resolve env-scoped values from `stack.yaml`
@@ -49,7 +49,7 @@
 ## Verification
 
 - `make live-apply env=staging playbook=docker-runtime.yml` completes without error
-- staging VM is reachable via SSH on `10.20.10.20`
+- staging VM is reachable via SSH on `10.10.10.20`
 - staging VM cannot reach production VMs on `10.10.10.0/24`
 - OpenBao staging token cannot read `secret/prod/` mounts
 

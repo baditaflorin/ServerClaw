@@ -48,6 +48,10 @@
           "requires_compose_secrets": {
             "type": "boolean"
           },
+          "oidc_provider": {
+            "type": "string",
+            "enum": ["authentik", "keycloak"]
+          },
           "suppression_preset": {
             "type": "string",
             "minLength": 1
@@ -64,6 +68,9 @@
             "minLength": 1
           },
           "keycloak_client_generated": {
+            "type": "boolean"
+          },
+          "authentik_client_generated": {
             "type": "boolean"
           },
           "notes": {

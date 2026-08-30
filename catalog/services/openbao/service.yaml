@@ -16,6 +16,7 @@ service:
     - openbao_controller_approle
     - openbao_atlas_approle
     - openbao_mail_platform_approle
+    - openbao_runtime_secret_provisioner_approle
   adr: '0043'
   runbook: docs/runbooks/configure-openbao.md
   runtime_pool: runtime-control

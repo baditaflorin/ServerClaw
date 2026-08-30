@@ -1,0 +1,62 @@
+---
+- name: Verify the Authentik OAuth reconciler inputs exist on the controller
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ authentik_oauth_manifest_file }}"
+    - "{{ authentik_oauth_reconcile_script }}"
+    - "{{ authentik_oauth_reconcile_token_file }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_oauth_reconcile_inputs
+  no_log: true
+
+- name: Assert the Authentik OAuth reconciler inputs are present
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists | default(false)
+      - item.stat.size | default(0) | int > 0
+    fail_msg: "An Authentik OAuth reconciler manifest, script, or token file is missing."
+  loop: "{{ authentik_oauth_reconcile_inputs.results }}"
+  loop_control:
+    label: "{{ item.item | basename }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Build the Authentik OAuth reconciler command
+  ansible.builtin.set_fact:
+    authentik_oauth_reconcile_argv: >-
+      {{
+        [
+          'uv', 'run', '--no-project', '--with', 'pyyaml', 'python',
+          authentik_oauth_reconcile_script,
+          '--manifest', authentik_oauth_manifest_file,
+          '--base-url', authentik_public_url,
+          '--platform-domain', platform_domain,
+          '--token-file', authentik_oauth_reconcile_token_file
+        ]
+        + (
+          authentik_oauth_reconcile_clients
+          | map('regex_replace', '^', '--client=')
+          | list
+        )
+      }}
+  no_log: true
+
+- name: Apply the Authentik OAuth2 provider and application manifest
+  ansible.builtin.command:
+    argv: "{{ authentik_oauth_reconcile_argv + ['--apply'] }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_oauth_reconcile_apply
+  changed_when: (authentik_oauth_reconcile_apply.stdout | from_json).changed | bool
+  no_log: true
+
+- name: Prove Authentik OAuth reconciliation is idempotent
+  ansible.builtin.command:
+    argv: "{{ authentik_oauth_reconcile_argv + ['--check', '--expect-no-change'] }}"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  no_log: true

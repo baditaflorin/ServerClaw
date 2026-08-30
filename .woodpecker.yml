@@ -1,8 +1,7 @@
 when:
-  - event: manual
-  - event: push
-    branch: main
-  - event: pull_request
+  # Workflow-level conditions are conjunctive; keep the global predicate to
+  # events so GitHub pull requests are not excluded before any step is built.
+  event: [manual, push, pull_request]
 
 labels:
   lv3: "true"
@@ -16,13 +15,21 @@ steps:
       - python3 -m pip install --no-cache-dir uv ansible-core
       - python3 --version
       - uv --version
-      - test -n "$LV3_WOODPECKER_SECRET_SMOKE"
       - make generate-platform-vars
       - git diff --exit-code -- inventory/group_vars/platform.yml inventory/group_vars/platform_tls_certs.yml
       - make validate-generated-vars
       - ANSIBLE_CONFIG="$PWD/ansible.cfg" ANSIBLE_COLLECTIONS_PATH="$PWD/collections" make syntax-check-woodpecker
       - ./scripts/validate_repo.sh json health-probes agent-standards
       - uv run --with pytest --with pyyaml python -m pytest tests/test_generate_platform_vars.py tests/test_postgres_vm_access_policy.py tests/test_woodpecker_playbook.py tests/test_woodpecker_runtime_role.py tests/test_woodpecker_client.py -q
+
+  validate-secret-contract:
+    image: alpine:3.22
+    commands:
+      - test -n "$LV3_WOODPECKER_SECRET_SMOKE"
     environment:
       LV3_WOODPECKER_SECRET_SMOKE:
         from_secret: LV3_WOODPECKER_SECRET_SMOKE
+    when:
+      - event: manual
+      - event: push
+        branch: main

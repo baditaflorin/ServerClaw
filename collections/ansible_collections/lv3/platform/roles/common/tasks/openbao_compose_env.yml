@@ -1,13 +1,14 @@
-# Purpose: Render and install an OpenBao-backed compose environment injection bundle for a runtime service.
-# Use case: Included by runtime roles that source their `.env` material from OpenBao instead of committing secrets.
-# Inputs: Service name, runtime paths, OpenBao secret payload, AppRole metadata, and agent template inputs.
-# Outputs: Ensures the OpenBao policy, AppRole, agent config, and compose env rendering assets exist for the target service.
-# Idempotency: Partially idempotent because secret writes and AppRole material can rotate when requested inputs change.
-# Dependencies: ADR 0165, ADR 0043, ADR 0077, and ADR 0197.
+# Purpose: Provision and verify an OpenBao-backed Compose environment for one registered runtime service.
+# Use case: Included by Docker Compose roles whose runtime payload is stored below their registered services/ KV namespace.
+# Inputs: Registered service identity, secret payload, pre-created service AppRole metadata, agent paths, and a narrow provisioner AppRole artifact.
+# Outputs: Reconciles the service KV payload, refreshes a valid service secret ID when needed, and proves a fresh OpenBao Agent render.
+# Idempotency: Desired OpenBao data and files are idempotent; the transient env is deliberately re-rendered to prove delivery.
+# Dependencies: ADR 0165, ADR 0043, ADR 0077, ADR 0197, and the openbao_runtime generated service contracts.
 ---
-- name: Validate OpenBao compose env helper inputs
+- name: Validate raw OpenBao compose env helper inputs
   ansible.builtin.assert:
     that:
+      - platform_service_registry is mapping
       - common_openbao_compose_env_service_name | length > 0
       - common_openbao_compose_env_agent_dir | length > 0
       - common_openbao_compose_env_runtime_dir | length > 0
@@ -21,94 +22,155 @@
       - common_openbao_compose_env_agent_template_file | length > 0
       - >-
         (common_openbao_compose_env_agent_template_local_file | default('') | length > 0)
-        or
-        (common_openbao_compose_env_agent_template_src | default('') | length > 0)
+        or (common_openbao_compose_env_agent_template_src | default('') | length > 0)
         or (common_openbao_compose_env_agent_template_content | default('') | length > 0)
       - common_openbao_compose_env_role_id_file | length > 0
       - common_openbao_compose_env_secret_id_file | length > 0
       - common_openbao_compose_env_image | length > 0
-      - openbao_init_local_file | length > 0
+      - common_openbao_compose_env_provisioner_credential_file | length > 0
+      - common_openbao_compose_env_provisioner_approle_name | length > 0
+      - common_openbao_compose_env_provisioner_policy_name | length > 0
       - openbao_http_port | string | length > 0
+      - not (common_openbao_compose_env_manage_local_openbao_runtime | bool)
+      - common_openbao_compose_env_require_fresh_agent_render | bool
     fail_msg: >-
-      common openbao_compose_env helper requires runtime paths, OpenBao secret payload,
-      AppRole metadata, and either a controller-local template source or pre-rendered template content.
+      The OpenBao Compose helper requires a registered runtime service, runtime
+      paths, a non-empty payload, a pre-created service AppRole contract, and a
+      narrow provisioner credential. It never restarts or unseals OpenBao.
 
-- name: Check whether the controller-local OpenBao init payload exists
+- name: Initialize registered OpenBao service matches
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_registered_service_matches: []
+
+- name: Resolve the caller against registered needs_openbao Compose services
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_registered_service_matches: >-
+      {{
+        common_openbao_compose_env_registered_service_matches
+        + [
+            {
+              'registry_key': item.key,
+              'secret_namespace': common_openbao_compose_env_registry_secret_namespace
+            }
+          ]
+      }}
+  vars:
+    common_openbao_compose_env_registry_secret_namespace: >-
+      {{ common_openbao_compose_env_secret_namespace_overrides[item.key] | default(item.key, true) }}
+    common_openbao_compose_env_registry_aliases:
+      - "{{ item.key }}"
+      - "{{ common_openbao_compose_env_secret_namespace_overrides[item.key] | default(item.key, true) }}"
+      - "{{ (item.value.site_dir | default('/opt/' ~ item.key, true)) | basename }}"
+  loop: "{{ platform_service_registry | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when:
+    - item.value.service_type | default('') == 'docker_compose'
+    - item.value.needs_openbao | default(true) | bool
+    - common_openbao_compose_env_service_name in common_openbao_compose_env_registry_aliases
+
+- name: Require one unambiguous registered OpenBao service
+  ansible.builtin.assert:
+    that:
+      - common_openbao_compose_env_registered_service_matches | length == 1
+    fail_msg: >-
+      {{ common_openbao_compose_env_service_name }} must resolve to exactly one
+      Docker Compose service with needs_openbao=true before secret provisioning.
+
+- name: Record the registered OpenBao service contract
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_registered_service: >-
+      {{ common_openbao_compose_env_registered_service_matches | first }}
+    common_openbao_compose_env_expected_policy_name: >-
+      {{
+        platform_identity.config_prefix
+        ~ '-service-'
+        ~ (common_openbao_compose_env_registered_service_matches | first).secret_namespace
+        ~ '-runtime'
+      }}
+    common_openbao_compose_env_expected_approle_name: >-
+      {{ (common_openbao_compose_env_registered_service_matches | first).secret_namespace ~ '-runtime' }}
+    common_openbao_compose_env_expected_secret_path: >-
+      {{ 'services/' ~ (common_openbao_compose_env_registered_service_matches | first).secret_namespace ~ '/runtime-env' }}
+
+- name: Enforce the registered OpenBao service boundary
+  ansible.builtin.assert:
+    that:
+      - common_openbao_compose_env_registered_service.registry_key is match('^[a-z0-9][a-z0-9_-]*$')
+      - common_openbao_compose_env_registered_service.secret_namespace is match('^[a-z0-9][a-z0-9_-]*$')
+      - common_openbao_compose_env_secret_path == common_openbao_compose_env_expected_secret_path
+      - common_openbao_compose_env_policy_name == common_openbao_compose_env_expected_policy_name
+      - common_openbao_compose_env_approle_name == common_openbao_compose_env_expected_approle_name
+      - common_openbao_compose_env_approle_name not in common_openbao_compose_env_protected_approle_names
+      - ('kv/data/' ~ common_openbao_compose_env_secret_path) in common_openbao_compose_env_policy_rules
+      - ('kv/metadata/' ~ common_openbao_compose_env_secret_path) in common_openbao_compose_env_policy_rules
+      - (common_openbao_compose_env_agent_config_file | dirname) == common_openbao_compose_env_agent_dir
+      - (common_openbao_compose_env_agent_template_file | dirname) == common_openbao_compose_env_agent_dir
+      - (common_openbao_compose_env_role_id_file | dirname) == common_openbao_compose_env_agent_dir
+      - (common_openbao_compose_env_secret_id_file | dirname) == common_openbao_compose_env_agent_dir
+      - (common_openbao_compose_env_env_file | dirname) == common_openbao_compose_env_runtime_dir
+    fail_msg: >-
+      The requested secret path, policy, AppRole, or agent files escape the
+      registered runtime-service contract. Controller and provisioner identities
+      can never be managed through this helper.
+
+- name: Check for the controller-local runtime-secret provisioner credential
   ansible.builtin.stat:
-    path: "{{ openbao_init_local_file }}"
+    path: "{{ common_openbao_compose_env_provisioner_credential_file }}"
   delegate_to: localhost
   become: false
-  register: common_openbao_compose_env_init_payload_local
+  register: common_openbao_compose_env_provisioner_credential_stat
   no_log: true
 
-- name: Fail when the controller-local OpenBao init payload is missing
-  ansible.builtin.fail:
-    msg: >-
-      {{ openbao_init_local_file }} is missing on the control machine.
-      Converge OpenBao before enabling runtime secret injection for {{ common_openbao_compose_env_service_name }}.
-  when: not common_openbao_compose_env_init_payload_local.stat.exists
+- name: Require the controller-local runtime-secret provisioner credential
+  ansible.builtin.assert:
+    that:
+      - common_openbao_compose_env_provisioner_credential_stat.stat.exists
+      - common_openbao_compose_env_provisioner_credential_stat.stat.isreg | default(false)
+    fail_msg: >-
+      The narrow runtime-secret provisioner AppRole artifact is unavailable.
+      Bootstrap it through the governed OpenBao administration path; no root-token fallback exists.
 
-- name: Record the controller-local OpenBao init payload
+- name: Read the runtime-secret provisioner credential
+  ansible.builtin.slurp:
+    src: "{{ common_openbao_compose_env_provisioner_credential_file }}"
+  delegate_to: localhost
+  become: false
+  register: common_openbao_compose_env_provisioner_credential_raw
+  no_log: true
+
+- name: Record the runtime-secret provisioner credential
   ansible.builtin.set_fact:
-    common_openbao_compose_env_init_payload: "{{ lookup('ansible.builtin.file', openbao_init_local_file) | from_json }}"
+    common_openbao_compose_env_provisioner_credential: >-
+      {{ common_openbao_compose_env_provisioner_credential_raw.content | b64decode | from_json }}
   no_log: true
 
-- name: Record OpenBao API facts for compose env injection
+- name: Validate the runtime-secret provisioner credential shape
+  ansible.builtin.assert:
+    that:
+      - >-
+        common_openbao_compose_env_provisioner_credential.role_name
+        == common_openbao_compose_env_provisioner_approle_name
+      - common_openbao_compose_env_provisioner_credential.auth_path | default('approle') == 'approle'
+      - common_openbao_compose_env_provisioner_credential.role_id | default('') | length > 0
+      - common_openbao_compose_env_provisioner_credential.secret_id | default('') | length > 0
+    fail_msg: >-
+      The runtime-secret provisioner artifact is malformed or belongs to a different AppRole.
+  no_log: true
+
+- name: Record the OpenBao API URL for Compose secret provisioning
   ansible.builtin.set_fact:
     common_openbao_compose_env_api_url: >-
       {{
         common_openbao_compose_env_openbao_address
         | default('http://127.0.0.1:' ~ (openbao_http_port | string), true)
       }}
-  no_log: true
 
-- name: Recover the local OpenBao runtime before helper API calls
-  ansible.builtin.include_tasks: ensure_local_openbao_runtime.yml
-  vars:
-    common_local_openbao_runtime_consumer_name: "{{ common_openbao_compose_env_service_name }}"
-  when: common_openbao_compose_env_manage_local_openbao_runtime | bool
-
-- name: Ensure the controller-local SSH control path directory exists before OpenBao API retries
-  ansible.builtin.file:
-    path: "{{ lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') }}"
-    state: directory
-    mode: "0700"
-  delegate_to: localhost
-  become: false
-  changed_when: false
-  when: (lookup('ansible.builtin.env', 'ANSIBLE_SSH_CONTROL_PATH_DIR') | default('', true) | length) > 0
-
-- name: Record whether the local OpenBao runtime needed recovery for compose env injection
-  ansible.builtin.set_fact:
-    common_openbao_compose_env_runtime_needs_recovery: >-
-      {{
-        (
-          (common_local_openbao_runtime_probe.status | default(0))
-          not in [200, 429, 472, 473, 501, 503]
-        )
-        if common_openbao_compose_env_manage_local_openbao_runtime | bool
-        else false
-      }}
-
-- name: Wait for the Docker daemon to answer after networking recovery
-  ansible.builtin.command:
-    argv:
-      - docker
-      - info
-      - --format
-      - '{{ "{{.ServerVersion}}" }}'
-  register: common_openbao_compose_env_docker_info
-  changed_when: false
-  retries: 10
-  delay: 2
-  until: common_openbao_compose_env_docker_info.rc == 0
-  when: common_openbao_compose_env_runtime_needs_recovery | bool
-
-- name: Wait for the configured OpenBao API to answer before runtime secret injection
+- name: Wait for the configured OpenBao API without mutating its runtime
   ansible.builtin.uri:
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
     method: GET
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
     status_code:
       - 200
       - 429
@@ -116,63 +178,165 @@
       - 473
       - 501
       - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_api_health
-  retries: 48
+  retries: 12
   delay: 5
   until: common_openbao_compose_env_api_health.status in [200, 429, 472, 473, 501, 503]
   changed_when: false
 
-- name: Ensure the configured OpenBao API is unsealed before runtime secret injection
-  ansible.builtin.include_tasks: unseal_openbao_api.yml
-  vars:
-    common_openbao_unseal_api_url: "{{ common_openbao_compose_env_api_url }}"
-    common_openbao_unseal_context: "runtime secret injection for {{ common_openbao_compose_env_service_name }}"
-    common_openbao_unseal_init_payload: "{{ common_openbao_compose_env_init_payload }}"
-
-- name: Confirm the configured OpenBao API is unsealed
+- name: Read the configured OpenBao seal status without attempting unseal
   ansible.builtin.uri:
     url: "{{ common_openbao_compose_env_api_url }}/v1/sys/seal-status"
     method: GET
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
     return_content: true
     status_code: 200
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
-  register: common_openbao_compose_env_unsealed_status
-  retries: 12
-  delay: 2
-  until:
-    - common_openbao_compose_env_unsealed_status.status == 200
-    - not (common_openbao_compose_env_unsealed_status.json.sealed | bool)
+  register: common_openbao_compose_env_seal_status
   changed_when: false
 
-- name: Assert the configured OpenBao API is unsealed before runtime secret injection
+- name: Fail closed when OpenBao is sealed or not initialized
   ansible.builtin.assert:
     that:
-      - not (common_openbao_compose_env_unsealed_status.json.sealed | bool)
+      - common_openbao_compose_env_seal_status.json.initialized | default(false) | bool
+      - not (common_openbao_compose_env_seal_status.json.sealed | default(true) | bool)
+      - common_openbao_compose_env_api_health.status in [200, 429, 472, 473]
     fail_msg: >-
-      OpenBao remained sealed on the runtime host while preparing secret injection
-      for {{ common_openbao_compose_env_service_name }}.
+      OpenBao is sealed, uninitialized, or unavailable. Runtime-service
+      provisioning never restarts or unseals the shared secret authority.
 
-- name: Wait for the configured OpenBao API to become active
+- name: Login with the runtime-secret provisioner AppRole
   ansible.builtin.uri:
-    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
-    method: GET
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/login"
+    method: POST
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
+    body_format: json
+    body:
+      role_id: "{{ common_openbao_compose_env_provisioner_credential.role_id }}"
+      secret_id: "{{ common_openbao_compose_env_provisioner_credential.secret_id }}"
+    return_content: true
     status_code:
       - 200
-      - 429
-      - 472
-      - 473
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+      - 400
+      - 403
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
-  register: common_openbao_compose_env_health
-  retries: 48
-  delay: 5
-  until: common_openbao_compose_env_health.status in [200, 429, 472, 473]
+  register: common_openbao_compose_env_provisioner_login
   changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Require a narrow authenticated provisioner token
+  ansible.builtin.assert:
+    that:
+      - common_openbao_compose_env_provisioner_login.status | default(0) == 200
+      - common_openbao_compose_env_provisioner_login.json.auth.client_token | default('') | length > 0
+      - >-
+        common_openbao_compose_env_provisioner_policy_name
+        in (common_openbao_compose_env_provisioner_login.json.auth.policies | default([]))
+      - "'root' not in (common_openbao_compose_env_provisioner_login.json.auth.policies | default([]))"
+      - >-
+        (
+          common_openbao_compose_env_provisioner_login.json.auth.policies
+          | default([])
+          | difference(['default', common_openbao_compose_env_provisioner_policy_name])
+          | length
+        ) == 0
+    fail_msg: >-
+      Runtime-secret provisioner authentication failed or returned an unsafe policy set.
+  no_log: true
+
+- name: Record the short-lived runtime-secret provisioner token
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_provisioner_token: >-
+      {{ common_openbao_compose_env_provisioner_login.json.auth.client_token }}
+  no_log: true
+
+- name: Record provisioner capability paths for the registered service
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_provisioner_kv_capability_path: >-
+      {{ 'kv/data/' ~ common_openbao_compose_env_expected_secret_path }}
+    common_openbao_compose_env_provisioner_role_id_capability_path: >-
+      {{ 'auth/approle/role/' ~ common_openbao_compose_env_expected_approle_name ~ '/role-id' }}
+    common_openbao_compose_env_provisioner_secret_id_capability_path: >-
+      {{ 'auth/approle/role/' ~ common_openbao_compose_env_expected_approle_name ~ '/secret-id' }}
+    common_openbao_compose_env_provisioner_denied_capability_paths:
+      - "kv/data/services/{{ common_openbao_compose_env_registered_service.secret_namespace }}/__contract_probe__"
+      - "sys/policies/acl/{{ common_openbao_compose_env_expected_policy_name }}"
+      - "auth/approle/role/controller-automation"
+      - "auth/approle/role/controller-automation/role-id"
+      - "auth/approle/role/controller-automation/secret-id"
+      - "auth/approle/role/{{ common_openbao_compose_env_provisioner_approle_name }}"
+      - "auth/approle/role/{{ common_openbao_compose_env_provisioner_approle_name }}/role-id"
+      - "auth/approle/role/{{ common_openbao_compose_env_provisioner_approle_name }}/secret-id"
+
+- name: Read the provisioner token's effective capabilities
+  ansible.builtin.uri:
+    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/capabilities-self"
+    method: POST
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
+    headers:
+      X-Vault-Token: "{{ common_openbao_compose_env_provisioner_token }}"
+    body_format: json
+    body:
+      paths: >-
+        {{
+          [
+            common_openbao_compose_env_provisioner_kv_capability_path,
+            common_openbao_compose_env_provisioner_role_id_capability_path,
+            common_openbao_compose_env_provisioner_secret_id_capability_path
+          ]
+          + common_openbao_compose_env_provisioner_denied_capability_paths
+        }}
+    return_content: true
+    status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
+  become: false
+  register: common_openbao_compose_env_provisioner_capabilities
+  changed_when: false
+  no_log: true
+
+- name: Require only the intended registered-service provisioner capabilities
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          common_openbao_compose_env_provisioner_capabilities.json.data[
+            common_openbao_compose_env_provisioner_kv_capability_path
+          ] | default([]) | sort
+        ) == ['create', 'read', 'update']
+      - >-
+        (
+          common_openbao_compose_env_provisioner_capabilities.json.data[
+            common_openbao_compose_env_provisioner_role_id_capability_path
+          ] | default([]) | sort
+        ) == ['read']
+      - >-
+        (
+          common_openbao_compose_env_provisioner_capabilities.json.data[
+            common_openbao_compose_env_provisioner_secret_id_capability_path
+          ] | default([]) | sort
+        ) == ['create', 'update']
+    fail_msg: >-
+      The runtime-secret provisioner does not have the exact capabilities
+      required by the registered service contract.
+  no_log: true
+
+- name: Require the provisioner to be denied policy and protected-AppRole management
+  ansible.builtin.assert:
+    that:
+      - item in common_openbao_compose_env_provisioner_capabilities.json.data
+      - common_openbao_compose_env_provisioner_capabilities.json.data[item] == ['deny']
+    fail_msg: >-
+      The runtime-secret provisioner unexpectedly has access to a policy or
+      protected AppRole management path.
+  loop: "{{ common_openbao_compose_env_provisioner_denied_capability_paths }}"
+  loop_control:
+    label: "{{ item }}"
+  no_log: true
 
 - name: Ensure the OpenBao agent and runtime env directories exist
   ansible.builtin.file:
@@ -187,110 +351,18 @@
     - path: "{{ common_openbao_compose_env_runtime_dir }}"
       mode: "0700"
 
-- name: Render the bootstrap runtime env file from the managed secret payload
-  ansible.builtin.copy:
-    dest: "{{ common_openbao_compose_env_env_file }}"
-    content: |-
-      {% for item in common_openbao_compose_env_secret_payload | dictsort %}
-      {{ item.0 }}={{ item.1 }}
-      {% endfor %}
-    owner: root
-    group: root
-    mode: "0600"
-  no_log: true
-
-- name: Probe the current runtime secret payload from OpenBao
+- name: Read the current registered runtime secret payload from OpenBao
   ansible.builtin.uri:
     url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: GET
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
     headers:
-      X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
+      X-Vault-Token: "{{ common_openbao_compose_env_provisioner_token }}"
     return_content: true
     status_code:
       - 200
       - 404
-      - 500
-      - 502
-      - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
-  become: false
-  register: common_openbao_compose_env_current_secret_probe
-  changed_when: false
-  failed_when: false
-  no_log: true
-
-- name: Read the configured OpenBao seal status after a transient runtime secret payload read failure
-  ansible.builtin.uri:
-    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/seal-status"
-    method: GET
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    return_content: true
-    status_code: 200
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
-  become: false
-  register: common_openbao_compose_env_secret_recovery_seal_status
-  retries: 12
-  delay: 2
-  until: common_openbao_compose_env_secret_recovery_seal_status.status == 200
-  changed_when: false
-  when: common_openbao_compose_env_current_secret_probe.status == 503
-
-- name: Unseal the configured OpenBao API when runtime secret payload reads catch it sealed
-  ansible.builtin.uri:
-    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/unseal"
-    method: POST
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    body_format: json
-    body:
-      key: "{{ item }}"
-    status_code: 200
-  loop: "{{ common_openbao_compose_env_init_payload.keys_base64[: (openbao_init_key_threshold | default(2) | int)] }}"
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
-  become: false
-  register: common_openbao_compose_env_secret_recovery_unseal
-  retries: 6
-  delay: 2
-  until: common_openbao_compose_env_secret_recovery_unseal.status == 200
-  when:
-    - common_openbao_compose_env_current_secret_probe.status == 503
-    - common_openbao_compose_env_secret_recovery_seal_status.json.sealed | bool
-  no_log: true
-
-- name: Wait for the configured OpenBao API to become active after runtime secret payload recovery
-  ansible.builtin.uri:
-    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/health"
-    method: GET
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    status_code:
-      - 200
-      - 429
-      - 472
-      - 473
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
-  become: false
-  register: common_openbao_compose_env_secret_recovery_health
-  retries: 24
-  delay: 5
-  until: common_openbao_compose_env_secret_recovery_health.status in [200, 429, 472, 473]
-  changed_when: false
-  when: common_openbao_compose_env_current_secret_probe.status in [500, 502, 503]
-
-- name: Read the current runtime secret payload from OpenBao
-  ansible.builtin.uri:
-    url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
-    method: GET
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    headers:
-      X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
-    return_content: true
-    status_code:
-      - 200
-      - 404
-      - 500
-      - 502
-      - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_current_secret
   retries: "{{ common_openbao_api_operation_retries }}"
@@ -299,18 +371,18 @@
   changed_when: false
   no_log: true
 
-- name: Store the runtime secret payload in OpenBao
+- name: Store the registered runtime secret payload in OpenBao
   ansible.builtin.uri:
     url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
     method: POST
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
     headers:
-      X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
+      X-Vault-Token: "{{ common_openbao_compose_env_provisioner_token }}"
     body_format: json
     body:
       data: "{{ common_openbao_compose_env_secret_payload }}"
     status_code: 200
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_secret_upsert
   retries: "{{ common_openbao_api_operation_retries }}"
@@ -318,92 +390,20 @@
   until: common_openbao_compose_env_secret_upsert.status == 200
   when: >-
     common_openbao_compose_env_current_secret.status == 404
-    or (common_openbao_compose_env_current_secret.json.data.data | default({})) != common_openbao_compose_env_secret_payload
+    or (common_openbao_compose_env_current_secret.json.data.data | default({}))
+       != common_openbao_compose_env_secret_payload
   no_log: true
 
-- name: Read the current OpenBao policy for the runtime AppRole
-  ansible.builtin.uri:
-    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/policies/acl/{{ common_openbao_compose_env_policy_name }}"
-    method: GET
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    headers:
-      X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
-    return_content: true
-    status_code:
-      - 200
-      - 404
-      - 500
-      - 502
-      - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
-  become: false
-  register: common_openbao_compose_env_current_policy
-  retries: "{{ common_openbao_api_operation_retries }}"
-  delay: "{{ common_openbao_api_operation_delay }}"
-  until: common_openbao_compose_env_current_policy.status in [200, 404]
-  changed_when: false
-  no_log: true
-
-- name: Upsert the OpenBao policy for the runtime AppRole
-  ansible.builtin.uri:
-    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/policies/acl/{{ common_openbao_compose_env_policy_name }}"
-    method: PUT
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    headers:
-      X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
-    body_format: json
-    body:
-      policy: "{{ common_openbao_compose_env_policy_rules }}"
-    status_code: 204
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
-  become: false
-  register: common_openbao_compose_env_policy_upsert
-  retries: "{{ common_openbao_api_operation_retries }}"
-  delay: "{{ common_openbao_api_operation_delay }}"
-  until: common_openbao_compose_env_policy_upsert.status == 204
-  when: >-
-    common_openbao_compose_env_current_policy.status == 404
-    or (common_openbao_compose_env_current_policy.json.data.policy | default('')) != common_openbao_compose_env_policy_rules
-  no_log: true
-
-- name: Upsert the OpenBao AppRole for the runtime agent
-  ansible.builtin.uri:
-    url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}"
-    method: POST
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    headers:
-      X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
-    body_format: json
-    body:
-      token_policies: "{{ common_openbao_compose_env_policy_name }}"
-      token_ttl: 15m
-      token_max_ttl: 1h
-      token_num_uses: 0
-      secret_id_ttl: 0
-      secret_id_num_uses: 0
-    status_code: 204
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
-  become: false
-  register: common_openbao_compose_env_approle_upsert
-  retries: "{{ common_openbao_api_operation_retries }}"
-  delay: "{{ common_openbao_api_operation_delay }}"
-  until: common_openbao_compose_env_approle_upsert.status == 204
-  no_log: true
-
-- name: Read the OpenBao AppRole role ID
+- name: Read the pre-created service AppRole role ID
   ansible.builtin.uri:
     url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/role-id"
     method: GET
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
     headers:
-      X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
+      X-Vault-Token: "{{ common_openbao_compose_env_provisioner_token }}"
     return_content: true
-    status_code:
-      - 200
-      - 500
-      - 502
-      - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+    status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
   register: common_openbao_compose_env_role_id
   retries: "{{ common_openbao_api_operation_retries }}"
@@ -412,7 +412,7 @@
   changed_when: false
   no_log: true
 
-- name: Persist the OpenBao AppRole role ID
+- name: Persist the service AppRole role ID
   ansible.builtin.copy:
     dest: "{{ common_openbao_compose_env_role_id_file }}"
     content: "{{ common_openbao_compose_env_role_id.json.data.role_id }}\n"
@@ -421,44 +421,216 @@
     mode: "0600"
   no_log: true
 
-- name: Check whether the OpenBao AppRole secret ID already exists on disk
+- name: Check whether a service AppRole secret ID exists on disk
   ansible.builtin.stat:
     path: "{{ common_openbao_compose_env_secret_id_file }}"
   register: common_openbao_compose_env_secret_id_stat
   no_log: true
 
-- name: Generate a durable OpenBao AppRole secret ID
+- name: Initialize the existing service AppRole secret ID
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_existing_secret_id: ""
+  no_log: true
+
+- name: Read the existing service AppRole secret ID
+  ansible.builtin.slurp:
+    src: "{{ common_openbao_compose_env_secret_id_file }}"
+  register: common_openbao_compose_env_existing_secret_id_raw
+  when: common_openbao_compose_env_secret_id_stat.stat.exists
+  no_log: true
+
+- name: Record the existing service AppRole secret ID
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_existing_secret_id: >-
+      {{ common_openbao_compose_env_existing_secret_id_raw.content | b64decode | trim }}
+  when: common_openbao_compose_env_secret_id_stat.stat.exists
+  no_log: true
+
+- name: Verify the existing service AppRole secret ID
   ansible.builtin.uri:
-    url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/secret-id"
+    url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/login"
     method: POST
-    validate_certs: "{{ common_openbao_compose_env_validate_certs | default(true) }}"
-    headers:
-      X-Vault-Token: "{{ common_openbao_compose_env_init_payload.root_token }}"
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
     body_format: json
-    body: {}
+    body:
+      role_id: "{{ common_openbao_compose_env_role_id.json.data.role_id }}"
+      secret_id: "{{ common_openbao_compose_env_existing_secret_id }}"
     return_content: true
     status_code:
       - 200
-      - 500
-      - 502
-      - 503
-  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit) }}"
+      - 400
+      - 403
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
   become: false
-  register: common_openbao_compose_env_secret_id
-  retries: "{{ common_openbao_api_operation_retries }}"
-  delay: "{{ common_openbao_api_operation_delay }}"
-  until: common_openbao_compose_env_secret_id.status == 200
-  when: not common_openbao_compose_env_secret_id_stat.stat.exists
+  register: common_openbao_compose_env_existing_service_login
+  changed_when: false
+  failed_when: false
+  when: common_openbao_compose_env_existing_secret_id | length > 0
   no_log: true
 
-- name: Persist the durable OpenBao AppRole secret ID
+- name: Record whether the existing service AppRole secret ID remains valid
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_existing_secret_id_valid: >-
+      {{
+        (common_openbao_compose_env_existing_service_login.status | default(0)) == 200
+        and (
+          common_openbao_compose_env_existing_service_login.json.auth.client_token
+          | default('')
+          | length
+        ) > 0
+      }}
+  no_log: true
+
+- name: Generate a service AppRole secret ID when the on-disk credential is absent or stale
+  ansible.builtin.uri:
+    url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/role/{{ common_openbao_compose_env_approle_name }}/secret-id"
+    method: POST
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
+    headers:
+      X-Vault-Token: "{{ common_openbao_compose_env_provisioner_token }}"
+    body_format: json
+    body: {}
+    return_content: true
+    status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
+  become: false
+  register: common_openbao_compose_env_generated_secret_id
+  retries: "{{ common_openbao_api_operation_retries }}"
+  delay: "{{ common_openbao_api_operation_delay }}"
+  until: common_openbao_compose_env_generated_secret_id.status == 200
+  when: not (common_openbao_compose_env_existing_secret_id_valid | bool)
+  no_log: true
+
+- name: Record the effective service AppRole secret ID
+  ansible.builtin.set_fact:
+    common_openbao_compose_env_effective_secret_id: >-
+      {{
+        common_openbao_compose_env_existing_secret_id
+        if common_openbao_compose_env_existing_secret_id_valid | bool
+        else common_openbao_compose_env_generated_secret_id.json.data.secret_id
+      }}
+  no_log: true
+
+- name: Persist a refreshed service AppRole secret ID
   ansible.builtin.copy:
     dest: "{{ common_openbao_compose_env_secret_id_file }}"
-    content: "{{ common_openbao_compose_env_secret_id.json.data.secret_id }}\n"
+    content: "{{ common_openbao_compose_env_effective_secret_id }}\n"
     owner: root
     group: root
     mode: "0600"
-  when: not common_openbao_compose_env_secret_id_stat.stat.exists
+  when: not (common_openbao_compose_env_existing_secret_id_valid | bool)
+  no_log: true
+
+- name: Login with the effective service AppRole credential
+  ansible.builtin.uri:
+    url: "{{ common_openbao_compose_env_api_url }}/v1/auth/approle/login"
+    method: POST
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
+    body_format: json
+    body:
+      role_id: "{{ common_openbao_compose_env_role_id.json.data.role_id }}"
+      secret_id: "{{ common_openbao_compose_env_effective_secret_id }}"
+    return_content: true
+    status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
+  become: false
+  register: common_openbao_compose_env_service_login
+  changed_when: false
+  no_log: true
+
+- name: Require the service AppRole to receive only its generated policy
+  ansible.builtin.assert:
+    that:
+      - common_openbao_compose_env_service_login.status == 200
+      - common_openbao_compose_env_service_login.json.auth.client_token | default('') | length > 0
+      - >-
+        common_openbao_compose_env_expected_policy_name
+        in (common_openbao_compose_env_service_login.json.auth.policies | default([]))
+      - "'root' not in (common_openbao_compose_env_service_login.json.auth.policies | default([]))"
+      - >-
+        (
+          common_openbao_compose_env_service_login.json.auth.policies
+          | default([])
+          | difference(['default', common_openbao_compose_env_expected_policy_name])
+          | length
+        ) == 0
+    fail_msg: >-
+      The generated service AppRole is missing, cannot authenticate, or has an unsafe policy set.
+  no_log: true
+
+- name: Read the service token's effective capabilities
+  ansible.builtin.uri:
+    url: "{{ common_openbao_compose_env_api_url }}/v1/sys/capabilities-self"
+    method: POST
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
+    headers:
+      X-Vault-Token: "{{ common_openbao_compose_env_service_login.json.auth.client_token }}"
+    body_format: json
+    body:
+      paths:
+        - "kv/data/{{ common_openbao_compose_env_expected_secret_path }}"
+        - "kv/data/services/{{ common_openbao_compose_env_registered_service.secret_namespace }}/__contract_probe__"
+        - "sys/policies/acl/{{ common_openbao_compose_env_expected_policy_name }}"
+        - "auth/approle/role/{{ common_openbao_compose_env_expected_approle_name }}/secret-id"
+    return_content: true
+    status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
+  become: false
+  register: common_openbao_compose_env_service_capabilities
+  changed_when: false
+  no_log: true
+
+- name: Require a read-only exact-path service AppRole capability set
+  ansible.builtin.assert:
+    that:
+      - >-
+        common_openbao_compose_env_service_capabilities.json.data[
+          'kv/data/' ~ common_openbao_compose_env_expected_secret_path
+        ] == ['read']
+      - >-
+        common_openbao_compose_env_service_capabilities.json.data[
+          'kv/data/services/'
+          ~ common_openbao_compose_env_registered_service.secret_namespace
+          ~ '/__contract_probe__'
+        ] == ['deny']
+      - >-
+        common_openbao_compose_env_service_capabilities.json.data[
+          'sys/policies/acl/' ~ common_openbao_compose_env_expected_policy_name
+        ] == ['deny']
+      - >-
+        common_openbao_compose_env_service_capabilities.json.data[
+          'auth/approle/role/'
+          ~ common_openbao_compose_env_expected_approle_name
+          ~ '/secret-id'
+        ] == ['deny']
+    fail_msg: >-
+      The service AppRole is not constrained to read-only access for its exact
+      registered runtime-env secret.
+  no_log: true
+
+- name: Verify the service AppRole can read its exact runtime payload
+  ansible.builtin.uri:
+    url: "{{ common_openbao_compose_env_api_url }}/v1/kv/data/{{ common_openbao_compose_env_secret_path }}"
+    method: GET
+    validate_certs: "{{ common_openbao_compose_env_validate_certs }}"
+    headers:
+      X-Vault-Token: "{{ common_openbao_compose_env_service_login.json.auth.client_token }}"
+    return_content: true
+    status_code: 200
+  delegate_to: "{{ common_openbao_compose_env_api_host | default(omit, true) }}"
+  become: false
+  register: common_openbao_compose_env_service_secret_read
+  changed_when: false
+  no_log: true
+
+- name: Assert the service AppRole read the expected runtime payload
+  ansible.builtin.assert:
+    that:
+      - >-
+        (common_openbao_compose_env_service_secret_read.json.data.data | default({}))
+        == common_openbao_compose_env_secret_payload
+    fail_msg: >-
+      The service AppRole did not read back the expected registered runtime payload.
   no_log: true
 
 - name: Render the OpenBao agent configuration
@@ -469,7 +641,7 @@
     group: root
     mode: "0640"
 
-- name: Render the OpenBao agent runtime env template
+- name: Copy the controller-local OpenBao agent runtime env template
   ansible.builtin.copy:
     src: "{{ common_openbao_compose_env_agent_template_local_file }}"
     dest: "{{ common_openbao_compose_env_agent_template_file }}"
@@ -479,7 +651,7 @@
   when: common_openbao_compose_env_agent_template_local_file | default('') | length > 0
   no_log: true
 
-- name: Render the OpenBao agent runtime env template
+- name: Write the inline OpenBao agent runtime env template
   ansible.builtin.copy:
     dest: "{{ common_openbao_compose_env_agent_template_file }}"
     content: "{{ common_openbao_compose_env_agent_template_content }}"
@@ -491,7 +663,7 @@
     - common_openbao_compose_env_agent_template_content | default('') | length > 0
   no_log: true
 
-- name: Render the OpenBao agent runtime env template
+- name: Render the role-provided OpenBao agent runtime env template
   ansible.builtin.template:
     src: "{{ common_openbao_compose_env_agent_template_src }}"
     dest: "{{ common_openbao_compose_env_agent_template_file }}"
@@ -503,8 +675,67 @@
     - common_openbao_compose_env_agent_template_content | default('') | length == 0
   no_log: true
 
-- name: Remove legacy compose-directory env files
+- name: Remove any stale transient env before proving OpenBao Agent delivery
+  ansible.builtin.file:
+    path: "{{ common_openbao_compose_env_env_file }}"
+    state: absent
+  when: common_openbao_compose_env_require_fresh_agent_render | bool
+  changed_when: false
+  no_log: true
+
+- name: Render the transient env through a one-shot OpenBao Agent
+  ansible.builtin.command:
+    argv:
+      - timeout
+      - --signal=TERM
+      - "{{ common_openbao_compose_env_agent_render_timeout | string }}"
+      - docker
+      - run
+      - --rm
+      - --network
+      - host
+      - --user
+      - "0:0"
+      - --env
+      - BAO_SKIP_DROP_ROOT=true
+      - --volume
+      - "{{ common_openbao_compose_env_agent_dir }}:/openbao-agent:ro"
+      - --volume
+      - "{{ common_openbao_compose_env_runtime_dir }}:{{ common_openbao_compose_env_runtime_dir }}"
+      - "{{ common_openbao_compose_env_image }}"
+      - agent
+      - -exit-after-auth
+      - "-config=/openbao-agent/{{ common_openbao_compose_env_agent_config_file | basename }}"
+  register: common_openbao_compose_env_agent_render
+  changed_when: false
+  when: common_openbao_compose_env_require_fresh_agent_render | bool
+  no_log: true
+
+- name: Inspect the freshly rendered OpenBao Agent env
+  ansible.builtin.stat:
+    path: "{{ common_openbao_compose_env_env_file }}"
+  register: common_openbao_compose_env_fresh_env
+  when: common_openbao_compose_env_require_fresh_agent_render | bool
+  no_log: true
+
+- name: Require a fresh root-only OpenBao Agent env
+  ansible.builtin.assert:
+    that:
+      - common_openbao_compose_env_agent_render.rc == 0
+      - common_openbao_compose_env_fresh_env.stat.exists
+      - common_openbao_compose_env_fresh_env.stat.isreg
+      - common_openbao_compose_env_fresh_env.stat.size | int > 0
+      - common_openbao_compose_env_fresh_env.stat.mode == '0600'
+      - common_openbao_compose_env_fresh_env.stat.uid | int == 0
+      - common_openbao_compose_env_fresh_env.stat.gid | int == 0
+    fail_msg: >-
+      The one-shot OpenBao Agent did not freshly render a non-empty root-only runtime env.
+  when: common_openbao_compose_env_require_fresh_agent_render | bool
+  no_log: true
+
+- name: Remove legacy compose-directory env files after fresh agent delivery
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop: "{{ common_openbao_compose_env_legacy_env_files | default([]) }}"
+  when: common_openbao_compose_env_require_fresh_agent_render | bool

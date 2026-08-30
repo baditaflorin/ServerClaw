@@ -11,6 +11,7 @@ SCRIPTS_DIR = REPO_ROOT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
+import identity_yaml  # noqa: E402
 import validation_toolkit  # noqa: E402
 
 
@@ -96,6 +97,26 @@ with patch.object(validation_toolkit, "_find_identity_path", return_value=identi
                 elif child.is_dir():
                     child.rmdir()
 
+    def test_identity_loaders_prefer_explicit_selector_over_shared_overlay(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="explicit-identity-selector-") as temp_value:
+            repo_root = Path(temp_value) / "repo"
+            identity_path = repo_root / "inventory" / "group_vars" / "all" / "identity.yml"
+            shared_path = repo_root / ".local" / "identity.yml"
+            explicit_path = repo_root / ".local" / "identity.yml.selected"
+            identity_path.parent.mkdir(parents=True)
+            shared_path.parent.mkdir(parents=True)
+            identity_path.write_text("platform_domain: example.com\n", encoding="utf-8")
+            shared_path.write_text("platform_domain: shared.example\n", encoding="utf-8")
+            explicit_path.write_text("platform_domain: selected.example\n", encoding="utf-8")
+
+            with (
+                patch.dict("os.environ", {"PLATFORM_IDENTITY_OVERLAY": str(explicit_path)}),
+                patch.object(validation_toolkit, "_find_identity_path", return_value=identity_path),
+                patch.object(identity_yaml, "_find_identity_path", return_value=identity_path),
+            ):
+                self.assertEqual(validation_toolkit.load_identity_vars()["platform_domain"], "selected.example")
+                self.assertEqual(identity_yaml.load_identity_vars()["platform_domain"], "selected.example")
+
     def test_resolve_public_domain_placeholders_uses_shared_local_overlay_values(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="validation-toolkit-"))
         repo_root = temp_dir / "repo"
@@ -109,7 +130,11 @@ with patch.object(validation_toolkit, "_find_identity_path", return_value=identi
 
             payload = {
                 "url": "https://api.example.com",
-                "nested": [{"fqdn": "chat.example.com"}, {"label": "unchanged"}],
+                "nested": [
+                    {"fqdn": "chat.example.com"},
+                    {"cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/"},
+                    {"label": "unchanged"},
+                ],
             }
 
             with patch.object(validation_toolkit, "_find_identity_path", return_value=identity_path):
@@ -117,7 +142,8 @@ with patch.object(validation_toolkit, "_find_identity_path", return_value=identi
 
             self.assertEqual(resolved["url"], "https://api.example.com")
             self.assertEqual(resolved["nested"][0]["fqdn"], "chat.example.com")
-            self.assertEqual(resolved["nested"][1]["label"], "unchanged")
+            self.assertEqual(resolved["nested"][1]["cert_path"], "/etc/letsencrypt/live/lv3-edge/")
+            self.assertEqual(resolved["nested"][2]["label"], "unchanged")
         finally:
             for child in sorted(temp_dir.rglob("*"), reverse=True):
                 if child.is_file() or child.is_symlink():

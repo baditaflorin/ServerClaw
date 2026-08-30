@@ -27,7 +27,7 @@
       "name": "ws-0185-live-apply.preview.example.com"
     },
     {
-      "address": "10.20.10.130",
+      "address": "10.10.10.130",
       "kind": "vm",
       "name": "2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z-runtime",
       "vmid": 910

@@ -21,7 +21,7 @@
       "kind": "restore_target",
       "name": "restore-verify-docker-runtime-lv3",
       "vmid": 901,
-      "address": "10.20.10.100"
+      "address": "10.10.10.100"
     },
     {
       "kind": "host",

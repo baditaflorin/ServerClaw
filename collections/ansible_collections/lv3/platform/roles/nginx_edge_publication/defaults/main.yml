@@ -114,6 +114,26 @@ public_edge_security_headers_overrides:
     content_security_policy: >-
       default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';
       object-src 'none'
+  errors.{{ platform_domain }}:
+    # GlitchTip starts allauth OIDC with a same-origin form POST whose 302
+    # target is the selected identity provider. Browsers enforce form-action
+    # across that redirect, so retain only the selected and rollback origins.
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'
+      https://id.{{ platform_domain }} https://sso.{{ platform_domain }};
+      frame-ancestors 'none'; object-src 'none'; script-src 'self';
+      style-src 'self' 'unsafe-inline'; img-src 'self' data:;
+      font-src 'self' data:; connect-src 'self'; manifest-src 'self'
+  id.{{ platform_domain }}:
+    # Authentik renders its per-request browser configuration in an inline
+    # script.  Blocking it leaves window.authentik unset and breaks the
+    # post-login redirect flow, so confine this compatibility exception to
+    # the Authentik origin.
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data:; font-src 'self' data:; connect-src 'self' wss://id.{{ platform_domain }};
+      manifest-src 'self'
   bi.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';

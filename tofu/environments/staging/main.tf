@@ -25,9 +25,9 @@ module "docker_runtime_staging_lv3" {
   bridge                  = var.bridge
   network_firewall        = false
   mac_address             = "BC:24:11:20:00:20"
-  ip_address              = "10.20.10.20"
+  ip_address              = "10.10.10.20"
   ip_cidr                 = 24
-  gateway                 = "10.20.10.1"
+  gateway                 = "10.10.10.1"
   nameserver              = var.nameserver
   search_domain           = var.search_domain
   tags                    = ["docker", "runtime", "staging", "lv3"]
@@ -53,9 +53,9 @@ module "monitoring_staging_lv3" {
   bridge                  = var.bridge
   network_firewall        = false
   mac_address             = "BC:24:11:20:00:40"
-  ip_address              = "10.20.10.40"
+  ip_address              = "10.10.10.40"
   ip_cidr                 = 24
-  gateway                 = "10.20.10.1"
+  gateway                 = "10.10.10.1"
   nameserver              = var.nameserver
   search_domain           = var.search_domain
   tags                    = ["monitoring", "staging", "lv3"]

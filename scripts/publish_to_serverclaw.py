@@ -29,6 +29,7 @@ from audit_sanitization_coverage import (
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_PATH = REPO_ROOT / "config" / "publication-sanitization.yaml"
 REMOTE_NAME = "serverclaw"
+PUBLIC_DEFAULT_BRANCH = "main"
 
 # Binary file extensions to skip during regex replacement
 BINARY_EXTENSIONS = frozenset(
@@ -187,6 +188,21 @@ def delete_paths(worktree: Path, config: dict) -> int:
     return count
 
 
+def regenerate_public_derived_artifacts(worktree: Path) -> None:
+    """Regenerate committed derived files after Tier A source replacements.
+
+    The public host and identity templates intentionally differ from the
+    private deployment inputs.  Their generated inventory must therefore be
+    rebuilt before the snapshot is committed, otherwise ServerClaw CI detects
+    stale generated files immediately after `make generate-platform-vars`.
+    """
+    run(["make", "generate-platform-vars"], cwd=worktree)
+    # `generate-platform-vars` first refreshes cross-cutting artifacts, then
+    # embeds them in platform.yml. A second pass establishes that generated
+    # fixed point after Tier A inputs change together.
+    run(["make", "generate-platform-vars"], cwd=worktree)
+
+
 def check_leaks(worktree: Path, config: dict) -> list[str]:
     """Scan for leak markers in the sanitized tree.
 
@@ -230,9 +246,27 @@ def check_leaks(worktree: Path, config: dict) -> list[str]:
     return violations
 
 
+def base_branch_snapshot_on_public_main(worktree: Path) -> None:
+    """Make the staged sanitized tree a clean descendant of ServerClaw main.
+
+    A publish branch is a complete snapshot, so its original parent is the
+    private repository's commit.  Resetting only HEAD after staging preserves
+    that snapshot tree while making its eventual public PR merge cleanly
+    against the current protected ServerClaw default branch.
+    """
+    run(["git", "fetch", REMOTE_NAME, PUBLIC_DEFAULT_BRANCH], cwd=worktree)
+    run(["git", "reset", "--soft", f"{REMOTE_NAME}/{PUBLIC_DEFAULT_BRANCH}"], cwd=worktree)
+
+
 def commit_and_push(worktree: Path, source_sha: str, push: bool, branch: str | None = None) -> None:
     """Commit sanitized changes and optionally push."""
     run(["git", "add", "-A"], cwd=worktree)
+
+    # ServerClaw main is protected. For a publish branch, build a commit with
+    # the exact sanitized snapshot tree but the live public main as its parent,
+    # so unrelated public updates do not make the publication PR conflict.
+    if branch:
+        base_branch_snapshot_on_public_main(worktree)
 
     # Check if there are changes
     result = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=worktree, capture_output=True)
@@ -346,6 +380,11 @@ def main() -> int:
         n_sanitized = apply_string_replacements(worktree, config)
         print(f"  sanitized {n_sanitized} files")
 
+        # Tier A templates replace generator inputs wholesale. Rebuild the
+        # committed generated files before validating or publishing the fork.
+        print("\nRegenerating public derived artifacts")
+        regenerate_public_derived_artifacts(worktree)
+
         # Leak check
         print("\nLeak check...")
         violations = check_leaks(worktree, config)
@@ -357,7 +396,7 @@ def main() -> int:
                 print(f"  ... and {len(violations) - 50} more", file=sys.stderr)
             return 1
 
-        print(f"  PASSED (no leaks detected)")
+        print("  PASSED (no leaks detected)")
         print(f"\nSummary: {n_replaced} files replaced, {n_deleted} deleted, {n_sanitized} files sanitized")
 
         # Commit and optionally push

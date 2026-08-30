@@ -79,13 +79,13 @@
   vars:
     common_manage_service_secrets_generate:
       - path: "{{ directus_key_remote_file }}"
-        command: "{{ 'directus' | secret(length=32) }}"
+        value: "{{ 'directus' | secret(length=32) }}"
         label: "directus-key"
       - path: "{{ directus_secret_remote_file }}"
-        command: "{{ 'directus' | secret(length=32) }}"
+        value: "{{ 'directus' | secret(length=32) }}"
         label: "directus-secret"
       - path: "{{ directus_admin_password_remote_file }}"
-        command: "{{ 'directus' | secret(length=32) }}"
+        value: "{{ 'directus' | secret(length=32) }}"
         label: "directus-admin-password"
     common_manage_service_secrets_read:
       - "{{ directus_key_remote_file }}"

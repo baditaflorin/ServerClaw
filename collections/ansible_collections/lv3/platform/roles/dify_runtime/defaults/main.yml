@@ -8,7 +8,25 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
+# These compatibility defaults mirror that derivation because Ansible validates
+# the role argument spec before the first derive_service_defaults task runs.
 dify_service_topology: "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('dify') }}"
+dify_site_dir: /opt/dify
+dify_data_dir: "{{ dify_site_dir }}/data"
+dify_secret_dir: "/etc/{{ platform_identity.unix_prefix }}/dify"
+dify_compose_file: "{{ dify_site_dir }}/docker-compose.yml"
+dify_env_file: "{{ compose_runtime_secret_root }}/dify/runtime.env"
+dify_legacy_env_file: "{{ dify_site_dir }}/dify.env"
+dify_container_name: dify-api
+dify_image: "{{ container_image_catalog.images.dify_api_runtime.ref }}"
+dify_internal_port: "{{ platform_service_registry.dify.internal_port }}"
+dify_local_artifact_dir: "{{ repo_shared_local_root }}/dify"
+dify_openbao_agent_dir: "{{ dify_site_dir }}/openbao"
+dify_openbao_agent_image: "{{ openbao_agent_image }}"
+dify_openbao_agent_container_name: dify-openbao-agent
+dify_openbao_secret_path: services/dify/runtime-env
+dify_openbao_policy_name: "{{ platform_identity.config_prefix }}-service-dify-runtime"
+dify_openbao_approle_name: dify-runtime
 dify_storage_dir: "{{ dify_data_dir }}/storage"
 dify_qdrant_dir: "{{ dify_data_dir }}/qdrant"
 dify_redis_dir: "{{ dify_data_dir }}/redis"
@@ -22,6 +40,8 @@ dify_database_user: dify
 dify_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 dify_database_password_local_file: "{{ dify_local_artifact_dir }}/database-password.txt"
 dify_init_password_local_file: "{{ dify_local_artifact_dir }}/init-password.txt"
+dify_init_password_random_bytes: 12
+dify_init_password_max_length: 30
 dify_admin_password_local_file: "{{ dify_local_artifact_dir }}/admin-password.txt"
 dify_secret_key_local_file: "{{ dify_local_artifact_dir }}/secret-key.txt"
 dify_redis_password_local_file: "{{ dify_local_artifact_dir }}/redis-password.txt"
@@ -87,7 +107,7 @@ dify_smtp_username: "{{ smtp_username }}"
 dify_smtp_password_local_file: "{{ smtp_password_local_file }}"
 dify_smtp_from_address: "{{ smtp_from_address }}"
 dify_smtp_use_tls: "{{ smtp_starttls }}"
-dify_keycloak_client_id: "{{ keycloak_dify_client_id }}"
-dify_keycloak_client_secret_local_file: "{{ keycloak_dify_client_secret_local_file }}"
-dify_keycloak_issuer: "{{ keycloak_public_base_url }}/realms/{{ keycloak_realm_name }}"
+dify_keycloak_client_id: "{{ platform_service_registry.dify.sso.client_id }}"
+dify_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/dify-client-secret.txt"
+dify_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
 dify_scripts_dir: "{{ playbook_dir | dirname }}/scripts"

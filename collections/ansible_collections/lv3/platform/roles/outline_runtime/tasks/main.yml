@@ -20,13 +20,17 @@
       - outline_internal_base_url | length > 0
       - outline_public_base_url | length > 0
       - outline_database_password_local_file | length > 0
-      - outline_keycloak_client_secret_local_file | length > 0
+      - outline_oidc_provider == 'authentik'
+      - outline_oidc_client_secret_local_file | length > 0
+      - outline_oidc_issuer | length > 0
+      - outline_oidc_discovery_url | length > 0
+      - outline_keycloak_rollback_client_secret_local_file | length > 0
       - outline_image | length > 0
       - outline_redis_image | length > 0
       - outline_minio_image | length > 0
     fail_msg: >-
       outline_runtime requires runtime paths, image refs, database auth,
-      and Keycloak OIDC credentials.
+      selected Authentik OIDC credentials, and the preserved Keycloak rollback artifact.
 
 - name: Check Outline prerequisites on the control machine
   ansible.builtin.include_role:
@@ -37,9 +41,12 @@
       - path: "{{ outline_database_password_local_file }}"
         description: "Outline database password"
         prerequisite: "Converge outline_postgres before deploying Outline"
-      - path: "{{ outline_keycloak_client_secret_local_file }}"
-        description: "Outline Keycloak client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying Outline"
+      - path: "{{ outline_oidc_client_secret_local_file }}"
+        description: "Outline selected Authentik client secret"
+        prerequisite: "Reconcile the Outline Authentik OAuth client before deploying Outline"
+      - path: "{{ outline_keycloak_rollback_client_secret_local_file }}"
+        description: "Outline Keycloak rollback client secret"
+        prerequisite: "Preserve the Keycloak Outline client before selecting Authentik"
 
 - name: Ensure the Outline runtime packages are present
   ansible.builtin.apt:
@@ -64,20 +71,62 @@
     - path: "{{ outline_secret_dir }}"
       mode: "0700"
 
+- name: Restore or generate Outline-compatible application secrets
+  # Outline validates SECRET_KEY as exactly 64 hexadecimal characters. Preserve
+  # a valid pre-unix-prefix key when present so encrypted database fields remain
+  # readable; fail closed rather than rotate an invalid existing key in place.
+  ansible.builtin.shell: |
+    set -euo pipefail
+    canonical="{{ item.canonical }}"
+    legacy="{{ item.legacy }}"
+
+    is_hex_32_file() {
+      test -s "$1" && grep -Eq '^[0-9a-f]{64}$' "$1"
+    }
+
+    if is_hex_32_file "$canonical"; then
+      exit 0
+    fi
+
+    if is_hex_32_file "$legacy"; then
+      install -D -m 0600 "$legacy" "$canonical"
+      echo restored
+      exit 0
+    fi
+
+    if test -s "$canonical"; then
+      echo "existing Outline application secret is invalid and no compatible recovery key is available" >&2
+      exit 1
+    fi
+
+    umask 077
+    openssl rand -hex 32 > "$canonical"
+    echo generated
+  args:
+    executable: /bin/bash
+  loop:
+    - label: outline-secret-key
+      canonical: "{{ outline_secret_key_remote_file }}"
+      legacy: "{{ outline_legacy_secret_key_remote_file }}"
+    - label: outline-utils-secret
+      canonical: "{{ outline_utils_secret_remote_file }}"
+      legacy: "{{ outline_legacy_utils_secret_remote_file }}"
+  loop_control:
+    label: "{{ item.label }}"
+  register: outline_compatible_secret_recovery
+  changed_when: >-
+    'restored' in (outline_compatible_secret_recovery.stdout | default(''))
+    or 'generated' in (outline_compatible_secret_recovery.stdout | default(''))
+  no_log: true
+
 - name: Manage Outline runtime secrets
   ansible.builtin.include_role:
     name: lv3.platform.common
     tasks_from: manage_service_secrets
   vars:
     common_manage_service_secrets_generate:
-      - path: "{{ outline_secret_key_remote_file }}"
-        command: "{{ 'outline' | secret(length=32) }}"
-        label: "outline-secret-key"
-      - path: "{{ outline_utils_secret_remote_file }}"
-        command: "{{ 'outline' | secret(length=32) }}"
-        label: "outline-utils-secret"
       - path: "{{ outline_redis_password_remote_file }}"
-        command: "{{ 'outline' | secret(length=32) }}"
+        value: "{{ 'outline' | secret(length=32) }}"
         label: "outline-redis-password"
     common_manage_service_secrets_read:
       - "{{ outline_secret_key_remote_file }}"
@@ -100,7 +149,7 @@
     outline_utils_secret: "{{ outline_decoded_secrets[1] }}"
     outline_redis_password: "{{ outline_decoded_secrets[2] }}"
     outline_database_password: "{{ lookup('ansible.builtin.file', outline_database_password_local_file) | trim }}"
-    outline_keycloak_client_secret: "{{ lookup('ansible.builtin.file', outline_keycloak_client_secret_local_file) | trim }}"
+    outline_oidc_client_secret: "{{ lookup('ansible.builtin.file', outline_oidc_client_secret_local_file) | trim }}"
     outline_s3_secret: "{{ lookup('ansible.builtin.file', outline_s3_secret_key_local_file) | trim }}"
     outline_runtime_secret_payload:
       DATABASE_URL: >-
@@ -109,7 +158,7 @@
       REDIS_URL: "redis://:{{ outline_decoded_secrets[2] | urlencode | replace('/', '%2F') }}@redis:6379/0"
       SECRET_KEY: "{{ outline_decoded_secrets[0] }}"
       UTILS_SECRET: "{{ outline_decoded_secrets[1] }}"
-      OIDC_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', outline_keycloak_client_secret_local_file) | trim }}"
+      OIDC_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', outline_oidc_client_secret_local_file) | trim }}"
       AWS_SECRET_ACCESS_KEY: "{{ lookup('ansible.builtin.file', outline_s3_secret_key_local_file) | trim }}"
       AWS_S3_UPLOAD_BUCKET_URL: "{{ outline_s3_public_url }}"
   no_log: true

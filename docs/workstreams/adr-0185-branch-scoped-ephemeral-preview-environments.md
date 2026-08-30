@@ -58,7 +58,7 @@
 - committed-head replay preview id: `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z`
 - profile: `runtime-smoke`
 - preview domain: `ws-0185-live-apply.preview.example.com`
-- preview member: VM `910` at `10.20.10.130`
+- preview member: VM `910` at `10.10.10.130`
 - lifecycle result: create, validate, and destroy all passed through repo automation
 - smoke verification: `id ops >/dev/null`
 - synthetic verification: `systemctl is-active docker`, `docker info >/dev/null`
@@ -68,7 +68,7 @@
 
 ## Operational Notes
 
-- early retries exposed a live host drift bug: `vmbr20` existed, but the nftables forward and postrouting chains were missing `10.20.10.0/24`
+- early retries exposed a live host drift bug: `vmbr20` existed, but the nftables forward and postrouting chains were missing `10.10.10.0/24`
 - branch-local replay of `playbooks/proxmox-staging-bridge.yml` restored the required host rules and unblocked preview guest egress
 - preview converge now waits for SSH, waits for cloud-init and apt lock release, forces APT over IPv4, and provisions the guest via Proxmox host automation over the `ops@100.64.0.1` jump path
 - the `runtime-smoke` preview member disables `docker_runtime_container_forward_compat_enabled` because the minimal preview image does not own a managed guest firewall contract

@@ -16,6 +16,7 @@
 - name: Validate OpenBao runtime inputs
   ansible.builtin.assert:
     that:
+      - platform_service_registry is mapping
       - openbao_image | length > 0
       - openbao_container_name | length > 0
       - openbao_site_dir | length > 0
@@ -23,6 +24,12 @@
       - openbao_compose_file | length > 0
       - openbao_local_artifact_dir | length > 0
       - openbao_init_local_file | length > 0
+      - openbao_runtime_secret_provisioner_approle_local_file | length > 0
+      - openbao_runtime_secret_provisioner_approle_name | length > 0
+      - openbao_runtime_secret_provisioner_policy_name | length > 0
+      - openbao_runtime_secret_namespace_overrides is mapping
+      - openbao_runtime_secret_provisioner_approle_name in openbao_runtime_secret_protected_approle_names
+      - "'controller-automation' in openbao_runtime_secret_protected_approle_names"
       - openbao_postgres_host | length > 0
       - openbao_postgres_admin_role | length > 0
       - not openbao_tls_enabled or openbao_tls_dir | length > 0
@@ -212,6 +219,108 @@
   tags:
     - mutation
 
+- name: Initialize registered OpenBao runtime-secret contracts
+  ansible.builtin.set_fact:
+    openbao_runtime_secret_service_contracts: []
+    openbao_runtime_service_policies: []
+    openbao_runtime_service_approles: []
+
+- name: Derive OpenBao runtime-secret contracts from the service registry
+  ansible.builtin.set_fact:
+    openbao_runtime_secret_service_contracts: >-
+      {{
+        openbao_runtime_secret_service_contracts
+        + [
+            {
+              'registry_key': item.key,
+              'secret_namespace': openbao_runtime_secret_namespace,
+              'secret_path': 'services/' ~ openbao_runtime_secret_namespace ~ '/runtime-env',
+              'policy_name': platform_identity.config_prefix ~ '-service-' ~ openbao_runtime_secret_namespace ~ '-runtime',
+              'approle_name': openbao_runtime_secret_namespace ~ '-runtime'
+            }
+          ]
+      }}
+  vars:
+    openbao_runtime_secret_namespace: >-
+      {{ openbao_runtime_secret_namespace_overrides[item.key] | default(item.key, true) }}
+  loop: "{{ platform_service_registry | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when:
+    - item.value.service_type | default('') == 'docker_compose'
+    - item.value.needs_openbao | default(true) | bool
+
+- name: Validate registered OpenBao runtime-secret contracts
+  ansible.builtin.assert:
+    that:
+      - openbao_runtime_secret_service_contracts | length > 0
+      - item.registry_key is match('^[a-z0-9][a-z0-9_-]*$')
+      - item.secret_namespace is match('^[a-z0-9][a-z0-9_-]*$')
+      - item.secret_path == 'services/' ~ item.secret_namespace ~ '/runtime-env'
+      - item.approle_name not in openbao_runtime_secret_protected_approle_names
+      - item.approle_name == item.secret_namespace ~ '-runtime'
+      - item.policy_name == platform_identity.config_prefix ~ '-service-' ~ item.secret_namespace ~ '-runtime'
+    fail_msg: >-
+      The registered OpenBao runtime-secret contract for {{ item.registry_key }}
+      is unsafe or collides with a protected automation identity.
+  loop: "{{ openbao_runtime_secret_service_contracts }}"
+  loop_control:
+    label: "{{ item.registry_key }}"
+
+- name: Require unique registered OpenBao runtime-secret namespaces
+  ansible.builtin.assert:
+    that:
+      - >-
+        (openbao_runtime_secret_service_contracts | map(attribute='secret_namespace') | unique | list | length)
+        == (openbao_runtime_secret_service_contracts | length)
+      - >-
+        (openbao_runtime_secret_service_contracts | map(attribute='approle_name') | unique | list | length)
+        == (openbao_runtime_secret_service_contracts | length)
+      - >-
+        (openbao_runtime_secret_service_contracts | map(attribute='policy_name') | unique | list | length)
+        == (openbao_runtime_secret_service_contracts | length)
+    fail_msg: >-
+      Registered OpenBao runtime-secret namespace overrides must remain unique.
+
+- name: Build registered service policies and AppRoles
+  ansible.builtin.set_fact:
+    openbao_runtime_service_policies: >-
+      {{
+        openbao_runtime_service_policies
+        + [
+            {
+              'name': item.policy_name,
+              'src': 'policy-service-runtime.hcl.j2',
+              'registry_key': item.registry_key,
+              'secret_namespace': item.secret_namespace,
+              'secret_path': item.secret_path
+            }
+          ]
+      }}
+    openbao_runtime_service_approles: >-
+      {{
+        openbao_runtime_service_approles
+        + [
+            {
+              'name': item.approle_name,
+              'policies': [item.policy_name],
+              'token_ttl': '15m',
+              'token_max_ttl': '1h',
+              'token_num_uses': 0,
+              'secret_id_ttl': 0,
+              'secret_id_num_uses': 0
+            }
+          ]
+      }}
+  loop: "{{ openbao_runtime_secret_service_contracts }}"
+  loop_control:
+    label: "{{ item.registry_key }}"
+
+- name: Record the complete managed OpenBao policy and AppRole catalogs
+  ansible.builtin.set_fact:
+    openbao_managed_policies: "{{ openbao_policies + openbao_runtime_service_policies }}"
+    openbao_managed_approles: "{{ openbao_approles + openbao_runtime_service_approles }}"
+
 - name: Render OpenBao policy files
   vars:
     mutation_audit_action: render.openbao_policies
@@ -222,7 +331,7 @@
     owner: root
     group: root
     mode: "0640"
-  loop: "{{ openbao_policies }}"
+  loop: "{{ openbao_managed_policies }}"
   tags:
     - mutation
 
@@ -1074,7 +1183,7 @@
 - name: Read rendered policy contents
   ansible.builtin.slurp:
     src: "{{ openbao_policy_dir }}/{{ item.name }}.hcl"
-  loop: "{{ openbao_policies }}"
+  loop: "{{ openbao_managed_policies }}"
   register: openbao_policy_contents
 
 - name: Read current OpenBao policies
@@ -1173,7 +1282,7 @@
   retries: 24
   delay: 2
   until: openbao_approle_upsert_result.status == 204
-  loop: "{{ openbao_approles }}"
+  loop: "{{ openbao_managed_approles }}"
   no_log: true
   tags:
     - mutation

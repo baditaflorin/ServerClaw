@@ -69,6 +69,26 @@ def local_overlay_root(repo_root: Path | None = None) -> Path:
     return shared_repo_root(repo_root) / ".local"
 
 
+def resolve_explicit_overlay_selector(
+    environment_variable: str,
+    *,
+    repo_root: Path | None = None,
+) -> Path | None:
+    """Resolve one explicitly selected overlay and fail closed when invalid."""
+
+    value = os.environ.get(environment_variable, "").strip()
+    if not value:
+        return None
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    selected = Path(value).expanduser()
+    if not selected.is_absolute():
+        selected = shared_repo_root(root) / selected
+    selected = selected.resolve()
+    if not selected.is_file():
+        raise FileNotFoundError(f"{environment_variable} does not select a regular file: {selected}")
+    return selected
+
+
 def receipts_root(repo_root: Path | None = None) -> Path:
     root = Path(repo_root) if repo_root is not None else REPO_ROOT
     shared_root = shared_repo_root(root)
@@ -356,6 +376,13 @@ def _topology_host_vars_overlay_path(repo_root: Path | None = None) -> Path | No
     root = Path(repo_root) if repo_root is not None else REPO_ROOT
     shared = shared_repo_root(root)
 
+    explicit = resolve_explicit_overlay_selector(
+        "PLATFORM_TOPOLOGY_OVERLAY",
+        repo_root=root,
+    )
+    if explicit is not None:
+        return explicit
+
     candidate = shared / ".local" / "host_vars" / "proxmox-host.yml"
     if _path_exists(candidate):
         return candidate
@@ -399,9 +426,7 @@ def load_topology_host_vars(repo_root: Path | None = None) -> dict[str, Any]:
 
     overlay_raw = load_yaml(overlay_path)
     if not isinstance(overlay_raw, dict):
-        raise TypeError(
-            f"{overlay_path}: expected top-level mapping, got {type(overlay_raw).__name__}"
-        )
+        raise TypeError(f"{overlay_path}: expected top-level mapping, got {type(overlay_raw).__name__}")
     for key, value in overlay_raw.items():
         merged[key] = value
     return merged

@@ -615,9 +615,33 @@ def landing_docs(repo_root: Path) -> list[tuple[CollectionSpec, str]]:
     return rendered
 
 
-def write_file(path: Path, content: str) -> None:
+def write_secret_file(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content.rstrip() + "\n", encoding="utf-8")
+    if path.is_symlink():
+        raise OutlineError(f"refusing to write API token through symlink: {path}")
+
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+
+    created = False
+    descriptor = -1
+    try:
+        descriptor = os.open(path, flags, 0o600)
+        created = True
+        os.fchmod(descriptor, 0o600)
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(content.rstrip() + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+    except Exception:
+        if created:
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+            path.unlink(missing_ok=True)
+        raise
 
 
 def build_opener() -> tuple[request.OpenerDirector, Any]:
@@ -639,7 +663,14 @@ def find_cookie(jar: Any, name: str) -> str | None:
 def bootstrap_token(
     base_url: str, username: str, password_file: Path, token_name: str, token_file: Path, scope: list[str]
 ) -> int:
-    if token_file.exists() and load_file(token_file):
+    if token_file.is_symlink():
+        raise OutlineError(f"refusing symlinked API token file: {token_file}")
+    if token_file.exists():
+        if not token_file.is_file():
+            raise OutlineError(f"API token path is not a regular file: {token_file}")
+        if not load_file(token_file):
+            raise OutlineError(f"API token file exists but is empty: {token_file}")
+        os.chmod(token_file, 0o600)
         print(f"api token already present at {token_file}")
         return 0
 
@@ -677,7 +708,7 @@ def bootstrap_token(
     token = token_payload.get("value") or token_payload.get("token")
     if not token:
         raise OutlineError(f"apiKeys.create response did not include a token value: {response}")
-    write_file(token_file, token)
+    write_secret_file(token_file, token)
     print(f"created api token at {token_file}")
     return 0
 

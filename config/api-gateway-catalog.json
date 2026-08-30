@@ -3,6 +3,16 @@
   "schema_version": "1.0.0",
   "services": [
     {
+      "id": "authentik",
+      "name": "Authentik",
+      "gateway_prefix": "/v1/authentik",
+      "upstream": "http://10.10.10.92:9000",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-read",
+      "strip_prefix": true,
+      "timeout_seconds": 30
+    },
+    {
       "id": "browser_runner",
       "name": "Browser Runner",
       "upstream": "http://10.10.10.20:8096",
@@ -70,6 +80,17 @@
       "healthcheck_path": "/api/health"
     },
     {
+      "id": "grist",
+      "name": "Grist",
+      "upstream": "http://10.10.10.20:8484",
+      "gateway_prefix": "/v1/grist",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/status"
+    },
+    {
       "id": "harbor",
       "name": "Harbor",
       "upstream": "http://10.10.10.92:8095",
@@ -90,6 +111,28 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/realms/lv3/.well-known/openid-configuration"
+    },
+    {
+      "id": "label_studio",
+      "name": "Label Studio",
+      "upstream": "http://10.10.10.20:8110",
+      "gateway_prefix": "/v1/label-studio",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/api/version"
+    },
+    {
+      "id": "lago",
+      "name": "Lago",
+      "upstream": "http://10.10.10.20:8099",
+      "gateway_prefix": "/v1/lago",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/health"
     },
     {
       "id": "langfuse",
@@ -180,17 +223,6 @@
       "healthcheck_path": "/health"
     },
     {
-      "id": "grist",
-      "name": "Grist",
-      "upstream": "http://10.10.10.20:8484",
-      "gateway_prefix": "/v1/grist",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-operator",
-      "strip_prefix": true,
-      "timeout_seconds": 30,
-      "healthcheck_path": "/status"
-    },
-    {
       "id": "outline",
       "name": "Outline",
       "upstream": "http://10.10.10.20:3006",
@@ -200,28 +232,6 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/_health"
-    },
-    {
-      "id": "label_studio",
-      "name": "Label Studio",
-      "upstream": "http://10.10.10.20:8110",
-      "gateway_prefix": "/v1/label-studio",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-operator",
-      "strip_prefix": true,
-      "timeout_seconds": 60,
-      "healthcheck_path": "/api/version"
-    },
-    {
-      "id": "lago",
-      "name": "Lago",
-      "upstream": "http://10.10.10.20:8099",
-      "gateway_prefix": "/v1/lago",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-operator",
-      "strip_prefix": true,
-      "timeout_seconds": 30,
-      "healthcheck_path": "/health"
     },
     {
       "id": "paperless",

@@ -5,16 +5,38 @@
   ansible.builtin.assert:
     that:
       - glitchtip_public_base_url | length > 0
+      - glitchtip_oidc_client_id | length > 0
+      - glitchtip_oidc_provider_id | length > 0
+      - glitchtip_oidc_issuer_url | length > 0
+      - glitchtip_oidc_discovery_url == (glitchtip_oidc_issuer_url ~ '/.well-known/openid-configuration')
+      - glitchtip_oidc_frontend_callback_url | length > 0
+      - glitchtip_oidc_client_secret_local_file | length > 0
       - glitchtip_api_token_local_file | length > 0
       - glitchtip_platform_findings_event_url_local_file | length > 0
     fail_msg: >-
-      glitchtip_runtime publication requires the public URL plus the
-      controller-local API token and DSN artifact paths.
+      glitchtip_runtime publication requires the public URL, selected OIDC
+      metadata, client ID, and controller-local API token and DSN artifacts.
 
 - name: Check whether the GlitchTip API token exists on the control machine
   ansible.builtin.stat:
     path: "{{ glitchtip_api_token_local_file }}"
   register: glitchtip_api_token_local
+
+- name: Check whether the selected GlitchTip OIDC client secret exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ glitchtip_oidc_client_secret_local_file }}"
+  register: glitchtip_oidc_client_secret_local
+
+- name: Fail if the selected GlitchTip OIDC client secret is unavailable locally
+  ansible.builtin.assert:
+    that:
+      - glitchtip_oidc_client_secret_local.stat.isreg | default(false)
+      - glitchtip_oidc_client_secret_local.stat.mode | default('') == '0600'
+      - glitchtip_oidc_client_secret_local.stat.size | default(0) | int > 0
+    fail_msg: >-
+      The selected GlitchTip OIDC client secret must exist as a nonempty 0600
+      controller-local file before public credential verification.
+  no_log: true
 
 - name: Check whether the GlitchTip platform findings DSN exists on the control machine
   ansible.builtin.stat:

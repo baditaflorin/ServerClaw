@@ -1,0 +1,46 @@
+id: correct-0mcp-network-direction-2026-08-27
+title: Correct 0mcp network postmortem direction and apply the live fix
+status: ready
+ready_to_merge: true
+live_applied: true
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: correct-0mcp-network-direction-2026-08-27
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: correct-0mcp-network-direction-2026-08-27-doc
+      paths:
+        - docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+        - workstreams/active/correct-0mcp-network-direction-2026-08-27.yaml
+        - workstreams/archive/2026/audit-0mcp-guest-network-drift-2026-08-27.yaml
+        - workstreams/archive/2026/fix-0mcp-guest-network-addressing-10-20.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Operator confirmed 10.10.10.x is the real example.org addressing, flipping
+  the direction of the 2026-08-26/27 postmortem (which had framed
+  10.10.10.x as correct). Corrected the doc with a prominent top-of-file
+  notice plus a full final section, and applied the live fix: reverted
+  nginx-edge (VMID 110) back to 10.10.10.10/vmbr20 (undoing the 2026-08-26
+  move), applied the corrected nftables ruleset (rendered from the fixed
+  IaC in platform_server#137) to the Proxmox host, and verified
+  headscale.example.org is back to 200. Also found and documented two new,
+  separate issues while re-verifying: mail (25/587/993) is reachable
+  internally but blocked externally (looks like Hetzner's default SMTP
+  port block, needs a support ticket, not fixable here) and LiveKit
+  (7881/7882) simply isn't running on runtime-comms at all (no networking
+  issue). Corrected ~/.ssh/config.d/0mcp.conf's 0mcp_nginx alias and its
+  misleading header comment on this Mac.
+
+objectives:
+  - Correct the postmortem's inverted framing
+  - Apply the live fix consistent with the corrected IaC
+
+completion_metrics:
+  - headscale.example.org confirmed 200 after the live fix
+  - Postmortem corrected with a clear top-of-file notice
+
+related_adrs: []

@@ -1,0 +1,13 @@
+---
+service_audit_name: authentik
+service_dns_fqdn: id.{{ platform_domain }}
+service_runtime_roles:
+  - lv3.platform.docker_runtime
+  - lv3.platform.authentik_runtime
+service_needs_dns: true
+service_needs_postgres: false
+service_needs_nginx_edge: true
+
+# The host port derives from platform_service_registry.authentik.internal_port;
+# the container still listens on its native port 9000.
+authentik_container_port: 9000

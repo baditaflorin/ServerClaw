@@ -37,9 +37,9 @@
       "operator_access": "Until a dedicated staging access path exists, operator-only staged services follow the same private path as production.",
       "private_network": {
         "bridge": "vmbr20",
-        "gateway_ipv4": "10.20.10.1",
+        "gateway_ipv4": "10.10.10.1",
         "cidr": 24,
-        "network": "10.20.10.0/24"
+        "network": "10.10.10.0/24"
       },
       "placement": {
         "failure_domain": "host:proxmox-host",

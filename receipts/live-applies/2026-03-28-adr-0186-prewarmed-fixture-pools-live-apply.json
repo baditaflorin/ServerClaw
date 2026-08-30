@@ -31,7 +31,7 @@
       "kind": "ephemeral_fixture",
       "name": "ops-base",
       "vmid": 912,
-      "address": "10.20.10.120"
+      "address": "10.10.10.120"
     }
   ],
   "verification": [

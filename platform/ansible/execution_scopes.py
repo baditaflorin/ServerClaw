@@ -7,10 +7,11 @@ import shlex
 import subprocess
 import sys
 import uuid
+from collections.abc import Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 
 def _inventory_cli_args(
@@ -29,6 +30,7 @@ def _inventory_cli_args(
         args.extend(("-i", str(path)))
     return args
 
+
 from platform.execution_lanes import LaneRegistry, load_execution_lane_catalog
 from platform.repo import REPO_ROOT, load_yaml, local_overlay_root
 
@@ -40,13 +42,30 @@ ALLOWED_EXECUTION_CLASSES = {"mutation", "diagnostic"}
 LIST_HOSTS_HEADER_PATTERN = re.compile(r"^\s+hosts \(\d+\):$")
 IMPORT_PLAYBOOK_PATTERN = re.compile(r"^\s*-\s*import_playbook:\s*(?P<path>.+?)\s*$")
 SHARD_COMPAT_EXCLUDES = {".ansible", ".git"}
-ENV_DEFAULT_EXPR_PATTERN = re.compile(
-    r"{{\s*env\s*\|\s*default\(\s*['\"](?P<default>[^'\"]+)['\"]\s*\)\s*}}"
-)
+ENV_DEFAULT_EXPR_PATTERN = re.compile(r"{{\s*env\s*\|\s*default\(\s*['\"](?P<default>[^'\"]+)['\"]\s*\)\s*}}")
 ENV_TERNARY_EXPR_PATTERN = re.compile(
     r"{{\s*['\"](?P<when_true>[^'\"]+)['\"]\s*if\s*\(\s*env\s*\|\s*default\(\s*['\"](?P<default>[^'\"]+)['\"]\s*\)\s*\)\s*==\s*['\"](?P<expected>[^'\"]+)['\"]\s*else\s*['\"](?P<when_false>[^'\"]+)['\"]\s*}}"
 )
 DEFAULT_LANE_RESERVATION_TTL_SECONDS = int(os.environ.get("LV3_EXECUTION_LANE_TTL_SECONDS", "14400"))
+RESERVED_IDENTITY_EXTRA_VAR_KEYS = {
+    "env",
+    "groups",
+    "host_public_hostname",
+    "hostvars",
+    "lv3_service_topology",
+    "management_gateway4",
+    "management_interface",
+    "management_ipv4",
+    "management_ipv6",
+    "management_ipv6_cidr",
+    "platform_config_prefix",
+    "platform_domain",
+    "platform_identity",
+    "platform_service_registry",
+    "platform_service_topology",
+    "platform_topology_host",
+    "proxmox_guests",
+}
 
 
 class AnsibleExecutionScopeError(RuntimeError):
@@ -95,17 +114,16 @@ class PlannedPlaybookExecution:
 
 def normalize_repo_path(path: str | Path, *, repo_root: Path = REPO_ROOT) -> str:
     candidate = Path(path)
-    if not candidate.is_absolute():
-        candidate = (repo_root / candidate).resolve()
-    else:
-        candidate = candidate.resolve()
+    candidate = (repo_root / candidate).resolve() if not candidate.is_absolute() else candidate.resolve()
     try:
         return candidate.relative_to(repo_root.resolve()).as_posix()
     except ValueError as exc:
         raise AnsibleExecutionScopeError(f"path '{candidate}' is outside repo root '{repo_root}'") from exc
 
 
-def load_scope_catalog(*, catalog_path: Path = CATALOG_PATH, repo_root: Path = REPO_ROOT) -> dict[str, ScopeCatalogEntry]:
+def load_scope_catalog(
+    *, catalog_path: Path = CATALOG_PATH, repo_root: Path = REPO_ROOT
+) -> dict[str, ScopeCatalogEntry]:
     payload = load_yaml(catalog_path)
     if not isinstance(payload, dict):
         raise AnsibleExecutionScopeError(f"{catalog_path} must define a mapping")
@@ -280,6 +298,30 @@ def extract_extra_vars_from_passthrough(
     return extra_vars
 
 
+def _validate_explicit_identity_passthrough(
+    passthrough_args: list[str] | None,
+    extra_vars: dict[str, Any],
+) -> None:
+    if not os.environ.get("PLATFORM_IDENTITY_OVERLAY", "").strip():
+        return
+    collisions = sorted(
+        key for key in extra_vars if key in RESERVED_IDENTITY_EXTRA_VAR_KEYS or key.startswith("ansible_")
+    )
+    if collisions:
+        raise AnsibleExecutionScopeError(
+            "passthrough extra-vars cannot override the explicit deployment identity: " + ", ".join(collisions)
+        )
+    for token in passthrough_args or []:
+        if (
+            token in {"-i", "--inventory"}
+            or token.startswith("--inventory=")
+            or (token.startswith("-i") and token != "-i")
+        ):
+            raise AnsibleExecutionScopeError(
+                "passthrough inventory options are forbidden when an explicit deployment identity is selected"
+            )
+
+
 def _collect_inventory_hosts(payload: Any) -> tuple[str, ...]:
     hosts: list[str] = []
 
@@ -288,7 +330,7 @@ def _collect_inventory_hosts(payload: Any) -> tuple[str, ...]:
             return
         node_hosts = node.get("hosts")
         if isinstance(node_hosts, dict):
-            hosts.extend(str(host) for host in node_hosts.keys())
+            hosts.extend(str(host) for host in node_hosts)
         children = node.get("children")
         if isinstance(children, dict):
             for child in children.values():
@@ -372,7 +414,9 @@ def _discover_playbook_host_patterns(
             continue
         raw_import = item.get("import_playbook")
         if isinstance(raw_import, str) and raw_import.strip():
-            resolved_import = normalize_repo_path(candidate.parent / raw_import.strip().strip("'\""), repo_root=repo_root)
+            resolved_import = normalize_repo_path(
+                candidate.parent / raw_import.strip().strip("'\""), repo_root=repo_root
+            )
             patterns.extend(
                 _discover_playbook_host_patterns(
                     resolved_import,
@@ -411,7 +455,11 @@ def _aggregate_imported_scope(playbook_path: str, child_scopes: list[ResolvedPla
     execution_classes = {scope.execution_class for scope in child_scopes}
     execution_class = "diagnostic" if execution_classes == {"diagnostic"} else "mutation"
     child_lanes = {scope.target_lane for scope in child_scopes if scope.target_lane}
-    if child_lanes and len(child_lanes) == 1 and all(scope.mutation_scope in {"host", "lane"} for scope in child_scopes):
+    if (
+        child_lanes
+        and len(child_lanes) == 1
+        and all(scope.mutation_scope in {"host", "lane"} for scope in child_scopes)
+    ):
         mutation_scope = "lane"
         target_lane = next(iter(child_lanes))
     else:
@@ -717,7 +765,10 @@ def _collect_makefile_entrypoints(makefile_path: Path, repo_root: Path) -> tuple
                 for path in sorted((repo_root / "playbooks" / "groups").glob("*.yml"))
             )
             continue
-        for pattern in (r"--playbook\s+\$\(REPO_ROOT\)/(?P<path>playbooks/[^\s]+\.yml)", r"\$\(REPO_ROOT\)/(?P<path>playbooks/[^\s]+\.yml)"):
+        for pattern in (
+            r"--playbook\s+\$\(REPO_ROOT\)/(?P<path>playbooks/[^\s]+\.yml)",
+            r"\$\(REPO_ROOT\)/(?P<path>playbooks/[^\s]+\.yml)",
+        ):
             match = re.search(pattern, line)
             if not match:
                 continue
@@ -756,7 +807,7 @@ def validate_scope_catalog(
         for child in children.values():
             if not isinstance(child, dict):
                 continue
-            for host in (child.get("hosts") or {}).keys():
+            for host in child.get("hosts") or {}:
                 known_hosts.add(str(host))
 
     for playbook_path, entry in catalog.items():
@@ -787,6 +838,7 @@ def run_scoped_playbook(
     lane_registry: LaneRegistry | None = None,
 ) -> subprocess.CompletedProcess[str]:
     extra_vars = extract_extra_vars_from_passthrough(passthrough_args, repo_root=repo_root)
+    _validate_explicit_identity_passthrough(passthrough_args, extra_vars)
     plan = plan_playbook_execution(
         playbook,
         env=env,
@@ -824,7 +876,9 @@ def _reserved_lane(
     catalog = load_execution_lane_catalog(repo_root=repo_root)
     lane = catalog.lanes.get(plan.target_lane)
     if lane is None:
-        raise AnsibleExecutionScopeError(f"target lane '{plan.target_lane}' is not defined in config/execution-lanes.yaml")
+        raise AnsibleExecutionScopeError(
+            f"target lane '{plan.target_lane}' is not defined in config/execution-lanes.yaml"
+        )
     if not lane.hostname:
         raise AnsibleExecutionScopeError(f"target lane '{plan.target_lane}' does not declare a hostname")
 
@@ -854,27 +908,18 @@ def _reserved_lane(
 def _resolve_identity_override(repo_root: Path) -> list[str]:
     """Return extra-vars args for the local identity overlay (ADR 0407).
 
-    Order of precedence (later overrides earlier):
+    An explicit ``$PLATFORM_IDENTITY_OVERLAY`` is an isolation boundary: only
+    that file is loaded. Falling through to, or first loading, the shared
+    ``.local/identity.yml`` can mix two deployments when a worktree targets a
+    different environment. Without an explicit selector, retain the
+    historical shared-overlay behavior for non-sensitive callers.
 
-    1. ``.local/identity.yml`` — the historical operator overlay; always
-       applied first when present (ADR 0407 default).
-    2. ``$PLATFORM_IDENTITY_OVERLAY`` — when set (ADR 0437 deployment-aware
-       bootstrap), the named overlay is appended *after* the base overlay
-       so the deployment-specific values win. This makes scoped runs
-       (``converge-<service>``) honor the same overlay the bootstrap chain
-       uses, eliminating the silent split between bootstrap-only flags and
-       day-to-day reconciles.
-
-    Both files are injected as ``-e @path`` so deployment-specific values
-    (real domain, operator name, brownout flags, kernel-required overrides,
-    etc.) override the generic defaults committed in
+    The selected file is injected as ``-e @path`` so deployment-specific
+    values override the generic defaults committed in
     ``inventory/group_vars/all/identity.yml``.
     """
     # .local/ is always relative to the shared repo root, even from worktrees.
-    args: list[str] = []
     local_identity = local_overlay_root(repo_root) / "identity.yml"
-    if local_identity.is_file():
-        args.extend(["-e", f"@{local_identity}"])
     overlay_env = os.environ.get("PLATFORM_IDENTITY_OVERLAY", "").strip()
     if overlay_env:
         overlay_path = Path(overlay_env)
@@ -884,9 +929,12 @@ def _resolve_identity_override(repo_root: Path) -> list[str]:
             # or just ``deployments/prod/identity.yml``.
             stripped = overlay_env.removeprefix(".local/")
             overlay_path = local_overlay_root(repo_root) / stripped
-        if overlay_path.is_file() and overlay_path.resolve() != local_identity.resolve():
-            args.extend(["-e", f"@{overlay_path}"])
-    return args
+        if not overlay_path.is_file():
+            raise AnsibleExecutionScopeError(f"explicit PLATFORM_IDENTITY_OVERLAY is not a file: {overlay_path}")
+        return ["-e", f"@{overlay_path}"]
+    if local_identity.is_file():
+        return ["-e", f"@{local_identity}"]
+    return []
 
 
 def run_planned_playbook(
@@ -899,6 +947,8 @@ def run_planned_playbook(
     lane_registry: LaneRegistry | None = None,
     inventory_paths: Sequence[Path] | None = None,
 ) -> subprocess.CompletedProcess[str]:
+    passthrough_extra_vars = extract_extra_vars_from_passthrough(passthrough_args, repo_root=repo_root)
+    _validate_explicit_identity_passthrough(passthrough_args, passthrough_extra_vars)
     command = [
         ansible_playbook_bin,
         *_inventory_cli_args(inventory_path, inventory_paths),
@@ -909,8 +959,8 @@ def run_planned_playbook(
         str(repo_root / plan.playbook_path),
         "-e",
         f"env={plan.env}",
-        *_resolve_identity_override(repo_root),
         *(passthrough_args or []),
+        *_resolve_identity_override(repo_root),
     ]
     with _reserved_lane(plan, repo_root=repo_root, lane_registry=lane_registry) as lane_reservation:
         if lane_reservation is not None and lane_reservation.status != "acquired":

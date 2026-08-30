@@ -28,14 +28,19 @@
   become: false
 
 - name: Generate database password when missing for {{ postgres_client_service }} (ADR 0480)
-  ansible.builtin.shell: >
-    python3 scripts/generate_secret_with_mask.py
-    --service "{{ postgres_client_service }}"
-    --type password
-    --output "{{ postgres_client_password_local_file }}"
-    --metadata "{{ postgres_client_password_local_file | dirname }}/.masked-secret"
-  args:
-    executable: /bin/bash
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_dir | dirname }}/scripts/generate_secret_with_mask.py"
+      - --service
+      - "{{ postgres_client_service }}"
+      - --type
+      - password
+      - --output
+      - "{{ postgres_client_password_local_file }}"
+      - --metadata
+      - "{{ postgres_client_password_local_file | dirname }}/.masked-secret"
+    creates: "{{ postgres_client_password_local_file }}"
   delegate_to: localhost
   become: false
   register: postgres_client_password_generation

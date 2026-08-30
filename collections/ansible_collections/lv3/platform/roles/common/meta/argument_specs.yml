@@ -345,3 +345,180 @@ argument_specs:
         default: 5
         description:
           - Delay in seconds between OpenBao read and write API operation retries.
+  openbao_compose_env:
+    short_description: Provision a registered Compose service secret through the narrow OpenBao runtime-secret AppRole.
+    options:
+      common_openbao_compose_env_service_name:
+        type: str
+        required: true
+        description:
+          - Friendly service name that must resolve to one needs_openbao Docker Compose registry entry.
+      common_openbao_compose_env_agent_dir:
+        type: path
+        required: true
+        description:
+          - Runtime host directory containing the service AppRole and agent configuration.
+      common_openbao_compose_env_runtime_dir:
+        type: path
+        required: true
+        description:
+          - Root-only transient directory where OpenBao Agent renders the Compose environment file.
+      common_openbao_compose_env_env_file:
+        type: path
+        required: true
+        description:
+          - Transient Compose environment file that must be freshly rendered by OpenBao Agent.
+      common_openbao_compose_env_secret_path:
+        type: str
+        required: true
+        description:
+          - KV v2 path beneath the registered service's services namespace.
+      common_openbao_compose_env_secret_payload:
+        type: dict
+        required: true
+        description:
+          - Secret payload written through the narrow provisioner identity.
+      common_openbao_compose_env_policy_name:
+        type: str
+        required: true
+        description:
+          - Pre-created service policy name; retained in the interface for validation but never managed by this helper.
+      common_openbao_compose_env_policy_rules:
+        type: str
+        required: true
+        description:
+          - Expected service ACL content retained for caller compatibility; policy creation belongs to openbao_runtime.
+      common_openbao_compose_env_approle_name:
+        type: str
+        required: true
+        description:
+          - Pre-created service AppRole name from the generated OpenBao service contract.
+      common_openbao_compose_env_agent_config_file:
+        type: path
+        required: true
+        description:
+          - Managed OpenBao Agent configuration path beneath the agent directory.
+      common_openbao_compose_env_agent_template_file:
+        type: path
+        required: true
+        description:
+          - Managed OpenBao Agent template path beneath the agent directory.
+      common_openbao_compose_env_agent_template_local_file:
+        type: path
+        required: false
+        default: ""
+        description:
+          - Optional controller-local agent template copied verbatim.
+      common_openbao_compose_env_agent_template_src:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Optional role template source used to render the agent template.
+      common_openbao_compose_env_agent_template_content:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Optional inline agent template content.
+      common_openbao_compose_env_role_id_file:
+        type: path
+        required: true
+        description:
+          - Runtime host file containing the service AppRole role ID.
+      common_openbao_compose_env_secret_id_file:
+        type: path
+        required: true
+        description:
+          - Runtime host file containing the service AppRole secret ID.
+      common_openbao_compose_env_image:
+        type: str
+        required: true
+        description:
+          - Pinned OpenBao image used for the one-shot agent render verification.
+      common_openbao_compose_env_legacy_env_files:
+        type: list
+        elements: path
+        required: false
+        default: []
+        description:
+          - Legacy Compose-directory env files removed only after a fresh agent render succeeds.
+      common_openbao_compose_env_openbao_address:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Explicit OpenBao API address; defaults to the target host loopback listener.
+      common_openbao_compose_env_manage_local_openbao_runtime:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Deprecated compatibility switch that must remain false; this helper never restarts or unseals OpenBao.
+      common_openbao_compose_env_validate_certs:
+        type: bool
+        required: false
+        default: true
+        description:
+          - Whether API calls validate the configured OpenBao TLS certificate.
+      common_openbao_compose_env_api_host:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Optional inventory host from which OpenBao API requests execute.
+      common_openbao_compose_env_provisioner_credential_file:
+        type: path
+        required: true
+        description:
+          - Controller-local AppRole JSON artifact for the narrow runtime-secret provisioner.
+      common_openbao_compose_env_provisioner_approle_name:
+        type: str
+        required: false
+        default: runtime-secret-provisioner
+        description:
+          - Expected role_name inside the provisioner credential artifact.
+      common_openbao_compose_env_provisioner_policy_name:
+        type: str
+        required: true
+        description:
+          - Exact least-privilege policy that the provisioner login must receive.
+      common_openbao_compose_env_protected_approle_names:
+        type: list
+        elements: str
+        required: false
+        default:
+          - controller-automation
+          - runtime-secret-provisioner
+        description:
+          - Identities that can never be selected as the target service AppRole.
+      common_openbao_compose_env_secret_namespace_overrides:
+        type: dict
+        required: false
+        default: {}
+        description:
+          - Explicit compatibility mappings from registry keys to canonical runtime-secret namespaces.
+      common_openbao_compose_env_require_fresh_agent_render:
+        type: bool
+        required: false
+        default: true
+        description:
+          - Whether to remove the transient env and require a successful one-shot agent render before returning.
+      common_openbao_compose_env_agent_render_timeout:
+        type: int
+        required: false
+        default: 120
+        description:
+          - Maximum seconds allowed for the one-shot OpenBao Agent render verification.
+      common_openbao_api_operation_retries:
+        type: int
+        required: false
+        default: 36
+        description:
+          - Number of retries for provisioner-authorized OpenBao API calls.
+      common_openbao_api_operation_delay:
+        type: int
+        required: false
+        default: 5
+        description:
+          - Delay in seconds between provisioner-authorized API retries.

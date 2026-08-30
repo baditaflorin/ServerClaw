@@ -12,6 +12,7 @@ TASKS_PATH = REPO_ROOT / "roles" / "mail_platform_runtime" / "tasks" / "main.yml
 ROTATE_TASKS_PATH = REPO_ROOT / "roles" / "mail_platform_runtime" / "tasks" / "rotate.yml"
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 CONTROL_PLANE_LANES_PATH = REPO_ROOT / "config" / "control-plane-lanes.json"
+GROUP_VARS_ALL_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "main.yml"
 
 
 def test_defaults_define_private_submission_port() -> None:
@@ -25,6 +26,11 @@ def test_defaults_define_submission_auth_retry_budget() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     assert defaults["mail_platform_submission_auth_retries"] == 12
     assert defaults["mail_platform_submission_auth_delay_seconds"] == 5
+
+
+def test_production_smtp_hostname_tracks_the_selected_deployment_prefix() -> None:
+    group_vars = yaml.safe_load(GROUP_VARS_ALL_PATH.read_text())
+    assert group_vars["smtp_host"] == "{{ platform_identity.config_prefix }}-mail-stalwart"
 
 
 def test_stalwart_template_adds_private_submission_listener() -> None:
@@ -63,6 +69,43 @@ def test_defaults_resolve_mail_gateway_otlp_endpoint_from_canonical_host_topolog
     assert defaults["mail_platform_gateway_trace_otlp_endpoint"] == (
         "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
     )
+
+
+def test_rotation_resolves_runtime_file_maps_before_target_paths() -> None:
+    tasks = yaml.safe_load(ROTATE_TASKS_PATH.read_text())
+    mapping_index = next(
+        index for index, task in enumerate(tasks) if task.get("name") == "Record the runtime secret file mappings"
+    )
+    target_index = next(
+        index for index, task in enumerate(tasks) if task.get("name") == "Record the target secret file paths"
+    )
+    mapping_facts = tasks[mapping_index]["ansible.builtin.set_fact"]
+    target_facts = tasks[target_index]["ansible.builtin.set_fact"]
+
+    assert mapping_index < target_index
+    assert "mail_platform_rotation_runtime_remote_files" in mapping_facts
+    assert "mail_platform_rotation_runtime_local_files" in mapping_facts
+    assert "mail_platform_rotation_remote_target_file" not in mapping_facts
+    assert "mail_platform_rotation_local_target_file" not in mapping_facts
+    assert "mail_platform_rotation_runtime_remote_files" in target_facts["mail_platform_rotation_remote_target_file"]
+    assert "mail_platform_rotation_runtime_local_files" in target_facts["mail_platform_rotation_local_target_file"]
+
+
+def test_mail_principal_mutations_use_stalwart_name_endpoints() -> None:
+    bootstrap = (REPO_ROOT / "roles/mail_platform_runtime/templates/bootstrap-mail-platform.py.j2").read_text()
+    gateway = (REPO_ROOT / "roles/mail_platform_runtime/files/mail-gateway/app.py").read_text()
+
+    assert "def principal_path(principal_name):" in bootstrap
+    assert 'fetch_principal(existing["name"])' in bootstrap
+    assert 'principal_path(existing["name"])' in bootstrap
+    assert 'existing["id"]' not in bootstrap
+
+    assert "def principal_path(principal_name: str) -> str:" in gateway
+    assert 'patch_principal(existing["name"], operations)' in gateway
+    assert 'delete_principal(existing["name"])' in gateway
+    assert "fetch_principal(domain_name)" in gateway
+    assert "fetch_principal(localpart)" in gateway
+    assert 'existing["id"]' not in gateway
 
 
 def test_mail_platform_runtime_verifies_plaintext_private_submission_auth() -> None:

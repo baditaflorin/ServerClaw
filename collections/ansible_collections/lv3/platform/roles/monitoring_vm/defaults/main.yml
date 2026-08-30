@@ -40,6 +40,8 @@ monitoring_stack_packages:
   - prometheus
   - prometheus-blackbox-exporter
 monitoring_stack_dir: "/etc/{{ platform_identity.unix_prefix }}/monitoring"
+monitoring_legacy_stack_dirs:
+  - "/etc/{{ platform_identity.config_prefix }}/monitoring"
 monitoring_repo_root: "{{ inventory_dir | dirname }}"
 monitoring_grafana_admin_user: admin
 monitoring_grafana_admin_password_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/grafana-admin-password"
@@ -81,11 +83,20 @@ monitoring_grafana_log_canary_dashboard_source_file: "{{ monitoring_repo_root }}
 monitoring_influxdb_admin_user: "{{ platform_identity.config_prefix }}-monitoring-admin"
 monitoring_influxdb_admin_password_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/influxdb-admin-password"
 monitoring_influxdb_operator_token_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/influxdb-operator.token"
+monitoring_influxdb_cli_configs_file: /root/.influxdbv2/configs
+monitoring_influxdb_legacy_org_name: ""
 monitoring_influxdb_proxmox_writer_token_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/influxdb-proxmox-writer.token"
 monitoring_influxdb_proxmox_writer_description: "{{ platform_identity.config_prefix }}-proxmox-writer"
 monitoring_influxdb_guest_writer_token_file: "/etc/{{ platform_identity.unix_prefix }}/monitoring/influxdb-guest-writer.token"
 monitoring_influxdb_guest_writer_description: "{{ platform_identity.config_prefix }}-guest-writer"
 monitoring_influxdb_grafana_reader_description: "{{ platform_identity.config_prefix }}-grafana-reader"
+monitoring_secret_migration_files:
+  - "{{ monitoring_grafana_admin_password_file }}"
+  - "{{ monitoring_influxdb_admin_password_file }}"
+  - "{{ monitoring_influxdb_operator_token_file }}"
+  - "{{ monitoring_influxdb_proxmox_writer_token_file }}"
+  - "{{ monitoring_influxdb_guest_writer_token_file }}"
+  - "{{ monitoring_grafana_datasource_token_file }}"
 monitoring_loki_config_file: /etc/loki/config.yml
 monitoring_loki_data_dir: /var/lib/loki
 monitoring_loki_http_url: http://127.0.0.1:3100
@@ -128,6 +139,7 @@ monitoring_loki_canary_log_selector: >-
 monitoring_grafana_annotation_retention: 2160h
 monitoring_prometheus_service_name: "{{ platform_identity.config_prefix }}-prometheus"
 monitoring_prometheus_service_file: /etc/systemd/system/{{ platform_identity.config_prefix }}-prometheus.service
+monitoring_prometheus_legacy_service_names: []
 monitoring_prometheus_config_file: /etc/prometheus/prometheus.yml
 monitoring_prometheus_data_dir: /var/lib/prometheus
 monitoring_prometheus_rules_dir: /etc/prometheus/rules

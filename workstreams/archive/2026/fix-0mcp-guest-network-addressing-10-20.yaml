@@ -1,0 +1,64 @@
+id: fix-0mcp-guest-network-addressing-10-20
+title: Fix example.org guest network addressing — swap internal/staging to match reality
+status: merged
+ready_to_merge: true
+live_applied: true
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: fix-0mcp-guest-network-addressing-10-20
+doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+ownership_manifest:
+  owned_surfaces:
+    - id: fix-0mcp-guest-network-addressing-10-20-code
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+        - inventory/group_vars/all/identity.yml
+        - inventory/hosts.yml
+        - workstreams/active/fix-0mcp-guest-network-addressing-10-20.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Operator confirmed: the real example.org fleet has always run on 10.10.10.x
+  (16 of 17 live guests were never on 10.10.10.x -- nginx-edge was the only
+  exception, and only because of a since-corrected manual mistake on
+  2026-08-26). The IaC had this backwards: `proxmox_internal_network` was
+  declared as 10.10.10.0/24 ("production") and `proxmox_staging_network` as
+  10.10.10.0/24 ("staging") -- inverted relative to physical reality, where
+  no separate staging VMs were ever actually provisioned (the "-staging"
+  suffixed inventory entries are generated placeholders with no real VM
+  behind them).
+
+  Fixed at the source: swapped proxmox_internal_*/proxmox_staging_* in
+  inventory/host_vars/proxmox-host.yml (network/bridge/ipv4/cidr), updated
+  proxmox_public_edge_ipv4 and all 17 proxmox_guests[].ipv4/gateway4 entries
+  (plus backup_vm_ipv4 and the 3 postgres_ha vip_ipv4 references) to
+  10.10.10.x, and updated identity.yml's platform_guest_network_cidr/
+  prefix/wildcard to match. Regenerated inventory/hosts.yml via `make
+  generate-inventory` -- confirmed no IP collisions between the now-swapped
+  production (10.10.10.x) and staging (10.10.10.x) host groups.
+
+  inventory/group_vars/platform.yml was deliberately left untouched here:
+  regenerating it on this machine pulls in a stale, mismatched `.local`
+  overlay (active-deployment=0fork, pointing at a completely different
+  physical server) that contaminates the output with example.org's real
+  values. Confirmed via `git stash` that `make validate-generated-vars`
+  already fails on clean main for the same reason, unrelated to this
+  change -- pre-existing, not introduced here.
+
+  Live infrastructure changes (reverting nginx-edge's own netplan/bridge/
+  cloud-init back to 10.10.10.10, and reapplying the corrected nftables on
+  the Proxmox host) are handled separately, after this lands, so the live
+  fleet and the declared IaC move together.
+
+objectives:
+  - Correct the inverted internal/staging network declarations
+  - Regenerate hosts.yml with no collisions
+
+completion_metrics:
+  - proxmox_internal_network is 10.10.10.0/24
+  - All 17 proxmox_guests entries use 10.10.10.x
+  - inventory/hosts.yml regenerated with no ansible_host collisions
+
+related_adrs: []

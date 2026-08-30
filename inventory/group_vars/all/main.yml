@@ -199,7 +199,7 @@ mail_platform_gateway_api_key_local_file: "{{ repo_shared_local_root }}/mail-pla
 mail_platform_brevo_api_key_local_file: "{{ repo_shared_local_root }}/mail-platform/brevo-api-key.txt"
 mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
-smtp_host: lv3-mail-stalwart
+smtp_host: "{{ platform_identity.config_prefix }}-mail-stalwart"
 smtp_port: "{{ hostvars[platform_topology_host].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
 smtp_starttls: false
 smtp_auth_enabled: true
@@ -224,9 +224,15 @@ openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.
 openbao_breakglass_password_local_file: "{{ openbao_local_artifact_dir }}/breakglass-password.txt"
 openbao_postgres_rotator_password_local_file: "{{ openbao_local_artifact_dir }}/postgres-rotator-password.txt"
 openbao_controller_approle_local_file: "{{ openbao_local_artifact_dir }}/controller-automation-approle.json"
+openbao_runtime_secret_provisioner_approle_local_file: "{{ openbao_local_artifact_dir }}/runtime-secret-provisioner-approle.json"
 openbao_atlas_approle_local_file: "{{ openbao_local_artifact_dir }}/atlas-approle.json"
 openbao_mail_platform_approle_local_file: "{{ openbao_local_artifact_dir }}/mail-platform-approle.json"
 openbao_secret_rotation_approle_local_file: "{{ openbao_local_artifact_dir }}/secret-rotation-approle.json"
+# Registry keys are the canonical OpenBao runtime-secret namespace.  The one
+# exception predates the registry and remains explicit until that service can
+# migrate without rotating its runtime AppRole or KV path.
+openbao_runtime_secret_namespace_overrides:
+  rag_context: platform-context
 # ADR 0438 Phase 4: individual artifact paths removed from group_vars — role defaults now use
 # {{ openbao_local_artifact_dir }}/... and are resolved lazily at task time (not baked by shard generator)
 # ADR 0438 Phase 5 (partial): derive OpenBao address from topology inventory instead of hardcoding.
@@ -235,6 +241,8 @@ openbao_secret_rotation_approle_local_file: "{{ openbao_local_artifact_dir }}/se
 # already maps openbao.owning_vm=runtime-control → the correct IP.
 common_openbao_compose_env_openbao_address: >-
   http://{{ hostvars[platform_topology_host].platform_service_topology.openbao.private_ip }}:{{ platform_ports.openbao_http_port }}
+common_openbao_compose_env_api_host: >-
+  {{ hostvars[platform_topology_host].platform_service_topology.openbao.owning_vm }}
 typesense_local_artifact_dir: "{{ repo_shared_local_root }}/typesense"
 openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
 compose_runtime_secret_root: "/run/{{ platform_config_prefix }}-secrets"

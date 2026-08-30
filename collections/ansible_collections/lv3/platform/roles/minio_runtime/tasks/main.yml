@@ -108,43 +108,49 @@
     - path: "{{ minio_mc_config_dir }}"
       mode: "0700"
 
+- name: Resolve the managed MinIO secret migration contracts
+  ansible.builtin.set_fact:
+    minio_managed_secret_contracts: >-
+      {%- set contracts = [] -%}
+      {%- set root_legacy_files = [] -%}
+      {%- for legacy_dir in minio_legacy_secret_dirs -%}
+      {%- set _ = root_legacy_files.append(legacy_dir ~ '/' ~ (minio_root_password_remote_file | basename)) -%}
+      {%- endfor -%}
+      {%- set _ = contracts.append({
+        'name': 'root',
+        'remote_file': minio_root_password_remote_file,
+        'local_file': minio_root_password_local_file,
+        'legacy_remote_files': root_legacy_files
+      }) -%}
+      {%- for consumer in minio_managed_consumers_resolved -%}
+      {%- set legacy_files = [] -%}
+      {%- for legacy_dir in minio_legacy_secret_dirs -%}
+      {%- set _ = legacy_files.append(legacy_dir ~ '/' ~ (consumer.secret_key_remote_file | basename)) -%}
+      {%- endfor -%}
+      {%- set _ = contracts.append({
+        'name': consumer.name,
+        'remote_file': consumer.secret_key_remote_file,
+        'local_file': consumer.secret_key_local_file,
+        'legacy_remote_files': legacy_files
+      }) -%}
+      {%- endfor -%}
+      {{ contracts }}
+  no_log: true
+
+- name: Preserve MinIO secrets across the POSIX-safe directory migration
+  ansible.builtin.include_tasks: migrate_secret.yml
+  loop: "{{ minio_managed_secret_contracts }}"
+  loop_control:
+    loop_var: minio_secret_contract
+    label: "{{ minio_secret_contract.name }}"
+  no_log: true
+
 - name: Install the pinned MinIO client
   ansible.builtin.get_url:
     url: "{{ minio_mc_url }}"
     dest: "{{ minio_mc_bin }}"
     mode: "0755"
     checksum: "{{ minio_mc_checksum }}"
-
-- name: Generate the MinIO root password when missing
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ minio_root_password_remote_file }}" ]; then
-      umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -hex 20 > "{{ minio_root_password_remote_file }}"
-                # Replace with: {{ "minio" | secret }}
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: minio_root_password_generation
-  changed_when: "'changed' in minio_root_password_generation.stdout"
-  no_log: true
-
-- name: Generate the MinIO consumer secret keys when missing
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ item.secret_key_remote_file }}" ]; then
-      umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -hex 20 > "{{ item.secret_key_remote_file }}"
-                # Replace with: {{ "minio" | secret }}
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  loop: "{{ minio_managed_consumers_resolved }}"
-  register: minio_consumer_secret_generation
-  changed_when: "'changed' in (minio_consumer_secret_generation.stdout | default(''))"
-  no_log: true
 
 - name: Read the MinIO root password
   ansible.builtin.slurp:

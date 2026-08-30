@@ -13,8 +13,8 @@ The current implementation builds previews from the current branch manifest plus
 - base domain: `preview.example.com`
 - current profile catalog: `runtime-smoke`
 - TTL enforcement: ADR 0106 governed ephemeral VM tags plus the existing preview/fixture reaper path
-- preview network boundary: shared `vmbr20` pool on `10.20.10.0/24`
-- current preview IP pool: `10.20.10.130-10.20.10.199`
+- preview network boundary: shared `vmbr20` pool on `10.10.10.0/24`
+- current preview IP pool: `10.10.10.130-10.10.10.199`
 - current preview VMID pool: the governed ephemeral range `910-979`
 - current jump path: `ops@100.64.0.1` to the Proxmox host, then the normal Proxmox guest jump path to the preview guest
 - current runtime-smoke override: `docker_runtime_container_forward_compat_enabled=false` because the minimal preview image does not own a repo-managed guest firewall contract yet
@@ -51,7 +51,7 @@ Expected result:
 - local active state under `.local/preview-environments/active/`
 - member-level governed receipts under `receipts/fixtures/` while the preview is active
 
-If guest package downloads stall during converge, first verify the Proxmox host still forwards and masquerades `10.20.10.0/24` through `vmbr0`. The supported repair path is the staging bridge replay documented in [staging-environment.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/docs/runbooks/staging-environment.md).
+If guest package downloads stall during converge, first verify the Proxmox host still forwards and masquerades `10.10.10.0/24` through `vmbr0`. The supported repair path is the staging bridge replay documented in [staging-environment.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0185-live-apply/docs/runbooks/staging-environment.md).
 
 ## Validate
 

@@ -1,0 +1,50 @@
+version: 1
+clients:
+  - id: glitchtip
+    enabled: true
+    client_secret_file: authentik/glitchtip-client-secret.txt
+    application:
+      name: GlitchTip
+      slug: glitchtip
+      launch_url: https://errors.{{ platform_domain }}
+    provider:
+      name: glitchtip
+      client_id: glitchtip
+      client_type: confidential
+      grant_types:
+        - authorization_code
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes:
+        - openid
+        - profile
+        - email
+      redirect_uris:
+        - https://errors.{{ platform_domain }}/accounts/oidc/authentik/login/callback/
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: outline
+    enabled: true
+    client_secret_file: authentik/outline-client-secret.txt
+    application:
+      name: Outline
+      slug: outline
+      launch_url: https://wiki.{{ platform_domain }}
+    provider:
+      name: outline
+      client_id: outline
+      client_type: confidential
+      grant_types:
+        - authorization_code
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes:
+        - openid
+        - profile
+        - email
+      redirect_uris:
+        - https://wiki.{{ platform_domain }}/auth/oidc.callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider

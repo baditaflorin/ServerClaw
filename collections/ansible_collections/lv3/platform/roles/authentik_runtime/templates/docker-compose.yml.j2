@@ -1,0 +1,114 @@
+# managed-by: role=authentik_runtime adr=0491 agent={{ lookup('env','LV3_AGENT_SESSION') | default('operator') }}
+services:
+  openbao-agent:
+    image: {{ authentik_openbao_agent_image }}
+    container_name: {{ authentik_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ authentik_env_file }} && test "$(stat -c %a {{ authentik_env_file }})" = 600
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ authentik_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ authentik_env_file | dirname }}:{{ authentik_env_file | dirname }}
+
+  postgres:
+    image: {{ authentik_postgres_image }}
+    container_name: {{ authentik_container_name }}-postgres
+    restart: unless-stopped
+    env_file:
+      - {{ authentik_env_file }}
+    environment:
+      POSTGRES_USER: authentik
+      POSTGRES_DB: authentik
+    volumes:
+      - {{ authentik_postgres_data_dir }}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U authentik -d authentik"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: {{ authentik_redis_image }}
+    container_name: {{ authentik_container_name }}-redis
+    restart: unless-stopped
+    command: --save 60 1 --loglevel warning
+    volumes:
+      - {{ authentik_redis_data_dir }}:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  authentik:
+    image: {{ authentik_image }}
+    container_name: {{ authentik_container_name }}
+    command: server
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - {{ authentik_env_file }}
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_WEB__BASE_URL: "{{ authentik_public_url }}"
+      AUTHENTIK_DISABLE_UPDATE_CHECK: "true"
+      AUTHENTIK_DISABLE_STARTUP_ANALYTICS: "true"
+      AUTHENTIK_ERROR_REPORTING__ENABLED: "false"
+    volumes:
+      - {{ authentik_media_dir }}:/media
+      - {{ authentik_templates_dir }}:/templates
+    ports:
+      - "{{ ansible_host }}:{{ authentik_internal_port }}:{{ authentik_container_port }}"
+      - "127.0.0.1:{{ authentik_internal_port }}:{{ authentik_container_port }}"
+
+  authentik-worker:
+    image: {{ authentik_image }}
+    container_name: {{ authentik_container_name }}-worker
+    command: worker
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - {{ authentik_env_file }}
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: postgres
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_WEB__BASE_URL: "{{ authentik_public_url }}"
+      AUTHENTIK_DISABLE_UPDATE_CHECK: "true"
+      AUTHENTIK_DISABLE_STARTUP_ANALYTICS: "true"
+      AUTHENTIK_ERROR_REPORTING__ENABLED: "false"
+    # Deliberately not mounting /var/run/docker.sock: that's only needed for
+    # Authentik's Docker-based outpost integration, which isn't part of the
+    # ADR 0491 Phase 1 scope (plain OIDC/SAML broker for existing apps).
+    # Add it later if a Docker-managed outpost is actually needed.
+    volumes:
+      - {{ authentik_media_dir }}:/media
+      - {{ authentik_templates_dir }}:/templates

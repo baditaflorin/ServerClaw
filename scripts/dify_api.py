@@ -261,6 +261,8 @@ class DifyClient:
             raise DifyApiError(
                 f"POST /console/api/workspaces/current/sso-setting returned {response.status_code}: {response.text.strip()}"
             )
+        if not response.content.strip():
+            return {}
         return response.json()
 
     def get_api_tool_provider(self, provider_name: str) -> dict[str, Any] | None:

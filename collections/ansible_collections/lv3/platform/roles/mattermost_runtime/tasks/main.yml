@@ -137,7 +137,7 @@
   vars:
     common_manage_service_secrets_generate:
       - path: "{{ mattermost_admin_password_remote_file }}"
-        command: "{{ 'mattermost' | secret(length=32) }}"
+        value: "{{ 'mattermost' | secret(length=32) }}"
         label: "mattermost-admin-password"
     common_manage_service_secrets_read:
       - "{{ mattermost_admin_password_remote_file }}"

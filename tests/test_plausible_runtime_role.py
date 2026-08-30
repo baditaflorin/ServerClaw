@@ -70,6 +70,23 @@ def test_plausible_runtime_tasks_manage_openbao_compose_and_port_recovery() -> N
     force_recreate_task = next(
         task for task in tasks if task.get("name") == "Force-recreate Plausible when the host port binding is missing"
     )
+    database_start_task = next(
+        task for task in tasks if task.get("name") == "Start the Plausible database before credential reconciliation"
+    )
+    database_probe_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Probe the persisted Plausible database role with the desired password"
+    )
+    database_reconcile_task = next(
+        task for task in tasks if task.get("name") == "Reconcile a stale persisted Plausible database role password"
+    )
+    database_verify_task = next(
+        task
+        for task in tasks
+        if task.get("name")
+        == "Verify the Plausible database role accepts the desired password over the service network"
+    )
     bootstrap_task = next(
         task for task in tasks if task.get("name") == "Reconcile the Plausible bootstrap user and site registrations"
     )
@@ -96,6 +113,19 @@ def test_plausible_runtime_tasks_manage_openbao_compose_and_port_recovery() -> N
     ]
     assert force_recreate_task["ansible.builtin.command"]["argv"][-2:] == ["--force-recreate", "--remove-orphans"]
     assert force_recreate_task["when"] == 'plausible_port_binding_check.stdout | trim == ""'
+    assert database_start_task["ansible.builtin.command"]["argv"][-2:] == ["--detach", "plausible-db"]
+    assert database_probe_task["failed_when"] is False
+    assert database_probe_task["no_log"] is True
+    assert "/run/secrets/database-password" in database_probe_task["ansible.builtin.command"]["argv"][-1]
+    assert "plausible_database_password" not in str(database_probe_task["ansible.builtin.command"]["argv"])
+    assert database_reconcile_task["ansible.builtin.command"]["argv"][-2:] == ["sh", "-s"]
+    assert database_reconcile_task["when"] == "plausible_database_password_probe.rc != 0"
+    assert database_reconcile_task["no_log"] is True
+    assert "ALTER ROLE %I PASSWORD %L" in database_reconcile_task["ansible.builtin.command"]["stdin"]
+    assert "/run/secrets/database-password" in database_reconcile_task["ansible.builtin.command"]["stdin"]
+    assert "printf '%s' \"$desired_password\" | base64" in database_reconcile_task["ansible.builtin.command"]["stdin"]
+    assert database_verify_task["no_log"] is True
+    assert "--host=plausible-db" in database_verify_task["ansible.builtin.command"]["argv"][-1]
     assert bootstrap_task["ansible.builtin.command"]["argv"][:4] == [
         "docker",
         "exec",
@@ -116,6 +146,9 @@ def test_plausible_verify_task_checks_tracker_and_synthetic_event_ingestion() ->
     event_check_task = next(
         task for task in tasks if task.get("name") == "Wait for the synthetic Plausible event to reach ClickHouse"
     )
+    bootstrap_assert_task = next(
+        task for task in tasks if task.get("name") == "Assert the Plausible bootstrap contract and tracker are healthy"
+    )
 
     assert tracker_task["ansible.builtin.uri"]["url"] == "{{ plausible_internal_base_url }}/js/script.js"
     assert event_task["ansible.builtin.uri"]["url"] == "{{ plausible_internal_base_url }}/api/event"
@@ -129,6 +162,10 @@ def test_plausible_verify_task_checks_tracker_and_synthetic_event_ingestion() ->
     ]
     assert event_check_task["ansible.builtin.command"]["argv"][4] == "rpc"
     assert event_check_task["until"] == "(plausible_event_check.stdout | trim | from_json).seen"
+    assertions = bootstrap_assert_task["ansible.builtin.assert"]["that"]
+    assert "common_verify_health_response.status == 200" in assertions
+    assert "common_verify_extra_response.status == 200" in assertions
+    assert all("plausible_verify_health" not in assertion for assertion in assertions)
 
 
 def test_plausible_runtime_templates_render_public_urls_and_repo_managed_site_checks() -> None:
@@ -148,6 +185,11 @@ def test_plausible_runtime_templates_render_public_urls_and_repo_managed_site_ch
         in env_template
     )
     assert '[[ with secret "kv/data/{{ plausible_openbao_secret_path }}" ]]' in ctmpl_template
+    assert "all_users = Repo.all(Auth.User)" in bootstrap_template
+    assert "{nil, [sole_user]}" in bootstrap_template
+    assert "unable to adopt the Plausible bootstrap identity" in bootstrap_template
+    assert "user.email != email" in bootstrap_template
+    assert "user_adopted: user_adopted" in bootstrap_template
     assert "Teams.get_or_create(user)" in bootstrap_template
     assert "Sites.create(user" in bootstrap_template
     assert "{:ok, {result, _changed?}} =" in bootstrap_template

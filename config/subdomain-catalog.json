@@ -116,7 +116,7 @@
       "owner_adr": "0197",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
@@ -133,7 +133,7 @@
       "owner_adr": "0283",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "The dashboard is protected by the shared edge oauth2-proxy and Keycloak flow while /js/, /api/event, and health endpoints stay public for tracker delivery and probe traffic."
@@ -151,7 +151,7 @@
       "tls": {
         "provider": "letsencrypt",
         "auto_renew": true,
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/"
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/"
       },
       "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Keycloak boundary; repo-managed Label Studio tokens remain the current app-local automation path."
     },
@@ -167,7 +167,7 @@
       "owner_adr": "0092",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published publicly through the shared NGINX edge and verified live from current main."
@@ -184,7 +184,7 @@
       "owner_adr": "0340",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications. Upstream routes to coolify-apps (10.10.10.71) \u2014 ADR 0340.",
@@ -203,7 +203,7 @@
       "owner_adr": "0292",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Keycloak OIDC client."
@@ -220,7 +220,7 @@
       "owner_adr": "0292",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "The shared edge protects the Lago browser UI while `/api/health` and `/api/v1/events` intentionally stay reachable for probes and governed producer ingest through the API gateway adapter."
@@ -237,7 +237,7 @@
       "owner_adr": "0380",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge for operator-only access via Tailscale headscale management network. WebRTC media streams direct from Proxmox host (UDP 50000-60000) bypass TLS proxy for latency optimization."
@@ -254,7 +254,7 @@
       "owner_adr": "0028",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       }
     },
@@ -270,7 +270,7 @@
       "owner_adr": "0081",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
@@ -287,7 +287,7 @@
       "owner_adr": "0394",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "LibreChat is published through the shared NGINX edge and carries the interactive ServerClaw chat surface plus its in-app Keycloak OIDC flow."
@@ -304,7 +304,7 @@
       "owner_adr": "0287",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge and authenticated through Woodpecker's delegated Gitea OAuth flow."
@@ -321,7 +321,7 @@
       "owner_adr": "0260",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects."
@@ -338,7 +338,7 @@
       "owner_adr": "0194",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Coolify dashboard published through the shared authenticated NGINX edge with the private controller API proxied on the management tailnet."
@@ -356,7 +356,7 @@
       "tls": {
         "provider": "letsencrypt",
         "auto_renew": true,
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/"
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/"
       },
       "notes": "The shared NGINX edge publishes data.example.com directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
     },
@@ -388,7 +388,7 @@
       "owner_adr": "0023",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       }
     },
@@ -404,7 +404,7 @@
       "owner_adr": "0094",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
@@ -421,7 +421,7 @@
       "owner_adr": "0202",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Private Excalidraw publication for repo-generated architecture scenes through the shared authenticated NGINX edge."
@@ -438,7 +438,7 @@
       "owner_adr": "0281",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge while GlitchTip itself delegates browser sign-in to the repo-managed Keycloak OIDC flow; health and DSN ingestion remain intentionally reachable for probes and SDK traffic."
@@ -461,7 +461,7 @@
       "owner_adr": "0021",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "The apex hostname is governed as a crawl-suppressed informational redirect to the shared NGINX edge entrypoint."
@@ -494,7 +494,7 @@
       "owner_adr": "0288",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Keycloak."
@@ -527,7 +527,7 @@
       "owner_adr": "0011",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       }
     },
@@ -543,7 +543,7 @@
       "owner_adr": "0072",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Planned staging hostname on the shared NGINX edge."
@@ -560,7 +560,7 @@
       "owner_adr": "0279",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Keycloak OIDC client."
@@ -577,7 +577,7 @@
       "owner_adr": "0144",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge and proxied to the Proxmox host Headscale listener on 10.10.10.1:8080."
@@ -594,10 +594,27 @@
       "owner_adr": "0152",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "id.example.com",
+      "service_id": "authentik",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "203.0.113.1",
+      "target_port": 443,
+      "owner_adr": "0491",
+      "tls": {
+        "provider": "letsencrypt",
+        "auto_renew": true,
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/"
+      },
+      "notes": "Deployed at the dedicated id.example.com hostname, separate from sso.example.com, so Keycloak's edge publication is completely unaffected during the parallel rollout (ADR 0491)."
     },
     {
       "fqdn": "langfuse.example.com",
@@ -611,7 +628,7 @@
       "owner_adr": "0146",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       }
     },
@@ -627,7 +644,7 @@
       "owner_adr": "0293",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "The shared NGINX edge proxies signalling at https://livekit.example.com while public TCP 7881 and UDP 7882 are forwarded directly to docker-runtime for WebRTC media."
@@ -644,7 +661,7 @@
       "owner_adr": "0150",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
@@ -661,7 +678,7 @@
       "owner_adr": "0041",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published as an informational HTTPS surface on the shared edge while the live mail service itself is reached over SMTP submission and IMAPS."
@@ -678,7 +695,7 @@
       "owner_adr": "0255",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR."
@@ -695,7 +712,7 @@
       "owner_adr": "0274",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "The MinIO browser console is published through the shared authenticated edge path and proxied to the docker-runtime guest listener on port 9011."
@@ -712,7 +729,7 @@
       "owner_adr": "0274",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "The public MinIO S3-compatible API is published through the shared NGINX edge and proxies to the docker-runtime guest listener on port 9010."
@@ -729,7 +746,7 @@
       "owner_adr": "0151",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
@@ -746,7 +763,7 @@
       "owner_adr": "0021",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       }
     },
@@ -762,7 +779,7 @@
       "owner_adr": "0299",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge; ntfy itself enforces repo-managed topic authentication for governed operator push delivery."
@@ -779,7 +796,7 @@
       "owner_adr": "0093",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Interactive runtime is live behind oauth2-proxy and Keycloak on the shared NGINX edge."
@@ -796,7 +813,7 @@
       "owner_adr": "0072",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Planned staging portal generated from the canonical service and environment catalogs."
@@ -813,7 +830,7 @@
       "owner_adr": "0285",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge; docs.example.com remains reserved for the developer portal from ADR 0094."
@@ -830,7 +847,7 @@
       "owner_adr": "0004",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       }
     },
@@ -846,7 +863,7 @@
       "owner_adr": "0201",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Harbor registry published through the shared NGINX edge with browser sign-in delegated at the Harbor application layer."
@@ -863,7 +880,7 @@
       "owner_adr": "0373",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Repo intake webhook service. Published through the shared NGINX edge and gated behind Keycloak oauth2-proxy."
@@ -880,7 +897,7 @@
       "owner_adr": "0346",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Local semantic code search over the repository using Ollama embeddings and Qdrant vector storage. No third-party APIs required."
@@ -946,7 +963,7 @@
       "owner_adr": "0056",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       }
     },
@@ -962,7 +979,7 @@
       "owner_adr": "0072",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Planned staging identity hostname on the shared NGINX edge."
@@ -979,7 +996,7 @@
       "owner_adr": "0109",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       }
     },
@@ -995,7 +1012,7 @@
       "owner_adr": "0193",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
@@ -1012,7 +1029,7 @@
       "owner_adr": "0027",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       }
     },
@@ -1028,7 +1045,7 @@
       "owner_adr": "0072",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Planned staged monitoring hostname on the shared NGINX edge."
@@ -1062,7 +1079,7 @@
       "owner_adr": "0199",
       "tls": {
         "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
       "notes": "Published through the shared NGINX edge while Outline itself delegates browser authentication to the repo-managed Keycloak OIDC client."

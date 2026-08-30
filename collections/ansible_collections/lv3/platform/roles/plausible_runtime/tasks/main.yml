@@ -86,13 +86,13 @@
   vars:
     common_manage_service_secrets_generate:
       - path: "{{ plausible_database_password_remote_file }}"
-        command: "{{ 'plausible' | secret(length=32) }}"
+        value: "{{ 'plausible' | secret(length=32) }}"
         label: "plausible-database-password"
       - path: "{{ plausible_secret_key_base_remote_file }}"
-        command: "{{ 'plausible' | secret }}"
+        value: "{{ 'plausible' | secret }}"
         label: "plausible-secret-key-base"
       - path: "{{ plausible_bootstrap_user_password_remote_file }}"
-        command: "{{ 'plausible' | secret(length=32) }}"
+        value: "{{ 'plausible' | secret(length=32) }}"
         label: "plausible-bootstrap-user-password"
     common_manage_service_secrets_read:
       - "{{ plausible_database_password_remote_file }}"
@@ -205,6 +205,100 @@
   vars:
     common_docker_bridge_chains_service_name: docker
     common_docker_bridge_chains_require_nat_chain: true
+
+- name: Start the Plausible database before credential reconciliation
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ plausible_compose_file }}"
+      - up
+      - --detach
+      - plausible-db
+  args:
+    chdir: "{{ plausible_site_dir }}"
+  register: plausible_database_start
+  changed_when: >-
+    'Created' in (plausible_database_start.stdout + plausible_database_start.stderr)
+    or 'Recreated' in (plausible_database_start.stdout + plausible_database_start.stderr)
+    or 'Started' in (plausible_database_start.stdout + plausible_database_start.stderr)
+
+- name: Wait for the Plausible database container to become healthy
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - --format
+      - '{{ "{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}" }}'
+      - "{{ plausible_db_container_name }}"
+  register: plausible_database_health
+  retries: 36
+  delay: 5
+  until: plausible_database_health.stdout | trim == 'healthy'
+  changed_when: false
+
+- name: Probe the persisted Plausible database role with the desired password
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ plausible_db_container_name }}"
+      - sh
+      - -ec
+      - >-
+        PGPASSWORD="$(cat /run/secrets/database-password)"
+        exec psql --host=plausible-db --username="$POSTGRES_USER"
+        --dbname="$POSTGRES_DB" --tuples-only --no-align --command="SELECT 1"
+  register: plausible_database_password_probe
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Reconcile a stale persisted Plausible database role password
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --interactive
+      - "{{ plausible_db_container_name }}"
+      - sh
+      - -s
+    stdin: |
+      set -eu
+      desired_password="$(cat /run/secrets/database-password)"
+      desired_password_b64="$(printf '%s' "$desired_password" | base64 | tr -d '\n')"
+      role_b64="$(printf '%s' "$POSTGRES_USER" | base64 | tr -d '\n')"
+      cat <<SQL | psql --username="$POSTGRES_USER" --dbname="$POSTGRES_DB" --set=ON_ERROR_STOP=1 --quiet
+      DO \$plausible_password_reconcile\$
+      BEGIN
+        EXECUTE format(
+          'ALTER ROLE %I PASSWORD %L',
+          convert_from(decode('$role_b64', 'base64'), 'UTF8'),
+          convert_from(decode('$desired_password_b64', 'base64'), 'UTF8')
+        );
+      END
+      \$plausible_password_reconcile\$;
+      SQL
+  when: plausible_database_password_probe.rc != 0
+  changed_when: true
+  no_log: true
+
+- name: Verify the Plausible database role accepts the desired password over the service network
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ plausible_db_container_name }}"
+      - sh
+      - -ec
+      - >-
+        PGPASSWORD="$(cat /run/secrets/database-password)"
+        exec psql --host=plausible-db --username="$POSTGRES_USER"
+        --dbname="$POSTGRES_DB" --tuples-only --no-align --command="SELECT 1"
+  register: plausible_database_password_verify
+  changed_when: false
+  no_log: true
 
 - name: Converge the Plausible compose stack
   ansible.builtin.include_role:

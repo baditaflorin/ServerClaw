@@ -15,7 +15,7 @@
 ## Context
 
 The 2026-04-28 postmortem
-([docs/postmortems/2026-04-28-multi-deployment-hardening-three-phase-session.md](docs/postmortems/2026-04-28-multi-deployment-hardening-three-phase-session.md))
+([2026-04-28 multi-deployment hardening postmortem](../postmortems/2026-04-28-multi-deployment-hardening-three-phase-session.md))
 identified four classes of repeatable failure in agent-driven hardening
 work:
 

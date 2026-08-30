@@ -3,6 +3,20 @@
   "schema_version": "1.0.0",
   "data_stores": [
     {
+      "id": "authentik_primary_data",
+      "service": "authentik",
+      "name": "Authentik primary data",
+      "class": "internal",
+      "retention_days": 30,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "authentik-postgres (runtime-control)"
+      ],
+      "notes": "Primary datastore is Authentik's own PostgreSQL database (users, groups, applications, providers, flows, and session state); Redis holds only ephemeral session/cache data, not durable state."
+    },
+    {
       "id": "browser-runner-artifacts",
       "service": "browser_runner",
       "name": "Browser runner bounded session artifacts",

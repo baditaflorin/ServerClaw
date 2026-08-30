@@ -7,6 +7,7 @@
 hetzner_dns_api_base_url: https://api.hetzner.cloud/v1
 hetzner_dns_zone_name: ""
 hetzner_dns_records: []
+hetzner_dns_rrsets_per_page: 100
 
 # ADR 0430 PR 3 — brownout-aware manual fallback.
 #

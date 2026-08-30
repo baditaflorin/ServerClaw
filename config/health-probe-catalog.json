@@ -102,6 +102,74 @@
         }
       }
     },
+    "authentik": {
+      "service_name": "authentik",
+      "owning_vm": "runtime-control",
+      "role": "authentik_runtime",
+      "verify_file": "roles/authentik_runtime/tasks/verify.yml",
+      "startup": {
+        "kind": "http",
+        "description": "Authentik startup completes once the readiness endpoint confirms both PostgreSQL and Redis connections are established.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9010/-/health/ready/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "liveness": {
+        "kind": "http",
+        "description": "The Authentik liveness endpoint responds as long as the server process is running, independent of its database/cache connectivity.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9010/-/health/live/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Authentik readiness endpoint confirms PostgreSQL and Redis connections can be established, meaning the server can actually handle auth traffic.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9010/-/health/ready/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "docker_publication": {
+          "container_name": "authentik",
+          "bindings": [
+            {
+              "host": "10.10.10.92",
+              "port": 9010
+            }
+          ],
+          "required_networks": []
+        }
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Authentik OIDC Discovery",
+          "type": "http",
+          "url": "https://id.example.com/-/health/ready/",
+          "description": "Authentik SSO broker published through the NGINX edge VM (ADR 0491, Phase 1 -- deployed in parallel with Keycloak).",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "backup_pbs": {
       "service_name": "backup-pbs",
       "owning_vm": "backup",
@@ -848,7 +916,7 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "The public GlitchTip health endpoint answers through the shared NGINX edge with Keycloak OIDC settings and project ingestion online.",
+        "description": "The public GlitchTip health endpoint answers through the shared NGINX edge with Authentik OIDC settings and project ingestion online.",
         "timeout_seconds": 300,
         "retries": 36,
         "delay_seconds": 5,

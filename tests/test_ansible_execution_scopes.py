@@ -252,7 +252,10 @@ descriptor:
     scopes.validate_scope_catalog(repo_root=repo_root, catalog_path=catalog_path, inventory_path=inventory_path)
 
 
-def test_resolve_identity_override_uses_shared_local_overlay_for_worktrees(tmp_path: Path) -> None:
+def test_resolve_identity_override_uses_shared_local_overlay_for_worktrees(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("PLATFORM_IDENTITY_OVERLAY", raising=False)
     repo_root = tmp_path
     worktree_root = repo_root / ".worktrees" / "ws-0346-live-apply"
     worktree_root.mkdir(parents=True)
@@ -260,6 +263,88 @@ def test_resolve_identity_override_uses_shared_local_overlay_for_worktrees(tmp_p
     write(identity_path, "platform_domain: example.com\n")
 
     assert scopes._resolve_identity_override(worktree_root) == ["-e", f"@{identity_path}"]
+
+
+def test_resolve_identity_override_explicit_selector_excludes_shared_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = tmp_path
+    worktree_root = repo_root / ".worktrees" / "ws-explicit-deployment"
+    worktree_root.mkdir(parents=True)
+    shared_identity = repo_root / ".local" / "identity.yml"
+    selected_identity = repo_root / ".local" / "identity.yml.target"
+    write(shared_identity, "platform_domain: unrelated.example\n")
+    write(selected_identity, "platform_domain: selected.example\n")
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(selected_identity))
+
+    args = scopes._resolve_identity_override(worktree_root)
+
+    assert args == ["-e", f"@{selected_identity}"]
+    assert str(shared_identity) not in args
+
+
+def test_resolve_identity_override_rejects_missing_explicit_selector(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = tmp_path
+    worktree_root = repo_root / ".worktrees" / "ws-missing-deployment"
+    worktree_root.mkdir(parents=True)
+    shared_identity = repo_root / ".local" / "identity.yml"
+    write(shared_identity, "platform_domain: unrelated.example\n")
+    missing_identity = repo_root / ".local" / "missing.yml"
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(missing_identity))
+
+    with pytest.raises(scopes.AnsibleExecutionScopeError, match="explicit PLATFORM_IDENTITY_OVERLAY"):
+        scopes._resolve_identity_override(worktree_root)
+
+
+def test_explicit_identity_is_last_and_passthrough_cannot_override_reserved_keys(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root, _catalog_path, inventory_path = make_repo(tmp_path)
+    selected_identity = repo_root / "selected-identity.yml"
+    write(selected_identity, "platform_domain: selected.example\n")
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(selected_identity))
+    plan = scopes.PlannedPlaybookExecution(
+        playbook_path="playbooks/leaf-alpha.yml",
+        env="production",
+        run_id="run-explicit",
+        mutation_scope="host",
+        execution_class="diagnostic",
+        target_lane=None,
+        target_hosts=("alpha",),
+        limit_expression="alpha",
+        inventory_shard_path=str(repo_root / ".ansible" / "shards" / "explicit.json"),
+        shared_surfaces=("playbooks/leaf-alpha.yml",),
+        source_leaf_playbooks=("playbooks/leaf-alpha.yml",),
+    )
+    captured: list[str] = []
+
+    def fake_run(command: list[str], **kwargs):
+        del kwargs
+        captured.extend(command)
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(scopes.subprocess, "run", fake_run)
+    scopes.run_planned_playbook(
+        plan,
+        passthrough_args=["-e", "authentik_secret_bootstrap_mode=adopt_legacy"],
+        inventory_path=inventory_path,
+        repo_root=repo_root,
+    )
+
+    identity_index = captured.index(f"@{selected_identity}")
+    passthrough_index = captured.index("authentik_secret_bootstrap_mode=adopt_legacy")
+    assert identity_index > passthrough_index
+
+    with pytest.raises(scopes.AnsibleExecutionScopeError, match="cannot override"):
+        scopes._validate_explicit_identity_passthrough(
+            ["-e", "platform_domain=attacker.example"],
+            {"platform_domain": "attacker.example"},
+        )
+    with pytest.raises(scopes.AnsibleExecutionScopeError, match="inventory options are forbidden"):
+        scopes._validate_explicit_identity_passthrough(["-i", "other.yml"], {})
 
 
 def test_plan_playbook_execution_discovers_hosts_and_writes_inventory_shard(
@@ -445,6 +530,7 @@ def test_plan_playbook_execution_uses_catalog_host_pattern_var(tmp_path: Path, m
 def test_run_scoped_playbook_uses_primary_inventory_for_group_vars_and_shard_for_scope(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    monkeypatch.delenv("PLATFORM_IDENTITY_OVERLAY", raising=False)
     repo_root, catalog_path, inventory_path = make_repo(tmp_path)
     write(repo_root / "playbooks" / "leaf-alpha.yml", "---\n- hosts: alpha\n")
 
@@ -547,6 +633,7 @@ def test_run_planned_playbook_reserves_and_releases_target_lane(
 def test_run_planned_playbook_uses_shared_local_identity_overlay_from_worktree(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    monkeypatch.delenv("PLATFORM_IDENTITY_OVERLAY", raising=False)
     shared_root = tmp_path / "repo"
     worktree_root = shared_root / ".worktrees" / "ws-0371-live-apply"
     local_overlay = shared_root / ".local"

@@ -6,10 +6,12 @@ LOCAL_OVERLAY_ROOT ?= $(shell $(REPO_ROOT)/scripts/resolve_local_overlay_root.sh
 DEPLOYMENT_ARG :=
 
 # ADR 0437: overlay-aware bootstrap.
-# When PLATFORM_IDENTITY_OVERLAY is set, rewire inventory, SSH key, env and
-# ansible extras so `make bootstrap` works for forks off a single env var.
-# Production (no env var) is byte-identical to the pre-ADR-0437 Makefile.
+# PLATFORM_IDENTITY_OVERLAY selects identity/SSH/bootstrap settings.
+# PLATFORM_TOPOLOGY_OVERLAY selects topology generation inputs. Neither one
+# selects inventory: only PLATFORM_INVENTORY_OVERLAY may append an inventory.
 PLATFORM_IDENTITY_OVERLAY ?=
+PLATFORM_TOPOLOGY_OVERLAY ?=
+PLATFORM_INVENTORY_OVERLAY ?=
 # Agents often invoke `make bootstrap` from inside a .claude/worktrees/ copy
 # whose CWD has no `.local/` (per CLAUDE.md: "worktrees intentionally lack
 # .local/"). Relative PLATFORM_IDENTITY_OVERLAY paths like
@@ -22,8 +24,8 @@ ifeq ($(patsubst /%,,$(PLATFORM_IDENTITY_OVERLAY)),$(PLATFORM_IDENTITY_OVERLAY))
 PLATFORM_IDENTITY_OVERLAY := $(LOCAL_OVERLAY_ROOT)/$(patsubst .local/%,%,$(PLATFORM_IDENTITY_OVERLAY))
 endif
 BOOTSTRAP_OVERLAY_MODE := 1
-BOOTSTRAP_OVERLAY_HOST_VARS ?= $(LOCAL_OVERLAY_ROOT)/host_vars/proxmox-host.yml
-BOOTSTRAP_OVERLAY_INVENTORY ?= $(LOCAL_OVERLAY_ROOT)/inventory/hosts.yml
+BOOTSTRAP_OVERLAY_HOST_VARS ?= $(if $(strip $(PLATFORM_TOPOLOGY_OVERLAY)),$(PLATFORM_TOPOLOGY_OVERLAY),$(LOCAL_OVERLAY_ROOT)/host_vars/proxmox-host.yml)
+BOOTSTRAP_OVERLAY_INVENTORY ?= $(if $(strip $(PLATFORM_INVENTORY_OVERLAY)),$(PLATFORM_INVENTORY_OVERLAY),$(LOCAL_OVERLAY_ROOT)/inventory/hosts.yml)
 # BOOTSTRAP_OVERLAY_SSH_KEY is the ops-user key that ansible plays use once
 # init-remote has created the ops sudoer. Provider-supplied root access is
 # only used for the init-remote step via BOOTSTRAP_OVERLAY_ROOT_KEY below.
@@ -34,10 +36,6 @@ BOOTSTRAP_OVERLAY_ROOT_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/hetzner_llm_agents_ed255
 BOOTSTRAP_OVERLAY_ROOT_USER ?= root
 BOOTSTRAP_OVERLAY_OPS_USER ?= ops
 BOOTSTRAP_OVERLAY_OPS_PUBKEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519.pub
-# Multi-inventory: committed inventory supplies group_vars/host_vars defaults
-# (so everything in inventory/group_vars/all/main.yml loads), while the
-# overlay inventory wins on host-level data it redefines.
-ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml -i $(BOOTSTRAP_OVERLAY_INVENTORY)
 BOOTSTRAP_KEY := $(BOOTSTRAP_OVERLAY_SSH_KEY)
 env := $(BOOTSTRAP_OVERLAY_ENV)
 ANSIBLE_OVERLAY_EXTRA := -e env=$(BOOTSTRAP_OVERLAY_ENV) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(PLATFORM_IDENTITY_OVERLAY)
@@ -47,10 +45,30 @@ export LV3_PROXMOX_HOST_ADDR := $(BOOTSTRAP_OVERLAY_HOST_ADDR)
 endif
 else
 BOOTSTRAP_OVERLAY_MODE :=
-ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml
 ANSIBLE_OVERLAY_EXTRA :=
 BOOTSTRAP_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519
 endif
+ifneq ($(strip $(PLATFORM_TOPOLOGY_OVERLAY)),)
+ifeq ($(patsubst /%,,$(PLATFORM_TOPOLOGY_OVERLAY)),$(PLATFORM_TOPOLOGY_OVERLAY))
+PLATFORM_TOPOLOGY_OVERLAY := $(LOCAL_OVERLAY_ROOT)/$(patsubst .local/%,%,$(PLATFORM_TOPOLOGY_OVERLAY))
+endif
+export PLATFORM_TOPOLOGY_OVERLAY
+endif
+ifneq ($(strip $(PLATFORM_INVENTORY_OVERLAY)),)
+ifeq ($(patsubst /%,,$(PLATFORM_INVENTORY_OVERLAY)),$(PLATFORM_INVENTORY_OVERLAY))
+PLATFORM_INVENTORY_OVERLAY := $(LOCAL_OVERLAY_ROOT)/$(patsubst .local/%,%,$(PLATFORM_INVENTORY_OVERLAY))
+endif
+export PLATFORM_INVENTORY_OVERLAY
+endif
+# Identity and topology selectors never imply an inventory overlay. The
+# committed private inventory remains authoritative unless the operator names
+# an explicit PLATFORM_INVENTORY_OVERLAY. This prevents a worktree from
+# silently composing an unrelated shared .local inventory into a live run.
+ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml
+ifneq ($(strip $(PLATFORM_INVENTORY_OVERLAY)),)
+ANSIBLE_INVENTORY += -i $(PLATFORM_INVENTORY_OVERLAY)
+endif
+DEPLOYMENT_SELECTION_INVENTORY_ARGS := --inventory-file "$(REPO_ROOT)/inventory/hosts.yml" $(if $(strip $(PLATFORM_INVENTORY_OVERLAY)),--inventory-file "$(PLATFORM_INVENTORY_OVERLAY)",)
 ANSIBLE_LOCAL_TEMP ?= /tmp/platform_server-ansible-local
 ANSIBLE_REMOTE_TEMP ?= /tmp
 ANSIBLE_ENV := ANSIBLE_LOCAL_TEMP=$(ANSIBLE_LOCAL_TEMP) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
@@ -144,9 +162,9 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 
 .PHONY: validate-local push-local prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-semgrep validate-compose-runtime-envs validate-dependency-direction validate-service-definitions validate-data-models validate-cross-catalog validate-types verify-waiver-escalation validate-policy validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-service-definitions generate-slo-rules validate-generated-slo generate-https-tls-assurance validate-generated-https-tls-assurance https-tls-assurance generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-edge-static-sites generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors generate-cross-cutting-artifacts validate-generated-cross-cutting docs deploy-ops-portal
 .PHONY: deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info capability-contracts capability-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness managed-image-gate sbom-refresh upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status atlas-validate atlas-lint atlas-refresh-snapshots atlas-drift-check
-.PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
+.PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight preflight-authentik-deployment-selection preflight-glitchtip-deployment-selection preflight-outline-deployment-selection preflight-openbao-deployment-selection syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-authentik syntax-check-outline syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
 .PHONY: syntax-check-ollama syntax-check-piper syntax-check-n8n syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit list-services diff-services list-service-deployments security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
-.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-site-parallel converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-repo-intake converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-piper converge-label-studio converge-n8n converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
+.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-site-parallel converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-repo-intake converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao bootstrap-openbao-runtime-secret-provisioner converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-authentik converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-piper converge-label-studio converge-n8n converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server apply-gate-tools syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
@@ -622,7 +640,7 @@ validate-generated-readme: ## Exit 1 if README.md is out of sync with docs/templ
 
 generate-platform-vars:
 	$(MAKE) generate-cross-cutting-artifacts
-	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --write $(DEPLOYMENT_ARG)
+	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --write $(DEPLOYMENT_ARG) $(if $(strip $(PLATFORM_IDENTITY_OVERLAY)),--identity-file "$(PLATFORM_IDENTITY_OVERLAY)",) $(if $(strip $(PLATFORM_TOPOLOGY_OVERLAY)),--topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)",)
 
 generate-slo-rules:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --write
@@ -646,7 +664,7 @@ validate-generated-uptime-kuma-monitors:
 	python3 $(REPO_ROOT)/scripts/uptime_contract.py --check
 
 generate-cross-cutting-artifacts:
-	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --write
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --write $(if $(strip $(PLATFORM_IDENTITY_OVERLAY)),--identity-file "$(PLATFORM_IDENTITY_OVERLAY)",) $(if $(strip $(PLATFORM_TOPOLOGY_OVERLAY)),--topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)",)
 
 validate-generated-cross-cutting:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --check
@@ -892,6 +910,34 @@ preflight:
 		uv run --with pyyaml python $(REPO_ROOT)/scripts/preflight_controller_local.py --workflow $(WORKFLOW); \
 	fi
 
+preflight-authentik-deployment-selection:
+	@test -n "$(strip $(PLATFORM_IDENTITY_OVERLAY))" || (echo "set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file" >&2; exit 1)
+	@test -n "$(strip $(PLATFORM_TOPOLOGY_OVERLAY))" || (echo "set PLATFORM_TOPOLOGY_OVERLAY to the intended deployment topology file" >&2; exit 1)
+	@test "$(env)" = "production" || (echo "set env=production for the guarded Authentik workflow" >&2; exit 1)
+	uv run --no-project --with pyyaml python $(REPO_ROOT)/scripts/validate_deployment_selection.py --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)" $(DEPLOYMENT_SELECTION_INVENTORY_ARGS) --environment "$(env)" --service authentik --required-host nginx
+	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --check --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)"
+
+preflight-glitchtip-deployment-selection:
+	@test -n "$(strip $(PLATFORM_IDENTITY_OVERLAY))" || (echo "set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file" >&2; exit 1)
+	@test -n "$(strip $(PLATFORM_TOPOLOGY_OVERLAY))" || (echo "set PLATFORM_TOPOLOGY_OVERLAY to the intended deployment topology file" >&2; exit 1)
+	@test "$(env)" = "production" || (echo "set env=production for the guarded GlitchTip workflow" >&2; exit 1)
+	uv run --no-project --with pyyaml python $(REPO_ROOT)/scripts/validate_deployment_selection.py --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)" $(DEPLOYMENT_SELECTION_INVENTORY_ARGS) --environment "$(env)" --service glitchtip --required-host nginx --required-host postgres
+	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --check --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)"
+
+preflight-outline-deployment-selection:
+	@test -n "$(strip $(PLATFORM_IDENTITY_OVERLAY))" || (echo "set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file" >&2; exit 1)
+	@test -n "$(strip $(PLATFORM_TOPOLOGY_OVERLAY))" || (echo "set PLATFORM_TOPOLOGY_OVERLAY to the intended deployment topology file" >&2; exit 1)
+	@test "$(env)" = "production" || (echo "set env=production for the guarded Outline workflow" >&2; exit 1)
+	uv run --no-project --with pyyaml python $(REPO_ROOT)/scripts/validate_deployment_selection.py --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)" $(DEPLOYMENT_SELECTION_INVENTORY_ARGS) --environment "$(env)" --service outline --required-host nginx --required-host postgres
+	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --check --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)"
+
+preflight-openbao-deployment-selection:
+	@test -n "$(strip $(PLATFORM_IDENTITY_OVERLAY))" || (echo "set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file" >&2; exit 1)
+	@test -n "$(strip $(PLATFORM_TOPOLOGY_OVERLAY))" || (echo "set PLATFORM_TOPOLOGY_OVERLAY to the intended deployment topology file" >&2; exit 1)
+	@test "$(env)" = "production" || (echo "set env=production for the guarded OpenBao workflow" >&2; exit 1)
+	uv run --no-project --with pyyaml python $(REPO_ROOT)/scripts/validate_deployment_selection.py --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)" $(DEPLOYMENT_SELECTION_INVENTORY_ARGS) --environment "$(env)" --service openbao --required-host postgres
+	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --check --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)"
+
 syntax-check:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --syntax-check
 
@@ -981,6 +1027,12 @@ syntax-check-coolify:
 
 syntax-check-keycloak:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/keycloak.yml -e @$(REPO_ROOT)/playbooks/vars/keycloak.yml --syntax-check
+
+syntax-check-authentik:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/authentik.yml -e @$(REPO_ROOT)/playbooks/vars/authentik.yml --syntax-check
+
+syntax-check-outline:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/outline.yml -e @$(REPO_ROOT)/playbooks/vars/outline.yml --syntax-check
 
 syntax-check-harbor:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/harbor.yml --syntax-check
@@ -1307,8 +1359,14 @@ converge-mail-platform:
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/mail-platform.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 converge-openbao:
+	$(MAKE) preflight-openbao-deployment-selection
 	$(MAKE) preflight WORKFLOW=converge-openbao
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/openbao.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+bootstrap-openbao-runtime-secret-provisioner:
+	$(MAKE) preflight-openbao-deployment-selection
+	$(MAKE) preflight WORKFLOW=bootstrap-openbao-runtime-secret-provisioner
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/bootstrap_openbao_runtime_secret_provisioner.py --apply --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)" --breakglass-password-file "$(LOCAL_OVERLAY_ROOT)/openbao/breakglass-password.txt" --output-root "$(LOCAL_OVERLAY_ROOT)/openbao" --ssh-private-key-file "$(BOOTSTRAP_KEY)"
 
 converge-openfga:
 	$(MAKE) preflight WORKFLOW=converge-openfga
@@ -1394,12 +1452,21 @@ converge-keycloak:
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/keycloak.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
+converge-authentik:
+	$(MAKE) preflight-authentik-deployment-selection
+	$(MAKE) preflight WORKFLOW=converge-authentik
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
+	$(MAKE) generate-edge-static-sites
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/authentik.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/authentik.yml $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
 converge-harbor:
 	$(MAKE) preflight WORKFLOW=converge-harbor
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/harbor.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 converge-outline:
+	$(MAKE) preflight-outline-deployment-selection
 	$(MAKE) preflight WORKFLOW=converge-outline
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/outline.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/outline.yml $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
@@ -1436,6 +1503,7 @@ converge-plausible:
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/plausible.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump -e @$(REPO_ROOT)/playbooks/vars/plausible.yml
 
 converge-glitchtip:
+	$(MAKE) preflight-glitchtip-deployment-selection
 	$(MAKE) preflight WORKFLOW=converge-glitchtip
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_exposure_audit.py --validate
 	$(MAKE) generate-edge-static-sites

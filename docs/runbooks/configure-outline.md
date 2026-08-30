@@ -9,23 +9,26 @@ The Outline workflow converges:
 - the PostgreSQL backend on `postgres`
 - the Outline runtime, Redis cache, and MinIO attachment store on `docker-runtime`
 - the public hostname `wiki.example.com` on the shared NGINX edge
-- the dedicated Keycloak OIDC client used by the Outline sign-in flow
-- the shared logout handoff from Outline to Keycloak and then to the shared `oauth2-proxy` cookie-cleanup endpoint on `ops.example.com`
+- the dedicated Authentik OIDC provider/application used by the selected Outline sign-in flow
+- the preserved Keycloak client and secret used only for per-client rollback
+- the Outline-to-Authentik logout handoff
 - the controller-local Outline API token and the initial living knowledge collections
 
 ## Preconditions
 
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload is already available under `.local/openbao/init.json`
-- Keycloak is already deployed and healthy on `sso.example.com`
-- the automation password file exists at `.local/keycloak/outline.automation-password.txt`
+- Authentik is already deployed and healthy on `id.example.com`
+- Keycloak remains healthy on `sso.example.com` for bounded rollback
+- `.local/outline/api-token.txt` is present before an existing deployment is cut over; the current first-token helper uses the preserved Keycloak `outline.automation` account
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
 ## Converge
 
-On `main`, run:
+On `main`, reconcile the Authentik provider/application first, then apply Outline:
 
 ```bash
+HETZNER_DNS_API_TOKEN=... make converge-authentik env=production
 HETZNER_DNS_API_TOKEN=... make live-apply-service service=outline env=production
 ```
 
@@ -65,26 +68,62 @@ The workflow maintains controller-local secrets under `.local/outline/`:
 - `minio-root-password.txt`
 - `api-token.txt`
 
-The Keycloak client secret is mirrored under `.local/keycloak/outline-client-secret.txt`.
+Every file in this directory is controller-local secret material. In
+particular, `api-token.txt` must be a regular owner-only `0600` file. The
+bootstrap helper creates it with exclusive owner-only permissions and
+normalizes an existing non-empty token to `0600`; the Outline publication gate
+refuses a symlink, non-regular file, empty file, or broader mode.
+
+The selected Authentik client secret is mirrored under
+`.local/authentik/outline-client-secret.txt`. The previous
+`.local/keycloak/outline-client-secret.txt` file remains mode `0600` and must
+not be deleted or reused; it is the per-client rollback artifact.
 
 ## Manual-free bootstrap path
 
-The role performs the first Outline admin bootstrap without browser interaction by:
+For an existing Keycloak-backed deployment, create the durable Outline API
+token before the Authentik cutover:
 
-1. following the normal `wiki.example.com -> Keycloak -> wiki.example.com` OIDC browser flow with the repo-managed `outline.automation` account
-2. extracting the resulting Outline app token
-3. minting the long-lived Outline API token stored under `.local/outline/api-token.txt`
-4. pruning the default `Welcome` collection after bootstrap
-5. syncing the living collection landing pages and indexes while deleting duplicate managed landing docs if they drift in
+```bash
+python3 scripts/sync_docs_to_outline.py bootstrap-token \
+  --base-url https://wiki.example.com \
+  --username outline.automation \
+  --password-file .local/keycloak/outline.automation-password.txt \
+  --token-file .local/outline/api-token.txt
+```
 
-Outline logout remains app-local first, but the repo-managed `OIDC_LOGOUT_URI` now hands the browser to Keycloak with a declared post-logout return path through `https://ops.example.com/.well-known/lv3/session/proxy-logout` so shared edge cookies are cleared before the final logged-out landing page.
+The helper follows the preserved Keycloak OIDC flow once, extracts the
+resulting Outline application session, and mints the long-lived token. The
+token remains valid after Outline selects Authentik, so routine converges do
+not need a migrated human or automation password. The publication phase then
+uses that token to prune the default `Welcome` collection and synchronize the
+managed collection landing pages and indexes.
+
+If the token is lost after cutover, do not create an unmanaged Authentik user
+or write a token directly into the database. Reapply the documented Keycloak
+rollback variables, mint the token through the preserved `outline.automation`
+account, verify the collections, then reapply the Authentik selection.
+
+Outline logout remains app-local first, then the repo-managed
+`OIDC_LOGOUT_URI` hands the browser to Authentik's provider-scoped end-session
+endpoint. The rollback variables retain the prior Keycloak logout URL and
+shared proxy-cleanup return path unchanged.
 
 The real live logout path should be verified through the authenticated UI
 account menu, not by assuming `GET /logout` fully exercises the browser flow.
-Today Outline still lands on the Keycloak confirmation page because it cannot
-provide `id_token_hint`; after that confirmation, the browser is returned
-through the shared proxy-cleanup path and both `home.example.com` and
-`wiki.example.com` must require fresh Keycloak login.
+Verify that the Authentik session is no longer sufficient to reopen Outline
+after logout. A Keycloak session may remain active for services that have not
+yet migrated; this is expected during ADR 0491 Phase 2 and is why the two
+identity providers stay independently available.
+
+## Per-client rollback
+
+Keep Keycloak running. To roll back Outline only, set the generic
+`outline_oidc_*` variables to the `outline_keycloak_rollback_*` values and use
+`.local/keycloak/outline-client-secret.txt` as the selected secret, then rerun
+the Outline converge. Do not change the fleet-wide identity-provider selector,
+DNS, or any other client. Reapply Authentik only after the Keycloak login and
+living-collection verification both pass.
 
 ## Syncing knowledge surfaces
 
@@ -106,7 +145,9 @@ Repository and syntax checks:
 
 ```bash
 python3 scripts/validate_service_completeness.py --service outline
-uv run --with pytest python -m pytest tests/test_outline_runtime_role.py tests/test_outline_playbook.py tests/test_outline_sync.py tests/test_keycloak_runtime_role.py tests/test_release_manager.py tests/test_generate_platform_vars.py
+uv run --with pytest python -m pytest tests/test_outline_runtime_role.py tests/test_outline_playbook.py tests/test_outline_sync.py tests/test_authentik_oauth_reconcile.py tests/test_authentik_runtime_role.py tests/test_keycloak_runtime_role.py tests/test_generate_cross_cutting_artifacts.py tests/test_generate_platform_vars.py
+make preflight-outline-deployment-selection env=production
+make syntax-check-outline
 uv run --with pyyaml --with jsonschema python -m unittest tests.test_grafana_sso_role tests.test_session_logout_verify
 ./scripts/validate_repo.sh agent-standards
 ./scripts/validate_repo.sh generated-portals
@@ -119,12 +160,16 @@ Runtime verification:
 
 ```bash
 curl -fsS https://wiki.example.com/_health
+curl -fsS https://id.example.com/application/o/outline/.well-known/openid-configuration
+curl -fsSI https://wiki.example.com/auth/oidc
 python3 scripts/sync_docs_to_outline.py verify --base-url https://wiki.example.com
-uv run --with playwright python scripts/session_logout_verify.py \
-  --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/outline.automation-password.txt
 ```
 
-The verify command asserts that the required collections exist and that the repo-managed landing docs were published successfully. A successful sync keeps the top-level collection set at `ADRs`, `Runbooks`, `Incident Postmortems`, `Agent Findings`, and `Architecture`.
+The redirect must select `https://id.example.com/application/o/authorize/` and
+client ID `outline`. The verify command asserts that all required collections
+and repo-managed landing documents exist. Finish with an authenticated browser
+journey: login through Authentik, open a protected collection, log out from the
+Outline account menu, and prove the same browser needs fresh Authentik login.
 
 ## Mainline replay notes
 

@@ -93,7 +93,7 @@
       "endpoint": {
         "host": "100.64.0.1",
         "port": 8006,
-        "server_name": "proxmox.example.com"
+        "server_name": "proxmox.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -137,7 +137,7 @@
       "endpoint": {
         "host": "100.64.0.1",
         "port": 443,
-        "server_name": "vault.example.com"
+        "server_name": "vault.example.org"
       },
       "policy": {
         "warn_hours": 6,
@@ -156,9 +156,9 @@
         "certificate_file": "/opt/vaultwarden/tls/server.crt",
         "key_file": "/opt/vaultwarden/tls/server.key",
         "root_file": "/opt/step-ca/home/certs/root_ca.crt",
-        "subject": "vault.example.com",
+        "subject": "vault.example.org",
         "sans": [
-          "vault.example.com",
+          "vault.example.org",
           "10.10.10.20",
           "100.118.189.95",
           "127.0.0.1",
@@ -174,12 +174,12 @@
       "id": "agents-edge",
       "service_id": "dify",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for agents.example.com.",
+      "summary": "Shared NGINX edge certificate served for agents.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "agents.example.com",
+        "host": "agents.example.org",
         "port": 443,
-        "server_name": "agents.example.com"
+        "server_name": "agents.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -191,19 +191,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "analytics-edge",
       "service_id": "plausible",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for analytics.example.com.",
+      "summary": "Shared NGINX edge certificate served for analytics.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "analytics.example.com",
+        "host": "analytics.example.org",
         "port": 443,
-        "server_name": "analytics.example.com"
+        "server_name": "analytics.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -215,19 +215,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "annotate-edge",
       "service_id": "label_studio",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for annotate.example.com.",
+      "summary": "Shared NGINX edge certificate served for annotate.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "annotate.example.com",
+        "host": "annotate.example.org",
         "port": 443,
-        "server_name": "annotate.example.com"
+        "server_name": "annotate.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -239,19 +239,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "api-edge",
       "service_id": "api_gateway",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for api.example.com.",
+      "summary": "Shared NGINX edge certificate served for api.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "api.example.com",
+        "host": "api.example.org",
         "port": 443,
-        "server_name": "api.example.com"
+        "server_name": "api.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -263,19 +263,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "apps-edge",
       "service_id": "coolify_apps",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for apps.example.com.",
+      "summary": "Shared NGINX edge certificate served for apps.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "apps.example.com",
+        "host": "apps.example.org",
         "port": 443,
-        "server_name": "apps.example.com"
+        "server_name": "apps.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -287,19 +287,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "bi-edge",
       "service_id": "superset",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for bi.example.com.",
+      "summary": "Shared NGINX edge certificate served for bi.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "bi.example.com",
+        "host": "bi.example.org",
         "port": 443,
-        "server_name": "bi.example.com"
+        "server_name": "bi.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -312,19 +312,19 @@
         "notes": "Renewed by Certbot on the shared public edge VM."
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "billing-edge",
       "service_id": "lago",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for billing.example.com.",
+      "summary": "Shared NGINX edge certificate served for billing.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "billing.example.com",
+        "host": "billing.example.org",
         "port": 443,
-        "server_name": "billing.example.com"
+        "server_name": "billing.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -336,19 +336,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "browser-edge",
       "service_id": "neko",
       "status": "active",
-      "summary": "Dedicated certificate for browser.example.com (Neko remote desktop).",
+      "summary": "Dedicated certificate for browser.example.org (Neko remote desktop).",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "browser.example.com",
+        "host": "browser.example.org",
         "port": 443,
-        "server_name": "browser.example.com"
+        "server_name": "browser.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -358,22 +358,22 @@
         "agent": "certbot-dns-hetzner",
         "managed_by_repo": false,
         "host": "nginx",
-        "notes": "Neko uses a dedicated NGINX server block with its own certificate, separate from the shared lv3-edge bundle."
+        "notes": "Neko uses a dedicated NGINX server block with its own certificate, separate from the shared 0mcp-edge bundle."
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/browser.example.com/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/browser.example.org/fullchain.pem"
       }
     },
     {
       "id": "build-edge",
       "service_id": "docker_build",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for build.example.com.",
+      "summary": "Shared NGINX edge certificate served for build.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "build.example.com",
+        "host": "build.example.org",
         "port": 443,
-        "server_name": "build.example.com"
+        "server_name": "build.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -386,7 +386,7 @@
         "notes": "Renewed by Certbot on the shared public edge VM."
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
@@ -417,12 +417,12 @@
       "id": "chat-edge",
       "service_id": "librechat",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for chat.example.com.",
+      "summary": "Shared NGINX edge certificate served for chat.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "chat.example.com",
+        "host": "chat.example.org",
         "port": 443,
-        "server_name": "chat.example.com"
+        "server_name": "chat.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -434,19 +434,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "ci-edge",
       "service_id": "woodpecker",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for ci.example.com.",
+      "summary": "Shared NGINX edge certificate served for ci.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "ci.example.com",
+        "host": "ci.example.org",
         "port": 443,
-        "server_name": "ci.example.com"
+        "server_name": "ci.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -458,19 +458,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "cloud-edge",
       "service_id": "nextcloud",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for cloud.example.com.",
+      "summary": "Shared NGINX edge certificate served for cloud.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "cloud.example.com",
+        "host": "cloud.example.org",
         "port": 443,
-        "server_name": "cloud.example.com"
+        "server_name": "cloud.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -482,19 +482,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "coolify-edge",
       "service_id": "coolify",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for coolify.example.com.",
+      "summary": "Shared NGINX edge certificate served for coolify.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "coolify.example.com",
+        "host": "coolify.example.org",
         "port": 443,
-        "server_name": "coolify.example.com"
+        "server_name": "coolify.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -506,19 +506,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "data-edge",
       "service_id": "directus",
       "status": "tls_pending",
-      "summary": "Shared NGINX edge certificate served for data.example.com.",
+      "summary": "Shared NGINX edge certificate served for data.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "data.example.com",
+        "host": "data.example.org",
         "port": 443,
-        "server_name": "data.example.com"
+        "server_name": "data.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -530,19 +530,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "docker-runtime-edge",
       "service_id": "docker_runtime",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for docker.example.com.",
+      "summary": "Shared NGINX edge certificate served for docker.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "docker.example.com",
+        "host": "docker.example.org",
         "port": 443,
-        "server_name": "docker.example.com"
+        "server_name": "docker.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -554,7 +554,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
@@ -585,12 +585,12 @@
       "id": "draw-edge",
       "service_id": "excalidraw",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for draw.example.com.",
+      "summary": "Shared NGINX edge certificate served for draw.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "draw.example.com",
+        "host": "draw.example.org",
         "port": 443,
-        "server_name": "draw.example.com"
+        "server_name": "draw.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -602,19 +602,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "errors-edge",
       "service_id": "glitchtip",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for errors.example.com.",
+      "summary": "Shared NGINX edge certificate served for errors.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "errors.example.com",
+        "host": "errors.example.org",
         "port": 443,
-        "server_name": "errors.example.com"
+        "server_name": "errors.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -626,19 +626,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "lv3-org-apex-edge",
       "service_id": "nginx_edge",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for the example.com apex crawl-policy endpoint.",
+      "summary": "Shared NGINX edge certificate served for the example.org apex crawl-policy endpoint.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "example.com",
+        "host": "example.org",
         "port": 443,
-        "server_name": "example.com"
+        "server_name": "example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -650,19 +650,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "flags-edge",
       "service_id": "flagsmith",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for flags.example.com.",
+      "summary": "Shared NGINX edge certificate served for flags.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "flags.example.com",
+        "host": "flags.example.org",
         "port": 443,
-        "server_name": "flags.example.com"
+        "server_name": "flags.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -674,19 +674,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "grafana-edge",
       "service_id": "grafana",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for grafana.example.com.",
+      "summary": "Shared NGINX edge certificate served for grafana.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "grafana.example.com",
+        "host": "grafana.example.org",
         "port": 443,
-        "server_name": "grafana.example.com"
+        "server_name": "grafana.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -698,19 +698,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "grist-edge",
       "service_id": "grist",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for grist.example.com.",
+      "summary": "Shared NGINX edge certificate served for grist.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "grist.example.com",
+        "host": "grist.example.org",
         "port": 443,
-        "server_name": "grist.example.com"
+        "server_name": "grist.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -722,7 +722,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
@@ -753,12 +753,12 @@
       "id": "home-edge",
       "service_id": "homepage",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for home.example.com.",
+      "summary": "Shared NGINX edge certificate served for home.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "home.example.com",
+        "host": "home.example.org",
         "port": 443,
-        "server_name": "home.example.com"
+        "server_name": "home.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -770,19 +770,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "langfuse-edge",
       "service_id": "langfuse",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for langfuse.example.com.",
+      "summary": "Shared NGINX edge certificate served for langfuse.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "langfuse.example.com",
+        "host": "langfuse.example.org",
         "port": 443,
-        "server_name": "langfuse.example.com"
+        "server_name": "langfuse.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -794,19 +794,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "livekit-edge",
       "service_id": "livekit",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for livekit.example.com.",
+      "summary": "Shared NGINX edge certificate served for livekit.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "livekit.example.com",
+        "host": "livekit.example.org",
         "port": 443,
-        "server_name": "livekit.example.com"
+        "server_name": "livekit.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -818,19 +818,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "logs-edge",
       "service_id": "dozzle",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for logs.example.com.",
+      "summary": "Shared NGINX edge certificate served for logs.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "logs.example.com",
+        "host": "logs.example.org",
         "port": 443,
-        "server_name": "logs.example.com"
+        "server_name": "logs.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -842,19 +842,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "mail-platform-edge",
       "service_id": "mail_platform",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for mail.example.com.",
+      "summary": "Shared NGINX edge certificate served for mail.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "mail.example.com",
+        "host": "mail.example.org",
         "port": 443,
-        "server_name": "mail.example.com"
+        "server_name": "mail.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -866,19 +866,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "matrix-edge",
       "service_id": "matrix_synapse",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for matrix.example.com.",
+      "summary": "Shared NGINX edge certificate served for matrix.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "matrix.example.com",
+        "host": "matrix.example.org",
         "port": 443,
-        "server_name": "matrix.example.com"
+        "server_name": "matrix.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -890,19 +890,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "minio-console-edge",
       "service_id": "minio",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for minio-console.example.com.",
+      "summary": "Shared NGINX edge certificate served for minio-console.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "minio-console.example.com",
+        "host": "minio-console.example.org",
         "port": 443,
-        "server_name": "minio-console.example.com"
+        "server_name": "minio-console.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -914,19 +914,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "minio-edge",
       "service_id": "minio",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for minio.example.com.",
+      "summary": "Shared NGINX edge certificate served for minio.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "minio.example.com",
+        "host": "minio.example.org",
         "port": 443,
-        "server_name": "minio.example.com"
+        "server_name": "minio.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -938,19 +938,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "n8n-edge",
       "service_id": "n8n",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for n8n.example.com.",
+      "summary": "Shared NGINX edge certificate served for n8n.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "n8n.example.com",
+        "host": "n8n.example.org",
         "port": 443,
-        "server_name": "n8n.example.com"
+        "server_name": "n8n.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -962,19 +962,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "nginx-edge-public",
       "service_id": "nginx_edge",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for nginx.example.com.",
+      "summary": "Shared NGINX edge certificate served for nginx.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "nginx.example.com",
+        "host": "nginx.example.org",
         "port": 443,
-        "server_name": "nginx.example.com"
+        "server_name": "nginx.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -986,19 +986,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "ntfy-edge",
       "service_id": "ntfy",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for ntfy.example.com.",
+      "summary": "Shared NGINX edge certificate served for ntfy.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "ntfy.example.com",
+        "host": "ntfy.example.org",
         "port": 443,
-        "server_name": "ntfy.example.com"
+        "server_name": "ntfy.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1010,19 +1010,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "ops-edge",
       "service_id": "ops_portal",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for ops.example.com.",
+      "summary": "Shared NGINX edge certificate served for ops.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "ops.example.com",
+        "host": "ops.example.org",
         "port": 443,
-        "server_name": "ops.example.com"
+        "server_name": "ops.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1034,19 +1034,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "paperless-edge",
       "service_id": "paperless",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for paperless.example.com.",
+      "summary": "Shared NGINX edge certificate served for paperless.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "paperless.example.com",
+        "host": "paperless.example.org",
         "port": 443,
-        "server_name": "paperless.example.com"
+        "server_name": "paperless.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1058,19 +1058,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "proxmox-edge-page",
       "service_id": "proxmox_ui",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for proxmox.example.com.",
+      "summary": "Shared NGINX edge certificate served for proxmox.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "proxmox.example.com",
+        "host": "proxmox.example.org",
         "port": 443,
-        "server_name": "proxmox.example.com"
+        "server_name": "proxmox.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1082,19 +1082,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "registry-edge",
       "service_id": "harbor",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for registry.example.com.",
+      "summary": "Shared NGINX edge certificate served for registry.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "registry.example.com",
+        "host": "registry.example.org",
         "port": 443,
-        "server_name": "registry.example.com"
+        "server_name": "registry.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1106,19 +1106,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "repo-intake-edge",
       "service_id": "repo_intake",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for repo-intake.example.com.",
+      "summary": "Shared NGINX edge certificate served for repo-intake.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "repo-intake.example.com",
+        "host": "repo-intake.example.org",
         "port": 443,
-        "server_name": "repo-intake.example.com"
+        "server_name": "repo-intake.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1130,19 +1130,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "repowise-edge",
       "service_id": "repowise",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for repowise.example.com.",
+      "summary": "Shared NGINX edge certificate served for repowise.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "repowise.example.com",
+        "host": "repowise.example.org",
         "port": 443,
-        "server_name": "repowise.example.com"
+        "server_name": "repowise.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1154,19 +1154,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "scheduler-edge",
       "service_id": "nomad",
       "status": "active",
-      "summary": "Site-local NGINX edge certificate served for scheduler.example.com.",
+      "summary": "Site-local NGINX edge certificate served for scheduler.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "scheduler.example.com",
+        "host": "scheduler.example.org",
         "port": 443,
-        "server_name": "scheduler.example.com"
+        "server_name": "scheduler.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1178,19 +1178,43 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/scheduler.example.com/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/scheduler.example.org/fullchain.pem"
+      }
+    },
+    {
+      "id": "authentik-edge",
+      "service_id": "authentik",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for id.example.org.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "id.example.org",
+        "port": 443,
+        "server_name": "id.example.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "keycloak-edge",
       "service_id": "keycloak",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for sso.example.com.",
+      "summary": "Shared NGINX edge certificate served for sso.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "sso.example.com",
+        "host": "sso.example.org",
         "port": 443,
-        "server_name": "sso.example.com"
+        "server_name": "sso.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1202,19 +1226,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "status-edge",
       "service_id": "status_page",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for status.example.com.",
+      "summary": "Shared NGINX edge certificate served for status.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "status.example.com",
+        "host": "status.example.org",
         "port": 443,
-        "server_name": "status.example.com"
+        "server_name": "status.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1226,19 +1250,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "tasks-edge",
       "service_id": "plane",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for tasks.example.com.",
+      "summary": "Shared NGINX edge certificate served for tasks.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "tasks.example.com",
+        "host": "tasks.example.org",
         "port": 443,
-        "server_name": "tasks.example.com"
+        "server_name": "tasks.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1250,19 +1274,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "uptime-kuma-edge",
       "service_id": "uptime_kuma",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for uptime.example.com.",
+      "summary": "Shared NGINX edge certificate served for uptime.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "uptime.example.com",
+        "host": "uptime.example.org",
         "port": 443,
-        "server_name": "uptime.example.com"
+        "server_name": "uptime.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1274,19 +1298,19 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     },
     {
       "id": "wiki-edge",
       "service_id": "outline",
       "status": "active",
-      "summary": "Shared NGINX edge certificate served for wiki.example.com.",
+      "summary": "Shared NGINX edge certificate served for wiki.example.org.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "wiki.example.com",
+        "host": "wiki.example.org",
         "port": 443,
-        "server_name": "wiki.example.com"
+        "server_name": "wiki.example.org"
       },
       "policy": {
         "warn_days": 21,
@@ -1298,7 +1322,7 @@
         "host": "nginx"
       },
       "material": {
-        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+        "bundle_path": "/etc/letsencrypt/live/0mcp-edge/fullchain.pem"
       }
     }
   ]

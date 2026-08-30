@@ -32,9 +32,9 @@ def test_proxmox_guest_aliases_do_not_require_real_vm_macaddr() -> None:
             "name": "docker-runtime",
             "role": "runtime-apps",
             "template_key": "lv3-debian-base",
-            "ipv4": "10.20.10.12",
+            "ipv4": "10.10.10.12",
             "cidr": 24,
-            "gateway4": "10.20.10.1",
+            "gateway4": "10.10.10.1",
             "macaddr": "BC:24:11:19:0A:920",
             "cores": 1,
             "memory_mb": 512,
@@ -48,7 +48,7 @@ def test_proxmox_guest_aliases_do_not_require_real_vm_macaddr() -> None:
     assert (vmid, name, ipv4, template_key, is_alias) == (
         920,
         "docker-runtime",
-        "10.20.10.12",
+        "10.10.10.12",
         "lv3-debian-base",
         True,
     )

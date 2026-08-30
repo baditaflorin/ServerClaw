@@ -1,0 +1,69 @@
+id: adr-authentik-replace-keycloak-2026-08-27
+title: "ADR 0491: replace Keycloak with Authentik (Phase 0 -- decision + client audit)"
+status: merged
+ready_to_merge: true
+live_applied: false
+depends_on: []
+conflicts_with: []
+owner: claude-agent
+branch: adr-authentik-replace-keycloak-2026-08-27
+doc: docs/adr/0491-authentik-for-operator-and-agent-sso.md
+ownership_manifest:
+  owned_surfaces:
+    - id: adr-authentik-replace-keycloak-2026-08-27-doc
+      paths:
+        - docs/adr/0491-authentik-for-operator-and-agent-sso.md
+        - docs/adr/.index.yaml
+        - docs/adr/index/by-concern/identity.yaml
+        - docs/adr/index/by-range/0400-0499.yaml
+        - docs/adr/index/by-status/accepted.yaml
+        - workstreams/active/adr-authentik-replace-keycloak-2026-08-27.yaml
+        - workstreams.yaml
+      mode: exclusive
+
+description: |
+  Operator decision: replace Keycloak entirely with Authentik (open-source,
+  agentic/API-first, git-friendly Blueprint config, integrates with OpenBao
+  via the existing generic secret-sidecar mechanism like every other
+  service). ADR 0056 (Keycloak's own ADR) already named Authentik as the
+  successor in its Vendor Exit Plan, written well before tonight's incident.
+
+  This is Phase 0 of a multi-phase plan (see
+  /Users/live/.claude/plans/humming-swimming-wand.md): writing the ADR and
+  auditing the real vs. ghost OIDC client scope before any deployment work.
+  Allocated ADR 0491 via scripts/adr_query_tool.py allocate. Audited the
+  live 0mcp Keycloak realm's 25 OIDC clients (12 users, 6 Keycloak
+  built-ins + 19 application clients) against actually-deployed services:
+  confirmed 9 real clients (ops-portal-oauth, grafana-oauth, outline,
+  glitchtip, lv3-plane-oidc, harbor, gitea-oauth, api-gateway,
+  serverclaw-runtime -- the last two confirmed via live /opt/gitea,
+  /opt/gitea-runner, /opt/api-gateway directories and the existing
+  configure-keycloak.md runbook documenting serverclaw-runtime as a real
+  cross-repo delegated-auth surface), 7 confirmed ghosts (dify, directus,
+  paperless, superset, grist, langfuse -- all previously confirmed
+  never-deployed via the docker-runtime service watchdog; nomad -- no
+  footprint anywhere on the fleet), and 2 ambiguous entries needing owner
+  confirmation before Phase 2 (0mpc-agent-hub/0mcp-agent-hub, serverclaw).
+
+  Regenerated the ADR index (scripts/generate_adr_index.py --write) so
+  ADR 0491 is discoverable via the by-concern/by-range/by-status shards,
+  and ran scripts/validate_adr_status_transitions.py clean.
+
+  No live infrastructure changed in this workstream -- Keycloak is
+  completely untouched. Phase 1 (standing up Authentik in parallel) is
+  separate follow-on work.
+
+objectives:
+  - Formally document the Keycloak-to-Authentik decision as an ADR, following this repo's governance convention
+  - Determine the real migration scope (which OIDC clients actually matter) before any deployment work begins
+  - Leave Keycloak completely untouched -- this is planning/documentation only
+
+completion_metrics:
+  - ADR 0491 exists, is indexed, and passes scripts/validate_adr_status_transitions.py
+  - The real-vs-ghost-vs-ambiguous client audit is documented with evidence, not assumption
+  - No live services were modified
+
+related_adrs:
+  - "0056"
+  - "0077"
+  - "0078"

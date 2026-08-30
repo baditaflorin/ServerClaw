@@ -3,7 +3,7 @@ service:
   id: glitchtip
   name: GlitchTip
   description: Sentry-compatible application error tracker with repo-managed projects,
-    DSNs, and Keycloak-backed browser sign-in.
+    DSNs, and Authentik-backed browser sign-in through allauth's headless flow.
   category: observability
   lifecycle_status: active
   vm: docker-runtime
@@ -31,6 +31,7 @@ service:
     - glitchtip_mail_gateway_dsn
     - glitchtip_windmill_jobs_dsn
     - glitchtip_platform_findings_event_url
+    - authentik_glitchtip_client_secret
     - keycloak_glitchtip_client_secret
     - mail_platform_server_mailbox_password
   adr: 0281
@@ -42,9 +43,10 @@ service:
     - glitchtip
     - oidc
     - observability
-  notes: Browser sign-in is delegated to the in-app Keycloak OIDC flow, while the
-    public DSN store path and health endpoint remain reachable for SDK delivery and
-    verification traffic.
+  notes: Browser sign-in is delegated to the in-app Authentik OIDC flow. The prior
+    Keycloak client secret remains a separate rollback artifact, while the public
+    DSN store path and health endpoint remain reachable for SDK delivery and verification
+    traffic.
   environments:
     production:
       status: active
@@ -52,14 +54,16 @@ service:
       subdomain: errors.example.com
       notes: The public GlitchTip surface is published through the shared NGINX edge,
         but the application itself owns browser authentication through the repo-managed
-        Keycloak client and project-scoped DSN issuance.
+        Authentik client and project-scoped DSN issuance.
 completeness:
   service_type: compose
   requires_subdomain: true
   requires_oidc: true
   requires_secrets: true
   requires_compose_secrets: true
-  keycloak_client_generated: true
+  oidc_provider: authentik
+  authentik_client_generated: true
+  keycloak_client_generated: false
   dashboard_file: config/grafana/dashboards/glitchtip.json
   alert_rule_file: config/alertmanager/rules/glitchtip.yml
   suppressed_checks:
@@ -97,10 +101,15 @@ dependency:
       description: The GlitchTip web runtime, project bootstrap flow, and supporting
         Valkey container run on docker-runtime.
     - from: glitchtip
+      to: authentik
+      type: soft
+      description: GlitchTip delegates browser sign-in to the shared Authentik OIDC
+        broker through a repo-managed confidential client and headless allauth redirect.
+    - from: glitchtip
       to: keycloak
       type: soft
-      description: GlitchTip delegates browser sign-in to the shared Keycloak OIDC
-        broker through a repo-managed confidential client.
+      description: The prior Keycloak confidential-client secret is retained only
+        as a per-client rollback path during ADR 0491 migration.
     - from: glitchtip
       to: mail_platform
       type: soft
@@ -160,7 +169,7 @@ health:
   readiness:
     kind: http
     description: The public GlitchTip health endpoint answers through the shared NGINX
-      edge with Keycloak OIDC settings and project ingestion online.
+      edge with Authentik OIDC settings and project ingestion online.
     timeout_seconds: 300
     retries: 36
     delay_seconds: 5

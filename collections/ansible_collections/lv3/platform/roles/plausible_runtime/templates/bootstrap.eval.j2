@@ -15,7 +15,25 @@ site_specs = [
 
 {:ok, {result, _changed?}} =
   Repo.transaction(fn ->
-    existing_user = Repo.get_by(Auth.User, email: email)
+    all_users = Repo.all(Auth.User)
+    desired_user = Repo.get_by(Auth.User, email: email)
+
+    existing_user =
+      case {desired_user, all_users} do
+        {user, _users} when not is_nil(user) ->
+          user
+
+        {nil, []} ->
+          nil
+
+        {nil, [sole_user]} ->
+          sole_user
+
+        {nil, users} ->
+          raise "unable to adopt the Plausible bootstrap identity while #{length(users)} users exist"
+      end
+
+    user_adopted = not is_nil(existing_user) and existing_user.email != email
 
     {user, user_created, profile_updated, password_updated} =
       case existing_user do
@@ -33,7 +51,8 @@ site_specs = [
           {user, true, false, false}
 
         user ->
-          profile_needs_update = user.name != name or user.email_verified != true
+          profile_needs_update =
+            user.email != email or user.name != name or user.email_verified != true
 
           user =
             if profile_needs_update do
@@ -98,6 +117,7 @@ site_specs = [
     payload = %{
       changed: user_created or profile_updated or password_updated or created_sites != [] or updated_sites != [],
       user_created: user_created,
+      user_adopted: user_adopted,
       profile_updated: profile_updated,
       password_updated: password_updated,
       created_sites: Enum.reverse(created_sites),

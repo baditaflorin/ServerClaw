@@ -113,6 +113,38 @@ argument_specs:
         required: true
         description:
           - Controller-local file that stores the initialization output.
+      openbao_runtime_secret_provisioner_approle_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local root-only AppRole artifact used by runtime-secret helper calls instead of the initialization root token.
+      openbao_runtime_secret_provisioner_approle_name:
+        type: str
+        required: false
+        default: runtime-secret-provisioner
+        description:
+          - Narrow AppRole identity that may write registered service KV payloads and mint service AppRole credentials.
+      openbao_runtime_secret_provisioner_policy_name:
+        type: str
+        required: true
+        description:
+          - Generated least-privilege policy attached to the runtime-secret provisioner.
+      openbao_runtime_secret_protected_approle_names:
+        type: list
+        elements: str
+        required: false
+        default:
+          - controller-automation
+          - runtime-secret-provisioner
+        description:
+          - AppRole identities that the registered runtime-service catalog must never manage.
+      openbao_runtime_secret_namespace_overrides:
+        type: dict
+        required: false
+        default:
+          rag_context: platform-context
+        description:
+          - Explicit compatibility mappings from registry keys to pre-existing service KV and AppRole namespaces.
       openbao_userpass_users:
         type: list
         elements: dict

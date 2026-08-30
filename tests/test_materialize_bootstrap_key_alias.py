@@ -3,6 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR = REPO_ROOT / "scripts"
@@ -46,3 +48,30 @@ def test_ensure_bootstrap_key_aliases_reports_present_aliases_without_rewriting(
     results = bootstrap_alias.ensure_bootstrap_key_aliases(repo_root)
 
     assert [item.status for item in results] == ["present", "present"]
+
+
+def test_ensure_bootstrap_key_aliases_accepts_a_same_path_creation_race(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo_root = tmp_path / "repo"
+    ssh_dir = repo_root / ".local" / "ssh"
+    ssh_dir.mkdir(parents=True)
+    legacy_private = ssh_dir / "hetzner_llm_agents_ed25519"
+    legacy_public = ssh_dir / "hetzner_llm_agents_ed25519.pub"
+    legacy_private.write_text("PRIVATE\n", encoding="utf-8")
+    legacy_public.write_text("PUBLIC\n", encoding="utf-8")
+
+    real_create = bootstrap_alias._create_relative_symlink
+
+    def create_then_report_race(alias_path: Path, target_path: Path) -> None:
+        real_create(alias_path, target_path)
+        raise FileExistsError(alias_path)
+
+    monkeypatch.setattr(bootstrap_alias, "_create_relative_symlink", create_then_report_race)
+
+    results = bootstrap_alias.ensure_bootstrap_key_aliases(repo_root)
+
+    assert [item.status for item in results] == ["present", "present"]
+    assert (ssh_dir / "bootstrap.id_ed25519").resolve() == legacy_private
+    assert (ssh_dir / "bootstrap.id_ed25519.pub").resolve() == legacy_public

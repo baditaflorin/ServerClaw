@@ -27,7 +27,7 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import yaml
-from identity_yaml import load_yaml_with_identity
+from identity_yaml import load_tracked_generation_identity_vars, load_yaml_with_identity
 from validation_toolkit import require_int, require_mapping, require_str
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -45,7 +45,10 @@ _FQDN_RE = re.compile(r"^[a-z0-9]([a-z0-9\-]*\.)+[a-z]{2,}$")
 
 def load_registry() -> dict[str, Any]:
     """Load and return platform_service_registry dict."""
-    data = load_yaml_with_identity(REGISTRY_PATH)
+    data = load_yaml_with_identity(
+        REGISTRY_PATH,
+        variables=load_tracked_generation_identity_vars() or None,
+    )
     data = require_mapping(data, str(REGISTRY_PATH))
     return require_mapping(
         data.get("platform_service_registry"),
@@ -281,7 +284,7 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Show diff between committed declarations and what the generator would produce.",
     )
-    args = parser.parse_args(argv)
+    parser.parse_args(argv)
 
     errors: list[str] = []
     warnings: list[str] = []
