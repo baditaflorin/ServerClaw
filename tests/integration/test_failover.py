@@ -17,7 +17,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.destructive]
 )
 def test_postgres_failover_services_recover(
     integration_config,
-    keycloak_token: str,
+    authentik_token: str,
     proxmox_agent_exec,
 ) -> None:
     gateway_url = require_url(
@@ -28,11 +28,11 @@ def test_postgres_failover_services_recover(
     proxmox_agent_exec(primary_vmid, "systemctl", "stop", "postgresql")
     time.sleep(35)
 
-    for service_id in ("keycloak", "windmill", "netbox", "mattermost"):
+    for service_id in ("authentik", "windmill", "netbox", "mattermost"):
         response = http_request(
             "GET",
             f"{gateway_url}/v1/platform/health/{service_id}",
-            headers=auth_header(keycloak_token),
+            headers=auth_header(authentik_token),
             verify=integration_config.verify_tls,
         )
         assert response.status_code == 200, response.text

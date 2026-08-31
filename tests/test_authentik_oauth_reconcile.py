@@ -30,6 +30,7 @@ class FakeAPI:
             {"pk": "scope-profile", "scope_name": "profile"},
             {"pk": "scope-email", "scope_name": "email"},
         ]
+        self.certificate_keys = [{"pk": "certificate-self-signed", "name": "authentik Self-signed Certificate"}]
         self.posts: list[tuple[str, dict[str, Any]]] = []
         self.patches: list[tuple[str, dict[str, Any]]] = []
 
@@ -39,6 +40,7 @@ class FakeAPI:
             MODULE.APPLICATIONS_PATH: self.applications,
             MODULE.FLOWS_PATH: self.flows,
             MODULE.SCOPE_MAPPINGS_PATH: self.scopes,
+            MODULE.CERTIFICATE_KEYS_PATH: self.certificate_keys,
         }[path]
 
     def post(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -140,6 +142,18 @@ def test_manifest_resolves_identity_without_committing_deployment_values() -> No
     ]
     assert clients["outline"]["application"]["launch_url"] == "https://wiki.example.net"
     assert clients["outline"]["provider"]["redirect_uris"] == ["https://wiki.example.net/auth/oidc.callback"]
+    assert clients["ops-portal-oauth"]["provider"]["redirect_uris"] == ["https://ops.example.net/oauth2/callback"]
+    assert clients["agent-hub"]["provider"]["client_id"] == "example-agent-hub"
+    assert clients["serverclaw-runtime"]["provider"]["grant_types"] == ["client_credentials"]
+
+
+def test_manifest_uses_platform_domain_prefix_when_no_override_is_supplied() -> None:
+    loaded = MODULE.load_manifest(
+        REPO_ROOT / "config" / "authentik" / "oauth-clients.yaml",
+        variables={"platform_domain": "example.net"},
+    )
+    clients = {client["id"]: client for client in loaded["clients"]}
+    assert clients["agent-hub"]["provider"]["client_id"] == "example-agent-hub"
 
 
 def test_adopts_linked_provider_preserves_pk_and_secret_then_is_idempotent(tmp_path: Path) -> None:

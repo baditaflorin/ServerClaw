@@ -65,9 +65,9 @@ dependency:
     adr: 0380
   outbound_edges:
     - from: neko
-      to: keycloak
+      to: authentik
       type: soft
-      description: Neko operator access is controlled through Keycloak OIDC client
+      description: Neko operator access is controlled through Authentik OIDC client
         configuration for Tailscale headscale management network.
     - from: neko
       to: nginx_edge

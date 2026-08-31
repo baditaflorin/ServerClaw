@@ -16,7 +16,7 @@ required_claim_value="{{ gitea_oidc_required_claim_value }}"
 group_team_map='{{ gitea_oidc_group_team_map | to_json }}'
 db_uri="postgresql://{{ gitea_database_user }}:${GITEA_DATABASE_PASSWORD}@{{ gitea_database_host }}:{{ gitea_database_port }}/{{ gitea_database_name }}"
 admin_password="${GITEA_ADMIN_PASSWORD}"
-oidc_client_secret="${GITEA_KEYCLOAK_CLIENT_SECRET}"
+oidc_client_secret="${GITEA_OIDC_CLIENT_SECRET}"
 token_file="{{ gitea_admin_token_remote_file }}"
 renovate_user="{{ gitea_renovate_username }}"
 renovate_email="{{ gitea_renovate_email }}"
@@ -93,16 +93,18 @@ if ! grep -qi "already exists" <<<"${create_renovate_output}"; then
   fi
 fi
 
+authentik_source_name="Authentik"
+legacy_source_name="Keycloak"
 auth_source_id="$(
   exec_gitea admin auth list \
-    | awk -F '\t' '$2 == "Keycloak" { print $1; exit }'
+    | awk -F '\t' -v source_name="${authentik_source_name}" '$2 == source_name { print $1; exit }'
 )"
 
 provider_name="openidConnect"
 if [[ -n "${auth_source_id}" ]]; then
   exec_gitea admin auth update-oauth \
     --id "${auth_source_id}" \
-    --name Keycloak \
+    --name "${authentik_source_name}" \
     --provider "${provider_name}" \
     --key "${oidc_client_id}" \
     --secret "${oidc_client_secret}" \
@@ -115,7 +117,7 @@ if [[ -n "${auth_source_id}" ]]; then
     --required-claim-value "${required_claim_value}" >/dev/null
 else
   exec_gitea admin auth add-oauth \
-    --name Keycloak \
+    --name "${authentik_source_name}" \
     --provider "${provider_name}" \
     --key "${oidc_client_id}" \
     --secret "${oidc_client_secret}" \
@@ -126,6 +128,17 @@ else
     --group-team-map-removal \
     --required-claim-name "${required_claim_name}" \
     --required-claim-value "${required_claim_value}" >/dev/null
+  changed=true
+fi
+
+# Preserve a working login path until Authentik has been created or updated.
+# Only then remove the obsolete Keycloak source so reruns cannot reactivate it.
+legacy_source_id="$(
+  exec_gitea admin auth list \
+    | awk -F '\t' -v source_name="${legacy_source_name}" '$2 == source_name { print $1; exit }'
+)"
+if [[ -n "${legacy_source_id}" ]]; then
+  exec_gitea admin auth delete --id "${legacy_source_id}" >/dev/null
   changed=true
 fi
 

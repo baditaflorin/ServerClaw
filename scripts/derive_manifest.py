@@ -128,7 +128,7 @@ def derive_smoke_endpoints(apex: str) -> list[str]:
     """Generate a starter smoke-endpoint list for the given apex."""
     return [
         f"https://registry.{{apex}}/api/v2.0/ping",
-        f"https://sso.{{apex}}/realms/{{apex_slug}}/.well-known/openid-configuration",
+        f"https://id.{{apex}}/application/o/ops-portal/.well-known/openid-configuration",
         f"https://wiki.{{apex}}/",
     ]
 

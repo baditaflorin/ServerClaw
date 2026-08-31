@@ -61,7 +61,7 @@ def test_fault_injection_script_runs_as_direct_entrypoint() -> None:
             "--repo-path",
             str(REPO_ROOT),
             "--scenario-names",
-            "fault:keycloak-unavailable",
+            "fault:authentik-unavailable",
             "--dry-run",
         ],
         cwd=REPO_ROOT,
@@ -73,4 +73,4 @@ def test_fault_injection_script_runs_as_direct_entrypoint() -> None:
     assert result.returncode == 0, result.stderr
     payload = json.loads(result.stdout)
     assert payload["status"] == "planned"
-    assert payload["selected_scenarios"] == ["fault:keycloak-unavailable"]
+    assert payload["selected_scenarios"] == ["fault:authentik-unavailable"]

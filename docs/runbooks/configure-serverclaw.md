@@ -7,9 +7,9 @@ This runbook converges the first live ServerClaw surface defined by ADR 0254.
 ## Result
 
 - `coolify` runs a dedicated Open WebUI-based ServerClaw runtime from `/opt/serverclaw`
-- `chat.example.com` is published through the shared NGINX edge with in-app Keycloak OIDC enabled
+- `chat.example.com` is published through the shared NGINX edge with in-app Authentik OIDC enabled
 - controller-local bootstrap secrets are mirrored under `.local/serverclaw/`
-- the dedicated Keycloak client secret is mirrored under `.local/keycloak/serverclaw-client-secret.txt`
+- the dedicated Authentik client secret is mirrored under `.local/authentik/serverclaw-client-secret.txt`
 - the runtime uses the existing One-API and SearXNG services on `docker-runtime`
 
 ## Controller-Local Inputs
@@ -18,7 +18,7 @@ Generated automatically on first converge:
 
 - `.local/serverclaw/admin-password.txt`
 - `.local/serverclaw/webui-secret-key.txt`
-- `.local/keycloak/serverclaw-client-secret.txt`
+- `.local/authentik/serverclaw-client-secret.txt`
 
 Optional local-only input:
 
@@ -59,7 +59,7 @@ Verify the runtime container and generated files on `coolify`:
 ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml coolify -m shell -a 'docker compose --file /opt/serverclaw/docker-compose.yml ps && sudo ls -ld /opt/serverclaw /opt/serverclaw/data /etc/lv3/serverclaw && sudo test -s /etc/lv3/serverclaw/runtime.env && sudo test ! -e /opt/serverclaw/serverclaw.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
-Verify the rendered runtime env enables Keycloak, One-API, and web search:
+Verify the rendered runtime env enables Authentik, One-API, and web search:
 
 ```bash
 ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/inventory/hosts.yml coolify -m shell -a "sudo grep -E '^(WEBUI_URL|WEBUI_NAME|ENABLE_OAUTH_SIGNUP|OAUTH_CLIENT_ID|OPENID_PROVIDER_URL|ENABLE_OPENAI_API|ENABLE_OLLAMA_API|OPENAI_API_BASE_URL|SEARXNG_QUERY_URL|DEFAULT_MODELS|DEFAULT_PINNED_MODELS)=' /etc/lv3/serverclaw/runtime.env" --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
@@ -136,7 +136,7 @@ surface is back in place.
 ## Operating Notes
 
 - Keep `WEBUI_URL=https://chat.example.com` aligned with the live hostname before changing the OIDC client contract.
-- Treat `.local/serverclaw/` and `.local/keycloak/serverclaw-client-secret.txt` as sensitive controller-only material.
+- Treat `.local/serverclaw/` and `.local/authentik/serverclaw-client-secret.txt` as sensitive controller-only material.
 - ServerClaw renders `/etc/lv3/serverclaw/runtime.env` directly during converge instead of running the shared OpenBao sidecar, because the managed OpenBao automation listener remains host-local to `docker-runtime`. The persistent path under `/etc/lv3/` ensures the env file survives host reboots without requiring the sidecar.
 - ServerClaw intentionally reuses the existing One-API and SearXNG backends instead of standing up a separate model or search tier for ADR 0254.
 - Matrix, channel bridges, delegated OpenFGA authorization, and the richer memory plane remain follow-on work for the adjacent ServerClaw ADRs.

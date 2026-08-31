@@ -11,6 +11,7 @@ worktree_path: unassigned/ws-0482-0fork-platform-not-bootstrapped
 doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
 depends_on:
   - ws-0481-explicit-deployment-context
+conflicts_with: []
 shared_surfaces:
   - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
 ownership_manifest:

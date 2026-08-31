@@ -53,7 +53,7 @@ Windmill seeds the same wrapper at `f/lv3/nightly_integration_tests` for browser
 The runner resolves defaults from [config/service-capability-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/service-capability-catalog.json) for these services when the selected environment is `active`:
 
 - `api_gateway`
-- `keycloak`
+- `authentik`
 - `grafana`
 - `netbox`
 - `openbao`
@@ -68,7 +68,7 @@ Core target resolution:
 
 - `LV3_INTEGRATION_ENVIRONMENT`
 - `LV3_INTEGRATION_GATEWAY_URL`
-- `LV3_INTEGRATION_KEYCLOAK_URL`
+- `LV3_INTEGRATION_AUTHENTIK_URL`
 - `LV3_INTEGRATION_GRAFANA_URL`
 - `LV3_INTEGRATION_NETBOX_URL`
 - `LV3_INTEGRATION_OPENBAO_URL`
@@ -91,8 +91,8 @@ Authentication and API access:
 - `LV3_TEST_RUNNER_PASSWORD`
 - `LV3_TEST_BEARER_TOKEN`
 - `LV3_INTEGRATION_REQUIRED_SERVICE_IDS`
-- `LV3_KEYCLOAK_PASSWORD_GRANT_CLIENT_ID`
-- `LV3_KEYCLOAK_PASSWORD_GRANT_CLIENT_SECRET`
+- `LV3_AUTHENTIK_CLIENT_ID`
+- `LV3_AUTHENTIK_CLIENT_SECRET`
 - `LV3_GRAFANA_TOKEN`
 - `LV3_NETBOX_TOKEN`
 - `LV3_OPENBAO_TOKEN`

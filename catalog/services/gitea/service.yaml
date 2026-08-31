@@ -2,7 +2,7 @@ schema_version: 1.0.0
 service:
   id: gitea
   name: Gitea
-  description: Private self-hosted Git service with Keycloak SSO, repo bootstrap automation,
+  description: Private self-hosted Git service with Authentik SSO, repo bootstrap automation,
     and a dedicated Actions runner on docker-build.
   category: automation
   lifecycle_status: active
@@ -42,7 +42,8 @@ completeness:
   requires_oidc: true
   requires_secrets: true
   requires_compose_secrets: true
-  keycloak_client_generated: true
+  oidc_provider: authentik
+  authentik_client_generated: true
 redundancy:
   tier: R1
   recovery_objective:
@@ -74,9 +75,9 @@ dependency:
       description: Gitea Actions jobs are delegated to the dedicated runner on docker-build,
         but repository hosting remains available without the runner.
     - from: gitea
-      to: keycloak
+      to: authentik
       type: soft
-      description: Operator SSO into Gitea prefers Keycloak, while the repo-managed
+      description: Operator SSO into Gitea uses Authentik, while the repo-managed
         bootstrap admin remains the break-glass fallback.
     - from: gitea
       to: minio

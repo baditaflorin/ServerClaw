@@ -31,12 +31,12 @@ def test_dify_runtime_declares_pre_validation_compatibility_defaults() -> None:
     assert defaults["dify_openbao_approle_name"] == "dify-runtime"
     assert defaults["dify_init_password_random_bytes"] == 12
     assert defaults["dify_init_password_max_length"] == 30
-    assert defaults["dify_keycloak_client_id"] == "{{ platform_service_registry.dify.sso.client_id }}"
+    assert defaults["dify_authentik_client_id"] == "{{ platform_service_registry.dify.sso.client_id }}"
     assert (
-        defaults["dify_keycloak_client_secret_local_file"]
-        == "{{ repo_shared_local_root }}/keycloak/dify-client-secret.txt"
+        defaults["dify_authentik_client_secret_local_file"]
+        == "{{ repo_shared_local_root }}/authentik/dify-client-secret.txt"
     )
-    assert defaults["dify_keycloak_issuer"] == "{{ keycloak_oidc_issuer_url }}"
+    assert defaults["dify_authentik_issuer"] == "{{ authentik_oidc_provider_base_url }}/dify/"
 
 
 def test_dify_runtime_repairs_init_password_and_bootstraps_through_a_private_tunnel() -> None:
@@ -51,7 +51,7 @@ def test_dify_runtime_repairs_init_password_and_bootstraps_through_a_private_tun
     assert "Persist the compatible Dify initialization password on the runtime host" in task_names
     assert "Mirror the compatible Dify initialization password to the controller" in task_names
 
-    bootstrap = next(task for task in tasks if task.get("name") == "Bootstrap Dify SSO with Keycloak OIDC")
+    bootstrap = next(task for task in tasks if task.get("name") == "Bootstrap Dify SSO with Authentik OIDC")
     argv = bootstrap["ansible.builtin.command"]["argv"]
     assert argv[:6] == ["uv", "run", "--with", "requests", "python", "{{ dify_scripts_dir }}/dify_sso_bootstrap.py"]
     assert "--admin-name" in argv

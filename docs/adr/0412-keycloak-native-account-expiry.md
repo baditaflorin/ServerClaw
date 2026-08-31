@@ -1,7 +1,7 @@
 # ADR 0412: Keycloak Native Account Expiry
 
 **Date:** 2026-04-13
-**Status:** Proposed
+**Status:** Deprecated (see service removal ADR — service removed from platform)
 **Related:** ADR 0411 (Unified Account Provisioning API)
 
 ---

@@ -630,7 +630,7 @@
       "verification_commands": [
         "python3 -m py_compile scripts/fault_injection.py config/windmill/scripts/fault-injection.py platform/faults/injector.py",
         "python3 -m pytest tests/test_fault_injection.py tests/test_fault_injection_repo_surfaces.py tests/test_fault_injection_windmill.py tests/test_windmill_operator_admin_app.py -q",
-        "python3 config/windmill/scripts/fault-injection.py --repo-path /srv/platform_server --scenario-names fault:keycloak-unavailable --dry-run"
+        "python3 config/windmill/scripts/fault-injection.py --repo-path /srv/platform_server --scenario-names fault:authentik-unavailable --dry-run"
       ],
       "human_navigation": {
         "launcher": {
@@ -2173,7 +2173,7 @@
       }
     },
     "converge-identity-core-watchdog": {
-      "description": "Deploy the identity-core health watchdog on runtime-control: a 15-second systemd timer that probes Keycloak, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).",
+      "description": "Deploy the identity-core health watchdog on runtime-control: a 15-second systemd timer that probes Authentik, Step-CA, OpenBao, and API Gateway and auto-restarts on failure (ADR 0376).",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2216,7 +2216,7 @@
       }
     },
     "converge-superset": {
-      "description": "Deploy the Superset metadata schema, runtime, Keycloak client, and public edge publication, then verify SQL-first BI access end to end.",
+      "description": "Deploy the Superset metadata schema, runtime, Authentik client, and public edge publication, then verify SQL-first BI access end to end.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2237,7 +2237,7 @@
           "superset_reader_password",
           "superset_secret_key",
           "superset_admin_password",
-          "keycloak_superset_client_secret"
+          "authentik_superset_client_secret"
         ]
       },
       "validation_targets": [
@@ -2252,7 +2252,7 @@
         "collections/ansible_collections/lv3/platform/playbooks/services/superset.yml",
         "collections/ansible_collections/lv3/platform/roles/superset_postgres",
         "collections/ansible_collections/lv3/platform/roles/superset_runtime",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
+        "collections/ansible_collections/lv3/platform/roles/authentik_runtime",
         "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
         "scripts/superset_bootstrap.py",
         "inventory/host_vars/proxmox-host.yml",
@@ -2271,13 +2271,13 @@
         "config/ansible-execution-scopes.yaml"
       ],
       "outputs": [
-        "A published Superset runtime on bi.example.com backed by the managed superset schema in the shared postgres database, a repo-managed Keycloak client, read-only PostgreSQL datasource registration, and a seeded landing dashboard."
+        "A published Superset runtime on bi.example.com backed by the managed superset schema in the shared postgres database, a repo-managed Authentik client, read-only PostgreSQL datasource registration, and a seeded landing dashboard."
       ],
       "verification_commands": [
         "make syntax-check-superset",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/superset/docker-compose.yml ps && curl -fsS http://127.0.0.1:8105/health'",
         "curl -fsS https://bi.example.com/health",
-        "python3 scripts/superset_bootstrap.py verify-public --base-url https://bi.example.com --expected-postgres-databases-file $(scripts/resolve_local_overlay_root.sh)/superset/postgres-databases.json --database-prefix PostgreSQL --expected-dashboard \"LV3 Platform Database Inventory\" --expected-chart \"PostgreSQL Databases\" --expected-sso-host sso.example.com --admin-username admin --admin-password-file $(scripts/resolve_local_overlay_root.sh)/superset/admin-password.txt --expected-extra-database \"Plausible ClickHouse\" --report-file $(scripts/resolve_local_overlay_root.sh)/superset/verify-public-report.json"
+        "python3 scripts/superset_bootstrap.py verify-public --base-url https://bi.example.com --expected-postgres-databases-file $(scripts/resolve_local_overlay_root.sh)/superset/postgres-databases.json --database-prefix PostgreSQL --expected-dashboard \"LV3 Platform Database Inventory\" --expected-chart \"PostgreSQL Databases\" --expected-sso-host id.example.com --admin-username admin --admin-password-file $(scripts/resolve_local_overlay_root.sh)/superset/admin-password.txt --expected-extra-database \"Plausible ClickHouse\" --report-file $(scripts/resolve_local_overlay_root.sh)/superset/verify-public-report.json"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2413,7 +2413,7 @@
         "generated_secret_ids": [
           "openfga_database_password",
           "openfga_preshared_key",
-          "keycloak_serverclaw_runtime_client_secret"
+          "authentik_serverclaw_runtime_client_secret"
         ]
       },
       "validation_targets": [
@@ -2427,20 +2427,20 @@
         "playbooks/openfga.yml",
         "collections/ansible_collections/lv3/platform/roles/openfga_postgres",
         "collections/ansible_collections/lv3/platform/roles/openfga_runtime",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/authentik_runtime/tasks/main.yml",
         "inventory/host_vars/proxmox-host.yml",
         "scripts/serverclaw_authz.py",
         "config/serverclaw-authz/bootstrap.json",
         "config/serverclaw-authz/model.json"
       ],
       "outputs": [
-        "A private OpenFGA runtime on docker-runtime with a PostgreSQL backend on postgres, a Proxmox-host controller proxy, mirrored operator and runtime Keycloak client secrets, and a verified delegated authorization store, model, tuple seed, and check set."
+        "A private OpenFGA runtime on docker-runtime with a PostgreSQL backend on postgres, a Proxmox-host controller proxy, mirrored operator and runtime Authentik client secrets, and a verified delegated authorization store, model, tuple seed, and check set."
       ],
       "verification_commands": [
         "make syntax-check-openfga",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 '\\''curl -fsS http://127.0.0.1:8098/healthz && docker compose --file /opt/openfga/docker-compose.yml ps'\\'''",
         "curl -fsS -H \"Authorization: Bearer $(cat $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt)\" http://100.64.0.1:8014/stores",
-        "python3 $(git rev-parse --show-toplevel)/scripts/serverclaw_authz.py verify --config $(git rev-parse --show-toplevel)/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt --keycloak-url https://sso.example.com"
+        "python3 $(git rev-parse --show-toplevel)/scripts/serverclaw_authz.py verify --config $(git rev-parse --show-toplevel)/config/serverclaw-authz/bootstrap.json --openfga-url http://100.64.0.1:8014 --openfga-preshared-key-file $(scripts/resolve_local_overlay_root.sh)/openfga/preshared-key.txt --authentik-url https://id.example.com"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -3470,7 +3470,7 @@
       "preferred_entrypoint": {
         "kind": "make_target",
         "target": "token-exposure-response",
-        "command": "make token-exposure-response TOKEN_ID=keycloak-agent-hub-client-secret EXPOSURE_SOURCE=git_diff TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'"
+        "command": "make token-exposure-response TOKEN_ID=authentik-agent-hub-client-secret EXPOSURE_SOURCE=git_diff TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'"
       },
       "preflight": {
         "required": false,
@@ -3496,56 +3496,13 @@
         "Mutation-ledger file events for revocation and incident creation when the required hooks succeed."
       ],
       "verification_commands": [
-        "make token-exposure-response TOKEN_ID=keycloak-agent-hub-client-secret EXPOSURE_SOURCE=git_diff TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
+        "make token-exposure-response TOKEN_ID=authentik-agent-hub-client-secret EXPOSURE_SOURCE=git_diff TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
         "uv run --with pytest --with pyyaml pytest -q $(git rev-parse --show-toplevel)/tests/test_token_lifecycle.py"
       ],
       "execution_class": "mutation",
       "budget": {
         "max_duration_seconds": 900,
         "max_steps": 150,
-        "max_concurrent_instances": 1,
-        "max_touched_hosts": 1,
-        "max_restarts": 0,
-        "max_rollback_depth": 1,
-        "escalation_action": "notify_and_abort"
-      }
-    },
-    "rotate-keycloak-client-secret": {
-      "description": "Rotate one ADR 0141 governed Keycloak client secret through the configured token hook contract.",
-      "lifecycle_status": "active",
-      "preferred_entrypoint": {
-        "kind": "make_target",
-        "target": "rotate-keycloak-client-secret",
-        "command": "make rotate-keycloak-client-secret TOKEN_ID=keycloak-agent-hub-client-secret TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'"
-      },
-      "preflight": {
-        "required": false,
-        "required_secret_ids": []
-      },
-      "validation_targets": [
-        "validate-data-models"
-      ],
-      "live_impact": "external_live",
-      "owner_runbook": "docs/runbooks/token-lifecycle-management.md",
-      "implementation_refs": [
-        "Makefile",
-        "config/token-policy.yaml",
-        "config/token-inventory.yaml",
-        "docs/runbooks/token-lifecycle-management.md",
-        "scripts/token_lifecycle.py",
-        "tests/test_token_lifecycle.py"
-      ],
-      "outputs": [
-        "A hook-backed or planned Keycloak client secret rotation result for the requested token id."
-      ],
-      "verification_commands": [
-        "make rotate-keycloak-client-secret TOKEN_ID=keycloak-agent-hub-client-secret TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
-        "uv run --with pytest --with pyyaml pytest -q $(git rev-parse --show-toplevel)/tests/test_token_lifecycle.py"
-      ],
-      "execution_class": "mutation",
-      "budget": {
-        "max_duration_seconds": 900,
-        "max_steps": 120,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 1,
         "max_restarts": 0,
@@ -3775,7 +3732,6 @@
         "validate-compose-runtime-envs",
         "syntax-check-mail-platform",
         "syntax-check-windmill",
-        "syntax-check-keycloak",
         "syntax-check-netbox",
         "syntax-check-mattermost"
       ],
@@ -3787,7 +3743,6 @@
         "docs/runbooks/compose-secrets-injection.md",
         "collections/ansible_collections/lv3/platform/playbooks/mail-platform.yml",
         "collections/ansible_collections/lv3/platform/playbooks/windmill.yml",
-        "collections/ansible_collections/lv3/platform/playbooks/keycloak.yml",
         "collections/ansible_collections/lv3/platform/playbooks/netbox.yml",
         "collections/ansible_collections/lv3/platform/playbooks/mattermost.yml"
       ],
@@ -4016,68 +3971,8 @@
         "escalation_action": "notify_and_abort"
       }
     },
-    "converge-keycloak": {
-      "description": "Converge Keycloak on docker-runtime, provision its PostgreSQL backend on postgres, publish it at sso.example.com, and wire Grafana through the shared SSO broker.",
-      "lifecycle_status": "active",
-      "preferred_entrypoint": {
-        "kind": "make_target",
-        "target": "converge-keycloak",
-        "command": "HETZNER_DNS_API_TOKEN=... make converge-keycloak"
-      },
-      "preflight": {
-        "required": true,
-        "required_secret_ids": [
-          "bootstrap_ssh_private_key",
-          "hetzner_dns_api_token"
-        ],
-        "bootstrap_manifest_ids": [
-          "shared-edge-generated-portals"
-        ],
-        "generated_secret_ids": [
-          "keycloak_database_password",
-          "keycloak_bootstrap_admin_password",
-          "keycloak_operator_password",
-          "keycloak_grafana_client_secret",
-          "keycloak_agent_client_secret"
-        ]
-      },
-      "validation_targets": [
-        "validate",
-        "syntax-check-keycloak"
-      ],
-      "live_impact": "guest_live",
-      "owner_runbook": "docs/runbooks/configure-keycloak.md",
-      "implementation_refs": [
-        "Makefile",
-        "collections/ansible_collections/lv3/platform/playbooks/keycloak.yml",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_postgres/tasks/main.yml",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
-        "collections/ansible_collections/lv3/platform/roles/grafana_sso/tasks/main.yml",
-        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml",
-        "inventory/host_vars/proxmox-host.yml",
-        "config/uptime-kuma/monitors.json"
-      ],
-      "outputs": [
-        "A repo-managed Keycloak realm on docker-runtime with a PostgreSQL backend, the public edge hostname sso.example.com, an initial named operator account, an agent confidential client, and Grafana wired to the shared OIDC login flow."
-      ],
-      "verification_commands": [
-        "make syntax-check-keycloak",
-        "curl -s https://sso.example.com/realms/lv3/.well-known/openid-configuration",
-        "curl -I https://grafana.example.com/login/generic_oauth"
-      ],
-      "execution_class": "mutation",
-      "budget": {
-        "max_duration_seconds": 900,
-        "max_steps": 250,
-        "max_concurrent_instances": 1,
-        "max_touched_hosts": 2,
-        "max_restarts": 0,
-        "max_rollback_depth": 1,
-        "escalation_action": "notify_and_abort"
-      }
-    },
     "converge-harbor": {
-      "description": "Converge Harbor on docker-runtime, publish it at registry.example.com through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner project automation credentials.",
+      "description": "Converge Harbor on docker-runtime, publish it at registry.example.com through the shared edge, bootstrap Authentik OIDC, and seed the check-runner project automation credentials.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4094,7 +3989,7 @@
           "harbor_admin_password",
           "harbor_database_password",
           "harbor_check_runner_robot_secret",
-          "keycloak_harbor_client_secret"
+          "authentik_harbor_client_secret"
         ]
       },
       "validation_targets": [
@@ -4114,7 +4009,7 @@
         "config/controller-local-secrets.json"
       ],
       "outputs": [
-        "A repo-managed Harbor deployment on docker-runtime with Trivy scanning enabled, a public registry endpoint at registry.example.com, Keycloak-backed browser sign-in, and a generated robot credential for check-runner image publication."
+        "A repo-managed Harbor deployment on docker-runtime with Trivy scanning enabled, a public registry endpoint at registry.example.com, Authentik-backed browser sign-in, and a generated robot credential for check-runner image publication."
       ],
       "verification_commands": [
         "make syntax-check-harbor",
@@ -4145,7 +4040,7 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key",
-          "keycloak_agent_client_secret"
+          "authentik_agent_hub_client_secret"
         ]
       },
       "validation_targets": [
@@ -4169,7 +4064,7 @@
         "config/api-gateway-catalog.json"
       ],
       "outputs": [
-        "A repo-managed FastAPI gateway on docker-runtime, the public edge hostname api.example.com, and an authenticated platform service catalog backed by Keycloak bearer tokens."
+        "A repo-managed FastAPI gateway on docker-runtime, the public edge hostname api.example.com, and an authenticated platform service catalog backed by Authentik bearer tokens."
       ],
       "verification_commands": [
         "make syntax-check-api-gateway",
@@ -4712,7 +4607,7 @@
           "langfuse_minio_secret_key",
           "langfuse_bootstrap_user_password",
           "langfuse_project_secret_key",
-          "keycloak_langfuse_client_secret"
+          "authentik_langfuse_client_secret"
         ]
       },
       "validation_targets": [
@@ -4726,13 +4621,13 @@
         "collections/ansible_collections/lv3/platform/playbooks/langfuse.yml",
         "collections/ansible_collections/lv3/platform/roles/langfuse_postgres",
         "collections/ansible_collections/lv3/platform/roles/langfuse_runtime",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/authentik_runtime/tasks/main.yml",
         "inventory/host_vars/proxmox-host.yml",
         "scripts/langfuse_trace_smoke.py",
         "platform/llm/observability.py"
       ],
       "outputs": [
-        "A repo-managed Langfuse runtime on docker-runtime with PostgreSQL on postgres, Keycloak-backed browser sign-in, mirrored bootstrap API credentials, and a live trace smoke-verification path."
+        "A repo-managed Langfuse runtime on docker-runtime with PostgreSQL on postgres, Authentik-backed browser sign-in, mirrored bootstrap API credentials, and a live trace smoke-verification path."
       ],
       "verification_commands": [
         "make syntax-check-langfuse",
@@ -4811,7 +4706,7 @@
       }
     },
     "converge-serverclaw": {
-      "description": "Deploy the first public ServerClaw surface on coolify, reconcile its dedicated Keycloak client, and publish chat.example.com through the shared edge.",
+      "description": "Deploy the first public ServerClaw surface on coolify, reconcile its dedicated Authentik client, and publish chat.example.com through the shared edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -4826,7 +4721,7 @@
         "generated_secret_ids": [
           "serverclaw_admin_password",
           "serverclaw_secret_key",
-          "serverclaw_oidc_client_secret"
+          "authentik_serverclaw_client_secret"
         ]
       },
       "validation_targets": [
@@ -4838,14 +4733,14 @@
       "implementation_refs": [
         "Makefile",
         "playbooks/serverclaw.yml",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
+        "collections/ansible_collections/lv3/platform/roles/authentik_runtime",
         "inventory/group_vars/all/identity.yml",
         "inventory/group_vars/all/main.yml",
         "inventory/group_vars/platform.yml",
         "inventory/host_vars/proxmox-host.yml"
       ],
       "outputs": [
-        "A public ServerClaw runtime deployed on coolify with a dedicated Keycloak client, repo-managed bootstrap auth, and chat.example.com published through the shared edge."
+        "A public ServerClaw runtime deployed on coolify with a dedicated Authentik client, repo-managed bootstrap auth, and chat.example.com published through the shared edge."
       ],
       "verification_commands": [
         "make syntax-check-serverclaw",
@@ -5235,7 +5130,7 @@
         "config/health-probe-catalog.json"
       ],
       "outputs": [
-        "A private Gitea runtime on docker-runtime with Keycloak OIDC login, a PostgreSQL backend on postgres, the bootstrapped ops/platform_server repository path, a dedicated self-hosted Actions runner on docker-build, and the ADR 0233 release-bundle signing plus repo-token secrets seeded for server-resident publication and verification."
+        "A private Gitea runtime on docker-runtime with Authentik OIDC login, a PostgreSQL backend on postgres, the bootstrapped ops/platform_server repository path, a dedicated self-hosted Actions runner on docker-build, and the ADR 0233 release-bundle signing plus repo-token secrets seeded for server-resident publication and verification."
       ],
       "verification_commands": [
         "make syntax-check-gitea",
@@ -6255,7 +6150,7 @@
         "One k6 smoke receipt per targeted service under receipts/k6 together with the raw summary export captured under receipts/k6/raw."
       ],
       "verification_commands": [
-        "make k6-smoke K6_ARGS=\"--service keycloak --service openfga\"",
+        "make k6-smoke K6_ARGS=\"--service authentik --service openfga\"",
         "python3 scripts/k6_load_testing.py --validate"
       ],
       "execution_class": "diagnostic",
@@ -6299,7 +6194,7 @@
         "A dated set of k6 load receipts, raw summary export, optional platform.slo.k6_regression NATS publication, and ntfy warning publication when the remaining error budget drops below 20 percent."
       ],
       "verification_commands": [
-        "make k6-load K6_ARGS=\"--service keycloak --service openfga\"",
+        "make k6-load K6_ARGS=\"--service authentik --service openfga\"",
         "python3 scripts/k6_load_testing.py --validate"
       ],
       "execution_class": "diagnostic",
@@ -6343,7 +6238,7 @@
         "A dated set of k6 soak receipts, raw summary export, optional regression events, and warning notifications for long-running latency or error-budget degradation."
       ],
       "verification_commands": [
-        "make k6-soak K6_ARGS=\"--service keycloak --service openfga --soak-duration 5m\"",
+        "make k6-soak K6_ARGS=\"--service authentik --service openfga --soak-duration 5m\"",
         "python3 scripts/k6_load_testing.py --validate"
       ],
       "execution_class": "diagnostic",
@@ -7035,7 +6930,7 @@
       }
     },
     "operator-onboard": {
-      "description": "Apply one ADR 0108 human-operator onboarding change across the repo-authoritative roster, Keycloak, OpenBao, step-ca, Tailscale, and Mattermost.",
+      "description": "Apply one ADR 0108 human-operator onboarding change across the repo-authoritative roster, Authentik, OpenBao, step-ca, Tailscale, and Mattermost.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7045,14 +6940,14 @@
       "preflight": {
         "required": true,
         "required_secret_ids": [
-          "keycloak_bootstrap_admin_password",
+          "authentik_bootstrap_password",
           "openbao_init_payload"
         ],
         "health_checks": [
           {
-            "id": "keycloak_public_discovery",
-            "description": "Keycloak realm discovery responds through the shared public SSO edge.",
-            "command": "curl -fsS https://sso.example.com/realms/lv3/.well-known/openid-configuration >/dev/null",
+            "id": "authentik_public_discovery",
+            "description": "Authentik OIDC discovery responds through the shared public identity edge.",
+            "command": "curl -fsS https://id.example.com/application/o/ops-portal/.well-known/openid-configuration >/dev/null",
             "timeout_seconds": 15
           },
           {
@@ -7089,7 +6984,7 @@
       ],
       "outputs": [
         "A normalized active operator entry committed in config/operators.yaml together with controller-local ADR 0108 state under .local/state/operator-access/.",
-        "The Keycloak user, OpenBao entity, and repo-managed operator role definitions are converged for the requested operator."
+        "The Authentik user, OpenBao entity, and repo-managed operator role definitions are converged for the requested operator."
       ],
       "verification_commands": [
         "make preflight WORKFLOW=operator-onboard",
@@ -7115,7 +7010,7 @@
       }
     },
     "operator-offboard": {
-      "description": "Disable one ADR 0108 human operator across Keycloak, OpenBao, Tailscale, and the repo-authoritative roster while preserving audit history.",
+      "description": "Disable one ADR 0108 human operator across Authentik, OpenBao, Tailscale, and the repo-authoritative roster while preserving audit history.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7125,7 +7020,7 @@
       "preflight": {
         "required": true,
         "required_secret_ids": [
-          "keycloak_bootstrap_admin_password",
+          "authentik_bootstrap_password",
           "openbao_init_payload"
         ]
       },
@@ -7145,7 +7040,7 @@
       ],
       "outputs": [
         "The targeted operator is marked inactive in config/operators.yaml and mirrored in controller-local ADR 0108 state.",
-        "Keycloak is disabled and the OpenBao entity is driven to the inactive state for the targeted operator."
+        "Authentik is disabled and the OpenBao entity is driven to the inactive state for the targeted operator."
       ],
       "verification_commands": [
         "python3 scripts/operator_manager.py validate",
@@ -7180,7 +7075,7 @@
       "preflight": {
         "required": true,
         "required_secret_ids": [
-          "keycloak_bootstrap_admin_password",
+          "authentik_bootstrap_password",
           "openbao_init_payload"
         ]
       },
@@ -7353,7 +7248,7 @@
       ]
     },
     "converge-semaphore": {
-      "description": "Converge the private Semaphore runtime on runtime-control, provision its PostgreSQL backend on postgres, reconcile the dedicated Keycloak OIDC client, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
+      "description": "Converge the private Semaphore runtime on runtime-control, provision its PostgreSQL backend on postgres, reconcile the dedicated Authentik OIDC client, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7370,7 +7265,7 @@
           "semaphore_admin_password",
           "semaphore_api_token",
           "semaphore_admin_auth",
-          "keycloak_semaphore_client_secret"
+          "authentik_semaphore_client_secret"
         ]
       },
       "validation_targets": [
@@ -7383,7 +7278,7 @@
         "Makefile",
         "playbooks/semaphore.yml",
         "inventory/semaphore-localhost.yml",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/semaphore_client.yml",
+        "config/authentik/oauth-clients.yaml",
         "collections/ansible_collections/lv3/platform/roles/semaphore_postgres",
         "collections/ansible_collections/lv3/platform/roles/semaphore_runtime",
         "platform/ansible/semaphore.py",
@@ -7392,7 +7287,7 @@
         "inventory/host_vars/proxmox-host.yml"
       ],
       "outputs": [
-        "Private Semaphore runtime on runtime-control with a PostgreSQL backend on postgres, a repo-managed Keycloak OIDC client mirrored under .local/keycloak/semaphore-client-secret.txt, controller-local auth artifacts under .local/semaphore, and a seeded self-test project."
+        "Private Semaphore runtime on runtime-control with a PostgreSQL backend on postgres, a repo-managed Authentik OIDC client mirrored under .local/authentik/semaphore-client-secret.txt, controller-local auth artifacts under .local/semaphore, and a seeded self-test project."
       ],
       "verification_commands": [
         "make syntax-check-semaphore",
@@ -7617,7 +7512,7 @@
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key",
-          "keycloak_agent_client_secret"
+          "authentik_agent_hub_client_secret"
         ]
       },
       "validation_targets": [
@@ -7773,7 +7668,7 @@
       }
     },
     "converge-directus": {
-      "description": "Deploy the Directus PostgreSQL backend, runtime, Keycloak client, and public edge publication, then verify REST, GraphQL, and OIDC access end to end.",
+      "description": "Deploy the Directus PostgreSQL backend, runtime, Authentik client, and public edge publication, then verify REST, GraphQL, and OIDC access end to end.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7795,7 +7690,7 @@
           "directus_secret",
           "directus_admin_password",
           "directus_service_registry_token",
-          "keycloak_directus_client_secret"
+          "authentik_directus_client_secret"
         ]
       },
       "validation_targets": [
@@ -7810,7 +7705,7 @@
         "collections/ansible_collections/lv3/platform/playbooks/services/directus.yml",
         "collections/ansible_collections/lv3/platform/roles/directus_postgres",
         "collections/ansible_collections/lv3/platform/roles/directus_runtime",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
+        "collections/ansible_collections/lv3/platform/roles/authentik_runtime",
         "scripts/directus_bootstrap.py",
         "inventory/host_vars/proxmox-host.yml",
         "config/service-capability-catalog.json",
@@ -7821,13 +7716,13 @@
         "config/workflow-catalog.json"
       ],
       "outputs": [
-        "A published Directus runtime on data.example.com backed by the dedicated directus PostgreSQL database, a repo-managed Keycloak client, a governed service_registry collection, and durable REST plus GraphQL verification credentials."
+        "A published Directus runtime on data.example.com backed by the dedicated directus PostgreSQL database, a repo-managed Authentik client, a governed service_registry collection, and durable REST plus GraphQL verification credentials."
       ],
       "verification_commands": [
         "make syntax-check-directus",
         "ssh -i $(scripts/resolve_local_overlay_root.sh)/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/directus/docker-compose.yml ps && curl -fsS http://127.0.0.1:8055/server/health'",
         "curl -fsS https://data.example.com/server/health",
-        "python3 scripts/directus_bootstrap.py verify-public --base-url https://data.example.com --api-token-file $(scripts/resolve_local_overlay_root.sh)/directus/service-registry-token.txt --collection service_registry --expected-service-name directus --expected-sso-host sso.example.com"
+        "python3 scripts/directus_bootstrap.py verify-public --base-url https://data.example.com --api-token-file $(scripts/resolve_local_overlay_root.sh)/directus/service-registry-token.txt --collection service_registry --expected-service-name directus --expected-sso-host id.example.com"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -7867,7 +7762,7 @@
         "playbooks/paperless.yml",
         "collections/ansible_collections/lv3/platform/roles/paperless_postgres",
         "collections/ansible_collections/lv3/platform/roles/paperless_runtime",
-        "collections/ansible_collections/lv3/platform/roles/keycloak_runtime",
+        "collections/ansible_collections/lv3/platform/roles/authentik_runtime",
         "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime",
         "scripts/paperless_sync.py",
         "inventory/host_vars/proxmox-host.yml",
@@ -7899,7 +7794,7 @@
       }
     },
     "converge-authentik": {
-      "description": "Converge the parallel Authentik identity broker, preserve its existing database and signing material, reconcile the declared GlitchTip and Outline OAuth providers, and publish id.example.com without changing Keycloak.",
+      "description": "Converge the Authentik identity broker, preserve its existing database and signing material, reconcile the declared OAuth providers, and publish id.example.com.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -7930,9 +7825,9 @@
             "timeout_seconds": 120
           },
           {
-            "id": "keycloak_public_discovery",
-            "description": "The retained Keycloak realm discovery endpoint remains healthy through the deployment-specific public edge before Authentik changes.",
-            "command": "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; keycloak_realm=\"${KEYCLOAK_REALM:-${platform_domain%%.*}}\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://sso.${platform_domain}/realms/${keycloak_realm}/.well-known/openid-configuration\" >/dev/null",
+            "id": "authentik_public_discovery",
+            "description": "The Authentik discovery endpoint remains healthy through the deployment-specific public edge before provider reconciliation.",
+            "command": "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://id.${platform_domain}/application/o/glitchtip/.well-known/openid-configuration\" >/dev/null",
             "timeout_seconds": 30
           }
         ]
@@ -7962,13 +7857,13 @@
         "config/data-catalog.json"
       ],
       "outputs": [
-        "A healthy Authentik runtime on runtime-control with its existing database and signing secrets preserved through OpenBao-backed runtime injection, stable repo-declared GlitchTip and Outline providers/applications, and controller-local client material adopted without rotation while Keycloak remains available for rollback."
+        "A healthy Authentik runtime on runtime-control with its existing database and signing secrets preserved through OpenBao-backed runtime injection, stable repo-declared providers and applications, and controller-local client material adopted without rotation."
       ],
       "verification_commands": [
         "make syntax-check-authentik",
         "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; curl --fail --silent --show-error \"https://id.${platform_domain}/-/health/ready/\" >/dev/null",
         "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; uv run --no-project --with pyyaml python scripts/reconcile_authentik_oauth.py --base-url \"https://id.${platform_domain}\" --platform-domain \"${platform_domain}\" --token-file \"${local_root}/authentik/bootstrap-token.txt\" --client glitchtip --check --expect-no-change",
-        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; keycloak_realm=\"${KEYCLOAK_REALM:-${platform_domain%%.*}}\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://sso.${platform_domain}/realms/${keycloak_realm}/.well-known/openid-configuration\" >/dev/null"
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://id.${platform_domain}/application/o/outline/.well-known/openid-configuration\" >/dev/null"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -7996,8 +7891,7 @@
           "hetzner_dns_api_token",
           "openbao_runtime_secret_provisioner_approle",
           "openbao_runtime_secret_provisioner_bootstrap_receipt",
-          "authentik_glitchtip_client_secret",
-          "keycloak_glitchtip_client_secret"
+          "authentik_glitchtip_client_secret"
         ],
         "bootstrap_manifest_ids": [
           "shared-edge-generated-portals"
@@ -8020,9 +7914,9 @@
             "timeout_seconds": 120
           },
           {
-            "id": "keycloak_public_discovery",
-            "description": "The retained Keycloak realm discovery endpoint remains healthy through the deployment-specific public edge before the GlitchTip Authentik cutover.",
-            "command": "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; keycloak_realm=\"${KEYCLOAK_REALM:-${platform_domain%%.*}}\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://sso.${platform_domain}/realms/${keycloak_realm}/.well-known/openid-configuration\" >/dev/null",
+            "id": "authentik_public_discovery",
+            "description": "The Authentik GlitchTip discovery endpoint remains healthy through the deployment-specific public edge before GlitchTip convergence.",
+            "command": "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://id.${platform_domain}/application/o/glitchtip/.well-known/openid-configuration\" >/dev/null",
             "timeout_seconds": 30
           }
         ]
@@ -8054,7 +7948,7 @@
         "config/service-completeness.json"
       ],
       "outputs": [
-        "A repo-managed GlitchTip runtime on docker-runtime with PostgreSQL on postgres, Authentik-backed browser sign-in through allauth's headless redirect flow, mirrored bootstrap credentials, project-scoped DSNs, and the prior Keycloak client secret retained as a per-client rollback artifact.",
+        "A repo-managed GlitchTip runtime on docker-runtime with PostgreSQL on postgres, Authentik-backed browser sign-in through allauth's headless redirect flow, mirrored bootstrap credentials, and project-scoped DSNs.",
         "Before Outline may advance, the live-apply receipt records an interactive Authentik browser login, an authenticated GlitchTip session, and logout back to an unauthenticated state."
       ],
       "verification_commands": [
@@ -8063,7 +7957,7 @@
         "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; curl --fail --silent --show-error \"https://errors.${platform_domain}/_allauth/browser/v1/config\" >/dev/null",
         "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; python3 scripts/glitchtip_oidc_smoke.py --base-url \"https://errors.${platform_domain}\" --provider-id authentik --issuer-url \"https://id.${platform_domain}/application/o/glitchtip\" --expected-client-id glitchtip --callback-url \"https://errors.${platform_domain}/login\" --client-secret-file \"${local_root}/authentik/glitchtip-client-secret.txt\"",
         "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; python3 scripts/glitchtip_event_smoke.py --base-url \"https://errors.${platform_domain}\" --organization-slug lv3 --api-token-file \"${local_root}/glitchtip/api-token.txt\" --dsn-file \"${local_root}/glitchtip/platform-findings-event-url.txt\"",
-        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; keycloak_realm=\"${KEYCLOAK_REALM:-${platform_domain%%.*}}\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://sso.${platform_domain}/realms/${keycloak_realm}/.well-known/openid-configuration\" >/dev/null"
+        "local_root=\"$(scripts/resolve_local_overlay_root.sh)\"; identity_file=\"${PLATFORM_IDENTITY_OVERLAY:?set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file}\"; case \"${identity_file}\" in /*) ;; .local/*) identity_file=\"${local_root}/${identity_file#.local/}\" ;; *) identity_file=\"${local_root}/${identity_file}\" ;; esac; platform_domain=\"$(uv run --no-project --with pyyaml python -c 'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding=\"utf-8\"))[\"platform_domain\"])' \"${identity_file}\")\"; curl --fail --silent --show-error --connect-timeout 5 --max-time 15 \"https://id.${platform_domain}/application/o/glitchtip/.well-known/openid-configuration\" >/dev/null"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -8077,7 +7971,7 @@
       }
     },
     "converge-outline": {
-      "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure shared MinIO S3 storage, publish it at wiki.example.com, and select the repo-managed Authentik OIDC client while retaining Keycloak rollback.",
+      "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure shared MinIO S3 storage, publish it at wiki.example.com, and select the repo-managed Authentik OIDC client while retaining Authentik rollback.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -8091,7 +7985,6 @@
           "hetzner_dns_api_token",
           "openbao_runtime_secret_provisioner_approle",
           "authentik_outline_client_secret",
-          "keycloak_outline_client_secret",
           "outline_api_token"
         ],
         "generated_secret_ids": [
@@ -8118,7 +8011,7 @@
         "config/integrations/outline--authentik.yaml"
       ],
       "outputs": [
-        "A repo-managed Outline wiki runtime on docker-runtime with PostgreSQL on postgres, shared MinIO S3 document storage, Authentik-backed browser sign-in, preserved Keycloak rollback material, and an NGINX edge publication at wiki.example.com."
+        "A repo-managed Outline wiki runtime on docker-runtime with PostgreSQL on postgres, shared MinIO S3 document storage, Authentik-backed browser sign-in, preserved Authentik rollback material, and an NGINX edge publication at wiki.example.com."
       ],
       "verification_commands": [
         "curl -fsS https://wiki.example.com/_health",
@@ -8187,7 +8080,7 @@
       "owner_runbook": "docs/runbooks/configure-litellm.md"
     },
     "converge-librechat": {
-      "description": "Deploy LibreChat on coolify, reconcile Keycloak OIDC client, and publish chat.example.com through the shared edge.",
+      "description": "Deploy LibreChat on coolify, reconcile Authentik OIDC client, and publish chat.example.com through the shared edge.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -8381,6 +8274,49 @@
       "verification_commands": [
         "python3 -m py_compile config/windmill/scripts/portal-health-sweep.py"
       ]
+    },
+    "rotate-authentik-client-secret": {
+      "description": "Rotate one ADR 0141 governed Authentik client secret through the configured token hook contract.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "rotate-authentik-client-secret",
+        "command": "make rotate-authentik-client-secret TOKEN_ID=authentik-agent-hub-client-secret TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/token-lifecycle-management.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/token-policy.yaml",
+        "config/token-inventory.yaml",
+        "docs/runbooks/token-lifecycle-management.md",
+        "scripts/token_lifecycle.py",
+        "tests/test_token_lifecycle.py"
+      ],
+      "outputs": [
+        "A hook-backed or planned Authentik client secret rotation result for the requested token id."
+      ],
+      "verification_commands": [
+        "make rotate-authentik-client-secret TOKEN_ID=authentik-agent-hub-client-secret TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
+        "uv run --with pytest --with pyyaml pytest -q $(git rev-parse --show-toplevel)/tests/test_token_lifecycle.py"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 120,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     }
   }
 }

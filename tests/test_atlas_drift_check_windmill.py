@@ -40,6 +40,7 @@ def test_wrapper_executes_repo_script_and_parses_clean_json(monkeypatch, tmp_pat
         captured["command"] = command
         captured["cwd"] = kwargs["cwd"]
         captured["env"] = kwargs["env"]
+        captured["timeout"] = kwargs["timeout"]
         return subprocess.CompletedProcess(
             command,
             0,
@@ -53,11 +54,66 @@ def test_wrapper_executes_repo_script_and_parses_clean_json(monkeypatch, tmp_pat
 
     assert payload["status"] == "ok"
     assert captured["cwd"] == repo_root
-    assert captured["command"][1:4] == ["docker", "nats-py", "pyyaml"]
+    assert captured["command"][1:5] == ["docker", "nats-py", "psycopg[binary]", "pyyaml"]
     assert captured["env"]["LV3_ATLAS_FORCE_DIRECT_ENDPOINTS"] == "1"
     assert captured["env"]["LV3_NATS_URL"] == "nats://127.0.0.1:4222"
+    assert captured["env"]["LV3_ATLAS_OPERATION_TIMEOUT_SECONDS"] == "8"
+    assert captured["timeout"] == module.DEFAULT_ATLAS_DRIFT_RUNTIME_TIMEOUT_SECONDS
     assert "scripts/atlas_schema.py" in captured["command"]
     assert payload["report"] == {"status": "clean", "drift_count": 0}
+
+
+def test_wrapper_returns_a_bounded_timeout_result(monkeypatch, tmp_path: Path) -> None:
+    module = load_module("atlas_drift_timeout")
+    repo_root = tmp_path
+    (repo_root / "scripts").mkdir(parents=True)
+    (repo_root / "scripts" / "atlas_schema.py").write_text("# placeholder\n", encoding="utf-8")
+    (repo_root / "scripts" / "run_python_with_packages.sh").write_text("#!/bin/sh\n", encoding="utf-8")
+    (repo_root / "scripts" / "run_python_with_packages.sh").chmod(0o755)
+
+    def fake_run(command, **kwargs):
+        raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    payload = cast(dict[str, Any], module.main(repo_path=str(repo_root)))
+
+    assert payload["status"] == "timeout"
+    assert payload["returncode"] == 124
+    assert str(module.DEFAULT_ATLAS_DRIFT_RUNTIME_TIMEOUT_SECONDS) in str(payload["reason"])
+
+
+def test_positive_int_env_does_not_widen_the_runtime_budget(monkeypatch) -> None:
+    module = load_module("atlas_drift_budget")
+
+    monkeypatch.setenv("LV3_WINDMILL_ATLAS_DRIFT_TIMEOUT_SECONDS", "999")
+
+    assert (
+        module.positive_int_env(
+            "LV3_WINDMILL_ATLAS_DRIFT_TIMEOUT_SECONDS",
+            module.DEFAULT_ATLAS_DRIFT_RUNTIME_TIMEOUT_SECONDS,
+        )
+        == module.DEFAULT_ATLAS_DRIFT_RUNTIME_TIMEOUT_SECONDS
+    )
+
+
+def test_wrapper_discovers_repo_from_environment(monkeypatch, tmp_path: Path) -> None:
+    module = load_module("atlas_drift_env_discovery")
+    (tmp_path / "scripts").mkdir(parents=True)
+    (tmp_path / "scripts" / "atlas_schema.py").write_text("# placeholder\n", encoding="utf-8")
+    (tmp_path / "scripts" / "run_python_with_packages.sh").write_text("#!/bin/sh\n", encoding="utf-8")
+    (tmp_path / "scripts" / "run_python_with_packages.sh").chmod(0o755)
+
+    def fake_run(command, **kwargs):
+        return subprocess.CompletedProcess(command, 0, json.dumps({"status": "clean"}), "")
+
+    monkeypatch.setenv("PLATFORM_REPO_ROOT", str(tmp_path))
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    payload = cast(dict[str, Any], module.main())
+
+    assert payload["status"] == "ok"
+    assert payload["report"] == {"status": "clean"}
 
 
 def test_wrapper_overrides_blank_direct_endpoint_env_values(monkeypatch, tmp_path: Path) -> None:

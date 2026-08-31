@@ -39,7 +39,7 @@ service:
       status: active
       url: https://n8n.example.com
       subdomain: n8n.example.com
-      notes: The editor is protected by the shared oauth2-proxy and Keycloak edge
+      notes: The editor is protected by the shared oauth2-proxy and Authentik edge
         flow while selected webhook paths remain intentionally public for governed
         ServerClaw connector calls.
 completeness:
@@ -75,9 +75,9 @@ dependency:
     adr: '0151'
   outbound_edges:
     - from: n8n
-      to: keycloak
+      to: authentik
       type: soft
-      description: The public n8n editor path is gated behind oauth2-proxy and Keycloak-backed
+      description: The public n8n editor path is gated behind oauth2-proxy and Authentik-backed
         browser authentication.
     - from: n8n
       to: nginx_edge

@@ -35,7 +35,7 @@ MONITOR_SERVICE_MAP: dict[str, str | None] = {
     "Harbor Registry Public": "harbor",
     "Headscale Public Health": "headscale",
     "Homepage Public": "homepage",
-    "Keycloak OIDC Discovery": "keycloak",
+    "Authentik OIDC Discovery": "authentik",
     "Lago Public Health": "lago",
     "Langfuse Public Health": "langfuse",
     "Mail Platform Gateway Private": None,  # infrastructure

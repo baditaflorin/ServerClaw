@@ -3143,7 +3143,7 @@ def build_parser() -> argparse.ArgumentParser:
     operator_add.add_argument("--role", required=True, choices=["admin", "operator", "viewer"])
     operator_add.add_argument("--ssh-key", default="")
     operator_add.add_argument("--id")
-    operator_add.add_argument("--keycloak-username")
+    operator_add.add_argument("--authentik-username")
     operator_add.add_argument("--tailscale-login-email")
     operator_add.add_argument("--tailscale-device-name")
     operator_add.add_argument("--dry-run", action="store_true")
@@ -3573,8 +3573,8 @@ def main(argv: list[str] | None = None) -> int:
             ]
             if args.id:
                 workflow_args.append(f"operator_id={args.id}")
-            if args.keycloak_username:
-                workflow_args.append(f"keycloak_username={args.keycloak_username}")
+            if args.authentik_username:
+                workflow_args.append(f"authentik_username={args.authentik_username}")
             if args.tailscale_login_email:
                 workflow_args.append(f"tailscale_login_email={args.tailscale_login_email}")
             if args.tailscale_device_name:

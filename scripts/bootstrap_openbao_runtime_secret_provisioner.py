@@ -61,6 +61,7 @@ OPENBAO_DEFAULTS_PATH: Final[Path] = (
     REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml"
 )
 PLATFORM_VARS_PATH: Final[Path] = REPO_ROOT / "inventory/group_vars/platform.yml"
+HOST_NATIVE_CONTRACTS_PATH: Final[Path] = REPO_ROOT / "config/openbao-host-native-service-contracts.yml"
 
 WORKFLOW_ID: Final[str] = "bootstrap-openbao-runtime-secret-provisioner"
 PROVISIONER_ROLE_NAME: Final[str] = "runtime-secret-provisioner"
@@ -68,6 +69,7 @@ ARTIFACT_FILENAME: Final[str] = "runtime-secret-provisioner-approle.json"
 RECEIPT_FILENAME: Final[str] = "runtime-secret-provisioner-bootstrap-receipt.json"
 SAFE_NAME_PATTERN: Final[re.Pattern[str]] = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
 SAFE_PREFIX_PATTERN: Final[re.Pattern[str]] = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+SAFE_SSH_HOST_ALIAS_PATTERN: Final[re.Pattern[str]] = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 HCL_PATH_PATTERN: Final[re.Pattern[str]] = re.compile(r'^path\s+"([^"]+)"\s+\{$')
 MAX_SECRET_FILE_BYTES: Final[int] = 4096
 MAX_ARTIFACT_BYTES: Final[int] = 64 * 1024
@@ -75,6 +77,23 @@ SSH_BINARY: Final[str] = "/usr/bin/ssh"
 SSH_USER: Final[str] = "ops"
 SSH_TUNNEL_START_TIMEOUT_SECONDS: Final[float] = 15.0
 SSH_TUNNEL_STOP_TIMEOUT_SECONDS: Final[float] = 3.0
+
+
+class AnsibleDefaultsSafeLoader(yaml.SafeLoader):
+    """Safely read the small Ansible tag subset used by role defaults.
+
+    ``!unsafe`` tells Ansible to retain literal template markers.  It does not
+    carry executable semantics, so treating its scalar value as ordinary text
+    lets this controller-side validator consume the canonical defaults without
+    broadening PyYAML's safe-loader surface.
+    """
+
+
+def _construct_ansible_unsafe(loader: yaml.SafeLoader, node: yaml.ScalarNode) -> str:
+    return loader.construct_scalar(node)
+
+
+AnsibleDefaultsSafeLoader.add_constructor("!unsafe", _construct_ansible_unsafe)
 
 
 class BootstrapError(RuntimeError):
@@ -236,6 +255,7 @@ class DesiredRole:
 @dataclass(frozen=True)
 class SSHTunnelConfiguration:
     jump_host: str
+    jump_port: int
     target_guest: str
     target_host: str
     remote_port: int
@@ -298,9 +318,18 @@ def _safe_name(value: Any, label: str) -> str:
     return name
 
 
+def _ssh_host_alias(value: str | None, label: str) -> str | None:
+    if value is None or not value.strip():
+        return None
+    alias = value.strip()
+    if not SAFE_SSH_HOST_ALIAS_PATTERN.fullmatch(alias):
+        raise BootstrapError(f"{label} has an unsafe SSH host alias")
+    return alias
+
+
 def _load_yaml_mapping(path: Path, label: str) -> dict[str, Any]:
     try:
-        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+        payload = yaml.load(path.read_text(encoding="utf-8"), Loader=AnsibleDefaultsSafeLoader)
     except FileNotFoundError:
         raise BootstrapError(f"{label} is missing") from None
     except (OSError, UnicodeError, yaml.YAMLError):
@@ -330,8 +359,11 @@ def _validate_identity(identity_file: Path) -> tuple[str, str, str]:
     prefix = domain.split(".", 1)[0]
     if not SAFE_PREFIX_PATTERN.fullmatch(prefix):
         raise BootstrapError("platform_config_prefix has an unsafe identifier")
-    management_ipv4 = _ipv4(identity.get("management_ipv4"), "management_ipv4")
-    return domain, prefix, management_ipv4
+    management_tailscale_ipv4 = _ipv4(
+        identity.get("management_tailscale_ipv4"),
+        "management_tailscale_ipv4",
+    )
+    return domain, prefix, management_tailscale_ipv4
 
 
 def _validate_api_url(value: Any) -> str:
@@ -344,6 +376,27 @@ def _validate_api_url(value: Any) -> str:
     if parsed.scheme == "http" and parsed.hostname not in {"127.0.0.1", "::1", "localhost"}:
         raise BootstrapError("plaintext OpenBao access is permitted only through a loopback endpoint")
     return api_url
+
+
+def _proxmox_jump_port_from_environment() -> int:
+    """Return the explicit management SSH port used by the guest jump path.
+
+    The same ``LV3_PROXMOX_HOST_PORT`` override drives Ansible's managed
+    ``proxmox_host_jump`` transport.  Keeping this bounded bootstrap on that
+    source prevents a break-glass-port migration from silently making the
+    controller-local OpenBao tunnel fall back to port 22.
+    """
+
+    raw_port = os.environ.get("LV3_PROXMOX_HOST_PORT", "").strip()
+    if not raw_port:
+        return 22
+    try:
+        port = int(raw_port)
+    except ValueError:
+        raise BootstrapError("LV3_PROXMOX_HOST_PORT must be a valid TCP port") from None
+    if not 1 <= port <= 65535:
+        raise BootstrapError("LV3_PROXMOX_HOST_PORT must be a valid TCP port")
+    return port
 
 
 def _guest_addresses(payload: dict[str, Any], *, label: str) -> dict[str, str]:
@@ -382,6 +435,7 @@ def _validate_topology_binding(
     registry: dict[str, Any],
     platform_vars: dict[str, Any],
     generation: dict[str, Any],
+    management_tailscale_ipv4: str,
 ) -> tuple[str, str, str, int]:
     selected_topology = _load_yaml_mapping(topology_file, "the explicit topology selector")
     source_label = _string(generation.get("host_vars_source"), "platform_generation.host_vars_source")
@@ -420,7 +474,12 @@ def _validate_topology_binding(
     if tracked_openbao.get("private_ip") != selected_guests.get(expected_owner):
         raise BootstrapError("the generated OpenBao private IP does not match the selected topology")
 
-    controller_ip = _ipv4(selected_topology.get("management_tailscale_ipv4"), "management_tailscale_ipv4")
+    # ``.local/identity.yml`` deliberately overlays the deployment's
+    # management address at generation time.  The committed topology can be a
+    # portable baseline (and therefore retain a placeholder or an older
+    # address), so bind the controller endpoint to the explicit identity
+    # selector rather than that lower-precedence source file.
+    controller_ip = _ipv4(management_tailscale_ipv4, "selected management_tailscale_ipv4")
     port_assignments = _mapping(selected_topology.get("platform_port_assignments"), "platform_port_assignments")
     controller_port = port_assignments.get("openbao_proxy_port")
     if isinstance(controller_port, bool) or not isinstance(controller_port, int) or not 1 <= controller_port <= 65535:
@@ -433,6 +492,11 @@ def _validate_topology_binding(
         raise BootstrapError("the generated OpenBao proxy port does not match the selected topology")
     if tracked_ports.get("openbao_http_port") != automation_port:
         raise BootstrapError("the generated OpenBao automation port does not match the selected topology")
+    tracked_management = _mapping(
+        _mapping(platform_vars.get("platform_host"), "platform_host").get("management"), "platform_host.management"
+    )
+    if _ipv4(tracked_management.get("tailscale_ipv4"), "platform_host.management.tailscale_ipv4") != controller_ip:
+        raise BootstrapError("the generated management address does not match the explicit identity selector")
     expected_api_url = _validate_api_url(f"https://{controller_ip}:{controller_port}")
     generated_api_url = _validate_api_url(platform_vars.get("openbao_controller_url"))
     if generated_api_url != expected_api_url:
@@ -441,12 +505,59 @@ def _validate_topology_binding(
     return generated_api_url, expected_owner, target_host, automation_port
 
 
+def _secret_path(value: Any, label: str) -> str:
+    raw_path = _string(value, label)
+    segments = raw_path.split("/")
+    if len(segments) != 3 or segments[0] != "services":
+        raise BootstrapError(f"{label} must be an exact services/<namespace>/<payload> KV path")
+    return "/".join(_safe_name(segment, f"{label} segment") for segment in segments)
+
+
+def _derive_host_native_contracts(
+    path: Path,
+    *,
+    config_prefix: str,
+    protected_approle_names: set[str],
+) -> list[ServiceContract]:
+    catalog = _load_yaml_mapping(path, "the host-native OpenBao contract catalog")
+    raw_contracts = catalog.get("openbao_host_native_service_contracts")
+    if not isinstance(raw_contracts, list) or not raw_contracts:
+        raise BootstrapError("the host-native OpenBao contract catalog must contain a non-empty contract list")
+
+    contracts: list[ServiceContract] = []
+    for index, raw_contract in enumerate(raw_contracts):
+        contract = _mapping(raw_contract, f"host-native OpenBao contract {index}")
+        registry_key = _safe_name(contract.get("id"), f"host-native OpenBao contract {index}.id")
+        secret_path = _secret_path(
+            contract.get("secret_path"), f"host-native OpenBao contract {registry_key}.secret_path"
+        )
+        policy_suffix = _safe_name(
+            contract.get("policy_suffix"), f"host-native OpenBao contract {registry_key}.policy_suffix"
+        )
+        approle_name = _safe_name(
+            contract.get("approle_name"), f"host-native OpenBao contract {registry_key}.approle_name"
+        )
+        if approle_name in protected_approle_names:
+            raise BootstrapError("a host-native OpenBao contract collides with a protected AppRole")
+        contracts.append(
+            ServiceContract(
+                registry_key=registry_key,
+                secret_namespace=secret_path.split("/")[1],
+                secret_path=secret_path,
+                policy_name=f"{config_prefix}-{policy_suffix}",
+                approle_name=approle_name,
+            )
+        )
+    return contracts
+
+
 def _derive_contracts(
     registry: dict[str, Any],
     *,
     config_prefix: str,
     namespace_overrides: dict[str, Any],
     protected_approle_names: set[str],
+    host_native_contracts_path: Path,
 ) -> tuple[ServiceContract, ...]:
     service_registry = _mapping(registry.get("platform_service_registry"), "platform_service_registry")
     normalized_overrides: dict[str, str] = {}
@@ -481,8 +592,16 @@ def _derive_contracts(
             )
         )
 
+    contracts.extend(
+        _derive_host_native_contracts(
+            host_native_contracts_path,
+            config_prefix=config_prefix,
+            protected_approle_names=protected_approle_names,
+        )
+    )
+
     if not contracts:
-        raise BootstrapError("the service registry contains no OpenBao-enabled Docker Compose services")
+        raise BootstrapError("the OpenBao contract catalog contains no managed services")
     for attribute in ("secret_namespace", "secret_path", "policy_name", "approle_name"):
         values = [getattr(contract, attribute) for contract in contracts]
         if len(values) != len(set(values)):
@@ -503,7 +622,7 @@ def _service_policy(contract: ServiceContract) -> str:
 def _provisioner_policy(contracts: tuple[ServiceContract, ...]) -> str:
     lines = [
         f"# managed-by: script={WORKFLOW_ID} adr=0491",
-        "# Generated from platform_service_registry entries with needs_openbao=true.",
+        "# Generated from registered Compose and host-native OpenBao contracts.",
         "# This identity can write exact runtime payloads and mint credentials only",
         "# for pre-created registered service AppRoles.",
     ]
@@ -550,10 +669,11 @@ def load_configuration(
     registry_path: Path = SERVICE_REGISTRY_PATH,
     defaults_path: Path = OPENBAO_DEFAULTS_PATH,
     platform_vars_path: Path = PLATFORM_VARS_PATH,
+    host_native_contracts_path: Path = HOST_NATIVE_CONTRACTS_PATH,
 ) -> BootstrapConfiguration:
     """Load and fail-closed validate every non-secret input before API access."""
 
-    domain, config_prefix, management_ipv4 = _validate_identity(identity_file)
+    domain, config_prefix, management_tailscale_ipv4 = _validate_identity(identity_file)
     registry = _load_yaml_mapping(registry_path, "the canonical service registry")
     defaults = _load_yaml_mapping(defaults_path, "the OpenBao role defaults")
     platform_vars = _load_yaml_mapping(platform_vars_path, "the generated platform variables")
@@ -566,17 +686,18 @@ def load_configuration(
     ).split(".", 1)[0]
     if generated_prefix != config_prefix:
         raise BootstrapError("the generated platform identity prefix does not match the explicit selector")
-    generated_management_ipv4 = _ipv4(
-        generated_identity.get("management_ipv4"),
-        "platform_generation.identity_overlay.management_ipv4",
+    generated_management_tailscale_ipv4 = _ipv4(
+        generated_identity.get("management_tailscale_ipv4"),
+        "platform_generation.identity_overlay.management_tailscale_ipv4",
     )
-    if generated_management_ipv4 != management_ipv4:
+    if generated_management_tailscale_ipv4 != management_tailscale_ipv4:
         raise BootstrapError("the generated management address does not match the explicit identity selector")
     api_url, target_guest, target_host, automation_port = _validate_topology_binding(
         topology_file,
         registry=registry,
         platform_vars=platform_vars,
         generation=generation,
+        management_tailscale_ipv4=management_tailscale_ipv4,
     )
 
     provisioner_role_name = _safe_name(
@@ -600,6 +721,7 @@ def load_configuration(
         config_prefix=config_prefix,
         namespace_overrides=overrides,
         protected_approle_names=protected,
+        host_native_contracts_path=host_native_contracts_path,
     )
     provisioner_policy_name = f"{config_prefix}-agent-runtime-secret-provisioner"
     policies = {contract.policy_name: _service_policy(contract) for contract in contracts}
@@ -613,7 +735,8 @@ def load_configuration(
         config_prefix=config_prefix,
         api_url=api_url,
         ssh_tunnel=SSHTunnelConfiguration(
-            jump_host=management_ipv4,
+            jump_host=management_tailscale_ipv4,
+            jump_port=_proxmox_jump_port_from_environment(),
             target_guest=target_guest,
             target_host=target_host,
             remote_port=automation_port,
@@ -1109,35 +1232,65 @@ def _build_ssh_tunnel_command(
     ssh_private_key_file: Path,
     *,
     local_port: int,
+    ssh_jump_alias: str | None = None,
 ) -> list[str]:
     if not 1 <= local_port <= 65535:
         raise BootstrapError("the OpenBao SSH tunnel local port is invalid")
     jump_host = _ipv4(configuration.ssh_tunnel.jump_host, "OpenBao SSH jump host")
+    jump_port = configuration.ssh_tunnel.jump_port
     target_host = _ipv4(configuration.ssh_tunnel.target_host, "OpenBao SSH target host")
+    if isinstance(jump_port, bool) or not isinstance(jump_port, int) or not 1 <= jump_port <= 65535:
+        raise BootstrapError("the OpenBao SSH tunnel jump port is invalid")
     remote_port = configuration.ssh_tunnel.remote_port
     if isinstance(remote_port, bool) or not isinstance(remote_port, int) or not 1 <= remote_port <= 65535:
         raise BootstrapError("the OpenBao SSH tunnel remote port is invalid")
     key_path = str(ssh_private_key_file)
-    proxy_command = shlex.join(
-        [
-            SSH_BINARY,
-            "-i",
-            key_path,
-            "-o",
-            "BatchMode=yes",
-            "-o",
-            "ConnectTimeout=10",
-            "-o",
-            "IdentitiesOnly=yes",
-            "-o",
-            "LogLevel=ERROR",
-            "-o",
-            "StrictHostKeyChecking=yes",
-            "-W",
-            "%h:%p",
-            f"{SSH_USER}@{jump_host}",
-        ]
-    )
+    selected_jump_alias = _ssh_host_alias(ssh_jump_alias, "the OpenBao SSH jump alias")
+    if selected_jump_alias is not None:
+        # A local SSH alias is the only safe way to select a managed route
+        # whose Proxmox hop has a distinct management key.  The alias is
+        # constrained to a host-token, and OpenSSH resolves its identity and
+        # host-key policy; the outer connection still uses the explicit guest
+        # bootstrap key and selector-derived target.
+        proxy_command = shlex.join(
+            [
+                SSH_BINARY,
+                "-o",
+                "BatchMode=yes",
+                "-o",
+                "ConnectTimeout=10",
+                "-o",
+                "LogLevel=ERROR",
+                "-o",
+                "StrictHostKeyChecking=yes",
+                "-W",
+                "[%h]:%p",
+                selected_jump_alias,
+            ]
+        )
+    else:
+        proxy_command = shlex.join(
+            [
+                SSH_BINARY,
+                "-i",
+                key_path,
+                "-o",
+                "BatchMode=yes",
+                "-o",
+                "ConnectTimeout=10",
+                "-o",
+                "IdentitiesOnly=yes",
+                "-o",
+                "LogLevel=ERROR",
+                "-o",
+                "StrictHostKeyChecking=yes",
+                "-p",
+                str(jump_port),
+                "-W",
+                "%h:%p",
+                f"{SSH_USER}@{jump_host}",
+            ]
+        )
     return [
         SSH_BINARY,
         "-i",
@@ -1196,10 +1349,17 @@ def _stop_ssh_tunnel(process: subprocess.Popen[bytes]) -> None:
 def _open_ssh_tunnel(
     configuration: BootstrapConfiguration,
     ssh_private_key_file: Path,
+    *,
+    ssh_jump_alias: str | None = None,
 ) -> Iterator[str]:
     key_file = _validate_ssh_private_key(ssh_private_key_file)
     local_port = _reserve_loopback_port()
-    command = _build_ssh_tunnel_command(configuration, key_file, local_port=local_port)
+    command = _build_ssh_tunnel_command(
+        configuration,
+        key_file,
+        local_port=local_port,
+        ssh_jump_alias=ssh_jump_alias,
+    )
     try:
         # The binary is fixed and every host/port argv value is selector-validated; shell is never used.
         process = subprocess.Popen(  # nosec B603
@@ -1386,6 +1546,7 @@ def _receipt_payload(
             "endpoint": configuration.api_url,
             "access_mode": "ssh_loopback_forward",
             "target_guest": configuration.ssh_tunnel.target_guest,
+            "jump_port": configuration.ssh_tunnel.jump_port,
             "automation_listener_port": configuration.ssh_tunnel.remote_port,
             "health_status": health["health_status"],
             "initialized": health["initialized"],
@@ -1601,6 +1762,14 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Mode-0600 private key used for the selector-derived ops SSH jump to the OpenBao automation listener.",
     )
+    parser.add_argument(
+        "--ssh-jump-alias",
+        default=os.environ.get("LV3_OPENBAO_SSH_JUMP_ALIAS", "") or None,
+        help=(
+            "Optional local OpenSSH host alias for the management hop. Use this when the "
+            "Proxmox host requires a distinct management key; the alias is never treated as a shell command."
+        ),
+    )
     return parser
 
 
@@ -1612,7 +1781,11 @@ def main(argv: list[str] | None = None) -> int:
             args.topology_file.expanduser().resolve(),
         )
         output_root, password_file = _validate_controller_paths(args.output_root, args.breakglass_password_file)
-        with _open_ssh_tunnel(configuration, args.ssh_private_key_file) as tunnel_url:
+        with _open_ssh_tunnel(
+            configuration,
+            args.ssh_private_key_file,
+            ssh_jump_alias=_ssh_host_alias(args.ssh_jump_alias, "--ssh-jump-alias"),
+        ) as tunnel_url:
             password = _read_breakglass_password(password_file)
             api = HTTPOpenBaoAPI(tunnel_url)
             result = reconcile(

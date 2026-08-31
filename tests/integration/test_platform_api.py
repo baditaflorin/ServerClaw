@@ -30,7 +30,7 @@ def test_gateway_public_healthz_and_openapi_are_available(integration_config) ->
     assert str(openapi_response.json().get("openapi", "")).startswith("3.")
 
 
-def test_service_catalog_returns_expected_services(keycloak_token: str, integration_config, catalog_services) -> None:
+def test_service_catalog_returns_expected_services(authentik_token: str, integration_config, catalog_services) -> None:
     gateway_url = require_url(
         integration_config.gateway_url,
         "LV3_INTEGRATION_GATEWAY_URL is required for platform API checks",
@@ -38,7 +38,7 @@ def test_service_catalog_returns_expected_services(keycloak_token: str, integrat
     response = http_request(
         "GET",
         f"{gateway_url}/v1/platform/services",
-        headers=auth_header(keycloak_token),
+        headers=auth_header(authentik_token),
         verify=integration_config.verify_tls,
     )
     assert response.status_code == 200, response.text
@@ -49,7 +49,7 @@ def test_service_catalog_returns_expected_services(keycloak_token: str, integrat
     assert returned.intersection(catalog_services)
 
 
-def test_drift_endpoint_returns_structured_report(keycloak_token: str, integration_config) -> None:
+def test_drift_endpoint_returns_structured_report(authentik_token: str, integration_config) -> None:
     gateway_url = require_url(
         integration_config.gateway_url,
         "LV3_INTEGRATION_GATEWAY_URL is required for platform API checks",
@@ -57,7 +57,7 @@ def test_drift_endpoint_returns_structured_report(keycloak_token: str, integrati
     response = http_request(
         "GET",
         f"{gateway_url}/v1/platform/drift",
-        headers=auth_header(keycloak_token),
+        headers=auth_header(authentik_token),
         verify=integration_config.verify_tls,
     )
     assert response.status_code == 200, response.text
@@ -66,7 +66,7 @@ def test_drift_endpoint_returns_structured_report(keycloak_token: str, integrati
     assert payload["overall"] in {"clean", "warn", "critical"}
 
 
-def test_health_endpoint_reports_service_states(keycloak_token: str, integration_config) -> None:
+def test_health_endpoint_reports_service_states(authentik_token: str, integration_config) -> None:
     gateway_url = require_url(
         integration_config.gateway_url,
         "LV3_INTEGRATION_GATEWAY_URL is required for platform API checks",
@@ -74,7 +74,7 @@ def test_health_endpoint_reports_service_states(keycloak_token: str, integration
     response = http_request(
         "GET",
         f"{gateway_url}/v1/platform/health",
-        headers=auth_header(keycloak_token),
+        headers=auth_header(authentik_token),
         verify=integration_config.verify_tls,
     )
     assert response.status_code == 200, response.text
@@ -83,7 +83,7 @@ def test_health_endpoint_reports_service_states(keycloak_token: str, integration
         assert service["status"] in {"healthy", "degraded", "down"}
 
 
-def test_dependency_graph_endpoint_returns_graph_when_available(keycloak_token: str, integration_config) -> None:
+def test_dependency_graph_endpoint_returns_graph_when_available(authentik_token: str, integration_config) -> None:
     gateway_url = require_url(
         integration_config.gateway_url,
         "LV3_INTEGRATION_GATEWAY_URL is required for platform API checks",
@@ -91,7 +91,7 @@ def test_dependency_graph_endpoint_returns_graph_when_available(keycloak_token: 
     response = http_request(
         "GET",
         f"{gateway_url}/v1/platform/dependencies",
-        headers=auth_header(keycloak_token),
+        headers=auth_header(authentik_token),
         verify=integration_config.verify_tls,
     )
     if response.status_code == 404:

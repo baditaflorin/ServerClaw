@@ -69,7 +69,7 @@ windmill_nats_password: >-
     | default('', true)
     | trim
   }}
-windmill_ntfy_base_url: https://ntfy.{{ platform_domain }}
+windmill_ntfy_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('ntfy', 'public') }}"
 windmill_ntfy_token_local_file: "{{ windmill_controller_repo_common_root }}/.local/ntfy/windmill-token.txt"
 windmill_resource_type_workspace: admins
 windmill_ntfy_resource_type_name: ntfy_platform_channel
@@ -109,6 +109,9 @@ windmill_bootstrap_identity_username: superadmin_secret
 windmill_bootstrap_identity_login_type: password
 windmill_private_base_url: "http://{{ windmill_service_topology.private_ip }}:{{ windmill_server_port }}"
 windmill_base_url: "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
+# Keep controller-side verification independently overridable so the public/operator
+# URL rendered into Windmill is never replaced with a transient tunnel endpoint.
+windmill_verification_base_url: "{{ windmill_base_url }}"
 windmill_runtime_api_base_url: "http://127.0.0.1:{{ windmill_server_port }}"
 windmill_worker_network_mode: "{{ windmill_server_network_mode }}"
 windmill_requires_docker_bridge_chains: true
@@ -215,15 +218,15 @@ windmill_worker_repo_mutable_files:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/state/execution-lanes/registry.lock"
     mode: "0666"
 windmill_worker_repo_secret_directories:
-  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/authentik"
     mode: "0700"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/ntfy"
     mode: "0700"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao"
     mode: "0700"
 windmill_worker_repo_secret_files:
-  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak/bootstrap-admin-password.txt"
-    src: "{{ windmill_controller_local_root }}/keycloak/bootstrap-admin-password.txt"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/authentik/bootstrap-token.txt"
+    src: "{{ windmill_controller_local_root }}/authentik/bootstrap-token.txt"
     mode: "0600"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/ntfy/alertmanager-password.txt"
     src: "{{ windmill_controller_local_root }}/ntfy/alertmanager-password.txt"
@@ -396,9 +399,10 @@ windmill_worker_checkout_stale_paths:
 windmill_operator_manager_env:
   LV3_OPERATOR_MANAGER_SURFACE: windmill
   LV3_OPENBAO_URL: http://{{ platform_identity.config_prefix }}-openbao:8201
-  KEYCLOAK_BOOTSTRAP_PASSWORD: >-
+  LV3_AUTHENTIK_URL: "{{ authentik_oidc_base_url }}"
+  LV3_AUTHENTIK_BOOTSTRAP_TOKEN: >-
     {{
-      lookup('ansible.builtin.file', windmill_controller_local_root ~ '/keycloak/bootstrap-admin-password.txt', errors='ignore')
+      lookup('ansible.builtin.file', windmill_controller_local_root ~ '/authentik/bootstrap-token.txt', errors='ignore')
       | default('', true)
       | trim
     }}
@@ -431,7 +435,7 @@ windmill_seed_scripts:
     summary: Validation gate status
     description: Repo-managed Windmill wrapper that returns the latest repository validation gate status as structured JSON.
   - path: f/lv3/windmill_healthcheck
-    local_file: "{{ windmill_seed_script_root_local_dir }}/{{ platform_identity.config_prefix }}-healthcheck.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/lv3-healthcheck.py"
     language: python3
     summary: LV3 Windmill healthcheck
     description: Repo-managed verification script for Windmill runtime and worker execution.
@@ -496,7 +500,7 @@ windmill_seed_scripts:
     summary: LV3 deploy and promote workflow
     description: Repo-managed wrapper for ADR 0073 staging gate evaluation, production promotion, and receipt generation.
   - path: f/lv3/mutation_audit_emit
-    local_file: "{{ windmill_seed_script_root_local_dir }}/{{ platform_identity.config_prefix }}-mutation-audit.py"
+    local_file: "{{ windmill_seed_script_root_local_dir }}/lv3-mutation-audit.py"
     language: python3
     summary: LV3 mutation audit helper
     description: Repo-managed helper that emits a structured mutation audit event from a Windmill job.
@@ -659,7 +663,7 @@ windmill_seed_scripts:
     local_file: "{{ windmill_seed_script_root_local_dir }}/fault-injection.py"
     language: python3
     summary: ADR 0171 controlled fault injection
-    description: Repo-managed Windmill wrapper that runs the bounded Keycloak and OpenBao fault-injection subset on docker-runtime.
+    description: Repo-managed Windmill wrapper that runs the bounded Authentik and OpenBao fault-injection subset on docker-runtime.
   - path: f/lv3/network-impairment-matrix
     local_file: "{{ windmill_seed_script_root_local_dir }}/network-impairment-matrix.py"
     language: python3
@@ -684,7 +688,7 @@ windmill_seed_scripts:
     local_file: "{{ windmill_seed_script_root_local_dir }}/operator-onboard.py"
     language: python3
     summary: ADR 0108 operator onboarding
-    description: Repo-managed wrapper that provisions one human operator across Keycloak, OpenBao, step-ca, Tailscale, and Mattermost.
+    description: Repo-managed wrapper that provisions one human operator across Authentik, OpenBao, step-ca, Tailscale, and Mattermost.
   - path: f/lv3/operator_offboard
     local_file: "{{ windmill_seed_script_root_local_dir }}/operator-offboard.py"
     language: python3
@@ -805,11 +809,16 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0155 queued intent dispatcher
     description: Repo-managed ADR 0155 worker that replays queued intents once their blocking workflow or resource claims are released.
-  - path: f/lv3/keycloak_account_expiry_reaper
-    local_file: "{{ inventory_dir }}/../config/windmill/scripts/keycloak-account-expiry-reaper.py"
+  - path: f/lv3/authentik_account_expiry_reaper
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/authentik-account-expiry-reaper.py"
     language: python3
-    summary: ADR 0412 Keycloak account expiry reaper
-    description: Repo-managed worker that scans Keycloak users with an account_expires_at attribute and disables those whose expiry timestamp has passed. Runs daily at 02:00 UTC.
+    summary: ADR 0412 Authentik account expiry reaper
+    description: Repo-managed worker that scans Authentik users with an account_expires_at attribute and disables those whose expiry timestamp has passed. Runs daily at 02:00 UTC.
+windmill_retire_keycloak_seed_assets: true
+windmill_retired_seed_script_paths:
+  - f/lv3/keycloak_account_expiry_reaper
+windmill_retired_seed_schedule_paths:
+  - f/lv3/keycloak_account_expiry_reaper_daily
 windmill_seed_schedules:
   - path: f/lv3/scheduler_watchdog_loop_every_10s
     schedule: "*/10 * * * * *"
@@ -942,15 +951,6 @@ windmill_seed_schedules:
     summary: ADR 0304 daily Atlas schema drift detection
     description: Repo-managed daily schema snapshot drift check that compares the committed Atlas HCL baselines against live PostgreSQL state and stores one receipt per drifted database.
     no_flow_overlap: true
-  - path: f/lv3/topology_drift_check_hourly
-    schedule: "0 30 * * * *"
-    timezone: Europe/Bucharest
-    script_path: f/lv3/topology_drift_check
-    args: {}
-    enabled: true
-    summary: ADR 0443 hourly runtime topology reconcile
-    description: Repo-managed hourly probe + diff that catches services running on the wrong VM, ports listening that the registry does not claim, and missing services after a half-failed converge.
-    no_flow_overlap: true
   - path: f/lv3/ephemeral_vm_reaper_every_30m
     schedule: "0 */30 * * * *"
     timezone: Europe/Bucharest
@@ -982,7 +982,7 @@ windmill_seed_schedules:
     timezone: UTC
     script_path: f/lv3/fault-injection
     args:
-      scenario_names: fault:keycloak-unavailable,fault:openbao-unavailable
+      scenario_names: fault:authentik-unavailable,fault:openbao-unavailable
       schedule_guard: first_sunday
     enabled: true
     summary: ADR 0171 first-Sunday guarded fault injection
@@ -1169,15 +1169,15 @@ windmill_seed_schedules:
     summary: Disabled ADR 0121 nightly search-index rebuild placeholder
     description: Repo-managed nightly search-index rebuild definition; enable it after the search fabric is applied live from main.
     no_flow_overlap: true
-  - path: f/lv3/keycloak_account_expiry_reaper_daily
+  - path: f/lv3/authentik_account_expiry_reaper_daily
     schedule: "0 0 2 * * *"
     timezone: UTC
-    script_path: f/lv3/keycloak_account_expiry_reaper
+    script_path: f/lv3/authentik_account_expiry_reaper
     args:
       dry_run: false
     enabled: true
-    summary: ADR 0412 daily Keycloak account expiry reaper
-    description: Repo-managed daily sweep at 02:00 UTC that disables Keycloak users whose account_expires_at attribute has passed. Implements the expiry side of ADR 0411 temporary account provisioning.
+    summary: ADR 0412 daily Authentik account expiry reaper
+    description: Repo-managed daily sweep at 02:00 UTC that disables Authentik users whose account_expires_at attribute has passed. Implements the expiry side of ADR 0411 temporary account provisioning.
     no_flow_overlap: true
 windmill_seed_raw_apps:
   - path: f/lv3/operator_access_admin

@@ -157,14 +157,14 @@ def render_service_dependency_graph(dependency_graph: dict[str, Any]) -> dict[st
         "excalidraw": (400, 220),
         "docker_runtime": (80, 60),
         "nginx_edge": (720, 60),
-        "keycloak": (80, 420),
+        "authentik": (80, 420),
         "homepage": (720, 420),
     }
     colors = {
         "excalidraw": "#ddd6fe",
         "docker_runtime": "#e0f2fe",
         "nginx_edge": "#fef3c7",
-        "keycloak": "#fee2e2",
+        "authentik": "#fee2e2",
         "homepage": "#dcfce7",
     }
     elements: list[dict[str, Any]] = []

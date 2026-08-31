@@ -17,7 +17,7 @@
 #              The wrapper only imports the canonical playbook and adds no extra mutation.
 #
 # Dependencies:
-#   - ADR 0491: Authentik replaces Keycloak as the shared identity plane.
+#   - ADR 0491: Authentik is the shared identity plane.
 #   - Requires: playbooks/authentik.yml
 #
 # Related ADRs: 0077, 0078, 0491

@@ -492,7 +492,7 @@
     {
       "vmid": 121,
       "name": "runtime-comms",
-      "status": "planned",
+      "status": "active",
       "environment": "production",
       "metrics_host": "runtime-comms",
       "allocated": {
@@ -508,12 +508,12 @@
       "disk_paths": [
         "/"
       ],
-      "notes": "Reserved planned capacity for ADR 0347 docker-runtime workload split."
+      "notes": "Activated for the ADR 0347 docker-runtime workload split; allocation reconciled with the governed runtime-pool rebalance."
     },
     {
       "vmid": 122,
       "name": "runtime-apps",
-      "status": "planned",
+      "status": "active",
       "environment": "production",
       "metrics_host": "runtime-apps",
       "allocated": {
@@ -529,7 +529,7 @@
       "disk_paths": [
         "/"
       ],
-      "notes": "Reserved planned capacity for ADR 0347 docker-runtime workload split."
+      "notes": "Activated for the ADR 0347 docker-runtime workload split; allocation reconciled with the governed runtime-pool rebalance."
     }
   ],
   "runtime_pool_memory": {
@@ -595,7 +595,7 @@
   ],
   "service_load_profiles": [
     {
-      "service_id": "keycloak",
+      "service_id": "authentik",
       "typical_concurrency": 5,
       "smoke_vus": 2,
       "request_timeout_seconds": 10,

@@ -161,10 +161,10 @@ def build_runbook_plan(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                     "command": "curl -skf https://grafana.localhost/api/health",
                 },
                 {
-                    "id": "verify_keycloak",
+                    "id": "verify_authentik",
                     "kind": "verify",
-                    "summary": "Verify Keycloak readiness through the public edge.",
-                    "command": "curl -skf https://sso.localhost/health/ready",
+                    "summary": "Verify Authentik readiness through the public edge.",
+                    "command": "curl -skf https://id.localhost/-/health/ready/",
                 },
             ],
         },

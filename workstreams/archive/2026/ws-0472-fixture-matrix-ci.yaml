@@ -1,0 +1,52 @@
+id: ws-0472-fixture-matrix-ci
+adr: "0470"
+title: "Per-deployment fixture inventory + matrix CI"
+status: merged
+ready_to_merge: true
+live_applied: false
+owner: platform-infrastructure
+branch: claude/crazy-chaplygin-c7c256
+worktree_path: .claude/worktrees/crazy-chaplygin-c7c256
+doc: docs/adr/0470-deployment-fixture-matrix.md
+depends_on:
+  - adr-0440-per-deployment-identity
+  - adr-0457-host-pinning
+  - adr-0469-connection-yml-vault-key-pull
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/archive/2026/ws-0472-fixture-matrix-ci.yaml
+ownership_manifest:
+  owned_surfaces:
+  - id: ws_0472_adr
+    paths:
+      - docs/adr/0470-deployment-fixture-matrix.md
+    mode: exclusive
+  - id: ws_0472_fixtures
+    paths:
+      - tests/fixtures/deployments/**
+    mode: exclusive
+  - id: ws_0472_tests
+    paths:
+      - tests/test_ws0472_deployment_fixture_matrix.py
+    mode: exclusive
+  - id: ws_0472_release_artifacts
+    paths:
+      - VERSION
+      - changelog.md
+      - docs/release-notes/**
+    mode: shared_contract
+    contract: release-bump-v1
+  - id: ws_0472_workstream
+    paths:
+      - workstreams/archive/2026/ws-0472-fixture-matrix-ci.yaml
+    mode: exclusive
+notes: |
+  Three synthetic deployments (minimal / multi-host / host-pinned) under
+  tests/fixtures/deployments/<slug>/. Parametrised matrix asserts every
+  contract validates against its schema for every fixture, plus
+  cross-file invariants (CIDR membership, vmid uniqueness). 28 new tests.
+
+  The workstream was merged before ADR 0488 superseded the multi-deployment
+  model and removed its fixtures and test. It is archived as historical
+  implementation evidence and no longer claims an active mutable surface.

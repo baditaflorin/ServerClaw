@@ -140,4 +140,4 @@ Both digests should match after a clean publication replay.
 
 This workstream implements the generated site, the governed history query tool, and edge publication wiring for `changelog.example.com`.
 
-`changelog.example.com` is live on platform version `0.40.0`; from platform version `0.114.7` onward it is also protected by the shared Keycloak portal auth gate defined in ADR 0133.
+`changelog.example.com` is live on platform version `0.40.0`; it is protected by the shared Authentik portal auth gate defined by the current identity-provider contract.

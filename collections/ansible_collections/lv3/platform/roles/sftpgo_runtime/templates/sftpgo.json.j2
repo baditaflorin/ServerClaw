@@ -35,15 +35,15 @@
         "enable_web_client": false,
         "enable_rest_api": true,
         "oidc": {
-          "client_id": "{{ sftpgo_keycloak_client_id }}",
-          "config_url": "{{ sftpgo_keycloak_config_url }}",
+          "client_id": "{{ sftpgo_authentik_client_id }}",
+          "config_url": "{{ sftpgo_authentik_config_url }}",
           "redirect_base_url": "{{ sftpgo_controller_url }}",
           "scopes": [
             "openid",
             "profile",
             "email"
           ],
-          "username_field": "{{ sftpgo_keycloak_username_field }}",
+          "username_field": "{{ sftpgo_authentik_username_field }}",
           "implicit_roles": true
         }
       }

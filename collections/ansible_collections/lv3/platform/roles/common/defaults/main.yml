@@ -55,6 +55,7 @@ common_openbao_systemd_credentials_agent_template_file: ""
 common_openbao_systemd_credentials_agent_template_local_file: ""
 common_openbao_systemd_credentials_agent_template_src: ""
 common_openbao_systemd_credentials_agent_template_content: ""
+common_openbao_systemd_credentials_expected_credential_content: ""
 common_openbao_systemd_credentials_role_id_file: ""
 common_openbao_systemd_credentials_secret_id_file: ""
 common_openbao_systemd_credentials_image: ""
@@ -63,6 +64,22 @@ common_openbao_systemd_credentials_agent_service_name: ""
 common_openbao_systemd_credentials_container_name: ""
 common_openbao_systemd_credentials_openbao_address: ""
 common_openbao_systemd_credentials_manage_local_openbao_runtime: true
+common_openbao_systemd_credentials_use_runtime_provisioner: false
+common_openbao_systemd_credentials_provisioner_credential_file: >-
+  {{
+    openbao_runtime_secret_provisioner_approle_local_file
+    | default(
+        (repo_shared_local_root | default('.local'))
+        ~ '/openbao/runtime-secret-provisioner-approle.json',
+        true
+      )
+  }}
+common_openbao_systemd_credentials_provisioner_approle_name: runtime-secret-provisioner
+common_openbao_systemd_credentials_provisioner_policy_name: >-
+  {{ platform_identity.config_prefix }}-agent-runtime-secret-provisioner
+common_openbao_systemd_credentials_protected_approle_names:
+  - controller-automation
+  - runtime-secret-provisioner
 common_openbao_compose_env_openbao_address: ""
 # Compatibility-only switch retained for existing callers.  The compose helper
 # rejects true and never restarts or unseals the shared OpenBao runtime.

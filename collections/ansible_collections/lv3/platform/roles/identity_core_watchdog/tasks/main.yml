@@ -1,6 +1,6 @@
 ---
 # Purpose: Install the identity-core health watchdog on runtime-control (ADR 0376).
-# Use case: Probes Keycloak, Step-CA, OpenBao, and API Gateway every 15 seconds.
+# Use case: Probes Authentik, Step-CA, OpenBao, and API Gateway every 15 seconds.
 #   Auto-restarts services on consecutive health failures with rate limiting and ntfy alerts.
 # Inputs:
 #   - identity_watchdog_* variables from defaults/main.yml

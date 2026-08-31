@@ -35,10 +35,7 @@ def test_defaults_define_public_oidc_and_local_artifacts() -> None:
         == "{{ outline_authentik_service_topology.public_hostname }}"
     )
     assert defaults["outline_public_hostname_overrides"][1]["address"] == "{{ outline_public_edge_private_ip }}"
-    assert (
-        defaults["outline_public_hostname_overrides"][2]["hostname"]
-        == "{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}"
-    )
+    assert len(defaults["outline_public_hostname_overrides"]) == 2
     assert defaults["outline_internal_base_url"] == "http://127.0.0.1:{{ outline_internal_port }}"
     assert (
         defaults["outline_database_host"]
@@ -50,21 +47,12 @@ def test_defaults_define_public_oidc_and_local_artifacts() -> None:
     )
     assert defaults["outline_oidc_issuer"].endswith("/application/o/outline/")
     assert defaults["outline_oidc_discovery_url"] == ("{{ outline_oidc_issuer }}.well-known/openid-configuration")
-    assert defaults["outline_oidc_logout_uri"].endswith("/application/o/outline/end-session/")
+    assert defaults["outline_oidc_logout_uri"].startswith(
+        "https://{{ outline_authentik_service_topology.public_hostname }}/application/o/outline/end-session/"
+    )
+    assert "post_logout_redirect_uri=" in defaults["outline_oidc_logout_uri"]
     assert defaults["outline_oidc_scopes"] == "openid profile email"
-    assert defaults["outline_keycloak_rollback_client_secret_local_file"] == (
-        "{{ repo_shared_local_root }}/keycloak/outline-client-secret.txt"
-    )
-    assert defaults["outline_keycloak_rollback_logout_uri"] == (
-        "{{ outline_session_authority.keycloak_logout_url }}"
-        "?client_id={{ outline_keycloak_rollback_client_id }}"
-        "&post_logout_redirect_uri={{ outline_session_authority.shared_proxy_cleanup_url | urlencode }}"
-    )
-    assert defaults["outline_bootstrap_username"] == "outline.automation"
     assert defaults["outline_api_token_local_file"] == "{{ outline_local_artifact_dir }}/api-token.txt"
-    assert defaults["outline_operator_password_local_file"] == (
-        "{{ repo_shared_local_root }}/keycloak/outline.automation-password.txt"
-    )
     assert defaults["outline_legacy_secret_dir"] == "/etc/{{ platform_config_prefix }}/outline"
     assert defaults["outline_legacy_secret_key_remote_file"] == "{{ outline_legacy_secret_dir }}/secret-key.txt"
     assert defaults["outline_legacy_utils_secret_remote_file"] == "{{ outline_legacy_secret_dir }}/utils-secret.txt"
@@ -83,18 +71,17 @@ def test_runtime_role_only_requires_runtime_secrets_before_edge_publish() -> Non
     verify_import = next(task for task in tasks if task.get("name") == "Verify the Outline runtime")
     task_names = {task["name"] for task in tasks}
 
-    assert "outline_operator_password_local_file | length > 0" not in validate_task["ansible.builtin.assert"]["that"]
     assert "outline_oidc_provider == 'authentik'" in validate_task["ansible.builtin.assert"]["that"]
     prerequisite_files = prerequisite_task["vars"]["common_check_local_secrets_files"]
-    assert {entry["path"] for entry in prerequisite_files} >= {
+    assert {entry["path"] for entry in prerequisite_files} == {
         "{{ outline_oidc_client_secret_local_file }}",
-        "{{ outline_keycloak_rollback_client_secret_local_file }}",
+        "{{ outline_database_password_local_file }}",
     }
     assert package_task["ansible.builtin.apt"]["name"] == ["openssl"]
     assert (
         "replace('/', '%2F')" in secret_fact["ansible.builtin.set_fact"]["outline_runtime_secret_payload"]["REDIS_URL"]
     )
-    assert "Check whether the Outline operator password exists on the control machine" not in task_names
+    assert "Require a durable Outline API token before publication" not in task_names
     assert verify_import["ansible.builtin.import_tasks"] == "verify.yml"
 
 
@@ -230,10 +217,12 @@ def test_runtime_role_recovers_docker_nat_chain_before_outline_startup() -> None
     assert "outline_pull.changed" in force_recreate_expression
 
 
-def test_publish_tasks_wait_for_public_health_then_bootstrap_sync_and_verify() -> None:
+def test_publish_tasks_require_durable_authority_then_sync_and_verify() -> None:
     tasks = load_yaml(PUBLISH_PATH)
     health_task = next(task for task in tasks if task.get("name") == "Wait for the Outline public health endpoint")
-    bootstrap_task = next(task for task in tasks if task.get("name") == "Bootstrap the Outline API token when needed")
+    durable_authority_task = next(
+        task for task in tasks if task.get("name") == "Require a durable Outline API token before publication"
+    )
     sync_task = next(task for task in tasks if task.get("name") == "Sync the Outline landing and index documents")
     verify_task = next(
         task for task in tasks if task.get("name") == "Verify the Outline public living knowledge surface"
@@ -256,24 +245,7 @@ def test_publish_tasks_wait_for_public_health_then_bootstrap_sync_and_verify() -
     assert redirect_task["ansible.builtin.uri"]["follow_redirects"] == "none"
     assert "outline_api_token_local.stat.mode == '0600'" in token_mode_task["ansible.builtin.assert"]["that"]
     assert token_mode_task["when"] == "outline_api_token_preexisting"
-    assert bootstrap_task["when"] == "not outline_api_token_preexisting"
-    assert bootstrap_task["ansible.builtin.command"]["argv"] == [
-        "python3",
-        "{{ inventory_dir }}/../scripts/sync_docs_to_outline.py",
-        "bootstrap-token",
-        "--base-url",
-        "{{ outline_public_base_url }}",
-        "--username",
-        "{{ outline_bootstrap_username }}",
-        "--password-file",
-        "{{ outline_operator_password_local_file }}",
-        "--token-name",
-        "{{ outline_api_token_name }}",
-        "--token-file",
-        "{{ outline_api_token_local_file }}",
-        "--scope",
-        "{{ outline_api_token_scopes | join(',') }}",
-    ]
+    assert durable_authority_task["ansible.builtin.assert"]["that"] == ["outline_api_token_preexisting"]
     assert sync_task["ansible.builtin.command"]["argv"][2:] == [
         "sync",
         "--repo-root",

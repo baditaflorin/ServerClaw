@@ -8,6 +8,7 @@ ROLE_ROOT = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platfor
 MEMBER_DEFAULTS = ROLE_ROOT / "nomad_cluster_member" / "defaults" / "main.yml"
 MEMBER_TASKS = ROLE_ROOT / "nomad_cluster_member" / "tasks" / "main.yml"
 BOOTSTRAP_DEFAULTS = ROLE_ROOT / "nomad_cluster_bootstrap" / "defaults" / "main.yml"
+BOOTSTRAP_TASKS = ROLE_ROOT / "nomad_cluster_bootstrap" / "tasks" / "main.yml"
 BOOTSTRAP_CONTROLLER_TASKS = ROLE_ROOT / "nomad_cluster_bootstrap" / "tasks" / "controller_artifacts.yml"
 BOOTSTRAP_VERIFY_TASKS = ROLE_ROOT / "nomad_cluster_bootstrap" / "tasks" / "verify.yml"
 MEMBER_TEMPLATE = ROLE_ROOT / "nomad_cluster_member" / "templates" / "nomad.hcl.j2"
@@ -93,6 +94,19 @@ def test_nomad_bootstrap_controller_tasks_generate_ca_server_and_client_material
     assert "Render the Nomad client OpenSSL profile" in names
     assert "Generate the Nomad server TLS certificate when missing" in names
     assert "Generate the Nomad client TLS certificate when missing" in names
+
+
+def test_nomad_bootstrap_validates_tokens_before_selecting_a_mirror_source() -> None:
+    tasks = load_tasks(BOOTSTRAP_TASKS)
+    names = {task["name"] for task in tasks}
+    assert "Validate the live Nomad bootstrap management token" in names
+    assert "Validate the controller-local Nomad bootstrap management token" in names
+    assert "Record the valid Nomad bootstrap management token source" in names
+    assert "Restore the controller-local Nomad bootstrap token from the validated live server" in names
+
+    bootstrap_task = next(task for task in tasks if task["name"] == "Bootstrap the Nomad ACL management token")
+    assert "nomad_cluster_bootstrap_remote_token_valid" in "\n".join(bootstrap_task["when"])
+    assert "nomad_cluster_bootstrap_local_token_valid" in "\n".join(bootstrap_task["when"])
 
 
 def test_nomad_bootstrap_verify_checks_service_and_batch_paths() -> None:

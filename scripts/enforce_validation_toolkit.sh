@@ -4,15 +4,38 @@
 
 set -e
 
-REPO_ROOT=$(git rev-parse --show-toplevel)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if command -v git >/dev/null 2>&1 && git -C "$SCRIPT_DIR/.." rev-parse --show-toplevel >/dev/null 2>&1; then
+  REPO_ROOT="$(git -C "$SCRIPT_DIR/.." rev-parse --show-toplevel)"
+else
+  # Immutable remote-validation snapshots intentionally omit .git. The script
+  # path remains a trustworthy repository anchor for content-only checks.
+  REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+fi
 MODE="${1:-}"
+
+git_metadata_available() {
+  command -v git >/dev/null 2>&1 && git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1
+}
 
 case "$MODE" in
   "")
-    FILES=$(git -C "$REPO_ROOT" diff --cached --name-only --diff-filter=ACM -- 'scripts/*.py' 'scripts/**/*.py' || true)
+    if git_metadata_available; then
+      FILES=$(git -C "$REPO_ROOT" diff --cached --name-only --diff-filter=ACM -- 'scripts/*.py' 'scripts/**/*.py' || true)
+    else
+      # The default mode is intentionally a no-op without Git metadata: it
+      # checks staged files, and snapshots have no staging area.
+      FILES=""
+    fi
     ;;
   --all-files)
-    FILES=$(git -C "$REPO_ROOT" ls-files -- 'scripts/*.py' 'scripts/**/*.py' || true)
+    if git_metadata_available; then
+      FILES=$(git -C "$REPO_ROOT" ls-files -- 'scripts/*.py' 'scripts/**/*.py' || true)
+    else
+      FILES=$(find "$REPO_ROOT/scripts" -type f -name '*.py' ! -path '*/__pycache__/*' -print \
+        | LC_ALL=C sort \
+        | sed "s#^$REPO_ROOT/##")
+    fi
     ;;
   *)
     echo "Usage: scripts/enforce_validation_toolkit.sh [--all-files]" >&2

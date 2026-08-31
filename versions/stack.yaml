@@ -1,11 +1,11 @@
 schema_version: 1.0.0
-repo_version: 0.179.45
+repo_version: 0.179.46
 platform_version: 0.178.222
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    coolify_runtime: 2026-04-28-coolify-0fork-runtime-live-apply
+    coolify_runtime: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply
     fork_services: 2026-04-27-ws-0372-0fork-services-all-7-deployed
     platform: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
     monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
@@ -15,10 +15,6 @@ live_apply_evidence:
     world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
-    public_edge_publication: 2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply
-    headscale: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
-    vikunja: 2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply
-    semaphore: 2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     identity_core_watchdog: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
     api_gateway: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
@@ -70,7 +66,6 @@ live_apply_evidence:
     neko: 2026-04-12-adr-0380-neko-exact-main-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
-    keycloak: 2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply
     n8n: 2026-03-29-adr-0259-n8n-serverclaw-connector-fabric-mainline-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     openfga: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
@@ -102,7 +97,6 @@ live_apply_evidence:
     dify: 2026-03-28-adr-0197-dify-mainline-live-apply
     shared_policy_packs: 2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply
     openbao_operator_entity: 2026-03-28-adr-0206-ports-and-adapters-live-apply
-    keycloak_operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     operator_access_review: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     operator_access_ports: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     openbao_operator_policy: 2026-03-28-adr-0206-ports-and-adapters-live-apply
@@ -163,7 +157,6 @@ live_apply_evidence:
     postgres_audit: 2026-03-31-adr-0303-pgaudit-mainline-live-apply
     typesense: 2026-03-31-adr-0277-typesense-mainline-live-apply
     superset: 2026-04-01-adr-0292-superset-mainline-live-apply
-    keycloak_direct_api: 2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply
     journey_analytics: 2026-04-02-adr-0316-journey-analytics-mainline-live-apply
     glitchtip: 2026-04-03-adr-0281-glitchtip-mainline-live-apply
     command_palette: 2026-04-02-adr-0311-global-command-palette-mainline-live-apply
@@ -181,7 +174,6 @@ live_apply_evidence:
     runbook_task_reentry: 2026-04-04-adr-0314-resumable-multi-step-flows-and-return-to-task-reentry-mainline-live-apply
     public_github_readiness: 2026-04-04-adr-0330-public-github-readiness-mainline-live-apply
     one_api: 2026-04-01-adr-0294-one-api-mainline-live-apply
-    open_webui: 2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply
     platform_context: 2026-04-01-adr-0294-one-api-mainline-live-apply
     jupyterhub: 2026-04-04-ws-0335-service-recovery-followup-live-apply
     service_definition_catalog_assembly: 2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply
@@ -192,6 +184,10 @@ live_apply_evidence:
     repowise: 2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply
     repo_intake: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
     platform_ops: 2026-04-21-adr-0391-cpu-only-operational-automation-live-apply
+    public_edge_publication: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
+    authentik: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
+    semaphore: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
+    identity_provider: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
@@ -349,33 +345,32 @@ desired_state:
         class: human_operator
         principal: florin.badita
         owner: Platform Operator
-        purpose: Routine named operator login for the shared Keycloak broker and the first SSO-backed control-plane apps.
-        scope_boundary: Keycloak realm `lv3` and downstream OIDC-integrated internal control-plane apps only; not used for Linux login, Proxmox API automation, or break-glass recovery.
+        purpose: Routine named operator login for the shared Authentik broker and the first SSO-backed control-plane apps.
+        scope_boundary: Authentik provider applications and downstream OIDC-integrated internal control-plane apps only; not used for Linux login, Proxmox API automation, or break-glass recovery.
         rotation_or_expiry: Rotate the bootstrap password after initial TOTP enrollment, on personnel change, or on compromise.
-        credential_storage: Controller-local bootstrap password under .local/keycloak until the first interactive login completes and the operator rotates it.
+        credential_storage: Controller-local Authentik operator credential and MFA recovery material under .local/authentik; never committed to git.
         shared_credential_material: false
         surfaces:
-          - keycloak_operator_login
           - grafana_sso
       - id: lv3-agent-hub
         class: agent
         principal: lv3-agent-hub
         owner: Repository automation
-        purpose: Confidential client-credentials identity for approved LV3 agent workflows against the shared Keycloak broker.
-        scope_boundary: Keycloak token issuance for the `lv3` realm only; not used for interactive login or unrelated services.
+        purpose: Confidential client-credentials identity for approved LV3 agent workflows against the shared Authentik broker.
+        scope_boundary: Authentik token issuance for the agent-hub provider only; not used for interactive login or unrelated services.
         rotation_or_expiry: Rotate the client secret on compromise, workflow ownership change, or broker reconfiguration.
-        credential_storage: Controller-local client secret under .local/keycloak with a mirrored runtime value on docker-runtime.
+        credential_storage: Controller-local Authentik client secret under .local/authentik with a mirrored runtime value on the consuming service.
         shared_credential_material: false
         surfaces:
-          - keycloak_client_credentials
+          - authentik_client_credentials
       - id: grafana-oauth
         class: service
         principal: grafana-oauth
         owner: Monitoring stack
-        purpose: OIDC client identity that lets Grafana delegate user authentication to Keycloak.
-        scope_boundary: Grafana login against the Keycloak `lv3` realm only; not used for Grafana admin API automation or any other application.
+        purpose: OIDC client identity that lets Grafana delegate user authentication to Authentik.
+        scope_boundary: Grafana login against the Authentik grafana provider only; not used for Grafana admin API automation or any other application.
         rotation_or_expiry: Rotate the client secret on compromise, Grafana reconfiguration, or broker client-policy changes.
-        credential_storage: Controller-local client secret under .local/keycloak with a mirrored value in Grafana's managed config on monitoring.
+        credential_storage: Controller-local Authentik Grafana client secret under .local/authentik with a mirrored runtime value on monitoring.
         shared_credential_material: false
         surfaces:
           - grafana_oauth
@@ -438,17 +433,17 @@ desired_state:
         shared_credential_material: true
         surfaces:
           - proxmox_host_linux_break_glass
-      - id: keycloak-bootstrap-admin
+      - id: authentik-bootstrap-admin
         class: break_glass
         principal: lv3-bootstrap-admin
         owner: Platform Operator
-        purpose: Emergency master-realm and realm-administration recovery for Keycloak when named operator login is unavailable.
-        scope_boundary: Keycloak recovery and bootstrap administration only; not used for routine operator sessions or non-human automation.
+        purpose: Emergency Authentik bootstrap administration and recovery when named operator login is unavailable.
+        scope_boundary: Authentik bootstrap administration only; not used for routine operator sessions or non-human automation.
         rotation_or_expiry: Rotate the bootstrap admin password after any break-glass use, compromise, or major broker recovery event.
-        credential_storage: Controller-local break-glass password under .local/keycloak; not committed to git.
+        credential_storage: Controller-local Authentik bootstrap password under .local/authentik; not committed to git.
         shared_credential_material: false
         surfaces:
-          - keycloak_master_admin
+          - authentik_bootstrap_admin
   security:
     management_sources:
       - 100.64.0.0/10
@@ -467,7 +462,7 @@ desired_state:
       - docker.example.com
       - build.example.com
       - uptime.example.com
-      - sso.example.com
+      - id.example.com
       - database.example.com
     publish_aaaa_initially: false
   mail:
@@ -520,7 +515,7 @@ desired_state:
       - nginx.example.com
       - ops.example.com
       - proxmox.example.com
-      - sso.example.com
+      - id.example.com
       - status.example.com
       - uptime.example.com
       - wiki.example.com
@@ -657,7 +652,7 @@ observed_state:
       - docker.example.com
       - build.example.com
       - uptime.example.com
-      - sso.example.com
+      - id.example.com
       - database.example.com
       - vault.example.com
   guests:
@@ -749,7 +744,6 @@ observed_state:
     grafana_internal_url: http://10.10.10.40:3000
     grafana_public_url: https://grafana.example.com
     grafana_sso_enabled: true
-    grafana_keycloak_redirect_verified: true
     loki_internal_url: http://10.10.10.40:3100
     prometheus_internal_url: http://10.10.10.40:9090
     tempo_internal_url: http://10.10.10.40:3200
@@ -930,12 +924,11 @@ observed_state:
       - agents/controller/proxmox-api-primary
       - agents/controller/monitoring
       - services/mail-platform/runtime
-  keycloak:
-    runtime_vm: 10.10.10.20
-    postgres_backend_vm: 10.10.10.50
-    public_url: https://sso.example.com
-    internal_http_url: http://10.10.10.20:8091
-    realm: lv3
+  authentik:
+    runtime_vm: 10.10.10.92
+    internal_http_url: http://10.10.10.92:9010
+    public_url: https://id.example.com
+    readiness_url: https://id.example.com/-/health/ready/
     container_running: true
     public_discovery_verified: true
     public_dns_verified_via_authoritative_resolver: true
@@ -973,7 +966,6 @@ observed_state:
     local_http_url: http://10.10.10.20:3001
     container_running: true
     public_health_verified: true
-    keycloak_oidc_verified: true
     automation_token_verified: true
     managed_collections:
       - ADRs
@@ -1074,7 +1066,6 @@ observed_state:
     edge_published: true
     local_auth_bootstrapped: true
     seeded_monitors: 7
-    keycloak_discovery_monitor_verified: true
   public_publication:
     edge_configured: true
     edge_tls_certificate_present: true
@@ -1086,7 +1077,7 @@ observed_state:
     grafana_domain_live: true
     mail_domain_live: true
     ops_domain_live: true
-    sso_domain_live: true
+    id_domain_live: true
     status_domain_live: true
     uptime_domain_live: true
     wiki_domain_live: true
@@ -1106,7 +1097,7 @@ observed_state:
       - nginx.example.com
       - ops.example.com
       - proxmox.example.com
-      - sso.example.com
+      - id.example.com
       - status.example.com
       - uptime.example.com
       - wiki.example.com
@@ -1189,7 +1180,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.179.45
+    current: 0.179.46
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.178.222

@@ -154,7 +154,7 @@
           "operator-offboard",
           "operator-onboard",
           "rotate-grafana-service-token",
-          "rotate-keycloak-client-secret",
+          "rotate-authentik-client-secret",
           "rotate-platform-cli-token",
           "rotate-secret",
           "rotate-windmill-token",

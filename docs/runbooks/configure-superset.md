@@ -3,7 +3,7 @@
 Superset is the repo-managed SQL-first business intelligence surface published
 at `https://bi.example.com`. The runtime lives on `docker-runtime`, stores its
 metadata in the `superset` schema of the shared `postgres` database on
-`postgres`, and delegates routine browser sign-in to Keycloak.
+`postgres`, and delegates routine browser sign-in to Authentik.
 
 ## Repo Surfaces
 
@@ -27,7 +27,7 @@ metadata in the `superset` schema of the shared `postgres` database on
 - Local Superset database auth remains available for the repo-managed
   break-glass admin account so public API verification can prove the seeded
   datasource inventory and dashboard contract after deploy. Routine browser
-  access is expected to use the Keycloak OIDC path.
+  access is expected to use the Authentik OIDC path.
 
 ## Controller-Local Artifacts
 
@@ -39,7 +39,7 @@ The converge path creates and reuses these controller-local files:
 - `.local/superset/admin-password.txt`
 - `.local/superset/postgres-databases.json`
 - `.local/superset/verify-public-report.json`
-- `.local/keycloak/superset-client-secret.txt`
+- `.local/authentik/superset-client-secret.txt`
 
 ## Converge
 
@@ -68,7 +68,7 @@ make converge-superset env=production
 - `HETZNER_DNS_API_TOKEN` in the environment so the playbook can publish
   `bi.example.com`
 - functional reachability from `docker-runtime` to `postgres` and the
-  shared Keycloak realm
+  shared Authentik provider
 
 The playbook performs these steps:
 
@@ -76,7 +76,7 @@ The playbook performs these steps:
 2. Creates or reconciles the `superset` metadata schema, the `superset`
    metadata role, and the `superset_reader` datasource role on `postgres`.
 3. Mirrors the generated database credentials and datasource catalog to the
-   controller, then creates the Superset runtime secrets and Keycloak client
+   controller, then creates the Superset runtime secrets and Authentik client
    secret mirror on `docker-runtime`.
 4. Builds the pinned Superset image, starts the runtime with OpenBao-injected
    env, runs the Superset metadata migrations, and reconciles the repo-managed
@@ -84,7 +84,7 @@ The playbook performs these steps:
 5. Registers the managed PostgreSQL datasources plus the optional Plausible
    ClickHouse datasource and seeds the landing dashboard.
 6. Publishes Superset through the shared NGINX edge and verifies the public
-   health, Keycloak redirect, datasource inventory, and landing dashboard
+   health, Authentik redirect, datasource inventory, and landing dashboard
    contract.
 
 ## Verification
@@ -114,7 +114,7 @@ python3 scripts/superset_bootstrap.py verify-public \
   --database-prefix PostgreSQL \
   --expected-dashboard "LV3 Platform Database Inventory" \
   --expected-chart "PostgreSQL Databases" \
-  --expected-sso-host sso.example.com \
+  --expected-sso-host id.example.com \
   --admin-username admin \
   --admin-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/superset/admin-password.txt \
   --expected-extra-database "Plausible ClickHouse" \
@@ -124,7 +124,7 @@ python3 scripts/superset_bootstrap.py verify-public \
 The verification helper checks:
 
 - `GET /health`
-- `GET /login/keycloak` redirects to `sso.example.com`
+- `GET /login/authentik` redirects to `id.example.com`
 - database-authenticated `POST /api/v1/security/login`
 - `GET /api/v1/database`
 - `GET /api/v1/chart`
@@ -135,7 +135,7 @@ The verification helper checks:
 - Re-run `make converge-superset` for drift correction or after rebuilding
   `docker-runtime`, `postgres`, or the shared edge configuration.
 - If public verification fails after a successful local converge, rerun
-  `playbooks/keycloak.yml` and then `make converge-superset` so the runtime
+  `playbooks/authentik.yml` and then `make converge-superset` so the runtime
   picks up the latest mirrored client secret.
 - If the runtime fails to publish after a Docker bridge-chain loss on
   `docker-runtime`, rerun `make converge-superset`. The role includes the

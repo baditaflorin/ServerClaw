@@ -192,12 +192,6 @@ playbooks:
     shared_surfaces:
       - service:homepage
       - inventory/host_vars/proxmox-host.yml
-  playbooks/keycloak.yml:
-    playbook_id: keycloak
-    mutation_scope: platform
-    shared_surfaces:
-      - service:keycloak
-      - inventory/host_vars/proxmox-host.yml
   playbooks/lago.yml:
     playbook_id: lago
     mutation_scope: platform

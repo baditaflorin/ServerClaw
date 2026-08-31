@@ -42,7 +42,7 @@
             "type": "string"
           },
           "auth": {
-            "const": "keycloak_jwt"
+            "const": "oidc_jwt"
           },
           "required_role": {
             "type": "string"

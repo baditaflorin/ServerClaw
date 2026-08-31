@@ -34,8 +34,8 @@ def test_directus_defaults_define_runtime_and_publication_contract() -> None:
     assert (
         defaults["directus_database_password_local_file"] == "{{ directus_local_artifact_dir }}/database-password.txt"
     )
-    assert defaults["directus_keycloak_client_secret_local_file"] == (
-        "{{ repo_shared_local_root }}/keycloak/directus-client-secret.txt"
+    assert defaults["directus_authentik_client_secret_local_file"] == (
+        "{{ repo_shared_local_root }}/authentik/directus-client-secret.txt"
     )
     assert defaults["directus_service_registry_token_local_file"] == (
         "{{ directus_local_artifact_dir }}/service-registry-token.txt"
@@ -60,7 +60,7 @@ def test_directus_runtime_requires_database_oidc_and_service_token_inputs() -> N
     assert derive_task["ansible.builtin.include_role"]["tasks_from"] == "derive_service_defaults"
     assert derive_task["vars"]["common_derive_service_name"] == "directus"
     assert "directus_database_password_local_file | length > 0" in required_inputs
-    assert "directus_keycloak_client_secret_local_file | length > 0" in required_inputs
+    assert "directus_authentik_client_secret_local_file | length > 0" in required_inputs
     assert "directus_service_registry_token_local_file | length > 0" in required_inputs
     assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
     assert converge_task["ansible.builtin.include_role"]["tasks_from"] == "docker_compose_converge"
@@ -123,7 +123,7 @@ def test_directus_verify_and_publish_tasks_use_expected_contract_endpoints() -> 
         "--expected-service-name",
         "directus",
         "--expected-sso-host",
-        "sso.{{ platform_domain }}",
+        "id.{{ platform_domain }}",
     ]
 
 
@@ -132,9 +132,9 @@ def test_directus_templates_include_public_url_and_oidc_settings() -> None:
     compose_template = COMPOSE_TEMPLATE_PATH.read_text()
 
     assert "PUBLIC_URL={{ directus_public_base_url }}" in env_template
-    assert "AUTH_PROVIDERS=keycloak" in env_template
-    assert "AUTH_KEYCLOAK_DRIVER=openid" in env_template
-    assert "AUTH_KEYCLOAK_ROLE_MAPPING={{ directus_keycloak_role_mapping_json }}" in env_template
+    assert "AUTH_PROVIDERS=authentik" in env_template
+    assert "AUTH_AUTHENTIK_DRIVER=openid" in env_template
+    assert "AUTH_AUTHENTIK_ROLE_MAPPING={{ directus_authentik_role_mapping_json }}" in env_template
     assert "image: {{ directus_image }}" in compose_template
     assert "{{ ansible_host }}:{{ directus_internal_port }}:{{ directus_container_port }}" in compose_template
     assert "127.0.0.1:{{ directus_internal_port }}:{{ directus_container_port }}" in compose_template

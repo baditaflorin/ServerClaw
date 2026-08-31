@@ -92,10 +92,10 @@ dependency:
       description: Dify uses the governed API gateway route to call named LV3 tools,
         but the canvas remains reachable without tool invocation.
     - from: dify
-      to: keycloak
+      to: authentik
       type: soft
       description: Operator browser access to Dify is gated behind the shared oauth2-proxy
-        and Keycloak authentication flow at the edge.
+        and Authentik authentication flow at the edge.
     - from: dify
       to: langfuse
       type: soft

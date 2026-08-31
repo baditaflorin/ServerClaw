@@ -78,10 +78,10 @@ extra_edges:
       strength: hard
       description: Neko WebRTC signalling is proxied through the shared NGINX edge at browser.{{ platform_domain }} with TLS termination and WebSocket upgrade support.
   - from: service:neko
-    to: service:keycloak
+    to: service:authentik
     edge_kind: depends_on
     metadata:
       source: manifest
       relationship: operator_authentication
       strength: soft
-      description: Neko operator access is controlled through Keycloak OIDC client configuration for Tailscale headscale management network.
+      description: Neko operator access is controlled through the Authentik OIDC client configuration for the Tailscale headscale management network.

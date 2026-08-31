@@ -155,11 +155,6 @@ platform_tls_certs:
     service: minio
     source: letsencrypt
     wildcard: false
-  sso.example.org:
-    cert_validity_days: 90
-    service: keycloak
-    source: letsencrypt
-    wildcard: false
   tasks.example.org:
     cert_validity_days: 90
     service: plane

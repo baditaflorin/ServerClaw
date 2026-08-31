@@ -1,6 +1,6 @@
-# Purpose: Define the default Superset runtime paths, image pin, datasource topology, and Keycloak publication settings.
+# Purpose: Define the default Superset runtime paths, image pin, datasource topology, and Authentik publication settings.
 # Use case: Loaded whenever the Superset runtime role converges or verifies the SQL-first BI surface.
-# Inputs: Platform topology, PostgreSQL host placement, Keycloak settings, and controller-local artefact paths.
+# Inputs: Platform topology, PostgreSQL host placement, Authentik settings, and controller-local artefact paths.
 # Outputs: Supplies stable runtime defaults consumed by the superset_runtime tasks and templates.
 # Idempotency: Fully idempotent because this file only declares desired defaults.
 # Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0063, ADR 0077, and ADR 0292.
@@ -20,7 +20,7 @@ superset_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_pu
 superset_public_hostname_overrides:
   - hostname: "{{ superset_service_topology.public_hostname }}"
     address: "{{ superset_public_edge_private_ip }}"
-  - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}"
+  - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}"
     address: "{{ superset_public_edge_private_ip }}"
 superset_compose_project_name: superset
 superset_compose_network_name: "{{ superset_compose_project_name }}_default"
@@ -37,7 +37,7 @@ superset_reader_password_local_file: "{{ superset_local_artifact_dir }}/reader-p
 superset_postgres_database_catalog_local_file: "{{ superset_local_artifact_dir }}/postgres-databases.json"
 superset_secret_key_local_file: "{{ superset_local_artifact_dir }}/secret-key.txt"
 superset_admin_password_local_file: "{{ superset_local_artifact_dir }}/admin-password.txt"
-superset_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/superset-client-secret.txt"
+superset_authentik_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/superset-client-secret.txt"
 superset_secret_key_remote_file: "{{ superset_secret_dir }}/secret-key.txt"
 superset_admin_password_remote_file: "{{ superset_secret_dir }}/admin-password.txt"
 superset_bootstrap_definition_file: "{{ superset_asset_dir }}/superset-bootstrap.json"
@@ -68,19 +68,19 @@ superset_admin_username: admin
 superset_admin_first_name: LV3
 superset_admin_last_name: Admin
 superset_admin_email: superset.admin@{{ platform_domain }}
-superset_keycloak_client_id: superset
-superset_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
-superset_keycloak_server_metadata_url: "{{ superset_keycloak_issuer }}/.well-known/openid-configuration"
-superset_keycloak_authorize_url: "{{ superset_keycloak_issuer }}/protocol/openid-connect/auth"
-superset_keycloak_token_url: "{{ superset_keycloak_issuer }}/protocol/openid-connect/token"
-superset_keycloak_api_base_url: "{{ superset_keycloak_issuer }}/protocol/"
-superset_keycloak_logout_url: >-
-  {{ superset_session_authority.keycloak_logout_url }}?client_id={{ superset_keycloak_client_id }}&post_logout_redirect_uri={{ superset_public_base_url | urlencode }}
-superset_keycloak_scopes:
+superset_authentik_client_id: superset
+superset_authentik_issuer: "{{ authentik_oidc_provider_base_url }}/superset/"
+superset_authentik_server_metadata_url: "{{ superset_authentik_issuer }}/.well-known/openid-configuration"
+superset_authentik_authorize_url: "{{ authentik_oidc_provider_base_url }}/authorize/"
+superset_authentik_token_url: "{{ authentik_oidc_provider_base_url }}/token/"
+superset_authentik_api_base_url: "{{ authentik_oidc_provider_base_url }}/"
+superset_authentik_logout_url: >-
+  {{ superset_session_authority.oidc_logout_url }}?post_logout_redirect_uri={{ superset_public_base_url | urlencode }}
+superset_authentik_scopes:
   - openid
   - profile
   - email
 superset_auth_user_registration_role: Gamma
 superset_auth_roles_mapping:
-  /{{ platform_identity.config_prefix }}-platform-admins:
+  "{{ platform_identity.config_prefix }}-platform-admins":
     - Admin

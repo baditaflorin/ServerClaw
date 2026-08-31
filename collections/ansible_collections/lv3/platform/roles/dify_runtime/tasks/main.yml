@@ -400,7 +400,7 @@
 - name: Run the Dify role verification tasks
   ansible.builtin.import_tasks: verify.yml
 
-- name: Bootstrap Dify SSO with Keycloak OIDC
+- name: Bootstrap Dify SSO with Authentik OIDC
   ansible.builtin.command:
     argv:
       - uv
@@ -419,12 +419,12 @@
       - "{{ dify_admin_password_local_file }}"
       - --init-password-file
       - "{{ dify_init_password_local_file }}"
-      - --keycloak-client-id
-      - "{{ dify_keycloak_client_id }}"
-      - --keycloak-client-secret-file
-      - "{{ dify_keycloak_client_secret_local_file }}"
-      - --keycloak-issuer-url
-      - "{{ dify_keycloak_issuer }}"
+      - --authentik-client-id
+      - "{{ dify_authentik_client_id }}"
+      - --authentik-client-secret-file
+      - "{{ dify_authentik_client_secret_local_file }}"
+      - --authentik-issuer-url
+      - "{{ dify_authentik_issuer }}"
       - --ssh-host
       - "{{ ansible_host }}"
       - --ssh-user

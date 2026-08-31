@@ -15,11 +15,11 @@ def test_load_network_impairment_matrix_resolves_catalog() -> None:
     assert "staging" in catalog.target_classes
     assert "added_latency" in catalog.impairments
     assert {entry.service for entry in catalog.entries} == {"api_gateway", "openbao", "windmill"}
-    gateway_keycloak = next(
-        entry for entry in catalog.entries if entry.service == "api_gateway" and entry.dependency == "keycloak"
+    gateway_authentik = next(
+        entry for entry in catalog.entries if entry.service == "api_gateway" and entry.dependency == "authentik"
     )
-    assert gateway_keycloak.expected_behaviour == "degrade_gracefully"
-    assert gateway_keycloak.service_catalog_tested_by == "fault:keycloak-unavailable"
+    assert gateway_authentik.expected_behaviour == "degrade_gracefully"
+    assert gateway_authentik.service_catalog_tested_by == "fault:authentik-unavailable"
 
 
 def test_build_network_impairment_report_filters_target_class() -> None:

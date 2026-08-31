@@ -571,9 +571,9 @@ def docker_runtime_probes() -> list[dict[str, Any]]:
     probes = load_health_probe_catalog()
     return [
         {
-            "name": "keycloak_ready",
-            "url": probes["keycloak"]["readiness"]["url"],
-            "expected_status": probes["keycloak"]["readiness"]["expected_status"][0],
+            "name": "authentik_ready",
+            "url": probes["authentik"]["readiness"]["url"],
+            "expected_status": probes["authentik"]["readiness"]["expected_status"][0],
             "required": True,
         },
         {

@@ -375,7 +375,7 @@ def evaluate_auth_findings(
                 component="auth",
                 target=target["fqdn"],
                 finding_id="auth.redirect",
-                summary="Protected surface did not redirect unauthenticated traffic to Keycloak.",
+                summary="Protected surface did not redirect unauthenticated traffic to Authentik.",
                 observed=f"status={response['status']} location={location or '<missing>'}",
             )
         )

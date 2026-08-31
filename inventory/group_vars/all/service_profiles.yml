@@ -30,7 +30,7 @@ service_profiles:
     description: Minimum viable platform — secrets, identity, proxy, ops.
     services:
       - openbao              # secret store
-      - keycloak             # identity provider
+      - authentik            # identity provider
       - step_ca              # internal CA
       - nginx_runtime        # edge proxy
       - docker_runtime       # container substrate

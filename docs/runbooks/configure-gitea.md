@@ -4,7 +4,7 @@ This runbook covers the private Gitea deployment introduced by ADR 0143.
 
 ## Purpose
 
-`git.example.com` provides the self-hosted Git and CI surface for LV3. It runs privately on `runtime-control`, uses PostgreSQL on `postgres`, authenticates operators through Keycloak, stores LFS payloads in the shared MinIO bucket `gitea-lfs`, and dispatches Actions jobs to `docker-build`.
+`git.example.com` provides the self-hosted Git and CI surface for LV3. It runs privately on `runtime-control`, uses PostgreSQL on `postgres`, authenticates operators through Authentik, stores LFS payloads in the shared MinIO bucket `gitea-lfs`, and dispatches Actions jobs to `docker-build`.
 
 ## Managed Paths
 

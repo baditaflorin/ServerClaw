@@ -471,23 +471,6 @@
         "failback_method": "Restore or rebuild runtime-general, then rerun the Homepage converge from git."
       }
     },
-    "keycloak": {
-      "tier": "R1",
-      "recovery_objective": {
-        "rto_minutes": 120,
-        "rpo_minutes": 1440
-      },
-      "backup_sources": [
-        "git_repository",
-        "pbs_vm_192"
-      ],
-      "standby": {
-        "kind": "cold",
-        "location": "docker-runtime",
-        "failover_trigger": "Restore docker-runtime when Keycloak or its dependent runtime state cannot be recovered in place.",
-        "failback_method": "Restore or rebuild docker-runtime, then rerun the Keycloak converge and identity verification flow."
-      }
-    },
     "label_studio": {
       "tier": "R1",
       "recovery_objective": {

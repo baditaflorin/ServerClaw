@@ -272,8 +272,8 @@ class PromotionPipelineTests(unittest.TestCase):
     def test_evaluate_slo_gate_blocks_on_k6_budget_warning(self) -> None:
         entries = [
             {
-                "id": "keycloak-availability",
-                "service_id": "keycloak",
+                "id": "authentik-availability",
+                "service_id": "authentik",
                 "indicator": "availability",
                 "metrics": {"budget_remaining": 0.75},
                 "metrics_available": True,
@@ -281,14 +281,14 @@ class PromotionPipelineTests(unittest.TestCase):
                 "k6": {
                     "current_signal": {
                         "scenario": "load",
-                        "receipt_path": "receipts/k6/load-keycloak-20260331T070000Z.json",
+                        "receipt_path": "receipts/k6/load-authentik-20260331T070000Z.json",
                         "result": "passed",
                         "error_budget_remaining_pct": 15.0,
                     },
                     "latest_receipts": {
                         "load": {
                             "scenario": "load",
-                            "receipt_path": "receipts/k6/load-keycloak-20260331T070000Z.json",
+                            "receipt_path": "receipts/k6/load-authentik-20260331T070000Z.json",
                             "result": "passed",
                             "error_budget_remaining_pct": 15.0,
                         }
@@ -298,11 +298,11 @@ class PromotionPipelineTests(unittest.TestCase):
         ]
 
         with patch.object(promotion_pipeline, "build_slo_status_entries", return_value=entries):
-            gate = promotion_pipeline.evaluate_slo_gate(prometheus_url="http://monitoring", service_id="keycloak")
+            gate = promotion_pipeline.evaluate_slo_gate(prometheus_url="http://monitoring", service_id="authentik")
 
         self.assertTrue(gate["checked"])
         self.assertIn(
-            "latest k6 load receipt for keycloak shows 15.0% remaining (receipts/k6/load-keycloak-20260331T070000Z.json)",
+            "latest k6 load receipt for authentik shows 15.0% remaining (receipts/k6/load-authentik-20260331T070000Z.json)",
             gate["blocking_messages"],
         )
 
@@ -805,9 +805,9 @@ class PromotionPipelineTests(unittest.TestCase):
             validate_schema=False,
         )
 
-        ordered = promotion_pipeline.deployment_order(["ops_portal", "postgres", "keycloak"], graph)
+        ordered = promotion_pipeline.deployment_order(["ops_portal", "postgres", "authentik"], graph)
 
-        self.assertEqual(ordered, ["postgres", "keycloak", "ops_portal"])
+        self.assertEqual(ordered, ["authentik", "postgres", "ops_portal"])
 
 
 if __name__ == "__main__":

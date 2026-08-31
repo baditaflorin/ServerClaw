@@ -1,7 +1,7 @@
 ---
 # Playbook: glitchtip.yml
 # Purpose: Converge the GlitchTip PostgreSQL backend, runtime, edge publication, and repo-managed DSN bootstrap artifacts.
-# Use case: Run during production or staging deployment, upgrade, or recovery when `errors.{{ platform_domain }}`, Keycloak OIDC, and project-scoped DSN outputs must match repo truth.
+# Use case: Run during production or staging deployment, upgrade, or recovery when `errors.{{ platform_domain }}`, Authentik OIDC, and project-scoped DSN outputs must match repo truth.
 #
 # Inputs (required):
 #   - env (string, required): Target environment selector used to choose the postgres, docker-runtime, and nginx guests.
@@ -10,13 +10,13 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - GlitchTip DNS, PostgreSQL credentials, runtime secrets, Keycloak OIDC client wiring, public edge publication, and repo-managed DSN bootstrap artifacts are reconciled to declared platform state.
+#   - GlitchTip DNS, PostgreSQL credentials, runtime secrets, Authentik OIDC client wiring, public edge publication, and repo-managed DSN bootstrap artifacts are reconciled to declared platform state.
 #
 # Idempotency: Partially idempotent
 #
 # Dependencies:
 #   - ADR 0281: GlitchTip is the repo-managed Sentry-compatible application error tracker.
-#   - Requires: postgres, docker-runtime, Keycloak, OpenBao, the internal submission relay on mail-platform, and the shared NGINX edge to already exist.
+#   - Requires: postgres, docker-runtime, Authentik, OpenBao, the internal submission relay on mail-platform, and the shared NGINX edge to already exist.
 #   - Role: lv3.platform.glitchtip_postgres - converges the PostgreSQL backend and controller-local database password mirror.
 #   - Role: lv3.platform.glitchtip_runtime - converges the runtime stack, bootstrap admin, API token, and DSN project artifacts.
 #
@@ -123,7 +123,6 @@
   roles:
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.docker_runtime
-    - role: lv3.platform.keycloak_runtime
     - role: lv3.platform.glitchtip_runtime
 
 - name: Publish GlitchTip through the NGINX edge

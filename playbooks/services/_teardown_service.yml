@@ -8,16 +8,16 @@
 #
 # Required extra-vars:
 #   teardown_host           — inventory hostname of the VM to target (e.g. docker-runtime)
-#   teardown_container_name — container name to stop and remove (e.g. keycloak)
+#   teardown_container_name — container name to stop and remove (e.g. service-app)
 #
 # Optional extra-vars:
 #   teardown_ignore_missing — if true, don't fail if container doesn't exist (default: true)
 #
 # Example:
-#   make teardown-service svc=keycloak on_vm=docker-runtime env=production
+#   make teardown-service svc=<service> on_vm=docker-runtime env=production
 #   # which runs:
 #   # ansible-playbook ... _teardown_service.yml -e teardown_host=docker-runtime
-#   #                                             -e teardown_container_name=keycloak
+#   #                                             -e teardown_container_name=<container>
 
 - name: "Teardown service container — {{ teardown_container_name | default('container') }} on {{ teardown_host | default('target-host') }}"
   hosts: "{{ teardown_host | default('localhost') }}"

@@ -4,7 +4,7 @@
 #           server-block fragment without touching other services' configs.
 #
 # Inputs (required):
-#   - nginx_fragment_service_name (str): Unique slug for this service (e.g. "keycloak").
+#   - nginx_fragment_service_name (str): Unique slug for this service (e.g. "authentik").
 #   - nginx_fragment_content (str): Full nginx server-block config for this service.
 #
 # Inputs (optional):

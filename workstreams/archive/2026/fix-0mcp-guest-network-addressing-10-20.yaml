@@ -7,6 +7,7 @@ depends_on: []
 conflicts_with: []
 owner: claude-agent
 branch: fix-0mcp-guest-network-addressing-10-20
+worktree_path: .worktrees/fix-0mcp-guest-network-addressing-10-20
 doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
 ownership_manifest:
   owned_surfaces:

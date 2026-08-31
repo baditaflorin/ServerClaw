@@ -19,21 +19,21 @@ AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = os.environ.get("SUPERSET_AUTH_USER_REGISTRATION_ROLE", "Gamma")
 AUTH_ROLES_SYNC_AT_LOGIN = True
 AUTH_ROLES_MAPPING = json.loads(os.environ.get("SUPERSET_AUTH_ROLES_MAPPING_JSON", "{}"))
-LOGOUT_REDIRECT_URL = os.environ.get("SUPERSET_KEYCLOAK_LOGOUT_URL")
+LOGOUT_REDIRECT_URL = os.environ.get("SUPERSET_AUTHENTIK_LOGOUT_URL")
 
 OAUTH_PROVIDERS = [
     {
-        "name": "keycloak",
+        "name": "authentik",
         "icon": "fa-key",
         "token_key": "access_token",
         "remote_app": {
-            "client_id": os.environ["SUPERSET_KEYCLOAK_CLIENT_ID"],
-            "client_secret": os.environ["SUPERSET_KEYCLOAK_CLIENT_SECRET"],
-            "api_base_url": os.environ["SUPERSET_KEYCLOAK_API_BASE_URL"],
-            "server_metadata_url": os.environ["SUPERSET_KEYCLOAK_SERVER_METADATA_URL"],
-            "access_token_url": os.environ["SUPERSET_KEYCLOAK_TOKEN_URL"],
-            "authorize_url": os.environ["SUPERSET_KEYCLOAK_AUTHORIZE_URL"],
-            "client_kwargs": {"scope": os.environ["SUPERSET_KEYCLOAK_SCOPES"]},
+            "client_id": os.environ["SUPERSET_AUTHENTIK_CLIENT_ID"],
+            "client_secret": os.environ["SUPERSET_AUTHENTIK_CLIENT_SECRET"],
+            "api_base_url": os.environ["SUPERSET_AUTHENTIK_API_BASE_URL"],
+            "server_metadata_url": os.environ["SUPERSET_AUTHENTIK_SERVER_METADATA_URL"],
+            "access_token_url": os.environ["SUPERSET_AUTHENTIK_TOKEN_URL"],
+            "authorize_url": os.environ["SUPERSET_AUTHENTIK_AUTHORIZE_URL"],
+            "client_kwargs": {"scope": os.environ["SUPERSET_AUTHENTIK_SCOPES"]},
         },
     }
 ]

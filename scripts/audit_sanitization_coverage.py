@@ -298,10 +298,10 @@ def extract_sensitive_values() -> list[SensitiveValue]:
                     if val and not is_placeholder(val):
                         add(val, "operators.yaml", "pii", "CRITICAL")
                 # Nested PII
-                keycloak = op.get("keycloak", {})
-                if isinstance(keycloak, dict):
+                authentik = op.get("authentik", {})
+                if isinstance(authentik, dict):
                     for field in ["username"]:
-                        val = keycloak.get(field, "")
+                        val = authentik.get(field, "")
                         if val and not is_placeholder(val):
                             add(val, "operators.yaml", "pii", "WARNING")
                 tailscale = op.get("tailscale", {})

@@ -20,7 +20,7 @@ This runbook converges the dedicated `coolify` PaaS VM, publishes the protected 
 - `./scripts/validate_repo.sh agent-standards` passes
 - the controller has the bootstrap SSH key configured for the Proxmox jump path
 - `HETZNER_DNS_API_TOKEN` is available for dashboard DNS publication and shared edge certificate expansion
-- the shared NGINX edge, Keycloak, and oauth2-proxy path are already converged
+- the shared NGINX edge, Authentik, and oauth2-proxy path are already converged
 - for private GitHub repository deployment bootstrap, `gh auth status` succeeds on
   the controller with repository administration access to the target repo
 
@@ -186,7 +186,7 @@ Use that runbook when:
 
 ## Access Model
 
-- `coolify.example.com` is protected by the shared oauth2-proxy and Keycloak edge flow.
+- `coolify.example.com` is protected by the shared oauth2-proxy and Authentik edge flow.
 - the Coolify API is consumed from the controller through the Proxmox host Tailscale TCP proxy, not over the public edge
 - `*.apps.example.com` is intentionally public because it is the published application ingress lane
 

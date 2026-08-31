@@ -119,7 +119,7 @@ platform_port_assignments:
   tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
-  keycloak_internal_http_port: 8091
+  authentik_internal_http_port: 9010
   neko_runtime_port: 8080
 monitoring_prometheus_listen_address: 0.0.0.0:9090
 openbao_http_extra_bind_addresses:
@@ -1269,7 +1269,7 @@ network_policy:
             - 8000
             - 8081
             - 8083
-            - 8091
+            - 9010
             - 8095
             - 8098
             - 8200
@@ -1285,7 +1285,7 @@ network_policy:
             - 4222
             - 8081
             - 8083
-            - 8091
+            - 9010
             - 8098
             - 9080
           description: Private guest-to-guest access to the control-plane mail relay, event bus, identity, authz, API gateway, and runtime-control router
@@ -1294,17 +1294,17 @@ network_policy:
           ports:
             - 1587
             - 4222
-            - 8091
+            - 9010
             - 9080
-          description: Local Docker workloads using the runtime-control mail relay, NATS listener, Keycloak API, and Traefik router
+          description: Local Docker workloads using the runtime-control mail relay, NATS listener, Authentik API, and Traefik router
         - source: 192.168.0.0/16
           protocol: tcp
           ports:
             - 1587
             - 4222
-            - 8091
+            - 9010
             - 9080
-          description: Local Docker workloads using the runtime-control mail relay, NATS listener, Keycloak API, and Traefik router
+          description: Local Docker workloads using the runtime-control mail relay, NATS listener, Authentik API, and Traefik router
         - source: docker-build
           protocol: tcp
           ports:
@@ -1317,9 +1317,9 @@ network_policy:
           ports:
             - 3003
             - 8083
-            - 8091
+            - 9010
             - 8095
-          description: Shared edge access to the API gateway, Keycloak, Harbor, and Gitea
+          description: Shared edge access to the API gateway, Authentik, Harbor, and Gitea
         - source: monitoring
           protocol: tcp
           ports:
@@ -1328,7 +1328,7 @@ network_policy:
             - 8000
             - 8081
             - 8083
-            - 8091
+            - 9010
             - 8095
             - 8098
             - 9000
@@ -1555,7 +1555,7 @@ network_policy:
           protocol: tcp
           ports:
             - 5432
-          description: Keycloak database on runtime-control
+          description: Authentik database on runtime-control
         - source: 172.16.0.0/12
           protocol: tcp
           ports:
@@ -3041,30 +3041,6 @@ platform_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ platform_context_controller_url }}"
-  keycloak:
-    service_name: keycloak
-    owning_vm: runtime-control
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}"
-    public_hostname: sso.{{ platform_domain }}
-    exposure_model: edge-published
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: sso
-      type: A
-      target: "{{ management_ipv4 }}"
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
-    urls:
-      internal: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
-      public: https://sso.{{ platform_domain }}
   harbor:
     service_name: harbor
     owning_vm: runtime-control

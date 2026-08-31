@@ -48,6 +48,12 @@ TEMPLATE_PATH = REPO_ROOT / "docs" / "templates" / "README.md.j2"
 README_PATH = REPO_ROOT / "README.md"
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 SERVICE_CATALOG_PATH = REPO_ROOT / "config" / "service-capability-catalog.json"
+GENERATED_BLOCK_RE = re.compile(
+    r"(?P<begin><!-- BEGIN GENERATED: (?P<marker>[a-z0-9-]+) -->\n)"
+    r"(?P<content>.*?)"
+    r"(?P<end><!-- END GENERATED: (?P=marker) -->)",
+    re.DOTALL,
+)
 
 # ---------------------------------------------------------------------------
 # Curated key targets shown in the README Make Targets table.
@@ -151,7 +157,32 @@ def build_make_targets_table(makefile_targets: dict[str, str]) -> str:
 # ---------------------------------------------------------------------------
 
 
-def render(template_path: Path = TEMPLATE_PATH) -> str:
+def preserve_generated_blocks(rendered: str, current: str) -> str:
+    """Keep bounded status-generator sections while refreshing template content.
+
+    README.md has two deterministic writers: this template renderer owns the
+    surrounding prose, while generate_status_docs.py owns marked status blocks.
+    Replacing the whole file must retain those blocks so both drift checks can
+    be true in the same repository state.
+    """
+
+    current_blocks: dict[str, str] = {}
+    for match in GENERATED_BLOCK_RE.finditer(current):
+        marker = match.group("marker")
+        if marker in current_blocks:
+            raise ValueError(f"README generated marker '{marker}' appears more than once")
+        current_blocks[marker] = match.group("content")
+
+    def restore(match: re.Match[str]) -> str:
+        content = current_blocks.get(match.group("marker"))
+        if content is None:
+            return match.group(0)
+        return f"{match.group('begin')}{content}{match.group('end')}"
+
+    return GENERATED_BLOCK_RE.sub(restore, rendered)
+
+
+def render(template_path: Path = TEMPLATE_PATH, *, current_path: Path | None = None) -> str:
     """Render the README template with live data. Returns the full README string."""
     try:
         from jinja2 import Environment, FileSystemLoader, StrictUndefined
@@ -175,11 +206,14 @@ def render(template_path: Path = TEMPLATE_PATH) -> str:
     tmpl = env.get_template(template_path.name)
     # Strip the Jinja2 comment block from the top of the rendered output;
     # it's already human-readable in the template file itself.
-    return tmpl.render(
+    rendered = tmpl.render(
         counts=counts,
         make_targets_table=make_targets_table,
         generated_on=date.today().isoformat(),
     )
+    if current_path is not None and current_path.exists():
+        return preserve_generated_blocks(rendered, current_path.read_text(encoding="utf-8"))
+    return rendered
 
 
 # ---------------------------------------------------------------------------
@@ -189,7 +223,7 @@ def render(template_path: Path = TEMPLATE_PATH) -> str:
 
 def check_drift(current_path: Path = README_PATH) -> bool:
     """Return True if README.md matches generated output, False if drift detected."""
-    generated = render()
+    generated = render(current_path=current_path)
     if not current_path.exists():
         return False
     return current_path.read_text() == generated
@@ -197,7 +231,7 @@ def check_drift(current_path: Path = README_PATH) -> bool:
 
 def show_diff(current_path: Path = README_PATH) -> str:
     """Return a unified diff between current README.md and generated output."""
-    generated = render().splitlines(keepends=True)
+    generated = render(current_path=current_path).splitlines(keepends=True)
     current = current_path.read_text().splitlines(keepends=True) if current_path.exists() else []
     return "".join(
         difflib.unified_diff(
@@ -243,7 +277,7 @@ def main() -> None:
         return
 
     if args.write:
-        content = render(template_path)
+        content = render(template_path, current_path=README_PATH)
         README_PATH.write_text(content)
         print(f"Written {README_PATH}", file=sys.stderr)
         return

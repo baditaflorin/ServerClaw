@@ -1278,7 +1278,7 @@ def validate_site(output_dir: Path) -> None:
     expected = [
         output_dir / "index.md",
         output_dir / "services" / "index.md",
-        output_dir / "services" / "keycloak.md",
+        output_dir / "services" / "authentik.md",
         output_dir / "runbooks" / "index.md",
         output_dir / "architecture" / "index.md",
         output_dir / "architecture" / "dependency-graph.md",

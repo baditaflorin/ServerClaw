@@ -42,15 +42,58 @@
     path: "{{ nomad_cluster_bootstrap_management_token_remote_file }}"
   register: nomad_cluster_bootstrap_remote_token_stat
 
-- name: Read the remote Nomad bootstrap token for controller restoration
+- name: Read the remote Nomad bootstrap token for validation
   ansible.builtin.slurp:
     src: "{{ nomad_cluster_bootstrap_management_token_remote_file }}"
   register: nomad_cluster_bootstrap_remote_token_raw
-  when:
-    - not nomad_cluster_bootstrap_local_token_stat.stat.exists
-    - nomad_cluster_bootstrap_remote_token_stat.stat.exists
+  no_log: true
+  when: nomad_cluster_bootstrap_remote_token_stat.stat.exists
 
-- name: Restore the controller-local Nomad bootstrap token from the live server
+- name: Validate the live Nomad bootstrap management token
+  ansible.builtin.command:
+    argv:
+      - nomad
+      - acl
+      - token
+      - self
+      - -address={{ nomad_cluster_bootstrap_server_local_url }}
+      - -ca-cert={{ nomad_cluster_bootstrap_remote_ca_cert_file }}
+      - -token={{ nomad_cluster_bootstrap_remote_token_raw.content | b64decode | trim }}
+  register: nomad_cluster_bootstrap_remote_token_validation
+  changed_when: false
+  failed_when: false
+  no_log: true
+  when: nomad_cluster_bootstrap_remote_token_stat.stat.exists
+
+- name: Validate the controller-local Nomad bootstrap management token
+  ansible.builtin.command:
+    argv:
+      - nomad
+      - acl
+      - token
+      - self
+      - -address={{ nomad_cluster_bootstrap_server_local_url }}
+      - -ca-cert={{ nomad_cluster_bootstrap_remote_ca_cert_file }}
+      - -token={{ lookup('ansible.builtin.file', nomad_cluster_bootstrap_management_token_local_file) | trim }}
+  register: nomad_cluster_bootstrap_local_token_validation
+  changed_when: false
+  failed_when: false
+  no_log: true
+  when:
+    - nomad_cluster_bootstrap_local_token_stat.stat.exists
+    - not (nomad_cluster_bootstrap_remote_token_validation.rc | default(1) == 0)
+
+- name: Record the valid Nomad bootstrap management token source
+  ansible.builtin.set_fact:
+    nomad_cluster_bootstrap_remote_token_valid: >-
+      {{ nomad_cluster_bootstrap_remote_token_stat.stat.exists
+         and (nomad_cluster_bootstrap_remote_token_validation.rc | default(1) == 0) }}
+    nomad_cluster_bootstrap_local_token_valid: >-
+      {{ nomad_cluster_bootstrap_local_token_stat.stat.exists
+         and (nomad_cluster_bootstrap_local_token_validation.rc | default(1) == 0) }}
+  no_log: true
+
+- name: Restore the controller-local Nomad bootstrap token from the validated live server
   ansible.builtin.copy:
     dest: "{{ nomad_cluster_bootstrap_management_token_local_file }}"
     content: "{{ nomad_cluster_bootstrap_remote_token_raw.content | b64decode | trim }}\n"
@@ -58,16 +101,7 @@
   delegate_to: localhost
   become: false
   no_log: true
-  when:
-    - not nomad_cluster_bootstrap_local_token_stat.stat.exists
-    - nomad_cluster_bootstrap_remote_token_stat.stat.exists
-
-- name: Refresh the controller-local Nomad bootstrap token stat after restoration
-  ansible.builtin.stat:
-    path: "{{ nomad_cluster_bootstrap_management_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: nomad_cluster_bootstrap_local_token_restored_stat
+  when: nomad_cluster_bootstrap_remote_token_valid | bool
 
 - name: Bootstrap the Nomad ACL management token
   ansible.builtin.command:
@@ -81,7 +115,9 @@
   register: nomad_cluster_bootstrap_acl_bootstrap
   changed_when: true
   no_log: true
-  when: not nomad_cluster_bootstrap_local_token_restored_stat.stat.exists
+  when:
+    - not (nomad_cluster_bootstrap_remote_token_valid | bool)
+    - not (nomad_cluster_bootstrap_local_token_valid | bool)
 
 - name: Persist the freshly bootstrapped Nomad management token locally
   ansible.builtin.copy:
@@ -91,7 +127,9 @@
   delegate_to: localhost
   become: false
   no_log: true
-  when: not nomad_cluster_bootstrap_local_token_restored_stat.stat.exists
+  when:
+    - not (nomad_cluster_bootstrap_remote_token_valid | bool)
+    - not (nomad_cluster_bootstrap_local_token_valid | bool)
 
 - name: Read the controller-local Nomad management token
   ansible.builtin.set_fact:

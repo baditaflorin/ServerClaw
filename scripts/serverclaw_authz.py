@@ -77,7 +77,7 @@ class AuthzError(RuntimeError):
 
 
 @dataclass(frozen=True)
-class KeycloakPrincipal:
+class AuthentikPrincipal:
     name: str
     principal: str
     grant_type: str
@@ -111,7 +111,7 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8").strip()
 
 
-def keycloak_principal(kind: str, identifier: str) -> str:
+def authentik_principal(kind: str, identifier: str) -> str:
     return f"principal:{kind}__{identifier}"
 
 
@@ -191,17 +191,17 @@ def decode_jwt_unverified(token: str) -> dict[str, Any]:
     try:
         _header, payload, _signature = token.split(".")
     except ValueError as exc:
-        raise AuthzError("unexpected JWT format returned by Keycloak") from exc
+        raise AuthzError("unexpected JWT format returned by Authentik") from exc
     padding = "=" * (-len(payload) % 4)
     decoded = base64.urlsafe_b64decode(payload + padding)
     return json.loads(decoded.decode("utf-8"))
 
 
-def load_principals(config: dict[str, Any]) -> list[KeycloakPrincipal]:
+def load_principals(config: dict[str, Any]) -> list[AuthentikPrincipal]:
     principals = []
     for name, item in config["principals"].items():
         principals.append(
-            KeycloakPrincipal(
+            AuthentikPrincipal(
                 name=name,
                 principal=item["principal"],
                 grant_type=item["grant_type"],
@@ -215,14 +215,14 @@ def load_principals(config: dict[str, Any]) -> list[KeycloakPrincipal]:
     return principals
 
 
-def verify_keycloak_principal(base_url: str, principal: KeycloakPrincipal) -> dict[str, Any]:
+def verify_authentik_principal(base_url: str, principal: AuthentikPrincipal) -> dict[str, Any]:
     if principal.grant_type == "declared":
         if not principal.username:
             raise AuthzError(f"declared principal '{principal.name}' is missing username")
-        expected_principal = keycloak_principal("keycloak-user", principal.username)
+        expected_principal = authentik_principal("authentik-user", principal.username)
         if principal.principal != expected_principal:
             raise AuthzError(
-                f"declared principal '{principal.name}' must match the stable Keycloak username reference "
+                f"declared principal '{principal.name}' must match the stable Authentik username reference "
                 f"'{expected_principal}'"
             )
         return {
@@ -239,7 +239,7 @@ def verify_keycloak_principal(base_url: str, principal: KeycloakPrincipal) -> di
     if not principal.client_id or principal.client_secret_file is None:
         raise AuthzError(f"token-backed principal '{principal.name}' is missing client_id or client_secret_file")
 
-    token_url = f"{base_url.rstrip('/')}/realms/lv3/protocol/openid-connect/token"
+    token_url = f"{base_url.rstrip('/')}/application/o/token/"
     form = {
         "client_id": principal.client_id,
         "client_secret": read_text(principal.client_secret_file),
@@ -262,7 +262,7 @@ def verify_keycloak_principal(base_url: str, principal: KeycloakPrincipal) -> di
     _status, payload = http_json("POST", token_url, form_body=form, expected_status=200)
     token = payload.get("access_token")
     if not isinstance(token, str) or not token:
-        raise AuthzError(f"Keycloak did not return an access_token for principal '{principal.name}'")
+        raise AuthzError(f"Authentik did not return an access_token for principal '{principal.name}'")
     claims = decode_jwt_unverified(token)
     mismatches = {
         claim: {"expected": expected, "actual": claims.get(claim)}
@@ -279,7 +279,9 @@ def verify_keycloak_principal(base_url: str, principal: KeycloakPrincipal) -> di
         "verification": "token",
         "claims": {
             claim: claims.get(claim)
-            for claim in sorted(set(principal.expected_claims) | {"sub", "azp", "preferred_username", "client_id"})
+            for claim in sorted(
+                set(principal.expected_claims) | {"sub", "aud", "preferred_username", "client_id", "groups"}
+            )
             if claims.get(claim) is not None
         },
     }
@@ -466,12 +468,12 @@ def run(
     config_path: Path,
     openfga_url: str,
     openfga_preshared_key: str,
-    keycloak_url: str,
+    authentik_url: str,
     report_path: Path | None,
 ) -> dict[str, Any]:
     config = load_json(config_path)
     model = load_json(repo_path(config["model_path"]))
-    principal_reports = [verify_keycloak_principal(keycloak_url, item) for item in load_principals(config)]
+    principal_reports = [verify_authentik_principal(authentik_url, item) for item in load_principals(config)]
     store_id, store_created = ensure_store(openfga_url, openfga_preshared_key, config["store"]["name"])
     model_id, model_changed = ensure_authorization_model(openfga_url, openfga_preshared_key, store_id, model)
     if mode == "apply":
@@ -500,7 +502,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--config", default=str(REPO_ROOT / "config" / "serverclaw-authz" / "bootstrap.json"))
     parser.add_argument("--openfga-url", required=True)
     parser.add_argument("--openfga-preshared-key-file", required=True)
-    parser.add_argument("--keycloak-url", required=True)
+    parser.add_argument("--authentik-url", required=True)
     parser.add_argument("--write-report")
     return parser.parse_args(argv)
 
@@ -513,7 +515,7 @@ def main(argv: list[str] | None = None) -> int:
             repo_path(args.config),
             args.openfga_url,
             read_text(repo_path(args.openfga_preshared_key_file)),
-            args.keycloak_url,
+            args.authentik_url,
             repo_path(args.write_report) if args.write_report else None,
         )
     except AuthzError as exc:

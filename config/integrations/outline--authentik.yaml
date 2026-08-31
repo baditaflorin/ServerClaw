@@ -25,8 +25,6 @@ connection:
 secrets:
   - path: .local/authentik/outline-client-secret.txt
     purpose: selected_oidc_client_secret
-  - path: .local/keycloak/outline-client-secret.txt
-    purpose: keycloak_per_client_rollback
   - path: .local/outline/api-token.txt
     purpose: durable_outline_sync_authority
 
@@ -42,13 +40,9 @@ pre_flight:
     callback_url: "https://wiki.{{ platform_domain }}/auth/oidc.callback"
   - check: outline_api_token_preserved
     path: .local/outline/api-token.txt
-  - check: keycloak_rollback_secret_preserved
-    path: .local/keycloak/outline-client-secret.txt
 
 post_deployment:
   - check: outline_oidc_redirect_selects_authentik
     endpoint: /auth/oidc
   - check: outline_living_collections_verify
     script: scripts/sync_docs_to_outline.py
-  - check: keycloak_remains_available
-    reason: per-client rollback during ADR 0491 migration

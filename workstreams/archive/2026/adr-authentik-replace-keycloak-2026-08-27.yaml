@@ -7,6 +7,7 @@ depends_on: []
 conflicts_with: []
 owner: claude-agent
 branch: adr-authentik-replace-keycloak-2026-08-27
+worktree_path: .worktrees/adr-authentik-replace-keycloak-2026-08-27
 doc: docs/adr/0491-authentik-for-operator-and-agent-sso.md
 ownership_manifest:
   owned_surfaces:

@@ -17,8 +17,6 @@
       - public_edge_oidc_auth_client_id
       - public_edge_oidc_auth_client_secret_local_file
       - public_edge_oidc_auth_issuer_url
-      - public_edge_oidc_auth_public_login_url
-      - public_edge_oidc_auth_internal_base_url
       - public_edge_oidc_auth_redirect_url
       - public_edge_oidc_auth_allowed_groups
       - public_edge_oidc_auth_email_domains
@@ -26,14 +24,25 @@
       - public_edge_oidc_auth_cookie_domain
       - public_edge_oidc_auth_cookie_expire
       - public_edge_oidc_auth_cookie_refresh
-      - public_edge_oidc_auth_redeem_url
-      - public_edge_oidc_auth_profile_url
-      - public_edge_oidc_auth_validate_url
-      - public_edge_oidc_auth_jwks_url
       - public_edge_oidc_auth_probe_hostname
     common_assert_vars_fail_msg: >-
-      public_edge_oidc_auth requires the oauth2-proxy install settings, Keycloak client material,
+      public_edge_oidc_auth requires the oauth2-proxy install settings, Authentik client material,
       and cookie/session configuration.
+
+- name: Resolve the public Authentik issuer hostname for local discovery
+  ansible.builtin.set_fact:
+    public_edge_oidc_auth_issuer_hostname: "{{ public_edge_oidc_auth_issuer_url | urlsplit('hostname') }}"
+
+- name: Pin the Authentik issuer hostname to the local NGINX edge
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^\\s*[^#\\s]+\\s+{{ public_edge_oidc_auth_issuer_hostname | regex_escape }}(?:\\s|$)'
+    line: "{{ ansible_host }} {{ public_edge_oidc_auth_issuer_hostname }}"
+    state: present
+    create: false
+  when:
+    - public_edge_oidc_auth_issuer_hostname | length > 0
+    - ansible_host | default('') | length > 0
 
 - name: Ensure the local ops portal artifact directory exists
   ansible.builtin.file:
@@ -72,7 +81,7 @@
     common_check_local_secrets_files:
       - path: "{{ public_edge_oidc_auth_client_secret_local_file }}"
         description: "public edge OIDC client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying the public edge OIDC auth"
+        prerequisite: "Converge the Authentik runtime before deploying the public edge OIDC auth"
 
 - name: Ensure public edge OIDC auth prerequisite packages are present
   ansible.builtin.apt:

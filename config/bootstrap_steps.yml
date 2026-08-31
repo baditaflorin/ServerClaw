@@ -280,13 +280,13 @@ steps:
     timeout_s: 600
     retries: 2
 
-  - id: "10-converge-keycloak"
-    title: "Bootstrap Keycloak identity provider"
-    make_target: converge-keycloak
+  - id: "10-converge-authentik"
+    title: "Bootstrap Authentik identity provider"
+    make_target: converge-authentik
     description: |
-      Deploys Keycloak, creates the platform realm, registers all service OIDC
-      clients, and creates the bootstrap admin user. Requires OpenBao for client
-      secrets and PostgreSQL for the backing DB.
+      Deploys Authentik, registers the repository-managed service OIDC clients,
+      and creates the bootstrap admin user. Requires OpenBao for client secrets
+      and Authentik's PostgreSQL backing store.
     preconditions:
       - id: openbao.reachable
         type: tcp
@@ -299,8 +299,8 @@ steps:
         port: 5432
         timeout_s: 5
     postconditions:
-      - id: keycloak.realm-discovery
-        post_condition_ref: keycloak.realm-discovery
+      - id: authentik.ready
+        post_condition_ref: authentik.ready
     timeout_s: 900
     retries: 2
 
@@ -312,9 +312,9 @@ steps:
       disabled_services). Each service's own postcondition is checked after
       convergence. Order is resolved from the service dependency graph.
     preconditions:
-      - id: keycloak.issuer
+      - id: authentik.issuer
         type: http
-        url: "https://sso.{apex}/realms/{apex_slug}/.well-known/openid-configuration"
+        url: "https://id.{apex}/application/o/ops-portal/.well-known/openid-configuration"
         expect_status: 200
         timeout_s: 10
       - id: openbao.unsealed

@@ -80,10 +80,10 @@ dependency:
     adr: 0193
   outbound_edges:
     - from: plane
-      to: keycloak
+      to: authentik
       type: soft
       description: Authenticated browser access to tasks.example.com depends on the
-        shared Keycloak-backed edge auth path, while the private controller path remains
+        shared Authentik-backed edge auth path, while the private controller path remains
         available for governed automation.
     - from: plane
       to: nginx_edge

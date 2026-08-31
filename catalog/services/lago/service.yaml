@@ -46,7 +46,7 @@ service:
     - edge-authenticated
     - event-ingest
   notes: The browser UI and management surfaces at billing.example.com stay behind
-    the shared oauth2-proxy and Keycloak edge-auth flow. Public `/api/health` and
+    the shared oauth2-proxy and Authentik edge-auth flow. Public `/api/health` and
     `/api/v1/events` remain reachable without browser sign-in, with event ingest terminating
     at the governed API-gateway adapter and rejected payloads published to `billing.events.rejected`.
   environments:
@@ -104,10 +104,10 @@ dependency:
       description: The Lago API, front end, worker, clock, Redis, and PDF sidecar
         run on docker-runtime.
     - from: lago
-      to: keycloak
+      to: authentik
       type: soft
       description: Operator browser access to billing.example.com is gated by the
-        shared oauth2-proxy and Keycloak edge-auth path.
+        shared oauth2-proxy and Authentik edge-auth path.
     - from: lago
       to: nginx_edge
       type: soft

@@ -76,7 +76,7 @@ The current catalog uses this extension for:
 - `gitea`
 - `harbor`
 - `homepage`
-- `keycloak`
+- `authentik`
 - `langfuse`
 - `openbao`
 - `outline`

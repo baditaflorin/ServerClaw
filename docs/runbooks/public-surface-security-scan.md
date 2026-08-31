@@ -29,7 +29,7 @@ The workflow:
 
 1. discovers active public HTTPS hostnames from `config/subdomain-catalog.json`
 2. evaluates required security headers and version disclosure on the unauthenticated response
-3. checks OIDC-protected public hostnames for the expected redirect to `sso.example.com`
+3. checks OIDC-protected public hostnames for the expected redirect to `id.example.com`
 4. runs `testssl.sh` against each hostname
 5. runs `nuclei` redirect and misconfiguration templates against `https://example.com`
 6. writes a receipt under `receipts/security-scan/`

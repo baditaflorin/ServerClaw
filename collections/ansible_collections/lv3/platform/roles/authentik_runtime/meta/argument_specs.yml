@@ -151,3 +151,28 @@ argument_specs:
         required: true
         description:
           - Manifest client identifiers reconciled by this converge.
+      authentik_identity_reconcile_enabled:
+        type: bool
+        required: true
+        description:
+          - Reconcile the governed Authentik groups and initial internal accounts.
+      authentik_identity_manifest_file:
+        type: path
+        required: true
+        description:
+          - Controller-side non-secret identity manifest.
+      authentik_identity_reconcile_script:
+        type: path
+        required: true
+        description:
+          - Controller-side idempotent Authentik identity reconciler.
+      authentik_identity_reconcile_token_file:
+        type: path
+        required: true
+        description:
+          - Ignored controller-local Authentik API token file.
+      authentik_bootstrap_admin_username:
+        type: str
+        required: true
+        description:
+          - Existing Authentik bootstrap administrator reconciled into platform groups.

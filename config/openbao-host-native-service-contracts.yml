@@ -1,0 +1,15 @@
+---
+# Purpose: Declare exact OpenBao contracts for managed host-native services.
+# Use case: Consumed by the bounded runtime-secret-provisioner bootstrap so
+# systemd services receive the same least-privilege lifecycle as Compose
+# services without being misclassified as Docker workloads.
+# Inputs: Safe service identifiers, KV v2 paths, policy suffixes, and AppRole
+# names only. Secret values never belong in this catalog.
+# Outputs: Exact service policies and provisioner capability paths.
+# Idempotency: Yes; contracts describe desired OpenBao identities only.
+# Dependencies: ADR 0302, ADR 0491, and OpenBao runtime-secret provisioner.
+openbao_host_native_service_contracts:
+  - id: restic_config_backup
+    secret_path: services/restic-config-backup/runtime-config
+    policy_suffix: restic-config-backup-runtime
+    approle_name: restic-config-backup

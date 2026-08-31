@@ -50,13 +50,13 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
   listener on `http://10.10.10.20:8098/healthz`; the
   `http://100.64.0.1:8014` controller proxy is Tailscale-bound and is only for
   controller-local bootstrap and verification.
-- If the public Keycloak smoke probe fails, check
-  `https://sso.example.com/realms/lv3/.well-known/openid-configuration` directly
+- If the public Authentik smoke probe fails, check
+  `https://id.example.com/-/health/ready/` directly
   before treating the result as a repo regression. The 2026-03-31 latest-main
   replay returned `502 Bad Gateway` from that exact URL, which confirmed a live
   edge/runtime failure rather than a k6-runner contract break.
-- If the public Keycloak OIDC probe and the guest-local
-  `http://10.10.10.20:8091/health/ready` check both time out or fail, preserve
+- If the public Authentik readiness probe and the guest-local
+  `http://10.10.10.92:9010/-/health/ready/` check both time out or fail, preserve
   the k6 receipts and outage evidence as live-service degradation; do not
   rewrite the run into a repository-only failure.
 - During `docker-runtime` redeploys, OpenFGA health can flap briefly while
@@ -91,8 +91,8 @@ The Windmill worker seeds `f/lv3/k6_load_testing` and schedules:
 
 ## Verification
 
-1. Run `make k6-smoke K6_ARGS="--service keycloak --service openfga"`.
-2. Run `make k6-load K6_ARGS="--service keycloak --service openfga"`.
+1. Run `make k6-smoke K6_ARGS="--service authentik --service openfga"`.
+2. Run `make k6-load K6_ARGS="--service authentik --service openfga"`.
 3. Confirm new receipts exist under `receipts/k6/` and `receipts/k6/raw/`.
 4. Run `python3 scripts/k6_load_testing.py --validate`.
 5. Query Prometheus for the latest `k6_*` samples during the run window if the

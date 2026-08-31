@@ -13,7 +13,7 @@ VALIDATE_WORKFLOW = REPO_ROOT / ".gitea" / "workflows" / "validate.yml"
 RENOVATE_WORKFLOW = REPO_ROOT / ".gitea" / "workflows" / "renovate.yml"
 RELEASE_BUNDLE_WORKFLOW = REPO_ROOT / ".gitea" / "workflows" / "release-bundle.yml"
 PYTHON_RUNNER_IMAGE = (
-    "registry.example.com/check-runner/python:3.12.10"
+    "${{ vars.CONTAINER_REGISTRY }}/check-runner/python:3.12.10"
     "@sha256:9dd2ea22539ed61d0aed774d0f29d2a2de674531b80f852484849500d64169ff"
 )
 SHALLOW_MANUAL_CHECKOUT_FETCH = (
@@ -77,7 +77,7 @@ def test_validate_workflow_uses_pinned_python_runner_and_manual_checkout() -> No
     assert 'LV3_DOCKER_WORKSPACE_PATH="$(cat .local/validation-gate/workspace-host.path)"' in workflow
     assert "Run k6 smoke gate" in workflow
     assert (
-        'make k6-smoke K6_ARGS="--runner-context gitea-actions --environment production --service keycloak --service openfga"'
+        'make k6-smoke K6_ARGS="--runner-context gitea-actions --environment production --service authentik --service openfga"'
         in workflow
     )
     assert "receipts/k6/raw" in workflow

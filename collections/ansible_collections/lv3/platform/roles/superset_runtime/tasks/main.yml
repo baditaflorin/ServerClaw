@@ -1,6 +1,6 @@
 # Purpose: Build the repo-managed Superset image, converge the runtime stack, and bootstrap the governed datasource inventory dashboard.
 # Use case: Run during Superset deployment, recovery, and exact-main replay on docker-runtime.
-# Inputs: Runtime paths, image pins, PostgreSQL credentials, Keycloak client secret, and the bootstrap verifier.
+# Inputs: Runtime paths, image pins, PostgreSQL credentials, Authentik client secret, and the bootstrap verifier.
 # Outputs: The live Superset container, OpenBao-backed runtime env, datasource registration, and seeded landing dashboard match repo truth.
 # Idempotency: Partially idempotent because compose restarts and managed metadata reconciliation occur when the declared runtime or bootstrap inputs change.
 # Dependencies: ADR 0165, ADR 0021, ADR 0042, ADR 0063, ADR 0077, and ADR 0292.
@@ -34,11 +34,11 @@
       - superset_database_password_local_file | length > 0
       - superset_reader_password_local_file | length > 0
       - superset_postgres_database_catalog_local_file | length > 0
-      - superset_keycloak_client_secret_local_file | length > 0
+      - superset_authentik_client_secret_local_file | length > 0
       - superset_controller_bootstrap_script_local_path | length > 0
     fail_msg: >-
       superset_runtime requires runtime paths, pinned image refs, PostgreSQL
-      auth, the datasource catalog, and the mirrored Keycloak client secret.
+      auth, the datasource catalog, and the mirrored Authentik client secret.
 
 - name: Check Superset prerequisites on the control machine
   ansible.builtin.include_role:
@@ -55,9 +55,9 @@
       - path: "{{ superset_postgres_database_catalog_local_file }}"
         description: "Superset PostgreSQL database catalog"
         prerequisite: "Converge superset_postgres before deploying Superset"
-      - path: "{{ superset_keycloak_client_secret_local_file }}"
-        description: "Superset Keycloak client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying Superset"
+      - path: "{{ superset_authentik_client_secret_local_file }}"
+        description: "Superset Authentik client secret"
+        prerequisite: "Converge the Authentik runtime before deploying Superset"
       - path: "{{ superset_controller_bootstrap_script_local_path }}"
         description: "Superset bootstrap helper script"
         prerequisite: "Ensure the repo bootstrap helper exists before deploying Superset"
@@ -122,7 +122,7 @@
     superset_admin_password: "{{ superset_decoded_secrets[1] }}"
     superset_database_password: "{{ lookup('ansible.builtin.file', superset_database_password_local_file) | trim }}"
     superset_reader_password: "{{ lookup('ansible.builtin.file', superset_reader_password_local_file) | trim }}"
-    superset_keycloak_client_secret: "{{ lookup('ansible.builtin.file', superset_keycloak_client_secret_local_file) | trim }}"
+    superset_authentik_client_secret: "{{ lookup('ansible.builtin.file', superset_authentik_client_secret_local_file) | trim }}"
     superset_expected_postgres_databases: "{{ lookup('ansible.builtin.file', superset_postgres_database_catalog_local_file) | from_json }}"
     superset_metadata_database_uri: >-
       postgresql+psycopg2://{{ superset_database_user }}:{{
@@ -139,7 +139,7 @@
           ('-csearch_path=' ~ superset_database_schema ~ ',public') | urlencode
         }}
       SUPERSET_ADMIN_PASSWORD: "{{ superset_decoded_secrets[1] }}"
-      SUPERSET_KEYCLOAK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', superset_keycloak_client_secret_local_file) | trim }}"
+      SUPERSET_AUTHENTIK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', superset_authentik_client_secret_local_file) | trim }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Superset

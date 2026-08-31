@@ -19,7 +19,7 @@ python3 scripts/operator_manager.py offboard --id alice-example --emit-json
 The offboarding flow:
 
 1. marks the operator inactive in `config/operators.yaml`
-2. disables the Keycloak user instead of deleting it
+2. disables the Authentik user instead of deleting it
 3. upserts the OpenBao entity in a disabled state
 4. optionally invokes the configured step-ca revocation hook
 5. removes matching Tailscale devices when API credentials are configured
@@ -51,7 +51,7 @@ The report flags operators with no recorded activity for 45 days and marks opera
 
 ## Failure Handling
 
-- If Keycloak disable succeeds but OpenBao or Tailscale fails, rerun the same offboard command. The flow is idempotent.
+- If Authentik disable succeeds but OpenBao or Tailscale fails, rerun the same offboard command. The flow is idempotent.
 - For controller-local OpenBao mutations, forward `docker-runtime` `127.0.0.1:8201` and export `LV3_OPENBAO_URL` to that forwarded loopback endpoint before rerunning the command; the shared service catalog URL remains the private mTLS listener and is not the operator-manager automation path.
 - If Tailscale credentials are unavailable, the repo-managed flow now records a skipped device-removal step instead of aborting the entire offboard. Remove the device manually in the admin console and record the action in the same incident thread or receipt.
 - If emergency SSH revocation is required, configure `LV3_STEP_CA_SSH_REVOKE_COMMAND` to point at the approved revocation wrapper and rerun the offboard command.

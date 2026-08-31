@@ -1,35 +1,38 @@
 {
-  "receipt_id": "2026-07-02-keycloak-plane-test-sso-user-live-apply",
   "applied_at_utc": "2026-07-02T09:45:08Z",
-  "applied_by": "codex",
+  "applied_on": "2026-07-02",
   "environment": "production",
-  "target": {
-    "service": "keycloak",
-    "vm": "runtime-control",
-    "realm": "0mcp",
-    "user": "plane-test@example.org"
-  },
-  "summary": "Created a minimal Keycloak SSO test user so the operator can pass oauth2-proxy before testing the Plane local account.",
-  "changes": [
-    "Authenticated to the live Keycloak admin CLI on runtime-control using the existing bootstrap admin recovery secret.",
-    "Created or updated the Keycloak user plane-test / plane-test@example.org in realm 0mcp.",
-    "Set the user as enabled and email-verified with no required actions for temporary testing.",
-    "Set a non-temporary password matching the Plane local test account password.",
-    "Mapped the user to the grafana-viewers group and platform-read realm role."
+  "evidence_refs": [
+    "docs/postmortems/2026-08-26-serverclaw-publish-blockers.md",
+    "workstreams/active/revive-receipts-ssh-key-plane-test-user.yaml"
+  ],
+  "notes": [
+    "Historical Keycloak evidence retained for auditability. The provider was later retired under ADR 0491 and this receipt does not describe an active identity path."
+  ],
+  "receipt_id": "2026-07-02-keycloak-plane-test-sso-user-live-apply",
+  "recorded_by": "codex",
+  "recorded_on": "2026-07-02",
+  "repo_version_context": "0.179.49",
+  "schema_version": "1.0.0",
+  "source_commit": "cc9be78ed0dae73d93b50ae0544eb27f4c7c28dc",
+  "summary": "Created a minimal historical Keycloak test identity for protected Plane-edge testing.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "runtime-control"
+    }
   ],
   "verification": [
     {
-      "check": "Keycloak user mapping",
-      "result": "plane-test@example.org is present in realm 0mcp, belongs to grafana-viewers, and has platform-read plus default realm roles."
+      "check": "Historical identity mapping",
+      "observed": "The designated test identity and required view/read roles were present in the then-active identity provider.",
+      "result": "pass"
     },
     {
-      "check": "Keycloak credential verification",
-      "result": "The realm token endpoint accepted the username/password grant for plane-test and returned access and refresh tokens."
-    },
-    {
-      "check": "Plane edge gate",
-      "result": "https://plane.example.org/ returns HTTP/2 302 to oauth2-proxy sign-in, confirming the public Plane hostname is still protected by SSO."
+      "check": "Historical protected-edge behavior",
+      "observed": "The public Plane endpoint redirected unauthenticated requests to the then-active SSO gate.",
+      "result": "pass"
     }
   ],
-  "sensitive_material": "The temporary password was returned only to the operator in chat and is intentionally not recorded in this receipt."
+  "workflow_id": "converge-keycloak"
 }

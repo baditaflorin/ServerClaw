@@ -139,11 +139,6 @@ except Exception:
 
 recover_vm_120() {
     recover_from_vm_batch 120 docker-runtime \
-        /etc/lv3/keycloak/bootstrap-admin-password       keycloak/bootstrap-admin-password.txt \
-        /etc/lv3/keycloak/admin-client-secret             keycloak/admin-client-secret.txt \
-        /etc/lv3/keycloak/florin.badita-password           keycloak/florin.badita-password.txt \
-        /etc/lv3/keycloak/outline.automation-password      keycloak/outline.automation-password.txt \
-        /etc/lv3/keycloak/recovery-admin-service-secret    keycloak/recovery-admin-service-secret.txt \
         /etc/lv3/gitea/admin-password                     gitea/admin-password.txt \
         /etc/lv3/gitea/admin-token                        gitea/admin-token.txt \
         /etc/lv3/gitea/webhook-secret                     gitea/webhook-secret.txt \
@@ -240,9 +235,16 @@ recover_vm_120() {
         /etc/lv3/openbao/init.json                        openbao/init.json
 }
 
+recover_vm_192() {
+    recover_from_vm_batch 192 runtime-control \
+        /etc/lv3/authentik/secret-key          authentik/secret-key.txt \
+        /etc/lv3/authentik/postgres-password   authentik/postgres-password.txt \
+        /etc/lv3/authentik/bootstrap-token     authentik/bootstrap-token.txt \
+        /etc/lv3/authentik/bootstrap-password  authentik/bootstrap-password.txt
+}
+
 recover_vm_150() {
     recover_from_vm_batch 150 postgres \
-        /etc/lv3/postgres/keycloak-password.txt           keycloak/database-password.txt \
         /etc/lv3/postgres/dify-password.txt               dify/database-password.txt \
         /etc/lv3/postgres/directus-password.txt           directus/database-password.txt \
         /etc/lv3/postgres/flagsmith-password.txt           flagsmith/database-password.txt \
@@ -287,6 +289,7 @@ log "Starting parallel recovery from all VMs..."
 start_time=$(date +%s)
 
 recover_vm_120 &
+recover_vm_192 &
 recover_vm_150 &
 recover_vm_110 &
 recover_vm_160 &

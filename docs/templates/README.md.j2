@@ -97,7 +97,7 @@ self-hosted platform:
 
 ### Services included
 
-SSO (Keycloak), secrets (OpenBao), databases (PostgreSQL), reverse proxy (Nginx),
+SSO (Authentik), secrets (OpenBao), databases (PostgreSQL), reverse proxy (Nginx),
 monitoring (Grafana + Prometheus), CI/CD (Woodpecker, Semaphore), Git hosting (Gitea),
 object storage (MinIO), container registry (Harbor), AI/LLM (Ollama, Dify, LiteLLM,
 LibreChat, Open WebUI), project management (Plane, Vikunja), communication
@@ -149,14 +149,14 @@ make docker-dev-down         # Cleanup
 ```
 Proxmox VE Host (Debian 13, bare metal)
   |
-  +-- nginx-edge        (10.10.10.10)  Reverse proxy, TLS termination
-  +-- docker-runtime    (10.10.10.20)  Primary application runtime
-  +-- docker-build      (10.10.10.30)  CI/CD build server
-  +-- monitoring        (10.10.10.40)  Grafana, Prometheus, Alertmanager
-  +-- postgres          (10.10.10.50)  Shared PostgreSQL 16
-  +-- backup            (10.10.10.60)  Proxmox Backup Server
-  +-- runtime-control   (10.10.10.92)  API gateway, agent tools
-  +-- runtime-ai        (10.10.10.90)  GPU workloads (Ollama, inference)
+  +-- nginx-edge        (edge VM)      Reverse proxy, TLS termination
+  +-- docker-runtime    (runtime VM)   Primary application runtime
+  +-- docker-build      (build VM)     CI/CD build server
+  +-- monitoring        (monitoring)   Grafana, Prometheus, Alertmanager
+  +-- postgres          (database VM)  Shared PostgreSQL 16
+  +-- backup            (backup VM)    Proxmox Backup Server
+  +-- runtime-control   (control VM)   API gateway, agent tools
+  +-- runtime-ai        (AI runtime)   GPU workloads (Ollama, inference)
   +-- [additional VMs per topology]
 ```
 

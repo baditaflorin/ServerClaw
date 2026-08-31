@@ -74,9 +74,9 @@ make uptime-robot-manage ACTION=list-monitors
 Open a short maintenance window and confirm it appears in Uptime Kuma:
 
 ```bash
-make open-maintenance-window SERVICE=keycloak REASON="status-page verification" DURATION_MINUTES=5
+make open-maintenance-window SERVICE=authentik REASON="status-page verification" DURATION_MINUTES=5
 make uptime-kuma-manage ACTION=list-maintenances
-make close-maintenance-window SERVICE=keycloak
+make close-maintenance-window SERVICE=authentik
 ```
 
 ## Notes

@@ -50,7 +50,7 @@ The helper can also be run directly on a managed Docker guest:
 
 ```bash
 sudo /usr/local/bin/lv3-docker-publication-assurance \
-  --service-id keycloak \
+  --service-id authentik \
   --service-probe-base64 '<base64-json>' \
   --contract-base64 '<base64-json>' \
   --heal \

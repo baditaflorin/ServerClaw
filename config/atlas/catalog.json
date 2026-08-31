@@ -55,11 +55,6 @@
       "snapshot_path": "config/atlas/glitchtip.hcl"
     },
     {
-      "id": "keycloak",
-      "database": "keycloak",
-      "snapshot_path": "config/atlas/keycloak.hcl"
-    },
-    {
       "id": "langfuse",
       "database": "langfuse",
       "snapshot_path": "config/atlas/langfuse.hcl"

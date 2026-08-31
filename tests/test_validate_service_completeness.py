@@ -115,12 +115,11 @@ def test_authentik_client_evidence_satisfies_provider_aware_oidc_check(
     profile["requires_oidc"] = True
     profile["oidc_provider"] = "authentik"
     profile["authentik_client_generated"] = True
-    profile["keycloak_client_generated"] = False
     completeness_path.write_text(json.dumps(completeness, indent=2) + "\n", encoding="utf-8")
 
     service_completeness = load_service_completeness(monkeypatch, tmp_path)
     result = service_completeness.evaluate_service("test_echo")
-    oidc_item = next(item for item in result.items if item.item_id == "keycloak_client")
+    oidc_item = next(item for item in result.items if item.item_id == "oidc_client")
 
     assert oidc_item.label == "OIDC client scaffold"
     assert oidc_item.required is True
@@ -128,7 +127,7 @@ def test_authentik_client_evidence_satisfies_provider_aware_oidc_check(
     assert "selected provider authentik" in oidc_item.detail
 
 
-def test_selected_authentik_provider_rejects_unrelated_keycloak_evidence(
+def test_selected_authentik_provider_requires_authentik_evidence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     build_repo(tmp_path)
@@ -139,12 +138,11 @@ def test_selected_authentik_provider_rejects_unrelated_keycloak_evidence(
     profile["requires_oidc"] = True
     profile["oidc_provider"] = "authentik"
     profile["authentik_client_generated"] = False
-    profile["keycloak_client_generated"] = True
     completeness_path.write_text(json.dumps(completeness, indent=2) + "\n", encoding="utf-8")
 
     service_completeness = load_service_completeness(monkeypatch, tmp_path)
     result = service_completeness.evaluate_service("test_echo")
-    oidc_item = next(item for item in result.items if item.item_id == "keycloak_client")
+    oidc_item = next(item for item in result.items if item.item_id == "oidc_client")
 
     assert oidc_item.required is True
     assert oidc_item.present is False

@@ -2,10 +2,10 @@
 # Neko Remote Desktop Role Defaults
 
 # --- Multi-instance configuration (primary interface) ---
-# Each entry provisions an isolated browser container + Keycloak user.
+# Each entry provisions an isolated browser container for an existing Authentik user.
 # Key = instance name (used for container name, data dir, logs).
 # Removing an entry from this dict causes the container to be destroyed
-# and the Keycloak user to be deleted on the next converge.
+# and its Authentik Neko assignment to be removed on the next converge.
 #
 # Example:
 #   neko_instances:
@@ -44,16 +44,15 @@ neko_log_driver: "json-file"
 neko_log_max_size: "10m"
 neko_log_max_file: "3"
 
-# --- Keycloak user lifecycle ---
-# Admin API credentials (same vars used by keycloak_runtime role)
-# These are read from the controller environment or local secrets.
-neko_keycloak_realm: "lv3"
-neko_keycloak_admin_url: "https://sso.{{ platform_domain }}"
+# --- Authentik assignment lifecycle ---
+# The playbook reads the bootstrap API token from the controller-local Authentik
+# secret store. It never creates an identity or changes a password.
+neko_authentik_admin_url: "{{ authentik_oidc_base_url | default('https://id.' + platform_domain) }}"
 
-# Attribute set on Keycloak users managed by this role.
-# Used to identify users to clean up when removed from neko_instances.
-neko_keycloak_managed_attribute: "neko_managed"
-neko_keycloak_managed_attribute_value: "true"
+# Attribute used solely to track the Neko assignment. Removing an instance
+# clears this attribute but intentionally preserves the Authentik user.
+neko_authentik_managed_attribute: "neko_managed"
+neko_authentik_managed_attribute_value: "true"
 
 # --- Change detection (do not edit manually) ---
 neko_runtime_image_pull_digest: ""

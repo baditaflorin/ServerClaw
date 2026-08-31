@@ -26,7 +26,7 @@ Concerns (phases):
     sso      — OIDC client declarations
 
 This script MUST NOT:
-    - Make live API calls (no Hetzner DNS API, no Keycloak API, no cert issuance)
+    - Make live API calls (no Hetzner DNS API, no Authentik API, no cert issuance)
     - Import requests at module load time (breaks --export-mcp validation container)
     - Modify files outside of config/generated/, config/subdomain-catalog.json,
       config/certificate-catalog.json, and inventory/group_vars/platform_hairpin.yml
@@ -78,7 +78,7 @@ HEALTH_PROBE_CATALOG_PATH = REPO_ROOT / "config" / "health-probe-catalog.json"
 CATALOG_PLATFORM_DOMAIN = "example.com"
 
 VALID_CONCERNS = ("hairpin", "dns", "tls", "proxy", "sso")
-VALID_SSO_PROVIDERS = {"authentik", "keycloak", "oauth2-proxy"}
+VALID_SSO_PROVIDERS = {"authentik", "oauth2-proxy"}
 VALID_DNS_TYPES = ("public", "internal")
 
 # FQDN must match this pattern: lowercase labels separated by dots, no leading/trailing hyphens.
@@ -334,7 +334,7 @@ def generate_sso_clients(registry: dict, write: bool = False, repo_root: Path = 
         )
 
         provider = require_str(
-            sso_config.get("provider", "keycloak"),
+            sso_config.get("provider", "authentik"),
             f"{path_prefix}.provider",
         )
         if provider not in VALID_SSO_PROVIDERS:

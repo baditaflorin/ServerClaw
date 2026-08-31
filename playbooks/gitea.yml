@@ -19,7 +19,7 @@
 #   - ADR 0143: Defines Gitea as the private Git forge for the platform.
 #   - ADR 0165: Requires playbook metadata for governed automation surfaces.
 #   - Role: lv3.platform.gitea_postgres — provisions the PostgreSQL backend and credentials.
-#   - Role: lv3.platform.gitea_runtime — converges the private Gitea runtime and Keycloak integration.
+#   - Role: lv3.platform.gitea_runtime — converges the private Gitea runtime and Authentik integration.
 #   - Role: lv3.platform.gitea_actions_runner — converges the private Actions runner on docker-build.
 #
 # Related ADRs: 0143, 0165, 0229
@@ -62,7 +62,7 @@
   roles:
     - role: lv3.platform.gitea_postgres
 
-- name: Converge private Gitea and its Keycloak client on runtime-control
+- name: Converge private Gitea on runtime-control
   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
@@ -70,11 +70,6 @@
     - tier-2
     - automation
     - service-gitea
-  vars:
-    keycloak_secret_dir: /etc/{{ platform_identity.unix_prefix }}/keycloak
-    keycloak_local_artifact_dir: "{{ repo_shared_local_root }}/keycloak"
-    proxmox_guests: "{{ hostvars[platform_topology_host].proxmox_guests }}"
-
   pre_tasks:
     - name: Run shared preflight checks
       ansible.builtin.import_tasks: tasks/preflight.yml
@@ -88,7 +83,6 @@
   roles:
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.docker_runtime
-    - role: lv3.platform.keycloak_runtime
     - role: lv3.platform.gitea_runtime
 
   post_tasks:

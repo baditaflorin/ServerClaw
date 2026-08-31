@@ -48,7 +48,7 @@ def test_outline_converge_requires_explicit_deployment_selection() -> None:
     )
 
 
-def test_outline_workflow_declares_authentik_and_keycloak_rollback_secrets() -> None:
+def test_outline_workflow_declares_authentik_and_durable_api_secrets() -> None:
     workflow = json.loads(WORKFLOW_CATALOG_PATH.read_text(encoding="utf-8"))["workflows"]["converge-outline"]
 
     assert "preflight-outline-deployment-selection" in workflow["validation_targets"]
@@ -56,16 +56,15 @@ def test_outline_workflow_declares_authentik_and_keycloak_rollback_secrets() -> 
     required = set(workflow["preflight"]["required_secret_ids"])
     assert {
         "authentik_outline_client_secret",
-        "keycloak_outline_client_secret",
         "outline_api_token",
     } <= required
 
 
-def test_outline_authentik_secret_is_cataloged_without_removing_keycloak_rollback() -> None:
+def test_outline_authentik_secret_is_cataloged_as_the_only_oidc_secret() -> None:
     controller = json.loads(CONTROLLER_SECRET_PATH.read_text(encoding="utf-8"))["secrets"]
     catalog = {entry["id"]: entry for entry in json.loads(SECRET_CATALOG_PATH.read_text(encoding="utf-8"))["secrets"]}
 
     assert controller["authentik_outline_client_secret"]["path"] == (".local/authentik/outline-client-secret.txt")
     assert catalog["authentik_outline_client_secret"]["owner_service"] == "outline"
-    assert controller["keycloak_outline_client_secret"]["status"] == "active"
-    assert catalog["keycloak_outline_client_secret"]["owner_service"] == "outline"
+    assert "keycloak_outline_client_secret" not in controller
+    assert "keycloak_outline_client_secret" not in catalog

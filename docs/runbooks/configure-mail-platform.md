@@ -86,7 +86,7 @@ The same converge also publishes a private SMTP submission relay for local platf
 - `10.10.10.92:1587`
 - `<config-prefix>-mail-stalwart:1587` from containers attached to `mail-platform_default`
 
-The host-address form is intended for VM-local platform workloads that can consume the runtime-control host address directly. The container-DNS form is intended for workloads that share the mail Docker network on `runtime-control`. STARTTLS stays disabled on this listener for plaintext-auth internal consumers. Keycloak uses the shared-network hostname `<config-prefix>-mail-stalwart:1587` because both the host-private path and the public hostname path proved unreliable from another container network. Public client submission remains on TCP `587`.
+The host-address form is intended for VM-local platform workloads that can consume the runtime-control host address directly. The container-DNS form is intended for workloads that share the mail Docker network on `runtime-control`. STARTTLS stays disabled on this listener for plaintext-auth internal consumers. Authentik uses the shared-network hostname `<config-prefix>-mail-stalwart:1587` because both the host-private path and the public hostname path proved unreliable from another container network. Public client submission remains on TCP `587`.
 
 ## Non-Production SMTP Contract
 

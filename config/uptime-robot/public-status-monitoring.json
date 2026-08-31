@@ -13,9 +13,9 @@
   ],
   "monitors": [
     {
-      "friendly_name": "lv3 SSO Discovery",
+      "friendly_name": "lv3 Authentik Readiness",
       "type": 1,
-      "url": "https://sso.example.com/realms/lv3/.well-known/openid-configuration",
+      "url": "https://id.example.com/-/health/ready/",
       "interval": 300,
       "alert_contacts": [
         "lv3 operator email",

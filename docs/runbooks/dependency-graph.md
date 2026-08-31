@@ -84,12 +84,12 @@ The remote validation gate also includes the dedicated `dependency-graph` check 
 ```bash
 python3 - <<'PY'
 import promotion_pipeline
-print(promotion_pipeline.deployment_order(["ops_portal", "keycloak", "postgres"]))
+print(promotion_pipeline.deployment_order(["ops_portal", "authentik", "postgres"]))
 PY
 ```
 
 Expected output:
 
 ```text
-['postgres', 'keycloak', 'ops_portal']
+['postgres', 'authentik', 'ops_portal']
 ```

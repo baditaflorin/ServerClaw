@@ -99,9 +99,9 @@
       - route_id: gitea
         prefix: /gitea
         upstream: "{{ platform_service_topology | platform_service_url('gitea', 'internal') }}"
-      - route_id: keycloak
-        prefix: /keycloak
-        upstream: http://127.0.0.1:18080
+      - route_id: authentik
+        prefix: /authentik
+        upstream: "{{ platform_service_topology | platform_service_url('authentik', 'internal') }}"
       - route_id: mail-platform
         prefix: /mail-platform
         upstream: "{{ platform_service_topology.mail_platform.urls.private_api }}"
@@ -202,7 +202,7 @@
 - import_playbook: step-ca.yml
 - import_playbook: openbao.yml
 - import_playbook: mail-platform.yml
-- import_playbook: keycloak.yml
+- import_playbook: authentik.yml
 - import_playbook: openfga.yml
 - import_playbook: nats-jetstream.yml
 - import_playbook: gitea.yml
@@ -232,9 +232,9 @@
         timeout: 30
       changed_when: false
 
-    - name: Verify the runtime-control Traefik route to Keycloak
+    - name: Verify the runtime-control Traefik route to Authentik
       ansible.builtin.uri:
-        url: http://127.0.0.1:9080/keycloak/realms/lv3/.well-known/openid-configuration
+        url: http://127.0.0.1:9080/authentik/-/health/ready/
         method: GET
         status_code:
           - 200
@@ -290,7 +290,6 @@
       - /opt/api-gateway/docker-compose.yml
       - /opt/gitea/docker-compose.yml
       - /opt/harbor/installer/harbor/docker-compose.yml
-      - /opt/keycloak/docker-compose.yml
       - /opt/mail-platform/docker-compose.yml
       - /opt/nats-jetstream/docker-compose.yml
       - /opt/openbao/docker-compose.yml

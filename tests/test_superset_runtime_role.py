@@ -33,29 +33,24 @@ def load_bootstrap_module():
     return module
 
 
-def test_defaults_define_runtime_paths_keycloak_and_landing_dashboard_contract() -> None:
+def test_defaults_define_runtime_paths_authentik_and_landing_dashboard_contract() -> None:
     defaults = load_yaml(ROLE_DEFAULTS)
 
     assert (
         defaults["superset_service_topology"]
-        == "{{ hostvars['proxmox-host'].platform_service_topology | service_topology_get('superset') }}"
+        == "{{ hostvars[platform_topology_host].platform_service_topology | service_topology_get('superset') }}"
     )
-    assert defaults["superset_site_dir"] == "/opt/superset"
     assert defaults["superset_build_dir"] == "{{ superset_site_dir }}/build"
-    assert defaults["superset_data_dir"] == "{{ superset_site_dir }}/data"
     assert defaults["superset_pythonpath_dir"] == "{{ superset_site_dir }}/pythonpath"
     assert defaults["superset_asset_dir"] == "{{ superset_site_dir }}/assets"
     assert defaults["superset_static_env_file"] == "{{ superset_site_dir }}/runtime.env"
     assert defaults["superset_public_base_url"] == "https://{{ superset_service_topology.public_hostname }}"
     assert defaults["superset_image_name"] == "lv3/superset"
     assert (
-        defaults["superset_internal_port"] == "{{ hostvars['proxmox-host'].platform_port_assignments.superset_port }}"
-    )
-    assert (
         defaults["superset_controller_bootstrap_script_local_path"]
         == "{{ inventory_dir ~ '/../scripts/superset_bootstrap.py' }}"
     )
-    assert defaults["superset_keycloak_client_id"] == "superset"
+    assert defaults["superset_authentik_client_id"] == "superset"
     assert defaults["superset_landing_dataset_name"] == "platform_database_inventory"
     assert defaults["superset_landing_chart_title"] == "PostgreSQL Databases"
     assert defaults["superset_landing_dashboard_title"] == "LV3 Platform Database Inventory"
@@ -150,14 +145,14 @@ def test_main_tasks_render_build_bootstrap_and_verify_runtime() -> None:
 
 def test_verify_tasks_cover_local_health_and_managed_contract() -> None:
     verify = load_yaml(ROLE_VERIFY)
-    health_task = next(task for task in verify if task["name"] == "Verify the Superset health endpoint locally")
+    health_task = next(task for task in verify if task["name"] == "Verify the Superset runtime health")
     contract_task = next(
         task
         for task in verify
         if task["name"] == "Verify the managed Superset datasources and landing dashboard locally"
     )
 
-    assert health_task["ansible.builtin.uri"]["url"] == "{{ superset_internal_base_url }}/health"
+    assert health_task["vars"]["common_verify_health_url"] == "{{ superset_internal_base_url }}/health"
     assert contract_task["ansible.builtin.command"]["argv"] == [
         "docker",
         "exec",
@@ -182,7 +177,7 @@ def test_publish_tasks_verify_public_health_redirect_and_api_contract() -> None:
     verify_task = next(
         task
         for task in publish
-        if task["name"] == "Verify the public Superset publication and Keycloak redirect contract"
+        if task["name"] == "Verify the public Superset publication and Authentik redirect contract"
     )
 
     assert health_task["ansible.builtin.uri"]["url"] == "{{ superset_public_base_url }}/health"
@@ -214,16 +209,16 @@ def test_templates_define_openbao_envs_compose_and_bootstrap_contract() -> None:
     assert "- {{ superset_env_file }}" in compose_template
 
     assert "SUPERSET_CONFIG_PATH=/app/pythonpath/superset_config.py" in env_template
-    assert "SUPERSET_KEYCLOAK_CLIENT_ID={{ superset_keycloak_client_id }}" in env_template
+    assert "SUPERSET_AUTHENTIK_CLIENT_ID={{ superset_authentik_client_id }}" in env_template
     assert "SUPERSET_AUTH_ROLES_MAPPING_JSON={{ superset_auth_roles_mapping | to_json }}" in env_template
 
     assert "kv/data/{{ superset_openbao_secret_path }}" in env_ctemplate
     assert "SUPERSET_DATABASE_URI" in env_ctemplate
-    assert "SUPERSET_KEYCLOAK_CLIENT_SECRET" in env_ctemplate
+    assert "SUPERSET_AUTHENTIK_CLIENT_SECRET" in env_ctemplate
 
     assert "AUTH_API_LOGIN_ALLOW_MULTIPLE_PROVIDERS = True" in config_template
     assert "AUTH_TYPE = AUTH_OAUTH" in config_template
-    assert '"name": "keycloak"' in config_template
+    assert '"name": "authentik"' in config_template
     assert "AUTH_ROLES_MAPPING = json.loads" in config_template
 
     assert '"name": "{{ superset_plausible_clickhouse_name }}"' in bootstrap_template

@@ -13,7 +13,7 @@ This runbook describes the second hardening and extensibility wave for the Flori
 
 ADRs 0001–0048 built the physical and logical platform: Proxmox host, six VMs, PKI, secrets, identity, workflows, and control-plane lanes.
 
-ADRs 0049–0071 defined the observability, operational tools (Keycloak, Mattermost, NetBox, Portainer), hardening (network policy, image policy, secret rotation, audit logging), and early agent automation.
+ADRs 0049–0071 defined the observability, operational tools (the identity broker, Mattermost, NetBox, Portainer), hardening (network policy, image policy, secret rotation, audit logging), and early agent automation.
 
 ADRs 0072–0081 address the gaps that remain before the platform can be operated confidently by any team member or agent without institutional memory:
 
@@ -93,7 +93,7 @@ ADR 0079 — Playbook Decomposition and Shared Execution Model
 ADR 0077 — Compose Runtime Secrets Injection via OpenBao Agent
 ```
 
-**ADR 0077** removes the last major plaintext-on-disk surface: `.env` files in Compose directories. An OpenBao Agent sidecar fetches secrets at startup into a `tmpfs` volume and re-fetches on TTL expiry. The five priority stacks (Grafana, Windmill, Mattermost, Keycloak, Open WebUI) are migrated first.
+**ADR 0077** removes the last major plaintext-on-disk surface: `.env` files in Compose directories. An OpenBao Agent sidecar fetches secrets at startup into a `tmpfs` volume and re-fetches on TTL expiry. The five priority stacks (Grafana, Windmill, Mattermost, Authentik, and the retired workbench) are migrated first.
 
 **Recommended delivery order:** 0077 (self-contained; no dependencies from this wave beyond live-applied ADRs)
 

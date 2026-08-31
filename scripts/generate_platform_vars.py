@@ -63,6 +63,7 @@ GENERATION_IDENTITY_ALLOWED_KEYS = {
     "management_ipv4",
     "management_ipv6",
     "management_ipv6_cidr",
+    "management_tailscale_ipv4",
     "platform_domain",
 }
 
@@ -205,7 +206,6 @@ PORT_KEYS = (
     "tesseract_ocr_port",
     "headscale_http_port",
     "vaultwarden_https_port",
-    "keycloak_internal_http_port",
     "mail_platform_internal_submission_port",
 )
 
@@ -396,7 +396,7 @@ def load_sources(
         f"{SERVICE_REGISTRY_PATH}.platform_service_registry",
     )
     # Only merge plain string/int/bool values — skip Jinja2-templated values that
-    # reference other identity vars (e.g. keycloak_oidc_issuer_url) to avoid
+    # reference other identity vars to avoid
     # partially-rendered strings propagating into platform.yml.
     for key, val in identity_vars.items():
         if key not in host_vars and isinstance(val, (str, int, bool)) and "{{" not in str(val):
@@ -655,9 +655,6 @@ def build_service_urls(
     elif service_id == "uptime_kuma":
         urls["internal"] = service_url("http", private_ip, extract_port(service["edge"]["upstream"], "edge.upstream"))
         port_map["internal"] = extract_port(service["edge"]["upstream"], "edge.upstream")
-    elif service_id == "keycloak":
-        urls["internal"] = service_url("http", private_ip, ports["keycloak_internal_http_port"])
-        port_map["internal"] = ports["keycloak_internal_http_port"]
     elif service_id == "mail_platform":
         urls["private_api"] = require_string(
             stack["desired_state"]["mail"]["api_private_url"],
@@ -710,9 +707,6 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["gitea_host_proxy_port"])
         port_map["internal"] = ports["gitea_http_port"]
         port_map["controller"] = ports["gitea_host_proxy_port"]
-    elif service_id == "keycloak":
-        urls["internal"] = service_url("http", private_ip, ports["keycloak_internal_http_port"])
-        port_map["internal"] = ports["keycloak_internal_http_port"]
     elif service_id == "netbox":
         urls["internal"] = service_url("http", private_ip, ports["netbox_server_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["netbox_host_proxy_port"])
@@ -1076,17 +1070,17 @@ def build_tcp_proxies(host_vars: dict[str, Any], ports: dict[str, int]) -> list[
 
 
 def build_platform_session_authority(service_topology: dict[str, Any], host_vars: dict[str, Any]) -> dict[str, str]:
-    keycloak_service = require_mapping(
-        service_topology.get("keycloak"),
-        "platform_service_topology.keycloak",
+    authentik_service = require_mapping(
+        service_topology.get("authentik"),
+        "platform_service_topology.authentik",
     )
     ops_portal_service = require_mapping(
         service_topology.get("ops_portal"),
         "platform_service_topology.ops_portal",
     )
-    keycloak_public_url = require_string(
-        require_mapping(keycloak_service.get("urls"), "platform_service_topology.keycloak.urls").get("public"),
-        "platform_service_topology.keycloak.urls.public",
+    authentik_public_url = require_string(
+        require_mapping(authentik_service.get("urls"), "platform_service_topology.authentik.urls").get("public"),
+        "platform_service_topology.authentik.urls.public",
     )
     ops_portal_public_url = require_string(
         require_mapping(
@@ -1101,7 +1095,7 @@ def build_platform_session_authority(service_topology: dict[str, Any], host_vars
             "platform_service_topology.ops_portal.public_hostname",
         ),
         "ops_portal_client_id": "ops-portal-oauth",
-        "keycloak_logout_url": f"{keycloak_public_url}/realms/lv3/protocol/openid-connect/logout",
+        "oidc_logout_url": f"{authentik_public_url}/application/o/ops-portal/end-session/",
         "oauth2_proxy_sign_out_url": f"{ops_portal_public_url}/oauth2/sign_out",
         "shared_logout_path": SESSION_AUTHORITY_SHARED_LOGOUT_PATH,
         "shared_logout_url": f"{ops_portal_public_url}{SESSION_AUTHORITY_SHARED_LOGOUT_PATH}",

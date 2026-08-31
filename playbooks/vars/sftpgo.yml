@@ -4,7 +4,7 @@ service_dns_fqdn: files.{{ platform_domain }}
 service_postgres_role: lv3.platform.sftpgo_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime
-  - lv3.platform.keycloak_runtime
+  - lv3.platform.authentik_runtime
   - lv3.platform.sftpgo_runtime
 service_needs_dns: true
 service_needs_postgres: true

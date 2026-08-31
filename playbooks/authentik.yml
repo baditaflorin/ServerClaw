@@ -1,10 +1,9 @@
 ---
 # Playbook: authentik.yml
 # Purpose: Converge DNS publication, runtime state, and edge publication for the
-#   repo-managed Authentik SSO broker (ADR 0491, replacing Keycloak).
-# Use case: Run during initial Authentik deployment or recovery when the
-#   identity broker must match repo truth. Deliberately parallel to Keycloak
-#   (id.example.org, not sso.example.org) during the Phase 1-2 migration window.
+#   repo-managed Authentik SSO broker (ADR 0491).
+# Use case: Run during initial Authentik deployment, client cutover, or recovery
+#   when the platform identity broker must match repository truth.
 #
 # Inputs (required):
 #   - env (string, required): Target environment selector used to choose the
@@ -21,11 +20,10 @@
 # Idempotency: Fully idempotent
 #
 # Dependencies:
-#   - ADR 0491: Authentik replaces Keycloak as the shared identity plane.
+#   - ADR 0491: Authentik is the shared identity plane.
 #   - Requires: runtime-control and the shared edge stack to already exist.
 #   - Role: lv3.platform.authentik_runtime - converges the application runtime
-#     (self-contained Postgres + Redis, no shared-fleet-postgres dependency
-#     unlike Keycloak).
+#     (self-contained Postgres + Redis, with no shared-fleet-postgres dependency).
 #
 # Related ADRs: 0056, 0077, 0078, 0491
 # Related Runbooks: docs/runbooks/configure-authentik.md

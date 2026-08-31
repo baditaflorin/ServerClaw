@@ -25,8 +25,8 @@ Two design notes:
   module — it shells out to `ansible-playbook`. That keeps the test
   suite light: tests cover the helper functions directly, no Ansible
   install required.
-- A role can be referenced by either short name (e.g. `keycloak_runtime`)
-  or fully-qualified name (`lv3.platform.keycloak_runtime`). The
+- A role can be referenced by either short name (e.g. `authentik_runtime`)
+  or fully-qualified name (`lv3.platform.authentik_runtime`). The
   discovery routine accepts both. ADR 0438 keeps the flat `roles/` tree
   mirrored to `collections/.../roles/`, so a role usually exists under
   both paths.

@@ -12,7 +12,7 @@ argument_specs:
         type: str
         required: true
         description: >-
-          Unique slug for this service (e.g. "keycloak", "directus").
+          Unique slug for this service (e.g. "authentik", "directus").
           Becomes the fragment filename: {{ nginx_fragment_dir }}/{{ slug }}.conf
       nginx_fragment_content:
         type: str

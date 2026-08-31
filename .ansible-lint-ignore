@@ -1,7 +1,49 @@
 # Existing large orchestration roles remain single files until their owning
 # workstreams split them into smaller task includes.
 collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml complexity[tasks]
-collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml complexity[tasks]
 collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml complexity[tasks]
 collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml complexity[tasks]
-collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml complexity[tasks]
+
+# These role-local compose tasks extend Ansible's runtime-only search path with
+# role_path. ansible-lint attempts to recursively render that special variable
+# during static analysis, even though Ansible resolves it correctly at runtime.
+collections/ansible_collections/lv3/platform/roles/dify_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/directus_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/flagsmith_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/grist_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/label_studio_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/lago_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/langfuse_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/librechat_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/litellm_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/livekit_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/matrix_synapse_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/mattermost_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/minio_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/n8n_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/netbox_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/nextcloud_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/openfga_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/outline_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/paperless_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/plane_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/plausible_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/rag_context_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/redpanda_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/semaphore_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/sftpgo_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/superset_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/temporal_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/typesense_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/vikunja_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml jinja[invalid]
+collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/tasks/main.yml jinja[invalid]
+
+# Existing non-migration findings retained as per-file exceptions until their
+# owning roles are refactored; new paths still remain lint-blocking.
+collections/ansible_collections/lv3/platform/roles/common/tasks/derive_service_defaults.yml jinja[spacing]
+collections/ansible_collections/lv3/platform/roles/coolify_app_deploy/tasks/main.yml jinja[spacing]
+collections/ansible_collections/lv3/platform/roles/neko_runtime/handlers/main.yml args[module]

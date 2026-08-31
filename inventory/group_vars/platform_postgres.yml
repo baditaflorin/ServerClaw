@@ -5,6 +5,10 @@
 # source_vm is DERIVED from platform_service_registry[service].host_group at template render time (ADR 0416 Phase 2).
 # Do NOT add source_vm to entries — it is no longer used and will emit a LEGACY warning in pg_hba.conf.
 # This drives: pg_hba.conf (least-privilege), nftables allowed_inbound, and postgres_client role.
+# A client with connection_mode: ssh_tunnel is an operator-only local tunnel
+# endpoint. It intentionally has no service registry or remote pg_hba entry:
+# the database connection terminates on PostgreSQL's existing loopback policy.
+# Do not use that mode for a managed runtime service.
 platform_postgres_clients:
   - service: dify
     database: dify
@@ -40,13 +44,6 @@ platform_postgres_clients:
     password_local_file: "{{ repo_shared_root }}/.local/glitchtip/database-password.txt"
     password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/glitchtip"
     password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/glitchtip/database-password"
-
-  - service: keycloak
-    database: keycloak
-    user: keycloak
-    password_local_file: "{{ repo_shared_root }}/.local/keycloak/database-password.txt"
-    password_remote_dir: "/etc/{{ platform_identity.unix_prefix }}/keycloak"
-    password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/keycloak/database-password"
 
   - service: label_studio
     database: label_studio
@@ -215,8 +212,10 @@ platform_postgres_clients:
     database: postgres
     user: openbao_rotator
 
-  # DBeaver administrative access for database diagnostics and management
+  # DBeaver is operator-only and reaches PostgreSQL through an SSH tunnel, so
+  # its database connection terminates on loopback rather than a service VM.
   - service: dbeaver
+    connection_mode: ssh_tunnel
     database: postgres
     user: dbeaver
     password_local_file: "{{ repo_shared_root }}/.local/dbeaver/database-password.txt"

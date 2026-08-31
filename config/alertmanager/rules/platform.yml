@@ -25,16 +25,16 @@ groups:
 
   - name: platform_core_alerts
     rules:
-      - alert: KeycloakDown
-        expr: probe_success{service="keycloak",probe_kind="readiness"} == 0
+      - alert: AuthentikDown
+        expr: probe_success{service="authentik",probe_kind="readiness"} == 0
         for: 2m
         labels:
           severity: critical
-          service: keycloak
+          service: authentik
         annotations:
-          summary: Keycloak OIDC discovery is unreachable.
-          description: The Keycloak readiness probe has been failing for at least two minutes.
-          runbook_url: https://docs.{{ platform_domain }}/runbooks/keycloak-down/
+          summary: Authentik OIDC readiness is unreachable.
+          description: The Authentik readiness probe has been failing for at least two minutes.
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-authentik/
           dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-platform-overview/lv3-platform-overview
 
       - alert: PostgresDown
@@ -63,7 +63,7 @@ groups:
 
       - alert: CertificateExpiringSoon
         expr: |
-          (probe_ssl_earliest_cert_expiry{service=~"grafana|keycloak|mail_platform|openbao|portainer|step_ca|uptime_kuma|vaultwarden"} - time())
+          (probe_ssl_earliest_cert_expiry{service=~"authentik|grafana|mail_platform|openbao|portainer|step_ca|uptime_kuma|vaultwarden"} - time())
           < (14 * 24 * 60 * 60)
         for: 15m
         labels:

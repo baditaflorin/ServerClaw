@@ -68,6 +68,12 @@ argument_specs:
         description:
           - Operator-facing base URL for Windmill.
           - Derived by derive_service_defaults when not set explicitly.
+      windmill_verification_base_url:
+        type: str
+        required: false
+        description:
+          - Controller-side URL used only for authenticated Windmill verification requests.
+          - Defaults to windmill_base_url and may point at a transient trusted tunnel.
       windmill_database_name:
         type: str
         required: true
@@ -100,6 +106,23 @@ argument_specs:
         required: true
         description:
           - Repo-managed scripts that should be present in the workspace after convergence.
+      windmill_retire_keycloak_seed_assets:
+        type: bool
+        required: false
+        description:
+          - Whether explicitly listed superseded Keycloak Windmill assets may be retired after replacement sync.
+      windmill_retired_seed_script_paths:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Explicit legacy script paths to delete only after replacement schedules have synchronized.
+      windmill_retired_seed_schedule_paths:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Explicit legacy schedule paths to delete only after replacement schedules have synchronized.
       windmill_seed_raw_apps:
         type: list
         elements: dict

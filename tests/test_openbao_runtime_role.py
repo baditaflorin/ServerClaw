@@ -84,7 +84,7 @@ PLAYBOOK_SEED_ROTATION_METADATA_TASKS_PATH = (
     / "tasks"
     / "seed_rotation_metadata.yml"
 )
-GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all.yml"
+GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "main.yml"
 RUNTIME_SECRET_PROVISIONER_POLICY_PATH = (
     REPO_ROOT
     / "collections"
@@ -131,13 +131,16 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
     assert "postgres_ha.initial_primary" in defaults
     assert "ansible_host" in defaults
     assert "@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable" in defaults
-    assert "creation_statements: !unsafe |-" in defaults
-    assert "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';" in defaults
-    assert 'GRANT lv3_openbao_connect_all TO "{{name}}";' in defaults
-    assert 'GRANT pg_read_all_data TO "{{name}}";' in defaults
-    assert 'GRANT pg_use_reserved_connections TO "{{name}}";' in defaults
-    assert "revocation_statements: !unsafe |-" in defaults
-    assert 'DROP ROLE IF EXISTS "{{name}}";' in defaults
+    assert "creation_statements:" in defaults
+    assert (
+        "!unsafe 'CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD ''{{password}}'' VALID UNTIL ''{{expiration}}'';'"
+        in defaults
+    )
+    assert "!unsafe 'GRANT __OPENBAO_CONNECT_ROLE__ TO \"{{name}}\";'" in defaults
+    assert "!unsafe 'GRANT pg_read_all_data TO \"{{name}}\";'" in defaults
+    assert "!unsafe 'GRANT pg_use_reserved_connections TO \"{{name}}\";'" in defaults
+    assert "revocation_statements:" in defaults
+    assert "!unsafe 'DROP ROLE IF EXISTS \"{{name}}\";'" in defaults
     assert "{{ name }}" not in defaults
     assert "{{ password }}" not in defaults
     assert "{{ expiration }}" not in defaults
@@ -152,7 +155,7 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
         / "roles"
         / "openbao_runtime"
         / "templates"
-        / "policy-lv3-agent-atlas.hcl.j2"
+        / "policy-agent-atlas.hcl.j2"
     ).read_text(encoding="utf-8")
     assert "  - name: postgres-atlas-readonly\n" in defaults
     assert "  - postgres-atlas-readonly" in defaults
@@ -160,12 +163,12 @@ def test_openbao_runtime_defaults_use_postgres_primary_address() -> None:
 
 def test_generated_platform_vars_pin_openbao_to_postgres_primary_ip() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
-    host_vars = generate_platform_vars.load_yaml(generate_platform_vars.HOST_VARS_PATH)
+    host_vars = generate_platform_vars.load_yaml(generate_platform_vars.TOPOLOGY_HOST_VARS_PATH)
     primary_inventory_host = host_vars["postgres_ha"]["initial_primary"]
     primary_guest = next(guest for guest in host_vars["proxmox_guests"] if guest["name"] == primary_inventory_host)
 
     assert platform_vars["openbao_postgres_host"] == primary_guest["ipv4"]
-    assert platform_vars["platform_postgres_host"] == "database.example.com"
+    assert platform_vars["platform_postgres_host"] == "database.example.org"
 
 
 def test_guest_side_postgres_clients_use_the_primary_guest_address() -> None:
@@ -192,7 +195,7 @@ def test_guest_side_postgres_clients_use_the_primary_guest_address() -> None:
         / "main.yml"
     ).read_text(encoding="utf-8")
 
-    expected = "{{ hostvars[hostvars['proxmox-host'].postgres_ha.initial_primary].ansible_host }}"
+    expected = "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
 
     assert f'mattermost_database_host: "{expected}"' in mattermost_defaults
     assert f'netbox_database_host: "{expected}"' in netbox_defaults
@@ -257,8 +260,10 @@ def test_openbao_runtime_restores_legacy_runtime_control_state_when_local_init_e
     tasks = TASKS_PATH.read_text(encoding="utf-8")
 
     assert "openbao_legacy_restore_enabled: true" in defaults
-    assert "openbao_legacy_restore_target_host: runtime-control" in defaults
-    assert "openbao_legacy_restore_source_host: docker-runtime" in defaults
+    assert "openbao_legacy_restore_target_host:" in defaults
+    assert "playbook_execution_host_patterns.runtime_control[playbook_execution_env]" in defaults
+    assert "openbao_legacy_restore_source_host:" in defaults
+    assert "playbook_execution_host_patterns.docker_runtime[playbook_execution_env]" in defaults
     assert "Determine whether legacy OpenBao state restore is required" in tasks
     assert "Read the legacy OpenBao initialization status from the source host" in tasks
     assert "Capture the legacy OpenBao raft snapshot from the source host" in tasks
@@ -518,6 +523,7 @@ def test_openbao_runtime_sends_database_role_statements_to_openbao_as_lists() ->
     assert "openbao_database_role_rollback_statements" in tasks
     assert "openbao_database_role_renew_statements" in tasks
     assert "item.creation_statements is not string" in tasks
+    assert "map('replace', '__OPENBAO_CONNECT_ROLE__', openbao_postgres_connect_role)" in tasks
     assert "(item.rollback_statements | default([])) is not string" in tasks
     assert 'creation_statements: "{{ openbao_database_role_creation_statements }}"' in tasks
     assert 'revocation_statements: "{{ openbao_database_role_revocation_statements }}"' in tasks
@@ -776,20 +782,21 @@ def test_openbao_playbook_refresh_task_recovers_each_approle_through_unseal_chec
     refresh_tasks = yaml.safe_load(PLAYBOOK_REFRESH_APPROLE_TASKS_PATH.read_text(encoding="utf-8"))
     task_names = [task["name"] for task in refresh_tasks]
 
-    assert (
-        "Ensure OpenBao remains unsealed before refreshing the controller-local AppRole artifact for {{ openbao_refresh_approle.name }}"
-        in task_names
+    assert any(
+        name.startswith("Ensure OpenBao remains unsealed before refreshing the controller-local AppRole artifact")
+        and "openbao_refresh_approle" in name
+        for name in task_names
     )
-    assert (
-        "Persist the refreshed AppRole artifact locally after end-to-end verification for {{ openbao_refresh_approle.name }}"
-        in task_names
+    assert any(
+        name.startswith("Persist the refreshed AppRole artifact locally after end-to-end verification")
+        and "openbao_refresh_approle" in name
+        for name in task_names
     )
 
     request_task = next(
         task
         for task in refresh_tasks
-        if task["name"]
-        == "Generate the refreshed AppRole secret ID after end-to-end verification for {{ openbao_refresh_approle.name }}"
+        if task["name"].startswith("Generate the refreshed AppRole secret ID after end-to-end verification")
     )
     request_block = request_task["block"][0]
     request_module = request_block["ansible.builtin.uri"]
@@ -805,8 +812,7 @@ def test_openbao_playbook_refresh_task_recovers_each_approle_through_unseal_chec
     persist_task = next(
         task
         for task in refresh_tasks
-        if task["name"]
-        == "Persist the refreshed AppRole artifact locally after end-to-end verification for {{ openbao_refresh_approle.name }}"
+        if task["name"].startswith("Persist the refreshed AppRole artifact locally after end-to-end verification")
     )
     assert (
         "openbao_refresh_existing_artifacts[openbao_refresh_approle.name].role_id"
@@ -836,13 +842,13 @@ def test_openbao_playbook_verifies_dynamic_credentials_with_env_and_retries() ->
 def test_openbao_inventory_exports_controller_local_artifact_paths_used_outside_role_scope() -> None:
     group_vars = yaml.safe_load(GROUP_VARS_PATH.read_text(encoding="utf-8"))
 
-    assert group_vars["openbao_postgres_connect_role"] == "lv3_openbao_connect_all"
+    assert group_vars["openbao_postgres_connect_role"] == "{{ platform_sql_prefix }}_openbao_connect_all"
     assert (
         group_vars["openbao_controller_approle_local_file"]
-        == "{{ repo_shared_local_root }}/openbao/controller-automation-approle.json"
+        == "{{ openbao_local_artifact_dir }}/controller-automation-approle.json"
     )
-    assert group_vars["openbao_atlas_approle_local_file"] == "{{ repo_shared_local_root }}/openbao/atlas-approle.json"
+    assert group_vars["openbao_atlas_approle_local_file"] == "{{ openbao_local_artifact_dir }}/atlas-approle.json"
     assert (
         group_vars["openbao_mail_platform_approle_local_file"]
-        == "{{ repo_shared_local_root }}/openbao/mail-platform-approle.json"
+        == "{{ openbao_local_artifact_dir }}/mail-platform-approle.json"
     )

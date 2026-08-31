@@ -2,7 +2,7 @@
 # NOTE: Conventional variables (site_dir, image, compose_file, env_file,
 # openbao_*, container_name, internal_port, local_artifact_dir) are derived
 # from platform_service_registry — ADR 0373.
-# Purpose: Declare the shared defaults for converging the Harbor runtime, secrets, Keycloak integration, and verification artifacts.
+# Purpose: Declare the shared defaults for converging the Harbor runtime, secrets, Authentik integration, and verification artifacts.
 # Use case: Used whenever the harbor_runtime role renders Harbor, manages robot credentials, and verifies the registry path.
 #
 # Inputs (required):
@@ -52,16 +52,12 @@ harbor_prepare_with_trivy: true
 harbor_project_creation_restriction: adminonly
 harbor_trivy_security_check: vuln
 harbor_trivy_ignore_unfixed: false
-harbor_keycloak_local_admin_url: http://127.0.0.1:18080
-harbor_keycloak_public_base_url: https://sso.{{ platform_domain }}
-harbor_keycloak_realm_name: "{{ keycloak_realm_name }}"
-harbor_keycloak_bootstrap_admin_username: "{{ platform_identity.config_prefix }}-bootstrap-admin"
-harbor_keycloak_bootstrap_admin_password_remote_file: "/etc/{{ platform_identity.unix_prefix }}/keycloak/bootstrap-admin-password"
-harbor_keycloak_admin_group: harbor-admins
-harbor_keycloak_client_id: harbor
-harbor_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/harbor-client-secret.txt"
-harbor_keycloak_client_secret: ""
-harbor_oidc_provider_name: Keycloak
+harbor_authentik_oidc_issuer_url: "{{ authentik_oidc_provider_base_url }}/harbor/"
+harbor_authentik_admin_group: harbor-admins
+harbor_oidc_client_id: harbor
+harbor_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/harbor-client-secret.txt"
+harbor_oidc_client_secret: ""
+harbor_oidc_provider_name: Authentik
 harbor_oidc_scope: openid,profile,email,groups
 harbor_oidc_user_claim: preferred_username
 harbor_oidc_groups_claim: groups

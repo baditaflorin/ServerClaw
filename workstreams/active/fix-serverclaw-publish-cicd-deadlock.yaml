@@ -1,4 +1,5 @@
 id: fix-serverclaw-publish-cicd-deadlock
+adr: "0419"
 title: Fix ServerClaw publish CI/branch-protection deadlock
 status: ready
 ready_to_merge: true
@@ -7,7 +8,11 @@ depends_on: []
 conflicts_with: []
 owner: claude-agent
 branch: fix-serverclaw-publish-cicd-deadlock
+worktree_path: .worktrees/fix-serverclaw-publish-cicd-deadlock
 doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/fix-serverclaw-publish-cicd-deadlock.yaml
 ownership_manifest:
   owned_surfaces:
     - id: fix-serverclaw-publish-cicd-deadlock-code
@@ -15,9 +20,10 @@ ownership_manifest:
         - .woodpecker.yml
         - scripts/publish_to_serverclaw.py
         - workstreams/active/fix-serverclaw-publish-cicd-deadlock.yaml
-        - workstreams.yaml
         - docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
-      mode: exclusive
+      # The remediation is complete; retain this as read-only provenance so
+      # other release integration work can safely regenerate shared artifacts.
+      mode: read_only
 
 description: |
   ServerClaw's "Require Woodpecker on main" ruleset (added 2026-08-13) requires

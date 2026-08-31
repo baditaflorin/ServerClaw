@@ -65,7 +65,7 @@ Current profiles:
 
 - `postgres`: waits briefly for PostgreSQL to settle, treats `postgres_ready` as the network and dependency gate, then requires the schema and dump checks to pass before the warm-up stage is complete.
 - `backup-vm`: waits briefly for PBS to settle, treats `backup_pbs_port` as the network gate, then requires `proxmox-backup-manager datastore list` to pass before the warm-up stage is complete.
-- `docker-runtime`: waits for the restored runtime to settle, retries Keycloak, NetBox, and Windmill local readiness until they all pass or the profile budget is exhausted, then replays the governed `restore-docker-runtime` synthetic transaction window.
+- `docker-runtime`: waits for the restored runtime to settle, retries Authentik, NetBox, and Windmill local readiness until they all pass or the profile budget is exhausted, then replays the governed `restore-docker-runtime` synthetic transaction window.
 
 Each receipt now records:
 
@@ -86,11 +86,11 @@ That evidence makes it clear whether a restore failed before guest access, durin
 
 ### docker-runtime
 
-- Keycloak readiness endpoint from the local guest
+- Authentik readiness endpoint from the local guest
 - NetBox readiness endpoint from the local guest
 - Windmill readiness endpoint from the local guest
 - OpenBao readiness endpoint as a non-blocking observation
-- repeated synthetic control-plane reads for Keycloak discovery, NetBox login, Windmill API version, and OpenBao health with per-request latency capture
+- repeated synthetic control-plane reads for Authentik readiness, NetBox login, Windmill API version, and OpenBao health with per-request latency capture
 
 ### backup
 

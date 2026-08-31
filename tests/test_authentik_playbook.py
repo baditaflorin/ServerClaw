@@ -97,8 +97,8 @@ def test_converge_authentik_target_and_controller_catalogs_cover_safe_adoption()
         "make --no-print-directory preflight-authentik-deployment-selection env=production"
     )
     assert (
-        "https://sso.${platform_domain}/realms/${keycloak_realm}/"
-        in health_checks["keycloak_public_discovery"]["command"]
+        "https://id.${platform_domain}/application/o/glitchtip/"
+        in health_checks["authentik_public_discovery"]["command"]
     )
     oauth_verification = next(
         entry for entry in workflow["verification_commands"] if "reconcile_authentik_oauth.py" in entry
@@ -110,7 +110,7 @@ def test_converge_authentik_target_and_controller_catalogs_cover_safe_adoption()
     assert command["approval_policy"] == "sensitive_live_change"
     assert command["evidence"]["live_apply_receipt_required"] is True
     assert "stable Authentik provider/application identifiers" in command["evidence"]["notes"]
-    assert "Keycloak" in command["failure_guidance"]["rollback_guidance"][1]
+    assert "Authentik" in command["failure_guidance"]["rollback_guidance"][1]
     command_inputs = {entry["name"]: entry for entry in command["inputs"]}
     assert command_inputs["PLATFORM_IDENTITY_OVERLAY"]["required"] is True
     assert command_inputs["PLATFORM_TOPOLOGY_OVERLAY"]["required"] is True
@@ -210,7 +210,6 @@ def test_authentik_glitchtip_secret_is_complete_across_secret_and_service_catalo
     assert secret_entry["storage_ref"] == "authentik_glitchtip_client_secret"
     assert "authentik_glitchtip_client_secret" in services["authentik"]["secret_catalog_ids"]
     assert "authentik_glitchtip_client_secret" in services["glitchtip"]["secret_catalog_ids"]
-    assert "keycloak_glitchtip_client_secret" in services["glitchtip"]["secret_catalog_ids"]
     provisioner = controller_secrets["openbao_runtime_secret_provisioner_approle"]
     assert provisioner["path"] == ".local/openbao/runtime-secret-provisioner-approle.json"
     receipt = controller_secrets["openbao_runtime_secret_provisioner_bootstrap_receipt"]
@@ -218,7 +217,7 @@ def test_authentik_glitchtip_secret_is_complete_across_secret_and_service_catalo
     assert "openbao_runtime_secret_provisioner_approle" in services["openbao"]["secret_catalog_ids"]
 
 
-def test_generated_dependency_evidence_models_authentik_selection_and_keycloak_rollback() -> None:
+def test_generated_dependency_evidence_models_authentik_selection() -> None:
     graph = json.loads(DEPENDENCY_GRAPH_PATH.read_text(encoding="utf-8"))
     nodes = {entry["id"]: entry for entry in graph["nodes"]}
     edges = {(entry["from"], entry["to"]): entry for entry in graph["edges"]}
@@ -228,8 +227,6 @@ def test_generated_dependency_evidence_models_authentik_selection_and_keycloak_r
     assert edges[("authentik", "openbao")]["type"] == "startup_only"
     assert edges[("glitchtip", "authentik")]["type"] == "soft"
     assert "headless allauth redirect" in edges[("glitchtip", "authentik")]["description"]
-    assert edges[("glitchtip", "keycloak")]["type"] == "soft"
-    assert "rollback" in edges[("glitchtip", "keycloak")]["description"]
 
 
 def test_authentik_runbook_documents_safe_bootstrap_adoption_and_read_only_idempotence() -> None:

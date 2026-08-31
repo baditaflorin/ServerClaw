@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from scripts.ops_portal.runtime_assurance import build_runtime_assurance_models
 
 
+def fresh_timestamp() -> str:
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
 def test_runtime_assurance_builder_promotes_direct_receipt_evidence_to_pass() -> None:
+    recorded_on = fresh_timestamp()
     services = [
         {
             "id": "grafana",
@@ -60,7 +67,7 @@ def test_runtime_assurance_builder_promotes_direct_receipt_evidence_to_pass() ->
             "_environment": "production",
             "_matched_services": ["grafana"],
             "_normalized_text": "grafana playwright login logout tls https certificate loki queryability smoke",
-            "recorded_on": "2026-03-24T18:00:00Z",
+            "recorded_on": recorded_on,
             "verification": [{"check": "smoke", "result": "pass"}],
         }
     ]
@@ -82,38 +89,38 @@ def test_runtime_assurance_builder_promotes_direct_receipt_evidence_to_pass() ->
 def test_runtime_assurance_builder_keeps_missing_proof_visible() -> None:
     services = [
         {
-            "id": "keycloak",
-            "name": "Keycloak",
+            "id": "authentik",
+            "name": "Authentik",
             "category": "access",
             "lifecycle_status": "active",
-            "vm": "docker-runtime",
-            "public_url": "https://sso.example.com",
-            "subdomain": "sso.example.com",
-            "runbook": "docs/runbooks/configure-keycloak.md",
-            "adr": "0056",
+            "vm": "runtime-control",
+            "public_url": "https://id.example.com",
+            "subdomain": "id.example.com",
+            "runbook": "docs/runbooks/configure-authentik.md",
+            "adr": "0491",
             "environments": {
                 "production": {
                     "status": "active",
-                    "url": "https://sso.example.com",
-                    "subdomain": "sso.example.com",
+                    "url": "https://id.example.com",
+                    "subdomain": "id.example.com",
                 }
             },
         }
     ]
     publications = [
         {
-            "service_id": "keycloak",
+            "service_id": "authentik",
             "environment": "production",
             "status": "active",
-            "fqdn": "sso.example.com",
+            "fqdn": "id.example.com",
             "publication": {"access_model": "upstream-auth"},
-            "adapter": {"repo_route_service_id": "keycloak", "tls": {"provider": "letsencrypt"}},
+            "adapter": {"repo_route_service_id": "authentik", "tls": {"provider": "letsencrypt"}},
         }
     ]
     health_payload = {
         "services": [
             {
-                "service_id": "keycloak",
+                "service_id": "authentik",
                 "status": "degraded",
                 "composite_status": "degraded",
                 "reason": "open incident inc-1",
@@ -193,6 +200,7 @@ def test_runtime_assurance_builder_handles_missing_health_entry_without_crashing
 
 
 def test_runtime_assurance_builder_uses_explicit_smoke_suite_override() -> None:
+    recorded_at = fresh_timestamp()
     services = [
         {
             "id": "ops_portal",
@@ -257,7 +265,7 @@ def test_runtime_assurance_builder_uses_explicit_smoke_suite_override() -> None:
             "_environment": "production",
             "_matched_services": ["ops_portal"],
             "_normalized_text": "ops portal smoke",
-            "recorded_at": "2026-03-25T11:00:00Z",
+            "recorded_at": recorded_at,
             "verification": [{"check": "Smoke", "result": "pass", "observed": "Generic smoke only."}],
         },
         {
@@ -265,7 +273,7 @@ def test_runtime_assurance_builder_uses_explicit_smoke_suite_override() -> None:
             "_environment": "production",
             "_matched_services": ["ops_portal"],
             "_normalized_text": "ops portal runtime assurance smoke",
-            "recorded_at": "2026-03-25T10:00:00Z",
+            "recorded_at": recorded_at,
             "verification": [
                 {
                     "check": "Runtime assurance smoke",
@@ -280,5 +288,5 @@ def test_runtime_assurance_builder_uses_explicit_smoke_suite_override() -> None:
 
     by_dimension = {dimension["id"]: dimension for dimension in rows[0]["dimensions"]}
     assert by_dimension["smoke"]["state"] == "pass"
-    assert by_dimension["smoke"]["last_verified"] == "2026-03-25T10:00:00Z"
+    assert by_dimension["smoke"]["last_verified"] == recorded_at
     assert "portal-overview" in by_dimension["smoke"]["detail"]

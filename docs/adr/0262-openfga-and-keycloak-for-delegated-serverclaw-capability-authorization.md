@@ -1,6 +1,6 @@
 # ADR 0262: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
 
-- Status: Accepted
+- Status: Deprecated (see service removal ADR — service removed from platform)
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.177.95
 - Implemented In Platform Version: 0.130.63

@@ -16,7 +16,7 @@ The Dify workflow converges:
 
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - OpenBao is deployed and healthy for compose runtime secret injection
-- `langfuse.example.com`, `api.example.com`, and `sso.example.com` are already healthy
+- `langfuse.example.com`, `api.example.com`, and `id.example.com` are already healthy
 - Hetzner DNS API credentials are available when the edge certificate requires expansion
 
 ## Converge

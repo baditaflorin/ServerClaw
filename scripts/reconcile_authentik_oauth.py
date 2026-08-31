@@ -52,6 +52,8 @@ PROVIDERS_PATH = "/api/v3/providers/oauth2/"
 APPLICATIONS_PATH = "/api/v3/core/applications/"
 FLOWS_PATH = "/api/v3/flows/instances/"
 SCOPE_MAPPINGS_PATH = "/api/v3/propertymappings/provider/scope/"
+CERTIFICATE_KEYS_PATH = "/api/v3/crypto/certificatekeypairs/"
+DEFAULT_SIGNING_KEY_NAME = "authentik Self-signed Certificate"
 MANAGED_PROVIDER_FIELDS = (
     "name",
     "authorization_flow",
@@ -60,6 +62,7 @@ MANAGED_PROVIDER_FIELDS = (
     "client_type",
     "grant_types",
     "client_id",
+    "signing_key",
     "include_claims_in_id_token",
     "redirect_uris",
     "sub_mode",
@@ -234,7 +237,13 @@ def _validate_client(raw: Any, index: int) -> dict[str, Any]:
 
 
 def load_manifest(path: Path, *, variables: dict[str, str] | None = None) -> dict[str, Any]:
-    rendered = resolve_jinja2_vars(path.read_text(encoding="utf-8"), variables)
+    rendered_variables = dict(variables or {})
+    # The default stays useful for local validation while a deployment can pass
+    # an explicitly overridden config prefix through the Ansible role.
+    platform_domain = rendered_variables.get("platform_domain")
+    if platform_domain and not rendered_variables.get("platform_config_prefix"):
+        rendered_variables["platform_config_prefix"] = platform_domain.split(".", 1)[0]
+    rendered = resolve_jinja2_vars(path.read_text(encoding="utf-8"), rendered_variables)
     payload = require_mapping(yaml.safe_load(rendered), str(path))
     if payload.get("version") != 1:
         raise ValueError(f"{path}.version must be 1")
@@ -371,6 +380,7 @@ def reconcile_manifest(
     applications = api.list_all(APPLICATIONS_PATH)
     flows = api.list_all(FLOWS_PATH)
     scope_mappings = api.list_all(SCOPE_MAPPINGS_PATH)
+    certificate_keys = api.list_all(CERTIFICATE_KEYS_PATH)
     changes: list[dict[str, Any]] = []
     plans: list[dict[str, Any]] = []
 
@@ -381,12 +391,16 @@ def reconcile_manifest(
     # Build and validate every selected client plan before changing either the
     # controller-local secret store or Authentik. This prevents a later secret,
     # ownership, or linkage conflict from leaving an earlier client half-applied.
-    for client in manifest["clients"]:
+    for client_index, client in enumerate(manifest["clients"]):
         client_id = str(client["id"])
         if not client["enabled"] or (selected_clients is not None and client_id not in selected_clients):
             continue
         app_config = client["application"]
         provider_config = client["provider"]
+        signing_key_name = require_str(
+            provider_config.get("signing_key_name", DEFAULT_SIGNING_KEY_NAME),
+            f"clients[{client_index}].provider.signing_key_name",
+        )
         application = _find_unique(applications, "slug", app_config["slug"], "application")
         provider = _find_unique(providers, "client_id", provider_config["client_id"], "OAuth provider")
         if provider is None and application is not None and application.get("provider") is not None:
@@ -414,6 +428,12 @@ def reconcile_manifest(
             _resolve_named_pk(scope_mappings, field="scope_name", value=scope, label="scope mapping")
             for scope in provider_config["scopes"]
         ]
+        signing_key_pk = _resolve_named_pk(
+            certificate_keys,
+            field="name",
+            value=signing_key_name,
+            label="certificate keypair",
+        )
         provider_desired = {
             "name": provider_config["name"],
             "authorization_flow": authorization_flow_pk,
@@ -422,6 +442,7 @@ def reconcile_manifest(
             "client_type": provider_config["client_type"],
             "grant_types": provider_config["grant_types"],
             "client_id": provider_config["client_id"],
+            "signing_key": signing_key_pk,
             "include_claims_in_id_token": provider_config["include_claims_in_id_token"],
             "redirect_uris": [
                 {
@@ -606,6 +627,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--platform-domain",
         help="Explicit platform_domain used to render the manifest (recommended for named deployments)",
     )
+    parser.add_argument(
+        "--platform-config-prefix",
+        help="Explicit platform config prefix used to render client IDs that must remain deployment-unique",
+    )
     parser.add_argument("--token-file", type=Path, required=True)
     parser.add_argument("--client", action="append", dest="clients", help="Reconcile only this manifest client")
     mode = parser.add_mutually_exclusive_group()
@@ -626,10 +651,14 @@ def main(argv: list[str] | None = None) -> int:
     token = args.token_file.read_text(encoding="utf-8").strip()
     if not token:
         raise ReconcileError(f"Authentik token file {args.token_file} is empty")
-    manifest = load_manifest(
-        args.manifest,
-        variables={"platform_domain": args.platform_domain} if args.platform_domain else None,
-    )
+    render_variables = None
+    if args.platform_domain:
+        render_variables = {"platform_domain": args.platform_domain}
+        if args.platform_config_prefix:
+            render_variables["platform_config_prefix"] = args.platform_config_prefix
+    elif args.platform_config_prefix:
+        raise ReconcileError("--platform-config-prefix requires --platform-domain")
+    manifest = load_manifest(args.manifest, variables=render_variables)
     result = reconcile_manifest(
         manifest,
         HTTPAuthentikAPI(require_http_url(args.base_url, "--base-url"), token),

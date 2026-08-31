@@ -16,7 +16,7 @@
 #              This file is a pure import wrapper around the top-level playbook.
 #
 # Dependencies:
-#   - ADR 0262: OpenFGA and Keycloak for delegated ServerClaw capability authorization.
+#   - ADR 0262: OpenFGA and Authentik for delegated ServerClaw capability authorization.
 #   - Role: openfga_runtime — implemented in the imported playbook.
 #
 # Related ADRs: 0262

@@ -1,5 +1,6 @@
 import asyncio
 import base64
+from datetime import UTC, datetime
 import json
 import sqlite3
 import sys
@@ -71,6 +72,10 @@ def write_json(path: Path, payload: dict) -> None:
 def write_yaml(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content)
+
+
+def fresh_timestamp() -> str:
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def write_billing_producer_catalog(tmp_path: Path, payload: dict) -> Path:
@@ -221,12 +226,12 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                     "runbook": "docs/runbooks/configure-api-gateway.md",
                     "degradation_modes": [
                         {
-                            "dependency": "keycloak",
+                            "dependency": "authentik",
                             "dependency_type": "soft",
                             "degraded_behaviour": "Use cached JWKS for up to 300 seconds.",
                             "degraded_for_seconds_max": 300,
                             "recovery_signal": "successful JWKS refresh",
-                            "tested_by": "fault:keycloak-unavailable",
+                            "tested_by": "fault:authentik-unavailable",
                         },
                         {
                             "dependency": "nats",
@@ -555,7 +560,7 @@ error_codes:
                     "name": "Windmill",
                     "upstream": upstream_base,
                     "gateway_prefix": "/v1/windmill",
-                    "auth": "keycloak_jwt",
+                    "auth": "oidc_jwt",
                     "required_role": "platform-operator",
                     "strip_prefix": True,
                     "timeout_seconds": 5,
@@ -569,8 +574,8 @@ error_codes:
         """
 schema_version: 1.0.0
 circuits:
-  - name: keycloak
-    service: Keycloak OIDC / JWKS
+  - name: authentik
+    service: Authentik OIDC / JWKS
     failure_threshold: 5
     recovery_window_s: 30
     success_threshold: 2
@@ -638,7 +643,7 @@ steps:
             "receipt_id": "receipt-windmill-runtime-assurance",
             "summary": "Applied windmill production smoke and log query verification",
             "workflow_id": "live-apply-service service=windmill env=production",
-            "recorded_on": "2026-03-23T18:15:00Z",
+            "recorded_on": fresh_timestamp(),
             "verification": [
                 {"check": "smoke test", "observed": "Smoke test passed", "result": "pass"},
                 {"check": "log query", "observed": "Loki log query succeeded", "result": "pass"},
@@ -678,7 +683,7 @@ steps:
         platform_vars_path=tmp_path / "inventory" / "group_vars" / "platform.yml",
         drift_receipts_dir=tmp_path / "receipts" / "drift-reports",
         jwks_url="http://jwks.test/jwks.json",
-        issuer="https://sso.example.test/realms/lv3",
+        issuer="https://id.example.test/application/o/agent-hub/",
         expected_audience=None,
         nats_url=None,
         nats_username=None,
@@ -694,7 +699,7 @@ steps:
         openapi_include_upstreams=False,
         graph_dsn=graph_dsn,
         world_state_dsn=world_state_dsn,
-        keycloak_retry_after_seconds=30,
+        authentik_retry_after_seconds=30,
     )
     token = sign_token(private_key, roles=["platform-operator"], issuer=config.issuer or "")
     return config, token
@@ -1096,7 +1101,7 @@ def test_billing_event_route_rejects_invalid_token_and_publishes_rejection(tmp_p
     asyncio.run(run())
 
 
-def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> None:
+def test_gateway_enters_and_surfaces_authentik_degraded_mode(tmp_path: Path) -> None:
     jwks_online = {"value": True}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -1104,7 +1109,7 @@ def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> N
             return httpx.Response(200, json={"status": "ok"})
         if jwks_online["value"]:
             return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
-        raise httpx.ConnectError("keycloak unavailable", request=request)
+        raise httpx.ConnectError("authentik unavailable", request=request)
 
     transport = httpx.MockTransport(handler)
     config, token = make_repo(tmp_path, "http://upstream.test")
@@ -1147,12 +1152,12 @@ def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> N
                     api_gateway_service = next(
                         item for item in degraded.json()["services"] if item["id"] == "api_gateway"
                     )
-                    assert api_gateway_service["active_degradations"][0]["dependency"] == "keycloak"
+                    assert api_gateway_service["active_degradations"][0]["dependency"] == "authentik"
 
                     active = await client.get("/v1/platform/degradations", headers=headers)
                     assert active.status_code == 200
                     assert active.json()["degradation_count"] == 1
-                    assert active.json()["services"]["api_gateway"][0]["dependency"] == "keycloak"
+                    assert active.json()["services"]["api_gateway"][0]["dependency"] == "authentik"
 
                     platform_health = await client.get("/v1/platform/health", headers=headers)
                     assert platform_health.status_code == 200
@@ -1164,7 +1169,7 @@ def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> N
                     assert failed.status_code == 503
                     assert failed.headers["Retry-After"] == "30"
                     assert failed.json()["error"]["code"] == "INFRA_RUNTIME_UNAVAILABLE"
-                    assert failed.json()["error"]["context"]["dependency"] == "keycloak"
+                    assert failed.json()["error"]["context"]["dependency"] == "authentik"
                     assert failed.json()["error"]["context"]["detail"]["error_code"] == "GATE_CIRCUIT_OPEN"
             finally:
                 await runtime.close()
@@ -1890,7 +1895,7 @@ def test_gateway_proxy_supports_raw_upstream_auth_headers(tmp_path: Path, monkey
                     "name": "Typesense",
                     "upstream": "http://typesense.test",
                     "gateway_prefix": "/v1/typesense",
-                    "auth": "keycloak_jwt",
+                    "auth": "oidc_jwt",
                     "required_role": "platform-read",
                     "strip_prefix": True,
                     "timeout_seconds": 5,
@@ -1952,7 +1957,7 @@ def test_gateway_runtime_root_exposes_scripts_tree(tmp_path: Path) -> None:
     assert resolved_root / "scripts" == scripts_root
 
 
-def test_gateway_returns_retry_after_when_keycloak_circuit_is_open(tmp_path: Path) -> None:
+def test_gateway_returns_retry_after_when_authentik_circuit_is_open(tmp_path: Path) -> None:
     jwks_calls = {"count": 0}
 
     def upstream(_request: httpx.Request) -> httpx.Response:
@@ -1960,7 +1965,7 @@ def test_gateway_returns_retry_after_when_keycloak_circuit_is_open(tmp_path: Pat
 
     def jwks(_request: httpx.Request) -> httpx.Response:
         jwks_calls["count"] += 1
-        return httpx.Response(503, json={"error": "keycloak restarting"})
+        return httpx.Response(503, json={"error": "authentik restarting"})
 
     transport = httpx.MockTransport(
         lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request)
@@ -1971,8 +1976,8 @@ def test_gateway_returns_retry_after_when_keycloak_circuit_is_open(tmp_path: Pat
         """
 schema_version: 1.0.0
 circuits:
-  - name: keycloak
-    service: Keycloak OIDC / JWKS
+  - name: authentik
+    service: Authentik OIDC / JWKS
     failure_threshold: 1
     recovery_window_s: 60
     success_threshold: 1

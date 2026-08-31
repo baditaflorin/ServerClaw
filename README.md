@@ -31,7 +31,7 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.45` |
+| Repository version | `0.179.46` |
 | Platform version | `0.178.222` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -44,13 +44,13 @@ monitored, and recoverable from a single repository.
 | Managed guest count | 17 |
 | Running guest count | 10 |
 | Template VM present | `true` |
-| Declared services | 72 |
-| Publicly published services | 48 |
+| Declared services | 71 |
+| Publicly published services | 47 |
 
 ### Service Exposure Summary
 | Exposure Model | Services |
 | --- | --- |
-| `edge-published` | 39 |
+| `edge-published` | 38 |
 | `edge-static` | 1 |
 | `informational-only` | 4 |
 | `private-only` | 28 |
@@ -58,14 +58,11 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
-| `coolify_runtime` | `2026-04-28-coolify-0fork-runtime-live-apply` |
 | `fork_services` | `2026-04-27-ws-0372-0fork-services-all-7-deployed` |
 | `restic_config_backup` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `repo_intake` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `platform_ops` | `2026-04-21-adr-0391-cpu-only-operational-automation-live-apply` |
 | `platform` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
-| `public_edge_publication` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
-| `keycloak` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
 | `directus` | `2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply` |
 | `validation_toolkit` | `2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply` |
 | `service_definition_catalog_assembly` | `2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply` |
@@ -76,10 +73,13 @@ monitored, and recoverable from a single repository.
 | `litellm` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `librechat` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `gitea` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
-| `semaphore` | `2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply` |
 | `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
+| `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
+| `ops_portal` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
+| `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
+| `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 
-Showing 20 of 187 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 183 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 ## Version Summary
@@ -89,12 +89,12 @@ Showing 20 of 187 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.45` |
+| Repository version | `0.179.46` |
 | Platform version | `0.178.222` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
-| Declared services | 72 |
+| Declared services | 71 |
 <!-- END GENERATED: version-summary -->
 
 ## Quick Start
@@ -133,8 +133,8 @@ assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
 
 - **[CLAUDE.md](CLAUDE.md)** — Claude Code session protocol with checklists and context
 - **[AGENTS.md](AGENTS.md)** — Multi-agent coordination rules and handoff protocol
-- **513+ ADRs** — Every architectural decision documented and indexed
-- **276+ runbooks** — Step-by-step procedures an AI agent can follow
+- **515+ ADRs** — Every architectural decision documented and indexed
+- **273+ runbooks** — Step-by-step procedures an AI agent can follow
 - **Workstream tracking** — Parallel agent sessions coordinate via YAML manifests
 
 Point Claude Code at this repo and it knows how to deploy, debug, and extend
@@ -168,16 +168,16 @@ self-hosted platform:
 
 | Layer | What | Count |
 |-------|------|-------|
-| Architecture decisions | `docs/adr/` | 513+ ADRs |
-| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 163 roles |
-| Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 61 playbooks |
-| Operational runbooks | `docs/runbooks/` | 276+ runbooks |
-| Automation scripts | `scripts/` | 362+ scripts |
+| Architecture decisions | `docs/adr/` | 515+ ADRs |
+| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 162 roles |
+| Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 60 playbooks |
+| Operational runbooks | `docs/runbooks/` | 273+ runbooks |
+| Automation scripts | `scripts/` | 365+ scripts |
 | Validation tests | `tests/` | Automated regression suite |
 
 ### Services included
 
-SSO (Keycloak with Authentik live alongside it), secrets (OpenBao), databases (PostgreSQL), reverse proxy (Nginx),
+SSO (Authentik), secrets (OpenBao), databases (PostgreSQL), reverse proxy (Nginx),
 monitoring (Grafana + Prometheus), CI/CD (Woodpecker, Semaphore), Git hosting (Gitea),
 object storage (MinIO), container registry (Harbor), AI/LLM (Ollama, Dify, LiteLLM,
 LibreChat, Open WebUI), project management (Plane, Vikunja), communication
@@ -229,14 +229,14 @@ make docker-dev-down         # Cleanup
 ```
 Proxmox VE Host (Debian 13, bare metal)
   |
-  +-- nginx-edge        (192.0.2.10)  Reverse proxy, TLS termination
-  +-- docker-runtime    (192.0.2.20)  Primary application runtime
-  +-- docker-build      (192.0.2.30)  CI/CD build server
-  +-- monitoring        (192.0.2.40)  Grafana, Prometheus, Alertmanager
-  +-- postgres          (192.0.2.50)  Shared PostgreSQL 16
-  +-- backup            (192.0.2.60)  Proxmox Backup Server
-  +-- runtime-control   (192.0.2.92)  API gateway, agent tools
-  +-- runtime-ai        (192.0.2.90)  GPU workloads (Ollama, inference)
+  +-- nginx-edge        (edge VM)      Reverse proxy, TLS termination
+  +-- docker-runtime    (runtime VM)   Primary application runtime
+  +-- docker-build      (build VM)     CI/CD build server
+  +-- monitoring        (monitoring)   Grafana, Prometheus, Alertmanager
+  +-- postgres          (database VM)  Shared PostgreSQL 16
+  +-- backup            (backup VM)    Proxmox Backup Server
+  +-- runtime-control   (control VM)   API gateway, agent tools
+  +-- runtime-ai        (AI runtime)   GPU workloads (Ollama, inference)
   +-- [additional VMs per topology]
 ```
 
@@ -271,8 +271,8 @@ variables from it — no manual IP editing.
 ```
 .
 ├── collections/ansible_collections/lv3/platform/
-│   ├── roles/           # 163 Ansible roles
-│   ├── playbooks/       # 61 playbooks
+│   ├── roles/           # 162 Ansible roles
+│   ├── playbooks/       # 60 playbooks
 │   └── plugins/         # Custom filters and callbacks
 ├── inventory/
 │   ├── hosts.yml        # GENERATED — see scripts/generate_inventory.py
@@ -286,10 +286,10 @@ variables from it — no manual IP editing.
 │   ├── minimal/         # Tier 1 compose (4 containers)
 │   └── full/            # Tier 2 compose (7 containers)
 ├── docs/
-│   ├── adr/             # 513+ architecture decision records
-│   ├── runbooks/        # 276+ operational runbooks
+│   ├── adr/             # 515+ architecture decision records
+│   ├── runbooks/        # 273+ operational runbooks
 │   └── templates/       # Jinja2 templates for generated docs (incl. this README)
-├── scripts/             # 362+ automation scripts
+├── scripts/             # 365+ automation scripts
 ├── local-overlay-template/  # Scaffold for .local/ secrets directory
 └── Makefile             # 35+ automation targets
 ```
@@ -305,7 +305,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 | `make generate-inventory` | Regenerate inventory/hosts.yml from proxmox_guests in host_vars/platform-host.yml |
 | `make validate-generated-inventory` | Exit 1 if inventory/hosts.yml is out of sync with proxmox_guests |
 | `make bootstrap` | Full platform bootstrap from bare Debian 13 (ADR 0386) |
-| `make bootstrap-minimal` | Bootstrap critical path only (PG + Keycloak + Nginx + OpenBao) |
+| `make bootstrap-minimal` | Bootstrap critical path only (PG + Authentik + Nginx + OpenBao) |
 | `make docker-dev-up` | Start minimal Docker dev environment (Tier 1) |
 | `make docker-dev-converge` | Run Ansible convergence against Docker dev containers |
 | `make converge-<service>` | Deploy a specific service |
@@ -357,11 +357,11 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 332 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 333 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
-| `0491` | Authentik Phase 2: reconcile GlitchTip and migrate Outline | `live_applied` | [adr-0491-authentik-phase2.md](docs/workstreams/adr-0491-authentik-phase2.md) |
+| `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](docs/adr/0470-deployment-fixture-matrix.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](docs/adr/0448-deployment-connection-registry-and-wrapper.md) |
 | `0407` | Ops Portal Sibling-Link IaC Substitution | `merged` | [0407-generic-by-default-local-overlay-architecture.md](docs/adr/0407-generic-by-default-local-overlay-architecture.md) |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](docs/workstreams/ws-0374-status-repair.md) |
@@ -411,6 +411,6 @@ and merge procedures.
 
 ---
 
-*Generated 2026-08-26 by [scripts/generate_readme.py](scripts/generate_readme.py)
+*Generated 2026-08-31 by [scripts/generate_readme.py](scripts/generate_readme.py)
 from [docs/templates/README.md.j2](docs/templates/README.md.j2).
 Run `make generate-readme` to refresh.*

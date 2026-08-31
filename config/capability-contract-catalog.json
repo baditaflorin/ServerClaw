@@ -128,7 +128,7 @@
         "Emit latency or failure data for discovery, authorization, and token exchange paths."
       ],
       "portability_constraints": [
-        "Downstream services consume OIDC and OAuth contracts rather than Keycloak-only SDK types.",
+        "Downstream services consume OIDC and OAuth contracts rather than provider-specific SDK types.",
         "Realm, client, and group data remain representable in portable repo-managed exports."
       ],
       "migration_expectations": {
@@ -151,11 +151,11 @@
         }
       ],
       "current_selection": {
-        "product_name": "Keycloak",
-        "service_id": "keycloak",
-        "selection_adr": "0056",
-        "runbook": "docs/runbooks/configure-keycloak.md",
-        "notes": "Selected for repo-managed OIDC, MFA, and group-aware operator login across shared edge and private surfaces."
+        "product_name": "Authentik",
+        "service_id": "authentik",
+        "selection_adr": "0491",
+        "runbook": "docs/runbooks/configure-authentik.md",
+        "notes": "Selected as the repo-managed OIDC, MFA, and group-aware identity provider for shared edge and private surfaces."
       }
     },
     {

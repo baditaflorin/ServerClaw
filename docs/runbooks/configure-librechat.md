@@ -19,7 +19,7 @@ make converge-librechat env=production
 ## Verification
 
 ```bash
-curl -fsS https://chat.example.com  # Should redirect to Keycloak login
+curl -fsS https://chat.example.com  # Should redirect to Authentik login
 ```
 
 ## Troubleshooting

@@ -1,4 +1,5 @@
 id: revive-netplan-mac-mismatch-adr
+adr: "0490"
 title: Revive netplan MAC mismatch recovery ADR from stale ServerClaw PR
 status: ready
 ready_to_merge: true
@@ -7,17 +8,19 @@ depends_on: []
 conflicts_with: []
 owner: claude-agent
 branch: revive-netplan-mac-mismatch-adr
+worktree_path: .worktrees/revive-netplan-mac-mismatch-adr
 doc: docs/adr/0490-netplan-mac-mismatch-recovery.md
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/revive-netplan-mac-mismatch-adr.yaml
 ownership_manifest:
   owned_surfaces:
     - id: revive-netplan-mac-mismatch-adr-code
       paths:
         - docs/adr/0490-netplan-mac-mismatch-recovery.md
-        - docs/adr/.index.yaml
         - docs/adr/index/
         - docs/adr/index/reservations.yaml
         - workstreams/active/revive-netplan-mac-mismatch-adr.yaml
-        - workstreams.yaml
       mode: exclusive
 
 description: |

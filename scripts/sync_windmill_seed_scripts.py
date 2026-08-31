@@ -457,6 +457,43 @@ def sync_script(
         raise SyncError(f"failed to sync {spec['path']} after {max_attempts} attempts: {detail}") from exc
 
 
+def retire_script(
+    *,
+    base_url: str,
+    workspace: str,
+    token: str,
+    script_path: str,
+    settle_interval_s: float,
+    request_timeout_s: float = DEFAULT_HTTP_TIMEOUT_S,
+) -> dict:
+    """Delete one explicitly retired repo-managed script and prove it is absent."""
+    status, _ = get_script(
+        base_url=base_url,
+        workspace=workspace,
+        token=token,
+        script_path=script_path,
+        timeout_s=request_timeout_s,
+    )
+    if status == 404:
+        return {"path": script_path, "status": "already_absent"}
+    delete_script(
+        base_url=base_url,
+        workspace=workspace,
+        token=token,
+        script_path=script_path,
+        timeout_s=request_timeout_s,
+    )
+    wait_for_absent(
+        base_url=base_url,
+        workspace=workspace,
+        token=token,
+        script_path=script_path,
+        timeout_s=settle_timeout(settle_interval_s, ABSENT_SETTLE_TIMEOUT_MULTIPLIER),
+        interval_s=settle_interval_s,
+    )
+    return {"path": script_path, "status": "retired"}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Synchronize repo-managed Windmill seed scripts.")
     parser.add_argument("--base-url", required=True)
@@ -465,6 +502,12 @@ def main() -> int:
     parser.add_argument("--max-attempts", type=int, default=8)
     parser.add_argument("--settle-interval", type=float, default=1.0)
     parser.add_argument("--http-timeout", type=float, default=DEFAULT_HTTP_TIMEOUT_S)
+    parser.add_argument(
+        "--retired-path",
+        action="append",
+        default=[],
+        help="Explicit repo-managed script path to delete only after the manifest is synchronized.",
+    )
     args = parser.parse_args()
 
     token = os.environ.get("WINDMILL_TOKEN", "").strip()
@@ -483,6 +526,17 @@ def main() -> int:
                     token=token,
                     spec=spec,
                     max_attempts=args.max_attempts,
+                    settle_interval_s=args.settle_interval,
+                    request_timeout_s=args.http_timeout,
+                )
+            )
+        for script_path in dict.fromkeys(args.retired_path):
+            results.append(
+                retire_script(
+                    base_url=args.base_url.rstrip("/"),
+                    workspace=args.workspace,
+                    token=token,
+                    script_path=script_path,
                     settle_interval_s=args.settle_interval,
                     request_timeout_s=args.http_timeout,
                 )

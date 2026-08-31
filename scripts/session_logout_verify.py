@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
+"""Verify shared-edge and Outline logout against the Authentik authority."""
 
 from __future__ import annotations
 
 import argparse
+import re
 import time
-from dataclasses import dataclass
-from http import cookiejar
 from pathlib import Path
-from urllib import error, parse, request
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from controller_automation_toolkit import emit_cli_error
-from sync_docs_to_outline import KeycloakLoginFormParser
 
 
 SCRIPT_PATH = Path(__file__).resolve()
@@ -30,69 +28,15 @@ def discover_local_root(repo_root: Path) -> Path:
 
 
 DEFAULT_LOCAL_ROOT = discover_local_root(REPO_ROOT)
-DEFAULT_PASSWORD_FILE = DEFAULT_LOCAL_ROOT / "keycloak" / "outline.automation-password.txt"
+DEFAULT_PASSWORD_FILE = DEFAULT_LOCAL_ROOT / "authentik" / "bootstrap-password.txt"
 DEFAULT_EDGE_URL = "https://home.localhost/"
 DEFAULT_EDGE_LOGOUT_URL = "https://home.localhost/.well-known/lv3/session/logout"
 DEFAULT_OUTLINE_OIDC_URL = "https://wiki.localhost/auth/oidc"
-DEFAULT_OUTLINE_LOGOUT_URL = "https://wiki.localhost/logout"
 DEFAULT_LOGGED_OUT_URL = "https://ops.localhost/.well-known/lv3/session/logged-out"
-DEFAULT_SHARED_PROXY_COOKIE_NAME = "_lv3_ops_portal_proxy"
-DEFAULT_OUTLINE_SESSION_COOKIE_NAME = "accessToken"
 
 
 class VerificationError(RuntimeError):
-    pass
-
-
-class NoRedirectHandler(request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        return None
-
-
-@dataclass(frozen=True)
-class ResponseSnapshot:
-    status_code: int
-    final_url: str
-    headers: dict[str, str]
-    body: str
-
-
-def build_opener(jar: cookiejar.CookieJar, *, follow_redirects: bool) -> request.OpenerDirector:
-    handlers: list[object] = [request.HTTPCookieProcessor(jar)]
-    if not follow_redirects:
-        handlers.append(NoRedirectHandler())
-    opener = request.build_opener(*handlers)
-    opener.addheaders = [("User-Agent", "lv3-session-logout-verify/1.0")]
-    return opener
-
-
-def fetch_response(
-    opener: request.OpenerDirector,
-    url: str,
-    *,
-    method: str = "GET",
-    data: bytes | None = None,
-    headers: dict[str, str] | None = None,
-    timeout_seconds: float,
-) -> ResponseSnapshot:
-    req = request.Request(url, data=data, method=method)
-    for header_name, header_value in (headers or {}).items():
-        req.add_header(header_name, header_value)
-    try:
-        with opener.open(req, timeout=timeout_seconds) as response:
-            return ResponseSnapshot(
-                status_code=response.getcode(),
-                final_url=response.geturl(),
-                headers={key.lower(): value for key, value in response.headers.items()},
-                body=response.read().decode("utf-8", errors="replace"),
-            )
-    except error.HTTPError as exc:
-        return ResponseSnapshot(
-            status_code=exc.code,
-            final_url=exc.geturl(),
-            headers={key.lower(): value for key, value in exc.headers.items()},
-            body=exc.read().decode("utf-8", errors="replace"),
-        )
+    """Raised when an Authentik browser verification does not meet its contract."""
 
 
 def normalize_url(url: str) -> str:
@@ -101,151 +45,9 @@ def normalize_url(url: str) -> str:
     return parsed._replace(path=path, query="", fragment="").geturl()
 
 
-def keycloak_login_form_present(body: str) -> bool:
-    return 'id="kc-form-login"' in body
-
-
-def keycloak_logout_confirmation_present(current_url: str, body: str) -> bool:
-    parsed = urlparse(current_url)
-    return parsed.path.endswith("/protocol/openid-connect/logout") and "Do you want to log out?" in body
-
-
-def assert_protected_redirect(snapshot: ResponseSnapshot, *, label: str) -> None:
-    location = snapshot.headers.get("location", "")
-    if snapshot.status_code != 302 or "/oauth2/sign_in" not in location:
-        raise VerificationError(
-            f"{label} should redirect to the oauth2-proxy sign-in challenge, "
-            f"found HTTP {snapshot.status_code} with location={location!r}"
-        )
-
-
-def assert_logged_out_destination(snapshot: ResponseSnapshot, *, expected_url: str, label: str) -> None:
-    if normalize_url(snapshot.final_url) != normalize_url(expected_url):
-        raise VerificationError(f"{label} should finish on {expected_url}, landed on {snapshot.final_url}")
-
-
-def assert_response_host(snapshot: ResponseSnapshot, *, expected_host: str, label: str) -> None:
-    if urlparse(snapshot.final_url).hostname != expected_host:
-        raise VerificationError(f"{label} should land on {expected_host}, landed on {snapshot.final_url}")
-
-
-def authenticate_keycloak_session(
-    opener: request.OpenerDirector,
-    *,
-    start_url: str,
-    username: str,
-    password: str,
-    timeout_seconds: float,
-) -> ResponseSnapshot:
-    initial = fetch_response(opener, start_url, timeout_seconds=timeout_seconds)
-    parser = KeycloakLoginFormParser()
-    parser.feed(initial.body)
-    if not parser.form_action:
-        if keycloak_login_form_present(initial.body):
-            raise VerificationError(f"unable to parse the Keycloak login form when starting at {start_url}")
-        return initial
-    form_fields = dict(parser.hidden_fields)
-    form_fields["username"] = username
-    form_fields["password"] = password
-    login_url = parse.urljoin(initial.final_url, parser.form_action)
-    authenticated = fetch_response(
-        opener,
-        login_url,
-        method="POST",
-        data=parse.urlencode(form_fields).encode("utf-8"),
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-        timeout_seconds=timeout_seconds,
-    )
-    if keycloak_login_form_present(authenticated.body):
-        raise VerificationError(f"Keycloak login form remained visible after authenticating against {start_url}")
-    return authenticated
-
-
-def find_cookie_value(jar: cookiejar.CookieJar, name: str, *, domain_contains: str | None = None) -> str | None:
-    for cookie in jar:
-        if cookie.name != name:
-            continue
-        if domain_contains and domain_contains not in cookie.domain:
-            continue
-        return cookie.value
-    return None
-
-
-def cookie_to_playwright_cookie(cookie: cookiejar.Cookie) -> dict[str, object]:
-    playwright_cookie: dict[str, object] = {
-        "name": cookie.name,
-        "value": cookie.value,
-        "domain": cookie.domain,
-        "path": cookie.path,
-        "secure": cookie.secure,
-    }
-    if cookie.expires is not None:
-        playwright_cookie["expires"] = cookie.expires
-    rest = {str(key).lower(): value for key, value in cookie._rest.items()}
-    if "httponly" in rest:
-        playwright_cookie["httpOnly"] = True
-    same_site = rest.get("samesite")
-    if same_site:
-        playwright_cookie["sameSite"] = str(same_site).capitalize()
-    return playwright_cookie
-
-
-def playwright_cookie_to_cookie(cookie: dict[str, object]) -> cookiejar.Cookie:
-    expires = cookie.get("expires")
-    expires_value = int(expires) if expires not in (-1, None) else None
-    return cookiejar.Cookie(
-        version=0,
-        name=str(cookie["name"]),
-        value=str(cookie["value"]),
-        port=None,
-        port_specified=False,
-        domain=str(cookie["domain"]),
-        domain_specified=True,
-        domain_initial_dot=str(cookie["domain"]).startswith("."),
-        path=str(cookie.get("path", "/")),
-        path_specified=True,
-        secure=bool(cookie.get("secure", False)),
-        expires=expires_value,
-        discard=expires_value is None,
-        comment=None,
-        comment_url=None,
-        rest={
-            "HttpOnly": cookie.get("httpOnly", False),
-            "SameSite": cookie.get("sameSite"),
-        },
-        rfc2109=False,
-    )
-
-
-def submit_keycloak_logout_confirmation(
-    page,
-    *,
-    timeout_milliseconds: int,
-) -> ResponseSnapshot:
-    # Headless Playwright clicks do not reliably advance the Keycloak logout form,
-    # so submit the exact live form over HTTP and then sync the resulting cookie
-    # state back into the browser context before resuming browser assertions.
-    form_state = page.locator("form").evaluate(
-        "form => ({ action: form.action, method: form.method || 'POST', "
-        "body: new URLSearchParams(new FormData(form)).toString() })"
-    )
-    jar = cookiejar.CookieJar()
-    for browser_cookie in page.context.cookies():
-        jar.set_cookie(playwright_cookie_to_cookie(browser_cookie))
-    snapshot = fetch_response(
-        build_opener(jar, follow_redirects=True),
-        form_state["action"],
-        method=str(form_state["method"]).upper(),
-        data=str(form_state["body"]).encode("utf-8"),
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-        timeout_seconds=timeout_milliseconds / 1000,
-    )
-    page.context.clear_cookies()
-    remaining_cookies = [cookie_to_playwright_cookie(cookie) for cookie in jar]
-    if remaining_cookies:
-        page.context.add_cookies(remaining_cookies)
-    page.goto(snapshot.final_url, wait_until="domcontentloaded", timeout=timeout_milliseconds)
-    return snapshot
+def assert_response_host(current_url: str, *, expected_host: str, label: str) -> None:
+    if urlparse(current_url).hostname != expected_host:
+        raise VerificationError(f"{label} should land on {expected_host}, landed on {current_url}")
 
 
 def load_playwright_sync_api():
@@ -254,13 +56,42 @@ def load_playwright_sync_api():
         from playwright.sync_api import sync_playwright
     except ImportError as exc:  # pragma: no cover - exercised only in live verification
         raise VerificationError(
-            "Outline browser verification requires Playwright. "
+            "Browser verification requires Playwright. "
             "Run `uv run --with playwright python scripts/session_logout_verify.py ...`."
         ) from exc
     return sync_playwright, PlaywrightTimeoutError
 
 
-def assert_page_requires_keycloak_login(
+def _authentik_identifier(page):
+    return page.get_by_label("Email or Username", exact=True)
+
+
+def _authentik_password(page):
+    """Return the visible Authentik password field.
+
+    Authentik's flow UI keeps a compatibility form with a hidden password
+    input in the document while the active stage renders its field inside a
+    component.  Combining both locators with ``or_`` can select that hidden
+    input first, making a browser verification submit an empty password.
+    The labelled locator is dynamic, so returning it without an eager
+    ``count`` check lets ``wait_for`` below wait for the active stage to
+    render.
+    """
+    return page.get_by_label("Password", exact=True).first
+
+
+def _authentik_submit(page):
+    return page.get_by_role("button", name=re.compile(r"^(log in|continue)$", re.IGNORECASE)).first
+
+
+def authentik_login_page_present(page) -> bool:
+    try:
+        return _authentik_identifier(page).is_visible()
+    except Exception:
+        return False
+
+
+def assert_page_requires_authentik_login(
     page,
     *,
     label: str,
@@ -268,31 +99,59 @@ def assert_page_requires_keycloak_login(
     playwright_timeout_error,
 ) -> None:
     try:
-        page.wait_for_selector("#kc-form-login", timeout=timeout_milliseconds)
+        _authentik_identifier(page).wait_for(state="visible", timeout=timeout_milliseconds)
     except playwright_timeout_error as exc:
-        raise VerificationError(f"{label} should require a fresh Keycloak login, landed on {page.url}") from exc
+        raise VerificationError(f"{label} should require a fresh Authentik login, landed on {page.url}") from exc
 
 
-def trigger_outline_ui_logout(
+def authenticate_authentik_session(
     page,
     *,
-    outline_logout_url: str,
+    username: str,
+    password: str,
     timeout_milliseconds: int,
     playwright_timeout_error,
 ) -> None:
+    """Complete Authentik's normal identifier/password flow when a login is needed."""
+    identifier = _authentik_identifier(page)
     try:
-        page.get_by_label("Account").last.click(timeout=timeout_milliseconds)
-    except playwright_timeout_error as exc:
-        raise VerificationError(
-            "Outline account menu was not available before logout verification "
-            f"(legacy logout URL: {outline_logout_url})"
-        ) from exc
+        identifier.wait_for(state="visible", timeout=timeout_milliseconds)
+    except playwright_timeout_error:
+        return
+
+    identifier.fill(username, timeout=timeout_milliseconds)
+    _authentik_submit(page).click(timeout=timeout_milliseconds)
+
+    password_input = _authentik_password(page)
     try:
-        page.get_by_text("Log out", exact=True).click(timeout=timeout_milliseconds)
+        password_input.wait_for(state="visible", timeout=timeout_milliseconds)
     except playwright_timeout_error as exc:
-        raise VerificationError(
-            f"Outline account menu did not expose the Log out action (legacy logout URL: {outline_logout_url})"
-        ) from exc
+        raise VerificationError("Authentik did not present the password stage after accepting the identifier") from exc
+    password_input.fill(password, timeout=timeout_milliseconds)
+    identity_host = urlparse(page.url).hostname or ""
+    _authentik_submit(page).click(timeout=timeout_milliseconds)
+    # Authentik submits the password stage through its flow API and only then
+    # navigates to the relying party callback.  Starting the next ``goto``
+    # immediately can cancel that still-in-flight navigation with Chromium's
+    # ``ERR_ABORTED`` even though the credentials were accepted.  Wait until
+    # the authentication-flow URL has been replaced, bounded by the caller's
+    # verification timeout.
+    deadline = time.monotonic() + (timeout_milliseconds / 1000)
+    while time.monotonic() < deadline:
+        current = urlparse(page.url)
+        # Wait through both Authentik's flow API redirect and the relying
+        # party's authorization-code callback.  Leaving Authentik alone is
+        # not sufficient: navigating again while oauth2-proxy is still
+        # setting its session cookies can discard the just-created session.
+        callback_in_flight = current.path.startswith("/oauth2/callback") or current.path.startswith("/oauth2/sign_in")
+        if current.hostname and current.hostname != identity_host and not callback_in_flight:
+            page.wait_for_timeout(500)
+            break
+        page.wait_for_timeout(250)
+    else:
+        raise VerificationError(f"Authentik login did not complete a relying-party callback, landed on {page.url}")
+    if authentik_login_page_present(page):
+        raise VerificationError("Authentik login remained visible after submitting the supplied operator credential")
 
 
 def wait_for_logged_out_destination(
@@ -300,179 +159,165 @@ def wait_for_logged_out_destination(
     *,
     expected_url: str,
     timeout_milliseconds: int,
-    playwright_timeout_error,
 ) -> None:
     deadline = time.monotonic() + (timeout_milliseconds / 1000)
     while time.monotonic() < deadline:
-        current_url = page.url
-        if normalize_url(current_url) == normalize_url(expected_url):
+        if normalize_url(page.url) == normalize_url(expected_url):
             return
-        body = page.locator("body").inner_text(timeout=timeout_milliseconds)
-        if keycloak_logout_confirmation_present(current_url, body):
-            snapshot = submit_keycloak_logout_confirmation(
-                page,
-                timeout_milliseconds=timeout_milliseconds,
-            )
-            if normalize_url(snapshot.final_url) != normalize_url(expected_url):
-                raise VerificationError(
-                    f"Keycloak logout confirmation should finish on {expected_url}, landed on {snapshot.final_url}"
-                )
-        page.wait_for_timeout(500)
-    raise VerificationError(f"Outline logout should finish on {expected_url}, landed on {page.url}")
+        page.wait_for_timeout(250)
+    raise VerificationError(f"Logout should finish on {expected_url}, landed on {page.url}")
+
+
+def wait_for_outline_logout_completion(
+    page,
+    *,
+    expected_url: str,
+    timeout_milliseconds: int,
+) -> None:
+    """Accept Authentik's provider-scoped logout confirmation page.
+
+    Authentik deliberately renders a confirmation page for RP-initiated
+    provider logout instead of automatically navigating to the requested
+    post-logout URI.  The page title and query parameter are the authoritative
+    proof that the Outline provider session was invalidated.  Continue the
+    verification at the shared logged-out endpoint so the following fresh-login
+    assertions exercise the same browser context.
+    """
+    deadline = time.monotonic() + (timeout_milliseconds / 1000)
+    expected = normalize_url(expected_url)
+    while time.monotonic() < deadline:
+        if normalize_url(page.url) == expected:
+            return
+
+        current = urlparse(page.url)
+        title = ""
+        try:
+            title = page.title()
+        except Exception:
+            pass
+        query_redirects = parse_qs(current.query).get("post_logout_redirect_uri", [])
+        provider_confirmation = (
+            current.hostname is not None
+            and current.path.startswith("/if/flow/")
+            and "provider-invalidation-flow" in current.path
+            and title.lower().startswith("you've logged out of ")
+            and any(normalize_url(candidate) == expected for candidate in query_redirects)
+        )
+        if provider_confirmation:
+            page.goto(expected_url, wait_until="domcontentloaded", timeout=timeout_milliseconds)
+            if normalize_url(page.url) == expected:
+                return
+        page.wait_for_timeout(250)
+    raise VerificationError(f"Logout should finish on {expected_url}, landed on {page.url}")
+
+
+def trigger_outline_ui_logout(page, *, timeout_milliseconds: int, playwright_timeout_error) -> None:
+    try:
+        page.get_by_label("Account").last.click(timeout=timeout_milliseconds)
+    except playwright_timeout_error as exc:
+        raise VerificationError("Outline account menu was not available before logout verification") from exc
+    try:
+        page.get_by_text("Log out", exact=True).click(timeout=timeout_milliseconds)
+    except playwright_timeout_error as exc:
+        raise VerificationError("Outline account menu did not expose the Log out action") from exc
 
 
 def verify_edge_logout(
+    page,
     *,
     edge_url: str,
     edge_logout_url: str,
     logged_out_url: str,
     username: str,
     password: str,
-    timeout_seconds: float,
+    timeout_milliseconds: int,
+    playwright_timeout_error,
 ) -> None:
-    jar = cookiejar.CookieJar()
-    browser = build_opener(jar, follow_redirects=True)
-    probe = build_opener(jar, follow_redirects=False)
-
-    assert_protected_redirect(
-        fetch_response(probe, edge_url, timeout_seconds=timeout_seconds),
-        label="Unauthenticated edge request",
-    )
-    authenticated = authenticate_keycloak_session(
-        browser,
-        start_url=edge_url,
+    page.goto(edge_url, wait_until="domcontentloaded", timeout=timeout_milliseconds)
+    authenticate_authentik_session(
+        page,
         username=username,
         password=password,
-        timeout_seconds=timeout_seconds,
+        timeout_milliseconds=timeout_milliseconds,
+        playwright_timeout_error=playwright_timeout_error,
     )
-    assert_response_host(
-        authenticated,
-        expected_host=urlparse(edge_url).hostname or "",
-        label="Shared edge login",
-    )
-    if not find_cookie_value(jar, DEFAULT_SHARED_PROXY_COOKIE_NAME):
-        raise VerificationError("Shared edge login did not produce the oauth2-proxy session cookie")
-    protected = fetch_response(browser, edge_url, timeout_seconds=timeout_seconds)
-    if protected.status_code != 200:
-        raise VerificationError(
-            f"Shared edge should return HTTP 200 after login, found {protected.status_code} at {protected.final_url}"
-        )
-    logout = fetch_response(browser, edge_logout_url, timeout_seconds=timeout_seconds)
-    assert_logged_out_destination(logout, expected_url=logged_out_url, label="Shared edge logout")
-    assert_protected_redirect(
-        fetch_response(probe, edge_url, timeout_seconds=timeout_seconds),
-        label="Post-logout edge request",
+    page.goto(edge_url, wait_until="domcontentloaded", timeout=timeout_milliseconds)
+    assert_response_host(page.url, expected_host=urlparse(edge_url).hostname or "", label="Shared edge login")
+
+    page.goto(edge_logout_url, wait_until="domcontentloaded", timeout=timeout_milliseconds)
+    wait_for_logged_out_destination(page, expected_url=logged_out_url, timeout_milliseconds=timeout_milliseconds)
+
+    page.goto(edge_url, wait_until="domcontentloaded", timeout=timeout_milliseconds)
+    assert_page_requires_authentik_login(
+        page,
+        label="Post-logout shared edge request",
+        timeout_milliseconds=timeout_milliseconds,
+        playwright_timeout_error=playwright_timeout_error,
     )
 
 
 def verify_outline_logout(
+    page,
     *,
     edge_url: str,
     outline_oidc_url: str,
-    outline_logout_url: str,
     logged_out_url: str,
     username: str,
     password: str,
-    timeout_seconds: float,
+    timeout_milliseconds: int,
+    playwright_timeout_error,
 ) -> None:
-    jar = cookiejar.CookieJar()
-    browser = build_opener(jar, follow_redirects=True)
-    probe = build_opener(jar, follow_redirects=False)
-
-    assert_protected_redirect(
-        fetch_response(probe, edge_url, timeout_seconds=timeout_seconds),
-        label="Unauthenticated edge request",
-    )
-    edge_authenticated = authenticate_keycloak_session(
-        browser,
-        start_url=edge_url,
+    page.goto(edge_url, wait_until="domcontentloaded", timeout=timeout_milliseconds)
+    authenticate_authentik_session(
+        page,
         username=username,
         password=password,
-        timeout_seconds=timeout_seconds,
+        timeout_milliseconds=timeout_milliseconds,
+        playwright_timeout_error=playwright_timeout_error,
     )
-    assert_response_host(
-        edge_authenticated,
-        expected_host=urlparse(edge_url).hostname or "",
-        label="Shared edge bootstrap login",
-    )
-    if not find_cookie_value(jar, DEFAULT_SHARED_PROXY_COOKIE_NAME):
-        raise VerificationError("Shared edge bootstrap login did not produce the oauth2-proxy session cookie")
-
-    outline_authenticated = authenticate_keycloak_session(
-        browser,
-        start_url=outline_oidc_url,
+    page.goto(outline_oidc_url, wait_until="networkidle", timeout=timeout_milliseconds)
+    authenticate_authentik_session(
+        page,
         username=username,
         password=password,
-        timeout_seconds=timeout_seconds,
-    )
-    assert_response_host(
-        outline_authenticated,
-        expected_host=urlparse(outline_oidc_url).hostname or "",
-        label="Outline login",
+        timeout_milliseconds=timeout_milliseconds,
+        playwright_timeout_error=playwright_timeout_error,
     )
     outline_host = urlparse(outline_oidc_url).hostname or ""
-    if not find_cookie_value(jar, DEFAULT_OUTLINE_SESSION_COOKIE_NAME, domain_contains=outline_host):
-        raise VerificationError("Outline login did not produce the Outline application session cookie")
+    assert_response_host(page.url, expected_host=outline_host, label="Outline login")
 
-    sync_playwright, playwright_timeout_error = load_playwright_sync_api()
-    timeout_milliseconds = int(timeout_seconds * 1000)
-    with sync_playwright() as playwright:
-        browser_context = playwright.chromium.launch(headless=True)
-        context = browser_context.new_context(ignore_https_errors=False)
-        context.add_cookies([cookie_to_playwright_cookie(cookie) for cookie in jar])
-        page = context.new_page()
+    trigger_outline_ui_logout(
+        page,
+        timeout_milliseconds=timeout_milliseconds,
+        playwright_timeout_error=playwright_timeout_error,
+    )
+    wait_for_outline_logout_completion(page, expected_url=logged_out_url, timeout_milliseconds=timeout_milliseconds)
 
-        page.goto(outline_oidc_url, wait_until="networkidle", timeout=timeout_milliseconds)
-        if urlparse(page.url).hostname != outline_host or keycloak_login_form_present(page.content()):
-            raise VerificationError(f"Outline browser bootstrap did not land on an authenticated wiki page: {page.url}")
-
-        trigger_outline_ui_logout(
+    for target, label in (
+        (edge_url, "Post-logout shared edge request"),
+        (outline_oidc_url, "Post-logout Outline OIDC request"),
+    ):
+        page.goto(target, wait_until="domcontentloaded", timeout=timeout_milliseconds)
+        assert_page_requires_authentik_login(
             page,
-            outline_logout_url=outline_logout_url,
+            label=label,
             timeout_milliseconds=timeout_milliseconds,
             playwright_timeout_error=playwright_timeout_error,
         )
-        wait_for_logged_out_destination(
-            page,
-            expected_url=logged_out_url,
-            timeout_milliseconds=timeout_milliseconds,
-            playwright_timeout_error=playwright_timeout_error,
-        )
-
-        page.goto(edge_url, wait_until="domcontentloaded", timeout=timeout_milliseconds)
-        assert_page_requires_keycloak_login(
-            page,
-            label="Post-logout shared edge request",
-            timeout_milliseconds=timeout_milliseconds,
-            playwright_timeout_error=playwright_timeout_error,
-        )
-
-        page.goto(outline_oidc_url, wait_until="domcontentloaded", timeout=timeout_milliseconds)
-        assert_page_requires_keycloak_login(
-            page,
-            label="Post-logout Outline OIDC request",
-            timeout_milliseconds=timeout_milliseconds,
-            playwright_timeout_error=playwright_timeout_error,
-        )
-
-        browser_context.close()
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Verify shared edge and Outline logout flows against the live LV3 platform."
-    )
-    parser.add_argument("--username", default="outline.automation", help="Keycloak username used for verification.")
+    parser = argparse.ArgumentParser(description="Verify shared edge and Outline logout flows against Authentik.")
+    parser.add_argument("--username", default="akadmin", help="Authentik username used for verification.")
     parser.add_argument(
         "--password-file",
         type=Path,
         default=DEFAULT_PASSWORD_FILE,
-        help="File containing the verification password.",
+        help="File containing the Authentik verification password.",
     )
     parser.add_argument("--edge-url", default=DEFAULT_EDGE_URL)
     parser.add_argument("--edge-logout-url", default=DEFAULT_EDGE_LOGOUT_URL)
     parser.add_argument("--outline-oidc-url", default=DEFAULT_OUTLINE_OIDC_URL)
-    parser.add_argument("--outline-logout-url", default=DEFAULT_OUTLINE_LOGOUT_URL)
     parser.add_argument("--logged-out-url", default=DEFAULT_LOGGED_OUT_URL)
     parser.add_argument("--timeout-seconds", type=float, default=60.0)
     parser.add_argument("--skip-edge", action="store_true", help="Skip the shared edge verification path.")
@@ -485,34 +330,45 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.skip_edge and args.skip_outline:
             raise ValueError("at least one verification target must remain enabled")
-        if not args.password_file.exists():
+        if not args.password_file.is_file():
             raise FileNotFoundError(f"password file not found: {args.password_file}")
         password = args.password_file.read_text(encoding="utf-8").strip()
         if not password:
             raise ValueError(f"password file is empty: {args.password_file}")
 
+        sync_playwright, playwright_timeout_error = load_playwright_sync_api()
+        timeout_milliseconds = int(args.timeout_seconds * 1000)
         results: list[str] = []
-        if not args.skip_edge:
-            verify_edge_logout(
-                edge_url=args.edge_url,
-                edge_logout_url=args.edge_logout_url,
-                logged_out_url=args.logged_out_url,
-                username=args.username,
-                password=password,
-                timeout_seconds=args.timeout_seconds,
-            )
-            results.append(f"verified shared edge logout via {args.edge_url}")
-        if not args.skip_outline:
-            verify_outline_logout(
-                edge_url=args.edge_url,
-                outline_oidc_url=args.outline_oidc_url,
-                outline_logout_url=args.outline_logout_url,
-                logged_out_url=args.logged_out_url,
-                username=args.username,
-                password=password,
-                timeout_seconds=args.timeout_seconds,
-            )
-            results.append(f"verified Outline logout via {args.outline_oidc_url}")
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=True)
+            context = browser.new_context(ignore_https_errors=False)
+            page = context.new_page()
+            if not args.skip_edge:
+                verify_edge_logout(
+                    page,
+                    edge_url=args.edge_url,
+                    edge_logout_url=args.edge_logout_url,
+                    logged_out_url=args.logged_out_url,
+                    username=args.username,
+                    password=password,
+                    timeout_milliseconds=timeout_milliseconds,
+                    playwright_timeout_error=playwright_timeout_error,
+                )
+                results.append(f"verified shared edge logout via {args.edge_url}")
+            if not args.skip_outline:
+                verify_outline_logout(
+                    page,
+                    edge_url=args.edge_url,
+                    outline_oidc_url=args.outline_oidc_url,
+                    logged_out_url=args.logged_out_url,
+                    username=args.username,
+                    password=password,
+                    timeout_milliseconds=timeout_milliseconds,
+                    playwright_timeout_error=playwright_timeout_error,
+                )
+                results.append(f"verified Outline logout via {args.outline_oidc_url}")
+            context.close()
+            browser.close()
         for line in results:
             print(line)
         return 0

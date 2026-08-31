@@ -17,7 +17,7 @@
 #
 # Dependencies:
 #   - ADR 0286: Vikunja as the task and project management REST API
-#   - Requires: OpenBao, docker-runtime, postgres, Keycloak, Windmill, and the shared NGINX edge to be reachable
+#   - Requires: OpenBao, docker-runtime, postgres, Authentik, Windmill, and the shared NGINX edge to be reachable
 #   - Role: vikunja_postgres — provisions the Vikunja database and login
 #   - Role: vikunja_runtime — deploys Vikunja, bootstraps auth, syncs desired state, and verifies controller workflows
 #

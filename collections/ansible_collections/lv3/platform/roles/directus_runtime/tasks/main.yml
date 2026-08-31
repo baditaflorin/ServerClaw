@@ -1,6 +1,6 @@
 # Purpose: Deploy the Directus runtime, bootstrap the governed collection schema, and verify the local service contract.
 # Use case: Run during Directus deployment, recovery, and exact-main replay on docker-runtime.
-# Inputs: Runtime paths, image refs, PostgreSQL credentials, Keycloak client secret, and bootstrap script defaults.
+# Inputs: Runtime paths, image refs, PostgreSQL credentials, Authentik client secret, and bootstrap script defaults.
 # Outputs: The live Directus container, OpenBao-backed runtime env, seeded collection schema, and local health endpoints match repo truth.
 # Idempotency: Partially idempotent because compose restarts and schema refreshes are performed when the declared runtime or bootstrap inputs change.
 # Dependencies: ADR 0165, ADR 0021, ADR 0063, ADR 0077, ADR 0289, ADR 0370, ADR 0373.
@@ -27,11 +27,11 @@
       - directus_database_user | length > 0
       - directus_database_host | length > 0
       - directus_database_password_local_file | length > 0
-      - directus_keycloak_client_secret_local_file | length > 0
+      - directus_authentik_client_secret_local_file | length > 0
       - directus_admin_password_remote_file | length > 0
       - directus_service_registry_token_local_file | length > 0
     fail_msg: >-
-      directus_runtime requires runtime paths, PostgreSQL auth, a Keycloak
+      directus_runtime requires runtime paths, PostgreSQL auth, a Authentik
       client secret, and the controller-local service token path.
 
 - name: Check Directus prerequisites on the control machine
@@ -43,9 +43,9 @@
       - path: "{{ directus_database_password_local_file }}"
         description: "Directus database password"
         prerequisite: "Converge directus_postgres before deploying Directus"
-      - path: "{{ directus_keycloak_client_secret_local_file }}"
-        description: "Directus Keycloak client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying Directus"
+      - path: "{{ directus_authentik_client_secret_local_file }}"
+        description: "Directus Authentik client secret"
+        prerequisite: "Converge the Authentik runtime before deploying Directus"
       - path: "{{ directus_service_registry_token_local_file }}"
         description: "Directus service registry token"
         prerequisite: "Converge directus_postgres before publishing Directus"
@@ -108,13 +108,13 @@
     directus_secret: "{{ directus_decoded_secrets[1] }}"
     directus_admin_password: "{{ directus_decoded_secrets[2] }}"
     directus_database_password: "{{ lookup('ansible.builtin.file', directus_database_password_local_file) | trim }}"
-    directus_keycloak_client_secret: "{{ lookup('ansible.builtin.file', directus_keycloak_client_secret_local_file) | trim }}"
+    directus_authentik_client_secret: "{{ lookup('ansible.builtin.file', directus_authentik_client_secret_local_file) | trim }}"
     directus_runtime_secret_payload:
       DB_PASSWORD: "{{ lookup('ansible.builtin.file', directus_database_password_local_file) | trim }}"
       KEY: "{{ directus_decoded_secrets[0] }}"
       SECRET: "{{ directus_decoded_secrets[1] }}"
       ADMIN_PASSWORD: "{{ directus_decoded_secrets[2] }}"
-      AUTH_KEYCLOAK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', directus_keycloak_client_secret_local_file) | trim }}"
+      AUTH_AUTHENTIK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', directus_authentik_client_secret_local_file) | trim }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Directus

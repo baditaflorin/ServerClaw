@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0197: Dify visual workflow canvas deployment and governance boundary.
-#   - Requires: OpenBao, Keycloak, Langfuse, and the shared NGINX edge to already be converged.
+#   - Requires: OpenBao, Authentik, Langfuse, and the shared NGINX edge to already be converged.
 #   - Role: lv3.platform.dify_postgres - provisions the named PostgreSQL role and database.
 #   - Role: lv3.platform.dify_runtime - converges the Dify runtime stack and bootstrap state.
 #

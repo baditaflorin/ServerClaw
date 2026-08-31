@@ -1,4 +1,5 @@
 id: revive-receipts-ssh-key-plane-test-user
+adr: "0420"
 title: Revive SSH key + Plane test-user receipts from stale ServerClaw PRs
 status: ready
 ready_to_merge: true
@@ -7,7 +8,11 @@ depends_on: []
 conflicts_with: []
 owner: claude-agent
 branch: revive-receipts-ssh-key-plane-test-user
+worktree_path: .worktrees/revive-receipts-ssh-key-plane-test-user
 doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/revive-receipts-ssh-key-plane-test-user.yaml
 ownership_manifest:
   owned_surfaces:
     - id: revive-receipts-ssh-key-plane-test-user-code
@@ -17,7 +22,6 @@ ownership_manifest:
         - receipts/live-applies/2026-07-02-keycloak-plane-test-sso-user-live-apply.json
         - receipts/live-applies/2026-07-02-keycloak-plane-test-oauth2-group-live-apply.json
         - workstreams/active/revive-receipts-ssh-key-plane-test-user.yaml
-        - workstreams.yaml
       mode: exclusive
 
 description: |

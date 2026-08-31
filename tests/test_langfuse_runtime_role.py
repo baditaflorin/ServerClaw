@@ -36,8 +36,11 @@ def test_tasks_require_minio_secret_and_record_shared_s3_secret() -> None:
     tasks = load_tasks()
     names = {task["name"] for task in tasks}
 
-    assert "Check whether the Langfuse MinIO secret key exists on the control machine" in names
-    assert "Fail if the Langfuse MinIO secret key is missing locally" in names
+    prerequisites = next(
+        task for task in tasks if task.get("name") == "Check Langfuse prerequisites on the control machine"
+    )
+    required_files = prerequisites["vars"]["common_check_local_secrets_files"]
+    assert any(item["description"] == "Langfuse MinIO secret key" for item in required_files)
 
     record_task = next(task for task in tasks if task.get("name") == "Record the Langfuse runtime secrets")
     assert "LANGFUSE_S3_SECRET_ACCESS_KEY" in record_task["ansible.builtin.set_fact"]["langfuse_runtime_secret_payload"]

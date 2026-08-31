@@ -10,3 +10,4 @@ groups:
         annotations:
           summary: "Authentik is unhealthy"
           description: "Authentik's Prometheus scrape target has been down for 5+ minutes -- operator and agent SSO login (id.example.org) is likely unavailable. Check the authentik-server container on runtime-control."
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-authentik/

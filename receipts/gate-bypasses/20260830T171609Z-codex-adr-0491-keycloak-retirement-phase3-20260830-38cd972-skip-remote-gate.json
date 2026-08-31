@@ -1,0 +1,37 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-08-30T17:16:09Z",
+  "bypass": "skip_remote_gate",
+  "source": "pre-push-hook",
+  "branch": "codex/adr-0491-keycloak-retirement-phase3-20260830",
+  "commit": "38cd97226b9fc31d214980a1555eda79c71a530b",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "The migration-induced generated artifact failures were repaired and rechecked. Remaining blocked lanes are pre-existing on untouched origin/main a0d84afaf: ansible-lint baseline violations, provider-boundary schema drift, platform_context_api completeness failure, workstream ownership overlap, duplicate YAML keys, and the unavailable OpenTofu runner due registry.example.com DNS. The migration-touched suite is 292 passed with the same four failures reproduced on origin/main.",
+    "impacted_lanes": [
+      "ansible-lint",
+      "schema-validation",
+      "service-completeness",
+      "workstream-surfaces",
+      "yaml-lint",
+      "tofu-validate"
+    ],
+    "substitute_evidence": [
+      "uv run --no-project --with-requirements requirements/api-gateway.txt --with-requirements requirements/integration-tests.txt --with jsonschema python -m pytest -q <migration-touched tests> (292 passed",
+      "four failures reproduced on origin/main)",
+      "./scripts/validate_repo.sh alert-rules generated-docs (current branch: passed)",
+      "./scripts/run_python_with_packages.sh pyyaml jsonschema -- scripts/generate_diagrams.py --check (passed)",
+      "./scripts/run_python_with_packages.sh jsonschema -- scripts/generate_dependency_diagram.py --check (passed)",
+      "uv run --no-project --with pyyaml python3 scripts/generate_adr_index.py --check and generate_status_docs.py --check (passed)",
+      "fresh origin/main: validate_repo.sh yaml workstream-surfaces data-models",
+      "validate_service_completeness.py --validate",
+      "validate_repo.sh ansible-lint (same failures)",
+      "fresh origin/main: validate_repo.sh ansible-syntax (passed)",
+      "fresh origin/main: validate_repo.sh tofu (runner unavailable because registry.example.com does not resolve)"
+    ],
+    "owner": "codex",
+    "expires_on": "2026-08-31",
+    "remediation_ref": "adr-0491-authentik-keycloak-sunset-2026-08-30"
+  }
+}

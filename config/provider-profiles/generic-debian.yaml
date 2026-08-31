@@ -53,4 +53,4 @@ post_bootstrap:
   - Set up DNS records pointing to the server's public IP
   - Configure TLS certificates
   - Set up VPN access (Tailscale or Headscale)
-  - Create operator accounts in Keycloak
+  - Create operator accounts in Authentik

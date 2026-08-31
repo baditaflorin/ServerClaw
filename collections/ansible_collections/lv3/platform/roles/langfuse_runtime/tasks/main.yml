@@ -35,7 +35,7 @@
       - langfuse_internal_base_url | length > 0
       - langfuse_public_base_url | length > 0
       - langfuse_database_password_local_file | length > 0
-      - langfuse_keycloak_client_secret_local_file | length > 0
+      - langfuse_authentik_client_secret_local_file | length > 0
       - langfuse_minio_secret_key_local_file | length > 0
       - langfuse_web_image | length > 0
       - langfuse_worker_image | length > 0
@@ -43,7 +43,7 @@
       - langfuse_redis_image | length > 0
     fail_msg: >-
       langfuse_runtime requires runtime paths, pinned image refs, database auth,
-      and the repo-managed Keycloak client secret.
+      and the repo-managed Authentik client secret.
 
 - name: Check Langfuse prerequisites on the control machine
   ansible.builtin.include_role:
@@ -54,9 +54,9 @@
       - path: "{{ langfuse_database_password_local_file }}"
         description: "Langfuse database password"
         prerequisite: "Converge langfuse_postgres before deploying Langfuse"
-      - path: "{{ langfuse_keycloak_client_secret_local_file }}"
-        description: "Langfuse Keycloak client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying Langfuse"
+      - path: "{{ langfuse_authentik_client_secret_local_file }}"
+        description: "Langfuse Authentik client secret"
+        prerequisite: "Converge the Authentik runtime before deploying Langfuse"
       - path: "{{ langfuse_minio_secret_key_local_file }}"
         description: "Langfuse MinIO secret key"
         prerequisite: "Converge MinIO before deploying Langfuse so shared object storage is available"
@@ -176,7 +176,7 @@
     langfuse_project_public_key: "{{ langfuse_decoded_secrets[6] }}"
     langfuse_project_secret_key: "{{ langfuse_decoded_secrets[7] }}"
     langfuse_database_password: "{{ lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim }}"
-    langfuse_keycloak_client_secret: "{{ lookup('ansible.builtin.file', langfuse_keycloak_client_secret_local_file) | trim }}"
+    langfuse_authentik_client_secret: "{{ lookup('ansible.builtin.file', langfuse_authentik_client_secret_local_file) | trim }}"
     langfuse_minio_secret_key: "{{ lookup('ansible.builtin.file', langfuse_minio_secret_key_local_file) | trim }}"
     langfuse_database_url: >-
       postgresql://{{ langfuse_database_user }}:{{ (lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim) | urlencode }}@{{ langfuse_database_host }}:5432/{{ langfuse_database_name }}
@@ -193,7 +193,7 @@
       DATABASE_PASSWORD: "{{ lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim }}"
       DATABASE_URL: >-
         postgresql://{{ langfuse_database_user }}:{{ (lookup('ansible.builtin.file', langfuse_database_password_local_file) | trim) | urlencode }}@{{ langfuse_database_host }}:5432/{{ langfuse_database_name }}
-      AUTH_KEYCLOAK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', langfuse_keycloak_client_secret_local_file) | trim }}"
+      AUTH_AUTHENTIK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', langfuse_authentik_client_secret_local_file) | trim }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Langfuse

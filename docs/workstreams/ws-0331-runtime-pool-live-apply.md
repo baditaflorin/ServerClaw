@@ -91,6 +91,26 @@
 
 ## Progress Notes
 
+### 2026-08-31: Capacity Drift Recovery (Complete)
+
+- Live Proxmox allocations for the residual Docker runtime, build host, and
+  two active runtime-pool guests had drifted above the capacity model.
+- The resulting host-memory pressure caused the kernel OOM killer to terminate
+  the residual Docker runtime shortly after boot.
+- The governed rebalance now includes the active `runtime-apps` and
+  `runtime-comms` guests, restarts capacity-reclaiming guests before the
+  residual runtime, and reconciles every allocation with the capacity model.
+- The governed rebalance completed successfully: all six selected guests
+  restarted, the declared Docker-runtime subset returned healthy, and the
+  host headroom gate passed.
+- The follow-on Restic converge and live backup completed successfully. Its
+  refreshed snapshot ledger now covers every governed source, including the
+  controller secret manifest and Falco overrides.
+- Windmill's scheduled Atlas drift wrapper now bounds both individual database
+  connections and total job runtime, so a dependency outage cannot recreate
+  the previous worker-memory pressure. A post-apply seeded healthcheck passed
+  with no lingering worker jobs.
+
 ### 2026-04-03: Capacity Rebalance And Restic Recovery Baseline
 
 - the governed capacity rebalance is now fully live-applied end to end,

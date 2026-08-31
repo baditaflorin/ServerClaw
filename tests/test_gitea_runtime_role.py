@@ -22,14 +22,13 @@ def load_tasks() -> list[dict]:
 def test_gitea_defaults_reference_private_service_topology() -> None:
     defaults = ROLE_DEFAULTS.read_text()
     assert "service_topology_get('gitea')" in defaults
-    assert "service_topology_get('keycloak')" in defaults
     assert "service_topology_get('minio')" in defaults
     assert "gitea-oauth" in defaults
     assert "playbook_execution_host_patterns.postgres[playbook_execution_env]" in defaults
     assert 'gitea_minio_secret_key_local_file: "{{ gitea_local_artifact_dir }}/minio-secret-key.txt"' in defaults
     assert "gitea_minio_bucket_name: gitea-lfs" in defaults
     assert "gitea_oidc_internal_discovery_url:" in defaults
-    assert "gitea_keycloak_service_topology.urls.internal" in defaults
+    assert "{{ authentik_oidc_provider_base_url }}/gitea/.well-known/openid-configuration" in defaults
 
 
 def test_gitea_compose_mounts_data_volume_and_openbao_env() -> None:
@@ -48,6 +47,9 @@ def test_gitea_bootstrap_script_creates_admin_token_and_runner_token() -> None:
     assert 'oidc_internal_discovery="{{ gitea_oidc_internal_discovery_url }}"' in template
     assert '--auto-discover-url "${oidc_internal_discovery}"' in template
     assert "exec_gitea admin auth list" in template
+    assert 'authentik_source_name="Authentik"' in template
+    assert 'legacy_source_name="Keycloak"' in template
+    assert 'exec_gitea admin auth delete --id "${legacy_source_id}"' in template
     assert "generate-access-token" in template
     assert "--raw" in template
     assert "generate-runner-token" in template
@@ -212,7 +214,7 @@ def test_gitea_waits_on_the_published_service_address() -> None:
     assert wait_task["ansible.builtin.wait_for"]["host"] == "{{ ansible_host }}"
 
 
-def test_gitea_waits_for_internal_keycloak_oidc_before_bootstrap() -> None:
+def test_gitea_waits_for_internal_authentik_oidc_before_bootstrap() -> None:
     tasks = load_tasks()
     minio_wait_task = next(
         task for task in tasks if task["name"] == "Wait for the shared MinIO API endpoint used by Gitea LFS"
@@ -220,7 +222,7 @@ def test_gitea_waits_for_internal_keycloak_oidc_before_bootstrap() -> None:
     wait_task = next(
         task
         for task in tasks
-        if task["name"] == "Wait for the Keycloak OIDC discovery endpoint used by Gitea bootstrap"
+        if task["name"] == "Wait for the Authentik OIDC discovery endpoint used by Gitea bootstrap"
     )
     assert minio_wait_task["ansible.builtin.uri"]["url"] == "http://{{ gitea_minio_endpoint }}/minio/health/live"
     assert wait_task["ansible.builtin.uri"]["url"] == "{{ gitea_oidc_internal_discovery_url }}"

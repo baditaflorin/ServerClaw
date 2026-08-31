@@ -190,6 +190,47 @@ def update_schedule(*, base_url: str, workspace: str, token: str, spec: dict, ti
         raise
 
 
+def delete_schedule(*, base_url: str, workspace: str, token: str, schedule_path: str, timeout_s: float) -> int:
+    status, _ = request_json_or_text(
+        base_url=base_url,
+        workspace=workspace,
+        token=token,
+        path=f"schedules/delete/{urllib.parse.quote(schedule_path, safe='')}",
+        method="DELETE",
+        expected_statuses=(200, 204, 404),
+        timeout_s=timeout_s,
+    )
+    return status
+
+
+def retire_schedule(*, base_url: str, workspace: str, token: str, schedule_path: str, timeout_s: float) -> dict:
+    """Delete one explicit legacy schedule after its replacement has synchronized."""
+    if not schedule_exists(
+        base_url=base_url,
+        workspace=workspace,
+        token=token,
+        schedule_path=schedule_path,
+        timeout_s=timeout_s,
+    ):
+        return {"path": schedule_path, "status": "already_absent"}
+    status = delete_schedule(
+        base_url=base_url,
+        workspace=workspace,
+        token=token,
+        schedule_path=schedule_path,
+        timeout_s=timeout_s,
+    )
+    if status != 404 and schedule_exists(
+        base_url=base_url,
+        workspace=workspace,
+        token=token,
+        schedule_path=schedule_path,
+        timeout_s=timeout_s,
+    ):
+        raise SyncError(f"retired schedule {schedule_path} remains present after deletion")
+    return {"path": schedule_path, "status": "retired" if status != 404 else "already_absent"}
+
+
 def sync_schedule(
     *,
     base_url: str,
@@ -269,6 +310,12 @@ def main() -> int:
     parser.add_argument("--max-attempts", type=int, default=8)
     parser.add_argument("--settle-interval", type=float, default=1.0)
     parser.add_argument("--http-timeout", type=float, default=DEFAULT_HTTP_TIMEOUT_S)
+    parser.add_argument(
+        "--retired-path",
+        action="append",
+        default=[],
+        help="Explicit repo-managed schedule path to delete only after the manifest is synchronized.",
+    )
     args = parser.parse_args()
 
     token = os.environ.get("WINDMILL_TOKEN", "").strip()
@@ -289,6 +336,16 @@ def main() -> int:
                     max_attempts=args.max_attempts,
                     settle_interval_s=args.settle_interval,
                     request_timeout_s=args.http_timeout,
+                )
+            )
+        for schedule_path in dict.fromkeys(args.retired_path):
+            results.append(
+                retire_schedule(
+                    base_url=args.base_url.rstrip("/"),
+                    workspace=args.workspace,
+                    token=token,
+                    schedule_path=schedule_path,
+                    timeout_s=args.http_timeout,
                 )
             )
     except Exception as exc:

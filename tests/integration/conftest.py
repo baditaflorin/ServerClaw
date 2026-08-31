@@ -15,7 +15,7 @@ import pytest
 
 
 REPO_ROOT = Path(os.environ.get("LV3_INTEGRATION_REPO_ROOT", Path(__file__).resolve().parents[2]))
-REALM = os.environ.get("LV3_INTEGRATION_KEYCLOAK_REALM", "lv3")
+AUTHENTIK_PROVIDER = os.environ.get("LV3_INTEGRATION_AUTHENTIK_PROVIDER", "agent-hub")
 
 
 @dataclass(frozen=True)
@@ -33,7 +33,7 @@ class IntegrationConfig:
     environment: str
     verify_tls: bool
     gateway_url: str | None
-    keycloak_url: str | None
+    authentik_url: str | None
     grafana_url: str | None
     netbox_url: str | None
     windmill_url: str | None
@@ -45,10 +45,8 @@ class IntegrationConfig:
     grafana_api_token: str | None
     netbox_api_token: str | None
     openbao_token: str | None
-    keycloak_username: str | None
-    keycloak_password: str | None
-    keycloak_client_id: str
-    keycloak_client_secret: str | None
+    authentik_client_id: str
+    authentik_client_secret: str | None
     preissued_bearer_token: str | None
     expected_issuer: str | None
     proxmox_api_url: str | None
@@ -217,22 +215,22 @@ def maybe_import_psycopg2():
 def integration_config() -> IntegrationConfig:
     catalog = load_service_catalog()
     environment = os.environ.get("LV3_INTEGRATION_ENVIRONMENT", "production")
-    keycloak_url = normalize_url(os.environ.get("LV3_INTEGRATION_KEYCLOAK_URL")) or resolve_service_url(
-        catalog, "keycloak", environment
+    authentik_url = normalize_url(os.environ.get("LV3_INTEGRATION_AUTHENTIK_URL")) or resolve_service_url(
+        catalog, "authentik", environment
     )
     expected_issuer = normalize_url(os.environ.get("LV3_INTEGRATION_EXPECTED_ISSUER"))
-    if expected_issuer is None and keycloak_url:
-        expected_issuer = f"{keycloak_url}/realms/{REALM}"
+    if expected_issuer is None and authentik_url:
+        expected_issuer = f"{authentik_url}/application/o/{AUTHENTIK_PROVIDER}/"
 
     required_ids = os.environ.get(
         "LV3_INTEGRATION_REQUIRED_SERVICE_IDS",
-        "keycloak,grafana,openbao,windmill,netbox,mattermost",
+        "authentik,grafana,openbao,windmill,netbox,mattermost",
     )
     return IntegrationConfig(
         environment=environment,
         verify_tls=env_bool("LV3_INTEGRATION_VERIFY_TLS", default=True),
         gateway_url=normalize_url(os.environ.get("LV3_INTEGRATION_GATEWAY_URL")),
-        keycloak_url=keycloak_url,
+        authentik_url=authentik_url,
         grafana_url=normalize_url(os.environ.get("LV3_INTEGRATION_GRAFANA_URL"))
         or resolve_service_url(catalog, "grafana", environment),
         netbox_url=normalize_url(os.environ.get("LV3_INTEGRATION_NETBOX_URL"))
@@ -249,10 +247,8 @@ def integration_config() -> IntegrationConfig:
         grafana_api_token=os.environ.get("LV3_GRAFANA_TOKEN"),
         netbox_api_token=os.environ.get("LV3_NETBOX_TOKEN"),
         openbao_token=os.environ.get("LV3_OPENBAO_TOKEN"),
-        keycloak_username=os.environ.get("LV3_TEST_RUNNER_USERNAME"),
-        keycloak_password=os.environ.get("LV3_TEST_RUNNER_PASSWORD"),
-        keycloak_client_id=os.environ.get("LV3_KEYCLOAK_PASSWORD_GRANT_CLIENT_ID", "platform-cli"),
-        keycloak_client_secret=os.environ.get("LV3_KEYCLOAK_PASSWORD_GRANT_CLIENT_SECRET"),
+        authentik_client_id=os.environ.get("LV3_AUTHENTIK_CLIENT_ID", "lv3-agent-hub"),
+        authentik_client_secret=os.environ.get("LV3_AUTHENTIK_CLIENT_SECRET"),
         preissued_bearer_token=os.environ.get("LV3_TEST_BEARER_TOKEN"),
         expected_issuer=expected_issuer,
         proxmox_api_url=normalize_url(os.environ.get("LV3_PROXMOX_API_URL")),
@@ -270,26 +266,24 @@ def require_network_opt_in() -> None:
 
 
 @pytest.fixture(scope="session")
-def keycloak_token(integration_config: IntegrationConfig) -> str:
+def authentik_token(integration_config: IntegrationConfig) -> str:
     if integration_config.preissued_bearer_token:
         return integration_config.preissued_bearer_token
-    if not integration_config.keycloak_url:
-        pytest.skip("Keycloak URL is not configured for this environment")
-    if not integration_config.keycloak_username or not integration_config.keycloak_password:
-        pytest.skip("LV3_TEST_RUNNER_USERNAME/LV3_TEST_RUNNER_PASSWORD are not configured")
+    if not integration_config.authentik_url:
+        pytest.skip("Authentik URL is not configured for this environment")
+    if not integration_config.authentik_client_secret:
+        pytest.skip("LV3_AUTHENTIK_CLIENT_SECRET is not configured")
 
     payload = {
-        "grant_type": "password",
-        "client_id": integration_config.keycloak_client_id,
-        "username": integration_config.keycloak_username,
-        "password": integration_config.keycloak_password,
+        "grant_type": "client_credentials",
+        "client_id": integration_config.authentik_client_id,
+        "client_secret": integration_config.authentik_client_secret,
+        "scope": "openid profile email",
     }
-    if integration_config.keycloak_client_secret:
-        payload["client_secret"] = integration_config.keycloak_client_secret
 
     response = http_request(
         "POST",
-        f"{integration_config.keycloak_url}/realms/{REALM}/protocol/openid-connect/token",
+        f"{integration_config.authentik_url}/application/o/token/",
         data=payload,
         verify=integration_config.verify_tls,
     )
@@ -300,9 +294,9 @@ def keycloak_token(integration_config: IntegrationConfig) -> str:
 @pytest.fixture(scope="session")
 def grafana_bearer_token(
     integration_config: IntegrationConfig,
-    keycloak_token: str,
+    authentik_token: str,
 ) -> str:
-    return integration_config.grafana_api_token or keycloak_token
+    return integration_config.grafana_api_token or authentik_token
 
 
 @pytest.fixture(scope="session")

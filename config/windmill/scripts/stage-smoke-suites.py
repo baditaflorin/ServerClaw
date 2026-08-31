@@ -19,14 +19,48 @@ def default_report_file(service: str, environment: str) -> str:
     return str(Path(tempfile.gettempdir()) / f"lv3-stage-smoke-suites-{safe_environment}-{safe_service}.json")
 
 
+def _resolve_repo_root(repo_path: str | None = None) -> Path:
+    """Locate the worker checkout when Windmill omits its environment hints."""
+    if repo_path:
+        return Path(repo_path)
+
+    candidates: list[Path] = []
+    for env_name in ("PLATFORM_REPO_ROOT", "LV3_WINDMILL_REPO_ROOT", "LV3_REPO_ROOT"):
+        value = os.environ.get(env_name, "").strip()
+        if value:
+            candidates.append(Path(value))
+
+    cwd = Path.cwd()
+    candidates.append(cwd)
+    candidates.extend(cwd.parents)
+    for base in (Path("/srv"), Path("/workspace"), Path("/workspaces")):
+        try:
+            candidates.extend(path for path in base.iterdir() if path.is_dir())
+        except OSError:
+            continue
+
+    seen: set[Path] = set()
+    for candidate in candidates:
+        try:
+            resolved = candidate.expanduser().resolve()
+        except OSError:
+            resolved = candidate.expanduser()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        if (resolved / "scripts" / "stage_smoke_suites.py").is_file():
+            return resolved
+    return Path("/srv/platform_server")
+
+
 def main(
     service: str = "windmill",
     environment: str = "production",
-    repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"),
+    repo_path: str | None = None,
     report_file: str = "",
     suite_ids: str = "",
 ):
-    repo_root = Path(repo_path)
+    repo_root = _resolve_repo_root(repo_path)
     script_path = repo_root / "scripts" / "stage_smoke_suites.py"
     if not script_path.exists():
         return {
@@ -98,7 +132,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run declared stage smoke suites from Windmill.")
     parser.add_argument("--service", default="windmill")
     parser.add_argument("--environment", default="production")
-    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
+    parser.add_argument("--repo-path", default=None)
     parser.add_argument("--report-file", default="")
     parser.add_argument("--suite-ids", default="")
     args = parser.parse_args()

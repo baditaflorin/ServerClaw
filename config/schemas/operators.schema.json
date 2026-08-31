@@ -34,7 +34,7 @@
         "email",
         "role",
         "status",
-        "keycloak",
+        "authentik",
         "ssh",
         "openbao",
         "tailscale",
@@ -71,12 +71,11 @@
         "notes": {
           "type": "string"
         },
-        "keycloak": {
+        "authentik": {
           "type": "object",
           "additionalProperties": false,
           "required": [
             "username",
-            "realm_roles",
             "groups",
             "enabled"
           ],
@@ -84,14 +83,6 @@
             "username": {
               "type": "string",
               "minLength": 1
-            },
-            "realm_roles": {
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "type": "string",
-                "minLength": 1
-              }
             },
             "groups": {
               "type": "array",

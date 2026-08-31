@@ -8,41 +8,39 @@ PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "paperless.yml"
 SERVICE_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "services" / "paperless.yml"
 
 
-def test_paperless_playbook_converges_only_the_paperless_dns_record() -> None:
+def test_paperless_playbook_composes_the_standard_service_converge_includes() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
-    dns_play = plays[0]
-    tasks = dns_play["tasks"]
 
-    assert dns_play["hosts"] == "localhost"
-    assert dns_play["connection"] == "local"
-    assert dns_play["vars"]["subdomain_fqdn"] == "paperless.example.com"
-
-    select_task = next(task for task in tasks if task.get("name") == "Select the Paperless subdomain entry")
-    assert (
-        "selectattr('fqdn', 'equalto', subdomain_fqdn)" in select_task["ansible.builtin.set_fact"]["selected_subdomain"]
-    )
-
-    converge_task = next(task for task in tasks if task.get("name") == "Converge the Paperless Hetzner DNS record")
-    assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.hetzner_dns_record"
-    assert converge_task["vars"]["hetzner_dns_record_name"] == "{{ selected_subdomain_record_name }}"
-    assert converge_task["vars"]["hetzner_dns_record_value"] == "{{ selected_subdomain.target }}"
+    assert [play["import_playbook"] for play in plays[:5]] == [
+        "_includes/service_enabled_guard.yml",
+        "_includes/dns_publication.yml",
+        "_includes/postgres_preparation.yml",
+        "_includes/docker_runtime_converge.yml",
+        "_includes/nginx_edge_publication.yml",
+    ]
+    assert plays[0]["vars"] == {"service_enabled_guard_name": "paperless"}
+    assert plays[1]["when"] == "service_needs_dns | default(false)"
+    assert plays[2]["when"] == "service_needs_postgres | default(false)"
+    assert plays[4]["when"] == "service_needs_nginx_edge | default(false)"
 
 
-def test_paperless_playbook_converges_database_runtime_api_gateway_and_edge_then_public_verify() -> None:
+def test_paperless_service_vars_define_database_runtime_and_edge_convergence() -> None:
     plays = yaml.safe_load(PLAYBOOK_PATH.read_text())
-    docker_play = next(play for play in plays if play["name"] == "Converge Paperless on the Docker runtime VM")
-    nginx_play = next(play for play in plays if play["name"] == "Publish Paperless through the NGINX edge")
-    publication_play = next(play for play in plays if play["name"] == "Verify Paperless publication end to end")
+    service_vars = yaml.safe_load((REPO_ROOT / "playbooks" / "vars" / "paperless.yml").read_text())
+    publication_play = plays[-1]
 
-    roles = [role["role"] for role in docker_play["roles"]]
-    assert roles == [
-        "lv3.platform.linux_guest_firewall",
+    assert service_vars["service_audit_name"] == "paperless"
+    assert service_vars["service_dns_fqdn"] == "paperless.{{ platform_domain }}"
+    assert service_vars["service_postgres_role"] == "lv3.platform.paperless_postgres"
+    assert service_vars["service_runtime_roles"] == [
         "lv3.platform.docker_runtime",
-        "lv3.platform.keycloak_runtime",
+        "lv3.platform.authentik_runtime",
         "lv3.platform.paperless_runtime",
         "lv3.platform.api_gateway_runtime",
     ]
-    assert plays.index(nginx_play) < plays.index(publication_play)
+    assert service_vars["service_needs_dns"] is True
+    assert service_vars["service_needs_postgres"] is True
+    assert service_vars["service_needs_nginx_edge"] is True
 
     publish_task = publication_play["tasks"][0]
     assert publication_play["hosts"] == "localhost"

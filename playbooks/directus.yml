@@ -1,6 +1,6 @@
 ---
 # Playbook: directus.yml
-# Purpose: Converge the Directus PostgreSQL backend, runtime, Keycloak client, and shared-edge publication.
+# Purpose: Converge the Directus PostgreSQL backend, runtime, Authentik client, and shared-edge publication.
 # Use case: Run during production or staging live apply of the repo-managed Directus REST and GraphQL data API.
 #
 # Inputs (required):
@@ -10,13 +10,13 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - Directus DNS, PostgreSQL role/database, runtime secrets, Keycloak OIDC client, access-model seed, and public verification match repo truth.
+#   - Directus DNS, PostgreSQL role/database, runtime secrets, Authentik OIDC client, access-model seed, and public verification match repo truth.
 #
 # Idempotency: Partially idempotent; convergence is repeatable, while the governed collection bootstrap and access-model seed reconcile state in place when required.
 #
 # Dependencies:
 #   - ADR 0289: Directus is the operational REST and GraphQL data API layer over PostgreSQL.
-#   - Requires: postgres_vm, docker_runtime, keycloak_runtime, directus_postgres, directus_runtime, and nginx_edge_publication.
+#   - Requires: postgres_vm, docker_runtime, authentik_runtime, directus_postgres, directus_runtime, and nginx_edge_publication.
 #
 # Related ADRs: 0021, 0042, 0063, 0077, 0086, 0289
 # Related Runbooks: docs/runbooks/configure-directus.md

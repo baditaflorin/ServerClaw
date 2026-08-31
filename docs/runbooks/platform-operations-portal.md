@@ -240,7 +240,7 @@ The portal publication path has three repo-managed components:
 
 - `ops_portal_runtime` serves the interactive FastAPI shell on
   `docker-runtime`
-- `public_edge_oidc_auth` runs `oauth2-proxy` on `nginx-edge` and uses the Keycloak client secret mirrored at `.local/keycloak/ops-portal-client-secret.txt`
+- `public_edge_oidc_auth` runs `oauth2-proxy` on `nginx-edge` and uses the Authentik client secret mirrored at `.local/authentik/ops-portal-oauth-client-secret.txt`
 - `nginx_edge_publication` forwards authenticated traffic for `ops.example.com` to
   the interactive runtime instead of serving the old static snapshot directly
 
@@ -257,14 +257,14 @@ Expected result: `HTTP/2 302` with `Location: https://ops.example.com/oauth2/sig
 External publication is now verified end to end:
 
 - `https://ops.example.com` returns `302` to `/oauth2/sign_in` for unauthenticated requests
-- `https://sso.example.com/realms/lv3/.well-known/openid-configuration` returns `200`
+- `https://id.example.com/-/health/ready/` returns `200`
 
 Two network details are now part of the live publication contract:
 
 - `nginx-edge` sets `proxmox_firewall_enabled: false`, which leaves `net0` at `firewall=0` and avoids the Proxmox `fwbr*` bridge path that was dropping public `80/443` SYNs before the guest kernel saw them
-- `docker-runtime` must allow TCP `8091` from `nginx-edge` in both the Proxmox VM firewall and the in-guest nftables policy so `sso.example.com` and `oauth2-proxy` can reach Keycloak
+- `runtime-control` must allow the declared Authentik upstream from `nginx-edge` so `id.example.com` and `oauth2-proxy` can complete OIDC discovery and authorization.
 
-If cloud access to `https://ops.example.com` regresses, verify those two conditions before changing the portal or Keycloak configuration again.
+If cloud access to `https://ops.example.com` regresses, verify those two conditions before changing the portal or Authentik configuration again.
 
 ## Application Launcher
 
@@ -306,7 +306,7 @@ Expected behavior:
 
 The safest live verification path is:
 
-1. favorite `Keycloak` or another common admin surface
+1. favorite `Authentik` or another common admin surface
 2. open `Validation Gate Status` or `Drift Status` from the launcher
 3. reopen the launcher and confirm the destination now appears under
    **Recent destinations**
@@ -402,7 +402,7 @@ Expected verification path:
 
 1. `GET /partials/activation` returns `200` and renders `First-Run Activation`
 2. before activation completes, `/partials/launcher` shows the locked-state copy
-   and `GET /launcher/go/service:keycloak` redirects to `/#activation`
+   and `GET /launcher/go/service:authentik` redirects to `/#activation`
 3. before activation completes, `/partials/overview` renders disabled deploy,
    restart, and rotate-secret controls
 4. after the required items are completed or the supervised reveal path is

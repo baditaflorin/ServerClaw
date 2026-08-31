@@ -62,7 +62,7 @@ argument_specs:
       sftpgo_database_password_local_file:
         type: path
         required: true
-      sftpgo_keycloak_client_secret_local_file:
+      sftpgo_authentik_client_secret_local_file:
         type: path
         required: true
       sftpgo_nats_password_local_file:

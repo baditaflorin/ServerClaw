@@ -20,6 +20,26 @@
   targets:
   - https://10.10.10.10:443/healthz
 # END SERVICE: api_gateway
+# BEGIN SERVICE: authentik
+- labels:
+    assurance_id: authentik-public
+    auth_requirement: upstream_auth
+    certificate_id: ''
+    display_url: https://id.example.com:443/-/health/ready/
+    environment: production
+    expected_issuer: letsencrypt
+    exposure: edge-published
+    policy_critical: '14'
+    policy_unit: days
+    policy_warn: '21'
+    probe_hostname: id.example.com
+    probe_module: http_2xx_follow_redirects
+    scope: public
+    service_id: authentik
+    service_name: Authentik
+  targets:
+  - https://10.10.10.10:443/-/health/ready/
+# END SERVICE: authentik
 # BEGIN SERVICE: backup_pbs
 - labels:
     assurance_id: backup-pbs-internal
@@ -398,26 +418,6 @@
   targets:
   - https://10.10.10.10:443/
 # END SERVICE: homepage
-# BEGIN SERVICE: keycloak
-- labels:
-    assurance_id: keycloak-public
-    auth_requirement: upstream_auth
-    certificate_id: ''
-    display_url: https://sso.example.com:443/realms/lv3/.well-known/openid-configuration
-    environment: production
-    expected_issuer: letsencrypt
-    exposure: edge-published
-    policy_critical: '14'
-    policy_unit: days
-    policy_warn: '21'
-    probe_hostname: sso.example.com
-    probe_module: http_2xx_follow_redirects
-    scope: public
-    service_id: keycloak
-    service_name: Keycloak
-  targets:
-  - https://10.10.10.10:443/realms/lv3/.well-known/openid-configuration
-# END SERVICE: keycloak
 # BEGIN SERVICE: label_studio
 - labels:
     assurance_id: label-studio-public
@@ -886,7 +886,7 @@
     policy_critical: '14'
     policy_unit: days
     policy_warn: '21'
-    probe_hostname: proxmox.example.com
+    probe_hostname: proxmox.example.org
     probe_module: http_2xx_follow_redirects
     scope: internal
     service_id: proxmox_ui

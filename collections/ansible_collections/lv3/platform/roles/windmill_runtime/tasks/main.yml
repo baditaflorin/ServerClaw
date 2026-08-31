@@ -13,6 +13,12 @@
   vars:
     common_derive_service_name: windmill
 
+- name: Resolve the effective public ntfy URL from the canonical service topology
+  ansible.builtin.set_fact:
+    windmill_ntfy_base_url: >-
+      {{ hostvars[platform_topology_host].platform_service_topology
+         | platform_service_url('ntfy', 'public') }}
+
 
 - name: Validate Windmill runtime inputs
   ansible.builtin.include_role:
@@ -101,6 +107,33 @@
         mode: "0700"
       - path: "{{ windmill_worker_repo_checkout_host_path }}"
         mode: "0755"
+
+- name: Check for an existing controller-side Windmill superadmin secret
+  ansible.builtin.stat:
+    path: "{{ windmill_superadmin_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_superadmin_secret_local_stat
+  no_log: true
+
+- name: Check for an existing Windmill superadmin secret on the runtime host
+  ansible.builtin.stat:
+    path: "{{ windmill_superadmin_secret_remote_file }}"
+  register: windmill_superadmin_secret_remote_stat
+  no_log: true
+
+- name: Restore the Windmill superadmin secret from the controller when available
+  ansible.builtin.copy:
+    src: "{{ windmill_superadmin_secret_local_file }}"
+    dest: "{{ windmill_superadmin_secret_remote_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - windmill_superadmin_secret_local_stat.stat.exists
+    - windmill_superadmin_secret_local_stat.stat.size | int > 0
+    - not windmill_superadmin_secret_remote_stat.stat.exists or windmill_superadmin_secret_remote_stat.stat.size | int == 0
+  no_log: true
 
 - name: Ensure the integration test runner password exists on the control machine
   ansible.builtin.shell: |
@@ -1015,8 +1048,7 @@
     set -euo pipefail
     if [ ! -s "{{ windmill_superadmin_secret_remote_file }}" ]; then
       umask 077
-      # ADR 0480: Manual migration needed for: openssl rand -hex 32 > "{{ windmill_superadmin_secret_remote_file }}"
-                # Replace with: {{ "windmill" | secret }}
+      printf '%s\n' {{ "windmill" | secret(length=32) | quote }} > "{{ windmill_superadmin_secret_remote_file }}"
       echo changed
     fi
   args:
@@ -2339,12 +2371,6 @@
   tags:
     - mutation
 
-- name: Remove the remote repo-managed Windmill script manifest
-  ansible.builtin.file:
-    path: "{{ windmill_seed_script_manifest_remote.path }}"
-    state: absent
-  become: false
-
 - name: Create a remote manifest path for repo-managed Windmill resources
   ansible.builtin.tempfile:
     state: file
@@ -2582,9 +2608,79 @@
   tags:
     - mutation
 
+- name: Retire explicitly superseded Windmill schedules after replacement sync
+  vars:
+    mutation_audit_action: retire.windmill_schedule
+    mutation_audit_target: windmill-workspace
+    mutation_audit_emit_on_success: true
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_seed_schedules.py"
+      - --base-url
+      - "{{ windmill_runtime_api_base_url }}"
+      - --workspace
+      - "{{ windmill_workspace_id }}"
+      - --manifest
+      - "{{ windmill_seed_schedule_manifest_remote.path }}"
+      - --retired-path
+      - "{{ item }}"
+      - --max-attempts
+      - "8"
+      - --settle-interval
+      - "1.0"
+  environment:
+    WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"
+  loop: "{{ windmill_retired_seed_schedule_paths | default([]) }}"
+  loop_control:
+    label: "{{ item }}"
+  when: windmill_retire_keycloak_seed_assets | default(false) | bool
+  changed_when: false
+  no_log: true
+  tags:
+    - mutation
+
+- name: Retire explicitly superseded Windmill scripts after schedule retirement
+  vars:
+    mutation_audit_action: retire.windmill_script
+    mutation_audit_target: windmill-workspace
+    mutation_audit_emit_on_success: true
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ windmill_worker_repo_checkout_host_path }}/scripts/sync_windmill_seed_scripts.py"
+      - --base-url
+      - "{{ windmill_runtime_api_base_url }}"
+      - --workspace
+      - "{{ windmill_workspace_id }}"
+      - --manifest
+      - "{{ windmill_seed_script_manifest_remote.path }}"
+      - --retired-path
+      - "{{ item }}"
+      - --max-attempts
+      - "20"
+      - --settle-interval
+      - "2.0"
+  environment:
+    WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"
+  loop: "{{ windmill_retired_seed_script_paths | default([]) }}"
+  loop_control:
+    label: "{{ item }}"
+  when: windmill_retire_keycloak_seed_assets | default(false) | bool
+  changed_when: false
+  no_log: true
+  tags:
+    - mutation
+
 - name: Remove the remote repo-managed Windmill schedule manifest
   ansible.builtin.file:
     path: "{{ windmill_seed_schedule_manifest_remote.path }}"
+    state: absent
+  become: false
+
+- name: Remove the remote repo-managed Windmill script manifest
+  ansible.builtin.file:
+    path: "{{ windmill_seed_script_manifest_remote.path }}"
     state: absent
   become: false
 
@@ -2609,15 +2705,23 @@
   when: windmill_remote_verification_enabled | bool
 
 - name: Run the Windmill seeded healthcheck script
-  ansible.builtin.shell: >
-    python3 {{ (windmill_worker_checkout_repo_root_local_dir ~ '/scripts/windmill_run_wait_result.py') | quote }}
-    --base-url {{ windmill_base_url | quote }}
-    --workspace {{ windmill_workspace_id | quote }}
-    --path {{ windmill_healthcheck_script_path | quote }}
-    --payload-json '{"probe":"live-verify"}'
-    --timeout {{ windmill_seed_job_timeout_seconds }}
-  args:
-    executable: /bin/bash
+  # ``command.argv`` keeps the ephemeral bootstrap credentials out of the
+  # controller-side shell command line.  They are still passed through the
+  # process environment to the helper, never interpolated into ``/bin/sh``.
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ windmill_worker_checkout_repo_root_local_dir ~ '/scripts/windmill_run_wait_result.py' }}"
+      - --base-url
+      - "{{ windmill_verification_base_url }}"
+      - --workspace
+      - "{{ windmill_workspace_id }}"
+      - --path
+      - "{{ windmill_healthcheck_script_path }}"
+      - --payload-json
+      - '{"probe":"live-verify"}'
+      - --timeout
+      - "{{ windmill_seed_job_timeout_seconds | string }}"
   delegate_to: localhost
   become: false
   environment:
@@ -2626,7 +2730,9 @@
   register: windmill_healthcheck
   retries: 3
   delay: 10
-  until: windmill_healthcheck.rc == 0
+  until:
+    - windmill_healthcheck.rc == 0
+    - (windmill_healthcheck.stdout | default('') | trim | length) > 0
   changed_when: false
   failed_when: false
   no_log: true
@@ -2635,6 +2741,8 @@
 - name: Assert the Windmill seeded healthcheck result
   ansible.builtin.assert:
     that:
+      - windmill_healthcheck.rc == 0
+      - (windmill_healthcheck.stdout | default('') | trim | length) > 0
       - (windmill_healthcheck.stdout | from_json).probe == "live-verify"
       - (windmill_healthcheck.stdout | from_json).job_id_present | bool
       - (windmill_healthcheck.stdout | from_json).workspace == windmill_workspace_id

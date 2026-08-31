@@ -27,6 +27,6 @@ argument_specs:
       langfuse_database_password_local_file:
         type: path
         required: true
-      langfuse_keycloak_client_secret_local_file:
+      langfuse_authentik_client_secret_local_file:
         type: path
         required: true

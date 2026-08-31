@@ -34,6 +34,7 @@
           '--manifest', authentik_oauth_manifest_file,
           '--base-url', authentik_public_url,
           '--platform-domain', platform_domain,
+          '--platform-config-prefix', platform_identity.config_prefix,
           '--token-file', authentik_oauth_reconcile_token_file
         ]
         + (

@@ -14,6 +14,7 @@ depends_on:
   - adr-0481-explicit-deployment-context
   - adr-0482-capacity-aware-dynamic-sizing
   - adr-0483-hands-off-bootstrap
+conflicts_with: []
 shared_surfaces:
   - docs/adr/0484-self-verification-contracts.md
   - config/contracts/deployment-v1/post-conditions.schema.json

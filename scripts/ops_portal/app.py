@@ -353,7 +353,7 @@ LAUNCHER_PURPOSE_OVERRIDES = {
     "grafana": "observe",
     "headscale": "administer",
     "homepage": "operate",
-    "keycloak": "administer",
+    "authentik": "administer",
     "langfuse": "observe",
     "netbox": "plan",
     "ops_portal": "operate",
@@ -422,7 +422,7 @@ DEFAULT_PERSONA_CATALOG = {
             "default": False,
             "focus_purposes": ["administer", "operate", "observe"],
             "default_favorites": [
-                "service:keycloak",
+                "service:authentik",
                 "service:openbao",
                 "service:proxmox_ui",
                 "service:portainer",

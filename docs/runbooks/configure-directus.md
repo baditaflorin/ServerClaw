@@ -3,7 +3,7 @@
 Directus is the repo-managed REST and GraphQL operational data API published at
 `https://data.example.com`. The runtime lives on `docker-runtime`, stores its
 state in the dedicated PostgreSQL database `directus` on `postgres`, and
-delegates routine browser sign-in to Keycloak.
+delegates routine browser sign-in to Authentik.
 
 ## Repo Surfaces
 
@@ -24,7 +24,7 @@ delegates routine browser sign-in to Keycloak.
   governed collection schema and a deterministic SQL seed to manage roles,
   policies, permissions, and the durable service token.
 - Local Directus auth remains available for the break-glass admin account.
-  Routine browser access is expected to use the Keycloak OIDC path.
+  Routine browser access is expected to use the Authentik OIDC path.
 
 ## Controller-Local Artifacts
 
@@ -35,7 +35,7 @@ The converge path creates and reuses these controller-local files:
 - `.local/directus/secret.txt`
 - `.local/directus/admin-password.txt`
 - `.local/directus/service-registry-token.txt`
-- `.local/keycloak/directus-client-secret.txt`
+- `.local/authentik/directus-client-secret.txt`
 
 ## Converge
 
@@ -72,7 +72,7 @@ The playbook performs these steps:
 1. Ensures the `data.example.com` Hetzner DNS record exists.
 2. Creates or reconciles the PostgreSQL role and dedicated `directus`
    database on `postgres`.
-3. Creates the Directus runtime secrets, Keycloak client secret mirror,
+3. Creates the Directus runtime secrets, Authentik client secret mirror,
    compose env, and runtime on `docker-runtime`.
 4. Bootstraps the governed `service_registry` collection and restarts
    Directus once if schema changes were applied.
@@ -106,7 +106,7 @@ python3 scripts/directus_bootstrap.py verify-public \
   --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/directus/service-registry-token.txt \
   --collection service_registry \
   --expected-service-name directus \
-  --expected-sso-host sso.example.com
+  --expected-sso-host id.example.com
 ```
 
 The verification helper checks:
@@ -114,7 +114,7 @@ The verification helper checks:
 - `GET /server/health`
 - `GET /server/ping`
 - `GET /server/specs/oas`
-- `GET /auth/login/keycloak` redirects to `sso.example.com`
+- `GET /auth/login/authentik` redirects to `id.example.com`
 - token-authenticated `GET /items/service_registry`
 - token-authenticated GraphQL query on `/graphql`
 
@@ -135,7 +135,7 @@ The verification helper checks:
 - If a new collection or field exists in Directus metadata but not GraphQL,
   restart Directus once and rerun the public verification. The role already
   performs this restart automatically when schema bootstrap changes occur.
-- If OIDC login breaks, reconverge `playbooks/keycloak.yml` and then rerun
+- If OIDC login breaks, reconverge `playbooks/authentik.yml` and then rerun
   `make converge-directus` so the runtime picks up the latest mirrored client
   secret.
 - If PostgreSQL inspection is needed during recovery, remember that Directus

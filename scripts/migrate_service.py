@@ -17,9 +17,9 @@ Registries updated (authoritative first):
   inventory/host_vars/proxmox-host.yml  Jinja2 VM refs in topology block (updated to match)
 
 Usage:
-    python scripts/migrate_service.py --svc keycloak --to runtime-control --dry-run
-    python scripts/migrate_service.py --svc keycloak --to runtime-control --execute
-    python scripts/migrate_service.py --svc keycloak --to runtime-control --execute --env staging
+    python scripts/migrate_service.py --svc <service> --to runtime-control --dry-run
+    python scripts/migrate_service.py --svc <service> --to runtime-control --execute
+    python scripts/migrate_service.py --svc <service> --to runtime-control --execute --env staging
 """
 
 from __future__ import annotations
@@ -403,7 +403,7 @@ def run_step(step: MigrationStep, env: str, *, dry_run: bool) -> bool:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--svc", required=True, help="Service name (e.g. keycloak)")
+    parser.add_argument("--svc", required=True, help="Service name (e.g. authentik)")
     parser.add_argument("--to", required=True, dest="to_vm", help="Target VM (e.g. runtime-control)")
     parser.add_argument("--env", default="production", help="Ansible env (default: production)")
     mode = parser.add_mutually_exclusive_group(required=True)

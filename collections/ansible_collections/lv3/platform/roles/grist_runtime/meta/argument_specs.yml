@@ -35,12 +35,12 @@ argument_specs:
       grist_session_secret_local_file:
         type: path
         required: true
-      grist_keycloak_client_secret_local_file:
+      grist_authentik_client_secret_local_file:
         type: path
         required: true
-      grist_keycloak_client_id:
+      grist_authentik_client_id:
         type: str
         required: true
-      grist_keycloak_issuer:
+      grist_authentik_issuer:
         type: str
         required: true

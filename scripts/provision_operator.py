@@ -3,7 +3,7 @@
 provision_operator.py — Canonical operator onboarding script for the platform.
 
 Implements ADR 0318: repeatable, code-first operator provisioning with audit-trail CC.
-Wraps the Keycloak direct-API procedure from ADR 0317 and adds Headscale VPN +
+Uses the Authentik admin API and adds Headscale VPN +
 step-ca bootstrap details so the operator receives everything in a single email.
 
 Usage:
@@ -19,12 +19,12 @@ Usage:
 
 What it does:
     1. Resolve controller-local inputs from the shared checkout even under `.worktrees/`
-    2. Reuse or generate `.local/keycloak/<username>-password.txt`
-    3. Create or verify the Keycloak user, roles, and groups
+    2. Reuse or generate `.local/authentik/<username>-password.txt`
+    3. Create or verify the Authentik user and group membership
     4. Optionally create or verify the Headscale user and pre-auth key
     5. Optionally send one onboarding email to the operator with CC to the requester
 
-`--skip-email` keeps the Keycloak provisioning and verification path live without
+`--skip-email` keeps the Authentik provisioning and verification path live without
 re-sending onboarding email or generating a fresh Headscale auth key. Use it when
 re-verifying an already onboarded operator from exact `main`.
 """
@@ -120,11 +120,11 @@ def read_required_text(path: Path, label: str) -> str:
     return path.read_text(encoding="utf-8").strip()
 
 
-def read_keycloak_bootstrap_password() -> str:
-    override = os.environ.get("LV3_KEYCLOAK_BOOTSTRAP_PASSWORD", "").strip()
+def read_authentik_bootstrap_token() -> str:
+    override = os.environ.get("LV3_AUTHENTIK_BOOTSTRAP_TOKEN", "").strip()
     if override:
         return override
-    return read_required_text(BOOTSTRAP_PASS_FILE, "Keycloak bootstrap password")
+    return read_required_text(AUTHENTIK_TOKEN_FILE, "Authentik bootstrap API token")
 
 
 def read_mail_gateway_api_key() -> str:
@@ -136,18 +136,16 @@ def read_mail_gateway_api_key() -> str:
 
 # ---------------------------------------------------------------------------
 # Identity resolution (ADR 0385 / ADR 0407)
-# Derive the realm, config prefix, and endpoints from inventory + the .local
+# Derive the config prefix and endpoints from inventory + the .local
 # identity overlay rather than hardcoding one deployment. This keeps the
 # committed script generic (no deployment-specific literals); real values come
 # from .local/identity.yml at runtime. Env vars override for ad-hoc runs.
 # ---------------------------------------------------------------------------
-def _resolve_identity() -> tuple[str, str, str]:
-    """Return (platform_domain, config_prefix, keycloak_realm).
+def _resolve_identity() -> tuple[str, str]:
+    """Return (platform_domain, config_prefix).
 
-    An explicit PLATFORM_DOMAIN env override takes full precedence: the prefix
-    and realm are then derived from it rather than from the .local overlay, so
-    domain and prefix can never disagree. Otherwise both come from the overlay
-    (with the prefix falling back to the domain's first label).
+    An explicit PLATFORM_DOMAIN env override takes full precedence. Authentik
+    does not scope operator accounts inside a separate realm.
     """
     domain = os.environ.get("PLATFORM_DOMAIN", "").strip()
     prefix = ""
@@ -162,24 +160,20 @@ def _resolve_identity() -> tuple[str, str, str]:
             pass
     domain = domain or "example.com"
     prefix = prefix or domain.split(".")[0]
-    realm = os.environ.get("LV3_KEYCLOAK_REALM", "").strip() or domain.split(".")[0]
-    return domain, prefix, realm
+    return domain, prefix
 
 
-PLATFORM_DOMAIN, CONFIG_PREFIX, REALM = _resolve_identity()
+PLATFORM_DOMAIN, CONFIG_PREFIX = _resolve_identity()
 
-# Keycloak
-DEFAULT_KEYCLOAK_URL = f"https://sso.{PLATFORM_DOMAIN}"
-ADMIN_USER = f"{CONFIG_PREFIX}-bootstrap-admin"
-BOOTSTRAP_PASS_FILE = repo_path(".local", "keycloak", "bootstrap-admin-password.txt")
-PASSWORD_DIR = repo_path(".local", "keycloak")
+# Authentik
+DEFAULT_AUTHENTIK_URL = f"https://id.{PLATFORM_DOMAIN}"
+AUTHENTIK_TOKEN_FILE = repo_path(".local", "authentik", "bootstrap-token.txt")
+PASSWORD_DIR = repo_path(".local", "authentik")
 
 # Mail delivery — the platform mail-gateway HTTP API. It listens on the internal
 # network only, so we reach it through the SSH proxy. The transactional profile
 # fixes the sender identity, so no From/SMTP credentials are configured here.
-MAIL_GATEWAY_KEY_FILE = repo_path(
-    ".local", "mail-platform", "profiles", "platform-transactional-gateway-api-key.txt"
-)
+MAIL_GATEWAY_KEY_FILE = repo_path(".local", "mail-platform", "profiles", "platform-transactional-gateway-api-key.txt")
 SSH_KEY_FILE = repo_path(".local", "ssh", "bootstrap.id_ed25519")
 SSH_PROXY = os.environ.get("LV3_SSH_PROXY", "").strip() or "ops@100.64.0.1"
 
@@ -192,11 +186,10 @@ HEADSCALE_AUTHKEY_DIR = repo_path(".local", "headscale")
 STEP_CA_URL = os.environ.get("LV3_STEP_CA_URL", "").strip() or f"https://ca.{PLATFORM_DOMAIN}"
 STEP_CA_ROOT_CERT = repo_path(".local", "step-ca", "certs", "root_ca.crt")
 
-# Role → (realm_roles, groups, openbao_policies)
+# Role → (Authentik groups, OpenBao policies)
 ROLE_DEFINITIONS: dict[str, dict[str, list[str]]] = {
     role_name: {
-        "realm_roles": list(definition.keycloak_roles),
-        "groups": list(definition.keycloak_groups),
+        "groups": list(definition.authentik_groups),
         "openbao_policies": list(definition.openbao_policies),
     }
     for role_name, definition in OPERATOR_MANAGER_ROLE_DEFINITIONS.items()
@@ -217,72 +210,16 @@ def configured_url(env_var: str, default: str) -> str:
     return default
 
 
-ADMIN_CLIENT_ID = f"{CONFIG_PREFIX}-admin-runtime"
-ADMIN_CLIENT_SECRET_FILE = repo_path(".local", "keycloak", "admin-client-secret.txt")
-
-
-def get_token(bootstrap_pass: str) -> str:
-    """Acquire an admin token from the Keycloak master realm.
-
-    Tries the client-credentials grant with the <prefix>-admin-runtime client
-    first (more reliable when the bootstrap admin password has been rotated).
-    Falls back to the password grant with the <prefix>-bootstrap-admin user.
-    """
-    keycloak_url = configured_url("LV3_KEYCLOAK_URL", DEFAULT_KEYCLOAK_URL)
-    token_url = f"{keycloak_url}/realms/master/protocol/openid-connect/token"
-
-    # Try client credentials first if the secret file exists
-    if ADMIN_CLIENT_SECRET_FILE.exists():
-        client_secret = ADMIN_CLIENT_SECRET_FILE.read_text(encoding="utf-8").strip()
-        if client_secret:
-            data = urllib.parse.urlencode(
-                {
-                    "client_id": ADMIN_CLIENT_ID,
-                    "client_secret": client_secret,
-                    "grant_type": "client_credentials",
-                }
-            ).encode("utf-8")
-            req = urllib.request.Request(
-                token_url,
-                data=data,
-                method="POST",
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
-            )
-            try:
-                with urllib.request.urlopen(req, context=_ssl_ctx()) as response:
-                    return json.loads(response.read())["access_token"]
-            except urllib.error.HTTPError:
-                print("[token] client-credentials grant failed, falling back to password grant")
-
-    # Fallback: password grant with bootstrap admin
-    data = urllib.parse.urlencode(
-        {
-            "client_id": "admin-cli",
-            "grant_type": "password",
-            "username": ADMIN_USER,
-            "password": bootstrap_pass,
-        }
-    ).encode("utf-8")
-    req = urllib.request.Request(
-        token_url,
-        data=data,
-        method="POST",
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
-    with urllib.request.urlopen(req, context=_ssl_ctx()) as response:
-        return json.loads(response.read())["access_token"]
-
-
-def kc(method: str, path: str, token: str, body: Any = None) -> tuple[int, Any]:
-    """Make a Keycloak admin REST API call. Returns (status_code, parsed_body)."""
-    keycloak_url = configured_url("LV3_KEYCLOAK_URL", DEFAULT_KEYCLOAK_URL)
-    url = f"{keycloak_url}/admin/realms/{REALM}{path}"
+def authentik_api(method: str, path: str, token: str, body: Any = None) -> tuple[int, Any]:
+    """Make an Authentik admin REST API call. Returns (status_code, parsed_body)."""
+    authentik_url = configured_url("LV3_AUTHENTIK_URL", DEFAULT_AUTHENTIK_URL)
+    url = f"{authentik_url}/api/v3{path}"
     data = json.dumps(body).encode("utf-8") if body is not None else None
     req = urllib.request.Request(
         url,
         data=data,
         method=method,
-        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json", "Accept": "application/json"},
     )
     try:
         with urllib.request.urlopen(req, context=_ssl_ctx()) as response:
@@ -409,7 +346,7 @@ def render_service_lines(domain: str) -> str:
         payload = json.loads(SERVICE_CATALOG_PATH.read_text(encoding="utf-8"))
         services = [s for s in payload.get("services", []) if isinstance(s, dict)]
     except (OSError, json.JSONDecodeError):
-        return f"  SSO portal                 https://sso.{domain}"
+        return f"  SSO portal                 https://id.{domain}"
     by_category: dict[str, list[tuple[str, str]]] = {}
     for service in services:
         url = service.get("public_url")
@@ -425,7 +362,7 @@ def render_service_lines(domain: str) -> str:
             continue
         lines.append(f"  {category_label}:")
         lines.extend(f"    {name:<26} {url}" for name, url in entries)
-    return "\n".join(lines) if lines else f"  SSO portal                 https://sso.{domain}"
+    return "\n".join(lines) if lines else f"  SSO portal                 https://id.{domain}"
 
 
 PLAIN_TEMPLATE = """\
@@ -437,7 +374,7 @@ a {role} account valid until {expiry}.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  YOUR SSO CREDENTIALS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  Login portal : {keycloak_url}
+  Login portal : {authentik_url}
   Username     : {username}
   Password     : {password}
   Expires      : {expiry}
@@ -503,7 +440,7 @@ Repo: {git_url}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  QUICK CHECKLIST
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  [ ] Log in at {keycloak_url} and change your password
+  [ ] Log in at {authentik_url} and change your password
   [ ] sudo tailscale up --login-server {headscale_url} --authkey <above>
   [ ] step ca bootstrap --ca-url {ca_url} --fingerprint {ca_fingerprint}
   [ ] Review docs/runbooks/operator-onboarding.md for SSH setup
@@ -531,7 +468,7 @@ def build_email_payload(
     ca_fingerprint: str,
 ) -> dict[str, Any]:
     requester_name = requester_email.split("@", 1)[0].replace(".", " ").title()
-    keycloak_url = configured_url("LV3_KEYCLOAK_URL", DEFAULT_KEYCLOAK_URL)
+    authentik_url = configured_url("LV3_AUTHENTIK_URL", DEFAULT_AUTHENTIK_URL)
     plain = PLAIN_TEMPLATE.format(
         first_name=first_name,
         requester_name=requester_name,
@@ -543,8 +480,8 @@ def build_email_payload(
         headscale_authkey=headscale_authkey,
         ca_fingerprint=ca_fingerprint,
         domain=PLATFORM_DOMAIN,
-        keycloak_url=keycloak_url,
-        account_url=f"{keycloak_url}/realms/{REALM}/account/",
+        authentik_url=authentik_url,
+        account_url=f"{authentik_url}/if/user/",
         headscale_url=configured_url("LV3_HEADSCALE_URL", DEFAULT_HEADSCALE_URL),
         ca_url=STEP_CA_URL,
         git_url=f"https://git.{PLATFORM_DOMAIN}",
@@ -591,47 +528,75 @@ def send_email_via_gateway(payload: dict[str, Any], api_key: str, ssh_key: Path)
         timeout=30,
     )
     if result.returncode != 0:
-        raise RuntimeError(
-            f"Mail gateway send failed: {result.stderr.decode('utf-8', errors='replace')}"
-        )
+        raise RuntimeError(f"Mail gateway send failed: {result.stderr.decode('utf-8', errors='replace')}")
     recipients = list(payload.get("to", [])) + list(payload.get("cc", []))
     print(f"Email sent via mail gateway to {', '.join(recipients)}")
 
 
-def _fetch_keycloak_user(username: str, bootstrap_pass: str) -> tuple[str | None, bool]:
-    token = get_token(bootstrap_pass)
-    status, body = kc("GET", f"/users?username={username}&exact=true", token)
-    if status != 200:
-        raise RuntimeError(f"Keycloak user lookup failed for {username}: HTTP {status}: {body}")
-    users = body or []
-    if users:
-        return users[0]["id"], True
-    return None, False
+def _list_authentik(path: str, token: str) -> list[dict[str, Any]]:
+    """Read every page from a small Authentik collection without leaking tokens."""
+    page = 1
+    results: list[dict[str, Any]] = []
+    while True:
+        separator = "&" if "?" in path else "?"
+        status, body = authentik_api("GET", f"{path}{separator}page={page}&page_size=100", token)
+        if status != 200 or not isinstance(body, dict):
+            raise RuntimeError(f"Authentik list failed for {path}: HTTP {status}")
+        batch = body.get("results")
+        if not isinstance(batch, list):
+            raise RuntimeError(f"Authentik list for {path} did not return results.")
+        results.extend(item for item in batch if isinstance(item, dict))
+        pagination = body.get("pagination")
+        next_page = pagination.get("next") if isinstance(pagination, dict) else None
+        if next_page is None:
+            return results
+        if isinstance(next_page, bool) or not isinstance(next_page, int) or next_page <= page:
+            raise RuntimeError(f"Authentik list for {path} returned an invalid pagination cursor.")
+        page = next_page
 
 
-def _verify_assignments(user_id: str, role_def: dict[str, list[str]], bootstrap_pass: str) -> None:
-    token = get_token(bootstrap_pass)
-    status, roles_body = kc("GET", f"/users/{user_id}/role-mappings/realm", token)
-    if status != 200:
-        raise RuntimeError(f"Keycloak role verification failed: HTTP {status}: {roles_body}")
-    observed_roles = {entry["name"] for entry in (roles_body or [])}
+def _fetch_authentik_user(username: str, token: str) -> tuple[str | None, bool, dict[str, Any] | None]:
+    users = _list_authentik(f"/core/users/?username={urllib.parse.quote(username, safe='')}&include_groups=true", token)
+    matches = [user for user in users if user.get("username") == username]
+    if len(matches) > 1:
+        raise RuntimeError(f"Authentik returned multiple users for {username!r}.")
+    if not matches:
+        return None, False, None
+    user_id = matches[0].get("pk")
+    if user_id is None or isinstance(user_id, bool) or not str(user_id).strip():
+        raise RuntimeError(f"Authentik user '{username}' has no primary key.")
+    return str(user_id), True, matches[0]
 
-    token = get_token(bootstrap_pass)
-    status, groups_body = kc("GET", f"/users/{user_id}/groups", token)
-    if status != 200:
-        raise RuntimeError(f"Keycloak group verification failed: HTTP {status}: {groups_body}")
-    observed_groups = {entry["name"] for entry in (groups_body or [])}
 
-    expected_roles = set(role_def["realm_roles"])
+def _authentik_group_map(token: str) -> dict[str, str]:
+    groups = _list_authentik("/core/groups/", token)
+    group_map: dict[str, str] = {}
+    for group in groups:
+        name, group_id = group.get("name"), group.get("pk")
+        if isinstance(name, str) and name and group_id is not None and not isinstance(group_id, bool):
+            group_map[name] = str(group_id)
+    return group_map
+
+
+def _verify_assignments(user_id: str, role_def: dict[str, list[str]], token: str) -> None:
+    status, user = authentik_api("GET", f"/core/users/{urllib.parse.quote(user_id, safe='')}/", token)
+    if status != 200 or not isinstance(user, dict):
+        raise RuntimeError(f"Authentik user verification failed: HTTP {status}")
+    group_map = _authentik_group_map(token)
     expected_groups = set(role_def["groups"])
-    missing_roles = sorted(expected_roles - observed_roles)
-    missing_groups = sorted(expected_groups - observed_groups)
-    if missing_roles or missing_groups:
-        raise RuntimeError(
-            f"Keycloak assignment verification failed: missing roles={missing_roles}, missing groups={missing_groups}"
-        )
-
-    print(f"[5] Roles:  {sorted(observed_roles)}")
+    missing_groups = sorted(expected_groups - set(group_map))
+    if missing_groups:
+        raise RuntimeError(f"Authentik groups are missing: {missing_groups}")
+    group_names_by_id = {group_id: name for name, group_id in group_map.items()}
+    user_groups = user.get("groups")
+    if not isinstance(user_groups, list):
+        raise RuntimeError("Authentik user verification response did not include a groups list.")
+    observed_groups = {
+        group_names_by_id[str(group_id)] for group_id in user_groups if str(group_id) in group_names_by_id
+    }
+    missing_assignments = sorted(expected_groups - observed_groups)
+    if missing_assignments:
+        raise RuntimeError(f"Authentik group assignment verification failed: missing groups={missing_assignments}")
     print(f"[5] Groups: {sorted(observed_groups)}")
 
 
@@ -641,24 +606,22 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
     PASSWORD_DIR.mkdir(parents=True, exist_ok=True)
     pw_file = PASSWORD_DIR / f"{args.username}-password.txt"
     existing_password = pw_file.read_text(encoding="utf-8").strip() if pw_file.exists() else None
+    password = existing_password or secrets.token_urlsafe(24)
 
     if existing_password:
-        password = existing_password
         print(f"[0] Reusing existing password from {pw_file}")
+    elif dry_run:
+        print(f"[0] DRY-RUN: would write password to {pw_file}")
     else:
-        password = secrets.token_urlsafe(24)
-        if dry_run:
-            print(f"[0] DRY-RUN: would write password to {pw_file}")
-        else:
-            print(f"[0] Will write a new password to {pw_file} after Keycloak user creation")
+        print(f"[0] Will write a new password to {pw_file} after Authentik user creation")
 
     if dry_run:
         print(f"[dry-run] Would provision {args.username} ({args.email}) role={args.role}")
         if args.skip_email:
-            print("[dry-run] Would stop after Keycloak provisioning and assignment verification")
+            print("[dry-run] Would stop after Authentik provisioning and group verification")
         else:
             print(f"[dry-run] Would create or reuse Headscale authkey under {HEADSCALE_AUTHKEY_DIR}")
-            print(f"[dry-run] Resolved realm={REALM} domain={PLATFORM_DOMAIN} keycloak={DEFAULT_KEYCLOAK_URL}")
+            print(f"[dry-run] Resolved domain={PLATFORM_DOMAIN} authentik={DEFAULT_AUTHENTIK_URL}")
             print(f"[dry-run] Would send onboarding email via mail gateway using proxy {SSH_PROXY}")
             print("[dry-run] Rendered welcome email below:\n")
             print(
@@ -677,77 +640,56 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
             )
         return
 
-    bootstrap_pass = read_keycloak_bootstrap_password()
-
-    user_id, user_exists = _fetch_keycloak_user(args.username, bootstrap_pass)
+    token = read_authentik_bootstrap_token()
+    user_id, user_exists, _existing_user = _fetch_authentik_user(args.username, token)
+    group_map = _authentik_group_map(token)
+    missing_group_defs = [name for name in role_def["groups"] if name not in group_map]
+    if missing_group_defs:
+        raise RuntimeError(f"Authentik groups missing from the directory: {missing_group_defs}")
+    user_payload = {
+        "username": args.username,
+        "name": args.name,
+        "email": args.email,
+        "is_active": True,
+        "type": "internal",
+        "groups": [group_map[name] for name in role_def["groups"]],
+    }
     if user_exists:
-        if not existing_password:
-            raise RuntimeError(f"Keycloak user already exists but the local password file is missing: {pw_file}")
         assert user_id is not None
-        print(f"[1] Keycloak user already exists: {user_id}")
+        status, _ = authentik_api("PATCH", f"/core/users/{urllib.parse.quote(user_id, safe='')}/", token, user_payload)
+        if status != 200:
+            raise RuntimeError(f"Authentik user update failed: HTTP {status}")
+        print(f"[1] Authentik user already exists and was reconciled: {user_id}")
+        if not existing_password and not args.skip_email:
+            raise RuntimeError(
+                f"Authentik user already exists but the local password file is missing: {pw_file}. "
+                "Use --skip-email or reset the user through the Authentik recovery flow."
+            )
     else:
-        first, *rest = args.name.split()
-        last = " ".join(rest) if rest else "Tmp"
-        payload = {
-            "username": args.username,
-            "email": args.email,
-            "firstName": first,
-            "lastName": last,
-            "enabled": True,
-            "emailVerified": True,
-            "credentials": [{"type": "password", "value": password, "temporary": False}],
-        }
-        token = get_token(bootstrap_pass)
-        status, body = kc("POST", "/users", token, payload)
-        if status != 201:
-            raise RuntimeError(f"Keycloak user creation failed: HTTP {status}: {body}")
+        status, user = authentik_api("POST", "/core/users/", token, user_payload)
+        if status != 201 or not isinstance(user, dict):
+            raise RuntimeError(f"Authentik user creation failed: HTTP {status}")
+        user_id_raw = user.get("pk")
+        if user_id_raw is None or isinstance(user_id_raw, bool) or not str(user_id_raw).strip():
+            raise RuntimeError("Authentik user creation response has no primary key.")
+        user_id = str(user_id_raw)
+        status, _ = authentik_api(
+            "POST", f"/core/users/{urllib.parse.quote(user_id, safe='')}/set_password/", token, {"password": password}
+        )
+        if status != 204:
+            raise RuntimeError(f"Authentik password setup failed: HTTP {status}")
         pw_file.write_text(password + "\n", encoding="utf-8")
-        print("[2] Keycloak user created")
+        print("[2] Authentik user created")
         print(f"[2] Generated password -> {pw_file}")
-        user_id, user_exists = _fetch_keycloak_user(args.username, bootstrap_pass)
-        if not user_exists or user_id is None:
-            raise RuntimeError(f"Keycloak user lookup failed after create for {args.username}")
         print(f"[2] User ID: {user_id}")
 
     assert user_id is not None
-
-    for role_name in role_def["realm_roles"]:
-        token = get_token(bootstrap_pass)
-        status, role_obj = kc("GET", f"/roles/{role_name}", token)
-        if status != 200 or not role_obj:
-            raise RuntimeError(f"Keycloak role lookup failed for {role_name}: HTTP {status}: {role_obj}")
-        token = get_token(bootstrap_pass)
-        status, body = kc(
-            "POST",
-            f"/users/{user_id}/role-mappings/realm",
-            token,
-            [{"id": role_obj["id"], "name": role_obj["name"]}],
-        )
-        if status not in (204, 409):
-            raise RuntimeError(f"Keycloak role assignment failed for {role_name}: HTTP {status}: {body}")
-        print(f"[3] Role '{role_name}' -> HTTP {status}")
-
-    token = get_token(bootstrap_pass)
-    status, all_groups = kc("GET", "/groups?max=200", token)
-    if status != 200:
-        raise RuntimeError(f"Keycloak group listing failed: HTTP {status}: {all_groups}")
-    group_map = {group["name"]: group["id"] for group in (all_groups or [])}
-    missing_group_defs = [name for name in role_def["groups"] if name not in group_map]
-    if missing_group_defs:
-        raise RuntimeError(f"Keycloak groups missing from realm: {missing_group_defs}")
-    for group_name in role_def["groups"]:
-        token = get_token(bootstrap_pass)
-        status, body = kc("PUT", f"/users/{user_id}/groups/{group_map[group_name]}", token)
-        if status not in (204, 409):
-            raise RuntimeError(f"Keycloak group assignment failed for {group_name}: HTTP {status}: {body}")
-        print(f"[4] Group '{group_name}' -> HTTP {status}")
-
-    _verify_assignments(user_id, role_def, bootstrap_pass)
+    _verify_assignments(user_id, role_def, token)
 
     if args.skip_email:
-        print("\n✓ Keycloak provisioning and assignment verification succeeded.")
-        print(f"  Keycloak username  : {args.username}")
-        print(f"  Keycloak user ID   : {user_id}")
+        print("\n✓ Authentik provisioning and group verification succeeded.")
+        print(f"  Authentik username : {args.username}")
+        print(f"  Authentik user ID  : {user_id}")
         print(f"  Password file      : {pw_file}")
         print("  Email / Headscale  : skipped by request (--skip-email)")
         return
@@ -776,8 +718,8 @@ def provision(args: argparse.Namespace, dry_run: bool = False) -> None:
     send_email_via_gateway(payload, gateway_api_key, SSH_KEY_FILE)
 
     print(f"\n✓ Operator '{args.name}' fully provisioned.")
-    print(f"  Keycloak username  : {args.username}")
-    print(f"  Keycloak user ID   : {user_id}")
+    print(f"  Authentik username : {args.username}")
+    print(f"  Authentik user ID  : {user_id}")
     print(f"  Password file      : {pw_file}")
     print(f"  Headscale user     : {hs_username}")
     print(f"  Headscale authkey  : {HEADSCALE_AUTHKEY_DIR / (hs_username + '-authkey.txt')}")
@@ -795,7 +737,7 @@ def main() -> None:
     parser.add_argument("--id", required=True, help="Operator ID (e.g. matei-busui-tmp-001)")
     parser.add_argument("--name", required=True, help='Full name (e.g. "Matei Busui")')
     parser.add_argument("--email", required=True, help="Operator email address")
-    parser.add_argument("--username", required=True, help="Keycloak username (e.g. matei.busui-tmp)")
+    parser.add_argument("--username", required=True, help="Authentik username (e.g. matei.busui-tmp)")
     parser.add_argument(
         "--role",
         required=True,
@@ -820,7 +762,7 @@ def main() -> None:
     parser.add_argument(
         "--skip-email",
         action="store_true",
-        help="Verify the Keycloak provisioning path without generating Headscale state or sending email",
+        help="Verify the Authentik provisioning path without generating Headscale state or sending email",
     )
     args = parser.parse_args()
     provision(args, dry_run=args.dry_run)

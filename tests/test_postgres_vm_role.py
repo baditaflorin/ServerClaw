@@ -9,6 +9,7 @@ DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
 TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
 VERIFY_PATH = ROLE_ROOT / "tasks" / "verify.yml"
 TEMPLATE_PATH = ROLE_ROOT / "templates" / "postgresql-lv3.conf.j2"
+PG_HBA_TEMPLATE_PATH = ROLE_ROOT / "templates" / "pg_hba.conf.j2"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -113,14 +114,14 @@ def test_main_tasks_load_sensitive_table_catalog_and_grant_audit_role() -> None:
     )
     assert validate_grants_task["loop"] == "{{ postgres_vm_pgaudit_table_grants_for_host }}"
     assert schema_grant_task["register"] == "postgres_vm_pgaudit_schema_grant"
-    assert schema_grant_task["loop"] == "{{ postgres_vm_pgaudit_table_grants_for_host }}"
+    assert schema_grant_task["loop"] == "{{ postgres_vm_pgaudit_existing_grants | default([]) }}"
     assert schema_grant_task["retries"] == 10
     assert schema_grant_task["delay"] == 3
     assert schema_grant_task["until"] == "postgres_vm_pgaudit_schema_grant.rc == 0"
     assert "postgres_vm_pgaudit_audit_role" in grant_task["ansible.builtin.command"]["argv"][-1]
     assert "item.privileges" in grant_task["ansible.builtin.command"]["argv"][-1]
     assert grant_task["register"] == "postgres_vm_pgaudit_table_grant"
-    assert grant_task["loop"] == "{{ postgres_vm_pgaudit_table_grants_for_host }}"
+    assert grant_task["loop"] == "{{ postgres_vm_pgaudit_existing_grants | default([]) }}"
     assert grant_task["retries"] == 10
     assert grant_task["delay"] == 3
     assert grant_task["until"] == "postgres_vm_pgaudit_table_grant.rc == 0"
@@ -138,6 +139,15 @@ def test_main_tasks_render_from_role_templates_and_restart_preload_libraries_whe
     assert "postgres_vm_cluster_major_version" in task_file
     assert "postgresql-{{ postgres_vm_cluster_major_version }}-pgaudit" in task_file
     assert "SHOW shared_preload_libraries" in VERIFY_PATH.read_text(encoding="utf-8")
+
+
+def test_pg_hba_template_allows_openbao_dynamic_database_roles_from_openbao_guest() -> None:
+    template = PG_HBA_TEMPLATE_PATH.read_text(encoding="utf-8")
+
+    assert "openbao_postgres_connect_role" in template
+    assert "platform_service_registry.openbao.host_group" in template
+    assert "platform_guest_catalog.by_name[openbao_host_group].ipv4" in template
+    assert "host    all             +{{ openbao_postgres_connect_role }}" in template
 
 
 def test_main_tasks_ensure_managed_conf_d_is_included() -> None:

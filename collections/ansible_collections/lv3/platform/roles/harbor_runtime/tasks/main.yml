@@ -1,5 +1,5 @@
 ---
-# Purpose: Converge the Harbor runtime stack, managed secrets, Keycloak OIDC integration, project policy, and controller-local robot credentials.
+# Purpose: Converge the Harbor runtime stack, managed secrets, Authentik OIDC integration, project policy, and controller-local robot credentials.
 # Use case: Run during Harbor deployment or replay on docker-runtime after edge publication and registry network access are prepared.
 #
 # Inputs (required):
@@ -9,8 +9,8 @@
 #   - harbor_public_hostname (str, required): Published Harbor hostname.
 #   - harbor_public_base_url (str, required): Public Harbor URL used for callbacks and verification.
 #   - harbor_http_port (int, required): Internal Harbor listener port.
-#   - harbor_keycloak_realm_name (str, required): Keycloak realm used for Harbor OIDC.
-#   - harbor_keycloak_client_id (str, required): Keycloak client ID for Harbor.
+#   - harbor_authentik_oidc_issuer_url (str, required): Authentik issuer used for Harbor OIDC.
+#   - harbor_oidc_client_id (str, required): Authentik client ID for Harbor.
 #   - harbor_check_runner_project_name (str, required): Managed Harbor project for check-runner images.
 #
 # Inputs (optional):
@@ -18,14 +18,14 @@
 #   - harbor_check_runner_project_public (bool, optional, default=true): Sets public pull behavior for the managed project.
 #
 # Outputs:
-#   - Managed Harbor compose stack, synchronized controller-local secrets, Keycloak client configuration, project retention policy, and robot credentials.
+#   - Managed Harbor compose stack, synchronized controller-local secrets, Authentik client configuration, project retention policy, and robot credentials.
 #
 # Idempotency: Conditionally idempotent
 #              Generated secrets are reused, API reconciliation is repeatable, and compose replay only occurs when assets changed or Harbor is unhealthy.
 #
 # Dependencies:
 #   - ADR 0201: Defines Harbor deployment, OIDC, CVE scanning, and registry robot credentials.
-#   - Requires: Keycloak bootstrap admin password file, generated topology facts, and Harbor installer access.
+#   - Requires: Authentik client secret, generated topology facts, and Harbor installer access.
 #   - Task file: verify.yml — runs read-only Harbor verification after convergence.
 #
 # Related ADRs: 0165, 0201
@@ -46,10 +46,10 @@
       - harbor_public_hostname | length > 0
       - harbor_public_base_url | length > 0
       - harbor_http_port | int > 0
-      - harbor_keycloak_realm_name | length > 0
-      - harbor_keycloak_client_id | length > 0
+      - harbor_authentik_oidc_issuer_url | length > 0
+      - harbor_oidc_client_id | length > 0
       - harbor_check_runner_project_name | length > 0
-    fail_msg: "harbor_runtime requires installer paths, public topology, Keycloak inputs, and a managed Harbor project."
+    fail_msg: "harbor_runtime requires installer paths, public topology, Authentik inputs, and a managed Harbor project."
 
 - name: Ensure the Harbor runtime packages are present
   ansible.builtin.apt:
@@ -480,278 +480,20 @@
   until: harbor_container_health.rc == 0
   changed_when: false
 
-- name: Read the Keycloak bootstrap admin password
-  ansible.builtin.slurp:
-    src: "{{ harbor_keycloak_bootstrap_admin_password_remote_file }}"
-  register: harbor_keycloak_bootstrap_admin_password_raw
+- name: Check the Authentik Harbor OIDC client secret on the control machine
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: check_local_secrets
+  vars:
+    common_check_local_secrets_files:
+      - path: "{{ harbor_oidc_client_secret_local_file }}"
+        description: "Harbor Authentik OIDC client secret"
+        prerequisite: "Converge the Authentik runtime before deploying Harbor"
   no_log: true
 
-- name: Record the Keycloak bootstrap admin password
+- name: Read the Authentik Harbor OIDC client secret
   ansible.builtin.set_fact:
-    harbor_keycloak_bootstrap_admin_password: "{{ harbor_keycloak_bootstrap_admin_password_raw.content | b64decode | trim }}"
-  no_log: true
-
-- name: Wait for the local Keycloak admin endpoint to recover after Docker reconciliation
-  ansible.builtin.uri:
-    url: "{{ harbor_keycloak_local_admin_url }}/realms/master/.well-known/openid-configuration"
-    method: GET
-    status_code: 200
-  register: harbor_keycloak_admin_ready
-  retries: 24
-  delay: 5
-  until: harbor_keycloak_admin_ready.status == 200
-  changed_when: false
-
-- name: Request a Keycloak admin token for Harbor bootstrap
-  ansible.builtin.uri:
-    url: "{{ harbor_keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
-    method: POST
-    body_format: form-urlencoded
-    body:
-      grant_type: password
-      client_id: admin-cli
-      username: "{{ harbor_keycloak_bootstrap_admin_username }}"
-      password: "{{ harbor_keycloak_bootstrap_admin_password }}"
-    status_code: 200
-  register: harbor_keycloak_admin_token_response
-  retries: 12
-  delay: 5
-  until: harbor_keycloak_admin_token_response.status == 200
-  ignore_errors: true
-  no_log: true
-
-- name: Record whether Keycloak bootstrap succeeded
-  ansible.builtin.set_fact:
-    harbor_keycloak_bootstrap_success: "{{ harbor_keycloak_admin_token_response.status is defined and harbor_keycloak_admin_token_response.status == 200 }}"
-  no_log: true
-
-- name: Record the Keycloak admin token
-  ansible.builtin.set_fact:
-    harbor_keycloak_admin_token: "{{ harbor_keycloak_admin_token_response.json.access_token }}"
-  when: harbor_keycloak_bootstrap_success
-  no_log: true
-
-- name: Query the Harbor admin group in Keycloak
-  ansible.builtin.uri:
-    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/groups?search={{ harbor_keycloak_admin_group | urlencode }}"
-    method: GET
-    headers:
-      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
-    status_code: 200
-  register: harbor_keycloak_group_query
-  changed_when: false
-  when: harbor_keycloak_bootstrap_success
-  no_log: true
-
-- name: Create the Harbor admin group in Keycloak when missing
-  ansible.builtin.uri:
-    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/groups"
-    method: POST
-    headers:
-      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
-    body_format: json
-    body:
-      name: "{{ harbor_keycloak_admin_group }}"
-    status_code:
-      - 201
-      - 409
-  when:
-    - harbor_keycloak_bootstrap_success
-    - (harbor_keycloak_group_query.json | selectattr('name', 'equalto', harbor_keycloak_admin_group) | list | length) == 0
-  no_log: true
-
-- name: Query the Harbor Keycloak client
-  ansible.builtin.uri:
-    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/clients?clientId={{ harbor_keycloak_client_id | urlencode }}"
-    method: GET
-    headers:
-      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
-    status_code: 200
-  register: harbor_keycloak_client_query
-  changed_when: false
-  when: harbor_keycloak_bootstrap_success
-  no_log: true
-
-- name: Create the Harbor Keycloak client when missing
-  ansible.builtin.uri:
-    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/clients"
-    method: POST
-    headers:
-      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
-    body_format: json
-    body:
-      clientId: "{{ harbor_keycloak_client_id }}"
-      name: Harbor Container Registry
-      description: OIDC client for LV3 Harbor container registry
-      enabled: true
-      protocol: openid-connect
-      publicClient: false
-      clientAuthenticatorType: "client-secret"
-      standardFlowEnabled: true
-      directAccessGrantsEnabled: false
-      serviceAccountsEnabled: false
-      fullScopeAllowed: false
-      redirectUris:
-        - "{{ harbor_public_base_url }}/c/oidc/callback"
-      webOrigins:
-        - "{{ harbor_public_base_url }}"
-      adminUrl: "{{ harbor_public_base_url }}"
-      attributes:
-        post.logout.redirect.uris: "{{ harbor_public_base_url }}/*"
-        "backchannel.logout.session.required": "true"
-        "backchannel.logout.revoke.offline.tokens": "true"
-      protocolMappers:
-        - name: "email"
-          protocolMapper: "oidc-usermodel-attribute-mapper"
-          protocol: "openid-connect"
-          config:
-            "userinfo.token.claim": "true"
-            "user.attribute": "email"
-            "id.token.claim": "true"
-            "access.token.claim": "true"
-            "claim.name": "email"
-            "jsonType.label": "String"
-        - name: "username"
-          protocolMapper: "oidc-usermodel-property-mapper"
-          protocol: "openid-connect"
-          config:
-            "userinfo.token.claim": "true"
-            "user.property": "username"
-            "id.token.claim": "true"
-            "access.token.claim": "true"
-            "claim.name": "preferred_username"
-            "jsonType.label": "String"
-        - name: "groups"
-          protocolMapper: "oidc-group-membership-mapper"
-          protocol: "openid-connect"
-          config:
-            "full.path": "false"
-            "id.token.claim": "true"
-            "access.token.claim": "true"
-            "claim.name": "groups"
-            "userinfo.token.claim": "true"
-    status_code:
-      - 201
-      - 409
-  when:
-    - harbor_keycloak_bootstrap_success
-    - harbor_keycloak_client_query.json | length == 0
-  no_log: true
-
-- name: Re-query the Harbor Keycloak client
-  ansible.builtin.uri:
-    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/clients?clientId={{ harbor_keycloak_client_id | urlencode }}"
-    method: GET
-    headers:
-      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
-    status_code: 200
-  register: harbor_keycloak_client_query_after
-  changed_when: false
-  when: harbor_keycloak_bootstrap_success
-  no_log: true
-
-- name: Record the Harbor Keycloak client UUID
-  ansible.builtin.set_fact:
-    harbor_keycloak_client_uuid: "{{ (harbor_keycloak_client_query_after.json | first).id }}"
-  when: harbor_keycloak_bootstrap_success
-  no_log: true
-
-- name: Update Harbor Keycloak client redirect URIs and protocol mappers
-  ansible.builtin.uri:
-    url: "{{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/clients/{{ harbor_keycloak_client_uuid }}"
-    method: PUT
-    headers:
-      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
-      Content-Type: "application/json"
-    body_format: json
-    body:
-      redirectUris:
-        - "{{ harbor_public_base_url }}/c/oidc/callback"
-      webOrigins:
-        - "{{ harbor_public_base_url }}"
-      protocolMappers:
-        - name: "email"
-          protocolMapper: "oidc-usermodel-attribute-mapper"
-          protocol: "openid-connect"
-          config:
-            "userinfo.token.claim": "true"
-            "user.attribute": "email"
-            "id.token.claim": "true"
-            "access.token.claim": "true"
-            "claim.name": "email"
-            "jsonType.label": "String"
-        - name: "username"
-          protocolMapper: "oidc-usermodel-property-mapper"
-          protocol: "openid-connect"
-          config:
-            "userinfo.token.claim": "true"
-            "user.property": "username"
-            "id.token.claim": "true"
-            "access.token.claim": "true"
-            "claim.name": "preferred_username"
-            "jsonType.label": "String"
-        - name: "groups"
-          protocolMapper: "oidc-group-membership-mapper"
-          protocol: "openid-connect"
-          config:
-            "full.path": "false"
-            "id.token.claim": "true"
-            "access.token.claim": "true"
-            "claim.name": "groups"
-            "userinfo.token.claim": "true"
-    status_code: [204]
-    validate_certs: false
-  when: harbor_keycloak_bootstrap_success
-  no_log: true
-
-- name: Read the Harbor Keycloak client secret
-  ansible.builtin.uri:
-    url: >-
-      {{ harbor_keycloak_local_admin_url }}/admin/realms/{{ harbor_keycloak_realm_name }}/clients/{{ harbor_keycloak_client_uuid }}/client-secret
-    method: GET
-    headers:
-      Authorization: "Bearer {{ harbor_keycloak_admin_token }}"
-    status_code: 200
-  register: harbor_keycloak_client_secret_response
-  changed_when: false
-  when: harbor_keycloak_bootstrap_success
-  no_log: true
-
-- name: Record the Harbor Keycloak client secret
-  ansible.builtin.set_fact:
-    harbor_keycloak_client_secret: "{{ harbor_keycloak_client_secret_response.json.value }}"
-  when: harbor_keycloak_bootstrap_success
-  no_log: true
-
-- name: Fallback - read cached Harbor Keycloak client secret if bootstrap failed
-  ansible.builtin.slurp:
-    src: "{{ harbor_keycloak_client_secret_local_file }}"
-  register: harbor_keycloak_client_secret_cached
-  failed_when: false
-  changed_when: false
-  delegate_to: localhost
-  become: false
-  when:
-    - not harbor_keycloak_bootstrap_success
-    - harbor_keycloak_client_secret | length == 0
-  no_log: true
-
-- name: Use cached client secret when bootstrap failed
-  ansible.builtin.set_fact:
-    harbor_keycloak_client_secret: "{{ harbor_keycloak_client_secret_cached.content | b64decode | trim }}"
-  when:
-    - not harbor_keycloak_bootstrap_success
-    - harbor_keycloak_client_secret_cached.content is defined
-  no_log: true
-
-- name: Mirror the Harbor Keycloak client secret to the control machine
-  ansible.builtin.copy:
-    dest: "{{ harbor_keycloak_client_secret_local_file }}"
-    content: "{{ harbor_keycloak_client_secret }}\n"
-    mode: "0600"
-  delegate_to: localhost
-  become: false
-  when: harbor_keycloak_bootstrap_success
+    harbor_oidc_client_secret: "{{ lookup('ansible.builtin.file', harbor_oidc_client_secret_local_file) | trim }}"
   no_log: true
 
 - name: Query Harbor configuration
@@ -1045,15 +787,15 @@
     body:
       auth_mode: oidc_auth
       oidc_name: "{{ harbor_oidc_provider_name }}"
-      oidc_endpoint: "{{ harbor_keycloak_public_base_url }}/realms/{{ harbor_keycloak_realm_name }}"
-      oidc_client_id: "{{ harbor_keycloak_client_id }}"
-      oidc_client_secret: "{{ harbor_keycloak_client_secret }}"
+      oidc_endpoint: "{{ harbor_authentik_oidc_issuer_url }}"
+      oidc_client_id: "{{ harbor_oidc_client_id }}"
+      oidc_client_secret: "{{ harbor_oidc_client_secret }}"
       oidc_scope: "{{ harbor_oidc_scope }}"
       oidc_user_claim: "{{ harbor_oidc_user_claim }}"
       oidc_groups_claim: "{{ harbor_oidc_groups_claim }}"
       oidc_verify_cert: "{{ harbor_oidc_verify_cert }}"
       oidc_auto_onboard: true
-      oidc_admin_group: "{{ harbor_keycloak_admin_group }}"
+      oidc_admin_group: "{{ harbor_authentik_admin_group }}"
       project_creation_restriction: "{{ harbor_project_creation_restriction }}"
       self_registration: false
     status_code:
@@ -1063,7 +805,6 @@
   retries: 24
   delay: 5
   until: harbor_oidc_configuration.status in [200, 201]
-  when: harbor_keycloak_bootstrap_success
   no_log: true
 
 - name: Query the check-runner Harbor project

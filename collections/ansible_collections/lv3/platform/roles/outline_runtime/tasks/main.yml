@@ -24,13 +24,12 @@
       - outline_oidc_client_secret_local_file | length > 0
       - outline_oidc_issuer | length > 0
       - outline_oidc_discovery_url | length > 0
-      - outline_keycloak_rollback_client_secret_local_file | length > 0
       - outline_image | length > 0
       - outline_redis_image | length > 0
       - outline_minio_image | length > 0
     fail_msg: >-
       outline_runtime requires runtime paths, image refs, database auth,
-      selected Authentik OIDC credentials, and the preserved Keycloak rollback artifact.
+      selected Authentik OIDC credentials.
 
 - name: Check Outline prerequisites on the control machine
   ansible.builtin.include_role:
@@ -44,9 +43,6 @@
       - path: "{{ outline_oidc_client_secret_local_file }}"
         description: "Outline selected Authentik client secret"
         prerequisite: "Reconcile the Outline Authentik OAuth client before deploying Outline"
-      - path: "{{ outline_keycloak_rollback_client_secret_local_file }}"
-        description: "Outline Keycloak rollback client secret"
-        prerequisite: "Preserve the Keycloak Outline client before selecting Authentik"
 
 - name: Ensure the Outline runtime packages are present
   ansible.builtin.apt:

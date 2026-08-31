@@ -2,9 +2,9 @@
 # Playbook: paperless.yml
 # Purpose: Converge the Paperless PostgreSQL backend, runtime, API route, and edge publication.
 # Use case: Run for production or staging live apply of the repo-managed Paperless document archive and API surface.
-# Outputs: PostgreSQL role and database, Paperless runtime secrets, Keycloak OIDC client, API token bootstrap, taxonomy reconciliation, API gateway route, NGINX edge publication, and public smoke verification.
+# Outputs: PostgreSQL role and database, Paperless runtime secrets, Authentik OIDC client, API token bootstrap, taxonomy reconciliation, API gateway route, NGINX edge publication, and public smoke verification.
 # Idempotency: Partially idempotent; runtime convergence is repeatable, while the public smoke upload performs a cleanup-backed verification transaction on each run.
-# Dependencies: ADR 0285, postgres_vm, keycloak_runtime, paperless_postgres, paperless_runtime, api_gateway_runtime, nginx_edge_publication.
+# Dependencies: ADR 0285, postgres_vm, authentik_runtime, paperless_postgres, paperless_runtime, api_gateway_runtime, nginx_edge_publication.
 #
 # Invocation: ansible-playbook playbooks/paperless.yml -e @playbooks/vars/paperless.yml -e env=production
 

@@ -14,16 +14,18 @@ platform_operator_name: "Platform Operator"
 platform_topology_host: "{{ groups['proxmox_hosts'][0] }}"
 
 # ---------------------------------------------------------------------------
-# Keycloak SSO identity — ADR 0388
+# Authentik SSO identity — ADR 0491
 # ---------------------------------------------------------------------------
-keycloak_realm_name: "{{ platform_domain | split('.') | first }}"
-keycloak_oidc_issuer_url: "https://sso.{{ platform_domain }}/realms/{{ keycloak_realm_name }}"
-keycloak_oidc_auth_url: "{{ keycloak_oidc_issuer_url }}/protocol/openid-connect/auth"
-keycloak_oidc_token_url: "{{ keycloak_oidc_issuer_url }}/protocol/openid-connect/token"
-keycloak_oidc_userinfo_url: "{{ keycloak_oidc_issuer_url }}/protocol/openid-connect/userinfo"
-keycloak_oidc_jwks_url: "{{ keycloak_oidc_issuer_url }}/protocol/openid-connect/certs"
-keycloak_oidc_logout_url: "{{ keycloak_oidc_issuer_url }}/protocol/openid-connect/logout"
-keycloak_oidc_discovery_url: "{{ keycloak_oidc_issuer_url }}/.well-known/openid-configuration"
+authentik_oidc_base_url: "https://id.{{ platform_domain }}"
+authentik_oidc_provider_base_url: "{{ authentik_oidc_base_url }}/application/o"
+authentik_default_oidc_application_slug: ops-portal
+authentik_oidc_issuer_url: "{{ authentik_oidc_provider_base_url }}/{{ authentik_default_oidc_application_slug }}/"
+authentik_oidc_auth_url: "{{ authentik_oidc_provider_base_url }}/authorize/"
+authentik_oidc_token_url: "{{ authentik_oidc_provider_base_url }}/token/"
+authentik_oidc_userinfo_url: "{{ authentik_oidc_provider_base_url }}/userinfo/"
+authentik_oidc_jwks_url: "{{ authentik_oidc_issuer_url }}jwks/"
+authentik_oidc_logout_url: "{{ authentik_oidc_issuer_url }}end-session/"
+authentik_oidc_discovery_url: "{{ authentik_oidc_issuer_url }}.well-known/openid-configuration"
 
 # ---------------------------------------------------------------------------
 # Proxmox host identity
@@ -63,9 +65,9 @@ serverclaw_admin_email: "{{ platform_operator_email }}"
 serverclaw_admin_name: "{{ platform_operator_name }}"
 serverclaw_public_url: "https://chat.{{ platform_domain }}"
 serverclaw_webui_name: ServerClaw
-serverclaw_oidc_provider_url: "{{ keycloak_oidc_discovery_url }}"
+serverclaw_oidc_provider_url: "{{ authentik_oidc_discovery_url }}"
 serverclaw_extra_hosts:
-  - "sso.{{ platform_domain }}:{{ hostvars[platform_topology_host].platform_guest_catalog.by_name[playbook_execution_host_patterns.nginx_edge[playbook_execution_env]].ipv4 }}"
+  - "id.{{ platform_domain }}:{{ hostvars[platform_topology_host].platform_guest_catalog.by_name[playbook_execution_host_patterns.nginx_edge[playbook_execution_env]].ipv4 }}"
 
 # ---------------------------------------------------------------------------
 # SearXNG

@@ -14,7 +14,7 @@ anchors onto it, and retiring the legacy copies from `docker-runtime`.
   on `9080`, and Dapr on `3500`
 - `monitoring` exposes the `runtime-control` Nomad namespace and sees
   `runtime-control` as a client
-- the control-plane slice for `api_gateway`, `gitea`, `harbor`, `keycloak`,
+- the control-plane slice for `api_gateway`, `gitea`, `harbor`, `authentik`,
   `mail_platform`, `nats_jetstream`, `openbao`, `openfga`, `semaphore`,
   `step_ca`, `temporal`, `vaultwarden`, and `windmill` runs on
   `runtime-control`
@@ -105,7 +105,7 @@ Verify the legacy control-plane copies are no longer running on
 
 ```bash
 ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime -m shell \
-  -a '! sudo docker ps --format "{{.Names}}" | grep -E "^(gitea|keycloak|openbao|openfga|semaphore|vaultwarden|windmill)$"' \
+  -a '! sudo docker ps --format "{{.Names}}" | grep -E "^(gitea|authentik|openbao|openfga|semaphore|vaultwarden|windmill)$"' \
   --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
@@ -137,7 +137,7 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime -m
   that case, re-run `lv3.platform.proxmox_network` on `proxmox-host` before
   retrying the full `runtime-control-pool` play.
 - Public edge publications for `api.example.com`, `registry.example.com`, and
-  `sso.example.com` still terminate on `nginx-edge`; the runtime-control substrate
+  `id.example.com` still terminates on `nginx-edge`; the runtime-control substrate
   remains private-only.
 - `runtime-control` is deliberately excluded from first-phase autoscaling. Its
   memory envelope is governed by ADR 0321, but scaling remains manual until the

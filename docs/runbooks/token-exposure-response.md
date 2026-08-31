@@ -12,7 +12,7 @@ Use this runbook when a governed API token is suspected to have been exposed in 
 
 ```bash
 uv run --with pyyaml python scripts/token_lifecycle.py exposure-response \
-  --token-id keycloak-agent-hub-client-secret \
+  --token-id authentik-agent-hub-client-secret \
   --exposure-source git_diff \
   --notes "Secret appeared in a local debug diff" \
   --dry-run \
@@ -23,7 +23,7 @@ uv run --with pyyaml python scripts/token_lifecycle.py exposure-response \
 
 ```bash
 uv run --with pyyaml python scripts/token_lifecycle.py exposure-response \
-  --token-id keycloak-agent-hub-client-secret \
+  --token-id authentik-agent-hub-client-secret \
   --exposure-source git_diff \
   --notes "Secret appeared in a local debug diff" \
   --print-report-json
@@ -34,7 +34,7 @@ The Windmill wrapper for the same path is:
 ```bash
 python3 config/windmill/scripts/token-exposure-response.py \
   --repo-path /srv/proxmox-host_server \
-  --token-id keycloak-agent-hub-client-secret \
+  --token-id authentik-agent-hub-client-secret \
   --exposure-source git_diff \
   --dry-run
 ```

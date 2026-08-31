@@ -44,18 +44,12 @@ def test_glitchtip_runtime_defaults_reference_service_topology_images_and_local_
     assert defaults["glitchtip_oidc_client_secret_local_file"] == (
         "{{ repo_shared_local_root }}/authentik/glitchtip-client-secret.txt"
     )
-    assert defaults["glitchtip_keycloak_rollback_client_secret_local_file"] == (
-        "{{ repo_shared_local_root }}/keycloak/glitchtip-client-secret.txt"
-    )
     assert defaults["glitchtip_oidc_provider"] == "openid_connect"
     assert defaults["glitchtip_oidc_provider_id"] == "authentik"
     assert defaults["glitchtip_oidc_provider_name"] == "Authentik"
     assert defaults["glitchtip_oidc_client_id"] == "glitchtip"
+    assert defaults["glitchtip_retired_oidc_provider_ids"] == ["keycloak"]
     assert not defaults["glitchtip_oidc_issuer_url"].endswith("/")
-    assert defaults["glitchtip_keycloak_rollback_provider"] == "openid_connect"
-    assert defaults["glitchtip_keycloak_rollback_provider_id"] == "keycloak"
-    assert defaults["glitchtip_keycloak_rollback_client_id"] == "glitchtip"
-    assert defaults["glitchtip_keycloak_rollback_issuer_url"] == "{{ keycloak_oidc_issuer_url }}"
     assert defaults["glitchtip_mail_submission_password_local_file"] == (
         "{{ repo_shared_local_root }}/mail-platform/server-mailbox-password.txt"
     )
@@ -146,7 +140,6 @@ def test_glitchtip_runtime_tasks_manage_openbao_bootstrap_and_port_recovery() ->
     )
     prerequisite_paths = [item["path"] for item in prerequisite_task["vars"]["common_check_local_secrets_files"]]
     assert "{{ glitchtip_oidc_client_secret_local_file }}" in prerequisite_paths
-    assert "{{ glitchtip_keycloak_rollback_client_secret_local_file }}" in prerequisite_paths
     assert openbao_helper["ansible.builtin.include_role"] == {
         "name": "lv3.platform.common",
         "tasks_from": "openbao_compose_env",
@@ -278,7 +271,7 @@ def test_glitchtip_publish_tasks_verify_public_settings_and_smoke_script() -> No
     frontend_assert_task = next(
         task
         for task in verify_tasks
-        if task.get("name") == "Assert the GlitchTip frontend advertises selected and rollback login providers"
+        if task.get("name") == "Assert the GlitchTip frontend advertises the Authentik login provider"
     )
     oidc_smoke_task = next(
         task
@@ -316,25 +309,15 @@ def test_glitchtip_publish_tasks_verify_public_settings_and_smoke_script() -> No
     frontend_selected_expression = provider_task["ansible.builtin.set_fact"][
         "glitchtip_publish_frontend_selected_provider"
     ]
-    frontend_rollback_expression = provider_task["ansible.builtin.set_fact"][
-        "glitchtip_publish_frontend_rollback_provider"
-    ]
     assert "glitchtip_publish_frontend_settings.json.socialApps" in frontend_selected_expression
-    assert "glitchtip_keycloak_rollback_provider_id" in frontend_rollback_expression
     assert assert_task["ansible.builtin.assert"]["that"][1] == (
         "glitchtip_publish_oidc_provider.client_id == glitchtip_oidc_client_id"
     )
     assert "glitchtip_oidc_discovery_url" in assert_task["ansible.builtin.assert"]["that"][2]
     frontend_assertions = frontend_assert_task["ansible.builtin.assert"]["that"]
     assert "glitchtip_publish_frontend_selected_provider != {}" in frontend_assertions
-    assert "glitchtip_publish_frontend_rollback_provider != {}" in frontend_assertions
     assert "glitchtip_publish_frontend_selected_provider.client_id == glitchtip_oidc_client_id" in frontend_assertions
     assert "glitchtip_publish_frontend_selected_provider.authorize_url | length > 0" in frontend_assertions
-    assert (
-        "glitchtip_publish_frontend_rollback_provider.client_id == glitchtip_keycloak_rollback_client_id"
-        in frontend_assertions
-    )
-    assert "glitchtip_publish_frontend_rollback_provider.authorize_url | length > 0" in frontend_assertions
     assert oidc_smoke_task["ansible.builtin.command"]["argv"][:2] == [
         "python3",
         "{{ inventory_dir }}/../scripts/glitchtip_oidc_smoke.py",
@@ -384,11 +367,6 @@ def test_glitchtip_runtime_templates_render_public_oidc_and_mail_settings() -> N
     assert "OrganizationUser.objects.filter(organization=org, user=user).first()" in bootstrap_template
     assert "OrganizationSocialApp.objects.get_or_create" in bootstrap_template
     assert "OIDC_PROVIDER_ID = {{ glitchtip_oidc_provider_id | to_json }}" in bootstrap_template
-    assert (
-        "KEYCLOAK_ROLLBACK_PROVIDER_ID = {{ glitchtip_keycloak_rollback_provider_id | to_json }}" in bootstrap_template
-    )
-    assert "client_secret=KEYCLOAK_ROLLBACK_CLIENT_SECRET" in bootstrap_template
-    assert '"rollback_social_app": {' in bootstrap_template
     assert "SocialApp.objects.select_for_update()" in bootstrap_template
     assert "duplicate.delete()" in bootstrap_template
     assert (
@@ -413,18 +391,16 @@ def test_glitchtip_role_argument_specs_and_postgres_tasks_cover_runtime_contract
     assert options["glitchtip_compose_network_name"]["type"] == "str"
     assert options["glitchtip_database_password_local_file"]["type"] == "path"
     assert options["glitchtip_oidc_client_secret_local_file"]["type"] == "path"
-    assert options["glitchtip_keycloak_rollback_client_secret_local_file"]["type"] == "path"
     assert options["glitchtip_oidc_provider_id"]["type"] == "str"
     assert options["glitchtip_oidc_client_id"]["type"] == "str"
+    assert options["glitchtip_retired_oidc_provider_ids"] == {
+        "type": "list",
+        "elements": "str",
+        "required": True,
+    }
     assert options["glitchtip_oidc_issuer_url"]["type"] == "str"
     assert options["glitchtip_oidc_discovery_url"]["type"] == "str"
     assert options["glitchtip_oidc_frontend_callback_url"]["type"] == "str"
-    assert options["glitchtip_keycloak_rollback_provider"]["type"] == "str"
-    assert options["glitchtip_keycloak_rollback_provider_id"]["type"] == "str"
-    assert options["glitchtip_keycloak_rollback_provider_name"]["type"] == "str"
-    assert options["glitchtip_keycloak_rollback_client_id"]["type"] == "str"
-    assert options["glitchtip_keycloak_rollback_issuer_url"]["type"] == "str"
-    assert options["glitchtip_keycloak_rollback_discovery_url"]["type"] == "str"
     assert options["glitchtip_api_token_local_file"]["type"] == "path"
     assert postgres_options["glitchtip_postgres_secret_dir"]["type"] == "path"
     assert postgres_options["glitchtip_postgres_password_file"]["type"] == "path"
@@ -434,7 +410,7 @@ def test_glitchtip_role_argument_specs_and_postgres_tasks_cover_runtime_contract
     assert postgres_task["vars"]["postgres_client_service"] == "{{ glitchtip_database_name }}"
 
 
-def test_glitchtip_catalog_and_integration_select_authentik_with_keycloak_rollback() -> None:
+def test_glitchtip_catalog_and_integration_select_authentik_only() -> None:
     contract = load_yaml(INTEGRATION_CONTRACT)
     catalog_bundle = load_yaml(SERVICE_CATALOG)
     catalog = catalog_bundle["service"]
@@ -447,11 +423,10 @@ def test_glitchtip_catalog_and_integration_select_authentik_with_keycloak_rollba
     assert contract["connection"]["issuer_url_var"] == "glitchtip_oidc_issuer_url"
     assert contract["connection"]["headless_redirect_path"] == ("/_allauth/browser/v1/auth/provider/redirect")
     secret_purposes = {entry["purpose"] for entry in contract["secrets"]}
-    assert secret_purposes == {"selected_oidc_client_secret", "keycloak_per_client_rollback"}
+    assert secret_purposes == {"selected_oidc_client_secret"}
     assert "authentik_glitchtip_client_secret" in catalog["secret_catalog_ids"]
     dependencies = {edge["to"]: edge for edge in catalog_bundle["dependency"]["outbound_edges"]}
     assert "Authentik OIDC" in dependencies["authentik"]["description"]
-    assert "rollback" in dependencies["keycloak"]["description"]
 
 
 def test_glitchtip_oidc_smoke_uses_headless_redirect_without_logging_oauth_state() -> None:
@@ -463,3 +438,22 @@ def test_glitchtip_oidc_smoke_uses_headless_redirect_without_logging_oauth_state
     assert "NoRedirectHandler" in smoke_script
     assert 'parsed._replace(query="", fragment="")' in smoke_script
     assert '"state":' not in smoke_script
+
+
+def test_glitchtip_bootstrap_retires_keycloak_after_authentik_is_reconciled() -> None:
+    bootstrap_template = BOOTSTRAP_TEMPLATE.read_text(encoding="utf-8")
+    publish_verify_tasks = load_yaml(ROLE_PUBLISH_VERIFY)
+
+    assert "OIDC_RETIRED_PROVIDER_IDS" in bootstrap_template
+    assert "def retire_social_apps" in bootstrap_template
+    assert "retired_social_apps = retire_social_apps" in bootstrap_template
+    assert "provider_id__in=retired_provider_ids" in bootstrap_template
+    frontend_assertion = next(
+        task
+        for task in publish_verify_tasks
+        if task.get("name") == "Assert the GlitchTip frontend advertises the Authentik login provider"
+    )
+    assert (
+        "glitchtip_publish_frontend_retired_providers | length == 0"
+        in frontend_assertion["ansible.builtin.assert"]["that"]
+    )

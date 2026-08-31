@@ -8,5 +8,5 @@ Managed surfaces:
 - Harbor data, logs, and generated compose stack under `/opt/harbor/data`
 - generated admin and internal database passwords under `/etc/lv3/harbor/`
 - mirrored local recovery material under `.local/harbor/`
-- repo-managed Keycloak client and admin group for Harbor OIDC
+- repo-managed Authentik client and admin group for Harbor OIDC
 - Harbor project bootstrap for check-runner image publication

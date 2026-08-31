@@ -6,7 +6,7 @@ argument_specs:
       - "Configures and deploys N isolated Neko (m1k1o/neko) WebRTC browser containers."
       - "Each entry in neko_instances provisions a dedicated container with its own TCP"
       - "signalling port and UDP media range. Removing an entry destroys the container."
-      - "Access is routed by Keycloak email via NGINX map at browser.{{ platform_domain }}."
+      - "Access is routed by Authentik email via NGINX map at browser.{{ platform_domain }}."
     version_added: "0.178.54"
     options:
       neko_instances:
@@ -97,25 +97,20 @@ argument_specs:
         default: 3
         description: "Maximum number of rotated log files"
 
-      neko_keycloak_realm:
+      neko_authentik_admin_url:
         type: str
-        default: "lv3"
-        description: "Keycloak realm for Neko-managed users"
+        default: "{{ authentik_oidc_base_url | default('https://id.' + platform_domain) }}"
+        description: "Authentik base URL for Neko assignment API calls"
 
-      neko_keycloak_admin_url:
-        type: str
-        default: "https://sso.{{ platform_domain }}"
-        description: "Keycloak base URL for admin API calls"
-
-      neko_keycloak_managed_attribute:
+      neko_authentik_managed_attribute:
         type: str
         default: "neko_managed"
-        description: "Keycloak user attribute name used to identify Neko-managed users"
+        description: "Authentik user attribute name used to identify Neko assignments"
 
-      neko_keycloak_managed_attribute_value:
+      neko_authentik_managed_attribute_value:
         type: str
         default: "true"
-        description: "Value of the neko_managed attribute on Neko-provisioned Keycloak users"
+        description: "Value of the Neko assignment attribute on Authentik users"
 
       neko_runtime_image_pull_digest:
         type: str

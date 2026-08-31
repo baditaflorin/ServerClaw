@@ -31,7 +31,7 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
     assert [route["route_id"] for route in playbook[1]["vars"]["runtime_pool_substrate_routes"]] == [
         "api-gateway",
         "gitea",
-        "keycloak",
+        "authentik",
         "mail-platform",
         "openfga",
         "semaphore",
@@ -43,7 +43,7 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
     assert route_upstreams == {
         "api-gateway": "{{ platform_service_topology | platform_service_url('api_gateway', 'internal') }}",
         "gitea": "{{ platform_service_topology | platform_service_url('gitea', 'internal') }}",
-        "keycloak": "http://127.0.0.1:18080",
+        "authentik": "{{ platform_service_topology | platform_service_url('authentik', 'internal') }}",
         "mail-platform": "{{ platform_service_topology.mail_platform.urls.private_api }}",
         "openfga": "{{ platform_service_topology | platform_service_url('openfga', 'internal') }}",
         "semaphore": "{{ platform_service_topology | platform_service_url('semaphore', 'internal') }}",
@@ -67,7 +67,7 @@ def test_runtime_control_pool_playbook_covers_provisioning_substrate_namespace_m
         "step-ca.yml",
         "openbao.yml",
         "mail-platform.yml",
-        "keycloak.yml",
+        "authentik.yml",
         "openfga.yml",
         "nats-jetstream.yml",
         "gitea.yml",

@@ -9,7 +9,7 @@ The Paperless workflow converges:
 - the PostgreSQL backend on `postgres`
 - the Paperless runtime, Redis broker, and backup-covered state volumes on `docker-runtime`
 - the public hostname `paperless.example.com` on the shared NGINX edge
-- the dedicated Keycloak OIDC client used by the Paperless sign-in flow
+- the dedicated Authentik OIDC client used by the Paperless sign-in flow
 - the durable Paperless API token in both controller-local secret storage and OpenBao
 - the repo-managed correspondents, document types, and tags used by archive automation
 
@@ -19,7 +19,7 @@ docs.example.com remains the developer portal; Paperless intentionally publishes
 
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload is already available under `.local/openbao/init.json`
-- Keycloak is already deployed and healthy on `sso.example.com`
+- Authentik is already deployed and healthy on `id.example.com`
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
 ## Converge
@@ -103,7 +103,7 @@ The workflow maintains controller-local secrets under `.local/paperless/`:
 - `sync-report.json`
 - `smoke-upload-report.json`
 
-The Keycloak client secret is mirrored under `.local/keycloak/paperless-client-secret.txt`.
+The Authentik client secret is mirrored under `.local/authentik/paperless-client-secret.txt`.
 
 ## Verification
 
@@ -116,7 +116,7 @@ uv run --with pytest python -m pytest \
   tests/test_paperless_playbook.py \
   tests/test_paperless_metadata.py \
   tests/test_paperless_sync.py \
-  tests/test_keycloak_runtime_role.py \
+  tests/test_authentik_runtime_role.py \
   tests/test_generate_platform_vars.py
 ./scripts/validate_repo.sh agent-standards health-probes
 ```

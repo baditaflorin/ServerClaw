@@ -8,7 +8,6 @@ from typing import Any
 
 
 DEFAULT_DATABASES: tuple[str, ...] = (
-    "keycloak",
     "mattermost",
     "netbox",
     "openbao",

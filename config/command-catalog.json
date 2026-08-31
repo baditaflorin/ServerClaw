@@ -624,11 +624,11 @@
           "description": "Controller-side SSH key used through the Proxmox jump path."
         },
         {
-          "name": "keycloak_agent_client_secret",
+          "name": "authentik_agent_hub_client_secret",
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-local Keycloak confidential-client secret used for authenticated gateway verification."
+          "description": "Controller-local Authentik confidential-client secret used for authenticated gateway verification."
         }
       ],
       "expected_preconditions": [
@@ -669,11 +669,11 @@
           "description": "Controller-side SSH key used through the Proxmox jump path."
         },
         {
-          "name": "keycloak_agent_client_secret",
+          "name": "authentik_agent_hub_client_secret",
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-local Keycloak confidential-client secret used for authenticated API gateway verification."
+          "description": "Controller-local Authentik confidential-client secret used for authenticated API gateway verification."
         }
       ],
       "expected_preconditions": [
@@ -688,7 +688,7 @@
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the browser-runner image build, runtime verification, API gateway replay, or governed tool verification fails.",
-          "Stop if the browser-runner route becomes publicly exposed outside the intended Keycloak or Dify trust boundary."
+          "Stop if the browser-runner route becomes publicly exposed outside the intended Authentik or Dify trust boundary."
         ],
         "rollback_guidance": [
           "Restore the last known-good browser-runner and gateway configuration from version control before retrying.",
@@ -921,7 +921,7 @@
       }
     },
     "converge-directus": {
-      "description": "Converge the Directus PostgreSQL backend, runtime, Keycloak client, and shared-edge publication, then verify REST, GraphQL, and OIDC access on data.example.com.",
+      "description": "Converge the Directus PostgreSQL backend, runtime, Authentik client, and shared-edge publication, then verify REST, GraphQL, and OIDC access on data.example.com.",
       "workflow_id": "converge-directus",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -944,16 +944,16 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-directus passes",
         "make validate passes before the apply",
-        "The Directus publication, dedicated database boundary, and Keycloak login blast radius are reviewed before rollout"
+        "The Directus publication, dedicated database boundary, and Authentik login blast radius are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, one local Directus health response, the public /server/health result, one Keycloak redirect response, and successful scoped REST plus GraphQL reads against the governed service_registry collection."
+        "notes": "Record the source commit, one local Directus health response, the public /server/health result, one Authentik redirect response, and successful scoped REST plus GraphQL reads against the governed service_registry collection."
       },
       "failure_guidance": {
         "stop_conditions": [
           "Stop if the Directus runtime fails to start, the access model cannot be seeded cleanly, or the governed collection bootstrap drifts from repo truth.",
-          "Stop if data.example.com does not serve the expected health contract or if the Keycloak redirect, REST token path, or GraphQL token path fails after converge."
+          "Stop if data.example.com does not serve the expected health contract or if the Authentik redirect, REST token path, or GraphQL token path fails after converge."
         ],
         "rollback_guidance": [
           "Restore the last known-good Directus runtime and publication config from version control before retrying.",
@@ -1222,7 +1222,7 @@
       }
     },
     "converge-gitea": {
-      "description": "Converge private Gitea with Keycloak OIDC, PostgreSQL, the repo bootstrap path, and the docker-build self-hosted Actions runner.",
+      "description": "Converge private Gitea with Authentik OIDC, PostgreSQL, the repo bootstrap path, and the docker-build self-hosted Actions runner.",
       "workflow_id": "converge-gitea",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -1238,7 +1238,7 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-gitea passes",
         "make validate passes before the apply",
-        "The Keycloak OIDC dependency, bootstrap repository state, and docker-build runner impact are reviewed before rollout"
+        "The Authentik OIDC dependency, bootstrap repository state, and docker-build runner impact are reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
@@ -1260,7 +1260,7 @@
       }
     },
     "converge-authentik": {
-      "description": "Converge the parallel Authentik runtime, preserve its adopted database and signing material, reconcile the declared GlitchTip and Outline OAuth providers, and publish id.example.com without changing Keycloak.",
+      "description": "Converge the Authentik runtime, preserve its adopted database and signing material, reconcile the declared OAuth providers, and publish id.example.com as the platform identity authority.",
       "workflow_id": "converge-authentik",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1342,20 +1342,20 @@
         "make preflight WORKFLOW=converge-authentik passes",
         "make validate passes before the apply",
         "A verified backup of the existing Authentik PostgreSQL bind mount and the pre-adoption environment file is available",
-        "The existing provider/application identifiers and Keycloak rollback path have been captured before reconciliation"
+        "The existing provider and application identifiers have been captured before reconciliation"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, verified datastore backup, preserved pre-adoption environment path, immutable image IDs, local and public health results, stable Authentik provider/application identifiers, a second no-change OAuth reconciliation, and a successful Keycloak discovery check."
+        "notes": "Record the source commit, verified datastore backup, preserved pre-adoption environment path, immutable image IDs, local and public health results, stable Authentik provider/application identifiers, and a second no-change OAuth reconciliation."
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if the datastore backup, OpenBao-rendered environment, Authentik health, OAuth reconciliation, edge publication, or Keycloak rollback check fails.",
+          "Stop if the datastore backup, OpenBao-rendered environment, Authentik health, OAuth reconciliation, or edge publication check fails.",
           "Stop if reconciliation would rotate the existing Authentik client secret or replace the provider/application objects instead of adopting them."
         ],
         "rollback_guidance": [
           "Restore the retained pre-adoption environment and last known-good immutable Authentik images, then verify the existing database before retrying.",
-          "Keep Keycloak and both per-client rollback secrets intact; do not advance another client while the Authentik/GlitchTip/Outline slice is unverified."
+          "Do not advance another client while the Authentik provider, GlitchTip, and Outline verification slice is unverified."
         ]
       },
       "execution": {
@@ -1424,13 +1424,6 @@
           "required": true,
           "source": "config/controller-local-secrets.json",
           "description": "Stable Authentik OAuth client secret consumed by GlitchTip's selected allauth provider."
-        },
-        {
-          "name": "keycloak_glitchtip_client_secret",
-          "kind": "controller_secret",
-          "required": true,
-          "source": "config/controller-local-secrets.json",
-          "description": "Prior Keycloak client secret retained as the per-client rollback artifact; public realm discovery is probed independently by workflow preflight."
         }
       ],
       "expected_preconditions": [
@@ -1439,19 +1432,19 @@
         "make preflight WORKFLOW=converge-glitchtip passes",
         "make validate passes before the apply",
         "The Authentik provider/application is reconciled and its discovery endpoint is reachable before GlitchTip changes",
-        "The prior Keycloak client secret remains present and the shared-edge plus first-party producer blast radius is reviewed before rollout"
+        "The shared-edge and first-party producer blast radius is reviewed before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, local and public GlitchTip health checks, public settings verification showing exactly one Authentik allauth provider, a successful headless authorization redirect with the expected issuer/client/callback, confidential-client acceptance at Authentik's token endpoint, an interactive Authentik login followed by an authenticated GlitchTip session and logout, one synthetic event reaching the live project issue list, and a successful retained-Keycloak public realm discovery probe. Outline must remain blocked until the browser-session evidence is present."
+        "notes": "Record the source commit, local and public GlitchTip health checks, public settings verification showing exactly one Authentik allauth provider, a successful headless authorization redirect with the expected issuer/client/callback, confidential-client acceptance at Authentik's token endpoint, an interactive Authentik login followed by an authenticated GlitchTip session and logout, and one synthetic event reaching the live project issue list. Outline must remain blocked until the browser-session evidence is present."
       },
       "failure_guidance": {
         "stop_conditions": [
           "Stop if PostgreSQL, the GlitchTip runtime, the shared edge publication, the confidential-client token-endpoint proof, or the OIDC settings verification fails.",
-          "Stop if the rollout would leave errors.example.com reachable without the declared Authentik provider, working headless redirect and DSN ingestion paths, an interactive login/session/logout proof, or the retained Keycloak rollback artifact."
+          "Stop if the rollout would leave errors.example.com reachable without the declared Authentik provider, working headless redirect and DSN ingestion paths, or an interactive login/session/logout proof."
         ],
         "rollback_guidance": [
-          "Restore the last known-good GlitchTip SocialApp selection and shared edge configuration, using the retained Keycloak client secret for the per-client rollback before retrying.",
+          "Restore the last known-good GlitchTip Authentik SocialApp selection and shared edge configuration before retrying.",
           "Do not compensate for a failed rollout by manually creating projects, DSNs, alert recipients, or client secrets outside the repo-managed path."
         ]
       },
@@ -1537,7 +1530,7 @@
       }
     },
     "converge-harbor": {
-      "description": "Converge Harbor on docker-runtime, publish it at registry.example.com through the shared edge, bootstrap Keycloak OIDC, and seed the check-runner Harbor project automation credentials.",
+      "description": "Converge Harbor on docker-runtime, publish it at registry.example.com through the shared edge, bootstrap Authentik OIDC, and seed the check-runner Harbor project automation credentials.",
       "workflow_id": "converge-harbor",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1568,7 +1561,7 @@
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if the Harbor runtime, Keycloak OIDC bootstrap, or shared-edge publication fails.",
+          "Stop if the Harbor runtime, Authentik OIDC bootstrap, or shared-edge publication fails.",
           "Stop if Harbor rejects the generated check-runner robot credential or pushed artifacts do not become pullable from docker-build.",
           "Stop if the change would remove the documented local Harbor admin break-glass recovery path."
         ],
@@ -1666,7 +1659,7 @@
       }
     },
     "converge-identity-core-watchdog": {
-      "description": "Deploy the identity-core health watchdog on runtime-control \u2014 probes Keycloak OIDC discovery, Step-CA, OpenBao, and API Gateway every 30s with auto-restart.",
+      "description": "Deploy the identity-core health watchdog on runtime-control \u2014 probes Authentik OIDC discovery, Step-CA, OpenBao, and API Gateway every 30s with auto-restart.",
       "workflow_id": "converge-identity-core-watchdog",
       "scope": "guest_runtime",
       "approval_policy": "standard_live_change",
@@ -1689,7 +1682,7 @@
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if any identity-core service (Keycloak, Step-CA, OpenBao, API Gateway) is unhealthy before deploying."
+          "Stop if any identity-core service (Authentik, Step-CA, OpenBao, API Gateway) is unhealthy before deploying."
         ],
         "rollback_guidance": [
           "Disable the timer with systemctl stop lv3-identity-watchdog.timer if the watchdog is causing unwanted restarts."
@@ -1698,51 +1691,6 @@
       "execution": {
         "profile": "docker_runtime_systemd_make",
         "timeout_seconds": 300
-      }
-    },
-    "converge-keycloak": {
-      "description": "Converge the shared Keycloak SSO broker, publish it at sso.example.com, and wire Grafana to the shared OIDC login flow.",
-      "workflow_id": "converge-keycloak",
-      "scope": "guest_runtime",
-      "approval_policy": "sensitive_live_change",
-      "inputs": [
-        {
-          "name": "bootstrap_ssh_private_key",
-          "kind": "controller_secret",
-          "required": true,
-          "source": "config/controller-local-secrets.json",
-          "description": "Controller-side SSH key used through the Proxmox jump path."
-        },
-        {
-          "name": "hetzner_dns_api_token",
-          "kind": "controller_secret",
-          "required": true,
-          "source": "config/controller-local-secrets.json",
-          "description": "DNS token used to publish sso.example.com and expand the shared edge certificate."
-        }
-      ],
-      "expected_preconditions": [
-        "make preflight WORKFLOW=converge-keycloak passes",
-        "make validate passes before the apply",
-        "The identity blast radius for Grafana and the shared SSO broker has been reviewed before changing login paths"
-      ],
-      "evidence": {
-        "live_apply_receipt_required": true,
-        "notes": "Record the source commit, sso.example.com verification, agent client-credentials verification, and the Grafana OAuth redirect check."
-      },
-      "failure_guidance": {
-        "stop_conditions": [
-          "Stop if PostgreSQL, Keycloak, edge publication, or Grafana redirect verification fails.",
-          "Stop if the change would remove the documented local break-glass login paths for Grafana or Keycloak recovery."
-        ],
-        "rollback_guidance": [
-          "Restore the last known-good Keycloak and Grafana auth configuration from version control before retrying.",
-          "Do not compensate for a broken SSO rollout by hand-editing Grafana or Keycloak state outside the repo."
-        ]
-      },
-      "execution": {
-        "profile": "docker_runtime_systemd_make",
-        "timeout_seconds": 900
       }
     },
     "converge-label-studio": {
@@ -1881,7 +1829,7 @@
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if PostgreSQL, Keycloak, the Langfuse runtime, or shared-edge publication fails.",
+          "Stop if PostgreSQL, Authentik, the Langfuse runtime, or shared-edge publication fails.",
           "Stop if the bootstrap project API keys or browser sign-in verification do not match the repo-managed seed."
         ],
         "rollback_guidance": [
@@ -2601,7 +2549,7 @@
       }
     },
     "converge-outline": {
-      "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure shared MinIO S3 storage, publish it at wiki.example.com, and select Authentik OIDC while preserving Keycloak rollback.",
+      "description": "Converge Outline wiki on docker-runtime, provision its PostgreSQL backend, configure shared MinIO S3 storage, publish it at wiki.example.com, and select Authentik OIDC while preserving Authentik rollback.",
       "workflow_id": "converge-outline",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -2649,11 +2597,11 @@
           "description": "Selected Authentik confidential-client secret consumed by the Outline runtime."
         },
         {
-          "name": "keycloak_outline_client_secret",
+          "name": "authentik_outline_client_secret",
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "Prior Keycloak client secret retained as the per-client rollback artifact."
+          "description": "Prior Authentik client secret retained as the per-client rollback artifact."
         },
         {
           "name": "outline_api_token",
@@ -2668,20 +2616,20 @@
         "make preflight WORKFLOW=converge-outline passes",
         "make validate passes before the apply",
         "The Outline Authentik provider/application and selected client secret are reconciled before runtime rollout",
-        "The MinIO platform bucket, durable Outline API token, and Keycloak rollback client are verified before rollout"
+        "The MinIO platform bucket, durable Outline API token, and Authentik rollback client are verified before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record Outline container health, MinIO bucket reachability, Authentik discovery and redirect results, living-collection API verification, authenticated login/session/logout evidence, and retained Keycloak discovery health."
+        "notes": "Record Outline container health, MinIO bucket reachability, Authentik discovery and redirect results, living-collection API verification, authenticated login/session/logout evidence, and retained Authentik discovery health."
       },
       "failure_guidance": {
         "stop_conditions": [
           "Stop if Outline fails to start, the S3 bucket is unreachable, or the Authentik OIDC redirect/discovery contract fails.",
-          "Stop if the converge would leave the wiki publicly reachable without authentication, lose API sync authority, or remove Keycloak rollback."
+          "Stop if the converge would leave the wiki publicly reachable without authentication, lose API sync authority, or remove Authentik rollback."
         ],
         "rollback_guidance": [
-          "Select the preserved Keycloak client variables and restore the last known-good Outline runtime state before retrying.",
-          "Do not delete the Authentik provider, durable Outline API token, MinIO data, or Keycloak rollback client after a failed rollout."
+          "Select the preserved Authentik client variables and restore the last known-good Outline runtime state before retrying.",
+          "Do not delete the Authentik provider, durable Outline API token, MinIO data, or Authentik rollback client after a failed rollout."
         ]
       },
       "execution": {
@@ -2759,11 +2707,11 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-openfga passes",
         "make validate passes before the apply",
-        "Keycloak and OpenBao are already converged and their controller-local artifacts are present before the change"
+        "Authentik and OpenBao are already converged and their controller-local artifacts are present before the change"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record source commit, host proxy publication, OpenFGA health, authenticated API access, Keycloak token issuance, and delegated authorization verification together."
+        "notes": "Record source commit, host proxy publication, OpenFGA health, authenticated API access, Authentik token issuance, and delegated authorization verification together."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -2771,7 +2719,7 @@
           "Stop if the change would leave the OpenFGA API reachable without the documented bearer-auth contract."
         ],
         "rollback_guidance": [
-          "Restore the last known-good repo-managed OpenFGA and Keycloak state before retrying instead of hand-editing the live store, model, tuples, or clients.",
+          "Restore the last known-good repo-managed OpenFGA and Authentik state before retrying instead of hand-editing the live store, model, tuples, or clients.",
           "Replay the API gateway converge after catalog changes so the private and routed contracts stay aligned."
         ]
       },
@@ -2861,7 +2809,7 @@
           "Stop if the public upload smoke test fails or leaves behind unmanaged documents after cleanup."
         ],
         "rollback_guidance": [
-          "Restore the last known-good Paperless runtime, Keycloak client, and edge publication from version control before retrying.",
+          "Restore the last known-good Paperless runtime, Authentik client, and edge publication from version control before retrying.",
           "Do not leave behind ad hoc Docker, DNS, nginx, or Paperless taxonomy drift outside the repo-managed workflow."
         ]
       },
@@ -3255,7 +3203,7 @@
       }
     },
     "converge-semaphore": {
-      "description": "Converge the private Semaphore runtime, PostgreSQL backend, dedicated Keycloak OIDC client, host-side Tailscale proxy, seeded self-test project, and controller-local auth artifacts.",
+      "description": "Converge the private Semaphore runtime, PostgreSQL backend, dedicated Authentik OIDC client, host-side Tailscale proxy, seeded self-test project, and controller-local auth artifacts.",
       "workflow_id": "converge-semaphore",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -3271,11 +3219,11 @@
       "expected_preconditions": [
         "make preflight WORKFLOW=converge-semaphore passes",
         "make validate passes before the apply",
-        "Semaphore remains private-only, the dedicated Keycloak client reconcile is expected, and the seeded project scope is understood before rollout"
+        "Semaphore remains private-only, the dedicated Authentik client reconcile is expected, and the seeded project scope is understood before rollout"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record PostgreSQL, runtime, proxy, Keycloak client-secret mirroring, one OIDC redirect response, controller-local auth artifact generation, and the seeded self-test task verification."
+        "notes": "Record PostgreSQL, runtime, proxy, Authentik client-secret mirroring, one OIDC redirect response, controller-local auth artifact generation, and the seeded self-test task verification."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -3293,7 +3241,7 @@
       }
     },
     "converge-serverclaw": {
-      "description": "Converge the public ServerClaw runtime, its dedicated Keycloak OIDC client, and the chat.example.com edge publication.",
+      "description": "Converge the public ServerClaw runtime, its dedicated Authentik OIDC client, and the chat.example.com edge publication.",
       "workflow_id": "converge-serverclaw",
       "scope": "host_and_guest",
       "approval_policy": "sensitive_live_change",
@@ -3313,15 +3261,15 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record Keycloak client secret mirroring, runtime health, public edge reachability, and bootstrap admin sign-in verification."
+        "notes": "Record Authentik client secret mirroring, runtime health, public edge reachability, and bootstrap admin sign-in verification."
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if the Keycloak client, runtime deployment, or edge publication fails verification.",
+          "Stop if the Authentik client, runtime deployment, or edge publication fails verification.",
           "Stop if chat.example.com serves traffic without the intended in-app authentication and repo-managed model-search settings."
         ],
         "rollback_guidance": [
-          "Restore the last known-good ServerClaw runtime, Keycloak client contract, and edge publication before retrying.",
+          "Restore the last known-good ServerClaw runtime, Authentik client contract, and edge publication before retrying.",
           "Do not compensate for a failed rollout with manual Coolify or nginx changes outside the repo."
         ]
       },
@@ -3407,7 +3355,7 @@
       }
     },
     "converge-superset": {
-      "description": "Converge the Superset PostgreSQL metadata plane, runtime, Keycloak client, and shared-edge publication, then verify SQL-first BI access on bi.example.com.",
+      "description": "Converge the Superset PostgreSQL metadata plane, runtime, Authentik client, and shared-edge publication, then verify SQL-first BI access on bi.example.com.",
       "workflow_id": "converge-superset",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -3434,16 +3382,16 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the source commit, one local Superset /health response, the public /health result, one Keycloak redirect response, and successful public API verification of the managed datasource inventory and landing dashboard."
+        "notes": "Record the source commit, one local Superset /health response, the public /health result, one Authentik redirect response, and successful public API verification of the managed datasource inventory and landing dashboard."
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if the Superset runtime fails to start, the managed metadata bootstrap fails, or the public publication does not preserve the documented Keycloak login path.",
+          "Stop if the Superset runtime fails to start, the managed metadata bootstrap fails, or the public publication does not preserve the documented Authentik login path.",
           "Stop if the public verification path cannot prove the managed datasource inventory or landing dashboard after converge."
         ],
         "rollback_guidance": [
-          "Restore the last known-good Superset runtime, Keycloak client, and shared-edge publication from version control before retrying.",
-          "Do not compensate for a failed rollout by leaving behind manual Superset metadata, PostgreSQL role, or Keycloak client drift outside the repo-managed converge path."
+          "Restore the last known-good Superset runtime, Authentik client, and shared-edge publication from version control before retrying.",
+          "Do not compensate for a failed rollout by leaving behind manual Superset metadata, PostgreSQL role, or Authentik client drift outside the repo-managed converge path."
         ]
       },
       "execution": {
@@ -4502,7 +4450,7 @@
           "kind": "operator_parameter",
           "required": true,
           "source": "Windmill worker environment or OpenBao injection",
-          "description": "Dedicated automation identity used to obtain a real Keycloak token for the integration suite."
+          "description": "Dedicated automation identity used to obtain a real Authentik token for the integration suite."
         },
         {
           "name": "LV3_TEST_RUNNER_PASSWORD",
@@ -4531,7 +4479,7 @@
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if the worker cannot reach the private platform URLs, the Keycloak token flow fails, or the rotation mutation leaves NetBox unhealthy.",
+          "Stop if the worker cannot reach the private platform URLs, the Authentik token flow fails, or the rotation mutation leaves NetBox unhealthy.",
           "Stop if the nightly job starts creating GlitchTip or Mattermost noise because the target environment is not yet intentionally enrolled."
         ],
         "rollback_guidance": [
@@ -4617,11 +4565,11 @@
       "approval_policy": "sensitive_live_change",
       "inputs": [
         {
-          "name": "keycloak_bootstrap_admin_password",
+          "name": "authentik_bootstrap_password",
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-local Keycloak bootstrap admin password used to disable the named operator account."
+          "description": "Controller-local Authentik bootstrap admin password used to disable the named operator account."
         },
         {
           "name": "openbao_init_payload",
@@ -4670,17 +4618,17 @@
       }
     },
     "operator-onboard": {
-      "description": "Provision one ADR 0108 human operator across the roster, Keycloak, OpenBao, and optional Tailscale and step-ca hooks.",
+      "description": "Provision one ADR 0108 human operator across the roster, Authentik, OpenBao, and optional Tailscale and step-ca hooks.",
       "workflow_id": "operator-onboard",
       "scope": "external_service",
       "approval_policy": "sensitive_live_change",
       "inputs": [
         {
-          "name": "keycloak_bootstrap_admin_password",
+          "name": "authentik_bootstrap_password",
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-local Keycloak bootstrap admin password used to create or update the named operator."
+          "description": "Controller-local Authentik bootstrap admin password used to create or update the named operator."
         },
         {
           "name": "openbao_init_payload",
@@ -4729,7 +4677,7 @@
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if Keycloak or OpenBao reconciliation fails before the roster and external state agree.",
+          "Stop if Authentik or OpenBao reconciliation fails before the roster and external state agree.",
           "Stop if the requested operator email or any required SSH key fingerprint does not match the reviewed access request."
         ],
         "rollback_guidance": [
@@ -5108,44 +5056,6 @@
         "rollback_guidance": [
           "Rerun the governed rotation after fixing hook prerequisites instead of issuing unmanaged Grafana tokens.",
           "Keep the replacement workflow and incident trail in receipts rather than patching consumers manually."
-        ]
-      },
-      "execution": {
-        "profile": "docker_runtime_systemd_make",
-        "timeout_seconds": 900
-      }
-    },
-    "rotate-keycloak-client-secret": {
-      "description": "Rotate one governed Keycloak client secret through the ADR 0141 token lifecycle hook contract.",
-      "workflow_id": "rotate-keycloak-client-secret",
-      "scope": "external_service",
-      "approval_policy": "sensitive_live_change",
-      "inputs": [
-        {
-          "name": "TOKEN_ID",
-          "kind": "operator_parameter",
-          "required": true,
-          "source": "config/token-inventory.yaml",
-          "description": "Governed Keycloak client-secret token id to rotate."
-        }
-      ],
-      "expected_preconditions": [
-        "uv run --with pyyaml python scripts/token_lifecycle.py validate passes",
-        "The selected TOKEN_ID belongs to the keycloak_client_secret class and defines a rotate hook in config/token-inventory.yaml",
-        "Operators have confirmed the dependent service can accept the replacement secret before rotation starts"
-      ],
-      "evidence": {
-        "live_apply_receipt_required": true,
-        "notes": "Record the token id, hook outcome, and any dependent service update performed by the rotation contract."
-      },
-      "failure_guidance": {
-        "stop_conditions": [
-          "Stop if the selected token id is not a governed Keycloak client secret.",
-          "Stop if the rotate hook fails or leaves the dependent service with mismatched credentials."
-        ],
-        "rollback_guidance": [
-          "Rerun the governed rotation after correcting the hook environment instead of setting ad hoc secrets.",
-          "Treat failed secret publication to the dependent service as an explicit incident requiring follow-up before retry."
         ]
       },
       "execution": {
@@ -5828,11 +5738,11 @@
       "approval_policy": "sensitive_live_change",
       "inputs": [
         {
-          "name": "keycloak_bootstrap_admin_password",
+          "name": "authentik_bootstrap_password",
           "kind": "controller_secret",
           "required": true,
           "source": "config/controller-local-secrets.json",
-          "description": "Controller-local Keycloak bootstrap admin password used for idempotent roster reconciliation."
+          "description": "Controller-local Authentik bootstrap admin password used for idempotent roster reconciliation."
         },
         {
           "name": "openbao_init_payload",
@@ -6065,6 +5975,44 @@
       "execution": {
         "profile": "docker_runtime_systemd_make",
         "timeout_seconds": 1800
+      }
+    },
+    "rotate-authentik-client-secret": {
+      "description": "Rotate one governed Authentik client secret through the ADR 0141 token lifecycle hook contract.",
+      "workflow_id": "rotate-authentik-client-secret",
+      "scope": "external_service",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "TOKEN_ID",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "config/token-inventory.yaml",
+          "description": "Governed Authentik client-secret token id to rotate."
+        }
+      ],
+      "expected_preconditions": [
+        "uv run --with pyyaml python scripts/token_lifecycle.py validate passes",
+        "The selected TOKEN_ID belongs to the authentik_client_secret class and defines a rotate hook in config/token-inventory.yaml",
+        "Operators have confirmed the dependent service can accept the replacement secret before rotation starts"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the token id, hook outcome, and any dependent service update performed by the rotation contract."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the selected token id is not a governed Authentik client secret.",
+          "Stop if the rotate hook fails or leaves the dependent service with mismatched credentials."
+        ],
+        "rollback_guidance": [
+          "Rerun the governed rotation after correcting the hook environment instead of setting ad hoc secrets.",
+          "Treat failed secret publication to the dependent service as an explicit incident requiring follow-up before retry."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     }
   },

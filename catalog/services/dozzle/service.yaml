@@ -63,10 +63,10 @@ dependency:
     adr: '0150'
   outbound_edges:
     - from: dozzle
-      to: keycloak
+      to: authentik
       type: soft
       description: Authenticated browser access to logs.example.com depends on the
-        shared Keycloak-backed edge auth path, but the private hub remains reachable
+        shared Authentik-backed edge auth path, but the private hub remains reachable
         for controlled operator verification.
     - from: dozzle
       to: nginx_edge

@@ -207,7 +207,7 @@
       "verification": {
         "smoke_endpoints": [
           "https://registry.{apex}/api/v2.0/ping",
-          "https://sso.{apex}/realms/{apex_slug}/.well-known/openid-configuration",
+          "https://id.{apex}/application/o/ops-portal/.well-known/openid-configuration",
           "https://wiki.{apex}/"
         ],
         "expected_running_vms_count": ">= 5"

@@ -5,7 +5,7 @@ approved_roles:
   - flagsmith
   - gitea
   - glitchtip
-  - keycloak
+  - authentik
   - lago
   - langfuse
   - matrix_synapse

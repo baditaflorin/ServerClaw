@@ -8,6 +8,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](../../adr/0470-deployment-fixture-matrix.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](../../adr/0448-deployment-connection-registry-and-wrapper.md) |
 | `0407` | Ops Portal Sibling-Link IaC Substitution | `merged` | [0407-generic-by-default-local-overlay-architecture.md](../../adr/0407-generic-by-default-local-overlay-architecture.md) |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](../../workstreams/ws-0374-status-repair.md) |
@@ -170,6 +171,19 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
+| `` | Regenerate platform.yml with corrected 10.10.10.x addressing | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
+| `` | Reboot-verify the forward-chain fix on all 17 guests, root-cause the Docker-wipe bug, fix Postgres corruption | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
+| `` | Postmortem — example.org fleet-wide public HTTPS outage (nginx-edge stale addressing) | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
+| `` | Investigate Postgres pg_authid corruption root cause -- inconclusive, found a real single-point-of-failure storage risk | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
+| `` | Fleet hygiene cleanup -- one more cloud-init guest fixed, keycloak/SSO fully restored, firewall-pools.json and mail-platform findings | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
+| `` | Close ServerClaw sanitization coverage gap and fix stale cert catalog entries | `merged` | [2026-08-26-serverclaw-publish-blockers.md](../../postmortems/2026-08-26-serverclaw-publish-blockers.md) |
+| `` | Add real keycloak monitoring, fix a 6th stale-address instance in nginx, pin the image version | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
+| `` | Fix fleet-pool-fw forward-chain gap on all 17 guests, not just 2 | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
+| `` | Fix apps.example.org root cause -- fleet-pool-fw migration missed forward chains | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
+| `` | Fix example.org guest network addressing — swap internal/staging to match reality | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
+| `` | Audit — example.org fleet-wide guest network identity drift | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
+| `` | ADR 0491: replace Keycloak with Authentik (Phase 0 -- decision + client audit) | `merged` | [0491-authentik-for-operator-and-agent-sso.md](../../adr/0491-authentik-for-operator-and-agent-sso.md) |
+| `0491` | Authentik Phase 2: reconcile GlitchTip and migrate Outline | `live_applied` | [adr-0491-authentik-phase2.md](../../workstreams/adr-0491-authentik-phase2.md) |
 | `0391` | CPU-only operational automation live apply | `live_applied` | [ws-0391-live-apply.md](../../workstreams/ws-0391-live-apply.md) |
 | `0373` | Live apply service registry and derived defaults from latest origin/main | `merged` | [ws-0373-live-apply.md](../../workstreams/ws-0373-live-apply.md) |
 | `0372` | ADR 0372 Live Apply and Automation Verification | `merged` | [ws-0372-live-apply.md](../../workstreams/ws-0372-live-apply.md) |

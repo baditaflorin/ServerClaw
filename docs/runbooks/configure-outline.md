@@ -10,7 +10,6 @@ The Outline workflow converges:
 - the Outline runtime, Redis cache, and MinIO attachment store on `docker-runtime`
 - the public hostname `wiki.example.com` on the shared NGINX edge
 - the dedicated Authentik OIDC provider/application used by the selected Outline sign-in flow
-- the preserved Keycloak client and secret used only for per-client rollback
 - the Outline-to-Authentik logout handoff
 - the controller-local Outline API token and the initial living knowledge collections
 
@@ -19,8 +18,7 @@ The Outline workflow converges:
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload is already available under `.local/openbao/init.json`
 - Authentik is already deployed and healthy on `id.example.com`
-- Keycloak remains healthy on `sso.example.com` for bounded rollback
-- `.local/outline/api-token.txt` is present before an existing deployment is cut over; the current first-token helper uses the preserved Keycloak `outline.automation` account
+- `.local/outline/api-token.txt` is present as a regular owner-only `0600` file
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
 ## Converge
@@ -70,60 +68,33 @@ The workflow maintains controller-local secrets under `.local/outline/`:
 
 Every file in this directory is controller-local secret material. In
 particular, `api-token.txt` must be a regular owner-only `0600` file. The
-bootstrap helper creates it with exclusive owner-only permissions and
-normalizes an existing non-empty token to `0600`; the Outline publication gate
-refuses a symlink, non-regular file, empty file, or broader mode.
+Outline publication gate refuses a symlink, non-regular file, empty file, or
+broader mode.
 
 The selected Authentik client secret is mirrored under
-`.local/authentik/outline-client-secret.txt`. The previous
-`.local/keycloak/outline-client-secret.txt` file remains mode `0600` and must
-not be deleted or reused; it is the per-client rollback artifact.
+`.local/authentik/outline-client-secret.txt`.
 
-## Manual-free bootstrap path
+## Durable API authority
 
-For an existing Keycloak-backed deployment, create the durable Outline API
-token before the Authentik cutover:
+Create the durable API token from an existing Authentik-authorized Outline
+session, then store it only at `.local/outline/api-token.txt` with mode `0600`.
+The token needs the scopes declared by `outline_api_token_scopes` in the role
+defaults. The role intentionally does not automate a browser password flow or
+write a token directly into the database.
 
-```bash
-python3 scripts/sync_docs_to_outline.py bootstrap-token \
-  --base-url https://wiki.example.com \
-  --username outline.automation \
-  --password-file .local/keycloak/outline.automation-password.txt \
-  --token-file .local/outline/api-token.txt
-```
-
-The helper follows the preserved Keycloak OIDC flow once, extracts the
-resulting Outline application session, and mints the long-lived token. The
-token remains valid after Outline selects Authentik, so routine converges do
-not need a migrated human or automation password. The publication phase then
-uses that token to prune the default `Welcome` collection and synchronize the
-managed collection landing pages and indexes.
-
-If the token is lost after cutover, do not create an unmanaged Authentik user
-or write a token directly into the database. Reapply the documented Keycloak
-rollback variables, mint the token through the preserved `outline.automation`
-account, verify the collections, then reapply the Authentik selection.
+If the token is lost, sign in through Authentik again with an authorized
+operator, create a replacement scoped token in Outline, store it at that path,
+and rerun the converge. Do not create an unmanaged identity or write a token
+directly into the database.
 
 Outline logout remains app-local first, then the repo-managed
 `OIDC_LOGOUT_URI` hands the browser to Authentik's provider-scoped end-session
-endpoint. The rollback variables retain the prior Keycloak logout URL and
-shared proxy-cleanup return path unchanged.
+endpoint.
 
 The real live logout path should be verified through the authenticated UI
 account menu, not by assuming `GET /logout` fully exercises the browser flow.
 Verify that the Authentik session is no longer sufficient to reopen Outline
-after logout. A Keycloak session may remain active for services that have not
-yet migrated; this is expected during ADR 0491 Phase 2 and is why the two
-identity providers stay independently available.
-
-## Per-client rollback
-
-Keep Keycloak running. To roll back Outline only, set the generic
-`outline_oidc_*` variables to the `outline_keycloak_rollback_*` values and use
-`.local/keycloak/outline-client-secret.txt` as the selected secret, then rerun
-the Outline converge. Do not change the fleet-wide identity-provider selector,
-DNS, or any other client. Reapply Authentik only after the Keycloak login and
-living-collection verification both pass.
+after logout.
 
 ## Syncing knowledge surfaces
 
@@ -145,7 +116,7 @@ Repository and syntax checks:
 
 ```bash
 python3 scripts/validate_service_completeness.py --service outline
-uv run --with pytest python -m pytest tests/test_outline_runtime_role.py tests/test_outline_playbook.py tests/test_outline_sync.py tests/test_authentik_oauth_reconcile.py tests/test_authentik_runtime_role.py tests/test_keycloak_runtime_role.py tests/test_generate_cross_cutting_artifacts.py tests/test_generate_platform_vars.py
+uv run --with pytest python -m pytest tests/test_outline_runtime_role.py tests/test_outline_playbook.py tests/test_outline_sync.py tests/test_authentik_oauth_reconcile.py tests/test_authentik_runtime_role.py tests/test_generate_cross_cutting_artifacts.py tests/test_generate_platform_vars.py
 make preflight-outline-deployment-selection env=production
 make syntax-check-outline
 uv run --with pyyaml --with jsonschema python -m unittest tests.test_grafana_sso_role tests.test_session_logout_verify
@@ -173,5 +144,4 @@ Outline account menu, and prove the same browser needs fresh Authentik login.
 
 ## Mainline replay notes
 
-- The authenticated Keycloak admin API is warmed immediately after restart so the first realm-management query does not race the container startup path.
 - The merged-main replay may retry the public `https://wiki.example.com/_health` probe briefly after the edge certificate expands to include `wiki.example.com`; a short retry window is expected during the NGINX reload.

@@ -73,7 +73,7 @@ These files are transient and regenerated on every refresh.
 Runs on the controller, calls the Outline API.
 
 - **sync_docs_to_outline.py sync** — Syncs ADRs, runbooks, and landing pages from git to wiki.example.com
-- Requires `.local/outline/api-token.txt` (OIDC token)
+- Requires `.local/outline/api-token.txt` (durable Outline API token)
 - If token is expired: See **Outline Token Expired?** section below
 
 ### Phase 3 & 4: Converge Remote Services
@@ -94,15 +94,9 @@ Runs on NGINX edge (nginx-edge).
 
 ### Outline Token Expired?
 
-If sync_docs_to_outline.py returns HTTP 401:
-
-```bash
-python3 scripts/sync_docs_to_outline.py bootstrap-token
-```
-
-This re-authenticates with Keycloak and creates a fresh API token. Requires:
-- `.local/keycloak/outline.automation-password.txt` (service account password)
-- Keycloak running and reachable at `https://auth.example.com`
+If sync_docs_to_outline.py returns HTTP 401, sign in to Outline through
+Authentik as an authorized operator, create a replacement scoped API token,
+and replace the owner-only `.local/outline/api-token.txt` file.
 
 Then retry the full cascade:
 
@@ -139,11 +133,11 @@ curl -H "Authorization: Bearer $(cat .local/outline/api-token.txt)" \
   https://wiki.example.com/api/collections.list
 ```
 
-If 401, re-bootstrap the token (see above). If 5xx, Outline may be down or restarting.
+If 401, replace the durable token (see above). If 5xx, Outline may be down or restarting.
 
 ## Related Procedures
 
-- **refresh-outline-api-token.md** — Manual refresh of Outline OIDC token (if bootstrap-token fails)
+- **configure-outline.md** — Authentik sign-in and durable Outline API token procedure
 - **configure-homepage.md** — Setup and troubleshooting for home.example.com
 - **configure-ops-portal.md** — Setup and troubleshooting for ops.example.com
 - **configure-outline.md** — Setup and troubleshooting for wiki.example.com

@@ -3,7 +3,7 @@
 # Use case: Used by Ansible argument validation before Harbor convergence or verification tasks run.
 #
 # Inputs (required):
-#   - Harbor runtime directories, public topology, Keycloak inputs, and managed project settings defined below.
+#   - Harbor runtime directories, public topology, Authentik inputs, and managed project settings defined below.
 #
 # Inputs (optional):
 #   - none
@@ -100,28 +100,16 @@ argument_specs:
       harbor_trivy_ignore_unfixed:
         type: bool
         required: true
-      harbor_keycloak_local_admin_url:
+      harbor_authentik_oidc_issuer_url:
         type: str
         required: true
-      harbor_keycloak_public_base_url:
+      harbor_authentik_admin_group:
         type: str
         required: true
-      harbor_keycloak_realm_name:
+      harbor_oidc_client_id:
         type: str
         required: true
-      harbor_keycloak_bootstrap_admin_username:
-        type: str
-        required: true
-      harbor_keycloak_bootstrap_admin_password_remote_file:
-        type: path
-        required: true
-      harbor_keycloak_admin_group:
-        type: str
-        required: true
-      harbor_keycloak_client_id:
-        type: str
-        required: true
-      harbor_keycloak_client_secret_local_file:
+      harbor_oidc_client_secret_local_file:
         type: path
         required: true
       harbor_oidc_provider_name:

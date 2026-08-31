@@ -1,0 +1,33 @@
+workstream_id: adr-0491-authentik-keycloak-sunset-2026-08-30
+state: completed
+schema_version: 1.1.0
+started_at: '2026-08-30T17:49:10Z'
+completed_at: '2026-08-31T11:53:12Z'
+applied_by: codex
+repo_version: origin/main:e3d3a1a43b96a80dbf1419796794d4de45b8b969
+adr: 0491
+summary: Authentik consumer convergence, operator cutover, and guarded Keycloak retirement completed.
+targets:
+  - service: authentik
+    host_group: runtime-control
+    state: active
+  - service: public-edge-authentication
+    host_group: nginx
+    state: active
+  - service: keycloak
+    host_group: runtime-control
+    state: archived-and-stopped
+  - service: keycloak
+    host_group: docker-runtime
+    state: archived-and-stopped
+  - infrastructure: proxmox-host
+    state: operator-ssh-access-verified
+errors: []
+notes:
+  - Authentik readiness, signing-key discovery, declared OAuth provider reconciliation, and identity/group reconciliation completed successfully.
+  - Active confidential-client and browser authorization-code flows were verified without recording credentials, tokens, cookies, or client secrets.
+  - The public edge redirects protected surfaces to Authentik; API bearer-token validation accepts an Authentik-issued token and rejects invalid or retired-issuer input.
+  - Grafana Generic OAuth redirect and GlitchTip OIDC plus event-ingestion smoke checks passed after their scoped converges.
+  - Keycloak compose definitions were archived on both former runtime hosts before the stacks were stopped. Runtime data and archives remain retained for the governed rollback window; no volume purge was performed.
+  - A supplied operator SSH public key was installed once through the established bootstrap access path and the Proxmox SSH service was verified without exposing key material.
+  - The former Keycloak hostname no longer routes to Keycloak. Remaining chat and structured-search degradation are separate services and were not treated as identity-cutover success criteria.

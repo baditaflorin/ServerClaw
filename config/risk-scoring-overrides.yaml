@@ -8,7 +8,7 @@ service_tiers:
   docker_runtime: critical
   docs_portal: medium
   grafana: medium
-  keycloak: high
+  authentik: high
   mail_platform: high
   mattermost: medium
   netbox: high
@@ -32,7 +32,7 @@ downstream_count_fallbacks:
   docker_runtime: 9
   docs_portal: 1
   grafana: 2
-  keycloak: 6
+  authentik: 6
   mail_platform: 3
   mattermost: 2
   netbox: 4

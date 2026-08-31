@@ -103,8 +103,12 @@ def check_postgres_source_vm_drift(
 
     This check:
     - Fails if any entry still has a legacy source_vm field
-    - Fails if any service is missing from platform_service_registry (IP can't be derived)
+    - Fails if any remote service client is missing from platform_service_registry (IP can't be derived)
     - Fails if the derived host_group is not a known guest in platform_guest_catalog
+
+    An explicit ``connection_mode: ssh_tunnel`` is reserved for an
+    operator-only client whose database session terminates on PostgreSQL
+    loopback. It has no remote source VM or pg_hba allow-list to derive.
     """
     errors: list[str] = []
 
@@ -124,6 +128,7 @@ def check_postgres_source_vm_drift(
     for client in postgres_clients:
         service_name = client.get("service", "")
         source_vm = client.get("source_vm", "")
+        connection_mode = str(client.get("connection_mode", "service_network")).strip()
 
         # Check 1: No legacy source_vm should remain (Phase 2 complete)
         if source_vm:
@@ -133,6 +138,18 @@ def check_postgres_source_vm_drift(
                 f"       Fix: remove 'source_vm' from this entry in {POSTGRES_CLIENTS_PATH.name}.\n"
                 f"       IP will be derived from platform_service_registry['{service_name}'].host_group "
                 f"at template render time (ADR 0416 Phase 2)."
+            )
+            continue
+
+        if connection_mode == "ssh_tunnel":
+            if verbose:
+                print(f"  SKIP   postgres client '{service_name}': operator SSH tunnel terminates on loopback")
+            continue
+
+        if connection_mode != "service_network":
+            errors.append(
+                f"INVALID postgres client '{service_name}': connection_mode={connection_mode!r} is unsupported.\n"
+                "         Fix: use 'service_network' for managed runtimes or 'ssh_tunnel' for an operator-only local tunnel."
             )
             continue
 

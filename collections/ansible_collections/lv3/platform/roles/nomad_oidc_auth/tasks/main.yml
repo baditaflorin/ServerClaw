@@ -1,8 +1,8 @@
 ---
-# Purpose: Configure Nomad's native OIDC auth method with Keycloak SSO.
-# Use case: Allows platform admins to sign into the Nomad UI at scheduler.{{ platform_domain }} via Keycloak OIDC.
+# Purpose: Configure Nomad's native OIDC auth method with Authentik SSO.
+# Use case: Allows platform admins to sign into the Nomad UI at scheduler.{{ platform_domain }} via Authentik OIDC.
 # Idempotency: All API calls use PUT or check-before-create patterns.
-# Dependencies: Nomad cluster must be running with ACL enabled; Keycloak client must exist.
+# Dependencies: Nomad cluster must be running with ACL enabled; Authentik client must exist.
 
 - name: Validate Nomad OIDC auth inputs
   ansible.builtin.include_role:
@@ -13,14 +13,25 @@
       - nomad_oidc_auth_server_url
       - nomad_oidc_auth_ca_cert_file
       - nomad_oidc_auth_bootstrap_token_remote_file
-      - nomad_oidc_auth_keycloak_client_id
-      - nomad_oidc_auth_keycloak_client_secret_local_file
+      - nomad_oidc_auth_authentik_client_id
+      - nomad_oidc_auth_authentik_client_secret_local_file
+      - nomad_oidc_auth_authentik_provider_slug
       - nomad_oidc_auth_oidc_discovery_url
       - nomad_oidc_auth_allowed_redirect_uris
       - nomad_oidc_auth_admin_group
     common_assert_vars_fail_msg: >-
-      nomad_oidc_auth requires the Nomad server URL, bootstrap token, Keycloak client ID and secret,
+      nomad_oidc_auth requires the Nomad server URL, bootstrap token, Authentik client ID and secret,
       OIDC discovery URL, redirect URIs, and admin group name.
+
+- name: Validate retired Nomad OIDC method names are safe
+  ansible.builtin.assert:
+    that:
+      - nomad_oidc_auth_retired_method_names is sequence
+      - nomad_oidc_auth_retired_method_names is not string
+      - nomad_oidc_auth_method_name not in nomad_oidc_auth_retired_method_names
+    fail_msg: >-
+      Retired Nomad OIDC method names must be a list that does not include the active
+      Authentik method '{{ nomad_oidc_auth_method_name }}'.
 
 - name: Read the Nomad bootstrap management token
   ansible.builtin.slurp:
@@ -33,9 +44,9 @@
     nomad_oidc_auth_token: "{{ nomad_oidc_auth_bootstrap_token_raw.content | b64decode | trim }}"
   no_log: true
 
-- name: Read the Keycloak client secret from the control machine
+- name: Read the Authentik client secret from the control machine
   ansible.builtin.set_fact:
-    nomad_oidc_auth_client_secret: "{{ lookup('ansible.builtin.file', nomad_oidc_auth_keycloak_client_secret_local_file) | trim }}"
+    nomad_oidc_auth_client_secret: "{{ lookup('ansible.builtin.file', nomad_oidc_auth_authentik_client_secret_local_file) | trim }}"
   delegate_to: localhost
   become: false
   no_log: true
@@ -51,7 +62,7 @@
     body_format: json
     body:
       Name: "{{ nomad_oidc_auth_admin_policy_name }}"
-      Description: Full access for platform admins authenticated via Keycloak OIDC.
+      Description: Full access for platform admins authenticated via Authentik OIDC.
       Rules: |
         namespace "*" {
           policy = "write"
@@ -189,7 +200,7 @@
 
 # --- OIDC Auth Method ---
 
-- name: Check whether the Keycloak OIDC auth method exists
+- name: Check whether the Authentik OIDC auth method exists
   ansible.builtin.uri:
     url: "{{ nomad_oidc_auth_server_url }}/v1/acl/auth-method/{{ nomad_oidc_auth_method_name }}"
     method: GET
@@ -199,7 +210,7 @@
     status_code: [200, 404]
   register: nomad_oidc_auth_method_check
 
-- name: Create the Keycloak OIDC auth method
+- name: Create the Authentik OIDC auth method
   ansible.builtin.uri:
     url: "{{ nomad_oidc_auth_server_url }}/v1/acl/auth-method"
     method: POST
@@ -214,10 +225,10 @@
       Default: true
       Config:
         OIDCDiscoveryURL: "{{ nomad_oidc_auth_oidc_discovery_url }}"
-        OIDCClientID: "{{ nomad_oidc_auth_keycloak_client_id }}"
+        OIDCClientID: "{{ nomad_oidc_auth_authentik_client_id }}"
         OIDCClientSecret: "{{ nomad_oidc_auth_client_secret }}"
         BoundAudiences:
-          - "{{ nomad_oidc_auth_keycloak_client_id }}"
+          - "{{ nomad_oidc_auth_authentik_client_id }}"
         AllowedRedirectURIs: "{{ nomad_oidc_auth_allowed_redirect_uris }}"
         ListClaimMappings:
           groups: groups
@@ -228,7 +239,7 @@
   when: nomad_oidc_auth_method_check.status == 404
   no_log: true
 
-- name: Update the Keycloak OIDC auth method
+- name: Update the Authentik OIDC auth method
   ansible.builtin.uri:
     url: "{{ nomad_oidc_auth_server_url }}/v1/acl/auth-method/{{ nomad_oidc_auth_method_name }}"
     method: POST
@@ -243,10 +254,10 @@
       Default: true
       Config:
         OIDCDiscoveryURL: "{{ nomad_oidc_auth_oidc_discovery_url }}"
-        OIDCClientID: "{{ nomad_oidc_auth_keycloak_client_id }}"
+        OIDCClientID: "{{ nomad_oidc_auth_authentik_client_id }}"
         OIDCClientSecret: "{{ nomad_oidc_auth_client_secret }}"
         BoundAudiences:
-          - "{{ nomad_oidc_auth_keycloak_client_id }}"
+          - "{{ nomad_oidc_auth_authentik_client_id }}"
         AllowedRedirectURIs: "{{ nomad_oidc_auth_allowed_redirect_uris }}"
         ListClaimMappings:
           groups: groups
@@ -310,7 +321,7 @@
     body_format: json
     body:
       AuthMethod: "{{ nomad_oidc_auth_method_name }}"
-      Description: "Map {{ nomad_oidc_auth_admin_group }} Keycloak group to platform-admin role."
+      Description: "Map {{ nomad_oidc_auth_admin_group }} Authentik group to platform-admin role."
       BindType: role
       BindName: "{{ nomad_oidc_auth_admin_role_name }}"
       Selector: "\"{{ nomad_oidc_auth_admin_group }}\" in list.groups"
@@ -355,3 +366,79 @@
     fail_msg: >-
       The Nomad OIDC auth method '{{ nomad_oidc_auth_method_name }}' was not found or is not configured
       as the default auth method. Users will not see the OIDC login button in the Nomad UI.
+
+# Keep retirement after the new provider has been created, made default, and
+# verified. A staged production run can set nomad_oidc_auth_retire_legacy_methods
+# to false until an interactive Authentik login has proven the full exchange.
+- name: List binding rules before retiring legacy OIDC methods
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/binding-rules"
+    method: GET
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    validate_certs: false
+    status_code: [200]
+  register: nomad_oidc_auth_legacy_binding_rules
+  when: nomad_oidc_auth_retire_legacy_methods | bool
+  no_log: true
+
+- name: Remove binding rules attached to retired OIDC methods
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/binding-rule/{{ item.ID }}"
+    method: DELETE
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    validate_certs: false
+    status_code: [200, 204, 404]
+  loop: >-
+    {{ (nomad_oidc_auth_legacy_binding_rules.json | default([]))
+       | selectattr('AuthMethod', 'defined')
+       | selectattr('ID', 'defined')
+       | list }}
+  loop_control:
+    label: "{{ item.AuthMethod }}:{{ item.ID }}"
+  when:
+    - nomad_oidc_auth_retire_legacy_methods | bool
+    - item.AuthMethod in nomad_oidc_auth_retired_method_names
+  no_log: true
+
+- name: Check whether retired OIDC auth methods remain
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/auth-method/{{ item }}"
+    method: GET
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    validate_certs: false
+    status_code: [200, 404]
+  loop: "{{ nomad_oidc_auth_retired_method_names | unique }}"
+  register: nomad_oidc_auth_retired_method_checks
+  when: nomad_oidc_auth_retire_legacy_methods | bool
+  no_log: true
+
+- name: Remove retired OIDC auth methods
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/auth-method/{{ item.item }}"
+    method: DELETE
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    validate_certs: false
+    status_code: [200, 204, 404]
+  loop: "{{ nomad_oidc_auth_retired_method_checks.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - nomad_oidc_auth_retire_legacy_methods | bool
+    - item.status | default(404) == 200
+  no_log: true
+
+- name: Verify retired OIDC auth methods are absent
+  ansible.builtin.uri:
+    url: "{{ nomad_oidc_auth_server_url }}/v1/acl/auth-method/{{ item }}"
+    method: GET
+    headers:
+      X-Nomad-Token: "{{ nomad_oidc_auth_token }}"
+    validate_certs: false
+    status_code: [404]
+  loop: "{{ nomad_oidc_auth_retired_method_names | unique }}"
+  when: nomad_oidc_auth_retire_legacy_methods | bool
+  no_log: true

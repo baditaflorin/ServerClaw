@@ -54,17 +54,19 @@ def test_load_scenario_catalog_resolves_known_scenarios() -> None:
     catalog = load_scenario_catalog(REPO_ROOT / "config" / "fault-scenarios.yaml")
 
     assert catalog.scheduled_scenario_names == (
-        "fault:keycloak-unavailable",
+        "fault:authentik-unavailable",
         "fault:openbao-unavailable",
     )
-    keycloak = catalog.scenarios["fault:keycloak-unavailable"]
+    authentik = catalog.scenarios["fault:authentik-unavailable"]
     openbao = catalog.scenarios["fault:openbao-unavailable"]
-    assert keycloak.fault.compose_project == "keycloak"
+    assert authentik.fault.compose_project == "authentik"
     assert openbao.fault.kind == "service_pause"
-    assert keycloak.before_probes[0].url == "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration"
-    assert keycloak.before_probes[0].execution_context == "host_network_helper"
-    assert keycloak.before_probes[1].headers == (("Host", "sso.example.com"),)
-    assert keycloak.during_probes[0].expect == "unreachable"
+    assert authentik.before_probes[0].name == "authentik:readiness"
+    assert authentik.before_probes[0].url == "http://127.0.0.1:9010/-/health/ready/"
+    assert authentik.before_probes[0].execution_context == "host_network_helper"
+    assert authentik.before_probes[1].url == "https://10.10.10.10/-/health/ready/"
+    assert authentik.before_probes[1].headers == (("Host", "id.{{ platform_domain }}"),)
+    assert authentik.during_probes[0].expect == "unreachable"
 
 
 def test_fault_injector_restores_container_after_success() -> None:
@@ -107,7 +109,7 @@ def test_fault_injector_restores_container_after_success() -> None:
 
 def test_fault_injector_fails_when_baseline_probe_is_not_healthy() -> None:
     catalog = load_scenario_catalog(REPO_ROOT / "config" / "fault-scenarios.yaml")
-    scenario = catalog.scenarios["fault:keycloak-unavailable"]
+    scenario = catalog.scenarios["fault:authentik-unavailable"]
     docker = FakeDockerClient()
     injector = FaultInjector(docker_client=docker, sleep=lambda _: None)
 
@@ -141,7 +143,7 @@ def test_fault_injector_runs_host_network_http_probe_via_helper_container() -> N
     injector = FaultInjector(docker_client=docker, sleep=lambda _: None)
     probe = (
         load_scenario_catalog(REPO_ROOT / "config" / "fault-scenarios.yaml")
-        .scenarios["fault:keycloak-unavailable"]
+        .scenarios["fault:authentik-unavailable"]
         .before_probes[1]
     )
 
@@ -159,8 +161,8 @@ def test_fault_injector_runs_host_network_http_probe_via_helper_container() -> N
                 "-t",
                 "1",
                 "--no-check-certificate",
-                "--header=Host: sso.example.com",
-                "https://10.10.10.10/realms/lv3/.well-known/openid-configuration",
+                "--header=Host: id.{{ platform_domain }}",
+                "https://10.10.10.10/-/health/ready/",
             ],
         )
     ]

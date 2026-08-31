@@ -31,6 +31,24 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
+def _python_with_pyyaml(script_name: str, *args: str) -> list[str]:
+    """Run generated-data checks with their declared YAML dependency.
+
+    The release gate is also used from minimal controller images where the
+    interpreter running this checker intentionally has no site packages.
+    Reuse the repository's dependency-aware runner instead of producing a
+    false stale-artifact failure in that supported environment.
+    """
+
+    return [
+        str(REPO_ROOT / "scripts" / "run_python_with_packages.sh"),
+        "pyyaml",
+        "--",
+        str(REPO_ROOT / "scripts" / script_name),
+        *args,
+    ]
+
+
 def _git_diff_names(base_ref: str) -> list[str]:
     """Return list of files changed compared to base ref."""
     result = subprocess.run(
@@ -166,11 +184,7 @@ def check_release_notes() -> dict:
 def check_adr_index() -> dict:
     """Check if ADR index is current (non-stale)."""
     result = subprocess.run(
-        [
-            sys.executable,
-            str(REPO_ROOT / "scripts" / "generate_adr_index.py"),
-            "--check",
-        ],
+        _python_with_pyyaml("generate_adr_index.py", "--check"),
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -181,7 +195,7 @@ def check_adr_index() -> dict:
         "id": "adr-index",
         "passed": passed,
         "message": "ADR index is current" if passed else "ADR index is stale",
-        "fix": "Run: python scripts/generate_adr_index.py --write",
+        "fix": "Run: uv run --with pyyaml python scripts/generate_adr_index.py --write",
     }
 
 
@@ -216,11 +230,7 @@ def check_platform_manifest() -> dict:
 def check_discovery_artifacts() -> dict:
     """Check if discovery artifacts are current."""
     result = subprocess.run(
-        [
-            sys.executable,
-            str(REPO_ROOT / "scripts" / "generate_discovery_artifacts.py"),
-            "--check",
-        ],
+        _python_with_pyyaml("generate_discovery_artifacts.py", "--check"),
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -231,7 +241,7 @@ def check_discovery_artifacts() -> dict:
         "id": "discovery-artifacts",
         "passed": passed,
         "message": "Discovery artifacts are current" if passed else "Discovery artifacts are stale",
-        "fix": "Run: python scripts/generate_discovery_artifacts.py --write",
+        "fix": "Run: uv run --with pyyaml python scripts/generate_discovery_artifacts.py --write",
     }
 
 

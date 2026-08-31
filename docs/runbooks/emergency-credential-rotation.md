@@ -22,7 +22,7 @@ For single-secret rotation, use the standard rotation workflow
 
 1. SSH access to all managed hosts via the bootstrap key
 2. Access to the Proxmox host for API token regeneration
-3. Access to the Keycloak admin console for client secret regeneration
+3. Access to the Authentik admin console for client secret regeneration
 4. Rename `.local/open-webui/provider.env` and `.local/serverclaw/provider.env`
    to `.bak` (preflight scanner workaround per CLAUDE.md)
 
@@ -76,8 +76,8 @@ python scripts/emergency_credential_rotation.py --tier t2 --apply
 Convergence order matters here:
 
 ```bash
-# 1. Keycloak first (all OIDC clients depend on it)
-make converge-keycloak env=production
+# 1. Authentik first (all OIDC clients depend on it)
+make converge-authentik env=production
 
 # 2. OpenBao (re-seeds rotated AppRole credentials)
 make converge-openbao env=production
@@ -194,9 +194,9 @@ After all convergences complete:
 python config/windmill/scripts/portal-health-sweep.py
 
 # Check each OIDC login works
-# Visit: https://grafana.example.com (should redirect to Keycloak)
-# Visit: https://semaphore.example.com (should show Keycloak login)
-# Visit: https://harbor.example.com (should show Keycloak login)
+# Visit: https://grafana.example.com (should redirect to Authentik)
+# Visit: https://semaphore.example.com (should show Authentik login)
+# Visit: https://harbor.example.com (should show Authentik login)
 
 # Run integration tests
 make test
@@ -225,7 +225,7 @@ The most common cause is convergence order — the service tried to connect to
 PostgreSQL with the new password before the Postgres role was reconverged.
 Fix: reconverge `postgres-vm` first, then the failing service.
 
-**Keycloak OIDC login broken:**
+**Authentik OIDC login broken:**
 The client secret was rotated but the service hasn't been reconverged yet.
 Fix: reconverge the specific service that's failing OIDC.
 

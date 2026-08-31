@@ -7,6 +7,7 @@ import os
 
 import argparse
 import json
+import re
 import shlex
 import subprocess
 from pathlib import Path, PurePosixPath
@@ -34,6 +35,7 @@ REMOTE_RUNTIME_SUPPORT_FILES = (
     ("scripts/script_bootstrap.py", 0o644),
     ("scripts/controller_automation_toolkit.py", 0o644),
     ("scripts/ntfy_publish.py", 0o644),
+    ("scripts/validation_toolkit.py", 0o644),
     ("platform/__init__.py", 0o644),
     ("platform/datetime_compat.py", 0o644),
     ("platform/enum_compat.py", 0o644),
@@ -51,6 +53,7 @@ REMOTE_RUNTIME_SUPPORT_FILES = (
 )
 SYNCABLE_REPORT_KEYS = ("receipt_path", "latest_snapshot_receipt")
 RESTIC_REMOTE_COMMAND_TIMEOUT_SECONDS = int(os.environ.get("RESTIC_TRIGGER_TIMEOUT_SECONDS", "180"))
+SIMPLE_JINJA_VARIABLE_PATTERN = re.compile(r"{{\s*([A-Za-z_][A-Za-z0-9_]*)\s*}}")
 
 
 def extract_report_json(stdout: str) -> dict | None:
@@ -143,8 +146,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Trigger ADR 0302 live restic workflows on docker-runtime.")
     parser.add_argument("--env", default="production")
     parser.add_argument("--mode", choices=["backup", "restore-verify"], default="backup")
-    parser.add_argument("--repo-root", default=DEFAULT_REMOTE_REPO_ROOT)
-    parser.add_argument("--credential-file", default=DEFAULT_RUNTIME_CREDENTIAL_FILE)
+    parser.add_argument("--repo-root", default=None)
+    parser.add_argument("--credential-file", default=None)
     parser.add_argument("--triggered-by", default="manual")
     parser.add_argument("--live-apply-trigger", action="store_true")
     return parser
@@ -203,7 +206,10 @@ def resolve_openbao_init_local_file() -> Path:
         if not group_vars.is_file():
             continue
         payload = yaml.safe_load(group_vars.read_text(encoding="utf-8")) or {}
-        init_path = str(payload.get("openbao_init_local_file") or "").strip()
+        init_path = resolve_group_var_path(
+            str(payload.get("openbao_init_local_file") or "").strip(),
+            payload,
+        )
         if init_path:
             shared_local_root_prefix = "{{ repo_shared_local_root }}/"
             if init_path.startswith(shared_local_root_prefix):
@@ -217,12 +223,111 @@ def resolve_openbao_init_local_file() -> Path:
     )
 
 
+def resolve_group_var_path(value: str, payload: dict) -> str:
+    """Resolve simple same-file Jinja scalar references in a local artifact path."""
+
+    if not value:
+        return value
+
+    substitutions = {key: item for key, item in payload.items() if isinstance(key, str) and isinstance(item, str)}
+    substitutions["repo_shared_local_root"] = str(resolve_repo_local_path(".local", repo_root=LOCAL_REPO_ROOT))
+    rendered = value
+    for _ in range(16):
+        updated = SIMPLE_JINJA_VARIABLE_PATTERN.sub(
+            lambda match: substitutions.get(match.group(1), match.group(0)),
+            rendered,
+        )
+        if updated == rendered:
+            break
+        rendered = updated
+
+    unresolved = SIMPLE_JINJA_VARIABLE_PATTERN.search(rendered)
+    if unresolved is not None:
+        raise ValueError(f"openbao_init_local_file references unresolved variable '{unresolved.group(1)}'")
+    return rendered
+
+
+def resolve_remote_repo_root(explicit_repo_root: str | None) -> str:
+    """Resolve the managed runtime checkout path from the selected identity overlay."""
+
+    explicit = str(explicit_repo_root or "").strip()
+    if explicit:
+        return explicit
+
+    environment_value = os.environ.get("PLATFORM_REPO_ROOT", "").strip()
+    if environment_value:
+        return environment_value
+
+    identity_paths = [LOCAL_REPO_ROOT / "inventory" / "group_vars" / "all" / "identity.yml"]
+    selected_overlay = os.environ.get("PLATFORM_IDENTITY_OVERLAY", "").strip()
+    if selected_overlay:
+        identity_paths.append(Path(selected_overlay).expanduser())
+
+    identity: dict[str, object] = {}
+    for path in identity_paths:
+        if not path.is_file():
+            continue
+        payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        if not isinstance(payload, dict):
+            raise ValueError(f"identity overlay must contain a mapping: {path}")
+        identity.update(payload)
+
+    raw_path = str(identity.get("platform_repo_checkout_path") or "").strip()
+    if not raw_path:
+        repo_name = str(identity.get("platform_repo_name") or "").strip()
+        raw_path = f"/srv/{repo_name}" if repo_name else DEFAULT_REMOTE_REPO_ROOT
+
+    resolved = resolve_group_var_path(raw_path, identity)
+    candidate = PurePosixPath(resolved)
+    if not candidate.is_absolute() or ".." in candidate.parts:
+        raise ValueError(f"managed restic repository path must be an absolute safe path: {resolved}")
+    return str(candidate)
+
+
+def resolve_runtime_credential_file(explicit_credential_file: str | None) -> str:
+    """Resolve the service credential path for the selected deployment identity."""
+
+    explicit = str(explicit_credential_file or "").strip()
+    if explicit:
+        candidate = PurePosixPath(explicit)
+        if not candidate.is_absolute() or ".." in candidate.parts:
+            raise ValueError(f"restic credential path must be an absolute safe path: {explicit}")
+        return str(candidate)
+
+    config_prefix = os.environ.get("PLATFORM_CONFIG_PREFIX", "").strip()
+    selected_overlay = os.environ.get("PLATFORM_IDENTITY_OVERLAY", "").strip()
+    if not config_prefix and selected_overlay:
+        overlay_path = Path(selected_overlay).expanduser()
+        if not overlay_path.is_file():
+            raise ValueError(f"selected identity overlay is missing: {overlay_path}")
+        payload = yaml.safe_load(overlay_path.read_text(encoding="utf-8")) or {}
+        if not isinstance(payload, dict):
+            raise ValueError(f"identity overlay must contain a mapping: {overlay_path}")
+        configured_prefix = str(payload.get("platform_config_prefix") or "").strip()
+        if configured_prefix and "{{" not in configured_prefix:
+            config_prefix = configured_prefix
+        if not config_prefix:
+            platform_domain = str(payload.get("platform_domain") or "").strip()
+            if platform_domain and "{{" not in platform_domain:
+                config_prefix = platform_domain.split(".", 1)[0]
+
+    if not config_prefix:
+        return DEFAULT_RUNTIME_CREDENTIAL_FILE
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*", config_prefix):
+        raise ValueError("platform credential configuration prefix contains unsupported characters")
+    return f"/run/{config_prefix}-systemd-credentials/restic-config-backup/runtime-config.json"
+
+
 def run_local_converge_restic(env: str) -> None:
     init_path = resolve_openbao_init_local_file()
     if not init_path.is_file():
         raise ValueError(f"OpenBao init payload is missing locally: {init_path}")
 
-    command = ["make", "converge-restic-config-backup", f"env={env}"]
+    # A parent live-apply can use scoped Ansible tags.  Do not let GNU make
+    # propagate those command-line overrides into this dependency converge:
+    # restic's credential bootstrap is deliberately untagged and must always
+    # run before the trigger checks the runtime credential file.
+    command = ["make", "converge-restic-config-backup", f"env={env}", "EXTRA_ARGS="]
     completed = subprocess.run(
         command,
         cwd=str(LOCAL_REPO_ROOT),
@@ -354,20 +459,22 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 0
 
+        credential_file = resolve_runtime_credential_file(args.credential_file)
         context = load_controller_context()
-        ensure_remote_runtime_support_files(context, repo_root=args.repo_root)
+        repo_root = resolve_remote_repo_root(args.repo_root)
+        ensure_remote_runtime_support_files(context, repo_root=repo_root)
         ensure_remote_runtime_credentials(
             context,
             env=args.env,
-            credential_file=args.credential_file,
+            credential_file=credential_file,
             refresh=args.live_apply_trigger and args.mode == "backup",
         )
         prefer_fallback_script = os.environ.get("RESTIC_USE_FALLBACK_SCRIPT") == "1"
         remote_command = build_remote_command(
             mode=args.mode,
             triggered_by=args.triggered_by,
-            repo_root=args.repo_root,
-            credential_file=args.credential_file,
+            repo_root=repo_root,
+            credential_file=credential_file,
             live_apply_trigger=args.live_apply_trigger,
             prefer_fallback_script=prefer_fallback_script,
         )
@@ -394,7 +501,7 @@ def main(argv: list[str] | None = None) -> int:
             synced_paths = sync_reported_receipt_artifacts(
                 context,
                 target="docker-runtime",
-                repo_root=args.repo_root,
+                repo_root=repo_root,
                 report=report,
             )
             if synced_paths:

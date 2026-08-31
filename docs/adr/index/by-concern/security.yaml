@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-29'
+generated: '2026-08-31'
 facet: concern
 concern: security
 total_adrs: 49
@@ -85,7 +85,7 @@ adrs:
     implemented_on: '2026-03-22'
   - adr: '0056'
     title: Keycloak For Operator And Agent SSO
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-03-22'
@@ -354,7 +354,7 @@ adrs:
     implemented_on: '2026-03-28'
   - adr: 0248
     title: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-03-28'
@@ -397,7 +397,7 @@ adrs:
     implemented_on: '2026-03-29'
   - adr: '0262'
     title: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-03-28'
@@ -583,7 +583,7 @@ adrs:
     path: docs/adr/0361-nomad-oidc-edge-publication.md
   - adr: '0361'
     title: Semaphore Keycloak OIDC Integration
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-07'
@@ -659,7 +659,7 @@ adrs:
     implemented_on: '2026-04-06'
   - adr: 0382
     title: Keycloak Sign-In Button Stuck Incident Postmortem
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-08'

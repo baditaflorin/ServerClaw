@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import tempfile
 from pathlib import Path
 
+import yaml
+
 from controller_automation_toolkit import emit_cli_error, repo_path
 from dependency_graph import load_dependency_graph, render_dependency_page
+from ops_portal.contextual_help import build_docs_page_help
 
 
 DEFAULT_OUTPUT = repo_path("docs", "site-generated", "architecture", "dependency-graph.md")
@@ -30,7 +34,26 @@ def build_parser() -> argparse.ArgumentParser:
 
 def render() -> str:
     graph = load_dependency_graph(validate_schema=True)
-    return render_dependency_page(graph)
+    target_path = Path("architecture", "dependency-graph.md")
+    content = render_dependency_page(graph)
+    content = re.sub(r"\A---\n.*?\n---\n+", "", content, count=1, flags=re.DOTALL)
+    content = re.sub(
+        r'\A!!! (?:note|warning|danger) "Sensitivity: [^"]+"\n(?: {4}.*\n)+\n*',
+        "",
+        content,
+        count=1,
+    )
+    metadata = {
+        "sensitivity": "INTERNAL",
+        "portal_display": "full",
+        "tags": ["architecture", "dependency-graph"],
+        "pagefind_section": "architecture",
+        "pagefind_audience": ["contributors", "operators"],
+        "contextual_help": build_docs_page_help(target_path=target_path, title="Dependency Graph"),
+    }
+    frontmatter = yaml.safe_dump(metadata, sort_keys=False, default_flow_style=False).strip()
+    notice = '!!! note "Sensitivity: INTERNAL"\n    This page is intended for authenticated operators and internal collaborators.\n'
+    return f"---\n{frontmatter}\n---\n\n{notice}\n{content.lstrip()}"
 
 
 def main(argv: list[str] | None = None) -> int:

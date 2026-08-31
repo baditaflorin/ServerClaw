@@ -53,6 +53,6 @@
       - --expected-service-name
       - directus
       - --expected-sso-host
-      - sso.{{ platform_domain }}
+      - id.{{ platform_domain }}
   register: directus_public_verify
   changed_when: false

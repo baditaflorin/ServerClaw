@@ -58,13 +58,13 @@ def load_tasks() -> list[dict]:
 def test_openfga_runtime_defaults_use_private_controller_url() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text(encoding="utf-8"))
 
-    assert defaults["openfga_image"] == "{{ container_image_catalog.images.openfga_runtime.ref }}"
+    assert "openfga_image" not in defaults
     assert "| urlencode" in defaults["openfga_datastore_uri"]
     assert defaults["openfga_controller_url"].startswith(
-        "http://{{ hostvars['proxmox-host'].management_tailscale_ipv4 }}"
+        "http://{{ hostvars[platform_topology_host].management_tailscale_ipv4 }}"
     )
     assert "openfga_host_proxy_port" in defaults["openfga_controller_url"]
-    assert defaults["openfga_preshared_key_local_file"].endswith("/.local/openfga/preshared-key.txt")
+    assert defaults["openfga_preshared_key_local_file"] == "{{ openfga_local_artifact_dir }}/preshared-key.txt"
 
 
 def test_openfga_runtime_bootstraps_openbao_env_and_migrations() -> None:
@@ -168,20 +168,16 @@ def test_openfga_runtime_bootstraps_openbao_env_and_migrations() -> None:
 def test_openfga_verify_task_checks_health_and_authenticated_api() -> None:
     tasks = yaml.safe_load(VERIFY_PATH.read_text(encoding="utf-8"))
 
-    health_task = next(
-        task for task in tasks if task.get("name") == "Verify OpenFGA responds on the local health endpoint"
-    )
+    health_task = next(task for task in tasks if task.get("name") == "Verify the OpenFGA runtime health endpoint")
     api_task = next(
         task for task in tasks if task.get("name") == "Verify the OpenFGA API enforces the repo-managed preshared key"
     )
-    assert_task = next(
-        task for task in tasks if task.get("name") == "Assert OpenFGA health and authenticated access are working"
-    )
+    assert_task = next(task for task in tasks if task.get("name") == "Assert OpenFGA authenticated access is working")
 
-    assert health_task["ansible.builtin.uri"]["url"] == "{{ openfga_local_url }}/healthz"
+    assert health_task["ansible.builtin.include_role"]["tasks_from"] == "verify_service_health"
+    assert health_task["vars"]["common_verify_health_url"] == "{{ openfga_local_url }}/healthz"
     assert api_task["ansible.builtin.uri"]["headers"]["Authorization"] == "Bearer {{ openfga_preshared_key }}"
-    assert "openfga_verify_health.status == 200" in assert_task["ansible.builtin.assert"]["that"]
-    assert any("SERVING" in clause for clause in assert_task["ansible.builtin.assert"]["that"])
+    assert assert_task["ansible.builtin.assert"]["that"] == ["openfga_verify_authenticated_api.status == 200"]
 
 
 def test_openfga_compose_template_uses_openbao_agent_and_runtime_env() -> None:
@@ -228,6 +224,6 @@ def test_openfga_playbook_bootstraps_serverclaw_authz_from_localhost() -> None:
         "openfga_bootstrap.rc != 0 or (openfga_bootstrap.stdout | length == 0) or "
         "(not (openfga_bootstrap.stdout | from_json).verification_passed)"
     )
-    assert bootstrap_play["vars"]["openfga_bootstrap_keycloak_url"] == (
-        "{{ hostvars['proxmox-host'].platform_service_topology.keycloak.urls.public }}"
+    assert bootstrap_play["vars"]["openfga_bootstrap_authentik_url"] == (
+        "{{ hostvars[platform_topology_host].platform_service_topology.authentik.urls.public }}"
     )

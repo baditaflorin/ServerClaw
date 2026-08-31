@@ -36,7 +36,7 @@ service:
     - ml-data
   notes: Label Studio runs on docker-runtime with a dedicated PostgreSQL database
     and repo-managed project catalog sync. Browser access is enforced by the shared
-    edge oauth2-proxy and Keycloak flow, while app-local admin and token auth remain
+    edge oauth2-proxy and Authentik flow, while app-local admin and token auth remain
     the current Community Edition-compatible recovery and automation path.
   environments:
     production:
@@ -94,10 +94,10 @@ dependency:
       description: The Label Studio runtime container and guest-local listener are
         hosted on docker-runtime.
     - from: label_studio
-      to: keycloak
+      to: authentik
       type: soft
       description: Browser access to annotate.example.com is gated by the shared oauth2-proxy
-        and Keycloak edge-auth flow, while app-local Label Studio tokens remain the
+        and Authentik edge-auth flow, while app-local Label Studio tokens remain the
         current automation path.
     - from: label_studio
       to: nginx_edge

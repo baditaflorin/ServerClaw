@@ -892,3 +892,7 @@
 - name: Reconcile the Authentik OAuth2 providers and applications
   ansible.builtin.import_tasks: oauth_clients.yml
   when: authentik_oauth_reconcile_enabled | bool
+
+- name: Reconcile Authentik groups and initial internal users
+  ansible.builtin.import_tasks: identities.yml
+  when: authentik_identity_reconcile_enabled | bool

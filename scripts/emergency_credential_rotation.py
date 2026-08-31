@@ -18,7 +18,7 @@ Usage:
     python scripts/emergency_credential_rotation.py --tier all --apply
 
     # Rotate a single secret by ID:
-    python scripts/emergency_credential_rotation.py --secret keycloak_grafana_client_secret --apply
+    python scripts/emergency_credential_rotation.py --secret authentik_grafana_client_secret --apply
 """
 
 from __future__ import annotations
@@ -58,7 +58,7 @@ TIER_DEFINITIONS = {
     "t2": {
         "label": "HIGH — privileged infrastructure credentials",
         "secret_id_prefixes": [
-            "keycloak_",
+            "authentik_",
             "openbao_",
             "bootstrap_ssh_",
             "control_plane_recovery_",
@@ -476,7 +476,7 @@ def main() -> None:
                 if len(parts) >= 2:
                     service = parts[0]
                     if service in (
-                        "keycloak",
+                        "authentik",
                         "openbao",
                         "semaphore",
                         "gitea",
@@ -501,11 +501,11 @@ def main() -> None:
             print("# Step 1: Reconverge PostgreSQL (propagates new DB passwords)")
             print("make converge-postgres-vm env=production")
             print()
-            print("# Step 2: Reconverge Keycloak (propagates new OIDC secrets)")
-            print("make converge-keycloak env=production")
+            print("# Step 2: Reconverge Authentik (propagates new OIDC secrets)")
+            print("make converge-authentik env=production")
             print()
             print("# Step 3: Reconverge each affected service")
-            for svc in sorted(rotated_services - {"keycloak", "step", "openbao"}):
+            for svc in sorted(rotated_services - {"authentik", "step", "openbao"}):
                 print(f"make converge-{svc.replace('_', '-')} env=production")
             print()
             print("# Step 4: Reconverge OpenBao (re-seeds rotated secrets)")

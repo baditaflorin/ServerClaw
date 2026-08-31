@@ -1,24 +1,19 @@
 {
   "schema_version": "1.0.0",
-  "recorded_at": "2026-04-21T11:12:30Z",
-  "recorded_on": "2026-04-21",
+  "recorded_at": "2026-08-31T20:02:03Z",
+  "recorded_on": "2026-08-31",
   "recorded_by": "codex",
   "repository": {
     "bucket": "restic-config-backup",
-    "endpoint": "http://10.200.3.3:9000"
+    "endpoint": "http://10.200.2.3:9000"
   },
   "summary": {
     "governed_sources": 5,
-    "protected": 2,
-    "uncovered": 2,
-    "inactive": 1,
-    "uncovered_sources": [
-      "receipts",
-      "controller_secret_manifest"
-    ],
-    "inactive_sources": [
-      "falco_overrides"
-    ]
+    "protected": 5,
+    "uncovered": 0,
+    "inactive": 0,
+    "uncovered_sources": [],
+    "inactive_sources": []
   },
   "sources": [
     {
@@ -27,7 +22,7 @@
       "paths": [
         "receipts"
       ],
-      "state": "uncovered",
+      "state": "protected",
       "expected_schedule": "every_6_hours",
       "freshness_minutes": 360,
       "freshness_policy": "interval",
@@ -35,10 +30,18 @@
         "keep_daily": 90,
         "keep_monthly": 12
       },
-      "latest_snapshot": null,
+      "latest_snapshot": {
+        "snapshot_id": "66b0fe69427e0c42b9ed67b99a12b2ce7bc2225efbd8ed68acf83856a6eeef9f",
+        "recorded_at": "2026-08-31T20:01:51Z",
+        "host": "docker-runtime",
+        "paths": [
+          "receipts"
+        ],
+        "files": 6
+      },
       "last_restore_verification": null,
       "reasons": [
-        "No new live-apply result was recorded for receipts."
+        "Latest snapshot is 0 minutes old and within the 390 minute freshness window."
       ]
     },
     {
@@ -56,13 +59,13 @@
         "keep_monthly": 6
       },
       "latest_snapshot": {
-        "snapshot_id": "860f7d11c55a726566816fb60c208b923c72dfc0a9ee2bdb19d36016dd555033",
-        "recorded_at": "2026-04-21T11:12:30Z",
+        "snapshot_id": "c943f847dba8f409e4514f4a55370126d7e8b9769d15fc3ea4565816731cb1b5",
+        "recorded_at": "2026-08-31T20:02:03Z",
         "host": "docker-runtime",
         "paths": [
           "config"
         ],
-        "files": 4
+        "files": 7
       },
       "last_restore_verification": null,
       "reasons": [
@@ -83,8 +86,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "a746390462ba4e3a77d3bcb80aafe1242e80705150996292fd2d066029f6bb96",
-        "recorded_at": "2026-04-21T11:12:30Z",
+        "snapshot_id": "fd6465d0a42668053d5be9726a341e2e57bd9baf9d0b2d78532209e888b4bf79",
+        "recorded_at": "2026-08-31T20:02:03Z",
         "host": "docker-runtime",
         "paths": [
           "versions/stack.yaml"
@@ -102,17 +105,25 @@
       "paths": [
         "config/controller-local-secrets.json"
       ],
-      "state": "uncovered",
+      "state": "protected",
       "expected_schedule": "daily",
       "freshness_minutes": 1440,
       "freshness_policy": "interval",
       "retention": {
         "keep_daily": 90
       },
-      "latest_snapshot": null,
+      "latest_snapshot": {
+        "snapshot_id": "0f5b2ed878e51505f20aaac46e5edbead5c81dd8158f4d89648a012fe9ca2cec",
+        "recorded_at": "2026-08-31T20:01:53Z",
+        "host": "docker-runtime",
+        "paths": [
+          "config/controller-local-secrets.json"
+        ],
+        "files": 1
+      },
       "last_restore_verification": null,
       "reasons": [
-        "No new live-apply result was recorded for controller_secret_manifest."
+        "Latest snapshot is 0 minutes old and within the 1470 minute freshness window."
       ]
     },
     {
@@ -121,17 +132,25 @@
       "paths": [
         "config/falco"
       ],
-      "state": "inactive",
+      "state": "protected",
       "expected_schedule": "successful_live_apply",
       "freshness_minutes": 1440,
       "freshness_policy": "event_driven",
       "retention": {
         "keep_daily": 30
       },
-      "latest_snapshot": null,
+      "latest_snapshot": {
+        "snapshot_id": "c34d0e7938394b0a174b6fa2e4c60b1f18fb28c78dd1c8d4b6340df6fc3b5e1a",
+        "recorded_at": "2026-08-31T20:02:03Z",
+        "host": "docker-runtime",
+        "paths": [
+          "config/falco"
+        ],
+        "files": 2
+      },
       "last_restore_verification": null,
       "reasons": [
-        "No live path currently exists for optional source falco_overrides backup path."
+        "Latest snapshot exists and this source is governed by the event-driven 'successful_live_apply' policy."
       ]
     }
   ]

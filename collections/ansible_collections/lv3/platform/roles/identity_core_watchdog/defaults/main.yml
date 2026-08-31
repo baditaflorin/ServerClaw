@@ -1,6 +1,6 @@
 ---
 # Purpose: Declare defaults for the identity-core health watchdog (ADR 0376).
-# Use case: Installs a systemd timer on runtime-control that probes Keycloak, Step-CA,
+# Use case: Installs a systemd timer on runtime-control that probes Authentik, Step-CA,
 #   OpenBao, and API Gateway every 15 seconds and auto-restarts on failure.
 # Inputs:
 #   - identity_watchdog_services (list): Services to monitor with health endpoints and compose project info.
@@ -14,7 +14,7 @@
 # Dependencies:
 #   - ADR 0376: Identity core VM isolation and watchdog.
 #   - ADR 0226: Systemd as host-resident supervisor.
-# Related ADRs: 0376, 0226, 0056, 0101
+# Related ADRs: 0376, 0226, 0491, 0101
 
 identity_watchdog_root: /var/lib/{{ platform_identity.config_prefix }}-identity-watchdog
 identity_watchdog_status_file: "{{ identity_watchdog_root }}/status.json"
@@ -48,11 +48,11 @@ identity_watchdog_ntfy_title: "LV3 Identity Watchdog"
 #   health_method: curl flags (e.g. -k for TLS ignore)
 #   expected_status: HTTP status code(s) that mean healthy
 identity_watchdog_services:
-  - name: keycloak
-    compose_dir: /opt/keycloak
-    compose_service: keycloak
+  - name: authentik
+    compose_dir: /opt/authentik
+    compose_service: authentik
     restart_args: ""
-    health_url: "http://127.0.0.1:18080/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration"
+    health_url: "http://127.0.0.1:9010/-/health/ready/"
     health_method: ""
     expected_status: "200"
   - name: step-ca

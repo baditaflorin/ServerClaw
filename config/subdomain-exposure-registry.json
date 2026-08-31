@@ -26,10 +26,7 @@
       "service_exclusions": [
         "glitchtip"
       ],
-      "feature_flags": {
-        "keycloak_glitchtip_enabled": false,
-        "keycloak_mail_platform_submission_recovery_enabled": false
-      },
+      "feature_flags": null,
       "overrides_file": "playbooks/vars/fork-overrides.yml"
     }
   },
@@ -175,7 +172,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "analytics.example.org",
@@ -257,7 +254,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "The dashboard is protected by the shared edge oauth2-proxy and Keycloak flow while /js/, /api/event, and health endpoints stay public for tracker delivery and probe traffic."
+      "notes": "The dashboard is protected by the shared edge oauth2-proxy and Authentik flow while /js/, /api/event, and health endpoints stay public for tracker delivery and probe traffic."
     },
     {
       "fqdn": "annotate.example.org",
@@ -329,7 +326,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Keycloak boundary; repo-managed Label Studio tokens remain the current app-local automation path."
+      "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Authentik boundary; repo-managed Label Studio tokens remain the current app-local automation path."
     },
     {
       "fqdn": "api.example.org",
@@ -546,7 +543,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Keycloak OIDC client."
+      "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Authentik OIDC client."
     },
     {
       "fqdn": "billing.example.org",
@@ -838,7 +835,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "chat.example.org",
@@ -910,7 +907,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "LibreChat is published through the shared NGINX edge and carries the interactive ServerClaw chat surface plus its in-app Keycloak OIDC flow."
+      "notes": "LibreChat is published through the shared NGINX edge and carries the interactive ServerClaw chat surface plus its in-app Authentik OIDC flow."
     },
     {
       "fqdn": "ci.example.org",
@@ -1216,7 +1213,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "The shared NGINX edge publishes data.example.org directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
+      "notes": "The shared NGINX edge publishes data.example.org directly to Directus. Browser users authenticate upstream through Authentik and API consumers authenticate with Directus-issued bearer tokens."
     },
     {
       "fqdn": "database.example.org",
@@ -1425,7 +1422,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "draw.example.org",
@@ -1574,7 +1571,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge while GlitchTip itself delegates browser sign-in to the repo-managed Keycloak OIDC flow; health and DSN ingestion remain intentionally reachable for probes and SDK traffic."
+      "notes": "Published through the shared NGINX edge while GlitchTip itself delegates browser sign-in to the repo-managed Authentik OIDC flow; health and DSN ingestion remain intentionally reachable for probes and SDK traffic."
     },
     {
       "fqdn": "files.example.org",
@@ -1714,7 +1711,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Keycloak."
+      "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Authentik."
     },
     {
       "fqdn": "git.example.org",
@@ -2001,7 +1998,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Keycloak OIDC client."
+      "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Authentik OIDC client."
     },
     {
       "fqdn": "headscale.example.org",
@@ -2143,7 +2140,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "id.example.org",
@@ -2214,7 +2211,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Deployed at the dedicated id.example.org hostname, separate from sso.example.org, so Keycloak's edge publication is completely unaffected during the parallel rollout (ADR 0491)."
+      "notes": "Deployed at the dedicated id.example.org hostname as the platform's Authentik identity surface (ADR 0491)."
     },
     {
       "fqdn": "langfuse.example.org",
@@ -2434,7 +2431,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "mail.example.org",
@@ -2812,7 +2809,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
+      "notes": "The editor is protected by the shared oauth2-proxy and Authentik edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
     },
     {
       "fqdn": "nginx.example.org",
@@ -3036,7 +3033,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Interactive runtime is live behind oauth2-proxy and Keycloak on the shared NGINX edge."
+      "notes": "Interactive runtime is live behind oauth2-proxy and Authentik on the shared NGINX edge."
     },
     {
       "fqdn": "ops.staging.example.org",
@@ -3246,7 +3243,7 @@
           "slug": "proxmox",
           "title": "Proxmox Administration",
           "description": "Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.",
-          "action_url": "https://{{ management_tailscale_ipv4 }}:8006/",
+          "action_url": "https://100.120.234.7:8006/",
           "action_label": "Open Private Proxmox UI",
           "meta": "Use Tailscale host access for routine Proxmox administration."
         },
@@ -3406,7 +3403,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Repo intake webhook service. Published through the shared NGINX edge and gated behind Keycloak oauth2-proxy."
+      "notes": "Repo intake webhook service. Published through the shared NGINX edge and gated behind Authentik oauth2-proxy."
     },
     {
       "fqdn": "repowise.example.org",
@@ -3684,144 +3681,6 @@
       "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime."
     },
     {
-      "fqdn": "sso.example.org",
-      "service_id": "keycloak",
-      "environment": "production",
-      "status": "active",
-      "owner_adr": "0056",
-      "publication": {
-        "delivery_model": "shared-edge",
-        "access_model": "upstream-auth",
-        "audience": "operator"
-      },
-      "assertions": {
-        "publication_class": "edge-published",
-        "environment": "production",
-        "audience": "operator",
-        "auth_requirement": "upstream_auth",
-        "route_target": {
-          "service_id": "keycloak",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}",
-          "target_port": 443
-        }
-      },
-      "evidence_plan": {
-        "dns_resolution": true,
-        "dns_zone": true,
-        "http_auth": false,
-        "private_route": false,
-        "tls": true
-      },
-      "adapter": {
-        "dns": {
-          "target": "203.0.113.1",
-          "target_port": 443,
-          "record_type": "A",
-          "records": [
-            {
-              "type": "A",
-              "value": "203.0.113.1"
-            }
-          ],
-          "managed": true,
-          "visibility": "public",
-          "zone_expected": true
-        },
-        "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
-        },
-        "edge_auth": {
-          "provider": "none",
-          "unauthenticated_paths": [],
-          "unauthenticated_prefix_paths": []
-        },
-        "repo_route_service_id": "keycloak",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.keycloak_internal_http_port }}"
-        },
-        "tls": {
-          "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
-          "auto_renew": true
-        }
-      },
-      "live_tracking_expected": true,
-      "notes": null
-    },
-    {
-      "fqdn": "sso.staging.example.org",
-      "service_id": "keycloak",
-      "environment": "staging",
-      "status": "planned",
-      "owner_adr": "0072",
-      "publication": {
-        "delivery_model": "shared-edge",
-        "access_model": "upstream-auth",
-        "audience": "operator"
-      },
-      "assertions": {
-        "publication_class": "edge-published",
-        "environment": "staging",
-        "audience": "operator",
-        "auth_requirement": "upstream_auth",
-        "route_target": {
-          "service_id": "keycloak",
-          "kind": "dns-only",
-          "source": "dns-only",
-          "target": "203.0.113.1",
-          "target_port": 443
-        }
-      },
-      "evidence_plan": {
-        "dns_resolution": true,
-        "dns_zone": true,
-        "http_auth": false,
-        "private_route": false,
-        "tls": false
-      },
-      "adapter": {
-        "dns": {
-          "target": "203.0.113.1",
-          "target_port": 443,
-          "record_type": "A",
-          "records": [
-            {
-              "type": "A",
-              "value": "203.0.113.1"
-            }
-          ],
-          "managed": true,
-          "visibility": "public",
-          "zone_expected": true
-        },
-        "routing": {
-          "mode": "dns-only",
-          "source": "dns-only",
-          "kind": null
-        },
-        "edge_auth": {
-          "provider": "none",
-          "unauthenticated_paths": [],
-          "unauthenticated_prefix_paths": []
-        },
-        "repo_route_service_id": null,
-        "repo_route_metadata": {},
-        "tls": {
-          "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
-          "auto_renew": true
-        }
-      },
-      "live_tracking_expected": false,
-      "notes": "Planned staging identity hostname on the shared NGINX edge."
-    },
-    {
       "fqdn": "status.example.org",
       "service_id": "status_page",
       "environment": "production",
@@ -3963,7 +3822,7 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "uptime.example.org",
@@ -4240,16 +4099,16 @@
         }
       },
       "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge while Outline itself delegates browser authentication to the repo-managed Keycloak OIDC client."
+      "notes": "Published through the shared NGINX edge while Outline itself delegates browser authentication to the repo-managed Authentik OIDC client."
     }
   ],
   "summary": {
-    "catalog_total": 58,
-    "active_total": 54,
-    "active_public_total": 48,
+    "catalog_total": 56,
+    "active_total": 53,
+    "active_public_total": 47,
     "active_private_total": 6,
-    "planned_total": 4,
-    "shared_edge_total": 47,
+    "planned_total": 3,
+    "shared_edge_total": 45,
     "platform_sso_total": 18
   }
 }

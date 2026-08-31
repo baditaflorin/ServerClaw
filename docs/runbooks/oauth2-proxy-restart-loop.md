@@ -7,7 +7,7 @@ high
 ## Symptoms
 
 - Users intermittently hit `502 Bad Gateway` or `503` on any `*.example.com` subdomain
-- Login redirects to `sso.example.com` briefly fail then succeed on retry
+- Login redirects to `id.example.com` briefly fail then succeed on retry
 - `journalctl -u lv3-ops-portal-oauth2-proxy-watchdog.service` shows repeated:
   ```
   WARN  oauth2-proxy probe failed (status=000, failures=1/2)
@@ -78,10 +78,10 @@ ansible-playbook \
 |-----------------|---------|
 | `status=000, failures=N` but `ss -tlnp \| grep 4180` shows port open | Script bug — `-f` flag |
 | `status=000` and port 4180 not listening | oauth2-proxy crashed — real failure |
-| `status=502` or `status=500` | Upstream Keycloak issue, not proxy |
+| `status=502` or `status=500` | Upstream identity-provider or edge issue, not proxy |
 
 ## Related
 
-- `keycloak-session-invalidation.md` — 500 errors users see after a Keycloak restart
-- `identity-core-watchdog.md` — the watchdog that monitors Keycloak and step-ca
+- `authentik-session-invalidation.md` — stale authorization-code recovery
+- `identity-core-watchdog.md` — the watchdog that monitors Authentik and step-ca
 - ADR 0376: `docs/adr/0376-identity-core-vm-isolation-and-watchdog.md`

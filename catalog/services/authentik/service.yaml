@@ -2,7 +2,7 @@ schema_version: 1.0.0
 service:
   id: authentik
   name: Authentik
-  description: Open-source IAM/SSO broker, agentic-first, replaces Keycloak (ADR 0491)
+  description: Open-source IAM/SSO broker for platform operators, services, and agentic workloads.
   category: access
   lifecycle_status: active
   vm: runtime-control
@@ -17,15 +17,18 @@ service:
     - authentik_outline_client_secret
   adr: 0491
   runbook: docs/runbooks/configure-authentik.md
+  runtime_pool: runtime-control
+  deployment_surface: playbooks/authentik.yml
+  restart_domain: runtime-control-identity
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+  mobility_tier: anchor
   tags:
     - identity
     - oidc
     - saml
     - sso
-    - keycloak-replacement
-  notes: Replaces Keycloak per ADR 0491. Deployed at a new subdomain (id.example.com,
-    not sso.example.com) so Keycloak remains fully functional throughout the parallel
-    rollout and staged client migration.
+  notes: The platform's primary IAM/SSO broker, published at id.example.com and
+    reconciled from the repository-owned OAuth client and identity manifests.
   environments:
     production:
       status: active
@@ -42,7 +45,7 @@ completeness:
   requires_compose_secrets: true
   dashboard_file: config/grafana/dashboards/authentik.json
   alert_rule_file: config/alertmanager/rules/authentik.yml
-  keycloak_client_generated: false
+  authentik_client_generated: false
   suppressed_checks: {}
 redundancy:
   tier: R1
@@ -128,7 +131,7 @@ health:
       name: Authentik OIDC Discovery
       type: http
       url: https://id.example.com/-/health/ready/
-      description: Authentik SSO broker published through the NGINX edge VM (ADR 0491, Phase 1 -- deployed in parallel with Keycloak).
+      description: Authentik SSO broker published through the NGINX edge VM.
       interval: 60
       retryInterval: 60
       maxretries: 0

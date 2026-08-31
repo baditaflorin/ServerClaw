@@ -48,13 +48,13 @@
       - vikunja_controller_url | length > 0
       - vikunja_public_base_url | length > 0
       - vikunja_database_password_local_file | length > 0
-      - vikunja_keycloak_client_secret_local_file | length > 0
+      - vikunja_authentik_client_secret_local_file | length > 0
       - vikunja_event_nats_password_local_file | length > 0
       - vikunja_image | length > 0
       - vikunja_bridge_image | length > 0
     fail_msg: >-
       vikunja_runtime requires runtime paths, pinned image refs, database auth,
-      the Keycloak OIDC client secret, and the NATS publish credential.
+      the Authentik OIDC client secret, and the NATS publish credential.
 
 - name: Check Vikunja prerequisites on the control machine
   ansible.builtin.include_role:
@@ -65,9 +65,9 @@
       - path: "{{ vikunja_database_password_local_file }}"
         description: "Vikunja database password"
         prerequisite: "Converge vikunja_postgres before deploying Vikunja"
-      - path: "{{ vikunja_keycloak_client_secret_local_file }}"
-        description: "Vikunja Keycloak client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying Vikunja"
+      - path: "{{ vikunja_authentik_client_secret_local_file }}"
+        description: "Vikunja Authentik client secret"
+        prerequisite: "Converge the Authentik runtime before deploying Vikunja"
       - path: "{{ vikunja_event_nats_password_local_file }}"
         description: "Vikunja NATS publish password"
         prerequisite: "Converge the NATS runtime before deploying Vikunja"
@@ -141,12 +141,12 @@
     vikunja_automation_password: "{{ vikunja_secret_reads.results[2].content | b64decode | trim }}"
     vikunja_operator_shadow_password: "{{ vikunja_secret_reads.results[3].content | b64decode | trim }}"
     vikunja_database_password: "{{ lookup('ansible.builtin.file', vikunja_database_password_local_file) | trim }}"
-    vikunja_keycloak_client_secret: "{{ lookup('ansible.builtin.file', vikunja_keycloak_client_secret_local_file) | trim }}"
+    vikunja_authentik_client_secret: "{{ lookup('ansible.builtin.file', vikunja_authentik_client_secret_local_file) | trim }}"
     vikunja_event_nats_password: "{{ lookup('ansible.builtin.file', vikunja_event_nats_password_local_file) | trim }}"
     vikunja_runtime_secret_payload:
       VIKUNJA_SERVICE_SECRET: "{{ vikunja_secret_reads.results[0].content | b64decode | trim }}"
       VIKUNJA_DATABASE_PASSWORD: "{{ lookup('ansible.builtin.file', vikunja_database_password_local_file) | trim }}"
-      VIKUNJA_AUTH_OPENID_PROVIDERS_LV3_CLIENTSECRET: "{{ lookup('ansible.builtin.file', vikunja_keycloak_client_secret_local_file) | trim }}"
+      VIKUNJA_AUTH_OPENID_PROVIDERS_LV3_CLIENTSECRET: "{{ lookup('ansible.builtin.file', vikunja_authentik_client_secret_local_file) | trim }}"
       VIKUNJA_WEBHOOK_SECRET: "{{ vikunja_secret_reads.results[1].content | b64decode | trim }}"
       VIKUNJA_EVENT_NATS_PASSWORD: "{{ lookup('ansible.builtin.file', vikunja_event_nats_password_local_file) | trim }}"
   no_log: true

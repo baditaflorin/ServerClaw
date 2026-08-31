@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from contextlib import contextmanager
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = REPO_ROOT / "scripts" / "atlas_schema.py"
@@ -30,7 +32,8 @@ def test_validate_catalog_accepts_repo_catalog() -> None:
     atlas_schema.validate_catalog(catalog, repo_root=REPO_ROOT)
 
     assert catalog["schema_version"] == "1.0.0"
-    assert len(catalog["databases"]) >= 20
+    # Keycloak was retired; the catalog still covers the remaining fleet.
+    assert len(catalog["databases"]) >= 19
     assert catalog["openbao"]["database_role"] == "postgres-atlas-readonly"
 
 
@@ -83,6 +86,20 @@ def test_diff_preview_is_bounded() -> None:
     assert preview[0].startswith("--- windmill-snapshot")
     assert preview[-1] == "... diff truncated ..."
     assert len(preview) == 201
+
+
+def test_diff_preview_skips_expensive_large_schema_diff(monkeypatch: pytest.MonkeyPatch) -> None:
+    atlas_schema = load_module()
+
+    def fail_if_called(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("large schema previews must not construct a full unified diff")
+
+    monkeypatch.setattr(atlas_schema.difflib, "unified_diff", fail_if_called)
+
+    preview = atlas_schema.diff_preview("a" * 40_000, "b" * 40_000, label="windmill")
+
+    assert preview[0].startswith("... diff preview omitted")
+    assert "first difference near line 1" in preview[1]
 
 
 def test_normalize_snapshot_strips_trailing_whitespace_per_line() -> None:
@@ -372,6 +389,129 @@ def test_run_drift_does_not_create_receipt_dir_when_schema_is_clean(monkeypatch,
     assert payload["status"] == "clean"
     assert payload["receipt_paths"] == []
     assert payload["receipt_errors"] == []
+
+
+def test_run_drift_reports_unprovisioned_catalog_databases_as_degraded(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    atlas_schema = load_module()
+    repo_root = tmp_path / "repo"
+    snapshot_dir = repo_root / "config" / "atlas"
+    snapshot_dir.mkdir(parents=True, exist_ok=True)
+    (snapshot_dir / "windmill.hcl").write_text('table "users" {}\n', encoding="utf-8")
+    (snapshot_dir / "langfuse.hcl").write_text('table "traces" {}\n', encoding="utf-8")
+    catalog = {
+        "schema_version": "1.0.0",
+        "atlas_image_ref": "docker.io/arigaio/atlas:test",
+        "dev_postgres_image": "docker.io/library/postgres:16",
+        "runtime": {
+            "openbao_guest": "docker-runtime",
+            "openbao_url": "http://127.0.0.1:8201",
+            "postgres_guest": "postgres",
+            "postgres_port": 5432,
+        },
+        "openbao": {
+            "approle_secret_id": "openbao_atlas_approle",
+            "database_role": "postgres-atlas-readonly",
+        },
+        "notifications": {
+            "nats_subject": "platform.db.schema_drift",
+            "ntfy": {
+                "url": "http://10.10.10.20:2586/platform.db.warn",
+                "username": "alertmanager",
+                "password_secret_id": "ntfy_alertmanager_password",
+            },
+        },
+        "receipts": {"drift_dir": "receipts/atlas-drift"},
+        "lint_targets": [
+            {
+                "id": "platform-control-plane",
+                "path": "config/atlas",
+                "latest": 1,
+                "triggers": ["config/atlas/"],
+                "dev_database": "atlas_lint",
+            }
+        ],
+        "databases": [
+            {
+                "id": "windmill",
+                "database": "windmill",
+                "snapshot_path": "config/atlas/windmill.hcl",
+            },
+            {
+                "id": "langfuse",
+                "database": "langfuse",
+                "snapshot_path": "config/atlas/langfuse.hcl",
+            },
+        ],
+    }
+
+    @contextmanager
+    def fake_openbao_url(_catalog, _context):
+        yield "http://10.10.10.20:8201"
+
+    @contextmanager
+    def fake_postgres_endpoint(_catalog, _context):
+        yield "10.10.10.50", 5432
+
+    monkeypatch.setattr(atlas_schema, "load_catalog", lambda _path: catalog)
+    monkeypatch.setattr(atlas_schema, "validate_catalog", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        atlas_schema,
+        "load_docker_sdk",
+        lambda: type("Docker", (), {"from_env": staticmethod(lambda: object())}),
+    )
+    monkeypatch.setattr(atlas_schema, "load_controller_context", lambda: {"guests": {}})
+    monkeypatch.setattr(atlas_schema, "resolve_openbao_url", fake_openbao_url)
+    monkeypatch.setattr(atlas_schema, "resolve_postgres_endpoint", fake_postgres_endpoint)
+    monkeypatch.setattr(atlas_schema, "openbao_login", lambda *_args, **_kwargs: "token")
+    monkeypatch.setattr(
+        atlas_schema,
+        "request_dynamic_credentials",
+        lambda *_args, **_kwargs: {"username": "atlas", "password": "secret"},
+    )
+
+    def inspect(_client, *, atlas_image_ref, database_url):
+        if "/langfuse?" in database_url:
+            raise RuntimeError('Atlas command failed: pq: database "langfuse" does not exist')
+        return 'table "users" {}\n'
+
+    monkeypatch.setattr(atlas_schema, "inspect_live_schema", inspect)
+
+    exit_code, payload = atlas_schema.run_drift(
+        repo_root=repo_root,
+        catalog_path=repo_root / "config" / "atlas" / "catalog.json",
+        write_receipts=False,
+        publish_nats=False,
+        publish_ntfy=False,
+    )
+
+    assert exit_code == 0
+    assert payload["status"] == "degraded"
+    assert payload["drift_count"] == 0
+    assert payload["checked_databases"][0]["database"] == "windmill"
+    assert payload["unavailable_databases"] == [
+        {
+            "database_id": "langfuse",
+            "database": "langfuse",
+            "snapshot_path": "config/atlas/langfuse.hcl",
+            "reason": "database_not_provisioned",
+        }
+    ]
+
+
+def test_is_missing_database_error_is_narrow() -> None:
+    atlas_schema = load_module()
+
+    assert atlas_schema.is_missing_database_error(
+        RuntimeError('pq: database "langfuse" does not exist'),
+        "langfuse",
+    )
+    assert not atlas_schema.is_missing_database_error(
+        RuntimeError('pq: password authentication failed for user "atlas"'),
+        "langfuse",
+    )
 
 
 def test_openbao_login_prefers_runtime_env_approle_json(monkeypatch) -> None:
@@ -706,11 +846,32 @@ def test_lint_target_passes_latest_scope_to_atlas(monkeypatch) -> None:
             "--dir",
             "file:///workspace/migrations",
             "--dev-url",
-            "postgres://postgres:postgres@host.docker.internal:57004/atlas_lint?sslmode=disable",
+            "postgres://postgres:postgres@host.docker.internal:57004/atlas_lint?sslmode=disable&connect_timeout=8",
             "--latest",
             "1",
         ]
     ]
+
+
+def test_operation_timeout_seconds_uses_a_valid_runtime_override(monkeypatch) -> None:
+    atlas_schema = load_module()
+
+    monkeypatch.setenv("LV3_ATLAS_OPERATION_TIMEOUT_SECONDS", "8")
+
+    assert atlas_schema.operation_timeout_seconds() == 8
+
+
+def test_operation_timeout_seconds_rejects_an_out_of_range_override(monkeypatch) -> None:
+    atlas_schema = load_module()
+
+    monkeypatch.setenv("LV3_ATLAS_OPERATION_TIMEOUT_SECONDS", "121")
+
+    try:
+        atlas_schema.operation_timeout_seconds()
+    except ValueError as exc:
+        assert "between 1 and 120" in str(exc)
+    else:
+        raise AssertionError("an out-of-range Atlas operation timeout must fail")
 
 
 def test_run_atlas_falls_back_to_exception_class_names_when_docker_errors_is_missing(

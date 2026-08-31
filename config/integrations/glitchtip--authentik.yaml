@@ -27,8 +27,6 @@ connection:
 secrets:
   - path: .local/authentik/glitchtip-client-secret.txt
     purpose: selected_oidc_client_secret
-  - path: .local/keycloak/glitchtip-client-secret.txt
-    purpose: keycloak_per_client_rollback
 
 health_check:
   endpoint: "{{ glitchtip_oidc_discovery_url }}"
@@ -42,16 +40,9 @@ pre_flight:
     callback_url: "https://errors.{{ platform_domain }}/accounts/oidc/authentik/login/callback/"
   - check: glitchtip_social_app_unique
     provider_id: authentik
-  - check: keycloak_rollback_secret_preserved
-    path: .local/keycloak/glitchtip-client-secret.txt
-  - check: keycloak_rollback_metadata_reconciled
-    issuer_url_var: keycloak_oidc_issuer_url
-    provider_id: keycloak
 
 post_deployment:
   - check: allauth_provider_redirect
     script: scripts/glitchtip_oidc_smoke.py
-  - check: frontend_settings_advertise_selected_and_rollback_providers
+  - check: frontend_settings_advertise_authentik_provider
     endpoint: /api/settings/
-  - check: keycloak_remains_available
-    reason: per-client rollback during ADR 0491 migration

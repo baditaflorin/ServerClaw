@@ -1,13 +1,15 @@
 ---
 # Purpose: Default inputs for the Nomad OIDC auth method configuration role.
-# Use case: Wires Keycloak SSO into Nomad's native OIDC auth, creating policies, roles, and binding rules.
+# Use case: Wires Authentik SSO into Nomad's native OIDC auth, creating policies, roles, and binding rules.
 # Dependencies: ADR 0232, ADR 0361.
 nomad_oidc_auth_server_url: https://127.0.0.1:4646
 nomad_oidc_auth_ca_cert_file: "/etc/{{ platform_identity.unix_prefix }}/nomad/tls/nomad-agent-ca.pem"
 nomad_oidc_auth_bootstrap_token_remote_file: "/etc/{{ platform_identity.unix_prefix }}/nomad/bootstrap-management.token"
-nomad_oidc_auth_keycloak_client_id: nomad
-nomad_oidc_auth_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/nomad-client-secret.txt"
-nomad_oidc_auth_oidc_discovery_url: "{{ keycloak_oidc_issuer_url }}"
+nomad_oidc_auth_authentik_client_id: nomad
+nomad_oidc_auth_authentik_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/nomad-client-secret.txt"
+nomad_oidc_auth_authentik_provider_slug: nomad
+nomad_oidc_auth_oidc_discovery_url: >-
+  {{ authentik_oidc_provider_base_url }}/{{ nomad_oidc_auth_authentik_provider_slug }}/.well-known/openid-configuration
 nomad_oidc_auth_allowed_redirect_uris:
   - https://scheduler.{{ platform_domain }}/ui/settings/tokens
   - http://localhost:4649/oidc/callback
@@ -16,5 +18,11 @@ nomad_oidc_auth_admin_policy_name: platform-admin
 nomad_oidc_auth_reader_policy_name: platform-reader
 nomad_oidc_auth_admin_role_name: platform-admin
 nomad_oidc_auth_reader_role_name: platform-reader
-nomad_oidc_auth_method_name: keycloak
+nomad_oidc_auth_method_name: authentik
+# The Authentik method is staged first. Production convergence may keep the
+# legacy method until an interactive OIDC login has been verified, then remove
+# only these explicit legacy names with nomad_oidc_auth_retire_legacy_methods.
+nomad_oidc_auth_retired_method_names:
+  - keycloak
+nomad_oidc_auth_retire_legacy_methods: true
 nomad_oidc_auth_max_token_ttl: 8h0m0s

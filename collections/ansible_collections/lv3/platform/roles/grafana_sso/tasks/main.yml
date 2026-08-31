@@ -4,10 +4,12 @@
     that:
       - grafana_sso_client_id | length > 0
       - grafana_sso_client_secret | length > 0
-      - grafana_sso_realm_name | length > 0
+      - grafana_sso_oidc_issuer_url | length > 0
+      - grafana_sso_oidc_authorization_url | length > 0
+      - grafana_sso_oidc_token_url | length > 0
+      - grafana_sso_oidc_userinfo_url | length > 0
       - grafana_sso_service_topology.public_hostname | length > 0
-      - grafana_sso_keycloak_service_topology.public_hostname | length > 0
-    fail_msg: "grafana_sso requires a client id, client secret, realm, and public hostnames."
+    fail_msg: "grafana_sso requires a client id, client secret, Authentik OIDC endpoints, and a public hostname."
 
 - name: Ensure Grafana knows its public root URL
   community.general.ini_file:
@@ -29,7 +31,7 @@
     - option: enabled
       value: "true"
     - option: name
-      value: Keycloak
+      value: Authentik
     - option: allow_sign_up
       value: "true"
     - option: client_id
@@ -43,13 +45,13 @@
     - option: login_attribute_path
       value: preferred_username
     - option: name_attribute_path
-      value: full_name
+      value: name
     - option: auth_url
-      value: "https://{{ grafana_sso_keycloak_service_topology.public_hostname }}/realms/{{ grafana_sso_realm_name }}/protocol/openid-connect/auth"
+      value: "{{ grafana_sso_oidc_authorization_url }}"
     - option: token_url
-      value: "https://{{ grafana_sso_keycloak_service_topology.public_hostname }}/realms/{{ grafana_sso_realm_name }}/protocol/openid-connect/token"
+      value: "{{ grafana_sso_oidc_token_url }}"
     - option: api_url
-      value: "https://{{ grafana_sso_keycloak_service_topology.public_hostname }}/realms/{{ grafana_sso_realm_name }}/protocol/openid-connect/userinfo"
+      value: "{{ grafana_sso_oidc_userinfo_url }}"
     - option: role_attribute_path
       value: "contains(groups[*], 'grafana-admins') && 'Admin' || contains(groups[*], 'grafana-viewers') && 'Viewer' || 'Viewer'"
     - option: groups_attribute_path
@@ -77,7 +79,7 @@
   until: grafana_sso_login_page.status == 200
   changed_when: false
 
-- name: Verify Grafana redirects the OAuth login to Keycloak
+- name: Verify Grafana redirects the OAuth login to Authentik
   ansible.builtin.uri:
     url: http://127.0.0.1:3000/login/generic_oauth
     method: GET
@@ -86,11 +88,10 @@
   register: grafana_sso_redirect
   changed_when: false
 
-- name: Assert the Grafana OAuth redirect is wired to Keycloak
+- name: Assert the Grafana OAuth redirect is wired to Authentik
   ansible.builtin.assert:
     that:
       - >-
-        ('https://' ~ grafana_sso_keycloak_service_topology.public_hostname ~ '/realms/' ~ grafana_sso_realm_name ~ '/protocol/openid-connect/auth')
-        in grafana_sso_redirect.location
+        grafana_sso_oidc_authorization_url in grafana_sso_redirect.location
       - ('client_id=' ~ grafana_sso_client_id) in grafana_sso_redirect.location
-    fail_msg: "Grafana is not redirecting the generic OAuth login path to the expected Keycloak client."
+    fail_msg: "Grafana is not redirecting the generic OAuth login path to the expected Authentik client."

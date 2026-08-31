@@ -18,7 +18,7 @@
 #
 # Dependencies:
 #   - ADR 0201: Harbor with CVE scanning is the service being deployed.
-#   - Requires: runtime-control, nginx, and Keycloak on runtime-control to be reachable.
+#   - Requires: runtime-control, nginx, and Authentik on runtime-control to be reachable.
 #   - Role: harbor_runtime — installs Harbor, bootstraps local runtime secrets, and verifies core services.
 #   - Role: nginx_edge_publication — renders the public reverse-proxy publication for registry.{{ platform_domain }}.
 #

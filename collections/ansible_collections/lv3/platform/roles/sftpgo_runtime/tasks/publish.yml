@@ -146,13 +146,13 @@
   register: sftpgo_oidc_redirect
   changed_when: false
 
-- name: Assert the SFTPGo admin OIDC redirect points to Keycloak
+- name: Assert the SFTPGo admin OIDC redirect points to Authentik
   ansible.builtin.assert:
     that:
       - sftpgo_oidc_redirect.location is defined
-      - hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname in sftpgo_oidc_redirect.location
-      - "'/protocol/openid-connect/auth' in sftpgo_oidc_redirect.location"
-    fail_msg: "SFTPGo admin OIDC login did not redirect to the expected Keycloak authorize endpoint."
+      - hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname in sftpgo_oidc_redirect.location
+      - "'/application/o/authorize/' in sftpgo_oidc_redirect.location"
+    fail_msg: "SFTPGo admin OIDC login did not redirect to the expected Authentik authorize endpoint."
 
 - name: Verify the public SFTPGo WebDAV smoke transfer
   ansible.builtin.command:

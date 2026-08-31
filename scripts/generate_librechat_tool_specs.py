@@ -78,7 +78,7 @@ TOOL_PACKS = {
     },
     "accounts": {
         "title": "ServerClaw Accounts — User Provisioning",
-        "description": "Provision and deprovision platform SSO accounts via Keycloak. A single account grants access to 17+ services. Supports optional expiry for temporary accounts (ADR 0411).",
+        "description": "Provision and deprovision platform SSO accounts via Authentik. A single account grants access to 17+ services. Supports optional expiry for temporary accounts (ADR 0411).",
         "tools": [
             "provision-account",
             "deprovision-account",

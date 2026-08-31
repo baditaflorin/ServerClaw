@@ -1,6 +1,6 @@
 # ADR 0317: Keycloak Direct-API Operator Provisioning via SSH Proxy
 
-- Status: Accepted
+- Status: Deprecated (see service removal ADR — service removed from platform)
 - Implementation Status: Implemented
 - Date: 2026-04-01
 - Implemented In Repo Version: 0.177.137

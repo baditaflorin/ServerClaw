@@ -77,6 +77,6 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetz
 
 ## Notes
 
-- Flagsmith Community Edition is published behind the shared edge oauth2-proxy and Keycloak boundary; this workflow does not rely on a Flagsmith-local OIDC client.
+- Flagsmith Community Edition is published behind the shared edge oauth2-proxy and Authentik boundary; this workflow does not rely on a Flagsmith-local OIDC client.
 - The public `/health` endpoint intentionally remains reachable without browser sign-in so external probes and role verification can confirm the edge path.
 - Client environment API keys are mirrored into `.local/flagsmith/environment-keys.json` and written to OpenBao at `services/flagsmith/environment-keys`; consume them from OpenBao rather than committing or hardcoding them.

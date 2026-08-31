@@ -99,7 +99,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetz
 
 ## Access Model
 
-- The editor at `https://n8n.example.com/` is protected by the shared oauth2-proxy and Keycloak edge flow.
+- The editor at `https://n8n.example.com/` is protected by the shared oauth2-proxy and Authentik edge flow.
 - The following paths are intentionally unauthenticated at the edge:
   - `/healthz`
   - `/webhook/`

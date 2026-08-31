@@ -13,22 +13,22 @@ Commands
   validate                 Validate: unique ports, no UDP overlap, valid emails
   next-port                Print next available TCP port (machine-readable)
   next-udp-range           Print next available UDP range (machine-readable)
-  sync-from-keycloak       Sync neko_instances from live Keycloak users
+  sync-from-authentik      Sync neko_instances from live Authentik users
 
-sync-from-keycloak
+sync-from-authentik
 ------------------
-Queries Keycloak for all users (or users in a specific group), then:
+Queries Authentik for all active users (or users in a specific group), then:
   - Adds entries for users not yet in neko_instances (auto-assigns port/UDP range)
-  - Removes entries for users whose email no longer exists in Keycloak
+  - Removes entries for users whose email no longer exists in Authentik
 
 This is idempotent — re-running preserves existing port/UDP assignments.
-Reads the admin client secret from .local/keycloak/admin-client-secret.txt
-(same secret file used by the neko.yml Ansible playbook).
+Reads the Authentik API token from .local/authentik/bootstrap-token.txt
+(the same local-only token source used by the neko.yml playbook).
 
 Example:
-  python3 scripts/neko_tool.py sync-from-keycloak \\
-      --keycloak-url http://10.10.10.20:8091 \\
-      --group /lv3-platform-admins
+  python3 scripts/neko_tool.py sync-from-authentik \\
+      --authentik-url https://id.example.com \\
+      --group platform-admins
 
 Exit codes
 ----------
@@ -41,11 +41,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import urllib.request
 import urllib.error
-import urllib.parse
 from pathlib import Path
 from typing import Any
 
@@ -132,11 +132,11 @@ def _build_neko_block(instances: dict[str, dict[str, Any]]) -> str:
         "# Neko multi-instance browser sessions",
         "# ---------------------------------------------------------------------------",
         "# Each entry provisions an isolated browser container on runtime-comms",
-        "# and a Keycloak user in the lv3 realm. Removing an entry destroys the",
-        "# container and the Keycloak user on the next converge.",
+        "# and assigns an existing Authentik user. Removing an entry destroys the",
+        "# container and clears the Neko assignment on the next converge.",
         "#",
         "# Key         = instance name (container name: neko-<key>, data dir: /opt/neko/instances/<key>)",
-        "# email       = Keycloak user email and routing key for NGINX → container mapping",
+        "# email       = Authentik user email and routing key for NGINX → container mapping",
         "# port        = TCP port the Neko signalling server binds on (must be unique per instance)",
         "# udp_range   = Ephemeral UDP port range for WebRTC media (must be unique per instance)",
         "#",
@@ -592,78 +592,60 @@ def cmd_next_udp_range(args: argparse.Namespace, instances: dict[str, dict[str, 
 
 
 # ---------------------------------------------------------------------------
-# Keycloak API helpers
+# Authentik API helpers
 # ---------------------------------------------------------------------------
 
 
-def _kc_request(url: str, token: str | None = None, data: bytes | None = None) -> Any:
-    """Make a GET (or POST if data is given) request; return parsed JSON."""
-    headers: dict[str, str] = {}
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    if data is not None:
-        headers["Content-Type"] = "application/x-www-form-urlencoded"
-    req = urllib.request.Request(url, data=data, headers=headers)
+def _authentik_request(url: str, token: str) -> Any:
+    """Make an authenticated Authentik API GET request and return parsed JSON."""
+    req = urllib.request.Request(
+        url,
+        headers={"Authorization": f"Bearer {token}", "Accept": "application/json"},
+    )
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             return json.loads(resp.read())
     except urllib.error.HTTPError as exc:
-        body = exc.read().decode(errors="replace")
-        raise RuntimeError(f"HTTP {exc.code} from {url}: {body}") from exc
+        raise RuntimeError(f"HTTP {exc.code} from {url}") from exc
 
 
-def _kc_get_token(kc_url: str, realm: str, client_id: str, client_secret: str) -> str:
-    """Obtain an admin access token using client_credentials grant."""
-    url = f"{kc_url}/realms/{realm}/protocol/openid-connect/token"
-    payload = urllib.parse.urlencode(
-        {
-            "grant_type": "client_credentials",
-            "client_id": client_id,
-            "client_secret": client_secret,
-        }
-    ).encode()
-    return _kc_request(url, data=payload)["access_token"]
+def _authentik_list_results(url: str, token: str) -> list[dict[str, Any]]:
+    """Return every result from an Authentik list endpoint without logging data."""
+    results: list[dict[str, Any]] = []
+    page = 1
+    while True:
+        separator = "&" if "?" in url else "?"
+        payload = _authentik_request(f"{url}{separator}page={page}&page_size=100", token)
+        current = payload.get("results", [])
+        if not isinstance(current, list):
+            raise RuntimeError(f"Unexpected list response from {url}")
+        results.extend(current)
+        if len(current) < 100:
+            return results
+        page += 1
+        if page > 100:
+            raise RuntimeError(f"Refusing to paginate more than 100 pages from {url}")
 
 
-def _kc_list_users_in_realm(kc_url: str, realm: str, token: str) -> list[dict[str, Any]]:
-    """Return all enabled users in the realm (max 1000)."""
-    url = f"{kc_url}/admin/realms/{realm}/users?max=1000&enabled=true"
-    return _kc_request(url, token=token)
+def _authentik_list_users(authentik_url: str, token: str) -> list[dict[str, Any]]:
+    """Return all Authentik users visible to the supplied API token."""
+    return _authentik_list_results(f"{authentik_url}/api/v3/core/users/", token)
 
 
-def _kc_list_users_in_group(kc_url: str, realm: str, token: str, group_path: str) -> list[dict[str, Any]]:
-    """Return all enabled users in a Keycloak group (looked up by path)."""
-    # First resolve path → group ID
-    # Strip leading slash for the search term — Keycloak search matches by name,
-    # not full path, so "%2F..." returns 0 results; we do exact path match below.
-    search_term = group_path.lstrip("/")
-    search_url = f"{kc_url}/admin/realms/{realm}/groups?search={urllib.parse.quote(search_term)}&max=100"
-    groups = _kc_request(search_url, token=token)
+def _authentik_list_users_in_group(
+    authentik_url: str,
+    token: str,
+    group_name: str,
+) -> list[dict[str, Any]]:
+    """Return Authentik users that belong to the named group."""
+    groups = _authentik_list_results(f"{authentik_url}/api/v3/core/groups/", token)
+    group = next((item for item in groups if item.get("name") == group_name), None)
+    if group is None:
+        raise RuntimeError(f"Authentik group {group_name!r} not found")
 
-    # Find exact path match (search is fuzzy)
-    group_id = None
-    for g in _flatten_groups(groups):
-        if g.get("path") == group_path:
-            group_id = g["id"]
-            break
-
-    if group_id is None:
-        raise RuntimeError(
-            f"Keycloak group {group_path!r} not found. "
-            f"Groups returned: {[g.get('path') for g in _flatten_groups(groups)]}"
-        )
-
-    members_url = f"{kc_url}/admin/realms/{realm}/groups/{group_id}/members?max=1000"
-    return _kc_request(members_url, token=token)
-
-
-def _flatten_groups(groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Recursively flatten group tree into a flat list."""
-    result = []
-    for g in groups:
-        result.append(g)
-        result.extend(_flatten_groups(g.get("subGroups", [])))
-    return result
+    member_pks = {int(pk) for pk in group.get("users", [])}
+    users = _authentik_list_users(authentik_url, token)
+    return [user for user in users if user.get("pk") in member_pks]
 
 
 def _email_to_instance_name(email: str) -> str:
@@ -675,70 +657,61 @@ def _email_to_instance_name(email: str) -> str:
     return name or "user"
 
 
-def cmd_sync_from_keycloak(
+def cmd_sync_from_authentik(
     args: argparse.Namespace,
     instances: dict[str, dict[str, Any]],
     platform_yml: Path,
 ) -> int:
-    """Sync neko_instances from live Keycloak users."""
-    # --- Load admin client secret ---
-    if args.secret_file:
-        secret_path = Path(args.secret_file).expanduser().resolve()
+    """Sync neko_instances from live Authentik users."""
+    # --- Load controller-local Authentik API token ---
+    if args.token_file:
+        token_path = Path(args.token_file).expanduser().resolve()
     else:
-        # Default: .local/keycloak/admin-client-secret.txt relative to repo root
+        # Default: .local/authentik/bootstrap-token.txt relative to repo root
         repo_root = platform_yml.parent.parent.parent
-        secret_path = repo_root / ".local" / "keycloak" / "admin-client-secret.txt"
+        token_path = repo_root / ".local" / "authentik" / "bootstrap-token.txt"
 
-    if not secret_path.exists():
+    if not token_path.exists():
         print(
-            f"ERROR: Admin client secret not found at {secret_path}\nUse --secret-file to specify an alternate path.",
+            f"ERROR: Authentik API token not found at {token_path}\nUse --token-file to specify an alternate path.",
             file=sys.stderr,
         )
         return 1
 
-    client_secret = secret_path.read_text().strip()
-    if not client_secret:
-        print(f"ERROR: Secret file is empty: {secret_path}", file=sys.stderr)
+    token = token_path.read_text().strip()
+    if not token:
+        print(f"ERROR: Token file is empty: {token_path}", file=sys.stderr)
         return 1
 
-    kc_url = args.keycloak_url.rstrip("/")
-    realm = args.realm
-    client_id = args.client_id
-
-    # --- Authenticate ---
-    if not args.json:
-        print(f"Authenticating with Keycloak at {kc_url} (realm=master, client={client_id})...")
-    try:
-        token = _kc_get_token(kc_url, "master", client_id, client_secret)
-    except Exception as exc:
-        print(f"ERROR: Could not obtain Keycloak admin token: {exc}", file=sys.stderr)
-        return 1
+    authentik_url = args.authentik_url.rstrip("/")
 
     # --- Fetch users ---
+    if not args.json:
+        print(f"Querying Authentik at {authentik_url}...")
     try:
         if args.group:
             if not args.json:
-                print(f"Fetching users in group {args.group!r} from realm {realm!r}...")
-            kc_users = _kc_list_users_in_group(kc_url, realm, token, args.group)
+                print(f"Fetching users in Authentik group {args.group!r}...")
+            authentik_users = _authentik_list_users_in_group(authentik_url, token, args.group)
         else:
             if not args.json:
-                print(f"Fetching all users from realm {realm!r}...")
-            kc_users = _kc_list_users_in_realm(kc_url, realm, token)
+                print("Fetching all Authentik users...")
+            authentik_users = _authentik_list_users(authentik_url, token)
     except Exception as exc:
-        print(f"ERROR: Could not fetch users from Keycloak: {exc}", file=sys.stderr)
+        print(f"ERROR: Could not fetch users from Authentik: {exc}", file=sys.stderr)
         return 1
 
-    # Build email → Keycloak user mapping (only enabled users with a valid email)
-    kc_by_email: dict[str, dict[str, Any]] = {}
-    for u in kc_users:
-        if not u.get("enabled", True):
+    # Build email → Authentik user mapping (only active users with a valid email)
+    authentik_by_email: dict[str, dict[str, Any]] = {}
+    for user in authentik_users:
+        if not user.get("is_active", True):
             continue
-        email = (u.get("email") or "").strip().lower()
+        email = (user.get("email") or "").strip().lower()
         if email and validate_email(email):
-            kc_by_email[email] = u
+            authentik_by_email[email] = user
 
     if not args.json:
-        print(f"Found {len(kc_by_email)} Keycloak user(s) with valid emails.")
+        print(f"Found {len(authentik_by_email)} active Authentik user(s) with valid emails.")
 
     # Build current email → instance name mapping
     current_by_email: dict[str, str] = {cfg["email"].lower(): name for name, cfg in instances.items()}
@@ -747,19 +720,19 @@ def cmd_sync_from_keycloak(
     to_add: list[str] = []  # emails to add
     to_remove: list[str] = []  # instance names to remove
 
-    for email in kc_by_email:
+    for email in authentik_by_email:
         if email not in current_by_email:
             to_add.append(email)
 
     for inst_email, inst_name in current_by_email.items():
-        if inst_email not in kc_by_email:
+        if inst_email not in authentik_by_email:
             to_remove.append(inst_name)
 
     if not to_add and not to_remove:
         if args.json:
             print(json.dumps({"status": "no_changes", "instances": instances}))
         else:
-            print("neko_instances is already in sync with Keycloak. Nothing to do.")
+            print("neko_instances is already in sync with Authentik. Nothing to do.")
         return 0
 
     if not args.json:
@@ -795,7 +768,7 @@ def cmd_sync_from_keycloak(
     for inst_name in to_remove:
         del instances[inst_name]
         if not args.json:
-            print(f"  Removed {inst_name!r} (no longer in Keycloak)")
+            print(f"  Removed {inst_name!r} (no longer in Authentik)")
 
     save_instances(platform_yml, instances)
 
@@ -857,7 +830,7 @@ def build_parser() -> argparse.ArgumentParser:
     # add
     p_add = sub.add_parser("add", help="Add a new instance")
     p_add.add_argument("name", help="Instance name (alphanumeric, hyphens, underscores)")
-    p_add.add_argument("--email", required=True, help="Keycloak user email")
+    p_add.add_argument("--email", required=True, help="Authentik user email")
     p_add.add_argument("--port", type=int, default=None, help="Override TCP port (default: auto)")
     p_add.add_argument(
         "--udp-range",
@@ -894,37 +867,27 @@ def build_parser() -> argparse.ArgumentParser:
     # next-udp-range
     sub.add_parser("next-udp-range", help="Print next available UDP range")
 
-    # sync-from-keycloak
+    # sync-from-authentik
     p_sync = sub.add_parser(
-        "sync-from-keycloak",
-        help="Sync neko_instances from live Keycloak users (add new, remove deleted)",
+        "sync-from-authentik",
+        help="Sync neko_instances from live Authentik users (add new, remove deleted)",
     )
     p_sync.add_argument(
-        "--keycloak-url",
-        default="http://10.10.10.20:8091",
-        help="Keycloak base URL (default: http://10.10.10.20:8091)",
+        "--authentik-url",
+        default=os.environ.get("LV3_AUTHENTIK_URL", "https://id.example.com"),
+        help="Authentik base URL (default: LV3_AUTHENTIK_URL or https://id.example.com)",
     )
     p_sync.add_argument(
-        "--realm",
-        default="lv3",
-        help="Keycloak realm to query (default: lv3)",
-    )
-    p_sync.add_argument(
-        "--client-id",
-        default="lv3-admin-runtime",
-        help="Admin client ID for client_credentials grant (default: lv3-admin-runtime)",
-    )
-    p_sync.add_argument(
-        "--secret-file",
+        "--token-file",
         default=None,
         metavar="PATH",
-        help="Path to admin client secret file (default: .local/keycloak/admin-client-secret.txt)",
+        help="Path to Authentik API token file (default: .local/authentik/bootstrap-token.txt)",
     )
     p_sync.add_argument(
         "--group",
-        default="/lv3-platform-admins",
-        metavar="GROUP_PATH",
-        help="Only sync users in this Keycloak group path (default: /lv3-platform-admins; use '' for all users)",
+        default="platform-admins",
+        metavar="GROUP_NAME",
+        help="Only sync users in this Authentik group (default: platform-admins; use '' for all users)",
     )
     p_sync.add_argument(
         "--dry-run",
@@ -962,8 +925,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_next_port(args, instances)
     elif args.command == "next-udp-range":
         return cmd_next_udp_range(args, instances)
-    elif args.command == "sync-from-keycloak":
-        return cmd_sync_from_keycloak(args, instances, platform_yml)
+    elif args.command == "sync-from-authentik":
+        return cmd_sync_from_authentik(args, instances, platform_yml)
     else:
         parser.print_help()
         return 2

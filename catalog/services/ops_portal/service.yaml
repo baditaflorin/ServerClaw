@@ -65,7 +65,7 @@ dependency:
     service: ops_portal
     name: Ops Portal
     vm: nginx
-    tier: 4
+    tier: 3
     category: automation
     adr: '0074'
   outbound_edges:
@@ -75,9 +75,9 @@ dependency:
       description: The interactive operations portal depends on the unified API gateway
         for governed platform actions and live status reads.
     - from: ops_portal
-      to: keycloak
+      to: authentik
       type: hard
-      description: ops.example.com is gated behind oauth2-proxy and Keycloak-backed
+      description: ops.example.com is gated behind oauth2-proxy and Authentik-backed
         browser authentication.
     - from: ops_portal
       to: nginx_edge

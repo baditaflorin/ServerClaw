@@ -10,7 +10,7 @@ The Langfuse workflow converges:
 - the Langfuse runtime on `docker-runtime`
 - the shared MinIO object-storage contract used for exports and media uploads
 - the public hostname `langfuse.example.com` on the shared NGINX edge
-- the Keycloak OIDC client used by the Langfuse sign-in flow
+- the Authentik OIDC client used by the Langfuse sign-in flow
 - the repo-managed bootstrap org, project, API keys, and bootstrap user
 
 ## Preconditions
@@ -18,7 +18,7 @@ The Langfuse workflow converges:
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload is already available under `.local/openbao/init.json`
 - MinIO is already deployed and healthy on `minio.example.com`
-- Keycloak is already deployed and healthy on `sso.example.com`
+- Authentik is already deployed and healthy on `id.example.com`
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
 ## Converge
@@ -44,7 +44,7 @@ The workflow maintains controller-local secrets under `.local/langfuse/`:
 - `project-public-key.txt`
 - `project-secret-key.txt`
 
-The Keycloak client secret is mirrored under `.local/keycloak/langfuse-client-secret.txt`.
+The Authentik client secret is mirrored under `.local/authentik/langfuse-client-secret.txt`.
 
 ## Verification
 

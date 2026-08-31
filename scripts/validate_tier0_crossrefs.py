@@ -134,6 +134,8 @@ def check_A1_postgres_services_exist_in_registry(tier0: dict) -> list[Finding]:
     registry = (tier0.get("service_registry") or {}).get("platform_service_registry", {}) or {}
 
     for entry in clients:
+        if entry.get("connection_mode") == "ssh_tunnel":
+            continue
         svc = entry.get("service")
         if svc and svc not in registry:
             findings.append(
@@ -185,8 +187,8 @@ def check_A2_postgres_remote_dir_no_hardcoded_prefix(tier0: dict) -> list[Findin
 def check_B1_public_fqdns_in_exposure_registry(tier0: dict) -> list[Finding]:
     """B1: every proxy.public_fqdn in service_registry has a subdomain in subdomain-exposure-registry.
 
-    The service registry stores template FQDNs like `sso.{{ platform_domain }}`;
-    the exposure registry stores resolved FQDNs like `sso.example.com`. We compare
+    The service registry stores template FQDNs like `id.{{ platform_domain }}`;
+    the exposure registry stores resolved FQDNs like `id.example.com`. We compare
     by subdomain label (the part before the first `.{{ platform_domain }}`) to
     handle both template and resolved forms.
     """

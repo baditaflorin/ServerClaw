@@ -161,16 +161,6 @@
       "next_failure_lane": "recover"
     },
     {
-      "service_id": "keycloak",
-      "primary_lane": "recover",
-      "secondary_lanes": [
-        "start",
-        "change"
-      ],
-      "next_success_lane": "start",
-      "next_failure_lane": "recover"
-    },
-    {
       "service_id": "langfuse",
       "primary_lane": "observe",
       "secondary_lanes": [

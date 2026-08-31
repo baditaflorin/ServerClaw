@@ -48,3 +48,416 @@ clients:
       include_claims_in_id_token: true
       sub_mode: hashed_user_id
       issuer_mode: per_provider
+  # The remaining clients complete the provider-neutral OIDC migration.
+  # Keep the provider name equal to the stable client ID so consumer defaults
+  # can derive a per-provider issuer without embedding a deployment-specific
+  # URL or manually maintained endpoint list.
+  - id: agent-hub
+    enabled: true
+    client_secret_file: authentik/agent-hub-client-secret.txt
+    application:
+      name: Agent Hub
+      slug: agent-hub
+      launch_url: https://api.{{ platform_domain }}
+    provider:
+      name: agent-hub
+      client_id: "{{ platform_config_prefix }}-agent-hub"
+      client_type: confidential
+      grant_types:
+        - client_credentials
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes:
+        - openid
+        - profile
+        - email
+      redirect_uris:
+        - https://api.{{ platform_domain }}/oauth/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: api-gateway
+    enabled: true
+    client_secret_file: authentik/api-gateway-client-secret.txt
+    application:
+      name: API Gateway
+      slug: api-gateway
+      launch_url: https://api.{{ platform_domain }}
+    provider:
+      name: api-gateway
+      client_id: api-gateway
+      client_type: confidential
+      grant_types:
+        - client_credentials
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes:
+        - openid
+        - profile
+        - email
+      redirect_uris:
+        - https://api.{{ platform_domain }}/oauth/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: dify
+    enabled: true
+    client_secret_file: authentik/dify-client-secret.txt
+    application:
+      name: Dify
+      slug: dify
+      launch_url: https://agents.{{ platform_domain }}
+    provider:
+      name: dify
+      client_id: dify
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://agents.{{ platform_domain }}/console/api/oauth/login/oidc/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: directus
+    enabled: true
+    client_secret_file: authentik/directus-client-secret.txt
+    application:
+      name: Directus
+      slug: directus
+      launch_url: https://data.{{ platform_domain }}
+    provider:
+      name: directus
+      client_id: directus
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://data.{{ platform_domain }}/auth/login/authentik/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: gitea-oauth
+    enabled: true
+    client_secret_file: authentik/gitea-client-secret.txt
+    application:
+      name: Gitea
+      slug: gitea
+      launch_url: https://git.{{ platform_domain }}
+    provider:
+      name: gitea-oauth
+      client_id: gitea-oauth
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://git.{{ platform_domain }}/user/oauth2/Authentik/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: grafana-oauth
+    enabled: true
+    client_secret_file: authentik/grafana-client-secret.txt
+    application:
+      name: Grafana
+      slug: grafana
+      launch_url: https://grafana.{{ platform_domain }}
+    provider:
+      name: grafana-oauth
+      client_id: grafana-oauth
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://grafana.{{ platform_domain }}/login/generic_oauth
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: grist
+    enabled: true
+    client_secret_file: authentik/grist-client-secret.txt
+    application:
+      name: Grist
+      slug: grist
+      launch_url: https://grist.{{ platform_domain }}
+    provider:
+      name: grist
+      client_id: grist
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://grist.{{ platform_domain }}/oauth2/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: harbor
+    enabled: true
+    client_secret_file: authentik/harbor-client-secret.txt
+    application:
+      name: Harbor
+      slug: harbor
+      launch_url: https://registry.{{ platform_domain }}
+    provider:
+      name: harbor
+      client_id: harbor
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://registry.{{ platform_domain }}/c/oidc/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: langfuse
+    enabled: true
+    client_secret_file: authentik/langfuse-client-secret.txt
+    application:
+      name: Langfuse
+      slug: langfuse
+      launch_url: https://langfuse.{{ platform_domain }}
+    provider:
+      name: langfuse
+      client_id: langfuse
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://langfuse.{{ platform_domain }}/api/auth/callback/authentik
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: nomad
+    enabled: true
+    client_secret_file: authentik/nomad-client-secret.txt
+    application:
+      name: Nomad Scheduler
+      slug: nomad
+      launch_url: https://scheduler.{{ platform_domain }}
+    provider:
+      name: nomad
+      client_id: nomad
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://scheduler.{{ platform_domain }}/ui/settings/tokens
+        - http://localhost:4649/oidc/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: ops-portal-oauth
+    enabled: true
+    client_secret_file: authentik/ops-portal-oauth-client-secret.txt
+    application:
+      name: Operations Portal
+      slug: ops-portal
+      launch_url: https://ops.{{ platform_domain }}
+    provider:
+      name: ops-portal-oauth
+      client_id: ops-portal-oauth
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://ops.{{ platform_domain }}/oauth2/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: paperless
+    enabled: true
+    client_secret_file: authentik/paperless-client-secret.txt
+    application:
+      name: Paperless
+      slug: paperless
+      launch_url: https://paperless.{{ platform_domain }}
+    provider:
+      name: paperless
+      client_id: paperless
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://paperless.{{ platform_domain }}/accounts/oidc/authentik/login/callback/
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: plane-oidc
+    enabled: true
+    client_secret_file: authentik/plane-oidc-client-secret.txt
+    application:
+      name: Plane
+      slug: plane
+      launch_url: https://tasks.{{ platform_domain }}
+    provider:
+      name: plane-oidc
+      client_id: "{{ platform_config_prefix }}-plane-oidc"
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://tasks.{{ platform_domain }}/auth/callback/authentik
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: repo-intake-oauth
+    enabled: true
+    client_secret_file: authentik/repo-intake-client-secret.txt
+    application:
+      name: Repository Intake
+      slug: repo-intake
+      launch_url: https://repo-intake.{{ platform_domain }}
+    provider:
+      name: repo-intake-oauth
+      client_id: repo-intake-oauth
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://repo-intake.{{ platform_domain }}/oauth2/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: semaphore
+    enabled: true
+    client_secret_file: authentik/semaphore-client-secret.txt
+    application:
+      name: Semaphore
+      slug: semaphore
+      launch_url: https://semaphore.{{ platform_domain }}
+    provider:
+      name: semaphore
+      client_id: semaphore
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://semaphore.{{ platform_domain }}/auth/oidc/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: serverclaw
+    enabled: true
+    client_secret_file: authentik/serverclaw-client-secret.txt
+    application:
+      name: ServerClaw
+      slug: serverclaw
+      launch_url: https://chat.{{ platform_domain }}
+    provider:
+      name: serverclaw
+      client_id: serverclaw
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://chat.{{ platform_domain }}/oauth/openid/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: serverclaw-runtime
+    enabled: true
+    client_secret_file: authentik/serverclaw-runtime-client-secret.txt
+    application:
+      name: ServerClaw Runtime
+      slug: serverclaw-runtime
+      launch_url: https://chat.{{ platform_domain }}
+    provider:
+      name: serverclaw-runtime
+      client_id: serverclaw-runtime
+      client_type: confidential
+      grant_types: [client_credentials]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://chat.{{ platform_domain }}/oauth/runtime/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: sftpgo
+    enabled: true
+    client_secret_file: authentik/sftpgo-client-secret.txt
+    application:
+      name: SFTPGo
+      slug: sftpgo
+      launch_url: https://files.{{ platform_domain }}
+    provider:
+      name: sftpgo
+      client_id: sftpgo
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://files.{{ platform_domain }}/web/oidc/redirect
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: superset
+    enabled: true
+    client_secret_file: authentik/superset-client-secret.txt
+    application:
+      name: Superset
+      slug: superset
+      launch_url: https://bi.{{ platform_domain }}
+    provider:
+      name: superset
+      client_id: superset
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://bi.{{ platform_domain }}/oauth-authorized/authentik
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: vikunja
+    enabled: true
+    client_secret_file: authentik/vikunja-client-secret.txt
+    application:
+      name: Vikunja
+      slug: vikunja
+      launch_url: https://tasks.{{ platform_domain }}
+    provider:
+      name: vikunja
+      client_id: vikunja
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://tasks.{{ platform_domain }}/auth/openid/lv3
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider

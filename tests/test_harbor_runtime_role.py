@@ -45,12 +45,12 @@ def test_role_tracks_robot_reconcile_state_before_refreshing_secret() -> None:
     assert "Reset the Harbor admin password seed in the Harbor database when credentials drift" in task_names
 
 
-def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
+def test_role_reads_the_authentik_secret_before_configuring_oidc() -> None:
     tasks = load_yaml(ROLE_TASKS)
     task_by_name = {task["name"]: task for task in tasks}
 
-    readiness_task = task_by_name["Wait for the local Keycloak admin endpoint to recover after Docker reconciliation"]
-    token_task = task_by_name["Request a Keycloak admin token for Harbor bootstrap"]
+    secret_check_task = task_by_name["Check the Authentik Harbor OIDC client secret on the control machine"]
+    secret_read_task = task_by_name["Read the Authentik Harbor OIDC client secret"]
     oidc_readiness_block = task_by_name["Verify the Harbor admin configuration API is reachable before OIDC bootstrap"]
     config_probe_task = oidc_readiness_block["block"][0]
     rescue_tasks = {task["name"]: task for task in oidc_readiness_block["rescue"]}
@@ -70,12 +70,10 @@ def test_role_waits_for_keycloak_before_bootstrap_token_request() -> None:
     re_probe_task = rescue_tasks["Re-probe the Harbor admin configuration API after the OIDC readiness recycle"]
     oidc_task = task_by_name["Configure Harbor OIDC defaults"]
 
-    assert readiness_task["retries"] == 24
-    assert readiness_task["delay"] == 5
-    assert readiness_task["until"] == "harbor_keycloak_admin_ready.status == 200"
-    assert token_task["retries"] == 12
-    assert token_task["delay"] == 5
-    assert token_task["until"] == "harbor_keycloak_admin_token_response.status == 200"
+    assert secret_check_task["no_log"] is True
+    assert "harbor_oidc_client_secret_local_file" in str(secret_check_task)
+    assert secret_read_task["no_log"] is True
+    assert "harbor_oidc_client_secret" in str(secret_read_task)
     assert config_probe_task["retries"] == 12
     assert config_probe_task["delay"] == 5
     assert config_probe_task["until"] == "harbor_config_query_before_oidc.status == 200"
@@ -196,7 +194,11 @@ def test_role_recovers_retention_policy_id_from_create_location_and_persists_met
         in created_facts["harbor_check_runner_retention_create_location"]
     )
     assert "regex_findall('[0-9]+$')" in created_facts["harbor_check_runner_retention_id_created"]
-    assert created_fact_task["when"] == "harbor_check_runner_retention_id_before == 0"
+    assert created_fact_task["when"] == [
+        "harbor_check_runner_retention_id_before == 0",
+        "harbor_check_runner_retention_create is not failed",
+        "harbor_check_runner_retention_create is not skipped",
+    ]
 
     retention_id_fact = retention_id_task["ansible.builtin.set_fact"]["harbor_check_runner_retention_id"]
     assert "after_id" in retention_id_fact
@@ -240,9 +242,7 @@ def test_verify_accepts_running_services_after_ping() -> None:
 def test_host_network_policy_allows_nginx_edge_access_to_harbor() -> None:
     host_vars = load_yaml(HOST_VARS)
     runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control"]["allowed_inbound"]
-    harbor_rule = next(
-        rule for rule in runtime_control_rules if rule["source"] == "nginx-edge" and 8095 in rule["ports"]
-    )
+    harbor_rule = next(rule for rule in runtime_control_rules if rule["source"] == "nginx" and 8095 in rule["ports"])
 
     assert "edge access" in harbor_rule["description"].lower()
     assert "harbor" in harbor_rule["description"].lower()

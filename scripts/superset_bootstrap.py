@@ -472,17 +472,17 @@ def verify_public(args: argparse.Namespace) -> int:
     check_health(args.base_url)
 
     no_redirect = build_opener(args.base_url, follow_redirects=False)
-    req = request.Request(f"{args.base_url}/login/keycloak", method="GET")
+    req = request.Request(f"{args.base_url}/login/authentik", method="GET")
     try:
         no_redirect.open(req, timeout=DEFAULT_TIMEOUT)
     except error.HTTPError as exc:
         if exc.code not in (301, 302, 303, 307, 308):
-            raise SupersetBootstrapError(f"/login/keycloak returned unexpected status {exc.code}") from exc
+            raise SupersetBootstrapError(f"/login/authentik returned unexpected status {exc.code}") from exc
         location = exc.headers.get("Location", "")
         if args.expected_sso_host not in location:
             raise SupersetBootstrapError(f"SSO redirect did not point at {args.expected_sso_host}: {location}")
     else:
-        raise SupersetBootstrapError("/login/keycloak unexpectedly succeeded without redirecting")
+        raise SupersetBootstrapError("/login/authentik unexpectedly succeeded without redirecting")
 
     report: dict[str, Any] = {"status": "ok", "redirect_host": args.expected_sso_host}
     if args.admin_username and args.admin_password_file:

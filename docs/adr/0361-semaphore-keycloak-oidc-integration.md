@@ -1,6 +1,6 @@
 # ADR 0361: Semaphore Keycloak OIDC Integration
 
-- Status: Accepted
+- Status: Deprecated (see service removal ADR — service removed from platform)
 - Implementation Status: Live applied
 - Implemented In Repo Version: 0.178.130
 - Implemented In Platform Version: 0.178.130

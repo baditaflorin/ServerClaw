@@ -37,7 +37,7 @@ CHECKLIST = [
     ("subdomain", "Subdomain entry"),
     ("api_gateway", "API gateway registration"),
     ("dependency_graph", "Dependency graph node"),
-    ("keycloak_client", "OIDC client scaffold"),
+    ("oidc_client", "OIDC client scaffold"),
     ("secret_definition", "Secret definition"),
     ("grafana_dashboard", "Grafana dashboard"),
     ("slo_definition", "SLO definition"),
@@ -184,7 +184,7 @@ def load_context() -> dict[str, Any]:
                 profile.get("alert_rule_file"),
                 f"config/service-completeness.json.services.{service_id}.alert_rule_file",
             )
-        for provider_field in ("authentik_client_generated", "keycloak_client_generated"):
+        for provider_field in ("authentik_client_generated",):
             if provider_field in profile:
                 require_bool(
                     profile.get(provider_field),
@@ -196,10 +196,9 @@ def load_context() -> dict[str, Any]:
                 oidc_provider,
                 f"config/service-completeness.json.services.{service_id}.oidc_provider",
             )
-            if oidc_provider not in {"authentik", "keycloak"}:
+            if oidc_provider != "authentik":
                 raise ValueError(
-                    f"config/service-completeness.json.services.{service_id}.oidc_provider "
-                    "must be authentik or keycloak"
+                    f"config/service-completeness.json.services.{service_id}.oidc_provider must be authentik"
                 )
             if not profile["requires_oidc"]:
                 raise ValueError(
@@ -494,15 +493,13 @@ def evaluate_service(
             today=today,
         ),
         item_result(
-            "keycloak_client",
+            "oidc_client",
             "OIDC client scaffold",
             required=bool(profile["requires_oidc"]),
             present=bool(
                 profile.get(f"{profile['oidc_provider']}_client_generated", False)
                 if profile.get("oidc_provider")
-                else (
-                    profile.get("authentik_client_generated", False) or profile.get("keycloak_client_generated", False)
-                )
+                else (profile.get("authentik_client_generated", False))
             ),
             detail=(
                 f"selected provider {profile['oidc_provider']} client evidence in config/service-completeness.json"

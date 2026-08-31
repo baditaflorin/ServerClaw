@@ -1,6 +1,6 @@
 # ADR 0382: Keycloak Sign-In Button Stuck Incident Postmortem
 
-- Status: Accepted
+- Status: Deprecated (see service removal ADR — service removed from platform)
 - Implementation Status: Live applied
 - Implemented In Repo Version: 0.178.144
 - Implemented In Platform Version: 0.178.144

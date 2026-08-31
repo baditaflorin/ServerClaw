@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-29'
+generated: '2026-08-31'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 377
+total_adrs: 378
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -644,7 +644,7 @@ adrs:
     implemented_on: '2026-03-22'
   - adr: '0056'
     title: Keycloak For Operator And Agent SSO
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-03-22'
@@ -3113,7 +3113,7 @@ adrs:
     implemented_on: '2026-03-27'
   - adr: 0183
     title: Keycloak Uses Shared-Mail-Network Internal Submission
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-03-27'
@@ -4139,7 +4139,7 @@ adrs:
     implemented_on: '2026-03-28'
   - adr: 0248
     title: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-03-28'
@@ -4405,7 +4405,7 @@ adrs:
     implemented_on: '2026-03-30'
   - adr: '0262'
     title: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-03-28'
@@ -5694,7 +5694,7 @@ adrs:
     implemented_on: '2026-04-02'
   - adr: '0317'
     title: Keycloak Direct-API Operator Provisioning via SSH Proxy
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-01'
@@ -6466,7 +6466,7 @@ adrs:
     path: docs/adr/0361-nomad-oidc-edge-publication.md
   - adr: '0361'
     title: Semaphore Keycloak OIDC Integration
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-07'
@@ -6807,7 +6807,7 @@ adrs:
     implemented_on: '2026-04-12'
   - adr: 0382
     title: Keycloak Sign-In Button Stuck Incident Postmortem
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-08'
@@ -7415,3 +7415,21 @@ adrs:
     summary: Add a top-level converge-nginx-edge make target that wraps
     filename: 0476-cert-lifecycle-manager-make-target-fix.md
     path: docs/adr/0476-cert-lifecycle-manager-make-target-fix.md
+  - adr: 0491
+    title: Authentik For Operator And Agent SSO
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-08-27'
+    concern: identity
+    keywords:
+      - authentik
+      - operator
+      - agent
+      - sso
+    summary: We will replace Keycloak with Authentik as the shared SSO and identity-broker layer for internal operator-facing
+      and approved agent-facing applications, followi
+    filename: 0491-authentik-for-operator-and-agent-sso.md
+    path: docs/adr/0491-authentik-for-operator-and-agent-sso.md
+    implemented_in_repo_version: 0.179.46
+    implemented_on: '2026-08-31'

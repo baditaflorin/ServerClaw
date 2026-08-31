@@ -174,7 +174,8 @@ monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
 monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
 monitoring_proxmox_writer_token_local_file: "{{ repo_shared_local_root }}/monitoring/proxmox-writer.token"
 monitoring_guest_writer_token_local_file: "{{ repo_shared_local_root }}/monitoring/guest-writer.token"
-keycloak_agent_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/{{ platform_config_prefix }}-agent-hub-client-secret.txt"
+authentik_agent_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/agent-hub-client-secret.txt"
+authentik_grafana_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/grafana-client-secret.txt"
 monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archive.key
 monitoring_influxdb_repo_keyring: /etc/apt/keyrings/influxdata-archive.gpg
 monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
@@ -242,6 +243,12 @@ openbao_runtime_secret_namespace_overrides:
 common_openbao_compose_env_openbao_address: >-
   http://{{ hostvars[platform_topology_host].platform_service_topology.openbao.private_ip }}:{{ platform_ports.openbao_http_port }}
 common_openbao_compose_env_api_host: >-
+  {{ hostvars[platform_topology_host].platform_service_topology.openbao.owning_vm }}
+# Host-native systemd credential consumers (for example the Gitea Renovate
+# runner on docker-build) use the same shared OpenBao API delegation.  Keep the
+# delegate derived from topology so standalone service playbooks do not fall
+# back to an empty host when they do not load fork-overrides.yml.
+common_openbao_systemd_credentials_api_host: >-
   {{ hostvars[platform_topology_host].platform_service_topology.openbao.owning_vm }}
 typesense_local_artifact_dir: "{{ repo_shared_local_root }}/typesense"
 openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"

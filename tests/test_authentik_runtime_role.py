@@ -37,7 +37,7 @@ def test_defaults_are_generic_pinned_and_fail_safe() -> None:
     assert "@sha256:" in defaults["authentik_postgres_image"]
     assert "@sha256:" in defaults["authentik_redis_image"]
     assert defaults["authentik_openbao_policy_name"].startswith("{{ platform_identity.config_prefix }}")
-    assert defaults["authentik_oauth_reconcile_clients"] == ["glitchtip", "outline"]
+    assert defaults["authentik_oauth_reconcile_clients"] == []
 
 
 def test_secret_adoption_is_allowlisted_and_never_overwrites_drift() -> None:

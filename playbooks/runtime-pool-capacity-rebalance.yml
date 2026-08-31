@@ -1,6 +1,6 @@
 # Playbook: runtime-pool-capacity-rebalance.yml
-# Purpose: Rebalance existing Proxmox guest memory allocations so the remaining runtime-general and runtime-control pool guests can be created without violating the governed host free-memory floor.
-# Use case: Run before the remaining ADR 0319 and ADR 0320 pool live applies when the production host needs repo-managed capacity reclamation.
+# Purpose: Rebalance existing Proxmox guest memory allocations so the runtime pools and the residual Docker runtime fit within the governed host-memory envelope.
+# Use case: Run when production host capacity drift prevents a runtime guest from starting or when the runtime-pool envelope needs repo-managed reclamation.
 #
 # Inputs (required):
 #   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump path.
@@ -11,7 +11,7 @@
 #   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
 #
 # Outputs:
-#   - Existing guests `docker-build`, `artifact-cache`, `coolify`, and `docker-runtime` carry the repo-declared reduced memory allocations needed for the remaining runtime-pool rollout.
+#   - Existing guests `runtime-apps`, `runtime-comms`, `docker-build`, `artifact-cache`, `coolify`, and `docker-runtime` carry the repo-declared allocations needed for the runtime-pool envelope.
 #
 # Idempotency: Partially idempotent
 #              The Proxmox-side replay is idempotent, but the memory changes require a stop/start cycle for each selected VM so the new allocation becomes effective.
@@ -25,7 +25,7 @@
 # Related Runbooks: docs/runbooks/runtime-pool-capacity-rebalance.md, docs/runbooks/runtime-pool-memory-governance.md
 #
 # Author: LV3 Platform
-# Last Updated: 2026-04-03
+# Last Updated: 2026-08-31
 ---
 - name: Rebalance the existing runtime-supporting VMs on the Proxmox host
   hosts: proxmox_hosts
@@ -37,6 +37,18 @@
     - service-runtime-pool-capacity-rebalance
   vars:
     runtime_pool_capacity_rebalance_vmids:
+      - 122
+      - 121
+      - 130
+      - 180
+      - 170
+      - 120
+    # Reclaim capacity before restarting the legacy residual runtime.  This
+    # prevents the host OOM killer from terminating VM 120 while the lower
+    # allocations are still pending a cold restart.
+    runtime_pool_capacity_rebalance_restart_order:
+      - 122
+      - 121
       - 130
       - 180
       - 170
@@ -57,14 +69,21 @@
   post_tasks:
     - name: Restart each rebalanced guest so the new memory setting takes effect
       ansible.builtin.shell: |
-        qm stop {{ item.vmid }} --skiplock 1 || true
-        qm start {{ item.vmid }}
+        qm stop {{ runtime_pool_capacity_rebalance_guest.vmid }} --skiplock 1 || true
+        qm start {{ runtime_pool_capacity_rebalance_guest.vmid }}
       args:
         executable: /bin/bash
       changed_when: true
-      loop: "{{ proxmox_guests_active }}"
+      loop: "{{ runtime_pool_capacity_rebalance_restart_order }}"
       loop_control:
-        label: "{{ item.name }}"
+        label: "{{ runtime_pool_capacity_rebalance_guest.name }}"
+      vars:
+        runtime_pool_capacity_rebalance_guest: >-
+          {{
+            proxmox_guests_active
+            | selectattr('vmid', 'equalto', item)
+            | first
+          }}
       tags:
         - guests
         - runtime-pool-capacity-rebalance
@@ -87,14 +106,23 @@
         - guests
         - runtime-pool-capacity-rebalance
 
-- name: Verify the rebalanced guests come back with SSH and Docker
-  hosts: docker-build:artifact-cache:coolify:docker-runtime
+- name: Verify the rebalanced guests come back with SSH and declared Docker runtimes
+  hosts: runtime-apps:runtime-comms:docker-build:artifact-cache:coolify:docker-runtime
   become: true
   gather_facts: false
   tags:
     - tier-2
     - automation
     - service-runtime-pool-capacity-rebalance
+  vars:
+    # runtime-apps is an active pool guest but does not provide a Docker
+    # runtime.  It still receives the SSH and host-fact verification above.
+    runtime_pool_capacity_rebalance_docker_hosts:
+      - runtime-comms
+      - docker-build
+      - artifact-cache
+      - coolify
+      - docker-runtime
 
   tasks:
     - name: Wait for SSH after the rebalance restart
@@ -108,6 +136,7 @@
       ansible.builtin.service:
         name: docker
         state: started
+      when: inventory_hostname in runtime_pool_capacity_rebalance_docker_hosts
 
     - name: Verify Docker is active on the rebalanced guest
       ansible.builtin.command:
@@ -121,6 +150,7 @@
       retries: 10
       delay: 3
       until: runtime_pool_capacity_rebalance_docker.stdout.strip() == "active"
+      when: inventory_hostname in runtime_pool_capacity_rebalance_docker_hosts
 
 - name: Verify host free memory after the rebalance
   hosts: proxmox_hosts

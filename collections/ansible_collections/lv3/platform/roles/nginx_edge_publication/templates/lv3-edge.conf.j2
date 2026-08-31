@@ -12,8 +12,8 @@
 {% macro oauth2_proxy_sign_out_url(redirect_url) -%}
 {{ public_edge_session_authority.oauth2_proxy_sign_out_url }}?rd={{ redirect_url | urlencode }}
 {%- endmacro %}
-{% macro keycloak_logout_url(client_id, post_logout_redirect_uri, include_id_token_hint=false, id_token_hint='') -%}
-{{ public_edge_session_authority.keycloak_logout_url }}?client_id={{ client_id | urlencode }}{% if id_token_hint | length > 0 %}&id_token_hint={{ id_token_hint }}{% elif include_id_token_hint %}&id_token_hint={id_token}{% endif %}&post_logout_redirect_uri={{ post_logout_redirect_uri | urlencode }}
+{% macro oidc_logout_url(post_logout_redirect_uri, include_id_token_hint=false, id_token_hint='') -%}
+{{ public_edge_session_authority.oidc_logout_url }}?{% if id_token_hint | length > 0 %}id_token_hint={{ id_token_hint }}&{% elif include_id_token_hint %}id_token_hint={id_token}&{% endif %}post_logout_redirect_uri={{ post_logout_redirect_uri | urlencode }}
 {%- endmacro %}
 {% macro plausible_tracking_domain(hostname) -%}
 {{ public_edge_plausible_tracked_sites.get(hostname, '') if public_edge_plausible_tracked_sites is mapping else '' }}
@@ -381,7 +381,7 @@ server {
             return 302 {{ oauth2_proxy_sign_out_url(public_edge_session_authority.shared_proxy_cleanup_url) }};
         }
 
-        return 302 {{ oauth2_proxy_sign_out_url(keycloak_logout_url(public_edge_session_authority.ops_portal_client_id, public_edge_session_authority.shared_logged_out_url, false, '$lv3_logout_id_token')) }};
+        return 302 {{ oauth2_proxy_sign_out_url(oidc_logout_url(public_edge_session_authority.shared_logged_out_url, false, '$lv3_logout_id_token')) }};
     }
 
 {% if site.hostname == public_edge_session_authority.authority_hostname %}
@@ -465,7 +465,7 @@ server {
         proxy_pass {{ protected_site.auth_proxy_upstream }};
         proxy_http_version 1.1;
         # oauth2-proxy's auth_request response carries X-Auth-Request-* headers
-        # (groups, email, preferred_username, access_token).  With Keycloak
+        # (groups, email, preferred_username, access_token).  With OIDC
         # group/role claims they can exceed nginx's default 4k proxy_buffer_size,
         # producing a 502 from the auth subrequest that nginx surfaces as a 500
         # to the browser.  See ADR 0444 (nginx oauth2-proxy buffer sizing) for
@@ -485,7 +485,7 @@ server {
     }
 
     # Intercept oauth2-proxy 500s at the callback endpoint (ADR 0376).
-    # A 500 here means Keycloak invalidated the auth code (e.g. after a restart).
+    # A 500 here means the identity provider invalidated the auth code (e.g. after a restart).
     # The browser holds a stale session cookie with already-used codes and will
     # keep replaying them — it cannot recover on its own.  We expire the cookie
     # server-side (Max-Age=0) so the next request starts a clean OIDC flow.
@@ -497,7 +497,7 @@ server {
         # proxy_buffer_size (4k / one OS page) is too small for this header and
         # causes a 502 "upstream sent too big header" error.  See ADR 0444 for
         # full rationale; 64k matches the /oauth2/auth location and absorbs
-        # Keycloak claim growth (groups + roles) without further hot-fixes.
+        # OIDC claim growth (groups + roles) without further hot-fixes.
         proxy_buffer_size 64k;
         proxy_buffers 4 64k;
 {{ hide_upstream_security_headers(site) }}
@@ -516,18 +516,18 @@ server {
         # Expire the oauth2-proxy session cookie AND the CSRF cookie.
         # The CSRF cookie holds the PKCE code_verifier (oauth2-proxy uses S256).
         # If only the session cookie is expired, the stale code_verifier persists,
-        # oauth2-proxy sends the wrong verifier to Keycloak → "Code not valid" on
+        # oauth2-proxy sends the wrong verifier to the identity provider → "Code not valid" on
         # every subsequent login attempt until the user manually clears cookies.
         add_header Set-Cookie "{{ public_edge_session_authority.cookie_name }}=; Path=/; Domain={{ public_edge_session_authority.cookie_domain }}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; Secure; SameSite=Lax" always;
         add_header Set-Cookie "{{ public_edge_session_authority.cookie_name }}_csrf=; Path=/; Domain={{ public_edge_session_authority.cookie_domain }}; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:01 GMT; HttpOnly; Secure; SameSite=Lax" always;
         add_header Cache-Control "no-store" always;
-        # Redirect to Keycloak logout — this kills the Keycloak server-side session AND
-        # clears the sso.{{ platform_domain }} browser cookie.  Without this step, Keycloak auto-logs the
+        # Redirect to the OIDC logout endpoint — this kills the provider server-side session AND
+        # clears its browser cookie. Without this step, the provider auto-logs the
         # user back in using its own still-valid session, generates a new code, which is
         # immediately "already used" → 500 → redirect loop.
         # post_logout_redirect_uri=/ is always registered; ops.{{ platform_domain }}/ then bounces through
         # oauth2-proxy which starts a fresh OIDC flow automatically.
-        return 302 {{ public_edge_session_authority.keycloak_logout_url }}?post_logout_redirect_uri={{ ("https://" ~ public_edge_session_authority.authority_hostname ~ "/") | urlencode }}&client_id={{ public_edge_session_authority.ops_portal_client_id | urlencode }};
+        return 302 {{ public_edge_session_authority.oidc_logout_url }}?post_logout_redirect_uri={{ ("https://" ~ public_edge_session_authority.authority_hostname ~ "/") | urlencode }};
     }
 
     location @oauth2_signin {

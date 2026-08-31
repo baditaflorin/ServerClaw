@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 RUNTIME_ENV_FILE = Path("/run/lv3-secrets/windmill/runtime.env")
 RUNTIME_ENV_KEYS = {
     "LV3_OPENBAO_URL",
-    "KEYCLOAK_BOOTSTRAP_PASSWORD",
+    "LV3_AUTHENTIK_BOOTSTRAP_TOKEN",
     "OPENBAO_INIT_JSON",
     "TAILSCALE_API_KEY",
     "TAILSCALE_TAILNET",

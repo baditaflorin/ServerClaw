@@ -2113,7 +2113,7 @@
         "properties": {
           "query": {
             "type": "string",
-            "description": "Search query (e.g., 'Keycloak timeout', 'ADR 0373 scope')"
+            "description": "Search query (e.g., 'Authentik timeout', 'ADR 0373 scope')"
           },
           "wing": {
             "type": "string",
@@ -2507,11 +2507,11 @@
     {
       "name": "provision-account",
       "title": "Provision Platform Account",
-      "description": "Create a Keycloak SSO account in the platform realm. Optionally set an expiry (account_expires_at attribute) and assign Keycloak groups. Returns the generated password so the operator can send login details. Covers 17+ services via OIDC. ADR 0411.",
+      "description": "Create an Authentik SSO account. Optionally set an expiry (account_expires_at attribute) and assign Authentik groups. Returns the generated password only for a newly created account. Covers the platform OIDC services. ADR 0411.",
       "category": "execute",
       "transport": "controller_local",
-      "endpoint": "service://keycloak/admin/realms/lv3/users",
-      "auth": "keycloak-admin-client-credentials",
+      "endpoint": "service://authentik/api/v3/core/users/",
+      "auth": "authentik-bootstrap-token",
       "approval_required": false,
       "audit_on_call": true,
       "mcp_annotations": {
@@ -2527,7 +2527,7 @@
         "properties": {
           "username": {
             "type": "string",
-            "description": "Keycloak username (e.g. 'florin.badita')"
+            "description": "Authentik username (e.g. 'operator.example')"
           },
           "email": {
             "type": "string",
@@ -2553,24 +2553,23 @@
           "groups": {
             "type": "array",
             "items": {"type": "string"},
-            "description": "Keycloak group names to assign. Defaults to ['lv3-platform-viewers', 'grafana-viewers']. Use 'lv3-platform-admins' for admin access."
+            "description": "Authentik group names to assign. Defaults to ['platform-read', 'grafana-viewers']. Use the platform admin group for admin access."
           }
         }
       },
       "output_schema": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["status", "user_id", "username", "email", "password", "realm", "groups_assigned", "sso_url"],
+        "required": ["status", "username"],
         "properties": {
           "status": {"type": "string"},
           "user_id": {"type": "string"},
           "username": {"type": "string"},
           "email": {"type": "string"},
           "password": {"type": "string"},
-          "realm": {"type": "string"},
           "groups_assigned": {"type": "array", "items": {"type": "string"}},
           "groups_skipped": {"type": "array", "items": {"type": "string"}},
-          "sso_url": {"type": "string"},
+          "identity_url": {"type": "string"},
           "expires_at": {"type": "string"}
         }
       },
@@ -2583,11 +2582,11 @@
     {
       "name": "deprovision-account",
       "title": "Deprovision Platform Account",
-      "description": "Disable (or permanently delete) a Keycloak SSO account by username. Disabling (default) is reversible; hard_delete=true is permanent and requires careful consideration. ADR 0411.",
+      "description": "Disable (or permanently delete) an Authentik SSO account by username. Disabling (default) is reversible; hard_delete=true is permanent and requires careful consideration. ADR 0411.",
       "category": "execute",
       "transport": "controller_local",
-      "endpoint": "service://keycloak/admin/realms/lv3/users/{user_id}",
-      "auth": "keycloak-admin-client-credentials",
+      "endpoint": "service://authentik/api/v3/core/users/{user_id}/",
+      "auth": "authentik-bootstrap-token",
       "approval_required": false,
       "audit_on_call": true,
       "mcp_annotations": {
@@ -2603,7 +2602,7 @@
         "properties": {
           "username": {
             "type": "string",
-            "description": "Keycloak username of the account to deprovision"
+            "description": "Authentik username of the account to deprovision"
           },
           "hard_delete": {
             "type": "boolean",

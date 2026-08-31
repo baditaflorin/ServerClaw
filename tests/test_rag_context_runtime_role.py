@@ -158,10 +158,12 @@ def test_role_uses_classic_builder_for_platform_context_stack_bring_up() -> None
     assert "PLATFORM_CONTEXT_API_TOKEN=" in env_contract_task["ansible.builtin.shell"]
 
 
-def test_compose_template_starts_platform_context_without_openbao_health_gate() -> None:
+def test_compose_template_waits_for_qdrant_health_without_openbao_health_gate() -> None:
     template = COMPOSE_TEMPLATE.read_text(encoding="utf-8")
     platform_context_api_section = template.split("  platform-context-api:", 1)[1]
-    assert "qdrant:" in platform_context_api_section
+    qdrant_section = template.split("  qdrant:", 1)[1].split("  platform-context-api:", 1)[0]
+    assert "curl --fail --silent --show-error http://127.0.0.1:6333/healthz" in qdrant_section
+    assert "qdrant:\n        condition: service_healthy" in platform_context_api_section
     assert "openbao-agent:\n        condition: service_healthy" not in platform_context_api_section
 
 

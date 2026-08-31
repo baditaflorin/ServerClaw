@@ -9,6 +9,7 @@ import difflib
 import hashlib
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -60,13 +61,46 @@ DEFAULT_CATALOG = repo_path("config", "atlas", "catalog.json")
 SUPPORTED_SCHEMA_VERSION = "1.0.0"
 DEFAULT_DRIFT_EXIT_CODE = 2
 DEFAULT_OPERATION_TIMEOUT_SECONDS = 120
+# Atlas receives a full PostgreSQL connection URL.  Giving libpq an explicit
+# limit prevents one unreachable catalog entry from consuming the whole daily
+# Windmill worker for the Docker container wait timeout.
+DEFAULT_POSTGRES_CONNECT_TIMEOUT_SECONDS = 8
+MAX_OPERATION_TIMEOUT_SECONDS = 120
 DEFAULT_DEV_POSTGRES_WAIT_SECONDS = 30
+MAX_DIFF_PREVIEW_LINES = 200
+# Schema inspections can be large enough for ``difflib.SequenceMatcher`` to
+# consume minutes of CPU and hundreds of MiB while constructing a complete
+# diff.  Drift receipts already retain stable hashes and the snapshot path, so
+# keep the human preview deliberately bounded for operational safety.
+MAX_DIFF_PREVIEW_SOURCE_CHARACTERS = 32_768
+MAX_DIFF_PREVIEW_SOURCE_LINES = 512
 CLI_SUBCOMMANDS = ("validate", "lint", "snapshot", "drift")
 CLI_GLOBAL_OPTIONS_WITH_VALUES = ("--repo-root", "--catalog", "--format")
 
 
 def env_flag(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def operation_timeout_seconds() -> int:
+    """Return the bounded timeout for one ephemeral Atlas container.
+
+    Windmill's daily drift job can narrow this with
+    ``LV3_ATLAS_OPERATION_TIMEOUT_SECONDS``.  Keep the generic CLI default
+    compatible with longer lint/snapshot operations while rejecting malformed
+    runtime overrides before they create an unbounded worker job.
+    """
+
+    raw_value = os.environ.get("LV3_ATLAS_OPERATION_TIMEOUT_SECONDS", "").strip()
+    if not raw_value:
+        return DEFAULT_OPERATION_TIMEOUT_SECONDS
+    try:
+        value = int(raw_value)
+    except ValueError as exc:
+        raise ValueError("LV3_ATLAS_OPERATION_TIMEOUT_SECONDS must be an integer") from exc
+    if value < 1 or value > MAX_OPERATION_TIMEOUT_SECONDS:
+        raise ValueError(f"LV3_ATLAS_OPERATION_TIMEOUT_SECONDS must be between 1 and {MAX_OPERATION_TIMEOUT_SECONDS}")
+    return value
 
 
 def ensure_repo_root_on_host(repo_root: Path) -> Path:
@@ -300,6 +334,12 @@ def decode_output(value: bytes | str | None) -> str:
     return value.strip()
 
 
+def redact_connection_secrets(value: str) -> str:
+    """Remove credentials embedded in database URLs before an error is logged."""
+
+    return re.sub(r"([A-Za-z][A-Za-z0-9+.-]*://)[^@\s]+@", r"\1<redacted>@", value)
+
+
 def load_docker_sdk():
     repo_root = REPO_ROOT.resolve()
     original = list(sys.path)
@@ -352,26 +392,56 @@ def run_atlas(
     if host_repo_root is not None:
         volumes[str(host_repo_root)] = {"bind": "/workspace", "mode": "ro"}
         working_dir = "/workspace"
+    container = None
+    command_label = redact_connection_secrets(" ".join(command))
     try:
-        output = client.containers.run(
+        # Run detached and explicitly wait for completion.  Docker SDK's
+        # synchronous ``containers.run(remove=True)`` path can hang forever
+        # when Atlas exits non-zero (notably for a catalog database that is not
+        # provisioned).  The detached form lets us collect the exit status,
+        # preserve the diagnostic, and always remove the temporary container.
+        container = client.containers.run(
             image_ref,
             command=command,
-            remove=True,
-            detach=False,
+            remove=False,
+            detach=True,
             stderr=True,
             stdout=True,
             working_dir=working_dir,
             volumes=volumes or None,
             extra_hosts={"host.docker.internal": "host-gateway"},
         )
+        # Keep compatibility with lightweight test doubles that return the
+        # command output directly instead of a Docker Container object.
+        if isinstance(container, (bytes, str)):
+            return decode_output(container)
+
+        wait_result = container.wait(timeout=operation_timeout_seconds())
+        status_code = int(wait_result.get("StatusCode", 0)) if isinstance(wait_result, dict) else 0
+        output = decode_output(container.logs(stdout=True, stderr=True))
+        if status_code != 0:
+            raise RuntimeError(
+                f"Atlas command failed ({command_label}): "
+                f"{redact_connection_secrets(output) or 'container exited with a non-zero status'}"
+            )
+        return output
     except Exception as exc:
         if docker_error_matches(docker_sdk, exc, attr_name="ContainerError"):
-            stderr = decode_output(getattr(exc, "stderr", None))
-            raise RuntimeError(f"Atlas command failed ({' '.join(command)}): {stderr or str(exc)}") from exc
+            stderr = redact_connection_secrets(decode_output(getattr(exc, "stderr", None)))
+            raise RuntimeError(
+                f"Atlas command failed ({command_label}): {stderr or redact_connection_secrets(str(exc))}"
+            ) from exc
         if docker_error_matches(docker_sdk, exc, attr_name="APIError"):
             raise RuntimeError(f"Atlas container API error: {exc}") from exc
         raise
-    return decode_output(output)
+    finally:
+        if container is not None and not isinstance(container, (bytes, str)):
+            try:
+                container.remove(force=True)
+            except Exception:
+                # The container may already have been removed by the daemon
+                # after a timeout or worker cancellation; cleanup is best effort.
+                pass
 
 
 @contextmanager
@@ -643,12 +713,52 @@ def request_dynamic_credentials(
     }
 
 
+def discover_postgres_databases(
+    *,
+    host: str,
+    port: int,
+    username: str,
+    password: str,
+) -> set[str] | None:
+    """Return the live PostgreSQL database names when the catalog query succeeds.
+
+    Atlas retries for a long time when pointed at a database that is not
+    provisioned.  A single lightweight catalog query lets drift checks mark
+    those entries as unavailable without weakening inspection of databases
+    that are present.  ``None`` deliberately means discovery was unavailable;
+    callers then retain the original Atlas-first behavior.
+    """
+
+    try:
+        import psycopg  # type: ignore[import-not-found]
+    except ImportError:
+        return None
+
+    try:
+        with psycopg.connect(
+            host=host,
+            port=port,
+            dbname="postgres",
+            user=username,
+            password=password,
+            connect_timeout=10,
+            autocommit=True,
+        ) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT datname FROM pg_database WHERE datallowconn")
+                return {str(row[0]) for row in cursor.fetchall()}
+    except Exception:
+        # A discovery failure must not turn a healthy Atlas check into a false
+        # degraded result.  Atlas remains the authoritative fallback below.
+        return None
+
+
 def postgres_url(*, host: str, port: int, database: str, username: str, password: str) -> str:
     return (
         "postgres://"
         f"{urllib.parse.quote(username, safe='')}:"
         f"{urllib.parse.quote(password, safe='')}"
-        f"@{host}:{port}/{database}?sslmode=disable"
+        f"@{host}:{port}/{database}?sslmode=disable&connect_timeout={DEFAULT_POSTGRES_CONNECT_TIMEOUT_SECONDS}"
     )
 
 
@@ -723,6 +833,24 @@ def inspect_live_schema(
     return normalize_snapshot(output)
 
 
+def is_missing_database_error(exc: BaseException, database_name: str) -> bool:
+    """Return whether Atlas failed because the target database is not provisioned.
+
+    The catalog intentionally describes the complete service fleet, while a
+    deployment may only have a subset of those databases provisioned.  Atlas
+    reports that condition as a RuntimeError from the container wrapper; keep
+    the check narrow so authentication, connectivity, and schema errors still
+    fail the drift run.
+    """
+
+    message = str(exc).lower()
+    normalized_name = database_name.strip().lower()
+    return (
+        f'database "{normalized_name}" does not exist' in message
+        or f"database {normalized_name} does not exist" in message
+    )
+
+
 def lint_target(
     client: Any,
     *,
@@ -765,17 +893,40 @@ def lint_target(
 
 
 def diff_preview(snapshot_content: str, live_content: str, *, label: str) -> list[str]:
-    diff = list(
-        difflib.unified_diff(
-            snapshot_content.splitlines(),
-            live_content.splitlines(),
-            fromfile=f"{label}-snapshot",
-            tofile=f"{label}-live",
-            lineterm="",
+    snapshot_lines = snapshot_content.splitlines()
+    live_lines = live_content.splitlines()
+    if (
+        len(snapshot_content) > MAX_DIFF_PREVIEW_SOURCE_CHARACTERS
+        or len(live_content) > MAX_DIFF_PREVIEW_SOURCE_CHARACTERS
+        or len(snapshot_lines) > MAX_DIFF_PREVIEW_SOURCE_LINES
+        or len(live_lines) > MAX_DIFF_PREVIEW_SOURCE_LINES
+    ):
+        first_difference_line = next(
+            (
+                index
+                for index, (snapshot_line, live_line) in enumerate(zip(snapshot_lines, live_lines), start=1)
+                if snapshot_line != live_line
+            ),
+            min(len(snapshot_lines), len(live_lines)) + 1,
         )
-    )
-    if len(diff) > 200:
-        return diff[:200] + ["... diff truncated ..."]
+        return [
+            "... diff preview omitted: source schema exceeds the safe preview limit "
+            f"({len(snapshot_content)} snapshot chars/{len(live_content)} live chars; "
+            f"{len(snapshot_lines)} snapshot lines/{len(live_lines)} live lines) ...",
+            f"... first difference near line {first_difference_line}; compare the recorded hashes and snapshot ...",
+        ]
+
+    diff: list[str] = []
+    for line in difflib.unified_diff(
+        snapshot_lines,
+        live_lines,
+        fromfile=f"{label}-snapshot",
+        tofile=f"{label}-live",
+        lineterm="",
+    ):
+        diff.append(line)
+        if len(diff) >= MAX_DIFF_PREVIEW_LINES:
+            return diff + ["... diff truncated ..."]
     return diff
 
 
@@ -1004,6 +1155,7 @@ def run_drift(
 
     checked: list[dict[str, Any]] = []
     drifted: list[dict[str, Any]] = []
+    unavailable: list[dict[str, Any]] = []
     event_records: list[dict[str, Any]] = []
     receipt_paths: list[str] = []
     receipt_errors: list[str] = []
@@ -1012,6 +1164,12 @@ def run_drift(
         token = openbao_login(context, openbao_url, catalog)
         credentials = request_dynamic_credentials(openbao_url, token=token, role_name=database_role)
         with resolve_postgres_endpoint(catalog, context) as (postgres_host, postgres_port):
+            live_databases = discover_postgres_databases(
+                host=postgres_host,
+                port=postgres_port,
+                username=credentials["username"],
+                password=credentials["password"],
+            )
             for entry in require_list(catalog.get("databases"), "config/atlas/catalog.json.databases"):
                 entry = require_mapping(entry, "config/atlas/catalog.json.databases[]")
                 database_id = require_str(entry.get("id"), "Atlas database id")
@@ -1020,18 +1178,41 @@ def run_drift(
                     entry.get("snapshot_path"),
                     f"Atlas database {database_id}.snapshot_path",
                 )
+                if live_databases is not None and database_name not in live_databases:
+                    unavailable.append(
+                        {
+                            "database_id": database_id,
+                            "database": database_name,
+                            "snapshot_path": str(snapshot_path.relative_to(repo_root)),
+                            "reason": "database_not_provisioned",
+                        }
+                    )
+                    continue
                 snapshot_content = normalize_snapshot(snapshot_path.read_text(encoding="utf-8"))
-                live_content = inspect_live_schema(
-                    client,
-                    atlas_image_ref=atlas_image_ref,
-                    database_url=postgres_url(
-                        host=postgres_host,
-                        port=postgres_port,
-                        database=database_name,
-                        username=credentials["username"],
-                        password=credentials["password"],
-                    ),
-                )
+                try:
+                    live_content = inspect_live_schema(
+                        client,
+                        atlas_image_ref=atlas_image_ref,
+                        database_url=postgres_url(
+                            host=postgres_host,
+                            port=postgres_port,
+                            database=database_name,
+                            username=credentials["username"],
+                            password=credentials["password"],
+                        ),
+                    )
+                except RuntimeError as exc:
+                    if not is_missing_database_error(exc, database_name):
+                        raise
+                    unavailable.append(
+                        {
+                            "database_id": database_id,
+                            "database": database_name,
+                            "snapshot_path": str(snapshot_path.relative_to(repo_root)),
+                            "reason": "database_not_provisioned",
+                        }
+                    )
+                    continue
                 checked.append(
                     {
                         "database_id": database_id,
@@ -1118,11 +1299,17 @@ def run_drift(
             drifted_ids=[record["database_id"] for record in drifted],
         )
 
-    status = "clean" if not drifted else "drift_detected"
+    if drifted:
+        status = "drift_detected"
+    elif unavailable:
+        status = "degraded"
+    else:
+        status = "clean"
     payload = {
         "status": status,
         "catalog_path": str(catalog_path),
         "checked_databases": checked,
+        "unavailable_databases": unavailable,
         "drifted_databases": drifted,
         "drift_count": len(drifted),
         "receipt_paths": receipt_paths,

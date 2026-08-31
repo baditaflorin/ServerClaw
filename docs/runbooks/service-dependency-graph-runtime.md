@@ -49,7 +49,7 @@ WHERE to_node = 'service:postgres'
 ORDER BY from_node;
 ```
 
-On current mainline, `service:keycloak`, `service:netbox`, `service:mattermost`, and `service:windmill` should all appear as dependents of `service:postgres`.
+On current mainline, `service:authentik`, `service:netbox`, `service:mattermost`, and `service:windmill` should all appear as dependents of `service:postgres`.
 
 `ispopulated` must be `t` before treating ADR 0117 as healthy. An unpopulated `world_state.current_view` causes the NetBox importer to fail even if the schema itself exists.
 

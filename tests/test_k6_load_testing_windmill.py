@@ -43,7 +43,7 @@ def test_k6_load_testing_invokes_repo_runner_via_uv(monkeypatch, tmp_path: Path)
         return subprocess.CompletedProcess(
             command,
             0,
-            stdout=json.dumps({"receipts": ["receipts/k6/load-keycloak.json"]}),
+            stdout=json.dumps({"receipts": ["receipts/k6/load-authentik.json"]}),
             stderr="",
         )
 
@@ -52,10 +52,10 @@ def test_k6_load_testing_invokes_repo_runner_via_uv(monkeypatch, tmp_path: Path)
     payload = module.main(
         repo_path=str(tmp_path),
         scenario="load",
-        service="keycloak",
+        service="authentik",
         publish_nats=True,
         notify_ntfy=True,
     )
 
     assert payload["status"] == "ok"
-    assert payload["receipts"] == ["receipts/k6/load-keycloak.json"]
+    assert payload["receipts"] == ["receipts/k6/load-authentik.json"]

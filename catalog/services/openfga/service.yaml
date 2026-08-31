@@ -16,7 +16,7 @@ service:
   secret_catalog_ids:
     - openfga_database_password
     - openfga_preshared_key
-    - keycloak_serverclaw_runtime_client_secret
+    - authentik_serverclaw_runtime_client_secret
   adr: '0262'
   runbook: docs/runbooks/configure-openfga.md
   runtime_pool: runtime-control
@@ -74,9 +74,9 @@ dependency:
     adr: '0262'
   outbound_edges:
     - from: openfga
-      to: keycloak
+      to: authentik
       type: soft
-      description: The repo-managed bootstrap verification path checks Keycloak-issued
+      description: The repo-managed bootstrap verification path checks Authentik-issued
         operator and runtime identities alongside the delegated authorization graph.
     - from: openfga
       to: openbao

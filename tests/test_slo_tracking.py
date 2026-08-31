@@ -50,15 +50,14 @@ def test_slo_status_entries_include_latest_k6_receipt_signal(tmp_path: Path) -> 
                 "review_note": "test",
                 "slos": [
                     {
-                        "id": "keycloak-latency",
-                        "service_id": "keycloak",
-                        "indicator": "latency",
+                        "id": "authentik-availability",
+                        "service_id": "authentik",
+                        "indicator": "availability",
                         "objective_percent": 95.0,
                         "window_days": 30,
-                        "target_url": "https://sso.example.com/realms/lv3/.well-known/openid-configuration",
+                        "target_url": "https://id.example.com/-/health/ready/",
                         "probe_module": "http_2xx_follow_redirects",
-                        "latency_threshold_ms": 500,
-                        "description": "Latency SLO",
+                        "description": "Availability SLO",
                     }
                 ],
             }
@@ -71,8 +70,8 @@ def test_slo_status_entries_include_latest_k6_receipt_signal(tmp_path: Path) -> 
             {
                 "services": [
                     {
-                        "id": "keycloak",
-                        "name": "Keycloak",
+                        "id": "authentik",
+                        "name": "Authentik",
                     },
                     {
                         "id": "grafana",
@@ -86,10 +85,10 @@ def test_slo_status_entries_include_latest_k6_receipt_signal(tmp_path: Path) -> 
         encoding="utf-8",
     )
     (tmp_path / "versions" / "stack.yaml").write_text("platform_version: 0.0.1\nobserved_state: {}\n", encoding="utf-8")
-    (tmp_path / "receipts" / "k6" / "load-keycloak-20260331T070000Z.json").write_text(
+    (tmp_path / "receipts" / "k6" / "load-authentik-20260331T070000Z.json").write_text(
         json.dumps(
             {
-                "service_id": "keycloak",
+                "service_id": "authentik",
                 "scenario": "load",
                 "recorded_on": "2026-03-31",
                 "recorded_at": "2026-03-31T07:00:00Z",
@@ -125,5 +124,5 @@ def test_slo_status_entries_include_latest_k6_receipt_signal(tmp_path: Path) -> 
     )
 
     assert entries[0]["k6"]["current_signal"]["scenario"] == "load"
-    assert entries[0]["k6"]["current_signal"]["receipt_path"] == "receipts/k6/load-keycloak-20260331T070000Z.json"
+    assert entries[0]["k6"]["current_signal"]["receipt_path"] == "receipts/k6/load-authentik-20260331T070000Z.json"
     assert entries[0]["k6"]["current_signal"]["error_budget_remaining_pct"] == 92.0

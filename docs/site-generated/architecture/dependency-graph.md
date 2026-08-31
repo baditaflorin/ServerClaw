@@ -61,9 +61,8 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Authentik, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, LiveKit, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
-| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Keycloak, Label Studio, Lago, Langfuse, LibreChat, LiteLLM Proxy, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, OpenFGA, Outline, Paperless-ngx, Plane, Plausible Analytics, Public Status Page, Repo Intake, SFTPGo, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
-| `3` | Homepage, Platform API Gateway, Woodpecker CI |
-| `4` | Ops Portal |
+| `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Homepage, Label Studio, Lago, Langfuse, LibreChat, LiteLLM Proxy, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, OpenFGA, Outline, Paperless-ngx, Plane, Platform API Gateway, Plausible Analytics, Public Status Page, Repo Intake, SFTPGo, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
+| `3` | Ops Portal, Woodpecker CI |
 
 ## Mermaid Diagram
 
@@ -115,7 +114,7 @@ graph TD
     gitea["Gitea\nTier 2"]
     glitchtip["GlitchTip\nTier 2"]
     gotenberg["Gotenberg\nTier 2"]
-    keycloak["Keycloak\nTier 2"]
+    homepage["Homepage\nTier 2"]
     label_studio["Label Studio\nTier 2"]
     lago["Lago\nTier 2"]
     langfuse["Langfuse\nTier 2"]
@@ -132,6 +131,7 @@ graph TD
     outline["Outline\nTier 2"]
     paperless["Paperless-ngx\nTier 2"]
     plane["Plane\nTier 2"]
+    api_gateway["Platform API Gateway\nTier 2"]
     plausible["Plausible Analytics\nTier 2"]
     status_page["Public Status Page\nTier 2"]
     repo_intake["Repo Intake\nTier 2"]
@@ -143,13 +143,11 @@ graph TD
     typesense["Typesense\nTier 2"]
     vaultwarden["Vaultwarden\nTier 2"]
     windmill["Windmill\nTier 2"]
-    homepage["Homepage\nTier 3"]
-    api_gateway["Platform API Gateway\nTier 3"]
+    ops_portal["Ops Portal\nTier 3"]
     woodpecker["Woodpecker CI\nTier 3"]
-    ops_portal["Ops Portal\nTier 4"]
     alertmanager -->|soft| mattermost
     alertmanager -->|soft| ntfy
-    api_gateway -->|hard| keycloak
+    api_gateway -->|hard| authentik
     api_gateway -->|soft| nginx_edge
     api_gateway -->|soft| typesense
     authentik -->|startup_only| openbao
@@ -160,43 +158,42 @@ graph TD
     changedetection -->|soft| mattermost
     changedetection -->|soft| ntfy
     changelog_portal -->|hard| nginx_edge
-    coolify -->|soft| keycloak
+    coolify -->|soft| authentik
     coolify -->|soft| nginx_edge
     coolify_apps -->|hard| coolify
     coolify_apps -->|soft| nginx_edge
     crawl4ai -->|hard| docker_runtime
     dify -->|soft| api_gateway
-    dify -->|soft| keycloak
+    dify -->|soft| authentik
     dify -->|soft| langfuse
     dify -->|soft| nginx_edge
     dify -->|soft| ollama
     dify -->|startup_only| openbao
     dify -->|hard| postgres
+    directus -->|soft| authentik
     directus -->|hard| docker_runtime
-    directus -->|soft| keycloak
     directus -->|soft| nginx_edge
     directus -->|startup_only| openbao
     directus -->|hard| postgres
     docs_portal -->|hard| nginx_edge
-    dozzle -->|soft| keycloak
+    dozzle -->|soft| authentik
     dozzle -->|soft| nginx_edge
+    excalidraw -->|soft| authentik
     excalidraw -->|hard| docker_runtime
-    excalidraw -->|soft| keycloak
     excalidraw -->|hard| nginx_edge
+    flagsmith -->|soft| authentik
     flagsmith -->|hard| docker_runtime
-    flagsmith -->|soft| keycloak
     flagsmith -->|soft| nginx_edge
     flagsmith -->|startup_only| openbao
     flagsmith -->|hard| postgres
+    gitea -->|soft| authentik
     gitea -->|soft| docker_build
-    gitea -->|soft| keycloak
     gitea -->|soft| minio
     gitea -->|soft| ntfy
     gitea -->|startup_only| openbao
     gitea -->|hard| postgres
     glitchtip -->|soft| authentik
     glitchtip -->|hard| docker_runtime
-    glitchtip -->|soft| keycloak
     glitchtip -->|soft| mail_platform
     glitchtip -->|soft| mattermost
     glitchtip -->|soft| nginx_edge
@@ -205,39 +202,34 @@ graph TD
     glitchtip -->|hard| postgres
     gotenberg -->|soft| api_gateway
     gotenberg -->|hard| docker_runtime
-    grafana -->|soft| keycloak
+    grafana -->|soft| authentik
     grafana -->|soft| minio
     grafana -->|soft| nginx_edge
-    grist -->|soft| keycloak
+    grist -->|soft| authentik
     grist -->|soft| nginx_edge
     grist -->|startup_only| openbao
-    harbor -->|soft| keycloak
+    harbor -->|soft| authentik
     harbor -->|soft| nginx_edge
     headscale -->|soft| nginx_edge
-    homepage -->|hard| keycloak
+    homepage -->|hard| authentik
     homepage -->|hard| nginx_edge
-    keycloak -->|soft| mailpit
-    keycloak -->|soft| nginx_edge
-    keycloak -->|startup_only| openbao
-    keycloak -->|hard| postgres
-    keycloak -->|startup_only| step_ca
     label_studio -->|soft| api_gateway
+    label_studio -->|soft| authentik
     label_studio -->|hard| docker_runtime
-    label_studio -->|soft| keycloak
     label_studio -->|soft| nginx_edge
     label_studio -->|startup_only| openbao
     label_studio -->|hard| postgres
     lago -->|soft| api_gateway
+    lago -->|soft| authentik
     lago -->|hard| docker_runtime
-    lago -->|soft| keycloak
     lago -->|soft| nginx_edge
     lago -->|hard| postgres
-    langfuse -->|soft| keycloak
+    langfuse -->|soft| authentik
     langfuse -->|soft| minio
     langfuse -->|soft| nginx_edge
     langfuse -->|startup_only| openbao
     langfuse -->|hard| postgres
-    librechat -->|soft| keycloak
+    librechat -->|soft| authentik
     librechat -->|hard| ollama
     librechat -->|startup_only| openbao
     librechat -->|soft| searxng
@@ -255,11 +247,11 @@ graph TD
     mattermost -->|hard| postgres
     minio -->|soft| nginx_edge
     minio -->|startup_only| openbao
-    n8n -->|soft| keycloak
+    n8n -->|soft| authentik
     n8n -->|soft| nginx_edge
     n8n -->|startup_only| openbao
     n8n -->|hard| postgres
-    neko -->|soft| keycloak
+    neko -->|soft| authentik
     neko -->|hard| nginx_edge
     netbox -->|startup_only| openbao
     netbox -->|hard| postgres
@@ -270,23 +262,23 @@ graph TD
     nomad -->|soft| docker_runtime
     ntfy -->|hard| docker_runtime
     ntfy -->|soft| nginx_edge
-    openfga -->|soft| keycloak
+    openfga -->|soft| authentik
     openfga -->|startup_only| openbao
     openfga -->|hard| postgres
     ops_portal -->|hard| api_gateway
-    ops_portal -->|hard| keycloak
+    ops_portal -->|hard| authentik
     ops_portal -->|hard| nginx_edge
-    outline -->|soft| keycloak
+    outline -->|soft| authentik
     outline -->|soft| nginx_edge
     outline -->|startup_only| openbao
     outline -->|hard| postgres
     paperless -->|soft| api_gateway
+    paperless -->|soft| authentik
     paperless -->|hard| docker_runtime
-    paperless -->|soft| keycloak
     paperless -->|soft| nginx_edge
     paperless -->|startup_only| openbao
     paperless -->|hard| postgres
-    plane -->|soft| keycloak
+    plane -->|soft| authentik
     plane -->|soft| nginx_edge
     plane -->|startup_only| openbao
     plane -->|hard| postgres
@@ -298,25 +290,25 @@ graph TD
     plausible -->|soft| nginx_edge
     plausible -->|startup_only| openbao
     redpanda -->|startup_only| openbao
+    repo_intake -->|soft| authentik
     repo_intake -->|hard| docker_runtime
-    repo_intake -->|soft| keycloak
     repo_intake -->|soft| nginx_edge
-    semaphore -->|soft| keycloak
+    semaphore -->|soft| authentik
     semaphore -->|startup_only| openbao
     semaphore -->|hard| postgres
-    serverclaw -->|soft| keycloak
+    serverclaw -->|soft| authentik
     serverclaw -->|soft| nginx_edge
     serverclaw -->|hard| ollama
     serverclaw -->|startup_only| openbao
     serverclaw -->|soft| searxng
+    sftpgo -->|soft| authentik
     sftpgo -->|hard| docker_runtime
-    sftpgo -->|soft| keycloak
     sftpgo -->|soft| nginx_edge
     sftpgo -->|hard| postgres
     status_page -->|hard| nginx_edge
     status_page -->|hard| uptime_kuma
+    superset -->|soft| authentik
     superset -->|hard| docker_runtime
-    superset -->|soft| keycloak
     superset -->|soft| nginx_edge
     superset -->|startup_only| openbao
     superset -->|hard| postgres

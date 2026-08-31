@@ -1,6 +1,6 @@
 # ADR 0183: Keycloak Uses Shared-Mail-Network Internal Submission
 
-- Status: Accepted
+- Status: Deprecated (see service removal ADR — service removed from platform)
 - Implementation Status: Implemented
 - Implemented In Repo Version: not yet
 - Implemented In Platform Version: not yet

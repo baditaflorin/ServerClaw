@@ -1,6 +1,6 @@
 # ADR 0388: Centralize Keycloak Realm Name and OIDC Issuer URL
 
-**Status:** Accepted
+**Status:** Deprecated (see service removal ADR — service removed from platform)
 **Decision Date:** 2026-04-09
 **Concern:** DRY, Fork Portability, SSO Configuration
 **Depends on:** ADR 0385 (IoC Library Refactor), ADR 0373 (Service Registry)

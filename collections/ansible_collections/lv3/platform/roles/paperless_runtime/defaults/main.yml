@@ -15,7 +15,7 @@ paperless_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_p
 paperless_public_hostname_overrides:
   - hostname: "{{ paperless_service_topology.public_hostname }}"
     address: "{{ paperless_public_edge_private_ip }}"
-  - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}"
+  - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}"
     address: "{{ paperless_public_edge_private_ip }}"
 paperless_redis_container_name: paperless-redis
 paperless_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
@@ -32,7 +32,7 @@ paperless_api_token_local_file: "{{ paperless_local_artifact_dir }}/api-token.tx
 paperless_taxonomy_local_file: "{{ paperless_local_artifact_dir }}/taxonomy.json"
 paperless_sync_report_local_file: "{{ paperless_local_artifact_dir }}/sync-report.json"
 paperless_smoke_report_local_file: "{{ paperless_local_artifact_dir }}/smoke-upload-report.json"
-paperless_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/paperless-client-secret.txt"
+paperless_authentik_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/paperless-client-secret.txt"
 paperless_secret_key_remote_file: "{{ paperless_secret_dir }}/secret-key.txt"
 paperless_redis_password_remote_file: "{{ paperless_secret_dir }}/redis-password.txt"
 paperless_admin_password_remote_file: "{{ paperless_secret_dir }}/admin-password.txt"
@@ -40,9 +40,9 @@ paperless_api_token_file: "{{ paperless_secret_dir }}/api-token"
 paperless_taxonomy_manifest_file: "{{ paperless_secret_dir }}/taxonomy.json"
 paperless_sync_report_file: "{{ paperless_site_dir }}/taxonomy-sync-report.json"
 paperless_sync_script: "{{ playbook_dir }}/../scripts/paperless_sync.py"
-paperless_keycloak_client_id: paperless
-paperless_keycloak_provider_id: keycloak
-paperless_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
+paperless_authentik_client_id: paperless
+paperless_authentik_provider_id: authentik
+paperless_authentik_issuer: "{{ authentik_oidc_provider_base_url }}/paperless/"
 paperless_admin_username: admin
 paperless_admin_mail: paperless-admin@{{ platform_domain }}
 paperless_timezone: Europe/Bucharest

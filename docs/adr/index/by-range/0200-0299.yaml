@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-29'
+generated: '2026-08-31'
 facet: range
 label: 0200-0299
 range:
@@ -906,7 +906,7 @@ adrs:
     path: docs/adr/0247-authenticated-browser-journey-verification-via-playwright.md
   - adr: 0248
     title: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-03-28'
@@ -1189,7 +1189,7 @@ adrs:
     implemented_on: '2026-03-30'
   - adr: '0262'
     title: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-03-28'

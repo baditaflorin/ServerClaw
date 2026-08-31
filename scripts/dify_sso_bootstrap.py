@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# Purpose: Idempotently bootstrap Dify and reconcile workspace SSO with a Keycloak OIDC provider.
+# Purpose: Idempotently bootstrap Dify and reconcile workspace SSO with an Authentik OIDC provider.
 # Use case: Called by the dify_runtime Ansible role after the stack is running.
-# Inputs: Dify/admin/init credentials, Keycloak OIDC settings, and optional SSH tunnel coordinates.
+# Inputs: Dify/admin/init credentials, Authentik OIDC settings, and optional SSH tunnel coordinates.
 # Outputs: JSON summary of admin setup, SSO action, change state, and transport.
 # Idempotency: Skips completed admin setup and matching SSO state; the SSH forward is transient.
 
@@ -159,9 +159,9 @@ def _bootstrap_sso(
     admin_name: str,
     admin_password: str,
     init_password: str,
-    keycloak_client_id: str,
-    keycloak_client_secret: str,
-    keycloak_issuer_url: str,
+    authentik_client_id: str,
+    authentik_client_secret: str,
+    authentik_issuer_url: str,
 ) -> dict:
     setup_before = client.setup_status()
     setup_changed = setup_before.get("step") != "finished"
@@ -182,23 +182,23 @@ def _bootstrap_sso(
             "reason": "SSO endpoint not present in this Dify version",
         }
 
-    if _sso_matches(current, client_id=keycloak_client_id, issuer_url=keycloak_issuer_url):
+    if _sso_matches(current, client_id=authentik_client_id, issuer_url=authentik_issuer_url):
         return {
             "action": "already-configured",
             "changed": setup_changed,
             "admin_bootstrap": "configured" if setup_changed else "already-configured",
             "type": _PROTOCOL,
-            "client_id": keycloak_client_id,
-            "issuer_url": keycloak_issuer_url,
+            "client_id": authentik_client_id,
+            "issuer_url": authentik_issuer_url,
         }
 
     try:
         response = client.configure_sso(
             enabled=True,
             protocol=_PROTOCOL,
-            client_id=keycloak_client_id,
-            client_secret=keycloak_client_secret,
-            issuer_url=keycloak_issuer_url,
+            client_id=authentik_client_id,
+            client_secret=authentik_client_secret,
+            issuer_url=authentik_issuer_url,
         )
     except DifyApiError as exc:
         if "not support programmatic" in str(exc) or "not found" in str(exc).lower():
@@ -215,25 +215,27 @@ def _bootstrap_sso(
         "changed": True,
         "admin_bootstrap": "configured" if setup_changed else "already-configured",
         "type": _PROTOCOL,
-        "client_id": keycloak_client_id,
-        "issuer_url": keycloak_issuer_url,
+        "client_id": authentik_client_id,
+        "issuer_url": authentik_issuer_url,
         "response": response,
     }
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Bootstrap Dify workspace SSO to use a Keycloak OIDC provider.")
+    parser = argparse.ArgumentParser(description="Bootstrap Dify workspace SSO to use an Authentik OIDC provider.")
     parser.add_argument("--base-url", required=True, help="Public Dify base URL (e.g. https://agents.localhost)")
     parser.add_argument("--admin-email", required=True, help="Dify admin email used to log in")
     parser.add_argument("--admin-name", default="Platform Operator", help="Dify admin name used during first setup")
     parser.add_argument("--admin-password-file", required=True, help="Path to the Dify admin password file")
     parser.add_argument("--init-password-file", required=True, help="Path to the Dify init-validation password file")
-    parser.add_argument("--keycloak-client-id", required=True, help="Keycloak client ID registered for Dify")
-    parser.add_argument("--keycloak-client-secret-file", required=True, help="Path to the Keycloak client secret file")
+    parser.add_argument("--authentik-client-id", required=True, help="Authentik client ID registered for Dify")
     parser.add_argument(
-        "--keycloak-issuer-url",
+        "--authentik-client-secret-file", required=True, help="Path to the Authentik client secret file"
+    )
+    parser.add_argument(
+        "--authentik-issuer-url",
         required=True,
-        help="Keycloak issuer URL (realm URL, e.g. https://sso.localhost/realms/lv3)",
+        help="Authentik issuer URL (e.g. https://id.example.com/application/o/dify/)",
     )
     parser.add_argument("--ssh-host", help="Dify runtime SSH host for a loopback API tunnel")
     parser.add_argument("--ssh-user", help="Dify runtime SSH user")
@@ -246,7 +248,7 @@ def main() -> int:
 
     admin_password = read_secret(args.admin_password_file)
     init_password = read_secret(args.init_password_file)
-    client_secret = read_secret(args.keycloak_client_secret_file)
+    client_secret = read_secret(args.authentik_client_secret_file)
     if len(init_password) > 30:
         raise ValueError("Dify initialization password exceeds the live API maximum of 30 characters")
 
@@ -257,9 +259,9 @@ def main() -> int:
             admin_name=args.admin_name,
             admin_password=admin_password,
             init_password=init_password,
-            keycloak_client_id=args.keycloak_client_id,
-            keycloak_client_secret=client_secret,
-            keycloak_issuer_url=args.keycloak_issuer_url,
+            authentik_client_id=args.authentik_client_id,
+            authentik_client_secret=client_secret,
+            authentik_issuer_url=args.authentik_issuer_url,
         )
     result["transport"] = "ssh_loopback_forward" if args.ssh_host else "direct"
     print(json.dumps(result, indent=2))

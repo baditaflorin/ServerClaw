@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-29'
+generated: '2026-08-31'
 facet: range
 label: 0300-0399
 range:
@@ -415,7 +415,7 @@ adrs:
     implemented_on: '2026-04-02'
   - adr: '0317'
     title: Keycloak Direct-API Operator Provisioning via SSH Proxy
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-01'
@@ -1510,7 +1510,7 @@ adrs:
     path: docs/adr/0361-nomad-oidc-edge-publication.md
   - adr: '0361'
     title: Semaphore Keycloak OIDC Integration
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-07'
@@ -1904,7 +1904,7 @@ adrs:
     implemented_on: '2026-04-12'
   - adr: 0382
     title: Keycloak Sign-In Button Stuck Incident Postmortem
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-08'

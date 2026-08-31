@@ -16,7 +16,7 @@
       "service": "api_gateway",
       "name": "Platform API Gateway",
       "vm": "docker-runtime",
-      "tier": 3,
+      "tier": 2,
       "category": "automation",
       "adr": "0092"
     },
@@ -232,18 +232,9 @@
       "service": "homepage",
       "name": "Homepage",
       "vm": "docker-runtime",
-      "tier": 3,
-      "category": "access",
-      "adr": "0152"
-    },
-    {
-      "id": "keycloak",
-      "service": "keycloak",
-      "name": "Keycloak",
-      "vm": "docker-runtime",
       "tier": 2,
       "category": "access",
-      "adr": "0056"
+      "adr": "0152"
     },
     {
       "id": "label_studio",
@@ -455,7 +446,7 @@
       "service": "ops_portal",
       "name": "Ops Portal",
       "vm": "nginx",
-      "tier": 4,
+      "tier": 3,
       "category": "automation",
       "adr": "0074"
     },
@@ -718,9 +709,9 @@
     },
     {
       "from": "api_gateway",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "hard",
-      "description": "The unified API gateway validates caller JWTs against Keycloak before serving authenticated platform routes."
+      "description": "The unified API gateway validates caller JWTs against Authentik before serving authenticated platform routes."
     },
     {
       "from": "api_gateway",
@@ -784,9 +775,9 @@
     },
     {
       "from": "coolify",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "Authenticated browser access to coolify.example.com depends on the shared Keycloak-backed edge auth path, while the private controller remains reachable over the management network."
+      "description": "Authenticated browser access to coolify.example.com depends on the shared Authentik-backed edge auth path, while the private controller remains reachable over the management network."
     },
     {
       "from": "coolify",
@@ -820,9 +811,9 @@
     },
     {
       "from": "dify",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "Operator browser access to Dify is gated behind the shared oauth2-proxy and Keycloak authentication flow at the edge."
+      "description": "Operator browser access to Dify is gated behind the shared oauth2-proxy and Authentik authentication flow at the edge."
     },
     {
       "from": "dify",
@@ -856,15 +847,15 @@
     },
     {
       "from": "directus",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "The Directus runtime container and guest-local listener are hosted on docker-runtime."
+      "to": "authentik",
+      "type": "soft",
+      "description": "Routine browser sign-in delegates to Authentik via OIDC while the local Directus admin remains break-glass only."
     },
     {
       "from": "directus",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "Routine browser sign-in delegates to Keycloak via OIDC while the local Directus admin remains break-glass only."
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Directus runtime container and guest-local listener are hosted on docker-runtime."
     },
     {
       "from": "directus",
@@ -892,9 +883,9 @@
     },
     {
       "from": "dozzle",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "Authenticated browser access to logs.example.com depends on the shared Keycloak-backed edge auth path, but the private hub remains reachable for controlled operator verification."
+      "description": "Authenticated browser access to logs.example.com depends on the shared Authentik-backed edge auth path, but the private hub remains reachable for controlled operator verification."
     },
     {
       "from": "dozzle",
@@ -904,15 +895,15 @@
     },
     {
       "from": "excalidraw",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "The Excalidraw frontend and collaboration room are hosted on docker-runtime."
+      "to": "authentik",
+      "type": "soft",
+      "description": "Operator access to draw.example.com depends on the shared Authentik-backed oauth2-proxy edge flow, while the private runtime can still be verified locally."
     },
     {
       "from": "excalidraw",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "Operator access to draw.example.com depends on the shared Keycloak-backed oauth2-proxy edge flow, while the private runtime can still be verified locally."
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Excalidraw frontend and collaboration room are hosted on docker-runtime."
     },
     {
       "from": "excalidraw",
@@ -922,15 +913,15 @@
     },
     {
       "from": "flagsmith",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "The Flagsmith Community Edition runtime and task processor are hosted on docker-runtime."
+      "to": "authentik",
+      "type": "soft",
+      "description": "Browser access to flags.example.com is gated by the shared oauth2-proxy and Authentik edge-auth path, while private environment-key consumers continue to use the internal runtime directly."
     },
     {
       "from": "flagsmith",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "Browser access to flags.example.com is gated by the shared oauth2-proxy and Keycloak edge-auth path, while private environment-key consumers continue to use the internal runtime directly."
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Flagsmith Community Edition runtime and task processor are hosted on docker-runtime."
     },
     {
       "from": "flagsmith",
@@ -952,15 +943,15 @@
     },
     {
       "from": "gitea",
-      "to": "docker_build",
+      "to": "authentik",
       "type": "soft",
-      "description": "Gitea Actions jobs are delegated to the dedicated runner on docker-build, but repository hosting remains available without the runner."
+      "description": "Operator SSO into Gitea uses Authentik, while the repo-managed bootstrap admin remains the break-glass fallback."
     },
     {
       "from": "gitea",
-      "to": "keycloak",
+      "to": "docker_build",
       "type": "soft",
-      "description": "Operator SSO into Gitea prefers Keycloak, while the repo-managed bootstrap admin remains the break-glass fallback."
+      "description": "Gitea Actions jobs are delegated to the dedicated runner on docker-build, but repository hosting remains available without the runner."
     },
     {
       "from": "gitea",
@@ -997,12 +988,6 @@
       "to": "docker_runtime",
       "type": "hard",
       "description": "The GlitchTip web runtime, project bootstrap flow, and supporting Valkey container run on docker-runtime."
-    },
-    {
-      "from": "glitchtip",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "The prior Keycloak confidential-client secret is retained only as a per-client rollback path during ADR 0491 migration."
     },
     {
       "from": "glitchtip",
@@ -1054,9 +1039,9 @@
     },
     {
       "from": "grafana",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "Grafana uses Keycloak for the preferred SSO path, but local admin remains the break-glass fallback."
+      "description": "Grafana uses Authentik for the preferred SSO path, but local admin remains the break-glass fallback."
     },
     {
       "from": "grafana",
@@ -1072,9 +1057,9 @@
     },
     {
       "from": "grist",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "Grist delegates routine browser sign-in to the shared Keycloak OIDC broker."
+      "description": "Grist delegates routine browser sign-in to the shared Authentik OIDC broker."
     },
     {
       "from": "grist",
@@ -1090,9 +1075,9 @@
     },
     {
       "from": "harbor",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "Operator browser sign-in to registry.example.com depends on the shared Keycloak OIDC path, while robot credentials still support governed automation."
+      "description": "Operator browser sign-in to registry.example.com depends on the shared Authentik OIDC path, while robot credentials still support governed automation."
     },
     {
       "from": "harbor",
@@ -1108,45 +1093,15 @@
     },
     {
       "from": "homepage",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "hard",
-      "description": "Public operator access to Homepage is intentionally gated through the shared Keycloak-backed oauth2-proxy flow on the NGINX edge."
+      "description": "Public operator access to Homepage is intentionally gated through the shared Authentik-backed oauth2-proxy flow on the NGINX edge."
     },
     {
       "from": "homepage",
       "to": "nginx_edge",
       "type": "hard",
       "description": "The unified dashboard is published at home.example.com through the shared NGINX edge and is not exposed directly on the public internet."
-    },
-    {
-      "from": "keycloak",
-      "to": "mailpit",
-      "type": "soft",
-      "description": "Staging and non-production Keycloak runs can relay SMTP through Mailpit for assertion-level mail verification without sending real email."
-    },
-    {
-      "from": "keycloak",
-      "to": "nginx_edge",
-      "type": "soft",
-      "description": "Public reachability for sso.example.com depends on the shared edge publication path."
-    },
-    {
-      "from": "keycloak",
-      "to": "openbao",
-      "type": "startup_only",
-      "description": "Keycloak reads its mirrored database and bootstrap secrets through the OpenBao agent before startup."
-    },
-    {
-      "from": "keycloak",
-      "to": "postgres",
-      "type": "hard",
-      "description": "Keycloak stores realm, client, and session state in Postgres."
-    },
-    {
-      "from": "keycloak",
-      "to": "step_ca",
-      "type": "startup_only",
-      "description": "Keycloak depends on the internal certificate authority when repo-managed internal TLS material is refreshed."
     },
     {
       "from": "label_studio",
@@ -1156,15 +1111,15 @@
     },
     {
       "from": "label_studio",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "The Label Studio runtime container and guest-local listener are hosted on docker-runtime."
+      "to": "authentik",
+      "type": "soft",
+      "description": "Browser access to annotate.example.com is gated by the shared oauth2-proxy and Authentik edge-auth flow, while app-local Label Studio tokens remain the current automation path."
     },
     {
       "from": "label_studio",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "Browser access to annotate.example.com is gated by the shared oauth2-proxy and Keycloak edge-auth flow, while app-local Label Studio tokens remain the current automation path."
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Label Studio runtime container and guest-local listener are hosted on docker-runtime."
     },
     {
       "from": "label_studio",
@@ -1192,15 +1147,15 @@
     },
     {
       "from": "lago",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "The Lago API, front end, worker, clock, Redis, and PDF sidecar run on docker-runtime."
+      "to": "authentik",
+      "type": "soft",
+      "description": "Operator browser access to billing.example.com is gated by the shared oauth2-proxy and Authentik edge-auth path."
     },
     {
       "from": "lago",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "Operator browser access to billing.example.com is gated by the shared oauth2-proxy and Keycloak edge-auth path."
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Lago API, front end, worker, clock, Redis, and PDF sidecar run on docker-runtime."
     },
     {
       "from": "lago",
@@ -1216,9 +1171,9 @@
     },
     {
       "from": "langfuse",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "Keycloak provides the preferred OIDC browser sign-in path, but a repo-managed bootstrap user remains the break-glass fallback."
+      "description": "Authentik provides the preferred OIDC browser sign-in path, but a repo-managed bootstrap user remains the break-glass fallback."
     },
     {
       "from": "langfuse",
@@ -1246,9 +1201,9 @@
     },
     {
       "from": "librechat",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "LibreChat uses Keycloak OIDC for authentication but can fall back to local login."
+      "description": "LibreChat uses Authentik OIDC for authentication but can fall back to local login."
     },
     {
       "from": "librechat",
@@ -1354,9 +1309,9 @@
     },
     {
       "from": "n8n",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "The public n8n editor path is gated behind oauth2-proxy and Keycloak-backed browser authentication."
+      "description": "The public n8n editor path is gated behind oauth2-proxy and Authentik-backed browser authentication."
     },
     {
       "from": "n8n",
@@ -1378,9 +1333,9 @@
     },
     {
       "from": "neko",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "Neko operator access is controlled through Keycloak OIDC client configuration for Tailscale headscale management network."
+      "description": "Neko operator access is controlled through Authentik OIDC client configuration for Tailscale headscale management network."
     },
     {
       "from": "neko",
@@ -1444,9 +1399,9 @@
     },
     {
       "from": "openfga",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "The repo-managed bootstrap verification path checks Keycloak-issued operator and runtime identities alongside the delegated authorization graph."
+      "description": "The repo-managed bootstrap verification path checks Authentik-issued operator and runtime identities alongside the delegated authorization graph."
     },
     {
       "from": "openfga",
@@ -1468,9 +1423,9 @@
     },
     {
       "from": "ops_portal",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "hard",
-      "description": "ops.example.com is gated behind oauth2-proxy and Keycloak-backed browser authentication."
+      "description": "ops.example.com is gated behind oauth2-proxy and Authentik-backed browser authentication."
     },
     {
       "from": "ops_portal",
@@ -1483,12 +1438,6 @@
       "to": "authentik",
       "type": "soft",
       "description": "Outline delegates routine browser sign-in to the shared Authentik OIDC broker through a repo-managed confidential client."
-    },
-    {
-      "from": "outline",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "The prior Keycloak confidential client and service-account bootstrap credential remain available only for per-client rollback and API-token recovery."
     },
     {
       "from": "outline",
@@ -1516,15 +1465,15 @@
     },
     {
       "from": "paperless",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "Paperless runs as a compose-managed workload on docker-runtime."
+      "to": "authentik",
+      "type": "soft",
+      "description": "Paperless delegates routine browser sign-in to the shared Authentik OIDC broker."
     },
     {
       "from": "paperless",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "Paperless delegates routine browser sign-in to the shared Keycloak OIDC broker."
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "Paperless runs as a compose-managed workload on docker-runtime."
     },
     {
       "from": "paperless",
@@ -1546,9 +1495,9 @@
     },
     {
       "from": "plane",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "Authenticated browser access to tasks.example.com depends on the shared Keycloak-backed edge auth path, while the private controller path remains available for governed automation."
+      "description": "Authenticated browser access to tasks.example.com depends on the shared Authentik-backed edge auth path, while the private controller path remains available for governed automation."
     },
     {
       "from": "plane",
@@ -1618,15 +1567,15 @@
     },
     {
       "from": "repo_intake",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "Repo-intake is hosted on the shared docker-runtime guest."
+      "to": "authentik",
+      "type": "soft",
+      "description": "repo-intake.example.com is gated behind the shared edge auth boundary and Authentik-backed browser authentication."
     },
     {
       "from": "repo_intake",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "repo-intake.example.com is gated behind the shared edge auth boundary and Keycloak-backed browser authentication."
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "Repo-intake is hosted on the shared docker-runtime guest."
     },
     {
       "from": "repo_intake",
@@ -1636,9 +1585,9 @@
     },
     {
       "from": "semaphore",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "Semaphore delegates routine browser sign-in to the shared Keycloak OIDC broker while retaining a repo-managed break-glass admin login."
+      "description": "Semaphore delegates routine browser sign-in to the shared Authentik OIDC broker while retaining a repo-managed break-glass admin login."
     },
     {
       "from": "semaphore",
@@ -1654,9 +1603,9 @@
     },
     {
       "from": "serverclaw",
-      "to": "keycloak",
+      "to": "authentik",
       "type": "soft",
-      "description": "ServerClaw prefers Keycloak-backed browser sign-in while retaining a repo-managed bootstrap admin as the break-glass fallback."
+      "description": "ServerClaw prefers Authentik-backed browser sign-in while retaining a repo-managed bootstrap admin as the break-glass fallback."
     },
     {
       "from": "serverclaw",
@@ -1684,15 +1633,15 @@
     },
     {
       "from": "sftpgo",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "SFTPGo runs as a compose-managed workload on docker-runtime."
+      "to": "authentik",
+      "type": "soft",
+      "description": "SFTPGo delegates operator browser sign-in to the shared Authentik OIDC broker."
     },
     {
       "from": "sftpgo",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "SFTPGo delegates operator browser sign-in to the shared Keycloak OIDC broker."
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "SFTPGo runs as a compose-managed workload on docker-runtime."
     },
     {
       "from": "sftpgo",
@@ -1720,15 +1669,15 @@
     },
     {
       "from": "superset",
-      "to": "docker_runtime",
-      "type": "hard",
-      "description": "The Superset runtime and its OpenBao-backed compose stack run on docker-runtime."
+      "to": "authentik",
+      "type": "soft",
+      "description": "Routine browser sign-in to bi.example.com depends on the repo-managed Authentik OIDC provider configuration."
     },
     {
       "from": "superset",
-      "to": "keycloak",
-      "type": "soft",
-      "description": "Routine browser sign-in to bi.example.com depends on the repo-managed Keycloak OIDC client and realm configuration."
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Superset runtime and its OpenBao-backed compose stack run on docker-runtime."
     },
     {
       "from": "superset",

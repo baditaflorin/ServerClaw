@@ -89,30 +89,26 @@ def test_glitchtip_workflow_and_command_catalogs_declare_the_live_apply_entrypoi
     assert "openbao_runtime_secret_provisioner_approle" in workflow["preflight"]["required_secret_ids"]
     assert "openbao_runtime_secret_provisioner_bootstrap_receipt" in workflow["preflight"]["required_secret_ids"]
     assert "authentik_glitchtip_client_secret" in workflow["preflight"]["required_secret_ids"]
-    assert "keycloak_glitchtip_client_secret" in workflow["preflight"]["required_secret_ids"]
     assert "authentik_glitchtip_client_secret" not in workflow["preflight"]["generated_secret_ids"]
-    assert "keycloak_glitchtip_client_secret" not in workflow["preflight"]["generated_secret_ids"]
     assert "glitchtip_platform_findings_event_url" in workflow["preflight"]["generated_secret_ids"]
     assert command["workflow_id"] == "converge-glitchtip"
     assert command["approval_policy"] == "sensitive_live_change"
     assert command["evidence"]["live_apply_receipt_required"] is True
     command_inputs = {entry["name"]: entry for entry in command["inputs"]}
     assert command_inputs["authentik_glitchtip_client_secret"]["required"] is True
-    assert command_inputs["keycloak_glitchtip_client_secret"]["required"] is True
     assert command_inputs["PLATFORM_IDENTITY_OVERLAY"]["required"] is True
     assert command_inputs["PLATFORM_TOPOLOGY_OVERLAY"]["required"] is True
     assert command_inputs["PLATFORM_INVENTORY_OVERLAY"]["required"] is False
     assert command_inputs["openbao_runtime_secret_provisioner_approle"]["required"] is True
     assert command_inputs["openbao_runtime_secret_provisioner_bootstrap_receipt"]["required"] is True
     assert "headless authorization redirect" in command["evidence"]["notes"]
-    assert "retained-Keycloak public realm discovery probe" in command["evidence"]["notes"]
     health_checks = {entry["id"]: entry for entry in workflow["preflight"]["health_checks"]}
     assert health_checks["glitchtip_deployment_selection"]["command"] == (
         "make --no-print-directory preflight-glitchtip-deployment-selection env=production"
     )
-    keycloak_check = health_checks["keycloak_public_discovery"]["command"]
-    assert "https://sso.${platform_domain}/realms/${keycloak_realm}/" in keycloak_check
-    assert "sso.example.com" not in keycloak_check
+    authentik_check = health_checks["authentik_public_discovery"]["command"]
+    assert "https://id.${platform_domain}/application/o/glitchtip/" in authentik_check
+    assert "id.example.com" not in authentik_check
     event_smoke = next(entry for entry in workflow["verification_commands"] if "glitchtip_event_smoke.py" in entry)
     assert "scripts/resolve_local_overlay_root.sh" in event_smoke
     assert ".local/glitchtip" not in event_smoke
@@ -155,7 +151,6 @@ def test_glitchtip_catalogs_match_tracked_topology_and_selected_oidc_provider() 
     assert services["glitchtip"]["internal_url"] == "http://10.10.10.20:3005"
     assert health["readiness"]["docker_publication"]["bindings"] == [{"host": "10.10.10.20", "port": 3005}]
     assert completeness["authentik_client_generated"] is True
-    assert completeness["keycloak_client_generated"] is False
     assert completeness["oidc_provider"] == "authentik"
     authentik_subdomain = next(entry for entry in subdomains if entry["service_id"] == "authentik")
     assert authentik_subdomain["status"] == "active"

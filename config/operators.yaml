@@ -9,10 +9,8 @@ operators:
     notes: |
       Example operator entry. Replace with your actual operator details.
       See ADR 0108 for the operator onboarding process.
-    keycloak:
+    authentik:
       username: example.operator
-      realm_roles:
-        - platform-admin
       groups:
         - platform-admins
         - grafana-admins

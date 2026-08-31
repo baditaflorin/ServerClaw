@@ -105,8 +105,8 @@ def validate_api_gateway_catalog(
 
         upstream = require_upstream_http_url(service.get("upstream"), f"{path}.upstream")
         auth = require_str(service.get("auth"), f"{path}.auth")
-        if auth != "keycloak_jwt":
-            raise ValueError(f"{path}.auth must stay 'keycloak_jwt' in this iteration")
+        if auth != "oidc_jwt":
+            raise ValueError(f"{path}.auth must stay 'oidc_jwt' in this iteration")
 
         normalized_service = {
             "id": service_id,

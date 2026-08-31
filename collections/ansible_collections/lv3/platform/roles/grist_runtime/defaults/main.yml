@@ -16,15 +16,15 @@ grist_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_publi
 grist_public_hostname_overrides:
   - hostname: "{{ grist_service_topology.public_hostname }}"
     address: "{{ grist_public_edge_private_ip }}"
-  - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}"
+  - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}"
     address: "{{ grist_public_edge_private_ip }}"
 grist_session_secret_local_file: "{{ grist_local_artifact_dir }}/session-secret.txt"
-grist_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/grist-client-secret.txt"
+grist_authentik_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/grist-client-secret.txt"
 grist_session_secret_remote_file: "{{ grist_secret_dir }}/session-secret.txt"
-grist_keycloak_client_id: grist
-grist_keycloak_issuer: "{{ keycloak_oidc_issuer_url }}"
-grist_keycloak_scopes: openid profile email
-grist_keycloak_sp_host: "{{ grist_public_base_url }}"
+grist_authentik_client_id: grist
+grist_authentik_issuer: "{{ authentik_oidc_provider_base_url }}/grist/"
+grist_authentik_scopes: openid profile email
+grist_authentik_sp_host: "{{ grist_public_base_url }}"
 grist_single_org: lv3
 grist_default_email: "{{ platform_operator_email }}"
 grist_force_login: false

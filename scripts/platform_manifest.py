@@ -176,9 +176,11 @@ def build_recent_changes(current_version: str) -> dict[str, str]:
 
 
 def load_static_config() -> dict[str, Any]:
-    from identity_yaml import load_yaml_with_identity
+    from identity_yaml import load_tracked_generation_identity_vars, load_yaml_with_identity
 
-    payload = load_yaml_with_identity(STATIC_CONFIG_PATH)
+    # Generated artifacts must validate from their tracked generation inputs,
+    # not whichever ignored identity overlay happens to be active locally.
+    payload = load_yaml_with_identity(STATIC_CONFIG_PATH, variables=load_tracked_generation_identity_vars())
     if not isinstance(payload, dict):
         raise ValueError(f"{STATIC_CONFIG_PATH} must be a mapping")
     if payload.get("schema_version") != "1.0.0":

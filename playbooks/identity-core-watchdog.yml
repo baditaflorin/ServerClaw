@@ -1,7 +1,7 @@
 ---
 # Playbook: identity-core-watchdog.yml
 # Purpose: Deploy the identity-core health watchdog on runtime-control (ADR 0376).
-# Use case: Run to install or update the systemd timer that probes Keycloak, Step-CA,
+# Use case: Run to install or update the systemd timer that probes Authentik, Step-CA,
 #   OpenBao, and API Gateway every 15 seconds and auto-restarts them on failure.
 #
 # Inputs (required):

@@ -126,7 +126,7 @@
       ],
       "required_slos": [
         {
-          "service_id": "keycloak",
+          "service_id": "authentik",
           "minimum_error_budget_remaining_percent": 99.0
         },
         {
