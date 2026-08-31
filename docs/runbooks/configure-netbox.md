@@ -58,5 +58,5 @@ Run these checks after converge:
 - NetBox stays private-only in this rollout. There is no public DNS record and no public edge publication.
 - The repository remains the source of truth. The NetBox sync is deliberately one-way from canonical repo data into the NetBox API.
 - The synchronized inventory now includes the Hetzner site, the Proxmox host, all six managed VMs, both canonical prefixes, their primary IP assignments, and the governed service catalog derived from repo topology plus published/private control-plane lanes.
-- The bootstrap superuser and API token are enough for repo-managed synchronization today. ADR 0056 should replace this with brokered identity once Keycloak is live.
+- The bootstrap superuser and API token are enough for repo-managed synchronization today. Brokered identity is provided by Authentik where the application exposes a supported integration.
 - Backup coverage currently comes from the existing VM backup policy: `postgres` protects the NetBox database and `docker-runtime` protects the runtime filesystem and Redis state.

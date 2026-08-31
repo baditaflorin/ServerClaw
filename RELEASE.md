@@ -1,12 +1,12 @@
-# Release 0.179.45
+# Release 0.179.46
 
-- Date: 2026-05-13
+- Date: 2026-08-31
 
 ## Summary
-- No changelog notes were present in `## Unreleased` at release time.
+- Complete the live-verified Authentik migration, cut over active OIDC consumers and edge authentication, and retire the Keycloak runtime with preserved rollback archives.
 
 ## Platform Impact
-- no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
+- Live Authentik cutover and Keycloak retirement are verified; the platform version remains unchanged until the merged automation is converged from main.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

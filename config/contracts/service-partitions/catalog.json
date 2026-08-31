@@ -8,9 +8,9 @@
       "summary": "Target pool for identity, secrets, workflow control, supply-chain, and other high-consequence control-plane anchors. Current VM placement may still be docker-runtime until the control migration wave lands.",
       "services": [
         "api_gateway",
+        "authentik",
         "gitea",
         "harbor",
-        "keycloak",
         "mail_platform",
         "nats_jetstream",
         "openbao",

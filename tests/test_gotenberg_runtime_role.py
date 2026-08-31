@@ -17,7 +17,7 @@ WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 COMMAND_CATALOG_PATH = REPO_ROOT / "config" / "command-catalog.json"
 API_GATEWAY_CATALOG_PATH = REPO_ROOT / "config" / "api-gateway-catalog.json"
 ANSIBLE_EXECUTION_SCOPES_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
-RUNTIME_AI_HOSTS = "{{ 'docker-runtime' if (env | default('production')) == 'staging' else 'runtime-ai' }}"
+RUNTIME_AI_HOSTS = "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-ai' }}"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -53,25 +53,21 @@ def test_main_tasks_render_compose_and_verify_runtime() -> None:
     names = [task["name"] for task in tasks]
 
     assert "Render the Gotenberg compose file" in names
-    assert "Pull the Gotenberg image" in names
+    assert "Converge the Gotenberg runtime" in names
     assert "Wait for the Gotenberg health endpoint" in names
     assert "Verify the Gotenberg runtime" in names
-    port_check = next(
-        task for task in tasks if task["name"] == "Check whether Gotenberg publishes the expected host port"
+    converge_task = next(task for task in tasks if task["name"] == "Converge the Gotenberg runtime")
+    assert converge_task["vars"]["common_docker_compose_converge_health_port"] == "{{ gotenberg_runtime_port }}"
+    assert converge_task["vars"]["common_docker_compose_converge_health_url"] == (
+        "{{ gotenberg_runtime_local_base_url }}{{ gotenberg_runtime_healthcheck_path }}"
     )
-    assert port_check["ansible.builtin.command"]["argv"] == [
-        "docker",
-        "port",
-        "{{ gotenberg_runtime_container_name }}",
-        "{{ gotenberg_runtime_container_port }}/tcp",
-    ]
 
 
 def test_verify_tasks_cover_health_chromium_and_libreoffice_paths() -> None:
     verify = yaml.safe_load(ROLE_VERIFY.read_text())
     names = [task["name"] for task in verify]
 
-    assert "Verify the Gotenberg health endpoint responds locally" in names
+    assert "Verify the Gotenberg runtime health" in names
     assert "Verify the Gotenberg Chromium HTML conversion route renders a PDF" in names
     assert "Verify the Gotenberg LibreOffice conversion route renders a PDF" in names
     chromium_task = next(
@@ -153,7 +149,7 @@ def test_api_gateway_catalog_exposes_the_authenticated_gotenberg_route() -> None
 
     assert route["gateway_prefix"] == "/v1/gotenberg"
     assert route["upstream"] == "http://10.10.10.90:3007"
-    assert route["auth"] == "keycloak_jwt"
+    assert route["auth"] == "oidc_jwt"
     assert route["healthcheck_path"] == "/health"
 
 

@@ -53,7 +53,14 @@ from platform.circuit import load_circuit_policies
 from platform.faults import load_network_impairment_matrix
 from platform.interface_contracts import validate_contracts
 from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars, validate_repo_relative_path
-from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars, load_sources
+from generate_platform_vars import (
+    PLATFORM_VARS_PATH,
+    PORT_KEYS,
+    _apply_generation_identity_overlay,
+    _load_generation_identity_overlay,
+    build_platform_vars,
+    load_sources,
+)
 from gate_bypass_waivers import load_catalog as load_gate_bypass_waiver_catalog
 from gate_bypass_waivers import summarize_receipts as summarize_gate_bypass_waivers
 from gate_bypass_waivers import validate_catalog as validate_gate_bypass_waiver_catalog
@@ -114,7 +121,6 @@ from platform.workstream_registry import (
     load_workstreams as load_workstream_registry_entries,
 )
 from preview_environment import load_profile_catalog, validate_profile_catalog
-from reference_deployment_samples import validate_reference_deployment_sources
 from repo_deploy_profiles import load_repo_deploy_catalog, validate_repo_deploy_catalog
 from repo_deploy_image_cache import load_profile_catalog as load_repo_deploy_base_image_profile_catalog
 from repo_deploy_image_cache import validate_profile_catalog as validate_repo_deploy_base_image_profile_catalog
@@ -877,9 +883,17 @@ def validate_vm_template_manifest(template_catalog: dict[str, Any]) -> None:
 
 def validate_platform_vars() -> None:
     platform_vars = require_mapping(load_yaml(PLATFORM_VARS_PATH), str(PLATFORM_VARS_PATH))
-    # Skip the .local/ overlay so the check passes on any machine regardless of
-    # which identity overlay the operator has in .local/identity.yml (ADR 0407).
-    stack, host_vars = load_sources(skip_local_override=True)
+    # Reproduce the generator's repository-safe default: ignore untracked local
+    # inputs, but retain the narrow identity snapshot recorded in the generated
+    # file.  This keeps platform.yml deterministic on another operator machine
+    # without replacing the private deployment's nested generated facts with
+    # public placeholders (ADR 0407).
+    stack, host_vars = load_sources(
+        skip_local_override=True,
+        skip_topology_override=True,
+        skip_generated_topology=True,
+    )
+    _apply_generation_identity_overlay(host_vars, _load_generation_identity_overlay(PLATFORM_VARS_PATH))
     expected_platform_vars = build_platform_vars(stack=stack, host_vars=host_vars)
     if platform_vars != expected_platform_vars:
         raise ValueError("inventory/group_vars/platform.yml must match scripts/generate_platform_vars.py output")
@@ -2021,6 +2035,18 @@ def validate_workstream_canonical_truth_metadata() -> None:
             require_str(
                 receipt_id,
                 f"{workstream_path}.canonical_truth.latest_receipts[{capability}]",
+            )
+
+        retired_capabilities = require_string_list(
+            canonical_truth.get("retired_capabilities", []),
+            f"{workstream_path}.canonical_truth.retired_capabilities",
+        )
+        if len(set(retired_capabilities)) != len(retired_capabilities):
+            raise ValueError(f"{workstream_path}.canonical_truth.retired_capabilities must not contain duplicates")
+        overlap = set(latest_receipts).intersection(retired_capabilities)
+        if overlap:
+            raise ValueError(
+                f"{workstream_path}.canonical_truth cannot both publish and retire capabilities: {sorted(overlap)}"
             )
 
 
@@ -3203,10 +3229,6 @@ def validate_preview_environment_profiles() -> None:
     validate_profile_catalog(load_profile_catalog())
 
 
-def validate_reference_deployment_data() -> None:
-    validate_reference_deployment_sources()
-
-
 def validate_repo_deploy_base_image_profiles() -> None:
     payload = load_repo_deploy_base_image_profile_catalog(REPO_DEPLOY_BASE_IMAGE_PROFILES_PATH)
     validate_repo_deploy_base_image_profile_catalog(payload, path=REPO_DEPLOY_BASE_IMAGE_PROFILES_PATH)
@@ -3359,7 +3381,6 @@ def validate_repository_data_models() -> int:
     validate_runtime_assurance_matrix_data()
     validate_repo_deploy_catalog_data()
     validate_preview_environment_profiles()
-    validate_reference_deployment_data()
     validate_repo_deploy_base_image_profiles()
     validate_ephemeral_pool_catalog()
     validate_restore_readiness_profiles()

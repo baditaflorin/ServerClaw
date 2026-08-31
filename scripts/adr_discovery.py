@@ -40,7 +40,7 @@ CONCERN_RULES: list[tuple[str, list[str]]] = [
     ),
     ("ci-cd", ["ci", "cd", "gitea", "github", "actions", "pipeline", "validation", "pre-push", "gate"]),
     ("automation", ["ansible", "playbook", "role", "windmill", "workflow", "automation", "scheduled"]),
-    ("identity", ["keycloak", "sso", "oidc", "identity", "authentication", "authorization", "access"]),
+    ("identity", ["authentik", "sso", "oidc", "identity", "authentication", "authorization", "access"]),
     (
         "documentation",
         ["changelog", "runbook", "documentation", "portal", "search", "indexing", "reservation", "shard"],

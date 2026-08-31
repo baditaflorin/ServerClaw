@@ -189,13 +189,29 @@
       vars:
         service_health_probe_id: nomad
         playbook_execution_post_verify_audit_action: playbook.verify.nomad
+        # The catalog has a generic legacy default, but the member role renders
+        # its unit and wrapper from the deployment configuration prefix.  Keep
+        # the shared post-verify probe aligned with that rendered contract.
+        playbook_execution_health_probe_overrides:
+          nomad:
+            liveness:
+              unit: "{{ platform_identity.config_prefix }}-nomad"
+              description: >-
+                The {{ platform_identity.config_prefix }}-nomad systemd unit is
+                active on monitoring.
+            readiness:
+              argv:
+                - "/usr/local/bin/{{ platform_identity.config_prefix }}-nomad"
+                - node
+                - status
+                - -json
 
     - name: Run shared completion notifications
       ansible.builtin.import_tasks: tasks/notify.yml
       vars:
         playbook_execution_notification_service: nomad
 
-- name: Configure Nomad OIDC auth method for Keycloak SSO
+- name: Configure Nomad OIDC auth method for Authentik SSO
   hosts: "{{ 'monitoring-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
   become: true
   gather_facts: true

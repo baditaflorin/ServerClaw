@@ -1,9 +1,9 @@
 ---
 # Purpose: Converge the Grist runtime and edge publication.
 # Use case: Run for production or staging live apply of the repo-managed Grist spreadsheet database.
-# Outputs: Keycloak OIDC client, Grist runtime secrets, Docker Compose runtime, DNS publication, and NGINX edge publication.
+# Outputs: Authentik OIDC client, Grist runtime secrets, Docker Compose runtime, DNS publication, and NGINX edge publication.
 # Idempotency: Partially idempotent; runtime convergence is repeatable and the public verification path rechecks the live OIDC-backed publication without mutating user data.
-# Dependencies: ADR 0279, docker_runtime, keycloak_runtime, grist_runtime, nginx_edge_publication.
+# Dependencies: ADR 0279, authentik_runtime, docker_runtime, grist_runtime, nginx_edge_publication.
 #
 # Invocation: ansible-playbook playbooks/grist.yml -e @playbooks/vars/grist.yml -e env=production
 

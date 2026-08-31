@@ -1,6 +1,6 @@
 # ADR 0056: Keycloak For Operator And Agent SSO
 
-- Status: Accepted
+- Status: Deprecated (see service removal ADR — service removed from platform)
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.66.0
 - Implemented In Platform Version: 0.34.0

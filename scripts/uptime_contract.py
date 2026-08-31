@@ -15,7 +15,6 @@ UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 
 # Generic placeholder values baked into the catalog (safe for public repo).
 CATALOG_PLATFORM_DOMAIN = "example.com"
-CATALOG_KEYCLOAK_REALM = "lv3"
 
 
 def load_health_probe_catalog(path: Path = HEALTH_PROBE_CATALOG_PATH) -> dict[str, Any]:
@@ -45,22 +44,17 @@ def build_uptime_monitors(
     catalog: dict[str, Any],
     *,
     platform_domain: str | None = None,
-    keycloak_realm_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Build the monitor list, substituting deployment-specific values.
 
-    When *platform_domain* or *keycloak_realm_name* differ from the catalog
-    placeholders (``example.com`` / ``lv3``), every string field in the
-    generated monitors is updated accordingly.  This lets a single catalog
-    serve all deployments without hard-coding deployment-specific URLs.
+    When *platform_domain* differs from the catalog placeholder (``example.com``),
+    every string field in the generated monitors is updated accordingly.  This
+    lets a single catalog serve all deployments without hard-coding
+    deployment-specific URLs.
     """
     substitutions: list[tuple[str, str]] = []
     if platform_domain and platform_domain != CATALOG_PLATFORM_DOMAIN:
         substitutions.append((CATALOG_PLATFORM_DOMAIN, platform_domain))
-    if keycloak_realm_name and keycloak_realm_name != CATALOG_KEYCLOAK_REALM:
-        # Replace /realms/<old>/ so we don't clobber unrelated occurrences of the prefix.
-        substitutions.append((f"/realms/{CATALOG_KEYCLOAK_REALM}/", f"/realms/{keycloak_realm_name}/"))
-
     services = catalog.get("services", {})
     monitors: list[dict[str, Any]] = []
     names: set[str] = set()
@@ -102,14 +96,12 @@ def outputs_match(
     output_path: Path = UPTIME_MONITORS_PATH,
     catalog_path: Path = HEALTH_PROBE_CATALOG_PATH,
     platform_domain: str | None = None,
-    keycloak_realm_name: str | None = None,
 ) -> bool:
     catalog = load_health_probe_catalog(catalog_path)
     expected = render_uptime_monitors(
         build_uptime_monitors(
             catalog,
             platform_domain=platform_domain,
-            keycloak_realm_name=keycloak_realm_name,
         )
     )
     if not output_path.exists():
@@ -122,13 +114,11 @@ def write_uptime_monitors(
     output_path: Path = UPTIME_MONITORS_PATH,
     catalog_path: Path = HEALTH_PROBE_CATALOG_PATH,
     platform_domain: str | None = None,
-    keycloak_realm_name: str | None = None,
 ) -> None:
     catalog = load_health_probe_catalog(catalog_path)
     monitors = build_uptime_monitors(
         catalog,
         platform_domain=platform_domain,
-        keycloak_realm_name=keycloak_realm_name,
     )
     output_path.write_text(render_uptime_monitors(monitors), encoding="utf-8")
 
@@ -159,14 +149,6 @@ def build_parser() -> argparse.ArgumentParser:
             f"({CATALOG_PLATFORM_DOMAIN!r}).  Omit on the main deployment."
         ),
     )
-    parser.add_argument(
-        "--keycloak-realm-name",
-        default=None,
-        help=(
-            "Keycloak realm name to substitute for the catalog placeholder "
-            f"({CATALOG_KEYCLOAK_REALM!r}).  Omit on the main deployment."
-        ),
-    )
     return parser
 
 
@@ -181,7 +163,6 @@ def main(argv: list[str] | None = None) -> int:
             "output_path": args.output,
             "catalog_path": args.catalog,
             "platform_domain": args.platform_domain,
-            "keycloak_realm_name": args.keycloak_realm_name,
         }
         if args.write:
             write_uptime_monitors(**kwargs)

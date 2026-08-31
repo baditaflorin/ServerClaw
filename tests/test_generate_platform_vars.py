@@ -190,6 +190,7 @@ def test_generation_identity_snapshot_rejects_unapproved_local_scalars() -> None
         {
             "platform_domain": "selected.example.net",
             "management_ipv4": "198.51.100.42",
+            "management_tailscale_ipv4": "100.64.0.42",
             "api_token": "must-not-be-tracked",
             "database_password": "must-not-be-tracked",
             "platform_repo_checkout_path": "/operator/private/path",
@@ -199,6 +200,7 @@ def test_generation_identity_snapshot_rejects_unapproved_local_scalars() -> None
     assert projected == {
         "platform_domain": "selected.example.net",
         "management_ipv4": "198.51.100.42",
+        "management_tailscale_ipv4": "100.64.0.42",
     }
 
 
@@ -542,15 +544,13 @@ def test_build_platform_vars_includes_nextcloud_publication_topology() -> None:
 def test_build_platform_vars_projects_control_and_dedicated_pool_metadata() -> None:
     platform_vars = generate_platform_vars.build_platform_vars()
 
-    keycloak = platform_vars["platform_service_topology"]["keycloak"]
+    authentik = platform_vars["platform_service_topology"]["authentik"]
     grafana = platform_vars["platform_service_topology"]["grafana"]
 
-    assert keycloak["owning_vm"] == "runtime-control"
-    assert keycloak["private_ip"] == "10.10.10.92"
-    assert keycloak["edge"]["upstream"] == "http://10.10.10.92:8091"
-    assert keycloak["runtime_pool"] == "runtime-control"
-    assert keycloak["restart_domain"] == "runtime-control-identity"
-    assert keycloak["mobility_tier"] == "anchor"
+    assert authentik["owning_vm"] == "runtime-control"
+    assert authentik["private_ip"] == "10.10.10.92"
+    assert authentik["edge"]["upstream"] == "http://10.10.10.92:9010"
+    assert "keycloak" not in platform_vars["platform_service_topology"]
     assert grafana["runtime_pool"] == "dedicated-monitoring"
     assert grafana["mobility_tier"] == "anchor"
 
@@ -561,7 +561,7 @@ def test_build_platform_vars_includes_shared_session_authority_contract() -> Non
 
     assert authority["authority_hostname"] == "ops.example.com"
     assert authority["ops_portal_client_id"] == "ops-portal-oauth"
-    assert authority["keycloak_logout_url"] == "https://sso.example.com/realms/lv3/protocol/openid-connect/logout"
+    assert authority["oidc_logout_url"] == "https://id.example.com/application/o/ops-portal/end-session/"
     assert authority["oauth2_proxy_sign_out_url"] == "https://ops.example.com/oauth2/sign_out"
     assert authority["shared_logout_path"] == "/.well-known/lv3/session/logout"
     assert authority["shared_proxy_cleanup_path"] == "/.well-known/lv3/session/proxy-logout"

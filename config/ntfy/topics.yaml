@@ -84,7 +84,7 @@ topics:
       - ci
       - rotating_light
   platform-identity-critical:
-    description: Identity-core watchdog alerts for Keycloak, Step-CA, OpenBao, and API Gateway failures and recoveries (ADR 0376).
+    description: Identity-core watchdog alerts for Authentik, Step-CA, OpenBao, and API Gateway failures and recoveries (ADR 0376).
     default_title: LV3 Identity Watchdog
     default_priority: 5
     default_tags:

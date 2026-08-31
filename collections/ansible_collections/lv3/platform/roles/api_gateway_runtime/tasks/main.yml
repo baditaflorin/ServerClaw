@@ -1,6 +1,6 @@
 # Purpose: Converge the API gateway runtime files, packaged repo surfaces, and supporting local artifacts.
 # Use case: Run during API gateway deploys and updates, including governed tool bridge changes for Dify.
-# Inputs: API gateway paths, build sources, tree sync specs, and Keycloak/openbao/runtime settings.
+# Inputs: API gateway paths, build sources, tree sync specs, and Authentik/openbao/runtime settings.
 # Outputs: Creates the on-host API gateway runtime tree and prepares synced sources and configuration.
 # Idempotency: Partially idempotent because some downstream sync and container restart steps intentionally refresh deployed state.
 # Dependencies: ADR 0165, ADR 0092, ADR 0175, and ADR 0197.
@@ -28,9 +28,9 @@
       - api_gateway_sources | length > 0
       - api_gateway_config_sources | length > 0
       - api_gateway_tree_sync_specs | length > 0
-      - api_gateway_keycloak_jwks_url | length > 0
-      - api_gateway_keycloak_issuer_url | length > 0
-    fail_msg: "api_gateway_runtime requires runtime paths, build sources, and Keycloak endpoint settings."
+      - api_gateway_authentik_jwks_url | length > 0
+      - api_gateway_authentik_issuer_url | length > 0
+    fail_msg: "api_gateway_runtime requires runtime paths, build sources, and Authentik endpoint settings."
 
 - name: Ensure API gateway prerequisite packages are present
   ansible.builtin.apt:
@@ -86,28 +86,6 @@
     mode: "0700"
   delegate_to: localhost
   become: false
-
-- name: Check whether the controller-local platform-context token exists for migration routing
-  ansible.builtin.stat:
-    path: "{{ api_gateway_platform_context_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: api_gateway_platform_context_token_stat
-
-- name: Read the controller-local platform-context token for migration routing
-  ansible.builtin.slurp:
-    src: "{{ api_gateway_platform_context_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: api_gateway_platform_context_token_raw
-  when: api_gateway_platform_context_token_stat.stat.exists
-  no_log: true
-
-- name: Record the optional migration token for platform-context gateway routing
-  ansible.builtin.set_fact:
-    api_gateway_platform_context_legacy_token: "{{ api_gateway_platform_context_token_raw.content | b64decode | trim }}"
-  when: api_gateway_platform_context_token_stat.stat.exists
-  no_log: true
 
 - name: Ensure nested parent directories for managed API gateway source files exist
   ansible.builtin.file:
@@ -332,14 +310,14 @@
     group: root
     mode: "0644"
 
-- name: Assert the external Keycloak Docker network exists
+- name: Assert the external Authentik Docker network exists
   ansible.builtin.command:
     argv:
       - docker
       - network
       - inspect
-      - "{{ api_gateway_keycloak_docker_network }}"
-  register: api_gateway_keycloak_network
+      - "{{ api_gateway_authentik_docker_network }}"
+  register: api_gateway_authentik_network
   changed_when: false
   when: api_gateway_network_mode != 'host'
 

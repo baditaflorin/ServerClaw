@@ -247,7 +247,7 @@ got clobbered in ADR 0376.
 
 1. `make converge-proxmox-host env=clone`  — base PVE config
 2. `make converge-proxmox-guests env=clone`  — create the 8 collapsed-topology VMs
-3. `make converge-runtime-control env=clone`  — Keycloak, step-ca, OpenBao (identity anchor)
+3. `make converge-runtime-control env=clone`  — Authentik, step-ca, OpenBao (identity anchor)
 4. `make converge-postgres env=clone`  — shared DB
 5. `make converge-mail-platform env=clone`  — Stalwart + Brevo bridge
 6. `make converge-runtime-apps env=clone`  — application services
@@ -266,7 +266,7 @@ is healthy and presenting valid certs via step-ca.
 dig +short A sso.<platform_domain>     # should be <new-ipv4>
 dig +short AAAA sso.<platform_domain>  # should be <new-ipv6>
 
-# Keycloak .well-known is reachable and signed by step-ca
+# Authentik readiness is reachable and signed by the shared edge certificate
 curl -sS https://sso.<platform_domain>/realms/<realm>/.well-known/openid-configuration | jq .issuer
 
 # Mail loop works: send a test message from the new operator address to a

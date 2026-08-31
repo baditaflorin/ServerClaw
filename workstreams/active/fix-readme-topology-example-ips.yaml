@@ -1,4 +1,5 @@
 id: fix-readme-topology-example-ips
+adr: "0407"
 title: Fix README architecture diagram example IP octet
 status: ready
 ready_to_merge: true
@@ -7,7 +8,11 @@ depends_on: []
 conflicts_with: []
 owner: claude-agent
 branch: fix-readme-topology-example-ips
+worktree_path: .worktrees/fix-readme-topology-example-ips
 doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/fix-readme-topology-example-ips.yaml
 ownership_manifest:
   owned_surfaces:
     - id: fix-readme-topology-example-ips-code
@@ -15,7 +20,6 @@ ownership_manifest:
         - docs/templates/README.md.j2
         - README.md
         - workstreams/active/fix-readme-topology-example-ips.yaml
-        - workstreams.yaml
       mode: exclusive
 
 description: |

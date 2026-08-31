@@ -1,0 +1,33 @@
+---
+# ADR 0353: Service Integration Contract Registry
+# managed-by: adr=0491 role=authentik_runtime
+schema_version: "1.0.0"
+contract_id: authentik--openbao
+consumer: authentik_runtime
+provider: openbao_runtime
+integration_type: secrets
+adr: "0491"
+
+connection:
+  addr_var: openbao_addr
+  auth_method: approle
+  role: authentik-runtime
+  secret_path: services/authentik/runtime-env
+
+secrets:
+  - path: openbao/services/authentik/runtime-env
+    env_var: AUTHENTIK_SECRET_KEY
+  - path: openbao/services/authentik/runtime-env
+    env_var: AUTHENTIK_POSTGRESQL__PASSWORD
+  - path: openbao/services/authentik/runtime-env
+    env_var: AUTHENTIK_BOOTSTRAP_PASSWORD
+
+health_check:
+  endpoint: /v1/sys/health
+  expected_status: 200
+  timeout_seconds: 5
+
+pre_flight:
+  - check: openbao_unsealed
+  - check: approle_exists
+    role: authentik-runtime

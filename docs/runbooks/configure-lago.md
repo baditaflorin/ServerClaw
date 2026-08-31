@@ -22,7 +22,7 @@ The Lago workflow converges:
 The current implementation uses these boundaries:
 
 - the Lago browser UI and operator management surface stay behind the shared
-  oauth2-proxy and Keycloak edge-auth flow
+  oauth2-proxy and Authentik edge-auth flow
 - anonymous requests to `billing.example.com/api/health` are intentionally rejected
   by the API gateway with the canonical `401` error envelope; use the
   repo-managed playbook verification path or the private guest-local endpoint

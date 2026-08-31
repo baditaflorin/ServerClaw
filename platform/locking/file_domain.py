@@ -6,7 +6,7 @@ lock-key naming convention:
 
   File-domain locks (ADR 0347):
     vm:{vmid}:config:{role}:{filename}
-    Example: vm:101:config:keycloak_runtime:docker-compose.yml
+    Example: vm:101:config:authentik_runtime:docker-compose.yml
 
   Apply-phase locks (ADR 0355):
     vm:{vmid}:apply
@@ -33,8 +33,8 @@ def file_domain_resource(vmid: str | int, role: str, filename: str) -> str:
     """Return canonical lock resource path for a managed config file.
 
     Example:
-        file_domain_resource("101", "keycloak_runtime", "docker-compose.yml")
-        → "vm:101:config:keycloak_runtime:docker-compose.yml"
+        file_domain_resource("101", "authentik_runtime", "docker-compose.yml")
+        → "vm:101:config:authentik_runtime:docker-compose.yml"
     """
     return f"vm:{vmid}:config:{role}:{filename}"
 
@@ -68,7 +68,7 @@ def acquire_file_domain_lock(
     Args:
         registry: ResourceLockRegistry instance.
         vmid: VM ID (e.g. "101").
-        role: Ansible role name managing the file (e.g. "keycloak_runtime").
+        role: Ansible role name managing the file (e.g. "authentik_runtime").
         filename: Config file basename (e.g. "docker-compose.yml").
         holder: Agent/session identifier acquiring the lock.
         context_id: Optional workstream or job ID for audit trail.
@@ -153,7 +153,7 @@ def file_domain_lock(
     """Context manager: acquire file-domain lock, yield, then release.
 
     Usage:
-        with file_domain_lock(registry, vmid="101", role="keycloak_runtime",
+        with file_domain_lock(registry, vmid="101", role="authentik_runtime",
                               filename="docker-compose.yml", holder="ws-0347"):
             # safe to write docker-compose.yml
             ...

@@ -46,13 +46,15 @@ class WorkstreamCanonicalTruth:
     release_bump: str | None
     included_in_repo_version: str | None
     latest_receipts: dict[str, str]
+    retired_capabilities: tuple[str, ...] = ()
 
 
 def parse_semver(value: str) -> tuple[int, int, int]:
     match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", value.strip())
     if not match:
         raise ValueError(f"invalid semantic version: {value}")
-    return tuple(int(part) for part in match.groups())
+    major, minor, patch = (int(part) for part in match.groups())
+    return major, minor, patch
 
 
 def bump_semver(value: str, bump: str) -> str:
@@ -139,6 +141,24 @@ def load_workstream_canonical_truth(path: Path | None = None) -> list[Workstream
                 path=f"{workstream_path}.canonical_truth.latest_receipts[{capability}]",
             )
 
+        retired_capabilities_value = canonical_truth_mapping.get("retired_capabilities", [])
+        if not isinstance(retired_capabilities_value, list):
+            raise ValueError(f"{workstream_path}.canonical_truth.retired_capabilities must be a list")
+        retired_capabilities = tuple(
+            _require_string(
+                capability,
+                path=f"{workstream_path}.canonical_truth.retired_capabilities[{index}]",
+            )
+            for index, capability in enumerate(retired_capabilities_value)
+        )
+        if len(set(retired_capabilities)) != len(retired_capabilities):
+            raise ValueError(f"{workstream_path}.canonical_truth.retired_capabilities must not contain duplicates")
+        overlap = set(latest_receipts).intersection(retired_capabilities)
+        if overlap:
+            raise ValueError(
+                f"{workstream_path}.canonical_truth cannot both publish and retire capabilities: {sorted(overlap)}"
+            )
+
         included_in_repo_version = _require_optional_semver(
             canonical_truth_mapping.get("included_in_repo_version"),
             path=f"{workstream_path}.canonical_truth.included_in_repo_version",
@@ -155,6 +175,7 @@ def load_workstream_canonical_truth(path: Path | None = None) -> list[Workstream
                 release_bump=release_bump,
                 included_in_repo_version=included_in_repo_version,
                 latest_receipts=latest_receipts,
+                retired_capabilities=retired_capabilities,
             )
         )
     return result
@@ -246,6 +267,8 @@ def assemble_latest_receipts(
             continue
         if item.included_in_repo_version is None:
             continue
+        for capability in item.retired_capabilities:
+            assembled.pop(capability, None)
         for capability, receipt_id in item.latest_receipts.items():
             assembled[capability] = receipt_id
     return assembled
@@ -273,7 +296,7 @@ def assemble_stack_text(
 
 
 def render_expected_files() -> dict[Path, str]:
-    import generate_status_docs
+    import generate_status_docs  # type: ignore[import-not-found]
 
     workstreams = load_workstream_canonical_truth()
     version = VERSION_PATH.read_text(encoding="utf-8").strip()
@@ -311,7 +334,7 @@ def render_expected_files() -> dict[Path, str]:
 
 
 def write_assembled_truth(*, update_readme: bool = True) -> list[Path]:
-    import generate_status_docs
+    import generate_status_docs  # type: ignore[import-not-found]
 
     workstreams = load_workstream_canonical_truth()
     version = VERSION_PATH.read_text(encoding="utf-8").strip()
@@ -385,7 +408,7 @@ def mark_pending_workstreams_released(version: str, *, workstreams_path: Path | 
         return changed_ids
 
     updated = resolved_workstreams_path.read_text(encoding="utf-8")
-    changed_ids: list[str] = []
+    compatibility_changed_ids: list[str] = []
     for item in items:
         pattern = re.compile(WORKSTREAM_BLOCK_PATTERN.format(workstream_id=re.escape(item.workstream_id)))
         match = pattern.search(updated)
@@ -412,10 +435,10 @@ def mark_pending_workstreams_released(version: str, *, workstreams_path: Path | 
             )
 
         updated = f"{updated[: match.start()]}{next_block}{updated[match.end() :]}"
-        changed_ids.append(item.workstream_id)
+        compatibility_changed_ids.append(item.workstream_id)
 
     resolved_workstreams_path.write_text(updated, encoding="utf-8")
-    return changed_ids
+    return compatibility_changed_ids
 
 
 def main(argv: list[str] | None = None) -> int:

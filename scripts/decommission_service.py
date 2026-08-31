@@ -47,10 +47,9 @@ SUBDOMAIN_CATALOG_PATH = repo_path("config", "subdomain-catalog.json")
 DEFAULT_POSTGRES_ADMIN_DSN_ENV = "LV3_POSTGRES_ADMIN_DSN"
 DEFAULT_OPENBAO_ADDR_ENV = "OPENBAO_ADDR"
 DEFAULT_OPENBAO_TOKEN_ENV = "OPENBAO_TOKEN"
-DEFAULT_KEYCLOAK_TOKEN_ENV = "KEYCLOAK_ADMIN_TOKEN"
+DEFAULT_AUTHENTIK_TOKEN_ENV = "LV3_AUTHENTIK_BOOTSTRAP_TOKEN"
 
 DATABASE_NAME_OVERRIDES = {
-    "keycloak": "keycloak",
     "mattermost": "mattermost",
     "netbox": "netbox",
     "windmill": "windmill",
@@ -76,6 +75,8 @@ INVENTORY_DIR = repo_path("inventory")
 TESTS_DIR = repo_path("tests")
 VERSIONS_DIR = repo_path("versions")
 DOCS_ADR_DIR = repo_path("docs", "adr")
+PLATFORM_SERVICES_PATH = repo_path("inventory", "group_vars", "all", "platform_services.yml")
+AUTHENTIK_OAUTH_CLIENTS_PATH = repo_path("config", "authentik", "oauth-clients.yaml")
 
 # Comprehensive catalog registry — every catalog file that needs cleanup on service removal.
 # Each entry describes the file path, cleanup strategy, and key field.
@@ -124,6 +125,12 @@ CATALOG_REGISTRY: list[dict[str, str]] = [
         "path": f"inventory/host_vars/{TOPOLOGY_HOST}.yml",
         "type": "yaml_var_prefix",
         "parent_key": "platform_port_assignments",
+    },
+    # --- Authentik OAuth manifest: remove the service's owned client block atomically ---
+    {
+        "path": "config/authentik/oauth-clients.yaml",
+        "type": "authentik_oauth_manifest",
+        "list_key": "clients",
     },
     # --- YAML block-marker files: use BEGIN/END SERVICE markers (one entry per hand-authored file) ---
     {"path": "inventory/group_vars/all/platform_services.yml", "type": "yaml_marker_block"},
@@ -193,6 +200,147 @@ def infer_database_name(service_id: str) -> str | None:
     return DATABASE_NAME_OVERRIDES.get(service_id)
 
 
+def _service_name_variants(service_id: str) -> list[str]:
+    """Return all naming variants for grep patterns."""
+    underscore = service_id
+    hyphen = service_id.replace("_", "-")
+    joined = service_id.replace("_", "")
+    return sorted(set([underscore, hyphen, joined]))
+
+
+def _yaml_scalar(value: str) -> str:
+    """Return a simple YAML scalar without comments or matching quotes.
+
+    The decommission utility intentionally keeps this parser narrow: it reads
+    only repo-owned scalar fields from the two manifests below, so it remains
+    usable by the standard-library-only CLI invocation.
+    """
+    normalized = value.split("#", 1)[0].strip()
+    if len(normalized) >= 2 and normalized[0] == normalized[-1] and normalized[0] in {"'", '"'}:
+        return normalized[1:-1]
+    return normalized
+
+
+def _manifest_client_blocks(path: Path = AUTHENTIK_OAUTH_CLIENTS_PATH) -> list[dict[str, Any]]:
+    """Read Authentik OAuth client blocks without rewriting unrelated YAML."""
+    content = path.read_text(encoding="utf-8")
+    starts = list(re.finditer(r"(?m)^  - id:\s*(?P<id>[^#\n]+)", content))
+    clients: list[dict[str, Any]] = []
+    for index, start in enumerate(starts):
+        end = starts[index + 1].start() if index + 1 < len(starts) else len(content)
+        block = content[start.start() : end]
+
+        def field(name: str) -> str | None:
+            match = re.search(rf"(?m)^      {re.escape(name)}:\s*(?P<value>[^#\n]+)", block)
+            return _yaml_scalar(match.group("value")) if match else None
+
+        clients.append(
+            {
+                "manifest_id": _yaml_scalar(start.group("id")),
+                "application_slug": field("slug"),
+                "provider_client_id": field("client_id"),
+                "start": start.start(),
+                "end": end,
+            }
+        )
+    return clients
+
+
+def _service_authentik_client_id(service_id: str, path: Path = PLATFORM_SERVICES_PATH) -> str | None:
+    """Return a service's declared Authentik client ID, if it owns one."""
+    content = path.read_text(encoding="utf-8")
+    block_match = re.search(
+        rf"(?ms)^  # BEGIN SERVICE: {re.escape(service_id)}\s*$\n(?P<body>.*?)(?=^  # END SERVICE: {re.escape(service_id)}\s*$)",
+        content,
+    )
+    if block_match is None:
+        return None
+    sso_match = re.search(
+        r"(?ms)^    sso:\s*$\n(?P<body>.*?)(?=^    [A-Za-z_][A-Za-z0-9_-]*:\s*|\Z)",
+        block_match.group("body"),
+    )
+    if sso_match is None:
+        return None
+    sso = sso_match.group("body")
+
+    def field(name: str) -> str | None:
+        match = re.search(rf"(?m)^      {re.escape(name)}:\s*(?P<value>[^#\n]+)", sso)
+        return _yaml_scalar(match.group("value")) if match else None
+
+    if field("enabled") != "true" or field("provider") != "authentik":
+        return None
+    client_id = field("client_id")
+    if not client_id:
+        raise ValueError(f"Service {service_id!r} enables Authentik SSO without a client_id")
+    return client_id
+
+
+def find_authentik_oauth_client(
+    service_id: str,
+    *,
+    service_registry_path: Path = PLATFORM_SERVICES_PATH,
+    manifest_path: Path = AUTHENTIK_OAUTH_CLIENTS_PATH,
+) -> dict[str, str] | None:
+    """Resolve the Authentik OAuth provider/application owned by a service.
+
+    The service registry is the authority for client ownership; the provider
+    manifest supplies the application slug required for safe API deletion.
+    Refusing ambiguous or missing matches prevents a decommission from
+    deleting another service's identity boundary.
+    """
+    client_id = _service_authentik_client_id(service_id, service_registry_path)
+    manifest_clients = _manifest_client_blocks(manifest_path)
+    if client_id is None:
+        variants = set(_service_name_variants(service_id))
+        matches = [
+            client
+            for client in manifest_clients
+            if client.get("manifest_id") in variants or client.get("application_slug") in variants
+        ]
+    else:
+        matches = [client for client in manifest_clients if client.get("provider_client_id") == client_id]
+    if not matches and client_id is None:
+        return None
+    if len(matches) != 1:
+        declared = client_id or service_id
+        raise ValueError(
+            f"Service {service_id!r} maps to Authentik client {declared!r}, "
+            f"but the OAuth manifest has {len(matches)} matching client blocks"
+        )
+    client = matches[0]
+    application_slug = client.get("application_slug")
+    if not application_slug:
+        raise ValueError(f"Authentik OAuth manifest client {client['manifest_id']!r} has no application slug")
+    return {
+        "manifest_id": str(client["manifest_id"]),
+        "provider_client_id": str(client["provider_client_id"]),
+        "application_slug": str(application_slug),
+    }
+
+
+def _remove_authentik_oauth_manifest_client(
+    path: Path,
+    service_id: str,
+    *,
+    service_registry_path: Path = PLATFORM_SERVICES_PATH,
+) -> bool:
+    """Remove one Authentik OAuth manifest block while preserving all others."""
+    client = find_authentik_oauth_client(
+        service_id,
+        service_registry_path=service_registry_path,
+        manifest_path=path,
+    )
+    if client is None:
+        return False
+    matches = [block for block in _manifest_client_blocks(path) if block.get("manifest_id") == client["manifest_id"]]
+    if len(matches) != 1:
+        raise ValueError(f"Authentik OAuth manifest client {client['manifest_id']!r} is ambiguous")
+    block = matches[0]
+    content = path.read_text(encoding="utf-8")
+    path.write_text(content[: int(block["start"])] + content[int(block["end"]) :], encoding="utf-8")
+    return True
+
+
 def build_plan(service_id: str) -> dict[str, Any]:
     service_catalog = load_service_catalog()
     subdomain_catalog = load_subdomain_catalog()
@@ -206,7 +354,7 @@ def build_plan(service_id: str) -> dict[str, Any]:
         "loki_delete_query": f'{{service="{service_id}"}}',
         "openbao_policy_name": f"lv3-service-{service_id}-runtime",
         "openbao_approle_name": f"{service_id}-runtime",
-        "keycloak_client_id": service_id,
+        "authentik_oauth_client": find_authentik_oauth_client(service_id),
         "subdomains": [_subdomain_record_name(record) for record in subdomains],
         "catalog_changes": {
             "service_capability_catalog": service_id,
@@ -276,25 +424,88 @@ def delete_openbao_policy(openbao_addr: str, token: str, policy_name: str, appro
     _http_request(f"{openbao_addr.rstrip('/')}/v1/auth/approle/role/{approle_name}", method="DELETE", headers=headers)
 
 
-def delete_keycloak_client(base_url: str, token: str, client_id: str, realm: str) -> None:
-    request_url = (
-        f"{base_url.rstrip('/')}/admin/realms/{realm}/clients?clientId={urllib.parse.quote(client_id, safe='')}"
-    )
+def _authentik_api_request(base_url: str, token: str, method: str, path: str) -> dict[str, Any]:
+    """Call Authentik without exposing token or response bodies in errors."""
     request = urllib.request.Request(
-        request_url,
-        headers={"Authorization": f"Bearer {token}"},
-        method="GET",
+        f"{base_url.rstrip('/')}{path}",
+        headers={"Accept": "application/json", "Authorization": f"Bearer {token}"},
+        method=method,
     )
-    with urllib.request.urlopen(request, timeout=10) as response:
-        payload = json.loads(response.read().decode("utf-8"))
-    if not payload:
-        return
-    client_uuid = payload[0]["id"]
-    _http_request(
-        f"{base_url.rstrip('/')}/admin/realms/{realm}/clients/{client_uuid}",
-        method="DELETE",
-        headers={"Authorization": f"Bearer {token}"},
-    )
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            body = response.read()
+    except urllib.error.HTTPError as exc:
+        exc.read()
+        raise RuntimeError(f"Authentik {method} {path} returned HTTP {exc.code}") from None
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"Authentik {method} {path} failed: {exc.reason}") from None
+    if not body:
+        return {}
+    payload = json.loads(body.decode("utf-8"))
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"Authentik {method} {path} returned an invalid response")
+    return payload
+
+
+def _authentik_list_all(base_url: str, token: str, path: str) -> list[dict[str, Any]]:
+    """Fetch a complete paginated Authentik collection."""
+    results: list[dict[str, Any]] = []
+    page = 1
+    while True:
+        query = urllib.parse.urlencode({"page": page, "page_size": 100})
+        payload = _authentik_api_request(base_url, token, "GET", f"{path}?{query}")
+        page_results = payload.get("results")
+        if not isinstance(page_results, list) or any(not isinstance(item, dict) for item in page_results):
+            raise RuntimeError(f"Authentik GET {path} returned an invalid results collection")
+        results.extend(page_results)
+        pagination = payload.get("pagination")
+        if not isinstance(pagination, dict):
+            raise RuntimeError(f"Authentik GET {path} returned invalid pagination")
+        next_page = pagination.get("next")
+        if not next_page:
+            return results
+        if isinstance(next_page, bool) or not isinstance(next_page, int) or next_page <= page:
+            raise RuntimeError(f"Authentik GET {path} returned invalid pagination")
+        page = next_page
+
+
+def delete_authentik_oauth_client(base_url: str, token: str, client: dict[str, Any]) -> None:
+    """Delete exactly one service-owned Authentik application and provider."""
+    client_id = str(client["provider_client_id"])
+    application_slug = str(client["application_slug"])
+    providers = _authentik_list_all(base_url, token, "/api/v3/providers/oauth2/")
+    provider_matches = [item for item in providers if item.get("client_id") == client_id]
+    if len(provider_matches) > 1:
+        raise RuntimeError(f"Authentik has multiple OAuth providers for client_id {client_id!r}")
+    provider = provider_matches[0] if provider_matches else None
+    provider_pk = provider.get("pk") if provider is not None else None
+    if provider is not None and provider_pk is None:
+        raise RuntimeError(f"Authentik OAuth provider {client_id!r} has no primary key")
+
+    applications = _authentik_list_all(base_url, token, "/api/v3/core/applications/")
+    application_matches = [item for item in applications if item.get("slug") == application_slug]
+    if len(application_matches) > 1:
+        raise RuntimeError(f"Authentik has multiple applications with slug {application_slug!r}")
+    application = application_matches[0] if application_matches else None
+    if application is not None and application.get("provider") not in {None, provider_pk}:
+        raise RuntimeError(
+            f"Authentik application {application_slug!r} is linked to a different provider; refusing deletion"
+        )
+
+    if application is not None:
+        _authentik_api_request(
+            base_url,
+            token,
+            "DELETE",
+            f"/api/v3/core/applications/{urllib.parse.quote(application_slug, safe='')}/",
+        )
+    if provider is not None:
+        _authentik_api_request(
+            base_url,
+            token,
+            "DELETE",
+            f"/api/v3/providers/oauth2/{urllib.parse.quote(str(provider_pk), safe='')}/",
+        )
 
 
 def execute_plan(
@@ -304,15 +515,14 @@ def execute_plan(
     loki_url: str | None,
     openbao_addr: str | None,
     openbao_token: str | None,
-    keycloak_url: str | None,
-    keycloak_token: str | None,
-    keycloak_realm: str,
+    authentik_url: str | None,
+    authentik_token: str | None,
 ) -> dict[str, Any]:
     applied: dict[str, Any] = {
         "postgres_dropped": False,
         "loki_delete_requested": False,
         "openbao_deleted": False,
-        "keycloak_deleted": False,
+        "authentik_oauth_deleted": False,
         "service_catalog_updated": False,
         "subdomain_catalog_updated": False,
     }
@@ -338,11 +548,15 @@ def execute_plan(
         )
         applied["openbao_deleted"] = True
 
-    if keycloak_url or keycloak_token:
-        if not keycloak_url or not keycloak_token:
-            raise ValueError("Keycloak deletion requires both --keycloak-url and KEYCLOAK_ADMIN_TOKEN")
-        delete_keycloak_client(keycloak_url, keycloak_token, plan["keycloak_client_id"], keycloak_realm)
-        applied["keycloak_deleted"] = True
+    if authentik_url or authentik_token:
+        if not authentik_url or not authentik_token:
+            raise ValueError("Authentik deletion requires both --authentik-url and LV3_AUTHENTIK_BOOTSTRAP_TOKEN")
+        authentik_client = plan.get("authentik_oauth_client")
+        if authentik_client is not None:
+            if not isinstance(authentik_client, dict):
+                raise ValueError("authentik_oauth_client plan entry must be a mapping")
+            delete_authentik_oauth_client(authentik_url, authentik_token, authentik_client)
+            applied["authentik_oauth_deleted"] = True
 
     applied["service_catalog_updated"] = rewrite_service_catalog(plan["service_id"])
     applied["subdomain_catalog_updated"] = rewrite_subdomain_catalog(plan["service_id"])
@@ -352,14 +566,6 @@ def execute_plan(
 # ============================================================================
 # Phase 2: Code Purge — deterministic file removal and catalog rewriting
 # ============================================================================
-
-
-def _service_name_variants(service_id: str) -> list[str]:
-    """Return all naming variants for grep patterns."""
-    underscore = service_id
-    hyphen = service_id.replace("_", "-")
-    joined = service_id.replace("_", "")
-    return sorted(set([underscore, hyphen, joined]))
 
 
 def _grep_files(patterns: list[str], search_dirs: list[Path], *, exclude_dirs: list[str] | None = None) -> list[Path]:
@@ -445,13 +651,6 @@ def _discover_deletable_files(service_id: str) -> list[Path]:
     # Tests — use role_name-aware pattern as well as service_id patterns (Amendment 3)
     for pattern in (f"test_{underscore}_*.py", f"test_{hyphen}_*.py", f"test_{role_name}_*.py"):
         files.extend(TESTS_DIR.glob(pattern))
-
-    # Keycloak client tasks
-    kc_tasks = ROLES_ROOT / "keycloak_runtime" / "tasks"
-    for name in (f"{underscore}_client.yml", f"{hyphen}_client.yml"):
-        candidate = kc_tasks / name
-        if candidate.is_file():
-            files.append(candidate)
 
     return sorted(set(files))
 
@@ -984,6 +1183,8 @@ def _apply_catalog_registry_entry(entry: dict[str, str], service_id: str) -> boo
         return _remove_from_yaml_dict_key(path, service_id, entry["list_key"])
     elif kind == "yaml_topology_block":
         return _remove_from_yaml_topology_block(path, entry["list_key"], service_id)
+    elif kind == "authentik_oauth_manifest":
+        return _remove_authentik_oauth_manifest_client(path, service_id)
     elif kind == "yaml_marker_block":
         return _remove_yaml_block_markers(path, service_id)
     elif kind == "json_array_flat":
@@ -1218,6 +1419,8 @@ def build_code_purge_plan(service_id: str) -> dict[str, Any]:
                     hit = isinstance(topology, dict) and bool(variants_set & set(topology.keys()))
                 except Exception:
                     hit = any(v in full.read_text() for v in variants_set)
+            elif kind == "authentik_oauth_manifest":
+                hit = find_authentik_oauth_client(service_id) is not None
             elif kind == "yaml_marker_block":
                 content = full.read_text()
                 hit = any(f"# BEGIN SERVICE: {v}" in content for v in variants_set)
@@ -1446,6 +1649,12 @@ def generate_removal_adr(
     db_section = ""
     if runtime_plan.get("database_name"):
         db_section = f"- Drop PostgreSQL database: `{runtime_plan['database_name']}`"
+    authentik_client = runtime_plan.get("authentik_oauth_client")
+    authentik_section = ""
+    if isinstance(authentik_client, dict):
+        authentik_section = (
+            f"- Remove Authentik OAuth application/provider: `{authentik_client.get('provider_client_id', service_id)}`"
+        )
 
     content = f"""# ADR {adr_number:04d}: Remove {service_name} from the Platform
 
@@ -1484,7 +1693,7 @@ Remove {service_name} following ADR 0389.
 ssh docker-runtime "cd /opt/lv3/{hyphen_name} && docker compose down --remove-orphans"
 ```
 {db_section}
-- Remove Keycloak OIDC client: `{runtime_plan.get("keycloak_client_id", service_id)}`
+{authentik_section}
 - Remove OpenBao policy: `{runtime_plan.get("openbao_policy_name", "")}`
 
 ### Phase 2: Code Removal
@@ -1526,7 +1735,7 @@ python3 scripts/decommission_service.py --service {service_id} \\
 
 - `public-edge` — remove NGINX upstream/server blocks
 - `database-dns` — remove DNS records
-- `keycloak` — remove OIDC client
+- `authentik` — remove OAuth application/provider
 - `monitoring-stack` — reload alert rules and dashboards
 
 ---
@@ -1635,6 +1844,8 @@ def validate_catalog_registry(probe_service_id: str) -> list[str]:
                     found = isinstance(topology, dict) and bool(variants_set & set(topology.keys()))
                 except Exception:
                     pass
+            elif kind == "authentik_oauth_manifest":
+                found = find_authentik_oauth_client(probe_service_id) is not None
             elif kind == "yaml_marker_block":
                 content = full.read_text()
                 found = any(f"# BEGIN SERVICE: {v}" in content for v in variants_set)
@@ -1711,8 +1922,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--postgres-admin-dsn", help="Superuser DSN for PostgreSQL cleanup.")
     parser.add_argument("--loki-url", help="Loki base URL with admin deletion enabled.")
     parser.add_argument("--openbao-addr", help="OpenBao base URL.")
-    parser.add_argument("--keycloak-url", help="Keycloak admin base URL, for example https://sso.localhost.")
-    parser.add_argument("--keycloak-realm", default="lv3", help="Keycloak realm containing the service client.")
+    parser.add_argument("--authentik-url", help="Authentik base URL, for example https://id.example.com.")
     args = parser.parse_args(argv)
 
     try:
@@ -1753,9 +1963,8 @@ def main(argv: list[str] | None = None) -> int:
                 loki_url=args.loki_url,
                 openbao_addr=args.openbao_addr or os.environ.get(DEFAULT_OPENBAO_ADDR_ENV),
                 openbao_token=os.environ.get(DEFAULT_OPENBAO_TOKEN_ENV),
-                keycloak_url=args.keycloak_url,
-                keycloak_token=os.environ.get(DEFAULT_KEYCLOAK_TOKEN_ENV),
-                keycloak_realm=args.keycloak_realm,
+                authentik_url=args.authentik_url,
+                authentik_token=os.environ.get(DEFAULT_AUTHENTIK_TOKEN_ENV),
             )
             payload["executed"] = True
 

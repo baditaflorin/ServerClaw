@@ -23,7 +23,7 @@ Use the shared retry taxonomy when platform code calls a networked dependency an
 ## Default Surfaces
 
 - `external_api`: third-party APIs and public webhooks
-- `internal_api`: Keycloak, Windmill, API-gateway upstream reads, NetBox sync
+- `internal_api`: Authentik, Windmill, API-gateway upstream reads, NetBox sync
 - `ansible_ssh`: SSH and other sequential host-connectivity retries
 - `nats_publish`: broker connection and publish attempts
 - `workflow_execution`: reserved for higher-level workflow retries once ADR 0165 idempotency keys make submission replay safe
@@ -38,7 +38,7 @@ from platform.retry import async_with_retry, policy_for_surface
 payload = await async_with_retry(
     lambda: client.get(url, timeout=10),
     policy=policy_for_surface("internal_api"),
-    error_context="keycloak jwks fetch",
+    error_context="authentik jwks fetch",
 )
 ```
 

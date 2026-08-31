@@ -1,3 +1,12 @@
+# BEGIN SERVICE: authentik
+- targets:
+    - https://id.example.com/-/health/ready/
+  labels:
+    service_id: authentik
+    slo_id: authentik-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+# END SERVICE: authentik
 # BEGIN SERVICE: browser_runner
 - targets:
     - http://10.10.10.20:8096/healthz
@@ -115,24 +124,6 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 # END SERVICE: homepage
-# BEGIN SERVICE: keycloak
-- targets:
-    - https://sso.example.com/realms/lv3/.well-known/openid-configuration
-  labels:
-    service_id: keycloak
-    slo_id: keycloak-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-# END SERVICE: keycloak
-# BEGIN SERVICE: keycloak
-- targets:
-    - https://sso.example.com/realms/lv3/.well-known/openid-configuration
-  labels:
-    service_id: keycloak
-    slo_id: keycloak-latency
-    indicator: latency
-    probe_module: http_2xx_follow_redirects
-# END SERVICE: keycloak
 # BEGIN SERVICE: label_studio
 - targets:
     - http://10.10.10.20:8110/api/version

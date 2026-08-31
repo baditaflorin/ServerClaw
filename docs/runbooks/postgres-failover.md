@@ -72,7 +72,7 @@ sudo patronictl -c /etc/patroni/config.yml switchover --leader postgres-replica 
 1. Confirm Patroni elected a new leader.
 2. Confirm `database.example.com:5432` accepts connections.
 3. Confirm dependent services are healthy:
-   - Keycloak discovery
+   - Authentik discovery
    - NetBox private UI
    - Mattermost private UI
    - Windmill private API

@@ -51,6 +51,7 @@ def configuration() -> Any:
         api_url="http://127.0.0.1:8201",
         ssh_tunnel=MODULE.SSHTunnelConfiguration(
             jump_host="192.0.2.10",
+            jump_port=22,
             target_guest="runtime-control",
             target_host="10.10.10.92",
             remote_port=8201,
@@ -61,6 +62,13 @@ def configuration() -> Any:
         provisioner_policy_name=provisioner_policy,
         protected_approle_names=("controller-automation", MODULE.PROVISIONER_ROLE_NAME),
     )
+
+
+def test_defaults_loader_preserves_ansible_unsafe_scalars(tmp_path: Path) -> None:
+    defaults = tmp_path / "defaults.yml"
+    defaults.write_text("literal: !unsafe '{{name}}'\n", encoding="utf-8")
+
+    assert MODULE._load_yaml_mapping(defaults, "test defaults") == {"literal": "{{name}}"}
 
 
 class FakeAPI:
@@ -219,7 +227,7 @@ def test_configuration_derives_canonical_prefix_exact_contracts_and_namespace_ov
     topology = tmp_path / "topology.yml"
     platform_vars = tmp_path / "platform.yml"
     identity.write_text(
-        "platform_domain: example.org\nplatform_config_prefix: 0mpc\nmanagement_ipv4: 192.0.2.10\n",
+        "platform_domain: example.org\nplatform_config_prefix: 0mpc\nmanagement_tailscale_ipv4: 192.0.2.10\n",
         encoding="utf-8",
     )
     registry.write_text(
@@ -276,8 +284,10 @@ platform_generation:
   host_vars_source: {topology}
   identity_overlay:
     platform_domain: example.org
-    management_ipv4: 192.0.2.10
+    management_tailscale_ipv4: 192.0.2.10
 platform_host:
+  management:
+    tailscale_ipv4: 192.0.2.10
   network:
     internal_ipv4: 10.10.10.1
 platform_guest_catalog:
@@ -291,7 +301,7 @@ platform_service_topology:
 platform_port_assignments:
   openbao_http_port: 8201
   openbao_proxy_port: 8201
-openbao_controller_url: https://127.0.0.1:8201
+openbao_controller_url: https://192.0.2.10:8201
 """.lstrip(),
         encoding="utf-8",
     )
@@ -304,10 +314,15 @@ openbao_controller_url: https://127.0.0.1:8201
         platform_vars_path=platform_vars,
     )
 
-    assert [contract.registry_key for contract in loaded.contracts] == ["authentik", "rag_context"]
+    assert [contract.registry_key for contract in loaded.contracts] == [
+        "authentik",
+        "rag_context",
+        "restic_config_backup",
+    ]
     assert loaded.config_prefix == "0mcp"
     assert loaded.ssh_tunnel == MODULE.SSHTunnelConfiguration(
         jump_host="192.0.2.10",
+        jump_port=22,
         target_guest="runtime-control",
         target_host="10.10.10.92",
         remote_port=8201,
@@ -321,6 +336,11 @@ openbao_controller_url: https://127.0.0.1:8201
     assert (
         'path "auth/approle/role/platform-context-runtime/role-id"' in loaded.policies[loaded.provisioner_policy_name]
     )
+    restic_contract = loaded.contracts[2]
+    assert restic_contract.secret_path == "services/restic-config-backup/runtime-config"
+    assert restic_contract.policy_name == "0mcp-restic-config-backup-runtime"
+    assert restic_contract.approle_name == "restic-config-backup"
+    assert 'path "auth/approle/role/restic-config-backup/secret-id"' in loaded.policies[loaded.provisioner_policy_name]
     assert 'path "*"' not in "\n".join(loaded.policies.values())
     receipt = MODULE._receipt_payload(
         loaded,
@@ -351,7 +371,7 @@ def test_configuration_rejects_generated_platform_from_another_identity(tmp_path
     topology = tmp_path / "topology.yml"
     platform_vars = tmp_path / "platform.yml"
     identity.write_text(
-        "platform_domain: selected.example.net\nmanagement_ipv4: 192.0.2.10\n",
+        "platform_domain: selected.example.net\nmanagement_tailscale_ipv4: 192.0.2.10\n",
         encoding="utf-8",
     )
     registry.write_text(
@@ -827,9 +847,62 @@ def test_ssh_tunnel_command_uses_only_selector_derived_hosts_and_loopback_forwar
     proxy_option = next(item for item in command if item.startswith("ProxyCommand="))
     assert "ops@192.0.2.10" in proxy_option
     assert "StrictHostKeyChecking=yes" in proxy_option
+    assert "-p 22" in proxy_option
     assert "operator key" in proxy_option
     assert config.api_url not in " ".join(command)
     assert "shell=" not in " ".join(command)
+
+
+def test_ssh_tunnel_command_can_use_a_validated_local_management_alias() -> None:
+    config = configuration()
+
+    command = MODULE._build_ssh_tunnel_command(
+        config,
+        Path("/tmp/operator key"),
+        local_port=18201,
+        ssh_jump_alias="operator-bastion",
+    )
+
+    proxy_option = next(item for item in command if item.startswith("ProxyCommand="))
+    assert "operator-bastion" in proxy_option
+    assert "[%h]:%p" in proxy_option
+    assert "operator key" not in proxy_option
+    assert config.ssh_tunnel.jump_host not in proxy_option
+    with pytest.raises(MODULE.BootstrapError, match="unsafe SSH host alias"):
+        MODULE._build_ssh_tunnel_command(
+            config,
+            Path("/tmp/operator key"),
+            local_port=18201,
+            ssh_jump_alias="operator-bastion; unexpected",
+        )
+
+
+def test_configuration_uses_the_explicit_management_port_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LV3_PROXMOX_HOST_PORT", "2222")
+
+    config = configuration()
+    config = MODULE.BootstrapConfiguration(
+        platform_domain=config.platform_domain,
+        config_prefix=config.config_prefix,
+        api_url=config.api_url,
+        ssh_tunnel=MODULE.SSHTunnelConfiguration(
+            jump_host=config.ssh_tunnel.jump_host,
+            jump_port=MODULE._proxmox_jump_port_from_environment(),
+            target_guest=config.ssh_tunnel.target_guest,
+            target_host=config.ssh_tunnel.target_host,
+            remote_port=config.ssh_tunnel.remote_port,
+        ),
+        contracts=config.contracts,
+        policies=config.policies,
+        roles=config.roles,
+        provisioner_policy_name=config.provisioner_policy_name,
+        protected_approle_names=config.protected_approle_names,
+    )
+
+    command = MODULE._build_ssh_tunnel_command(config, Path("/tmp/operator key"), local_port=18201)
+
+    proxy_option = next(item for item in command if item.startswith("ProxyCommand="))
+    assert "-p 2222" in proxy_option
 
 
 def test_ssh_private_key_rejects_symlink_and_insecure_mode(tmp_path: Path) -> None:

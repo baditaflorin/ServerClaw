@@ -4,7 +4,7 @@
 # Inputs: gitea_* runtime paths, database credentials, publication URLs, and OIDC/bootstrap secrets.
 # Outputs: Rendered compose runtime, validated service configuration, and Gitea bootstrap state.
 # Idempotency: Partially idempotent; reruns reconcile the same runtime, config files, and seeded settings.
-# Dependencies: ADR 0143, ADR 0165, and the shared PostgreSQL plus Keycloak surfaces.
+# Dependencies: ADR 0143, ADR 0165, and the shared PostgreSQL plus Authentik surfaces.
 
 - name: Derive conventional service variables from platform_service_registry
   ansible.builtin.import_tasks: ../common/tasks/derive_service_defaults.yml
@@ -73,7 +73,7 @@
         prerequisite: "Converge gitea_postgres before deploying Gitea"
       - path: "{{ gitea_oidc_client_secret_local_file }}"
         description: "Gitea OIDC client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying Gitea"
+        prerequisite: "Converge the Authentik runtime before deploying Gitea"
       - path: "{{ gitea_minio_secret_key_local_file }}"
         description: "Gitea MinIO secret key"
         prerequisite: "Converge MinIO before deploying Gitea"
@@ -165,7 +165,7 @@
     gitea_runtime_secret_payload:
       GITEA__database__PASSWD: "{{ lookup('ansible.builtin.file', gitea_database_password_local_file) | trim }}"
       GITEA_ADMIN_PASSWORD: "{{ gitea_decoded_secrets[0] }}"
-      GITEA_KEYCLOAK_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', gitea_oidc_client_secret_local_file) | trim }}"
+      GITEA_OIDC_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', gitea_oidc_client_secret_local_file) | trim }}"
       GITEA__lfs__MINIO_SECRET_ACCESS_KEY: "{{ lookup('ansible.builtin.file', gitea_minio_secret_key_local_file) | trim }}"
       GITEA_WEBHOOK_SECRET: "{{ gitea_decoded_secrets[1] }}"
       GITEA_NTFY_TOKEN: "{{ lookup('ansible.builtin.file', gitea_ntfy_token_local_file) | trim }}"
@@ -485,7 +485,7 @@
   until: gitea_login_page.status == 200
   changed_when: false
 
-- name: Wait for the Keycloak OIDC discovery endpoint used by Gitea bootstrap
+- name: Wait for the Authentik OIDC discovery endpoint used by Gitea bootstrap
   ansible.builtin.uri:
     url: "{{ gitea_oidc_internal_discovery_url }}"
     method: GET
@@ -504,7 +504,7 @@
   environment:
     GITEA_ADMIN_PASSWORD: "{{ gitea_admin_password }}"
     GITEA_DATABASE_PASSWORD: "{{ gitea_database_password }}"
-    GITEA_KEYCLOAK_CLIENT_SECRET: "{{ gitea_oidc_client_secret }}"
+    GITEA_OIDC_CLIENT_SECRET: "{{ gitea_oidc_client_secret }}"
     GITEA_RENOVATE_PASSWORD: "{{ gitea_renovate_password }}"
     GITEA_RELEASE_BUNDLE_COSIGN_PRIVATE_KEY: "{{ gitea_release_bundle_cosign_private_key }}"
     GITEA_RELEASE_BUNDLE_COSIGN_PASSWORD: "{{ gitea_release_bundle_cosign_password }}"

@@ -2,7 +2,7 @@ schema_version: 1.0.0
 service:
   id: librechat
   name: LibreChat
-  description: Private multi-model chat interface with Keycloak SSO, agent presets,
+  description: Private multi-model chat interface with Authentik SSO, agent presets,
     and customizable UI.
   category: access
   lifecycle_status: active
@@ -42,7 +42,7 @@ completeness:
   alert_rule_file: config/alertmanager/rules/librechat.yml
   suppressed_checks:
     api_gateway: '2027-01-01'
-    keycloak_client: '2027-01-01'
+    oidc_client: '2027-01-01'
     secret_definition: '2027-01-01'
     grafana_dashboard: '2027-01-01'
     slo_definition: '2027-01-01'
@@ -73,9 +73,9 @@ dependency:
     category: automation
   outbound_edges:
     - from: librechat
-      to: keycloak
+      to: authentik
       type: soft
-      description: LibreChat uses Keycloak OIDC for authentication but can fall back
+      description: LibreChat uses Authentik OIDC for authentication but can fall back
         to local login.
     - from: librechat
       to: ollama

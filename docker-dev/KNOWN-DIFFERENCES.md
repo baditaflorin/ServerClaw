@@ -49,7 +49,7 @@ Roles check `platform_environment` to adapt behavior:
 - Ansible convergence of Docker Compose services
 - Service-to-service communication over the 10.99.10.0/24 network
 - PostgreSQL database operations
-- Keycloak SSO (with self-signed certs)
+- Authentik SSO (with self-signed certs)
 - OpenBao secret management
 - Nginx reverse proxy
 - Most application services (Dify, Gitea, n8n, etc.)

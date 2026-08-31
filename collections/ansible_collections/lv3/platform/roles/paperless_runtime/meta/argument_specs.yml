@@ -47,7 +47,7 @@ argument_specs:
       paperless_database_password_local_file:
         type: path
         required: true
-      paperless_keycloak_client_secret_local_file:
+      paperless_authentik_client_secret_local_file:
         type: path
         required: true
       paperless_sync_script:

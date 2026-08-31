@@ -8,7 +8,7 @@ import dependency_graph
 def test_dependency_graph_validates_against_service_catalog() -> None:
     graph = dependency_graph.load_dependency_graph(validate_schema=True)
     assert len(graph.nodes) >= 34
-    assert graph.nodes["ops_portal"].tier == 4
+    assert graph.nodes["ops_portal"].tier == 3
 
 
 def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -> None:
@@ -22,9 +22,9 @@ def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -
         "gitea",
         "glitchtip",
         "label_studio",
-        "keycloak",
         "lago",
         "langfuse",
+        "litellm",
         "mattermost",
         "matrix_synapse",
         "n8n",
@@ -35,22 +35,23 @@ def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -
         "paperless",
         "plane",
         "semaphore",
+        "sftpgo",
         "superset",
         "temporal",
         "vaultwarden",
         "windmill",
         "woodpecker",
     }
-    assert set(impact.transitive_hard) == {"api_gateway", "homepage", "ops_portal"}
+    assert set(impact.transitive_hard) == set()
 
 
 def test_deployment_order_sorts_dependencies_before_dependents() -> None:
     graph = dependency_graph.load_dependency_graph(validate_schema=False)
     ordered = dependency_graph.deployment_order(
-        ["ops_portal", "windmill", "postgres", "keycloak"],
+        ["ops_portal", "windmill", "postgres", "authentik"],
         graph,
     )
-    assert ordered == ["postgres", "keycloak", "windmill", "ops_portal"]
+    assert ordered == ["authentik", "postgres", "ops_portal", "windmill"]
 
 
 def test_render_dependency_markdown_contains_mermaid_and_tiers() -> None:
@@ -58,7 +59,7 @@ def test_render_dependency_markdown_contains_mermaid_and_tiers() -> None:
     markdown = dependency_graph.render_dependency_markdown(graph)
 
     assert "```mermaid" in markdown
-    assert "| `4` | Ops Portal |" in markdown
+    assert "| `3` | Ops Portal, Woodpecker CI |" in markdown
 
 
 def test_render_dependency_page_wraps_markdown_for_generated_docs() -> None:

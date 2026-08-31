@@ -9,7 +9,7 @@
 #
 # Inputs: None.
 #
-# Outputs: Override variables consumed by the keycloak, mail-platform, and
+# Outputs: Override variables consumed by the identity, mail-platform, and
 # openbao-agent-sidecar paths.
 #
 # Idempotency: N/A for vars file because it only declares variables.
@@ -30,18 +30,6 @@ service_needs_nginx_edge: false
 # worktrees do not ship. Fork deploys set it explicitly.
 # Override on the CLI for non-0fork forks: -e platform_domain=<your-domain>.
 platform_domain: example.org
-
-# --- Keycloak reconciliation flags ---
-# Mail-platform submission recovery runs an SSO-authenticated smoke test
-# against the live edge. It is optional and frequently fails on fresh
-# forks whose TLS / oauth2-proxy are not yet warmed up.
-keycloak_mail_platform_submission_recovery_enabled: false
-
-# GlitchTip: the keycloak_runtime role reads its OAuth client secret but
-# has no matching create task. Forks that do not run GlitchTip must set
-# this to false to skip the 24-retry 404 loop (see ADR 0435 notes + the
-# gated read/mirror tasks in keycloak_runtime/tasks/main.yml).
-keycloak_glitchtip_enabled: false
 
 # --- OpenBao sidecar ---
 # ADR 0424 §2 collapses openbao onto runtime-control for the fork. Other
@@ -185,12 +173,9 @@ windmill_atlas_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/a
 windmill_remote_verification_enabled: false
 
 # --- PostgreSQL pg_hba extra sources ---
-# In the fork topology, Keycloak runs on docker-runtime (10.10.10.20) but
-# platform_service_registry.keycloak.host_group points to runtime-control (10.10.10.92).
-# The pg_hba template only generates an entry for the registered host_group IP, so
-# Keycloak cannot connect from docker-runtime.
-# Adding 10.10.10.20/32 here generates a blanket "host all all 10.10.10.20/32" entry
-# that covers all services running on docker-runtime (safe for an internal fork VM).
+# The pg_hba template derives service client addresses from the service registry.
+# Keep the bridge ranges explicit for services that run in the collapsed fork
+# topology; this is safe for an internal fork VM.
 postgres_vm_client_allowed_sources_extra_bridge:
   - 172.16.0.0/12
   - 192.168.0.0/16

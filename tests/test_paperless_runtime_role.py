@@ -34,12 +34,11 @@ def test_defaults_define_public_oidc_runtime_and_taxonomy_contract() -> None:
     )
     assert (
         defaults["paperless_public_hostname_overrides"][1]["hostname"]
-        == "{{ hostvars['proxmox-host'].platform_service_topology.keycloak.public_hostname }}"
+        == "{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}"
     )
-    assert defaults["paperless_internal_port"] == "{{ paperless_service_topology.ports.internal }}"
     assert defaults["paperless_internal_base_url"] == "http://127.0.0.1:{{ paperless_internal_port }}"
-    assert defaults["paperless_keycloak_client_id"] == "paperless"
-    assert defaults["paperless_keycloak_issuer"] == "https://sso.example.com/realms/lv3"
+    assert defaults["paperless_authentik_client_id"] == "paperless"
+    assert defaults["paperless_authentik_issuer"] == "{{ authentik_oidc_provider_base_url }}/paperless/"
     assert defaults["paperless_ocr_language"] == "eng"
     assert defaults["paperless_image_pull_retries"] == 5
     assert defaults["paperless_image_pull_delay_seconds"] == 5
@@ -50,9 +49,11 @@ def test_defaults_define_public_oidc_runtime_and_taxonomy_contract() -> None:
     assert defaults["paperless_openbao_runtime_recovery_enabled"] == (
         "{{ paperless_openbao_runtime_compose_file | length > 0 }}"
     )
-    assert defaults["paperless_api_token_local_file"].endswith("/.local/paperless/api-token.txt")
-    assert defaults["paperless_taxonomy_local_file"].endswith("/.local/paperless/taxonomy.json")
-    assert defaults["paperless_smoke_report_local_file"].endswith("/.local/paperless/smoke-upload-report.json")
+    assert defaults["paperless_api_token_local_file"] == "{{ paperless_local_artifact_dir }}/api-token.txt"
+    assert defaults["paperless_taxonomy_local_file"] == "{{ paperless_local_artifact_dir }}/taxonomy.json"
+    assert defaults["paperless_smoke_report_local_file"] == (
+        "{{ paperless_local_artifact_dir }}/smoke-upload-report.json"
+    )
     assert defaults["paperless_volume_names"]["media"] == "paperless-media"
     assert len(defaults["paperless_taxonomy_manifest"]["correspondents"]) == 3
     assert len(defaults["paperless_taxonomy_manifest"]["document_types"]) == 3
@@ -187,7 +188,7 @@ def test_verify_tasks_check_api_auth_and_taxonomy_drift() -> None:
     tasks = load_yaml(ROLE_VERIFY)
     names = [task["name"] for task in tasks]
 
-    assert "Verify the Paperless local root endpoint" in names
+    assert "Verify the Paperless runtime health" in names
     assert "Verify the Paperless authenticated documents endpoint" in names
     assert "Verify the Paperless taxonomy matches the declared manifest" in names
 
@@ -211,7 +212,7 @@ def test_templates_enable_public_proxy_headers_and_named_state_volumes() -> None
     assert "{{ paperless_volume_names.media }}:/usr/src/paperless/media" in compose_template
     assert '"{{ ansible_host }}:{{ paperless_internal_port }}:8000"' in compose_template
     assert '"127.0.0.1:{{ paperless_internal_port }}:8000"' in compose_template
-    assert '      - "{{ item.hostname }}:{{ item.address }}"' in compose_template
+    assert "{{ hairpin_hosts() }}" in compose_template
     assert "PAPERLESS_REDIRECT_LOGIN_TO_SSO=true" in env_template
     assert "PAPERLESS_APPS=allauth.socialaccount.providers.openid_connect" in env_template
     assert "PAPERLESS_SOCIALACCOUNT_PROVIDERS={{ paperless_oidc_provider_json }}" in env_template
@@ -232,7 +233,7 @@ def test_inventory_exposes_paperless_to_edge_monitoring_and_private_callers() ->
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime"]["allowed_inbound"]
     host_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "host")
     assert 8018 in host_rule["ports"]
-    nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx-edge" and 8018 in rule["ports"])
+    nginx_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "nginx" and 8018 in rule["ports"])
     assert 8018 in nginx_rule["ports"]
     guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 8018 in rule["ports"])
     assert 8018 in guest_rule["ports"]
@@ -267,7 +268,7 @@ def test_api_gateway_catalog_exposes_the_authenticated_paperless_route() -> None
 
     assert route["gateway_prefix"] == "/v1/paperless"
     assert route["upstream"] == "http://10.10.10.20:8018"
-    assert route["auth"] == "keycloak_jwt"
+    assert route["auth"] == "oidc_jwt"
     assert route["healthcheck_path"] == "/"
 
 

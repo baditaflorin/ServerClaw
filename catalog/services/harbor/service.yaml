@@ -18,7 +18,7 @@ service:
     - harbor_admin_password
     - harbor_database_password
     - harbor_check_runner_robot_secret
-    - keycloak_harbor_client_secret
+    - authentik_harbor_client_secret
   adr: '0201'
   runbook: docs/runbooks/configure-harbor.md
   runtime_pool: runtime-control
@@ -47,7 +47,8 @@ completeness:
   requires_compose_secrets: false
   dashboard_file: config/grafana/dashboards/harbor.json
   alert_rule_file: config/alertmanager/rules/harbor.yml
-  keycloak_client_generated: true
+  oidc_provider: authentik
+  authentik_client_generated: true
   suppressed_checks: {}
 redundancy:
   tier: R1
@@ -75,10 +76,10 @@ dependency:
     adr: '0201'
   outbound_edges:
     - from: harbor
-      to: keycloak
+      to: authentik
       type: soft
       description: Operator browser sign-in to registry.example.com depends on the
-        shared Keycloak OIDC path, while robot credentials still support governed
+        shared Authentik OIDC path, while robot credentials still support governed
         automation.
     - from: harbor
       to: nginx_edge

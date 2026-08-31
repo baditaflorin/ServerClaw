@@ -54,7 +54,7 @@
             'login' in grist_publish_auth_redirect.location
             or 'oidc' in grist_publish_auth_redirect.location
             or 'oauth' in grist_publish_auth_redirect.location
-            or hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname in grist_publish_auth_redirect.location
+            or hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname in grist_publish_auth_redirect.location
           )
         )
         or

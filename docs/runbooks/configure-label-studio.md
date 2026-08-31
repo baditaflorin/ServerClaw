@@ -4,7 +4,7 @@ Label Studio is the repo-managed human-in-the-loop data annotation platform
 published at `https://annotate.example.com`. The runtime lives on
 `docker-runtime`, stores its state in the dedicated PostgreSQL database
 `label_studio` on `postgres`, and uses the shared edge oauth2-proxy plus
-Keycloak browser-auth boundary while preserving app-local admin and token auth
+Authentik browser-auth boundary while preserving app-local admin and token auth
 for Community Edition-compatible automation and break-glass recovery.
 
 ## Repo Surfaces
@@ -18,7 +18,7 @@ for Community Edition-compatible automation and break-glass recovery.
 ## Implementation Variance From ADR 0289
 
 - Browser sign-in is enforced at the shared edge through oauth2-proxy and
-  Keycloak, not by a first-class in-app OIDC client. This keeps the published
+  Authentik, not by a first-class in-app OIDC client. This keeps the published
   UI protected while avoiding Community Edition auth drift.
 - Repo automation continues to use the Label Studio admin password and legacy
   API token surfaces for deterministic project-catalog sync and post-apply
@@ -135,7 +135,7 @@ The verification helper checks:
   daemon restart or firewall reconciliation leaves the API gateway structured
   search dependency unavailable.
 - If the public UI or API stops redirecting through oauth2-proxy, reconverge
-  `make converge-keycloak env=production`, then rerun
+  `make converge-authentik env=production`, then rerun
   `make converge-label-studio`. The shared auth boundary can drift even when
   the Label Studio private runtime itself is healthy.
 - If the private API works but the public redirect fails, inspect the Label

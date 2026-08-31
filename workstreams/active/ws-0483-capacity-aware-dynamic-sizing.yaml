@@ -14,6 +14,7 @@ depends_on:
   - adr-0440-deployment-layout
   - adr-0441-service-profiles
   - adr-0481-explicit-deployment-context
+conflicts_with: []
 shared_surfaces:
   - docs/adr/0482-capacity-aware-dynamic-sizing.md
   - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml

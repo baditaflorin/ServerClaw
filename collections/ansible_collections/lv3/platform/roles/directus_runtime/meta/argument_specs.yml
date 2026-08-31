@@ -28,7 +28,7 @@ argument_specs:
       directus_database_password_local_file:
         type: path
         required: true
-      directus_keycloak_client_secret_local_file:
+      directus_authentik_client_secret_local_file:
         type: path
         required: true
       directus_admin_password_local_file:

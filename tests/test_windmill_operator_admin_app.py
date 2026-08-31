@@ -264,12 +264,12 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         ),
     }.issubset(mutable_files)
     assert defaults["windmill_worker_repo_secret_directories"] == [
-        {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak", "mode": "0700"},
+        {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/authentik", "mode": "0700"},
         {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/ntfy", "mode": "0700"},
         {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao", "mode": "0700"},
     ]
     assert defaults["windmill_worker_repo_secret_files"][0]["path"] == (
-        "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak/bootstrap-admin-password.txt"
+        "{{ windmill_worker_repo_checkout_host_path }}/.local/authentik/bootstrap-token.txt"
     )
     assert defaults["windmill_worker_repo_secret_files"][1]["path"] == (
         "{{ windmill_worker_repo_checkout_host_path }}/.local/ntfy/alertmanager-password.txt"
@@ -320,8 +320,12 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     ]
     assert defaults["windmill_operator_manager_env"]["LV3_OPERATOR_MANAGER_SURFACE"] == "windmill"
     assert defaults["windmill_openbao_runtime_network"] == "openbao_default"
-    assert defaults["windmill_operator_manager_env"]["LV3_OPENBAO_URL"] == "http://lv3-openbao:8201"
-    assert "KEYCLOAK_BOOTSTRAP_PASSWORD" in defaults["windmill_operator_manager_env"]
+    assert defaults["windmill_operator_manager_env"]["LV3_OPENBAO_URL"] == (
+        "http://{{ platform_identity.config_prefix }}-openbao:8201"
+    )
+    assert defaults["windmill_operator_manager_env"]["LV3_AUTHENTIK_URL"] == "{{ authentik_oidc_base_url }}"
+    assert "LV3_AUTHENTIK_BOOTSTRAP_TOKEN" in defaults["windmill_operator_manager_env"]
+    assert "KEYCLOAK_BOOTSTRAP_PASSWORD" not in defaults["windmill_operator_manager_env"]
     assert "OPENBAO_INIT_JSON" in defaults["windmill_operator_manager_env"]
     assert {
         frozenset(
@@ -660,9 +664,8 @@ def test_operator_roster_script_returns_sanitized_roster(tmp_path: Path) -> None
                         "role": "admin",
                         "status": "active",
                         "notes": "primary operator",
-                        "keycloak": {
+                        "authentik": {
                             "username": "alice.example",
-                            "realm_roles": ["platform-admin"],
                             "groups": ["lv3-platform-admins"],
                         },
                         "ssh": {"public_keys": [{"name": "bootstrap", "fingerprint": "SHA256:test"}]},
@@ -683,7 +686,7 @@ def test_operator_roster_script_returns_sanitized_roster(tmp_path: Path) -> None
     assert payload["operator_count"] == 1
     assert payload["active_count"] == 1
     assert payload["inactive_count"] == 0
-    assert payload["operators"][0]["keycloak_username"] == "alice.example"
+    assert payload["operators"][0]["authentik_username"] == "alice.example"
     assert payload["operators"][0]["ssh_enabled"] is True
     assert "public_keys" not in payload["operators"][0]
 
@@ -743,7 +746,7 @@ def test_operator_onboard_wrapper_reads_runtime_env_fallback(tmp_path: Path, mon
     workflow.write_text("# stub\n", encoding="utf-8")
     runtime_env = tmp_path / "runtime.env"
     runtime_env.write_text(
-        "LV3_OPENBAO_URL=http://127.0.0.1:8201\nKEYCLOAK_BOOTSTRAP_PASSWORD=test-bootstrap\nOPENBAO_INIT_JSON={'root_token':'test'}\nIGNORED=value\n",
+        "LV3_OPENBAO_URL=http://127.0.0.1:8201\nLV3_AUTHENTIK_BOOTSTRAP_TOKEN=test-bootstrap\nOPENBAO_INIT_JSON={'root_token':'test'}\nIGNORED=value\n",
         encoding="utf-8",
     )
     module = load_module(
@@ -762,7 +765,7 @@ def test_operator_onboard_wrapper_reads_runtime_env_fallback(tmp_path: Path, mon
 
     assert payload["status"] == "ok"
     assert captured["env"]["LV3_OPENBAO_URL"] == "http://127.0.0.1:8201"
-    assert captured["env"]["KEYCLOAK_BOOTSTRAP_PASSWORD"] == "test-bootstrap"
+    assert captured["env"]["LV3_AUTHENTIK_BOOTSTRAP_TOKEN"] == "test-bootstrap"
     assert captured["env"]["OPENBAO_INIT_JSON"] == "{'root_token':'test'}"
     assert "IGNORED" not in captured["env"]
 
@@ -869,6 +872,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert defaults["windmill_workspace_id"] == "lv3"
     assert defaults["windmill_resource_type_workspace"] == "admins"
     assert defaults["windmill_ntfy_resource_path"] == "f/lv3/ntfy_platform"
+    assert defaults["windmill_verification_base_url"] == "{{ windmill_base_url }}"
     assert "Ensure the Windmill bootstrap admin login type matches the managed contract" in tasks
     assert "/api/users/set_login_type/" in tasks
     assert "Ensure the Windmill bootstrap admin password matches the managed secret" in tasks
@@ -903,8 +907,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "{{ windmill_seed_resource_manifest_remote.path }}" in tasks
     assert tasks.count("uv") >= 1
     assert tasks.count("python3") >= 3
-    assert "--path {{ windmill_healthcheck_script_path | quote }}" in tasks
-    assert "--path {{ windmill_stage_smoke_suites_script_path | quote }}" in verify_tasks
+    assert '- --path\n      - "{{ windmill_healthcheck_script_path }}"' in tasks
+    assert '- --path\n      - "{{ windmill_stage_smoke_suites_script_path }}"' in verify_tasks
     assert '$1 == "DATABASE_URL"' in tasks
     assert '. "{{ windmill_env_file }}"' not in tasks
     assert "Converge repo-managed Windmill schedule enabled flags" in tasks
@@ -1039,10 +1043,20 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'retries: "{{ windmill_worker_container_wait_retries }}"' in tasks
     assert 'delay: "{{ windmill_worker_container_wait_delay_seconds }}"' in tasks
     assert "--payload-json" in tasks
-    assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
+    assert '- --timeout\n      - "{{ windmill_seed_job_timeout_seconds | string }}"' in tasks
     assert "Run the Windmill seeded healthcheck script" in tasks
+    healthcheck_task = next(
+        task for task in yaml.safe_load(tasks) if task.get("name") == "Run the Windmill seeded healthcheck script"
+    )
+    assert "ansible.builtin.command" in healthcheck_task
+    assert "ansible.builtin.shell" not in healthcheck_task
+    assert healthcheck_task["ansible.builtin.command"]["argv"][:2] == [
+        "python3",
+        "{{ windmill_worker_checkout_repo_root_local_dir ~ '/scripts/windmill_run_wait_result.py' }}",
+    ]
     assert 'WINDMILL_TOKEN: "{{ windmill_runtime_api_token }}"' in tasks
-    assert "until: windmill_healthcheck.rc == 0" in tasks
+    assert "until:\n    - windmill_healthcheck.rc == 0" in tasks
+    assert "(windmill_healthcheck.stdout | default('') | trim | length) > 0" in tasks
     assert "failed_when: false" in tasks
     assert "' not found' in (windmill_up.stderr | default(''))" in tasks
     assert "Wait for Windmill workers to register before seeded healthcheck execution" in tasks
@@ -1051,6 +1065,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "import_tasks: wait_for_workers.yml" in verify_tasks
     assert "Wait for Windmill workers to register" in wait_for_workers_tasks
     assert "/api/workers/list" in wait_for_workers_tasks
+    assert "windmill_verification_base_url" in wait_for_workers_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in wait_for_workers_tasks
     assert "windmill_registered_workers" in wait_for_workers_tasks
     assert 'retries: "{{ windmill_runtime_api_wait_retries }}"' in verify_tasks
@@ -1076,7 +1091,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Reconcile the Windmill runtime before validation gate verification" in verify_tasks
     assert "Reconcile the Windmill runtime before stage smoke verification" in verify_tasks
     assert "Reconcile the Windmill runtime before Atlas drift verification" in verify_tasks
-    assert "--path {{ windmill_validation_gate_status_script_path | quote }}" in verify_tasks
+    assert '- --path\n      - "{{ windmill_validation_gate_status_script_path }}"' in verify_tasks
     assert "Run the Windmill validation gate status script" in verify_tasks
     assert "Assert the Windmill validation gate status result" in verify_tasks
     assert "Windmill validation gate status did not return structured output after retries." in verify_tasks
@@ -1084,6 +1099,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "gate_status.waiver_summary.release_blockers" in verify_tasks
     assert "Run the Windmill Atlas drift check script" in verify_tasks
     assert "Assert the Windmill Atlas drift check result" in verify_tasks
+    assert "windmill_atlas_drift_check_passed" in verify_tasks
+    assert "windmill_atlas_drift_assertion is failed" not in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations" in verify_tasks
     assert (
         "Verify the critical Windmill verification scripts are seeded with current controller content" in verify_tasks
@@ -1115,7 +1132,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
         "lookup('ansible.builtin.file', inventory_dir ~ '/../config/windmill/scripts/stage-smoke-suites.py', rstrip=False)"
         in verify_tasks
     )
-    assert "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
+    assert "{{ windmill_verification_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert "timeout: 10" in verify_tasks
     assert "windmill_verify_critical_seed_script_drift_paths" in verify_tasks
@@ -1123,7 +1140,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_verify_critical_seed_script_expectations[item.json.path].content" in verify_tasks
     assert "windmill_verify_critical_seed_script_expectations[item.json.path].local_file" in verify_tasks
     assert "windmill_verify_critical_seed_scripts_final" in verify_tasks
-    assert '- "{{ windmill_base_url }}"' in verify_tasks
+    assert '- "{{ windmill_verification_base_url }}"' in verify_tasks
     assert "Verify the Windmill default operations scripts are seeded" in verify_tasks
     assert 'WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"' in verify_tasks
     assert 'Authorization: "Bearer {{ windmill_runtime_api_token }}"' in verify_tasks
@@ -1394,15 +1411,15 @@ def test_windmill_runtime_sync_and_controller_verify_calls_use_the_expected_urls
     assert verify_seed_task["delegate_to"] == "localhost"
     assert (
         verify_seed_task["ansible.builtin.uri"]["url"]
-        == "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
+        == "{{ windmill_verification_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
     )
     assert resync_seed_task["delegate_to"] == "localhost"
-    assert "{{ windmill_base_url }}" in resync_seed_task["ansible.builtin.command"]["argv"]
+    assert "{{ windmill_verification_base_url }}" in resync_seed_task["ansible.builtin.command"]["argv"]
     assert "{{ windmill_private_base_url }}" not in resync_seed_task["ansible.builtin.command"]["argv"]
     assert verify_seed_post_repair_task["delegate_to"] == "localhost"
     assert (
         verify_seed_post_repair_task["ansible.builtin.uri"]["url"]
-        == "{{ windmill_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
+        == "{{ windmill_verification_base_url }}/api/w/{{ windmill_workspace_id }}/scripts/get/p/{{ item.path | urlencode }}"
     )
 
 

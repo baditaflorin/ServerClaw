@@ -7,6 +7,7 @@ depends_on: []
 conflicts_with: []
 owner: claude-agent
 branch: regenerate-platform-vars-10-20-addressing
+worktree_path: .worktrees/regenerate-platform-vars-10-20-addressing
 doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
 ownership_manifest:
   owned_surfaces:

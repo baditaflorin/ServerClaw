@@ -1,0 +1,70 @@
+version: 1
+
+# This manifest describes stable identity metadata only. It reconciles the
+# bootstrap Authentik administrator in place and never imports a password from
+# a retired identity provider.
+groups:
+  - id: platform-admins
+    name: "{{ platform_config_prefix }}-platform-admins"
+    attributes:
+      identity_class: human_operator
+      scope_boundary: platform_admin
+  - id: platform-read
+    name: platform-read
+    attributes:
+      identity_class: service_or_human
+      scope_boundary: platform_read
+  - id: platform-operator
+    name: platform-operator
+    attributes:
+      identity_class: human_operator
+      scope_boundary: platform_operator
+  - id: grafana-admins
+    name: grafana-admins
+    attributes:
+      identity_class: human_operator
+      scope_boundary: grafana_admin
+  - id: grafana-viewers
+    name: grafana-viewers
+    attributes:
+      identity_class: human_operator
+      scope_boundary: grafana_readonly
+  - id: harbor-admins
+    name: harbor-admins
+    attributes:
+      identity_class: human_operator
+      scope_boundary: harbor_admin
+  - id: approved-agent-clients
+    name: approved-agent-clients
+    attributes:
+      identity_class: service_account
+      scope_boundary: approved_client_credentials
+
+users:
+  - id: bootstrap-platform-operator
+    # Authentik creates this account during its own bootstrap. It is reconciled
+    # in place so the retirement workflow never needs a legacy password file.
+    username: "{{ authentik_bootstrap_admin_username }}"
+    provisioning: existing_only
+    name: "{{ platform_operator_name }}"
+    email: "{{ platform_operator_email }}"
+    groups:
+      - authentik Admins
+      - "{{ platform_config_prefix }}-platform-admins"
+      - platform-operator
+      - platform-read
+      - grafana-admins
+      - harbor-admins
+    is_active: true
+  # Authentik creates this service account alongside the agent-hub
+  # client-credentials provider. Keep it existing-only: the OAuth reconciler
+  # owns creation, while this manifest owns its narrowly scoped authorization.
+  - id: agent-hub-client-credentials
+    username: ak-agent-hub-client_credentials
+    provisioning: existing_only
+    managed_fields:
+      - groups
+    groups:
+      - approved-agent-clients
+      - platform-operator
+      - platform-read

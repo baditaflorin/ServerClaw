@@ -39,13 +39,13 @@ semaphore_private_base_url: "{{ platform_service_topology | platform_service_url
 semaphore_controller_url: "{{ platform_service_topology | platform_service_url('semaphore', 'controller') }}"
 semaphore_verify_ssl: false
 
-# Keycloak OIDC configuration
+# Authentik OIDC configuration
 semaphore_enable_oidc: true
-semaphore_oidc_provider: keycloak
+semaphore_oidc_provider: authentik
 semaphore_oidc_client_id: semaphore
-semaphore_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/semaphore-client-secret.txt"
+semaphore_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/semaphore-client-secret.txt"
 semaphore_oidc_client_secret_guest_file: "{{ semaphore_secret_dir }}/oidc-client-secret"
-semaphore_oidc_issuer_url: "{{ keycloak_oidc_issuer_url }}"
+semaphore_oidc_issuer_url: "{{ authentik_oidc_provider_base_url }}/semaphore/"
 semaphore_oidc_callback_url: "{{ semaphore_controller_url }}/auth/oidc/callback"
 semaphore_oidc_scopes: "openid profile email"
 semaphore_oidc_auto_provision_user: true

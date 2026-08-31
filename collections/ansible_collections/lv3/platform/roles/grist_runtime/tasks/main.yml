@@ -23,14 +23,14 @@
       - grist_internal_port | int > 0
       - grist_internal_base_url | length > 0
       - grist_public_base_url | length > 0
-      - grist_keycloak_client_secret_local_file | length > 0
+      - grist_authentik_client_secret_local_file | length > 0
       - grist_image | length > 0
-      - grist_keycloak_client_id | length > 0
-      - grist_keycloak_issuer | length > 0
+      - grist_authentik_client_id | length > 0
+      - grist_authentik_issuer | length > 0
       - grist_default_email | length > 0
     fail_msg: >-
       grist_runtime requires runtime paths, image refs, public URLs,
-      and Keycloak OIDC credentials.
+      and Authentik OIDC credentials.
 
 - name: Check Grist prerequisites on the control machine
   ansible.builtin.include_role:
@@ -38,9 +38,9 @@
     tasks_from: check_local_secrets
   vars:
     common_check_local_secrets_files:
-      - path: "{{ grist_keycloak_client_secret_local_file }}"
-        description: "Grist Keycloak client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying Grist"
+      - path: "{{ grist_authentik_client_secret_local_file }}"
+        description: "Grist Authentik client secret"
+        prerequisite: "Converge the Authentik runtime before deploying Grist"
 
 - name: Ensure the Grist runtime packages are present
   ansible.builtin.apt:
@@ -102,10 +102,10 @@
 - name: Record the Grist runtime secrets
   ansible.builtin.set_fact:
     grist_session_secret: "{{ grist_decoded_secrets[0] }}"
-    grist_keycloak_client_secret: "{{ lookup('ansible.builtin.file', grist_keycloak_client_secret_local_file) | trim }}"
+    grist_authentik_client_secret: "{{ lookup('ansible.builtin.file', grist_authentik_client_secret_local_file) | trim }}"
     grist_runtime_secret_payload:
       GRIST_SESSION_SECRET: "{{ grist_decoded_secrets[0] }}"
-      GRIST_OIDC_IDP_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', grist_keycloak_client_secret_local_file) | trim }}"
+      GRIST_OIDC_IDP_CLIENT_SECRET: "{{ lookup('ansible.builtin.file', grist_authentik_client_secret_local_file) | trim }}"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Grist
@@ -763,15 +763,15 @@
       - grist_docker_nat_chain.rc == 0 or grist_docker_nat_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Grist published ports will fail."
 
-- name: Wait for the Keycloak issuer discovery document through the shared edge route before Grist startup
+- name: Wait for the Authentik issuer discovery document through the shared edge route before Grist startup
   ansible.builtin.shell: |
     set -euo pipefail
     discovery_json="$(curl --fail --silent --show-error \
       --connect-timeout 5 \
       --max-time 10 \
-      --resolve '{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}:443:{{ grist_public_edge_private_ip }}' \
-      '{{ grist_keycloak_issuer }}/.well-known/openid-configuration')"
-    DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_keycloak_issuer }}" <<'PY'
+      --resolve '{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}:443:{{ grist_public_edge_private_ip }}' \
+      '{{ grist_authentik_issuer }}/.well-known/openid-configuration')"
+    DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_authentik_issuer }}" <<'PY'
     import json
     import os
     import sys
@@ -783,10 +783,10 @@
     PY
   args:
     executable: /bin/bash
-  register: grist_keycloak_discovery
+  register: grist_authentik_discovery
   retries: 18
   delay: 5
-  until: grist_keycloak_discovery.rc == 0
+  until: grist_authentik_discovery.rc == 0
   changed_when: false
 
 - name: Check whether the Grist local port is already published
@@ -1056,15 +1056,15 @@
         and '"errMessage":"No login system is configured"' in (grist_pre_verify_auth_surface.content | default(''))
       }}
 
-- name: Wait for the Keycloak issuer discovery document through the shared edge route before Grist login middleware recovery
+- name: Wait for the Authentik issuer discovery document through the shared edge route before Grist login middleware recovery
   ansible.builtin.shell: |
     set -euo pipefail
     discovery_json="$(curl --fail --silent --show-error \
       --connect-timeout 5 \
       --max-time 10 \
-      --resolve '{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}:443:{{ grist_public_edge_private_ip }}' \
-      '{{ grist_keycloak_issuer }}/.well-known/openid-configuration')"
-    DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_keycloak_issuer }}" <<'PY'
+      --resolve '{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}:443:{{ grist_public_edge_private_ip }}' \
+      '{{ grist_authentik_issuer }}/.well-known/openid-configuration')"
+    DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_authentik_issuer }}" <<'PY'
     import json
     import os
     import sys
@@ -1076,10 +1076,10 @@
     PY
   args:
     executable: /bin/bash
-  register: grist_keycloak_discovery_recovery
+  register: grist_authentik_discovery_recovery
   retries: 18
   delay: 5
-  until: grist_keycloak_discovery_recovery.rc == 0
+  until: grist_authentik_discovery_recovery.rc == 0
   changed_when: false
   when: grist_oidc_login_recovery_needed | bool
 

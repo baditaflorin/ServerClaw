@@ -52,27 +52,17 @@ argument_specs:
         type: str
         required: true
         description:
-          - OIDC client id registered in Keycloak for the operations portal.
+          - OIDC client id registered in Authentik for the operations portal.
       public_edge_oidc_auth_client_secret_local_file:
         type: path
         required: true
         description:
-          - Controller-local file used to mirror the Keycloak client secret.
+          - Controller-local file used to mirror the Authentik client secret.
       public_edge_oidc_auth_issuer_url:
         type: str
         required: true
         description:
           - OIDC issuer URL used by the auth proxy.
-      public_edge_oidc_auth_public_login_url:
-        type: str
-        required: true
-        description:
-          - Public Keycloak authorization endpoint used for browser redirects.
-      public_edge_oidc_auth_internal_base_url:
-        type: str
-        required: true
-        description:
-          - Private Keycloak base URL used by the auth proxy for server-side token and JWKS calls.
       public_edge_oidc_auth_redirect_url:
         type: str
         required: true
@@ -83,7 +73,7 @@ argument_specs:
         elements: str
         required: true
         description:
-          - Keycloak groups that may authenticate to the protected portal.
+          - Authentik groups that may authenticate to the protected portal.
       public_edge_oidc_auth_email_domains:
         type: list
         elements: str
@@ -110,26 +100,6 @@ argument_specs:
         required: true
         description:
           - Session refresh interval.
-      public_edge_oidc_auth_redeem_url:
-        type: str
-        required: true
-        description:
-          - Private Keycloak token endpoint used by the auth proxy.
-      public_edge_oidc_auth_profile_url:
-        type: str
-        required: true
-        description:
-          - Private Keycloak userinfo endpoint used by the auth proxy.
-      public_edge_oidc_auth_validate_url:
-        type: str
-        required: true
-        description:
-          - Private Keycloak validation endpoint used by the auth proxy.
-      public_edge_oidc_auth_jwks_url:
-        type: str
-        required: true
-        description:
-          - Private Keycloak JWKS endpoint used by the auth proxy.
       public_edge_oidc_auth_probe_hostname:
         type: str
         required: true

@@ -9,7 +9,7 @@ and verifies both the private runtime and the authenticated public edge route.
 
 - `runtime-general` runs Homepage from `/opt/homepage`
 - Homepage config is regenerated from the canonical service and subdomain catalogs on every converge
-- `home.example.com` is published on the shared NGINX edge behind the repo-managed Keycloak oauth2-proxy gate
+- `home.example.com` is published on the shared NGINX edge behind the repo-managed Authentik oauth2-proxy gate
 - Uptime Kuma manages the `Homepage Public` monitor for the new dashboard URL
 
 ## Commands

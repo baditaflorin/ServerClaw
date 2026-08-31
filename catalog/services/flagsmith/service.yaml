@@ -35,7 +35,7 @@ service:
     - control-plane
     - edge-authenticated
   notes: The public UI and browser management API are protected by the shared edge
-    oauth2-proxy and Keycloak flow while server-side environment keys remain private
+    oauth2-proxy and Authentik flow while server-side environment keys remain private
     and repo-managed through OpenBao.
   environments:
     production:
@@ -89,10 +89,10 @@ dependency:
       description: The Flagsmith Community Edition runtime and task processor are
         hosted on docker-runtime.
     - from: flagsmith
-      to: keycloak
+      to: authentik
       type: soft
       description: Browser access to flags.example.com is gated by the shared oauth2-proxy
-        and Keycloak edge-auth path, while private environment-key consumers continue
+        and Authentik edge-auth path, while private environment-key consumers continue
         to use the internal runtime directly.
     - from: flagsmith
       to: nginx_edge

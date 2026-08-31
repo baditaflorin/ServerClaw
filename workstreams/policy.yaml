@@ -4,6 +4,12 @@ delivery_model:
   branch_prefix: codex/
   allowed_extra_prefixes:
     - claude/
+    # Historical source branches retained by revived, ready-to-merge workstreams
+    # and explicit planning placeholders; new work defaults to codex/.
+    - unassigned/
+    - revive-
+    - fix-
+    - correct-
   workstream_doc_root: docs/workstreams
   registry_owner: main
 release_policy:

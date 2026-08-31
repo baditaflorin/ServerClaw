@@ -91,7 +91,7 @@
           "id": "platform-api-gateway",
           "kind": "service_api",
           "endpoint": "https://api.example.com/v1",
-          "auth": "Keycloak-issued bearer tokens validated against the LV3 realm JWKS by the gateway before request forwarding.",
+          "auth": "Authentik-issued bearer tokens validated against the provider JWKS by the gateway before request forwarding.",
           "service_refs": [
             "api_gateway"
           ],
@@ -233,7 +233,7 @@
           "id": "langfuse-observability-api",
           "kind": "service_api",
           "endpoint": "https://langfuse.example.com/api/public",
-          "auth": "Project-scoped Langfuse public and secret API keys mirrored under .local/langfuse plus Keycloak-backed browser sign-in for interactive operator use.",
+          "auth": "Project-scoped Langfuse public and secret API keys mirrored under .local/langfuse plus Authentik-backed browser sign-in for interactive operator use.",
           "service_refs": [
             "langfuse"
           ],

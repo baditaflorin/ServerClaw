@@ -161,7 +161,7 @@ def test_api_gateway_catalog_exposes_the_authenticated_changedetection_route() -
 
     assert route["gateway_prefix"] == "/v1/changedetection"
     assert route["upstream"] == "http://10.10.10.20:5000"
-    assert route["auth"] == "keycloak_jwt"
+    assert route["auth"] == "oidc_jwt"
     assert route["healthcheck_path"] == "/"
 
 

@@ -13,15 +13,12 @@ The GlitchTip workflow converges:
 - the shared PostgreSQL backend role and database on `postgres`
 - the public hostname `errors.example.com` on the shared NGINX edge
 - one selected generic `openid_connect` SocialApp, currently `provider_id=authentik`
-- one healthy retained `provider_id=keycloak` SocialApp for per-client rollback
 - the bootstrap admin, API token, and project-scoped DSN artifacts under
   `.local/glitchtip/`
 - the alert-recipient wiring for Mattermost and ntfy
 
-The GlitchTip playbook does not converge either identity provider. The selected
-Authentik application/provider must exist before GlitchTip runs. The prior
-Keycloak client secret remains a separate rollback artifact and is never
-overwritten by Authentik reconciliation.
+The GlitchTip playbook does not converge the identity provider. The selected
+Authentik application/provider must exist before GlitchTip runs.
 
 ## Preconditions
 
@@ -49,7 +46,6 @@ overwritten by Authentik reconciliation.
   PLATFORM_DOMAIN="$(uv run --no-project --with pyyaml python -c \
     'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))["platform_domain"])' \
     "${IDENTITY_FILE}")"
-  KEYCLOAK_REALM="${KEYCLOAK_REALM:-${PLATFORM_DOMAIN%%.*}}"
   ```
 
   Leave `PLATFORM_INVENTORY_OVERLAY` unset to use the committed private
@@ -76,7 +72,6 @@ overwritten by Authentik reconciliation.
 - the Authentik provider declaration in `config/authentik/oauth-clients.yaml`
   uses the same public client ID as `glitchtip_oidc_client_id`
 - `${LOCAL_ROOT}/authentik/glitchtip-client-secret.txt` exists
-- `${LOCAL_ROOT}/keycloak/glitchtip-client-secret.txt` is preserved for rollback
 - Authentik registers this backend callback exactly:
   `https://errors.example.com/accounts/oidc/authentik/login/callback/`
 - `HETZNER_DNS_API_TOKEN` is available when the edge certificate needs expansion
@@ -98,19 +93,18 @@ HETZNER_DNS_API_TOKEN=... make converge-glitchtip env=production
 
 The GlitchTip target repeats the explicit identity/topology guard, then
 preflight checks the narrow OpenBao provisioner artifact, both
-provider-specific client-secret artifacts, and the retained Keycloak public
-discovery endpoint. Only after those checks pass does it validate the public
-subdomain contract, refresh the shared edge generated sites, and converge
-PostgreSQL, GlitchTip, and NGINX publication. It does not modify Authentik,
-Keycloak, or OpenBao.
+provider-specific client-secret artifact. Only after those checks pass does it
+validate the public subdomain contract, refresh the shared edge generated
+sites, and converge PostgreSQL, GlitchTip, and NGINX publication. It does not
+modify Authentik or OpenBao.
 
-The runtime role reconciles both the selected and rollback SocialApps
-transactionally by `provider` plus `provider_id`, updates their non-secret
-metadata and provider-specific client credentials, links them to the managed
-organization, and collapses duplicate rows for each provider. Keeping the
-rollback metadata healthy is required: GlitchTip resolves every SocialApp when
-serving `/api/settings/`, so one stale provider can hide all OIDC buttons even
-when the selected Authentik headless redirect is healthy.
+The runtime role reconciles the selected SocialApp transactionally by
+`provider` plus `provider_id`, updates its non-secret metadata and
+provider-specific client credentials, links it to the managed organization,
+and collapses duplicate rows. It also removes explicitly retired providers.
+GlitchTip resolves every SocialApp when serving `/api/settings/`, so one stale
+provider can hide all OIDC buttons even when the selected Authentik headless
+redirect is healthy.
 
 The compose template uses the shared `hairpin_hosts()` mapping. This is required
 because GlitchTip fetches OIDC discovery server-side; a container that resolves
@@ -131,9 +125,8 @@ The workflow maintains controller-local artifacts under `.local/glitchtip/`:
 - `windmill-jobs.dsn`
 - `platform-findings-event-url.txt`
 
-The selected Authentik client artifacts and preserved Keycloak rollback secret
-remain in their provider-specific `.local/` directories; they are not copied
-into Git or rendered into receipts.
+The selected Authentik client artifacts remain in their provider-specific
+`.local/` directory; they are not copied into Git or rendered into receipts.
 
 ## Producer rollout
 
@@ -177,9 +170,6 @@ python3 scripts/glitchtip_event_smoke.py \
   --dsn-file "${LOCAL_ROOT}/glitchtip/platform-findings-event-url.txt" \
   --timeout-seconds 300 \
   --request-timeout-seconds 60
-curl --fail --silent --show-error \
-  "https://sso.${PLATFORM_DOMAIN}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration" \
-  >/dev/null
 ```
 
 GlitchTip uses django-allauth in headless-only mode. A GET to
@@ -216,13 +206,13 @@ successful redirect-only smoke is not a substitute for this gate, and Outline
 remains blocked until the login, session, and logout evidence is present.
 
 The converge also requires `/api/settings/` to return HTTP 200 and advertise
-both Authentik and the retained Keycloak rollback provider with resolved
-authorization URLs. This protects the actual login page from a stale rollback
-issuer that would otherwise make the frontend settings request fail closed.
-The edge CSP must likewise permit `form-action` to the selected Authentik and
-rollback Keycloak origins. GlitchTip begins OIDC with a same-origin allauth form
-POST, but browsers enforce `form-action` across its external 302 redirect; a
-`'self'`-only policy leaves both buttons visible while silently blocking login.
+the selected Authentik provider with a resolved authorization URL. It rejects
+any explicitly retired provider, so a dead issuer cannot make the
+frontend settings request fail closed. The edge CSP permits `form-action` to
+the selected Authentik origin. GlitchTip begins OIDC with a same-origin
+allauth form POST, but browsers enforce `form-action` across its external 302
+redirect; a `'self'`-only policy leaves the button visible while silently
+blocking login.
 
 `scripts/resolve_local_overlay_root.sh` makes these token-file and DSN-file
 arguments work from both the primary checkout and linked worktrees. Do not
@@ -230,17 +220,15 @@ replace them with worktree-relative `.local/` paths.
 
 ## Per-client rollback
 
-Keep Authentik and Keycloak live in parallel throughout ADR 0491. If the
+Do not restore the retired provider as an in-place GlitchTip rollback. If the
 Authentik redirect or token exchange fails:
 
 1. Preserve the failed Authentik metadata and logs without recording secrets.
-2. Select the prior Keycloak provider metadata and the existing
-   `${LOCAL_ROOT}/keycloak/glitchtip-client-secret.txt` through an explicitly
-   reviewed role override or integration change.
+2. Recover only the reviewed Authentik client configuration through the
+   governed procedure and record a separate live-apply receipt if the scope
+   reaches the identity provider.
 3. Reconcile only GlitchTip and repeat the headless redirect plus event smokes.
-4. Re-probe the retained Keycloak public discovery endpoint; secret-file
-   presence alone is not rollback-health evidence.
-5. Do not decommission Authentik or Keycloak as part of this per-client rollback.
+4. Do not decommission Authentik as part of that emergency rollback.
 
 ## Notes
 

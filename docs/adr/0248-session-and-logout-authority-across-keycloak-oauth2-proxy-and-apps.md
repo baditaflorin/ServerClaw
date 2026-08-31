@@ -1,6 +1,6 @@
 # ADR 0248: Session And Logout Authority Across Keycloak, Oauth2-Proxy, And App Surfaces
 
-- Status: Accepted
+- Status: Deprecated (see service removal ADR — service removed from platform)
 - Implementation Status: Live applied
 - Implemented In Repo Version: 0.177.63
 - Implemented In Platform Version: 0.130.45

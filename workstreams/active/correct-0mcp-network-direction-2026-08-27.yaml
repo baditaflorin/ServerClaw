@@ -1,4 +1,5 @@
 id: correct-0mcp-network-direction-2026-08-27
+adr: "0416"
 title: Correct 0mcp network postmortem direction and apply the live fix
 status: ready
 ready_to_merge: true
@@ -7,7 +8,11 @@ depends_on: []
 conflicts_with: []
 owner: claude-agent
 branch: correct-0mcp-network-direction-2026-08-27
+worktree_path: .worktrees/correct-0mcp-network-direction-2026-08-27
 doc: docs/postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/correct-0mcp-network-direction-2026-08-27.yaml
 ownership_manifest:
   owned_surfaces:
     - id: correct-0mcp-network-direction-2026-08-27-doc
@@ -16,7 +21,6 @@ ownership_manifest:
         - workstreams/active/correct-0mcp-network-direction-2026-08-27.yaml
         - workstreams/archive/2026/audit-0mcp-guest-network-drift-2026-08-27.yaml
         - workstreams/archive/2026/fix-0mcp-guest-network-addressing-10-20.yaml
-        - workstreams.yaml
       mode: exclusive
 
 description: |

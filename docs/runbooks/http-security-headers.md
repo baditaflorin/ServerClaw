@@ -36,4 +36,4 @@ curl -sSI https://docs.example.com/ | rg 'Strict-Transport-Security|Content-Secu
 
 - Adjust `public_edge_security_headers_overrides` when a specific published app needs a narrower or broader CSP than the global default.
 - Keep the global policy strict and document each relaxed directive in ADR 0136.
-- Re-run the audit after every public-edge change and after upgrades to Grafana, Keycloak, Uptime Kuma, MkDocs, or the ops portal.
+- Re-run the audit after every public-edge change and after upgrades to Grafana, Authentik, Uptime Kuma, MkDocs, or the ops portal.

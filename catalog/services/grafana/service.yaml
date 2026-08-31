@@ -72,9 +72,9 @@ dependency:
     adr: '0011'
   outbound_edges:
     - from: grafana
-      to: keycloak
+      to: authentik
       type: soft
-      description: Grafana uses Keycloak for the preferred SSO path, but local admin
+      description: Grafana uses Authentik for the preferred SSO path, but local admin
         remains the break-glass fallback.
     - from: grafana
       to: minio

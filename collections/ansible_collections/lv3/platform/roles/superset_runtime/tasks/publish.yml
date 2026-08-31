@@ -1,4 +1,4 @@
-# Purpose: Verify the public Superset publication, health contract, and Keycloak redirect path.
+# Purpose: Verify the public Superset publication, health contract, and Authentik redirect path.
 # Use case: Run from localhost after the Superset runtime and shared edge publication are converged.
 # Inputs: Public URL, controller-local admin password, the datasource catalog file, and the verification helper.
 # Outputs: Confirms the public Superset publication is reachable and the managed datasources and landing dashboard are visible through the API.
@@ -53,7 +53,7 @@
     - (superset_publish_public_health.content | trim) == "OK"
   changed_when: false
 
-- name: Verify the public Superset publication and Keycloak redirect contract
+- name: Verify the public Superset publication and Authentik redirect contract
   ansible.builtin.command:
     argv:
       - python3
@@ -70,7 +70,7 @@
       - --expected-chart
       - "{{ superset_landing_chart_title }}"
       - --expected-sso-host
-      - sso.{{ platform_domain }}
+      - id.{{ platform_domain }}
       - --admin-username
       - "{{ superset_admin_username }}"
       - --admin-password-file
@@ -83,7 +83,7 @@
   changed_when: false
   when: superset_register_plausible_clickhouse | bool
 
-- name: Verify the public Superset publication and Keycloak redirect contract without optional databases
+- name: Verify the public Superset publication and Authentik redirect contract without optional databases
   ansible.builtin.command:
     argv:
       - python3
@@ -100,7 +100,7 @@
       - --expected-chart
       - "{{ superset_landing_chart_title }}"
       - --expected-sso-host
-      - sso.{{ platform_domain }}
+      - id.{{ platform_domain }}
       - --admin-username
       - "{{ superset_admin_username }}"
       - --admin-password-file

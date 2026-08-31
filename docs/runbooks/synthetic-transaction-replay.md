@@ -13,7 +13,7 @@ ADR 0190 adds a privacy-safe replay harness for capacity, recovery, and failover
 
 `restore-docker-runtime` replays representative control-plane reads against the isolated restored guest after boot and warm-up complete:
 
-- Keycloak OIDC discovery
+- Authentik OIDC discovery
 - NetBox login page render
 - Windmill API version
 - OpenBao active-health probe as a non-blocking observation

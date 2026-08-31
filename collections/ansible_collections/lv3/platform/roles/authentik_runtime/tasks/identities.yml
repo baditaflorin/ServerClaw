@@ -1,0 +1,77 @@
+---
+# Purpose: Reconcile Authentik human identity groups and initial operator accounts.
+# Use case: Run after OAuth reconciliation so the Authentik-only path has governed human and machine access.
+# Inputs: Non-secret identity manifest and Authentik API token.
+# Outputs: Groups, the existing bootstrap administrator, and service accounts match the manifest.
+# Idempotency: Fully idempotent; existing Authentik credentials are never reset.
+# Dependencies: ADR 0165 and ADR 0491.
+
+- name: Verify the Authentik identity reconciler inputs exist on the controller
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ authentik_identity_manifest_file }}"
+    - "{{ authentik_identity_reconcile_script }}"
+    - "{{ authentik_identity_reconcile_token_file }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_identity_reconcile_inputs
+  no_log: true
+
+- name: Assert the Authentik identity reconciler inputs are present
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists | default(false)
+      - item.stat.size | default(0) | int > 0
+    fail_msg: "An Authentik identity reconciler manifest, script, or token file is missing."
+  loop: "{{ authentik_identity_reconcile_inputs.results }}"
+  loop_control:
+    label: "{{ item.item | basename }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Build the Authentik identity reconciler command
+  ansible.builtin.set_fact:
+    authentik_identity_reconcile_argv:
+      - uv
+      - run
+      - --no-project
+      - --with
+      - pyyaml
+      - python
+      - "{{ authentik_identity_reconcile_script }}"
+      - --manifest
+      - "{{ authentik_identity_manifest_file }}"
+      - --base-url
+      - "{{ authentik_public_url }}"
+      - --token-file
+      - "{{ authentik_identity_reconcile_token_file }}"
+      - --platform-domain
+      - "{{ platform_domain }}"
+      - --platform-config-prefix
+      - "{{ platform_identity.config_prefix }}"
+      - --authentik-bootstrap-admin-username
+      - "{{ authentik_bootstrap_admin_username }}"
+      - --platform-operator-name
+      - "{{ platform_operator_name }}"
+      - --platform-operator-email
+      - "{{ platform_operator_email }}"
+  no_log: true
+
+- name: Apply the Authentik identity manifest
+  ansible.builtin.command:
+    argv: "{{ authentik_identity_reconcile_argv + ['--apply'] }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_identity_reconcile_apply
+  changed_when: (authentik_identity_reconcile_apply.stdout | from_json).changed | bool
+  no_log: true
+
+- name: Prove Authentik identity reconciliation is idempotent
+  ansible.builtin.command:
+    argv: "{{ authentik_identity_reconcile_argv + ['--check', '--expect-no-change'] }}"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  no_log: true

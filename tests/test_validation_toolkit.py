@@ -117,6 +117,34 @@ with patch.object(validation_toolkit, "_find_identity_path", return_value=identi
                 self.assertEqual(validation_toolkit.load_identity_vars()["platform_domain"], "selected.example")
                 self.assertEqual(identity_yaml.load_identity_vars()["platform_domain"], "selected.example")
 
+    def test_identity_loaders_fall_back_to_tracked_generation_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="tracked-identity-fallback-") as temp_value:
+            repo_root = Path(temp_value) / "repo"
+            identity_path = repo_root / "inventory" / "group_vars" / "all" / "identity.yml"
+            platform_path = repo_root / "inventory" / "group_vars" / "platform.yml"
+            identity_path.parent.mkdir(parents=True)
+            identity_path.write_text("platform_domain: example.com\n", encoding="utf-8")
+            platform_path.write_text(
+                """
+platform_generation:
+  identity_overlay:
+    platform_domain: tracked.example
+""".lstrip(),
+                encoding="utf-8",
+            )
+
+            with (
+                patch.dict(
+                    "os.environ",
+                    {"PLATFORM_IDENTITY_OVERLAY": "", "LV3_DISABLE_SHARED_LOCAL_IDENTITY": ""},
+                    clear=False,
+                ),
+                patch.object(validation_toolkit, "_find_identity_path", return_value=identity_path),
+                patch.object(identity_yaml, "_find_identity_path", return_value=identity_path),
+            ):
+                self.assertEqual(validation_toolkit.load_identity_vars()["platform_domain"], "tracked.example")
+                self.assertEqual(identity_yaml.load_identity_vars()["platform_domain"], "tracked.example")
+
     def test_resolve_public_domain_placeholders_uses_shared_local_overlay_values(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="validation-toolkit-"))
         repo_root = temp_dir / "repo"

@@ -85,7 +85,7 @@ export const Favorite = {
 
 export const Locked = {
   args: {
-    name: 'Keycloak Admin',
+    name: 'Authentik Admin',
     description: 'Identity provider — manage users, groups, and OIDC clients.',
     summary: '',
     primaryBadge: 'Recover',
@@ -100,7 +100,7 @@ export const Grid = {
     <div class="launcher-entry-grid">
       ${entryCard({ name: 'Grafana', description: 'Metrics and logs.', summary: '', primaryBadge: 'Observe', badges: ['product'], isFavorite: false, locked: false })}
       ${entryCard({ name: 'Gitea', description: 'Source code hosting.', summary: '', primaryBadge: 'Change', badges: ['product'], isFavorite: true, locked: false })}
-      ${entryCard({ name: 'Keycloak', description: 'Identity provider.', summary: '', primaryBadge: 'Recover', badges: ['security'], isFavorite: false, locked: true })}
+      ${entryCard({ name: 'Authentik', description: 'Identity provider.', summary: '', primaryBadge: 'Recover', badges: ['security'], isFavorite: false, locked: true })}
       ${entryCard({ name: 'Outline', description: 'Living wiki.', summary: '', primaryBadge: 'Learn', badges: ['reference'], isFavorite: false, locked: false })}
     </div>
   `,

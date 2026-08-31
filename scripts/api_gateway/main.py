@@ -269,7 +269,7 @@ class GatewayConfig:
     graph_dsn: str | None = None
     world_state_dsn: str | None = None
     clock_skew_seconds: int = 30
-    keycloak_retry_after_seconds: int = 30
+    authentik_retry_after_seconds: int = 30
     dify_tools_api_key: str | None = None
     dify_tools_api_key_header: str = "X-LV3-Dify-Api-Key"
     billing_api_base_url: str | None = None
@@ -353,7 +353,7 @@ class TypesenseStructuredSearchClient:
         }
 
 
-class KeycloakJWTVerifier:
+class AuthentikJWTVerifier:
     def __init__(
         self,
         *,
@@ -391,7 +391,7 @@ class KeycloakJWTVerifier:
         self._degradation_store.activate(
             "api_gateway",
             self._degradation_mode,
-            source="keycloak_jwks",
+            source="authentik_jwks",
             last_error=error,
             metadata=metadata,
         )
@@ -399,7 +399,7 @@ class KeycloakJWTVerifier:
     def _clear_degradation(self) -> None:
         if self._degradation_store is None:
             return
-        dependency = str((self._degradation_mode or {}).get("dependency") or "keycloak")
+        dependency = str((self._degradation_mode or {}).get("dependency") or "authentik")
         self._degradation_store.clear("api_gateway", dependency)
 
     def _dependency_unavailable(self, retry_after: int) -> HTTPException:
@@ -408,9 +408,9 @@ class KeycloakJWTVerifier:
             detail={
                 "code": "GATE_CIRCUIT_OPEN",
                 "error_code": "GATE_CIRCUIT_OPEN",
-                "circuit": "keycloak",
-                "dependency": "keycloak",
-                "message": "Keycloak is unavailable and the JWKS cache has expired.",
+                "circuit": "authentik",
+                "dependency": "authentik",
+                "message": "Authentik is unavailable and the JWKS cache has expired.",
                 "retry_after": retry_after,
                 "retry_after_s": retry_after,
             },
@@ -425,7 +425,7 @@ class KeycloakJWTVerifier:
                     timeout=resolve_timeout_seconds("http_request"),
                 ),
                 policy=self._retry_policy,
-                error_context="keycloak jwks fetch",
+                error_context="authentik jwks fetch",
             )
             response.raise_for_status()
             return response.json()
@@ -695,20 +695,20 @@ class GatewayRuntime:
             policies_path=config.circuit_policy_path,
             backend=MemoryCircuitStateBackend(),
         )
-        self.verifier = KeycloakJWTVerifier(
+        self.verifier = AuthentikJWTVerifier(
             jwks_url=config.jwks_url,
             issuer=config.issuer,
             expected_audience=config.expected_audience,
             clock_skew_seconds=config.clock_skew_seconds,
             client=self.http_client,
             degradation_store=self.degradation_store,
-            degradation_mode=self.degradation_mode("api_gateway", "keycloak"),
-            retry_after_seconds=config.keycloak_retry_after_seconds,
+            degradation_mode=self.degradation_mode("api_gateway", "authentik"),
+            retry_after_seconds=config.authentik_retry_after_seconds,
             circuit_breaker=self.circuit_registry.async_breaker(
-                "keycloak",
+                "authentik",
                 exception_classifier=should_count_httpx_exception,
             )
-            if self.circuit_registry.has_policy("keycloak")
+            if self.circuit_registry.has_policy("authentik")
             else None,
         )
         self.event_emitter = NatsEventEmitter(
@@ -1067,11 +1067,11 @@ def build_config() -> GatewayConfig:
             os.environ.get("LV3_GATEWAY_DRIFT_RECEIPTS_DIR", repo_root / "receipts" / "drift-reports")
         ),
         jwks_url=os.environ.get(
-            "KEYCLOAK_JWKS_URL",
-            "https://sso.localhost/realms/lv3/protocol/openid-connect/certs",
+            "OIDC_JWKS_URL",
+            "https://id.localhost/application/o/agent-hub/jwks/",
         ),
-        issuer=os.environ.get("KEYCLOAK_ISSUER_URL", "https://sso.localhost/realms/lv3"),
-        expected_audience=os.environ.get("KEYCLOAK_EXPECTED_AUDIENCE") or None,
+        issuer=os.environ.get("OIDC_ISSUER_URL", "https://id.localhost/application/o/agent-hub/"),
+        expected_audience=os.environ.get("OIDC_EXPECTED_AUDIENCE") or None,
         nats_url=os.environ.get("NATS_URL") or None,
         nats_username=os.environ.get("LV3_NATS_USERNAME") or None,
         nats_password=os.environ.get("LV3_NATS_PASSWORD") or None,
@@ -1094,7 +1094,7 @@ def build_config() -> GatewayConfig:
         world_state_dsn=os.environ.get("LV3_GATEWAY_WORLD_STATE_DSN") or os.environ.get("WORLD_STATE_DSN") or None,
         openapi_include_upstreams=os.environ.get("LV3_GATEWAY_INCLUDE_UPSTREAM_OPENAPI", "false").lower()
         in {"1", "true", "yes"},
-        keycloak_retry_after_seconds=int(os.environ.get("LV3_GATEWAY_KEYCLOAK_RETRY_AFTER_SECONDS", "30")),
+        authentik_retry_after_seconds=int(os.environ.get("LV3_GATEWAY_OIDC_RETRY_AFTER_SECONDS", "30")),
         dify_tools_api_key=os.environ.get("LV3_DIFY_TOOLS_API_KEY") or None,
         dify_tools_api_key_header=os.environ.get("LV3_DIFY_TOOLS_API_KEY_HEADER", "X-LV3-Dify-Api-Key"),
         billing_api_base_url=os.environ.get("LV3_GATEWAY_BILLING_API_BASE_URL") or None,
@@ -1126,17 +1126,6 @@ async def require_identity(request: Request) -> dict[str, Any]:
     if not header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="missing bearer token")
     token = header.split(" ", 1)[1].strip()
-    legacy_platform_context_token = os.environ.get("LV3_GATEWAY_PLATFORM_CONTEXT_LEGACY_TOKEN", "").strip()
-    if legacy_platform_context_token and token == legacy_platform_context_token:
-        identity = {
-            "claims": {"sub": "platform-context-legacy-token"},
-            "roles": {"platform-read", "platform-operator"},
-            "subject": "platform-context-legacy-token",
-            "token": token,
-        }
-        set_context(actor_id=identity["subject"])
-        request.state.identity = identity
-        return identity
     runtime: GatewayRuntime = request.app.state.runtime
     claims = await runtime.verifier.verify(token)
     identity = {

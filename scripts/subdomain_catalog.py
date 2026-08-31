@@ -21,7 +21,7 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
     if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
         sys.modules.pop("platform", None)
 
-from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
+from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars, load_yaml
 
 from identity_yaml import load_yaml_with_identity, resolve_jinja2_vars
 from validation_toolkit import (
@@ -150,37 +150,43 @@ def expected_dns_records_for_entry(entry: dict[str, Any], path: str) -> list[dic
     return parsed_records
 
 
-def load_subdomain_catalog() -> dict[str, Any]:
-    return resolve_public_domain_placeholders(load_json(SUBDOMAIN_CATALOG_PATH))
+def load_subdomain_catalog(identity_vars: dict[str, str] | None = None) -> dict[str, Any]:
+    return resolve_public_domain_placeholders(load_json(SUBDOMAIN_CATALOG_PATH), identity_vars=identity_vars)
 
 
-def _resolve_identity_placeholders(value: Any) -> Any:
+def _resolve_identity_placeholders(value: Any, identity_vars: dict[str, str] | None = None) -> Any:
     """Recursively resolve ``{{ platform_domain }}``-style placeholders in
     string values of *value*. Operators' overlay values are typically literal,
     but the committed host_vars file uses identity placeholders in
     ``platform_service_topology[*].public_hostname`` — so the resolved form is what
     subdomain validation needs."""
     if isinstance(value, str):
-        return resolve_jinja2_vars(value)
+        return resolve_jinja2_vars(value, variables=identity_vars)
     if isinstance(value, list):
-        return [_resolve_identity_placeholders(item) for item in value]
+        return [_resolve_identity_placeholders(item, identity_vars) for item in value]
     if isinstance(value, dict):
-        return {key: _resolve_identity_placeholders(item) for key, item in value.items()}
+        return {key: _resolve_identity_placeholders(item, identity_vars) for key, item in value.items()}
     return value
 
 
-def load_host_vars() -> dict[str, Any]:
+def load_host_vars(
+    identity_vars: dict[str, str] | None = None,
+    *,
+    include_local_overlay: bool = True,
+) -> dict[str, Any]:
     # ADR 0430 — overlay-aware so subdomain validation and portal rendering
     # see fork-specific `proxmox_guests` and `platform_service_topology`. Identity
     # placeholders in the committed base (e.g. ``public_hostname:
     # nginx.{{ platform_domain }}``) are resolved post-merge so downstream
     # hostname validation matches the operator's real domain.
-    merged = load_topology_host_vars()
-    return _resolve_identity_placeholders(merged)
+    merged = load_topology_host_vars() if include_local_overlay else load_yaml(TOPOLOGY_HOST_VARS_PATH)
+    if not isinstance(merged, dict):
+        raise TypeError(f"{TOPOLOGY_HOST_VARS_PATH}: expected top-level mapping")
+    return _resolve_identity_placeholders(merged, identity_vars)
 
 
-def load_public_edge_defaults() -> dict[str, Any]:
-    return load_yaml_with_identity(PUBLIC_EDGE_DEFAULTS_PATH)
+def load_public_edge_defaults(identity_vars: dict[str, str] | None = None) -> dict[str, Any]:
+    return load_yaml_with_identity(PUBLIC_EDGE_DEFAULTS_PATH, variables=identity_vars)
 
 
 def validate_reserved_prefixes(catalog: dict[str, Any]) -> dict[str, set[str]]:

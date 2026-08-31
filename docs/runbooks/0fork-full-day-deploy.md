@@ -68,7 +68,7 @@ This runs `playbooks/0fork-full-day.yml`, which imports in order:
    control-loops, backups.
 2. `site.yml` — full service convergence under `env=clone`: data tier,
    security, observability, automation, communication, platform-apps
-   (Keycloak, OpenBao, step-ca, API gateway, mail-platform, etc.).
+   (Authentik, OpenBao, step-ca, API gateway, mail-platform, etc.).
 3. `mail-platform-send-gmail.yml` — acceptance email to
    `{{ platform_operator_email }}`.
 

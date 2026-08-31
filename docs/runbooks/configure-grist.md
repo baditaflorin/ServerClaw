@@ -8,15 +8,15 @@ The Grist workflow converges:
 
 - the Grist runtime and persistent document store on `docker-runtime`
 - the public hostname `grist.example.com` on the shared NGINX edge
-- the dedicated Keycloak OIDC client used by the Grist sign-in flow
+- the dedicated Authentik OIDC client used by the Grist sign-in flow
 - the controller-local Grist session secret mirrored under `.local/grist/`
 
 ## Preconditions
 
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
 - the OpenBao init payload is already available under `.local/openbao/init.json`
-- Keycloak is already deployed and healthy on `sso.example.com`
-- the Keycloak discovery document answers at `https://sso.example.com/realms/lv3/.well-known/openid-configuration`
+- Authentik is already deployed and healthy on `id.example.com`
+- the Authentik provider discovery document answers for the declared `grist` issuer
 - Hetzner DNS API credentials are available when the edge certificate needs expansion
 
 The Grist role now waits for that discovery document through the shared edge
@@ -66,7 +66,7 @@ The workflow maintains controller-local secrets under `.local/grist/`:
 
 - `session-secret.txt`
 
-The Keycloak client secret is mirrored under `.local/keycloak/grist-client-secret.txt`.
+The Authentik client secret is mirrored under `.local/authentik/grist-client-secret.txt`.
 
 ## Runtime layout
 
@@ -90,7 +90,7 @@ Repository and syntax checks:
 
 ```bash
 python3 scripts/validate_service_completeness.py --service grist
-uv run --with pytest --with jsonschema --with pyyaml python -m pytest -q tests/test_grist_runtime_role.py tests/test_grist_playbook.py tests/test_keycloak_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_ansible_execution_scopes.py tests/test_validate_service_completeness.py tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_container_image_policy.py
+uv run --with pytest --with jsonschema --with pyyaml python -m pytest -q tests/test_grist_runtime_role.py tests/test_grist_playbook.py tests/test_authentik_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_ansible_execution_scopes.py tests/test_validate_service_completeness.py tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_container_image_policy.py
 uv run --with pyyaml --with jsonschema python scripts/ansible_scope_runner.py run --inventory inventory/hosts.yml --run-id ws0279syntax --playbook playbooks/services/grist.yml --env production -- --private-key .local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --syntax-check
 ./scripts/validate_repo.sh agent-standards workstream-surfaces data-models
 make preflight WORKFLOW=live-apply-service service=grist env=production
@@ -106,7 +106,7 @@ Runtime verification:
 curl -fsS https://grist.example.com/status
 curl -sS -D /tmp/grist-o-docs.headers https://grist.example.com/o/docs/ -o /dev/null
 sed -n '1,20p' /tmp/grist-o-docs.headers
-rg '^location: https://sso.example.com/realms/lv3/protocol/openid-connect/auth' /tmp/grist-o-docs.headers
+rg '^location: https://id.example.com/application/o/' /tmp/grist-o-docs.headers
 ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
   -o StrictHostKeyChecking=no \
@@ -123,20 +123,20 @@ PY
 
 The public `/status` endpoint should return `200` and the body
 `Grist server(home,docs,static) is alive.` while unauthenticated requests to
-`https://grist.example.com/o/docs/` should return `HTTP 302` into the Keycloak
-OIDC flow at `https://sso.example.com/realms/lv3/protocol/openid-connect/auth...`.
+`https://grist.example.com/o/docs/` should return `HTTP 302` into the Authentik
+OIDC flow at `https://id.example.com/application/o/...`.
 The container logs should include `OIDCConfig: initialized with issuer
-https://sso.example.com/realms/lv3` and `loginMiddlewareComment: oidc`.
+https://id.example.com/application/o/grist/` and `loginMiddlewareComment: oidc`.
 
 ## Operating notes
 
-- Grist uses the named Keycloak operator email as the repo-managed first-admin path.
+- Grist uses the named Authentik operator email as the repo-managed first-admin path.
 - Do not store platform-authoritative host, network, or release truth only inside Grist; continue to keep canonical platform state in repo-managed files and governed systems such as NetBox or PostgreSQL.
-- Treat `.local/grist/` and `.local/keycloak/grist-client-secret.txt` as sensitive controller-only material.
+- Treat `.local/grist/` and `.local/authentik/grist-client-secret.txt` as sensitive controller-only material.
 - Keep `grist.example.com/status` publicly reachable through the shared edge for health verification.
 - Document routes require authentication for the org workspace; individual documents that the owner marks as public are reachable without login via the share link.
 - If the first publication run fails before Hetzner DNS state is observable, confirm `grist.example.com` resolves to `203.0.113.1` and rerun the scoped playbook; the DNS and edge publication path is idempotent once the record exists.
-- If Grist ever serves the blocked auth page with `No login system is configured`, rerun the repo-managed play first. The current role is expected to recover that startup race automatically by rechecking Keycloak discovery and force-recreating only the Grist container.
+- If Grist ever serves the blocked auth page with `No login system is configured`, rerun the repo-managed play first. The current role is expected to recover that startup race automatically by rechecking Authentik discovery and force-recreating only the Grist container.
 - When adding a new user to the `lv3` org, the recommended path is through the Grist UI (Admin panel → Users). Direct SQLite edits to `home.sqlite3` are a break-glass measure only and must be followed by a managed live-apply to restore idempotent state.
 - Always use `docker compose up -d --force-recreate` to apply env file changes. `docker compose restart` reuses the cached container environment and will not pick up changes made to `grist.env`.
 
@@ -171,7 +171,7 @@ https://sso.example.com/realms/lv3` and `loginMiddlewareComment: oidc`.
 
 | File | Change |
 |------|--------|
-| `roles/nginx_edge_publication/defaults/main.yml` | Added `grist.example.com` CSP override: `script-src 'self' 'unsafe-inline'`, `connect-src` includes `https://sso.example.com` |
+| `roles/nginx_edge_publication/defaults/main.yml` | Added `grist.example.com` CSP override: `script-src 'self' 'unsafe-inline'`, `connect-src` includes `https://id.example.com` |
 | `roles/nginx_edge_publication/defaults/main.yml` | Added `public_edge_site_tls_materials: {}` default |
 | `roles/grist_runtime/templates/grist.env.j2` | Added `GRIST_SERVE_SAME_ORIGIN=true`, `GRIST_ANONYMOUS_PLAYGROUND` |
 | `roles/grist_runtime/defaults/main.yml` | Changed `grist_force_login: true` → `false`; added `grist_anonymous_playground: false` |

@@ -14,7 +14,7 @@ Commands
 Examples
 --------
   python scripts/api_gateway_tool.py list
-  python scripts/api_gateway_tool.py list --auth keycloak_jwt
+  python scripts/api_gateway_tool.py list --auth oidc
   python scripts/api_gateway_tool.py show --id gitea
   python scripts/api_gateway_tool.py auth-required
   python scripts/api_gateway_tool.py upstream --service grafana

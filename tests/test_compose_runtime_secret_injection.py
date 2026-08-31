@@ -5,7 +5,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 ROLE_RUNTIME_PATHS = {
     "windmill_runtime": "/run/lv3-secrets/windmill/runtime.env",
-    "keycloak_runtime": "/run/lv3-secrets/keycloak/runtime.env",
+    "authentik_runtime": "/run/lv3-secrets/authentik/runtime.env",
     "mattermost_runtime": "/run/lv3-secrets/mattermost/runtime.env",
     "matrix_synapse_runtime": "/run/lv3-secrets/matrix-synapse/runtime.env",
     "netbox_runtime": "/run/lv3-secrets/netbox/runtime.env",
@@ -23,12 +23,13 @@ def test_common_openbao_agent_helper_exists() -> None:
     assert "{{ common_openbao_compose_env_agent_template_file | basename }}" in template
     assert 'destination          = "{{ common_openbao_compose_env_env_file }}"' in template
     assert "common_openbao_compose_env_api_url" in helper
-    assert "Render the bootstrap runtime env file from the managed secret payload" in helper
-    assert "common_openbao_compose_env_secret_payload | dictsort" in helper
-    assert "register: common_openbao_compose_env_approle_upsert" in helper
-    assert "until: common_openbao_compose_env_approle_upsert.status == 204" in helper
-    assert "register: common_openbao_compose_env_unsealed_status" in helper
-    assert "not (common_openbao_compose_env_unsealed_status.json.sealed | bool)" in helper
+    assert "Render the role-provided OpenBao agent runtime env template" in helper
+    assert 'data: "{{ common_openbao_compose_env_secret_payload }}"' in helper
+    assert "register: common_openbao_compose_env_secret_upsert" in helper
+    assert "until: common_openbao_compose_env_secret_upsert.status == 200" in helper
+    assert "Login with the runtime-secret provisioner AppRole" in helper
+    assert "register: common_openbao_compose_env_seal_status" in helper
+    assert "not (common_openbao_compose_env_seal_status.json.sealed | default(true) | bool)" in helper
 
 
 def test_validate_repo_checks_for_unexpected_env_files() -> None:

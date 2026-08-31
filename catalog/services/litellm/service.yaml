@@ -40,7 +40,7 @@ completeness:
   suppressed_checks:
     subdomain: '2027-01-01'
     api_gateway: '2027-01-01'
-    keycloak_client: '2027-01-01'
+    oidc_client: '2027-01-01'
     secret_definition: '2027-01-01'
     grafana_dashboard: '2027-01-01'
     slo_definition: '2027-01-01'

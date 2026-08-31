@@ -147,7 +147,7 @@ make converge-site
 ```
 
 This is the big one. It deploys all services across all VMs:
-PostgreSQL, Keycloak (SSO), OpenBao (secrets), Nginx (edge proxy),
+PostgreSQL, Authentik (SSO), OpenBao (secrets), Nginx (edge proxy),
 Grafana (monitoring), and all application services.
 
 For a faster first pass, converge only the critical path:
@@ -166,7 +166,7 @@ make verify-platform
 
 1. **DNS:** Create A records pointing `*.yourdomain.com` to your server's public IP
 2. **TLS:** Certificates are managed by step-ca; verify with `make validate-certificates`
-3. **SSO:** Log into Keycloak at `https://auth.yourdomain.com` and create operator accounts
+3. **SSO:** Log into Authentik at `https://id.yourdomain.com` and create operator accounts
 4. **Monitoring:** Access Grafana at `https://grafana.yourdomain.com`
 
 ---

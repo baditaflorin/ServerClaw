@@ -15,7 +15,7 @@ Recover the interactive ops portal runtime when `ops.example.com` or the local `
   acknowledge and dismiss actions reset after refresh
 - the portal loads but the masthead, sidebar, or state components render unstyled as plain HTML
 - the login flow redirects to `/oauth2/callback?...error=invalid_scope`
-- the Keycloak login form accepts a submit and then renders `We are sorry... Unexpected error when handling authentication request to identity provider.`
+- the Authentik login flow accepts a submit and then returns an authorization or callback error
 - password reset or required-action flows claim success but the reset email never arrives
 - `docker compose ps` on `docker-runtime` shows the `ops-portal` container exited or unhealthy
 
@@ -81,18 +81,15 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetz
   'curl -k -I -H "Host: ops.example.com" https://127.0.0.1/health'
 ```
 
-7. If the portal redirects to Keycloak but the submit fails, check the Keycloak runtime directly:
+7. If the portal redirects to Authentik but the submit fails, check Authentik
+   readiness before changing the portal:
 
 ```bash
-curl -I https://sso.example.com/realms/lv3/.well-known/openid-configuration
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
-  -o IdentitiesOnly=yes \
-  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
-  ops@10.10.10.20 \
-  'docker logs --tail 80 keycloak-keycloak-1'
+curl --fail --silent --show-error https://id.example.com/-/health/ready/ >/dev/null
 ```
 
-If the logs show `Acquisition timeout while waiting for new connection`, the JDBC pool is wedged. If a restart then fails with `No chain/target/match by that name`, Docker's nat chain on `docker-runtime` is missing and Keycloak must be recreated after Docker itself is restarted.
+If Authentik is not ready, follow [Authentik Down](authentik-down.md). Do not
+restart the portal to repair an identity-provider outage.
 
 6. If the shell renders but charts stay blank or the shared PatternFly shell is
    unstyled, verify the same-origin runtime assets and mirrored topology file
@@ -269,29 +266,23 @@ ANSIBLE_HOST_KEY_CHECKING=False "$REPO/scripts/run_with_namespace.sh" uvx --from
    `https://unpkg.com/@patternfly/patternfly@5.4.0/patternfly.min.css` asset
    and that `/static/portal.js` loads from the same origin.
 
-10. If the callback includes `error=invalid_scope`, verify the rendered oauth2-proxy config on `nginx-edge` does not request a custom `groups` scope. The portal relies on a client-mapped `groups` claim, so the requested scope must stay `openid profile email` unless a real Keycloak client scope named `groups` is added and assigned.
-11. If the auth failure is actually Keycloak, recover the runtime from the Proxmox host through the guest agent:
+10. If the callback includes `error=invalid_scope`, verify the rendered
+    oauth2-proxy config on `nginx-edge` requests only `openid profile email`.
+    The portal receives group membership through Authentik provider claims; do
+    not request a custom `groups` scope unless the provider contract is changed
+    and validated.
+11. If the identity provider is unhealthy, follow
+    [Authentik Down](authentik-down.md); do not recreate unrelated Docker
+    stacks through the guest agent.
+12. Re-verify the IdP and portal redirect path:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
-  -o IdentitiesOnly=yes \
-  root@100.64.0.1 \
-  "qm guest exec 120 -- /bin/sh -lc 'systemctl restart docker'"
-
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
-  -o IdentitiesOnly=yes \
-  root@100.64.0.1 \
-  \"qm guest exec 120 -- /bin/sh -lc 'cd /opt/keycloak && docker compose up -d --force-recreate keycloak'\"
-```
-
-11. Re-verify the IdP and portal redirect path:
-
-```bash
-curl -I https://sso.example.com/realms/lv3/.well-known/openid-configuration
+curl -I https://id.example.com/-/health/ready/
 curl -I https://ops.example.com/oauth2/sign_in
 ```
 
-12. If login is healthy but password-reset mail is still broken, verify the realm SMTP path and the private relay on `docker-runtime`:
+13. If login is healthy but password-reset mail is still broken, verify the
+    Authentik mail path and the private relay on `docker-runtime`:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
@@ -304,10 +295,13 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetz
   -o IdentitiesOnly=yes \
   -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p' \
   ops@10.10.10.20 \
-  'docker logs --tail 120 keycloak-keycloak-1 | grep -i -E "smtp|reset_password|required.action"'
+  'sudo docker compose -f /opt/authentik/docker-compose.yml logs --tail 120 --no-color authentik worker | grep -i -E "smtp|mail|password|reset"'
 ```
 
-Use the base login URLs (`https://ops.example.com` or `https://ops.example.com/oauth2/sign_in`) when retesting. A stale `login-actions/...` or `reset-credentials?...` URL without the matching browser cookie can still render Keycloak's generic `We are sorry...` page even when the live service is healthy.
+Use the base login URLs (`https://ops.example.com` or
+`https://ops.example.com/oauth2/sign_in`) when retesting. A stale authorization
+or reset URL without its matching browser cookie can fail even when the live
+service is healthy; begin a clean sign-in instead of reusing it.
 
 ## Static Fallback
 

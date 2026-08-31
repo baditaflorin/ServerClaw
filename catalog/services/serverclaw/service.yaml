@@ -18,7 +18,7 @@ service:
   secret_catalog_ids:
     - serverclaw_admin_password
     - serverclaw_secret_key
-    - serverclaw_oidc_client_secret
+    - authentik_serverclaw_client_secret
   adr: '0254'
   runbook: docs/runbooks/configure-serverclaw.md
   runtime_pool: dedicated-coolify
@@ -36,7 +36,7 @@ service:
       status: active
       url: https://chat.example.com
       subdomain: chat.example.com
-      notes: ServerClaw uses in-app Keycloak OIDC for routine browser login while
+      notes: ServerClaw uses in-app Authentik OIDC for routine browser login while
         retaining a repo-managed bootstrap admin as break-glass access.
 completeness:
   service_type: compose
@@ -44,7 +44,8 @@ completeness:
   requires_oidc: true
   requires_secrets: true
   requires_compose_secrets: true
-  keycloak_client_generated: true
+  oidc_provider: authentik
+  authentik_client_generated: true
   dashboard_file: config/grafana/dashboards/serverclaw.json
   alert_rule_file: config/alertmanager/rules/serverclaw.yml
   suppressed_checks:
@@ -77,9 +78,9 @@ dependency:
     adr: '0254'
   outbound_edges:
     - from: serverclaw
-      to: keycloak
+      to: authentik
       type: soft
-      description: ServerClaw prefers Keycloak-backed browser sign-in while retaining
+      description: ServerClaw prefers Authentik-backed browser sign-in while retaining
         a repo-managed bootstrap admin as the break-glass fallback.
     - from: serverclaw
       to: nginx_edge

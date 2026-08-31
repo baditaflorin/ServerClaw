@@ -1,9 +1,9 @@
 ---
 # Purpose: Converge the Outline wiki database, runtime, and edge publication.
 # Use case: Run for production or staging live apply of the repo-managed Outline knowledge surface.
-# Outputs: PostgreSQL role and database, Outline runtime secrets, Keycloak OIDC client, NGINX edge publication, and repo-managed Outline landing pages.
+# Outputs: PostgreSQL role and database, Outline runtime secrets, Authentik OIDC client, NGINX edge publication, and repo-managed Outline landing pages.
 # Idempotency: Partially idempotent; runtime convergence is repeatable, while the first admin bootstrap is skipped once the controller-local API token already exists and sync updates deterministic documents in place.
-# Dependencies: ADR 0199, postgres_vm, keycloak_runtime, outline_postgres, outline_runtime, nginx_edge_publication.
+# Dependencies: ADR 0199, postgres_vm, authentik_runtime, outline_postgres, outline_runtime, nginx_edge_publication.
 #
 # Invocation: ansible-playbook playbooks/outline.yml -e @playbooks/vars/outline.yml -e env=production
 
@@ -30,6 +30,11 @@
   hosts: localhost
   connection: local
   gather_facts: false
+  vars_files:
+    # The publication task runs on localhost rather than an inventory host.
+    # Load the generated platform facts explicitly so shared session authority
+    # (including the Authentik logout endpoint) resolves before templating.
+    - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
 
   tasks:
     - name: Bootstrap and verify the Outline living knowledge surface

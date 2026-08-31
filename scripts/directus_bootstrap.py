@@ -310,17 +310,17 @@ def verify_public(args: argparse.Namespace) -> int:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(json.dumps(openapi, indent=2) + "\n", encoding="utf-8")
 
-    req = request.Request(f"{args.base_url}/auth/login/keycloak", method="GET")
+    req = request.Request(f"{args.base_url}/auth/login/authentik", method="GET")
     try:
         no_redirect.open(req, timeout=DEFAULT_TIMEOUT)
     except error.HTTPError as exc:
         if exc.code not in (301, 302, 303, 307, 308):
-            raise DirectusError(f"/auth/login/keycloak returned unexpected status {exc.code}") from exc
+            raise DirectusError(f"/auth/login/authentik returned unexpected status {exc.code}") from exc
         location = exc.headers.get("Location", "")
         if args.expected_sso_host not in location:
             raise DirectusError(f"SSO redirect did not point at {args.expected_sso_host}: {location}")
     else:
-        raise DirectusError("/auth/login/keycloak unexpectedly succeeded without redirecting")
+        raise DirectusError("/auth/login/authentik unexpectedly succeeded without redirecting")
 
     rest = api_request(
         opener,

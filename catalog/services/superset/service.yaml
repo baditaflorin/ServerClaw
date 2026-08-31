@@ -19,7 +19,7 @@ service:
     - superset_reader_password
     - superset_secret_key
     - superset_admin_password
-    - keycloak_superset_client_secret
+    - authentik_superset_client_secret
   adr: 0292
   adr_file: docs/adr/0292-apache-superset-as-the-sql-first-business-intelligence-layer.md
   runbook: docs/runbooks/configure-superset.md
@@ -36,7 +36,7 @@ service:
     - oidc
   notes: Superset runs on docker-runtime, stores metadata in the managed superset
     schema of the shared postgres database on postgres, delegates browser sign-in
-    to Keycloak, and seeds a repo-managed PostgreSQL inventory dashboard plus the
+    to Authentik, and seeds a repo-managed PostgreSQL inventory dashboard plus the
     optional Plausible ClickHouse datasource.
   environments:
     production:
@@ -44,14 +44,15 @@ service:
       url: https://bi.example.com
       subdomain: bi.example.com
       notes: Public publication terminates on the shared NGINX edge while browser
-        authentication remains upstream in the service-native Keycloak OIDC flow.
+        authentication remains upstream in the service-native Authentik OIDC flow.
 completeness:
   service_type: compose
   requires_subdomain: true
   requires_oidc: true
   requires_secrets: true
   requires_compose_secrets: true
-  keycloak_client_generated: true
+  oidc_provider: authentik
+  authentik_client_generated: true
   suppressed_checks:
     api_gateway: '2026-09-30'
     alert_rules: '2026-09-30'
@@ -90,10 +91,10 @@ dependency:
       description: The Superset runtime and its OpenBao-backed compose stack run on
         docker-runtime.
     - from: superset
-      to: keycloak
+      to: authentik
       type: soft
       description: Routine browser sign-in to bi.example.com depends on the repo-managed
-        Keycloak OIDC client and realm configuration.
+        Authentik OIDC provider configuration.
     - from: superset
       to: nginx_edge
       type: soft

@@ -18,7 +18,6 @@ def test_serverclaw_playbook_refreshes_host_network_runtime_and_edge() -> None:
     assert play_names == [
         "Ensure Hetzner DNS publication for ServerClaw",
         "Converge the Proxmox guest network policy for ServerClaw",
-        "Converge the ServerClaw Keycloak client on the Docker runtime VM",
         "Converge ServerClaw on the Coolify runtime VM",
         "Publish ServerClaw through the NGINX edge",
     ]
@@ -36,10 +35,10 @@ def test_serverclaw_playbook_refreshes_host_network_runtime_and_edge() -> None:
     assert host_roles == ["lv3.platform.proxmox_network"]
     assert playbook[1]["vars_files"] == ["{{ playbook_dir }}/../inventory/group_vars/platform.yml"]
 
-    guest_roles = [role["role"] for role in playbook[3]["roles"]]
+    guest_roles = [role["role"] for role in playbook[2]["roles"]]
     assert guest_roles == [
         "lv3.platform.linux_guest_firewall",
     ]
 
-    edge_roles = [role["role"] for role in playbook[4]["roles"]]
+    edge_roles = [role["role"] for role in playbook[3]["roles"]]
     assert edge_roles == ["lv3.platform.nginx_edge_publication"]

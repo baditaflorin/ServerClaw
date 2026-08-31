@@ -17,7 +17,7 @@ make scaffold-service \
   NAME=my-service \
   TYPE=compose \
   VM=docker-runtime \
-  DEPENDS_ON=postgres,keycloak \
+  DEPENDS_ON=postgres,authentik \
   OIDC=true
 ```
 

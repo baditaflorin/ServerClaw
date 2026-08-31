@@ -120,7 +120,7 @@ public_edge_security_headers_overrides:
     # across that redirect, so retain only the selected and rollback origins.
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'
-      https://id.{{ platform_domain }} https://sso.{{ platform_domain }};
+      https://id.{{ platform_domain }};
       frame-ancestors 'none'; object-src 'none'; script-src 'self';
       style-src 'self' 'unsafe-inline'; img-src 'self' data:;
       font-src 'self' data:; connect-src 'self'; manifest-src 'self'
@@ -139,7 +139,7 @@ public_edge_security_headers_overrides:
       default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
-      connect-src 'self' https://bi.{{ platform_domain }} https://sso.{{ platform_domain }}; worker-src 'self' blob:;
+      connect-src 'self' https://bi.{{ platform_domain }} https://id.{{ platform_domain }}; worker-src 'self' blob:;
       child-src 'self' blob:; manifest-src 'self'
   coolify.{{ platform_domain }}:
     content_security_policy: >-
@@ -154,7 +154,7 @@ public_edge_security_headers_overrides:
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
       style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
       font-src 'self' data:; connect-src 'self' https://annotate.{{ platform_domain }}
-      https://sso.{{ platform_domain }} wss://annotate.{{ platform_domain }}; worker-src 'self' blob:;
+      https://id.{{ platform_domain }} wss://annotate.{{ platform_domain }}; worker-src 'self' blob:;
       child-src 'self' blob:; manifest-src 'self'
   chat.{{ platform_domain }}:
     content_security_policy: >-
@@ -181,7 +181,7 @@ public_edge_security_headers_overrides:
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob:; font-src 'self' data:;
-      connect-src 'self' https://grist.{{ platform_domain }} https://sso.{{ platform_domain }}; manifest-src 'self'
+      connect-src 'self' https://grist.{{ platform_domain }} https://id.{{ platform_domain }}; manifest-src 'self'
   grafana.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -195,7 +195,7 @@ public_edge_security_headers_overrides:
       object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
       style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
       font-src 'self' data:; connect-src 'self' https://notebooks.{{ platform_domain }}
-      wss://notebooks.{{ platform_domain }} https://sso.{{ platform_domain }}; worker-src 'self' blob:;
+      wss://notebooks.{{ platform_domain }} https://id.{{ platform_domain }}; worker-src 'self' blob:;
       child-src 'self' blob:; manifest-src 'self'
   n8n.{{ platform_domain }}:
     content_security_policy: >-
@@ -233,17 +233,6 @@ public_edge_security_headers_overrides:
       style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://unpkg.com;
       font-src 'self' data: https://unpkg.com;
       connect-src 'self'; manifest-src 'self'
-  sso.{{ platform_domain }}:
-    # Keycloak uses same-origin iframes for session management (authChecker.js
-    # and the admin-console 3rd-party-cookie probe).  frame-ancestors must be
-    # 'self', and X-Frame-Options must be SAMEORIGIN, or the iframe times out
-    # and the Sign-In button on the login page becomes unresponsive.
-    x_frame_options: SAMEORIGIN
-    content_security_policy: >-
-      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';
-      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
-      img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://sso.{{ platform_domain }};
-      frame-src 'self'; manifest-src 'self'
   wiki.{{ platform_domain }}:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -270,7 +259,7 @@ public_edge_security_headers_overrides:
       https://uptime.{{ platform_domain }} ws://uptime.{{ platform_domain }} wss://uptime.{{ platform_domain }}; manifest-src 'self'
   scheduler.{{ platform_domain }}:
     content_security_policy: >-
-      default-src 'self'; base-uri 'self'; form-action 'self' https://sso.{{ platform_domain }};
+      default-src 'self'; base-uri 'self'; form-action 'self' https://id.{{ platform_domain }};
       frame-ancestors 'none'; object-src 'none';
       script-src 'self' 'unsafe-inline' 'unsafe-eval';
       style-src 'self' 'unsafe-inline';
@@ -278,17 +267,9 @@ public_edge_security_headers_overrides:
       connect-src 'self' https://scheduler.{{ platform_domain }} wss://scheduler.{{ platform_domain }};
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
 # ADR 0413: Prefix-path ACL overrides — keyed by raw hostname (with {{ platform_domain }} placeholders).
-# Use acl_prefix_paths when you need allow/deny CIDR lists (e.g. Keycloak admin restricted to VPN).
+# Use acl_prefix_paths when you need allow/deny CIDR lists for a published service.
 # Use blocked_prefix_paths when you want a blanket 404 for a path prefix.
-public_edge_acl_prefix_paths_overrides:
-  sso.{{ platform_domain }}:
-    # Keycloak admin console — internal network and Tailscale VPN only (ADR 0413).
-    # External access blocked to prevent brute-force and CVE exposure on the admin API.
-    - path: /admin/
-      allow:
-        - 10.10.10.0/24
-        - 100.64.0.0/10
-        - 127.0.0.1
+public_edge_acl_prefix_paths_overrides: {}
 
 public_edge_blocked_prefix_paths_overrides: {}
 

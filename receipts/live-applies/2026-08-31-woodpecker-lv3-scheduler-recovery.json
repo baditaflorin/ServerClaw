@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-08-31-woodpecker-lv3-scheduler-recovery",
+  "applied_on": "2026-08-31",
+  "recorded_on": "2026-08-31",
+  "recorded_at": "2026-08-31T21:02:28Z",
+  "recorded_by": "codex",
+  "source_commit": "ba1f6460d",
+  "repo_version_context": "0.179.46",
+  "workflow_id": "converge-woodpecker",
+  "adr": "0287",
+  "environment": "production",
+  "summary": "Restored scheduling for the active label-matched Woodpecker workers after their persisted no-schedule state blocked the release validation pipelines.",
+  "targets": [
+    {
+      "kind": "ci_control_plane",
+      "name": "woodpecker"
+    },
+    {
+      "kind": "ci_agent_pool",
+      "name": "lv3-labeled-workers"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Worker eligibility",
+      "result": "pass",
+      "observed": "Only the two active workers carrying the required lv3 label were re-enabled; unlabeled and historic agents were not changed."
+    },
+    {
+      "check": "Queued push validation",
+      "result": "pass",
+      "observed": "The blocked push pipeline transitioned from pending to running and completed successfully."
+    },
+    {
+      "check": "Queued pull-request validation",
+      "result": "pass",
+      "observed": "The blocked pull-request pipeline transitioned from pending to running and completed successfully."
+    },
+    {
+      "check": "GitHub commit-status callback",
+      "result": "pass",
+      "observed": "GitHub received successful Woodpecker statuses for both required validation contexts, and the release pull request became mergeable."
+    }
+  ],
+  "evidence_refs": [
+    ".woodpecker.yml",
+    "docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md",
+    "receipts/live-applies/2026-08-31-woodpecker-lv3-scheduler-recovery.json"
+  ],
+  "notes": [
+    "This was a targeted CI scheduler recovery only; application, edge, identity, and Proxmox runtime configuration were not changed.",
+    "The repair was performed after the Authentik cutover release had already merged, so this receipt records the exact live control-plane adjustment separately."
+  ]
+}

@@ -330,7 +330,7 @@ def command_bootstrap(args: argparse.Namespace) -> int:
         username=args.oidc_admin_username,
         password=oidc_admin_password,
         email=args.oidc_admin_email,
-        description="Repo-managed Keycloak-backed SFTPGo administrator",
+        description="Repo-managed Authentik-backed SFTPGo administrator",
     )
     api_key_value, api_key_changed = ensure_api_key(
         base_url=args.base_url,

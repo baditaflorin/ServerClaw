@@ -61,9 +61,6 @@ argument_specs:
       glitchtip_oidc_client_secret_local_file:
         type: path
         required: true
-      glitchtip_keycloak_rollback_client_secret_local_file:
-        type: path
-        required: true
       glitchtip_oidc_provider:
         type: str
         required: true
@@ -76,6 +73,10 @@ argument_specs:
       glitchtip_oidc_client_id:
         type: str
         required: true
+      glitchtip_retired_oidc_provider_ids:
+        type: list
+        elements: str
+        required: true
       glitchtip_oidc_issuer_url:
         type: str
         required: true
@@ -83,24 +84,6 @@ argument_specs:
         type: str
         required: true
       glitchtip_oidc_frontend_callback_url:
-        type: str
-        required: true
-      glitchtip_keycloak_rollback_provider:
-        type: str
-        required: true
-      glitchtip_keycloak_rollback_provider_id:
-        type: str
-        required: true
-      glitchtip_keycloak_rollback_provider_name:
-        type: str
-        required: true
-      glitchtip_keycloak_rollback_client_id:
-        type: str
-        required: true
-      glitchtip_keycloak_rollback_issuer_url:
-        type: str
-        required: true
-      glitchtip_keycloak_rollback_discovery_url:
         type: str
         required: true
       glitchtip_api_token_local_file:

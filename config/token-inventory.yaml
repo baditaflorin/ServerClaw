@@ -1,52 +1,52 @@
 schema_version: 1.0.0
 tokens:
-  - id: keycloak-grafana-client-secret
-    token_class: keycloak_client_secret
+  - id: authentik-grafana-client-secret
+    token_class: authentik_client_secret
     owner_service: grafana
     subject: grafana
     issued_at: "2026-03-24T00:00:00Z"
-    storage_ref: .local/keycloak/grafana-client-secret.txt
+    storage_ref: .local/authentik/grafana-client-secret.txt
     permissions:
       - grafana_oidc_login
       - grafana_oidc_callback
     workflows:
-      rotate: rotate-keycloak-client-secret
+      rotate: rotate-authentik-client-secret
       exposure_response: token-exposure-response
-  - id: keycloak-ops-portal-client-secret
-    token_class: keycloak_client_secret
+  - id: authentik-ops-portal-client-secret
+    token_class: authentik_client_secret
     owner_service: ops_portal
     subject: ops-portal
     issued_at: "2026-03-24T00:00:00Z"
-    storage_ref: .local/keycloak/ops-portal-client-secret.txt
+    storage_ref: .local/authentik/ops-portal-oauth-client-secret.txt
     permissions:
       - oauth2_proxy_upstream_auth
       - edge_login_broker
     workflows:
-      rotate: rotate-keycloak-client-secret
+      rotate: rotate-authentik-client-secret
       exposure_response: token-exposure-response
-  - id: keycloak-agent-hub-client-secret
-    token_class: keycloak_client_secret
-    owner_service: keycloak
+  - id: authentik-agent-hub-client-secret
+    token_class: authentik_client_secret
+    owner_service: authentik
     subject: lv3-agent-hub
     issued_at: "2026-03-24T00:00:00Z"
-    storage_ref: .local/keycloak/lv3-agent-hub-client-secret.txt
+    storage_ref: .local/authentik/agent-hub-client-secret.txt
     permissions:
       - agent_client_credentials
       - gateway_verification
     workflows:
-      rotate: rotate-keycloak-client-secret
+      rotate: rotate-authentik-client-secret
       exposure_response: token-exposure-response
-  - id: keycloak-api-gateway-client-secret
-    token_class: keycloak_client_secret
+  - id: authentik-api-gateway-client-secret
+    token_class: authentik_client_secret
     owner_service: api_gateway
     subject: api-gateway
     issued_at: "2026-03-24T00:00:00Z"
-    storage_ref: .local/keycloak/api-gateway-client-secret.txt
+    storage_ref: .local/authentik/api-gateway-client-secret.txt
     permissions:
       - gateway_client_credentials
       - upstream_jwt_exchange
     workflows:
-      rotate: rotate-keycloak-client-secret
+      rotate: rotate-authentik-client-secret
       exposure_response: token-exposure-response
   - id: windmill-superadmin-token
     token_class: windmill_api_token

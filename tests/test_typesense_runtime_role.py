@@ -67,17 +67,20 @@ def test_main_tasks_generate_api_key_sync_openbao_and_verify_runtime() -> None:
 def test_verify_tasks_cover_the_health_contract() -> None:
     verify = yaml.safe_load(ROLE_VERIFY.read_text())
 
-    assert verify[0]["name"] == "Verify the Typesense health endpoint responds"
-    assert verify[0]["ansible.builtin.uri"]["url"] == "{{ typesense_internal_base_url }}/health"
-    assert verify[0]["until"] == "typesense_verify_health.status == 200"
+    assert verify[0]["name"] == "Verify the Typesense runtime"
+    assert verify[0]["ansible.builtin.include_role"] == {
+        "name": "lv3.platform.common",
+        "tasks_from": "verify_service_health",
+    }
+    assert verify[0]["vars"]["common_verify_health_url"] == "{{ typesense_internal_base_url }}/health"
 
 
 def test_compose_template_publishes_private_port_and_openbao_sidecar() -> None:
     template = COMPOSE_TEMPLATE.read_text()
 
     assert '"{{ typesense_port }}:8108"' in template
-    assert "container_name: {{ typesense_openbao_agent_container_name }}" in template
-    assert "openbao-agent:" in template
+    assert "{% from 'compose_macros.j2' import openbao_sidecar %}" in template
+    assert '{{ openbao_sidecar("typesense") }}' in template
     assert "env_file:" in template
     assert "- {{ typesense_env_file }}" in template
     assert "typesense-data:/data" in template
@@ -144,7 +147,7 @@ def test_api_gateway_catalog_exposes_the_authenticated_typesense_route() -> None
 
     assert route["gateway_prefix"] == "/v1/typesense"
     assert route["upstream"] == "http://10.10.10.20:8108"
-    assert route["auth"] == "keycloak_jwt"
+    assert route["auth"] == "oidc_jwt"
     assert route["upstream_auth_env_var"] == "LV3_GATEWAY_TYPESENSE_API_KEY"
     assert route["upstream_auth_header"] == "X-TYPESENSE-API-KEY"
     assert route["upstream_auth_scheme"] == "raw"

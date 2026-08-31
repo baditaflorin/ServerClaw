@@ -79,19 +79,19 @@ Run these checks after converge or after the guarded live apply:
 ## OIDC Authentication (ADR 0361)
 
 The Nomad UI at `https://scheduler.example.com` uses Nomad's native OIDC auth method
-backed by Keycloak. No oauth2-proxy is used — Nomad handles login directly.
+backed by Authentik. No oauth2-proxy is used — Nomad handles login directly.
 
 ### How it works
 
 1. User opens `https://scheduler.example.com`
 2. Nomad UI shows "Sign In with OIDC" button
-3. Click redirects to Keycloak (`sso.example.com`) for authentication
+3. Click redirects to Authentik (`id.example.com`) for authentication
 4. On success, Nomad exchanges the OIDC token for a Nomad ACL token
 5. Token is stored in the browser; user can view/manage jobs
 
 ### Access levels
 
-- **lv3-platform-admins** Keycloak group → `platform-admin` role (full write)
+- **lv3-platform-admins** Authentik group → `platform-admin` role (full write)
 - All other authenticated users → `platform-reader` role (read-only)
 
 ### Converging OIDC auth
@@ -106,7 +106,7 @@ ansible-playbook playbooks/nomad.yml --tags service-nomad-oidc -e env=production
 
 ```bash
 # Check auth method exists:
-curl -sS https://100.64.0.1:8013/v1/acl/auth-method/keycloak \
+curl -sS https://100.64.0.1:8013/v1/acl/auth-method/authentik \
   --cacert .local/nomad/tls/nomad-agent-ca.pem \
   -H "X-Nomad-Token: $(cat .local/nomad/tokens/bootstrap-management.token)" | jq .Name
 

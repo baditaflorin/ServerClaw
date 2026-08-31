@@ -21,7 +21,14 @@ def _load_scalar_identity_mapping(path: Path) -> dict[str, str]:
 
 
 def load_identity_vars() -> dict[str, str]:
-    """Load simple scalar identity variables from identity.yml and the shared .local overlay."""
+    """Load scalar identity variables from committed, selected, or tracked inputs.
+
+    A worktree deliberately has no private ``.local/identity.yml`` of its own.
+    When neither an explicit profile nor the shared default profile exists, use
+    the identity snapshot embedded in generated ``platform.yml``.  This keeps
+    generated-artifact validation reproducible instead of accidentally
+    validating a private registry with the public placeholder identity.
+    """
     path = _find_identity_path()
     identity_vars = _load_scalar_identity_mapping(path)
 
@@ -39,7 +46,10 @@ def load_identity_vars() -> dict[str, str]:
         return identity_vars
 
     overlay_path = local_overlay_root(path.parents[3]) / "identity.yml"
-    identity_vars.update(_load_scalar_identity_mapping(overlay_path))
+    if overlay_path.is_file():
+        identity_vars.update(_load_scalar_identity_mapping(overlay_path))
+    else:
+        identity_vars.update(load_tracked_generation_identity_vars(path.parents[1] / "platform.yml"))
     return identity_vars
 
 

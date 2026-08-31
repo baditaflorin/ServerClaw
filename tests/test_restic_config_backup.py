@@ -945,6 +945,24 @@ def test_trigger_remote_command_includes_live_apply_flag() -> None:
     assert "--live-apply-trigger" in command
 
 
+def test_local_restic_converge_clears_parent_scoped_extra_args(tmp_path: Path, monkeypatch) -> None:
+    init_path = tmp_path / "init.json"
+    init_path.write_text("{}\n", encoding="utf-8")
+    captured: list[list[str]] = []
+
+    monkeypatch.setattr(trigger, "resolve_openbao_init_local_file", lambda: init_path)
+
+    def fake_run(command, **_kwargs):
+        captured.append(command)
+        return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(trigger.subprocess, "run", fake_run)
+
+    trigger.run_local_converge_restic("production")
+
+    assert captured == [["make", "converge-restic-config-backup", "env=production", "EXTRA_ARGS="]]
+
+
 def test_trigger_remote_command_falls_back_to_api_gateway_script_and_keeps_repo_surfaces() -> None:
     command = trigger.build_remote_command(
         mode="backup",
@@ -1057,6 +1075,70 @@ def test_resolve_openbao_init_local_file_maps_repo_shared_local_root(tmp_path: P
     resolved = trigger.resolve_openbao_init_local_file()
 
     assert resolved == tmp_path / ".local" / "openbao" / "init.json"
+
+
+def test_resolve_openbao_init_local_file_resolves_nested_group_var_path(tmp_path: Path, monkeypatch) -> None:
+    worktree_root = tmp_path / ".worktrees" / "ws-0373"
+    inventory_dir = worktree_root / "inventory" / "group_vars" / "all"
+    inventory_dir.mkdir(parents=True)
+    (inventory_dir / "main.yml").write_text(
+        "\n".join(
+            [
+                'openbao_local_artifact_dir: "{{ repo_shared_local_root }}/openbao"',
+                'openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"',
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(trigger, "LOCAL_REPO_ROOT", worktree_root)
+
+    resolved = trigger.resolve_openbao_init_local_file()
+
+    assert resolved == tmp_path / ".local" / "openbao" / "init.json"
+
+
+def test_resolve_remote_repo_root_uses_selected_identity_overlay(tmp_path: Path, monkeypatch) -> None:
+    identity_dir = tmp_path / "inventory" / "group_vars" / "all"
+    identity_dir.mkdir(parents=True)
+    (identity_dir / "identity.yml").write_text(
+        "platform_repo_name: platform_server\nplatform_repo_checkout_path: /srv/{{ platform_repo_name }}\n",
+        encoding="utf-8",
+    )
+    overlay = tmp_path / "identity.yml.production"
+    overlay.write_text(
+        "platform_repo_name: deployment_server\nplatform_repo_checkout_path: /srv/{{ platform_repo_name }}\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(trigger, "LOCAL_REPO_ROOT", tmp_path)
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(overlay))
+
+    assert trigger.resolve_remote_repo_root(None) == "/srv/deployment_server"
+
+
+def test_resolve_remote_repo_root_prefers_explicit_argument_over_identity_overlay(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(trigger, "LOCAL_REPO_ROOT", tmp_path)
+    monkeypatch.setenv("PLATFORM_REPO_ROOT", "/srv/environment-server")
+
+    assert trigger.resolve_remote_repo_root("/srv/explicit-server") == "/srv/explicit-server"
+
+
+def test_resolve_runtime_credential_file_uses_selected_identity_prefix(tmp_path: Path, monkeypatch) -> None:
+    overlay = tmp_path / "identity.yml.production"
+    overlay.write_text("platform_domain: deployment.example.com\n", encoding="utf-8")
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(overlay))
+    monkeypatch.delenv("PLATFORM_CONFIG_PREFIX", raising=False)
+
+    assert (
+        trigger.resolve_runtime_credential_file(None)
+        == "/run/deployment-systemd-credentials/restic-config-backup/runtime-config.json"
+    )
+
+
+def test_resolve_runtime_credential_file_prefers_an_explicit_path(monkeypatch) -> None:
+    monkeypatch.setenv("PLATFORM_CONFIG_PREFIX", "deployment")
+
+    assert trigger.resolve_runtime_credential_file("/run/custom/restic.json") == "/run/custom/restic.json"
 
 
 def test_sync_reported_receipt_artifacts_downloads_reported_files(tmp_path: Path, monkeypatch) -> None:
@@ -1466,6 +1548,9 @@ def test_restic_role_prefers_runtime_control_openbao_with_local_fallback() -> No
         'common_openbao_systemd_credentials_manage_local_openbao_runtime: "{{ restic_config_backup_runtime_openbao_effective_manage_local_runtime }}"'
         in tasks
     )
+    assert "common_openbao_systemd_credentials_use_runtime_provisioner: true" in tasks
+    assert "common_openbao_systemd_credentials_provisioner_credential_file" in tasks
+    assert "common_openbao_systemd_credentials_expected_credential_content" in tasks
 
 
 def test_restic_role_recovers_minio_root_secret_from_live_container_when_local_secret_drifts() -> None:

@@ -5,7 +5,7 @@
 # Regenerate: uv run --with pyyaml python3 scripts/generate_discovery_artifacts.py --write
 # ============================================================================
 schema_version: 1
-generated: '2026-04-14'
+generated: '2026-08-31'
 source_root: docs/discovery/config-locations
 pack_manifest: docs/discovery/onboarding-packs.yaml
 purpose: Generated root configuration discovery entrypoint. Use the section summaries below to choose the right canonical source file under docs/discovery/config-locations/.
@@ -48,7 +48,7 @@ section_index:
     file: docs/discovery/config-locations/inventory.yaml
     summary: Host, group, and topology inputs for the platform inventory model.
     when_to_read: Use this section when changing hosts, groups, host vars, or topology declarations.
-    entry_count: 8
+    entry_count: 6
   - id: automation
     title: Automation And Tooling Config
     file: docs/discovery/config-locations/automation.yaml

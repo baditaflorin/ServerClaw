@@ -189,33 +189,31 @@ openbao_database_connection_url: >-
   postgresql://{{ "{{username}}" }}:{{ "{{password}}" }}@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable
 openbao_database_plugin_name: postgresql-database-plugin
 openbao_database_password_authentication: scram-sha-256
-# NOTE: {{ "{{name}}" }} / {{ "{{password}}" }} / {{ "{{expiration}}" }} are
-# OpenBao template placeholders that must reach OpenBao literally.  We use the
-# {{ '{{foo}}' }} Jinja escape (same pattern as openbao_database_connection_url)
-# so Ansible can still substitute openbao_postgres_connect_role above them.
-# Production (platform_sql_prefix=lv3) and forks (e.g. platform_sql_prefix=fork)
-# both get the correct role name.
+# NOTE: the !unsafe values below keep OpenBao's {{name}} / {{password}} /
+# {{expiration}} placeholders literal through Ansible's recursive templating.
+# The connect-role marker is replaced with openbao_postgres_connect_role in the
+# task before the API request, so forks do not inherit the lv3 SQL role name.
 openbao_database_roles:
   - name: postgres-readonly
     db_name: "{{ openbao_database_name }}"
-    creation_statements: |-
-      CREATE ROLE "{{ '{{name}}' }}" WITH LOGIN PASSWORD '{{ '{{password}}' }}' VALID UNTIL '{{ '{{expiration}}' }}';
-      GRANT {{ openbao_postgres_connect_role }} TO "{{ '{{name}}' }}";
-      GRANT pg_read_all_data TO "{{ '{{name}}' }}";
-      GRANT pg_use_reserved_connections TO "{{ '{{name}}' }}";
-    revocation_statements: |-
-      DROP ROLE IF EXISTS "{{ '{{name}}' }}";
+    creation_statements:
+      - !unsafe 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD ''{{password}}'' VALID UNTIL ''{{expiration}}'';'
+      - !unsafe 'GRANT __OPENBAO_CONNECT_ROLE__ TO "{{name}}";'
+      - !unsafe 'GRANT pg_read_all_data TO "{{name}}";'
+      - !unsafe 'GRANT pg_use_reserved_connections TO "{{name}}";'
+    revocation_statements:
+      - !unsafe 'DROP ROLE IF EXISTS "{{name}}";'
     default_ttl: 1h
     max_ttl: 24h
   - name: postgres-atlas-readonly
     db_name: "{{ openbao_database_name }}"
-    creation_statements: |-
-      CREATE ROLE "{{ '{{name}}' }}" WITH LOGIN PASSWORD '{{ '{{password}}' }}' VALID UNTIL '{{ '{{expiration}}' }}';
-      GRANT {{ openbao_postgres_connect_role }} TO "{{ '{{name}}' }}";
-      GRANT pg_read_all_data TO "{{ '{{name}}' }}";
-      GRANT pg_use_reserved_connections TO "{{ '{{name}}' }}";
-    revocation_statements: |-
-      DROP ROLE IF EXISTS "{{ '{{name}}' }}";
+    creation_statements:
+      - !unsafe 'CREATE ROLE "{{name}}" WITH LOGIN PASSWORD ''{{password}}'' VALID UNTIL ''{{expiration}}'';'
+      - !unsafe 'GRANT __OPENBAO_CONNECT_ROLE__ TO "{{name}}";'
+      - !unsafe 'GRANT pg_read_all_data TO "{{name}}";'
+      - !unsafe 'GRANT pg_use_reserved_connections TO "{{name}}";'
+    revocation_statements:
+      - !unsafe 'DROP ROLE IF EXISTS "{{name}}";'
     default_ttl: 1h
     max_ttl: 24h
 openbao_seeded_secret_paths:

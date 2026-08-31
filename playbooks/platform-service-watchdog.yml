@@ -60,10 +60,10 @@
         service_watchdog_ntfy_topic: platform-service-watchdog-runtime-control
         service_watchdog_services:
           # Identity-core (P0 — also covered by identity_core_watchdog for redundancy)
-          - name: keycloak
-            compose_dir: /opt/keycloak
-            compose_service: keycloak
-            health_url: "http://127.0.0.1:19000/health/live"
+          - name: authentik
+            compose_dir: /opt/authentik
+            compose_service: authentik
+            health_url: "http://127.0.0.1:9010/-/health/ready/"
             expected_status: "200"
           - name: step-ca
             compose_dir: /opt/step-ca

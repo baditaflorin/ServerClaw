@@ -1,7 +1,7 @@
 ---
 # Playbook: openfga.yml
 # Purpose: Converge the private OpenFGA runtime, its PostgreSQL backend, the Proxmox host proxy, and the repo-managed ServerClaw delegated authorization bootstrap.
-# Use case: Run during ADR 0262 rollout, recovery, or replay when OpenFGA and its Keycloak-backed ServerClaw authz seed must match repo truth.
+# Use case: Run during ADR 0262 rollout, recovery, or replay when OpenFGA and its Authentik-backed ServerClaw authz seed must match repo truth.
 #
 # Inputs (required):
 #   - env (string, required): Target environment selector used to choose the postgres and docker-runtime guests.
@@ -15,8 +15,8 @@
 # Idempotency: Fully idempotent
 #
 # Dependencies:
-#   - ADR 0262: OpenFGA and Keycloak for delegated ServerClaw capability authorization.
-#   - Requires: OpenBao, Keycloak, PostgreSQL, docker-runtime, and the Proxmox host Tailscale proxy lane to already exist.
+#   - ADR 0262: OpenFGA and Authentik for delegated ServerClaw capability authorization.
+#   - Requires: OpenBao, Authentik, PostgreSQL, docker-runtime, and the Proxmox host Tailscale proxy lane to already exist.
 #
 # Related ADRs: 0056, 0254, 0262
 # Related Runbooks: docs/runbooks/configure-openfga.md
@@ -52,7 +52,7 @@
     - role: lv3.platform.postgres_vm
     - role: lv3.platform.openfga_postgres
 
-- name: Converge OpenFGA and its Keycloak bootstrap on runtime-control
+- name: Converge OpenFGA and its Authentik bootstrap on runtime-control
   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
   become: true
   gather_facts: true
@@ -70,7 +70,6 @@
   roles:
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.docker_runtime
-    - role: lv3.platform.keycloak_runtime
     - role: lv3.platform.openfga_runtime
 
   post_tasks:
@@ -97,8 +96,8 @@
         hostvars[platform_topology_host].platform_port_assignments.openfga_host_proxy_port
       }}
     openfga_bootstrap_preshared_key_file: "{{ repo_shared_local_root }}/openfga/preshared-key.txt"
-    openfga_bootstrap_keycloak_url: >-
-      {{ hostvars[platform_topology_host].platform_service_topology.keycloak.urls.public }}
+    openfga_bootstrap_authentik_url: >-
+      {{ hostvars[platform_topology_host].platform_service_topology.authentik.urls.public }}
 
   tasks:
     - name: Bootstrap the ServerClaw authorization store, model, and tuples
@@ -117,8 +116,8 @@
           - "{{ openfga_bootstrap_url }}"
           - --openfga-preshared-key-file
           - "{{ openfga_bootstrap_preshared_key_file }}"
-          - --keycloak-url
-          - "{{ openfga_bootstrap_keycloak_url }}"
+          - --authentik-url
+          - "{{ openfga_bootstrap_authentik_url }}"
           - --write-report
           - "{{ openfga_bootstrap_report_file }}"
       register: openfga_bootstrap

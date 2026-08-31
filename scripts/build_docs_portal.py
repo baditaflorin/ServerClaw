@@ -20,7 +20,7 @@ THEME_OVERRIDES_DIR = repo_path("docs", "theme-overrides")
 PUBLISHED_ARTIFACT_SCAN = repo_path("scripts", "published_artifact_secret_scan.py")
 EXPECTED_SITE_ARTIFACTS = (
     Path("index.html"),
-    Path("services", "keycloak", "index.html"),
+    Path("services", "authentik", "index.html"),
     Path("reference", "ports", "index.html"),
     Path("pagefind", "pagefind-entry.json"),
     Path("pagefind", "pagefind-ui.js"),

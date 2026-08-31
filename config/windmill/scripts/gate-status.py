@@ -91,8 +91,55 @@ def build_gate_status_command(repo_root: Path) -> list[str]:
     return [sys.executable, str(script_path), "--format", "json"]
 
 
-def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server")) -> dict[str, Any]:
-    repo_root = Path(repo_path)
+def _resolve_repo_root(repo_path: str | None = None) -> Path:
+    """Find the checkout containing the validation gate helper.
+
+    Windmill may scrub worker environment variables when it executes a job.
+    Keep an explicit ``--repo-path`` authoritative (including for the missing
+    checkout error), then use environment hints and lightweight filesystem
+    discovery instead of baking a deployment-specific checkout path into the
+    seeded script.
+    """
+    if repo_path:
+        return Path(repo_path)
+
+    candidates: list[Path] = []
+    for env_name in ("PLATFORM_REPO_ROOT", "LV3_WINDMILL_REPO_ROOT", "LV3_REPO_ROOT"):
+        value = os.environ.get(env_name, "").strip()
+        if value:
+            candidates.append(Path(value))
+
+    # The worker normally starts in (or below) its checkout even when the
+    # environment variable is unavailable.  Check the working directory and
+    # its parents before looking in conventional shared-worker directories.
+    cwd = Path.cwd()
+    candidates.append(cwd)
+    candidates.extend(cwd.parents)
+    for base in (Path("/srv"), Path("/workspace"), Path("/workspaces")):
+        try:
+            candidates.extend(path for path in base.iterdir() if path.is_dir())
+        except OSError:
+            continue
+
+    seen: set[Path] = set()
+    for candidate in candidates:
+        try:
+            resolved = candidate.expanduser().resolve()
+        except OSError:
+            resolved = candidate.expanduser()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        if (resolved / "scripts" / "gate_status.py").is_file():
+            return resolved
+
+    # Preserve the historical diagnostic path when discovery cannot find a
+    # checkout; callers still receive a structured blocked result.
+    return Path("/srv/platform_server")
+
+
+def main(repo_path: str | None = None) -> dict[str, Any]:
+    repo_root = _resolve_repo_root(repo_path)
     script_path = repo_root / "scripts" / "gate_status.py"
     if not script_path.exists():
         return {
@@ -166,6 +213,6 @@ def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_se
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Show repository validation gate status from Windmill.")
-    parser.add_argument("--repo-path", default=os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_server"))
+    parser.add_argument("--repo-path", default=None)
     args = parser.parse_args()
     print(json.dumps(main(repo_path=args.repo_path), indent=2, sort_keys=True))

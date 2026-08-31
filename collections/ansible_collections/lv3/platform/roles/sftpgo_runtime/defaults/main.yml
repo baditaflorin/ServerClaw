@@ -29,11 +29,10 @@ sftpgo_smoke_user_public_key_local_file: "{{ sftpgo_smoke_user_private_key_local
 sftpgo_smoke_user_home_dir: "/srv/sftpgo/data/{{ sftpgo_smoke_user_username }}"
 sftpgo_smoke_user_quota_bytes: 104857600
 sftpgo_smoke_user_quota_files: 100
-sftpgo_keycloak_client_id: sftpgo
-sftpgo_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/sftpgo-client-secret.txt"
-sftpgo_keycloak_config_url: >-
-  https://{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration
-sftpgo_keycloak_username_field: preferred_username
+sftpgo_authentik_client_id: sftpgo
+sftpgo_authentik_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/sftpgo-client-secret.txt"
+sftpgo_authentik_config_url: "{{ authentik_oidc_provider_base_url }}/sftpgo/.well-known/openid-configuration"
+sftpgo_authentik_username_field: preferred_username
 sftpgo_admin_port: "{{ hostvars[platform_topology_host].platform_port_assignments.sftpgo_admin_port }}"
 sftpgo_webdav_port: "{{ hostvars[platform_topology_host].platform_port_assignments.sftpgo_webdav_port }}"
 sftpgo_sftp_port: "{{ hostvars[platform_topology_host].platform_port_assignments.sftpgo_sftp_port }}"
@@ -45,7 +44,7 @@ sftpgo_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_publ
 sftpgo_public_hostname_overrides:
   - hostname: "{{ sftpgo_service_topology.public_hostname }}"
     address: "{{ sftpgo_public_edge_private_ip }}"
-  - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}"
+  - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}"
     address: "{{ sftpgo_public_edge_private_ip }}"
 sftpgo_event_subject: platform.sftpgo.events
 sftpgo_nats_host: "{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}"

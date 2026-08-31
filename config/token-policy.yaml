@@ -1,12 +1,12 @@
 schema_version: 1.0.0
 token_classes:
-  - class: keycloak_client_secret
+  - class: authentik_client_secret
     max_ttl_days: 90
     warning_window_days: 14
     enforcement_grace_days: 7
     rotation_trigger: manual_or_scheduled
     storage: openbao
-    revocation_workflow: rotate-keycloak-client-secret
+    revocation_workflow: rotate-authentik-client-secret
     on_exposure: immediate_revocation
   - class: openbao_api_token
     max_ttl_days: 1

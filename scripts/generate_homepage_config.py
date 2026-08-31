@@ -36,7 +36,7 @@ SERVICE_ICONS = {
     "docs_portal": "mdi-file-document-multiple",
     "grafana": "si-grafana",
     "homepage": "mdi-view-dashboard",
-    "keycloak": "si-keycloak",
+    "authentik": "si-authentik",
     "mail_platform": "mdi-email-fast",
     "mattermost": "si-mattermost",
     "netbox": "si-netbox",

@@ -50,7 +50,7 @@ def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_se
     for operator in operators:
         if not isinstance(operator, dict):
             continue
-        keycloak = operator.get("keycloak") if isinstance(operator.get("keycloak"), dict) else {}
+        authentik = operator.get("authentik") if isinstance(operator.get("authentik"), dict) else {}
         ssh = operator.get("ssh") if isinstance(operator.get("ssh"), dict) else {}
         tailscale = operator.get("tailscale") if isinstance(operator.get("tailscale"), dict) else {}
         audit = operator.get("audit") if isinstance(operator.get("audit"), dict) else {}
@@ -63,9 +63,8 @@ def main(repo_path: str = os.environ.get("PLATFORM_REPO_ROOT", "/srv/platform_se
                 "role": operator.get("role", ""),
                 "status": operator.get("status", ""),
                 "notes": operator.get("notes", ""),
-                "keycloak_username": keycloak.get("username", ""),
-                "realm_roles": keycloak.get("realm_roles", []) if isinstance(keycloak.get("realm_roles"), list) else [],
-                "groups": keycloak.get("groups", []) if isinstance(keycloak.get("groups"), list) else [],
+                "authentik_username": authentik.get("username", ""),
+                "groups": authentik.get("groups", []) if isinstance(authentik.get("groups"), list) else [],
                 "tailscale_login_email": tailscale.get("login_email", ""),
                 "ssh_enabled": bool(public_keys),
                 "onboarded_at": audit.get("onboarded_at", ""),

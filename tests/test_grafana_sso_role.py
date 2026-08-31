@@ -4,28 +4,33 @@ import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULTS_PATH = REPO_ROOT / "roles" / "grafana_sso" / "defaults" / "main.yml"
-TASKS_PATH = REPO_ROOT / "roles" / "grafana_sso" / "tasks" / "main.yml"
+ROLE_DEFAULTS = REPO_ROOT / "roles" / "grafana_sso" / "defaults" / "main.yml"
+ROLE_META = REPO_ROOT / "roles" / "grafana_sso" / "meta" / "argument_specs.yml"
+ROOT_PLAYBOOK = REPO_ROOT / "playbooks" / "services" / "grafana.yml"
+COLLECTION_PLAYBOOK = (
+    REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "services" / "grafana.yml"
+)
 
 
-def load_yaml(path: Path) -> list[dict] | dict:
-    return yaml.safe_load(path.read_text())
+def load_yaml(path: Path):
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
-def test_defaults_route_grafana_logout_through_keycloak_then_shared_proxy_cleanup() -> None:
-    defaults = load_yaml(DEFAULTS_PATH)
+def test_grafana_sso_loads_the_authentik_secret_from_the_controller_local_artifact() -> None:
+    defaults = load_yaml(ROLE_DEFAULTS)
+    options = load_yaml(ROLE_META)["argument_specs"]["main"]["options"]
 
-    assert defaults["grafana_sso_session_authority"] == "{{ platform_session_authority }}"
-    assert defaults["grafana_sso_signout_redirect_url"] == (
-        "{{ grafana_sso_session_authority.keycloak_logout_url }}"
-        "?client_id={{ grafana_sso_client_id }}"
-        "&post_logout_redirect_uri={{ grafana_sso_session_authority.shared_proxy_cleanup_url | urlencode }}"
+    assert defaults["grafana_sso_client_secret_local_file"] == "{{ authentik_grafana_client_secret_local_file }}"
+    assert (
+        "lookup('ansible.builtin.file', grafana_sso_client_secret_local_file)" in defaults["grafana_sso_client_secret"]
     )
+    assert options["grafana_sso_client_secret_local_file"]["type"] == "path"
+    assert "grafana_sso_client_secret" not in options
 
 
-def test_tasks_write_the_repo_managed_signout_redirect_url() -> None:
-    tasks = load_yaml(TASKS_PATH)
-    oauth_task = next(task for task in tasks if task.get("name") == "Enable Generic OAuth in Grafana")
-    signout_option = next(item for item in oauth_task["loop"] if item["option"] == "signout_redirect_url")
+def test_both_grafana_service_entrypoints_apply_the_authentik_sso_role() -> None:
+    for playbook_path in (ROOT_PLAYBOOK, COLLECTION_PLAYBOOK):
+        playbook = load_yaml(playbook_path)
+        roles = [role["role"] for role in playbook[0]["roles"]]
 
-    assert signout_option["value"] == "{{ grafana_sso_signout_redirect_url }}"
+        assert roles[-1] == "lv3.platform.grafana_sso"

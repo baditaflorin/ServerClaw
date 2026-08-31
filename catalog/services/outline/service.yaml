@@ -26,7 +26,6 @@ service:
     - outline_minio_root_password
     - outline_api_token
     - authentik_outline_client_secret
-    - keycloak_outline_client_secret
   adr: 0199
   runbook: docs/runbooks/configure-outline.md
   runtime_pool: runtime-general
@@ -40,8 +39,7 @@ service:
     - outline
     - oidc
   notes: Browser sign-in is delegated to the repo-managed Authentik confidential
-    client. The Keycloak client and secret remain intact as an explicit per-client
-    rollback path during ADR 0491 migration.
+    client.
   environments:
     production:
       status: active
@@ -57,7 +55,6 @@ completeness:
   alert_rule_file: config/alertmanager/rules/outline.yml
   oidc_provider: authentik
   authentik_client_generated: true
-  keycloak_client_generated: false
   suppressed_checks: {}
 redundancy:
   tier: R1
@@ -90,11 +87,6 @@ dependency:
       type: soft
       description: Outline delegates routine browser sign-in to the shared Authentik
         OIDC broker through a repo-managed confidential client.
-    - from: outline
-      to: keycloak
-      type: soft
-      description: The prior Keycloak confidential client and service-account bootstrap
-        credential remain available only for per-client rollback and API-token recovery.
     - from: outline
       to: nginx_edge
       type: soft

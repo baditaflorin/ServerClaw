@@ -316,7 +316,18 @@ def _get_real_domain() -> Optional[str]:
     Returns None when the file is absent, malformed, or set to the
     generic placeholder `example.com`.
     """
-    domain = _read_platform_domain(LOCAL_ROOT / "identity.yml")
+    # An explicit overlay is the deployment selector used by generation and
+    # converge commands.  Honor it here as well; otherwise a worktree silently
+    # reads the shared default identity and can skip the certificates that were
+    # just rendered for the selected deployment.
+    selected_overlay = os.environ.get("PLATFORM_IDENTITY_OVERLAY", "").strip()
+    if selected_overlay:
+        overlay_path = Path(selected_overlay).expanduser()
+        if not overlay_path.is_absolute():
+            overlay_path = REPO_ROOT / overlay_path
+        domain = _read_platform_domain(overlay_path)
+    else:
+        domain = _read_platform_domain(LOCAL_ROOT / "identity.yml")
     if domain and domain != "example.com":
         return domain
     return None

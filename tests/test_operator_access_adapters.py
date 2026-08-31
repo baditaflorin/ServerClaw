@@ -1,25 +1,25 @@
 from __future__ import annotations
 
 import operator_manager
-from platform.operator_access import KeycloakAdminAdapter, OpenBaoIdentityAdapter
+from platform.operator_access import AuthentikAdminAdapter, OpenBaoIdentityAdapter
 
 
-def test_keycloak_adapter_inventory_translates_provider_payloads() -> None:
+def test_authentik_adapter_inventory_translates_provider_payloads() -> None:
     calls: list[str] = []
 
     def fake_request(url: str, **kwargs):
         calls.append(url)
-        if url.endswith("/realms/master/protocol/openid-connect/token"):
-            return {"access_token": "bootstrap-token"}
-        if "users?username=alice&exact=true" in url:
-            return [{"id": "user-1", "username": "alice", "enabled": False, "email": "alice@example.com"}]
+        if "/api/v3/core/users/?" in url:
+            assert kwargs["headers"]["Authorization"] == "Bearer bootstrap-token"
+            return {
+                "results": [{"pk": 1, "username": "alice", "is_active": False, "email": "alice@example.com"}],
+                "pagination": {"next": None},
+            }
         raise AssertionError(f"unexpected request: {url} {kwargs}")
 
-    adapter = KeycloakAdminAdapter(
-        base_url="https://sso.example.test",
-        realm="lv3",
-        bootstrap_admin="bootstrap-admin",
-        bootstrap_password_loader=lambda: "secret",
+    adapter = AuthentikAdminAdapter(
+        base_url="https://id.example.test",
+        api_token_loader=lambda: "bootstrap-token",
         request=fake_request,
     )
 
@@ -30,67 +30,49 @@ def test_keycloak_adapter_inventory_translates_provider_payloads() -> None:
         "username": "alice",
         "email": "alice@example.com",
     }
-    assert calls[0].endswith("/realms/master/protocol/openid-connect/token")
+    assert "/api/v3/core/users/?" in calls[0]
 
 
-def test_keycloak_adapter_prefers_client_credentials_when_configured() -> None:
-    grants: list[str] = []
+def test_authentik_adapter_uses_static_admin_token() -> None:
+    headers: list[dict[str, str]] = []
 
     def fake_request(url: str, **kwargs):
-        if url.endswith("/realms/master/protocol/openid-connect/token"):
-            grants.append(kwargs["form"]["grant_type"])
-            return {"access_token": "cc-token"}
-        if "users?username=alice&exact=true" in url:
-            return [{"id": "user-1", "username": "alice", "enabled": True, "email": "alice@example.com"}]
+        headers.append(kwargs["headers"])
+        if "/api/v3/core/users/?" in url:
+            return {
+                "results": [{"pk": 1, "username": "alice", "is_active": True, "email": "alice@example.com"}],
+                "pagination": {"next": None},
+            }
         raise AssertionError(f"unexpected request: {url} {kwargs}")
 
-    adapter = KeycloakAdminAdapter(
-        base_url="https://sso.example.test",
-        realm="acme",
-        bootstrap_admin="acme-bootstrap-admin",
-        bootstrap_password_loader=lambda: (_ for _ in ()).throw(AssertionError("password grant must not run")),
-        admin_client_id="acme-admin-runtime",
-        admin_client_secret_loader=lambda: "client-secret",
+    adapter = AuthentikAdminAdapter(
+        base_url="https://id.example.test",
+        api_token_loader=lambda: "api-token",
         request=fake_request,
     )
 
     adapter.inventory_user("alice", email_fallback="fallback@example.com")
-    assert grants == ["client_credentials"]
+    assert headers == [{"Authorization": "Bearer api-token", "Accept": "application/json"}]
 
 
-def test_keycloak_adapter_falls_back_to_password_grant() -> None:
-    grants: list[str] = []
-
-    def fake_request(url: str, **kwargs):
-        if url.endswith("/realms/master/protocol/openid-connect/token"):
-            grant = kwargs["form"]["grant_type"]
-            grants.append(grant)
-            if grant == "client_credentials":
-                raise RuntimeError("invalid_client")
-            return {"access_token": "pw-token"}
-        if "users?username=alice&exact=true" in url:
-            return [{"id": "user-1", "username": "alice", "enabled": True, "email": "alice@example.com"}]
-        raise AssertionError(f"unexpected request: {url} {kwargs}")
-
-    adapter = KeycloakAdminAdapter(
-        base_url="https://sso.example.test",
-        realm="acme",
-        bootstrap_admin="acme-bootstrap-admin",
-        bootstrap_password_loader=lambda: "secret",
-        admin_client_id="acme-admin-runtime",
-        admin_client_secret_loader=lambda: "stale-secret",
-        request=fake_request,
+def test_authentik_adapter_rejects_missing_admin_token() -> None:
+    adapter = AuthentikAdminAdapter(
+        base_url="https://id.example.test",
+        api_token_loader=lambda: None,
     )
 
-    adapter.inventory_user("alice", email_fallback="fallback@example.com")
-    assert grants == ["client_credentials", "password"]
+    try:
+        adapter.inventory_user("alice", email_fallback="fallback@example.com")
+    except RuntimeError as exc:
+        assert "Authentik admin auth failed" in str(exc)
+    else:  # pragma: no cover - assertion safeguard
+        raise AssertionError("missing Authentik token should fail")
 
 
 def test_operator_manager_resolve_identity_env_override(monkeypatch) -> None:
     monkeypatch.setenv("PLATFORM_DOMAIN", "acme.example")
-    monkeypatch.delenv("LV3_KEYCLOAK_REALM", raising=False)
-    domain, prefix, realm = operator_manager._resolve_identity()
-    assert (domain, prefix, realm) == ("acme.example", "acme", "acme")
+    domain, prefix = operator_manager._resolve_identity()
+    assert (domain, prefix) == ("acme.example", "acme")
 
 
 def test_openbao_adapter_inventory_translates_provider_payloads() -> None:
@@ -134,9 +116,6 @@ def test_openbao_adapter_inventory_reports_missing_entities() -> None:
 
 def test_live_backend_inventory_uses_port_contracts() -> None:
     class FakeIdentityDirectory:
-        def ensure_role(self, role_name: str, *, description: str):
-            raise AssertionError("not used")
-
         def ensure_group(self, group_name: str):
             raise AssertionError("not used")
 
@@ -204,7 +183,7 @@ def test_live_backend_inventory_uses_port_contracts() -> None:
             "name": "Alice Example",
             "email": "alice@example.com",
             "role": "operator",
-            "keycloak": {"username": "alice"},
+            "authentik": {"username": "alice"},
             "openbao": {"entity_name": "alice", "policies": ["platform-operator"]},
             "ssh": {"principal": "alice", "certificate_ttl_hours": 24},
             "tailscale": {"login_email": "alice@example.com"},
@@ -213,7 +192,7 @@ def test_live_backend_inventory_uses_port_contracts() -> None:
         offline=False,
     )
 
-    assert payload["keycloak"]["status"] == "active"
+    assert payload["authentik"]["status"] == "active"
     assert payload["openbao"]["entity_name"] == "alice"
     assert payload["tailscale"]["status"] == "connected"
     assert payload["step_ca"]["status"] == "cached"

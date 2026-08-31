@@ -1,7 +1,7 @@
 ---
 - name: Wait for Windmill workers to register
   ansible.builtin.uri:
-    url: "{{ windmill_base_url }}/api/workers/list"
+    url: "{{ windmill_verification_base_url }}/api/workers/list"
     method: GET
     headers:
       Authorization: "Bearer {{ windmill_runtime_api_token }}"

@@ -27,8 +27,8 @@ require_string = require_str
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from mutation_audit import build_event, emit_event
 from platform.operator_access import (
+    AuthentikAdminAdapter,
     IdentityDirectoryPort,
-    KeycloakAdminAdapter,
     MattermostWebhookAdapter,
     MeshNetworkPort,
     NotificationPort,
@@ -45,20 +45,19 @@ ROSTER_PATH = repo_path("config", "operators.yaml")
 ROSTER_SCHEMA_PATH = repo_path("config", "schemas", "operators.schema.json")
 POLICY_DIR = repo_path("config", "openbao", "policies")
 STATE_DIR = repo_path(".local", "state", "operator-access")
-KEYCLOAK_BOOTSTRAP_PASSWORD_PATH = repo_path(".local", "keycloak", "bootstrap-admin-password.txt")
-KEYCLOAK_ADMIN_CLIENT_SECRET_PATH = repo_path(".local", "keycloak", "admin-client-secret.txt")
+AUTHENTIK_BOOTSTRAP_TOKEN_PATH = repo_path(".local", "authentik", "bootstrap-token.txt")
 OPENBAO_INIT_PATH = repo_path(".local", "openbao", "init.json")
 TAILSCALE_API_KEY_PATH = repo_path(".local", "tailscale", "api-key.txt")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 
 
-def _resolve_identity() -> tuple[str, str, str]:
-    """Return (platform_domain, config_prefix, keycloak_realm).
+def _resolve_identity() -> tuple[str, str]:
+    """Return (platform_domain, config_prefix).
 
     Derived from inventory + the .local identity overlay (ADR 0385 / ADR 0407)
     so the committed module carries no deployment-specific realm or prefix. An
-    explicit PLATFORM_DOMAIN env override takes precedence and drives both the
-    prefix and the realm; LV3_KEYCLOAK_REALM overrides the realm alone.
+    explicit PLATFORM_DOMAIN env override takes precedence and drives the
+    prefix. Authentik has no realm-scoped operator directory.
     """
     domain = os.environ.get("PLATFORM_DOMAIN", "").strip()
     prefix = ""
@@ -73,18 +72,15 @@ def _resolve_identity() -> tuple[str, str, str]:
             pass
     domain = domain or "example.com"
     prefix = prefix or domain.split(".")[0]
-    realm = os.environ.get("LV3_KEYCLOAK_REALM", "").strip() or domain.split(".")[0]
-    return domain, prefix, realm
+    return domain, prefix
 
 
-PLATFORM_DOMAIN, CONFIG_PREFIX, KEYCLOAK_REALM = _resolve_identity()
-KEYCLOAK_BOOTSTRAP_ADMIN = f"{CONFIG_PREFIX}-bootstrap-admin"
-KEYCLOAK_ADMIN_CLIENT_ID = f"{CONFIG_PREFIX}-admin-runtime"
+PLATFORM_DOMAIN, CONFIG_PREFIX = _resolve_identity()
 ROLE_NAMES = {"admin", "operator", "viewer"}
 STATUS_NAMES = {"active", "inactive"}
 ISO8601_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 OPERATOR_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
-KEYCLOAK_USERNAME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
+AUTHENTIK_USERNAME_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
 SSH_PUBKEY_PREFIXES = {"ssh-ed25519", "ssh-rsa", "ecdsa-sha2-nistp256", "ecdsa-sha2-nistp384", "ecdsa-sha2-nistp521"}
 PLACEHOLDER_PUBLIC_KEY_TOKEN = "REPLACE_WITH_YOUR_PUBLIC_KEY"
 PLACEHOLDER_FINGERPRINT_TOKEN = "REPLACE_WITH_YOUR_FINGERPRINT"
@@ -94,8 +90,7 @@ require_string = require_str
 
 @dataclass(frozen=True)
 class RoleDefinition:
-    keycloak_roles: tuple[str, ...]
-    keycloak_groups: tuple[str, ...]
+    authentik_groups: tuple[str, ...]
     openbao_policies: tuple[str, ...]
     tailscale_tags: tuple[str, ...]
     ssh_enabled: bool
@@ -103,22 +98,25 @@ class RoleDefinition:
 
 ROLE_DEFINITIONS: dict[str, RoleDefinition] = {
     "admin": RoleDefinition(
-        keycloak_roles=("platform-admin",),
-        keycloak_groups=("lv3-platform-admins", "grafana-admins"),
+        authentik_groups=(
+            f"{CONFIG_PREFIX}-platform-admins",
+            "platform-operator",
+            "platform-read",
+            "grafana-admins",
+            "harbor-admins",
+        ),
         openbao_policies=("platform-admin",),
         tailscale_tags=("tag:platform-operator",),
         ssh_enabled=True,
     ),
     "operator": RoleDefinition(
-        keycloak_roles=("platform-operator",),
-        keycloak_groups=("lv3-platform-operators", "grafana-viewers"),
+        authentik_groups=("platform-operator", "platform-read", "grafana-viewers"),
         openbao_policies=("platform-operator",),
         tailscale_tags=("tag:platform-operator",),
         ssh_enabled=True,
     ),
     "viewer": RoleDefinition(
-        keycloak_roles=("platform-read",),
-        keycloak_groups=("lv3-platform-viewers", "grafana-viewers"),
+        authentik_groups=("platform-read", "grafana-viewers"),
         openbao_policies=("platform-read",),
         tailscale_tags=("tag:platform-operator",),
         ssh_enabled=False,
@@ -175,7 +173,7 @@ def slugify(value: str) -> str:
 
 def default_username(name: str, email: str) -> str:
     local = email.split("@", 1)[0].strip().lower()
-    if KEYCLOAK_USERNAME_PATTERN.match(local):
+    if AUTHENTIK_USERNAME_PATTERN.match(local):
         return local
     return slugify(name)
 
@@ -256,18 +254,11 @@ def load_mattermost_webhook() -> str | None:
     return None
 
 
-def load_keycloak_bootstrap_password() -> str | None:
-    value = os.environ.get("KEYCLOAK_BOOTSTRAP_PASSWORD", "").strip()
+def load_authentik_bootstrap_token() -> str | None:
+    value = os.environ.get("LV3_AUTHENTIK_BOOTSTRAP_TOKEN", "").strip()
     if value:
         return value
-    return load_text_if_exists(KEYCLOAK_BOOTSTRAP_PASSWORD_PATH)
-
-
-def load_keycloak_admin_client_secret() -> str | None:
-    value = os.environ.get("LV3_KEYCLOAK_ADMIN_CLIENT_SECRET", "").strip()
-    if value:
-        return value
-    return load_text_if_exists(KEYCLOAK_ADMIN_CLIENT_SECRET_PATH)
+    return load_text_if_exists(AUTHENTIK_BOOTSTRAP_TOKEN_PATH)
 
 
 def load_openbao_init_payload() -> dict[str, Any]:
@@ -323,15 +314,14 @@ def normalize_operator_record(raw: Any, *, index: int) -> dict[str, Any]:
     if status not in STATUS_NAMES:
         raise OperatorManagerError(f"{path}.status must be one of {sorted(STATUS_NAMES)}.")
 
-    keycloak = require_mapping(operator.get("keycloak"), f"{path}.keycloak")
-    username = require_string(keycloak.get("username"), f"{path}.keycloak.username")
-    if not KEYCLOAK_USERNAME_PATTERN.match(username):
-        raise OperatorManagerError(f"{path}.keycloak.username must use lowercase Keycloak identifier format.")
-    keycloak_roles = require_string_list(keycloak.get("realm_roles"), f"{path}.keycloak.realm_roles")
-    keycloak_groups = require_string_list(keycloak.get("groups"), f"{path}.keycloak.groups")
-    enabled = keycloak.get("enabled")
+    authentik = require_mapping(operator.get("authentik"), f"{path}.authentik")
+    username = require_string(authentik.get("username"), f"{path}.authentik.username")
+    if not AUTHENTIK_USERNAME_PATTERN.match(username):
+        raise OperatorManagerError(f"{path}.authentik.username must use lowercase Authentik identifier format.")
+    authentik_groups = require_string_list(authentik.get("groups"), f"{path}.authentik.groups")
+    enabled = authentik.get("enabled")
     if not isinstance(enabled, bool):
-        raise OperatorManagerError(f"{path}.keycloak.enabled must be boolean.")
+        raise OperatorManagerError(f"{path}.authentik.enabled must be boolean.")
 
     ssh = require_mapping(operator.get("ssh"), f"{path}.ssh")
     ssh_principal = require_string(ssh.get("principal"), f"{path}.ssh.principal")
@@ -403,10 +393,9 @@ def normalize_operator_record(raw: Any, *, index: int) -> dict[str, Any]:
         "email": require_string(operator.get("email"), f"{path}.email"),
         "role": role,
         "status": status,
-        "keycloak": {
+        "authentik": {
             "username": username,
-            "realm_roles": keycloak_roles,
-            "groups": keycloak_groups,
+            "groups": authentik_groups,
             "enabled": enabled,
         },
         "ssh": {
@@ -452,13 +441,13 @@ def validate_operator_roster(payload: Any) -> dict[str, Any]:
             raise OperatorManagerError(f"Duplicate operator id '{operator['id']}' in config/operators.yaml.")
         if operator["email"] in seen_emails:
             raise OperatorManagerError(f"Duplicate operator email '{operator['email']}' in config/operators.yaml.")
-        if operator["keycloak"]["username"] in seen_usernames:
+        if operator["authentik"]["username"] in seen_usernames:
             raise OperatorManagerError(
-                f"Duplicate Keycloak username '{operator['keycloak']['username']}' in config/operators.yaml."
+                f"Duplicate Authentik username '{operator['authentik']['username']}' in config/operators.yaml."
             )
         seen_ids.add(operator["id"])
         seen_emails.add(operator["email"])
-        seen_usernames.add(operator["keycloak"]["username"])
+        seen_usernames.add(operator["authentik"]["username"])
     return {
         "$schema": "config/schemas/operators.schema.json",
         "schema_version": "1.0.0",
@@ -487,9 +476,8 @@ def normalize_notes_markdown(value: str) -> str | None:
 def role_payload(role: str) -> dict[str, Any]:
     definition = ROLE_DEFINITIONS[role]
     return {
-        "keycloak": {
-            "realm_roles": list(definition.keycloak_roles),
-            "groups": list(definition.keycloak_groups),
+        "authentik": {
+            "groups": list(definition.authentik_groups),
             "enabled": True,
         },
         "ssh": {
@@ -511,7 +499,7 @@ def create_operator_record(
     role: str,
     ssh_public_key: str,
     operator_id: str | None,
-    keycloak_username: str | None,
+    authentik_username: str | None,
     ssh_key_name: str,
     tailscale_login_email: str | None,
     tailscale_device_name: str | None,
@@ -523,10 +511,10 @@ def create_operator_record(
     derived_id = operator_id or slugify(name)
     if not OPERATOR_ID_PATTERN.match(derived_id):
         raise OperatorManagerError("operator id must use lowercase letters, numbers, and hyphens.")
-    username = keycloak_username or default_username(name, email)
-    if not KEYCLOAK_USERNAME_PATTERN.match(username):
+    username = authentik_username or default_username(name, email)
+    if not AUTHENTIK_USERNAME_PATTERN.match(username):
         raise OperatorManagerError(
-            "keycloak username must use lowercase letters, numbers, dots, underscores, or hyphens."
+            "authentik username must use lowercase letters, numbers, dots, underscores, or hyphens."
         )
     derived = role_payload(role)
     public_keys: list[dict[str, str]] = []
@@ -547,10 +535,9 @@ def create_operator_record(
         "email": email.strip().lower(),
         "role": role,
         "status": "active",
-        "keycloak": {
+        "authentik": {
             "username": username,
-            "realm_roles": derived["keycloak"]["realm_roles"],
-            "groups": derived["keycloak"]["groups"],
+            "groups": derived["authentik"]["groups"],
             "enabled": True,
         },
         "ssh": {
@@ -598,7 +585,7 @@ def mark_operator_inactive(
         if operator["id"] != operator_id:
             continue
         operator["status"] = "inactive"
-        operator["keycloak"]["enabled"] = False
+        operator["authentik"]["enabled"] = False
         operator["audit"]["offboarded_at"] = utc_now()
         operator["audit"]["offboarded_by"] = offboarded_by
         return validate_operator_roster(updated), operator
@@ -665,13 +652,9 @@ def build_live_backend_ports() -> tuple[
     NotificationPort,
 ]:
     return (
-        KeycloakAdminAdapter(
-            base_url=service_url("keycloak", prefer_public=True),
-            realm=KEYCLOAK_REALM,
-            bootstrap_admin=KEYCLOAK_BOOTSTRAP_ADMIN,
-            bootstrap_password_loader=load_keycloak_bootstrap_password,
-            admin_client_id=KEYCLOAK_ADMIN_CLIENT_ID,
-            admin_client_secret_loader=load_keycloak_admin_client_secret,
+        AuthentikAdminAdapter(
+            base_url=service_url("authentik", prefer_public=True),
+            api_token_loader=load_authentik_bootstrap_token,
         ),
         OpenBaoIdentityAdapter(
             base_url=service_url("openbao"),
@@ -738,24 +721,18 @@ class LiveBackend:
 
     def ensure_prerequisites_payload(self) -> dict[str, Any]:
         policy_results: dict[str, Any] = {}
-        role_results: dict[str, Any] = {}
         group_results: dict[str, Any] = {}
         for policy_name, document in policy_documents().items():
             policy_results[policy_name] = self.secret_authority.ensure_policy(policy_name, document)
         for definition in ROLE_DEFINITIONS.values():
-            for role_name in definition.keycloak_roles:
-                role_results[role_name] = self.identity_directory.ensure_role(
-                    role_name,
-                    description=f"Repo-managed ADR 0108 operator role {role_name}.",
-                ).get("name", role_name)
-            for group_name in definition.keycloak_groups:
+            for group_name in definition.authentik_groups:
                 group_results[group_name] = self.identity_directory.ensure_group(group_name).get("name", group_name)
-        return {"keycloak_roles": role_results, "keycloak_groups": group_results, "openbao_policies": policy_results}
+        return {"authentik_groups": group_results, "openbao_policies": policy_results}
 
     def ensure_prerequisites(self) -> dict[str, Any]:
         missing: list[str] = []
-        if not load_keycloak_bootstrap_password():
-            missing.append("KEYCLOAK_BOOTSTRAP_PASSWORD or " + str(KEYCLOAK_BOOTSTRAP_PASSWORD_PATH))
+        if not load_authentik_bootstrap_token():
+            missing.append("LV3_AUTHENTIK_BOOTSTRAP_TOKEN or " + str(AUTHENTIK_BOOTSTRAP_TOKEN_PATH))
         try:
             load_openbao_init_payload()
         except (OperatorManagerError, FileNotFoundError):
@@ -766,7 +743,7 @@ class LiveBackend:
         details = self.ensure_prerequisites_payload()
         details.update(
             {
-                "keycloak_url": service_url("keycloak", prefer_public=True),
+                "authentik_url": service_url("authentik", prefer_public=True),
                 "openbao_url": service_url("openbao"),
                 "tailscale_tailnet": load_tailscale_tailnet() or "",
                 "mattermost_webhook_configured": bool(load_mattermost_webhook()),
@@ -776,7 +753,7 @@ class LiveBackend:
 
     def onboard_operator(self, operator: dict[str, Any], bootstrap_password: str) -> dict[str, Any]:
         prereq = self.ensure_prerequisites_payload()
-        keycloak = self.identity_directory.ensure_user(operator, bootstrap_password=bootstrap_password)
+        authentik = self.identity_directory.ensure_user(operator, bootstrap_password=bootstrap_password)
         openbao = self.secret_authority.ensure_entity(operator)
         step_ca = self.ssh_certificates.register_principal(
             operator,
@@ -787,7 +764,7 @@ class LiveBackend:
             "\n".join(
                 [
                     f"Operator onboarded: {operator['name']} ({operator['role']})",
-                    f"Keycloak user: `{operator['keycloak']['username']}`",
+                    f"Authentik user: `{operator['authentik']['username']}`",
                     f"Tailscale login: `{operator['tailscale']['login_email']}`",
                 ]
             )
@@ -796,7 +773,7 @@ class LiveBackend:
         return {
             "bootstrap_password": bootstrap_password,
             "prerequisites": prereq,
-            "keycloak": keycloak,
+            "authentik": authentik,
             "openbao": openbao,
             "step_ca": step_ca,
             "tailscale": tailscale,
@@ -806,7 +783,7 @@ class LiveBackend:
 
     def offboard_operator(self, operator: dict[str, Any], reason: str | None) -> dict[str, Any]:
         prereq = self.ensure_prerequisites_payload()
-        keycloak = self.identity_directory.disable_user(operator["keycloak"]["username"])
+        authentik = self.identity_directory.disable_user(operator["authentik"]["username"])
         openbao = self.secret_authority.ensure_entity(operator)
         step_ca = self.ssh_certificates.revoke_principal(
             operator,
@@ -820,7 +797,7 @@ class LiveBackend:
         audit = self._emit_audit("operator.offboarded", operator["id"])
         return {
             "prerequisites": prereq,
-            "keycloak": keycloak,
+            "authentik": authentik,
             "openbao": openbao,
             "step_ca": step_ca,
             "tailscale": tailscale,
@@ -829,20 +806,20 @@ class LiveBackend:
         }
 
     def recover_totp(self, operator: dict[str, Any]) -> dict[str, Any]:
-        keycloak = self.identity_directory.recover_totp(operator["keycloak"]["username"])
+        authentik = self.identity_directory.recover_totp(operator["authentik"]["username"])
         audit = self._emit_audit("operator.totp_recovered", operator["id"])
-        return {"keycloak": keycloak, "audit": audit}
+        return {"authentik": authentik, "audit": audit}
 
     def reset_password(self, operator: dict[str, Any], password: str, *, temporary: bool) -> dict[str, Any]:
         if not password.strip():
             raise OperatorManagerError("Password reset requires a non-empty password.")
-        keycloak = self.identity_directory.reset_password(
-            operator["keycloak"]["username"],
+        authentik = self.identity_directory.reset_password(
+            operator["authentik"]["username"],
             password=password,
             temporary=temporary,
         )
         audit = self._emit_audit("operator.password_recovered", operator["id"])
-        return {"keycloak": keycloak, "audit": audit}
+        return {"authentik": authentik, "audit": audit}
 
     def update_operator_notes(self, operator: dict[str, Any], notes_markdown: str) -> dict[str, Any]:
         audit = self._emit_audit("operator.notes_updated", operator["id"])
@@ -858,7 +835,7 @@ class LiveBackend:
         ssh_enabled = ROLE_DEFINITIONS[operator["role"]].ssh_enabled
         summary = {
             "operator": operator,
-            "keycloak": {"status": "offline" if offline else "unknown"},
+            "authentik": {"status": "offline" if offline else "unknown"},
             "openbao": {"status": "offline" if offline else "unknown"},
             "step_ca": (
                 {"status": "disabled", "reason": f"role '{operator['role']}' does not receive SSH access"}
@@ -871,8 +848,8 @@ class LiveBackend:
         if offline:
             return summary
 
-        summary["keycloak"] = self.identity_directory.inventory_user(
-            operator["keycloak"]["username"],
+        summary["authentik"] = self.identity_directory.inventory_user(
+            operator["authentik"]["username"],
             email_fallback=operator["email"],
         )
         summary["openbao"] = self.secret_authority.inventory_entity(
@@ -919,22 +896,20 @@ class NoopBackend:
 
     def recover_totp(self, operator: dict[str, Any]) -> dict[str, Any]:
         return {
-            "keycloak": {
+            "authentik": {
                 "status": "dry-run",
-                "username": operator["keycloak"]["username"],
-                "required_actions": ["CONFIGURE_TOTP"],
-                "failure_counters_cleared": True,
+                "username": operator["authentik"]["username"],
+                "re_enrollment_required": True,
             }
         }
 
     def reset_password(self, operator: dict[str, Any], password: str, *, temporary: bool) -> dict[str, Any]:
         return {
-            "keycloak": {
+            "authentik": {
                 "status": "dry-run",
-                "username": operator["keycloak"]["username"],
-                "temporary": temporary,
-                "required_actions": ["UPDATE_PASSWORD"] if temporary else [],
-                "failure_counters_cleared": True,
+                "username": operator["authentik"]["username"],
+                "temporary_requested": temporary,
+                "temporary_enforced": False,
             }
         }
 
@@ -949,7 +924,7 @@ class NoopBackend:
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
         return {
             "operator": operator,
-            "keycloak": {"status": "dry-run"},
+            "authentik": {"status": "dry-run"},
             "openbao": {"status": "dry-run"},
             "step_ca": (
                 {"status": "disabled", "reason": f"role '{operator['role']}' does not receive SSH access"}
@@ -980,7 +955,7 @@ def persist_state(operator_id: str, operation: str, result: dict[str, Any], *, s
             "updated_at": utc_now(),
         }
     )
-    for key in ("keycloak", "openbao", "step_ca", "tailscale", "mattermost", "audit"):
+    for key in ("authentik", "openbao", "step_ca", "tailscale", "mattermost", "audit"):
         if key in result:
             current[key] = result[key]
     if "bootstrap_password" in result:
@@ -1000,7 +975,7 @@ def onboard(
     actor_id: str,
     actor_class: str,
     operator_id: str | None,
-    keycloak_username: str | None,
+    authentik_username: str | None,
     ssh_key_name: str,
     tailscale_login_email: str | None,
     tailscale_device_name: str | None,
@@ -1014,7 +989,7 @@ def onboard(
         role=role,
         ssh_public_key=ssh_key,
         operator_id=operator_id,
-        keycloak_username=keycloak_username,
+        authentik_username=authentik_username,
         ssh_key_name=ssh_key_name,
         tailscale_login_email=tailscale_login_email,
         tailscale_device_name=tailscale_device_name,
@@ -1253,7 +1228,7 @@ def render_inventory_text(payload: dict[str, Any]) -> str:
         f"Access inventory for: {operator['id']}",
         f"  Name: {operator['name']}",
         f"  Email: {operator['email']}",
-        f"  Keycloak: {payload['keycloak'].get('status', 'unknown')}, username={operator['keycloak']['username']}",
+        f"  Authentik: {payload['authentik'].get('status', 'unknown')}, username={operator['authentik']['username']}",
         (
             f"  step-ca SSH: disabled for role {operator['role']}"
             if not ROLE_DEFINITIONS[operator["role"]].ssh_enabled
@@ -1285,7 +1260,7 @@ def build_parser() -> argparse.ArgumentParser:
     onboard_parser.add_argument("--role", required=True, choices=sorted(ROLE_NAMES))
     onboard_parser.add_argument("--ssh-key", default="")
     onboard_parser.add_argument("--ssh-key-name", default="primary")
-    onboard_parser.add_argument("--keycloak-username")
+    onboard_parser.add_argument("--authentik-username")
     onboard_parser.add_argument("--tailscale-login-email")
     onboard_parser.add_argument("--tailscale-device-name")
     onboard_parser.add_argument("--bootstrap-password")
@@ -1300,14 +1275,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     recover_totp_parser = subparsers.add_parser(
         "recover-totp",
-        help="Reset one operator's Keycloak TOTP enrollment and require fresh setup on next login.",
+        help="Reset one operator's Authentik TOTP enrollment and require fresh setup on next login.",
     )
     recover_totp_parser.add_argument("--id", required=True)
     recover_totp_parser.add_argument("--dry-run", action="store_true")
 
     reset_password_parser = subparsers.add_parser(
         "reset-password",
-        help="Set one operator's Keycloak password and optionally require rotation on next login.",
+        help="Set one operator's Authentik password. Forced rotation requires a configured recovery flow.",
     )
     reset_password_parser.add_argument("--id", required=True)
     reset_password_parser.add_argument("--password", required=True)
@@ -1363,7 +1338,7 @@ def main(argv: list[str] | None = None) -> int:
                 actor_id=args.actor_id,
                 actor_class=args.actor_class,
                 operator_id=args.id,
-                keycloak_username=args.keycloak_username,
+                authentik_username=args.authentik_username,
                 ssh_key_name=args.ssh_key_name,
                 tailscale_login_email=args.tailscale_login_email,
                 tailscale_device_name=args.tailscale_device_name,

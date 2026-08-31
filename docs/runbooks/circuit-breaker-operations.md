@@ -51,7 +51,7 @@ Normal path:
 curl -sS -H "Authorization: Bearer <token>" https://api.example.com/v1/health | jq .
 ```
 
-When Keycloak or a proxied upstream dependency is unavailable:
+When Authentik or a proxied upstream dependency is unavailable:
 
 - the first dependency failure is surfaced as a `503` or `502`
 - once the circuit is open, repeated requests return `503`

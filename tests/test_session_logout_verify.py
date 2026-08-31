@@ -1,5 +1,4 @@
 import sys
-from http import cookiejar
 from pathlib import Path
 
 import pytest
@@ -15,7 +14,7 @@ import session_logout_verify  # noqa: E402
 
 def test_discover_local_root_prefers_shared_repo_root_for_worktrees(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
-    worktree_root = repo_root / ".worktrees" / "ws-0248"
+    worktree_root = repo_root / ".worktrees" / "ws-0491"
     (repo_root / ".local").mkdir(parents=True)
     worktree_root.mkdir(parents=True)
 
@@ -23,137 +22,41 @@ def test_discover_local_root_prefers_shared_repo_root_for_worktrees(tmp_path: Pa
 
 
 def test_normalize_url_ignores_trailing_slashes_and_queries() -> None:
-    assert session_logout_verify.normalize_url(
-        "https://ops.example.com/.well-known/lv3/session/logged-out/?next=1"
-    ) == ("https://ops.example.com/.well-known/lv3/session/logged-out")
-
-
-def test_assert_protected_redirect_accepts_relative_oauth2_proxy_challenges() -> None:
-    snapshot = session_logout_verify.ResponseSnapshot(
-        status_code=302,
-        final_url="https://home.example.com/",
-        headers={"location": "/oauth2/sign_in?rd=https%3A%2F%2Fhome.example.com%2F"},
-        body="",
-    )
-
-    session_logout_verify.assert_protected_redirect(snapshot, label="shared edge")
-
-
-def test_keycloak_logout_confirmation_present_matches_prompt_page() -> None:
-    assert session_logout_verify.keycloak_logout_confirmation_present(
-        "https://sso.example.com/realms/lv3/protocol/openid-connect/logout?client_id=outline",
-        "LV3 CONTROL PLANE\nDo you want to log out?\n",
-    )
-
-
-def test_keycloak_logout_confirmation_present_rejects_non_prompt_pages() -> None:
-    assert not session_logout_verify.keycloak_logout_confirmation_present(
-        "https://ops.example.com/.well-known/lv3/session/logged-out",
-        "You are logged out",
-    )
-
-
-def test_find_cookie_value_filters_by_name_and_domain() -> None:
-    jar = cookiejar.CookieJar()
-    jar.set_cookie(
-        cookiejar.Cookie(
-            version=0,
-            name="accessToken",
-            value="outline-session",
-            port=None,
-            port_specified=False,
-            domain="wiki.example.com",
-            domain_specified=True,
-            domain_initial_dot=False,
-            path="/",
-            path_specified=True,
-            secure=True,
-            expires=None,
-            discard=True,
-            comment=None,
-            comment_url=None,
-            rest={},
-            rfc2109=False,
-        )
-    )
-
-    assert session_logout_verify.find_cookie_value(jar, "accessToken") == "outline-session"
     assert (
-        session_logout_verify.find_cookie_value(jar, "accessToken", domain_contains="wiki.example.com")
-        == "outline-session"
-    )
-    assert session_logout_verify.find_cookie_value(jar, "accessToken", domain_contains="home.example.com") is None
-
-
-def test_cookie_to_playwright_cookie_preserves_security_attributes() -> None:
-    cookie = cookiejar.Cookie(
-        version=0,
-        name="_lv3_ops_portal_proxy",
-        value="proxy-session",
-        port=None,
-        port_specified=False,
-        domain=".example.com",
-        domain_specified=True,
-        domain_initial_dot=True,
-        path="/",
-        path_specified=True,
-        secure=True,
-        expires=1_900_000_000,
-        discard=False,
-        comment=None,
-        comment_url=None,
-        rest={"HttpOnly": None, "SameSite": "Lax"},
-        rfc2109=False,
+        session_logout_verify.normalize_url("https://ops.example.com/.well-known/lv3/session/logged-out/?next=1")
+        == "https://ops.example.com/.well-known/lv3/session/logged-out"
     )
 
-    assert session_logout_verify.cookie_to_playwright_cookie(cookie) == {
-        "name": "_lv3_ops_portal_proxy",
-        "value": "proxy-session",
-        "domain": ".example.com",
-        "path": "/",
-        "secure": True,
-        "expires": 1_900_000_000,
-        "httpOnly": True,
-        "sameSite": "Lax",
-    }
+
+def test_assert_response_host_rejects_unexpected_host() -> None:
+    with pytest.raises(session_logout_verify.VerificationError, match="should land"):
+        session_logout_verify.assert_response_host(
+            "https://id.example.com/if/flow/default-authentication-flow/",
+            expected_host="home.example.com",
+            label="shared edge login",
+        )
 
 
-def test_playwright_cookie_to_cookie_preserves_security_attributes() -> None:
-    cookie = session_logout_verify.playwright_cookie_to_cookie(
-        {
-            "name": "_lv3_ops_portal_proxy",
-            "value": "proxy-session",
-            "domain": ".example.com",
-            "path": "/",
-            "secure": True,
-            "expires": 1_900_000_000,
-            "httpOnly": True,
-            "sameSite": "Lax",
-        }
-    )
-
-    assert cookie.name == "_lv3_ops_portal_proxy"
-    assert cookie.value == "proxy-session"
-    assert cookie.domain == ".example.com"
-    assert cookie.path == "/"
-    assert cookie.secure is True
-    assert cookie.expires == 1_900_000_000
-    assert cookie.discard is False
-    assert cookie._rest == {"HttpOnly": True, "SameSite": "Lax"}
-
-
-def test_assert_page_requires_keycloak_login_raises_when_form_never_appears() -> None:
+def test_assert_page_requires_authentik_login_raises_when_identifier_never_appears() -> None:
     class FakeTimeoutError(Exception):
         pass
+
+    class FakeLocator:
+        def wait_for(self, *, state: str, timeout: int) -> None:
+            assert state == "visible"
+            assert timeout == 1_000
+            raise FakeTimeoutError("identifier missing")
 
     class FakePage:
         url = "https://home.example.com/"
 
-        def wait_for_selector(self, selector: str, timeout: int) -> None:
-            raise FakeTimeoutError(f"{selector} missing after {timeout}")
+        def get_by_label(self, label: str, *, exact: bool):
+            assert label == "Email or Username"
+            assert exact is True
+            return FakeLocator()
 
-    with pytest.raises(session_logout_verify.VerificationError):
-        session_logout_verify.assert_page_requires_keycloak_login(
+    with pytest.raises(session_logout_verify.VerificationError, match="fresh Authentik login"):
+        session_logout_verify.assert_page_requires_authentik_login(
             FakePage(),
             label="home request",
             timeout_milliseconds=1_000,
@@ -161,105 +64,41 @@ def test_assert_page_requires_keycloak_login_raises_when_form_never_appears() ->
         )
 
 
-def test_wait_for_logged_out_destination_confirms_keycloak_prompt() -> None:
-    expected_url = "https://ops.example.com/.well-known/lv3/session/logged-out"
-    calls: list[int] = []
+def test_outline_logout_accepts_authentik_provider_confirmation_and_continues() -> None:
+    expected = "https://ops.example.com/.well-known/lv3/session/logged-out"
 
     class FakePage:
-        def __init__(self) -> None:
-            self.url = "https://sso.example.com/realms/lv3/protocol/openid-connect/logout?client_id=outline"
-
-        def locator(self, selector: str):  # noqa: ANN201
-            assert selector == "body"
-
-            class FakeBodyLocator:
-                def inner_text(self, timeout: int) -> str:
-                    assert timeout == 1_000
-                    return "LV3 CONTROL PLANE\nDo you want to log out?\n"
-
-            return FakeBodyLocator()
-
-        def wait_for_timeout(self, timeout: int) -> None:
-            assert timeout == 500
-
-    def fake_submit_keycloak_logout_confirmation(page: object, *, timeout_milliseconds: int):  # type: ignore[no-untyped-def]
-        assert isinstance(page, FakePage)
-        assert timeout_milliseconds == 1_000
-        calls.append(timeout_milliseconds)
-        page.url = expected_url
-        return session_logout_verify.ResponseSnapshot(
-            status_code=200,
-            final_url=expected_url,
-            headers={},
-            body="Signed out",
+        url = (
+            "https://id.example.com/if/flow/default-provider-invalidation-flow/"
+            "?post_logout_redirect_uri=https%3A%2F%2Fops.example.com%2F.well-known%2Flv3%2Fsession%2Flogged-out"
         )
+
+        def title(self) -> str:
+            return "You've logged out of Outline. - authentik"
+
+        def goto(self, target: str, *, wait_until: str, timeout: int) -> None:
+            assert wait_until == "domcontentloaded"
+            assert timeout == 1_000
+            self.url = target
+
+        def wait_for_timeout(self, _milliseconds: int) -> None:
+            raise AssertionError("provider confirmation should be accepted without polling")
 
     page = FakePage()
-    monkeypatch = pytest.MonkeyPatch()
+    session_logout_verify.wait_for_outline_logout_completion(page, expected_url=expected, timeout_milliseconds=1_000)
+    assert page.url == expected
+
+
+def test_parse_args_defaults_to_authentik_bootstrap_credential() -> None:
+    args = session_logout_verify.parse_args([])
+
+    assert args.username == "akadmin"
+    assert args.password_file == session_logout_verify.DEFAULT_LOCAL_ROOT / "authentik" / "bootstrap-password.txt"
+
+
+def test_main_rejects_no_verification_target(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
-        session_logout_verify,
-        "submit_keycloak_logout_confirmation",
-        fake_submit_keycloak_logout_confirmation,
+        session_logout_verify, "parse_args", lambda _argv: type("Args", (), {"skip_edge": True, "skip_outline": True})()
     )
 
-    try:
-        session_logout_verify.wait_for_logged_out_destination(
-            page,
-            expected_url=expected_url,
-            timeout_milliseconds=1_000,
-            playwright_timeout_error=RuntimeError,
-        )
-    finally:
-        monkeypatch.undo()
-
-    assert page.url == expected_url
-    assert calls == [1_000]
-
-
-def test_authenticate_keycloak_session_accepts_existing_sso_session(monkeypatch: pytest.MonkeyPatch) -> None:
-    expected = session_logout_verify.ResponseSnapshot(
-        status_code=200,
-        final_url="https://wiki.example.com/collection/architecture/recent",
-        headers={},
-        body="<html><title>Outline</title></html>",
-    )
-    calls: list[str] = []
-
-    def fake_fetch_response(*args, **kwargs):  # type: ignore[no-untyped-def]
-        calls.append(kwargs.get("method", "GET"))
-        return expected
-
-    monkeypatch.setattr(session_logout_verify, "fetch_response", fake_fetch_response)
-
-    actual = session_logout_verify.authenticate_keycloak_session(
-        object(),  # type: ignore[arg-type]
-        start_url="https://wiki.example.com/auth/oidc",
-        username="outline.automation",
-        password="secret",
-        timeout_seconds=60,
-    )
-
-    assert actual == expected
-    assert calls == ["GET"]
-
-
-def test_authenticate_keycloak_session_raises_for_unparseable_keycloak_form(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    login_page = session_logout_verify.ResponseSnapshot(
-        status_code=200,
-        final_url="https://sso.example.com/realms/lv3/protocol/openid-connect/auth",
-        headers={},
-        body='<html><form id="kc-form-login"></form></html>',
-    )
-
-    monkeypatch.setattr(session_logout_verify, "fetch_response", lambda *args, **kwargs: login_page)
-
-    with pytest.raises(session_logout_verify.VerificationError, match="unable to parse the Keycloak login form"):
-        session_logout_verify.authenticate_keycloak_session(
-            object(),  # type: ignore[arg-type]
-            start_url="https://wiki.example.com/auth/oidc",
-            username="outline.automation",
-            password="secret",
-            timeout_seconds=60,
-        )
+    assert session_logout_verify.main([]) == 2

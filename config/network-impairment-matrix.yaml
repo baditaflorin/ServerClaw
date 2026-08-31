@@ -111,9 +111,9 @@ impairments:
 
 entries:
   - service: api_gateway
-    dependency: keycloak
+    dependency: authentik
     expected_behaviour: degrade_gracefully
-    service_catalog_tested_by: fault:keycloak-unavailable
+    service_catalog_tested_by: fault:authentik-unavailable
     target_classes:
       - staging
       - preview

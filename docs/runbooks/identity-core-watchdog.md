@@ -14,7 +14,7 @@ Both are part of ADR 0376. Both start on boot and survive reboots.
 
 | Service | Host | Probe | Healthy response |
 |---------|------|-------|-----------------|
-| keycloak | runtime-control | `GET /realms/lv3/.well-known/openid-configuration` on port 18080 | HTTP 200 + JSON |
+| authentik | runtime-control | `GET /-/health/ready/` on port 9010 | HTTP 200 |
 | step-ca | runtime-control | ACME health endpoint | HTTP 200 |
 | openbao | runtime-control | vault health endpoint | HTTP 200 |
 | api-gateway | runtime-control | health endpoint | HTTP 200 |
@@ -38,7 +38,7 @@ cat /run/lv3-oauth2-proxy-watchdog/failures
 
 On runtime-control every 30s:
 ```
-INFO  keycloak: healthy
+INFO  authentik: healthy
 INFO  step-ca: healthy
 INFO  openbao: healthy
 INFO  api-gateway: healthy
@@ -51,9 +51,9 @@ On nginx-edge — silent when healthy (only logs on failure or recovery).
 
 The watchdog will log:
 ```
-WARN  keycloak probe failed (status=000, failures=1/2)
-WARN  keycloak probe failed (status=000, failures=2/2)
-ERROR Restarting keycloak (docker compose restart)
+WARN  authentik probe failed (status=000, failures=1/2)
+WARN  authentik probe failed (status=000, failures=2/2)
+ERROR Restarting authentik (docker compose restart)
 ```
 
 And send an ntfy alert to the `platform-identity-critical` topic.
@@ -115,5 +115,5 @@ To change the interval or add a service, edit defaults and re-converge.
 ## Related
 
 - `oauth2-proxy-restart-loop.md` — if the oauth2-proxy watchdog is causing restarts
-- `keycloak-session-invalidation.md` — 500 errors after Keycloak restarts
+- `authentik-session-invalidation.md` — stale authorization-code recovery
 - ADR 0376: `docs/adr/0376-identity-core-vm-isolation-and-watchdog.md`

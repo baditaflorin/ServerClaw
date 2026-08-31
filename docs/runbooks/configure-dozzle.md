@@ -12,7 +12,7 @@ guests.
 - `docker-runtime`, `docker-build`, and `monitoring` each run a
   Dozzle agent on port `7007`
 - `logs.example.com` is published through the shared NGINX edge and protected by
-  the repo-managed Keycloak oauth2-proxy gate
+  the repo-managed Authentik oauth2-proxy gate
 - the Dozzle hub aggregates logs from all three managed Docker guests
 
 ## Commands

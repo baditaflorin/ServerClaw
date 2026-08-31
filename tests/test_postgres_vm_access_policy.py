@@ -6,10 +6,10 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 POSTGRES_GROUP_VARS_PATH = REPO_ROOT / "inventory" / "group_vars" / "postgres_guests.yml"
+POSTGRES_CLIENTS_PATH = REPO_ROOT / "inventory" / "group_vars" / "platform_postgres.yml"
 POSTGRES_PREPARATION_INCLUDE_PATH = REPO_ROOT / "playbooks" / "_includes" / "postgres_preparation.yml"
 POSTGRES_CLIENT_PLAYBOOKS = [
     REPO_ROOT / "playbooks" / "dify.yml",
-    REPO_ROOT / "playbooks" / "keycloak.yml",
     REPO_ROOT / "playbooks" / "langfuse.yml",
     REPO_ROOT / "playbooks" / "mattermost.yml",
     REPO_ROOT / "playbooks" / "matrix-synapse.yml",
@@ -76,6 +76,13 @@ def test_postgres_network_policy_allows_monitoring_to_scrape_alloy_metrics() -> 
     postgres_12345_sources = {rule["source"] for rule in postgres_rules if 12345 in rule.get("ports", [])}
 
     assert postgres_12345_sources == {"monitoring"}
+
+
+def test_operator_dbeaver_client_is_explicitly_ssh_tunnel_only() -> None:
+    postgres_clients = yaml.safe_load(POSTGRES_CLIENTS_PATH.read_text())["platform_postgres_clients"]
+    dbeaver = next(client for client in postgres_clients if client["service"] == "dbeaver")
+
+    assert dbeaver["connection_mode"] == "ssh_tunnel"
 
 
 def test_postgres_client_sources_are_centralized_in_group_vars() -> None:

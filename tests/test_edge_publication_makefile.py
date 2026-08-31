@@ -23,10 +23,10 @@ def test_converge_matrix_synapse_builds_and_validates_edge_publication_prerequis
     )
 
 
-def test_converge_keycloak_bootstrap_materializes_shared_edge_generated_portals() -> None:
+def test_converge_authentik_bootstrap_materializes_shared_edge_generated_portals() -> None:
     workflows = json.loads((REPO_ROOT / "config" / "workflow-catalog.json").read_text(encoding="utf-8"))["workflows"]
 
-    assert workflows["converge-keycloak"]["preflight"]["bootstrap_manifest_ids"] == ["shared-edge-generated-portals"]
+    assert workflows["converge-authentik"]["preflight"]["bootstrap_manifest_ids"] == ["shared-edge-generated-portals"]
 
 
 def test_route_dns_assertion_ledger_runs_public_endpoint_admission_before_apply() -> None:

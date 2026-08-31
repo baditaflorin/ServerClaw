@@ -21,7 +21,7 @@ ADR 0052, ADR 0053, ADR 0059, and ADR 0060 are now implemented and live; the rem
 - [ADR 0053](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md): traces and service maps for internal apps and workflows, implemented on `monitoring`
 - [ADR 0054](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0054-netbox-for-topology-ipam-and-inventory.md): visual topology, IPAM, and inventory plane
 - [ADR 0055](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0055-portainer-for-read-mostly-docker-runtime-operations.md): read-mostly runtime console for Docker operations, now live privately on `docker-runtime`
-- [ADR 0056](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0056-keycloak-for-operator-and-agent-sso.md): shared SSO for internal apps
+- [ADR 0491](../adr/0491-authentik-for-operator-and-agent-sso.md): shared SSO for internal apps
 - [ADR 0057](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0057-mattermost-for-chatops-and-operator-agent-collaboration.md): ChatOps and collaboration surface
 - [ADR 0058](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md): internal event backbone for workflows and agents
 - [ADR 0059](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0059-ntopng-for-private-network-flow-visibility.md): private network flow visibility
@@ -68,7 +68,7 @@ The pragmatic first placement for these services is:
 
 - `monitoring` for Loki and Tempo if the monitoring VM has enough capacity
 - `proxmox-host` for ntopng, where `vmbr10` and `vmbr0` can be observed directly without adding a mirror or `nProbe`
-- `docker-runtime` for NetBox, Portainer, Keycloak, Mattermost, NATS, Open WebUI, and GlitchTip
+- `runtime-control` for Authentik and other identity-core services; `docker-runtime` for NetBox, Portainer, Mattermost, NATS, and GlitchTip
 - `postgres` for applications that need a dedicated relational backend
 
 This keeps the first rollout aligned with the current single-node-first topology. If the control-plane blast radius grows too large, a dedicated control-plane VM can be introduced in a later ADR.

@@ -4,7 +4,6 @@ import importlib.util
 import sys
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -52,3 +51,44 @@ def test_proxmox_guest_aliases_do_not_require_real_vm_macaddr() -> None:
         "lv3-debian-base",
         True,
     )
+
+
+def test_platform_vars_validation_reuses_tracked_identity_snapshot(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    platform_vars_path = tmp_path / "platform.yml"
+    platform_vars_path.write_text("sentinel: true\n", encoding="utf-8")
+    calls: dict[str, object] = {}
+
+    def fake_load_sources(
+        skip_local_override: bool = False,
+        *,
+        skip_topology_override: bool = False,
+        skip_generated_topology: bool = False,
+    ):
+        calls.update(
+            skip_local_override=skip_local_override,
+            skip_topology_override=skip_topology_override,
+            skip_generated_topology=skip_generated_topology,
+        )
+        return {}, {}
+
+    def fake_apply(host_vars: dict, overlay: dict) -> None:
+        host_vars.update(overlay)
+
+    monkeypatch.setattr(models, "PLATFORM_VARS_PATH", platform_vars_path)
+    monkeypatch.setattr(models, "load_sources", fake_load_sources)
+    monkeypatch.setattr(
+        models, "_load_generation_identity_overlay", lambda path: {"platform_domain": "tracked.example"}
+    )
+    monkeypatch.setattr(models, "_apply_generation_identity_overlay", fake_apply)
+    monkeypatch.setattr(models, "build_platform_vars", lambda *, stack, host_vars: {"sentinel": True})
+
+    models.validate_platform_vars()
+
+    assert calls == {
+        "skip_local_override": True,
+        "skip_topology_override": True,
+        "skip_generated_topology": True,
+    }

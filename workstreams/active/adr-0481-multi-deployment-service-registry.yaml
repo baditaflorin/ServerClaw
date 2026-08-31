@@ -71,7 +71,6 @@ ownership_manifest:
     - id: adr_0481_workstream
       paths:
         - workstreams/active/adr-0481-multi-deployment-service-registry.yaml
-        - workstreams.yaml
         - docs/postmortems/2026-05-11-service-inventory-gap-multi-deployment.md
       mode: exclusive
     - id: adr_0481_generated

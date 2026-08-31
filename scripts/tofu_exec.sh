@@ -58,24 +58,53 @@ append_env() {
   fi
 }
 
+native_execution_enabled() {
+  [[ "${LV3_NATIVE_EXECUTION:-}" == "1" ]]
+}
+
+native_workdir() {
+  local workdir="$1"
+
+  case "$workdir" in
+    /plans)
+      printf '%s\n' "$TOFU_PLAN_DIR"
+      ;;
+    /plans/*)
+      printf '%s/%s\n' "$TOFU_PLAN_DIR" "${workdir#/plans/}"
+      ;;
+    *)
+      printf '%s\n' "$workdir"
+      ;;
+  esac
+}
+
 write_cli_config() {
   local workdir="$1"
   local cli_config="$TOFU_PLAN_DIR/tofu.tfrc"
   local provider_path=""
+  local local_provider_path=""
 
-  if [[ "$workdir" = /* ]]; then
-    provider_path="$workdir/.terraform/providers"
-  else
-    provider_path="$TOFU_WORKSPACE/$workdir/.terraform/providers"
+  if [[ -d "$workdir/.terraform/providers" ]]; then
+    local_provider_path="$workdir/.terraform/providers"
+  elif [[ -d "$REPO_ROOT/$workdir/.terraform/providers" ]]; then
+    local_provider_path="$REPO_ROOT/$workdir/.terraform/providers"
   fi
 
-  if [[ ! -d "$REPO_ROOT/$workdir/.terraform/providers" && ! -d "$workdir/.terraform/providers" ]]; then
+  if [[ -z "$local_provider_path" ]]; then
     cat >"$cli_config" <<'EOF'
 provider_installation {
   direct {}
 }
 EOF
     return 0
+  fi
+
+  if native_execution_enabled; then
+    provider_path="$local_provider_path"
+  elif [[ "$workdir" = /* ]]; then
+    provider_path="$workdir/.terraform/providers"
+  else
+    provider_path="$TOFU_WORKSPACE/$workdir/.terraform/providers"
   fi
 
   cat >"$cli_config" <<EOF
@@ -94,6 +123,22 @@ EOF
 run_tofu() {
   local workdir="$1"
   shift
+
+  if native_execution_enabled; then
+    local local_workdir=""
+    local tofu_bin=""
+
+    tofu_bin="$(command -v tofu || true)"
+    if [[ -z "$tofu_bin" ]]; then
+      echo "native OpenTofu execution requested but tofu is not installed" >&2
+      return 127
+    fi
+
+    local_workdir="$(native_workdir "$workdir")"
+    write_cli_config "$local_workdir"
+    TF_CLI_CONFIG_FILE="$TOFU_PLAN_DIR/tofu.tfrc" "$tofu_bin" -chdir="$local_workdir" "$@"
+    return
+  fi
 
   write_cli_config "$workdir"
 
@@ -140,17 +185,29 @@ validate_environment() {
 
 plan_path() {
   local environment="$1"
-  printf '/plans/%s.tfplan\n' "$environment"
+  if native_execution_enabled; then
+    printf '%s/%s.tfplan\n' "$TOFU_PLAN_DIR" "$environment"
+  else
+    printf '/plans/%s.tfplan\n' "$environment"
+  fi
 }
 
 plan_json_path() {
   local environment="$1"
-  printf '/plans/%s.plan.json\n' "$environment"
+  if native_execution_enabled; then
+    printf '%s/%s.plan.json\n' "$TOFU_PLAN_DIR" "$environment"
+  else
+    printf '/plans/%s.plan.json\n' "$environment"
+  fi
 }
 
 state_path() {
   local environment="$1"
-  printf '/plans/%s.tfstate\n' "$environment"
+  if native_execution_enabled; then
+    printf '%s/%s.tfstate\n' "$TOFU_PLAN_DIR" "$environment"
+  else
+    printf '/plans/%s.tfstate\n' "$environment"
+  fi
 }
 
 use_backend() {

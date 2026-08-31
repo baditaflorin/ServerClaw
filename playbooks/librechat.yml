@@ -1,13 +1,13 @@
 ---
 # Playbook: librechat.yml
-# Purpose: Converge LibreChat, its Keycloak OIDC client, and the authenticated public edge publication on chat.{{ platform_domain }}.
+# Purpose: Converge LibreChat, its Authentik OIDC client, and the authenticated public edge publication on chat.{{ platform_domain }}.
 # Use case: Run during LibreChat deployment, upgrade, or recovery when the chat surface must match repo truth.
 #
 # Inputs (required):
 #   - env (str, required): Target environment selector.
 #
 # Outputs:
-#   - LibreChat is deployed on coolify, Keycloak OIDC is configured, chat.{{ platform_domain }} is published through the shared edge.
+#   - LibreChat is deployed on coolify, Authentik OIDC is configured, chat.{{ platform_domain }} is published through the shared edge.
 #
 # Idempotency: Fully idempotent
 #
@@ -46,12 +46,9 @@
   roles:
     - role: lv3.platform.proxmox_network
 
-# NOTE: Keycloak client play disabled — admin token 401 (known issue).
-# LibreChat reuses the existing serverclaw OIDC client.
-# Re-enable once Keycloak admin client secret rotation is fixed.
-# - name: Converge the LibreChat Keycloak client on the Docker runtime VM
-#   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
-#   ...
+# LibreChat uses the declarative Authentik serverclaw OIDC client from
+# config/authentik/oauth-clients.yaml; the identity provider is reconciled by
+# playbooks/authentik.yml.
 
 - name: Converge LibreChat on the Coolify runtime VM
   hosts: "{{ 'coolify-staging' if (env | default('production')) == 'staging' else 'coolify' }}"

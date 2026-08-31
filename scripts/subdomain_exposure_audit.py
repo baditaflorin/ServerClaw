@@ -31,6 +31,7 @@ from publication_contract import (
     publication_delivery_model,
     registry_entries,
 )
+from identity_yaml import load_tracked_generation_identity_vars
 import subdomain_catalog
 
 
@@ -42,7 +43,7 @@ PUBLIC_EDGE_DEFAULTS_PATH = repo_path("roles", "nginx_edge_publication", "defaul
 GLOBAL_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 RECEIPTS_DIR = repo_path("receipts", "subdomain-exposure-audit")
 HETZNER_DNS_API_TOKEN_ENV = "HETZNER_DNS_API_TOKEN"
-EXPECTED_EDGE_OIDC_PREFIX = "https://sso.localhost/realms/lv3/protocol/openid-connect/auth"
+EXPECTED_EDGE_OIDC_PREFIX = "https://id.localhost/"
 PROBE_USER_AGENT = "lv3-subdomain-exposure-audit/1.0"
 PUBLIC_ENDPOINT_STATUSES = {"active", "planned"}
 EXPECTED_ISSUER_BY_TLS_PROVIDER = {
@@ -63,9 +64,10 @@ def iso_timestamp(value: datetime) -> str:
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
-def load_certificate_catalog() -> dict[str, Any]:
+def load_certificate_catalog(identity_vars: dict[str, str] | None = None) -> dict[str, Any]:
     return subdomain_catalog.resolve_public_domain_placeholders(
-        json.loads(CERTIFICATE_CATALOG_PATH.read_text(encoding="utf-8"))
+        json.loads(CERTIFICATE_CATALOG_PATH.read_text(encoding="utf-8")),
+        identity_vars=identity_vars,
     )
 
 
@@ -350,16 +352,22 @@ def build_registry(
     catalog: dict[str, Any] | None = None,
     host_vars: dict[str, Any] | None = None,
     public_edge_defaults: dict[str, Any] | None = None,
+    identity_vars: dict[str, str] | None = None,
+    include_local_topology_overlay: bool = True,
 ) -> dict[str, Any]:
     if catalog is None:
-        catalog = subdomain_catalog.load_subdomain_catalog()
+        catalog = subdomain_catalog.load_subdomain_catalog(identity_vars)
     if host_vars is None:
-        host_vars = subdomain_catalog.load_host_vars()
+        host_vars = subdomain_catalog.load_host_vars(
+            identity_vars,
+            include_local_overlay=include_local_topology_overlay,
+        )
     if public_edge_defaults is None:
-        public_edge_defaults = subdomain_catalog.load_public_edge_defaults()
+        public_edge_defaults = subdomain_catalog.load_public_edge_defaults(identity_vars)
 
     service_catalog = subdomain_catalog.resolve_public_domain_placeholders(
-        subdomain_catalog.load_json(subdomain_catalog.SERVICE_CATALOG_PATH)
+        subdomain_catalog.load_json(subdomain_catalog.SERVICE_CATALOG_PATH),
+        identity_vars=identity_vars,
     )
     subdomain_catalog.validate_subdomain_catalog(catalog, service_catalog, host_vars, public_edge_defaults)
 
@@ -416,11 +424,17 @@ def check_registry_current(registry: dict[str, Any]) -> None:
 def expected_edge_certificate_domains(
     host_vars: dict[str, Any] | None = None,
     public_edge_defaults: dict[str, Any] | None = None,
+    *,
+    identity_vars: dict[str, str] | None = None,
+    include_local_topology_overlay: bool = True,
 ) -> set[str]:
     if host_vars is None:
-        host_vars = subdomain_catalog.load_host_vars()
+        host_vars = subdomain_catalog.load_host_vars(
+            identity_vars,
+            include_local_overlay=include_local_topology_overlay,
+        )
     if public_edge_defaults is None:
-        public_edge_defaults = subdomain_catalog.load_public_edge_defaults()
+        public_edge_defaults = subdomain_catalog.load_public_edge_defaults(identity_vars)
     return {
         hostname
         for hostname in subdomain_catalog.collect_edge_route_hostnames(host_vars, public_edge_defaults)
@@ -437,12 +451,17 @@ def collect_repo_findings(
     *,
     certificate_catalog: dict[str, Any] | None = None,
     edge_certificate_domains: set[str] | None = None,
+    identity_vars: dict[str, str] | None = None,
+    include_local_topology_overlay: bool = True,
 ) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     if certificate_catalog is None:
-        certificate_catalog = load_certificate_catalog()
+        certificate_catalog = load_certificate_catalog(identity_vars)
     if edge_certificate_domains is None:
-        edge_certificate_domains = expected_edge_certificate_domains()
+        edge_certificate_domains = expected_edge_certificate_domains(
+            identity_vars=identity_vars,
+            include_local_topology_overlay=include_local_topology_overlay,
+        )
     zone_name = registry.get("zone_name", "localhost")
 
     certificate_entries = subdomain_catalog.require_list(
@@ -716,7 +735,7 @@ def collect_http_auth_findings(registry: dict[str, Any]) -> list[dict[str, Any]]
                     "severity": "CRITICAL",
                     "subdomain": entry["fqdn"],
                     "finding": "edge_oidc_not_enforced_on_live_probe",
-                    "detail": f"Expected unauthenticated access to redirect into Keycloak; observed final URL {final_url}.",
+                    "detail": f"Expected unauthenticated access to redirect into Authentik; observed final URL {final_url}.",
                 }
             )
     return findings
@@ -1019,8 +1038,14 @@ def build_report(
     include_private_routes: bool = False,
     include_tls: bool = False,
     include_hetzner_zone: bool = False,
+    identity_vars: dict[str, str] | None = None,
+    include_local_topology_overlay: bool = True,
 ) -> dict[str, Any]:
-    findings = collect_repo_findings(registry)
+    findings = collect_repo_findings(
+        registry,
+        identity_vars=identity_vars,
+        include_local_topology_overlay=include_local_topology_overlay,
+    )
     zone_records: list[dict[str, Any]] = []
     if include_live_dns:
         findings.extend(collect_resolution_findings(registry))
@@ -1078,7 +1103,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--include-http-auth",
         action="store_true",
-        help="Probe live edge_oidc hostnames and validate redirects into Keycloak.",
+        help="Probe live edge_oidc hostnames and validate redirects into Authentik.",
     )
     parser.add_argument(
         "--include-private-routes",
@@ -1104,12 +1129,20 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
     try:
-        registry = build_registry()
+        validation_registry = None
+        validation_identity_vars = None
         if args.check_registry or args.validate:
-            check_registry_current(registry)
+            validation_identity_vars = load_tracked_generation_identity_vars() or None
+            validation_registry = build_registry(
+                identity_vars=validation_identity_vars,
+                include_local_topology_overlay=False,
+            )
+            check_registry_current(validation_registry)
+
+        registry = validation_registry if validation_registry is not None else build_registry()
 
         if args.write_registry:
-            write_json(REGISTRY_PATH, registry, indent=2, sort_keys=False)
+            write_json(REGISTRY_PATH, build_registry(), indent=2, sort_keys=False)
 
         report = build_report(
             registry,
@@ -1118,6 +1151,8 @@ def main(argv: list[str] | None = None) -> int:
             include_private_routes=args.include_private_routes,
             include_tls=args.include_tls,
             include_hetzner_zone=args.include_hetzner_zone,
+            identity_vars=validation_identity_vars,
+            include_local_topology_overlay=validation_registry is None,
         )
 
         if args.validate and report["findings"]:

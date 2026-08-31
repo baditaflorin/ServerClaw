@@ -31,7 +31,7 @@ provider_boundaries:
       - Translate Hetzner DNS rrset provider payload into canonical record facts
     raw_pattern_counts:
       hetzner_dns_zone_lookup.json.zones: 1
-      hetzner_dns_records_lookup.json.rrsets: 1
+      page.rrsets: 1
     canonical_patterns:
       - dns_provider_boundary_zone_candidates
       - dns_provider_boundary_zone

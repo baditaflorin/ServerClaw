@@ -121,7 +121,6 @@ make validate-dependency-direction
 make validate-architecture-fitness
 make validate-health-probes
 make validate-generated-docs
-uv run --with pyyaml python3 scripts/reference_deployment_samples.py validate
 ```
 
 The root-summary subset can also be replayed directly:

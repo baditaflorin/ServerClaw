@@ -14,7 +14,7 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -203,16 +203,28 @@ def load_identity_vars() -> dict[str, str]:
 
     # Worktrees intentionally do not have their own .local/ directory. Load the
     # shared overlay from the main repo root when available so validation and
-    # generator scripts see the real deployment domain/IP facts.
+    # generator scripts see the real deployment domain/IP facts. If no default
+    # profile exists, use the tracked platform-generation snapshot so generated
+    # artifact checks remain deterministic in an isolated worktree.
     overlay_path = local_overlay_root(path.parents[3]) / "identity.yml"
-    identity_vars.update(_load_scalar_identity_mapping(overlay_path))
+    if overlay_path.is_file():
+        identity_vars.update(_load_scalar_identity_mapping(overlay_path))
+    else:
+        from identity_yaml import load_tracked_generation_identity_vars
+
+        identity_vars.update(load_tracked_generation_identity_vars(path.parents[1] / "platform.yml"))
     return identity_vars
 
 
-def resolve_public_domain_placeholders(value: Any) -> Any:
+def resolve_public_domain_placeholders(
+    value: Any,
+    *,
+    identity_vars: Mapping[str, str] | None = None,
+) -> Any:
     """Resolve committed public-domain and certificate-lineage placeholders."""
 
-    platform_domain = load_identity_vars().get("platform_domain", "example.com")
+    variables = identity_vars if identity_vars is not None else load_identity_vars()
+    platform_domain = variables.get("platform_domain", "example.com")
     platform_config_prefix = platform_domain.split(".", 1)[0]
 
     def _resolve(current: Any) -> Any:

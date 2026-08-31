@@ -28,7 +28,6 @@
       - glitchtip_public_base_url | length > 0
       - glitchtip_database_password_local_file | length > 0
       - glitchtip_oidc_client_secret_local_file | length > 0
-      - glitchtip_keycloak_rollback_client_secret_local_file | length > 0
       - glitchtip_oidc_provider | length > 0
       - glitchtip_oidc_provider_id | length > 0
       - glitchtip_oidc_provider_name | length > 0
@@ -37,18 +36,6 @@
       - glitchtip_oidc_issuer_url == (glitchtip_oidc_issuer_url | regex_replace('/+$', ''))
       - glitchtip_oidc_discovery_url == (glitchtip_oidc_issuer_url ~ '/.well-known/openid-configuration')
       - glitchtip_oidc_frontend_callback_url | length > 0
-      - glitchtip_keycloak_rollback_provider | length > 0
-      - glitchtip_keycloak_rollback_provider_id | length > 0
-      - glitchtip_keycloak_rollback_provider_id != glitchtip_oidc_provider_id
-      - glitchtip_keycloak_rollback_provider_name | length > 0
-      - glitchtip_keycloak_rollback_client_id | length > 0
-      - glitchtip_keycloak_rollback_issuer_url | length > 0
-      - >-
-        glitchtip_keycloak_rollback_issuer_url
-        == (glitchtip_keycloak_rollback_issuer_url | regex_replace('/+$', ''))
-      - >-
-        glitchtip_keycloak_rollback_discovery_url
-        == (glitchtip_keycloak_rollback_issuer_url ~ '/.well-known/openid-configuration')
       - glitchtip_api_token_local_file | length > 0
       - glitchtip_admin_password_local_file | length > 0
       - glitchtip_image | length > 0
@@ -56,7 +43,7 @@
     fail_msg: >-
       glitchtip_runtime requires runtime paths, image refs, database auth,
       bootstrap artifact paths, normalized OIDC metadata, selected OIDC client
-      artifacts, and the preserved Keycloak rollback secret.
+      artifacts, and the selected Authentik provider configuration.
 
 - name: Check GlitchTip prerequisites on the control machine
   ansible.builtin.include_role:
@@ -70,9 +57,6 @@
       - path: "{{ glitchtip_oidc_client_secret_local_file }}"
         description: "GlitchTip selected OIDC client secret"
         prerequisite: "Provision the GlitchTip Authentik provider and mirror its client secret"
-      - path: "{{ glitchtip_keycloak_rollback_client_secret_local_file }}"
-        description: "GlitchTip Keycloak rollback client secret"
-        prerequisite: "Preserve the prior Keycloak client secret before selecting Authentik"
       - path: "{{ glitchtip_mail_submission_password_local_file }}"
         description: "GlitchTip mail submission password"
         prerequisite: "Converge the mail platform before deploying GlitchTip"
@@ -209,8 +193,6 @@
     glitchtip_valkey_password: "{{ glitchtip_secret_reads.results[1].content | b64decode | trim }}"
     glitchtip_database_password: "{{ lookup('ansible.builtin.file', glitchtip_database_password_local_file) | trim }}"
     glitchtip_oidc_client_secret: "{{ lookup('ansible.builtin.file', glitchtip_oidc_client_secret_local_file) | trim }}"
-    glitchtip_keycloak_rollback_client_secret: >-
-      {{ lookup('ansible.builtin.file', glitchtip_keycloak_rollback_client_secret_local_file) | trim }}
     glitchtip_mail_submission_password: "{{ lookup('ansible.builtin.file', glitchtip_mail_submission_password_local_file) | trim }}"
     glitchtip_admin_password: "{{ glitchtip_local_bootstrap_reads.results[0].content | b64decode | trim }}"
     glitchtip_api_token: "{{ glitchtip_local_bootstrap_reads.results[1].content | b64decode | trim }}"

@@ -10,10 +10,12 @@ import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime
+
 try:
     from datetime import UTC
 except ImportError:  # Python < 3.11
     from datetime import timezone
+
     UTC = timezone.utc  # type: ignore[assignment]
 from pathlib import Path
 from typing import Any
@@ -36,7 +38,7 @@ DEFAULT_ENVIRONMENT = primary_environment()
 @dataclass(frozen=True)
 class SuiteTargets:
     gateway_url: str | None
-    keycloak_url: str | None
+    authentik_url: str | None
     grafana_url: str | None
     netbox_url: str | None
     openbao_url: str | None
@@ -48,7 +50,7 @@ class SuiteTargets:
             key: value
             for key, value in {
                 "gateway_url": self.gateway_url,
-                "keycloak_url": self.keycloak_url,
+                "authentik_url": self.authentik_url,
                 "grafana_url": self.grafana_url,
                 "netbox_url": self.netbox_url,
                 "openbao_url": self.openbao_url,
@@ -220,8 +222,8 @@ def resolve_targets(repo_root: Path, environment: str) -> SuiteTargets:
     return SuiteTargets(
         gateway_url=env_override("LV3_INTEGRATION_GATEWAY_URL")
         or resolve_service_url(catalog, "api_gateway", environment),
-        keycloak_url=env_override("LV3_INTEGRATION_KEYCLOAK_URL")
-        or resolve_service_url(catalog, "keycloak", environment),
+        authentik_url=env_override("LV3_INTEGRATION_AUTHENTIK_URL")
+        or resolve_service_url(catalog, "authentik", environment),
         grafana_url=env_override("LV3_INTEGRATION_GRAFANA_URL") or resolve_service_url(catalog, "grafana", environment),
         netbox_url=env_override("LV3_INTEGRATION_NETBOX_URL") or resolve_service_url(catalog, "netbox", environment),
         openbao_url=env_override("LV3_INTEGRATION_OPENBAO_URL") or resolve_service_url(catalog, "openbao", environment),
@@ -310,8 +312,8 @@ def prepare_environment(
 
     if targets.gateway_url:
         os.environ.setdefault("LV3_INTEGRATION_GATEWAY_URL", targets.gateway_url)
-    if targets.keycloak_url:
-        os.environ.setdefault("LV3_INTEGRATION_KEYCLOAK_URL", targets.keycloak_url)
+    if targets.authentik_url:
+        os.environ.setdefault("LV3_INTEGRATION_AUTHENTIK_URL", targets.authentik_url)
     if targets.grafana_url:
         os.environ.setdefault("LV3_INTEGRATION_GRAFANA_URL", targets.grafana_url)
     if targets.netbox_url:

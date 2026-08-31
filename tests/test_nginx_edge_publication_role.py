@@ -317,7 +317,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         glitchtip_csp = security_overrides["errors.{{ platform_domain }}"]["content_security_policy"]
         self.assertIn("form-action 'self'", glitchtip_csp)
         self.assertIn("https://id.{{ platform_domain }}", glitchtip_csp)
-        self.assertIn("https://sso.{{ platform_domain }}", glitchtip_csp)
+        self.assertNotIn("https://sso.{{ platform_domain }}", glitchtip_csp)
         authentik_csp = security_overrides["id.{{ platform_domain }}"]["content_security_policy"]
         self.assertIn("script-src 'self' 'unsafe-inline'", authentik_csp)
         self.assertIn("wss://id.{{ platform_domain }}", authentik_csp)
@@ -454,9 +454,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("public_edge_session_authority.shared_logout_path", self.template)
         self.assertIn("public_edge_session_authority.shared_proxy_cleanup_path", self.template)
         self.assertIn("public_edge_session_authority.shared_logged_out_path", self.template)
-        self.assertIn("public_edge_session_authority.ops_portal_client_id", self.template)
         self.assertIn("oauth2_proxy_sign_out_url(", self.template)
-        self.assertIn("keycloak_logout_url(", self.template)
+        self.assertIn("oidc_logout_url(", self.template)
         self.assertIn("site.hostname == public_edge_session_authority.authority_hostname", self.template)
         self.assertIn("map $http_authorization $lv3_logout_id_token", self.template)
         self.assertIn("location @lv3_shared_logout_without_session {", self.template)
@@ -474,7 +473,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("public_edge_session_authority.cookie_name }}_csrf", self.template)
         self.assertIn('add_header Cache-Control "no-store" always;', self.template)
         self.assertIn('public_edge_session_authority.authority_hostname ~ "/"', self.template)
-        self.assertIn("public_edge_session_authority.ops_portal_client_id | urlencode", self.template)
+        self.assertIn("post_logout_redirect_uri={{ post_logout_redirect_uri | urlencode }}", self.template)
 
 
 if __name__ == "__main__":

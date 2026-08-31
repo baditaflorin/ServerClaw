@@ -1,0 +1,334 @@
+id: adr-0491-authentik-phase2-2026-08-28
+adr: "0491"
+title: "Authentik Phase 2: reconcile GlitchTip and migrate Outline"
+status: live_applied
+ready_to_merge: false
+live_applied: true
+owner: codex
+branch: codex/authentik-phase2-closeout-20260830
+worktree_path: .worktrees/codex-authentik-phase2-closeout-20260830
+doc: docs/workstreams/adr-0491-authentik-phase2.md
+canonical_truth:
+  changelog_entry: Complete the live-verified Authentik Phase 2 migration for GlitchTip and Outline while retaining Keycloak as the per-client rollback broker.
+  release_bump: patch
+  included_in_repo_version: 0.179.46
+  # The Phase 3–4 cutover supersedes this interim provider receipt. Its
+  # evidence remains in receipts/live-applies for historical audit.
+  latest_receipts: {}
+depends_on:
+  - adr-authentik-replace-keycloak-2026-08-27
+conflicts_with:
+  - ws-0424-fork-clone-0fork
+  - ws-0438-generic-by-construction
+  - ws-0439-deployment-profiles
+  - ws-0443-topology-drift-detection
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/archive/2026/adr-0491-authentik-phase2-2026-08-28.yaml
+  - docs/workstreams/adr-0491-authentik-phase2.md
+  - docs/adr/0491-authentik-for-operator-and-agent-sso.md
+  - docs/runbooks/configure-authentik.md
+  - docs/runbooks/configure-dify.md
+  - docs/runbooks/configure-glitchtip.md
+  - docs/runbooks/configure-outline.md
+  - scripts/sync_docs_to_outline.py
+  - tests/test_outline_sync.py
+  - docs/runbooks/minio-object-storage.md
+  - docs/runbooks/monitoring-stack.md
+  - docs/runbooks/secret-rotation-and-lifecycle.md
+  - README.md
+  - Makefile
+  - scripts/bootstrap_openbao_runtime_secret_provisioner.py
+  - tests/test_bootstrap_openbao_runtime_secret_provisioner.py
+  - .woodpecker.yml
+  - config/workflow-catalog.json
+  - config/command-catalog.json
+  - inventory/group_vars/all/platform_services.yml
+  - inventory/group_vars/all/main.yml
+  - inventory/group_vars/platform.yml
+  - inventory/group_vars/platform_hairpin.yml
+  - inventory/host_vars/proxmox-host.yml
+  - config/ansible-execution-scopes.yaml
+  - config/authentik/oauth-clients.yaml
+  - config/controller-local-secrets.json
+  - config/secret-catalog.json
+  - config/service-capability-catalog.json
+  - config/health-probe-catalog.json
+  - config/service-redundancy-catalog.json
+  - config/dependency-graph.json
+  - config/data-catalog.json
+  - config/slo-catalog.json
+  - config/integrations/glitchtip--authentik.yaml
+  - config/integrations/outline--authentik.yaml
+  - catalog/services/authentik/service.yaml
+  - catalog/services/glitchtip/service.yaml
+  - catalog/services/outline/service.yaml
+  - collections/ansible_collections/lv3/platform/roles/authentik_runtime/
+  - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/
+  - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/
+  - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/
+  - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/
+  - collections/ansible_collections/lv3/platform/roles/minio_runtime/
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+  - collections/ansible_collections/lv3/platform/roles/plausible_runtime/
+  - collections/ansible_collections/lv3/platform/roles/postgres_client/
+  - collections/ansible_collections/lv3/platform/roles/outline_runtime/
+  - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+  - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/dify_runtime/
+  - collections/ansible_collections/lv3/platform/roles/openbao_runtime/
+  - playbooks/authentik.yml
+  - playbooks/glitchtip.yml
+  - playbooks/vars/dify.yml
+  - playbooks/minio.yml
+  - playbooks/outline.yml
+  - playbooks/services/minio.yml
+  - playbooks/vars/minio.yml
+  - playbooks/secret-rotation.yml
+  - collections/ansible_collections/lv3/platform/playbooks/secret-rotation.yml
+  - tests/test_authentik_runtime_role.py
+  - scripts/dify_api.py
+  - scripts/dify_sso_bootstrap.py
+  - tests/test_dify_api.py
+  - tests/test_dify_runtime_role.py
+  - tests/test_dify_sso_bootstrap.py
+  - tests/test_hetzner_dns_record_role.py
+  - tests/test_hetzner_dns_records_role.py
+  - tests/test_glitchtip_runtime_role.py
+  - tests/test_minio_runtime_role.py
+  - tests/test_monitoring_vm_role.py
+  - tests/test_plausible_runtime_role.py
+  - tests/test_postgres_client_role.py
+  - tests/test_outline_runtime_role.py
+  - tests/test_secret_rotation.py
+  - collections/ansible_collections/lv3/platform/plugins/filter/generate_secret.py
+  - scripts/generate_cross_cutting_artifacts.py
+  - scripts/generate_platform_vars.py
+  - platform/repo.py
+  - scripts/identity_yaml.py
+  - scripts/validation_toolkit.py
+  - scripts/materialize_bootstrap_key_alias.py
+  - config/subdomain-catalog.json
+  - config/subdomain-exposure-registry.json
+  - config/certificate-catalog.json
+  - config/certificate-catalog.template.json
+  - scripts/generate_certificate_catalog.py
+  - docs/site-generated/architecture/dependency-graph.md
+  - docs/adr/0449-phase4-self-healing-primitives.md
+  - receipts/ops-portal-snapshot.html
+  - tests/test_generate_inventory.py
+  - tests/test_validation_toolkit.py
+  - tests/test_generate_certificate_catalog.py
+  - tests/test_materialize_bootstrap_key_alias.py
+  - tests/test_preflight_controller_local.py
+  - scripts/reconcile_authentik_oauth.py
+  - scripts/glitchtip_oidc_smoke.py
+  - tests/test_generate_cross_cutting_artifacts.py
+  - tests/test_generate_platform_vars.py
+  - tests/test_generate_platform_vars_cross_cutting.py
+  - tests/test_authentik_oauth_reconcile.py
+  - tests/test_openbao_compose_env_helper.py
+  - receipts/live-applies/**
+ownership_manifest:
+  owned_surfaces:
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: authentik_phase2_tracking
+      paths:
+        - workstreams/archive/2026/adr-0491-authentik-phase2-2026-08-28.yaml
+        - docs/workstreams/adr-0491-authentik-phase2.md
+      mode: exclusive
+    - id: authentik_phase2_governance
+      paths:
+        - docs/adr/0491-authentik-for-operator-and-agent-sso.md
+        - docs/runbooks/configure-authentik.md
+        - docs/runbooks/configure-glitchtip.md
+        - docs/runbooks/configure-outline.md
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: authentik_phase2_portal_selector_contract
+      paths:
+        - config/subdomain-catalog.json
+        - config/subdomain-exposure-registry.json
+        - config/certificate-catalog.json
+        - config/certificate-catalog.template.json
+        - docs/site-generated/architecture/dependency-graph.md
+        - docs/adr/0449-phase4-self-healing-primitives.md
+        - receipts/ops-portal-snapshot.html
+        - platform/repo.py
+        - scripts/identity_yaml.py
+        - scripts/validation_toolkit.py
+        - scripts/generate_certificate_catalog.py
+        - tests/test_generate_inventory.py
+        - tests/test_validation_toolkit.py
+        - tests/test_generate_certificate_catalog.py
+      mode: shared_contract
+      contract: deployment-selector-propagation-v1
+    - id: authentik_phase2_runtime
+      paths:
+        - catalog/services/authentik/service.yaml
+        - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+        - playbooks/authentik.yml
+        - playbooks/services/authentik.yml
+        - tests/test_authentik_runtime_role.py
+        - tests/test_authentik_playbook.py
+      mode: exclusive
+    - id: authentik_phase2_dns_adapter_fix
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/hetzner_dns_record/**
+        - collections/ansible_collections/lv3/platform/roles/hetzner_dns_records/**
+        - tests/test_hetzner_dns_record_role.py
+        - tests/test_hetzner_dns_records_role.py
+      mode: exclusive
+    - id: authentik_phase2_minio_secret_path_recovery
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/minio_runtime/**
+        - docs/runbooks/minio-object-storage.md
+        - playbooks/minio.yml
+        - playbooks/services/minio.yml
+        - playbooks/vars/minio.yml
+        - tests/test_minio_runtime_role.py
+      mode: exclusive
+    - id: authentik_phase2_monitoring_secret_path_recovery
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+        - docs/runbooks/monitoring-stack.md
+        - tests/test_monitoring_vm_role.py
+      mode: exclusive
+    - id: authentik_phase2_plausible_password_recovery
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/plausible_runtime/**
+        - tests/test_plausible_runtime_role.py
+      mode: exclusive
+    - id: postgres_client_secret_generation_fix
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/postgres_client/**
+        - collections/ansible_collections/lv3/platform/plugins/filter/generate_secret.py
+        - tests/test_postgres_client_role.py
+      mode: exclusive
+    - id: glitchtip_authentik_cutover
+      paths:
+        - catalog/services/glitchtip/service.yaml
+        - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/**
+        - playbooks/glitchtip.yml
+        - playbooks/services/glitchtip.yml
+        - playbooks/vars/glitchtip.yml
+        - tests/test_glitchtip_runtime_role.py
+        - tests/test_glitchtip_playbook.py
+      mode: exclusive
+    - id: outline_authentik_cutover
+      paths:
+        - catalog/services/outline/service.yaml
+        - collections/ansible_collections/lv3/platform/roles/outline_runtime/**
+        - playbooks/outline.yml
+        - playbooks/services/outline.yml
+        - playbooks/vars/outline.yml
+        - tests/test_outline_runtime_role.py
+        - tests/test_outline_playbook.py
+        - scripts/sync_docs_to_outline.py
+        - tests/test_outline_sync.py
+      mode: exclusive
+    - id: platform_service_registry
+      paths:
+        - inventory/group_vars/all/platform_services.yml
+        - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: service-registry-v1
+    - id: authentik_phase2_generated_topology
+      paths:
+        - inventory/group_vars/platform.yml
+        - inventory/group_vars/platform_hairpin.yml
+        - scripts/generate_cross_cutting_artifacts.py
+        - scripts/generate_platform_vars.py
+        - tests/test_generate_cross_cutting_artifacts.py
+        - tests/test_generate_platform_vars.py
+        - tests/test_generate_platform_vars_cross_cutting.py
+      mode: shared_contract
+      contract: generated-platform-topology-v1
+    - id: authentik_phase2_openbao_foundation
+      paths:
+        - inventory/group_vars/all/main.yml
+        - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/common/meta/argument_specs.yml
+        - collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml
+        - collections/ansible_collections/lv3/platform/roles/openbao_runtime/**
+        - scripts/bootstrap_openbao_runtime_secret_provisioner.py
+        - tests/test_bootstrap_openbao_runtime_secret_provisioner.py
+        - tests/test_openbao_compose_env_helper.py
+      mode: shared_contract
+      contract: openbao-runtime-secret-provisioner-v1
+    - id: authentik_phase2_oauth_contracts
+      paths:
+        - config/authentik/oauth-clients.yaml
+        - config/integrations/glitchtip--authentik.yaml
+        - config/integrations/outline--authentik.yaml
+        - scripts/reconcile_authentik_oauth.py
+        - scripts/glitchtip_oidc_smoke.py
+        - tests/test_authentik_oauth_reconcile.py
+      mode: exclusive
+    - id: authentik_phase2_secret_catalogs
+      paths:
+        - config/controller-local-secrets.json
+        - config/secret-catalog.json
+      mode: shared_contract
+      contract: secret-catalog-v1
+    - id: authentik_phase2_execution_scope
+      paths:
+        - config/ansible-execution-scopes.yaml
+      mode: shared_contract
+      contract: ansible-execution-scope-v1
+    - id: authentik_phase2_controller_workflows
+      paths:
+        - README.md
+        - Makefile
+        - .woodpecker.yml
+        - config/workflow-catalog.json
+        - config/command-catalog.json
+        - scripts/materialize_bootstrap_key_alias.py
+        - tests/test_materialize_bootstrap_key_alias.py
+        - tests/test_preflight_controller_local.py
+      mode: shared_contract
+      contract: controller-workflow-catalog-v1
+    - id: authentik_phase2_service_aggregates
+      paths:
+        - config/service-capability-catalog.json
+        - config/health-probe-catalog.json
+        - config/service-redundancy-catalog.json
+        - config/dependency-graph.json
+        - config/data-catalog.json
+        - config/slo-catalog.json
+      mode: shared_contract
+      contract: service-definition-aggregate-v1
+    - id: authentik_phase2_live_apply_evidence
+      paths:
+        - receipts/live-applies/**
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+description: |
+  Continue ADR 0491 after the parallel Authentik deployment. First close the
+  incomplete GlitchTip verification and replace its one-off API/ORM setup with
+  repeatable repository automation. Reconcile the Authentik deployment with
+  its OpenBao-backed target and validate the supported Ansible path before
+  adding more dependants. Only after those gates pass, migrate Outline as the
+  next approved client and prove a complete authorization-code round trip.
+
+  No other OIDC client is changed in this workstream. Keycloak remains live as
+  the per-client rollback path. Human operator migration, MFA re-enrolment,
+  serverclaw-runtime coordination, and Keycloak decommission remain outside
+  scope and require later review checkpoints.
+objectives:
+  - Prove the repaired GlitchTip domain and Authentik OIDC path end to end.
+  - Make Authentik application/provider and GlitchTip SocialApp state declarative and idempotent.
+  - Reconcile Authentik secrets with OpenBao and validate the Ansible deployment path.
+  - Migrate Outline only after the GlitchTip and Authentik foundation gates pass.
+completion_metrics:
+  - GlitchTip reports the correct allowed host and completes an Authentik login round trip.
+  - Re-running the governed automation produces no duplicate Authentik or GlitchTip objects.
+  - Authentik runs from OpenBao-rendered secrets and remains healthy through the edge.
+  - The Authentik playbook passes syntax and controlled live converge verification.
+  - Outline completes an Authentik login round trip while Keycloak remains available for rollback.
+blockers: []

@@ -75,7 +75,7 @@ AGENT_PACKS = [
         "conversation_starters": [
             "Search the wiki for deployment procedures",
             "List all document collections",
-            "Show me the runbook for Keycloak",
+            "Show me the runbook for Authentik",
         ],
     },
     {

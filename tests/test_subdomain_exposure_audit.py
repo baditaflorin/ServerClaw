@@ -356,7 +356,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
             audit.http_probe = original
 
         self.assertEqual(findings[0]["severity"], "CRITICAL")
-        self.assertIn("Keycloak", findings[0]["detail"])
+        self.assertIn("Authentik", findings[0]["detail"])
 
     def test_tls_findings_record_hostname_mismatch_without_crashing(self) -> None:
         registry = {
@@ -530,6 +530,44 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+    def test_check_registry_uses_tracked_generation_identity(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="subdomain-exposure-tracked-"))
+        try:
+            registry_path = temp_dir / "subdomain-exposure-registry.json"
+            expected_registry = audit.build_registry()
+            registry_path.write_text(json.dumps(expected_registry) + "\n", encoding="utf-8")
+            build_calls: list[tuple[dict[str, str] | None, bool]] = []
+            report_calls: list[tuple[dict[str, str] | None, bool]] = []
+
+            def build_with_identity(*_args, identity_vars=None, include_local_topology_overlay=True, **_kwargs):
+                build_calls.append((identity_vars, include_local_topology_overlay))
+                return expected_registry
+
+            def report_with_identity(*_args, identity_vars=None, include_local_topology_overlay=True, **_kwargs):
+                report_calls.append((identity_vars, include_local_topology_overlay))
+                return {"findings": []}
+
+            original = audit.REGISTRY_PATH
+            audit.REGISTRY_PATH = registry_path
+            try:
+                with (
+                    patch.object(audit, "build_registry", side_effect=build_with_identity),
+                    patch.object(
+                        audit,
+                        "load_tracked_generation_identity_vars",
+                        return_value={"platform_domain": "tracked.example"},
+                    ),
+                    patch.object(audit, "build_report", side_effect=report_with_identity),
+                ):
+                    self.assertEqual(audit.main(["--check-registry", "--validate"]), 0)
+            finally:
+                audit.REGISTRY_PATH = original
+        finally:
+            shutil.rmtree(temp_dir)
+
+        self.assertEqual(build_calls[-1], ({"platform_domain": "tracked.example"}, False))
+        self.assertEqual(report_calls[-1], ({"platform_domain": "tracked.example"}, False))
+
     def test_wildcard_edge_alias_matches_catalog_hostname(self) -> None:
         route = {
             "hostname": "apps.example.com",
@@ -539,7 +577,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         self.assertEqual(audit.resolve_route_for_hostname("repo-smoke.apps.example.com", [route]), route)
 
 
-def _replace_example_domain(value):
+def _replace_example_domain(value, **_kwargs):
     if isinstance(value, str):
         return value.replace("example.com", "example.com")
     if isinstance(value, list):

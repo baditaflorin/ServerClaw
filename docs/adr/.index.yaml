@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-29'
+generated: '2026-08-31'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
 total_adrs: 515
 adr_number_range:
@@ -14,16 +14,16 @@ adr_number_range:
   last: 0491
   next_available: 0492
 implementation_status_summary:
-  Implemented: 377
-  Partial: 5
+  Implemented: 378
+  Partial: 4
   Not Implemented: 33
   Deprecated: 14
   Accepted: 31
   Proposed: 55
 decision_status_summary:
-  Accepted: 371
+  Accepted: 364
   Proposed: 62
-  Deprecated: 31
+  Deprecated: 38
   Implemented: 51
 facets:
   by_range:
@@ -111,11 +111,11 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 377
+      count: 378
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 5
+      count: 4
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -141,11 +141,11 @@ reservation_ledger:
 latest_adrs:
   - adr: 0491
     title: Authentik For Operator And Agent SSO
-    implementation_status: Partial
-    currently_describes: mixed_state
+    implementation_status: Implemented
+    currently_describes: current_state
     concern: identity
     path: docs/adr/0491-authentik-for-operator-and-agent-sso.md
-    implemented_on: '2026-08-30'
+    implemented_on: '2026-08-31'
   - adr: 0490
     title: Netplan MAC Mismatch — Root Cause and Self-Healing Recovery Model
     implementation_status: Proposed

@@ -66,7 +66,7 @@
         "observe"
       ],
       "default_favorites": [
-        "service:keycloak",
+        "service:authentik",
         "service:openbao",
         "service:proxmox_ui",
         "service:portainer",

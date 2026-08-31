@@ -1,0 +1,47 @@
+---
+# ADR 0353: Service Integration Contract Registry
+# managed-by: adr=0491 role=plane_runtime
+schema_version: "1.0.0"
+contract_id: plane--authentik
+consumer: plane_runtime
+provider: authentik_runtime
+integration_type: oidc
+adr: "0491"
+
+connection:
+  oidc_provider_url_var: authentik_oidc_provider_base_url
+  application_slug: plane
+  client_id: "{{ platform_identity.config_prefix }}-plane-oidc"
+  client_secret_var: plane_oidc_client_secret
+
+environment_variables:
+  OIDC_SERVER_URL: "{{ authentik_oidc_provider_base_url }}/plane/"
+  OIDC_CLIENT_ID: "{{ platform_identity.config_prefix }}-plane-oidc"
+  OIDC_CLIENT_SECRET: "{{ plane_oidc_client_secret }}"
+  OIDC_DISCOVERY_URL: "{{ authentik_oidc_provider_base_url }}/plane/.well-known/openid-configuration"
+  OIDC_CALLBACK_URL: "{{ plane_service_topology.public_base_url }}/auth/callback/authentik"
+  ENABLE_OIDC: "true"
+  OIDC_ENABLE_AUTO_SIGNUP: "true"
+  OIDC_SCOPES: "openid profile email"
+
+secrets:
+  - path: .local/authentik/plane-oidc-client-secret.txt
+    env_var: OIDC_CLIENT_SECRET
+
+health_check:
+  endpoint: "{{ authentik_oidc_provider_base_url }}/plane/.well-known/openid-configuration"
+  expected_status: 200
+  timeout_seconds: 5
+
+pre_flight:
+  - check: authentik_application_exists
+    slug: plane
+  - check: authentik_provider_callback_matches
+    callback_url: "{{ plane_service_topology.public_base_url }}/auth/callback/authentik"
+  - check: plane_deployment_ready
+    service_name: plane
+
+post_deployment:
+  - action: notify
+    service: plane
+    message: "Authentik OIDC integration configured. Users can sign in through the platform identity provider."

@@ -1,32 +1,38 @@
 {
-  "receipt_id": "2026-07-17-claude-ops-authorized-key-live-apply",
   "applied_at_utc": "2026-07-17T16:01:08Z",
-  "applied_by": "codex",
+  "applied_on": "2026-07-17",
   "environment": "production",
-  "target": {
-    "host": "proxmox-host",
-    "account": "claude-ops",
-    "file": "~/.ssh/authorized_keys"
-  },
-  "summary": "Added an operator-provided ED25519 SSH public key to the claude-ops account for Proxmox host access.",
-  "changes": [
-    "Ensured the claude-ops ~/.ssh directory exists with mode 0700.",
-    "Ensured ~/.ssh/authorized_keys exists with mode 0600.",
-    "Appended the operator-provided public key only when it was not already present."
+  "evidence_refs": [
+    "docs/postmortems/2026-08-26-serverclaw-publish-blockers.md",
+    "workstreams/active/revive-receipts-ssh-key-plane-test-user.yaml"
+  ],
+  "notes": [
+    "Historical receipt normalized to the ADR 0420 live-apply schema without retaining public-key material or its fingerprint."
+  ],
+  "receipt_id": "2026-07-17-claude-ops-authorized-key-live-apply",
+  "recorded_by": "claude",
+  "recorded_on": "2026-07-17",
+  "repo_version_context": "0.179.50",
+  "schema_version": "1.0.0",
+  "source_commit": "d193f5e3b68cb094744f6b24ab22e53dc9cf19e5",
+  "summary": "Installed an operator-provided SSH public key for managed Proxmox host access.",
+  "targets": [
+    {
+      "kind": "bare-metal",
+      "name": "proxmox-host"
+    }
   ],
   "verification": [
     {
       "check": "SSH target account",
-      "result": "Connected through the repo-managed SSH config as claude-ops on the Proxmox host."
+      "observed": "Connected through the repository-managed SSH configuration to the designated operator account on the Proxmox host.",
+      "result": "pass"
     },
     {
-      "check": "authorized_keys contents",
-      "result": "authorized_keys contains the new ED25519 key fingerprint SHA256:iIyk3Yi4ojWW6XaKtIuPseym0sT0veuIOv/mWxg1BYc."
-    },
-    {
-      "check": "permissions",
-      "result": "~/.ssh is mode 0700 and ~/.ssh/authorized_keys is mode 0600."
+      "check": "Authorized key and permissions",
+      "observed": "The intended authorized-key entry was present and restrictive SSH directory and file permissions were verified.",
+      "result": "pass"
     }
   ],
-  "sensitive_material": "The public key body and workstation-local comment are intentionally not recorded in this receipt."
+  "workflow_id": "harden-access"
 }

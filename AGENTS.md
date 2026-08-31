@@ -474,7 +474,7 @@ from platform.locking import file_domain_lock, apply_lock, ResourceLockRegistry
 registry = ResourceLockRegistry()
 
 # Lock a specific config file (ADR 0347)
-with file_domain_lock(registry, vmid="101", role="keycloak_runtime",
+with file_domain_lock(registry, vmid="101", role="authentik_runtime",
                       filename="docker-compose.yml", holder="ws-0347"):
     # safe to write — no other agent can write this file concurrently
     ...
@@ -526,15 +526,15 @@ Receipt files live in `receipts/live-applies/<workstream-id>-apply-receipt.yaml`
 To add/update a service's nginx config atomically (write-validate-rename-reload):
 
 ```yaml
-- name: publish keycloak nginx fragment
+- name: publish authentik nginx fragment
   ansible.builtin.include_role:
     name: lv3.platform.nginx_fragment_config
   vars:
-    nginx_fragment_service_name: keycloak
+    nginx_fragment_service_name: authentik
     nginx_fragment_content: |
       server {
         listen 443 ssl;
-        server_name sso.example.org;
+        server_name id.example.org;
         ...
       }
 ```
@@ -558,7 +558,7 @@ internal jobs. Agents and operators can view, dispatch, and manage jobs.
 
 | Resource | Location |
 |---|---|
-| **UI** | Nomad scheduler web UI (OIDC login via Keycloak) |
+| **UI** | Nomad scheduler web UI (OIDC login via Authentik) |
 | **API proxy** | Tailscale mesh management proxy (requires management token) |
 | **Server** | monitoring (see inventory for host details) |
 | **Clients** | docker-runtime, runtime-general, runtime-ai, runtime-control, docker-build |
@@ -588,10 +588,10 @@ nginx routes to the wrong IP, etc.).
 
 ```bash
 # Preview: show exactly what will change and which converges will run
-make migrate-service-dry-run svc=keycloak to=runtime-control
+make migrate-service-dry-run svc=authentik to=runtime-control
 
 # Execute: update all registries + ordered converge + write receipt
-make migrate-service svc=keycloak to=runtime-control env=production
+make migrate-service svc=authentik to=runtime-control env=production
 ```
 
 The script updates all three registry fields atomically:
@@ -624,7 +624,7 @@ The gate is the backstop; `make migrate-service` is the preventive tool.
 **Teardown only** (stop a container without full migration):
 
 ```bash
-make teardown-service svc=keycloak on_vm=docker-runtime env=production
+make teardown-service svc=<service> on_vm=<vm> env=production
 ```
 
 ## Cross-Service Wiring Rules

@@ -32,7 +32,7 @@ def test_main_executes_fault_injection_script(monkeypatch, tmp_path: Path) -> No
 
     payload = fault_injection_windmill.main(
         repo_path=str(repo_root),
-        scenario_names="fault:keycloak-unavailable",
+        scenario_names="fault:authentik-unavailable",
         schedule_guard="first_sunday",
         dry_run=True,
     )

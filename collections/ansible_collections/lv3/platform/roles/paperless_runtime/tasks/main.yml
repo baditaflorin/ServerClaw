@@ -19,7 +19,7 @@
       - paperless_internal_base_url | length > 0
       - paperless_public_base_url | length > 0
       - paperless_database_password_local_file | length > 0
-      - paperless_keycloak_client_secret_local_file | length > 0
+      - paperless_authentik_client_secret_local_file | length > 0
       - paperless_sync_script | length > 0
       - paperless_taxonomy_manifest | length > 0
       - paperless_taxonomy_manifest_file | length > 0
@@ -30,7 +30,7 @@
       - paperless_redis_image | length > 0
     fail_msg: >-
       paperless_runtime requires runtime paths, image refs, database auth,
-      the Keycloak client secret, and taxonomy reconciliation inputs.
+      the Authentik client secret, and taxonomy reconciliation inputs.
 
 - name: Check Paperless prerequisites on the control machine
   ansible.builtin.include_role:
@@ -41,9 +41,9 @@
       - path: "{{ paperless_database_password_local_file }}"
         description: "Paperless database password"
         prerequisite: "Converge paperless_postgres before deploying Paperless"
-      - path: "{{ paperless_keycloak_client_secret_local_file }}"
-        description: "Paperless Keycloak client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying Paperless"
+      - path: "{{ paperless_authentik_client_secret_local_file }}"
+        description: "Paperless Authentik client secret"
+        prerequisite: "Converge the Authentik runtime before deploying Paperless"
 
 - name: Ensure the Paperless runtime packages are present
   ansible.builtin.apt:
@@ -117,12 +117,12 @@
           'openid_connect': {
             'APPS': [
               {
-                'provider_id': paperless_keycloak_provider_id,
-                'name': 'Keycloak',
-                'client_id': paperless_keycloak_client_id,
-                'secret': lookup('ansible.builtin.file', paperless_keycloak_client_secret_local_file) | trim,
+                'provider_id': paperless_authentik_provider_id,
+                'name': 'Authentik',
+                'client_id': paperless_authentik_client_id,
+                'secret': lookup('ansible.builtin.file', paperless_authentik_client_secret_local_file) | trim,
                 'settings': {
-                  'server_url': paperless_keycloak_issuer ~ '/.well-known/openid-configuration'
+                  'server_url': paperless_authentik_issuer ~ '/.well-known/openid-configuration'
                 }
               }
             ]
@@ -140,12 +140,12 @@
             'openid_connect': {
               'APPS': [
                 {
-                  'provider_id': paperless_keycloak_provider_id,
-                  'name': 'Keycloak',
-                  'client_id': paperless_keycloak_client_id,
-                  'secret': lookup('ansible.builtin.file', paperless_keycloak_client_secret_local_file) | trim,
+                  'provider_id': paperless_authentik_provider_id,
+                  'name': 'Authentik',
+                  'client_id': paperless_authentik_client_id,
+                  'secret': lookup('ansible.builtin.file', paperless_authentik_client_secret_local_file) | trim,
                   'settings': {
-                    'server_url': paperless_keycloak_issuer ~ '/.well-known/openid-configuration'
+                    'server_url': paperless_authentik_issuer ~ '/.well-known/openid-configuration'
                   }
                 }
               ]

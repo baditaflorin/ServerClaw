@@ -1,3 +1,4 @@
+# managed-by: role=rag_context_runtime adr=0070 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
 {% from 'compose_macros.j2' import openbao_sidecar %}
 services:
 {{ openbao_sidecar("platform_context") }}
@@ -12,6 +13,12 @@ services:
 {% endif %}
     volumes:
       - {{ platform_context_data_dir }}:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:6333/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
   platform-context-api:
     build:
@@ -22,7 +29,7 @@ services:
     restart: unless-stopped
     depends_on:
       qdrant:
-        condition: service_started
+        condition: service_healthy
     env_file:
       - {{ platform_context_env_file }}
     volumes:

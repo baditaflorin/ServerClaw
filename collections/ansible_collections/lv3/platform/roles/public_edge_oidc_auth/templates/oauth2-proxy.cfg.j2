@@ -3,20 +3,18 @@ http_address = "{{ public_edge_oidc_auth_http_address }}"
 reverse_proxy = true
 set_xauthrequest = true
 skip_provider_button = true
-skip_oidc_discovery = true
+skip_oidc_discovery = false
 upstreams = ["static://202"]
 scope = "{{ public_edge_oidc_auth_scope }}"
 client_id = "{{ public_edge_oidc_auth_client_id }}"
 client_secret = "{{ lookup('ansible.builtin.file', public_edge_oidc_auth_client_secret_local_file) | trim }}"
 redirect_url = "{{ public_edge_oidc_auth_redirect_url }}"
 oidc_issuer_url = "{{ public_edge_oidc_auth_issuer_url }}"
-login_url = "{{ public_edge_oidc_auth_public_login_url }}"
-redeem_url = "{{ public_edge_oidc_auth_redeem_url }}"
-profile_url = "{{ public_edge_oidc_auth_profile_url }}"
-validate_url = "{{ public_edge_oidc_auth_validate_url }}"
 oidc_jwks_url = "{{ public_edge_oidc_auth_jwks_url }}"
+oidc_enabled_signing_algs = [{% for algorithm in public_edge_oidc_auth_oidc_enabled_signing_algorithms %}"{{ algorithm }}"{% if not loop.last %}, {% endif %}{% endfor %}]
 allowed_groups = [{% for group in public_edge_oidc_auth_allowed_groups %}"{{ group }}"{% if not loop.last %}, {% endif %}{% endfor %}]
 email_domains = [{% for domain in public_edge_oidc_auth_email_domains %}"{{ domain }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+insecure_oidc_allow_unverified_email = {{ public_edge_oidc_auth_allow_unverified_email | bool | lower }}
 cookie_name = "{{ public_edge_oidc_auth_cookie_name }}"
 cookie_secret = "{{ lookup('ansible.builtin.file', public_edge_oidc_auth_cookie_secret_local_file) | trim }}"
 cookie_domains = ["{{ public_edge_oidc_auth_cookie_domain }}"]
@@ -30,8 +28,6 @@ pass_access_token = true
 pass_authorization_header = true
 set_authorization_header = true
 code_challenge_method = "S256"
-# NOTE: oauth2-proxy defaults approval_prompt to "force" and always sends it
-# as a query parameter.  Keycloak ignores approval_prompt (non-standard);
-# SSO auto-login works because Keycloak only inspects the OIDC `prompt` param.
-# Setting approval_prompt="" here is a no-op (oauth2-proxy still sends "force"),
-# but we keep the comment for future maintainers investigating login behaviour.
+# Endpoint discovery remains enabled so Authentik's per-provider issuer, global
+# authorization endpoint, and provider-specific JWKS stay in one verified OIDC
+# discovery document rather than drifting as a copied endpoint set.

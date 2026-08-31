@@ -14,7 +14,7 @@ Usage:
     python scripts/validate_sso_clients.py --check   # exit 0 if valid, 1 on error
     python scripts/validate_sso_clients.py --list    # print all declared clients
 
-This script does NOT make live Keycloak API calls.
+This script does NOT make live Authentik API calls.
 """
 
 from __future__ import annotations
@@ -82,7 +82,7 @@ def validate_clients(clients: dict) -> tuple[list[str], list[str]]:
             errors.append(str(exc))
 
         # Required: provider
-        provider = client_config.get("provider", "keycloak")
+        provider = client_config.get("provider", "authentik")
         try:
             require_str(provider, f"{path}.provider")
         except ValueError as exc:
@@ -153,7 +153,7 @@ def main(argv: list[str] | None = None) -> int:
 The source file is config/generated/sso-clients.yaml (produced by
 generate_cross_cutting_artifacts.py --write --only sso).
 
-This script does NOT make live Keycloak API calls.
+This script does NOT make live Authentik API calls.
 """,
     )
     mode = parser.add_mutually_exclusive_group(required=True)

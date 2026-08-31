@@ -192,7 +192,7 @@ Palette behavior:
 6. Resolve any inline schema validation feedback before submitting.
 7. Submit the create action.
 8. Record the returned bootstrap password securely.
-9. Direct the new operator to sign in through Keycloak, rotate the bootstrap password, complete TOTP enrollment, and then finish the **First-Run Activation** checklist in the interactive ops portal.
+9. Direct the new operator to sign in through Authentik, rotate the bootstrap password, complete MFA enrollment, and then finish the **First-Run Activation** checklist in the interactive ops portal.
 
 ## Off-boarding Flow
 

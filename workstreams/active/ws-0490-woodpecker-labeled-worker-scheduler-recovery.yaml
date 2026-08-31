@@ -1,0 +1,63 @@
+id: ws-0490-woodpecker-labeled-worker-scheduler-recovery
+adr: "0287"
+title: Restore scheduling for active label-matched Woodpecker workers
+status: ready
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/woodpecker-lv3-scheduler-recovery-20260901
+worktree_path: .worktrees/woodpecker-lv3-scheduler-recovery-20260901
+doc: docs/workstreams/ws-0490-woodpecker-labeled-worker-scheduler-recovery.md
+depends_on:
+  - adr-0287-woodpecker-ci
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0490-woodpecker-labeled-worker-scheduler-recovery.yaml
+  - docs/workstreams/ws-0490-woodpecker-labeled-worker-scheduler-recovery.md
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - receipts/live-applies/2026-08-31-woodpecker-lv3-scheduler-recovery.json
+ownership_manifest:
+  owned_surfaces:
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: woodpecker_scheduler_recovery_tracking
+      paths:
+        - workstreams/active/ws-0490-woodpecker-labeled-worker-scheduler-recovery.yaml
+        - docs/workstreams/ws-0490-woodpecker-labeled-worker-scheduler-recovery.md
+      mode: exclusive
+    - id: release_truth
+      paths:
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: release-truth-v1
+    - id: woodpecker_scheduler_recovery_generated_diagram
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-index-and-diagram-v1
+    - id: live_apply_evidence
+      paths:
+        - receipts/live-applies/2026-08-31-woodpecker-lv3-scheduler-recovery.json
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+context: |
+  Required release validation pipelines were pending because the only two live
+  workers matching the repository's required label were healthy but marked
+  no-schedule in the CI scheduler. The recovery re-enabled only those active,
+  label-matched workers. Both previously queued validation pipelines then ran
+  and completed successfully.
+tasks:
+  - id: t1
+    title: Identify the exact active label-matched workers and restore scheduler eligibility
+    status: completed
+  - id: t2
+    title: Verify queued push and pull-request validation pipelines complete successfully
+    status: completed
+  - id: t3
+    title: Record the live control-plane recovery and refresh generated repository evidence
+    status: completed

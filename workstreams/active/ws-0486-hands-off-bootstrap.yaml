@@ -18,6 +18,7 @@ depends_on:
   - adr-0482-capacity-aware-dynamic-sizing
   - adr-0484-self-verification-contracts
   - adr-0485-convergence-idempotency-tests
+conflicts_with: []
 shared_surfaces:
   - docs/adr/0483-hands-off-bootstrap.md
   - config/contracts/deployment-v1/manifest.schema.json

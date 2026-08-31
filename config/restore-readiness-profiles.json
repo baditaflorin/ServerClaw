@@ -16,11 +16,11 @@
       }
     },
     "docker-runtime": {
-      "description": "Allow the restored control-plane runtime time to settle, require Keycloak, NetBox, and Windmill to answer locally, then replay the governed post-restore control-plane reads.",
+      "description": "Allow the restored control-plane runtime time to settle, require Authentik, NetBox, and Windmill to answer locally, then replay the governed post-restore control-plane reads.",
       "initial_wait_seconds": 90,
       "max_attempts": 10,
       "network_dependency_checks": [
-        "keycloak_ready",
+        "authentik_ready",
         "netbox_ready",
         "windmill_ready"
       ],

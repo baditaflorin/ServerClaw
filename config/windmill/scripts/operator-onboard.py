@@ -7,7 +7,7 @@ from pathlib import Path
 RUNTIME_ENV_FILE = Path("/run/lv3-secrets/windmill/runtime.env")
 RUNTIME_ENV_KEYS = {
     "LV3_OPENBAO_URL",
-    "KEYCLOAK_BOOTSTRAP_PASSWORD",
+    "LV3_AUTHENTIK_BOOTSTRAP_TOKEN",
     "OPENBAO_INIT_JSON",
     "TAILSCALE_API_KEY",
     "TAILSCALE_TAILNET",
@@ -39,7 +39,7 @@ def main(
     role: str = "operator",
     ssh_key: str = "",
     operator_id: str = "",
-    keycloak_username: str = "",
+    authentik_username: str = "",
     tailscale_login_email: str = "",
     tailscale_device_name: str = "",
     bootstrap_password: str = "",
@@ -82,8 +82,8 @@ def main(
         command.extend(["--ssh-key", ssh_key])
     if operator_id:
         command.extend(["--id", operator_id])
-    if keycloak_username:
-        command.extend(["--keycloak-username", keycloak_username])
+    if authentik_username:
+        command.extend(["--authentik-username", authentik_username])
     if tailscale_login_email:
         command.extend(["--tailscale-login-email", tailscale_login_email])
     if tailscale_device_name:

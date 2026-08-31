@@ -1,6 +1,6 @@
 ---
 # Playbook: superset.yml
-# Purpose: Converge the Superset PostgreSQL metadata plane, runtime, Keycloak client, and shared-edge publication.
+# Purpose: Converge the Superset PostgreSQL metadata plane, runtime, Authentik client, and shared-edge publication.
 # Use case: Run during production or staging live apply of the repo-managed SQL-first business intelligence layer.
 #
 # Inputs (required):
@@ -10,13 +10,13 @@
 #   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH path to managed guests.
 #
 # Outputs:
-#   - Superset DNS, PostgreSQL metadata schema, datasource roles, runtime secrets, Keycloak OIDC client, and public verification match repo truth.
+#   - Superset DNS, PostgreSQL metadata schema, datasource roles, runtime secrets, Authentik OIDC client, and public verification match repo truth.
 #
 # Idempotency: Partially idempotent; convergence is repeatable, while the runtime metadata bootstrap reconciles managed datasources and the landing dashboard in place.
 #
 # Dependencies:
 #   - ADR 0292: Superset is the SQL-first business intelligence layer for operational data.
-#   - Requires: postgres_vm, docker_runtime, keycloak_runtime, superset_postgres, superset_runtime, and nginx_edge_publication.
+#   - Requires: postgres_vm, docker_runtime, authentik_runtime, superset_postgres, superset_runtime, and nginx_edge_publication.
 #
 # Related ADRs: 0021, 0042, 0063, 0077, 0292
 # Related Runbooks: docs/runbooks/configure-superset.md

@@ -1,6 +1,6 @@
-# Purpose: Define the default Directus runtime paths, image pin, bootstrap identities, and Keycloak publication settings.
+# Purpose: Define the default Directus runtime paths, image pin, bootstrap identities, and Authentik publication settings.
 # Use case: Loaded whenever the Directus runtime role converges or verifies the repo-managed data API surface.
-# Inputs: Platform topology, image catalog, Keycloak settings, PostgreSQL location, and controller-local secret paths.
+# Inputs: Platform topology, image catalog, Authentik settings, PostgreSQL location, and controller-local secret paths.
 # Outputs: Supplies stable runtime defaults consumed by the directus_runtime tasks and templates.
 # Idempotency: Fully idempotent because this file only declares desired defaults.
 # Dependencies: ADR 0165, ADR 0021, ADR 0063, ADR 0077, ADR 0289, ADR 0373.
@@ -17,7 +17,7 @@ directus_public_edge_private_ip: "{{ hostvars[platform_topology_host].proxmox_pu
 directus_public_hostname_overrides:
   - hostname: "{{ directus_service_topology.public_hostname }}"
     address: "{{ directus_public_edge_private_ip }}"
-  - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.keycloak.public_hostname }}"
+  - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}"
     address: "{{ directus_public_edge_private_ip }}"
 directus_compose_project_name: directus
 directus_compose_network_name: "{{ directus_compose_project_name }}_default"
@@ -34,26 +34,26 @@ directus_key_local_file: "{{ directus_local_artifact_dir }}/key.txt"
 directus_secret_local_file: "{{ directus_local_artifact_dir }}/secret.txt"
 directus_admin_password_local_file: "{{ directus_local_artifact_dir }}/admin-password.txt"
 directus_service_registry_token_local_file: "{{ directus_local_artifact_dir }}/service-registry-token.txt"
-directus_keycloak_client_secret_local_file: "{{ repo_shared_local_root }}/keycloak/directus-client-secret.txt"
+directus_authentik_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/directus-client-secret.txt"
 directus_key_remote_file: "{{ directus_secret_dir }}/key.txt"
 directus_secret_remote_file: "{{ directus_secret_dir }}/secret.txt"
 directus_admin_password_remote_file: "{{ directus_secret_dir }}/admin-password.txt"
-directus_keycloak_client_id: directus
-directus_keycloak_issuer_url: "{{ keycloak_oidc_issuer_url }}"
-directus_keycloak_allow_public_registration: true
-directus_keycloak_sync_user_info: true
-directus_keycloak_group_claim_name: groups
-directus_keycloak_email_key: email
-directus_keycloak_first_name_key: given_name
-directus_keycloak_last_name_key: family_name
-directus_keycloak_label: Keycloak
-directus_keycloak_icon: lock
+directus_authentik_client_id: directus
+directus_authentik_issuer_url: "{{ authentik_oidc_provider_base_url }}/directus/"
+directus_authentik_allow_public_registration: true
+directus_authentik_sync_user_info: true
+directus_authentik_group_claim_name: groups
+directus_authentik_email_key: email
+directus_authentik_first_name_key: given_name
+directus_authentik_last_name_key: family_name
+directus_authentik_label: Authentik
+directus_authentik_icon: lock
 directus_observer_role_id: 4b0fd2c2-596a-4e1f-bd0a-a9d8617c4c40
 directus_operator_role_id: 1e4a3bf6-1798-49dd-b8e3-1c129422e7df
-directus_keycloak_role_mapping_json: >-
-  {"/{{ platform_identity.config_prefix }}-platform-admins":"{{ directus_operator_role_id }}"}
-directus_keycloak_login_path: /auth/login/keycloak
-directus_keycloak_callback_path: /auth/login/keycloak/callback
+directus_authentik_role_mapping_json: >-
+  {"{{ platform_identity.config_prefix }}-platform-admins":"{{ directus_operator_role_id }}"}
+directus_authentik_login_path: /auth/login/authentik
+directus_authentik_callback_path: /auth/login/authentik/callback
 directus_bootstrap_collection_name: service_registry
 directus_bootstrap_public_hostname: "{{ directus_service_topology.public_hostname }}"
 directus_bootstrap_internal_url: "http://{{ ansible_host }}:{{ directus_internal_port }}"

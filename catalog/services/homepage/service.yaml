@@ -33,7 +33,7 @@ service:
       url: https://home.example.com
       subdomain: home.example.com
       notes: Published through the shared NGINX edge and gated behind the repo-managed
-        Keycloak oauth2-proxy flow.
+        Authentik oauth2-proxy flow.
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -65,15 +65,15 @@ dependency:
     service: homepage
     name: Homepage
     vm: docker-runtime
-    tier: 3
+    tier: 2
     category: access
     adr: '0152'
   outbound_edges:
     - from: homepage
-      to: keycloak
+      to: authentik
       type: hard
       description: Public operator access to Homepage is intentionally gated through
-        the shared Keycloak-backed oauth2-proxy flow on the NGINX edge.
+        the shared Authentik-backed oauth2-proxy flow on the NGINX edge.
     - from: homepage
       to: nginx_edge
       type: hard

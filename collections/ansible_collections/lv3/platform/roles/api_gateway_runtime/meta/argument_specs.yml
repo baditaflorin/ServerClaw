@@ -20,13 +20,13 @@ argument_specs:
         required: true
         description:
           - Controller-local catalog files copied into the runtime config directory.
-      api_gateway_keycloak_jwks_url:
+      api_gateway_authentik_jwks_url:
         type: str
         required: true
         description:
-          - Keycloak JWKS endpoint used for bearer-token verification.
-      api_gateway_keycloak_issuer_url:
+          - Authentik JWKS endpoint used for bearer-token verification.
+      api_gateway_authentik_issuer_url:
         type: str
         required: true
         description:
-          - Expected Keycloak issuer for gateway JWT verification.
+          - Expected Authentik issuer for gateway JWT verification.

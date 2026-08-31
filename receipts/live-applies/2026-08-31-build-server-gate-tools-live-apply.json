@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-08-31-build-server-gate-tools-live-apply",
+  "applied_on": "2026-08-31",
+  "recorded_on": "2026-08-31",
+  "recorded_at": "2026-08-31T20:02:03Z",
+  "recorded_by": "codex",
+  "source_commit": "167d2a322",
+  "repo_version_context": "0.179.46",
+  "workflow_id": "live-apply-service",
+  "adr": "0364",
+  "environment": "production",
+  "summary": "Updated the managed build-server gate toolchain so native OpenTofu validation satisfies the repository requirement.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-build",
+      "vmid": "130"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Managed gate-tool convergence",
+      "result": "pass",
+      "observed": "The scoped playbook completed with no unreachable or failed tasks."
+    },
+    {
+      "check": "OpenTofu version",
+      "result": "pass",
+      "observed": "The build guest reports OpenTofu v1.12.6."
+    },
+    {
+      "check": "Remote validation gate",
+      "result": "pass",
+      "observed": "Native tofu validation passed; governed reruns completed the two timed remote checks."
+    },
+    {
+      "check": "Post-apply configuration backup",
+      "result": "pass",
+      "observed": "All five governed configuration sources were protected with no uncovered or inactive sources."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml",
+    "receipts/restic-snapshots-latest.json"
+  ],
+  "notes": [
+    "The managed version pin was raised after the pre-push gate reported that the previous build-server OpenTofu version did not meet the repository constraint.",
+    "The build guest SSH host key was verified through the trusted Proxmox guest agent before the local trust record was refreshed."
+  ]
+}

@@ -15,22 +15,18 @@
       },
       "scenarios": [
         {
-          "id": "keycloak-oidc-discovery",
-          "name": "Keycloak OIDC discovery",
+          "id": "authentik-readiness",
+          "name": "Authentik readiness",
           "kind": "http",
           "required": true,
           "iterations": 3,
           "minimum_success_rate": 1.0,
           "request": {
-            "url": "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration",
+            "url": "http://127.0.0.1:9010/-/health/ready/",
             "method": "GET",
             "timeout_seconds": 10,
             "expected_status": [
               200
-            ],
-            "expect_body_contains": [
-              "\"issuer\"",
-              "/realms/lv3"
             ]
           }
         },

@@ -66,16 +66,16 @@ The standard data-model validator fails if any of these fields are missing.
 | --- | --- | --- | --- | --- |
 | `ops` | `human_operator` | `Platform Operator` | Proxmox host and guest Linux administration | Currently shares the bootstrap SSH key material with the break-glass `root` path; ADR 0047 should retire that overlap. |
 | `ops@pam` | `human_operator` | `Platform Operator` | Routine Proxmox UI and CLI administration | Protected with TOTP and scoped to Proxmox administration. |
-| `florin.badita` | `human_operator` | `Platform Operator` | Shared SSO for internal control-plane apps | Provisioned in Keycloak with TOTP enrollment required on first interactive login. |
+| `florin.badita` | `human_operator` | `Platform Operator` | Shared SSO for internal control-plane apps | Provisioned in Authentik with MFA enrollment required on first interactive login. |
 | `lv3-automation@pve` | `agent` | `Repository automation` | Proxmox API automation | Uses a privilege-separated token stored only under `.local/proxmox-api`. |
-| `lv3-agent-hub` | `agent` | `Repository automation` | Shared Keycloak client-credentials path for approved agent workflows | Confidential client secret is mirrored only under `.local/keycloak/`. |
+| `lv3-agent-hub` | `agent` | `Repository automation` | Shared Authentik client-credentials path for approved agent workflows | Confidential client secret is mirrored only under `.local/authentik/`. |
 | `server@example.com` | `service` | `Mail platform runtime` | Managed mailbox and authenticated mail submission | Backed by the internal mail platform on `docker-runtime`. |
 | `alerts@example.com` | `service` | `Platform operations` | Operator alert sender profile | Scoped to outbound alert delivery through the managed mail gateway and backed by profile-specific credentials under `.local/mail-platform/profiles/`. |
 | `platform@example.com` | `service` | `Platform services` | Platform transactional sender profile | Scoped to repo-managed service notifications through the managed mail gateway. |
 | `agents@example.com` | `agent` | `Repository automation` | Agent and workflow report sender profile | Scoped to automated report delivery through the managed mail gateway and rejected if reused for another profile. |
-| `grafana-oauth` | `service` | `Monitoring stack` | Grafana OIDC login against the shared Keycloak realm | Confidential client secret is used only for Grafana's generic OAuth integration. |
+| `grafana-oauth` | `service` | `Monitoring stack` | Grafana OIDC login against the shared Authentik provider | Confidential client secret is used only for Grafana's generic OAuth integration. |
 | `root` | `break_glass` | `Platform Operator` | Emergency Proxmox host recovery | Key-only and reserved for recovery. Rotate immediately after any real use. |
-| `lv3-bootstrap-admin` | `break_glass` | `Platform Operator` | Keycloak master-realm recovery and realm administration bootstrap | Stored under `.local/keycloak/` and reserved for IdP recovery, not routine operator login. |
+| `lv3-bootstrap-admin` | `break_glass` | `Platform Operator` | Authentik bootstrap administration and recovery | Stored under `.local/authentik/` and reserved for IdP recovery, not routine operator login. |
 
 ## Change Rules
 

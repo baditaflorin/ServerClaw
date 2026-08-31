@@ -29,10 +29,10 @@ platform_ops = load_module("platform_ops", "scripts/platform_ops.py")
 
 
 def test_decommission_plan_uses_service_id_subdomain_catalog() -> None:
-    plan = decommission_service.build_plan("keycloak")
+    plan = decommission_service.build_plan("authentik")
 
-    assert "sso.example.com" in plan["subdomains"]
-    assert "sso.staging.example.com" in plan["catalog_changes"]["subdomain_catalog"]
+    assert "id.example.com" in plan["subdomains"]
+    assert plan["authentik_oauth_client"] is None
 
 
 def test_rewrite_subdomain_catalog_removes_service_id_and_legacy_service_keys(tmp_path: Path) -> None:
@@ -41,7 +41,7 @@ def test_rewrite_subdomain_catalog_removes_service_id_and_legacy_service_keys(tm
         json.dumps(
             {
                 "subdomains": [
-                    {"service_id": "keycloak", "fqdn": "sso.example.com"},
+                    {"service_id": "authentik", "fqdn": "id.example.com"},
                     {"service": "legacy_service", "hostname": "legacy.example.com"},
                     {"service_id": "grafana", "fqdn": "grafana.example.com"},
                 ]
@@ -51,7 +51,7 @@ def test_rewrite_subdomain_catalog_removes_service_id_and_legacy_service_keys(tm
         encoding="utf-8",
     )
 
-    assert decommission_service.rewrite_subdomain_catalog("keycloak", catalog_path) is True
+    assert decommission_service.rewrite_subdomain_catalog("authentik", catalog_path) is True
     assert decommission_service.rewrite_subdomain_catalog("legacy_service", catalog_path) is True
 
     remaining = json.loads(catalog_path.read_text(encoding="utf-8"))["subdomains"]
@@ -84,8 +84,96 @@ def test_validate_registry_cli_keeps_stdout_machine_readable_json() -> None:
 
 
 def test_decommission_preview_includes_https_tls_marker_files() -> None:
-    marker_files = {item["file"] for item in platform_ops._find_yaml_marker_files("keycloak")}
+    marker_files = {item["file"] for item in platform_ops._find_yaml_marker_files("authentik")}
 
     assert "config/prometheus/file_sd/https_tls_targets.yml" in marker_files
     if (REPO_ROOT / "config/prometheus/rules/https_tls_alerts.yml").is_file():
         assert "config/prometheus/rules/https_tls_alerts.yml" in marker_files
+
+
+def test_authentik_oauth_client_mapping_and_manifest_removal_are_service_scoped(tmp_path: Path) -> None:
+    registry_path = tmp_path / "platform_services.yml"
+    registry_path.write_text(
+        """platform_service_registry:
+  # BEGIN SERVICE: grafana
+  grafana:
+    sso:
+      enabled: true
+      provider: authentik
+      client_id: grafana-oauth
+  # END SERVICE: grafana
+""",
+        encoding="utf-8",
+    )
+    manifest_path = tmp_path / "oauth-clients.yaml"
+    manifest_path.write_text(
+        """version: 1
+clients:
+  - id: grafana-oauth
+    application:
+      name: Grafana
+      slug: grafana
+    provider:
+      name: grafana-oauth
+      client_id: grafana-oauth
+  - id: outline
+    application:
+      name: Outline
+      slug: outline
+    provider:
+      name: outline
+      client_id: outline
+""",
+        encoding="utf-8",
+    )
+
+    client = decommission_service.find_authentik_oauth_client(
+        "grafana",
+        service_registry_path=registry_path,
+        manifest_path=manifest_path,
+    )
+
+    assert client == {
+        "manifest_id": "grafana-oauth",
+        "provider_client_id": "grafana-oauth",
+        "application_slug": "grafana",
+    }
+    assert (
+        decommission_service._remove_authentik_oauth_manifest_client(
+            manifest_path,
+            "grafana",
+            service_registry_path=registry_path,
+        )
+        is True
+    )
+    remaining = manifest_path.read_text(encoding="utf-8")
+    assert "id: grafana-oauth" not in remaining
+    assert "id: outline" in remaining
+
+
+def test_delete_authentik_oauth_client_removes_application_before_provider(monkeypatch) -> None:
+    calls: list[tuple[str, str]] = []
+
+    def list_all(_base_url: str, _token: str, path: str):
+        if path == "/api/v3/providers/oauth2/":
+            return [{"pk": 42, "client_id": "grafana-oauth"}]
+        assert path == "/api/v3/core/applications/"
+        return [{"slug": "grafana", "provider": 42}]
+
+    def request(_base_url: str, _token: str, method: str, path: str):
+        calls.append((method, path))
+        return {}
+
+    monkeypatch.setattr(decommission_service, "_authentik_list_all", list_all)
+    monkeypatch.setattr(decommission_service, "_authentik_api_request", request)
+
+    decommission_service.delete_authentik_oauth_client(
+        "https://id.example.com",
+        "not-a-real-token",
+        {"provider_client_id": "grafana-oauth", "application_slug": "grafana"},
+    )
+
+    assert calls == [
+        ("DELETE", "/api/v3/core/applications/grafana/"),
+        ("DELETE", "/api/v3/providers/oauth2/42/"),
+    ]

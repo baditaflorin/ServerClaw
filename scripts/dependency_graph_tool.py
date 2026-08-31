@@ -20,7 +20,7 @@ Examples
   python scripts/dependency_graph_tool.py depends-on --node gitea
   python scripts/dependency_graph_tool.py depended-by --node postgres
   python scripts/dependency_graph_tool.py blast-radius --node postgres
-  python scripts/dependency_graph_tool.py path --from gitea --to keycloak
+  python scripts/dependency_graph_tool.py path --from gitea --to authentik
   python scripts/dependency_graph_tool.py summary
 """
 

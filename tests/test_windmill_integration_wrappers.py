@@ -81,6 +81,22 @@ def test_stage_smoke_wrapper_exports_worker_local_windmill_url(monkeypatch, tmp_
     ]
 
 
+def test_stage_smoke_wrapper_discovers_repo_from_environment(monkeypatch, tmp_path: Path) -> None:
+    (tmp_path / "scripts").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "scripts" / "stage_smoke_suites.py").write_text("# placeholder\n", encoding="utf-8")
+    wrapper = load_module("windmill_stage_smoke_wrapper_env", "config/windmill/scripts/stage-smoke-suites.py")
+
+    def fake_run(command, **kwargs):
+        return subprocess.CompletedProcess(command, 0, '{"status":"passed"}', "")
+
+    monkeypatch.setenv("PLATFORM_REPO_ROOT", str(tmp_path))
+    monkeypatch.setattr(wrapper.subprocess, "run", fake_run)
+
+    payload = wrapper.main()
+
+    assert payload["status"] == "ok"
+
+
 def test_nightly_wrapper_sets_worker_local_windmill_url_before_run_suite(monkeypatch, tmp_path: Path) -> None:
     write_health_probe_catalog(tmp_path)
     (tmp_path / "scripts").mkdir(parents=True, exist_ok=True)

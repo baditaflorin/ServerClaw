@@ -56,14 +56,14 @@
       ]
     },
     {
-      "adr": "0056",
+      "adr": "0491",
       "capability_id": "operator_identity_broker",
-      "product_id": "keycloak",
+      "product_id": "authentik",
       "critical_surface": "shared_operator_and_agent_sso",
       "capability_definition_refs": [
         "docs/adr/0046-identity-classes-for-humans-services-and-agents.md",
         "docs/adr/0047-short-lived-credentials-and-internal-mtls.md",
-        "docs/runbooks/configure-keycloak.md"
+        "docs/runbooks/configure-authentik.md"
       ]
     },
     {

@@ -9,7 +9,6 @@
     "directory_mode": "0750"
   },
   "managed_postgres_databases": [
-    "keycloak",
     "mattermost",
     "netbox",
     "windmill"

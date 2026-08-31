@@ -29,11 +29,11 @@ def test_resolve_targets_prefers_active_environment(monkeypatch, tmp_path: Path)
                     },
                 },
                 {
-                    "id": "keycloak",
-                    "public_url": "https://sso.example.com",
+                    "id": "authentik",
+                    "public_url": "https://id.example.com",
                     "environments": {
-                        "production": {"status": "active", "url": "https://sso.example.com"},
-                        "staging": {"status": "active", "url": "https://sso.staging.example.com"},
+                        "production": {"status": "active", "url": "https://id.example.com"},
+                        "staging": {"status": "active", "url": "https://id.staging.example.com"},
                     },
                 },
                 {
@@ -44,14 +44,14 @@ def test_resolve_targets_prefers_active_environment(monkeypatch, tmp_path: Path)
             ]
         },
     )
-    monkeypatch.delenv("LV3_INTEGRATION_KEYCLOAK_URL", raising=False)
+    monkeypatch.delenv("LV3_INTEGRATION_AUTHENTIK_URL", raising=False)
     monkeypatch.delenv("LV3_INTEGRATION_WINDMILL_URL", raising=False)
     monkeypatch.delenv("LV3_WINDMILL_BASE_URL", raising=False)
 
     targets = integration_suite.resolve_targets(tmp_path, "staging")
 
     assert targets.gateway_url == "https://api.staging.example.com"
-    assert targets.keycloak_url == "https://sso.staging.example.com"
+    assert targets.authentik_url == "https://id.staging.example.com"
     assert targets.windmill_url is None
 
 
@@ -126,9 +126,9 @@ def test_run_suite_invokes_pytest_when_targets_exist(monkeypatch, tmp_path: Path
         {
             "services": [
                 {
-                    "id": "keycloak",
-                    "public_url": "https://sso.example.com",
-                    "environments": {"staging": {"status": "active", "url": "https://sso.staging.example.com"}},
+                    "id": "authentik",
+                    "public_url": "https://id.example.com",
+                    "environments": {"staging": {"status": "active", "url": "https://id.staging.example.com"}},
                 }
             ]
         },
@@ -140,11 +140,11 @@ def test_run_suite_invokes_pytest_when_targets_exist(monkeypatch, tmp_path: Path
         assert repo_root == tmp_path
         assert mode == "gate"
         assert extra_args == ["-q"]
-        assert selection == ["tests/integration/test_authentication.py::test_keycloak_issues_valid_jwt"]
+        assert selection == ["tests/integration/test_authentication.py::test_authentik_issues_valid_jwt"]
         reporter = integration_suite.SuiteReporter()
         reporter.results = {
-            "tests/integration/test_authentication.py::test_keycloak_issues_valid_jwt": {
-                "nodeid": "tests/integration/test_authentication.py::test_keycloak_issues_valid_jwt",
+            "tests/integration/test_authentication.py::test_authentik_issues_valid_jwt": {
+                "nodeid": "tests/integration/test_authentication.py::test_authentik_issues_valid_jwt",
                 "outcome": "passed",
                 "duration_seconds": 0.12,
                 "longrepr": "",
@@ -159,12 +159,12 @@ def test_run_suite_invokes_pytest_when_targets_exist(monkeypatch, tmp_path: Path
         mode="gate",
         environment="staging",
         extra_args=["-q"],
-        selection=["tests/integration/test_authentication.py::test_keycloak_issues_valid_jwt"],
-        required_service_ids=["keycloak"],
+        selection=["tests/integration/test_authentication.py::test_authentik_issues_valid_jwt"],
+        required_service_ids=["authentik"],
     )
 
     assert exit_code == 0
     assert payload["status"] == "passed"
     assert payload["summary"]["passed"] == 1
-    assert payload["selection"] == ["tests/integration/test_authentication.py::test_keycloak_issues_valid_jwt"]
-    assert payload["required_service_ids"] == ["keycloak"]
+    assert payload["selection"] == ["tests/integration/test_authentication.py::test_authentik_issues_valid_jwt"]
+    assert payload["required_service_ids"] == ["authentik"]

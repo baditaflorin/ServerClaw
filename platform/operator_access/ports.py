@@ -4,9 +4,6 @@ from typing import Any, Mapping, Protocol, Sequence
 
 
 class IdentityDirectoryPort(Protocol):
-    def ensure_role(self, role_name: str, *, description: str) -> dict[str, Any]:
-        ...
-
     def ensure_group(self, group_name: str) -> dict[str, Any]:
         ...
 

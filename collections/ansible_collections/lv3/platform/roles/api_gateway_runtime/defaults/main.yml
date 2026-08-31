@@ -169,7 +169,6 @@ api_gateway_runtime_assurance_matrix_src: "{{ api_gateway_repo_root }}/config/ru
 api_gateway_environment_topology_src: "{{ api_gateway_repo_root }}/config/environment-topology.json"
 api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars/platform.yml"
 api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
-api_gateway_platform_context_token_local_file: "{{ api_gateway_shared_local_root }}/platform-context/api-token.txt"
 api_gateway_dify_tools_api_key_local_file: "{{ api_gateway_shared_local_root }}/dify/tools-api-key.txt"
 api_gateway_billing_ingest_producers_local_file: "{{ api_gateway_shared_local_root }}/lago/producer-catalog.json"
 api_gateway_lago_org_api_key_local_file: "{{ api_gateway_shared_local_root }}/lago/org-api-key.txt"
@@ -283,15 +282,15 @@ api_gateway_config_sources:
     dest: environment-topology.json
   - src: "{{ api_gateway_platform_vars_src }}"
     dest: platform.yml
-api_gateway_keycloak_internal_base_url: http://127.0.0.1:18080
-api_gateway_keycloak_jwks_url: "{{ api_gateway_keycloak_internal_base_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/certs"
-api_gateway_keycloak_issuer_url: "{{ keycloak_oidc_issuer_url }}"
-api_gateway_keycloak_token_url: "{{ keycloak_oidc_token_url }}"
-api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080
-api_gateway_keycloak_verify_ready_retries: 60
-api_gateway_keycloak_verify_ready_delay: 5
-api_gateway_keycloak_verify_token_retries: 18
-api_gateway_keycloak_verify_token_delay: 5
+api_gateway_authentik_provider_slug: agent-hub
+api_gateway_authentik_jwks_url: "{{ authentik_oidc_provider_base_url }}/{{ api_gateway_authentik_provider_slug }}/jwks/"
+api_gateway_authentik_issuer_url: "{{ authentik_oidc_provider_base_url }}/{{ api_gateway_authentik_provider_slug }}/"
+api_gateway_authentik_discovery_url: "{{ authentik_oidc_provider_base_url }}/{{ api_gateway_authentik_provider_slug }}/.well-known/openid-configuration"
+api_gateway_authentik_token_url: "{{ authentik_oidc_provider_base_url }}/token/"
+api_gateway_authentik_verify_ready_retries: 60
+api_gateway_authentik_verify_ready_delay: 5
+api_gateway_authentik_verify_token_retries: 18
+api_gateway_authentik_verify_token_delay: 5
 api_gateway_typesense_verify_retries: 24
 api_gateway_typesense_verify_delay: 5
 # Set to false on fork deployments where the controller-reachable Typesense URL
@@ -300,7 +299,6 @@ api_gateway_typesense_verify_delay: 5
 api_gateway_typesense_controller_verify_enabled: true
 api_gateway_structured_search_verify_retries: 24
 api_gateway_structured_search_verify_delay: 5
-api_gateway_keycloak_docker_network: keycloak_default
 api_gateway_tree_sync_become_timeout: 60
 api_gateway_runtime_recovery_probe_retries: 18
 api_gateway_runtime_recovery_probe_delay: 5
@@ -327,15 +325,11 @@ api_gateway_graph_dsn: >-
   }}@{{ api_gateway_database_host }}:{{ api_gateway_database_port }}/{{ api_gateway_database_name }}?sslmode=disable
 api_gateway_world_state_dsn: "{{ api_gateway_graph_dsn }}"
 api_gateway_verify_client_id: "{{ platform_identity.config_prefix }}-agent-hub"
-api_gateway_verify_client_secret_local_file: >-
-  {{
-    keycloak_agent_client_secret_local_file
-    | default(api_gateway_repo_root ~ '/.local/keycloak/{{ platform_identity.config_prefix }}-agent-hub-client-secret.txt')
-  }}
+api_gateway_verify_client_secret_local_file: "{{ api_gateway_shared_local_root }}/authentik/agent-hub-client-secret.txt"
 api_gateway_nats_url: nats://127.0.0.1:4222
 api_gateway_nats_username: jetstream-admin
 api_gateway_nats_password_local_file: "{{ api_gateway_repo_root }}/.local/nats/jetstream-admin-password.txt"
-api_gateway_keycloak_retry_after_seconds: 30
+api_gateway_authentik_retry_after_seconds: 30
 api_gateway_nats_password: >-
   {{
     lookup('ansible.builtin.file', api_gateway_nats_password_local_file, errors='ignore')
@@ -369,7 +363,6 @@ api_gateway_windmill_token: >-
     | default('', true)
     | trim
   }}
-api_gateway_platform_context_internal_url: "http://{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}:8010/v1/context/query"
 api_gateway_portainer_base_url: "https://{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].ansible_host }}:9443"
 api_gateway_portainer_username: ops-portainer
 api_gateway_portainer_endpoint_id: "1"

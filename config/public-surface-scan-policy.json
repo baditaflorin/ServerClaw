@@ -54,7 +54,7 @@
     }
   ],
   "auth_redirect": {
-    "expected_host": "sso.example.com",
+    "expected_host": "id.example.com",
     "forbidden_headers": [
       "X-Auth-Request-User"
     ],

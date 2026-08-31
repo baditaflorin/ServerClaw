@@ -1,0 +1,41 @@
+---
+- name: "{{ _item.key }} | Resolve existing Authentik user by email"
+  ansible.builtin.set_fact:
+    _neko_authentik_existing_user: >-
+      {{
+        _neko_authentik_users
+        | selectattr('email', 'defined')
+        | selectattr('email', 'equalto', _item.value.email)
+        | list
+        | first
+        | default({})
+      }}
+
+- name: "{{ _item.key }} | Require an existing Authentik identity"
+  ansible.builtin.assert:
+    that:
+      - _neko_authentik_existing_user | length > 0
+      - _neko_authentik_existing_user.is_active | default(true) | bool
+    fail_msg: >-
+      Neko instance {{ _item.key }} requires an existing active Authentik user
+      with email {{ _item.value.email }}. Provision the platform identity first,
+      then rerun this playbook.
+
+- name: "{{ _item.key }} | Mark Authentik user as Neko-assigned"
+  ansible.builtin.uri:
+    url: "{{ _neko_authentik_url }}/api/v3/core/users/{{ _neko_authentik_existing_user.pk }}/"
+    method: PATCH
+    headers: "{{ _neko_authentik_headers }}"
+    body_format: json
+    body:
+      attributes: >-
+        {{
+          (_neko_authentik_existing_user.attributes | default({}))
+          | combine({_neko_authentik_managed_attribute: _neko_authentik_managed_attribute_value})
+        }}
+    status_code: 200
+  when: >-
+    (_neko_authentik_existing_user.attributes | default({})).get(
+      _neko_authentik_managed_attribute, ''
+    ) != _neko_authentik_managed_attribute_value
+  changed_when: true

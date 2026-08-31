@@ -79,13 +79,13 @@ Execute destructive runtime cleanup:
 LV3_POSTGRES_ADMIN_DSN='postgresql://postgres:...@database.example.com/postgres' \
 OPENBAO_ADDR='https://openbao.lv3.internal' \
 OPENBAO_TOKEN='...' \
-KEYCLOAK_ADMIN_TOKEN='...' \
+LV3_AUTHENTIK_BOOTSTRAP_TOKEN='...' \
 python3 scripts/decommission_service.py \
   --service netbox \
   --execute \
   --confirm netbox \
   --loki-url http://127.0.0.1:3100 \
-  --keycloak-url https://sso.example.com
+  --authentik-url https://id.example.com
 ```
 
 Execute deterministic code cleanup from a clean branch:

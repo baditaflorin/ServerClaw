@@ -56,12 +56,12 @@
       "dashboard_url": "https://grafana.example.com/d/lv3-platform-api-gateway/lv3-platform-api-gateway",
       "degradation_modes": [
         {
-          "dependency": "keycloak",
+          "dependency": "authentik",
           "dependency_type": "soft",
           "degraded_behaviour": "Use cached JWKS for bearer-token validation until the cache expires. After cache expiry, return GATE_CIRCUIT_OPEN with Retry-After 30 for auth-gated requests.",
           "degraded_for_seconds_max": 300,
-          "recovery_signal": "successful JWKS refresh from Keycloak",
-          "tested_by": "fault:keycloak-unavailable"
+          "recovery_signal": "successful JWKS refresh from Authentik",
+          "tested_by": "fault:authentik-unavailable"
         },
         {
           "dependency": "nats",
@@ -94,7 +94,7 @@
     {
       "id": "authentik",
       "name": "Authentik",
-      "description": "Open-source IAM/SSO broker, agentic-first, replaces Keycloak (ADR 0491)",
+      "description": "Open-source IAM/SSO broker for platform operators, services, and agentic workloads.",
       "category": "access",
       "lifecycle_status": "active",
       "vm": "runtime-control",
@@ -111,14 +111,18 @@
       ],
       "adr": "0491",
       "runbook": "docs/runbooks/configure-authentik.md",
+      "runtime_pool": "runtime-control",
+      "deployment_surface": "playbooks/authentik.yml",
+      "restart_domain": "runtime-control-identity",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-control",
+      "mobility_tier": "anchor",
       "tags": [
         "identity",
         "oidc",
         "saml",
-        "sso",
-        "keycloak-replacement"
+        "sso"
       ],
-      "notes": "Replaces Keycloak per ADR 0491. Deployed at a new subdomain (id.example.com, not sso.example.com) so Keycloak remains fully functional throughout the parallel rollout and staged client migration.",
+      "notes": "The platform's primary IAM/SSO broker, published at id.example.com and reconciled from the repository-owned OAuth client and identity manifests.",
       "environments": {
         "production": {
           "status": "active",
@@ -458,7 +462,7 @@
         "directus_secret",
         "directus_admin_password",
         "directus_service_registry_token",
-        "keycloak_directus_client_secret"
+        "authentik_directus_client_secret"
       ],
       "adr": "0289",
       "adr_file": "docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md",
@@ -476,13 +480,13 @@
         "rest",
         "oidc"
       ],
-      "notes": "Directus runs on docker-runtime, uses a dedicated PostgreSQL database named directus, publishes data.example.com through the shared NGINX edge, delegates routine browser sign-in to Keycloak, and retains a repo-managed break-glass local admin password for recovery.",
+      "notes": "Directus runs on docker-runtime, uses a dedicated PostgreSQL database named directus, publishes data.example.com through the shared NGINX edge, delegates routine browser sign-in to Authentik, and retains a repo-managed break-glass local admin password for recovery.",
       "environments": {
         "production": {
           "status": "active",
           "url": "https://data.example.com",
           "subdomain": "data.example.com",
-          "notes": "Repo automation verifies the public /server/health endpoint, the Keycloak login redirect, and scoped REST plus GraphQL token access against the governed service_registry collection."
+          "notes": "Repo automation verifies the public /server/health endpoint, the Authentik login redirect, and scoped REST plus GraphQL token access against the governed service_registry collection."
         }
       }
     },
@@ -656,7 +660,7 @@
           "status": "active",
           "url": "https://draw.example.com",
           "subdomain": "draw.example.com",
-          "notes": "Live applied on the ADR 0202 workstream branch and protected by the shared Keycloak-backed oauth2-proxy edge flow."
+          "notes": "Live applied on the ADR 0202 workstream branch and protected by the shared Authentik-backed oauth2-proxy edge flow."
         }
       }
     },
@@ -697,7 +701,7 @@
         "control-plane",
         "edge-authenticated"
       ],
-      "notes": "The public UI and browser management API are protected by the shared edge oauth2-proxy and Keycloak flow while server-side environment keys remain private and repo-managed through OpenBao.",
+      "notes": "The public UI and browser management API are protected by the shared edge oauth2-proxy and Authentik flow while server-side environment keys remain private and repo-managed through OpenBao.",
       "environments": {
         "production": {
           "status": "active",
@@ -710,7 +714,7 @@
     {
       "id": "gitea",
       "name": "Gitea",
-      "description": "Private self-hosted Git service with Keycloak SSO, repo bootstrap automation, and a dedicated Actions runner on docker-build.",
+      "description": "Private self-hosted Git service with Authentik SSO, repo bootstrap automation, and a dedicated Actions runner on docker-build.",
       "category": "automation",
       "lifecycle_status": "active",
       "vm": "runtime-control",
@@ -781,7 +785,6 @@
         "glitchtip_windmill_jobs_dsn",
         "glitchtip_platform_findings_event_url",
         "authentik_glitchtip_client_secret",
-        "keycloak_glitchtip_client_secret",
         "mail_platform_server_mailbox_password"
       ],
       "adr": "0281",
@@ -794,7 +797,7 @@
         "oidc",
         "observability"
       ],
-      "notes": "Browser sign-in is delegated to the in-app Authentik OIDC flow. The prior Keycloak client secret remains a separate rollback artifact, while the public DSN store path and health endpoint remain reachable for SDK delivery and verification traffic.",
+      "notes": "Browser sign-in is delegated to the in-app Authentik OIDC flow while the public DSN store path and health endpoint remain reachable for SDK delivery and verification traffic.",
       "environments": {
         "production": {
           "status": "active",
@@ -905,7 +908,7 @@
       ],
       "secret_catalog_ids": [
         "grist_session_secret",
-        "keycloak_grist_client_secret"
+        "authentik_grist_client_secret"
       ],
       "adr": "0279",
       "runbook": "docs/runbooks/configure-grist.md",
@@ -927,7 +930,7 @@
           "status": "active",
           "url": "https://grist.example.com",
           "subdomain": "grist.example.com",
-          "notes": "The public spreadsheet surface is published through the shared edge while the document UI remains gated by the repo-managed Keycloak OIDC client."
+          "notes": "The public spreadsheet surface is published through the shared edge while the document UI remains gated by the repo-managed Authentik OIDC client."
         }
       }
     },
@@ -949,7 +952,7 @@
         "harbor_admin_password",
         "harbor_database_password",
         "harbor_check_runner_robot_secret",
-        "keycloak_harbor_client_secret"
+        "authentik_harbor_client_secret"
       ],
       "adr": "0201",
       "runbook": "docs/runbooks/configure-harbor.md",
@@ -1045,49 +1048,9 @@
           "status": "active",
           "url": "https://home.example.com",
           "subdomain": "home.example.com",
-          "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+          "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
         }
       }
-    },
-    {
-      "id": "keycloak",
-      "name": "Keycloak",
-      "description": "Shared SSO and OIDC broker for operator-facing and approved agent-facing applications.",
-      "category": "access",
-      "lifecycle_status": "active",
-      "vm": "runtime-control",
-      "vmid": 192,
-      "internal_url": "http://10.10.10.92:8091",
-      "public_url": "https://sso.example.com",
-      "subdomain": "sso.example.com",
-      "exposure": "edge-published",
-      "uptime_monitor_name": "Keycloak OIDC Discovery",
-      "health_probe_id": "keycloak",
-      "adr": "0056",
-      "tags": [
-        "identity",
-        "oidc",
-        "sso",
-        "tokens"
-      ],
-      "environments": {
-        "production": {
-          "status": "active",
-          "url": "https://sso.example.com",
-          "subdomain": "sso.example.com"
-        },
-        "staging": {
-          "status": "planned",
-          "url": "https://sso.staging.example.com",
-          "subdomain": "sso.staging.example.com",
-          "notes": "Planned staging identity hostname on the shared edge."
-        }
-      },
-      "runtime_pool": "runtime-control",
-      "deployment_surface": "playbooks/keycloak.yml",
-      "restart_domain": "runtime-control-identity",
-      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/runtime-control",
-      "mobility_tier": "anchor"
     },
     {
       "id": "label_studio",
@@ -1126,7 +1089,7 @@
         "edge-authenticated",
         "ml-data"
       ],
-      "notes": "Label Studio runs on docker-runtime with a dedicated PostgreSQL database and repo-managed project catalog sync. Browser access is enforced by the shared edge oauth2-proxy and Keycloak flow, while app-local admin and token auth remain the current Community Edition-compatible recovery and automation path.",
+      "notes": "Label Studio runs on docker-runtime with a dedicated PostgreSQL database and repo-managed project catalog sync. Browser access is enforced by the shared edge oauth2-proxy and Authentik flow, while app-local admin and token auth remain the current Community Edition-compatible recovery and automation path.",
       "environments": {
         "production": {
           "status": "active",
@@ -1184,7 +1147,7 @@
         "edge-authenticated",
         "event-ingest"
       ],
-      "notes": "The browser UI and management surfaces at billing.example.com stay behind the shared oauth2-proxy and Keycloak edge-auth flow. Public `/api/health` and `/api/v1/events` remain reachable without browser sign-in, with event ingest terminating at the governed API-gateway adapter and rejected payloads published to `billing.events.rejected`.",
+      "notes": "The browser UI and management surfaces at billing.example.com stay behind the shared oauth2-proxy and Authentik edge-auth flow. Public `/api/health` and `/api/v1/events` remain reachable without browser sign-in, with event ingest terminating at the governed API-gateway adapter and rejected payloads published to `billing.events.rejected`.",
       "environments": {
         "production": {
           "status": "active",
@@ -1219,7 +1182,7 @@
         "langfuse_bootstrap_user_password",
         "langfuse_minio_secret_key",
         "langfuse_project_secret_key",
-        "keycloak_langfuse_client_secret"
+        "authentik_langfuse_client_secret"
       ],
       "adr": "0146",
       "runbook": "docs/runbooks/configure-langfuse.md",
@@ -1245,7 +1208,7 @@
     {
       "id": "librechat",
       "name": "LibreChat",
-      "description": "Private multi-model chat interface with Keycloak SSO, agent presets, and customizable UI.",
+      "description": "Private multi-model chat interface with Authentik SSO, agent presets, and customizable UI.",
       "category": "access",
       "lifecycle_status": "active",
       "vm": "coolify",
@@ -1614,7 +1577,7 @@
           "status": "active",
           "url": "https://n8n.example.com",
           "subdomain": "n8n.example.com",
-          "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while selected webhook paths remain intentionally public for governed ServerClaw connector calls."
+          "notes": "The editor is protected by the shared oauth2-proxy and Authentik edge flow while selected webhook paths remain intentionally public for governed ServerClaw connector calls."
         }
       }
     },
@@ -2041,7 +2004,7 @@
       "secret_catalog_ids": [
         "openfga_database_password",
         "openfga_preshared_key",
-        "keycloak_serverclaw_runtime_client_secret"
+        "authentik_serverclaw_runtime_client_secret"
       ],
       "adr": "0262",
       "runbook": "docs/runbooks/configure-openfga.md",
@@ -2132,8 +2095,7 @@
         "outline_redis_password",
         "outline_minio_root_password",
         "outline_api_token",
-        "authentik_outline_client_secret",
-        "keycloak_outline_client_secret"
+        "authentik_outline_client_secret"
       ],
       "adr": "0199",
       "runbook": "docs/runbooks/configure-outline.md",
@@ -2148,7 +2110,7 @@
         "outline",
         "oidc"
       ],
-      "notes": "Browser sign-in is delegated to the repo-managed Authentik confidential client. The Keycloak client and secret remain intact as an explicit per-client rollback path during ADR 0491 migration.",
+      "notes": "Browser sign-in is delegated to the repo-managed Authentik confidential client.",
       "environments": {
         "production": {
           "status": "active",
@@ -2160,7 +2122,7 @@
     {
       "id": "paperless",
       "name": "Paperless-ngx",
-      "description": "Self-hosted document archive and metadata API with OCR, taxonomy reconciliation, and Keycloak-backed operator sign-in.",
+      "description": "Self-hosted document archive and metadata API with OCR, taxonomy reconciliation, and Authentik-backed operator sign-in.",
       "category": "data",
       "lifecycle_status": "active",
       "vm": "docker-runtime",
@@ -2181,7 +2143,7 @@
         "paperless_redis_password",
         "paperless_admin_password",
         "paperless_api_token",
-        "keycloak_paperless_client_secret"
+        "authentik_paperless_client_secret"
       ],
       "adr": "0285",
       "adr_file": "docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md",
@@ -2598,7 +2560,7 @@
           "status": "active",
           "url": "https://repo-intake.example.com",
           "subdomain": "repo-intake.example.com",
-          "notes": "Published through the shared NGINX edge and gated behind Keycloak oauth2-proxy."
+          "notes": "Published through the shared NGINX edge and gated behind Authentik oauth2-proxy."
         }
       }
     },
@@ -2685,7 +2647,7 @@
     {
       "id": "semaphore",
       "name": "Semaphore",
-      "description": "Private Semaphore UI and API for bounded Ansible job execution with a repo-managed Keycloak OIDC login path and retained break-glass admin access.",
+      "description": "Private Semaphore UI and API for bounded Ansible job execution with a repo-managed Authentik OIDC login path and retained break-glass admin access.",
       "category": "automation",
       "lifecycle_status": "active",
       "vm": "runtime-control",
@@ -2701,7 +2663,7 @@
         "semaphore_database_password",
         "semaphore_admin_password",
         "semaphore_api_token",
-        "keycloak_semaphore_client_secret"
+        "authentik_semaphore_client_secret"
       ],
       "adr": "0149",
       "runbook": "docs/runbooks/configure-semaphore.md",
@@ -2741,7 +2703,7 @@
       "secret_catalog_ids": [
         "serverclaw_admin_password",
         "serverclaw_secret_key",
-        "serverclaw_oidc_client_secret"
+        "authentik_serverclaw_client_secret"
       ],
       "adr": "0254",
       "runbook": "docs/runbooks/configure-serverclaw.md",
@@ -2761,7 +2723,7 @@
           "status": "active",
           "url": "https://chat.example.com",
           "subdomain": "chat.example.com",
-          "notes": "ServerClaw uses in-app Keycloak OIDC for routine browser login while retaining a repo-managed bootstrap admin as break-glass access."
+          "notes": "ServerClaw uses in-app Authentik OIDC for routine browser login while retaining a repo-managed bootstrap admin as break-glass access."
         }
       }
     },
@@ -2887,7 +2849,7 @@
         "superset_reader_password",
         "superset_secret_key",
         "superset_admin_password",
-        "keycloak_superset_client_secret"
+        "authentik_superset_client_secret"
       ],
       "adr": "0292",
       "adr_file": "docs/adr/0292-apache-superset-as-the-sql-first-business-intelligence-layer.md",
@@ -2904,13 +2866,13 @@
         "sql",
         "oidc"
       ],
-      "notes": "Superset runs on docker-runtime, stores metadata in the managed superset schema of the shared postgres database on postgres, delegates browser sign-in to Keycloak, and seeds a repo-managed PostgreSQL inventory dashboard plus the optional Plausible ClickHouse datasource.",
+      "notes": "Superset runs on docker-runtime, stores metadata in the managed superset schema of the shared postgres database on postgres, delegates browser sign-in to Authentik, and seeds a repo-managed PostgreSQL inventory dashboard plus the optional Plausible ClickHouse datasource.",
       "environments": {
         "production": {
           "status": "active",
           "url": "https://bi.example.com",
           "subdomain": "bi.example.com",
-          "notes": "Public publication terminates on the shared NGINX edge while browser authentication remains upstream in the service-native Keycloak OIDC flow."
+          "notes": "Public publication terminates on the shared NGINX edge while browser authentication remains upstream in the service-native Authentik OIDC flow."
         }
       }
     },

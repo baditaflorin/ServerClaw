@@ -1,0 +1,182 @@
+id: adr-0491-authentik-keycloak-sunset-2026-08-30
+adr: "0491"
+title: "Authentik Phase 3–4: migrate all clients and retire Keycloak"
+status: ready_for_merge
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/adr-0491-platform-vars-authentik-20260830
+worktree_path: .worktrees/adr-0491-live-apply-20260830
+doc: docs/workstreams/adr-0491-authentik-keycloak-sunset.md
+canonical_truth:
+  changelog_entry: Complete the Authentik client migration, operator cutover, and governed Keycloak retirement.
+  release_bump: patch
+  included_in_repo_version: 0.179.46
+  latest_receipts:
+    identity_provider: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
+    authentik: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
+    public_edge_publication: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
+    semaphore: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
+  retired_capabilities:
+    - keycloak
+    - keycloak_direct_api
+    - keycloak_operator_access
+    - open_webui
+depends_on:
+  - adr-0491-authentik-phase2-2026-08-28
+conflicts_with:
+  - ws-0424-fork-clone-0fork
+  - ws-0438-generic-by-construction
+  - ws-0439-deployment-profiles
+  - ws-0443-topology-drift-detection
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/adr-0491-authentik-keycloak-sunset-2026-08-30.yaml
+  - docs/workstreams/adr-0491-authentik-keycloak-sunset.md
+  - docs/adr/0491-authentik-for-operator-and-agent-sso.md
+  - docs/runbooks/configure-authentik.md
+  - inventory/group_vars/all/identity.yml
+  - inventory/group_vars/all/platform_services.yml
+  - inventory/group_vars/platform.yml
+  - config/authentik/
+  - config/integrations/
+  - config/capability-contract-catalog.json
+  - config/service-capability-catalog.json
+  - config/api-gateway-catalog.json
+  - config/dependency-graph.json
+  - config/health-probe-catalog.json
+  - catalog/services/
+  - collections/ansible_collections/lv3/platform/roles/authentik_runtime/
+  - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+  - collections/ansible_collections/lv3/platform/roles/gitea_runtime/
+  - collections/ansible_collections/lv3/platform/roles/grafana_sso/
+  - collections/ansible_collections/lv3/platform/roles/harbor_runtime/
+  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
+  - collections/ansible_collections/lv3/platform/roles/plane_runtime/
+  - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/
+  - playbooks/authentik.yml
+  - playbooks/public-edge.yml
+  - scripts/reconcile_authentik_oauth.py
+  - scripts/
+  - tests/
+  - receipts/live-applies/
+ownership_manifest:
+  owned_surfaces:
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: authentik_keycloak_sunset_tracking
+      paths:
+        - workstreams/active/adr-0491-authentik-keycloak-sunset-2026-08-30.yaml
+        - docs/workstreams/adr-0491-authentik-keycloak-sunset.md
+      mode: exclusive
+    - id: identity_migration_governance
+      paths:
+        - docs/adr/0491-authentik-for-operator-and-agent-sso.md
+        - docs/runbooks/configure-authentik.md
+        - inventory/group_vars/all/identity.yml
+        - inventory/group_vars/all/platform_services.yml
+        - inventory/group_vars/platform.yml
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: identity_migration_runtime
+      paths:
+        - config/authentik/**
+        - config/integrations/**
+        - config/capability-contract-catalog.json
+        - config/service-capability-catalog.json
+        - config/api-gateway-catalog.json
+        - config/dependency-graph.json
+        - config/health-probe-catalog.json
+        - catalog/services/**
+        - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/**
+        - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+        - collections/ansible_collections/lv3/platform/roles/gitea_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/grafana_sso/**
+        - collections/ansible_collections/lv3/platform/roles/harbor_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/plane_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/semaphore_runtime/**
+        - playbooks/authentik.yml
+        - playbooks/public-edge.yml
+        - scripts/reconcile_authentik_oauth.py
+        - scripts/reconcile_authentik_identities.py
+        - scripts/authentik_cutover_smoke.py
+        - tests/test_authentik_oauth_reconcile.py
+        - tests/test_authentik_identity_reconcile.py
+        - tests/test_authentik_cutover_smoke.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: identity_migration_repository_integration
+      paths:
+        - .ansible-lint-ignore
+        - .gitea/workflows/**
+        - AGENTS.md
+        - CONTRIBUTING.md
+        - Makefile
+        - RELEASE.md
+        - catalog/services/**
+        - collections/ansible_collections/lv3/platform/**
+        - config/**
+        - docker-dev/**
+        - docs/**
+        - inventory/**
+        - platform/locking/**
+        - playbooks/**
+        - publication/templates/**
+        - scripts/**
+        - tests/**
+        - ui-tests/**
+        - workstreams/active/**
+        - workstreams/archive/**
+        - workstreams/policy.yaml
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: identity_migration_release_truth
+      paths:
+        - .config-locations.yaml
+        - .repo-structure.yaml
+        - README.md
+        - VERSION
+        - build/**
+        - changelog.md
+        - versions/stack.yaml
+      mode: shared_contract
+      contract: release-truth-v1
+    - id: identity_migration_receipts
+      paths:
+        - receipts/live-applies/**
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+description: |
+  The Authentik cutover is live: declared clients and identities were reconciled,
+  the shared edge and native consumers now use Authentik, and the retired
+  Keycloak runtime was archived and stopped after end-to-end verification.
+
+  Historical registrations are not recreated. Archive and runtime data are
+  retained only as governed rollback evidence; active configuration contains no
+  Keycloak runtime, route, probe, or dependency contract.
+objectives:
+  - Make Authentik provider, application, group, and named-operator state declarative and idempotent.
+  - Cut the shared edge OAuth proxy, native OIDC consumers, and API token validation to Authentik.
+  - Validate confidential-client, browser authorization-code, protected-edge, and service-token flows live.
+  - Remove Keycloak runtime, public routing, active health checks, and active dependency contracts only after all checks pass.
+completion_metrics:
+  - Every active OIDC issuer, JWKS URL, service secret path, and edge login URL resolves to Authentik.
+  - The Authentik operator account can complete a protected browser login and has the required platform groups.
+  - The API gateway accepts Authentik-issued bearer tokens and rejects the retired Keycloak issuer.
+  - Public protected services redirect to Authentik, and their health checks remain green after the cutover.
+  - No Keycloak container, active NGINX route, active health probe, or active dependency contract remains.
+  - A completed live-apply receipt records a tested cold backup and rollback reference for the retired Keycloak data.
+blockers: []
+acceptance_criteria_met: true
+lifecycle_state: live_applied
+live_apply_receipt: receipts/live-applies/adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt.json
+portable: true
+portable_notes: |
+  Provider-neutral migration mechanics are committed; deployment identity and
+  credentials remain in the ignored local overlay.

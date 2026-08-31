@@ -23,14 +23,14 @@ service:
   mobility_tier: anchor
   dashboard_url: https://grafana.example.com/d/lv3-platform-api-gateway/lv3-platform-api-gateway
   degradation_modes:
-    - dependency: keycloak
+    - dependency: authentik
       dependency_type: soft
       degraded_behaviour: Use cached JWKS for bearer-token validation until the cache
         expires. After cache expiry, return GATE_CIRCUIT_OPEN with Retry-After 30
         for auth-gated requests.
       degraded_for_seconds_max: 300
-      recovery_signal: successful JWKS refresh from Keycloak
-      tested_by: fault:keycloak-unavailable
+      recovery_signal: successful JWKS refresh from Authentik
+      tested_by: fault:authentik-unavailable
     - dependency: nats
       dependency_type: soft
       degraded_behaviour: Buffer platform.api.request events in the gateway-local
@@ -82,14 +82,14 @@ dependency:
     service: api_gateway
     name: Platform API Gateway
     vm: docker-runtime
-    tier: 3
+    tier: 2
     category: automation
     adr: 0092
   outbound_edges:
     - from: api_gateway
-      to: keycloak
+      to: authentik
       type: hard
-      description: The unified API gateway validates caller JWTs against Keycloak
+      description: The unified API gateway validates caller JWTs against Authentik
         before serving authenticated platform routes.
     - from: api_gateway
       to: nginx_edge

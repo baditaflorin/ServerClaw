@@ -272,9 +272,9 @@ def _files_to_services(changed_files: list[str]) -> dict[str, list[str]]:
             service_files["__platform_wide__"].append(f)
             continue
 
-        # Keycloak runtime changes
-        if "roles/keycloak_runtime/" in f:
-            service_files["keycloak"].append(f)
+        # Authentik runtime changes
+        if "roles/authentik_runtime/" in f:
+            service_files["authentik"].append(f)
             continue
 
         # Docker runtime changes

@@ -13,8 +13,8 @@ def test_generated_payloads_include_fast_and_slow_burn_alerts():
 
     assert recording_payload["groups"][0]["name"] == "slo_recording_rules"
     alert_names = {rule["alert"] for rule in alert_payload["groups"][0]["rules"]}
-    assert "SLOFastBurn_keycloak_availability" in alert_names
-    assert "SLOSlowBurn_keycloak_availability" in alert_names
+    assert "SLOFastBurn_authentik_availability" in alert_names
+    assert "SLOSlowBurn_authentik_availability" in alert_names
 
 
 def test_generated_slo_files_include_decommission_block_markers():
@@ -24,8 +24,8 @@ def test_generated_slo_files_include_decommission_block_markers():
         generate_slo_rules.PROMETHEUS_TARGETS_PATH,
     ):
         content = path.read_text(encoding="utf-8")
-        assert "# BEGIN SERVICE: keycloak" in content
-        assert "# END SERVICE: keycloak" in content
+        assert "# BEGIN SERVICE: authentik" in content
+        assert "# END SERVICE: authentik" in content
 
 
 def test_latency_slo_recording_rules_use_subqueries():
@@ -35,9 +35,9 @@ def test_latency_slo_recording_rules_use_subqueries():
     latency_rules = {
         rule["record"]: rule["expr"]
         for rule in recording_payload["groups"][0]["rules"]
-        if rule["record"].startswith("slo:keycloak_latency:success_ratio_")
+        if rule["record"].startswith("slo:openfga_latency:success_ratio_")
     }
 
-    assert latency_rules["slo:keycloak_latency:success_ratio_5m"].endswith("[5m:])")
-    assert latency_rules["slo:keycloak_latency:success_ratio_1h"].endswith("[1h:])")
-    assert latency_rules["slo:keycloak_latency:success_ratio_30d"].endswith("[30d:])")
+    assert latency_rules["slo:openfga_latency:success_ratio_5m"].endswith("[5m:])")
+    assert latency_rules["slo:openfga_latency:success_ratio_1h"].endswith("[1h:])")
+    assert latency_rules["slo:openfga_latency:success_ratio_30d"].endswith("[30d:])")

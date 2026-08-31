@@ -28,7 +28,7 @@
       "public_hostnames": [
         "api.example.com"
       ],
-      "reachability": "Reachable on https://api.example.com through the NGINX edge, with Keycloak bearer-token authentication enforced by the gateway itself.",
+      "reachability": "Reachable on https://api.example.com through the NGINX edge, with Authentik bearer-token authentication enforced by the gateway itself.",
       "approval_notes": "ADR 0092 approves this single public-edge gateway surface so downstream service APIs can stay internal implementation detail."
     },
     {
@@ -133,7 +133,7 @@
       "public_hostnames": [
         "langfuse.example.com"
       ],
-      "reachability": "Reachable on https://langfuse.example.com/api/public through the shared NGINX edge, authenticated with project-scoped API keys for ingestion and Keycloak-backed browser login for operators.",
+      "reachability": "Reachable on https://langfuse.example.com/api/public through the shared NGINX edge, authenticated with project-scoped API keys for ingestion and Authentik-backed browser login for operators.",
       "approval_notes": "ADR 0146 approves this public-edge observability surface so agent traces can be emitted without relying on private network paths."
     },
     {

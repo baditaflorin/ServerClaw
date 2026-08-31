@@ -26,6 +26,7 @@ def test_nomad_playbook_covers_controller_proxy_server_clients_and_bootstrap() -
         "Converge the Nomad server on the monitoring guest",
         "Converge the Nomad clients on the runtime, runtime-general, runtime-ai, runtime-control, and build guests",
         "Bootstrap Nomad ACLs and verify repo-managed smoke jobs",
+        "Configure Nomad OIDC auth method for Authentik SSO",
     ]
 
     controller_play = playbook[0]
@@ -60,6 +61,14 @@ def test_nomad_playbook_covers_controller_proxy_server_clients_and_bootstrap() -
 
     bootstrap_roles = [role["role"] for role in playbook[4]["roles"]]
     assert bootstrap_roles == ["lv3.platform.nomad_cluster_bootstrap"]
+
+    post_verify = next(task for task in playbook[4]["post_tasks"] if task["name"] == "Run shared post-verify checks")
+    nomad_override = post_verify["vars"]["playbook_execution_health_probe_overrides"]["nomad"]
+    assert nomad_override["liveness"]["unit"] == "{{ platform_identity.config_prefix }}-nomad"
+    assert nomad_override["readiness"]["argv"][0] == "/usr/local/bin/{{ platform_identity.config_prefix }}-nomad"
+
+    oidc_roles = [role["role"] for role in playbook[5]["roles"]]
+    assert oidc_roles == ["lv3.platform.nomad_oidc_auth"]
 
 
 def test_nomad_service_wrapper_imports_the_canonical_playbook() -> None:

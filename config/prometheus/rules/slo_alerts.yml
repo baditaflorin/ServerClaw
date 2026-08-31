@@ -2,6 +2,48 @@ groups:
   - name: slo_alert_rules
     interval: 1m
     rules:
+# BEGIN SERVICE: authentik
+      - alert: SLOFastBurn_authentik_availability
+        expr: (slo:authentik_availability:error_rate_5m > (14 * 0.005000)) and (slo:authentik_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: authentik
+          slo_id: authentik-availability
+          indicator: availability
+        annotations:
+          summary: authentik-availability is burning its error budget at 14x
+          description: Authentik's readiness endpoint remains reachable through the shared
+            edge for operator and service authentication.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_authentik_availability
+        expr: slo:authentik_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: authentik
+          slo_id: authentik-availability
+          indicator: availability
+        annotations:
+          summary: authentik-availability is burning its error budget at 3x
+          description: Authentik's readiness endpoint remains reachable through the shared
+            edge for operator and service authentication.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_authentik_availability
+        expr: slo:authentik_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: authentik
+          slo_id: authentik-availability
+          indicator: availability
+        annotations:
+          summary: authentik-availability has less than 10% error budget remaining
+          description: Authentik's readiness endpoint remains reachable through the shared
+            edge for operator and service authentication.
+          runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: authentik
 # BEGIN SERVICE: browser_runner
       - alert: SLOFastBurn_browser_runner_availability
         expr: (slo:browser_runner_availability:error_rate_5m > (14 * 0.010000)) and (slo:browser_runner_availability:error_rate_1h
@@ -545,84 +587,6 @@ groups:
             LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
 # END SERVICE: homepage
-# BEGIN SERVICE: keycloak
-      - alert: SLOFastBurn_keycloak_availability
-        expr: (slo:keycloak_availability:error_rate_5m > (14 * 0.003000)) and (slo:keycloak_availability:error_rate_1h
-          > (14 * 0.003000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: keycloak
-          slo_id: keycloak-availability
-          indicator: availability
-        annotations:
-          summary: keycloak-availability is burning its error budget at 14x
-          description: Keycloak discovery remains reachable for operator and service authentication.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_keycloak_availability
-        expr: slo:keycloak_availability:error_rate_1h > (3 * 0.003000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: keycloak
-          slo_id: keycloak-availability
-          indicator: availability
-        annotations:
-          summary: keycloak-availability is burning its error budget at 3x
-          description: Keycloak discovery remains reachable for operator and service authentication.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_keycloak_availability
-        expr: slo:keycloak_availability:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: keycloak
-          slo_id: keycloak-availability
-          indicator: availability
-        annotations:
-          summary: keycloak-availability has less than 10% error budget remaining
-          description: Keycloak discovery remains reachable for operator and service authentication.
-          runbook: docs/runbooks/slo-tracking.md
-# END SERVICE: keycloak
-# BEGIN SERVICE: keycloak
-      - alert: SLOFastBurn_keycloak_latency
-        expr: (slo:keycloak_latency:error_rate_5m > (14 * 0.050000)) and (slo:keycloak_latency:error_rate_1h
-          > (14 * 0.050000))
-        for: 2m
-        labels:
-          severity: critical
-          service_id: keycloak
-          slo_id: keycloak-latency
-          indicator: latency
-        annotations:
-          summary: keycloak-latency is burning its error budget at 14x
-          description: Keycloak discovery responds in under 500ms for 95% of probes.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOSlowBurn_keycloak_latency
-        expr: slo:keycloak_latency:error_rate_1h > (3 * 0.050000)
-        for: 60m
-        labels:
-          severity: warning
-          service_id: keycloak
-          slo_id: keycloak-latency
-          indicator: latency
-        annotations:
-          summary: keycloak-latency is burning its error budget at 3x
-          description: Keycloak discovery responds in under 500ms for 95% of probes.
-          runbook: docs/runbooks/slo-tracking.md
-      - alert: SLOBudgetCritical_keycloak_latency
-        expr: slo:keycloak_latency:budget_remaining < 0.10
-        for: 10m
-        labels:
-          severity: critical
-          service_id: keycloak
-          slo_id: keycloak-latency
-          indicator: latency
-        annotations:
-          summary: keycloak-latency has less than 10% error budget remaining
-          description: Keycloak discovery responds in under 500ms for 95% of probes.
-          runbook: docs/runbooks/slo-tracking.md
-# END SERVICE: keycloak
 # BEGIN SERVICE: label_studio
       - alert: SLOFastBurn_label_studio_availability
         expr: (slo:label_studio_availability:error_rate_5m > (14 * 0.010000)) and (slo:label_studio_availability:error_rate_1h

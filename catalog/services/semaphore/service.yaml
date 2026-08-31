@@ -3,7 +3,7 @@ service:
   id: semaphore
   name: Semaphore
   description: Private Semaphore UI and API for bounded Ansible job execution with
-    a repo-managed Keycloak OIDC login path and retained break-glass admin access.
+    a repo-managed Authentik OIDC login path and retained break-glass admin access.
   category: automation
   lifecycle_status: active
   vm: runtime-control
@@ -18,7 +18,7 @@ service:
     - semaphore_database_password
     - semaphore_admin_password
     - semaphore_api_token
-    - keycloak_semaphore_client_secret
+    - authentik_semaphore_client_secret
   adr: 0149
   runbook: docs/runbooks/configure-semaphore.md
   runtime_pool: runtime-control
@@ -41,7 +41,8 @@ completeness:
   requires_oidc: true
   requires_secrets: true
   requires_compose_secrets: true
-  keycloak_client_generated: true
+  oidc_provider: authentik
+  authentik_client_generated: true
   suppressed_checks: {}
 redundancy:
   tier: R1
@@ -69,9 +70,9 @@ dependency:
     adr: 0149
   outbound_edges:
     - from: semaphore
-      to: keycloak
+      to: authentik
       type: soft
-      description: Semaphore delegates routine browser sign-in to the shared Keycloak
+      description: Semaphore delegates routine browser sign-in to the shared Authentik
         OIDC broker while retaining a repo-managed break-glass admin login.
     - from: semaphore
       to: openbao

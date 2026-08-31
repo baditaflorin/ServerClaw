@@ -1,8 +1,8 @@
 schema_version: 1.0.0
 
 circuits:
-  - name: keycloak
-    service: Keycloak OIDC / JWKS
+  - name: authentik
+    service: Authentik OIDC / JWKS
     failure_threshold: 5
     recovery_window_s: 30
     success_threshold: 2

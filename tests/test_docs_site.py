@@ -24,7 +24,7 @@ class DocsSiteTests(unittest.TestCase):
             docs_site.validate_site(temp_dir)
 
             index_md = (temp_dir / "index.md").read_text(encoding="utf-8")
-            keycloak_md = (temp_dir / "services" / "keycloak.md").read_text(encoding="utf-8")
+            authentik_md = (temp_dir / "services" / "authentik.md").read_text(encoding="utf-8")
             minio_md = (temp_dir / "services" / "minio.md").read_text(encoding="utf-8")
             ports_md = (temp_dir / "reference" / "ports.md").read_text(encoding="utf-8")
             api_md = (temp_dir / "api" / "index.md").read_text(encoding="utf-8")
@@ -36,8 +36,8 @@ class DocsSiteTests(unittest.TestCase):
             )[0].stem
 
             self.assertIn("LV3 Platform Docs", index_md)
-            self.assertIn("https://sso.example.com", keycloak_md)
-            self.assertIn("ADR 0056", keycloak_md)
+            self.assertIn("https://id.example.com", authentik_md)
+            self.assertIn("ADR 0491", authentik_md)
             self.assertIn(
                 "../architecture/decisions/0274-minio-as-the-s3-compatible-object-storage-layer.md",
                 minio_md,
@@ -49,15 +49,15 @@ class DocsSiteTests(unittest.TestCase):
             self.assertIn("| Service | Surface | Port | Endpoint |", ports_md)
             self.assertIn("docs.example.com", ports_md)
             self.assertIn("OpenAPI browser", api_md)
-            self.assertIn("sensitivity: INTERNAL", keycloak_md)
+            self.assertIn("sensitivity: INTERNAL", authentik_md)
             self.assertIn("sensitivity: PUBLIC", api_md)
-            self.assertIn("portal_display: full", keycloak_md)
-            self.assertIn("pagefind_section: services", keycloak_md)
-            self.assertIn("pagefind_service: keycloak", keycloak_md)
-            self.assertIn("pagefind_audience:", keycloak_md)
-            self.assertIn("contextual_help:", keycloak_md)
-            self.assertIn("Reference Glossary", keycloak_md)
-            self.assertIn("Live apply", keycloak_md)
+            self.assertIn("portal_display: full", authentik_md)
+            self.assertIn("pagefind_section: services", authentik_md)
+            self.assertIn("pagefind_service: authentik", authentik_md)
+            self.assertIn("pagefind_audience:", authentik_md)
+            self.assertIn("contextual_help:", authentik_md)
+            self.assertIn("Reference Glossary", authentik_md)
+            self.assertIn("Live apply", authentik_md)
             self.assertIn("pagefind_section: api", api_md)
             subdomains_md = (temp_dir / "reference" / "subdomains.md").read_text(encoding="utf-8")
             self.assertIn("edge_oidc", subdomains_md)

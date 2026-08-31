@@ -162,9 +162,9 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 
 .PHONY: validate-local push-local prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-semgrep validate-compose-runtime-envs validate-dependency-direction validate-service-definitions validate-data-models validate-cross-catalog validate-types verify-waiver-escalation validate-policy validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-service-definitions generate-slo-rules validate-generated-slo generate-https-tls-assurance validate-generated-https-tls-assurance https-tls-assurance generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-edge-static-sites generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors generate-cross-cutting-artifacts validate-generated-cross-cutting docs deploy-ops-portal
 .PHONY: deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info capability-contracts capability-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness managed-image-gate sbom-refresh upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status atlas-validate atlas-lint atlas-refresh-snapshots atlas-drift-check
-.PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight preflight-authentik-deployment-selection preflight-glitchtip-deployment-selection preflight-outline-deployment-selection preflight-openbao-deployment-selection syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-keycloak syntax-check-authentik syntax-check-outline syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
+.PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight preflight-authentik-deployment-selection preflight-glitchtip-deployment-selection preflight-outline-deployment-selection preflight-openbao-deployment-selection syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-authentik syntax-check-outline syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
 .PHONY: syntax-check-ollama syntax-check-piper syntax-check-n8n syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit list-services diff-services list-service-deployments security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
-.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-site-parallel converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-repo-intake converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao bootstrap-openbao-runtime-secret-provisioner converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-keycloak converge-authentik converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-piper converge-label-studio converge-n8n converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret
+.PHONY: harden-access harden-guest-access harden-security provision-api-access converge-site-parallel converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-repo-intake converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao bootstrap-openbao-runtime-secret-provisioner converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-authentik converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-piper converge-label-studio converge-n8n converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-authentik-client-secret
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server apply-gate-tools syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
@@ -656,8 +656,7 @@ validate-generated-https-tls-assurance:
 
 generate-uptime-kuma-monitors:
 	python3 $(REPO_ROOT)/scripts/uptime_contract.py --write \
-	  $(if $(PLATFORM_DOMAIN),--platform-domain $(PLATFORM_DOMAIN)) \
-	  $(if $(KEYCLOAK_REALM_NAME),--keycloak-realm-name $(KEYCLOAK_REALM_NAME))
+	  $(if $(PLATFORM_DOMAIN),--platform-domain $(PLATFORM_DOMAIN))
 
 validate-generated-uptime-kuma-monitors:
 	python3 $(REPO_ROOT)/scripts/materialize_live_apply_worktree_artifacts.py --artifact uptime_kuma_monitors --repo-root $(REPO_ROOT)
@@ -1025,9 +1024,6 @@ syntax-check-restic-config-backup:
 syntax-check-coolify:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/coolify.yml --syntax-check
 
-syntax-check-keycloak:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/keycloak.yml -e @$(REPO_ROOT)/playbooks/vars/keycloak.yml --syntax-check
-
 syntax-check-authentik:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/authentik.yml -e @$(REPO_ROOT)/playbooks/vars/authentik.yml --syntax-check
 
@@ -1218,7 +1214,7 @@ operator-onboard:
 	@test -n "$(EMAIL)" || (echo "set EMAIL=<operator-email>"; exit 1)
 	@test -n "$(ROLE)" || (echo "set ROLE=<admin|operator|viewer>"; exit 1)
 	@case "$(ROLE)" in admin|operator) test -n "$(SSH_KEY)" || { echo "set SSH_KEY=@/path/to/public-key.pub"; exit 1; } ;; viewer) : ;; *) echo "ROLE must be admin, operator, or viewer"; exit 1 ;; esac
-	uvx --from pyyaml python $(REPO_ROOT)/scripts/operator_manager.py onboard --name "$(NAME)" --email "$(EMAIL)" --role "$(ROLE)" $(if $(SSH_KEY),--ssh-key "$(SSH_KEY)",) $(if $(OPERATOR_ID),--id "$(OPERATOR_ID)",) $(if $(KEYCLOAK_USERNAME),--keycloak-username "$(KEYCLOAK_USERNAME)",) $(if $(TAILSCALE_LOGIN_EMAIL),--tailscale-login-email "$(TAILSCALE_LOGIN_EMAIL)",) $(if $(TAILSCALE_DEVICE_NAME),--tailscale-device-name "$(TAILSCALE_DEVICE_NAME)",) $(if $(BOOTSTRAP_PASSWORD),--bootstrap-password "$(BOOTSTRAP_PASSWORD)",) --emit-json
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/operator_manager.py onboard --name "$(NAME)" --email "$(EMAIL)" --role "$(ROLE)" $(if $(SSH_KEY),--ssh-key "$(SSH_KEY)",) $(if $(OPERATOR_ID),--id "$(OPERATOR_ID)",) $(if $(AUTHENTIK_USERNAME),--authentik-username "$(AUTHENTIK_USERNAME)",) $(if $(TAILSCALE_LOGIN_EMAIL),--tailscale-login-email "$(TAILSCALE_LOGIN_EMAIL)",) $(if $(TAILSCALE_DEVICE_NAME),--tailscale-device-name "$(TAILSCALE_DEVICE_NAME)",) $(if $(BOOTSTRAP_PASSWORD),--bootstrap-password "$(BOOTSTRAP_PASSWORD)",) --emit-json
 
 operator-offboard:
 	$(MAKE) preflight WORKFLOW=operator-offboard
@@ -1447,11 +1443,6 @@ converge-identity-core-watchdog:
 	$(MAKE) preflight WORKFLOW=converge-identity-core-watchdog
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/identity-core-watchdog.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
-converge-keycloak:
-	$(MAKE) preflight WORKFLOW=converge-keycloak
-	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/keycloak.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
-
 converge-authentik:
 	$(MAKE) preflight-authentik-deployment-selection
 	$(MAKE) preflight WORKFLOW=converge-authentik
@@ -1550,10 +1541,10 @@ converge-livekit:
 converge-neko:
 	$(MAKE) preflight WORKFLOW=converge-neko
 	$(MAKE) generate-edge-static-sites
-	@echo "Syncing neko_instances from Keycloak (--dry-run to preview)..."
-	python3 $(REPO_ROOT)/scripts/neko_tool.py sync-from-keycloak \
-	  --keycloak-url http://10.10.10.20:8091 \
-	  --group /lv3-platform-admins
+	@echo "Syncing Neko assignments from Authentik (--dry-run to preview)..."
+	python3 $(REPO_ROOT)/scripts/neko_tool.py sync-from-authentik \
+	  --authentik-url "https://id.$(PLATFORM_DOMAIN)" \
+	  --group "$(PLATFORM_CONFIG_PREFIX)-admins"
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/neko.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
@@ -1701,9 +1692,9 @@ converge-mattermost:
 # atomically, then the correct ordered converge sequence is executed.
 #
 # Usage:
-#   make migrate-service-dry-run svc=keycloak to=runtime-control
-#   make migrate-service         svc=keycloak to=runtime-control env=production
-#   make teardown-service        svc=keycloak on_vm=docker-runtime env=production
+#   make migrate-service-dry-run svc=<service> to=runtime-control
+#   make migrate-service         svc=<service> to=runtime-control env=production
+#   make teardown-service        svc=<service> on_vm=docker-runtime env=production
 #   make detect-orphans
 #   make purge-orphans
 # ---------------------------------------------------------------------------
@@ -1757,7 +1748,7 @@ token-exposure-response:
 	@test -n "$(TOKEN_ID)" || (echo "set TOKEN_ID=<token-id>"; exit 1)
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/token_lifecycle.py exposure-response --token-id "$(TOKEN_ID)" $(if $(EXPOSURE_SOURCE),--exposure-source "$(EXPOSURE_SOURCE)",) $(if $(EXPOSURE_NOTES),--notes "$(EXPOSURE_NOTES)",) $(TOKEN_LIFECYCLE_ARGS)
 
-rotate-keycloak-client-secret:
+rotate-authentik-client-secret:
 	@test -n "$(TOKEN_ID)" || (echo "set TOKEN_ID=<token-id>"; exit 1)
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/token_lifecycle.py rotate --token-id "$(TOKEN_ID)" $(TOKEN_LIFECYCLE_ARGS)
 
@@ -2181,7 +2172,7 @@ endif
 	@echo ""
 	@echo "=== Bootstrap complete ==="
 
-bootstrap-minimal: ## Bootstrap critical path only (PG + Keycloak + Nginx + OpenBao)
+bootstrap-minimal: ## Bootstrap critical path only (PG + Authentik + Nginx + OpenBao)
 	@echo "=== Minimal bootstrap: critical path only ==="
 	@if [ ! -d "$(LOCAL_OVERLAY_ROOT)" ]; then \
 		$(MAKE) init-local; \
@@ -2200,11 +2191,11 @@ endif
 	$(MAKE) provision-guests
 	$(MAKE) verify-bootstrap-guests
 	$(MAKE) converge-postgres-vm
-	$(MAKE) converge-keycloak
+	$(MAKE) converge-authentik
 	$(MAKE) converge-openbao
 	$(MAKE) converge-api-gateway
 	@echo ""
-	@echo "=== Minimal bootstrap complete (PG, Keycloak, OpenBao, API Gateway) ==="
+	@echo "=== Minimal bootstrap complete (PG, Authentik, OpenBao, API Gateway) ==="
 
 verify-bootstrap-proxmox: ## Verify Proxmox VE is installed and operational
 	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/verify-bootstrap-proxmox.yml --private-key $(BOOTSTRAP_KEY) $(ANSIBLE_TRACE_ARGS) $(ANSIBLE_OVERLAY_EXTRA)

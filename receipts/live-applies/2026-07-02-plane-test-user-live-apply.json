@@ -1,36 +1,38 @@
 {
-  "receipt_id": "2026-07-02-plane-test-user-live-apply",
   "applied_at_utc": "2026-07-02T09:33:36Z",
-  "applied_by": "codex",
+  "applied_on": "2026-07-02",
   "environment": "production",
-  "target": {
-    "service": "plane",
-    "vm": "docker-runtime-lv3",
-    "public_url": "https://plane.example.org",
-    "canonical_public_url": "https://tasks.example.org"
-  },
-  "summary": "Initialized the live Plane instance through the repo-managed bootstrap path and created a temporary member account for operator testing.",
-  "changes": [
-    "Opened a temporary SSH tunnel from the controller workstation to docker-runtime-lv3 port 8093.",
-    "Ran scripts/plane_bootstrap.py against the tunneled Plane endpoint using the existing .local/plane bootstrap spec and password files.",
-    "Created the normal Plane user plane-test@example.org through the live Plane Django ORM.",
-    "Added plane-test@example.org to workspace 0mcp-platform as role 15.",
-    "Added plane-test@example.org to project ADR as role 15.",
-    "Closed the temporary SSH tunnel."
+  "evidence_refs": [
+    "docs/postmortems/2026-08-26-serverclaw-publish-blockers.md",
+    "workstreams/active/revive-receipts-ssh-key-plane-test-user.yaml"
+  ],
+  "notes": [
+    "Historical receipt normalized to the ADR 0420 live-apply schema; credentials and operator-specific identifiers are intentionally omitted."
+  ],
+  "receipt_id": "2026-07-02-plane-test-user-live-apply",
+  "recorded_by": "codex",
+  "recorded_on": "2026-07-02",
+  "repo_version_context": "0.179.49",
+  "schema_version": "1.0.0",
+  "source_commit": "14503c174dee893f34b17568686672c11ebb7bed",
+  "summary": "Initialized the live Plane service through its governed bootstrap path and created a temporary member for operator testing.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-runtime"
+    }
   ],
   "verification": [
     {
       "check": "Plane bootstrap state",
-      "result": "Plane contains admin ops@example.org, workspace 0mcp-platform, and project ADR."
+      "observed": "The designated administrator, workspace, and ADR project were present after the governed bootstrap.",
+      "result": "pass"
     },
     {
-      "check": "Plane test user membership",
-      "result": "plane-test@example.org is an active member of workspace 0mcp-platform and project ADR with role 15."
-    },
-    {
-      "check": "Plane credential verification",
-      "result": "Plane email/password sign-in for plane-test@example.org succeeded through the tunneled Plane endpoint and returned workspace 0mcp-platform."
+      "check": "Plane test-member access",
+      "observed": "The designated temporary member had active workspace and project membership, and interactive sign-in succeeded through the controlled service path.",
+      "result": "pass"
     }
   ],
-  "sensitive_material": "The temporary password was returned only to the operator in chat and is intentionally not recorded in this receipt."
+  "workflow_id": "converge-plane"
 }

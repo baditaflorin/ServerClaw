@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-29'
+generated: '2026-08-31'
 facet: concern
 concern: vm-topology
 total_adrs: 48
@@ -517,7 +517,7 @@ adrs:
     implemented_on: '2026-04-02'
   - adr: '0317'
     title: Keycloak Direct-API Operator Provisioning via SSH Proxy
-    status: Accepted
+    status: Deprecated
     implementation_status: Implemented
     currently_describes: current_state
     date: '2026-04-01'

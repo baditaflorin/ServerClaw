@@ -12,6 +12,7 @@ platform_generation:
     management_ipv4: 203.0.113.1
     management_gateway4: 203.0.113.65
     management_ipv6: 2001:db8::2
+    management_tailscale_ipv4: 100.120.234.7
     host_public_hostname: debian-base-template
 platform_host:
   id: proxmox-host
@@ -24,7 +25,7 @@ platform_host:
     ipv6: 2001:db8::2
     ipv6_cidr: 64
     gateway6: fe80::1
-    tailscale_ipv4: 100.64.0.1
+    tailscale_ipv4: 100.120.234.7
   network:
     wan_bridge: vmbr0
     internal_bridge: vmbr10
@@ -70,97 +71,97 @@ platform_host:
     tailscale_operator_target_guest: 10.10.10.30
     tailscale_tcp_proxies:
       - name: ntopng
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 3001
         upstream_host: 127.0.0.1
         upstream_port: 3000
       - name: postgres
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 5432
         upstream_host: 10.10.10.50
         upstream_port: 5432
       - name: windmill
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8005
         upstream_host: 10.10.10.92
         upstream_port: 8000
       - name: nomad
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8013
         upstream_host: 10.10.10.40
         upstream_port: 4646
       - name: mattermost
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8066
         upstream_host: 10.10.10.20
         upstream_port: 8065
       - name: matrix-synapse
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8015
         upstream_host: 10.10.10.20
         upstream_port: 8008
       - name: gitea
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 3009
         upstream_host: 10.10.10.92
         upstream_port: 3003
       - name: netbox
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8004
         upstream_host: 10.10.10.20
         upstream_port: 8082
       - name: typesense
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8016
         upstream_host: 10.10.10.20
         upstream_port: 8108
       - name: step-ca
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 9443
         upstream_host: 10.10.10.92
         upstream_port: 9000
       - name: openbao
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8200
         upstream_host: 10.10.10.92
         upstream_port: 8200
       - name: openfga
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8014
         upstream_host: 10.10.10.92
         upstream_port: 8098
       - name: semaphore
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8020
         upstream_host: 10.10.10.92
         upstream_port: 3004
       - name: plane
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8011
         upstream_host: 10.10.10.20
         upstream_port: 8093
       - name: woodpecker
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8017
         upstream_host: 10.10.10.20
         upstream_port: 8102
       - name: platform-context-api
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8010
         upstream_host: 10.10.10.20
         upstream_port: 8010
       - name: portainer
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 9444
         upstream_host: 10.10.10.20
         upstream_port: 9443
       - name: vaultwarden
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 443
         upstream_host: 10.10.10.92
         upstream_port: 8222
       - name: coolify
-        listen_address: 100.64.0.1
+        listen_address: 100.120.234.7
         listen_port: 8012
         upstream_host: 10.10.10.70
         upstream_port: 8000
@@ -262,7 +263,6 @@ platform_ports:
   tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
-  keycloak_internal_http_port: 8091
   mail_platform_internal_submission_port: 1587
 platform_port_assignments:
   alertmanager_port: 9093
@@ -362,7 +362,6 @@ platform_port_assignments:
   tesseract_ocr_port: 3008
   headscale_http_port: 8080
   vaultwarden_https_port: 8222
-  keycloak_internal_http_port: 8091
   mail_platform_internal_submission_port: 1587
 platform_guest_catalog:
   list:
@@ -1790,7 +1789,7 @@ platform_service_topology:
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox-host
-    private_ip: 100.64.0.1
+    private_ip: 100.120.234.7
     public_hostname: proxmox.example.org
     exposure_model: informational-only
     observability:
@@ -1811,7 +1810,7 @@ platform_service_topology:
       title: Proxmox Administration
       description: Proxmox administration remains private and is reached over Tailscale
         instead of being published directly on the public edge.
-      action_url: https://100.64.0.1:8006/
+      action_url: https://100.120.234.7:8006/
       action_label: Open Private Proxmox UI
       meta: Use Tailscale host access for routine Proxmox administration.
     service_id: proxmox_ui
@@ -1824,7 +1823,7 @@ platform_service_topology:
       controller: 8006
     urls:
       public: https://proxmox.example.org
-      controller: https://100.64.0.1:8006/
+      controller: https://100.120.234.7:8006/
   docker_runtime:
     service_name: docker-runtime
     owning_vm: docker-runtime
@@ -2088,7 +2087,7 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.64.0.1:9443
+      url: https://100.120.234.7:9443
     service_id: step_ca
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/step-ca.yml
@@ -2100,7 +2099,7 @@ platform_service_topology:
       controller: 9443
     urls:
       internal: https://10.10.10.92:9000
-      controller: https://100.64.0.1:9443
+      controller: https://100.120.234.7:9443
   tika:
     service_name: tika
     owning_vm: runtime-ai
@@ -2147,7 +2146,7 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8020
+      url: http://100.120.234.7:8020
     service_id: semaphore
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/semaphore.yml
@@ -2159,7 +2158,7 @@ platform_service_topology:
       controller: 8020
     urls:
       internal: http://10.10.10.92:3004
-      controller: http://100.64.0.1:8020
+      controller: http://100.120.234.7:8020
   windmill:
     service_name: windmill
     owning_vm: runtime-control
@@ -2170,7 +2169,7 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8005
+      url: http://100.120.234.7:8005
     service_id: windmill
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/windmill.yml
@@ -2182,7 +2181,7 @@ platform_service_topology:
       controller: 8005
     urls:
       internal: http://10.10.10.92:8000
-      controller: http://100.64.0.1:8005
+      controller: http://100.120.234.7:8005
   nomad:
     service_name: nomad
     owning_vm: monitoring
@@ -2207,11 +2206,11 @@ platform_service_topology:
       upstream_ssl_verify: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.64.0.1:8013
+      url: https://100.120.234.7:8013
     urls:
       public: https://scheduler.example.org
       internal: https://10.10.10.40:4646
-      controller: https://100.64.0.1:8013
+      controller: https://100.120.234.7:8013
     service_id: nomad
     runtime_pool: dedicated-monitoring
     deployment_surface: playbooks/services/nomad.yml
@@ -2235,11 +2234,11 @@ platform_service_topology:
       visibility: tailnet
       name: git
       type: A
-      target: 100.64.0.1
+      target: 100.120.234.7
       ttl: 60
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:3009
+      url: http://100.120.234.7:3009
     service_id: gitea
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/gitea.yml
@@ -2252,7 +2251,7 @@ platform_service_topology:
     urls:
       public: https://git.example.org
       internal: http://10.10.10.92:3003
-      controller: http://100.64.0.1:3009
+      controller: http://100.120.234.7:3009
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime
@@ -2263,7 +2262,7 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8066
+      url: http://100.120.234.7:8066
     service_id: mattermost
     runtime_pool: runtime-general
     deployment_surface: playbooks/mattermost.yml
@@ -2275,7 +2274,7 @@ platform_service_topology:
       controller: 8066
     urls:
       internal: http://10.10.10.20:8065
-      controller: http://100.64.0.1:8066
+      controller: http://100.120.234.7:8066
   matrix_synapse:
     service_name: matrix-synapse
     owning_vm: docker-runtime
@@ -2300,7 +2299,7 @@ platform_service_topology:
       upstream: http://10.10.10.20:8008
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8015
+      url: http://100.120.234.7:8015
     service_id: matrix_synapse
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/matrix-synapse.yml
@@ -2313,7 +2312,7 @@ platform_service_topology:
     urls:
       public: https://matrix.example.org
       internal: http://10.10.10.20:8008
-      controller: http://100.64.0.1:8015
+      controller: http://100.120.234.7:8015
   netbox:
     service_name: netbox
     owning_vm: docker-runtime
@@ -2324,7 +2323,7 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8004
+      url: http://100.120.234.7:8004
     service_id: netbox
     runtime_pool: runtime-general
     deployment_surface: playbooks/netbox.yml
@@ -2336,7 +2335,7 @@ platform_service_topology:
       controller: 8004
     urls:
       internal: http://10.10.10.20:8082
-      controller: http://100.64.0.1:8004
+      controller: http://100.120.234.7:8004
   typesense:
     service_name: typesense
     owning_vm: docker-runtime
@@ -2347,7 +2346,7 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8016
+      url: http://100.120.234.7:8016
     service_id: typesense
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/typesense.yml
@@ -2359,7 +2358,7 @@ platform_service_topology:
       controller: 8016
     urls:
       internal: http://10.10.10.20:8108
-      controller: http://100.64.0.1:8016
+      controller: http://100.120.234.7:8016
   searxng:
     service_name: searxng
     owning_vm: docker-runtime
@@ -2374,11 +2373,11 @@ platform_service_topology:
       visibility: tailnet
       name: search
       type: A
-      target: 100.64.0.1
+      target: 100.120.234.7
       ttl: 60
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:80
+      url: http://100.120.234.7:80
     service_id: searxng
     runtime_pool: runtime-general
     deployment_surface: playbooks/searxng.yml
@@ -2391,7 +2390,7 @@ platform_service_topology:
     urls:
       public: http://search.example.org
       internal: http://10.10.10.20:8881
-      controller: http://100.64.0.1:80
+      controller: http://100.120.234.7:80
   langfuse:
     service_name: langfuse
     owning_vm: docker-runtime
@@ -2670,7 +2669,7 @@ platform_service_topology:
       upstream: http://10.10.10.20:8093
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8011
+      url: http://100.120.234.7:8011
     service_id: plane
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/plane.yml
@@ -2683,7 +2682,7 @@ platform_service_topology:
     urls:
       public: https://tasks.example.org
       internal: http://10.10.10.20:8093
-      controller: http://100.64.0.1:8011
+      controller: http://100.120.234.7:8011
   woodpecker:
     service_name: woodpecker
     owning_vm: docker-runtime
@@ -2708,7 +2707,7 @@ platform_service_topology:
       upstream: http://10.10.10.20:8102
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8017
+      url: http://100.120.234.7:8017
     service_id: woodpecker
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/woodpecker.yml
@@ -2721,7 +2720,7 @@ platform_service_topology:
     urls:
       public: https://ci.example.org
       internal: http://10.10.10.20:8102
-      controller: http://100.64.0.1:8017
+      controller: http://100.120.234.7:8017
   outline:
     service_name: outline
     owning_vm: docker-runtime
@@ -3084,7 +3083,7 @@ platform_service_topology:
       upstream: http://10.10.10.70:8000
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8012
+      url: http://100.120.234.7:8012
     service_id: coolify
     runtime_pool: dedicated-coolify
     deployment_surface: playbooks/services/coolify.yml
@@ -3097,7 +3096,7 @@ platform_service_topology:
     urls:
       public: https://coolify.example.org
       internal: http://10.10.10.70:8000
-      controller: http://100.64.0.1:8012
+      controller: http://100.120.234.7:8012
   coolify_apps:
     service_name: coolify-apps
     owning_vm: coolify-apps
@@ -3231,7 +3230,7 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8010
+      url: http://100.120.234.7:8010
     service_id: platform_context_api
     runtime_pool: runtime-ai
     deployment_surface: playbooks/services/rag-context.yml
@@ -3243,39 +3242,7 @@ platform_service_topology:
       controller: 8010
     urls:
       internal: http://10.10.10.20:8010
-      controller: http://100.64.0.1:8010
-  keycloak:
-    service_name: keycloak
-    owning_vm: runtime-control
-    private_ip: 10.10.10.92
-    public_hostname: sso.example.org
-    exposure_model: edge-published
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: sso
-      type: A
-      target: 203.0.113.1
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      kind: proxy
-      upstream: http://10.10.10.92:8091
-    urls:
-      public: https://sso.example.org
-      internal: http://10.10.10.92:8091
-    service_id: keycloak
-    runtime_pool: runtime-control
-    deployment_surface: playbooks/keycloak.yml
-    restart_domain: runtime-control-identity
-    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
-    mobility_tier: anchor
-    ports:
-      internal: 8091
+      controller: http://100.120.234.7:8010
   harbor:
     service_name: harbor
     owning_vm: runtime-control
@@ -3387,7 +3354,7 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.64.0.1:8200
+      url: https://100.120.234.7:8200
     service_id: openbao
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/openbao.yml
@@ -3399,7 +3366,7 @@ platform_service_topology:
       controller: 8200
     urls:
       internal: https://10.10.10.92:8200
-      controller: https://100.64.0.1:8200
+      controller: https://100.120.234.7:8200
   openfga:
     service_name: openfga
     owning_vm: runtime-control
@@ -3410,7 +3377,7 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8014
+      url: http://100.120.234.7:8014
     service_id: openfga
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/openfga.yml
@@ -3422,7 +3389,7 @@ platform_service_topology:
       controller: 8014
     urls:
       internal: http://10.10.10.92:8098
-      controller: http://100.64.0.1:8014
+      controller: http://100.120.234.7:8014
   temporal:
     service_name: temporal
     owning_vm: runtime-control
@@ -3481,14 +3448,14 @@ platform_service_topology:
   ntopng:
     service_name: ntopng
     owning_vm: proxmox-host
-    private_ip: 100.64.0.1
+    private_ip: 100.120.234.7
     exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: true
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:3001
+      url: http://100.120.234.7:3001
     service_id: ntopng
     runtime_pool: host-management
     deployment_surface: playbooks/ntopng.yml
@@ -3500,7 +3467,7 @@ platform_service_topology:
       controller: 3001
     urls:
       internal: http://127.0.0.1:3000
-      controller: http://100.64.0.1:3001
+      controller: http://100.120.234.7:3001
   portainer:
     service_name: portainer
     owning_vm: docker-runtime
@@ -3511,7 +3478,7 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.64.0.1:9444
+      url: https://100.120.234.7:9444
     service_id: portainer
     runtime_pool: runtime-general
     deployment_surface: playbooks/portainer.yml
@@ -3523,7 +3490,7 @@ platform_service_topology:
       controller: 9444
     urls:
       internal: https://10.10.10.20:9443
-      controller: https://100.64.0.1:9444
+      controller: https://100.120.234.7:9444
   vaultwarden:
     service_name: vaultwarden
     owning_vm: runtime-control
@@ -3538,7 +3505,7 @@ platform_service_topology:
       visibility: tailnet
       name: vault
       type: A
-      target: 100.64.0.1
+      target: 100.120.234.7
       ttl: 60
     access:
       kind: tailscale-tcp-proxy
@@ -3570,7 +3537,7 @@ platform_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: 100.64.0.1
+      target: 100.120.234.7
       ttl: 60
     service_id: postgres
     runtime_pool: dedicated-postgres
@@ -3584,7 +3551,7 @@ platform_service_topology:
     urls:
       public: https://database.example.org
       internal: postgresql://database.example.org:5432
-      controller: postgresql://100.64.0.1:5432
+      controller: postgresql://100.120.234.7:5432
   backup_pbs:
     service_name: backup-pbs
     owning_vm: backup
@@ -3785,6 +3752,11 @@ platform_service_topology:
       kind: proxy
       upstream: http://10.10.10.92:9010
     service_id: authentik
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/authentik.yml
+    restart_domain: runtime-control-identity
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 9010
     urls:
@@ -3793,7 +3765,7 @@ platform_service_topology:
 platform_session_authority:
   authority_hostname: ops.example.org
   ops_portal_client_id: ops-portal-oauth
-  keycloak_logout_url: https://sso.example.org/realms/lv3/protocol/openid-connect/logout
+  oidc_logout_url: https://id.example.org/application/o/ops-portal/end-session/
   oauth2_proxy_sign_out_url: https://ops.example.org/oauth2/sign_out
   shared_logout_path: /.well-known/lv3/session/logout
   shared_logout_url: https://ops.example.org/.well-known/lv3/session/logout
@@ -3945,10 +3917,6 @@ platform_dns_records:
       type: A
       value: 203.0.113.1
       ttl: 60
-    - name: sso
-      type: A
-      value: 203.0.113.1
-      ttl: 60
     - name: registry
       type: A
       value: 203.0.113.1
@@ -4016,19 +3984,19 @@ platform_dns_records:
   tailnet:
     - name: git
       type: A
-      value: 100.64.0.1
+      value: 100.120.234.7
       ttl: 60
     - name: search
       type: A
-      value: 100.64.0.1
+      value: 100.120.234.7
       ttl: 60
     - name: vault
       type: A
-      value: 100.64.0.1
+      value: 100.120.234.7
       ttl: 60
     - name: database
       type: A
-      value: 100.64.0.1
+      value: 100.120.234.7
       ttl: 60
 platform_dns_declarations:
   agents.example.org:
@@ -4196,11 +4164,6 @@ platform_dns_declarations:
     target_host: nginx
     ttl: 3600
     type: internal
-  sso.example.org:
-    service: keycloak
-    target_host: nginx
-    ttl: 60
-    type: public
   tasks.example.org:
     service: plane
     target_host: nginx
@@ -4351,18 +4314,6 @@ platform_nginx_upstreams:
     host: runtime-general
     ip: 10.10.10.91
     auth_proxy: true
-    websocket: false
-    max_body_size: 10m
-    path_prefix: /
-  - name: keycloak_upstream
-    service_name: keycloak
-    fqdn: sso.example.org
-    extra_fqdns:
-      - sso.staging.example.org
-    port: 8091
-    host: runtime-control
-    ip: 10.10.10.92
-    auth_proxy: false
     websocket: false
     max_body_size: 10m
     path_prefix: /
@@ -4591,14 +4542,14 @@ platform_nginx_upstreams:
     path_prefix: /
 platform_sso_clients:
   api-gateway:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris: []
     scopes:
       - openid
     service: api_gateway
   dify:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
       - https://agents.example.org/console/api/oauth/login/oidc/callback
@@ -4608,20 +4559,20 @@ platform_sso_clients:
       - email
     service: dify
   directus:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
-      - https://data.example.org/auth/login/keycloak/callback
+      - https://data.example.org/auth/login/authentik/callback
     scopes:
       - openid
       - profile
       - email
     service: directus
   gitea-oauth:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
-      - https://git.example.org/user/oauth2/Keycloak/callback
+      - https://git.example.org/user/oauth2/Authentik/callback
     scopes:
       - openid
       - profile
@@ -4638,7 +4589,7 @@ platform_sso_clients:
       - email
     service: glitchtip
   grist:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
       - https://grist.example.org/oauth2/callback
@@ -4648,7 +4599,7 @@ platform_sso_clients:
       - email
     service: grist
   harbor:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
       - https://registry.example.org/c/oidc/callback
@@ -4659,17 +4610,17 @@ platform_sso_clients:
       - groups
     service: harbor
   langfuse:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
-      - https://langfuse.example.org/api/auth/callback/keycloak
+      - https://langfuse.example.org/api/auth/callback/authentik
     scopes:
       - openid
       - profile
       - email
     service: langfuse
   ops-portal-oauth:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
       - https://ops.example.org/oauth2/callback
@@ -4689,17 +4640,17 @@ platform_sso_clients:
       - email
     service: outline
   paperless:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
-      - https://paperless.example.org/accounts/oidc/keycloak/login/callback/
+      - https://paperless.example.org/accounts/oidc/authentik/login/callback/
     scopes:
       - openid
       - profile
       - email
     service: paperless
   repo-intake-oauth:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
       - https://repo-intake.example.org/oauth2/callback
@@ -4709,7 +4660,7 @@ platform_sso_clients:
       - email
     service: repo_intake
   serverclaw:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
       - https://chat.example.org/oauth/openid/callback
@@ -4719,7 +4670,7 @@ platform_sso_clients:
       - email
     service: librechat
   sftpgo:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
       - https://files.example.org/web/oidc/redirect
@@ -4729,17 +4680,17 @@ platform_sso_clients:
       - email
     service: sftpgo
   superset:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
-      - https://bi.example.org/oauth-authorized/keycloak
+      - https://bi.example.org/oauth-authorized/authentik
     scopes:
       - openid
       - profile
       - email
     service: superset
   vikunja:
-    provider: keycloak
+    provider: authentik
     public_client: false
     redirect_uris:
       - https://tasks.example.org/auth/openid/lv3
@@ -4806,8 +4757,6 @@ platform_hairpin_nat_hosts:
   - hostname: paperless.example.org
     address: 10.10.10.10
   - hostname: registry.example.org
-    address: 10.10.10.10
-  - hostname: sso.example.org
     address: 10.10.10.10
   - hostname: tasks.example.org
     address: 10.10.10.10
@@ -4969,11 +4918,6 @@ platform_tls_certs:
   s3.example.org:
     cert_validity_days: 90
     service: minio
-    source: letsencrypt
-    wildcard: false
-  sso.example.org:
-    cert_validity_days: 90
-    service: keycloak
     source: letsencrypt
     wildcard: false
   tasks.example.org:
@@ -5149,7 +5093,7 @@ public_edge_service_topology:
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox-host
-    private_ip: 100.64.0.1
+    private_ip: 100.120.234.7
     public_hostname: proxmox.example.org
     exposure_model: informational-only
     observability:
@@ -5170,7 +5114,7 @@ public_edge_service_topology:
       title: Proxmox Administration
       description: Proxmox administration remains private and is reached over Tailscale
         instead of being published directly on the public edge.
-      action_url: https://100.64.0.1:8006/
+      action_url: https://100.120.234.7:8006/
       action_label: Open Private Proxmox UI
       meta: Use Tailscale host access for routine Proxmox administration.
     service_id: proxmox_ui
@@ -5183,7 +5127,7 @@ public_edge_service_topology:
       controller: 8006
     urls:
       public: https://proxmox.example.org
-      controller: https://100.64.0.1:8006/
+      controller: https://100.120.234.7:8006/
   docker_runtime:
     service_name: docker-runtime
     owning_vm: docker-runtime
@@ -5447,7 +5391,7 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.64.0.1:9443
+      url: https://100.120.234.7:9443
     service_id: step_ca
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/step-ca.yml
@@ -5459,7 +5403,7 @@ public_edge_service_topology:
       controller: 9443
     urls:
       internal: https://10.10.10.92:9000
-      controller: https://100.64.0.1:9443
+      controller: https://100.120.234.7:9443
   tika:
     service_name: tika
     owning_vm: runtime-ai
@@ -5506,7 +5450,7 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8020
+      url: http://100.120.234.7:8020
     service_id: semaphore
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/semaphore.yml
@@ -5518,7 +5462,7 @@ public_edge_service_topology:
       controller: 8020
     urls:
       internal: http://10.10.10.92:3004
-      controller: http://100.64.0.1:8020
+      controller: http://100.120.234.7:8020
   windmill:
     service_name: windmill
     owning_vm: runtime-control
@@ -5529,7 +5473,7 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8005
+      url: http://100.120.234.7:8005
     service_id: windmill
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/windmill.yml
@@ -5541,7 +5485,7 @@ public_edge_service_topology:
       controller: 8005
     urls:
       internal: http://10.10.10.92:8000
-      controller: http://100.64.0.1:8005
+      controller: http://100.120.234.7:8005
   nomad:
     service_name: nomad
     owning_vm: monitoring
@@ -5566,11 +5510,11 @@ public_edge_service_topology:
       upstream_ssl_verify: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.64.0.1:8013
+      url: https://100.120.234.7:8013
     urls:
       public: https://scheduler.example.org
       internal: https://10.10.10.40:4646
-      controller: https://100.64.0.1:8013
+      controller: https://100.120.234.7:8013
     service_id: nomad
     runtime_pool: dedicated-monitoring
     deployment_surface: playbooks/services/nomad.yml
@@ -5594,11 +5538,11 @@ public_edge_service_topology:
       visibility: tailnet
       name: git
       type: A
-      target: 100.64.0.1
+      target: 100.120.234.7
       ttl: 60
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:3009
+      url: http://100.120.234.7:3009
     service_id: gitea
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/gitea.yml
@@ -5611,7 +5555,7 @@ public_edge_service_topology:
     urls:
       public: https://git.example.org
       internal: http://10.10.10.92:3003
-      controller: http://100.64.0.1:3009
+      controller: http://100.120.234.7:3009
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime
@@ -5622,7 +5566,7 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8066
+      url: http://100.120.234.7:8066
     service_id: mattermost
     runtime_pool: runtime-general
     deployment_surface: playbooks/mattermost.yml
@@ -5634,7 +5578,7 @@ public_edge_service_topology:
       controller: 8066
     urls:
       internal: http://10.10.10.20:8065
-      controller: http://100.64.0.1:8066
+      controller: http://100.120.234.7:8066
   matrix_synapse:
     service_name: matrix-synapse
     owning_vm: docker-runtime
@@ -5659,7 +5603,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:8008
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8015
+      url: http://100.120.234.7:8015
     service_id: matrix_synapse
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/matrix-synapse.yml
@@ -5672,7 +5616,7 @@ public_edge_service_topology:
     urls:
       public: https://matrix.example.org
       internal: http://10.10.10.20:8008
-      controller: http://100.64.0.1:8015
+      controller: http://100.120.234.7:8015
   netbox:
     service_name: netbox
     owning_vm: docker-runtime
@@ -5683,7 +5627,7 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8004
+      url: http://100.120.234.7:8004
     service_id: netbox
     runtime_pool: runtime-general
     deployment_surface: playbooks/netbox.yml
@@ -5695,7 +5639,7 @@ public_edge_service_topology:
       controller: 8004
     urls:
       internal: http://10.10.10.20:8082
-      controller: http://100.64.0.1:8004
+      controller: http://100.120.234.7:8004
   typesense:
     service_name: typesense
     owning_vm: docker-runtime
@@ -5706,7 +5650,7 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8016
+      url: http://100.120.234.7:8016
     service_id: typesense
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/typesense.yml
@@ -5718,7 +5662,7 @@ public_edge_service_topology:
       controller: 8016
     urls:
       internal: http://10.10.10.20:8108
-      controller: http://100.64.0.1:8016
+      controller: http://100.120.234.7:8016
   searxng:
     service_name: searxng
     owning_vm: docker-runtime
@@ -5733,11 +5677,11 @@ public_edge_service_topology:
       visibility: tailnet
       name: search
       type: A
-      target: 100.64.0.1
+      target: 100.120.234.7
       ttl: 60
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:80
+      url: http://100.120.234.7:80
     service_id: searxng
     runtime_pool: runtime-general
     deployment_surface: playbooks/searxng.yml
@@ -5750,7 +5694,7 @@ public_edge_service_topology:
     urls:
       public: http://search.example.org
       internal: http://10.10.10.20:8881
-      controller: http://100.64.0.1:80
+      controller: http://100.120.234.7:80
   langfuse:
     service_name: langfuse
     owning_vm: docker-runtime
@@ -6029,7 +5973,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:8093
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8011
+      url: http://100.120.234.7:8011
     service_id: plane
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/plane.yml
@@ -6042,7 +5986,7 @@ public_edge_service_topology:
     urls:
       public: https://tasks.example.org
       internal: http://10.10.10.20:8093
-      controller: http://100.64.0.1:8011
+      controller: http://100.120.234.7:8011
   woodpecker:
     service_name: woodpecker
     owning_vm: docker-runtime
@@ -6067,7 +6011,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.20:8102
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8017
+      url: http://100.120.234.7:8017
     service_id: woodpecker
     runtime_pool: runtime-general
     deployment_surface: playbooks/services/woodpecker.yml
@@ -6080,7 +6024,7 @@ public_edge_service_topology:
     urls:
       public: https://ci.example.org
       internal: http://10.10.10.20:8102
-      controller: http://100.64.0.1:8017
+      controller: http://100.120.234.7:8017
   outline:
     service_name: outline
     owning_vm: docker-runtime
@@ -6443,7 +6387,7 @@ public_edge_service_topology:
       upstream: http://10.10.10.70:8000
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8012
+      url: http://100.120.234.7:8012
     service_id: coolify
     runtime_pool: dedicated-coolify
     deployment_surface: playbooks/services/coolify.yml
@@ -6456,7 +6400,7 @@ public_edge_service_topology:
     urls:
       public: https://coolify.example.org
       internal: http://10.10.10.70:8000
-      controller: http://100.64.0.1:8012
+      controller: http://100.120.234.7:8012
   coolify_apps:
     service_name: coolify-apps
     owning_vm: coolify-apps
@@ -6590,7 +6534,7 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8010
+      url: http://100.120.234.7:8010
     service_id: platform_context_api
     runtime_pool: runtime-ai
     deployment_surface: playbooks/services/rag-context.yml
@@ -6602,39 +6546,7 @@ public_edge_service_topology:
       controller: 8010
     urls:
       internal: http://10.10.10.20:8010
-      controller: http://100.64.0.1:8010
-  keycloak:
-    service_name: keycloak
-    owning_vm: runtime-control
-    private_ip: 10.10.10.92
-    public_hostname: sso.example.org
-    exposure_model: edge-published
-    observability:
-      guest_dashboard: false
-      service_telemetry: false
-    dns:
-      managed: true
-      visibility: public
-      name: sso
-      type: A
-      target: 203.0.113.1
-      ttl: 60
-    edge:
-      enabled: true
-      tls: true
-      kind: proxy
-      upstream: http://10.10.10.92:8091
-    urls:
-      public: https://sso.example.org
-      internal: http://10.10.10.92:8091
-    service_id: keycloak
-    runtime_pool: runtime-control
-    deployment_surface: playbooks/keycloak.yml
-    restart_domain: runtime-control-identity
-    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
-    mobility_tier: anchor
-    ports:
-      internal: 8091
+      controller: http://100.120.234.7:8010
   harbor:
     service_name: harbor
     owning_vm: runtime-control
@@ -6746,7 +6658,7 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.64.0.1:8200
+      url: https://100.120.234.7:8200
     service_id: openbao
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/openbao.yml
@@ -6758,7 +6670,7 @@ public_edge_service_topology:
       controller: 8200
     urls:
       internal: https://10.10.10.92:8200
-      controller: https://100.64.0.1:8200
+      controller: https://100.120.234.7:8200
   openfga:
     service_name: openfga
     owning_vm: runtime-control
@@ -6769,7 +6681,7 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:8014
+      url: http://100.120.234.7:8014
     service_id: openfga
     runtime_pool: runtime-control
     deployment_surface: playbooks/services/openfga.yml
@@ -6781,7 +6693,7 @@ public_edge_service_topology:
       controller: 8014
     urls:
       internal: http://10.10.10.92:8098
-      controller: http://100.64.0.1:8014
+      controller: http://100.120.234.7:8014
   temporal:
     service_name: temporal
     owning_vm: runtime-control
@@ -6840,14 +6752,14 @@ public_edge_service_topology:
   ntopng:
     service_name: ntopng
     owning_vm: proxmox-host
-    private_ip: 100.64.0.1
+    private_ip: 100.120.234.7
     exposure_model: private-only
     observability:
       guest_dashboard: false
       service_telemetry: true
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.64.0.1:3001
+      url: http://100.120.234.7:3001
     service_id: ntopng
     runtime_pool: host-management
     deployment_surface: playbooks/ntopng.yml
@@ -6859,7 +6771,7 @@ public_edge_service_topology:
       controller: 3001
     urls:
       internal: http://127.0.0.1:3000
-      controller: http://100.64.0.1:3001
+      controller: http://100.120.234.7:3001
   portainer:
     service_name: portainer
     owning_vm: docker-runtime
@@ -6870,7 +6782,7 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.64.0.1:9444
+      url: https://100.120.234.7:9444
     service_id: portainer
     runtime_pool: runtime-general
     deployment_surface: playbooks/portainer.yml
@@ -6882,7 +6794,7 @@ public_edge_service_topology:
       controller: 9444
     urls:
       internal: https://10.10.10.20:9443
-      controller: https://100.64.0.1:9444
+      controller: https://100.120.234.7:9444
   vaultwarden:
     service_name: vaultwarden
     owning_vm: runtime-control
@@ -6897,7 +6809,7 @@ public_edge_service_topology:
       visibility: tailnet
       name: vault
       type: A
-      target: 100.64.0.1
+      target: 100.120.234.7
       ttl: 60
     access:
       kind: tailscale-tcp-proxy
@@ -6929,7 +6841,7 @@ public_edge_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: 100.64.0.1
+      target: 100.120.234.7
       ttl: 60
     service_id: postgres
     runtime_pool: dedicated-postgres
@@ -6943,7 +6855,7 @@ public_edge_service_topology:
     urls:
       public: https://database.example.org
       internal: postgresql://database.example.org:5432
-      controller: postgresql://100.64.0.1:5432
+      controller: postgresql://100.120.234.7:5432
   backup_pbs:
     service_name: backup-pbs
     owning_vm: backup
@@ -7144,6 +7056,11 @@ public_edge_service_topology:
       kind: proxy
       upstream: http://10.10.10.92:9010
     service_id: authentik
+    runtime_pool: runtime-control
+    deployment_surface: playbooks/authentik.yml
+    restart_domain: runtime-control-identity
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-control
+    mobility_tier: anchor
     ports:
       internal: 9010
     urls:
@@ -7186,27 +7103,27 @@ platform_postgres_host: database.example.org
 openbao_postgres_host: 10.10.10.50
 openbao_http_extra_bind_addresses:
   - 10.10.10.92
-openbao_controller_url: https://100.64.0.1:8200
+openbao_controller_url: https://100.120.234.7:8200
 openfga_http_port: 8098
 openfga_host_proxy_port: 8014
-openfga_controller_url: http://100.64.0.1:8014
+openfga_controller_url: http://100.120.234.7:8014
 semaphore_server_port: 3004
 semaphore_host_proxy_port: 8020
 semaphore_private_base_url: http://10.10.10.92:3004
-semaphore_controller_url: http://100.64.0.1:8020
+semaphore_controller_url: http://100.120.234.7:8020
 netbox_host_proxy_port: 8004
-netbox_controller_url: http://100.64.0.1:8004
+netbox_controller_url: http://100.120.234.7:8004
 typesense_port: 8108
 typesense_host_proxy_port: 8016
-typesense_controller_url: http://100.64.0.1:8016
+typesense_controller_url: http://100.120.234.7:8016
 plane_port: 8093
 plane_host_proxy_port: 8011
 plane_private_base_url: http://10.10.10.20:8093
-plane_controller_url: http://100.64.0.1:8011
+plane_controller_url: http://100.120.234.7:8011
 woodpecker_http_port: 8102
 woodpecker_host_proxy_port: 8017
 woodpecker_private_base_url: http://10.10.10.20:8102
-woodpecker_controller_url: http://100.64.0.1:8017
+woodpecker_controller_url: http://100.120.234.7:8017
 api_gateway_internal_port: 8083
 api_gateway_public_url: https://api.example.org
 api_gateway_internal_url: http://10.10.10.92:8083
@@ -7214,39 +7131,39 @@ headscale_http_port: 8080
 headscale_public_url: https://headscale.example.org
 headscale_internal_url: http://10.10.10.1:8080
 ntopng_proxy_port: 3001
-ntopng_operator_url: http://100.64.0.1:3001
+ntopng_operator_url: http://100.120.234.7:3001
 mattermost_server_port: 8065
 mattermost_host_proxy_port: 8066
 mattermost_private_base_url: http://10.10.10.20:8065
-mattermost_controller_url: http://100.64.0.1:8066
+mattermost_controller_url: http://100.120.234.7:8066
 matrix_synapse_port: 8008
 matrix_synapse_host_proxy_port: 8015
 matrix_synapse_private_base_url: http://10.10.10.20:8008
-matrix_synapse_controller_url: http://100.64.0.1:8015
+matrix_synapse_controller_url: http://100.120.234.7:8015
 matrix_synapse_public_url: https://matrix.example.org
 gitea_http_port: 3003
 gitea_host_proxy_port: 3009
 gitea_root_url: https://git.example.org
 gitea_private_base_url: http://10.10.10.92:3003
-gitea_controller_url: http://100.64.0.1:3009
+gitea_controller_url: http://100.120.234.7:3009
 minio_public_url: https://minio.example.org
 minio_console_public_url: https://minio-console.example.org
 platform_context_internal_port: 8010
 platform_context_host_proxy_port: 8010
 platform_context_private_url: http://127.0.0.1:8010
-platform_context_controller_url: http://100.64.0.1:8010
+platform_context_controller_url: http://100.120.234.7:8010
 portainer_host_proxy_port: 9444
-portainer_controller_url: https://100.64.0.1:9444
+portainer_controller_url: https://100.120.234.7:9444
 vaultwarden_https_port: 8222
 vaultwarden_controller_url: https://vault.example.org
 step_ca_api_port: 9000
 step_ca_proxy_port: 9443
 step_ca_internal_url: https://10.10.10.92:9000
-step_ca_controller_url: https://100.64.0.1:9443
+step_ca_controller_url: https://100.120.234.7:9443
 windmill_host_proxy_port: 8005
-windmill_controller_url: http://100.64.0.1:8005
+windmill_controller_url: http://100.120.234.7:8005
 nomad_host_proxy_port: 8013
-nomad_controller_url: https://100.64.0.1:8013
+nomad_controller_url: https://100.120.234.7:8013
 monitoring_loki_push_api_url: http://10.10.10.40:3100/loki/api/v1/push
 proxmox_management_allowed_tcp_ports:
   - 3001
@@ -7337,5 +7254,4 @@ ntopng_http_port: 3000
 portainer_https_port: 9443
 tika_port: 9998
 tesseract_ocr_port: 3008
-keycloak_internal_http_port: 8091
 mail_platform_internal_submission_port: 1587

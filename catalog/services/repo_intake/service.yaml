@@ -31,7 +31,7 @@ service:
       status: active
       url: https://repo-intake.example.com
       subdomain: repo-intake.example.com
-      notes: Published through the shared NGINX edge and gated behind Keycloak oauth2-proxy.
+      notes: Published through the shared NGINX edge and gated behind Authentik oauth2-proxy.
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -75,10 +75,10 @@ dependency:
       type: hard
       description: Repo-intake is hosted on the shared docker-runtime guest.
     - from: repo_intake
-      to: keycloak
+      to: authentik
       type: soft
       description: repo-intake.example.com is gated behind the shared edge auth boundary
-        and Keycloak-backed browser authentication.
+        and Authentik-backed browser authentication.
     - from: repo_intake
       to: nginx_edge
       type: soft

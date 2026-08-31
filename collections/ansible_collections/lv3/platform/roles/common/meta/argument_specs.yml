@@ -290,6 +290,12 @@ argument_specs:
         default: ""
         description:
           - Optional inline template content written into the agent template path.
+      common_openbao_systemd_credentials_expected_credential_content:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Optional exact rendered credential content used for post-refresh verification when the managed file is not key-value formatted.
       common_openbao_systemd_credentials_role_id_file:
         type: path
         required: true
@@ -333,6 +339,30 @@ argument_specs:
         default: true
         description:
           - Whether the helper may restart and recover a local OpenBao runtime when the configured API address is unavailable.
+      common_openbao_systemd_credentials_use_runtime_provisioner:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Use the bounded runtime-secret provisioner artifact instead of the legacy OpenBao root-token manager path.
+      common_openbao_systemd_credentials_provisioner_credential_file:
+        type: path
+        required: false
+        default: ""
+        description:
+          - Controller-local AppRole JSON artifact for the narrow runtime-secret provisioner.
+      common_openbao_systemd_credentials_provisioner_approle_name:
+        type: str
+        required: false
+        default: runtime-secret-provisioner
+        description:
+          - Expected AppRole name recorded in the provisioner credential artifact.
+      common_openbao_systemd_credentials_provisioner_policy_name:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Exact least-privilege policy that the provisioner login must receive.
       common_openbao_api_operation_retries:
         type: int
         required: false

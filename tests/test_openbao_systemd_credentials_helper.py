@@ -54,9 +54,15 @@ def test_openbao_systemd_credentials_helper_supports_remote_api_targets() -> Non
     tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
 
     assert "common_openbao_systemd_credentials_manage_local_openbao_runtime: true" in defaults
+    assert "common_openbao_systemd_credentials_use_runtime_provisioner: false" in defaults
+    assert "common_openbao_systemd_credentials_provisioner_credential_file" in defaults
+    assert 'common_openbao_systemd_credentials_expected_credential_content: ""' in defaults
     assert "common_openbao_api_operation_retries: 36" in defaults
     assert "common_openbao_api_operation_delay: 5" in defaults
     assert "common_openbao_systemd_credentials_manage_local_openbao_runtime:" in meta
+    assert "common_openbao_systemd_credentials_use_runtime_provisioner:" in meta
+    assert "common_openbao_systemd_credentials_provisioner_credential_file:" in meta
+    assert "common_openbao_systemd_credentials_expected_credential_content:" in meta
     assert "common_openbao_api_operation_retries:" in meta
     assert "common_openbao_api_operation_delay:" in meta
     assert "common_openbao_systemd_credentials_api_url" in tasks
@@ -73,6 +79,16 @@ def test_openbao_systemd_credentials_helper_supports_remote_api_targets() -> Non
     )
     assert 'retries: "{{ common_openbao_api_operation_retries }}"' in tasks
     assert 'delay: "{{ common_openbao_api_operation_delay }}"' in tasks
+
+
+def test_openbao_systemd_credentials_helper_can_use_the_bounded_runtime_provisioner() -> None:
+    tasks = HELPER_TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "Login with the runtime-secret provisioner AppRole" in tasks
+    assert "Require exact provisioner access for host-native secret delivery" in tasks
+    assert "no root-token fallback exists" in tasks
+    assert "common_openbao_systemd_credentials_management_token" in tasks
+    assert "not (common_openbao_systemd_credentials_use_runtime_provisioner | bool)" in tasks
 
 
 def test_openbao_systemd_credentials_unit_waits_with_a_valid_shell_if_clause() -> None:
@@ -96,6 +112,7 @@ def test_openbao_systemd_credentials_restarts_and_rechecks_when_secret_payload_c
     assert "common_openbao_systemd_credentials_expected_credential_lines" in tasks
     assert "dict2items | sort(attribute='key')" in tasks
     assert "common_openbao_systemd_credentials_refreshed_credential_file" in tasks
+    assert "common_openbao_systemd_credentials_expected_rendered_content" in tasks
 
 
 def test_openbao_systemd_credentials_helper_uses_include_task_for_local_runtime_reset_connection() -> None:

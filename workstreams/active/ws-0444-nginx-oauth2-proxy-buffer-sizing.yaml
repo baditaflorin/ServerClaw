@@ -20,7 +20,6 @@ ownership_manifest:
     - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2
     - roles/nginx_edge_publication/templates/lv3-edge.conf.j2
     - docs/adr/0444-nginx-oauth2-proxy-buffer-sizing.md
-    - docs/adr/.index.yaml
     - docs/adr/index/**
     - workstreams/archive/2026/ws-0407-ops-portal-domain-substitution.yaml
     - docs/status/history/merged-workstreams.md

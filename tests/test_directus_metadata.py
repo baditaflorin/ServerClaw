@@ -25,7 +25,7 @@ def test_directus_service_catalog_declares_active_runtime_and_secret_contract() 
         "directus_secret",
         "directus_admin_password",
         "directus_service_registry_token",
-        "keycloak_directus_client_secret",
+        "authentik_directus_client_secret",
     ]
 
 
@@ -48,7 +48,7 @@ def test_directus_runbook_documents_database_boundary_and_public_verification() 
 
     assert "dedicated `directus` database" in text
     assert "`public` schema" in text
-    assert "Keycloak" in text
+    assert "Authentik" in text
     assert "make converge-directus" in text
     assert "verify-public" in text
     assert "data.example.com" in text

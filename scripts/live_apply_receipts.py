@@ -38,6 +38,7 @@ HISTORICAL_WORKFLOW_ID_PATTERNS = (
 # Historical receipts can legitimately reference workflow ids that were later
 # retired or renamed out of the active workflow catalog.
 RETIRED_WORKFLOW_IDS = {
+    "converge-keycloak",
     "converge-open-webui",
     "converge-realtime",
 }
@@ -113,10 +114,30 @@ def validate_source_commit(commit: str, path: Path) -> None:
         raise ValueError(f"{path.name}: source_commit '{commit}' is not available in the current git object database")
 
 
+def snapshot_source_commit() -> str | None:
+    """Return the immutable snapshot source commit when it is well formed."""
+
+    candidate = os.environ.get("LV3_SNAPSHOT_SOURCE_COMMIT", "").strip()
+    return candidate if COMMIT_HASH_PATTERN.fullmatch(candidate) else None
+
+
+def commits_refer_to_same_revision(left: str, right: str) -> bool:
+    """Treat short and full forms of one commit as equivalent."""
+
+    return left.startswith(right) or right.startswith(left)
+
+
 def evidence_ref_exists(ref: str, *, source_commit: str) -> bool:
     if resolve_receipt_path(ref).exists():
         return True
     if not git_commit_lookup_available():
+        snapshot_commit = snapshot_source_commit()
+        if snapshot_commit is not None and not commits_refer_to_same_revision(source_commit, snapshot_commit):
+            # A snapshot attests the exact current tree but intentionally
+            # excludes Git history. Historical receipts can refer to evidence
+            # that no longer exists in the current tree; their source commit
+            # was already syntax-validated by validate_source_commit().
+            return True
         return False
     if not git_commit_exists(source_commit):
         return git_path_exists_in_history(ref)

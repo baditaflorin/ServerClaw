@@ -1,4 +1,5 @@
 id: fix-serverclaw-pii-leak-check-leaks-gap
+adr: "0409"
 title: Fix ServerClaw publish leak-check gap that let real PII through
 status: ready
 ready_to_merge: true
@@ -7,7 +8,11 @@ depends_on: []
 conflicts_with: []
 owner: claude-agent
 branch: fix-serverclaw-pii-leak-check-leaks-gap
+worktree_path: .worktrees/fix-serverclaw-pii-leak-check-leaks-gap
 doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/fix-serverclaw-pii-leak-check-leaks-gap.yaml
 ownership_manifest:
   owned_surfaces:
     - id: fix-serverclaw-pii-leak-check-leaks-gap-code
@@ -16,8 +21,9 @@ ownership_manifest:
         - config/publication-sanitization.yaml
         - docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
         - workstreams/active/fix-serverclaw-pii-leak-check-leaks-gap.yaml
-        - workstreams.yaml
-      mode: exclusive
+      # The remediation is complete; retain this as read-only provenance so
+      # other release integration work can safely regenerate shared artifacts.
+      mode: read_only
 
 description: |
   Post-publish verification of the 2026-08-26 ServerClaw sanitized snapshot

@@ -19,7 +19,7 @@ class FakeBackend:
 
     def onboard_operator(self, operator: dict, bootstrap_password: str) -> dict:
         return {
-            "keycloak": {"status": "active", "username": operator["keycloak"]["username"]},
+            "authentik": {"status": "active", "username": operator["authentik"]["username"]},
             "openbao": {"status": "active", "entity_name": operator["openbao"]["entity_name"]},
             "step_ca": {"status": "ok", "principal": operator["ssh"]["principal"]},
             "tailscale": {"status": "ok", "login_email": operator["tailscale"]["login_email"]},
@@ -30,7 +30,7 @@ class FakeBackend:
 
     def offboard_operator(self, operator: dict, reason: str | None) -> dict:
         return {
-            "keycloak": {"status": "disabled", "username": operator["keycloak"]["username"]},
+            "authentik": {"status": "disabled", "username": operator["authentik"]["username"]},
             "openbao": {"status": "disabled", "entity_name": operator["openbao"]["entity_name"]},
             "step_ca": {"status": "ok", "principal": operator["ssh"]["principal"]},
             "tailscale": {"status": "ok"},
@@ -40,23 +40,21 @@ class FakeBackend:
 
     def recover_totp(self, operator: dict) -> dict:
         return {
-            "keycloak": {
+            "authentik": {
                 "status": "totp-reset",
-                "username": operator["keycloak"]["username"],
-                "required_actions": ["CONFIGURE_TOTP"],
-                "failure_counters_cleared": True,
+                "username": operator["authentik"]["username"],
+                "re_enrollment_required": True,
             },
             "audit": {"status": "ok"},
         }
 
     def reset_password(self, operator: dict, password: str, *, temporary: bool) -> dict:
         return {
-            "keycloak": {
+            "authentik": {
                 "status": "password-reset",
-                "username": operator["keycloak"]["username"],
-                "temporary": temporary,
-                "required_actions": ["UPDATE_PASSWORD"] if temporary else [],
-                "failure_counters_cleared": True,
+                "username": operator["authentik"]["username"],
+                "temporary_requested": temporary,
+                "temporary_enforced": False,
             },
             "audit": {"status": "ok"},
         }
@@ -99,7 +97,7 @@ def roster_paths(tmp_path: Path) -> tuple[Path, Path]:
 def test_repo_operator_roster_validates() -> None:
     roster = yaml.safe_load(operator_manager.ROSTER_PATH.read_text(encoding="utf-8"))
     normalized = operator_manager.validate_operator_roster(roster)
-    assert normalized["operators"][0]["id"] == "florin-badita"
+    assert normalized["operators"][0]["id"] == "example-admin"
 
 
 def test_service_url_prefers_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -121,7 +119,7 @@ def test_onboard_writes_roster_and_state(roster_paths: tuple[Path, Path], monkey
         actor_id="tester",
         actor_class="operator",
         operator_id=None,
-        keycloak_username=None,
+        authentik_username=None,
         ssh_key_name="laptop",
         tailscale_login_email=None,
         tailscale_device_name="alice-mbp",
@@ -131,9 +129,9 @@ def test_onboard_writes_roster_and_state(roster_paths: tuple[Path, Path], monkey
 
     saved = yaml.safe_load(roster_path.read_text(encoding="utf-8"))
     assert payload["operator"]["id"] == "alice-example"
-    assert saved["operators"][0]["keycloak"]["username"] == "alice"
+    assert saved["operators"][0]["authentik"]["username"] == "alice"
     state = json.loads((state_dir / "alice-example.json").read_text(encoding="utf-8"))
-    assert state["keycloak"]["username"] == "alice"
+    assert state["authentik"]["username"] == "alice"
     assert state["last_operation"] == "onboard"
 
 
@@ -153,7 +151,7 @@ def test_viewer_onboard_does_not_require_or_store_ssh_key(
         actor_id="tester",
         actor_class="operator",
         operator_id=None,
-        keycloak_username=None,
+        authentik_username=None,
         ssh_key_name="laptop",
         tailscale_login_email=None,
         tailscale_device_name=None,
@@ -179,7 +177,7 @@ def test_offboard_marks_operator_inactive(roster_paths: tuple[Path, Path], monke
         actor_id="tester",
         actor_class="operator",
         operator_id=None,
-        keycloak_username=None,
+        authentik_username=None,
         ssh_key_name="laptop",
         tailscale_login_email=None,
         tailscale_device_name=None,
@@ -203,7 +201,7 @@ def test_offboard_marks_operator_inactive(roster_paths: tuple[Path, Path], monke
     assert operator["audit"]["offboarded_by"] == "tester"
     state = json.loads((state_dir / "alice-example.json").read_text(encoding="utf-8"))
     assert state["last_operation"] == "offboard"
-    assert payload["result"]["keycloak"]["status"] == "disabled"
+    assert payload["result"]["authentik"]["status"] == "disabled"
 
 
 def test_recover_totp_persists_state(roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
@@ -219,7 +217,7 @@ def test_recover_totp_persists_state(roster_paths: tuple[Path, Path], monkeypatc
         actor_id="tester",
         actor_class="operator",
         operator_id=None,
-        keycloak_username=None,
+        authentik_username=None,
         ssh_key_name="laptop",
         tailscale_login_email=None,
         tailscale_device_name=None,
@@ -238,8 +236,8 @@ def test_recover_totp_persists_state(roster_paths: tuple[Path, Path], monkeypatc
 
     state = json.loads((state_dir / "alice-example.json").read_text(encoding="utf-8"))
     assert state["last_operation"] == "recover-totp"
-    assert state["keycloak"]["status"] == "totp-reset"
-    assert payload["result"]["keycloak"]["required_actions"] == ["CONFIGURE_TOTP"]
+    assert state["authentik"]["status"] == "totp-reset"
+    assert payload["result"]["authentik"]["re_enrollment_required"] is True
 
 
 def test_reset_password_persists_state(roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch) -> None:
@@ -255,7 +253,7 @@ def test_reset_password_persists_state(roster_paths: tuple[Path, Path], monkeypa
         actor_id="tester",
         actor_class="operator",
         operator_id=None,
-        keycloak_username=None,
+        authentik_username=None,
         ssh_key_name="laptop",
         tailscale_login_email=None,
         tailscale_device_name=None,
@@ -276,8 +274,8 @@ def test_reset_password_persists_state(roster_paths: tuple[Path, Path], monkeypa
 
     state = json.loads((state_dir / "alice-example.json").read_text(encoding="utf-8"))
     assert state["last_operation"] == "reset-password"
-    assert state["keycloak"]["status"] == "password-reset"
-    assert payload["result"]["keycloak"]["required_actions"] == ["UPDATE_PASSWORD"]
+    assert state["authentik"]["status"] == "password-reset"
+    assert payload["result"]["authentik"]["temporary_enforced"] is False
 
 
 def test_update_notes_persists_markdown_and_review_audit(
@@ -295,7 +293,7 @@ def test_update_notes_persists_markdown_and_review_audit(
         actor_id="tester",
         actor_class="operator",
         operator_id=None,
-        keycloak_username=None,
+        authentik_username=None,
         ssh_key_name="laptop",
         tailscale_login_email=None,
         tailscale_device_name=None,
@@ -338,7 +336,7 @@ def test_update_notes_can_clear_existing_markdown(
         actor_id="tester",
         actor_class="operator",
         operator_id=None,
-        keycloak_username=None,
+        authentik_username=None,
         ssh_key_name="laptop",
         tailscale_login_email=None,
         tailscale_device_name=None,
@@ -387,10 +385,9 @@ def test_quarterly_review_flags_stale_operator(
                         "email": "alice@example.com",
                         "role": "viewer",
                         "status": "active",
-                        "keycloak": {
+                        "authentik": {
                             "username": "alice",
-                            "realm_roles": ["platform-read"],
-                            "groups": ["lv3-platform-viewers", "grafana-viewers"],
+                            "groups": ["platform-read", "grafana-viewers"],
                             "enabled": True,
                         },
                         "ssh": {
@@ -454,10 +451,10 @@ def test_live_backend_skips_tailscale_remove_when_not_configured(
     assert "TAILSCALE_API_KEY or TAILSCALE_TAILNET" in payload["reason"]
 
 
-def test_keycloak_bootstrap_password_prefers_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("KEYCLOAK_BOOTSTRAP_PASSWORD", "EnvBootstrap123")
+def test_authentik_bootstrap_token_prefers_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LV3_AUTHENTIK_BOOTSTRAP_TOKEN", "EnvBootstrapToken")
 
-    assert operator_manager.load_keycloak_bootstrap_password() == "EnvBootstrap123"
+    assert operator_manager.load_authentik_bootstrap_token() == "EnvBootstrapToken"
 
 
 def test_openbao_root_token_reads_env_payload(monkeypatch: pytest.MonkeyPatch) -> None:

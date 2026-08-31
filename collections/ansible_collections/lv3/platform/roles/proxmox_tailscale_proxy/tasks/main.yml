@@ -24,6 +24,68 @@
       - proxmox_tailscale_effective_tcp_proxies is sequence
     fail_msg: "proxmox_tailscale_proxy requires a list of TCP proxy definitions."
 
+- name: Resolve declared Proxmox Tailscale proxy unit names
+  ansible.builtin.set_fact:
+    proxmox_tailscale_proxy_expected_unit_names: >-
+      {{
+        (
+          proxmox_tailscale_effective_tcp_proxies
+          | map(attribute='name')
+          | map('regex_replace', '^', 'lv3-tailscale-proxy-')
+          | map('regex_replace', '$', '.socket')
+          | list
+        )
+        +
+        (
+          proxmox_tailscale_effective_tcp_proxies
+          | map(attribute='name')
+          | map('regex_replace', '^', 'lv3-tailscale-proxy-')
+          | map('regex_replace', '$', '.service')
+          | list
+        )
+      }}
+
+- name: Find previously managed Proxmox Tailscale proxy units
+  ansible.builtin.find:
+    paths: /etc/systemd/system
+    patterns:
+      - "lv3-tailscale-proxy-*.socket"
+      - "lv3-tailscale-proxy-*.service"
+    file_type: file
+  register: proxmox_tailscale_proxy_existing_units
+
+- name: Stop and disable stale Proxmox Tailscale proxy units
+  ansible.builtin.systemd:
+    name: "{{ item.path | basename }}"
+    enabled: false
+    state: stopped
+  loop: "{{ proxmox_tailscale_proxy_existing_units.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  when: (item.path | basename) not in proxmox_tailscale_proxy_expected_unit_names
+
+- name: Clear failed state from stale Proxmox Tailscale proxy units
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - reset-failed
+      - "{{ item.path | basename }}"
+  loop: "{{ proxmox_tailscale_proxy_existing_units.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  when: (item.path | basename) not in proxmox_tailscale_proxy_expected_unit_names
+  changed_when: false
+
+- name: Remove stale Proxmox Tailscale proxy unit files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ proxmox_tailscale_proxy_existing_units.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  when: (item.path | basename) not in proxmox_tailscale_proxy_expected_unit_names
+  notify: Reload systemd
+
 - name: Ensure Proxmox Tailscale proxy systemd unit directory exists
   ansible.builtin.file:
     path: /etc/systemd/system
@@ -77,6 +139,26 @@
   loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
   loop_control:
     label: "{{ item.name }}"
+
+- name: Re-arm changed Proxmox Tailscale proxy socket listeners
+  ansible.builtin.systemd:
+    name: "lv3-tailscale-proxy-{{ item.name }}.socket"
+    state: restarted
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  vars:
+    proxmox_tailscale_socket_unit_changed: >-
+      {{
+        (
+          proxmox_tailscale_proxy_sockets.results
+          | selectattr('item.name', 'equalto', item.name)
+          | map(attribute='changed')
+          | first
+          | default(false)
+        ) | bool
+      }}
+  when: proxmox_tailscale_socket_unit_changed
 
 - name: Start Proxmox Tailscale proxy sockets when the listener is not already owned by an active proxy service
   ansible.builtin.systemd:

@@ -1,6 +1,6 @@
 # Purpose: Verify the deployed API gateway runtime, mounted config bundle, and authenticated operator surfaces.
 # Use case: Run after API gateway converges or during validation to prove the live runtime is healthy and wired correctly.
-# Inputs: API gateway URLs, runtime probe paths, Keycloak verification credentials, and controller-local fallback tokens.
+# Inputs: API gateway URLs, runtime probe paths, and Authentik verification credentials.
 # Outputs: Confirms health, auth enforcement, bundle mounts, and runtime-assurance responses without mutating service state.
 # Idempotency: Fully idempotent because these tasks only read state and assert expected behavior.
 # Dependencies: ADR 0165, ADR 0092, ADR 0175, ADR 0197, ADR 0262, and ADR 0371.
@@ -42,58 +42,45 @@
   become: false
   register: api_gateway_verify_client_secret_stat
 
-- name: Check whether the controller-local legacy platform context token exists
-  ansible.builtin.stat:
-    path: "{{ api_gateway_platform_context_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: api_gateway_platform_context_token_stat
-
-- name: Default the local Keycloak discovery endpoint as unavailable for API gateway verification
+- name: Default the local Authentik discovery endpoint as unavailable for API gateway verification
   ansible.builtin.set_fact:
-    api_gateway_keycloak_verify_discovery_available: false
+    api_gateway_authentik_verify_discovery_available: false
 
-- name: Wait for the local Keycloak realm discovery endpoint used by API gateway verification
+- name: Wait for the Authentik discovery endpoint used by API gateway verification
   when: api_gateway_verify_client_secret_stat.stat.exists
   block:
-    - name: Wait for the local Keycloak realm discovery endpoint used by API gateway verification
+    - name: Wait for the Authentik discovery endpoint used by API gateway verification
       ansible.builtin.uri:
-        url: "{{ api_gateway_keycloak_verify_base_url }}/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration"
+        url: "{{ api_gateway_authentik_discovery_url }}"
         method: GET
         return_content: true
         status_code: 200
-      register: api_gateway_keycloak_verify_discovery
-      retries: >-
-        {{
-          3
-          if api_gateway_platform_context_token_stat.stat.exists
-          else api_gateway_keycloak_verify_ready_retries
-        }}
-      delay: "{{ api_gateway_keycloak_verify_ready_delay }}"
-      until: api_gateway_keycloak_verify_discovery.status == 200
+      register: api_gateway_authentik_verify_discovery
+      retries: "{{ api_gateway_authentik_verify_ready_retries }}"
+      delay: "{{ api_gateway_authentik_verify_ready_delay }}"
+      until: api_gateway_authentik_verify_discovery.status == 200
       changed_when: false
 
-    - name: Record the local Keycloak discovery endpoint as available for API gateway verification
+    - name: Record the Authentik discovery endpoint as available for API gateway verification
       ansible.builtin.set_fact:
-        api_gateway_keycloak_verify_discovery_available: true
+        api_gateway_authentik_verify_discovery_available: true
 
-    - name: Assert the local Keycloak discovery document matches the public issuer
+    - name: Assert the Authentik discovery document matches the configured issuer
       ansible.builtin.assert:
         that:
-          - api_gateway_keycloak_verify_discovery.json.issuer == api_gateway_keycloak_issuer_url
-        fail_msg: "API gateway verification reached Keycloak locally, but the discovery issuer does not match the public issuer."
+          - api_gateway_authentik_verify_discovery.json.issuer == api_gateway_authentik_issuer_url
+        fail_msg: "API gateway verification reached Authentik, but the discovery issuer does not match the configured issuer."
   rescue:
-    - name: Mark the local Keycloak discovery endpoint as unavailable for API gateway verification
+    - name: Mark the Authentik discovery endpoint as unavailable for API gateway verification
       ansible.builtin.set_fact:
-        api_gateway_keycloak_verify_discovery_available: false
+        api_gateway_authentik_verify_discovery_available: false
 
-- name: Assert that API gateway verification can fall back when local Keycloak discovery is unavailable
+- name: Assert that API gateway verification can reach Authentik discovery
   ansible.builtin.assert:
     that:
-      - api_gateway_keycloak_verify_discovery_available or api_gateway_platform_context_token_stat.stat.exists
+      - api_gateway_authentik_verify_discovery_available
     fail_msg: >-
-      API gateway verification could not reach the local Keycloak discovery endpoint
-      and no legacy platform context token was available for authenticated fallback verification.
+      API gateway verification could not reach the Authentik discovery endpoint.
 
 - name: Read the controller-local API gateway verification client secret
   ansible.builtin.slurp:
@@ -104,67 +91,52 @@
   when: api_gateway_verify_client_secret_stat.stat.exists
   no_log: true
 
-- name: Read the controller-local legacy platform context token
-  ansible.builtin.slurp:
-    src: "{{ api_gateway_platform_context_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: api_gateway_platform_context_token_raw
-  when: api_gateway_platform_context_token_stat.stat.exists
-  no_log: true
-
-- name: Default the Keycloak API gateway verification token request status
+- name: Default the Authentik API gateway verification token request status
   ansible.builtin.set_fact:
-    api_gateway_verify_keycloak_request_succeeded: false
+    api_gateway_verify_authentik_request_succeeded: false
 
-- name: Request a Keycloak bearer token for API gateway verification
+- name: Request an Authentik bearer token for API gateway verification
   when:
     - api_gateway_verify_client_secret_stat.stat.exists
-    - api_gateway_keycloak_verify_discovery_available
+    - api_gateway_authentik_verify_discovery_available
   block:
-    - name: Request a Keycloak bearer token for API gateway verification
+    - name: Request an Authentik bearer token for API gateway verification
       ansible.builtin.uri:
-        url: "{{ api_gateway_keycloak_verify_base_url }}/realms/{{ keycloak_realm_name }}/protocol/openid-connect/token"
+        url: "{{ api_gateway_authentik_token_url }}"
         method: POST
         body_format: form-urlencoded
         body:
           grant_type: client_credentials
           client_id: "{{ api_gateway_verify_client_id }}"
           client_secret: "{{ api_gateway_verify_client_secret_raw.content | b64decode | trim }}"
+          # Authentik only evaluates the profile scope mapping for a
+          # client-credentials grant when the scopes are requested explicitly.
+          # That mapping carries the service account's platform-read group,
+          # which the protected gateway routes require.
+          scope: openid profile email
         status_code: 200
       register: api_gateway_verify_token_response
-      retries: "{{ api_gateway_keycloak_verify_token_retries }}"
-      delay: "{{ api_gateway_keycloak_verify_token_delay }}"
+      retries: "{{ api_gateway_authentik_verify_token_retries }}"
+      delay: "{{ api_gateway_authentik_verify_token_delay }}"
       until: api_gateway_verify_token_response.status == 200
       no_log: true
       changed_when: false
 
-    - name: Record whether the Keycloak verification token request returned an access token
+    - name: Record whether the Authentik verification token request returned an access token
       ansible.builtin.set_fact:
-        api_gateway_verify_keycloak_request_succeeded: >-
+        api_gateway_verify_authentik_request_succeeded: >-
           {{ (api_gateway_verify_token_response.json.access_token | default('')) | length > 0 }}
   rescue:
-    - name: Mark the Keycloak verification token request as unavailable
+    - name: Mark the Authentik verification token request as unavailable
       ansible.builtin.set_fact:
-        api_gateway_verify_keycloak_request_succeeded: false
+        api_gateway_verify_authentik_request_succeeded: false
 
-- name: Record the API gateway verification bearer token from Keycloak
+- name: Record the API gateway verification bearer token from Authentik
   ansible.builtin.set_fact:
     api_gateway_verify_access_token: "{{ api_gateway_verify_token_response.json.access_token }}"
   when:
     - api_gateway_verify_client_secret_stat.stat.exists
-    - api_gateway_verify_keycloak_request_succeeded
-  no_log: true
-
-- name: Record the API gateway verification bearer token from the legacy platform context
-  ansible.builtin.set_fact:
-    api_gateway_verify_access_token: "{{ api_gateway_platform_context_token_raw.content | b64decode | trim }}"
-  when:
-    - api_gateway_platform_context_token_stat.stat.exists
-    - not (
-        api_gateway_verify_client_secret_stat.stat.exists
-        and api_gateway_verify_keycloak_request_succeeded
-      )
+    - api_gateway_verify_authentik_request_succeeded
   no_log: true
 
 - name: Assert that an authenticated API gateway verification token is available
@@ -173,8 +145,8 @@
       - api_gateway_verify_access_token is defined
       - api_gateway_verify_access_token | length > 0
     fail_msg: >-
-      API gateway verification requires either the Keycloak client secret or the
-      legacy platform context token to validate authenticated platform routes.
+      API gateway verification requires the Authentik machine client credential
+      to validate authenticated platform routes.
 
 - name: Verify the authenticated platform service catalog endpoint succeeds with a real bearer token
   ansible.builtin.uri:

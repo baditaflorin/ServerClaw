@@ -22,7 +22,7 @@ service:
     - directus_secret
     - directus_admin_password
     - directus_service_registry_token
-    - keycloak_directus_client_secret
+    - authentik_directus_client_secret
   adr: 0289
   adr_file: docs/adr/0289-directus-as-the-rest-graphql-data-api-layer-over-postgres.md
   runbook: docs/runbooks/configure-directus.md
@@ -40,14 +40,14 @@ service:
     - oidc
   notes: Directus runs on docker-runtime, uses a dedicated PostgreSQL database named
     directus, publishes data.example.com through the shared NGINX edge, delegates
-    routine browser sign-in to Keycloak, and retains a repo-managed break-glass local
+    routine browser sign-in to Authentik, and retains a repo-managed break-glass local
     admin password for recovery.
   environments:
     production:
       status: active
       url: https://data.example.com
       subdomain: data.example.com
-      notes: Repo automation verifies the public /server/health endpoint, the Keycloak
+      notes: Repo automation verifies the public /server/health endpoint, the Authentik
         login redirect, and scoped REST plus GraphQL token access against the governed
         service_registry collection.
 completeness:
@@ -56,7 +56,8 @@ completeness:
   requires_oidc: true
   requires_secrets: true
   requires_compose_secrets: true
-  keycloak_client_generated: true
+  oidc_provider: authentik
+  authentik_client_generated: true
   suppressed_checks:
     api_gateway: '2026-09-30'
     alert_rules: '2026-09-30'
@@ -93,9 +94,9 @@ dependency:
       description: The Directus runtime container and guest-local listener are hosted
         on docker-runtime.
     - from: directus
-      to: keycloak
+      to: authentik
       type: soft
-      description: Routine browser sign-in delegates to Keycloak via OIDC while the
+      description: Routine browser sign-in delegates to Authentik via OIDC while the
         local Directus admin remains break-glass only.
     - from: directus
       to: nginx_edge

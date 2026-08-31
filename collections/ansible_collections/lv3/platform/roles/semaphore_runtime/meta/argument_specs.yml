@@ -64,17 +64,17 @@ argument_specs:
         type: bool
         required: false
         default: true
-        description: Enable Keycloak OIDC SSO authentication
+        description: Enable Authentik OIDC SSO authentication
       semaphore_oidc_provider:
         type: str
         required: false
-        default: keycloak
+        default: authentik
         description: OIDC provider name
       semaphore_oidc_client_id:
         type: str
         required: false
         default: semaphore
-        description: Keycloak OIDC client ID
+        description: Authentik OIDC client ID
       semaphore_oidc_client_secret_local_file:
         type: path
         required: false
@@ -82,7 +82,7 @@ argument_specs:
       semaphore_oidc_issuer_url:
         type: str
         required: false
-        description: Keycloak realm issuer URL
+        description: Authentik provider issuer URL
       semaphore_oidc_callback_url:
         type: str
         required: false

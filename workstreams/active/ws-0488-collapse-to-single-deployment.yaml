@@ -15,6 +15,7 @@ depends_on:
   - adr-0482-capacity-aware-dynamic-sizing
   - adr-0484-self-verification-contracts
   - adr-0485-convergence-idempotency-tests
+conflicts_with: []
 supersedes:
   - adr-0437-overlay-aware-bootstrap
   - adr-0439-multi-deployment-repo-architecture
@@ -70,10 +71,11 @@ ownership_manifest:
         - tests/fixtures/deployments/
         - tests/test_adr_0439_multi_deployment.py
         - tests/test_adr_0440_phase2_generators.py
-        - tests/test_ws0461_cert_validator_multi_deployment.py
         - tests/test_ws0472_deployment_fixture_matrix.py
         - collections/ansible_collections/lv3/platform/roles/host_pinning_guard/
-      mode: exclusive
+      # Completed deletion inventory retained for audit; it no longer reserves
+      # paths that have been removed or are owned by superseded workstreams.
+      mode: read_only
     - id: ws_0488_makefile
       paths:
         - Makefile

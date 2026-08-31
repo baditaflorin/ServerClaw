@@ -21,26 +21,27 @@ def test_defaults_define_public_oidc_and_local_artifacts() -> None:
     defaults = load_yaml(DEFAULTS_PATH)
     assert defaults["grist_public_base_url"] == "https://{{ grist_service_topology.public_hostname }}"
     assert defaults["grist_session_authority"] == "{{ platform_session_authority }}"
-    assert defaults["grist_public_edge_private_ip"] == "{{ hostvars['proxmox-host'].proxmox_public_edge_ipv4 }}"
+    assert defaults["grist_public_edge_private_ip"] == "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
     assert defaults["grist_public_hostname_overrides"][0]["hostname"] == "{{ grist_service_topology.public_hostname }}"
     assert (
         defaults["grist_public_hostname_overrides"][1]["hostname"]
-        == "{{ hostvars['proxmox-host'].platform_service_topology.keycloak.public_hostname }}"
+        == "{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}"
     )
-    assert defaults["grist_internal_port"] == "{{ hostvars['proxmox-host'].platform_port_assignments.grist_port }}"
     assert defaults["grist_internal_base_url"] == "http://127.0.0.1:{{ grist_internal_port }}"
     assert defaults["grist_static_env_file"] == "{{ grist_site_dir }}/grist.env"
-    assert defaults["grist_keycloak_client_id"] == "grist"
-    assert defaults["grist_keycloak_issuer"] == "https://sso.example.com/realms/lv3"
-    assert defaults["grist_keycloak_scopes"] == "openid profile email"
-    assert defaults["grist_force_login"] is True
+    assert defaults["grist_authentik_client_id"] == "grist"
+    assert defaults["grist_authentik_issuer"] == "{{ authentik_oidc_provider_base_url }}/grist/"
+    assert defaults["grist_authentik_scopes"] == "openid profile email"
+    assert defaults["grist_force_login"] is False
     assert defaults["grist_runtime_uid"] == "1001"
     assert defaults["grist_runtime_gid"] == "1001"
-    assert defaults["grist_session_secret_local_file"].endswith("/.local/grist/session-secret.txt")
-    assert defaults["grist_keycloak_client_secret_local_file"].endswith("/.local/keycloak/grist-client-secret.txt")
+    assert defaults["grist_session_secret_local_file"] == "{{ grist_local_artifact_dir }}/session-secret.txt"
+    assert defaults["grist_authentik_client_secret_local_file"] == (
+        "{{ repo_shared_local_root }}/authentik/grist-client-secret.txt"
+    )
 
 
-def test_runtime_role_requires_only_the_keycloak_client_secret_before_startup() -> None:
+def test_runtime_role_requires_only_the_authentik_client_secret_before_startup() -> None:
     tasks = load_yaml(TASKS_PATH)
     validate_task = next(task for task in tasks if task.get("name") == "Validate Grist runtime inputs")
     package_task = next(task for task in tasks if task.get("name") == "Ensure the Grist runtime packages are present")
@@ -48,7 +49,7 @@ def test_runtime_role_requires_only_the_keycloak_client_secret_before_startup() 
     verify_import = next(task for task in tasks if task.get("name") == "Verify the Grist runtime")
 
     assert "grist_static_env_file | length > 0" in validate_task["ansible.builtin.assert"]["that"]
-    assert "grist_keycloak_client_secret_local_file | length > 0" in validate_task["ansible.builtin.assert"]["that"]
+    assert "grist_authentik_client_secret_local_file | length > 0" in validate_task["ansible.builtin.assert"]["that"]
     assert "grist_runtime_uid | length > 0" in validate_task["ansible.builtin.assert"]["that"]
     assert "grist_runtime_gid | length > 0" in validate_task["ansible.builtin.assert"]["that"]
     assert "grist_session_secret_local_file | length > 0" not in validate_task["ansible.builtin.assert"]["that"]
@@ -122,11 +123,11 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     )
     env_render = next(task for task in tasks if task.get("name") == "Render the Grist environment file")
     compose_render = next(task for task in tasks if task.get("name") == "Render the Grist compose file")
-    keycloak_discovery = next(
+    authentik_discovery = next(
         task
         for task in tasks
         if task.get("name")
-        == "Wait for the Keycloak issuer discovery document through the shared edge route before Grist startup"
+        == "Wait for the Authentik issuer discovery document through the shared edge route before Grist startup"
     )
     local_port_probe = next(
         task for task in tasks if task.get("name") == "Check whether the Grist local port is already published"
@@ -188,7 +189,7 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
         task
         for task in tasks
         if task.get("name")
-        == "Wait for the Keycloak issuer discovery document through the shared edge route before Grist login middleware recovery"
+        == "Wait for the Authentik issuer discovery document through the shared edge route before Grist login middleware recovery"
     )
     auth_recovery_up = next(
         task for task in tasks if task.get("name") == "Force-recreate the Grist runtime after OIDC bootstrap recovery"
@@ -279,21 +280,23 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert env_render["register"] == "grist_env_template"
     assert env_render["ansible.builtin.template"]["dest"] == "{{ grist_static_env_file }}"
     assert compose_render["register"] == "grist_compose_template"
-    assert "--resolve" in keycloak_discovery["ansible.builtin.shell"]
-    assert "--connect-timeout 5" in keycloak_discovery["ansible.builtin.shell"]
-    assert "--max-time 10" in keycloak_discovery["ansible.builtin.shell"]
-    assert "{{ grist_public_edge_private_ip }}" in keycloak_discovery["ansible.builtin.shell"]
-    assert "{{ grist_keycloak_issuer }}/.well-known/openid-configuration" in keycloak_discovery["ansible.builtin.shell"]
+    assert "--resolve" in authentik_discovery["ansible.builtin.shell"]
+    assert "--connect-timeout 5" in authentik_discovery["ansible.builtin.shell"]
+    assert "--max-time 10" in authentik_discovery["ansible.builtin.shell"]
+    assert "{{ grist_public_edge_private_ip }}" in authentik_discovery["ansible.builtin.shell"]
     assert (
-        '{{ hostvars["proxmox-host"].platform_service_topology.keycloak.public_hostname }}'
-        in keycloak_discovery["ansible.builtin.shell"]
+        "{{ grist_authentik_issuer }}/.well-known/openid-configuration" in authentik_discovery["ansible.builtin.shell"]
     )
     assert (
-        'DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_keycloak_issuer }}" <<\'PY\''
-        in keycloak_discovery["ansible.builtin.shell"]
+        "{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}"
+        in authentik_discovery["ansible.builtin.shell"]
     )
-    assert 'payload = json.loads(os.environ["DISCOVERY_JSON"])' in keycloak_discovery["ansible.builtin.shell"]
-    assert keycloak_discovery["until"] == "grist_keycloak_discovery.rc == 0"
+    assert (
+        'DISCOVERY_JSON="$discovery_json" python3 - "{{ grist_authentik_issuer }}" <<\'PY\''
+        in authentik_discovery["ansible.builtin.shell"]
+    )
+    assert 'payload = json.loads(os.environ["DISCOVERY_JSON"])' in authentik_discovery["ansible.builtin.shell"]
+    assert authentik_discovery["until"] == "grist_authentik_discovery.rc == 0"
     assert local_port_probe["ansible.builtin.wait_for"]["port"] == "{{ grist_internal_port }}"
     assert status_probe["ansible.builtin.uri"]["url"] == "{{ grist_internal_base_url }}/status"
     assert "com.docker.compose.replace" in replace_cleanup["ansible.builtin.shell"]
@@ -325,7 +328,7 @@ def test_runtime_role_recovers_docker_nat_chain_before_grist_startup() -> None:
     assert "--max-time 10" in auth_recovery_discovery["ansible.builtin.shell"]
     assert "{{ grist_public_edge_private_ip }}" in auth_recovery_discovery["ansible.builtin.shell"]
     assert 'payload = json.loads(os.environ["DISCOVERY_JSON"])' in auth_recovery_discovery["ansible.builtin.shell"]
-    assert auth_recovery_discovery["until"] == "grist_keycloak_discovery_recovery.rc == 0"
+    assert auth_recovery_discovery["until"] == "grist_authentik_discovery_recovery.rc == 0"
     assert auth_recovery_up["ansible.builtin.command"]["argv"][-3:] == ["--force-recreate", "--no-deps", "grist"]
     assert auth_recovery_up["register"] == "grist_oidc_recovery_up"
     assert auth_recovery_up["until"] == "grist_oidc_recovery_up.rc == 0"
@@ -365,7 +368,7 @@ def test_publish_tasks_wait_for_public_status_and_verify_login_gating() -> None:
 
 def test_verify_task_checks_the_local_status_endpoint() -> None:
     verify = load_yaml(VERIFY_PATH)
-    health_task = next(task for task in verify if task.get("name") == "Verify the Grist local status endpoint")
+    health_task = next(task for task in verify if task.get("name") == "Verify the Grist runtime health")
     auth_tasks = [
         task
         for task in verify
@@ -378,7 +381,7 @@ def test_verify_task_checks_the_local_status_endpoint() -> None:
     assert len(assert_tasks) == 1
     auth_task = auth_tasks[0]
     assert_task = assert_tasks[0]
-    assert health_task["ansible.builtin.uri"]["url"] == "{{ grist_internal_base_url }}/status"
+    assert health_task["vars"]["common_verify_health_url"] == "{{ grist_internal_base_url }}/status"
     assert auth_task["ansible.builtin.uri"]["url"] == "{{ grist_internal_base_url }}/o/docs/"
     assert auth_task["ansible.builtin.uri"]["headers"]["Host"] == "{{ grist_service_topology.public_hostname }}"
     assert 400 in auth_task["ansible.builtin.uri"]["status_code"]
@@ -394,7 +397,7 @@ def test_grist_templates_enable_persistent_oidc_runtime() -> None:
     compose_template = COMPOSE_TEMPLATE_PATH.read_text()
     assert "APP_HOME_URL={{ grist_public_base_url }}" in env_template
     assert "GRIST_FORCE_LOGIN={{ 'true' if grist_force_login else 'false' }}" in env_template
-    assert "GRIST_OIDC_SP_HOST={{ grist_keycloak_sp_host }}" in env_template
+    assert "GRIST_OIDC_SP_HOST={{ grist_authentik_sp_host }}" in env_template
     assert (
         'GRIST_SESSION_SECRET=[[ with secret "kv/data/{{ grist_openbao_secret_path }}" ]][[ .Data.data.GRIST_SESSION_SECRET ]][[ end ]]'
         in env_ctemplate
@@ -407,7 +410,7 @@ def test_grist_templates_enable_persistent_oidc_runtime() -> None:
     assert "      - {{ grist_persist_dir }}:/persist" in compose_template
     assert '      - "{{ ansible_host }}:{{ grist_internal_port }}:8484"' in compose_template
     assert '      - "127.0.0.1:{{ grist_internal_port }}:8484"' in compose_template
-    assert '      - "{{ item.hostname }}:{{ item.address }}"' in compose_template
+    assert "{{ hairpin_hosts() }}" in compose_template
     assert "node -e" in compose_template
     assert "http://127.0.0.1:8484/status" in compose_template
     assert "wget --no-verbose" not in compose_template

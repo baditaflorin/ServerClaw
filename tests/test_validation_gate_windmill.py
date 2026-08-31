@@ -60,6 +60,24 @@ print(json.dumps(payload))
     assert payload["command"].endswith("--format json")
 
 
+def test_gate_status_wrapper_discovers_repo_from_environment(tmp_path: Path, monkeypatch) -> None:
+    module = load_module("gate_status_windmill_env_discovery", WRAPPER_PATH)
+    write_gate_status_script(
+        tmp_path,
+        """
+import json
+
+print(json.dumps({"manifest_path": "manifest.json", "enabled_checks": [{"id": "agent-standards"}]}))
+""",
+    )
+    monkeypatch.setenv("PLATFORM_REPO_ROOT", str(tmp_path))
+
+    payload = module.main()
+
+    assert payload["status"] == "ok"
+    assert payload["gate_status"]["manifest_path"] == "manifest.json"
+
+
 def test_gate_status_wrapper_injects_waiver_summary_when_missing(tmp_path: Path) -> None:
     module = load_module("gate_status_windmill_waiver_summary", WRAPPER_PATH)
     repo_root = tmp_path

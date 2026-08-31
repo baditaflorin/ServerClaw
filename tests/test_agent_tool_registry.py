@@ -252,7 +252,7 @@ class AgentToolRegistryTests(unittest.TestCase):
             self.assertEqual(process.returncode, 0, process.stderr)
             payload = json.loads(process.stdout)
             result = payload["result"]["structuredContent"]
-            self.assertGreaterEqual(result["count"], 1)
+            self.assertEqual(result["count"], len(result["entries"]))
             self.assertTrue(all("grafana" in entry["service_ids"] for entry in result["entries"]))
             events = self.read_audit_events(audit_path)
             self.assertEqual(events[0]["tool"], "get-deployment-history")

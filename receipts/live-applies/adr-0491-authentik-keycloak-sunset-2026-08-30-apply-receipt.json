@@ -1,0 +1,68 @@
+{
+  "adr": "0491",
+  "applied_on": "2026-08-31",
+  "environment": "production",
+  "evidence_refs": [
+    "docs/adr/0491-authentik-for-operator-and-agent-sso.md",
+    "docs/workstreams/adr-0491-authentik-keycloak-sunset.md",
+    "docs/runbooks/configure-authentik.md",
+    "workstreams/active/adr-0491-authentik-keycloak-sunset-2026-08-30.yaml"
+  ],
+  "notes": [
+    "The normal generic GlitchTip wrapper stopped during preflight because of an unrelated stale controller DNS credential. The scoped runtime converge was then run with the same service selection and verified successfully; no credential material is recorded here.",
+    "Keycloak compose definitions were archived on both former runtime hosts before shutdown. Runtime data and archives remain retained for the governed rollback window; no volumes were purged.",
+    "The former Keycloak hostname no longer routes to Keycloak. Separate chat and structured-search degradation were observed but are outside the identity-cutover acceptance criteria."
+  ],
+  "receipt_id": "adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt",
+  "recorded_at": "2026-08-31T11:53:12Z",
+  "recorded_by": "codex",
+  "recorded_on": "2026-08-31",
+  "repo_version_context": "0.179.45",
+  "schema_version": "1.0.0",
+  "source_commit": "e3d3a1a43b96a80dbf1419796794d4de45b8b969",
+  "summary": "Completed the live-verified Authentik consumer convergence, protected-edge cutover, and guarded Keycloak retirement while retaining reversible archive evidence.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "runtime-control",
+      "vmid": "192"
+    },
+    {
+      "kind": "vm",
+      "name": "docker-runtime",
+      "vmid": "120"
+    },
+    {
+      "kind": "vm",
+      "name": "nginx-edge",
+      "vmid": "110"
+    },
+    {
+      "kind": "bare-metal",
+      "name": "proxmox-host"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Authentik readiness and declared identity reconciliation",
+      "observed": "Readiness, signing-key discovery, managed OAuth provider/client reconciliation, and identity/group reconciliation completed without duplicate managed objects.",
+      "result": "pass"
+    },
+    {
+      "check": "Protected application and API authentication paths",
+      "observed": "The governed browser authorization-code, protected-edge, Grafana Generic OAuth, GlitchTip OIDC/event, and API bearer-token paths passed; invalid and retired-issuer input was rejected.",
+      "result": "pass"
+    },
+    {
+      "check": "Keycloak retirement safety",
+      "observed": "Compose definitions were archived on both former runtime hosts before shutdown; no active Keycloak container, edge route, health probe, or dependency contract remains, and data volumes were retained.",
+      "result": "pass"
+    },
+    {
+      "check": "Operator SSH recovery",
+      "observed": "The supplied operator public key was installed through the verified bootstrap path with SSH service configuration and permissions checked; no key material is recorded.",
+      "result": "pass"
+    }
+  ],
+  "workflow_id": "converge-authentik"
+}

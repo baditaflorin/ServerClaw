@@ -72,16 +72,18 @@ REQUIREMENTS_PATH = REPO_ROOT / "requirements" / "api-gateway.txt"
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 
 
-def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
+def test_api_gateway_role_uses_authentik_oidc_endpoints() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
-    assert "api_gateway_keycloak_internal_base_url" in defaults
-    assert "http://127.0.0.1:18080" in defaults
-    assert "api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080" in defaults
-    assert "api_gateway_keycloak_verify_ready_retries: 60" in defaults
-    assert "api_gateway_keycloak_verify_ready_delay: 5" in defaults
-    assert "api_gateway_keycloak_verify_token_retries: 18" in defaults
-    assert "api_gateway_keycloak_verify_token_delay: 5" in defaults
+    assert "api_gateway_authentik_provider_slug: agent-hub" in defaults
+    assert "api_gateway_authentik_jwks_url" in defaults
+    assert "api_gateway_authentik_issuer_url" in defaults
+    assert "api_gateway_authentik_discovery_url" in defaults
+    assert "api_gateway_authentik_token_url" in defaults
+    assert "api_gateway_authentik_verify_ready_retries: 60" in defaults
+    assert "api_gateway_authentik_verify_ready_delay: 5" in defaults
+    assert "api_gateway_authentik_verify_token_retries: 18" in defaults
+    assert "api_gateway_authentik_verify_token_delay: 5" in defaults
     assert "api_gateway_runtime_recovery_probe_retries: 18" in defaults
     assert "api_gateway_runtime_recovery_probe_delay: 5" in defaults
     assert "api_gateway_typesense_verify_retries: 24" in defaults
@@ -90,8 +92,7 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_structured_search_verify_delay: 5" in defaults
     assert "api_gateway_tree_sync_become_timeout: 60" in defaults
     assert "api_gateway_network_mode: host" in defaults
-    assert "api_gateway_keycloak_docker_network: keycloak_default" in defaults
-    assert "/realms/lv3/protocol/openid-connect/certs" in defaults
+    assert "{{ authentik_oidc_provider_base_url }}/{{ api_gateway_authentik_provider_slug }}/jwks/" in defaults
     assert "api_gateway_nats_url: nats://127.0.0.1:4222" in defaults
     assert "/.local/nats/jetstream-admin-password.txt" in defaults
     assert "api_gateway_ledger_event_types_src" in defaults
@@ -113,7 +114,7 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
     assert "api_gateway_service_topology" in defaults
-    assert "hostvars['proxmox-host'].platform_service_topology.api_gateway" in defaults
+    assert "platform_service_topology | service_topology_get('api_gateway')" in defaults
     assert "api_gateway_windmill_service_topology" in defaults
     assert "api_gateway_windmill_base_url" in defaults
     assert "api_gateway_windmill_service_topology.private_ip" in defaults
@@ -125,11 +126,20 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     )
     assert "api_gateway_graph_dsn" in defaults
     assert 'api_gateway_world_state_dsn: "{{ api_gateway_graph_dsn }}"' in defaults
-    assert "/.local/dify/tools-api-key.txt" in defaults
+    assert (
+        'api_gateway_dify_tools_api_key_local_file: "{{ api_gateway_shared_local_root }}/dify/tools-api-key.txt"'
+        in defaults
+    )
     assert "api_gateway_dify_tools_api_key_header: X-LV3-Dify-Api-Key" in defaults
-    assert "/.local/lago/producer-catalog.json" in defaults
-    assert "/.local/lago/org-api-key.txt" in defaults
-    assert "hostvars['proxmox-host'].platform_service_topology.lago" in defaults
+    assert (
+        'api_gateway_billing_ingest_producers_local_file: "{{ api_gateway_shared_local_root }}/lago/producer-catalog.json"'
+        in defaults
+    )
+    assert (
+        'api_gateway_lago_org_api_key_local_file: "{{ api_gateway_shared_local_root }}/lago/org-api-key.txt"'
+        in defaults
+    )
+    assert "hostvars[platform_topology_host].platform_service_topology.lago" in defaults
     assert (
         "api_gateway_billing_api_base_url: \"{{ api_gateway_lago_service_topology.urls.api | default('') }}\""
         in defaults
@@ -313,31 +323,29 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "Retry the API gateway stack start after Docker engine recovery" in tasks
     assert "/v1/platform/runtime-assurance" in verify_tasks
     assert "runtime assurance endpoint returns a report envelope" in verify_tasks
-    assert "Check whether the controller-local legacy platform context token exists" in verify_tasks
-    assert "Read the controller-local legacy platform context token" in verify_tasks
-    assert "Default the Keycloak API gateway verification token request status" in verify_tasks
-    assert "Record whether the Keycloak verification token request returned an access token" in verify_tasks
-    assert "Mark the Keycloak verification token request as unavailable" in verify_tasks
-    assert "Record the API gateway verification bearer token from the legacy platform context" in verify_tasks
-    assert "API gateway verification requires either the Keycloak client secret or the" in verify_tasks
-    assert "Default the local Keycloak discovery endpoint as unavailable for API gateway verification" in verify_tasks
+    assert "Check whether the controller-local API gateway verification client secret exists" in verify_tasks
+    assert "Default the Authentik API gateway verification token request status" in verify_tasks
+    assert "Record whether the Authentik verification token request returned an access token" in verify_tasks
+    assert "Mark the Authentik verification token request as unavailable" in verify_tasks
+    assert "Record the API gateway verification bearer token from Authentik" in verify_tasks
+    assert "API gateway verification requires the Authentik machine client credential" in verify_tasks
+    assert "Default the local Authentik discovery endpoint as unavailable for API gateway verification" in verify_tasks
     assert "tar --no-same-owner --no-same-permissions" in sync_tree_tasks
-    assert "api_gateway_keycloak_retry_after_seconds: 30" in defaults
-    assert "Request a Keycloak bearer token for API gateway verification" in verify_tasks
-    assert "Wait for the local Keycloak realm discovery endpoint used by API gateway verification" in verify_tasks
-    assert "Record the local Keycloak discovery endpoint as available for API gateway verification" in verify_tasks
-    assert "Mark the local Keycloak discovery endpoint as unavailable for API gateway verification" in verify_tasks
-    assert "API gateway verification could not reach the local Keycloak discovery endpoint" in verify_tasks
-    assert "/realms/lv3/.well-known/openid-configuration" in verify_tasks
-    assert "api_gateway_keycloak_verify_discovery.json.issuer == api_gateway_keycloak_issuer_url" in verify_tasks
-    assert "api_gateway_keycloak_verify_discovery_available" in verify_tasks
-    assert "if api_gateway_platform_context_token_stat.stat.exists" in verify_tasks
+    assert "api_gateway_authentik_retry_after_seconds: 30" in defaults
+    assert "Request an Authentik bearer token for API gateway verification" in verify_tasks
+    assert "Wait for the Authentik discovery endpoint used by API gateway verification" in verify_tasks
+    assert "Record the Authentik discovery endpoint as available for API gateway verification" in verify_tasks
+    assert "Mark the Authentik discovery endpoint as unavailable for API gateway verification" in verify_tasks
+    assert "API gateway verification could not reach the Authentik discovery endpoint" in verify_tasks
+    assert 'url: "{{ api_gateway_authentik_discovery_url }}"' in verify_tasks
+    assert "api_gateway_authentik_verify_discovery.json.issuer == api_gateway_authentik_issuer_url" in verify_tasks
+    assert "api_gateway_authentik_verify_discovery_available" in verify_tasks
     assert 'retries: "{{ api_gateway_runtime_recovery_probe_retries }}"' in verify_tasks
     assert 'delay: "{{ api_gateway_runtime_recovery_probe_delay }}"' in verify_tasks
     assert "until: api_gateway_auth_check.status == 401" in verify_tasks
-    assert 'delay: "{{ api_gateway_keycloak_verify_ready_delay }}"' in verify_tasks
-    assert 'retries: "{{ api_gateway_keycloak_verify_token_retries }}"' in verify_tasks
-    assert 'delay: "{{ api_gateway_keycloak_verify_token_delay }}"' in verify_tasks
+    assert 'delay: "{{ api_gateway_authentik_verify_ready_delay }}"' in verify_tasks
+    assert 'retries: "{{ api_gateway_authentik_verify_token_retries }}"' in verify_tasks
+    assert 'delay: "{{ api_gateway_authentik_verify_token_delay }}"' in verify_tasks
     assert "until: api_gateway_verify_token_response.status == 200" in verify_tasks
     assert "Wait for the Typesense backend used by API gateway structured search verification" in verify_tasks
     assert 'X-TYPESENSE-API-KEY: "{{ api_gateway_resolved_typesense_api_key }}"' in verify_tasks
@@ -397,7 +405,7 @@ def test_api_gateway_role_syncs_the_typesense_platform_catalog() -> None:
     assert "api_gateway_typesense_service_topology" in defaults
     assert "api_gateway_typesense_controller_url" in defaults
     assert "platform_service_topology | service_topology_get('typesense')" in defaults
-    assert "hostvars['proxmox-host'].typesense_host_proxy_port" in defaults
+    assert "hostvars[platform_topology_host].typesense_host_proxy_port" in defaults
     assert 'api_gateway_typesense_base_url: ""' in defaults
     assert "api_gateway_typesense_collection: platform-services" in defaults
     assert "api_gateway_typesense_api_key_local_file" in defaults
@@ -407,8 +415,8 @@ def test_api_gateway_role_syncs_the_typesense_platform_catalog() -> None:
     assert "api_gateway_resolved_typesense_api_key" in tasks
     assert "api_gateway_typesense_service_topology.urls.internal" in tasks
     assert "else 'http://127.0.0.1:8108'" in tasks
-    assert "Assert the API gateway structured-search Typesense connection settings resolved" in tasks
-    assert "Check whether the controller-local Typesense API key exists" in tasks
+    assert "Warn when Typesense connection settings are missing (structured-search will be degraded)" in tasks
+    assert "common_check_local_secrets_files" in tasks
     assert "Wait for the controller-visible Typesense health endpoint" in tasks
     assert "Sync the Typesense platform-services collection from the service catalog" in tasks
     assert "register: api_gateway_env_template" in tasks

@@ -15,7 +15,7 @@ The browser runner workflow converges:
 ## Preconditions
 
 - `bootstrap_ssh_private_key` is present under `.local/ssh/`
-- `keycloak_agent_client_secret` is present under `.local/keycloak/`
+- `authentik_agent_client_secret` is present under `.local/authentik/`
 - the shared API gateway at `api.example.com` is already healthy enough to accept a route replay
 - Dify is already deployed if you intend to verify the governed tool-provider sync end to end
 

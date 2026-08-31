@@ -2,6 +2,63 @@ groups:
   - name: slo_recording_rules
     interval: 5m
     rules:
+# BEGIN SERVICE: authentik
+      - record: slo:authentik_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="authentik-availability"}[5m])
+        labels:
+          slo_id: authentik-availability
+          service_id: authentik
+          indicator: availability
+      - record: slo:authentik_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="authentik-availability"}[1h])
+        labels:
+          slo_id: authentik-availability
+          service_id: authentik
+          indicator: availability
+      - record: slo:authentik_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="authentik-availability"}[30d])
+        labels:
+          slo_id: authentik-availability
+          service_id: authentik
+          indicator: availability
+      - record: slo:authentik_availability:error_rate_5m
+        expr: 1 - slo:authentik_availability:success_ratio_5m
+        labels:
+          slo_id: authentik-availability
+          service_id: authentik
+          indicator: availability
+      - record: slo:authentik_availability:error_rate_1h
+        expr: 1 - slo:authentik_availability:success_ratio_1h
+        labels:
+          slo_id: authentik-availability
+          service_id: authentik
+          indicator: availability
+      - record: slo:authentik_availability:error_rate_30d
+        expr: 1 - slo:authentik_availability:success_ratio_30d
+        labels:
+          slo_id: authentik-availability
+          service_id: authentik
+          indicator: availability
+      - record: slo:authentik_availability:budget_remaining
+        expr: clamp_min(1 - (slo:authentik_availability:error_rate_30d / 0.005000), 0)
+        labels:
+          slo_id: authentik-availability
+          service_id: authentik
+          indicator: availability
+      - record: slo:authentik_availability:burn_rate_1h
+        expr: slo:authentik_availability:error_rate_1h / 0.005000
+        labels:
+          slo_id: authentik-availability
+          service_id: authentik
+          indicator: availability
+      - record: slo:authentik_availability:time_to_budget_exhaustion_days
+        expr: (slo:authentik_availability:budget_remaining * 30) / clamp_min(slo:authentik_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: authentik-availability
+          service_id: authentik
+          indicator: availability
+# END SERVICE: authentik
 # BEGIN SERVICE: browser_runner
       - record: slo:browser_runner_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="browser-runner-availability"}[5m])
@@ -745,123 +802,6 @@ groups:
           service_id: homepage
           indicator: availability
 # END SERVICE: homepage
-# BEGIN SERVICE: keycloak
-      - record: slo:keycloak_availability:success_ratio_5m
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="keycloak-availability"}[5m])
-        labels:
-          slo_id: keycloak-availability
-          service_id: keycloak
-          indicator: availability
-      - record: slo:keycloak_availability:success_ratio_1h
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="keycloak-availability"}[1h])
-        labels:
-          slo_id: keycloak-availability
-          service_id: keycloak
-          indicator: availability
-      - record: slo:keycloak_availability:success_ratio_30d
-        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="keycloak-availability"}[30d])
-        labels:
-          slo_id: keycloak-availability
-          service_id: keycloak
-          indicator: availability
-      - record: slo:keycloak_availability:error_rate_5m
-        expr: 1 - slo:keycloak_availability:success_ratio_5m
-        labels:
-          slo_id: keycloak-availability
-          service_id: keycloak
-          indicator: availability
-      - record: slo:keycloak_availability:error_rate_1h
-        expr: 1 - slo:keycloak_availability:success_ratio_1h
-        labels:
-          slo_id: keycloak-availability
-          service_id: keycloak
-          indicator: availability
-      - record: slo:keycloak_availability:error_rate_30d
-        expr: 1 - slo:keycloak_availability:success_ratio_30d
-        labels:
-          slo_id: keycloak-availability
-          service_id: keycloak
-          indicator: availability
-      - record: slo:keycloak_availability:budget_remaining
-        expr: clamp_min(1 - (slo:keycloak_availability:error_rate_30d / 0.003000), 0)
-        labels:
-          slo_id: keycloak-availability
-          service_id: keycloak
-          indicator: availability
-      - record: slo:keycloak_availability:burn_rate_1h
-        expr: slo:keycloak_availability:error_rate_1h / 0.003000
-        labels:
-          slo_id: keycloak-availability
-          service_id: keycloak
-          indicator: availability
-      - record: slo:keycloak_availability:time_to_budget_exhaustion_days
-        expr: (slo:keycloak_availability:budget_remaining * 30) / clamp_min(slo:keycloak_availability:burn_rate_1h,
-          0.001)
-        labels:
-          slo_id: keycloak-availability
-          service_id: keycloak
-          indicator: availability
-# END SERVICE: keycloak
-# BEGIN SERVICE: keycloak
-      - record: slo:keycloak_latency:success_ratio_5m
-        expr: avg_over_time((probe_duration_seconds{job="slo-blackbox",slo_id="keycloak-latency"}
-          < bool 0.5)[5m:])
-        labels:
-          slo_id: keycloak-latency
-          service_id: keycloak
-          indicator: latency
-      - record: slo:keycloak_latency:success_ratio_1h
-        expr: avg_over_time((probe_duration_seconds{job="slo-blackbox",slo_id="keycloak-latency"}
-          < bool 0.5)[1h:])
-        labels:
-          slo_id: keycloak-latency
-          service_id: keycloak
-          indicator: latency
-      - record: slo:keycloak_latency:success_ratio_30d
-        expr: avg_over_time((probe_duration_seconds{job="slo-blackbox",slo_id="keycloak-latency"}
-          < bool 0.5)[30d:])
-        labels:
-          slo_id: keycloak-latency
-          service_id: keycloak
-          indicator: latency
-      - record: slo:keycloak_latency:error_rate_5m
-        expr: 1 - slo:keycloak_latency:success_ratio_5m
-        labels:
-          slo_id: keycloak-latency
-          service_id: keycloak
-          indicator: latency
-      - record: slo:keycloak_latency:error_rate_1h
-        expr: 1 - slo:keycloak_latency:success_ratio_1h
-        labels:
-          slo_id: keycloak-latency
-          service_id: keycloak
-          indicator: latency
-      - record: slo:keycloak_latency:error_rate_30d
-        expr: 1 - slo:keycloak_latency:success_ratio_30d
-        labels:
-          slo_id: keycloak-latency
-          service_id: keycloak
-          indicator: latency
-      - record: slo:keycloak_latency:budget_remaining
-        expr: clamp_min(1 - (slo:keycloak_latency:error_rate_30d / 0.050000), 0)
-        labels:
-          slo_id: keycloak-latency
-          service_id: keycloak
-          indicator: latency
-      - record: slo:keycloak_latency:burn_rate_1h
-        expr: slo:keycloak_latency:error_rate_1h / 0.050000
-        labels:
-          slo_id: keycloak-latency
-          service_id: keycloak
-          indicator: latency
-      - record: slo:keycloak_latency:time_to_budget_exhaustion_days
-        expr: (slo:keycloak_latency:budget_remaining * 30) / clamp_min(slo:keycloak_latency:burn_rate_1h,
-          0.001)
-        labels:
-          slo_id: keycloak-latency
-          service_id: keycloak
-          indicator: latency
-# END SERVICE: keycloak
 # BEGIN SERVICE: label_studio
       - record: slo:label_studio_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="label-studio-availability"}[5m])

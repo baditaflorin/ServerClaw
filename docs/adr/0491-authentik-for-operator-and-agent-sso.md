@@ -1,10 +1,10 @@
 # ADR 0491: Authentik For Operator And Agent SSO
 
 - Status: Accepted
-- Implementation Status: Partial implementation live applied; broader client migration remains pending
-- Implemented In Repo Version: not yet
+- Implementation Status: Live applied; repository integration is ready for release merge
+- Implemented In Repo Version: 0.179.46
 - Implemented In Platform Version: not yet
-- Implemented On: 2026-08-30
+- Implemented On: 2026-08-31
 - Date: 2026-08-27
 
 ## Context
@@ -68,7 +68,7 @@ Initial integration targets (the 9 confirmed-real clients from the audit above):
 ## Consequences
 
 - Identity broker configuration becomes git-native (Blueprint YAML) instead of living only in a runtime realm export.
-- The `identity_provider` capability contract's `current_selection` will need updating once Authentik is live and verified (Phase 4, not this ADR's implementation).
+- The `identity_provider` capability contract now selects Authentik and the active catalog, health, SLO, and dependency records name it as the identity service.
 - Real users and confidential clients require a coordinated, one-by-one cutover; this is not a same-day flip.
 - Ghost OIDC client registrations (`dify`, `directus`, `paperless`, `superset`, `grist`, `langfuse`, `nomad`) do not need to be recreated in Authentik at all — they were never backing a real integration.
 
@@ -80,6 +80,6 @@ Initial integration targets (the 9 confirmed-real clients from the audit above):
 
 ## Implementation Notes
 
-- Phase 1 is live: Authentik runs on `runtime-control`, fully parallel to the still-working Keycloak, using the shared OpenBao sidecar mechanism per ADR 0077.
-- The scoped initial Phase 2 is live-verified for GlitchTip and Outline. It includes a fresh operator browser authorization-code login into the protected Outline workspace, while Keycloak discovery remains healthy as the per-client rollback broker.
-- Subsequent client migration, human-operator cutover, MFA re-enrolment, and Keycloak decommission remain follow-on work. Each requires its own approval, verification, and rollback checkpoint; see this ADR's Phase 2 workstream document.
+- Phases 1–4 are live as of 2026-08-31. Authentik runs on the designated identity runtime, reconciles the declared OAuth clients and identities, and is the issuer used by active OIDC consumers and the shared edge proxy.
+- Live verification covered Authentik readiness and signing material, provider reconciliation, an operator authorization-code flow, protected-edge redirects, API bearer-token acceptance and rejection behavior, Grafana OAuth redirect, and GlitchTip OIDC plus event-ingestion checks.
+- The retired Keycloak compose stacks were archived on each former runtime host and stopped only after those checks passed. Runtime volumes and archive material remain retained for the documented rollback window; no active Keycloak container, edge route, health probe, or dependency contract remains.

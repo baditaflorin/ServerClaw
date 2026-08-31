@@ -12,7 +12,7 @@ Dependency graph that drives the wave ordering:
                                    guest-access touches every host)
   Wave 2 — [postgres || backup || step-ca]  : 3 different VMs, no deps
   Wave 3 — openbao              : runtime-control, depends on step-ca TLS cert
-  Wave 4 — [minio || keycloak]  : docker-runtime vs runtime-control, both
+  Wave 4 — [minio || authentik]  : docker-runtime vs runtime-control, both
                                    depend only on openbao+postgres (wave 2+3)
   Wave 5 — observability        : monitoring VM + per-guest log shippers
   Wave 6 — automation           : gitea+windmill (runtime-control) + nomad (monitoring)
@@ -81,7 +81,7 @@ WAVES: list[tuple[str, list[tuple[str, str]]]] = [
         "4-services",
         [
             ("minio", "services/minio.yml"),
-            ("keycloak", "services/keycloak.yml"),
+            ("authentik", "services/authentik.yml"),
         ],
     ),
     ("5-observability", [("observability", "groups/observability.yml")]),

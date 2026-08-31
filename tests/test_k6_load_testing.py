@@ -678,12 +678,12 @@ def test_publish_regression_event_fails_fast_when_nats_endpoint_is_unreachable(m
     with pytest.raises(RuntimeError, match="timed out"):
         k6_load_testing.publish_regression_event(
             repo_root=tmp_path,
-            service_id="keycloak",
+            service_id="authentik",
             scenario="load",
-            receipt_path=tmp_path / "receipts" / "k6" / "load-keycloak.json",
+            receipt_path=tmp_path / "receipts" / "k6" / "load-authentik.json",
             regression={
                 "checked": True,
-                "baseline_receipt": "receipts/k6/load-keycloak-previous.json",
+                "baseline_receipt": "receipts/k6/load-authentik-previous.json",
                 "baseline_p95_ms": 10.0,
                 "current_p95_ms": 25.0,
                 "regression_ratio": 1.5,
@@ -737,7 +737,7 @@ def test_build_receipts_keeps_passed_result_when_only_nats_regression_notificati
         "build_regression_payload",
         lambda **_kwargs: {
             "checked": True,
-            "baseline_receipt": "receipts/k6/load-keycloak-previous.json",
+            "baseline_receipt": "receipts/k6/load-authentik-previous.json",
             "baseline_p95_ms": 10.0,
             "current_p95_ms": 25.0,
             "regression_ratio": 1.5,
@@ -758,12 +758,12 @@ def test_build_receipts_keeps_passed_result_when_only_nats_regression_notificati
 
     summary = {
         "metrics": {
-            "checks{service_id:keycloak}": {
+            "checks{service_id:authentik}": {
                 "passes": 10,
                 "fails": 0,
                 "value": 1,
             },
-            "http_req_duration{service_id:keycloak}": {
+            "http_req_duration{service_id:authentik}": {
                 "p(95)": 25.0,
                 "avg": 20.0,
                 "max": 30.0,
@@ -772,12 +772,12 @@ def test_build_receipts_keeps_passed_result_when_only_nats_regression_notificati
     }
     targets = [
         {
-            "service_id": "keycloak",
-            "service_name": "Keycloak",
-            "target_url": "https://sso.example.com/realms/lv3/.well-known/openid-configuration",
-            "availability_slo_id": "keycloak-availability",
+            "service_id": "authentik",
+            "service_name": "Authentik",
+            "target_url": "https://id.example.com/-/health/ready/",
+            "availability_slo_id": "authentik-availability",
             "availability_objective_percent": 99.7,
-            "latency_slo_id": "keycloak-latency",
+            "latency_slo_id": None,
             "latency_threshold_ms": 500.0,
             "vus": 5,
             "duration": "5m",

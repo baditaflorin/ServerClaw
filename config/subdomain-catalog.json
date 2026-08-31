@@ -119,7 +119,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "analytics.example.com",
@@ -136,7 +136,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "The dashboard is protected by the shared edge oauth2-proxy and Keycloak flow while /js/, /api/event, and health endpoints stay public for tracker delivery and probe traffic."
+      "notes": "The dashboard is protected by the shared edge oauth2-proxy and Authentik flow while /js/, /api/event, and health endpoints stay public for tracker delivery and probe traffic."
     },
     {
       "fqdn": "annotate.example.com",
@@ -153,7 +153,7 @@
         "auto_renew": true,
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/"
       },
-      "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Keycloak boundary; repo-managed Label Studio tokens remain the current app-local automation path."
+      "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Authentik boundary; repo-managed Label Studio tokens remain the current app-local automation path."
     },
     {
       "fqdn": "api.example.com",
@@ -206,7 +206,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Keycloak OIDC client."
+      "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Authentik OIDC client."
     },
     {
       "fqdn": "billing.example.com",
@@ -273,7 +273,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "chat.example.com",
@@ -290,7 +290,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "LibreChat is published through the shared NGINX edge and carries the interactive ServerClaw chat surface plus its in-app Keycloak OIDC flow."
+      "notes": "LibreChat is published through the shared NGINX edge and carries the interactive ServerClaw chat surface plus its in-app Authentik OIDC flow."
     },
     {
       "fqdn": "ci.example.com",
@@ -358,7 +358,7 @@
         "auto_renew": true,
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/"
       },
-      "notes": "The shared NGINX edge publishes data.example.com directly to Directus. Browser users authenticate upstream through Keycloak and API consumers authenticate with Directus-issued bearer tokens."
+      "notes": "The shared NGINX edge publishes data.example.com directly to Directus. Browser users authenticate upstream through Authentik and API consumers authenticate with Directus-issued bearer tokens."
     },
     {
       "fqdn": "database.example.com",
@@ -407,7 +407,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "draw.example.com",
@@ -441,7 +441,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge while GlitchTip itself delegates browser sign-in to the repo-managed Keycloak OIDC flow; health and DSN ingestion remain intentionally reachable for probes and SDK traffic."
+      "notes": "Published through the shared NGINX edge while GlitchTip itself delegates browser sign-in to the repo-managed Authentik OIDC flow; health and DSN ingestion remain intentionally reachable for probes and SDK traffic."
     },
     {
       "fqdn": "example.com",
@@ -497,7 +497,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Keycloak."
+      "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Authentik."
     },
     {
       "fqdn": "git.example.com",
@@ -563,7 +563,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Keycloak OIDC client."
+      "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Authentik OIDC client."
     },
     {
       "fqdn": "headscale.example.com",
@@ -597,7 +597,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "id.example.com",
@@ -614,7 +614,7 @@
         "auto_renew": true,
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/"
       },
-      "notes": "Deployed at the dedicated id.example.com hostname, separate from sso.example.com, so Keycloak's edge publication is completely unaffected during the parallel rollout (ADR 0491)."
+      "notes": "Deployed at the dedicated id.example.com hostname as the platform's Authentik identity surface (ADR 0491)."
     },
     {
       "fqdn": "langfuse.example.com",
@@ -664,7 +664,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "mail.example.com",
@@ -749,7 +749,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
+      "notes": "The editor is protected by the shared oauth2-proxy and Authentik edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
     },
     {
       "fqdn": "nginx.example.com",
@@ -799,7 +799,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Interactive runtime is live behind oauth2-proxy and Keycloak on the shared NGINX edge."
+      "notes": "Interactive runtime is live behind oauth2-proxy and Authentik on the shared NGINX edge."
     },
     {
       "fqdn": "ops.staging.example.com",
@@ -883,7 +883,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Repo intake webhook service. Published through the shared NGINX edge and gated behind Keycloak oauth2-proxy."
+      "notes": "Repo intake webhook service. Published through the shared NGINX edge and gated behind Authentik oauth2-proxy."
     },
     {
       "fqdn": "repowise.example.com",
@@ -952,39 +952,6 @@
       "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime."
     },
     {
-      "fqdn": "sso.example.com",
-      "service_id": "keycloak",
-      "environment": "production",
-      "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "203.0.113.1",
-      "target_port": 443,
-      "owner_adr": "0056",
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
-        "auto_renew": true
-      }
-    },
-    {
-      "fqdn": "sso.staging.example.com",
-      "service_id": "keycloak",
-      "environment": "staging",
-      "status": "planned",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "203.0.113.1",
-      "target_port": 443,
-      "owner_adr": "0072",
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
-        "auto_renew": true
-      },
-      "notes": "Planned staging identity hostname on the shared NGINX edge."
-    },
-    {
       "fqdn": "status.example.com",
       "service_id": "status_page",
       "environment": "production",
@@ -1015,7 +982,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Authentik oauth2-proxy flow."
     },
     {
       "fqdn": "uptime.example.com",
@@ -1082,7 +1049,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge while Outline itself delegates browser authentication to the repo-managed Keycloak OIDC client."
+      "notes": "Published through the shared NGINX edge while Outline itself delegates browser authentication to the repo-managed Authentik OIDC client."
     }
   ]
 }

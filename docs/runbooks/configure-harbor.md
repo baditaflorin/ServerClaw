@@ -8,7 +8,7 @@ It covers:
 
 - Harbor runtime deployment on `runtime-control`
 - shared edge publication for `https://registry.example.com`
-- repo-managed Keycloak OIDC bootstrap for Harbor operators
+- repo-managed Authentik OIDC bootstrap for Harbor operators
 - repo-managed `check-runner` Harbor project bootstrap
 - project robot credentials mirrored under `.local/harbor/`
 - migration and validation of the existing check-runner images through Harbor
@@ -19,7 +19,7 @@ Before running the workflow, confirm:
 
 1. the controller has the SSH key at `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519`
 2. `runtime-control`, `docker-build`, and `nginx-edge` are reachable through the Proxmox jump path
-3. Keycloak is already live on `runtime-control`
+3. Authentik is already live on `runtime-control`
 4. `HETZNER_DNS_API_TOKEN` is available in the shell that runs the converge
 
 ## Entrypoints
@@ -37,8 +37,8 @@ The workflow manages these live surfaces:
 - Harbor data under `/opt/harbor/data`
 - Harbor logs under `/var/log/harbor`
 - shared public hostname `https://registry.example.com`
-- Keycloak confidential client `harbor`
-- Keycloak group `harbor-admins`
+- Authentik confidential client `harbor`
+- Authentik group `harbor-admins`
 - Harbor project `check-runner`
 - Harbor project robot account for `check-runner` image publication
 
@@ -49,9 +49,9 @@ After a successful converge, these controller-local files should exist:
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/harbor/admin-password.txt`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/harbor/database-password.txt`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/harbor/check-runner-robot.json`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/keycloak/harbor-client-secret.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/authentik/harbor-client-secret.txt`
 
-Treat the `.local/harbor/` subtree and the Harbor Keycloak client secret as recovery material and keep them out of git.
+Treat the `.local/harbor/` subtree and the Harbor Authentik client secret as recovery material and keep them out of git.
 
 ## Verification
 
@@ -73,4 +73,4 @@ Run these checks after converge:
 
 - Harbor currently uses the local filesystem backend. Migrating Harbor blob storage to the object-storage design from ADR 0203 remains a later mainline step.
 - The `check-runner` Harbor project is intentionally public for pull compatibility during the initial migration, while push remains scoped to the generated project robot credential.
-- Human operator browser sign-in is delegated to Keycloak OIDC; API bootstrap continues to use the Harbor `admin` credential mirrored under `.local/harbor/`.
+- Human operator browser sign-in is delegated to Authentik OIDC; API bootstrap continues to use the Harbor `admin` credential mirrored under `.local/harbor/`.

@@ -175,14 +175,14 @@ post_conditions:
     expect_status: 401
     critical: false   # informational; some deploys may allow anonymous pulls
 
-  # --- Identity / Keycloak --------------------------------------------
+  # --- Identity / Authentik -------------------------------------------
 
-  - id: keycloak.realm-discovery
-    description: Keycloak realm discovery endpoint returns a valid issuer
-    after_step: converge-keycloak
+  - id: authentik.provider-discovery
+    description: Authentik provider discovery endpoint returns a valid issuer
+    after_step: converge-authentik
     tags: [final-smoke]
     type: http
-    url: "https://sso.{apex}/realms/{apex_slug}/.well-known/openid-configuration"
+    url: "https://id.{apex}/application/o/ops-portal/.well-known/openid-configuration"
     expect_status: 200
     expect_body_contains: "issuer"
     timeout_s: 10

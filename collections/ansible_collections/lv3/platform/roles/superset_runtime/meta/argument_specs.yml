@@ -63,7 +63,7 @@ argument_specs:
       superset_postgres_database_catalog_local_file:
         type: path
         required: true
-      superset_keycloak_client_secret_local_file:
+      superset_authentik_client_secret_local_file:
         type: path
         required: true
       superset_controller_bootstrap_script_local_path:

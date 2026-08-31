@@ -4,7 +4,7 @@ service_dns_fqdn: paperless.{{ platform_domain }}
 service_postgres_role: lv3.platform.paperless_postgres
 service_runtime_roles:
   - lv3.platform.docker_runtime
-  - lv3.platform.keycloak_runtime
+  - lv3.platform.authentik_runtime
   - lv3.platform.paperless_runtime
   - lv3.platform.api_gateway_runtime
 service_needs_dns: true

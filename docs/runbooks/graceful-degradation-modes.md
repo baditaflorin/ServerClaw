@@ -52,25 +52,25 @@ curl -H "Authorization: Bearer $LV3_TOKEN" https://api.example.com/v1/platform/h
 
 Expected:
 
-- the `api_gateway` service entry shows the declared `keycloak` and `nats` degradation modes
+- the `api_gateway` service entry shows the declared `authentik` and `nats` degradation modes
 - `/v1/platform/degradations` reports zero active degradations during steady state
 - the health payload shows `active_degradations: []` for `api_gateway` during steady state
 
-## Verify Keycloak Graceful Degradation
+## Verify Authentik Graceful Degradation
 
 1. Confirm the gateway has a warm JWKS cache by calling any authenticated `/v1/*` endpoint once.
-2. Temporarily make the Keycloak JWKS endpoint unreachable from the gateway container.
+2. Temporarily make the Authentik JWKS endpoint unreachable from the gateway container.
 3. Re-run an authenticated gateway request before the cached JWKS expires.
 
 Expected:
 
 - authenticated requests continue to succeed while the cached JWKS remains valid
-- `/v1/platform/degradations` reports an active `keycloak` degradation for `api_gateway`
+- `/v1/platform/degradations` reports an active `authentik` degradation for `api_gateway`
 - once the cache expires, authenticated requests fail fast with `503` and `Retry-After: 30` instead of timing out or returning an ambiguous `401`
 
 ## Recovery
 
-- restore Keycloak reachability
+- restore Authentik reachability
 - issue another authenticated gateway request to force a JWKS refresh
 - confirm `/v1/platform/degradations` is empty again
 - if `nats-outbox.jsonl` exists, confirm it drains after NATS publication succeeds again

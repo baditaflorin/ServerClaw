@@ -2,10 +2,9 @@
 
 ## Purpose and safety boundary
 
-This runbook converges the Authentik identity broker introduced by
+This runbook converges the Authentik identity broker selected by
 [ADR 0491](../adr/0491-authentik-for-operator-and-agent-sso.md). Authentik is
-deployed in parallel with Keycloak at `https://id.example.com`; the retained
-Keycloak realm at `https://sso.example.com` stays live as the rollback path.
+the authoritative platform identity provider at `https://id.example.com`.
 
 The workflow manages:
 
@@ -16,9 +15,9 @@ The workflow manages:
 - the repo-declared OAuth providers and applications in
   `config/authentik/oauth-clients.yaml`
 
-It does not decommission Keycloak, rotate an adopted Authentik secret, migrate
-the human operator, or authorize later ADR 0491 migration phases. During Phase
-2 it reconciles only the manifest clients explicitly selected by the role.
+It does not rotate an adopted Authentik secret or authorize an unreviewed
+identity-client change. It reconciles only the manifest clients explicitly
+selected by the role.
 
 ## Secret modes
 
@@ -65,7 +64,6 @@ export PLATFORM_TOPOLOGY_OVERLAY="${TOPOLOGY_FILE}"
 PLATFORM_DOMAIN="$(uv run --no-project --with pyyaml python -c \
   'import pathlib,sys,yaml; print(yaml.safe_load(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))["platform_domain"])' \
   "${IDENTITY_FILE}")"
-KEYCLOAK_REALM="${KEYCLOAK_REALM:-${PLATFORM_DOMAIN%%.*}}"
 ```
 
 Leave `PLATFORM_INVENTORY_OVERLAY` unset to use the committed private
@@ -98,15 +96,11 @@ Before the first adoption apply:
    verification in the apply receipt.
 4. Confirm `/opt/authentik/.env` is a non-empty, root-owned, non-symlink regular
    file with mode `0600`. Inspect metadata only; do not display its contents.
-5. Verify the current Authentik ready endpoint and retained Keycloak public
-   discovery endpoint. Stop if either is unhealthy:
+5. Verify the current Authentik ready endpoint. Stop if it is unhealthy:
 
    ```bash
    curl --fail --silent --show-error \
      "https://id.${PLATFORM_DOMAIN}/-/health/ready/" >/dev/null
-   curl --fail --silent --show-error \
-     "https://sso.${PLATFORM_DOMAIN}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration" \
-     >/dev/null
    ```
 
 The role-created `/opt/authentik/.env.pre-openbao-adoption` protects the legacy
@@ -222,23 +216,20 @@ uv run --no-project --with pyyaml python scripts/reconcile_authentik_oauth.py \
 
 ## Verification and evidence
 
-After the apply, verify both identity providers and record only non-secret
+After the apply, verify the identity provider and record only non-secret
 results:
 
 ```bash
 curl --fail --silent --show-error \
   "https://id.${PLATFORM_DOMAIN}/-/health/ready/" >/dev/null
-curl --fail --silent --show-error \
-  "https://sso.${PLATFORM_DOMAIN}/realms/${KEYCLOAK_REALM}/.well-known/openid-configuration" \
-  >/dev/null
 ```
 
 The receipt must include the source commit, lock IDs, backup and restore-check
 identifier, old and new immutable image IDs, preserved legacy-environment path,
 stable provider/application IDs, successful second no-change reconciliation,
-fresh OpenBao render evidence, Authentik health, and retained Keycloak public
-discovery health. Never include tokens, passwords, client secrets, rendered
-environments, or authorization URLs containing state.
+and fresh OpenBao render and Authentik-health evidence. Never include tokens,
+passwords, client secrets, rendered environments, or authorization URLs
+containing state.
 
 ### Browser sign-in and edge CSP
 
@@ -260,8 +251,7 @@ success result in the apply receipt.
 
 Rollback is ordered and preserves evidence:
 
-1. Stop the Authentik application containers if the new runtime is unhealthy;
-   do not alter Keycloak.
+1. Stop the Authentik application containers if the runtime is unhealthy.
 2. Preserve failed-run logs and metadata without secret values.
 3. Restore the last known-good compose definition and immutable Authentik
    images. If returning to the legacy compose contract, restore
@@ -271,12 +261,10 @@ Rollback is ordered and preserves evidence:
 4. Reuse the existing PostgreSQL bind mount when it is healthy. If it is not,
    restore the verified pre-apply `pbs_vm_192` recovery point before starting
    Authentik; never generate replacement secrets over the restored database.
-5. Verify Authentik readiness and the retained Keycloak public discovery
-   endpoint again. For a GlitchTip-only provider rollback, follow
-   [Configure GlitchTip](configure-glitchtip.md) and use its preserved Keycloak
-   client artifact. For an Outline-only provider rollback, follow
-   [Configure Outline](configure-outline.md) and select its preserved Keycloak
-   client variables without changing any other relying party.
+5. Verify Authentik readiness again. For a client-specific recovery, follow
+   that service's runbook and restore only its reviewed Authentik configuration.
+   The retired provider is an archive-only emergency recovery path and must not
+   be restarted as part of an ordinary service rollback.
 6. Mark the apply receipt failed or rolled back with the recovery evidence.
 
 Do not delete the adopted canonical files, OpenBao payload, provisioner

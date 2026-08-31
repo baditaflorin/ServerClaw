@@ -5,13 +5,13 @@ This runbook documents the repo-managed onboarding path introduced by ADR 0108.
 ## What This Controls
 
 - `config/operators.yaml` is the authoritative roster for human operators.
-- `scripts/operator_manager.py` applies that roster to Keycloak, OpenBao, step-ca, Tailscale, and Mattermost.
+- `scripts/operator_manager.py` applies that roster to Authentik, OpenBao, step-ca, Tailscale, and Mattermost.
 - Windmill wrappers live under `config/windmill/scripts/` so the same flow can run from the worker checkout after merge.
 
 ## Preconditions
 
 - `config/operators.yaml` validates.
-- `.local/keycloak/bootstrap-admin-password.txt` exists on the controller or Windmill worker.
+- `.local/authentik/bootstrap-token.txt` exists on the controller or Windmill worker.
 - `.local/openbao/init.json` exists on the controller or Windmill worker.
 - `make preflight WORKFLOW=operator-onboard` passes.
 - Optional but recommended:
@@ -40,7 +40,7 @@ python3 scripts/windmill_run_wait_result.py \
     "role": "operator",
     "ssh_key": "'"$(cat /tmp/alice.pub)"'",
     "operator_id": "alice-example",
-    "keycloak_username": "alice.example"
+    "authentik_username": "alice.example"
   }'
 ```
 
@@ -62,8 +62,8 @@ lv3 operator add \
 The workflow:
 
 1. normalizes the operator record into `config/operators.yaml`
-2. ensures the Keycloak realm roles and groups exist
-3. upserts the Keycloak user and assigns the ADR 0108 realm role
+2. ensures the Authentik groups exist
+3. upserts the Authentik user and assigns the ADR 0108 group set
 4. upserts the OpenBao entity and the repo-managed operator policies
 5. optionally calls the configured step-ca and Tailscale automation hooks
 6. posts a welcome summary to Mattermost when a webhook is configured
@@ -89,7 +89,7 @@ mutating controls.
 
 ## Post-Provisioning Activation
 
-Once the operator exists in Keycloak and the governed backend has returned the
+Once the operator exists in Authentik and the governed backend has returned the
 bootstrap credentials:
 
 1. have the operator sign in through the protected portal path at `ops.example.com`
@@ -144,8 +144,8 @@ python3 scripts/operator_manager.py onboard \
   --emit-json
 ```
 
-When the controller-side OpenBao or Windmill path is unavailable and you only need the
-Keycloak direct-API fallback from ADR 0317, use:
+When the controller-side OpenBao or Windmill path is unavailable and you only
+need the Authentik direct-API fallback, use:
 
 ```bash
 python3 scripts/provision_operator.py \
@@ -162,14 +162,12 @@ Notes:
 
 - `scripts/provision_operator.py` now resolves `.local/` from the shared repo root, so it is safe
   to run from a dedicated git worktree under `.worktrees/`.
-- When the public Keycloak edge is degraded but the legacy direct fallback lane on
-  `docker-runtime` is still healthy, forward `127.0.0.1:18080` from
-  `ops@10.10.10.20` and run the script with
-  `LV3_KEYCLOAK_URL=http://127.0.0.1:18080`.
-- If the controller-local bootstrap password file is stale relative to the live
-  Keycloak runtime, pass the current value ephemerally with
-  `LV3_KEYCLOAK_BOOTSTRAP_PASSWORD=...` instead of rewriting the shared secret
-  file first.
+- When the public Authentik edge is degraded but the runtime-local service is
+  healthy, use the approved SSH path and set `LV3_AUTHENTIK_URL` only for that
+  one command. Do not weaken host-key verification or rewrite shared secrets.
+- If the controller-local Authentik bootstrap-token file is stale, restore it
+  through the governed secret path before retrying; do not pass it in command
+  history or commit it.
 - If the controller-local transactional SMTP password file is stale relative to
   the live mail runtime, pass the current value ephemerally with
   `LV3_PLATFORM_SMTP_PASSWORD=...` instead of rewriting the shared secret file
@@ -214,7 +212,7 @@ make sync-operators
 - `python3 scripts/operator_access_inventory.py --id <operator-id>`
 - `make workflow-info WORKFLOW=operator-onboard`
 - `make workflow-info WORKFLOW=sync-operators`
-- `curl -fsS https://sso.example.com/realms/lv3/.well-known/openid-configuration >/dev/null`
+- `curl -fsS https://id.example.com/-/health/ready/ >/dev/null`
 - `curl -fsS http://100.64.0.1:8005/api/version`
 - `LOCAL_OVERLAY_ROOT="$(./scripts/resolve_local_overlay_root.sh)"; curl -s -H "Authorization: Bearer $(cat "${LOCAL_OVERLAY_ROOT}/windmill/superadmin-secret.txt")" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/quarterly_access_review_every_monday_0900")'`
 

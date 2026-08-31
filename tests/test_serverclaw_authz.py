@@ -24,10 +24,10 @@ def test_bootstrap_config_points_to_stable_repo_managed_principals() -> None:
     config = json.loads(BOOTSTRAP_PATH.read_text(encoding="utf-8"))
 
     assert config["store"]["name"] == "serverclaw-authz"
-    assert config["principals"]["operator"]["principal"] == "principal:keycloak-user__florin.badita"
+    assert config["principals"]["operator"]["principal"] == "principal:authentik-user__florin.badita"
     assert config["principals"]["operator"]["grant_type"] == "declared"
     assert "client_secret_file" not in config["principals"]["operator"]
-    assert config["principals"]["runtime"]["principal"] == "principal:keycloak-client__serverclaw-runtime"
+    assert config["principals"]["runtime"]["principal"] == "principal:authentik-client__serverclaw-runtime"
     assert any(item["name"] == "unauthorized-client-cannot-read-data-scope" for item in config["checks"])
 
 
@@ -91,12 +91,12 @@ def test_build_report_marks_failed_checks() -> None:
     assert report["verification_passed"] is False
 
 
-def test_declared_principal_verification_uses_the_stable_keycloak_username_reference() -> None:
-    report = serverclaw_authz.verify_keycloak_principal(
-        "https://sso.example.com",
-        serverclaw_authz.KeycloakPrincipal(
+def test_declared_principal_verification_uses_the_stable_authentik_username_reference() -> None:
+    report = serverclaw_authz.verify_authentik_principal(
+        "https://id.example.com",
+        serverclaw_authz.AuthentikPrincipal(
             name="operator",
-            principal="principal:keycloak-user__florin.badita",
+            principal="principal:authentik-user__florin.badita",
             grant_type="declared",
             expected_claims={},
             username="florin.badita",

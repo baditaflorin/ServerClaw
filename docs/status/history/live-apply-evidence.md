@@ -8,14 +8,11 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
-| `coolify_runtime` | `2026-04-28-coolify-0fork-runtime-live-apply` |
 | `fork_services` | `2026-04-27-ws-0372-0fork-services-all-7-deployed` |
 | `restic_config_backup` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `repo_intake` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `platform_ops` | `2026-04-21-adr-0391-cpu-only-operational-automation-live-apply` |
 | `platform` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
-| `public_edge_publication` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
-| `keycloak` | `2026-04-15-adr-0382-keycloak-sign-in-button-stuck-mainline-live-apply` |
 | `directus` | `2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply` |
 | `validation_toolkit` | `2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply` |
 | `service_definition_catalog_assembly` | `2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply` |
@@ -26,7 +23,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `litellm` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `librechat` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `gitea` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
-| `semaphore` | `2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply` |
 | `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `ops_portal` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
@@ -34,8 +30,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `identity_core_watchdog` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
 | `docker_runtime` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
-| `vikunja` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
-| `headscale` | `2026-04-10-adr-0388-keycloak-oidc-9-services-live-apply` |
 | `ollama` | `2026-04-07-ollama-serverclaw-gemma4-live-apply` |
 | `windmill` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
 | `vaultwarden` | `2026-04-05-ws-0331-runtime-pool-mainline-live-apply` |
@@ -67,16 +61,15 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `sectional_agent_discovery` | `2026-04-03-adr-0327-sectional-agent-discovery-mainline-live-apply` |
 | `root_summary_rollover` | `2026-04-03-adr-0328-root-summary-rollover-mainline-live-apply` |
 | `operator_onboarding` | `2026-04-03-adr-0318-repeatable-operator-onboarding-mainline-live-apply` |
-| `open_webui` | `2026-04-03-adr-0341-open-webui-keycloak-oidc-live-apply` |
 | `ntfy` | `2026-04-03-adr-0299-ntfy-mainline-live-apply` |
 | `label_studio` | `2026-04-03-adr-0289-label-studio-mainline-live-apply` |
 | `glitchtip` | `2026-04-03-adr-0281-glitchtip-mainline-live-apply` |
 | `falco` | `2026-04-03-adr-0300-falco-mainline-live-apply` |
+| `coolify_runtime` | `2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply` |
 | `coolify_apps` | `2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply` |
 | `tika` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
 | `tesseract_ocr` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
 | `operator_access` | `2026-04-02-adr-0315-canonical-page-states-mainline-live-apply` |
-| `keycloak_direct_api` | `2026-04-02-adr-0317-keycloak-direct-api-mainline-live-apply` |
 | `journey_analytics` | `2026-04-02-adr-0316-journey-analytics-mainline-live-apply` |
 | `gotenberg` | `2026-04-02-adr-0319-runtime-ai-pool-mainline-live-apply` |
 | `docs_portal` | `2026-04-02-adr-0313-contextual-help-mainline-live-apply` |
@@ -146,7 +139,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `openbao_operator_entity` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `monitoring` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
 | `log_queryability_canary` | `2026-03-28-adr-0250-log-queryability-canary-live-apply` |
-| `keycloak_operator_access` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `host_control_loops` | `2026-03-28-adr-0226-host-control-loops-mainline-live-apply` |
 | `gitea_actions_runners` | `2026-03-28-adr-0229-gitea-actions-runners-live-apply` |
 | `fixture_pools` | `2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply` |
@@ -195,3 +187,7 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
+| `semaphore` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
+| `public_edge_publication` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
+| `identity_provider` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
+| `authentik` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |

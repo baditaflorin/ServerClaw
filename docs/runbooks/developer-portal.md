@@ -60,14 +60,14 @@ The deploy target refreshes both shared edge static directories before publicati
 ## Verification
 
 - `build/docs-portal/index.html` exists after `make docs`
-- `build/docs-portal/services/keycloak/index.html` exists
+- `build/docs-portal/services/authentik/index.html` exists
 - `build/docs-portal/reference/ports/index.html` exists
 - `build/docs-portal/reference/glossary/index.html` exists
 - `build/docs-portal/pagefind/pagefind-entry.json` exists
 - `build/docs-portal/pagefind/pagefind-ui.js` exists
 - `build/docs-portal/index.html` references `pagefind/pagefind-ui.js`
-- `docs/site-generated/services/keycloak.md` includes `contextual_help:`
-- `build/docs-portal/services/keycloak/index.html` contains `Contextual Help`
+- `docs/site-generated/services/authentik.md` includes `contextual_help:`
+- `build/docs-portal/services/authentik/index.html` contains `Contextual Help`
   and `Escalation Path`
 - unauthenticated `curl -Ik https://docs.example.com/` returns `302` to `/oauth2/sign_in`
 - the rendered site carries `<meta name="robots" content="noindex, nofollow">`

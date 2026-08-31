@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 import check_release_readiness as readiness
 
@@ -68,3 +69,34 @@ def test_changelog_entry_rejects_placeholder_release_notes(tmp_path: Path, monke
 
     assert result["passed"] is False
     assert result["message"] == "No entry under ## Unreleased in changelog.md"
+
+
+def test_generated_data_checks_use_the_dependency_aware_runner(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(readiness, "REPO_ROOT", tmp_path)
+    commands: list[list[str]] = []
+
+    def fake_run(command, **kwargs):
+        commands.append(command)
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(readiness.subprocess, "run", fake_run)
+
+    assert readiness.check_adr_index()["passed"] is True
+    assert readiness.check_discovery_artifacts()["passed"] is True
+
+    assert commands == [
+        [
+            str(tmp_path / "scripts" / "run_python_with_packages.sh"),
+            "pyyaml",
+            "--",
+            str(tmp_path / "scripts" / "generate_adr_index.py"),
+            "--check",
+        ],
+        [
+            str(tmp_path / "scripts" / "run_python_with_packages.sh"),
+            "pyyaml",
+            "--",
+            str(tmp_path / "scripts" / "generate_discovery_artifacts.py"),
+            "--check",
+        ],
+    ]

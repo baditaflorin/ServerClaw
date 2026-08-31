@@ -16,8 +16,8 @@
 #
 # Instance lifecycle:
 #   - Add entry to neko_instances in inventory/group_vars/platform.yml
-#   - Run this playbook → container created + Keycloak user provisioned
-#   - Remove entry → container destroyed + Keycloak user deleted
+#   - Run this playbook → container created + existing Authentik account assigned
+#   - Remove entry → container destroyed + Authentik assignment removed
 #
 # Usage:
 #   make converge-service service=neko env=production
@@ -66,110 +66,100 @@
       tags: [notify, neko]
 
 # ---------------------------------------------------------------------------
-# Play 2: Keycloak user lifecycle — provision/deprovision users for instances
+# Play 2: Authentik assignment lifecycle for instances
 # ---------------------------------------------------------------------------
-# For each entry in neko_instances: ensure a Keycloak user exists in the lv3
-# realm with the configured email and neko_managed=true attribute.
-# For Keycloak users with neko_managed=true that are NOT in neko_instances:
-# delete them (lifecycle enforcement).
+# For each entry in neko_instances: require an existing Authentik user with the
+# configured email and attach the neko_managed=true assignment attribute.
+# For users no longer assigned to an instance, remove only that attribute; do
+# not delete their platform identity.
 #
-# Graceful: each user operation uses ignore_errors so one user failing
-# never blocks others from being provisioned.
+# The lifecycle deliberately does not create accounts or set passwords. Account
+# provisioning belongs to the platform operator workflow, while Neko only owns
+# its per-user session assignment.
 # ---------------------------------------------------------------------------
-- name: "Keycloak User Lifecycle for Neko Instances"
+- name: "Authentik Assignment Lifecycle for Neko Instances"
   hosts: localhost
   gather_facts: false
-  tags: [tier-2, keycloak, service-neko]
+  tags: [tier-2, authentik, service-neko]
 
   vars:
-    _neko_kc_url: "https://sso.{{ platform_domain }}"
-    _neko_kc_realm: "lv3"
-    _neko_kc_admin_client_id: "lv3-admin-runtime"
-    _neko_kc_secret_file: "{{ lookup('env', 'REPO_ROOT') | default(playbook_dir + '/../../../..', true) }}/.local/keycloak/admin-client-secret.txt"
+    _neko_authentik_url: "{{ authentik_oidc_base_url | default('https://id.' + platform_domain) }}"
+    _neko_authentik_token_file: "{{ lookup('env', 'REPO_ROOT') | default(playbook_dir + '/../../../..', true) }}/.local/authentik/bootstrap-token.txt"
+    _neko_authentik_managed_attribute: "neko_managed"
+    _neko_authentik_managed_attribute_value: "true"
 
   tasks:
-    - name: Load Keycloak admin client secret from local secrets store
+    - name: Load Authentik bootstrap API token from local secrets store
       ansible.builtin.set_fact:
-        _neko_kc_secret: "{{ lookup('ansible.builtin.file', _neko_kc_secret_file) | trim }}"
+        _neko_authentik_token: "{{ lookup('ansible.builtin.file', _neko_authentik_token_file) | trim }}"
       no_log: true
 
-    - name: Obtain Keycloak admin access token
-      ansible.builtin.uri:
-        url: "{{ _neko_kc_url }}/realms/master/protocol/openid-connect/token"
-        method: POST
-        body_format: form-urlencoded
-        body:
-          grant_type: client_credentials
-          client_id: "{{ _neko_kc_admin_client_id }}"
-          client_secret: "{{ _neko_kc_secret }}"
-        status_code: 200
-        return_content: true
-      register: _neko_kc_token_resp
-      no_log: true
-      retries: 3
-      delay: 5
-      until: _neko_kc_token_resp.status == 200
-
-    - name: Store admin auth headers
+    - name: Store Authentik API headers
       ansible.builtin.set_fact:
-        _neko_kc_headers:
-          Authorization: "Bearer {{ _neko_kc_token_resp.json.access_token }}"
+        _neko_authentik_headers:
+          Authorization: "Bearer {{ _neko_authentik_token }}"
           Content-Type: "application/json"
       no_log: true
 
-    # --- Provision: ensure a Keycloak user exists for each neko_instances entry ---
+    - name: List Authentik users for Neko assignment reconciliation
+      ansible.builtin.uri:
+        url: "{{ _neko_authentik_url }}/api/v3/core/users/?page_size=100"
+        method: GET
+        headers: "{{ _neko_authentik_headers }}"
+        status_code: 200
+        return_content: true
+      register: _neko_authentik_users_response
+      changed_when: false
+      retries: 3
+      delay: 5
+      until: _neko_authentik_users_response.status == 200
 
-    - name: "Provision Keycloak user — {{ _item.key }} ({{ _item.value.email }})"
+    - name: Store Authentik users for assignment reconciliation
+      ansible.builtin.set_fact:
+        _neko_authentik_users: "{{ _neko_authentik_users_response.json.results | default([]) }}"
+
+    # --- Assign: require an existing Authentik user for each neko_instances entry ---
+
+    - name: "Assign Authentik user — {{ _item.key }} ({{ _item.value.email }})"
       ansible.builtin.include_tasks:
-        file: _includes/neko_kc_provision_user.yml
+        file: _includes/neko_authentik_assign_user.yml
       loop: "{{ neko_instances | dict2items }}"
       loop_control:
         loop_var: _item
         label: "{{ _item.key }} ({{ _item.value.email }})"
 
-    # --- Deprovision: delete Keycloak users with neko_managed=true not in neko_instances ---
-
-    - name: Find all Keycloak users with neko_managed=true attribute
-      ansible.builtin.uri:
-        url: "{{ _neko_kc_url }}/admin/realms/{{ _neko_kc_realm }}/users?q=neko_managed:true&max=200"
-        method: GET
-        headers: "{{ _neko_kc_headers }}"
-        status_code: 200
-        return_content: true
-      register: _neko_kc_managed_users
-      changed_when: false
-
     - name: Build set of expected emails from neko_instances
       ansible.builtin.set_fact:
         _neko_expected_emails: "{{ neko_instances.values() | map(attribute='email') | list }}"
 
-    - name: "Deprovision Keycloak user — {{ _user.email }} (no longer in neko_instances)"
+    # --- Unassign: remove only the Neko-owned metadata from stale accounts ---
+
+    - name: "Remove stale Authentik Neko assignment — {{ _user.email | default(_user.username) }}"
       ansible.builtin.uri:
-        url: "{{ _neko_kc_url }}/admin/realms/{{ _neko_kc_realm }}/users/{{ _user.id }}"
-        method: DELETE
-        headers: "{{ _neko_kc_headers }}"
-        status_code: [204, 404]
-      loop: >-
-        {{
-          _neko_kc_managed_users.json
-          | selectattr('email', 'defined')
-          | selectattr('email', 'not in', _neko_expected_emails)
-          | list
-        }}
+        url: "{{ _neko_authentik_url }}/api/v3/core/users/{{ _user.pk }}/"
+        method: PATCH
+        headers: "{{ _neko_authentik_headers }}"
+        body_format: json
+        body:
+          attributes: "{{ _user.attributes | default({}) | dict2items | rejectattr('key', 'equalto', _neko_authentik_managed_attribute) | items2dict }}"
+        status_code: 200
+      loop: "{{ _neko_authentik_users }}"
       loop_control:
         loop_var: _user
-        label: "{{ _user.email }}"
+        label: "{{ _user.email | default(_user.username) }}"
+      when:
+        - (_user.attributes | default({})).get(_neko_authentik_managed_attribute, '') == _neko_authentik_managed_attribute_value
+        - (_user.email | default('')) not in _neko_expected_emails
       changed_when: true
-      ignore_errors: true
 
-    - name: Display Keycloak user lifecycle summary
+    - name: Display Authentik assignment lifecycle summary
       ansible.builtin.debug:
         msg:
-          - "Neko Keycloak User Lifecycle"
-          - "============================="
+          - "Neko Authentik Assignment Lifecycle"
+          - "===================================="
           - "Configured instances: {{ neko_instances | length }}"
           - "Expected emails:      {{ _neko_expected_emails }}"
-          - "Managed users found:  {{ _neko_kc_managed_users.json | length }}"
+          - "Users inspected:      {{ _neko_authentik_users | length }}"
 
 # ---------------------------------------------------------------------------
 # Play 3: Publish Neko on NGINX Edge Gateway (email-keyed routing)
@@ -291,7 +281,7 @@
           - "Configured instances: {{ neko_instances | length }}"
           - "Edge URL: https://browser.{{ platform_domain }}"
           - ""
-          - "Each user authenticates via Keycloak SSO (browser.{{ platform_domain }})."
+          - "Each user authenticates via Authentik SSO (browser.{{ platform_domain }})."
           - "After login, NGINX routes X-Auth-Request-Email to their container."
           - "Users not assigned a container receive HTTP 403."
           - ""

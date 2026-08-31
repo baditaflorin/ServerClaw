@@ -24,7 +24,7 @@ make docker-dev-converge     # Deploy services via Ansible
 | Container | IP | Role |
 |-----------|-----|------|
 | postgres-vm | 10.10.10.50 | Shared PostgreSQL |
-| control-plane | 10.10.10.92 | Keycloak, OpenBao, API gateway |
+| control-plane | 10.10.10.92 | Authentik, OpenBao, API gateway |
 | nginx-edge | 10.10.10.10 | Reverse proxy (host ports 8080/8443) |
 | monitoring-vm | 10.10.10.40 | Grafana + Prometheus (opt-in) |
 

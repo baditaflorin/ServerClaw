@@ -311,6 +311,42 @@ def test_assemble_latest_receipts_keeps_merged_live_applied_workstreams(canonica
     assert latest["semaphore"] == "2026-04-13-adr-0361-semaphore-keycloak-oidc-live-apply"
 
 
+def test_assemble_latest_receipts_removes_retired_capabilities(canonical_repo: Path) -> None:
+    items = [
+        canonical_truth.WorkstreamCanonicalTruth(
+            workstream_id="ws-0382-keycloak",
+            adr="0382",
+            title="Keycloak live apply",
+            status="live_applied",
+            live_applied=True,
+            changelog_entry=None,
+            release_bump=None,
+            included_in_repo_version="0.178.144",
+            latest_receipts={"keycloak": "older-keycloak-receipt"},
+        ),
+        canonical_truth.WorkstreamCanonicalTruth(
+            workstream_id="adr-0491-authentik-cutover",
+            adr="0491",
+            title="Authentik cutover",
+            status="live_applied",
+            live_applied=True,
+            changelog_entry=None,
+            release_bump=None,
+            included_in_repo_version="0.179.46",
+            latest_receipts={"authentik": "authentik-cutover-receipt"},
+            retired_capabilities=("keycloak",),
+        ),
+    ]
+
+    latest = canonical_truth.assemble_latest_receipts(
+        items,
+        stack_path=canonical_repo / "versions" / "stack.yaml",
+    )
+
+    assert latest["authentik"] == "authentik-cutover-receipt"
+    assert "keycloak" not in latest
+
+
 def test_mark_pending_workstreams_released_sets_repo_version(canonical_repo: Path) -> None:
     changed = canonical_truth.mark_pending_workstreams_released("0.10.1")
 

@@ -11,29 +11,29 @@ Use this runbook to execute the ADR 0171 controlled fault-injection suite agains
 
 The first implementation intentionally targets the local `docker-runtime` subset only:
 
-- `fault:keycloak-unavailable`
+- `fault:authentik-unavailable`
 - `fault:openbao-unavailable`
 
-The initial subset keeps the drills bounded and reversible: Keycloak uses a stop/start outage, while OpenBao uses pause/unpause so the singleton secret store does not come back sealed after the check.
+The initial subset keeps the drills bounded and reversible: Authentik uses a stop/start outage, while OpenBao uses pause/unpause so the singleton secret store does not come back sealed after the check.
 
 ## Manual Execution
 
 Trigger one scenario through the governed Windmill path:
 
 ```bash
-make fault-injection FAULT_INJECTION_ARGS='scenario_names=fault:keycloak-unavailable'
+make fault-injection FAULT_INJECTION_ARGS='scenario_names=fault:authentik-unavailable'
 ```
 
 Trigger the current monthly subset:
 
 ```bash
-make fault-injection FAULT_INJECTION_ARGS='scenario_names=fault:keycloak-unavailable,fault:openbao-unavailable'
+make fault-injection FAULT_INJECTION_ARGS='scenario_names=fault:authentik-unavailable,fault:openbao-unavailable'
 ```
 
 If you need to inspect the worker-side plan without applying a fault:
 
 ```bash
-uv run --with pyyaml python config/windmill/scripts/fault-injection.py --repo-path /srv/proxmox-host_server --scenario-names fault:keycloak-unavailable --dry-run
+uv run --with pyyaml python config/windmill/scripts/fault-injection.py --repo-path /srv/proxmox-host_server --scenario-names fault:authentik-unavailable --dry-run
 ```
 
 ## Expected Outputs
@@ -48,7 +48,7 @@ The Windmill schedule is enabled weekly at `03:00 UTC` on Sundays, but the scrip
 
 Current scheduled subset:
 
-- `fault:keycloak-unavailable`
+- `fault:authentik-unavailable`
 - `fault:openbao-unavailable`
 
 ## Live Apply Checklist

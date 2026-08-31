@@ -1,5 +1,5 @@
 # depends_on:
-#   - playbooks/keycloak.yml
+#   - playbooks/authentik.yml
 #   - playbooks/windmill.yml
 ---
 # Playbook: services/vikunja.yml

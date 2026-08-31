@@ -337,6 +337,34 @@ def test_build_manifest_generates_schema_compliant_payload(tmp_path: Path) -> No
     assert manifest["known_gaps"][0]["adr"] == "0128"
 
 
+def test_load_static_config_uses_tracked_generation_identity(monkeypatch, tmp_path: Path) -> None:
+    module = load_module("platform_manifest_test_tracked_identity", "scripts/platform_manifest.py")
+    repo_root = make_repo(tmp_path)
+    configure_paths(module, repo_root)
+    (repo_root / "config" / "manifest-static.yaml").write_text(
+        """
+schema_version: "1.0.0"
+identity:
+  platform_name: {{ platform_domain }}
+  operator: "{{ platform_operator_name }}"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    import identity_yaml
+
+    monkeypatch.setattr(
+        identity_yaml,
+        "load_tracked_generation_identity_vars",
+        lambda: {"platform_domain": "tracked.example", "platform_operator_name": "Tracked Operator"},
+    )
+
+    payload = module.load_static_config()
+
+    assert payload["identity"] == {"platform_name": "tracked.example", "operator": "Tracked Operator"}
+
+
 def test_check_detects_manifest_drift(tmp_path: Path) -> None:
     module = load_module("platform_manifest_test_drift", "scripts/platform_manifest.py")
     repo_root = make_repo(tmp_path)

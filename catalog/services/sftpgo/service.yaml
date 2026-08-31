@@ -36,7 +36,8 @@ completeness:
   requires_oidc: true
   requires_secrets: true
   requires_compose_secrets: true
-  keycloak_client_generated: true
+  oidc_provider: authentik
+  authentik_client_generated: true
   suppressed_checks:
     health_probe: '2027-01-01'
     api_gateway: '2027-01-01'
@@ -77,9 +78,9 @@ dependency:
       type: hard
       description: SFTPGo runs as a compose-managed workload on docker-runtime.
     - from: sftpgo
-      to: keycloak
+      to: authentik
       type: soft
-      description: SFTPGo delegates operator browser sign-in to the shared Keycloak
+      description: SFTPGo delegates operator browser sign-in to the shared Authentik
         OIDC broker.
     - from: sftpgo
       to: nginx_edge

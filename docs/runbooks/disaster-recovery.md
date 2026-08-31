@@ -96,7 +96,7 @@ Verify public-edge services:
 
 ```bash
 curl -skf https://grafana.example.com/api/health
-curl -skf https://sso.example.com/health/ready
+curl -skf https://id.example.com/-/health/ready/
 ```
 
 ## Tier 4: Restore Build Infrastructure

@@ -9,12 +9,14 @@ host free-memory floor intact before `runtime-general` and
 
 ## Result
 
+- `runtime-apps` runs at `8 GiB`
+- `runtime-comms` runs at `8 GiB`
 - `docker-build` runs at `12 GiB`
 - `artifact-cache` runs at `4 GiB`
 - `coolify` runs at `6 GiB`
 - `docker-runtime` runs at `18 GiB`
-- the Proxmox host regains the headroom needed to create `runtime-general`
-  and `runtime-control` without a one-way memory squeeze
+- the Proxmox host regains headroom for the live runtime pools and the
+  residual Docker runtime without a one-way memory squeeze
 
 ## Commands
 
@@ -48,15 +50,20 @@ Verify the live Proxmox memory settings:
 
 ```bash
 ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml proxmox_hosts -m shell \
-  -a 'for id in 120 130 170 180; do echo === $id ===; qm config $id | egrep "^(name|memory):"; done' \
+  -a 'for id in 120 121 122 130 170 180; do echo === $id ===; qm config $id | egrep "^(name|memory):"; done' \
   --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
-Verify the rebalanced guests came back with Docker:
+Verify every rebalanced guest is reachable, then verify Docker only on the
+guests that declare a Docker runtime:
 
 ```bash
-ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-build,artifact-cache,coolify,docker-runtime -m shell \
+ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml runtime-apps,runtime-comms,docker-build,artifact-cache,coolify,docker-runtime -m ping \
+  --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml runtime-comms,docker-build,artifact-cache,coolify,docker-runtime -m shell \
   -a 'hostname -s && systemctl is-active docker.service' \
   --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump

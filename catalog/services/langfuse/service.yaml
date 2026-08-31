@@ -24,7 +24,7 @@ service:
     - langfuse_bootstrap_user_password
     - langfuse_minio_secret_key
     - langfuse_project_secret_key
-    - keycloak_langfuse_client_secret
+    - authentik_langfuse_client_secret
   adr: '0146'
   runbook: docs/runbooks/configure-langfuse.md
   runtime_pool: runtime-general
@@ -48,6 +48,8 @@ completeness:
   requires_oidc: true
   requires_secrets: true
   requires_compose_secrets: true
+  oidc_provider: authentik
+  authentik_client_generated: true
   suppression_preset: legacy-service
 redundancy:
   tier: R1
@@ -75,9 +77,9 @@ dependency:
     adr: '0146'
   outbound_edges:
     - from: langfuse
-      to: keycloak
+      to: authentik
       type: soft
-      description: Keycloak provides the preferred OIDC browser sign-in path, but
+      description: Authentik provides the preferred OIDC browser sign-in path, but
         a repo-managed bootstrap user remains the break-glass fallback.
     - from: langfuse
       to: minio

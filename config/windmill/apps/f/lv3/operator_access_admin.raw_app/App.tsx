@@ -80,8 +80,7 @@ type OperatorRecord = {
   role: string;
   status: string;
   notes?: string;
-  keycloak_username: string;
-  realm_roles: string[];
+  authentik_username: string;
   groups: string[];
   tailscale_login_email: string;
   ssh_enabled: boolean;
@@ -403,8 +402,8 @@ function formatOperatorSearchText(operator: OperatorRecord): string {
     operator.email,
     operator.role,
     operator.status,
-    operator.keycloak_username,
-    operator.realm_roles.join(" "),
+    operator.authentik_username,
+    operator.groups.join(" "),
     operator.groups.join(" "),
     operator.tailscale_login_email,
     operator.notes ?? "",
@@ -443,16 +442,16 @@ function StatusCell({ value }: CustomCellRendererProps<OperatorRecord, string>) 
   return <span className={`pill ${pillToneClass(status)}`}>{status}</span>;
 }
 
-function KeycloakCell({ data }: CustomCellRendererProps<OperatorRecord>) {
+function AuthentikCell({ data }: CustomCellRendererProps<OperatorRecord>) {
   if (!data) {
     return null;
   }
 
-  const roles = data.realm_roles.join(", ");
+  const groups = data.groups.join(", ");
   return (
     <div className="operatorIdentity">
-      <span className="operatorPrimary">{data.keycloak_username || "n/a"}</span>
-      <span className="operatorSecondary">{roles || "no realm roles"}</span>
+      <span className="operatorPrimary">{data.authentik_username || "n/a"}</span>
+      <span className="operatorSecondary">{groups || "no groups"}</span>
     </div>
   );
 }
@@ -981,12 +980,12 @@ function App() {
         cellRenderer: StatusCell,
       },
       {
-        headerName: "Keycloak",
-        field: "keycloak_username",
+        headerName: "Authentik",
+        field: "authentik_username",
         minWidth: 240,
-        cellRenderer: KeycloakCell,
+        cellRenderer: AuthentikCell,
         getQuickFilterText: ({ data }) =>
-          data ? [data.keycloak_username, data.realm_roles.join(" ")].filter(Boolean).join(" ") : "",
+          data ? [data.authentik_username, data.groups.join(" ")].filter(Boolean).join(" ") : "",
       },
       {
         headerName: "SSH",
@@ -1013,12 +1012,6 @@ function App() {
         hide: true,
         minWidth: 190,
         cellRenderer: TimestampCell,
-      },
-      {
-        headerName: "Realm Roles",
-        field: "realm_roles",
-        hide: true,
-        valueGetter: ({ data }) => data?.realm_roles.join(", ") ?? "",
       },
       {
         headerName: "Groups",
@@ -2625,8 +2618,8 @@ function App() {
           operator.email,
           operator.role,
           operator.status,
-          operator.keycloak_username,
-          ...operator.realm_roles,
+          operator.authentik_username,
+          ...operator.groups,
           ...operator.groups,
         ],
         canFavorite: true,
@@ -2641,8 +2634,8 @@ function App() {
           operator.email,
           operator.role,
           operator.status,
-          operator.keycloak_username,
-          operator.realm_roles.join(" "),
+          operator.authentik_username,
+          operator.groups.join(" "),
           operator.groups.join(" "),
         ]
           .join(" ")
@@ -3114,7 +3107,7 @@ function App() {
                   <span className="pill pillRole">{selectedOperator.name}</span>
                   <span className={`pill ${pillToneClass(selectedOperator.status)}`}>{selectedOperator.status}</span>
                   <span className="pill">{selectedOperator.role}</span>
-                  <span className="pill">{selectedOperator.keycloak_username || "no username"}</span>
+                  <span className="pill">{selectedOperator.authentik_username || "no username"}</span>
                   <span className="pill">{selectedOperator.notes ? "Notes present" : "No saved notes"}</span>
                   <span className="pill">Reviewed {formatDate(selectedOperator.last_reviewed_at)}</span>
                 </div>
@@ -3436,16 +3429,16 @@ function App() {
                   </FieldShell>
 
                   <FieldShell
-                    htmlFor="onboard-keycloak-username"
-                    label="Keycloak Username"
-                    hint="Optional username override for Keycloak."
-                    error={onboardForm.formState.errors.keycloak_username?.message}
-                    touched={onboardForm.formState.touchedFields.keycloak_username}
+                    htmlFor="onboard-authentik-username"
+                    label="Authentik Username"
+                    hint="Optional username override for Authentik."
+                    error={onboardForm.formState.errors.authentik_username?.message}
+                    touched={onboardForm.formState.touchedFields.authentik_username}
                   >
                     <input
-                      id="onboard-keycloak-username"
-                      {...onboardForm.register("keycloak_username")}
-                      aria-invalid={Boolean(onboardForm.formState.errors.keycloak_username)}
+                      id="onboard-authentik-username"
+                      {...onboardForm.register("authentik_username")}
+                      aria-invalid={Boolean(onboardForm.formState.errors.authentik_username)}
                       placeholder="optional username override"
                     />
                   </FieldShell>
@@ -3688,7 +3681,7 @@ function App() {
                 <span className="pill pillRole">{selectedOperator.name}</span>
                 <span className={`pill ${pillToneClass(selectedOperator.status)}`}>{selectedOperator.status}</span>
                 <span className="pill">{selectedOperator.role}</span>
-                <span className="pill">{selectedOperator.keycloak_username || "no username"}</span>
+                <span className="pill">{selectedOperator.authentik_username || "no username"}</span>
               </div>
             ) : null}
             <pre>

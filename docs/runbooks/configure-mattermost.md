@@ -70,7 +70,7 @@ Run these checks after converge:
 ## Notes
 
 - Mattermost stays private-only in this rollout. There is no public edge publication and no public DNS record for it.
-- This rollout intentionally uses a repo-managed local admin plus incoming webhook model first. Shared SSO through Keycloak remains a follow-on integration under ADR 0056 instead of blocking the private ChatOps surface entirely.
+- This rollout intentionally uses a repo-managed local admin plus incoming webhook model first. Shared SSO through Authentik is a follow-on integration and does not block the private ChatOps surface.
 - Chat channels are a collaboration surface, not the source of truth. Final decisions, live-apply evidence, and durable operational state still belong in ADRs, runbooks, receipts, and repo-managed automation.
 - The webhook manifest includes internal URLs for service-to-service routing and external URLs for operator access through the Proxmox host Tailscale proxy.
 - ADR 0097 uses the `alerts_critical` webhook for critical Alertmanager notifications and `ops` for informational operator events.

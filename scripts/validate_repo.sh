@@ -8,6 +8,9 @@ ANSIBLE_COLLECTIONS_DIR="${LV3_ANSIBLE_COLLECTIONS_DIR:-$VALIDATION_CACHE_DIR/co
 ANSIBLE_COLLECTIONS_SHA_FILE="${LV3_ANSIBLE_COLLECTIONS_SHA_FILE:-$VALIDATION_CACHE_DIR/requirements.sha}"
 PYTHON_BIN="${LV3_VALIDATE_PYTHON_BIN:-}"
 VALIDATION_GALAXY_SERVER="${LV3_VALIDATION_GALAXY_SERVER:-${LV3_ANSIBLE_GALAXY_SERVER:-release_galaxy}}"
+ANSIBLE_CORE_VERSION="${LV3_ANSIBLE_CORE_VERSION:-2.17.10}"
+ANSIBLE_LINT_VERSION="${LV3_ANSIBLE_LINT_VERSION:-24.12.2}"
+YAMLLINT_VERSION="${LV3_YAMLLINT_VERSION:-1.37.1}"
 UV_CMD=(uv)
 ANSIBLE_PLAYBOOK_CMD=()
 ANSIBLE_GALAXY_CMD=()
@@ -111,10 +114,13 @@ ensure_uv() {
 configure_validation_commands() {
   ensure_uv
   if [[ "$HAS_UV" == true ]]; then
-    ANSIBLE_PLAYBOOK_CMD=("${UV_CMD[@]}" tool run --from ansible-core ansible-playbook)
-    ANSIBLE_GALAXY_CMD=("${UV_CMD[@]}" tool run --from ansible-core ansible-galaxy)
-    ANSIBLE_LINT_CMD=("${UV_CMD[@]}" tool run --from ansible-lint ansible-lint)
-    YAMLLINT_CMD=("${UV_CMD[@]}" tool run --from yamllint yamllint)
+    ANSIBLE_PLAYBOOK_CMD=("${UV_CMD[@]}" tool run --from "ansible-core==${ANSIBLE_CORE_VERSION}" ansible-playbook)
+    ANSIBLE_GALAXY_CMD=("${UV_CMD[@]}" tool run --from "ansible-core==${ANSIBLE_CORE_VERSION}" ansible-galaxy)
+    ANSIBLE_LINT_CMD=(
+      "${UV_CMD[@]}" tool run --from "ansible-lint==${ANSIBLE_LINT_VERSION}"
+      --with "ansible-core==${ANSIBLE_CORE_VERSION}" ansible-lint
+    )
+    YAMLLINT_CMD=("${UV_CMD[@]}" tool run --from "yamllint==${YAMLLINT_VERSION}" yamllint)
     return 0
   fi
 
@@ -438,7 +444,7 @@ validate_ansible_lint() {
   fi
   (
     cd "$REPO_ROOT"
-    "${ANSIBLE_LINT_CMD[@]}" "${lint_targets[@]}"
+    ANSIBLE_LINT_NODEPS=1 "${ANSIBLE_LINT_CMD[@]}" --offline "${lint_targets[@]}"
   )
 }
 

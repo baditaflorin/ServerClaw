@@ -3,7 +3,7 @@ service:
   id: paperless
   name: Paperless-ngx
   description: Self-hosted document archive and metadata API with OCR, taxonomy reconciliation,
-    and Keycloak-backed operator sign-in.
+    and Authentik-backed operator sign-in.
   category: data
   lifecycle_status: active
   vm: docker-runtime
@@ -23,7 +23,7 @@ service:
     - paperless_redis_password
     - paperless_admin_password
     - paperless_api_token
-    - keycloak_paperless_client_secret
+    - authentik_paperless_client_secret
   adr: 0285
   adr_file: docs/adr/0285-paperless-ngx-as-the-document-management-and-archive-api.md
   runbook: docs/runbooks/configure-paperless.md
@@ -56,7 +56,8 @@ completeness:
   requires_compose_secrets: true
   dashboard_file: config/grafana/dashboards/slo-overview.json
   alert_rule_file: config/prometheus/rules/slo_alerts.yml
-  keycloak_client_generated: true
+  oidc_provider: authentik
+  authentik_client_generated: true
   suppressed_checks: {}
 redundancy:
   tier: R1
@@ -95,9 +96,9 @@ dependency:
       type: hard
       description: Paperless runs as a compose-managed workload on docker-runtime.
     - from: paperless
-      to: keycloak
+      to: authentik
       type: soft
-      description: Paperless delegates routine browser sign-in to the shared Keycloak
+      description: Paperless delegates routine browser sign-in to the shared Authentik
         OIDC broker.
     - from: paperless
       to: nginx_edge

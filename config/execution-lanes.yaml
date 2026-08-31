@@ -71,7 +71,7 @@ lanes:
       - api_gateway
       - gitea
       - harbor
-      - keycloak
+      - authentik
       - mail_platform
       - nats_jetstream
       - openbao

@@ -55,7 +55,7 @@ def parse_args() -> argparse.Namespace:
 Examples:
   %(prog)s list --vmid 101
   %(prog)s validate --vmid 101
-  %(prog)s diff --vmid 101 --service keycloak
+  %(prog)s diff --vmid 101 --service authentik
   %(prog)s orphans --vmid 101
         """,
     )

@@ -22,7 +22,7 @@
       - sftpgo_config_file | length > 0
       - sftpgo_env_file | length > 0
       - sftpgo_database_password_local_file | length > 0
-      - sftpgo_keycloak_client_secret_local_file | length > 0
+      - sftpgo_authentik_client_secret_local_file | length > 0
       - sftpgo_nats_password_local_file | length > 0
       - sftpgo_image | length > 0
       - sftpgo_controller_url | length > 0
@@ -32,7 +32,7 @@
       - sftpgo_sftp_port | int > 0
     fail_msg: >-
       sftpgo_runtime requires runtime paths, image refs, controller URLs,
-      database auth, and Keycloak or NATS credentials.
+      database auth, and Authentik or NATS credentials.
 
 - name: Check SFTPGo prerequisites on the control machine
   ansible.builtin.include_role:
@@ -43,9 +43,9 @@
       - path: "{{ sftpgo_database_password_local_file }}"
         description: "SFTPGo database password"
         prerequisite: "Converge sftpgo_postgres before deploying SFTPGo"
-      - path: "{{ sftpgo_keycloak_client_secret_local_file }}"
-        description: "SFTPGo Keycloak client secret"
-        prerequisite: "Converge the Keycloak runtime before deploying SFTPGo"
+      - path: "{{ sftpgo_authentik_client_secret_local_file }}"
+        description: "SFTPGo Authentik client secret"
+        prerequisite: "Converge the Authentik runtime before deploying SFTPGo"
       - path: "{{ sftpgo_nats_password_local_file }}"
         description: "SFTPGo NATS JetStream admin password"
         prerequisite: "Converge the NATS JetStream runtime before deploying SFTPGo"
@@ -109,12 +109,12 @@
 - name: Record the SFTPGo runtime secrets
   ansible.builtin.set_fact:
     sftpgo_database_password: "{{ lookup('ansible.builtin.file', sftpgo_database_password_local_file) | trim }}"
-    sftpgo_keycloak_client_secret: "{{ lookup('ansible.builtin.file', sftpgo_keycloak_client_secret_local_file) | trim }}"
+    sftpgo_authentik_client_secret: "{{ lookup('ansible.builtin.file', sftpgo_authentik_client_secret_local_file) | trim }}"
     sftpgo_bootstrap_admin_password: "{{ lookup('ansible.builtin.file', sftpgo_bootstrap_admin_password_local_file) | trim }}"
     sftpgo_nats_password: "{{ lookup('ansible.builtin.file', sftpgo_nats_password_local_file) | trim }}"
     sftpgo_runtime_secret_payload:
       SFTPGO_DATA_PROVIDER__PASSWORD: "{{ lookup('ansible.builtin.file', sftpgo_database_password_local_file) | trim }}"
-      SFTPGO_HTTPD__BINDINGS__0__OIDC__CLIENT_SECRET: "{{ lookup('ansible.builtin.file', sftpgo_keycloak_client_secret_local_file) | trim }}"
+      SFTPGO_HTTPD__BINDINGS__0__OIDC__CLIENT_SECRET: "{{ lookup('ansible.builtin.file', sftpgo_authentik_client_secret_local_file) | trim }}"
       SFTPGO_DEFAULT_ADMIN_USERNAME: "{{ sftpgo_bootstrap_admin_username }}"
       SFTPGO_DEFAULT_ADMIN_PASSWORD: "{{ lookup('ansible.builtin.file', sftpgo_bootstrap_admin_password_local_file) | trim }}"
       NATS_SERVER_URL: >-

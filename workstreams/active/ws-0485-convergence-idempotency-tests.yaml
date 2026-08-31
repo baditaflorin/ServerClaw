@@ -14,6 +14,7 @@ depends_on:
   - adr-0482-capacity-aware-dynamic-sizing
   - adr-0483-hands-off-bootstrap
   - adr-0484-self-verification-contracts
+conflicts_with: []
 shared_surfaces:
   - docs/adr/0485-convergence-idempotency-tests.md
   - tests/integration/test_idempotency.py

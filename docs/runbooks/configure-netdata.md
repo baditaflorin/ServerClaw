@@ -13,7 +13,7 @@ edge route at `realtime.example.com`.
   stream into the monitoring parent
 - Prometheus scrapes the consolidated Netdata exporter from `monitoring`
 - `realtime.example.com` is published on the shared NGINX edge behind the
-  repo-managed Keycloak oauth2-proxy gate
+  repo-managed Authentik oauth2-proxy gate
 
 ## Commands
 

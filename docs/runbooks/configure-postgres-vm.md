@@ -109,7 +109,7 @@ Confirm the per-service registry entries exist in `pg_hba.conf`:
 
 ```bash
 ansible -i inventory/hosts.yml postgres \
-  -m shell -a "sudo grep -nE 'host\\s+(keycloak|windmill)\\s+(keycloak|windmill_admin)' /etc/postgresql/*/main/pg_hba.conf" \
+  -m shell -a "sudo grep -nE 'host\\s+(authentik|windmill)\\s+(authentik|windmill_admin)' /etc/postgresql/*/main/pg_hba.conf" \
   --private-key .local/ssh/bootstrap.id_ed25519 \
   -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
@@ -121,7 +121,7 @@ ssh -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyJump=ops@10
 ssh -i .local/ssh/bootstrap.id_ed25519 -o IdentitiesOnly=yes -o ProxyJump=ops@100.64.0.1 ops@10.10.10.92
 ```
 
-Use `psql` from `docker-runtime` and `runtime-control` with the controller-local password material for representative services, then confirm an unintended login such as `keycloak -> windmill` returns `no pg_hba.conf entry`.
+Use `psql` from `docker-runtime` and `runtime-control` with the controller-local password material for representative services, then confirm an unintended login such as `authentik -> windmill` returns `no pg_hba.conf entry`.
 
 Confirm that the DNS record resolves to the Proxmox host Tailscale IP:
 

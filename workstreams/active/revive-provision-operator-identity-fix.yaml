@@ -1,4 +1,5 @@
 id: revive-provision-operator-identity-fix
+adr: "0385"
 title: Revive provision_operator/operator_manager identity-derivation fix from stale ServerClaw PR
 status: ready
 ready_to_merge: true
@@ -7,7 +8,11 @@ depends_on: []
 conflicts_with: []
 owner: claude-agent
 branch: revive-provision-operator-identity-fix
+worktree_path: .worktrees/revive-provision-operator-identity-fix
 doc: docs/postmortems/2026-08-26-serverclaw-publish-blockers.md
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/revive-provision-operator-identity-fix.yaml
 ownership_manifest:
   owned_surfaces:
     - id: revive-provision-operator-identity-fix-code
@@ -15,7 +20,6 @@ ownership_manifest:
         - scripts/provision_operator.py
         - scripts/operator_manager.py
         - workstreams/active/revive-provision-operator-identity-fix.yaml
-        - workstreams.yaml
       mode: exclusive
 
 description: |

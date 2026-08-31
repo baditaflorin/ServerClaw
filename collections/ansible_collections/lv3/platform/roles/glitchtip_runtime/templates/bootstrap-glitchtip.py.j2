@@ -28,13 +28,8 @@ OIDC_CLIENT_SECRET = {{ glitchtip_oidc_client_secret | to_json }}
 OIDC_PROVIDER = {{ glitchtip_oidc_provider | to_json }}
 OIDC_PROVIDER_ID = {{ glitchtip_oidc_provider_id | to_json }}
 OIDC_PROVIDER_NAME = {{ glitchtip_oidc_provider_name | to_json }}
+OIDC_RETIRED_PROVIDER_IDS = {{ glitchtip_retired_oidc_provider_ids | to_json }}
 OIDC_SERVER_URL = {{ glitchtip_oidc_issuer_url | regex_replace('/+$', '') | to_json }}
-KEYCLOAK_ROLLBACK_CLIENT_ID = {{ glitchtip_keycloak_rollback_client_id | to_json }}
-KEYCLOAK_ROLLBACK_CLIENT_SECRET = {{ glitchtip_keycloak_rollback_client_secret | to_json }}
-KEYCLOAK_ROLLBACK_PROVIDER = {{ glitchtip_keycloak_rollback_provider | to_json }}
-KEYCLOAK_ROLLBACK_PROVIDER_ID = {{ glitchtip_keycloak_rollback_provider_id | to_json }}
-KEYCLOAK_ROLLBACK_PROVIDER_NAME = {{ glitchtip_keycloak_rollback_provider_name | to_json }}
-KEYCLOAK_ROLLBACK_SERVER_URL = {{ glitchtip_keycloak_rollback_issuer_url | regex_replace('/+$', '') | to_json }}
 MATTERMOST_ALERT_URL = {{ glitchtip_mattermost_alert_url | to_json }}
 NTFY_ALERT_URL = {{ glitchtip_ntfy_alert_url | to_json }}
 PROJECT_SPECS = {{ glitchtip_bootstrap_projects | to_json }}
@@ -160,6 +155,28 @@ def ensure_social_app(
         return app
 
 
+def retire_social_apps(*, provider: str, active_social_app: SocialApp, retired_provider_ids: list[str]):
+    retired_provider_ids = set(retired_provider_ids)
+    if active_social_app.provider_id in retired_provider_ids:
+        raise RuntimeError("the selected OIDC provider cannot also be retired")
+    if not retired_provider_ids:
+        return []
+    with transaction.atomic():
+        retired_apps = list(
+            SocialApp.objects.select_for_update()
+            .filter(provider=provider, provider_id__in=retired_provider_ids)
+            .exclude(pk=active_social_app.pk)
+            .order_by("id")
+        )
+        retired = [
+            {"provider": app.provider, "provider_id": app.provider_id}
+            for app in retired_apps
+        ]
+        for app in retired_apps:
+            app.delete()
+    return retired
+
+
 def ensure_api_token(user: User) -> APIToken:
     token = APIToken.objects.filter(token=API_TOKEN_VALUE).first()
     if token is None:
@@ -254,14 +271,10 @@ social_app = ensure_social_app(
     client_secret=OIDC_CLIENT_SECRET,
     server_url=OIDC_SERVER_URL,
 )
-rollback_social_app = ensure_social_app(
-    org,
-    provider=KEYCLOAK_ROLLBACK_PROVIDER,
-    provider_id=KEYCLOAK_ROLLBACK_PROVIDER_ID,
-    provider_name=KEYCLOAK_ROLLBACK_PROVIDER_NAME,
-    client_id=KEYCLOAK_ROLLBACK_CLIENT_ID,
-    client_secret=KEYCLOAK_ROLLBACK_CLIENT_SECRET,
-    server_url=KEYCLOAK_ROLLBACK_SERVER_URL,
+retired_social_apps = retire_social_apps(
+    provider=OIDC_PROVIDER,
+    active_social_app=social_app,
+    retired_provider_ids=OIDC_RETIRED_PROVIDER_IDS,
 )
 token = ensure_api_token(user)
 projects = ensure_projects(org, team)
@@ -278,11 +291,7 @@ print(
                 "provider": social_app.provider,
                 "provider_id": social_app.provider_id,
             },
-            "rollback_social_app": {
-                "name": rollback_social_app.name,
-                "provider": rollback_social_app.provider,
-                "provider_id": rollback_social_app.provider_id,
-            },
+            "retired_social_apps": retired_social_apps,
             "projects": projects,
         },
         sort_keys=True,

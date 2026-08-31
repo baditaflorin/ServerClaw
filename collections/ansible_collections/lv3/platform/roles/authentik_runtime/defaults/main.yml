@@ -64,6 +64,14 @@ authentik_oauth_reconcile_enabled: true
 authentik_oauth_manifest_file: "{{ inventory_dir }}/../config/authentik/oauth-clients.yaml"
 authentik_oauth_reconcile_script: "{{ inventory_dir }}/../scripts/reconcile_authentik_oauth.py"
 authentik_oauth_reconcile_token_file: "{{ authentik_bootstrap_token_local_file }}"
-authentik_oauth_reconcile_clients:
-  - glitchtip
-  - outline
+# Empty means reconcile the complete declared manifest.  A narrowly scoped
+# rollout can still pass an explicit list while a normal converge makes every
+# consumer's Authentik client contract durable.
+authentik_oauth_reconcile_clients: []
+authentik_identity_reconcile_enabled: true
+authentik_identity_manifest_file: "{{ inventory_dir }}/../config/authentik/identities.yaml"
+authentik_identity_reconcile_script: "{{ inventory_dir }}/../scripts/reconcile_authentik_identities.py"
+authentik_identity_reconcile_token_file: "{{ authentik_bootstrap_token_local_file }}"
+# Authentik's own bootstrap creates this account. A private overlay may override
+# it when a deployment intentionally uses a different bootstrap administrator.
+authentik_bootstrap_admin_username: akadmin

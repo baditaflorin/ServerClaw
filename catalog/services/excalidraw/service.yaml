@@ -33,7 +33,7 @@ service:
       url: https://draw.example.com
       subdomain: draw.example.com
       notes: Live applied on the ADR 0202 workstream branch and protected by the shared
-        Keycloak-backed oauth2-proxy edge flow.
+        Authentik-backed oauth2-proxy edge flow.
 completeness:
   service_type: compose
   requires_subdomain: true
@@ -74,9 +74,9 @@ dependency:
       type: hard
       description: The Excalidraw frontend and collaboration room are hosted on docker-runtime.
     - from: excalidraw
-      to: keycloak
+      to: authentik
       type: soft
-      description: Operator access to draw.example.com depends on the shared Keycloak-backed
+      description: Operator access to draw.example.com depends on the shared Authentik-backed
         oauth2-proxy edge flow, while the private runtime can still be verified locally.
     - from: excalidraw
       to: nginx_edge

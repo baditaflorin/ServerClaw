@@ -216,7 +216,7 @@ git commit -m "ADR 0025: Upgrade to Implemented
 
 Deployed compose-managed runtime stacks to docker-runtime.
 Multiple recent commits (ab755354d, dcc9aa4fa, d718979ec) implement
-the decision. Code references in keycloak_runtime, nginx_edge_publication roles."
+the decision. Code references in authentik_runtime, nginx_edge_publication roles."
 ```
 
 ---

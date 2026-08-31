@@ -65,7 +65,7 @@ class RepoPaths:
     alert_rule_dir: Path
     platform_services_path: Path
     uptime_kuma_monitors_path: Path
-    keycloak_runtime_defaults_path: Path
+    authentik_runtime_defaults_path: Path
 
 
 @dataclass(frozen=True)
@@ -289,14 +289,14 @@ def build_repo_paths(repo_root: Path) -> RepoPaths:
         alert_rule_dir=repo_root / "config" / "alertmanager" / "rules",
         platform_services_path=repo_root / "inventory" / "group_vars" / "all" / "platform_services.yml",
         uptime_kuma_monitors_path=repo_root / "config" / "uptime-kuma" / "monitors.json",
-        keycloak_runtime_defaults_path=(
+        authentik_runtime_defaults_path=(
             repo_root
             / "collections"
             / "ansible_collections"
             / "lv3"
             / "platform"
             / "roles"
-            / "keycloak_runtime"
+            / "authentik_runtime"
             / "defaults"
             / "main.yml"
         ),
@@ -808,7 +808,7 @@ def build_service_completeness_entry(spec: ServiceSpec) -> dict[str, Any]:
         "requires_compose_secrets": spec.service_type == "compose",
         "dashboard_file": spec.dashboard_path.as_posix(),
         "alert_rule_file": spec.alert_rule_path.as_posix(),
-        "keycloak_client_generated": spec.requires_oidc,
+        "authentik_client_generated": spec.requires_oidc,
         "suppressed_checks": {},
     }
 
@@ -1042,7 +1042,7 @@ def update_api_gateway_catalog(path: Path, spec: ServiceSpec) -> None:
             "name": spec.display_name,
             "gateway_prefix": f"/v1/{spec.name_slug}",
             "upstream": spec.internal_url,
-            "auth": "keycloak_jwt",
+            "auth": "oidc_jwt",
             "required_role": "platform-operator" if spec.requires_oidc else "platform-read",
             "strip_prefix": True,
             "timeout_seconds": 30,
@@ -1123,7 +1123,7 @@ def update_service_completeness(path: Path, spec: ServiceSpec) -> None:
         "requires_compose_secrets": spec.service_type == "compose",
         "dashboard_file": spec.dashboard_path.as_posix(),
         "alert_rule_file": spec.alert_rule_path.as_posix(),
-        "keycloak_client_generated": spec.requires_oidc,
+        "authentik_client_generated": spec.requires_oidc,
         "suppressed_checks": {},
     }
     catalog["services"] = dict(sorted(catalog["services"].items()))
@@ -1236,26 +1236,26 @@ def update_uptime_kuma_monitors(path: Path, spec: ServiceSpec) -> None:
     write_json(path, monitors)
 
 
-def update_keycloak_role_defaults(path: Path, spec: ServiceSpec) -> None:
-    """Append a scaffolded keycloak variable stub to keycloak_runtime/defaults/main.yml.
+def update_authentik_role_defaults(path: Path, spec: ServiceSpec) -> None:
+    """Append a scaffolded Authentik variable stub to authentik_runtime/defaults/main.yml.
 
     Only runs when the service requires OIDC. Adds the minimal variables needed
-    for keycloak_runtime to manage the service's OIDC client, wrapped in
+    for authentik_runtime to manage the service's OIDC client, wrapped in
     # BEGIN SERVICE / # END SERVICE markers.
 
     The caller (print_checklist) will remind the operator to also add the
-    corresponding tasks to keycloak_runtime/tasks/main.yml by hand.
+    corresponding tasks to authentik_runtime/tasks/main.yml by hand.
     """
     if not spec.requires_oidc or not path.is_file():
         return
 
     stub = (
         f"\n# BEGIN SERVICE: {spec.service_id}\n"
-        f"keycloak_{spec.service_id}_client_id: {spec.service_id}\n"
-        f"keycloak_{spec.service_id}_redirect_uris:\n"
+        f"authentik_{spec.service_id}_client_id: {spec.service_id}\n"
+        f"authentik_{spec.service_id}_redirect_uris:\n"
         f'  - "{spec.public_url or spec.internal_url}/*"\n'
-        f'keycloak_{spec.service_id}_root_url: "{spec.public_url or spec.internal_url}"\n'
-        f'keycloak_{spec.service_id}_client_secret: ""\n'
+        f'authentik_{spec.service_id}_root_url: "{spec.public_url or spec.internal_url}"\n'
+        f'authentik_{spec.service_id}_client_secret: ""\n'
         f"# END SERVICE: {spec.service_id}\n"
     )
     content = path.read_text()
@@ -1277,7 +1277,7 @@ def print_checklist(spec: ServiceSpec) -> None:
     )
     if spec.requires_oidc:
         print(
-            f"  [ ] KEYCLOAK: add task blocks to keycloak_runtime/tasks/main.yml — "
+            f"  [ ] AUTHENTIK: add task blocks to authentik_runtime/tasks/main.yml — "
             f"defaults stub was scaffolded automatically (search for '# BEGIN SERVICE: {spec.service_id}')"
         )
 
@@ -1345,7 +1345,7 @@ def main(argv: list[str] | None = None) -> int:
             update_service_completeness(repo_paths.service_completeness_path, spec)
         update_platform_services_registry(repo_paths.platform_services_path, spec)
         update_uptime_kuma_monitors(repo_paths.uptime_kuma_monitors_path, spec)
-        update_keycloak_role_defaults(repo_paths.keycloak_runtime_defaults_path, spec)
+        update_authentik_role_defaults(repo_paths.authentik_runtime_defaults_path, spec)
         write_placeholder_scan_receipt(repo_paths.root, spec)
         print_checklist(spec)
     except ValueError as exc:

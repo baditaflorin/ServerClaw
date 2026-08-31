@@ -17,342 +17,236 @@ def _split_name(name: str) -> tuple[str, str]:
     return first, last
 
 
-class KeycloakAdminAdapter:
+class AuthentikAdminAdapter:
+    """Manage operator identities through Authentik's governed REST API.
+
+    Authentik uses group UUIDs rather than realm-scoped role names.  The
+    adapter therefore reconciles group membership directly and deliberately
+    never overwrites an existing user's password during an ordinary roster
+    sync.
+    """
+
     def __init__(
         self,
         *,
         base_url: str,
-        realm: str,
-        bootstrap_admin: str,
-        bootstrap_password_loader: Callable[[], str | None],
-        admin_client_id: str | None = None,
-        admin_client_secret_loader: Callable[[], str | None] | None = None,
+        api_token_loader: Callable[[], str | None],
         request: RequestFunc = request_json,
     ):
         self.base_url = base_url.rstrip("/")
-        self.realm = realm
-        self.bootstrap_admin = bootstrap_admin
-        self._bootstrap_password_loader = bootstrap_password_loader
-        self._admin_client_id = admin_client_id
-        self._admin_client_secret_loader = admin_client_secret_loader
+        self._api_token_loader = api_token_loader
         self._request = request
-        self._token: str | None = None
         self._user_cache: dict[str, dict[str, Any]] = {}
 
-    def _token_endpoint(self) -> str:
-        return f"{self.base_url}/realms/master/protocol/openid-connect/token"
-
-    def _client_credentials_token(self) -> str | None:
-        """Try the repo-managed admin client (client-credentials grant).
-
-        Preferred over the bootstrap-admin password grant because it keeps
-        working when the bootstrap password has been rotated. Returns None on
-        any failure so the caller can fall back to the password grant.
-        """
-        if not (self._admin_client_id and self._admin_client_secret_loader):
-            return None
-        secret = self._admin_client_secret_loader()
-        if not secret:
-            return None
-        try:
-            payload = self._request(
-                self._token_endpoint(),
-                method="POST",
-                form={
-                    "grant_type": "client_credentials",
-                    "client_id": self._admin_client_id,
-                    "client_secret": secret,
-                },
-            )
-        except Exception:  # noqa: BLE001 — best-effort; fall back to password grant
-            return None
-        access_token = payload.get("access_token") if isinstance(payload, dict) else None
-        return access_token if isinstance(access_token, str) and access_token else None
-
-    def _admin_token(self) -> str:
-        if self._token is not None:
-            return self._token
-        token = self._client_credentials_token()
-        if token:
-            self._token = token
-            return token
-        password = self._bootstrap_password_loader()
-        if not password:
-            raise RuntimeError(
-                "Keycloak admin auth failed: no admin client secret and no bootstrap admin password configured."
-            )
-        payload = self._request(
-            self._token_endpoint(),
-            method="POST",
-            form={
-                "grant_type": "password",
-                "client_id": "admin-cli",
-                "username": self.bootstrap_admin,
-                "password": password,
-            },
-        )
-        access_token = payload.get("access_token")
-        if not isinstance(access_token, str) or not access_token:
-            raise RuntimeError("Keycloak did not return an access token for the bootstrap admin.")
-        self._token = access_token
-        return access_token
-
     def _headers(self) -> dict[str, str]:
-        return {"Authorization": f"Bearer {self._admin_token()}"}
-
-    def _role_url(self, role_name: str) -> str:
-        return (
-            f"{self.base_url}/admin/realms/{self.realm}/roles/"
-            f"{urllib.parse.quote(role_name, safe='')}"
-        )
-
-    def ensure_role(self, role_name: str, *, description: str) -> dict[str, Any]:
-        url = self._role_url(role_name)
-        try:
-            payload = self._request(url, headers=self._headers(), expected_status=(200,))
-        except RuntimeError:
-            self._request(
-                f"{self.base_url}/admin/realms/{self.realm}/roles",
-                method="POST",
-                headers=self._headers(),
-                body={"name": role_name, "description": description},
-                expected_status=(201, 204),
+        token = self._api_token_loader()
+        if not token:
+            raise RuntimeError(
+                "Authentik admin auth failed: set LV3_AUTHENTIK_BOOTSTRAP_TOKEN or provide "
+                ".local/authentik/bootstrap-token.txt."
             )
-            payload = self._request(url, headers=self._headers(), expected_status=(200,))
+        return {"Authorization": f"Bearer {token}", "Accept": "application/json"}
+
+    def _url(self, path: str, query: Mapping[str, str] | None = None) -> str:
+        suffix = urllib.parse.urlencode(query or {})
+        return f"{self.base_url}/api/v3{path}" + (f"?{suffix}" if suffix else "")
+
+    @staticmethod
+    def _results(payload: Any, *, label: str) -> tuple[list[dict[str, Any]], int | None]:
+        if isinstance(payload, list):
+            return [item for item in payload if isinstance(item, dict)], None
         if not isinstance(payload, dict):
-            raise RuntimeError(f"Keycloak role '{role_name}' did not return an object.")
-        return payload
+            raise RuntimeError(f"Authentik {label} did not return a result object.")
+        results = payload.get("results")
+        if not isinstance(results, list):
+            raise RuntimeError(f"Authentik {label} did not return a results list.")
+        pagination = payload.get("pagination", {})
+        next_page = pagination.get("next") if isinstance(pagination, dict) else None
+        if next_page is None:
+            return [item for item in results if isinstance(item, dict)], None
+        if isinstance(next_page, bool) or not isinstance(next_page, int) or next_page < 1:
+            raise RuntimeError(f"Authentik {label} returned an invalid pagination cursor.")
+        return [item for item in results if isinstance(item, dict)], next_page
+
+    def _list(self, path: str, query: Mapping[str, str] | None = None) -> list[dict[str, Any]]:
+        page = 1
+        results: list[dict[str, Any]] = []
+        while True:
+            request_query = {"page": str(page), "page_size": "100", **dict(query or {})}
+            payload = self._request(
+                self._url(path, request_query), headers=self._headers(), expected_status=(200,)
+            )
+            batch, next_page = self._results(payload, label=path)
+            results.extend(batch)
+            if next_page is None:
+                return results
+            if next_page <= page:
+                raise RuntimeError(f"Authentik {path} returned a non-advancing pagination cursor.")
+            page = next_page
+
+    @staticmethod
+    def _pk(payload: Mapping[str, Any], *, label: str) -> str:
+        value = payload.get("pk", payload.get("id"))
+        if isinstance(value, bool) or value is None or str(value).strip() == "":
+            raise RuntimeError(f"Authentik {label} did not expose a primary key.")
+        return str(value)
+
+    @staticmethod
+    def _exact(items: Sequence[dict[str, Any]], *, field: str, value: str, label: str) -> dict[str, Any] | None:
+        matches = [item for item in items if item.get(field) == value]
+        if len(matches) > 1:
+            raise RuntimeError(f"Multiple Authentik {label} objects match {field}={value!r}.")
+        return matches[0] if matches else None
+
+    def _group(self, group_name: str) -> dict[str, Any] | None:
+        groups = self._list("/core/groups/", {"name": group_name})
+        return self._exact(groups, field="name", value=group_name, label="group")
 
     def ensure_group(self, group_name: str) -> dict[str, Any]:
-        search_url = (
-            f"{self.base_url}/admin/realms/{self.realm}/groups"
-            f"?search={urllib.parse.quote(group_name, safe='')}"
-        )
-        groups = self._request(search_url, headers=self._headers(), expected_status=(200,))
-        if isinstance(groups, list):
-            for group in groups:
-                if isinstance(group, dict) and group.get("name") == group_name:
-                    return group
-        self._request(
-            f"{self.base_url}/admin/realms/{self.realm}/groups",
+        group = self._group(group_name)
+        if group is not None:
+            return group
+        created = self._request(
+            self._url("/core/groups/"),
             method="POST",
             headers=self._headers(),
             body={"name": group_name},
-            expected_status=(201, 204),
+            expected_status=(201,),
         )
-        groups = self._request(search_url, headers=self._headers(), expected_status=(200,))
-        if isinstance(groups, list):
-            for group in groups:
-                if isinstance(group, dict) and group.get("name") == group_name:
-                    return group
-        raise RuntimeError(f"Keycloak group '{group_name}' could not be created or found.")
+        if isinstance(created, dict) and created.get("name") == group_name:
+            return created
+        group = self._group(group_name)
+        if group is None:
+            raise RuntimeError(f"Authentik group '{group_name}' could not be created or found.")
+        return group
 
     def _user(self, username: str) -> dict[str, Any] | None:
         if username in self._user_cache:
             return self._user_cache[username]
-        url = (
-            f"{self.base_url}/admin/realms/{self.realm}/users"
-            f"?username={urllib.parse.quote(username, safe='')}&exact=true"
-        )
-        users = self._request(url, headers=self._headers(), expected_status=(200,))
-        if isinstance(users, list):
-            for user in users:
-                if isinstance(user, dict) and user.get("username") == username:
-                    self._user_cache[username] = user
-                    return user
-        return None
+        users = self._list("/core/users/", {"username": username, "include_groups": "true"})
+        user = self._exact(users, field="username", value=username, label="user")
+        if user is not None:
+            self._user_cache[username] = user
+        return user
 
     def _user_id(self, username: str) -> str:
         user = self._user(username)
         if user is None:
-            raise RuntimeError(f"Keycloak user '{username}' was not found.")
-        user_id = user.get("id")
-        if not isinstance(user_id, str) or not user_id:
-            raise RuntimeError(f"Keycloak user '{username}' does not expose an id.")
-        return user_id
+            raise RuntimeError(f"Authentik user '{username}' was not found.")
+        return self._pk(user, label=f"user '{username}'")
 
-    def _user_details(self, username: str) -> dict[str, Any]:
-        payload = self._request(
-            f"{self.base_url}/admin/realms/{self.realm}/users/{self._user_id(username)}",
-            headers=self._headers(),
-            expected_status=(200,),
-        )
-        if not isinstance(payload, dict):
-            raise RuntimeError(f"Keycloak user '{username}' did not return a valid detail payload.")
-        return payload
-
-    def _user_credentials(self, username: str) -> list[dict[str, Any]]:
-        payload = self._request(
-            f"{self.base_url}/admin/realms/{self.realm}/users/{self._user_id(username)}/credentials",
-            headers=self._headers(),
-            expected_status=(200,),
-        )
-        if not isinstance(payload, list):
-            raise RuntimeError(f"Keycloak credentials for '{username}' did not return a list.")
-        return [entry for entry in payload if isinstance(entry, dict)]
+    def _group_ids(self, group_names: Sequence[str]) -> list[str]:
+        return [self._pk(self.ensure_group(name), label=f"group '{name}'") for name in group_names]
 
     def ensure_user(self, operator: Mapping[str, Any], *, bootstrap_password: str) -> dict[str, Any]:
-        username = str(operator["keycloak"]["username"])
-        first_name, last_name = _split_name(str(operator["name"]))
+        identity = operator["authentik"]
+        if not isinstance(identity, Mapping):
+            raise RuntimeError("Operator record does not contain an Authentik identity block.")
+        username = str(identity["username"])
         payload = {
             "username": username,
-            "firstName": first_name,
-            "lastName": last_name,
+            "name": str(operator["name"]),
             "email": str(operator["email"]),
-            "enabled": bool(operator["keycloak"]["enabled"]),
-            "emailVerified": True,
-            "requiredActions": ["UPDATE_PASSWORD", "CONFIGURE_TOTP"],
-            "credentials": [
-                {
-                    "type": "password",
-                    "value": bootstrap_password,
-                    "temporary": True,
-                }
-            ],
-            "groups": list(operator["keycloak"]["groups"]),
+            "is_active": bool(identity["enabled"]),
+            "groups": self._group_ids([str(name) for name in identity["groups"]]),
+            "type": "internal",
         }
         existing = self._user(username)
+        created = existing is None
         if existing is None:
-            self._request(
-                f"{self.base_url}/admin/realms/{self.realm}/users",
+            response = self._request(
+                self._url("/core/users/"),
                 method="POST",
                 headers=self._headers(),
                 body=payload,
-                expected_status=(201, 204),
+                expected_status=(201,),
             )
-        else:
+            if not isinstance(response, dict):
+                raise RuntimeError(f"Authentik user '{username}' did not return a valid create response.")
+            user_id = self._pk(response, label=f"user '{username}'")
             self._request(
-                f"{self.base_url}/admin/realms/{self.realm}/users/{self._user_id(username)}",
-                method="PUT",
+                self._url(f"/core/users/{urllib.parse.quote(user_id, safe='')}/set_password/"),
+                method="POST",
                 headers=self._headers(),
-                body=payload,
+                body={"password": bootstrap_password},
                 expected_status=(204,),
             )
+        else:
+            user_id = self._pk(existing, label=f"user '{username}'")
+            self._request(
+                self._url(f"/core/users/{urllib.parse.quote(user_id, safe='')}/"),
+                method="PATCH",
+                headers=self._headers(),
+                body=payload,
+                expected_status=(200,),
+            )
         self._user_cache.pop(username, None)
-        user_id = self._user_id(username)
-        role_representations = [
-            self.ensure_role(role_name, description=f"Repo-managed operator role {role_name}.")
-            for role_name in operator["keycloak"]["realm_roles"]
-        ]
-        self._request(
-            f"{self.base_url}/admin/realms/{self.realm}/users/{user_id}/role-mappings/realm",
-            method="POST",
-            headers=self._headers(),
-            body=role_representations,
-            expected_status=(204,),
-        )
         return {
             "user_id": user_id,
             "username": username,
-            "realm_roles": list(operator["keycloak"]["realm_roles"]),
+            "groups": list(identity["groups"]),
+            "created": created,
+            "password_set": created,
         }
 
     def disable_user(self, username: str) -> dict[str, Any]:
-        if self._user(username) is None:
+        user = self._user(username)
+        if user is None:
             return {"status": "missing", "username": username}
-        details = self._user_details(username)
-        details["enabled"] = False
+        user_id = self._pk(user, label=f"user '{username}'")
         self._request(
-            f"{self.base_url}/admin/realms/{self.realm}/users/{self._user_id(username)}",
-            method="PUT",
+            self._url(f"/core/users/{urllib.parse.quote(user_id, safe='')}/"),
+            method="PATCH",
             headers=self._headers(),
-            body=details,
-            expected_status=(204,),
+            body={"is_active": False},
+            expected_status=(200,),
         )
         self._user_cache.pop(username, None)
-        return {"status": "disabled", "username": username, "user_id": self._user_id(username)}
+        return {"status": "disabled", "username": username, "user_id": user_id}
 
     def recover_totp(self, username: str) -> dict[str, Any]:
         user_id = self._user_id(username)
-        details = self._user_details(username)
-        removed_credentials: list[dict[str, str]] = []
-        for credential in self._user_credentials(username):
-            if credential.get("type") != "otp":
+        removed_devices: list[dict[str, Any]] = []
+        for device in self._list("/authenticators/admin/totp/"):
+            device_user = device.get("user")
+            device_user_id = (
+                self._pk(device_user, label="TOTP device user") if isinstance(device_user, Mapping) else None
+            )
+            if device_user_id != user_id:
                 continue
-            credential_id = credential.get("id")
-            if not isinstance(credential_id, str) or not credential_id:
-                continue
+            device_id = self._pk(device, label="TOTP device")
             self._request(
-                f"{self.base_url}/admin/realms/{self.realm}/users/{user_id}/credentials/{credential_id}",
+                self._url(f"/authenticators/admin/totp/{urllib.parse.quote(device_id, safe='')}/"),
                 method="DELETE",
                 headers=self._headers(),
-                expected_status=(200, 204),
+                expected_status=(204,),
             )
-            removed_credentials.append(
-                {
-                    "id": credential_id,
-                    "userLabel": str(credential.get("userLabel") or ""),
-                }
-            )
-
-        required_actions = details.get("requiredActions")
-        if not isinstance(required_actions, list):
-            required_actions = []
-        normalized_required_actions = [str(action) for action in required_actions if str(action).strip()]
-        if "CONFIGURE_TOTP" not in normalized_required_actions:
-            normalized_required_actions.append("CONFIGURE_TOTP")
-        details["requiredActions"] = normalized_required_actions
-        self._request(
-            f"{self.base_url}/admin/realms/{self.realm}/users/{user_id}",
-            method="PUT",
-            headers=self._headers(),
-            body=details,
-            expected_status=(204,),
-        )
-        self._request(
-            f"{self.base_url}/admin/realms/{self.realm}/attack-detection/brute-force/users/{user_id}",
-            method="DELETE",
-            headers=self._headers(),
-            expected_status=(200, 204),
-        )
-        self._user_cache.pop(username, None)
+            removed_devices.append({"id": device_id, "name": str(device.get("name") or "")})
         return {
             "status": "totp-reset",
             "username": username,
             "user_id": user_id,
-            "removed_otp_credentials": removed_credentials,
-            "required_actions": normalized_required_actions,
-            "failure_counters_cleared": True,
+            "removed_totp_devices": removed_devices,
+            "re_enrollment_required": True,
         }
 
     def reset_password(self, username: str, *, password: str, temporary: bool) -> dict[str, Any]:
         user_id = self._user_id(username)
-        details = self._user_details(username)
         self._request(
-            f"{self.base_url}/admin/realms/{self.realm}/users/{user_id}/reset-password",
-            method="PUT",
+            self._url(f"/core/users/{urllib.parse.quote(user_id, safe='')}/set_password/"),
+            method="POST",
             headers=self._headers(),
-            body={"type": "password", "temporary": temporary, "value": password},
+            body={"password": password},
             expected_status=(204,),
-        )
-        required_actions = details.get("requiredActions")
-        if not isinstance(required_actions, list):
-            required_actions = []
-        normalized_required_actions = [str(action) for action in required_actions if str(action).strip()]
-        if temporary and "UPDATE_PASSWORD" not in normalized_required_actions:
-            normalized_required_actions.append("UPDATE_PASSWORD")
-        details["requiredActions"] = normalized_required_actions
-        self._request(
-            f"{self.base_url}/admin/realms/{self.realm}/users/{user_id}",
-            method="PUT",
-            headers=self._headers(),
-            body=details,
-            expected_status=(204,),
-        )
-        self._request(
-            f"{self.base_url}/admin/realms/{self.realm}/attack-detection/brute-force/users/{user_id}",
-            method="DELETE",
-            headers=self._headers(),
-            expected_status=(200, 204),
         )
         self._user_cache.pop(username, None)
         return {
             "status": "password-reset",
             "username": username,
             "user_id": user_id,
-            "temporary": temporary,
-            "required_actions": normalized_required_actions,
-            "failure_counters_cleared": True,
+            "temporary_requested": temporary,
+            "temporary_enforced": False,
+            "recovery_flow_required_for_forced_rotation": temporary,
         }
 
     def inventory_user(self, username: str, *, email_fallback: str) -> dict[str, Any]:
@@ -360,7 +254,7 @@ class KeycloakAdminAdapter:
         if user is None:
             return {"status": "missing", "username": username}
         return {
-            "status": "active" if user.get("enabled") else "disabled",
+            "status": "active" if user.get("is_active") else "disabled",
             "username": username,
             "email": user.get("email", email_fallback),
         }

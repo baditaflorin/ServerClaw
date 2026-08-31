@@ -1,39 +1,49 @@
 ---
 argument_specs:
   main:
-    short_description: Configure Grafana to use the shared Keycloak OIDC login flow.
+    short_description: Configure Grafana to use the shared Authentik OIDC login flow.
     options:
       grafana_sso_service_topology:
         type: dict
         required: true
         description:
           - Service topology entry for Grafana.
-      grafana_sso_keycloak_service_topology:
-        type: dict
-        required: true
-        description:
-          - Service topology entry for the shared Keycloak broker.
       grafana_sso_client_id:
         type: str
         required: true
         description:
-          - OIDC client id Grafana should use against Keycloak.
-      grafana_sso_client_secret:
+          - OIDC client id Grafana should use against Authentik.
+      grafana_sso_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file containing the OIDC client secret Grafana should use against Authentik.
+      grafana_sso_oidc_issuer_url:
         type: str
         required: true
         description:
-          - OIDC client secret Grafana should use against Keycloak.
-      grafana_sso_realm_name:
+          - Authentik issuer URL for the Grafana provider.
+      grafana_sso_oidc_authorization_url:
         type: str
         required: true
         description:
-          - Keycloak realm name used for Grafana login.
+          - Authentik authorization endpoint for Grafana login.
+      grafana_sso_oidc_token_url:
+        type: str
+        required: true
+        description:
+          - Authentik token endpoint for Grafana login.
+      grafana_sso_oidc_userinfo_url:
+        type: str
+        required: true
+        description:
+          - Authentik userinfo endpoint for Grafana login.
       grafana_sso_login_groups:
         type: list
         elements: str
         required: true
         description:
-          - Keycloak groups that should be requested and mapped during login.
+          - Authentik groups that should be requested and mapped during login.
       grafana_sso_root_url:
         type: str
         required: true
@@ -43,4 +53,4 @@ argument_specs:
         type: str
         required: true
         description:
-          - Logout redirect URL sent to Keycloak after Grafana signout.
+          - Logout redirect URL sent to Authentik after Grafana signout.

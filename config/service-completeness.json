@@ -10,7 +10,7 @@
       "subdomain": "2026-09-23",
       "api_gateway": "2026-09-23",
       "dependency_graph": "2026-09-23",
-      "keycloak_client": "2026-09-23",
+      "oidc_client": "2026-09-23",
       "secret_definition": "2026-09-23",
       "grafana_dashboard": "2026-09-23",
       "slo_definition": "2026-09-23",
@@ -45,7 +45,7 @@
       "requires_compose_secrets": true,
       "dashboard_file": "config/grafana/dashboards/authentik.json",
       "alert_rule_file": "config/alertmanager/rules/authentik.yml",
-      "keycloak_client_generated": false,
+      "authentik_client_generated": false,
       "suppressed_checks": {}
     },
     "backup_pbs": {
@@ -92,7 +92,7 @@
       "requires_compose_secrets": false,
       "suppressed_checks": {
         "api_gateway": "2026-09-23",
-        "keycloak_client": "2026-09-23",
+        "oidc_client": "2026-09-23",
         "grafana_dashboard": "2026-09-23",
         "slo_definition": "2026-09-23",
         "data_catalog": "2026-09-23",
@@ -141,7 +141,8 @@
       "requires_oidc": true,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "keycloak_client_generated": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
       "suppressed_checks": {
         "api_gateway": "2026-09-30",
         "alert_rules": "2026-09-30",
@@ -210,7 +211,8 @@
       "requires_oidc": true,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "keycloak_client_generated": true
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true
     },
     "glitchtip": {
       "service_type": "compose",
@@ -220,7 +222,6 @@
       "requires_compose_secrets": true,
       "oidc_provider": "authentik",
       "authentik_client_generated": true,
-      "keycloak_client_generated": false,
       "dashboard_file": "config/grafana/dashboards/glitchtip.json",
       "alert_rule_file": "config/alertmanager/rules/glitchtip.yml",
       "suppressed_checks": {
@@ -253,7 +254,8 @@
       "requires_compose_secrets": true,
       "dashboard_file": "config/grafana/dashboards/grist.json",
       "alert_rule_file": "config/alertmanager/rules/grist.yml",
-      "keycloak_client_generated": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
       "suppressed_checks": {}
     },
     "harbor": {
@@ -264,7 +266,8 @@
       "requires_compose_secrets": false,
       "dashboard_file": "config/grafana/dashboards/harbor.json",
       "alert_rule_file": "config/alertmanager/rules/harbor.yml",
-      "keycloak_client_generated": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
       "suppressed_checks": {}
     },
     "headscale": {
@@ -286,14 +289,6 @@
       "suppressed_checks": {
         "api_gateway": "2026-09-23"
       }
-    },
-    "keycloak": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
     },
     "label_studio": {
       "service_type": "compose",
@@ -324,6 +319,8 @@
       "requires_oidc": true,
       "requires_secrets": true,
       "requires_compose_secrets": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
       "suppression_preset": "legacy-service"
     },
     "librechat": {
@@ -336,7 +333,7 @@
       "alert_rule_file": "config/alertmanager/rules/librechat.yml",
       "suppressed_checks": {
         "api_gateway": "2027-01-01",
-        "keycloak_client": "2027-01-01",
+        "oidc_client": "2027-01-01",
         "secret_definition": "2027-01-01",
         "grafana_dashboard": "2027-01-01",
         "slo_definition": "2027-01-01",
@@ -355,7 +352,7 @@
       "suppressed_checks": {
         "subdomain": "2027-01-01",
         "api_gateway": "2027-01-01",
-        "keycloak_client": "2027-01-01",
+        "oidc_client": "2027-01-01",
         "secret_definition": "2027-01-01",
         "grafana_dashboard": "2027-01-01",
         "slo_definition": "2027-01-01",
@@ -546,7 +543,6 @@
       "alert_rule_file": "config/alertmanager/rules/outline.yml",
       "oidc_provider": "authentik",
       "authentik_client_generated": true,
-      "keycloak_client_generated": false,
       "suppressed_checks": {}
     },
     "paperless": {
@@ -557,7 +553,8 @@
       "requires_compose_secrets": true,
       "dashboard_file": "config/grafana/dashboards/slo-overview.json",
       "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
-      "keycloak_client_generated": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
       "suppressed_checks": {}
     },
     "piper": {
@@ -662,7 +659,7 @@
       "requires_compose_secrets": false,
       "suppressed_checks": {
         "api_gateway": "2027-01-01",
-        "keycloak_client": "2027-01-01",
+        "oidc_client": "2027-01-01",
         "grafana_dashboard": "2027-01-01",
         "slo_definition": "2027-01-01",
         "data_catalog": "2027-01-01",
@@ -683,7 +680,8 @@
       "requires_oidc": true,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "keycloak_client_generated": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
       "suppressed_checks": {}
     },
     "serverclaw": {
@@ -692,7 +690,8 @@
       "requires_oidc": true,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "keycloak_client_generated": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
       "dashboard_file": "config/grafana/dashboards/serverclaw.json",
       "alert_rule_file": "config/alertmanager/rules/serverclaw.yml",
       "suppressed_checks": {
@@ -707,7 +706,8 @@
       "requires_oidc": true,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "keycloak_client_generated": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
       "suppressed_checks": {
         "health_probe": "2027-01-01",
         "api_gateway": "2027-01-01",
@@ -741,7 +741,8 @@
       "requires_oidc": true,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "keycloak_client_generated": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
       "suppressed_checks": {
         "api_gateway": "2026-09-30",
         "alert_rules": "2026-09-30",

@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 import argparse
-import html.parser
 import os
 import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-from urllib import parse, request
 
 from outline_client import (
     DEFAULT_BASE_URL,
@@ -22,36 +19,7 @@ from outline_client import (
     documents_in_collection,
     ensure_document,
     load_api_token,
-    load_file,
 )
-
-API_TOKEN_SCOPES = [
-    "collections.create",
-    "collections.delete",
-    "collections.info",
-    "collections.list",
-    "collections.update",
-    "collections.memberships",
-    "collections.addUser",
-    "collections.removeUser",
-    "collections.addGroup",
-    "collections.removeGroup",
-    "documents.create",
-    "documents.delete",
-    "documents.info",
-    "documents.list",
-    "documents.update",
-    "groups.create",
-    "groups.delete",
-    "groups.info",
-    "groups.list",
-    "groups.update",
-    "groups.memberships",
-    "groups.addUser",
-    "groups.removeUser",
-    "users.list",
-    "users.read",
-]
 
 
 @dataclass(frozen=True)
@@ -149,29 +117,6 @@ COLLECTION_SPECS = [
         landing_markdown="",
     ),
 ]
-
-
-class KeycloakLoginFormParser(html.parser.HTMLParser):
-    def __init__(self) -> None:
-        super().__init__()
-        self.in_login_form = False
-        self.form_action: str | None = None
-        self.hidden_fields: dict[str, str] = {}
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        attr_map = dict(attrs)
-        if tag == "form" and attr_map.get("id") == "kc-form-login":
-            self.in_login_form = True
-            self.form_action = attr_map.get("action")
-            return
-        if self.in_login_form and tag == "input":
-            name = attr_map.get("name")
-            if name:
-                self.hidden_fields[name] = attr_map.get("value", "")
-
-    def handle_endtag(self, tag: str) -> None:
-        if tag == "form" and self.in_login_form:
-            self.in_login_form = False
 
 
 GITHUB_REPO_BASE = os.environ.get("GITHUB_REPO_BASE_URL", "https://github.com/baditaflorin/ServerClaw/blob/main")
@@ -615,104 +560,6 @@ def landing_docs(repo_root: Path) -> list[tuple[CollectionSpec, str]]:
     return rendered
 
 
-def write_secret_file(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.is_symlink():
-        raise OutlineError(f"refusing to write API token through symlink: {path}")
-
-    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
-    if hasattr(os, "O_NOFOLLOW"):
-        flags |= os.O_NOFOLLOW
-
-    created = False
-    descriptor = -1
-    try:
-        descriptor = os.open(path, flags, 0o600)
-        created = True
-        os.fchmod(descriptor, 0o600)
-        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
-            handle.write(content.rstrip() + "\n")
-            handle.flush()
-            os.fsync(handle.fileno())
-    except Exception:
-        if created:
-            try:
-                os.close(descriptor)
-            except OSError:
-                pass
-            path.unlink(missing_ok=True)
-        raise
-
-
-def build_opener() -> tuple[request.OpenerDirector, Any]:
-    from http import cookiejar
-
-    jar = cookiejar.CookieJar()
-    opener = request.build_opener(request.HTTPCookieProcessor(jar))
-    opener.addheaders = [("User-Agent", "lv3-outline-sync/1.0")]
-    return opener, jar
-
-
-def find_cookie(jar: Any, name: str) -> str | None:
-    for cookie in jar:
-        if cookie.name == name:
-            return cookie.value
-    return None
-
-
-def bootstrap_token(
-    base_url: str, username: str, password_file: Path, token_name: str, token_file: Path, scope: list[str]
-) -> int:
-    if token_file.is_symlink():
-        raise OutlineError(f"refusing symlinked API token file: {token_file}")
-    if token_file.exists():
-        if not token_file.is_file():
-            raise OutlineError(f"API token path is not a regular file: {token_file}")
-        if not load_file(token_file):
-            raise OutlineError(f"API token file exists but is empty: {token_file}")
-        os.chmod(token_file, 0o600)
-        print(f"api token already present at {token_file}")
-        return 0
-
-    opener, jar = build_opener()
-    with opener.open(f"{base_url.rstrip('/')}/auth/oidc", timeout=60) as response:
-        login_html = response.read().decode("utf-8", errors="replace")
-        login_url = response.geturl()
-
-    parser = KeycloakLoginFormParser()
-    parser.feed(login_html)
-    if not parser.form_action:
-        raise OutlineError(f"unable to find Keycloak login form at {login_url}")
-
-    form_fields = dict(parser.hidden_fields)
-    form_fields["username"] = username
-    form_fields["password"] = load_file(password_file)
-    payload = parse.urlencode(form_fields).encode("utf-8")
-    login_request = request.Request(parser.form_action, data=payload, method="POST")
-    login_request.add_header("Content-Type", "application/x-www-form-urlencoded")
-    with opener.open(login_request, timeout=60) as response:
-        _ = response.read()
-
-    app_token = find_cookie(jar, "accessToken")
-    csrf_token = find_cookie(jar, "csrfToken")
-    client = OutlineClient(base_url, app_token=app_token, opener=opener, csrf_token=csrf_token)
-    response = client.call(
-        "apiKeys.create",
-        {
-            "name": token_name,
-            "scope": scope,
-        },
-        use_app_token=True,
-    )
-    token_payload = response.get("data", {})
-    token = token_payload.get("value") or token_payload.get("token")
-    if not token:
-        raise OutlineError(f"apiKeys.create response did not include a token value: {response}")
-    write_secret_file(token_file, token)
-    print(f"created api token at {token_file}")
-    return 0
-
-
 def cleanup_bootstrap_collections(client: OutlineClient) -> list[str]:
     outcomes: list[str] = []
     welcome = collections_by_name(client).get("Welcome")
@@ -792,16 +639,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Bootstrap and sync the LV3 Outline knowledge surface.")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    bootstrap = subparsers.add_parser("bootstrap-token", help="Create the repo-managed Outline API token through OIDC.")
-    bootstrap.add_argument("--base-url", default=DEFAULT_BASE_URL)
-    bootstrap.add_argument("--username", default="outline.automation")
-    bootstrap.add_argument(
-        "--password-file", type=Path, default=Path(".local/keycloak/outline.automation-password.txt")
-    )
-    bootstrap.add_argument("--token-name", default="lv3-outline-sync")
-    bootstrap.add_argument("--token-file", type=Path, default=DEFAULT_TOKEN_FILE)
-    bootstrap.add_argument("--scope", default=",".join(API_TOKEN_SCOPES))
-
     sync_parser = subparsers.add_parser("sync", help="Sync the managed Outline collections and landing pages.")
     sync_parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parents[1])
     sync_parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
@@ -819,16 +656,6 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
-        if args.command == "bootstrap-token":
-            scopes = [item.strip() for item in args.scope.split(",") if item.strip()]
-            return bootstrap_token(
-                base_url=args.base_url,
-                username=args.username,
-                password_file=args.password_file,
-                token_name=args.token_name,
-                token_file=args.token_file,
-                scope=scopes,
-            )
         if args.command == "sync":
             return sync(args.repo_root.resolve(), args.base_url, args.api_token_file, dry_run=args.dry_run)
         if args.command == "verify":

@@ -3,7 +3,7 @@
 ## Purpose
 
 Operate the private OpenFGA runtime that implements ADR 0262's delegated
-ServerClaw authorization model and keep its Keycloak-backed bootstrap state
+ServerClaw authorization model and keep its Authentik-backed bootstrap state
 replayable from the repository.
 
 ## Repo Sources Of Truth
@@ -20,8 +20,8 @@ replayable from the repository.
 
 - OpenBao is already converged and the controller has
   `.local/openbao/init.json`.
-- Keycloak is already converged, the named operator account exists for the
-  stable `principal:keycloak-user__florin.badita` reference, and the
+- Authentik is already converged, the named operator account exists for the
+  stable `principal:authentik-user__florin.badita` reference, and the
   `serverclaw-runtime` client can issue client-credentials tokens.
 - PostgreSQL and `runtime-control` are reachable through the standard
   Proxmox jump path.
@@ -59,7 +59,7 @@ python3 scripts/serverclaw_authz.py verify \
   --config config/serverclaw-authz/bootstrap.json \
   --openfga-url http://100.64.0.1:8014 \
   --openfga-preshared-key-file .local/openfga/preshared-key.txt \
-  --keycloak-url https://sso.example.com
+  --authentik-url https://id.example.com
 ```
 
 Expected results:
@@ -69,10 +69,10 @@ Expected results:
   network and is the canonical probe target for SLO and k6 validation
 - `http://100.64.0.1:8014/stores` returns `200` when the repo-managed
   preshared key is presented
-- the controller-side bootstrap and verify steps use the public Keycloak URL at
-  `https://sso.example.com` because the control machine does not have direct
+- the controller-side bootstrap and verify steps use the public Authentik URL at
+  `https://id.example.com` because the control machine does not have direct
   routing to the private `runtime-control` listener
-- the bootstrap report records the declared Keycloak operator principal and a
+- the bootstrap report records the declared Authentik operator principal and a
   live client-credentials token for `serverclaw-runtime`
 - the configured OpenFGA checks all return their expected boolean result
 
@@ -81,12 +81,12 @@ Expected results:
 - `.local/openfga/database-password.txt`
 - `.local/openfga/preshared-key.txt`
 - `.local/openfga/serverclaw-authz-bootstrap-report.json`
-- `.local/keycloak/serverclaw-runtime-client-secret.txt`
+- `.local/authentik/serverclaw-runtime-client-secret.txt`
 
 ## Recovery Notes
 
 - Re-run `make converge-openfga env=production` instead of hand-editing the
-  OpenFGA store, tuples, or the runtime Keycloak client.
+  OpenFGA store, tuples, or the runtime Authentik client.
 - Keep the OpenFGA runtime on `8098`; `8096` is already occupied by the
   separate `browser-runner` stack on `runtime-control`. Treat
   `http://10.10.10.92:8098` as the canonical guest-network runtime URL, while
@@ -96,7 +96,7 @@ Expected results:
 - If the controller-local preshared key is lost, rotate it by deleting
   `.local/openfga/preshared-key.txt` and replaying the converge from git.
 - If the authz checks fail after runtime-client recreation, re-run the OpenFGA
-  converge so the latest Keycloak runtime client and tuple seed are replayed
+  converge so the latest Authentik runtime client and tuple seed are replayed
   together.
 - During shared `runtime-control` converges, verify
   `http://10.10.10.92:8098/healthz` from the build host before re-running k6

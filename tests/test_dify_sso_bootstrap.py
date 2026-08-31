@@ -40,9 +40,9 @@ def bootstrap(client: FakeDifyClient) -> dict:
         admin_name="Platform Operator",
         admin_password="admin-password",
         init_password="init-password",
-        keycloak_client_id="dify",
-        keycloak_client_secret="client-secret",
-        keycloak_issuer_url="https://sso.example.com/realms/platform",
+        authentik_client_id="dify",
+        authentik_client_secret="client-secret",
+        authentik_issuer_url="https://id.example.com/application/o/dify/",
     )
 
 
@@ -65,7 +65,7 @@ def test_bootstrap_is_unchanged_when_admin_and_sso_already_match() -> None:
             "enabled": True,
             "type": "oidc",
             "client_id": "dify",
-            "issuer_url": "https://sso.example.com/realms/platform",
+            "issuer_url": "https://id.example.com/application/o/dify/",
         },
     )
 

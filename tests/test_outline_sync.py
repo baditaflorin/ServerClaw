@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import stat
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
@@ -44,21 +42,11 @@ class FakeResponse:
     def geturl(self) -> str:
         return self._url
 
-    def __enter__(self) -> FakeResponse:
+    def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
         return None
-
-
-class FakeOpener:
-    def __init__(self, responses: list[FakeResponse]) -> None:
-        self.responses = responses
-        self.calls: list[object] = []
-
-    def open(self, request, timeout: int = 60):
-        self.calls.append(request)
-        return self.responses.pop(0)
 
 
 def test_outline_client_uses_urlopen_when_bearer_token_auth_is_used(
@@ -81,75 +69,6 @@ def test_outline_client_uses_urlopen_when_bearer_token_auth_is_used(
     req = captured["request"]
     assert req.full_url == "https://wiki.example/api/collections.list"
     assert req.get_header("Authorization") == "Bearer outline-api-token"
-
-
-def test_bootstrap_token_uses_oidc_session_cookie_to_create_an_api_token(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    password_file = tmp_path / "operator-password.txt"
-    token_file = tmp_path / "api-token.txt"
-    password_file.write_text("super-secret\n", encoding="utf-8")
-    opener = FakeOpener(
-        [
-            FakeResponse(
-                '<form id="kc-form-login" action="https://sso.example/login"><input name="session_code" value="abc"></form>',
-                "https://sso.example/login",
-            ),
-            FakeResponse("", "https://wiki.example/auth/oidc.callback"),
-        ]
-    )
-    jar = [SimpleNamespace(name="csrfToken", value="csrf-cookie-value")]
-    calls: list[tuple[str, dict[str, object], bool, object, object]] = []
-
-    monkeypatch.setattr(outline_sync, "build_opener", lambda: (opener, jar))
-
-    def fake_call(self, endpoint: str, payload: dict[str, object], *, use_app_token: bool = False):
-        calls.append((endpoint, payload, use_app_token, self.opener, self.csrf_token))
-        return {"data": {"value": "outline-api-token"}}
-
-    monkeypatch.setattr(outline_sync.OutlineClient, "call", fake_call)
-
-    exit_code = outline_sync.bootstrap_token(
-        "https://wiki.example",
-        "florin.badita",
-        password_file,
-        "lv3-outline-sync",
-        token_file,
-        ["collections.create"],
-    )
-
-    assert exit_code == 0
-    assert token_file.read_text(encoding="utf-8").strip() == "outline-api-token"
-    assert stat.S_IMODE(token_file.stat().st_mode) == 0o600
-    assert len(opener.calls) == 2
-    assert calls == [
-        (
-            "apiKeys.create",
-            {"name": "lv3-outline-sync", "scope": ["collections.create"]},
-            True,
-            opener,
-            "csrf-cookie-value",
-        )
-    ]
-
-
-def test_bootstrap_token_normalizes_existing_token_permissions(tmp_path: Path) -> None:
-    token_file = tmp_path / "api-token.txt"
-    token_file.write_text("outline-api-token\n", encoding="utf-8")
-    token_file.chmod(0o644)
-
-    exit_code = outline_sync.bootstrap_token(
-        "https://wiki.example",
-        "outline.automation",
-        tmp_path / "unused-password.txt",
-        "lv3-outline-sync",
-        token_file,
-        ["collections.create"],
-    )
-
-    assert exit_code == 0
-    assert token_file.read_text(encoding="utf-8").strip() == "outline-api-token"
-    assert stat.S_IMODE(token_file.stat().st_mode) == 0o600
 
 
 def test_landing_docs_render_repo_indexes_from_canonical_files(tmp_path: Path) -> None:

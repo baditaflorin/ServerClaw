@@ -56,14 +56,11 @@
           | first
         ) | default({})
       }}
-    glitchtip_publish_frontend_rollback_provider: >-
+    glitchtip_publish_frontend_retired_providers: >-
       {{
-        (
-          glitchtip_publish_frontend_settings.json.socialApps
-          | selectattr('provider', 'equalto', glitchtip_keycloak_rollback_provider_id)
-          | list
-          | first
-        ) | default({})
+        glitchtip_publish_frontend_settings.json.socialApps
+        | selectattr('provider', 'in', glitchtip_retired_oidc_provider_ids)
+        | list
       }}
 
 - name: Assert the GlitchTip public auth config advertises the selected OIDC issuer
@@ -76,20 +73,16 @@
         == glitchtip_oidc_discovery_url
     fail_msg: "GlitchTip public auth config does not expose the selected normalized OIDC configuration."
 
-- name: Assert the GlitchTip frontend advertises selected and rollback login providers
+- name: Assert the GlitchTip frontend advertises the Authentik login provider
   ansible.builtin.assert:
     that:
       - glitchtip_publish_frontend_selected_provider != {}
       - glitchtip_publish_frontend_selected_provider.client_id == glitchtip_oidc_client_id
       - glitchtip_publish_frontend_selected_provider.authorize_url | length > 0
-      - glitchtip_publish_frontend_rollback_provider != {}
-      - >-
-        glitchtip_publish_frontend_rollback_provider.client_id
-        == glitchtip_keycloak_rollback_client_id
-      - glitchtip_publish_frontend_rollback_provider.authorize_url | length > 0
+      - glitchtip_publish_frontend_retired_providers | length == 0
     fail_msg: >-
-      GlitchTip frontend settings do not expose healthy selected and rollback
-      login providers; the interactive login page would hide OIDC choices.
+      GlitchTip frontend settings do not expose the configured Authentik login
+      provider exclusively; a retired identity provider is still active.
 
 - name: Run the GlitchTip headless OIDC redirect smoke verification
   ansible.builtin.command:

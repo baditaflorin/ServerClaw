@@ -321,6 +321,32 @@
     openbao_managed_policies: "{{ openbao_policies + openbao_runtime_service_policies }}"
     openbao_managed_approles: "{{ openbao_approles + openbao_runtime_service_approles }}"
 
+- name: Inspect the existing OpenBao Raft state before rendering its configuration
+  ansible.builtin.stat:
+    path: "{{ openbao_data_dir }}/raft/raft.db"
+  register: openbao_existing_raft_database
+  changed_when: false
+
+- name: Read the existing OpenBao Raft node ID before rendering its configuration
+  ansible.builtin.shell: |
+    set -o pipefail
+    awk -F'"' '/^[[:space:]]*node_id[[:space:]]*=/ { print $2; exit }' "{{ openbao_config_file }}"
+  args:
+    executable: /bin/bash
+  register: openbao_existing_raft_node_id
+  changed_when: false
+  failed_when: false
+  when: openbao_existing_raft_database.stat.exists
+
+- name: Preserve the existing OpenBao Raft node ID across inventory hostname migrations
+  ansible.builtin.set_fact:
+    openbao_raft_node_id: "{{ openbao_existing_raft_node_id.stdout | trim }}"
+  when:
+    - openbao_existing_raft_database.stat.exists
+    - openbao_existing_raft_node_id.rc == 0
+    - openbao_existing_raft_node_id.stdout | trim | length > 0
+    - openbao_raft_node_id == inventory_hostname
+
 - name: Render OpenBao policy files
   vars:
     mutation_audit_action: render.openbao_policies
@@ -1407,9 +1433,13 @@
     mutation_audit_emit_on_success: true
     openbao_database_role_creation_statements: >-
       {{
-        item.creation_statements
-        if item.creation_statements is not string
-        else [item.creation_statements]
+        (
+          item.creation_statements
+          if item.creation_statements is not string
+          else [item.creation_statements]
+        )
+        | map('replace', '__OPENBAO_CONNECT_ROLE__', openbao_postgres_connect_role)
+        | list
       }}
     openbao_database_role_revocation_statements: >-
       {{

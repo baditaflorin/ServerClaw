@@ -1,5 +1,5 @@
 from .adapters import (
-    KeycloakAdminAdapter,
+    AuthentikAdminAdapter,
     MattermostWebhookAdapter,
     OpenBaoIdentityAdapter,
     StepCACommandAdapter,
@@ -16,7 +16,7 @@ from .ports import (
 
 __all__ = [
     "IdentityDirectoryPort",
-    "KeycloakAdminAdapter",
+    "AuthentikAdminAdapter",
     "MattermostWebhookAdapter",
     "MeshNetworkPort",
     "NotificationPort",

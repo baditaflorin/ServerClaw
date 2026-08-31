@@ -79,9 +79,9 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: api-gateway
-      client_secret_local_file: .local/keycloak/api-gateway-client-secret.txt
+      client_secret_local_file: .local/authentik/api-gateway-client-secret.txt
       redirect_uris: []
       scopes:
         - openid
@@ -194,9 +194,9 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: dify
-      client_secret_local_file: .local/keycloak/dify-client-secret.txt
+      client_secret_local_file: .local/authentik/dify-client-secret.txt
       redirect_uris:
         - "https://agents.{{ platform_domain }}/console/api/oauth/login/oidc/callback"
       scopes:
@@ -232,7 +232,7 @@ platform_service_registry:
       publish:
         - hostname: "data.{{ platform_domain }}"
           address_host: nginx
-        - hostname: "sso.{{ platform_domain }}"
+        - hostname: "id.{{ platform_domain }}"
           address_host: nginx
     dns:
       records:
@@ -248,11 +248,11 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: directus
-      client_secret_local_file: .local/keycloak/directus-client-secret.txt
+      client_secret_local_file: .local/authentik/directus-client-secret.txt
       redirect_uris:
-        - "https://data.{{ platform_domain }}/auth/login/keycloak/callback"
+        - "https://data.{{ platform_domain }}/auth/login/authentik/callback"
       scopes:
         - openid
         - profile
@@ -263,7 +263,7 @@ platform_service_registry:
       upstream_port: 8055
       upstream_host: docker-runtime
       public_fqdn: data.{{ platform_domain }}
-      auth_proxy: false             # upstream Keycloak OIDC handles auth
+      auth_proxy: false             # upstream Authentik OIDC handles auth
   # END SERVICE: directus
 
   # BEGIN SERVICE: dozzle
@@ -386,11 +386,11 @@ platform_service_registry:
           ttl: 3600
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: gitea-oauth
-      client_secret_local_file: .local/keycloak/gitea-client-secret.txt
+      client_secret_local_file: .local/authentik/gitea-client-secret.txt
       redirect_uris:
-        - "https://git.{{ platform_domain }}/user/oauth2/Keycloak/callback"
+        - "https://git.{{ platform_domain }}/user/oauth2/Authentik/callback"
       scopes:
         - openid
         - profile
@@ -471,7 +471,7 @@ platform_service_registry:
       publish:
         - hostname: "grist.{{ platform_domain }}"
           address_host: nginx
-        - hostname: "sso.{{ platform_domain }}"
+        - hostname: "id.{{ platform_domain }}"
           address_host: nginx
     dns:
       records:
@@ -487,9 +487,9 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: grist
-      client_secret_local_file: .local/keycloak/grist-client-secret.txt
+      client_secret_local_file: .local/authentik/grist-client-secret.txt
       redirect_uris:
         - "https://grist.{{ platform_domain }}/oauth2/callback"
       scopes:
@@ -502,7 +502,7 @@ platform_service_registry:
       upstream_port: 8484
       upstream_host: docker-runtime
       public_fqdn: grist.{{ platform_domain }}
-      auth_proxy: false             # upstream Keycloak OIDC handles auth
+      auth_proxy: false             # upstream Authentik OIDC handles auth
   # END SERVICE: grist
 
   # ---------------------------------------------------------------------------
@@ -531,9 +531,9 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: harbor
-      client_secret_local_file: .local/keycloak/harbor-client-secret.txt
+      client_secret_local_file: .local/authentik/harbor-client-secret.txt
       redirect_uris:
         - "https://registry.{{ platform_domain }}/c/oidc/callback"
       scopes:
@@ -571,40 +571,6 @@ platform_service_registry:
   # K
   # ---------------------------------------------------------------------------
 
-  # BEGIN SERVICE: keycloak
-  keycloak:
-    service_type: docker_compose
-    image_catalog_key: ""            # uses upstream quay.io/keycloak/keycloak — pinned in defaults
-    internal_port: 8091
-    host_group: runtime-control
-    site_dir: /opt/keycloak
-    container_name: keycloak
-    needs_openbao: true
-    hairpin:
-      publish:
-        - hostname: "sso.{{ platform_domain }}"
-          address_host: nginx
-    dns:
-      records:
-        - fqdn: "sso.{{ platform_domain }}"
-          type: public
-          target_host: nginx
-          ttl: 60
-    tls:
-      domains:
-        - "sso.{{ platform_domain }}"
-      cert_source: letsencrypt
-      wildcard: false
-      cert_validity_days: 90
-    proxy:
-      enabled: true
-      upstream_port: 8091
-      upstream_host: runtime-control
-      public_fqdn: sso.{{ platform_domain }}
-      auth_proxy: false             # Keycloak IS the SSO provider; cannot front itself
-      extra_fqdns:
-        - "sso.staging.{{ platform_domain }}"
-  # END SERVICE: keycloak
 
   # ---------------------------------------------------------------------------
   # L
@@ -686,7 +652,7 @@ platform_service_registry:
       publish:
         - hostname: "langfuse.{{ platform_domain }}"
           address_host: nginx
-        - hostname: "sso.{{ platform_domain }}"
+        - hostname: "id.{{ platform_domain }}"
           address_host: nginx
     dns:
       records:
@@ -702,11 +668,11 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: langfuse
-      client_secret_local_file: .local/keycloak/langfuse-client-secret.txt
+      client_secret_local_file: .local/authentik/langfuse-client-secret.txt
       redirect_uris:
-        - "https://langfuse.{{ platform_domain }}/api/auth/callback/keycloak"
+        - "https://langfuse.{{ platform_domain }}/api/auth/callback/authentik"
       scopes:
         - openid
         - profile
@@ -959,7 +925,7 @@ platform_service_registry:
       upstream_port: 8084
       upstream_host: docker-runtime
       public_fqdn: cloud.{{ platform_domain }}
-      auth_proxy: false             # Nextcloud has native OIDC via Keycloak
+      auth_proxy: false             # Nextcloud has native OIDC via Authentik when enabled
       max_body_size: 4096m          # large file uploads
   # END SERVICE: nextcloud
 
@@ -1052,9 +1018,9 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: ops-portal-oauth
-      client_secret_local_file: .local/keycloak/ops-portal-client-secret.txt
+      client_secret_local_file: .local/authentik/ops-portal-oauth-client-secret.txt
       redirect_uris:
         - "https://ops.{{ platform_domain }}/oauth2/callback"
       scopes:
@@ -1097,9 +1063,9 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: repo-intake-oauth
-      client_secret_local_file: .local/keycloak/repo-intake-client-secret.txt
+      client_secret_local_file: .local/authentik/repo-intake-client-secret.txt
       redirect_uris:
         - "https://repo-intake.{{ platform_domain }}/oauth2/callback"
       scopes:
@@ -1136,8 +1102,6 @@ platform_service_registry:
         - hostname: "wiki.{{ platform_domain }}"
           address_host: nginx
         - hostname: "id.{{ platform_domain }}"
-          address_host: nginx
-        - hostname: "sso.{{ platform_domain }}"
           address_host: nginx
     dns:
       records:
@@ -1193,7 +1157,7 @@ platform_service_registry:
       publish:
         - hostname: "paperless.{{ platform_domain }}"
           address_host: nginx
-        - hostname: "sso.{{ platform_domain }}"
+        - hostname: "id.{{ platform_domain }}"
           address_host: nginx
     dns:
       records:
@@ -1209,11 +1173,11 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: paperless
-      client_secret_local_file: .local/keycloak/paperless-client-secret.txt
+      client_secret_local_file: .local/authentik/paperless-client-secret.txt
       redirect_uris:
-        - "https://paperless.{{ platform_domain }}/accounts/oidc/keycloak/login/callback/"
+        - "https://paperless.{{ platform_domain }}/accounts/oidc/authentik/login/callback/"
       scopes:
         - openid
         - profile
@@ -1224,7 +1188,7 @@ platform_service_registry:
       upstream_port: 8018
       upstream_host: docker-runtime
       public_fqdn: paperless.{{ platform_domain }}
-      auth_proxy: false             # upstream Keycloak OIDC handles auth
+      auth_proxy: false             # upstream Authentik OIDC handles auth
       max_body_size: 256m           # large document uploads
   # END SERVICE: paperless
 
@@ -1410,7 +1374,7 @@ platform_service_registry:
       publish:
         - hostname: "files.{{ platform_domain }}"
           address_host: nginx
-        - hostname: "sso.{{ platform_domain }}"
+        - hostname: "id.{{ platform_domain }}"
           address_host: nginx
     dns:
       records:
@@ -1426,9 +1390,9 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: sftpgo
-      client_secret_local_file: .local/keycloak/sftpgo-client-secret.txt
+      client_secret_local_file: .local/authentik/sftpgo-client-secret.txt
       redirect_uris:
         - "https://files.{{ platform_domain }}/web/oidc/redirect"
       scopes:
@@ -1463,7 +1427,7 @@ platform_service_registry:
       publish:
         - hostname: "bi.{{ platform_domain }}"
           address_host: nginx
-        - hostname: "sso.{{ platform_domain }}"
+        - hostname: "id.{{ platform_domain }}"
           address_host: nginx
     dns:
       records:
@@ -1479,11 +1443,11 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: superset
-      client_secret_local_file: .local/keycloak/superset-client-secret.txt
+      client_secret_local_file: .local/authentik/superset-client-secret.txt
       redirect_uris:
-        - "https://bi.{{ platform_domain }}/oauth-authorized/keycloak"
+        - "https://bi.{{ platform_domain }}/oauth-authorized/authentik"
       scopes:
         - openid
         - profile
@@ -1494,7 +1458,7 @@ platform_service_registry:
       upstream_port: 8105
       upstream_host: docker-runtime
       public_fqdn: bi.{{ platform_domain }}
-      auth_proxy: false             # Superset native Keycloak OIDC handles auth
+      auth_proxy: false             # Superset native Authentik OIDC handles auth
   # END SERVICE: superset
 
   # ---------------------------------------------------------------------------
@@ -1621,9 +1585,9 @@ platform_service_registry:
     needs_postgres: true
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: vikunja
-      client_secret_local_file: .local/keycloak/vikunja-client-secret.txt
+      client_secret_local_file: .local/authentik/vikunja-client-secret.txt
       redirect_uris:
         - "https://tasks.{{ platform_domain }}/auth/openid/lv3"
       scopes:
@@ -1773,7 +1737,7 @@ platform_service_registry:
       publish:
         - hostname: "chat.{{ platform_domain }}"
           address_host: nginx
-        - hostname: "sso.{{ platform_domain }}"
+        - hostname: "id.{{ platform_domain }}"
           address_host: nginx
     proxy:
       enabled: true
@@ -1796,9 +1760,9 @@ platform_service_registry:
       cert_validity_days: 90
     sso:
       enabled: true
-      provider: keycloak
+      provider: authentik
       client_id: serverclaw
-      client_secret_local_file: .local/keycloak/serverclaw-client-secret.txt
+      client_secret_local_file: .local/authentik/serverclaw-client-secret.txt
       redirect_uris:
         - "https://chat.{{ platform_domain }}/oauth/openid/callback"
       scopes:
