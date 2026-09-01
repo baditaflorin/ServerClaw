@@ -3,9 +3,10 @@ argument_specs:
   main:
     short_description: "Platform-wide service health watchdog (ADR 0421)"
     description: >
-      Installs a systemd timer that probes Docker Compose services every N seconds
-      and auto-restarts them on consecutive health failures. Extends the
-      identity_core_watchdog pattern (ADR 0376) to all application VMs.
+      Installs a systemd timer that probes configured services every N seconds and
+      applies an explicit recovery policy after consecutive health failures.
+      Docker Compose enforcement is the compatibility default; systemd recovery
+      supports a shadow mode that records the action without executing it.
     options:
       service_watchdog_name:
         type: str
@@ -16,7 +17,7 @@ argument_specs:
         type: list
         required: false
         default: []
-        description: "List of service probe definitions. Each entry must have name, compose_dir, compose_service, health_url, health_method, expected_status, and optionally exclude_from_auto_restart."
+        description: "List of service probe definitions. Each entry must have name, health_url, and expected_status; compose_dir is required only for docker-compose enforcement, while systemd recovery requires systemd_unit and shadow mode. Optional recovery_driver defaults to docker-compose and recovery_mode defaults to enforce."
       service_watchdog_probe_interval_sec:
         type: int
         required: false

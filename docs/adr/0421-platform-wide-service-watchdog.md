@@ -78,9 +78,12 @@ services. The role installs a systemd timer that:
 1. **Probes** each service's HTTP health endpoint (from `health-probe-catalog.json`)
    every **30 seconds**.
 2. **Auto-restarts** via `docker compose restart` after **2 consecutive failures**.
+   Non-Compose services must start with the `systemd` recovery driver in
+   `shadow` mode; the watchdog records the proposed action without executing it.
 3. **Rate-limits** restarts to **6 per service per hour** to prevent storms.
 4. **Alerts** via ntfy on failure, on restart, on recovery, and on rate-limit hit.
-5. **Writes** a machine-readable status file consumed by the composite health index.
+5. **Writes** a machine-readable status file, including the configured recovery
+   driver, mode, and most recent recovery action, for the composite health index.
 6. **Logs** every probe to systemd journal (→ Loki ingestion, ADR 0052).
 
 ### VM deployment matrix
@@ -91,7 +94,7 @@ services. The role installs a systemd timer that:
 | `docker-runtime` | browser_runner, changedetection, crawl4ai, dify, directus, dozzle, glitchtip, grist, label_studio, lago, langfuse, litellm, matrix_synapse, mattermost, minio, n8n, netbox, ntfy, ollama, outline, paperless, piper, plane, plausible, repowise, searxng, superset, typesense, woodpecker | P1 — app services |
 | `runtime-general` | homepage, mailpit, uptime_kuma | P1 — platform ops |
 | `runtime-ai` | gotenberg, tesseract_ocr, tika | P2 — AI processing |
-| `monitoring` | alertmanager, grafana | P1 — observability pipeline |
+| `monitoring` | alertmanager; Grafana is owned by a dedicated systemd shadow lane | P1 — observability pipeline |
 | `coolify` | coolify, librechat | P2 — managed deployments |
 
 ### Probe strategy
@@ -142,6 +145,30 @@ Service probe schema (mirrors the identity watchdog service spec):
   exclude_from_auto_restart: false # set true for openbao, postgres
 ```
 
+For a host-native unit, declare the recovery mechanism explicitly and observe it
+in shadow mode before proposing a separate enforcement implementation:
+
+```yaml
+- name: grafana
+  recovery_driver: systemd
+  recovery_mode: shadow
+  systemd_unit: grafana-server.service
+  health_url: "http://127.0.0.1:3000/api/health"
+  expected_status: "200"
+```
+
+#### Grafana ownership handoff
+
+Grafana is deliberately absent from the generic `monitoring` watchdog service
+list. The dedicated Grafana pilot first quiesces and re-renders that legacy
+watchdog as Alertmanager observation only (automatic recovery excluded), verifies
+that its rendered script has no Grafana block, and only then enables the separate
+`grafana-shadow` timer. This makes Grafana's recovery owner unique during the
+pilot; no Compose watchdog may race
+the native-systemd shadow policy. A failed handoff does not enable the shadow
+timer and is treated as a governed rollback/repair event rather than a reason
+to edit rendered systemd units or scripts manually.
+
 ### Postmortem and learned lessons
 
 See `docs/postmortems/2026-04-21-whack-a-mole-service-outages.md`.
@@ -178,6 +205,9 @@ See `docs/postmortems/2026-04-21-whack-a-mole-service-outages.md`.
       a Plane issue (ADR 0360) for human triage
 - [ ] Phase 4: Watchdog health is itself monitored — deploy a Loki alert rule
       that fires if the watchdog hasn't emitted a log line in >2 minutes
+- [ ] Host-native pilot: source implementation is ready for operator-approved
+      convergence; Grafana's systemd shadow lane must be observed before any
+      enforced systemd restart is proposed.
 
 ---
 
@@ -189,14 +219,19 @@ See `docs/postmortems/2026-04-21-whack-a-mole-service-outages.md`.
 2. `docker-runtime` second (highest service density, most incidents)
 3. All other VMs in parallel
 
-### Makefile target
+### Grafana shadow pilot targets
 
 ```bash
-make converge-platform-watchdog env=production
+make check-grafana-shadow-watchdog env=production
+make converge-grafana-shadow-watchdog env=production
 ```
 
-Runs `playbooks/platform-service-watchdog.yml` across all VMs in dependency order.
+Both commands run only `playbooks/grafana-shadow-watchdog.yml` against the
+monitoring lane. The check target has fixed `--check --diff` behavior and
+validates the current Grafana/native-unit/legacy-timer preconditions. The apply
+first completes and verifies the Alertmanager-observation-only legacy handoff, then enables
+the Grafana shadow timer.
 
 ### Runbook
 
-See `docs/runbooks/platform-service-watchdog.md` (created alongside this ADR).
+See `docs/runbooks/platform-service-watchdog.md`.

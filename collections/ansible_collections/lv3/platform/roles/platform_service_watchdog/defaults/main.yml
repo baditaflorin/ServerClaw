@@ -1,7 +1,8 @@
 ---
 # Purpose: Declare defaults for the platform-wide service health watchdog (ADR 0421).
 # Use case: Installs a systemd timer on any application VM that probes configured
-#   Docker Compose services every N seconds and auto-restarts them on failure.
+#   services every N seconds and applies their explicitly configured recovery policy
+#   after consecutive failures.
 # Inputs:
 #   - service_watchdog_name (string): Logical name for this watchdog instance.
 #   - service_watchdog_services (list): Services to monitor.
@@ -43,14 +44,21 @@ service_watchdog_ntfy_title: "LV3 Service Watchdog"
 
 # Services to monitor — each entry must have:
 #   name: human-readable service identifier (used in ntfy messages and state file keys)
-#   compose_dir: path to the docker-compose project directory on the target VM
-#   compose_service: service name within the compose file to restart (empty = whole stack)
-#   restart_args: docker compose subcommand + args
-#     - "" (empty): "restart <compose_service> --timeout 30" — running container
-#     - "up -d": brings up a stopped/OOM-killed container
 #   health_url: HTTP(S) URL to probe (must be reachable from localhost on the target VM)
 #   health_method: extra curl flags (e.g. "-k" to ignore TLS cert)
 #   expected_status: HTTP status code string(s) that mean healthy (e.g. "200")
 #   exclude_from_auto_restart: bool — probe and alert but never restart (default: false)
 #     Use for services where restart requires manual intervention (e.g. openbao, postgres)
+#   recovery_driver: "docker-compose" (default) or "systemd"
+#   recovery_mode: "enforce" (default) or "shadow"
+#     - shadow records and notifies the action that would be taken, but never runs it
+#   systemd_unit: required when recovery_driver is "systemd" (shadow mode only)
+#   compose_dir: required when recovery_driver is "docker-compose" and recovery_mode is "enforce"
+#   compose_service: service name within the compose file to restart (empty = whole stack)
+#   restart_args: docker compose subcommand + args
+#     - "" (empty): "restart <compose_service> --timeout 30" — running container
+#     - "up -d": brings up a stopped/OOM-killed container
+#
+# Docker Compose + enforce remains the compatibility default. A systemd service
+# must start in shadow mode until its probe and recovery receipts have been reviewed.
 service_watchdog_services: []

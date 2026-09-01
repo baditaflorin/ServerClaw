@@ -399,10 +399,10 @@
         playbook_execution_notification_service: platform_service_watchdog
 
 # ---------------------------------------------------------------------------
-# monitoring (P1 — alertmanager, grafana)
+# monitoring (P1 — Alertmanager; Grafana is handed off to the dedicated shadow pilot)
 # ---------------------------------------------------------------------------
 - name: Deploy service watchdog on monitoring
-  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
+  hosts: "{{ 'monitoring-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
   become: true
   gather_facts: true
   tags:
@@ -431,11 +431,9 @@
             compose_service: alertmanager
             health_url: "http://127.0.0.1:9093/-/healthy"
             expected_status: "200"
-          - name: grafana
-            compose_dir: /opt/grafana
-            compose_service: grafana
-            health_url: "http://127.0.0.1:3000/api/health"
-            expected_status: "200"
+            exclude_from_auto_restart: true  # Grafana shadow pilot: observe/alert only.
+          # Grafana is deliberately owned by playbooks/grafana-shadow-watchdog.yml.
+          # Do not add it here without an explicit recovery-policy handoff.
 
   post_tasks:
     - name: Run shared completion notifications

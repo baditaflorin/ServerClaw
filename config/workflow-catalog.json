@@ -2215,6 +2215,55 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-grafana-shadow-watchdog": {
+      "description": "Hand Grafana from the legacy monitoring watchdog to a monitoring-host-only systemd shadow lane. The legacy instance becomes Alertmanager observe-only; the new lane records a proposed Grafana recovery but never restarts it.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-grafana-shadow-watchdog",
+        "command": "make converge-grafana-shadow-watchdog"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-grafana-shadow-watchdog"
+      ],
+      "live_impact": "guest_live",
+      "target_lane": "lane:monitoring",
+      "owner_runbook": "docs/runbooks/platform-service-watchdog.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/grafana-shadow-watchdog.yml",
+        "playbooks/platform-service-watchdog.yml",
+        "collections/ansible_collections/lv3/platform/roles/platform_service_watchdog",
+        "docs/runbooks/platform-service-watchdog.md"
+      ],
+      "outputs": [
+        "The legacy monitoring watchdog is rendered without Grafana and with Alertmanager automatic recovery excluded; a separate Grafana shadow watchdog probes every 30 seconds. After two failed probes it writes a shadow receipt for grafana-server.service without executing systemctl restart, resetting failures, or consuming the restart budget."
+      ],
+      "verification_commands": [
+        "make syntax-check-grafana-shadow-watchdog",
+        "make check-grafana-shadow-watchdog env=production",
+        "On the monitoring VM: systemctl is-active grafana-server.service lv3-monitoring-watchdog.timer lv3-grafana-shadow-watchdog.timer",
+        "On the monitoring VM: grep -F 'svc_name=\"grafana\"' /usr/local/libexec/lv3-monitoring-watchdog.sh must return no match"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 300,
+        "max_steps": 80,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-superset": {
       "description": "Deploy the Superset metadata schema, runtime, Authentik client, and public edge publication, then verify SQL-first BI access end to end.",
       "lifecycle_status": "active",

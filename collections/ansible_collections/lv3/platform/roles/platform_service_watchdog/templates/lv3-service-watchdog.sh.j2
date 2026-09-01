@@ -3,7 +3,7 @@
 # Platform service health watchdog — ADR 0421
 # Watchdog instance: {{ service_watchdog_name }}
 # Probes {{ service_watchdog_services | length }} service(s) every {{ service_watchdog_probe_interval_sec }}s.
-# Auto-restarts on {{ service_watchdog_failure_threshold }} consecutive failures.
+# Applies the configured recovery policy on {{ service_watchdog_failure_threshold }} consecutive failures.
 # Rate-limited to {{ service_watchdog_max_restarts_per_hour }} restarts/hour/service.
 
 set -euo pipefail
@@ -115,12 +115,13 @@ restart_service() {
 }
 
 handle_unhealthy() {
-    local svc="$1" compose_dir="$2" compose_service="$3" restart_args="$4" exclude_restart="$5"
-    local failures restarts_this_hour
+    local svc="$1" recovery_driver="$2" recovery_mode="$3" systemd_unit="$4" compose_dir="$5" compose_service="$6" restart_args="$7" exclude_restart="$8"
+    local failures restarts_this_hour recovery_target
 
     failures="$(get_failure_count "${svc}")"
     failures=$(( failures + 1 ))
     set_failure_count "${svc}" "${failures}"
+    recovery_actions["${svc}"]="waiting"
     log_warn "${svc}: unhealthy — ${failures} consecutive failure(s)"
 
     if [[ "${failures}" -lt "${FAILURE_THRESHOLD}" ]]; then
@@ -130,6 +131,7 @@ handle_unhealthy() {
     # Threshold reached
     if [[ "${exclude_restart}" == "true" ]]; then
         log_warn "${svc}: threshold reached but auto-restart excluded (manual intervention required)"
+        recovery_actions["${svc}"]="excluded"
         if [[ "${failures}" -eq "${FAILURE_THRESHOLD}" ]]; then
             send_ntfy \
                 "${NTFY_TITLE} — ${svc} DOWN (no auto-restart)" \
@@ -139,8 +141,55 @@ handle_unhealthy() {
         return 0
     fi
 
+    case "${recovery_driver}" in
+        docker-compose)
+            recovery_target="docker compose in ${compose_dir}"
+            ;;
+        systemd)
+            if [[ -z "${systemd_unit}" ]]; then
+                recovery_actions["${svc}"]="invalid_configuration"
+                log_error "${svc}: systemd recovery driver has no unit; refusing recovery"
+                return 0
+            fi
+            if [[ "${recovery_mode}" != "shadow" ]]; then
+                recovery_actions["${svc}"]="invalid_configuration"
+                log_error "${svc}: systemd enforcement is not implemented; refusing recovery"
+                return 0
+            fi
+            recovery_target="systemctl restart ${systemd_unit}"
+            ;;
+        *)
+            recovery_actions["${svc}"]="invalid_configuration"
+            log_error "${svc}: unknown recovery driver ${recovery_driver}; refusing recovery"
+            return 0
+            ;;
+    esac
+
+    # Shadow mode is deliberately before Compose validation and restart accounting:
+    # it must never execute a command or consume an action budget.
+    if [[ "${recovery_mode}" == "shadow" ]]; then
+        recovery_actions["${svc}"]="would_restart"
+        log_warn "${svc}: SHADOW recovery — would run '${recovery_target}'"
+        if [[ "${failures}" -eq "${FAILURE_THRESHOLD}" ]]; then
+            send_ntfy \
+                "${NTFY_TITLE} — ${svc} SHADOW recovery" \
+                "${svc} failed ${failures} consecutive probes on ${HOSTNAME}. Shadow mode would run '${recovery_target}'; no recovery action was executed." \
+                "rotating_light,eyes" "3"
+        fi
+        return 0
+    fi
+
+    # The systemd branch is intentionally shadow-only. Keeping this guard in the
+    # generated script makes a future configuration-only flip fail closed.
+    if [[ "${recovery_driver}" != "docker-compose" ]]; then
+        recovery_actions["${svc}"]="invalid_configuration"
+        log_error "${svc}: unsupported enforced recovery driver ${recovery_driver}; refusing recovery"
+        return 0
+    fi
+
     if [[ ! -d "${compose_dir}" ]]; then
         log_error "${svc}: compose directory ${compose_dir} does not exist; refusing restart"
+        recovery_actions["${svc}"]="missing_recovery_target"
         if [[ "${failures}" -eq "${FAILURE_THRESHOLD}" ]]; then
             send_ntfy \
                 "${NTFY_TITLE} — ${svc} unmanaged" \
@@ -153,7 +202,7 @@ handle_unhealthy() {
     restarts_this_hour="$(get_restart_count_this_hour "${svc}")"
 
     if [[ "${restarts_this_hour}" -lt "${MAX_RESTARTS_PER_HOUR}" ]]; then
-        log_warn "${svc}: threshold reached (${failures}/${FAILURE_THRESHOLD}), attempting restart (${restarts_this_hour}/${MAX_RESTARTS_PER_HOUR} this hour)"
+        log_warn "${svc}: threshold reached (${failures}/${FAILURE_THRESHOLD}), attempting docker compose recovery (${restarts_this_hour}/${MAX_RESTARTS_PER_HOUR} this hour)"
         send_ntfy \
             "${NTFY_TITLE} — ${svc} DOWN" \
             "${svc} failed ${failures} consecutive probes on ${HOSTNAME}. Auto-restarting (${restarts_this_hour}/${MAX_RESTARTS_PER_HOUR} this hour)." \
@@ -161,11 +210,15 @@ handle_unhealthy() {
 
         if restart_service "${svc}" "${compose_dir}" "${compose_service}" "${restart_args}"; then
             increment_restart_count "${svc}"
+            recovery_actions["${svc}"]="restarted"
             # Give the restarted service a complete failure window to become ready.
             set_failure_count "${svc}" 0
+        else
+            recovery_actions["${svc}"]="restart_failed"
         fi
     else
         log_error "${svc}: restart rate limit reached (${MAX_RESTARTS_PER_HOUR}/hour). Manual intervention required."
+        recovery_actions["${svc}"]="rate_limited"
         # Only alert once when hitting the limit (avoid spam)
         if [[ "${restarts_this_hour}" -eq "${MAX_RESTARTS_PER_HOUR}" ]]; then
             send_ntfy \
@@ -179,6 +232,7 @@ handle_unhealthy() {
 # --- main probe loop ---
 
 declare -A results
+declare -A recovery_actions
 overall_healthy=true
 
 {% for svc in service_watchdog_services %}
@@ -188,7 +242,10 @@ overall_healthy=true
     svc_url="{{ svc.health_url }}"
     svc_method="{{ svc.health_method | default('') }}"
     svc_expected="{{ svc.expected_status }}"
-    svc_compose_dir="{{ svc.compose_dir }}"
+    svc_recovery_driver="{{ svc.recovery_driver | default('docker-compose') }}"
+    svc_recovery_mode="{{ svc.recovery_mode | default('enforce') }}"
+    svc_systemd_unit="{{ svc.systemd_unit | default('') }}"
+    svc_compose_dir="{{ svc.compose_dir | default('') }}"
     svc_compose_service="{{ svc.compose_service | default('') }}"
     svc_restart_args="{{ svc.restart_args | default('') }}"
     svc_exclude_restart="{{ svc.exclude_from_auto_restart | default(false) | lower }}"
@@ -198,6 +255,7 @@ overall_healthy=true
         prev_failures="$(get_failure_count "${svc_name}")"
         set_failure_count "${svc_name}" 0
         results["${svc_name}"]="healthy"
+        recovery_actions["${svc_name}"]="none"
 
         # Recovery notification: only when coming back from a failure state
         if [[ "${prev_failures}" -ge "${FAILURE_THRESHOLD}" ]]; then
@@ -212,6 +270,9 @@ overall_healthy=true
         overall_healthy=false
         handle_unhealthy \
             "${svc_name}" \
+            "${svc_recovery_driver}" \
+            "${svc_recovery_mode}" \
+            "${svc_systemd_unit}" \
             "${svc_compose_dir}" \
             "${svc_compose_service}" \
             "${svc_restart_args}" \
@@ -234,6 +295,10 @@ overall_healthy=true
 {% for svc in service_watchdog_services %}
     echo "    \"{{ svc.name }}\": {"
     echo "      \"status\": \"${results[{{ svc.name }}]:-unknown}\","
+    echo "      \"recovery_driver\": \"{{ svc.recovery_driver | default('docker-compose') }}\","
+    echo "      \"recovery_mode\": \"{{ svc.recovery_mode | default('enforce') }}\","
+    echo "      \"systemd_unit\": \"{{ svc.systemd_unit | default('') }}\","
+    echo "      \"recovery_action\": \"${recovery_actions[{{ svc.name }}]:-none}\","
     echo "      \"failure_count\": $(get_failure_count "{{ svc.name }}"),"
     echo "      \"restarts_this_hour\": $(get_restart_count_this_hour "{{ svc.name }}")"
     echo "    }{{ ',' if not loop.last else '' }}"

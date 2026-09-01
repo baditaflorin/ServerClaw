@@ -1,7 +1,7 @@
 ---
 # Purpose: Install the platform service health watchdog on an application VM (ADR 0421).
-# Use case: Probes configured Docker Compose services at a fixed interval, auto-restarts
-#   on consecutive failures with rate limiting and ntfy alerts.
+# Use case: Probes configured services at a fixed interval and applies explicitly
+#   configured recovery policy with rate limiting and ntfy alerts.
 # Inputs:
 #   - service_watchdog_* variables from defaults/main.yml
 #   - service_watchdog_services: list of service probe definitions (required, non-empty)
@@ -23,6 +23,65 @@
       - service_watchdog_max_restarts_per_hour | int > 0
       - service_watchdog_script_path | length > 0
     fail_msg: "platform_service_watchdog requires a non-empty service list and valid probe configuration."
+
+- name: Validate platform service watchdog recovery settings
+  ansible.builtin.assert:
+    that:
+      - (item.recovery_driver | default('docker-compose')) in ['docker-compose', 'systemd']
+      - (item.recovery_mode | default('enforce')) in ['enforce', 'shadow']
+    fail_msg: >-
+      {{ item.name }} must use recovery_driver docker-compose or systemd and
+      recovery_mode enforce or shadow.
+  loop: "{{ service_watchdog_services }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Validate systemd watchdog recovery settings
+  ansible.builtin.assert:
+    that:
+      - item.systemd_unit is defined
+      - item.systemd_unit | string | length > 0
+      - (item.recovery_mode | default('enforce')) == 'shadow'
+    fail_msg: >-
+      {{ item.name }} uses the systemd recovery driver. It requires a non-empty
+      systemd_unit and recovery_mode: shadow; systemd enforcement is not enabled.
+  loop: "{{ service_watchdog_services }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: (item.recovery_driver | default('docker-compose')) == 'systemd'
+
+- name: Validate systemd watchdog recovery units are loaded
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - show
+      - "{{ item.systemd_unit }}"
+      - --property=LoadState
+      - --value
+  register: service_watchdog_systemd_unit_state
+  changed_when: false
+  check_mode: false
+  failed_when: >-
+    service_watchdog_systemd_unit_state.rc != 0 or
+    (service_watchdog_systemd_unit_state.stdout | trim) != 'loaded'
+  loop: "{{ service_watchdog_services }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: (item.recovery_driver | default('docker-compose')) == 'systemd'
+
+- name: Validate Docker Compose watchdog recovery directories
+  ansible.builtin.assert:
+    that:
+      - item.compose_dir is defined
+      - item.compose_dir | string | length > 0
+    fail_msg: >-
+      {{ item.name }} uses enforced docker-compose recovery but has no compose_dir.
+  loop: "{{ service_watchdog_services }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - (item.recovery_driver | default('docker-compose')) == 'docker-compose'
+    - (item.recovery_mode | default('enforce')) == 'enforce'
 
 - name: Ensure the service watchdog root and state directories exist
   ansible.builtin.file:

@@ -1,0 +1,205 @@
+---
+# Playbook: grafana-shadow-watchdog.yml
+# Purpose: Move Grafana onto one host-native, shadow-only recovery lane (ADR 0421).
+# Scope: The monitoring host only. The first play removes Grafana from the active
+# legacy monitoring watchdog while retaining Alertmanager observation only. The
+# second, separate play creates the Grafana-only shadow timer. The play boundary
+# prevents role handler notifications for the two timer names from coalescing.
+#
+# Grafana is healthy before the handoff begins. The legacy timer/service are
+# quiesced before its script is replaced, and the handoff is verified before the
+# shadow timer is enabled. On two failed probes, the resulting shadow timer only
+# records and notifies the `systemctl restart grafana-server.service` command
+# that would be used; the role has no enforced systemd recovery implementation.
+
+- name: Hand off Grafana from the legacy monitoring watchdog
+  hosts: "{{ 'monitoring-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - grafana-shadow-watchdog
+    - watchdog
+    - monitoring
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.grafana-shadow-watchdog
+        playbook_execution_audit_target: grafana_shadow_watchdog
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.monitoring[playbook_execution_env] }}"
+
+    - name: Verify Grafana is healthy before the recovery-policy handoff
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:3000/api/health"
+        method: GET
+        status_code: 200
+        return_content: false
+      changed_when: false
+      check_mode: false
+
+    - name: Verify the legacy monitoring watchdog timer is active before handoff
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - is-active
+          - lv3-monitoring-watchdog.timer
+      changed_when: false
+      check_mode: false
+
+    - name: Verify the native Grafana recovery unit is loaded before handoff
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - show
+          - grafana-server.service
+          - --property=LoadState
+          - --value
+      register: grafana_shadow_preflight_unit_state
+      changed_when: false
+      check_mode: false
+      failed_when: >-
+        grafana_shadow_preflight_unit_state.rc != 0 or
+        (grafana_shadow_preflight_unit_state.stdout | trim) != 'loaded'
+
+    - name: Quiesce the legacy monitoring watchdog during the Grafana handoff
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: stopped
+      loop:
+        - lv3-monitoring-watchdog.timer
+        - lv3-monitoring-watchdog.service
+      when: not ansible_check_mode
+
+  roles:
+    - role: lv3.platform.platform_service_watchdog
+      vars:
+        # This is the current legacy instance, re-rendered with Alertmanager
+        # observation only. Grafana is intentionally absent and Alertmanager
+        # auto-restart is excluded so this workflow has no non-Grafana actions.
+        service_watchdog_name: monitoring
+        service_watchdog_ntfy_topic: platform-service-watchdog-monitoring
+        service_watchdog_services:
+          - name: alertmanager
+            compose_dir: /opt/alertmanager
+            compose_service: alertmanager
+            health_url: "http://127.0.0.1:9093/-/healthy"
+            expected_status: "200"
+            exclude_from_auto_restart: true
+
+  post_tasks:
+    - name: Apply the legacy watchdog handoff before enabling Grafana shadow mode
+      ansible.builtin.meta: flush_handlers
+      when: not ansible_check_mode
+
+    - name: Verify the legacy watchdog no longer contains a Grafana service block
+      ansible.builtin.command:
+        argv:
+          - grep
+          - -F
+          - 'svc_name="grafana"'
+          - /usr/local/libexec/lv3-monitoring-watchdog.sh
+      register: grafana_shadow_legacy_grafana_entry
+      changed_when: false
+      check_mode: false
+      failed_when: grafana_shadow_legacy_grafana_entry.rc != 1
+      when: not ansible_check_mode
+
+    - name: Verify the contained legacy monitoring watchdog timer is active
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - is-active
+          - lv3-monitoring-watchdog.timer
+      changed_when: false
+      check_mode: false
+      when: not ansible_check_mode
+
+- name: Deploy the Grafana-only shadow watchdog
+  hosts: "{{ 'monitoring-staging' if (env | default('production')) == 'staging' else 'monitoring' }}"
+  become: true
+  gather_facts: false
+  tags:
+    - grafana-shadow-watchdog
+    - watchdog
+    - monitoring
+
+  roles:
+    - role: lv3.platform.platform_service_watchdog
+      vars:
+        service_watchdog_name: grafana-shadow
+        service_watchdog_ntfy_topic: platform-service-watchdog-monitoring
+        service_watchdog_services:
+          - name: grafana
+            recovery_driver: systemd
+            recovery_mode: shadow
+            systemd_unit: grafana-server.service
+            health_url: "http://127.0.0.1:3000/api/health"
+            expected_status: "200"
+
+  post_tasks:
+    - name: Apply the Grafana shadow timer before post-apply verification
+      ansible.builtin.meta: flush_handlers
+      when: not ansible_check_mode
+
+    - name: Verify Grafana shadow watchdog
+      ansible.builtin.include_role:
+        name: lv3.platform.platform_service_watchdog
+        tasks_from: verify.yml
+      vars:
+        service_watchdog_name: grafana-shadow
+        service_watchdog_timer_name: lv3-grafana-shadow-watchdog.timer
+        service_watchdog_service_name: lv3-grafana-shadow-watchdog.service
+        service_watchdog_status_file: /var/lib/lv3-grafana-shadow-watchdog/status.json
+        service_watchdog_probe_interval_sec: 30
+      when: not ansible_check_mode
+
+    - name: Verify Grafana remains healthy after shadow policy convergence
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:3000/api/health"
+        method: GET
+        status_code: 200
+        return_content: false
+      changed_when: false
+      check_mode: false
+
+    - name: Verify Grafana is owned only by the shadow watchdog
+      block:
+        - name: Confirm the legacy watchdog contains no Grafana service block
+          ansible.builtin.command:
+            argv:
+              - grep
+              - -F
+              - 'svc_name="grafana"'
+              - /usr/local/libexec/lv3-monitoring-watchdog.sh
+          register: grafana_shadow_final_legacy_grafana_entry
+          changed_when: false
+          check_mode: false
+          failed_when: grafana_shadow_final_legacy_grafana_entry.rc != 1
+
+        - name: Confirm the legacy monitoring watchdog timer is active
+          ansible.builtin.command:
+            argv:
+              - systemctl
+              - is-active
+              - lv3-monitoring-watchdog.timer
+          changed_when: false
+          check_mode: false
+
+        - name: Confirm the Grafana shadow watchdog timer is active
+          ansible.builtin.command:
+            argv:
+              - systemctl
+              - is-active
+              - lv3-grafana-shadow-watchdog.timer
+          changed_when: false
+          check_mode: false
+      when: not ansible_check_mode
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: grafana_shadow_watchdog
+      when: not ansible_check_mode

@@ -1693,6 +1693,43 @@
         "timeout_seconds": 300
       }
     },
+    "converge-grafana-shadow-watchdog": {
+      "description": "Hand Grafana from the legacy monitoring watchdog to its own native-systemd shadow lane. The handoff leaves Alertmanager observe-only and records, but cannot execute, a Grafana restart.",
+      "workflow_id": "converge-grafana-shadow-watchdog",
+      "scope": "guest_runtime",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-grafana-shadow-watchdog passes",
+        "Grafana is healthy, grafana-server.service is loaded, and lv3-monitoring-watchdog.timer is active before the policy handoff"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, check result, Grafana/local-health state, both watchdog timer states, proof that the legacy rendered script lacks Grafana, and a status-file receipt. A shadow receipt must not increment restarts_this_hour."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if Grafana, grafana-server.service, the legacy monitoring timer, or the shadow timer is unhealthy before or after the apply.",
+          "Stop if the legacy rendered script still owns Grafana, Alertmanager automatic recovery is not excluded, or the new Grafana policy is not systemd plus shadow plus grafana-server.service."
+        ],
+        "rollback_guidance": [
+          "Reapply the last known-good watchdog source through the canonical converge path; do not hand-edit the live script or systemd units.",
+          "A failed handoff may leave the legacy timer stopped; do not start the shadow timer manually. Repair or roll back through the trusted controller and re-verify both timer states."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 300
+      }
+    },
     "converge-label-studio": {
       "description": "Converge the Label Studio runtime, shared PostgreSQL backing store, repo-managed project catalog, and the authenticated annotate.example.com publication.",
       "workflow_id": "converge-label-studio",

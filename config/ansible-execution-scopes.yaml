@@ -607,6 +607,14 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - roles/identity_core_watchdog
+  playbooks/grafana-shadow-watchdog.yml:
+    playbook_id: grafana-shadow-watchdog
+    mutation_scope: lane
+    target_lane: lane:monitoring
+    shared_surfaces:
+      - roles/platform_service_watchdog
+      - service:grafana
+      - service:monitoring
   playbooks/superset.yml:
     playbook_id: superset
     mutation_scope: platform

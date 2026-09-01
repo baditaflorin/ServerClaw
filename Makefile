@@ -172,6 +172,7 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
 .PHONY: migrate-service migrate-service-dry-run teardown-service detect-orphans purge-orphans
 .PHONY: syntax-check-litellm converge-litellm syntax-check-librechat converge-librechat converge-outline
+.PHONY: syntax-check-grafana-shadow-watchdog check-grafana-shadow-watchdog converge-grafana-shadow-watchdog
 .PHONY: syntax-check-flagsmith converge-flagsmith
 .PHONY: syntax-check-lago converge-lago
 .PHONY: syntax-check-matrix-synapse converge-matrix-synapse
@@ -943,6 +944,9 @@ syntax-check:
 syntax-check-monitoring:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/monitoring-stack.yml --syntax-check
 
+syntax-check-grafana-shadow-watchdog:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/grafana-shadow-watchdog.yml --syntax-check
+
 syntax-check-ntfy:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ntfy.yml -e @$(REPO_ROOT)/playbooks/vars/ntfy.yml --syntax-check
 
@@ -1442,6 +1446,14 @@ converge-coolify:
 converge-identity-core-watchdog:
 	$(MAKE) preflight WORKFLOW=converge-identity-core-watchdog
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/identity-core-watchdog.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+check-grafana-shadow-watchdog:
+	$(MAKE) preflight WORKFLOW=converge-grafana-shadow-watchdog
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/grafana-shadow-watchdog.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) --check --diff
+
+converge-grafana-shadow-watchdog:
+	$(MAKE) preflight WORKFLOW=converge-grafana-shadow-watchdog
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/grafana-shadow-watchdog.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
 
 converge-authentik:
 	$(MAKE) preflight-authentik-deployment-selection
