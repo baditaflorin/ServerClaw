@@ -1,0 +1,9 @@
+[Unit]
+Description=Bounded Proxmox storage recovery
+After=local-fs.target pve-cluster.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/proxmox-storage-recovery/config
+ExecStart=/usr/local/libexec/proxmox-storage-recovery.sh
+TimeoutStartSec=6min
