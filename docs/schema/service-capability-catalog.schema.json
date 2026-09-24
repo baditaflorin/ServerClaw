@@ -90,7 +90,7 @@
           "mesh_access": {
             "type": "string",
             "enum": ["tailnet"],
-            "description": "Optional private mesh access boundary. Requires private-only exposure and a managed tailnet route."
+            "description": "Optional private mesh access boundary. Requires private-only exposure, managed tailnet-scoped DNS, and a managed Tailscale proxy route."
           },
           "uptime_monitor_name": {
             "type": "string",

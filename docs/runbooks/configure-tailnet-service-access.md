@@ -13,8 +13,9 @@ In a service bundle, retain `exposure: private-only` and add:
 mesh_access: tailnet
 ```
 
-The catalog validator requires the service to remain private-only and to have a
-managed Tailscale TCP proxy access path in the Proxmox topology.
+The catalog validator requires the service to remain private-only and to have
+managed DNS with `visibility: tailnet` plus a managed Tailscale TCP proxy access
+path in the Proxmox topology.
 Do not publish the same hostname through the public edge as a workaround.
 
 ## Select the control plane

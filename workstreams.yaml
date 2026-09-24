@@ -93,8 +93,8 @@ workstreams:
   - Allow the operator to select hosted Tailscale or self-hosted Headscale without
     an implicit live migration.
   completion_metrics:
-  - A tailnet service must be private-only and have a declared repo-managed Tailscale
-    TCP proxy path.
+  - A tailnet service must be private-only and have managed tailnet-scoped DNS plus
+    a repo-managed Tailscale TCP proxy path.
   - The mesh selector accepts Tailscale with no custom login server or Headscale with
     an HTTPS login server, and rejects mismatched combinations before apply.
   - An enrolled host cannot change control plane unless the dedicated migration flag

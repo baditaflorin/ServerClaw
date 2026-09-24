@@ -21,8 +21,8 @@ and self-hosted Headscale.
 
 ## Verification
 
-1. A catalog entry marked `mesh_access: tailnet` is private-only and has a
-   repo-managed Tailscale TCP proxy path.
+1. A catalog entry marked `mesh_access: tailnet` is private-only and has
+   managed tailnet-scoped DNS plus a repo-managed Tailscale TCP proxy path.
 2. Hosted Tailscale is selected with an empty custom login-server URL; Headscale
    requires an HTTPS login-server URL.
 3. Invalid provider/URL combinations fail before the role can call `tailscale
@@ -34,8 +34,8 @@ and self-hosted Headscale.
 
 Passed:
 
-- Focused tests: 21 passed across service catalog validation, provider/migration
-  guards, and service-definition generation.
+- Focused tests: 30 passed across service catalog validation, provider/migration
+  guards, service-definition generation, and Tailscale proxy-role checks.
 - Service catalog schema/topology validation and generated service-definition
   consistency check.
 - Repository-wide Ansible syntax matrix and service-definition gate.

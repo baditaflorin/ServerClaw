@@ -23,8 +23,8 @@ particular, choosing Headscale must not imply replacing the Tailscale client.
 ## Decision
 
 - Add an optional `mesh_access: tailnet` field to service definitions. It is
-  valid only for `private-only` services with a repo-declared Tailscale TCP
-  proxy path.
+  valid only for `private-only` services with repo-declared tailnet-scoped DNS
+  and a managed Tailscale TCP proxy path.
 - Add flat Proxmox host variables for the mesh control-plane provider and login
   server. Hosted Tailscale uses provider `tailscale` with no custom login
   server; Headscale uses provider `headscale` and an HTTPS login-server URL.

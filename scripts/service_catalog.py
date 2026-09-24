@@ -497,6 +497,15 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                             f"service '{service_id}' mesh_access=tailnet requires a managed "
                             "tailscale-tcp-proxy access path"
                         )
+                    dns = require_mapping(
+                        topology_entry.get("dns"),
+                        f"platform_service_topology.{service_id}.dns",
+                    )
+                    if dns.get("managed") is not True or dns.get("visibility") != "tailnet":
+                        raise ValueError(
+                            f"service '{service_id}' mesh_access=tailnet requires managed DNS "
+                            "with visibility=tailnet"
+                        )
             elif mesh_access == "tailnet" and lifecycle_status == "active":
                 raise ValueError(f"active tailnet service '{service_id}' must have a topology access path")
 
