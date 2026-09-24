@@ -66,6 +66,7 @@ ALLOWED_EXPOSURES = {
     "informational-only",
     "private-only",
 }
+ALLOWED_MESH_ACCESS = {"tailnet"}
 ALLOWED_DEPENDENCY_TYPES = {"hard", "soft", "optional"}
 
 
@@ -363,6 +364,14 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
         if exposure not in ALLOWED_EXPOSURES:
             raise ValueError(f"services[{index}].exposure must be one of {sorted(ALLOWED_EXPOSURES)}")
 
+        mesh_access = service.get("mesh_access")
+        if mesh_access is not None:
+            mesh_access = require_str(mesh_access, f"services[{index}].mesh_access")
+            if mesh_access not in ALLOWED_MESH_ACCESS:
+                raise ValueError(f"services[{index}].mesh_access must be one of {sorted(ALLOWED_MESH_ACCESS)}")
+            if exposure != "private-only":
+                raise ValueError(f"services[{index}].mesh_access=tailnet requires exposure=private-only")
+
         internal_url = None
         public_url = None
         subdomain = None
@@ -478,6 +487,27 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                         f"service '{service_id}' exposure '{exposure}' does not match topology exposure "
                         f"'{topology_entry.get('exposure_model')}'"
                     )
+                if mesh_access == "tailnet":
+                    access = require_mapping(
+                        topology_entry.get("access"),
+                        f"platform_service_topology.{service_id}.access",
+                    )
+                    if access.get("kind") != "tailscale-tcp-proxy":
+                        raise ValueError(
+                            f"service '{service_id}' mesh_access=tailnet requires a managed "
+                            "tailscale-tcp-proxy access path"
+                        )
+                    dns = require_mapping(
+                        topology_entry.get("dns"),
+                        f"platform_service_topology.{service_id}.dns",
+                    )
+                    if dns.get("managed") is not True or dns.get("visibility") != "tailnet":
+                        raise ValueError(
+                            f"service '{service_id}' mesh_access=tailnet requires managed DNS "
+                            "with visibility=tailnet"
+                        )
+            elif mesh_access == "tailnet" and lifecycle_status == "active":
+                raise ValueError(f"active tailnet service '{service_id}' must have a topology access path")
 
     if declared_probe_service_ids != probe_service_ids:
         missing = sorted(probe_service_ids - declared_probe_service_ids)
@@ -515,6 +545,8 @@ def show_service(catalog: dict[str, Any], service_id: str) -> int:
         print(f"Category: {service['category']}")
         print(f"VM: {service['vm']}" + (f" (VMID {service['vmid']})" if "vmid" in service else ""))
         print(f"Exposure: {service['exposure']}")
+        if "mesh_access" in service:
+            print(f"Mesh access: {service['mesh_access']}")
         print(f"Description: {service['description']}")
         if "internal_url" in service:
             print(f"Internal URL: {service['internal_url']}")

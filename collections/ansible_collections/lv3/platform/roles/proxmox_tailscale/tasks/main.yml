@@ -12,7 +12,25 @@
       - proxmox_tailscale_hostname
       - proxmox_tailscale_advertise_routes
       - proxmox_tailscale_auth_key_env_var
-    common_assert_vars_fail_msg: "proxmox_tailscale requires repository settings plus hostname and advertised route inputs."
+      - proxmox_tailscale_provider
+    common_assert_vars_fail_msg: "proxmox_tailscale requires repository settings, an explicit provider, and hostname/route inputs."
+
+- name: Validate the selected Tailscale-compatible mesh control plane
+  ansible.builtin.assert:
+    that:
+      - proxmox_tailscale_provider in ['tailscale', 'headscale']
+      - proxmox_tailscale_login_server is defined
+      - >-
+        (proxmox_tailscale_provider == 'tailscale' and proxmox_tailscale_login_server | trim | length == 0)
+        or
+        (proxmox_tailscale_provider == 'headscale' and
+         proxmox_tailscale_login_server is match('^https://[A-Za-z0-9.-]+(:[0-9]{1,5})?$'))
+    fail_msg: >-
+      Select hosted Tailscale with an empty login server, or Headscale with a
+      hostname-based HTTPS login server. This role never performs a control-plane
+      migration implicitly.
+  tags:
+    - always
 
 - name: Ensure Tailscale repository prerequisites are present
   ansible.builtin.apt:
@@ -88,6 +106,38 @@
   register: proxmox_tailscale_ipv4
   failed_when: false
   changed_when: false
+
+- name: Read the active Tailscale-compatible control plane
+  ansible.builtin.command: tailscale debug prefs
+  register: proxmox_tailscale_control_preferences
+  changed_when: false
+  no_log: true
+  when: proxmox_tailscale_ipv4.rc == 0
+
+- name: Resolve the active and desired mesh control-plane URLs
+  ansible.builtin.set_fact:
+    proxmox_tailscale_active_control_url: >-
+      {{ (proxmox_tailscale_control_preferences.stdout | from_json).ControlURL
+         | default('') | trim | regex_replace('/+$', '') }}
+    proxmox_tailscale_expected_control_url: >-
+      {{ 'https://controlplane.tailscale.com'
+         if proxmox_tailscale_provider == 'tailscale'
+         else proxmox_tailscale_login_server | trim | regex_replace('/+$', '') }}
+  when: proxmox_tailscale_ipv4.rc == 0
+
+- name: Refuse an implicit change to the active mesh control plane
+  ansible.builtin.assert:
+    that:
+      - >-
+        proxmox_tailscale_active_control_url == proxmox_tailscale_expected_control_url
+        or proxmox_tailscale_allow_control_plane_migration | bool
+    fail_msg: >-
+      The active mesh control plane differs from the selected provider. This
+      apply will not migrate the node implicitly; review the mesh migration
+      runbook and set proxmox_tailscale_allow_control_plane_migration=true only
+      for an explicitly approved migration.
+    quiet: true
+  when: proxmox_tailscale_ipv4.rc == 0
 
 - name: Attach the Proxmox host to the tailnet with the supplied auth key
   ansible.builtin.command: /usr/local/sbin/lv3-tailscale-up

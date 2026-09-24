@@ -1,0 +1,79 @@
+id: ws-0493-tailnet-access-config
+adr: "0492"
+title: Declare provider-neutral tailnet-only service access
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/tailnet-only-service-contract
+worktree_path: .worktrees/codex-tailnet-service-contract
+doc: docs/workstreams/ws-0493-tailnet-access-config.md
+depends_on:
+  - adr-0144-headscale-for-zero-trust-mesh-vpn
+conflicts_with: []
+shared_surfaces:
+  - catalog/services/gitea/service.yaml
+  - config/service-capability-catalog.json
+  - docs/schema/service-capability-catalog.schema.json
+  - inventory/host_vars/proxmox-host.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale/
+  - scripts/service_catalog.py
+  - tests/
+  - docs/adr/0492-provider-neutral-tailnet-service-access.md
+  - docs/runbooks/configure-tailnet-service-access.md
+  - workstreams/active/ws-0493-tailnet-access-config.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: tailnet_mesh_selector
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale/
+      mode: exclusive
+    - id: tailnet_service_contract
+      paths:
+        - catalog/services/gitea/service.yaml
+        - config/service-capability-catalog.json
+        - docs/schema/service-capability-catalog.schema.json
+        - scripts/service_catalog.py
+      mode: shared_contract
+      contract: service-mesh-access-v1
+    - id: tailnet_access_docs_and_tracking
+      paths:
+        - docs/adr/0492-provider-neutral-tailnet-service-access.md
+        - docs/runbooks/configure-tailnet-service-access.md
+        - docs/workstreams/ws-0493-tailnet-access-config.md
+        - workstreams/active/ws-0493-tailnet-access-config.yaml
+        - workstreams.yaml
+      mode: exclusive
+tasks:
+  - id: t1
+    title: Specify provider-neutral tailnet access and hosted Tailscale versus Headscale selection
+    status: completed
+  - id: t2
+    title: Implement catalog validation and explicit mesh control-plane selector
+    status: completed
+  - id: t3
+    title: Add regression tests and generic operator documentation
+    status: completed
+  - id: t4
+    title: Run schema, catalog, Ansible, and repository validation
+    status: completed
+objectives:
+  - Make tailnet-only service intent explicit without changing public exposure semantics.
+  - Keep service network access independent of the chosen mesh control plane.
+  - Allow the operator to select hosted Tailscale or self-hosted Headscale without an implicit live migration.
+completion_metrics:
+  - A tailnet service must be private-only and have managed tailnet-scoped DNS plus a repo-managed Tailscale TCP proxy path.
+  - The mesh selector accepts Tailscale with no custom login server or Headscale with an HTTPS login server, and rejects mismatched combinations before apply.
+  - An enrolled host cannot change control plane unless the dedicated migration flag is explicitly enabled.
+  - Existing catalog generation and Ansible syntax checks pass without deployment-specific values or secrets in committed files.
+  - No live mesh migration or ACL change is performed by this workstream.
+blockers: []
+acceptance_criteria_met: true
+lifecycle_state: in_progress
+portable: true
+portable_notes: >-
+  The mesh control-plane provider and URL are fork configuration. Tailnet access
+  is declared on individual service catalog entries; no real operator identity,
+  tailnet address, credential, or deployment hostname belongs in this workstream.

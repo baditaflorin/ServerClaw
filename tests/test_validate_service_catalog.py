@@ -4,6 +4,7 @@ import sys
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -59,6 +60,65 @@ class ValidateServiceCatalogTest(unittest.TestCase):
 
         self.assertIn("ServerClaw", n8n["description"])
         self.assertIn("connector-fabric", n8n["tags"])
+
+    def test_gitea_declares_tailnet_access_separately_from_private_exposure(self) -> None:
+        catalog = service_catalog.load_service_catalog()
+        gitea = next(item for item in catalog["services"] if item["id"] == "gitea")
+
+        self.assertEqual(gitea["exposure"], "private-only")
+        self.assertEqual(gitea["mesh_access"], "tailnet")
+        service_catalog.validate_service_catalog(catalog)
+
+    def test_tailnet_access_cannot_be_publicly_exposed(self) -> None:
+        catalog = copy.deepcopy(service_catalog.load_service_catalog())
+        gitea = next(item for item in catalog["services"] if item["id"] == "gitea")
+        gitea["exposure"] = "edge-published"
+
+        with self.assertRaisesRegex(ValueError, "mesh_access=tailnet requires exposure=private-only"):
+            service_catalog.validate_service_catalog(catalog)
+
+    def test_tailnet_access_requires_a_managed_tailscale_proxy(self) -> None:
+        catalog = copy.deepcopy(service_catalog.load_service_catalog())
+        gitea = next(item for item in catalog["services"] if item["id"] == "gitea")
+        host_vars = service_catalog.load_yaml(service_catalog.TOPOLOGY_HOST_VARS_PATH)
+        host_vars["platform_service_topology"]["gitea"]["access"]["kind"] = "public-edge"
+
+        original_load_yaml = service_catalog.load_yaml
+        with patch.object(
+            service_catalog,
+            "load_yaml",
+            side_effect=lambda path: host_vars if path == service_catalog.TOPOLOGY_HOST_VARS_PATH else original_load_yaml(path),
+        ):
+            with self.assertRaisesRegex(ValueError, "requires a managed tailscale-tcp-proxy access path"):
+                service_catalog.validate_service_catalog(catalog)
+
+    def test_tailnet_access_requires_managed_tailnet_dns(self) -> None:
+        catalog = copy.deepcopy(service_catalog.load_service_catalog())
+        host_vars = service_catalog.load_yaml(service_catalog.TOPOLOGY_HOST_VARS_PATH)
+        host_vars["platform_service_topology"]["gitea"]["dns"]["visibility"] = "public"
+
+        original_load_yaml = service_catalog.load_yaml
+        with patch.object(
+            service_catalog,
+            "load_yaml",
+            side_effect=lambda path: host_vars if path == service_catalog.TOPOLOGY_HOST_VARS_PATH else original_load_yaml(path),
+        ):
+            with self.assertRaisesRegex(ValueError, "requires managed DNS with visibility=tailnet"):
+                service_catalog.validate_service_catalog(catalog)
+
+    def test_tailnet_access_rejects_unmanaged_dns(self) -> None:
+        catalog = copy.deepcopy(service_catalog.load_service_catalog())
+        host_vars = service_catalog.load_yaml(service_catalog.TOPOLOGY_HOST_VARS_PATH)
+        host_vars["platform_service_topology"]["gitea"]["dns"]["managed"] = False
+
+        original_load_yaml = service_catalog.load_yaml
+        with patch.object(
+            service_catalog,
+            "load_yaml",
+            side_effect=lambda path: host_vars if path == service_catalog.TOPOLOGY_HOST_VARS_PATH else original_load_yaml(path),
+        ):
+            with self.assertRaisesRegex(ValueError, "requires managed DNS with visibility=tailnet"):
+                service_catalog.validate_service_catalog(catalog)
 
     def test_invalid_explicit_smoke_suite_requires_matching_tokens(self) -> None:
         catalog = {
