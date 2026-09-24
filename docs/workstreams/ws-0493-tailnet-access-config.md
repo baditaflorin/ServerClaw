@@ -61,3 +61,9 @@ operations with their own backup, access-path, and operator-confirmation gates.
 The governed Plane sync rejected the saved local API credential. Git remains
 the authoritative workstream record; no alternate credential or manual Plane
 write was attempted.
+
+## Merge and live status
+
+The reusable configuration contract merged to ServerClaw `main` in PR #49 at
+`32fa34ab`. It is not yet applied to a live deployment: tailnet ACLs, split DNS,
+node enrollment, and any Tailscale-to-Headscale migration remain unchanged.

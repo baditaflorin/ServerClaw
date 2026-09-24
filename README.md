@@ -133,8 +133,8 @@ assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
 
 - **[CLAUDE.md](CLAUDE.md)** — Claude Code session protocol with checklists and context
 - **[AGENTS.md](AGENTS.md)** — Multi-agent coordination rules and handoff protocol
-- **515+ ADRs** — Every architectural decision documented and indexed
-- **273+ runbooks** — Step-by-step procedures an AI agent can follow
+- **516+ ADRs** — Every architectural decision documented and indexed
+- **274+ runbooks** — Step-by-step procedures an AI agent can follow
 - **Workstream tracking** — Parallel agent sessions coordinate via YAML manifests
 
 Point Claude Code at this repo and it knows how to deploy, debug, and extend
@@ -168,10 +168,10 @@ self-hosted platform:
 
 | Layer | What | Count |
 |-------|------|-------|
-| Architecture decisions | `docs/adr/` | 515+ ADRs |
+| Architecture decisions | `docs/adr/` | 516+ ADRs |
 | Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 162 roles |
 | Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 60 playbooks |
-| Operational runbooks | `docs/runbooks/` | 273+ runbooks |
+| Operational runbooks | `docs/runbooks/` | 274+ runbooks |
 | Automation scripts | `scripts/` | 365+ scripts |
 | Validation tests | `tests/` | Automated regression suite |
 
@@ -286,8 +286,8 @@ variables from it — no manual IP editing.
 │   ├── minimal/         # Tier 1 compose (4 containers)
 │   └── full/            # Tier 2 compose (7 containers)
 ├── docs/
-│   ├── adr/             # 515+ architecture decision records
-│   ├── runbooks/        # 273+ operational runbooks
+│   ├── adr/             # 516+ architecture decision records
+│   ├── runbooks/        # 274+ operational runbooks
 │   └── templates/       # Jinja2 templates for generated docs (incl. this README)
 ├── scripts/             # 365+ automation scripts
 ├── local-overlay-template/  # Scaffold for .local/ secrets directory
@@ -411,6 +411,6 @@ and merge procedures.
 
 ---
 
-*Generated 2026-08-31 by [scripts/generate_readme.py](scripts/generate_readme.py)
+*Generated 2026-09-24 by [scripts/generate_readme.py](scripts/generate_readme.py)
 from [docs/templates/README.md.j2](docs/templates/README.md.j2).
 Run `make generate-readme` to refresh.*

@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-31'
+generated: '2026-09-24'
 facet: status
 implementation_status: Accepted
 slug: accepted
-total_adrs: 32
+total_adrs: 31
 adrs:
   - adr: '0002'
     title: Target Proxmox VE 9 on Debian 13
@@ -582,18 +582,3 @@ adrs:
     summary: Ship a single orchestrator target — make deploy-0fork — that chains the
     filename: 0431-0fork-full-day-deployment.md
     path: docs/adr/0431-0fork-full-day-deployment.md
-  - adr: 0492
-    title: Provider-Neutral Tailnet Service Access
-    status: Accepted
-    implementation_status: Accepted
-    currently_describes: current_state
-    date: '2026-09-24'
-    concern: identity
-    keywords:
-      - provider-neutral
-      - tailnet
-      - service
-      - access
-    summary: '- Add an optional meshaccess: tailnet field to service definitions. It is'
-    filename: 0492-provider-neutral-tailnet-service-access.md
-    path: docs/adr/0492-provider-neutral-tailnet-service-access.md
