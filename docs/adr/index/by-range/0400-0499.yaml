@@ -12,7 +12,7 @@ label: 0400-0499
 range:
   start: '0400'
   end: 0499
-total_adrs: 83
+total_adrs: 84
 adrs:
   - adr: '0400'
     title: Homepage Dashboard Fidelity — Catalog-Driven Lifecycle and UX Compliance
@@ -764,9 +764,9 @@ adrs:
       - programmatic-deploy
       - phase
       - hardening
-      - fork
+      - example
+      - org
       - com
-      - lv3
     summary: Phase 1 = six items. Items 1 and 2 are already in flight (ws-0438,
     filename: 0445-phase1-multi-deployment-hardening.md
     path: docs/adr/0445-phase1-multi-deployment-hardening.md
@@ -1542,3 +1542,18 @@ adrs:
     path: docs/adr/0491-authentik-for-operator-and-agent-sso.md
     implemented_in_repo_version: 0.179.46
     implemented_on: '2026-08-31'
+  - adr: 0492
+    title: Provider-Neutral Tailnet Service Access
+    status: Accepted
+    implementation_status: Accepted
+    currently_describes: current_state
+    date: '2026-09-24'
+    concern: identity
+    keywords:
+      - provider-neutral
+      - tailnet
+      - service
+      - access
+    summary: '- Add an optional meshaccess: tailnet field to service definitions. It is'
+    filename: 0492-provider-neutral-tailnet-service-access.md
+    path: docs/adr/0492-provider-neutral-tailnet-service-access.md

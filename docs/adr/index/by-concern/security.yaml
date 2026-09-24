@@ -822,9 +822,9 @@ adrs:
       - programmatic-deploy
       - phase
       - hardening
-      - fork
+      - example
+      - org
       - com
-      - lv3
     summary: Phase 1 = six items. Items 1 and 2 are already in flight (ws-0438,
     filename: 0445-phase1-multi-deployment-hardening.md
     path: docs/adr/0445-phase1-multi-deployment-hardening.md

@@ -25,6 +25,91 @@ archive_summary:
   by_year:
     '2026': 337
 workstreams:
+- id: ws-0493-tailnet-access-config
+  adr: 0492
+  title: Declare provider-neutral tailnet-only service access
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/tailnet-only-service-contract
+  worktree_path: .worktrees/codex-tailnet-service-contract
+  doc: docs/workstreams/ws-0493-tailnet-access-config.md
+  depends_on:
+  - adr-0144-headscale-for-zero-trust-mesh-vpn
+  conflicts_with: []
+  shared_surfaces:
+  - catalog/services/gitea/service.yaml
+  - config/service-capability-catalog.json
+  - docs/schema/service-capability-catalog.schema.json
+  - inventory/host_vars/proxmox-host.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale/
+  - scripts/service_catalog.py
+  - tests/
+  - docs/adr/0492-provider-neutral-tailnet-service-access.md
+  - docs/runbooks/configure-tailnet-service-access.md
+  - workstreams/active/ws-0493-tailnet-access-config.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: tailnet_mesh_selector
+      paths:
+      - inventory/host_vars/proxmox-host.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale/
+      mode: exclusive
+    - id: tailnet_service_contract
+      paths:
+      - catalog/services/gitea/service.yaml
+      - config/service-capability-catalog.json
+      - docs/schema/service-capability-catalog.schema.json
+      - scripts/service_catalog.py
+      mode: shared_contract
+      contract: service-mesh-access-v1
+    - id: tailnet_access_docs_and_tracking
+      paths:
+      - docs/adr/0492-provider-neutral-tailnet-service-access.md
+      - docs/runbooks/configure-tailnet-service-access.md
+      - docs/workstreams/ws-0493-tailnet-access-config.md
+      - workstreams/active/ws-0493-tailnet-access-config.yaml
+      - workstreams.yaml
+      mode: exclusive
+  tasks:
+  - id: t1
+    title: Specify provider-neutral tailnet access and hosted Tailscale versus Headscale
+      selection
+    status: completed
+  - id: t2
+    title: Implement catalog validation and explicit mesh control-plane selector
+    status: completed
+  - id: t3
+    title: Add regression tests and generic operator documentation
+    status: completed
+  - id: t4
+    title: Run schema, catalog, Ansible, and repository validation
+    status: completed
+  objectives:
+  - Make tailnet-only service intent explicit without changing public exposure semantics.
+  - Keep service network access independent of the chosen mesh control plane.
+  - Allow the operator to select hosted Tailscale or self-hosted Headscale without
+    an implicit live migration.
+  completion_metrics:
+  - A tailnet service must be private-only and have a declared repo-managed Tailscale
+    TCP proxy path.
+  - The mesh selector accepts Tailscale with no custom login server or Headscale with
+    an HTTPS login server, and rejects mismatched combinations before apply.
+  - An enrolled host cannot change control plane unless the dedicated migration flag
+    is explicitly enabled.
+  - Existing catalog generation and Ansible syntax checks pass without deployment-specific
+    values or secrets in committed files.
+  - No live mesh migration or ACL change is performed by this workstream.
+  blockers: []
+  acceptance_criteria_met: true
+  lifecycle_state: in_progress
+  portable: true
+  portable_notes: The mesh control-plane provider and URL are fork configuration.
+    Tailnet access is declared on individual service catalog entries; no real operator
+    identity, tailnet address, credential, or deployment hostname belongs in this
+    workstream.
 - id: adr-0491-authentik-keycloak-sunset-2026-08-30
   adr: 0491
   title: "Authentik Phase 3\u20134: migrate all clients and retire Keycloak"
@@ -841,8 +926,8 @@ workstreams:
     will be ballooning-enabled from creation.
 - id: ws-0482-0fork-platform-not-bootstrapped
   adr: 0482
-  title: "example.org platform deployment never landed \u2014 registry.example.org 502\
-    \ + others are catch-all illusions"
+  title: "example.org platform deployment never landed \u2014 registry.example.org\
+    \ 502 + others are catch-all illusions"
   status: planned
   ready_to_merge: false
   live_applied: false
@@ -3291,11 +3376,12 @@ workstreams:
     \ all\n   have their `adr:` field quoted now (YAML octal-int parser was\n   coercing\
     \ 0447 -> 295). Don't revert.\n2. receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json\n\
     \   was reconstructed because PR #71 referenced it but never committed\n   the\
-    \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n \
-    \  now serves example.org after yesterday's recovery).\n\nPlus follow-ups not in\
-    \ ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n - Deployment-aware\
-    \ cert validation.\n - `make new-deployment` / `make use-deployment` (ADR 0442)\
-    \ \u2014 the\n   `run_with_deployment.sh` wrapper is the leaf they would invoke.\n"
+    \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n\
+    \   now serves example.org after yesterday's recovery).\n\nPlus follow-ups not\
+    \ in ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n\
+    \ - Deployment-aware cert validation.\n - `make new-deployment` / `make use-deployment`\
+    \ (ADR 0442) \u2014 the\n   `run_with_deployment.sh` wrapper is the leaf they\
+    \ would invoke.\n"
 - id: ws-0447-phase3-llm-ergonomics-and-traceability
   adr: '0447'
   title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
@@ -4345,12 +4431,12 @@ workstreams:
   - .local/identity.yml.0fork (new, not committed)
   - .local/hetzner/dns.env (new, not committed)
   summary: "First real fork-viability test. Stands up a collapsed nested-Proxmox topology\
-    \ on a Hetzner AX41-NVMe using example.org (full apex) as the identity. Drives ADR\
-    \ 0385 (identity core) and ADR 0407 (generic-by-default) to their limits. Also\
-    \ produces ADR 0425 \u2014 a retrospective on the 420-ADR build process and what\
-    \ the clone attempt revealed about gaps in the platform's forkability claim. ADR\
-    \ numbers collided with a parallel LSP-AI evaluation workstream (0422/0423) that\
-    \ landed on main while this one was in progress; renumbered to 0424/0425.\n"
+    \ on a Hetzner AX41-NVMe using example.org (full apex) as the identity. Drives\
+    \ ADR 0385 (identity core) and ADR 0407 (generic-by-default) to their limits.\
+    \ Also produces ADR 0425 \u2014 a retrospective on the 420-ADR build process and\
+    \ what the clone attempt revealed about gaps in the platform's forkability claim.\
+    \ ADR numbers collided with a parallel LSP-AI evaluation workstream (0422/0423)\
+    \ that landed on main while this one was in progress; renumbered to 0424/0425.\n"
   ownership_manifest:
     owned_surfaces:
     - id: ws_0424_tracking
@@ -4513,8 +4599,7 @@ workstreams:
   progress:
     completed_2026_04_21:
     - Hetzner DNS API token verified against zone example.org (id EXAMPLE0ZoneId00000000)
-    - SSH access to 203.0.113.3 confirmed with llm-agents@platform_server
-      key
+    - SSH access to 203.0.113.3 confirmed with llm-agents@platform_server key
     - Host key fingerprint pinned (ED25519 9xWVsKZxKXoBR3O9369Ixj/Ke/qwiLQ5SBDli/STwVk)
     - Hardware inventory captured (Ryzen 3600, 62 GiB, 2x476 GB NVMe, /dev/kvm present)
     - ADR 0424 drafted
@@ -4556,8 +4641,8 @@ workstreams:
     - Configure vmbr0 Hetzner WAN bridge (after operator KVM standby)
     - Converge runtime-control (Keycloak + step-ca + OpenBao + Headscale)
     - Converge postgres, mail-platform, runtime-apps, monitoring, nginx-edge
-    - Create DNS records on example.org (wildcard already covers them; blocked on API
-      brownout)
+    - Create DNS records on example.org (wildcard already covers them; blocked on
+      API brownout)
     - Provision operator@example.org mailbox
     - Send confirmation email from operator@example.org to operator@example.com
     - Capture live-apply evidence and close workstream
@@ -4703,8 +4788,8 @@ workstreams:
       - playbooks/platform-service-watchdog.yml
       mode: exclusive
   notes: 'Service health audit: 73 services, 5 VMs without watchdog coverage. SSH
-    to servers unavailable at time of audit (connection timeout to 203.0.113.1).
-    All service probe URLs derived from config/health-probe-catalog.json. Deploy with:
+    to servers unavailable at time of audit (connection timeout to 203.0.113.1). All
+    service probe URLs derived from config/health-probe-catalog.json. Deploy with:
     make converge-platform-watchdog env=production Or per-VM: ansible-playbook playbooks/platform-service-watchdog.yml
     -e env=production -e watchdog_vm=docker-runtime
 
@@ -4886,7 +4971,8 @@ workstreams:
       - workstreams/archive/2026/audit-0mcp-guest-network-drift-2026-08-27.yaml
       - workstreams/archive/2026/fix-0mcp-guest-network-addressing-10-20.yaml
       mode: exclusive
-  description: 'Operator confirmed 10.10.10.x is the real example.org addressing, flipping
+  description: 'Operator confirmed 10.10.10.x is the real example.org addressing,
+    flipping
 
     the direction of the 2026-08-26/27 postmortem (which had framed
 

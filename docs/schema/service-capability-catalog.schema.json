@@ -87,6 +87,11 @@
               "private-only"
             ]
           },
+          "mesh_access": {
+            "type": "string",
+            "enum": ["tailnet"],
+            "description": "Optional private mesh access boundary. Requires private-only exposure and a managed tailnet route."
+          },
           "uptime_monitor_name": {
             "type": "string",
             "minLength": 1

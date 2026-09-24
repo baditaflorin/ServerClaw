@@ -125,7 +125,8 @@ monitoring_prometheus_listen_address: 0.0.0.0:9090
 openbao_http_extra_bind_addresses:
   - "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}"
 proxmox_tailscale_hostname: proxmox-host-subnet-router
-proxmox_tailscale_login_server: https://headscale.{{ platform_domain }}
+proxmox_tailscale_provider: headscale
+proxmox_tailscale_login_server: "https://headscale.{{ platform_domain }}"
 proxmox_tailscale_tags: []
 proxmox_tailscale_advertise_routes:
   - "{{ proxmox_internal_network }}"

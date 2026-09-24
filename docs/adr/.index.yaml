@@ -8,20 +8,20 @@
 schema_version: 2
 generated: '2026-08-31'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 515
+total_adrs: 516
 adr_number_range:
   first: '0001'
-  last: 0491
-  next_available: 0492
+  last: 0492
+  next_available: 0493
 implementation_status_summary:
   Implemented: 378
   Partial: 4
   Not Implemented: 33
   Deprecated: 14
-  Accepted: 31
+  Accepted: 32
   Proposed: 55
 decision_status_summary:
-  Accepted: 364
+  Accepted: 365
   Proposed: 62
   Deprecated: 38
   Implemented: 51
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 83
+      count: 84
       first_adr: '0400'
-      last_adr: 0491
+      last_adr: 0492
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -79,7 +79,7 @@ facets:
       count: 11
     - concern: identity
       path: docs/adr/index/by-concern/identity.yaml
-      count: 10
+      count: 11
     - concern: monitoring
       path: docs/adr/index/by-concern/monitoring.yaml
       count: 14
@@ -127,7 +127,7 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 31
+      count: 32
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
@@ -137,8 +137,14 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0492
+  next_available_adr: 0493
 latest_adrs:
+  - adr: 0492
+    title: Provider-Neutral Tailnet Service Access
+    implementation_status: Accepted
+    currently_describes: current_state
+    concern: identity
+    path: docs/adr/0492-provider-neutral-tailnet-service-access.md
   - adr: 0491
     title: Authentik For Operator And Agent SSO
     implementation_status: Implemented
@@ -194,12 +200,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: testing
     path: docs/adr/0481-pentest-fleet-coolify-migration.md
-  - adr: 0481
-    title: Explicit Deployment Context (no implicit identity.yml swap)
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: ci-cd
-    path: docs/adr/0481-explicit-deployment-context.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

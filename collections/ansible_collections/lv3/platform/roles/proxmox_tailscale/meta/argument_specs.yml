@@ -39,6 +39,24 @@ argument_specs:
         required: true
         description:
           - Environment variable name that carries the optional Tailscale auth key.
+      proxmox_tailscale_provider:
+        type: str
+        required: true
+        choices:
+          - tailscale
+          - headscale
+        description:
+          - Control-plane provider. Both choices use the Tailscale client.
+      proxmox_tailscale_login_server:
+        type: str
+        required: false
+        description:
+          - HTTPS Headscale URL; must be empty when using hosted Tailscale.
+      proxmox_tailscale_allow_control_plane_migration:
+        type: bool
+        required: false
+        description:
+          - Explicitly permit this apply to change the active mesh control plane.
       proxmox_tailscale_accept_dns:
         type: bool
         required: false
