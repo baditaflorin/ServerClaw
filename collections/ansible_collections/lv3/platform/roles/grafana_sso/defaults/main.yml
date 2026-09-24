@@ -8,6 +8,14 @@ grafana_sso_oidc_issuer_url: "{{ authentik_oidc_provider_base_url }}/grafana/"
 grafana_sso_oidc_authorization_url: "{{ authentik_oidc_provider_base_url }}/authorize/"
 grafana_sso_oidc_token_url: "{{ authentik_oidc_provider_base_url }}/token/"
 grafana_sso_oidc_userinfo_url: "{{ authentik_oidc_provider_base_url }}/userinfo/"
+grafana_sso_authentik_hostname: "id.{{ platform_domain }}"
+grafana_sso_internal_edge_ip: >-
+  {{
+    (
+      hostvars[platform_topology_host].platform_service_topology
+      | service_topology_get('nginx_edge')
+    ).private_ip | string | trim
+  }}
 grafana_sso_login_groups:
   - grafana-admins
   - grafana-viewers

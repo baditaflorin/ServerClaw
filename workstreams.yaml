@@ -6079,6 +6079,71 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 26a30662-ed8e-4d3d-9f07-154522ff67cd
+- id: ws-0494-grafana-authentik-reachability
+  title: Restore Grafana server-side Authentik connectivity
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/grafana-authentik-hairpin
+  worktree_path: .worktrees/codex-grafana-authentik-hairpin
+  doc: docs/workstreams/ws-0494-grafana-authentik-reachability.md
+  depends_on:
+  - adr-0491-authentik-keycloak-sunset-2026-08-30
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/grafana_sso/
+  - tests/test_grafana_sso_role.py
+  - docs/runbooks/monitoring-stack.md
+  - docs/workstreams/ws-0494-grafana-authentik-reachability.md
+  - workstreams/active/ws-0494-grafana-authentik-reachability.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: grafana_authentik_reachability
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/grafana_sso/
+      - tests/test_grafana_sso_role.py
+      - docs/runbooks/monitoring-stack.md
+      mode: exclusive
+    - id: grafana_sso_workstream_tracking
+      paths:
+      - docs/workstreams/ws-0494-grafana-authentik-reachability.md
+      - workstreams/active/ws-0494-grafana-authentik-reachability.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  tasks:
+  - id: t1
+    title: Reproduce Grafana-to-Authentik token endpoint failure
+    status: completed
+  - id: t2
+    title: Route server-side OIDC calls through the private edge and add credential
+      probe
+    status: completed
+  - id: t3
+    title: Run focused tests and apply through the governed Grafana workflow
+    status: in_progress
+  objectives:
+  - Keep browser authorization on the public Authentik URL while making server-side
+    OIDC endpoints reachable from Grafana.
+  - Fail Grafana SSO convergence if the provider is unreachable or rejects the configured
+    confidential client.
+  completion_metrics:
+  - The monitoring VM resolves Authentik through private NGINX using the public TLS
+    hostname.
+  - Discovery returns HTTP 200 with TLS verification and the invalid-code probe returns
+    invalid_grant.
+  - Grafana's local and public health/login probes remain healthy after convergence.
+  - No secret value is printed, committed, or rotated.
+  blockers:
+  - Full managed apply is held until the selected private topology matches the live
+    fleet; make validate also reports generated platform.yml drift.
+  acceptance_criteria_met: false
+  lifecycle_state: in_progress
+  portable: true
+  portable_notes: The ingress address and domain are derived from deployment topology
+    and identity overlays; committed automation contains no deployment-specific values.
 surface_ownership:
   global_mutable_paths:
   - receipts/gate-bypasses/*
