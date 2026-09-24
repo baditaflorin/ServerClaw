@@ -1,10 +1,10 @@
 # ADR 0492: Provider-Neutral Tailnet Service Access
 
 - Status: Accepted
-- Implementation Status: In Progress
-- First Repo Version: pending PR merge (baseline `0.179.46`)
+- Implementation Status: Partial
+- First Repo Version: `0.179.47`
 - First Platform Version: pending live apply (baseline `0.178.222`)
-- Implemented On: pending merge and live verification
+- Implemented On: 2026-09-24 (repository configuration merged; live application pending)
 - Date: 2026-09-24
 
 ## Context

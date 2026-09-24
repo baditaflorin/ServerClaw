@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- `0.179.47`: Add tailnet-only service declarations with managed tailnet DNS and an explicit Tailscale/Headscale control-plane selector.
+
 ## Latest Release
 
 - [0.179.46 release notes](docs/release-notes/0.179.46.md)

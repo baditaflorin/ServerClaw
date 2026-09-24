@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-31'
+generated: '2026-09-24'
 facet: concern
 concern: identity
 total_adrs: 11
@@ -205,8 +205,8 @@ adrs:
   - adr: 0492
     title: Provider-Neutral Tailnet Service Access
     status: Accepted
-    implementation_status: Accepted
-    currently_describes: current_state
+    implementation_status: Partial
+    currently_describes: mixed_state
     date: '2026-09-24'
     concern: identity
     keywords:

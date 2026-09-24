@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-08-31'
+generated: '2026-09-24'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
 total_adrs: 516
 adr_number_range:
@@ -15,10 +15,10 @@ adr_number_range:
   next_available: 0493
 implementation_status_summary:
   Implemented: 378
-  Partial: 4
+  Partial: 5
   Not Implemented: 33
   Deprecated: 14
-  Accepted: 32
+  Accepted: 31
   Proposed: 55
 decision_status_summary:
   Accepted: 365
@@ -115,7 +115,7 @@ facets:
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 4
+      count: 5
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -127,7 +127,7 @@ facets:
     - implementation_status: Accepted
       slug: accepted
       path: docs/adr/index/by-status/accepted.yaml
-      count: 32
+      count: 31
     - implementation_status: Proposed
       slug: proposed
       path: docs/adr/index/by-status/proposed.yaml
@@ -141,8 +141,8 @@ reservation_ledger:
 latest_adrs:
   - adr: 0492
     title: Provider-Neutral Tailnet Service Access
-    implementation_status: Accepted
-    currently_describes: current_state
+    implementation_status: Partial
+    currently_describes: mixed_state
     concern: identity
     path: docs/adr/0492-provider-neutral-tailnet-service-access.md
   - adr: 0491

@@ -29,11 +29,11 @@ workstreams:
   adr: 0492
   title: Declare provider-neutral tailnet-only service access
   status: in_progress
-  ready_to_merge: false
+  ready_to_merge: true
   live_applied: false
   owner: codex
-  branch: codex/tailnet-only-service-contract
-  worktree_path: .worktrees/codex-tailnet-service-contract
+  branch: codex/ws-0493-closeout
+  worktree_path: .worktrees/ws-0493-closeout
   doc: docs/workstreams/ws-0493-tailnet-access-config.md
   depends_on:
   - adr-0144-headscale-for-zero-trust-mesh-vpn
