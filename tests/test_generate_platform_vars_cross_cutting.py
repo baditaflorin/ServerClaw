@@ -34,6 +34,47 @@ def test_load_optional_cross_cutting_generated_inputs_returns_empty_when_missing
     }
 
 
+def test_load_optional_cross_cutting_generated_inputs_preserves_embedded_snapshot_when_sources_are_absent(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        generate_platform_vars, "CROSS_CUTTING_DNS_DECLARATIONS_PATH", tmp_path / "config/generated/dns.yml"
+    )
+    monkeypatch.setattr(
+        generate_platform_vars, "CROSS_CUTTING_NGINX_UPSTREAMS_PATH", tmp_path / "config/generated/nginx.yml"
+    )
+    monkeypatch.setattr(generate_platform_vars, "CROSS_CUTTING_SSO_CLIENTS_PATH", tmp_path / "config/generated/sso.yml")
+    monkeypatch.setattr(
+        generate_platform_vars, "CROSS_CUTTING_HAIRPIN_PATH", tmp_path / "inventory/group_vars/hairpin.yml"
+    )
+    monkeypatch.setattr(
+        generate_platform_vars, "CROSS_CUTTING_TLS_CERTS_PATH", tmp_path / "inventory/group_vars/tls.yml"
+    )
+    previous_platform_vars = tmp_path / "platform.yml"
+    write_yaml(
+        previous_platform_vars,
+        {
+            "platform_dns_declarations": {"chat.example.org": {"service": "librechat"}},
+            "platform_nginx_upstreams": [{"service_name": "librechat", "fqdn": "chat.example.org"}],
+            "platform_sso_clients": {"serverclaw": {"provider": "authentik"}},
+            "platform_hairpin_nat_hosts": [{"hostname": "chat.example.org", "address": "10.10.10.10"}],
+            "platform_tls_certs": {"chat.example.org": {"service": "librechat"}},
+        },
+    )
+
+    payload = generate_platform_vars.load_optional_cross_cutting_generated_inputs(
+        previous_platform_vars_path=previous_platform_vars
+    )
+
+    assert payload == {
+        "dns_declarations": {"chat.example.org": {"service": "librechat"}},
+        "nginx_upstreams": [{"service_name": "librechat", "fqdn": "chat.example.org"}],
+        "sso_clients": {"serverclaw": {"provider": "authentik"}},
+        "hairpin_hosts": [{"hostname": "chat.example.org", "address": "10.10.10.10"}],
+        "tls_certs": {"chat.example.org": {"service": "librechat"}},
+    }
+
+
 def test_load_optional_cross_cutting_generated_inputs_reads_generated_files(tmp_path, monkeypatch) -> None:
     dns_path = tmp_path / "config/generated/dns.yml"
     nginx_path = tmp_path / "config/generated/nginx.yml"
