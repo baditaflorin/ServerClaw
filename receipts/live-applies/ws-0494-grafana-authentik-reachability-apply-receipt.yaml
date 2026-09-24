@@ -1,0 +1,31 @@
+workstream_id: ws-0494-grafana-authentik-reachability
+state: completed
+schema_version: 1.1.0
+started_at: '2026-09-24T13:00:00Z'
+completed_at: '2026-09-24T13:06:18Z'
+applied_by: codex
+repo_version: d5effab49
+summary: >-
+  Re-verify the existing narrow Grafana-to-Authentik private-edge mapping and
+  its server-side OAuth checks without changing client credentials or provider
+  configuration.
+targets:
+  - target: monitoring
+    role: grafana_sso_connectivity
+errors: []
+notes:
+  - >-
+    The host-specific mapping pre-existed this verification and resolves the
+    identity hostname through the private edge. Authentik discovery returned
+    HTTP 200 with certificate verification enabled.
+  - >-
+    The Grafana client-authentication probe returned HTTP 400 invalid_grant
+    for a deliberately invalid authorization code, confirming the confidential
+    client was accepted without issuing a token.
+  - >-
+    The local Grafana login endpoint returned HTTP 200, its OAuth entry point
+    returned HTTP 302, and the public Grafana login endpoint returned HTTP 200.
+  - >-
+    No new role converge was attempted. The selected repository topology does
+    not match the verified live network, and make validate currently fails on
+    generated platform.yml drift; normal deployment remains pending.

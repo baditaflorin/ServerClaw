@@ -8,8 +8,30 @@
       - grafana_sso_oidc_authorization_url | length > 0
       - grafana_sso_oidc_token_url | length > 0
       - grafana_sso_oidc_userinfo_url | length > 0
+      - grafana_sso_authentik_hostname | length > 0
+      - grafana_sso_internal_edge_ip is match('^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$')
       - grafana_sso_service_topology.public_hostname | length > 0
-    fail_msg: "grafana_sso requires a client id, client secret, Authentik OIDC endpoints, and a public hostname."
+    fail_msg: >-
+      grafana_sso requires a client id, client secret, Authentik OIDC endpoints,
+      a public hostname, and private NGINX edge topology.
+
+- name: Verify the topology-derived private edge is reachable before changing host resolution
+  ansible.builtin.wait_for:
+    host: "{{ grafana_sso_internal_edge_ip }}"
+    port: 443
+    state: started
+    timeout: 5
+  changed_when: false
+
+- name: Route Grafana's server-side Authentik requests through the private edge
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    marker: "# {mark} LV3 GRAFANA AUTHENTIK HAIRPIN"
+    block: "{{ grafana_sso_internal_edge_ip }} {{ grafana_sso_authentik_hostname }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Grafana
 
 - name: Ensure Grafana knows its public root URL
   community.general.ini_file:
@@ -78,6 +100,39 @@
   delay: 3
   until: grafana_sso_login_page.status == 200
   changed_when: false
+
+- name: Verify Grafana's host can reach the Authentik provider discovery endpoint
+  ansible.builtin.uri:
+    url: "{{ grafana_sso_oidc_issuer_url }}.well-known/openid-configuration"
+    method: GET
+    status_code: 200
+    return_content: true
+    timeout: 10
+  register: grafana_sso_oidc_discovery
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana client credentials are accepted by Authentik
+  ansible.builtin.uri:
+    url: "{{ grafana_sso_oidc_token_url }}"
+    method: POST
+    url_username: "{{ grafana_sso_client_id }}"
+    url_password: "{{ grafana_sso_client_secret }}"
+    force_basic_auth: true
+    body_format: form-urlencoded
+    body:
+      grant_type: authorization_code
+      code: lv3-preflight-invalid-authorization-code
+      redirect_uri: "{{ grafana_sso_root_url }}/login/generic_oauth"
+    status_code: 400
+    return_content: true
+    timeout: 10
+  register: grafana_sso_client_auth_probe
+  failed_when: >-
+    grafana_sso_client_auth_probe.status != 400
+    or grafana_sso_client_auth_probe.json.error | default('') != 'invalid_grant'
+  changed_when: false
+  no_log: true
 
 - name: Verify Grafana redirects the OAuth login to Authentik
   ansible.builtin.uri:
