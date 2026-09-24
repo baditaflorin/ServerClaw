@@ -5,7 +5,14 @@ Use this runbook to converge and verify the dedicated repo-intake runtime on
 
 ## Converge
 
+The governed target checks the controller bootstrap key and Coolify API auth
+artifact first. Run repository validation and the focused playbook syntax check
+before applying:
+
 ```bash
+make preflight WORKFLOW=converge-repo-intake
+make validate
+make syntax-check-repo-intake
 make converge-repo-intake
 ```
 
@@ -14,8 +21,10 @@ make converge-repo-intake
 Verify the private listener on `docker-runtime`:
 
 ```bash
-ssh -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8101/health'
-ssh -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:8101/ | grep -q "Repo Intake"'
+ansible -i "${PLATFORM_INVENTORY_OVERLAY:?select the deployment inventory}" docker-runtime \
+  -m ansible.builtin.uri -a 'url=http://127.0.0.1:8101/health status_code=200'
+ansible -i "${PLATFORM_INVENTORY_OVERLAY:?select the deployment inventory}" docker-runtime \
+  -m ansible.builtin.uri -a 'url=http://127.0.0.1:8101/ status_code=200 return_content=true'
 ```
 
 ## Public Verification

@@ -428,41 +428,74 @@ def load_sources(
     return stack, host_vars
 
 
-def load_optional_cross_cutting_generated_inputs() -> dict[str, Any]:
+def load_optional_cross_cutting_generated_inputs(
+    *, previous_platform_vars_path: Path | None = None
+) -> dict[str, Any]:
     """Load ADR 0374 generated artifacts when present.
 
     These files are intentionally ignored because they contain deployment-specific
     values. They still need to flow into platform.yml so playbooks that only load
-    platform.yml can consume the generated hairpin/TLS/registry context.
+    platform.yml can consume the generated hairpin/TLS/registry context. In a clean
+    checkout the ignored sources are absent, so preserve the corresponding values
+    already embedded in the tracked platform.yml instead of silently deleting them.
     """
+
+    previous: dict[str, Any] = {}
+    if previous_platform_vars_path is not None and previous_platform_vars_path.is_file():
+        previous = require_mapping(
+            load_yaml(previous_platform_vars_path),
+            str(previous_platform_vars_path),
+        )
 
     def optional_yaml(path: Path) -> Any:
         if not path.exists():
             return None
         return load_yaml(path)
 
-    def optional_mapping(path: Path, key: str) -> dict[str, Any]:
+    def optional_mapping(path: Path, key: str, output_key: str) -> dict[str, Any]:
         payload = optional_yaml(path)
         if payload is None:
-            return {}
+            value = {} if path.exists() else previous.get(output_key, {})
+            return require_mapping(value, f"{previous_platform_vars_path or path}.{output_key}")
         payload = require_mapping(payload, str(path))
         value = payload.get(key, {})
         return require_mapping(value, f"{path}.{key}") if value else {}
 
-    def optional_list(path: Path, key: str) -> list[Any]:
+    def optional_list(path: Path, key: str, output_key: str) -> list[Any]:
         payload = optional_yaml(path)
         if payload is None:
-            return []
+            value = [] if path.exists() else previous.get(output_key, [])
+            return require_list(value, f"{previous_platform_vars_path or path}.{output_key}")
         payload = require_mapping(payload, str(path))
         value = payload.get(key, [])
         return require_list(value, f"{path}.{key}") if value else []
 
     return {
-        "dns_declarations": optional_mapping(CROSS_CUTTING_DNS_DECLARATIONS_PATH, "dns_records"),
-        "nginx_upstreams": optional_list(CROSS_CUTTING_NGINX_UPSTREAMS_PATH, "platform_nginx_upstreams"),
-        "sso_clients": optional_mapping(CROSS_CUTTING_SSO_CLIENTS_PATH, "sso_clients"),
-        "hairpin_hosts": optional_list(CROSS_CUTTING_HAIRPIN_PATH, "platform_hairpin_nat_hosts"),
-        "tls_certs": optional_mapping(CROSS_CUTTING_TLS_CERTS_PATH, "platform_tls_certs"),
+        "dns_declarations": optional_mapping(
+            CROSS_CUTTING_DNS_DECLARATIONS_PATH,
+            "dns_records",
+            "platform_dns_declarations",
+        ),
+        "nginx_upstreams": optional_list(
+            CROSS_CUTTING_NGINX_UPSTREAMS_PATH,
+            "platform_nginx_upstreams",
+            "platform_nginx_upstreams",
+        ),
+        "sso_clients": optional_mapping(
+            CROSS_CUTTING_SSO_CLIENTS_PATH,
+            "sso_clients",
+            "platform_sso_clients",
+        ),
+        "hairpin_hosts": optional_list(
+            CROSS_CUTTING_HAIRPIN_PATH,
+            "platform_hairpin_nat_hosts",
+            "platform_hairpin_nat_hosts",
+        ),
+        "tls_certs": optional_mapping(
+            CROSS_CUTTING_TLS_CERTS_PATH,
+            "platform_tls_certs",
+            "platform_tls_certs",
+        ),
     }
 
 
@@ -1134,6 +1167,8 @@ def _assert_no_host_proxy_port_collisions(resolved_ports: dict[str, int]) -> Non
 def build_platform_vars(
     stack: dict[str, Any] | None = None,
     host_vars: dict[str, Any] | None = None,
+    *,
+    previous_platform_vars_path: Path | None = None,
 ) -> dict[str, Any]:
     if stack is None or host_vars is None:
         stack, host_vars = load_sources()
@@ -1155,7 +1190,9 @@ def build_platform_vars(
     session_authority = build_platform_session_authority(service_topology, host_vars)
     dns_records = build_dns_records(service_topology, host_vars)
     tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
-    cross_cutting_inputs = load_optional_cross_cutting_generated_inputs()
+    cross_cutting_inputs = load_optional_cross_cutting_generated_inputs(
+        previous_platform_vars_path=previous_platform_vars_path
+    )
     monitoring_service = service_topology["grafana"]
     mail_service = service_topology["mail_platform"]
     mattermost_service = service_topology["mattermost"]
@@ -1426,7 +1463,13 @@ def write_platform_vars(
     stack, host_vars = load_sources(skip_generated_topology=use_topology_override)
     if not host_vars.get(GENERATION_IDENTITY_OVERLAY_KEY):
         _apply_generation_identity_overlay(host_vars, _load_generation_identity_overlay(output_path))
-    rendered = render_platform_vars(build_platform_vars(stack=stack, host_vars=host_vars))
+    rendered = render_platform_vars(
+        build_platform_vars(
+            stack=stack,
+            host_vars=host_vars,
+            previous_platform_vars_path=output_path,
+        )
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(rendered)
     print(f"Wrote generated platform vars to {output_path}")
@@ -1452,7 +1495,13 @@ def check_platform_vars(
     )
     if not use_identity_override:
         _apply_generation_identity_overlay(host_vars, _load_generation_identity_overlay(output_path))
-    rendered = render_platform_vars(build_platform_vars(stack=stack, host_vars=host_vars))
+    rendered = render_platform_vars(
+        build_platform_vars(
+            stack=stack,
+            host_vars=host_vars,
+            previous_platform_vars_path=output_path,
+        )
+    )
     current = output_path.read_text() if output_path.exists() else ""
     if rendered != current:
         print(
@@ -1473,7 +1522,15 @@ def dry_run(
     stack, host_vars = load_sources(skip_generated_topology=use_topology_override)
     if not host_vars.get(GENERATION_IDENTITY_OVERLAY_KEY):
         _apply_generation_identity_overlay(host_vars, _load_generation_identity_overlay(output_path))
-    sys.stdout.write(render_platform_vars(build_platform_vars(stack=stack, host_vars=host_vars)))
+    sys.stdout.write(
+        render_platform_vars(
+            build_platform_vars(
+                stack=stack,
+                host_vars=host_vars,
+                previous_platform_vars_path=output_path,
+            )
+        )
+    )
     return 0
 
 

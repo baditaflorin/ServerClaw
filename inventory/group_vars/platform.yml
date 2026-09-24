@@ -3312,6 +3312,38 @@ platform_service_topology:
     urls:
       public: https://ops.example.org
       internal: http://10.10.10.20:8092
+  repo_intake:
+    service_name: repo-intake
+    owning_vm: docker-runtime
+    private_ip: 10.10.10.20
+    public_hostname: repo-intake.example.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: repo-intake
+      type: A
+      target: 203.0.113.1
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8101
+    service_id: repo_intake
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/repo-intake.yml
+    restart_domain: runtime-general
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: elastic_stateless
+    ports:
+      internal: 8101
+    urls:
+      public: https://repo-intake.example.org
+      internal: http://10.10.10.20:8101
   homepage:
     service_name: homepage
     owning_vm: runtime-general
@@ -3922,6 +3954,10 @@ platform_dns_records:
       value: 203.0.113.1
       ttl: 60
     - name: ops
+      type: A
+      value: 203.0.113.1
+      ttl: 60
+    - name: repo-intake
       type: A
       value: 203.0.113.1
       ttl: 60
@@ -6616,6 +6652,38 @@ public_edge_service_topology:
     urls:
       public: https://ops.example.org
       internal: http://10.10.10.20:8092
+  repo_intake:
+    service_name: repo-intake
+    owning_vm: docker-runtime
+    private_ip: 10.10.10.20
+    public_hostname: repo-intake.example.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: repo-intake
+      type: A
+      target: 203.0.113.1
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8101
+    service_id: repo_intake
+    runtime_pool: runtime-general
+    deployment_surface: playbooks/services/repo-intake.yml
+    restart_domain: runtime-general
+    api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/runtime-general
+    mobility_tier: elastic_stateless
+    ports:
+      internal: 8101
+    urls:
+      public: https://repo-intake.example.org
+      internal: http://10.10.10.20:8101
   homepage:
     service_name: homepage
     owning_vm: runtime-general

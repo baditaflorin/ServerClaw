@@ -169,8 +169,9 @@ def test_default_check_reuses_tracked_identity_snapshot(
     )
     captured: dict[str, Any] = {}
 
-    def fake_build_platform_vars(*, stack, host_vars):
+    def fake_build_platform_vars(*, stack, host_vars, previous_platform_vars_path=None):
         captured.update(host_vars)
+        captured["previous_platform_vars_path"] = previous_platform_vars_path
         return {"sentinel": True}
 
     monkeypatch.setattr(generate_platform_vars, "build_platform_vars", fake_build_platform_vars)
@@ -183,6 +184,7 @@ def test_default_check_reuses_tracked_identity_snapshot(
     assert generate_platform_vars.check_platform_vars(output_path) == 0
     assert captured["platform_domain"] == "tracked.example.net"
     assert captured["management_ipv4"] == "198.51.100.42"
+    assert captured["previous_platform_vars_path"] == output_path
 
 
 def test_generation_identity_snapshot_rejects_unapproved_local_scalars() -> None:

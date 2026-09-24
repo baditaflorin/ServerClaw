@@ -168,7 +168,7 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server apply-gate-tools syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
-.PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko
+.PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko syntax-check-repo-intake
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
 .PHONY: migrate-service migrate-service-dry-run teardown-service detect-orphans purge-orphans
 .PHONY: syntax-check-litellm converge-litellm syntax-check-librechat converge-librechat converge-outline
@@ -1059,6 +1059,9 @@ syntax-check-api-gateway:
 
 syntax-check-ops-portal:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ops-portal.yml --syntax-check
+
+syntax-check-repo-intake:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/repo-intake.yml --syntax-check
 
 syntax-check-dify:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/dify.yml --syntax-check
