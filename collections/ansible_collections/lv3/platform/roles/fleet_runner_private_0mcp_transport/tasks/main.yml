@@ -1,0 +1,255 @@
+---
+- name: Reject private 0mcp transport convergence outside the designated Builder LXC108
+  ansible.builtin.assert:
+    that:
+      - inventory_hostname == '0docker_builder'
+      - fleet_runner_private_0mcp_transport_target_host == '0docker_builder'
+      - fleet_runner_private_0mcp_transport_dir == '/etc/fleet-runner'
+      - fleet_runner_private_0mcp_transport_file == '/etc/fleet-runner/private-0mcp-transport.json'
+      - fleet_runner_private_0mcp_known_hosts_dir == '/etc/fleet-runner/known_hosts'
+      - fleet_runner_private_0mcp_known_hosts_file == '/etc/fleet-runner/known_hosts/0mcp-vm180'
+      - fleet_runner_private_0mcp_global_known_hosts_file == '/etc/fleet-runner/known_hosts/empty-global'
+      - fleet_runner_private_0mcp_ssh_config_file == '/etc/ssh/ssh_config.d/90-fleet-runner-private-0mcp.conf'
+      - fleet_runner_private_0mcp_wrapper_file == '/usr/local/sbin/fleet-runner-private-0mcp'
+      - fleet_runner_private_0mcp_bastion == 'root@203.0.113.1:2222'
+      - fleet_runner_private_0mcp_dockerhost == 'claude-ops@10.10.10.80'
+      - fleet_runner_private_0mcp_compose_root == '/opt/services'
+    fail_msg: >-
+      The private 0mcp transport is a fixed Builder LXC108 contract. It must
+      not be retargeted, supplied from inventory, or applied to another host.
+
+- name: Inspect private transport parent before managing it
+  ansible.builtin.stat:
+    path: "{{ fleet_runner_private_0mcp_transport_dir }}"
+    follow: false
+  register: fleet_runner_private_0mcp_transport_dir_before
+  changed_when: false
+
+- name: Refuse a non-directory or symlink private transport parent
+  ansible.builtin.assert:
+    that:
+      - not (fleet_runner_private_0mcp_transport_dir_before.stat.exists | default(false)) or fleet_runner_private_0mcp_transport_dir_before.stat.isdir
+      - not (fleet_runner_private_0mcp_transport_dir_before.stat.islnk | default(false))
+
+- name: Ensure the root-only private transport parent exists
+  ansible.builtin.file:
+    path: "{{ fleet_runner_private_0mcp_transport_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Inspect the private transport known-hosts parent before managing it
+  ansible.builtin.stat:
+    path: "{{ fleet_runner_private_0mcp_known_hosts_dir }}"
+    follow: false
+  register: fleet_runner_private_0mcp_known_hosts_dir_before
+  changed_when: false
+
+- name: Refuse a non-directory or symlink private transport known-hosts parent
+  ansible.builtin.assert:
+    that:
+      - not (fleet_runner_private_0mcp_known_hosts_dir_before.stat.exists | default(false)) or fleet_runner_private_0mcp_known_hosts_dir_before.stat.isdir
+      - not (fleet_runner_private_0mcp_known_hosts_dir_before.stat.islnk | default(false))
+
+- name: Ensure the root-only private transport known-hosts parent exists
+  ansible.builtin.file:
+    path: "{{ fleet_runner_private_0mcp_known_hosts_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Inspect the system SSH configuration parent before writing transport policy
+  ansible.builtin.stat:
+    path: /etc/ssh/ssh_config.d
+    follow: false
+  register: fleet_runner_private_0mcp_ssh_config_dir
+  changed_when: false
+
+- name: Require a safe system SSH configuration parent
+  ansible.builtin.assert:
+    that:
+      - fleet_runner_private_0mcp_ssh_config_dir.stat.exists
+      - fleet_runner_private_0mcp_ssh_config_dir.stat.isdir
+      - not (fleet_runner_private_0mcp_ssh_config_dir.stat.islnk | default(false))
+      - fleet_runner_private_0mcp_ssh_config_dir.stat.pw_name == 'root'
+      - fleet_runner_private_0mcp_ssh_config_dir.stat.gr_name == 'root'
+      - fleet_runner_private_0mcp_ssh_config_dir.stat.mode is match('^0[0-7][0145][0145]$')
+    fail_msg: /etc/ssh/ssh_config.d must be a root-owned non-symlink directory not writable by other accounts.
+
+- name: Enumerate every system SSH include candidate before enabling the private transport
+  ansible.builtin.command:
+    argv:
+      - find
+      - /etc/ssh/ssh_config.d
+      - -mindepth
+      - '1'
+      - -maxdepth
+      - '1'
+      - -name
+      - '*.conf'
+      - -print
+  register: fleet_runner_private_0mcp_ssh_include_candidates
+  changed_when: false
+
+- name: Inspect system SSH configuration and include candidates before enabling the private transport
+  ansible.builtin.stat:
+    path: "{{ item }}"
+    follow: false
+  loop: "{{ ['/etc/ssh/ssh_config'] + fleet_runner_private_0mcp_ssh_include_candidates.stdout_lines }}"
+  register: fleet_runner_private_0mcp_ssh_config_files_before
+  changed_when: false
+
+- name: Require root-owned immutable system SSH configuration inputs
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.isreg
+      - not (item.stat.islnk | default(false))
+      - item.stat.pw_name == 'root'
+      - item.stat.gr_name == 'root'
+      - item.stat.mode is match('^0[0-7][0145][0145]$')
+    fail_msg: >-
+      Every /etc/ssh/ssh_config and ssh_config.d/*.conf input must be a
+      root-owned regular non-symlink file not writable by group or other
+      accounts before the private transport may trust ssh -G output.
+  loop: "{{ fleet_runner_private_0mcp_ssh_config_files_before.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Inspect private transport files before writing them
+  ansible.builtin.stat:
+    path: "{{ item }}"
+    follow: false
+  loop:
+    - "{{ fleet_runner_private_0mcp_transport_file }}"
+    - "{{ fleet_runner_private_0mcp_known_hosts_file }}"
+    - "{{ fleet_runner_private_0mcp_global_known_hosts_file }}"
+    - "{{ fleet_runner_private_0mcp_ssh_config_file }}"
+    - "{{ fleet_runner_private_0mcp_wrapper_file }}"
+  register: fleet_runner_private_0mcp_files_before
+  changed_when: false
+
+- name: Refuse a symlink in the private transport contract
+  ansible.builtin.assert:
+    that:
+      - not (item.stat.islnk | default(false))
+      - not (item.stat.exists | default(false)) or item.stat.isreg
+  loop: "{{ fleet_runner_private_0mcp_files_before.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Write pinned private 0mcp known-hosts material
+  ansible.builtin.template:
+    src: 0mcp-vm180.known_hosts.j2
+    dest: "{{ fleet_runner_private_0mcp_known_hosts_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Write root-only private 0mcp transport contract
+  ansible.builtin.template:
+    src: private-0mcp-transport.json.j2
+    dest: "{{ fleet_runner_private_0mcp_transport_file }}"
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Write empty root-only global known-hosts file for the private transport
+  ansible.builtin.copy:
+    dest: "{{ fleet_runner_private_0mcp_global_known_hosts_file }}"
+    content: ''
+    owner: root
+    group: root
+    mode: '0400'
+
+- name: Write strict SSH configuration for the private 0mcp transport
+  ansible.builtin.template:
+    src: 90-fleet-runner-private-0mcp.conf.j2
+    dest: "{{ fleet_runner_private_0mcp_ssh_config_file }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Write root-only private 0mcp fleet-runner entrypoint
+  ansible.builtin.template:
+    src: fleet-runner-private-0mcp.j2
+    dest: "{{ fleet_runner_private_0mcp_wrapper_file }}"
+    owner: root
+    group: root
+    mode: '0750'
+
+- name: Inspect the managed private 0mcp transport files
+  ansible.builtin.stat:
+    path: "{{ item }}"
+    follow: false
+  loop:
+    - "{{ fleet_runner_private_0mcp_transport_dir }}"
+    - "{{ fleet_runner_private_0mcp_known_hosts_dir }}"
+    - "{{ fleet_runner_private_0mcp_transport_file }}"
+    - "{{ fleet_runner_private_0mcp_known_hosts_file }}"
+    - "{{ fleet_runner_private_0mcp_global_known_hosts_file }}"
+    - "{{ fleet_runner_private_0mcp_ssh_config_file }}"
+    - "{{ fleet_runner_private_0mcp_wrapper_file }}"
+  register: fleet_runner_private_0mcp_files_after
+  changed_when: false
+
+- name: Require fixed root-only private 0mcp transport permissions
+  ansible.builtin.assert:
+    that:
+      - fleet_runner_private_0mcp_files_after.results[0].stat.isdir
+      - not (fleet_runner_private_0mcp_files_after.results[0].stat.islnk | default(false))
+      - fleet_runner_private_0mcp_files_after.results[0].stat.pw_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[0].stat.gr_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[0].stat.mode == '0700'
+      - fleet_runner_private_0mcp_files_after.results[1].stat.isdir
+      - not (fleet_runner_private_0mcp_files_after.results[1].stat.islnk | default(false))
+      - fleet_runner_private_0mcp_files_after.results[1].stat.pw_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[1].stat.gr_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[1].stat.mode == '0700'
+      - fleet_runner_private_0mcp_files_after.results[2].stat.isreg
+      - not (fleet_runner_private_0mcp_files_after.results[2].stat.islnk | default(false))
+      - fleet_runner_private_0mcp_files_after.results[2].stat.pw_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[2].stat.gr_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[2].stat.mode == '0600'
+      - fleet_runner_private_0mcp_files_after.results[3].stat.isreg
+      - not (fleet_runner_private_0mcp_files_after.results[3].stat.islnk | default(false))
+      - fleet_runner_private_0mcp_files_after.results[3].stat.pw_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[3].stat.gr_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[3].stat.mode == '0644'
+      - fleet_runner_private_0mcp_files_after.results[4].stat.isreg
+      - not (fleet_runner_private_0mcp_files_after.results[4].stat.islnk | default(false))
+      - fleet_runner_private_0mcp_files_after.results[4].stat.pw_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[4].stat.gr_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[4].stat.mode == '0400'
+      - fleet_runner_private_0mcp_files_after.results[5].stat.isreg
+      - not (fleet_runner_private_0mcp_files_after.results[5].stat.islnk | default(false))
+      - fleet_runner_private_0mcp_files_after.results[5].stat.pw_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[5].stat.gr_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[5].stat.mode == '0644'
+      - fleet_runner_private_0mcp_files_after.results[6].stat.isreg
+      - not (fleet_runner_private_0mcp_files_after.results[6].stat.islnk | default(false))
+      - fleet_runner_private_0mcp_files_after.results[6].stat.pw_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[6].stat.gr_name == 'root'
+      - fleet_runner_private_0mcp_files_after.results[6].stat.mode == '0750'
+
+- name: Inspect the private 0mcp SSH transport without connecting
+  ansible.builtin.command:
+    argv:
+      - ssh
+      - -G
+      - -o
+      - StrictHostKeyChecking=yes
+      - -J
+      - "{{ fleet_runner_private_0mcp_bastion }}"
+      - "{{ fleet_runner_private_0mcp_dockerhost }}"
+  register: fleet_runner_private_0mcp_ssh_config
+  changed_when: false
+
+- name: Require strict pinned known-host resolution for the private transport
+  ansible.builtin.assert:
+    that:
+      - "'stricthostkeychecking true' in fleet_runner_private_0mcp_ssh_config.stdout_lines"
+      - "('userknownhostsfile ' ~ fleet_runner_private_0mcp_known_hosts_file) in fleet_runner_private_0mcp_ssh_config.stdout_lines"
+      - "('globalknownhostsfile ' ~ fleet_runner_private_0mcp_global_known_hosts_file) in fleet_runner_private_0mcp_ssh_config.stdout_lines"

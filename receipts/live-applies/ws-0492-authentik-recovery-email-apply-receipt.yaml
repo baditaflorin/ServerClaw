@@ -1,0 +1,30 @@
+workstream_id: ws-0492-authentik-recovery-email
+state: completed
+schema_version: 1.1.0
+started_at: '2026-09-01T07:32:15Z'
+completed_at: '2026-09-01T07:32:18Z'
+applied_by: codex/authentik-recovery-final3-apply-20260901
+repo_version: 0.179.46
+adr: 0491
+summary: Verified the merged Authentik recovery request and dispatched the operator
+  reset email.
+targets:
+- service: authentik
+  host_group: runtime-control
+  vmid: 192
+- service: nginx
+  host_group: nginx
+errors: []
+notes:
+- VM 192 backup snapshot vm/192/2026-09-01T07:00:33Z completed successfully before
+  the governed apply attempts.
+- 'PR #213 added the required managed recovery email-stage payload and was merged
+  before dispatch.'
+- The live recovery-flow API contract, identity reconciliation check, worker SMTP
+  authentication, and public readiness checks passed.
+- The operator recovery-email request returned HTTP 204 after the live checks passed.
+- The local operator identity file was tightened to owner-only mode before it was
+  read by the governed client.
+- Hetzner DNS reconciliation remained outside the scoped apply because the available
+  controller credential does not enumerate the deployment DNS zone; the existing public
+  route was verified healthy.

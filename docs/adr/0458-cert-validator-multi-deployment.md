@@ -48,7 +48,7 @@ python3 scripts/certificate_validator.py --check-all --all-deployments
 python3 scripts/certificate_validator.py --check-all
 
 # Single-deployment scoping unchanged:
-python3 scripts/certificate_validator.py --check-all --deployment retired-deployment
+python3 scripts/certificate_validator.py --check-all --deployment 0fork
 ```
 
 ## References

@@ -12,9 +12,9 @@
 
 Today, every deployment's `proxmox_guests` list (in `inventory/host_vars/proxmox-host.yml` or `.local/deployments/<slug>/topology.yml`) carries **hard-coded** `memory_mb`, `cores`, and `disk_gb` for each VM. Those numbers were sized for lv3's original Hetzner box and have been propagated unchanged when the platform is forked.
 
-The 2026-05-11 retired-deployment incident demonstrates the failure mode:
+The 2026-05-11 0fork incident demonstrates the failure mode:
 
-- retired-deployment runs on an AX41-NVMe with **64 GB physical RAM**.
+- 0fork runs on an AX41-NVMe with **64 GB physical RAM**.
 - The inherited topology allocates **~180 GB of guest RAM** (17 VMs sized for lv3's larger original host).
 - The Proxmox kernel falls back to swap (~28 GB used in normal operation).
 - Adding any new VM, or restarting one cleanly, pushes the host into severe memory pressure: SSH banner exchange times out, Docker logging hiccups cause Harbor's `nginx` + `harbor-portal` to silently exit-128 and stay exited for 5 days.
@@ -161,13 +161,13 @@ Algorithm:
 5. Same algorithm for CPU and disk independently.
 6. Emit `topology.yml` with the computed `proxmox_guests` list, each carrying:
    - `memory_mb`, `cores`, `disk_gb`
-   - **`balloon: <40% of memory_mb>`** — always enable ballooning (lesson from the retired-deployment incident)
+   - **`balloon: <40% of memory_mb>`** — always enable ballooning (lesson from the 0fork incident)
    - Standard fields (ipv4, gateway4, vmid, role, etc.) carried over from the static template.
 7. Stamp the file with `generated_at`, `capacity_hash`, `policy_hash`, `profile_hash` for traceability.
 
 ### 5. Always-on ballooning (load-bearing default)
 
-Every VM the resolver emits gets `balloon: <40%-of-ram_mb>`. The retired-deployment incident showed that with `balloon: 0`, the host cannot reclaim idle RAM from over-provisioned VMs — it falls back to swap, then SSH degrades, then operators cannot remediate. Ballooning is no longer an optional knob; it is part of the default policy.
+Every VM the resolver emits gets `balloon: <40%-of-ram_mb>`. The 0fork incident showed that with `balloon: 0`, the host cannot reclaim idle RAM from over-provisioned VMs — it falls back to swap, then SSH degrades, then operators cannot remediate. Ballooning is no longer an optional knob; it is part of the default policy.
 
 (Operators can override via `service_overrides` in `profile.yml` if a specific workload truly cannot tolerate ballooning — e.g. databases pinning shared_buffers. That escape hatch stays.)
 
@@ -193,7 +193,7 @@ Every VM the resolver emits gets `balloon: <40%-of-ram_mb>`. The retired-deploym
 ### Positive
 
 - **Real portability.** `make new-deployment` becomes the actual one-command fork experience the platform was already pretending to offer.
-- **No more lv3-sized topologies on smaller hosts.** The retired-deployment incident's root cause becomes structurally impossible.
+- **No more lv3-sized topologies on smaller hosts.** The 0fork incident's root cause becomes structurally impossible.
 - **Sizing is auditable and traceable.** Every `topology.yml` carries the hashes of the inputs that produced it. "Why does this VM have 16 GB?" is answered by `(capacity, policy, profile)`, all of which are versioned.
 - **Operator power inverts correctly.** Operators describe *which* services they want (profile). The platform decides *how big* each gets (policy + capacity). Today operators get a hard-coded answer to both; that's wrong.
 
@@ -209,11 +209,11 @@ Every VM the resolver emits gets `balloon: <40%-of-ram_mb>`. The retired-deploym
 
 ### Migration
 
-For existing deployments (lv3, retired-deployment):
+For existing deployments (lv3, 0fork):
 
-1. `make probe-capacity slug=retired-deployment` — writes `capacity.yml` from the live host.
-2. `make resolve-topology slug=retired-deployment` — generates new `topology.yml` reflecting actual capacity.
-3. Diff: shows that on retired-deployment's 64 GB host, the resolver would never have over-allocated to 180 GB; would have produced a coherent ~50 GB topology with ballooning enabled by default.
+1. `make probe-capacity slug=0fork` — writes `capacity.yml` from the live host.
+2. `make resolve-topology slug=0fork` — generates new `topology.yml` reflecting actual capacity.
+3. Diff: shows that on 0fork's 64 GB host, the resolver would never have over-allocated to 180 GB; would have produced a coherent ~50 GB topology with ballooning enabled by default.
 4. Operator decides whether to apply (which requires VM reboots / resizes).
 
 For new deployments: `make new-deployment` runs the full chain end-to-end.
@@ -229,7 +229,7 @@ For new deployments: `make new-deployment` runs the full chain end-to-end.
 | 2 | `config/sizing-policy.yml` — committed, covering all 17 current service classes | 1 day |
 | 3 | `scripts/resolve_topology.py` — the resolver; `make resolve-topology` + `make plan-capacity` | 2 days |
 | 4 | Wire into `make new-deployment` so the full chain runs end-to-end | 0.5 day |
-| 5 | Backfill: re-probe + re-resolve lv3 and retired-deployment, diff against current `topology.yml`, document what would change | 0.5 day |
+| 5 | Backfill: re-probe + re-resolve lv3 and 0fork, diff against current `topology.yml`, document what would change | 0.5 day |
 | 6 | `make apply-topology` — separate ADR; defines safe live-resize/migration semantics | follow-up |
 
 Phase 0 lands with this commit. Phases 1–5 are tracked in ws-0483 and can be picked up in any order, though 1→2→3→4 is the natural sequence.
@@ -239,10 +239,10 @@ Phase 0 lands with this commit. Phases 1–5 are tracked in ws-0483 and can be p
 ## References
 
 - ADR 0407 — Generic by default (deployment values live in `.local/`)
-- ADR 0424 — retired-deployment clone topology / collapsed shape
+- ADR 0424 — 0fork clone topology / collapsed shape
 - ADR 0440 — Per-deployment directory layout
 - ADR 0441 — Service profiles
 - ADR 0481 — Explicit deployment context
-- Postmortem: 2026-05-11 retired-deployment registry.example.org 502 incident
+- Postmortem: 2026-05-11 0fork registry.example.org 502 incident
   - Root cause chain: lv3-sized topology on 64 GB host → memory pressure → swap → host SSH degraded → Harbor `nginx`/`harbor-portal` exit-128 from logging-driver failure → no watchdog → undetected 5 days.
   - This ADR addresses the first link (over-sized topology); ws-0482 addresses the watchdog gap; the logging-driver switch is recorded in ws-0481 t-followup.

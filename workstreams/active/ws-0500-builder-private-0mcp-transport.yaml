@@ -1,0 +1,51 @@
+id: ws-0500-builder-private-0mcp-transport
+adr: '0296'
+title: Declare the Builder-only private 0mcp fleet-runner transport
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/builder-0mcp-transport
+worktree_path: .worktrees/builder-0mcp-transport
+doc: docs/workstreams/ws-0500-builder-private-0mcp-transport.md
+depends_on:
+  - ws-0499-builder-publisher-identity
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/fleet_runner_private_0mcp_transport/**
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-runner-private-0mcp-transport.yml
+  - playbooks/fleet-runner-private-0mcp-transport.yml
+  - docs/runbooks/fleet-runner-private-0mcp-transport.md
+  - tests/test_fleet_runner_private_0mcp_transport_role.py
+  - docs/workstreams/ws-0500-builder-private-0mcp-transport.md
+  - workstreams/active/ws-0500-builder-private-0mcp-transport.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: builder_private_0mcp_transport_contract
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/fleet_runner_private_0mcp_transport/**
+        - collections/ansible_collections/lv3/platform/playbooks/fleet-runner-private-0mcp-transport.yml
+        - playbooks/fleet-runner-private-0mcp-transport.yml
+        - docs/runbooks/fleet-runner-private-0mcp-transport.md
+        - tests/test_fleet_runner_private_0mcp_transport_role.py
+      mode: exclusive
+    - id: ws_0500_tracking
+      paths:
+        - docs/workstreams/ws-0500-builder-private-0mcp-transport.md
+        - workstreams/active/ws-0500-builder-private-0mcp-transport.yaml
+      mode: exclusive
+context: |
+  Private broker deployment needs a Builder-only 0mcp SSH transport that is
+  explicit, host-key pinned, and independent of the historical 0docker lane.
+  The role has no credential material and cannot install any SSH key.
+tasks:
+  - id: t1
+    title: Add the fixed Builder private 0mcp transport role and entrypoint
+    status: completed
+  - id: t2
+    title: Add static coverage for host pinning, permissions, and strict SSH preflight
+    status: completed
+  - id: t3
+    title: Run focused and repository validation before normal PR review
+    status: in_progress

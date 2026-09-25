@@ -21,95 +21,308 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 337
+  total_workstreams: 339
   by_year:
-    '2026': 337
+    '2026': 339
 workstreams:
-- id: ws-0493-tailnet-access-config
-  adr: 0492
-  title: Declare provider-neutral tailnet-only service access
+- id: ws-0498-https-tls-test-baseline
+  adr: 0491
+  title: Repair HTTPS/TLS test and fresh-worktree platform-vars validation baselines
   status: in_progress
-  ready_to_merge: true
+  ready_to_merge: false
   live_applied: false
   owner: codex
-  branch: codex/ws-0493-closeout
-  worktree_path: .worktrees/ws-0493-closeout
-  doc: docs/workstreams/ws-0493-tailnet-access-config.md
+  branch: codex/regenerate-https-tls-baseline
+  worktree_path: .worktrees/regenerate-https-tls-baseline
+  doc: docs/workstreams/ws-0498-https-tls-test-baseline.md
   depends_on:
-  - adr-0144-headscale-for-zero-trust-mesh-vpn
+  - ws-0496-generated-artifact-reconciliation
   conflicts_with: []
   shared_surfaces:
-  - catalog/services/gitea/service.yaml
-  - config/service-capability-catalog.json
-  - docs/schema/service-capability-catalog.schema.json
-  - inventory/host_vars/proxmox-host.yml
-  - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale/
-  - scripts/service_catalog.py
-  - tests/
-  - docs/adr/0492-provider-neutral-tailnet-service-access.md
-  - docs/runbooks/configure-tailnet-service-access.md
-  - workstreams/active/ws-0493-tailnet-access-config.yaml
+  - tests/test_https_tls_assurance_targets.py
+  - scripts/generate_platform_vars.py
+  - scripts/validate_repository_data_models.py
+  - scripts/generate_cross_cutting_artifacts.py
+  - scripts/validate_dns_declarations.py
+  - scripts/validate_sso_clients.py
+  - scripts/validate_nginx_config.py
+  - scripts/parallel_check.py
+  - config/validation-gate.json
+  - policy/conftest/repository.rego
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - tests/test_generate_platform_vars.py
+  - tests/test_generate_platform_vars_cross_cutting.py
+  - tests/test_validate_repository_data_models.py
+  - tests/test_generate_cross_cutting_artifacts.py
+  - tests/test_fresh_worktree_generated_output_validation.py
+  - tests/test_validation_gate.py
+  - tests/test_validation_lanes.py
+  - docs/workstreams/ws-0498-https-tls-test-baseline.md
+  - workstreams/active/ws-0498-https-tls-test-baseline.yaml
   - workstreams.yaml
   ownership_manifest:
     owned_surfaces:
-    - id: tailnet_mesh_selector
+    - id: https_tls_target_test
       paths:
-      - inventory/host_vars/proxmox-host.yml
-      - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale/
-      mode: exclusive
-    - id: tailnet_service_contract
-      paths:
-      - catalog/services/gitea/service.yaml
-      - config/service-capability-catalog.json
-      - docs/schema/service-capability-catalog.schema.json
-      - scripts/service_catalog.py
+      - tests/test_https_tls_assurance_targets.py
       mode: shared_contract
-      contract: service-mesh-access-v1
-    - id: tailnet_access_docs_and_tracking
+      contract: https-tls-assurance-v1
+    - id: platform_vars_fresh_worktree_validation
       paths:
-      - docs/adr/0492-provider-neutral-tailnet-service-access.md
-      - docs/runbooks/configure-tailnet-service-access.md
-      - docs/workstreams/ws-0493-tailnet-access-config.md
-      - workstreams/active/ws-0493-tailnet-access-config.yaml
+      - scripts/generate_platform_vars.py
+      - scripts/validate_repository_data_models.py
+      - scripts/generate_cross_cutting_artifacts.py
+      - scripts/validate_dns_declarations.py
+      - scripts/validate_sso_clients.py
+      - scripts/validate_nginx_config.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_generate_platform_vars_cross_cutting.py
+      - tests/test_validate_repository_data_models.py
+      - tests/test_generate_cross_cutting_artifacts.py
+      - tests/test_fresh_worktree_generated_output_validation.py
+      mode: shared_contract
+      contract: platform-vars-reproducibility-v1
+    - id: validation_gate_timeout_cleanup
+      paths:
+      - config/validation-gate.json
+      - scripts/parallel_check.py
+      - policy/conftest/repository.rego
+      - build/platform-manifest.json
+      - tests/test_validation_gate.py
+      - tests/test_validation_lanes.py
+      mode: shared_contract
+      contract: validation-gate-runner-v1
+    - id: generated_docs_baseline
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-documentation-v1
+    - id: ws_0498_tracking
+      paths:
+      - docs/workstreams/ws-0498-https-tls-test-baseline.md
+      - workstreams/active/ws-0498-https-tls-test-baseline.yaml
+      mode: exclusive
+    - id: workstream_registry
+      paths:
       - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  tasks:
+  - id: t1
+    title: Align the stale Proxmox hostname assertions with canonical discovery
+    status: completed
+  - id: t2
+    title: Preserve strict platform-vars equivalence when deployment-derived inputs
+      are present
+    status: completed
+  - id: t3
+    title: Run focused validation and submit a review-only pull request
+    status: in_progress
+- id: ws-0496-generated-artifact-reconciliation
+  adr: 0491
+  title: Reconcile stale 0mcp generated deployment artifacts
+  status: ready_for_merge
+  ready_to_merge: true
+  live_applied: false
+  owner: codex
+  branch: codex/ws-0496-generated-artifact-reconciliation
+  worktree_path: .worktrees/ws-0496-generated-artifact-reconciliation
+  doc: docs/workstreams/ws-0496-generated-artifact-reconciliation.md
+  depends_on:
+  - ws-0495-authentik-direct-smtp-recovery
+  conflicts_with: []
+  shared_surfaces:
+  - Makefile
+  - inventory/group_vars/platform.yml
+  - config/prometheus/rules/https_tls_alerts.yml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/configure-authentik.md
+  - tests/test_validate_deployment_selection.py
+  - docs/workstreams/ws-0496-generated-artifact-reconciliation.md
+  - workstreams/active/ws-0496-generated-artifact-reconciliation.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: generated_deployment_artifacts
+      paths:
+      - inventory/group_vars/platform.yml
+      - config/prometheus/rules/https_tls_alerts.yml
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - Makefile
+      - docs/runbooks/configure-authentik.md
+      - tests/test_validate_deployment_selection.py
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ws_0496_tracking
+      paths:
+      - docs/workstreams/ws-0496-generated-artifact-reconciliation.md
+      - workstreams/active/ws-0496-generated-artifact-reconciliation.yaml
       mode: exclusive
   tasks:
   - id: t1
-    title: Specify provider-neutral tailnet access and hosted Tailscale versus Headscale
-      selection
+    title: Reproduce the stale generated-artifact checks from explicit 0mcp selectors
     status: completed
   - id: t2
-    title: Implement catalog validation and explicit mesh control-plane selector
+    title: Regenerate the minimum stale artifact set and inspect every semantic delta
     status: completed
   - id: t3
-    title: Add regression tests and generic operator documentation
+    title: Run the generation and deployment-selection validation suite
     status: completed
   - id: t4
-    title: Run schema, catalog, Ansible, and repository validation
+    title: Regenerate the stale platform manifest identified by the full validation
+      gate
     status: completed
-  objectives:
-  - Make tailnet-only service intent explicit without changing public exposure semantics.
-  - Keep service network access independent of the chosen mesh control plane.
-  - Allow the operator to select hosted Tailscale or self-hosted Headscale without
-    an implicit live migration.
-  completion_metrics:
-  - A tailnet service must be private-only and have managed tailnet-scoped DNS plus
-    a repo-managed Tailscale TCP proxy path.
-  - The mesh selector accepts Tailscale with no custom login server or Headscale with
-    an HTTPS login server, and rejects mismatched combinations before apply.
-  - An enrolled host cannot change control plane unless the dedicated migration flag
-    is explicitly enabled.
-  - Existing catalog generation and Ansible syntax checks pass without deployment-specific
-    values or secrets in committed files.
-  - No live mesh migration or ACL change is performed by this workstream.
-  blockers: []
-  acceptance_criteria_met: true
-  lifecycle_state: in_progress
-  portable: true
-  portable_notes: The mesh control-plane provider and URL are fork configuration.
-    Tailnet access is declared on individual service catalog entries; no real operator
-    identity, tailnet address, credential, or deployment hostname belongs in this
-    workstream.
+  - id: t5
+    title: Regenerate the stale agent-coordination diagram identified by the full
+      validation gate
+    status: completed
+- id: ws-0495-authentik-direct-smtp-recovery
+  adr: 0491
+  title: Restore Authentik recovery delivery through managed internal SMTP
+  status: ready_for_merge
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/ws-0495-live-apply
+  worktree_path: .worktrees/ws-0495-live-apply
+  doc: docs/workstreams/ws-0495-authentik-direct-smtp-recovery.md
+  depends_on:
+  - ws-0493-authentik-mail-gateway-bridge
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+  - config/integrations/authentik--mail-platform.yaml
+  - docs/runbooks/configure-authentik.md
+  - docs/workstreams/ws-0495-authentik-direct-smtp-recovery.md
+  - receipts/live-applies/ws-0495-authentik-direct-smtp-recovery-apply-receipt.yaml
+  - tests/test_authentik_runtime_role.py
+  - workstreams/active/ws-0495-authentik-direct-smtp-recovery.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: authentik_recovery_smtp_contract
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+      - config/integrations/authentik--mail-platform.yaml
+      - docs/runbooks/configure-authentik.md
+      - tests/test_authentik_runtime_role.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: ws_0495_tracking
+      paths:
+      - docs/workstreams/ws-0495-authentik-direct-smtp-recovery.md
+      - receipts/live-applies/ws-0495-authentik-direct-smtp-recovery-apply-receipt.yaml
+      - workstreams/active/ws-0495-authentik-direct-smtp-recovery.yaml
+      mode: exclusive
+  tasks:
+  - id: t1
+    title: Verify the direct managed SMTP delivery path and record the provider rejection
+    status: completed
+  - id: t2
+    title: Make the verified SMTP route the governed Authentik recovery default
+    status: completed
+  - id: t3
+    title: Apply, request a new reset, and verify mail-server delivery evidence
+    status: completed
+- id: ws-0492-authentik-recovery-email
+  adr: 0491
+  title: Add governed Authentik operator recovery email
+  status: ready_for_merge
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/authentik-recovery-final3-apply-20260901
+  worktree_path: .worktrees/authentik-recovery-final3-apply-20260901
+  doc: docs/workstreams/ws-0492-authentik-recovery-email.md
+  depends_on:
+  - adr-0491-authentik-keycloak-sunset-2026-08-30
+  conflicts_with: []
+  shared_surfaces:
+  - config/authentik/recovery-flow.yaml
+  - config/integrations/authentik--mail-platform.yaml
+  - config/integrations/authentik--openbao.yaml
+  - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+  - build/platform-manifest.json
+  - inventory/group_vars/platform.yml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/configure-authentik.md
+  - docs/workstreams/ws-0492-authentik-recovery-email.md
+  - scripts/authentik_recovery.py
+  - receipts/live-applies/ws-0492-authentik-recovery-email-apply-receipt.yaml
+  - scripts/validate_deployment_selection.py
+  - tests/test_authentik_recovery.py
+  - tests/test_authentik_runtime_role.py
+  - tests/test_validate_deployment_selection.py
+  - workstreams/active/ws-0492-authentik-recovery-email.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: identity_migration_runtime
+      paths:
+      - config/authentik/recovery-flow.yaml
+      - config/integrations/authentik--mail-platform.yaml
+      - config/integrations/authentik--openbao.yaml
+      - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: identity_migration_governance
+      paths:
+      - inventory/group_vars/platform.yml
+      - docs/runbooks/configure-authentik.md
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: identity_migration_release_truth
+      paths:
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: release-truth-v1
+    - id: identity_migration_repository_integration
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/workstreams/ws-0492-authentik-recovery-email.md
+      - scripts/authentik_recovery.py
+      - scripts/validate_deployment_selection.py
+      - tests/test_authentik_recovery.py
+      - tests/test_authentik_runtime_role.py
+      - tests/test_validate_deployment_selection.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: identity_migration_live_apply_evidence
+      paths:
+      - receipts/live-applies/ws-0492-authentik-recovery-email-apply-receipt.yaml
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    - id: ws_0492_workstream_shard
+      paths:
+      - workstreams/active/ws-0492-authentik-recovery-email.yaml
+      mode: exclusive
+  context: 'Authentik is live and the operator account is valid. This workstream adds
+    a
+
+    declarative, rate-limited recovery flow through the platform''s authenticated
+
+    internal SMTP relay, bound to the active brand and default authentication
+
+    identification stage. The worker resolves that relay over the existing
+
+    private mail-platform Docker network, avoiding runtime-host SMTP hairpinning.
+
+    '
+  tasks:
+  - id: t1
+    title: Add an idempotent Authentik recovery-flow blueprint and runtime mail configuration
+    status: completed
+  - id: t2
+    title: Validate the rendered runtime and recovery-flow state
+    status: completed
+  - id: t3
+    title: Merge and apply through the governed Authentik converge path
+    status: completed
+  - id: t4
+    title: Send and verify the operator password-recovery email
+    status: completed
 - id: adr-0491-authentik-keycloak-sunset-2026-08-30
   adr: 0491
   title: "Authentik Phase 3\u20134: migrate all clients and retire Keycloak"
@@ -138,7 +351,7 @@ workstreams:
   depends_on:
   - adr-0491-authentik-phase2-2026-08-28
   conflicts_with:
-  - ws-0424-retired-deployment
+  - ws-0424-fork-clone-0fork
   - ws-0438-generic-by-construction
   - ws-0439-deployment-profiles
   - ws-0443-topology-drift-detection
@@ -585,7 +798,7 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   owner: claude
-  deployment: retired-deployment
+  deployment: 0fork
   branch: claude/happy-maxwell-b79396
   worktree_path: .claude/worktrees/happy-maxwell-b79396
   doc: docs/adr/0485-convergence-idempotency-tests.md
@@ -672,7 +885,7 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   owner: claude
-  deployment: retired-deployment
+  deployment: 0fork
   branch: unassigned/ws-0484-self-verification-contracts
   worktree_path: unassigned/ws-0484-self-verification-contracts
   doc: docs/adr/0484-self-verification-contracts.md
@@ -759,7 +972,7 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   owner: claude
-  deployment: retired-deployment
+  deployment: 0fork
   branch: claude/happy-maxwell-b79396
   worktree_path: .claude/worktrees/happy-maxwell-b79396
   doc: docs/adr/0483-hands-off-bootstrap.md
@@ -818,8 +1031,8 @@ workstreams:
       \ input format"
     status: completed
   - id: t2-derive-manifest
-    title: "scripts/derive_manifest.py \u2014 introspect lv3 + retired-deployment\
-      \ to emit draft manifests"
+    title: "scripts/derive_manifest.py \u2014 introspect lv3 + 0fork to emit draft\
+      \ manifests"
     status: completed
   - id: t3-bootstrap-steps
     title: "config/bootstrap_steps.yml \u2014 the 14-step contract chain (preconditions\
@@ -848,7 +1061,7 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   owner: claude
-  deployment: retired-deployment
+  deployment: 0fork
   branch: unassigned/ws-0483-capacity-aware-dynamic-sizing
   worktree_path: unassigned/ws-0483-capacity-aware-dynamic-sizing
   doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
@@ -910,53 +1123,53 @@ workstreams:
       a forkable deployment
     status: pending
   - id: t6-backfill
-    title: Re-probe and re-resolve lv3 and retired-deployment; diff against current
-      topology and document deltas
+    title: Re-probe and re-resolve lv3 and 0fork; diff against current topology and
+      document deltas
     status: pending
   - id: t7-apply
     title: Separate ADR for `make apply-topology` (live-resize semantics)
     status: pending
   findings:
-  - '2026-05-11 incident on retired-deployment showed the lv3-sized topology over-allocates
-    RAM to 180GB on a 64GB host. The fix is structural, not parametric: sizing must
-    be derived from probed host capacity, not copied from another deployment.'
-  - The retired-deployment-incident audit revealed every VM had balloon=0 (ballooning
-    disabled). Always-on ballooning (40% floor) is now part of the policy defaults;
-    the retired-deployment host has been queued to enable ballooning on next VM reboot,
-    but new deployments will be ballooning-enabled from creation.
-- id: ws-0482-retired-deployment-not-bootstrapped
+  - '2026-05-11 incident on 0fork showed the lv3-sized topology over-allocates RAM
+    to 180GB on a 64GB host. The fix is structural, not parametric: sizing must be
+    derived from probed host capacity, not copied from another deployment.'
+  - The 0fork-incident audit revealed every VM had balloon=0 (ballooning disabled).
+    Always-on ballooning (40% floor) is now part of the policy defaults; the 0fork
+    host has been queued to enable ballooning on next VM reboot, but new deployments
+    will be ballooning-enabled from creation.
+- id: ws-0482-0fork-platform-not-bootstrapped
   adr: 0482
-  title: "example.org platform deployment never landed \u2014 registry.example.org\
-    \ 502 + others are catch-all illusions"
+  title: "example.org platform deployment never landed \u2014 registry.example.org 502\
+    \ + others are catch-all illusions"
   status: planned
   ready_to_merge: false
   live_applied: false
   owner: unassigned
-  deployment: retired-deployment
-  branch: unassigned/ws-0482-retired-deployment-not-bootstrapped
-  worktree_path: unassigned/ws-0482-retired-deployment-not-bootstrapped
+  deployment: 0fork
+  branch: unassigned/ws-0482-0fork-platform-not-bootstrapped
+  worktree_path: unassigned/ws-0482-0fork-platform-not-bootstrapped
   doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
   depends_on:
   - ws-0481-explicit-deployment-context
   conflicts_with: []
   shared_surfaces:
-  - workstreams/active/ws-0482-retired-deployment-not-bootstrapped.yaml
+  - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
   ownership_manifest:
     owned_surfaces:
     - id: ws_0482_workstream
       paths:
-      - workstreams/active/ws-0482-retired-deployment-not-bootstrapped.yaml
+      - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
       mode: shared_contract
-      contract: ws-0482-retired-deployment-not-bootstrapped-v1
+      contract: ws-0482-0fork-platform-not-bootstrapped-v1
   tasks:
   - id: t1
-    title: "Decide scope \u2014 bootstrap full platform on retired-deployment OR remove\
-      \ platform vhosts from nginx-proxy-manager"
+    title: "Decide scope \u2014 bootstrap full platform on 0fork OR remove platform\
+      \ vhosts from nginx-proxy-manager"
     status: pending
   - id: t2
     title: "If bootstrap \u2014 resolve `hosts: runtime-control` hardcode in playbooks/harbor.yml\
-      \ (and likely others) since runtime-control VM does not exist on retired-deployment\
-      \ (collapsed topology)"
+      \ (and likely others) since runtime-control VM does not exist on 0fork (collapsed\
+      \ topology)"
     status: pending
   - id: t3
     title: "If bootstrap \u2014 converge prereqs in order (postgres-vm, openbao, keycloak)\
@@ -967,25 +1180,25 @@ workstreams:
       \ 200/302 from catch-all (registry, ci, chat, wiki, analytics, errors, ntfy)"
     status: pending
   findings:
-  - "2026-05-11 status check found retired-deployment docker-runtime (10.10.10.20)\
-    \ hosts 78 personal-app /opt projects (wemeshup, badita_org, 0exec_com, scrapetheworld,\
-    \ \u2026) but ZERO platform services (no /opt/harbor, /opt/outline, /opt/librechat,\
-    \ /opt/plausible, /opt/glitchtip, /opt/woodpecker, /opt/ntfy)."
-  - "The 2026-04-27 receipt receipts/live-applies/2026-04-27-ws-0372-retired-deployment-services-all-7-deployed.json\
+  - "2026-05-11 status check found 0fork docker-runtime (10.10.10.20) hosts 78 personal-app\
+    \ /opt projects (wemeshup, badita_org, 0exec_com, scrapetheworld, \u2026) but\
+    \ ZERO platform services (no /opt/harbor, /opt/outline, /opt/librechat, /opt/plausible,\
+    \ /opt/glitchtip, /opt/woodpecker, /opt/ntfy)."
+  - "The 2026-04-27 receipt receipts/live-applies/2026-04-27-ws-0372-0fork-services-all-7-deployed.json\
     \ claims all 7 services were deployed and verified UP. That claim is incorrect\
     \ for the current host state \u2014 either the receipt was aspirational, the converge\
     \ silently failed but reported pass, or the deployment was rolled back manually."
-  - 'On retired-deployment the Proxmox host only runs 3 VMs (ubuntu-24-04 = 10.10.10.20,
-    nginx-proxy-manager VM, stopped DNS VM). The runtime-control VM (10.10.10.92)
-    that the committed service registry assigns Harbor + Keycloak + others to does
-    not exist. The collapsed-topology pattern (ADR 0424) intended docker-runtime to
-    be the only runtime, but the inventory still names the host runtime-control, and
-    the harbor playbook hardcodes `hosts: runtime-control`.'
+  - 'On 0fork the Proxmox host only runs 3 VMs (ubuntu-24-04 = 10.10.10.20, nginx-proxy-manager
+    VM, stopped DNS VM). The runtime-control VM (10.10.10.92) that the committed service
+    registry assigns Harbor + Keycloak + others to does not exist. The collapsed-topology
+    pattern (ADR 0424) intended docker-runtime to be the only runtime, but the inventory
+    still names the host runtime-control, and the harbor playbook hardcodes `hosts:
+    runtime-control`.'
   - Symptoms visible from outside: registry.example.org returns 502 (nginx vhost upstream
       unreachable). chat / wiki / analytics / errors / ntfy / ci return 200/302 from
       the nginx catch-all but no real backend exists.
-  - This is not a "fix Harbor in 20 minutes" job. It is a "bootstrap retired-deployment's
-    platform from scratch" job.
+  - This is not a "fix Harbor in 20 minutes" job. It is a "bootstrap 0fork's platform
+    from scratch" job.
 - id: ws-0481-pentest-fleet-migration
   adr: 0481
   title: Migrate ethical-pentest microservice fleet from 0docker to 0mcp/florin via
@@ -1068,7 +1281,7 @@ workstreams:
   - Makefile
   - CLAUDE.md
   - .local/deployments/lv3/
-  - .local/deployments/retired-deployment/
+  - .local/deployments/0fork/
   - .local/active-deployment
   ownership_manifest:
     owned_surfaces:
@@ -1097,7 +1310,7 @@ workstreams:
       - docs/adr/.index.yaml
       - docs/adr/index/**
       - workstreams.yaml
-      - workstreams/active/ws-0482-retired-deployment-not-bootstrapped.yaml
+      - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
       - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
       - workstreams/active/ws-0484-self-verification-contracts.yaml
       - workstreams/active/ws-0485-convergence-idempotency-tests.yaml
@@ -1124,12 +1337,11 @@ workstreams:
     title: Backfill .local/deployments/lv3/ from the parked lv3-backup identity
     status: pending
   - id: t2
-    title: Remove or repurpose .local/deployments/prod/ (currently a stale retired-deployment
-      duplicate)
+    title: Remove or repurpose .local/deployments/prod/ (currently a stale 0fork duplicate)
     status: pending
   - id: t3
-    title: "Write .local/active-deployment marker (defaults to retired-deployment\
-      \ \u2014 current active)"
+    title: "Write .local/active-deployment marker (defaults to 0fork \u2014 current\
+      \ active)"
     status: pending
   - id: t4
     title: "Add Makefile targets \u2014 whoami, deployments-list, use-deployment,\
@@ -1161,10 +1373,9 @@ workstreams:
     `make use-deployment slug=<s>`, `make bind-worktree slug=<s>`, `make sync-identity-link`,
     `make _require-deployment` all verified working end-to-end (both happy path and
     failure path) on 2026-05-11.
-  - "Side discovery (spawned ws-0482) \u2014 retired-deployment's platform deployment\
-    \ from ws-0372 never actually landed. The Harbor 502 originally reported is not\
-    \ a transient outage; it is a \"never deployed\" symptom amplified by stale nginx\
-    \ vhost entries."
+  - "Side discovery (spawned ws-0482) \u2014 0fork's platform deployment from ws-0372\
+    \ never actually landed. The Harbor 502 originally reported is not a transient\
+    \ outage; it is a \"never deployed\" symptom amplified by stale nginx vhost entries."
 - id: adr-0481-multi-deployment-service-registry
   adr: 0481
   title: "ADR 0481 \u2014 Multi-Deployment Service Registry (Schema v3 + list_services.py)"
@@ -1176,13 +1387,13 @@ workstreams:
   worktree_path: .claude/worktrees/friendly-pike-233883
   doc: docs/postmortems/2026-05-11-service-inventory-gap-multi-deployment.md
   related_adrs:
-  - docs/adr/0424-retired-deployment-record.md
+  - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   - docs/adr/0437-fork-bootstrap-gaps.md
   - docs/adr/0440-per-deployment-layout.md
   - docs/adr/0480-multi-deployment-certificate-validation.md
   depends_on:
   - adr-0407-generic-by-default
-  - adr-0424-retired-deployment-record
+  - adr-0424-fork-clone-onto-hetzner-ax41
   conflicts_with: []
   shared_surfaces:
   - workstreams.yaml
@@ -2467,21 +2678,21 @@ workstreams:
       paths:
       - workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
       mode: exclusive
-  notes: "Phase 2 of ADR 0457. Closes the lv3 \u2194 retired-deployment oauth2-proxy@4180\n\
-    collision class of bug at converge time rather than at incident time.\n\nNew role\
-    \ `lv3.platform.host_pinning_guard`:\n - Resolves the active deployment slug from\
-    \ active_deployment_slug,\n   $DEPLOYMENT, or .local/active-deployment.\n - Looks\
-    \ up the host's deployment_owner from proxmox_guests.\n - Refuses the converge\
-    \ with a remediation message when the slugs\n   mismatch, OR when deployment_owner\
-    \ is set but no active slug is\n   resolvable (strict mode default).\n - Skips\
-    \ silently when neither side is set (legacy single-deployment\n   behavior).\n\
-    \nWired into playbooks/public-edge.yml as the first role so it runs\nbefore linux_guest_firewall,\
-    \ public_edge_oidc_auth, and\nnginx_edge_publication. Other playbooks (ops-portal.yml,\n\
-    keycloak.yml, etc.) can opt in by adding the same role. Wiring\nbeyond public-edge\
-    \ is deliberately deferred \u2014 each playbook's\nauthor should review the change.\n\
-    \n9 tests: 5 structure (role exists, files present, defaults\nunchanged, public-edge\
-    \ wired) + 4 behavioural (ansible-playbook\n--check on a synthetic inventory).\
-    \ Behavioural tests skip when\nansible-playbook is not on PATH.\n"
+  notes: "Phase 2 of ADR 0457. Closes the lv3 \u2194 0fork oauth2-proxy@4180\ncollision\
+    \ class of bug at converge time rather than at incident time.\n\nNew role `lv3.platform.host_pinning_guard`:\n\
+    \ - Resolves the active deployment slug from active_deployment_slug,\n   $DEPLOYMENT,\
+    \ or .local/active-deployment.\n - Looks up the host's deployment_owner from proxmox_guests.\n\
+    \ - Refuses the converge with a remediation message when the slugs\n   mismatch,\
+    \ OR when deployment_owner is set but no active slug is\n   resolvable (strict\
+    \ mode default).\n - Skips silently when neither side is set (legacy single-deployment\n\
+    \   behavior).\n\nWired into playbooks/public-edge.yml as the first role so it\
+    \ runs\nbefore linux_guest_firewall, public_edge_oidc_auth, and\nnginx_edge_publication.\
+    \ Other playbooks (ops-portal.yml,\nkeycloak.yml, etc.) can opt in by adding the\
+    \ same role. Wiring\nbeyond public-edge is deliberately deferred \u2014 each playbook's\n\
+    author should review the change.\n\n9 tests: 5 structure (role exists, files present,\
+    \ defaults\nunchanged, public-edge wired) + 4 behavioural (ansible-playbook\n\
+    --check on a synthetic inventory). Behavioural tests skip when\nansible-playbook\
+    \ is not on PATH.\n"
 - id: ws-0458-host-pinning-gate-wiring
   adr: '0457'
   title: "Host-pinning gate wiring \u2014 host-pinning lane in validate_repo.sh"
@@ -2574,18 +2785,17 @@ workstreams:
       paths:
       - workstreams/active/ws-0457-host-pinning-deployment-owner.yaml
       mode: exclusive
-  notes: "Closes Slice D from the ws-0448 postmortem (the lv3 \u2194 retired-deployment\n\
-    oauth2-proxy@4180 collision class of bug).\n\nPhase 1 (this workstream) ships:\n\
-    \ - config/contracts/deployment-v1/topology.schema.json: optional\n   `deployment_owner`\
-    \ field on each proxmox_guests[*] entry,\n   pattern ^[a-z0-9][a-z0-9_-]*$.\n\
-    \ - scripts/host_pinning_check.py: read-only audit primitive that\n   walks active\
-    \ or all deployments and reports drift (declared_owner\n   != declaring deployment).\n\
-    \ - 12 new tests covering schema acceptance, drift detection,\n   host filter,\
-    \ cross-deployment info surfacing, and CLI exit codes.\n\nPhase 2 (NOT in this\
-    \ workstream \u2014 deferred): wire the field into\nnginx_edge_publication / public_edge_oidc_auth\
-    \ role tasks so a\nconverge refuses to install services on a host pinned to a\n\
-    different deployment. That's role-author work that should land\nper-role with\
-    \ review.\n"
+  notes: "Closes Slice D from the ws-0448 postmortem (the lv3 \u2194 0fork\noauth2-proxy@4180\
+    \ collision class of bug).\n\nPhase 1 (this workstream) ships:\n - config/contracts/deployment-v1/topology.schema.json:\
+    \ optional\n   `deployment_owner` field on each proxmox_guests[*] entry,\n   pattern\
+    \ ^[a-z0-9][a-z0-9_-]*$.\n - scripts/host_pinning_check.py: read-only audit primitive\
+    \ that\n   walks active or all deployments and reports drift (declared_owner\n\
+    \   != declaring deployment).\n - 12 new tests covering schema acceptance, drift\
+    \ detection,\n   host filter, cross-deployment info surfacing, and CLI exit codes.\n\
+    \nPhase 2 (NOT in this workstream \u2014 deferred): wire the field into\nnginx_edge_publication\
+    \ / public_edge_oidc_auth role tasks so a\nconverge refuses to install services\
+    \ on a host pinned to a\ndifferent deployment. That's role-author work that should\
+    \ land\nper-role with review.\n"
 - id: ws-0456-deployment-aware-cert-validation
   adr: '0456'
   title: Deployment-aware cert validation + cross_deployment_drift gate-bypass reason
@@ -3377,14 +3587,13 @@ workstreams:
     \ surfaces. Captures three cross-cutting changes ws-0448 made\nthat other agents\
     \ need to know about:\n\n1. workstreams/active/**.yaml + workstreams/archive/2026/**.yaml\
     \ all\n   have their `adr:` field quoted now (YAML octal-int parser was\n   coercing\
-    \ 0447 -> 295). Don't revert.\n2. receipts/live-applies/2026-04-28-coolify-retired-deployment-runtime-live-apply.json\n\
+    \ 0447 -> 295). Don't revert.\n2. receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json\n\
     \   was reconstructed because PR #71 referenced it but never committed\n   the\
-    \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n\
-    \   now serves example.org after yesterday's recovery).\n\nPlus follow-ups not\
-    \ in ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n\
-    \ - Deployment-aware cert validation.\n - `make new-deployment` / `make use-deployment`\
-    \ (ADR 0442) \u2014 the\n   `run_with_deployment.sh` wrapper is the leaf they\
-    \ would invoke.\n"
+    \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n \
+    \  now serves example.org after yesterday's recovery).\n\nPlus follow-ups not in\
+    \ ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n - Deployment-aware\
+    \ cert validation.\n - `make new-deployment` / `make use-deployment` (ADR 0442)\
+    \ \u2014 the\n   `run_with_deployment.sh` wrapper is the leaf they would invoke.\n"
 - id: ws-0447-phase3-llm-ergonomics-and-traceability
   adr: '0447'
   title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
@@ -3522,14 +3731,14 @@ workstreams:
       paths:
       - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
       mode: exclusive
-  context: "After the retired-deployment Coolify deployment (converges 16-25) and\
-    \ the first app deploy\n(education_wemeshup), several manual steps were required:\n\
-    \  1. nginx was manually patched to point to coolify VM (10.10.10.70:80) instead\n\
-    \     of coolify-apps VM (10.10.10.71:443), because coolify-apps has no Traefik.\n\
-    \  2. The app's domain scheme was switched from https:// to http:// to avoid\n\
-    \     Traefik's HTTP-01 ACME challenge loop (nginx redirects port 80\u2192443,\
-    \ so\n     the challenge can never complete).\n  3. PermitRootLogin was manually\
-    \ enabled on coolify-apps VM.\n\nThese patches are WRONG. The next `make converge-nginx`\
+  context: "After the 0fork Coolify deployment (converges 16-25) and the first app\
+    \ deploy\n(education_wemeshup), several manual steps were required:\n  1. nginx\
+    \ was manually patched to point to coolify VM (10.10.10.70:80) instead\n     of\
+    \ coolify-apps VM (10.10.10.71:443), because coolify-apps has no Traefik.\n  2.\
+    \ The app's domain scheme was switched from https:// to http:// to avoid\n   \
+    \  Traefik's HTTP-01 ACME challenge loop (nginx redirects port 80\u2192443, so\n\
+    \     the challenge can never complete).\n  3. PermitRootLogin was manually enabled\
+    \ on coolify-apps VM.\n\nThese patches are WRONG. The next `make converge-nginx`\
     \ overwrites the manual\nnginx patch and the app breaks. This workstream makes\
     \ the platform converge to\nthe correct state unattended.\n\nKey insight: the\
     \ nginx template at publication/templates/proxmox-host.yml:2982\nis ALREADY CORRECT\
@@ -3626,7 +3835,7 @@ workstreams:
 
       '
   references:
-  - postmortem: docs/postmortems/2026-04-28-coolify-retired-deployment-deployment-and-education-wemeshup.md
+  - postmortem: docs/postmortems/2026-04-28-coolify-0fork-deployment-and-education-wemeshup.md
   - adr: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
   - adr: docs/adr/0340-coolify-vm-separation.md
   - template: publication/templates/proxmox-host.yml:2982
@@ -3770,7 +3979,7 @@ workstreams:
   - docs/adr/0445-phase1-multi-deployment-hardening.md
   - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
   - tests/fixtures/inventories/lv3-shape.yml
-  - tests/fixtures/inventories/retired-deployment-shape.yml
+  - tests/fixtures/inventories/0fork-shape.yml
   - tests/fixtures/inventories/synthetic-shape.yml
   - tests/fixtures/inventories/README.md
   - scripts/converge_dry_run.py
@@ -3803,8 +4012,8 @@ workstreams:
       target_version: 0.179.x
       done:
       - tests/fixtures/inventories/lv3-shape.yml (equal-flavor path)
-      - 'tests/fixtures/inventories/retired-deployment-shape.yml (divergent-flavor
-        path: leading digit stripped)'
+      - 'tests/fixtures/inventories/0fork-shape.yml (divergent-flavor path: leading
+        digit stripped)'
       - tests/fixtures/inventories/synthetic-shape.yml (testfork.invalid third identity)
       - tests/fixtures/inventories/README.md documenting fixture contract
       - "tests/test_fixture_inventories.py \u2014 12 cases covering parse, scalars,\
@@ -3849,7 +4058,7 @@ workstreams:
         \ loader, closing\nthe seam between phase 1.1 (fixtures) and ws-0439 (substrate).\n"
       done:
       - "test: tests/test_ws0445_deployment_loader_integration.py \u2014 7 cases proving\
-        \ lv3/retired-deployment/synthetic identity shapes validate through scripts/deployment.py\
+        \ lv3/0fork/synthetic identity shapes validate through scripts/deployment.py\
         \ against config/contracts/deployment-v1/ schemas"
       deferred_to_phase_2:
       - one-release deprecation warning for legacy `env=production` enum
@@ -3868,8 +4077,8 @@ workstreams:
     three fixtures
   - validate_no_hardcoded_topology.py flags default('<known-prod-IP-or-domain>') in
     role defaults
-  - make converge-X deployment=retired-deployment and make converge-X deployment=lv3
-    are first-class entry points
+  - make converge-X deployment=0fork and make converge-X deployment=lv3 are first-class
+    entry points
   - ws-0438 phase 6 is retired or restructured (no duplicate ownership)
   ownership_manifest:
     owned_surfaces:
@@ -3882,7 +4091,7 @@ workstreams:
     - id: ws_0444_fixtures
       paths:
       - tests/fixtures/inventories/lv3-shape.yml
-      - tests/fixtures/inventories/retired-deployment-shape.yml
+      - tests/fixtures/inventories/0fork-shape.yml
       - tests/fixtures/inventories/synthetic-shape.yml
       - tests/fixtures/inventories/README.md
       mode: shared_contract
@@ -4096,7 +4305,7 @@ workstreams:
       - config/subdomain-exposure-registry.json
       - inventory/group_vars/platform.yml
       - inventory/group_vars/platform_tls_certs.yml
-      - receipts/live-applies/2026-04-27-ws-0372-retired-deployment-services-all-7-deployed.json
+      - receipts/live-applies/2026-04-27-ws-0372-0fork-services-all-7-deployed.json
       mode: shared_contract
       contract: release-bump-v1
     - id: ws_0443_workstream
@@ -4129,7 +4338,7 @@ workstreams:
   doc: docs/adr/0439-deployment-profiles-subset-selection.md
   depends_on:
   - adr-0407-generic-by-default
-  - adr-0431-retired-deployment-full-day-deploy
+  - adr-0431-0fork-full-day-deploy
   - adr-0438-generic-by-construction
   conflicts_with: []
   shared_surfaces:
@@ -4266,7 +4475,7 @@ workstreams:
       target_version: 0.179.0
       done:
       - 'feat(identity): platform_identity filter plugin with 5 flavors (config/sql/pve/unix/dns_label)'
-      - 'test: 18 unit tests across lv3/retired-deployment/UPPERCASE/edge-case inputs'
+      - 'test: 18 unit tests across lv3/0fork/UPPERCASE/edge-case inputs'
       - 'fix(identity): migrate proxmox_notification_*, keycloak_realm_name, monitoring_influxdb_org
         to platform_identity'
       - 'fix(identity): migrate proxmox_api_automation_user to pve_prefix (was config_prefix)'
@@ -4292,8 +4501,8 @@ workstreams:
         template values'
       - 'fix(openbao): replace 4 !unsafe SQL grants with Jinja-escape pattern (Phase
         0 ef1445216)'
-      - 'fix(nomad): replace per-deployment lv3-/retired-deployment- smoke job HCL
-        files with single in-role Jinja template; job/service names derive from platform_identity.config_prefix'
+      - 'fix(nomad): replace per-deployment lv3-/0fork- smoke job HCL files with single
+        in-role Jinja template; job/service names derive from platform_identity.config_prefix'
       - 'fix(nomad): rewrite playbooks/nomad.yml multi-host-group hosts expression
         to single-line ternary (ansible_scope_runner regex parser does not handle
         parenthesised folded scalars)'
@@ -4344,8 +4553,8 @@ workstreams:
       - Promote from advisory to required
   acceptance_criteria:
   - Pre-push lint scanner green on main with zero allow-comments outside docs/tests
-  - PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment make bootstrap
-    completes without any lv3/prefix/credential hardcoding workaround in fork-overrides.yml
+  - PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make bootstrap completes without
+    any lv3/prefix/credential hardcoding workaround in fork-overrides.yml
   - Generic-deploy CI job green against testfork.invalid synthetic identity
   ownership_manifest:
     owned_surfaces:
@@ -4402,16 +4611,16 @@ workstreams:
     alone.
 
     '
-- id: ws-0424-retired-deployment
+- id: ws-0424-fork-clone-0fork
   adr: '0424'
-  title: "ADR 0424 \u2014 retired example.org deployment record"
+  title: "ADR 0424 \u2014 example.org Clone onto Hetzner AX41-NVMe"
   status: in_progress
   ready_to_merge: false
   live_applied: false
   owner: claude
   branch: claude/gallant-chebyshev-b0def1
   worktree_path: .claude/worktrees/gallant-chebyshev-b0def1
-  doc: docs/adr/0424-retired-deployment-record.md
+  doc: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   related_adrs:
   - docs/adr/0425-retrospective-420-adr-platform-build.md
   depends_on:
@@ -4422,8 +4631,8 @@ workstreams:
   conflicts_with: []
   shared_surfaces:
   - workstreams.yaml
-  - workstreams/active/ws-0424-retired-deployment.yaml
-  - docs/adr/0424-retired-deployment-record.md
+  - workstreams/active/ws-0424-fork-clone-0fork.yaml
+  - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   - docs/adr/0425-retrospective-420-adr-platform-build.md
   - docs/runbooks/hetzner-bare-metal-bootstrap.md
   started: '2026-04-21'
@@ -4431,21 +4640,21 @@ workstreams:
   surfaces:
   - example.org (full apex scope, apex wiped and repointed 2026-04-21)
   - Hetzner AX41-NVMe
-  - .local/identity.yml.retired-deployment (new, not committed)
+  - .local/identity.yml.0fork (new, not committed)
   - .local/hetzner/dns.env (new, not committed)
-  summary: "First real deployment-portability test. Stands up a collapsed nested-Proxmox\
-    \ topology on a Hetzner AX41-NVMe using example.org (full apex) as the identity.\
-    \ Drives ADR 0385 (identity core) and ADR 0407 (generic-by-default) to their limits.\
-    \ Also produces ADR 0425 \u2014 a retrospective on the 420-ADR build process and\
-    \ what the deployment exercise revealed about gaps in the platform's portability\
-    \ claim. ADR numbers collided with a parallel LSP-AI evaluation workstream (0422/0423)\
-    \ that landed on main while this one was in progress; renumbered to 0424/0425.\n"
+  summary: "First real fork-viability test. Stands up a collapsed nested-Proxmox topology\
+    \ on a Hetzner AX41-NVMe using example.org (full apex) as the identity. Drives ADR\
+    \ 0385 (identity core) and ADR 0407 (generic-by-default) to their limits. Also\
+    \ produces ADR 0425 \u2014 a retrospective on the 420-ADR build process and what\
+    \ the clone attempt revealed about gaps in the platform's forkability claim. ADR\
+    \ numbers collided with a parallel LSP-AI evaluation workstream (0422/0423) that\
+    \ landed on main while this one was in progress; renumbered to 0424/0425.\n"
   ownership_manifest:
     owned_surfaces:
     - id: ws_0424_tracking
       paths:
-      - workstreams/active/ws-0424-retired-deployment.yaml
-      - docs/adr/0424-retired-deployment-record.md
+      - workstreams/active/ws-0424-fork-clone-0fork.yaml
+      - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
       - docs/adr/0425-retrospective-420-adr-platform-build.md
       - docs/runbooks/hetzner-bare-metal-bootstrap.md
       mode: exclusive
@@ -4464,7 +4673,7 @@ workstreams:
       - docs/site-generated/architecture/dependency-graph.md
       mode: shared_contract
       contract: generated-index-and-diagram-v1
-    - id: ws_0424_secondary_deployment_tactical_fixes
+    - id: ws_0424_clone_deploy_tactical_fixes
       paths:
       - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2
       - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
@@ -4494,8 +4703,8 @@ workstreams:
       - platform/ansible/execution_scopes.py
       - platform/repo.py
       - docs/adr/0437-overlay-aware-bootstrap.md
-      - docs/postmortems/2026-04-22-secondary-deployment-bootstrap-gap.md
-      - docs/diaries/2026-04-22-secondary-deployment-bootstrap.md
+      - docs/postmortems/2026-04-22-fork-bootstrap-gap.md
+      - docs/diaries/2026-04-22-fork-bootstrap.md
       mode: exclusive
     - id: ws_0424_fresh_host_bootstrap_fixes
       paths:
@@ -4602,14 +4811,14 @@ workstreams:
   progress:
     completed_2026_04_21:
     - Hetzner DNS API token verified against zone example.org (id EXAMPLE0ZoneId00000000)
-    - SSH access to 203.0.113.3 confirmed with llm-agents@platform_server key
+    - SSH access to 203.0.113.3 confirmed with llm-agents@platform_server
+      key
     - Host key fingerprint pinned (ED25519 9xWVsKZxKXoBR3O9369Ixj/Ke/qwiLQ5SBDli/STwVk)
     - Hardware inventory captured (Ryzen 3600, 62 GiB, 2x476 GB NVMe, /dev/kvm present)
     - ADR 0424 drafted
     - ADR 0425 retrospective drafted
     - Bootstrap runbook drafted
-    - Identity overlay .local/identity.yml.retired-deployment written (apex scope
-      confirmed)
+    - Identity overlay .local/identity.yml.0fork written (apex scope confirmed)
     - example.org apex DNS wiped and repointed at 203.0.113.3 (backup saved)
     - Hostname set to debian-base-template.example.org on box
     - PVE repo + GPG key installed (pve-no-subscription trixie)
@@ -4624,9 +4833,9 @@ workstreams:
     - iptables-persistent installed, ip_forward persisted via /etc/sysctl.d/99-proxmox-forward.conf
     - Debian 13 cloud-init template built as VMID 9000 (libguestfs-blocked; qemu-guest-agent
       injected via cloud-init user-data instead)
-    - 8 service VMs provisioned and cloud-init-complete on 10.10.10.X (nginx-edge
-      110, runtime-apps 122, docker-build 130, monitoring 140, postgres 150, backup
-      160, mail-platform 181, runtime-control 192)
+    - 8 service VMs cloned and cloud-init-complete on 10.10.10.X (nginx-edge 110,
+      runtime-apps 122, docker-build 130, monitoring 140, postgres 150, backup 160,
+      mail-platform 181, runtime-control 192)
     - Runbook section 11 appended with verbatim live-apply commands + provisioning
       receipt table
     - Direct-SMTP Gmail deliverability tested and documented as blocked on rDNS+SPF/DKIM
@@ -4635,7 +4844,7 @@ workstreams:
       \ API still functional"
     blocked_pending_operator:
     - Configure Hetzner WAN bridge vmbr0 (risk of lockout; needs Robot KVM standby)
-    - Deploy Headscale inside secondary deployment and enroll workstation
+    - Deploy Headscale inside clone and enroll workstation
     - Set rDNS on 203.0.113.3 via Hetzner Robot (no API path)
     - Rotate the DNS token shared in chat on 2026-04-21
     - Verify Hetzner account name "Mr. Raabe" (non-blocking)
@@ -4645,17 +4854,17 @@ workstreams:
     - Configure vmbr0 Hetzner WAN bridge (after operator KVM standby)
     - Converge runtime-control (Keycloak + step-ca + OpenBao + Headscale)
     - Converge postgres, mail-platform, runtime-apps, monitoring, nginx-edge
-    - Create DNS records on example.org (wildcard already covers them; blocked on
-      API brownout)
+    - Create DNS records on example.org (wildcard already covers them; blocked on API
+      brownout)
     - Provision operator@example.org mailbox
     - Send confirmation email from operator@example.org to operator@example.com
     - Capture live-apply evidence and close workstream
   notes: "This workstream was started while the operator was AFK. Destructive actions\
     \ performed with explicit operator authorization (apex wipe). A RAID1 near-miss\
     \ occurred during disk inventory \u2014 see ADR 0425 live postmortem. Recovery\
-    \ was clean. The DNS token shared in chat should be rotated regardless of secondary\
-    \ deployment outcome. See ADR 0424 open questions for the full list of decisions\
-    \ awaiting operator confirmation on return.\n"
+    \ was clean. The DNS token shared in chat should be rotated regardless of clone\
+    \ outcome. See ADR 0424 open questions for the full list of decisions awaiting\
+    \ operator confirmation on return.\n"
 - id: ws-0422-lsp-ai-decision
   title: "ADR 0422/0423 \u2014 lsp-ai editor-side AI language server decision (do\
     \ not deploy)"
@@ -4792,8 +5001,8 @@ workstreams:
       - playbooks/platform-service-watchdog.yml
       mode: exclusive
   notes: 'Service health audit: 73 services, 5 VMs without watchdog coverage. SSH
-    to servers unavailable at time of audit (connection timeout to 203.0.113.1). All
-    service probe URLs derived from config/health-probe-catalog.json. Deploy with:
+    to servers unavailable at time of audit (connection timeout to 203.0.113.1).
+    All service probe URLs derived from config/health-probe-catalog.json. Deploy with:
     make converge-platform-watchdog env=production Or per-VM: ansible-playbook playbooks/platform-service-watchdog.yml
     -e env=production -e watchdog_vm=docker-runtime
 
@@ -4975,8 +5184,7 @@ workstreams:
       - workstreams/archive/2026/audit-0mcp-guest-network-drift-2026-08-27.yaml
       - workstreams/archive/2026/fix-0mcp-guest-network-addressing-10-20.yaml
       mode: exclusive
-  description: 'Operator confirmed 10.10.10.x is the real example.org addressing,
-    flipping
+  description: 'Operator confirmed 10.10.10.x is the real example.org addressing, flipping
 
     the direction of the 2026-08-26/27 postmortem (which had framed
 
@@ -5070,6 +5278,65 @@ workstreams:
     Related postmortem: ADR 0415.
 
     '
+- id: ws-0501-https-alert-presence-contract
+  adr: 0409
+  title: Gate optional HTTPS validation on the ignored alerts artifact
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/fix-https-alert-presence-gate
+  worktree_path: .worktrees/fix-https-alert-presence-gate
+  doc: docs/workstreams/ws-0501-https-alert-presence-contract.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - scripts/generate_https_tls_assurance.py
+  - scripts/validate_repo.sh
+  - tests/test_generate_https_tls_assurance.py
+  - docs/workstreams/ws-0501-https-alert-presence-contract.md
+  - workstreams/active/ws-0500-https-alert-runtime-output-gate.yaml
+  - workstreams/archive/2026/ws-0500-https-alert-runtime-output-gate.yaml
+  - workstreams/active/ws-0501-https-alert-presence-contract.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: https_alert_presence_contract
+      paths:
+      - scripts/generate_https_tls_assurance.py
+      - scripts/validate_repo.sh
+      - tests/test_generate_https_tls_assurance.py
+      mode: exclusive
+    - id: ws_0500_closeout
+      paths:
+      - workstreams/active/ws-0500-https-alert-runtime-output-gate.yaml
+      - workstreams/archive/2026/ws-0500-https-alert-runtime-output-gate.yaml
+      mode: exclusive
+    - id: ws_0501_tracking
+      paths:
+      - docs/workstreams/ws-0501-https-alert-presence-contract.md
+      - workstreams/active/ws-0501-https-alert-presence-contract.yaml
+      mode: exclusive
+  context: 'The generator''s tracked targets file exists in every clean checkout,
+    while
+
+    only the deployment-local alerts file is ignored. Optional validation must
+
+    use the ignored alerts artifact as its presence signal and remain strict
+
+    once that artifact exists.
+
+    '
+  tasks:
+  - id: t1
+    title: Correct optional presence detection to use only the ignored alerts file
+    status: completed
+  - id: t2
+    title: Cover clean tracked-target state and strict present-alert drift
+    status: completed
+  - id: t3
+    title: Run focused validation and open a review-only correction PR
+    status: in_progress
 - id: fix-serverclaw-pii-leak-check-leaks-gap
   adr: 0409
   title: Fix ServerClaw publish leak-check gap that let real PII through
@@ -5127,6 +5394,89 @@ workstreams:
   - serverclaw/main HEAD no longer contains the leaked file
   related_adrs:
   - "ADR 0409 \u2014 Generalize committed code to eliminate publication sanitization"
+- id: ws-0511-serverclaw-public-route-template
+  adr: '0407'
+  title: Keep the ServerClaw host template aligned with the edge route catalog
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/serverclaw-public-route-template-20260925
+  worktree_path: .worktrees/codex-serverclaw-public-route-template-20260925
+  doc: docs/workstreams/ws-0511-serverclaw-public-route-template.md
+  canonical_truth:
+    changelog_entry: Keep the sanitized ServerClaw host template consistent with active
+      authenticated edge routes.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  depends_on:
+  - ws-0510-gitea-authentik-oidc-e2e
+  conflicts_with: []
+  shared_surfaces:
+  - publication/templates/proxmox-host.yml
+  - config/validation-lanes.yaml
+  - tests/test_publish_to_serverclaw.py
+  - tests/test_validation_lanes.py
+  - workstreams/active/ws-0511-serverclaw-public-route-template.yaml
+  - docs/workstreams/ws-0511-serverclaw-public-route-template.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams.yaml
+  - VERSION
+  - changelog.md
+  - build/platform-manifest.json
+  ownership_manifest:
+    owned_surfaces:
+    - id: sanitized_edge_route_template
+      paths:
+      - publication/templates/proxmox-host.yml
+      - tests/test_publish_to_serverclaw.py
+      - docs/workstreams/ws-0511-serverclaw-public-route-template.md
+      mode: exclusive
+    - id: publication_template_validation_routing
+      paths:
+      - config/validation-lanes.yaml
+      - tests/test_validation_lanes.py
+      mode: exclusive
+    - id: workstream_tracking
+      paths:
+      - workstreams/active/ws-0511-serverclaw-public-route-template.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: generated_workstream_diagram
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: repository_release_truth
+      paths:
+      - VERSION
+      - changelog.md
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: release-truth-v1
+  context: 'The sanitized ServerClaw snapshot retains the active repo-intake edge-auth
+
+    catalog entry, but its Tier A Proxmox host template omitted the corresponding
+
+    enabled edge route. The public Woodpecker pipeline therefore rejected the
+
+    generated snapshot. Keep the generic host template and its regression test in
+
+    sync so future sanitized publications remain valid without deployment values.
+
+    '
+  tasks:
+  - id: t1
+    title: Add the generic edge route, regression test, and validation-lane routing
+    status: completed
+  - id: t2
+    title: Validate generated public snapshot and required repository checks
+    status: pending
+  - id: t3
+    title: Merge the private-source fix and refresh the ServerClaw publication PR
+    status: pending
 - id: fix-readme-topology-example-ips
   adr: '0407'
   title: Fix README architecture diagram example IP octet
@@ -5237,7 +5587,7 @@ workstreams:
   - scripts/topology-snapshot.json
   - workstreams/archive/2026/ws-0391-live-apply.yaml
   - workstreams/archive/2026/ws-0391-live-apply.yaml
-  - workstreams/active/ws-0424-retired-deployment.yaml
+  - workstreams/active/ws-0424-fork-clone-0fork.yaml
   - receipts/live-applies/**
   ownership_manifest:
     owned_surfaces:
@@ -5314,7 +5664,7 @@ workstreams:
       - scripts/check_release_readiness.py
       - scripts/generate_cross_cutting_artifacts.py
       - scripts/topology-snapshot.json
-      - workstreams/active/ws-0424-retired-deployment.yaml
+      - workstreams/active/ws-0424-fork-clone-0fork.yaml
       mode: shared_contract
       contract: workstream-metadata-gate-repair-v1
   canonical_truth:
@@ -5556,6 +5906,84 @@ workstreams:
     automated remediation playbooks.
 
     '
+- id: ws-0497-dns-catalog-selection
+  adr: '0374'
+  title: Resolve generic subdomain catalog entries for selected DNS checks
+  status: merged
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/ws-0497-postmerge-release
+  worktree_path: .worktrees/ws-0497-postmerge-release
+  doc: docs/workstreams/ws-0497-dns-catalog-selection.md
+  canonical_truth:
+    changelog_entry: Resolve selected DNS catalog placeholders during guarded deployment
+      preflight without changing the generic catalog or live DNS.
+    release_bump: patch
+  depends_on:
+  - ws-0496-generated-artifact-reconciliation
+  conflicts_with: []
+  shared_surfaces:
+  - scripts/generate_cross_cutting_artifacts.py
+  - tests/test_generate_cross_cutting_artifacts.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/workstreams/ws-0497-dns-catalog-selection.md
+  - workstreams/active/ws-0497-dns-catalog-selection.yaml
+  - workstreams.yaml
+  - README.md
+  - docs/status/history/merged-workstreams.md
+  - build/platform-manifest.json
+  - changelog.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: selected_dns_catalog_comparison
+      paths:
+      - scripts/generate_cross_cutting_artifacts.py
+      - tests/test_generate_cross_cutting_artifacts.py
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: adr-0374-cross-cutting-manifest-v1
+    - id: ws_0497_dns_catalog_selection_tracking
+      paths:
+      - docs/workstreams/ws-0497-dns-catalog-selection.md
+      - workstreams/active/ws-0497-dns-catalog-selection.yaml
+      mode: exclusive
+    - id: current_main_generated_status
+      paths:
+      - README.md
+      - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+    - id: current_main_platform_manifest
+      paths:
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: release-truth-v1
+    - id: pending_repository_release_note
+      paths:
+      - changelog.md
+      mode: shared_contract
+      contract: release-truth-v1
+  tasks:
+  - id: t1
+    title: Reproduce selector-specific catalog drift from the 0mcp production identity
+    status: completed
+  - id: t2
+    title: Resolve generic catalog hostnames in memory for selected DNS comparisons
+    status: completed
+  - id: t3
+    title: Verify selected DNS generation without mutating the generic catalog
+    status: completed
+  - id: t4
+    title: Remove the stale legacy Keycloak hairpin test expectation
+    status: completed
+  - id: t5
+    title: Declare the refreshed coordination diagram in the workstream ownership
+      manifest
+    status: completed
+  - id: t6
+    title: Recheck the HTTPS/TLS alert output reported stale by the full gate
+    status: completed
 - id: ws-0364-service-api-agent-tools
   adr: '0364'
   title: 'Service API agent tools: Outline, Netbox, Dify + generic auth helper (ADR
@@ -5687,6 +6115,340 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-0503-builder-publisher-identity
+  adr: 0296
+  title: Declare a root-only Builder LXC108 fleet-runner publisher identity
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/builder-publisher-identity-iac
+  worktree_path: .worktrees/builder-publisher-identity-iac
+  doc: docs/workstreams/ws-0503-builder-publisher-identity.md
+  depends_on:
+  - ws-0497-fleet-build-broker-vm180
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/fleet_runner_image_publisher_identity/**
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-runner-image-publisher.yml
+  - playbooks/fleet-runner-image-publisher.yml
+  - docs/runbooks/fleet-runner-image-publisher.md
+  - tests/test_fleet_runner_image_publisher_identity_role.py
+  - docs/workstreams/ws-0499-builder-publisher-identity.md
+  - workstreams/active/ws-0499-builder-publisher-identity.yaml
+  - docs/workstreams/ws-0503-builder-publisher-identity.md
+  - workstreams/active/ws-0503-builder-publisher-identity.yaml
+  - docs/workstreams/ws-0498-builder-publisher-identity.md
+  - workstreams/active/ws-0498-builder-publisher-identity.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: builder_publisher_identity_contract
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/fleet_runner_image_publisher_identity/**
+      - collections/ansible_collections/lv3/platform/playbooks/fleet-runner-image-publisher.yml
+      - playbooks/fleet-runner-image-publisher.yml
+      - docs/runbooks/fleet-runner-image-publisher.md
+      - tests/test_fleet_runner_image_publisher_identity_role.py
+      mode: exclusive
+    - id: ws_0499_tracking_removal
+      paths:
+      - docs/workstreams/ws-0499-builder-publisher-identity.md
+      - workstreams/active/ws-0499-builder-publisher-identity.yaml
+      mode: exclusive
+    - id: ws_0498_tracking_removal
+      paths:
+      - docs/workstreams/ws-0498-builder-publisher-identity.md
+      - workstreams/active/ws-0498-builder-publisher-identity.yaml
+      mode: exclusive
+    - id: ws_0503_tracking
+      paths:
+      - docs/workstreams/ws-0503-builder-publisher-identity.md
+      - workstreams/active/ws-0503-builder-publisher-identity.yaml
+      mode: exclusive
+  context: 'The dedicated 0docker Builder LXC108 needs a stable local non-secret identity
+
+    before it can be trusted as the fleet-runner image-publishing surface. The
+
+    contract must be unavailable to general docker-build guests and must not carry
+    a
+
+    registry endpoint, credential, package token, image reference, or runtime
+
+    topology.
+
+    '
+  tasks:
+  - id: t1
+    title: Add the fail-closed root-only Builder LXC108 publisher identity role and
+      controlled entrypoint
+    status: completed
+  - id: t2
+    title: Add static role and playbook coverage for identity, path, mode, and host
+      isolation
+    status: completed
+  - id: t3
+    title: Run focused and repository validation before review
+    status: completed
+- id: ws-0500-builder-private-0mcp-transport
+  adr: 0296
+  title: Declare the Builder-only private 0mcp fleet-runner transport
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/builder-0mcp-transport
+  worktree_path: .worktrees/builder-0mcp-transport
+  doc: docs/workstreams/ws-0500-builder-private-0mcp-transport.md
+  depends_on:
+  - ws-0499-builder-publisher-identity
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/fleet_runner_private_0mcp_transport/**
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-runner-private-0mcp-transport.yml
+  - playbooks/fleet-runner-private-0mcp-transport.yml
+  - docs/runbooks/fleet-runner-private-0mcp-transport.md
+  - tests/test_fleet_runner_private_0mcp_transport_role.py
+  - docs/workstreams/ws-0500-builder-private-0mcp-transport.md
+  - workstreams/active/ws-0500-builder-private-0mcp-transport.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: builder_private_0mcp_transport_contract
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/fleet_runner_private_0mcp_transport/**
+      - collections/ansible_collections/lv3/platform/playbooks/fleet-runner-private-0mcp-transport.yml
+      - playbooks/fleet-runner-private-0mcp-transport.yml
+      - docs/runbooks/fleet-runner-private-0mcp-transport.md
+      - tests/test_fleet_runner_private_0mcp_transport_role.py
+      mode: exclusive
+    - id: ws_0500_tracking
+      paths:
+      - docs/workstreams/ws-0500-builder-private-0mcp-transport.md
+      - workstreams/active/ws-0500-builder-private-0mcp-transport.yaml
+      mode: exclusive
+  context: 'Private broker deployment needs a Builder-only 0mcp SSH transport that
+    is
+
+    explicit, host-key pinned, and independent of the historical 0docker lane.
+
+    The role has no credential material and cannot install any SSH key.
+
+    '
+  tasks:
+  - id: t1
+    title: Add the fixed Builder private 0mcp transport role and entrypoint
+    status: completed
+  - id: t2
+    title: Add static coverage for host pinning, permissions, and strict SSH preflight
+    status: completed
+  - id: t3
+    title: Run focused and repository validation before normal PR review
+    status: in_progress
+- id: ws-0497-fleet-build-broker-vm180
+  adr: 0296
+  title: Declare a fail-closed private fleet build broker baseline on VM180
+  status: ready_for_merge
+  ready_to_merge: true
+  live_applied: false
+  owner: codex
+  branch: codex/broker-vm180-iac
+  worktree_path: .worktrees/broker-vm180-iac
+  doc: docs/workstreams/ws-0497-fleet-build-broker-vm180.md
+  depends_on:
+  - ws-0274-artifact-cache-plane
+  conflicts_with: []
+  shared_surfaces:
+  - inventory/host_vars/proxmox-host.yml
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker.yml
+  - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_runtime/**
+  - playbooks/fleet-build-broker.yml
+  - tests/test_fleet_build_broker_runtime_role.py
+  - docs/workstreams/ws-0497-fleet-build-broker-vm180.md
+  - workstreams/active/ws-0497-fleet-build-broker-vm180.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: fleet_build_broker_vm180_runtime
+      paths:
+      - inventory/host_vars/proxmox-host.yml
+      - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker.yml
+      - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_runtime/**
+      - playbooks/fleet-build-broker.yml
+      - tests/test_fleet_build_broker_runtime_role.py
+      mode: shared_contract
+      contract: fleet-build-broker-vm180-v1
+    - id: ws_0497_tracking
+      paths:
+      - docs/workstreams/ws-0497-fleet-build-broker-vm180.md
+      - workstreams/active/ws-0497-fleet-build-broker-vm180.yaml
+      mode: exclusive
+  context: 'The broker is a private mTLS-only builder control plane, not a public
+    service.
+
+    Its credentials are rendered exclusively by go-fleet-secrets under a root-only
+
+    deployment contract. VM180 already reserves 5002 for the central GHCR cache;
+
+    the broker may use only that cache and must not install a VM-local package
+
+    credential. Private-GHCR cache authentication is a separate cache-owned
+
+    remediation and blocks an apply until verified.
+
+    '
+  tasks:
+  - id: t1
+    title: Declare private VM180 host-port policy for the two named builders
+    status: completed
+  - id: t2
+    title: Add a cache-only immutable-image broker Compose baseline with root-rendered
+      mounts
+    status: completed
+  - id: t3
+    title: Validate the static IaC and create a review-only pull request
+    status: completed
+- id: ws-0502-cache-ghcr-private-auth
+  adr: 0295
+  title: Add a cache-only private GHCR upstream-auth contract
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/cache-ghcr-private-auth
+  worktree_path: .worktrees/ws-0502-cache-ghcr-private-auth
+  doc: docs/workstreams/ws-0502-cache-ghcr-private-auth.md
+  depends_on:
+  - ws-0274-artifact-cache-plane
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_runtime/**
+  - collections/ansible_collections/lv3/platform/playbooks/artifact-cache-vm.yml
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker.yml
+  - collections/ansible_collections/lv3/platform/vars/artifact_cache_registry_endpoints.yml
+  - playbooks/artifact-cache-vm.yml
+  - tests/test_artifact_cache_runtime_role.py
+  - tests/test_artifact_cache_playbook.py
+  - tests/test_fleet_build_broker_runtime_role.py
+  - docs/runbooks/artifact-cache-runtime.md
+  - docs/workstreams/ws-0501-cache-ghcr-private-auth.md
+  - workstreams/active/ws-0501-cache-ghcr-private-auth.yaml
+  - docs/workstreams/ws-0502-cache-ghcr-private-auth.md
+  - workstreams/active/ws-0502-cache-ghcr-private-auth.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: artifact_cache_ghcr_private_auth
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/**
+      - collections/ansible_collections/lv3/platform/playbooks/artifact-cache-vm.yml
+      - collections/ansible_collections/lv3/platform/vars/artifact_cache_registry_endpoints.yml
+      - playbooks/artifact-cache-vm.yml
+      - tests/test_artifact_cache_runtime_role.py
+      - tests/test_artifact_cache_playbook.py
+      - docs/runbooks/artifact-cache-runtime.md
+      mode: exclusive
+    - id: broker_private_cache_endpoint
+      paths:
+      - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker.yml
+      - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_runtime/**
+      - tests/test_fleet_build_broker_runtime_role.py
+      mode: shared_contract
+      contract: fleet-build-broker-vm180-v1
+    - id: ws_0501_tracking_removal
+      paths:
+      - docs/workstreams/ws-0501-cache-ghcr-private-auth.md
+      - workstreams/active/ws-0501-cache-ghcr-private-auth.yaml
+      mode: exclusive
+    - id: ws_0502_tracking
+      paths:
+      - docs/workstreams/ws-0502-cache-ghcr-private-auth.md
+      - workstreams/active/ws-0502-cache-ghcr-private-auth.yaml
+      mode: exclusive
+  context: 'The public GHCR pull-through cache remains anonymous on VM180:5002. A
+
+    separate `127.0.0.1:5005` adapter may receive one narrowly scoped
+
+    package-read identity through an approved cache-only vault renderer. The
+
+    credential must never be copied to the broker, a builder, public adapter,
+
+    Ansible output, Compose environment, or another cache adapter. Private pulls
+
+    are fail-closed unless a fixed root:root 0400 regular configuration beneath
+
+    fixed root:root 0700 directories is already present.
+
+    '
+  tasks:
+  - id: t1
+    title: Add an opt-in root-only GHCR proxy configuration contract
+    status: in_progress
+  - id: t2
+    title: Add static role and rendered-Compose isolation tests
+    status: in_progress
+  - id: t3
+    title: Document the cache-only credential boundary and verification gate
+    status: in_progress
+- id: ws-0494-woodpecker-ci-network-recovery
+  adr: 0287
+  title: Restore the Woodpecker CI webhook runtime after bridge detachment
+  status: ready
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/woodpecker-ci-network-recovery-20260901
+  worktree_path: .worktrees/woodpecker-ci-network-recovery-20260901
+  doc: docs/workstreams/ws-0494-woodpecker-ci-network-recovery.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0494-woodpecker-ci-network-recovery.yaml
+  - docs/workstreams/ws-0494-woodpecker-ci-network-recovery.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - receipts/live-applies/ws-0494-woodpecker-ci-network-recovery-apply-receipt.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0494_tracking
+      paths:
+      - workstreams/active/ws-0494-woodpecker-ci-network-recovery.yaml
+      - docs/workstreams/ws-0494-woodpecker-ci-network-recovery.md
+      mode: exclusive
+    - id: ws_0494_live_apply_evidence
+      paths:
+      - receipts/live-applies/ws-0494-woodpecker-ci-network-recovery-apply-receipt.yaml
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    - id: ws_0494_generated_diagram
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-index-and-diagram-v1
+  context: 'GitHub push and pull-request deliveries to the managed Woodpecker instance
+
+    received HTTP 502 while the server container lacked its declared Compose
+
+    bridge attachment. This workstream records the minimal live recovery and
+
+    the successful server-side validation that followed.
+
+    '
+  tasks:
+  - id: t1
+    title: Isolate the CI webhook failure to the runtime bridge attachment
+    status: completed
+  - id: t2
+    title: Reattach the Woodpecker server to its declared Compose bridge
+    status: completed
+  - id: t3
+    title: Verify the public CI endpoint and a fresh pull-request pipeline
+    status: completed
 - id: ws-0490-woodpecker-labeled-worker-scheduler-recovery
   adr: 0287
   title: Restore scheduling for active label-matched Woodpecker workers
@@ -5760,12 +6522,12 @@ workstreams:
 - id: ws-0377-repo-intake-subdomain
   adr: '0224'
   title: Repo Intake as First-Class Subdomain
-  status: in_progress
+  status: ready
   ready_to_merge: false
   live_applied: false
-  owner: codex
-  branch: codex/repo-intake-preflight
-  worktree_path: .worktrees/codex-repo-intake-preflight
+  owner: platform-infrastructure
+  branch: claude/zen-agnesi
+  worktree_path: .claude/worktrees/zen-agnesi
   doc: docs/workstreams/ws-0377-repo-intake-subdomain.md
   depends_on:
   - adr-0224-self-service-repo-intake-and-agent-assisted-deployments
@@ -5777,11 +6539,6 @@ workstreams:
   - playbooks/services/repo_intake.yml
   - config/generated/nginx-upstreams.yaml
   - inventory/group_vars/all/platform_services.yml
-  - Makefile
-  - config/workflow-catalog.json
-  - config/command-catalog.json
-  - tests/test_repo_intake_workflow.py
-  - docs/runbooks/repo-intake.md
   ownership_manifest:
     owned_surfaces:
     - id: repo_intake_service
@@ -5792,46 +6549,16 @@ workstreams:
       - playbooks/services/repo_intake.yml
       - inventory/group_vars/platform_services.yml
       mode: exclusive
-    - id: repo_intake_governed_workflow
-      paths:
-      - Makefile
-      - config/workflow-catalog.json
-      - config/command-catalog.json
-      - tests/test_repo_intake_workflow.py
-      - docs/runbooks/repo-intake.md
-      mode: shared_contract
-      contract: governed-service-workflow-v1
-  description: 'Finish the first-class Repo Intake runtime contract and recover its
-    missing
+  description: 'Extract repo-intake from ops_portal as a first-class service with
+    its own
 
-    upstream without bypassing the shared Authentik edge boundary. The governed
+    subdomain (repo-intake.example.com). Mirrors the ops_portal architectural pattern
 
-    make target currently references a preflight workflow that is absent from the
+    but focuses on self-service repo deployment workflows. Updates navigation in
 
-    workflow catalog, so live deployment remains blocked until the catalog, syntax,
-
-    and topology gates are consistent.
+    homepage and ops_portal to link to the new surface.
 
     '
-  tasks:
-  - id: t1
-    title: Reproduce the missing Repo Intake upstream and preflight catalog entry
-    status: completed
-  - id: t2
-    title: Restore the NGINX firewall/upstream contract and governed workflow preflight
-    status: completed
-  - id: t3
-    title: Validate the catalog, preflight, syntax, and Repo Intake contract tests
-    status: completed
-  - id: t4
-    title: Apply only after selected topology and repository validation are safe,
-      then verify public and private paths
-    status: pending
-  blockers:
-  - Current live apply is held because the selected deployment overlay is stale and
-    full repository validation fails on generated platform-variable drift.
-  acceptance_criteria_met: false
-  lifecycle_state: in_progress
 - id: ws-realtime-dynamic-children
   adr: 0196
   title: Auto-discover all production hosts as Netdata streaming children
@@ -5907,6 +6634,143 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 27265749-5306-4790-b09c-4a056a18e089
+- id: ws-0510-gitea-authentik-oidc-e2e
+  adr: '0143'
+  title: Enable least-privilege Gitea Authentik OIDC and browser E2E verification
+  status: merged
+  ready_to_merge: false
+  live_applied: true
+  owner: codex
+  branch: codex/gitea-authentik-live-receipt-20260925
+  worktree_path: .worktrees/codex-gitea-authentik-live-postmerge-20260925
+  doc: docs/workstreams/ws-0510-gitea-authentik-oidc-e2e.md
+  canonical_truth:
+    changelog_entry: Enable least-privilege Gitea Authentik login and verify a non-admin
+      browser session.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      gitea: ws-0510-gitea-authentik-oidc-e2e
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/authentik/identities.yaml
+  - config/authentik/test-identities.yaml
+  - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+  - scripts/gitea_authentik_e2e.py
+  - tests/test_authentik_identity_reconcile.py
+  - tests/test_gitea_authentik_e2e.py
+  - tests/test_gitea_runtime_role.py
+  - .woodpecker.yml
+  - config/validation-lanes.yaml
+  - config/validation-gate.json
+  - scripts/service_completeness.py
+  - tests/test_validate_service_completeness.py
+  - scripts/subdomain_catalog.py
+  - tests/test_subdomain_catalog.py
+  - tests/test_validation_lanes.py
+  - scripts/validate_repo.sh
+  - inventory/group_vars/platform.yml
+  - scripts/topology-snapshot.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/configure-gitea.md
+  - receipts/live-applies/ws-0510-gitea-authentik-oidc-e2e-apply-receipt.yaml
+  - README.md
+  - docs/status/history/merged-workstreams.md
+  - changelog.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  ownership_manifest:
+    owned_surfaces:
+    - id: gitea_authentik_login_contract
+      paths:
+      - config/authentik/identities.yaml
+      - config/authentik/test-identities.yaml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+      - scripts/gitea_authentik_e2e.py
+      - tests/test_authentik_identity_reconcile.py
+      - tests/test_gitea_authentik_e2e.py
+      - tests/test_gitea_runtime_role.py
+      - .woodpecker.yml
+      - docs/workstreams/ws-0510-gitea-authentik-oidc-e2e.md
+      - docs/runbooks/configure-gitea.md
+      mode: exclusive
+    - id: generated_deployment_artifacts
+      paths:
+      - inventory/group_vars/platform.yml
+      - scripts/topology-snapshot.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: validation_lane_routing
+      paths:
+      - config/validation-lanes.yaml
+      - tests/test_validation_lanes.py
+      mode: exclusive
+    - id: service_completeness_scope
+      paths:
+      - scripts/service_completeness.py
+      - tests/test_validate_service_completeness.py
+      mode: exclusive
+    - id: subdomain_validation_identity_cache
+      paths:
+      - scripts/subdomain_catalog.py
+      - tests/test_subdomain_catalog.py
+      mode: exclusive
+    - id: validate_repo_shell_contract
+      paths:
+      - scripts/validate_repo.sh
+      mode: shared_contract
+      contract: validate-repo-shell-v1
+    - id: validation_gate_runner
+      paths:
+      - config/validation-gate.json
+      mode: shared_contract
+      contract: validation-gate-runner-v1
+    - id: gitea_live_apply_evidence
+      paths:
+      - receipts/live-applies/ws-0510-gitea-authentik-oidc-e2e-apply-receipt.yaml
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    - id: current_main_generated_status
+      paths:
+      - README.md
+      - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+    - id: canonical_truth
+      paths:
+      - changelog.md
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: release-truth-v1
+  context: 'Gitea''s configured OIDC group requirement currently allows only platform
+
+    administrators to authenticate. Add a dedicated login-only group for
+
+    ordinary users and a separately invoked non-admin test account so the full
+
+    Authentik redirect, authentication, callback, and Gitea session can be
+
+    verified without granting the account administrative access. The service
+
+    completeness gate scopes its existing checklist to changed services and
+
+    retains a full-inventory fallback for global or unscoped changes.
+
+    '
+  tasks:
+  - id: t1
+    title: Implement login-only group, browser E2E, and service-scoped validation
+    status: completed
+  - id: t2
+    title: Run unit tests and repository CI, then merge the private-source PR
+    status: completed
+  - id: t3
+    title: Reconcile the Authentik group and test identity, converge Gitea, and verify
+      browser login
+    status: completed
 - id: adr-0095-unified-search
   adr: 0095
   title: Unified search across platform services
@@ -6118,161 +6982,252 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 26a30662-ed8e-4d3d-9f07-154522ff67cd
-- id: ws-0495-gitea-authentik-e2e
-  title: Permit least-privilege Gitea users through Authentik and verify OIDC end
-    to end
+- id: ws-0499-fleet-build-broker-pki-vault-writer
+  adr: '0047'
+  title: Install a forced-command, one-shot Dockerhost writer for broker PKI material
   status: in_progress
   ready_to_merge: false
   live_applied: false
   owner: codex
-  branch: codex/authentik-e2e-20260925
-  worktree_path: .worktrees/codex-authentik-e2e-20260925
-  doc: docs/workstreams/ws-0495-gitea-authentik-e2e.md
+  branch: codex/fix-broker-pki-writer-config-validation
+  worktree_path: .worktrees/fix-broker-pki-writer-config-validation
+  doc: docs/workstreams/ws-0499-fleet-build-broker-pki-vault-writer.md
   depends_on:
-  - adr-0491-authentik-keycloak-sunset-2026-08-30
+  - ws-0497-fleet-build-broker-vm180
   conflicts_with: []
   shared_surfaces:
-  - config/authentik/identities.yaml
-  - config/authentik/test-identities.yaml
-  - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
-  - scripts/gitea_authentik_e2e.py
-  - tests/test_gitea_authentik_e2e.py
-  - tests/test_authentik_identity_reconcile.py
-  - tests/test_gitea_runtime_role.py
-  - docs/runbooks/configure-gitea.md
-  - docs/workstreams/ws-0495-gitea-authentik-e2e.md
-  - workstreams/active/ws-0495-gitea-authentik-e2e.yaml
+  - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_pki_vault_writer/**
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker-pki-vault-writer.yml
+  - playbooks/fleet-build-broker-pki-vault-writer.yml
+  - docs/runbooks/fleet-build-broker-pki-vault-writer.md
+  - tests/test_fleet_build_broker_pki_vault_writer.py
+  - collections/ansible_collections/lv3/platform/roles/artifact_cache_ghcr_reader_bridge/templates/sshd-artifact-cache-ghcr-reader.conf.j2
+  - tests/test_artifact_cache_ghcr_secret_renderer.py
+  - docs/workstreams/ws-0499-fleet-build-broker-pki-vault-writer.md
+  - workstreams/active/ws-0499-fleet-build-broker-pki-vault-writer.yaml
   - workstreams.yaml
-  - receipts/live-applies/
   ownership_manifest:
     owned_surfaces:
-    - id: gitea_authentik_user_entitlement
+    - id: fleet_build_broker_pki_vault_writer_runtime
       paths:
-      - config/authentik/identities.yaml
-      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
-      - tests/test_authentik_identity_reconcile.py
-      - tests/test_gitea_runtime_role.py
-      - docs/runbooks/configure-gitea.md
-      mode: shared_contract
-      contract: authentik-gitea-users-v1
-    - id: gitea_oidc_e2e
-      paths:
-      - config/authentik/test-identities.yaml
-      - scripts/gitea_authentik_e2e.py
-      - tests/test_gitea_authentik_e2e.py
+      - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_pki_vault_writer/**
+      - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker-pki-vault-writer.yml
+      - playbooks/fleet-build-broker-pki-vault-writer.yml
+      - docs/runbooks/fleet-build-broker-pki-vault-writer.md
+      - tests/test_fleet_build_broker_pki_vault_writer.py
       mode: exclusive
-    - id: gitea_authentik_workstream_tracking
+    - id: ws_0499_tracking
       paths:
-      - docs/workstreams/ws-0495-gitea-authentik-e2e.md
-      - workstreams/active/ws-0495-gitea-authentik-e2e.yaml
+      - docs/workstreams/ws-0499-fleet-build-broker-pki-vault-writer.md
+      - workstreams/active/ws-0499-fleet-build-broker-pki-vault-writer.yaml
+      mode: exclusive
+    - id: forced_command_ssh_match_syntax
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/artifact_cache_ghcr_reader_bridge/templates/sshd-artifact-cache-ghcr-reader.conf.j2
+      - tests/test_artifact_cache_ghcr_secret_renderer.py
+      mode: exclusive
+    - id: completed_cache_delivery_tracking
+      paths:
+      - workstreams/active/ws-0504-cache-ghcr-secret-renderer.yaml
+      - workstreams/archive/2026/ws-0504-cache-ghcr-secret-renderer.yaml
+      mode: shared_contract
+      contract: completed-workstream-transition-v1
+    - id: workstream_registry
+      paths:
       - workstreams.yaml
-      - receipts/live-applies/
       mode: shared_contract
       contract: workstream-registry-v1
+  context: 'The private broker PKI handoff needs one atomic ten-record vault batch
+    but
+
+    must never receive persistent vault-write authority or Dockerhost API-key
+
+    administration material. This workstream installs only the narrow, remote
+
+    forced-command transaction boundary. The follow-up corrects an OpenSSH
+
+    Match-block directive, restores the minimum privilege-safe
+
+    AuthorizedKeysFile traversal that OpenSSH requires, and permits that exact
+
+    traversal-only parent in the root-only executable''s fixed-config validator.
+
+    It does not create a client key, issue certificates, write a vault record,
+
+    expose a route, or broaden the restricted account''s authority.
+
+    '
   tasks:
   - id: t1
-    title: Add a non-admin Gitea entitlement without changing the admin team mapping
+    title: Install root-only transaction code with fixed one-use authority and batch
+      validation
     status: completed
   - id: t2
-    title: Add a secret-safe opt-in test identity and browser OIDC verification
+    title: Restrict Dockerhost SSH and sudo to the exact PKI transaction
     status: completed
   - id: t3
-    title: Run focused and repository validation, then apply and verify the live flow
+    title: Correct the fail-closed SSH syntax, key traversal, and fixed-config validation
+      invariants
     status: in_progress
-  objectives:
-  - Allow explicitly entitled Authentik users to authenticate to private Gitea without
-    granting platform-admin or Owners access.
-  - Keep the test identity opt-in, non-admin, and backed by a generated local-only
-    password.
-  - Verify the full browser authorization-code flow and account role without bypassing
-    TLS validation.
-  completion_metrics:
-  - The Gitea OIDC requirement uses a dedicated ordinary-user group while the platform-admins-to-Owners
-    mapping remains unchanged.
-  - The standard Authentik identity reconcile does not create the test identity; a
-    separate explicit manifest does.
-  - Automated tests prove no password or token is written to output and that the browser
-    flow lands in Gitea as a non-admin user.
-  - Live Authentik and Gitea state is reconciled only after a selected deployment
-    passes the fail-closed deployment guard.
-  - A PR passes the repository's required CI before merge; no private deployment values
-    or credentials are published.
-  blockers:
-  - The fail-closed live selector rejects the current generated platform snapshot
-    because it does not match the selected private deployment overlay. No live identity
-    or Gitea mutation is allowed until the selected deployment state is reconciled
-    in a reviewed deployment worktree.
-  acceptance_criteria_met: false
-  lifecycle_state: in_progress
-  portable: true
-  portable_notes: The service hostname, internal CA, operator identity, and credentials
-    are resolved from the selected deployment's ignored local overlay and are not
-    committed.
-- id: ws-0494-grafana-authentik-reachability
-  title: Restore Grafana server-side Authentik connectivity
+- id: ws-0497-fleet-build-broker-pki-handoff
+  adr: '0042'
+  title: Add root-only fleet-build-broker PKI issuance and renewal handoff
   status: in_progress
   ready_to_merge: false
   live_applied: false
   owner: codex
-  branch: codex/grafana-authentik-hairpin
-  worktree_path: .worktrees/codex-grafana-authentik-hairpin
-  doc: docs/workstreams/ws-0494-grafana-authentik-reachability.md
+  branch: codex/fix-broker-pki-handoff-template
+  worktree_path: .worktrees/fix-broker-pki-handoff-template
+  doc: docs/workstreams/ws-0497-fleet-build-broker-pki-handoff.md
   depends_on:
-  - adr-0491-authentik-keycloak-sunset-2026-08-30
+  - adr-0042-step-ca-for-ssh-and-internal-tls
+  - adr-0047-short-lived-credentials-and-internal-mtls
+  - adr-0101-automated-certificate-lifecycle-management
   conflicts_with: []
   shared_surfaces:
-  - collections/ansible_collections/lv3/platform/roles/grafana_sso/
-  - tests/test_grafana_sso_role.py
-  - docs/runbooks/monitoring-stack.md
-  - docs/workstreams/ws-0494-grafana-authentik-reachability.md
-  - workstreams/active/ws-0494-grafana-authentik-reachability.yaml
-  - workstreams.yaml
+  - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_pki_handoff/**
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker-pki.yml
+  - inventory/host_vars/proxmox-host.yml
+  - inventory/hosts.yml
+  - tests/test_fleet_build_broker_pki_handoff.py
+  - docs/workstreams/ws-0497-fleet-build-broker-pki-handoff.md
+  - workstreams/active/ws-0497-fleet-build-broker-pki-handoff.yaml
   ownership_manifest:
     owned_surfaces:
-    - id: grafana_authentik_reachability
+    - id: fleet_build_broker_pki_handoff_role
       paths:
-      - collections/ansible_collections/lv3/platform/roles/grafana_sso/
-      - tests/test_grafana_sso_role.py
-      - docs/runbooks/monitoring-stack.md
+      - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_pki_handoff/**
+      - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker-pki.yml
+      - tests/test_fleet_build_broker_pki_handoff.py
       mode: exclusive
-    - id: grafana_sso_workstream_tracking
+    - id: fleet_build_broker_pki_handoff_tracking
       paths:
-      - docs/workstreams/ws-0494-grafana-authentik-reachability.md
-      - workstreams/active/ws-0494-grafana-authentik-reachability.yaml
-      - workstreams.yaml
+      - docs/workstreams/ws-0497-fleet-build-broker-pki-handoff.md
+      - workstreams/active/ws-0497-fleet-build-broker-pki-handoff.yaml
+      mode: exclusive
+    - id: fleet_build_broker_pki_writer_firewall
+      paths:
+      - inventory/host_vars/proxmox-host.yml
       mode: shared_contract
-      contract: workstream-registry-v1
+      contract: fleet-build-broker-vm180-v1
+    - id: fleet_build_broker_pki_writer_firewall_inventory
+      paths:
+      - inventory/hosts.yml
+      mode: shared_contract
+      contract: inventory-hosts-v1
   tasks:
   - id: t1
-    title: Reproduce Grafana-to-Authentik token endpoint failure
+    title: Define the root-only Step-CA leaf and dedicated client-CA contract
     status: completed
   - id: t2
-    title: Route server-side OIDC calls through the private edge and add credential
-      probe
+    title: Implement fail-closed issuance and short-lived vault writer handoff
     status: completed
   - id: t3
-    title: Run focused tests and apply through the governed Grafana workflow
+    title: Add offline contract and renewal-failure harness coverage
+    status: completed
+  - id: t4
+    title: Review, merge, and integrate the writer bridge, PKI prerequisites, private
+      firewall path, and executable template delivery
     status: in_progress
-  objectives:
-  - Keep browser authorization on the public Authentik URL while making server-side
-    OIDC endpoints reachable from Grafana.
-  - Fail Grafana SSO convergence if the provider is unreachable or rejects the configured
-    confidential client.
-  completion_metrics:
-  - The monitoring VM resolves Authentik through private NGINX using the public TLS
-    hostname.
-  - Discovery returns HTTP 200 with TLS verification and the invalid-code probe returns
-    invalid_grant.
-  - Grafana's local and public health/login probes remain healthy after convergence.
-  - No secret value is printed, committed, or rotated.
-  blockers:
-  - Full managed apply is held until the selected private topology matches the live
-    fleet; make validate also reports generated platform.yml drift.
-  acceptance_criteria_met: false
-  lifecycle_state: in_progress
-  portable: true
-  portable_notes: The ingress address and domain are derived from deployment topology
-    and identity overlays; committed automation contains no deployment-specific values.
+- id: ws-0493-authentik-mail-gateway-bridge
+  adr: '0041'
+  title: Route Authentik transactional mail through the managed delivery gateway
+  status: ready_for_merge
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/mail-platform-brevo-live-apply-20260901
+  worktree_path: .worktrees/mail-platform-brevo-live-apply-20260901
+  doc: docs/workstreams/ws-0493-authentik-mail-gateway-bridge.md
+  depends_on:
+  - adr-0491-authentik-keycloak-sunset-2026-08-30
+  - ws-0492-authentik-recovery-email
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/mail_platform_observability/**
+  - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-mail-platform.json.j2
+  - config/validation-gate.json
+  - config/integrations/authentik--mail-platform.yaml
+  - docs/runbooks/configure-authentik.md
+  - docs/runbooks/configure-mail-platform.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/workstreams/ws-0493-authentik-mail-gateway-bridge.md
+  - receipts/live-applies/ws-0493-authentik-mail-gateway-bridge-apply-receipt.yaml
+  - receipts/ops-portal-snapshot.html
+  - receipts/restic-snapshots-latest.json
+  - tests/test_authentik_runtime_role.py
+  - tests/test_mail_gateway_smtp_bridge.py
+  - tests/test_mail_platform_runtime_role.py
+  - workstreams/active/ws-0493-authentik-mail-gateway-bridge.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: authentik_mail_delivery_contract
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+      - config/integrations/authentik--mail-platform.yaml
+      - docs/runbooks/configure-authentik.md
+      - tests/test_authentik_runtime_role.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: managed_mail_gateway_runtime
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/mail_platform_observability/**
+      - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-mail-platform.json.j2
+      - docs/runbooks/configure-mail-platform.md
+      - tests/test_mail_gateway_smtp_bridge.py
+      - tests/test_mail_platform_runtime_role.py
+      mode: shared_contract
+      contract: adr-0041-mail-platform-v1
+    - id: ws_0493_workstream_shard
+      paths:
+      - docs/workstreams/ws-0493-authentik-mail-gateway-bridge.md
+      - workstreams/active/ws-0493-authentik-mail-gateway-bridge.yaml
+      - receipts/live-applies/ws-0493-authentik-mail-gateway-bridge-apply-receipt.yaml
+      - receipts/ops-portal-snapshot.html
+      - receipts/restic-snapshots-latest.json
+      mode: exclusive
+    - id: ws_0493_generated_identity_truth
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: ws_0493_validation_runner
+      paths:
+      - config/validation-gate.json
+      mode: shared_contract
+      contract: validation-gate-runner-v1
+  context: 'The governed Authentik recovery request reached Stalwart, but its queued
+
+    message repeatedly timed out during direct outbound SMTP delivery. ADR 0041
+
+    designates the private mail gateway''s Brevo API route as the live
+
+    transactional delivery path. This workstream adds a private, authenticated
+
+    SMTP compatibility bridge inside that gateway so Authentik can retain its
+
+    supported SMTP interface without depending on blocked direct port-25 egress.
+
+    '
+  tasks:
+  - id: t1
+    title: Capture the failed direct-delivery evidence and select the governed gateway
+      path
+    status: completed
+  - id: t2
+    title: Implement and test the private authenticated SMTP-to-transactional gateway
+      bridge
+    status: completed
+  - id: t3
+    title: Apply mail platform then Authentik through the governed converge path
+    status: completed
+  - id: t4
+    title: Dispatch a fresh recovery email and verify provider acceptance and public
+      recovery flow
+    status: completed
 surface_ownership:
   global_mutable_paths:
   - receipts/gate-bypasses/*

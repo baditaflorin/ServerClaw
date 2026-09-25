@@ -4219,54 +4219,6 @@
         "escalation_action": "notify_and_abort"
       }
     },
-    "converge-repo-intake": {
-      "description": "Converge Repo Intake on the selected Docker runtime and verify its private health endpoint while preserving the shared Authentik edge boundary.",
-      "lifecycle_status": "active",
-      "preferred_entrypoint": {
-        "kind": "make_target",
-        "target": "converge-repo-intake",
-        "command": "make converge-repo-intake"
-      },
-      "preflight": {
-        "required": true,
-        "required_secret_ids": [
-          "bootstrap_ssh_private_key",
-          "coolify_admin_auth"
-        ],
-        "generated_secret_ids": []
-      },
-      "validation_targets": [
-        "validate",
-        "syntax-check-repo-intake"
-      ],
-      "live_impact": "guest_live",
-      "owner_runbook": "docs/runbooks/repo-intake.md",
-      "implementation_refs": [
-        "Makefile",
-        "playbooks/repo-intake.yml",
-        "collections/ansible_collections/lv3/platform/roles/repo_intake_runtime",
-        "catalog/services/repo_intake/service.yaml",
-        "docs/runbooks/repo-intake.md"
-      ],
-      "outputs": [
-        "A healthy Repo Intake runtime on the selected Docker guest, reachable only through its declared authenticated edge publication."
-      ],
-      "verification_commands": [
-        "make syntax-check-repo-intake",
-        "ansible -i \"${PLATFORM_INVENTORY_OVERLAY:?select the deployment inventory}\" docker-runtime -m ansible.builtin.uri -a 'url=http://127.0.0.1:8101/health status_code=200'",
-        "curl -I https://repo-intake.example.com/"
-      ],
-      "execution_class": "mutation",
-      "budget": {
-        "max_duration_seconds": 900,
-        "max_steps": 220,
-        "max_concurrent_instances": 1,
-        "max_touched_hosts": 1,
-        "max_restarts": 1,
-        "max_rollback_depth": 1,
-        "escalation_action": "notify_and_abort"
-      }
-    },
     "converge-dify": {
       "description": "Converge Dify on docker-runtime, provision its PostgreSQL backend on postgres, publish it at agents.example.com, and verify the governed tool-sync and workflow export path.",
       "lifecycle_status": "active",

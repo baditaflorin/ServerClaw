@@ -1,0 +1,26 @@
+workstream_id: ws-0510-gitea-authentik-oidc-e2e
+state: completed
+schema_version: 1.1.0
+started_at: '2026-09-25T18:19:54Z'
+completed_at: '2026-09-25T18:51:12Z'
+applied_by: codex
+repo_version: 0.179.46
+adr: '0143'
+summary: Apply least-privilege Gitea Authentik login and verify a non-admin browser
+  session.
+targets:
+- service: gitea
+  vmid: '192'
+  host: runtime-control
+errors: []
+notes:
+- Gitea/Authentik service converge succeeded on runtime-control VM 192; live container
+  healthy with no restarts.
+- Fresh Firefox E2E completed Authentik OIDC login, returned to Gitea as gitea-e2e,
+  and verified is_admin=false with TLS validation enabled and the local CA trusted
+  in a temporary profile.
+- Restic configuration backup hook protected all governed sources; latest snapshot
+  receipt was refreshed.
+- Full host security posture scan had unrelated Trivy image-pull gaps (missing Plane
+  image and Docker Hub rate limit); host-only scan fallback is recorded in security
+  receipt.

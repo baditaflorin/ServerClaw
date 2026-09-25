@@ -38,16 +38,6 @@ argument_specs:
         required: true
         description:
           - Authentik userinfo endpoint for Grafana login.
-      grafana_sso_authentik_hostname:
-        type: str
-        required: true
-        description:
-          - Authentik hostname that Grafana must resolve through the private edge.
-      grafana_sso_internal_edge_ip:
-        type: str
-        required: true
-        description:
-          - Private NGINX edge address used for Grafana's server-side OIDC requests.
       grafana_sso_login_groups:
         type: list
         elements: str

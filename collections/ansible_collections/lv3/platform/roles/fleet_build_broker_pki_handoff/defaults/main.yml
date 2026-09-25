@@ -1,0 +1,31 @@
+---
+# Root-only, controller-side handoff. This role never gives the broker workload
+# the Step-CA provisioner, client-CA private key, vault admin authority, or a
+# certificate-renewal credential.
+fleet_build_broker_pki_handoff_name: fleet-build-broker-pki-renew
+fleet_build_broker_pki_handoff_binary_path: /usr/local/libexec/fleet-build-broker-pki-handoff
+fleet_build_broker_pki_handoff_config_path: /etc/fleet-build-broker-pki/handoff.json
+fleet_build_broker_pki_handoff_state_path: /var/lib/fleet-build-broker-pki/issuance-state.json
+fleet_build_broker_pki_handoff_service_path: /etc/systemd/system/fleet-build-broker-pki-renew.service
+fleet_build_broker_pki_handoff_timer_path: /etc/systemd/system/fleet-build-broker-pki-renew.timer
+fleet_build_broker_pki_handoff_on_calendar: hourly
+fleet_build_broker_pki_handoff_randomized_delay_seconds: 300
+fleet_build_broker_pki_server_dns: fleet-build-broker.internal
+fleet_build_broker_pki_server_ip: ""
+fleet_build_broker_pki_step_command:
+  - /usr/local/bin/step
+fleet_build_broker_pki_step_ca_url: "{{ step_ca_internal_url }}"
+fleet_build_broker_pki_step_root_certificate_file: "{{ step_ca_remote_root_certificate_file }}"
+fleet_build_broker_pki_step_provisioner: services
+fleet_build_broker_pki_step_provisioner_password_file: "{{ step_ca_services_password_file }}"
+# The broker's sole client trust anchor is deliberately self-signed and does
+# not chain to the platform root. The root-only handoff bootstraps it once in
+# its private state directory, then refuses unplanned automatic CA rotation.
+fleet_build_broker_pki_client_ca_directory: "{{ fleet_build_broker_pki_handoff_state_path | dirname }}/client-ca"
+fleet_build_broker_pki_client_ca_certificate_file: "{{ fleet_build_broker_pki_client_ca_directory }}/client-ca.crt"
+fleet_build_broker_pki_client_ca_key_file: "{{ fleet_build_broker_pki_client_ca_directory }}/client-ca.key"
+# The command implements the documented transaction protocol: issue one
+# five-minute infra-privileged writer key, consume the JSON payload on stdin,
+# upsert the entire batch, and revoke in a finally path. It must be installed
+# by the deployment/control-plane integration before this role is converged.
+fleet_build_broker_pki_vault_writer_command: []

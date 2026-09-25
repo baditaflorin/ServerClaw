@@ -5,7 +5,7 @@ status: in_progress
 ready_to_merge: false
 live_applied: false
 owner: claude
-deployment: retired-deployment
+deployment: 0fork
 branch: unassigned/ws-0483-capacity-aware-dynamic-sizing
 worktree_path: unassigned/ws-0483-capacity-aware-dynamic-sizing
 doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
@@ -66,11 +66,11 @@ tasks:
     title: Wire probe + resolve into `make new-deployment` so one command bootstraps a forkable deployment
     status: pending
   - id: t6-backfill
-    title: Re-probe and re-resolve lv3 and retired-deployment; diff against current topology and document deltas
+    title: Re-probe and re-resolve lv3 and 0fork; diff against current topology and document deltas
     status: pending
   - id: t7-apply
     title: Separate ADR for `make apply-topology` (live-resize semantics)
     status: pending
 findings:
-  - "2026-05-11 incident on retired-deployment showed the lv3-sized topology over-allocates RAM to 180GB on a 64GB host. The fix is structural, not parametric: sizing must be derived from probed host capacity, not copied from another deployment."
-  - The retired-deployment-incident audit revealed every VM had balloon=0 (ballooning disabled). Always-on ballooning (40% floor) is now part of the policy defaults; the retired-deployment host has been queued to enable ballooning on next VM reboot, but new deployments will be ballooning-enabled from creation.
+  - "2026-05-11 incident on 0fork showed the lv3-sized topology over-allocates RAM to 180GB on a 64GB host. The fix is structural, not parametric: sizing must be derived from probed host capacity, not copied from another deployment."
+  - The 0fork-incident audit revealed every VM had balloon=0 (ballooning disabled). Always-on ballooning (40% floor) is now part of the policy defaults; the 0fork host has been queued to enable ballooning on next VM reboot, but new deployments will be ballooning-enabled from creation.

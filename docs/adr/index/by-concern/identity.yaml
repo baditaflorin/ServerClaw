@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-09-24'
+generated: '2026-08-31'
 facet: concern
 concern: identity
-total_adrs: 11
+total_adrs: 10
 adrs:
   - adr: '0007'
     title: Agent-Oriented Access Model
@@ -202,18 +202,3 @@ adrs:
     path: docs/adr/0491-authentik-for-operator-and-agent-sso.md
     implemented_in_repo_version: 0.179.46
     implemented_on: '2026-08-31'
-  - adr: 0492
-    title: Provider-Neutral Tailnet Service Access
-    status: Accepted
-    implementation_status: Partial
-    currently_describes: mixed_state
-    date: '2026-09-24'
-    concern: identity
-    keywords:
-      - provider-neutral
-      - tailnet
-      - service
-      - access
-    summary: '- Add an optional meshaccess: tailnet field to service definitions. It is'
-    filename: 0492-provider-neutral-tailnet-service-access.md
-    path: docs/adr/0492-provider-neutral-tailnet-service-access.md

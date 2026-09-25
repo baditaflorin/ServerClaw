@@ -5,7 +5,6 @@ tailscale_apt_repo_file: /etc/apt/sources.list.d/tailscale.list
 tailscale_apt_repo_url: https://pkgs.tailscale.com/stable/debian/trixie.tailscale-keyring.list
 proxmox_tailscale_auth_key_env_var: TAILSCALE_AUTH_KEY
 proxmox_tailscale_login_server: ""
-proxmox_tailscale_allow_control_plane_migration: false
 proxmox_tailscale_accept_dns: false
 proxmox_tailscale_snat_subnet_routes: true
 proxmox_tailscale_enable_ssh: false

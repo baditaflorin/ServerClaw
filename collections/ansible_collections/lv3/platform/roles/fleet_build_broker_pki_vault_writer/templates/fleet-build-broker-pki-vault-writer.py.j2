@@ -1,0 +1,352 @@
+#!/usr/bin/env python3
+"""Dockerhost-only, one-shot writer for the fixed broker PKI vault batch.
+
+The process deliberately has no general administrative mode. It accepts one
+already-issued PKI batch on standard input, creates one constrained writer in
+memory through the local administration boundary, submits exactly one HTTPS
+request, and revokes that writer in a finally path. It never logs, prints,
+persists, returns, or places credentials or certificate material in an
+environment variable.
+"""
+
+from __future__ import annotations
+
+import argparse
+import grp
+import json
+import os
+from pathlib import Path
+import re
+import ssl
+import stat
+import sys
+from typing import Any
+from urllib import error, request
+
+
+CONFIG_PATH = Path("/etc/fleet-build-broker-pki-vault-writer/transaction.json")
+APIKEY_URL = "http://127.0.0.1:18021"
+VAULT_URL = "https://fleet-secrets.0exec.com"
+ADMIN_TOKEN_FILE = Path("/opt/_shared/apikey-admin.env")
+WRITER_PRINCIPAL = "fleet-build-broker-pki-renewer"
+WRITER_GROUP = "fleet-build-broker-pki-writer"
+WRITER_SCOPE = "infra-privileged"
+WRITER_TIER = "infra-privileged"
+WRITER_TTL_SECONDS = 300
+WRITER_USE_LIMIT = 1
+REQUEST_TIMEOUT_SECONDS = 15
+MAX_PAYLOAD_BYTES = 512 * 1024
+MAX_ISSUE_RESPONSE_BYTES = 16 * 1024
+KEY_PATTERN = re.compile(r"ak_[0-9a-f]{32}\Z")
+
+RUNTIME_RENDERER = "fleet-build-broker-runtime-renderer"
+MONITOR_RENDERER = "fleet-build-broker-monitor-renderer"
+EXPECTED_BATCH = (
+    ("fleet_build_broker_server_cert", (RUNTIME_RENDERER,), "Fleet build broker 24-hour server certificate"),
+    ("fleet_build_broker_server_key", (RUNTIME_RENDERER,), "Fleet build broker 24-hour server private key"),
+    (
+        "fleet_build_broker_client_ca",
+        (RUNTIME_RENDERER,),
+        "Broker-exclusive client trust anchor for broker verification only",
+    ),
+    (
+        "fleet_build_broker_server_ca",
+        (MONITOR_RENDERER, "fleet-build-broker-builder-0docker", "fleet-build-broker-builder-0mcp"),
+        "Platform server trust bundle for broker callers only",
+    ),
+    (
+        "fleet_build_broker_builder_0docker_cert",
+        ("fleet-build-broker-builder-0docker",),
+        "Fleet build broker builder-0docker client certificate",
+    ),
+    (
+        "fleet_build_broker_builder_0docker_key",
+        ("fleet-build-broker-builder-0docker",),
+        "Fleet build broker builder-0docker client private key",
+    ),
+    (
+        "fleet_build_broker_builder_0mcp_cert",
+        ("fleet-build-broker-builder-0mcp",),
+        "Fleet build broker builder-0mcp client certificate",
+    ),
+    (
+        "fleet_build_broker_builder_0mcp_key",
+        ("fleet-build-broker-builder-0mcp",),
+        "Fleet build broker builder-0mcp client private key",
+    ),
+    (
+        "fleet_build_broker_monitor_cert",
+        (MONITOR_RENDERER,),
+        "Fleet build broker monitor client certificate",
+    ),
+    (
+        "fleet_build_broker_monitor_key",
+        (MONITOR_RENDERER,),
+        "Fleet build broker monitor client private key",
+    ),
+)
+
+
+class BridgeError(RuntimeError):
+    """A deliberately non-sensitive failure classification."""
+
+
+class NoRedirect(request.HTTPRedirectHandler):
+    """Never redirect an authenticated request to another authority."""
+
+    def redirect_request(self, req: request.Request, fp: Any, code: int, msg: str, headers: Any, newurl: str) -> None:
+        del req, fp, code, msg, headers, newurl
+        return None
+
+
+def _require(condition: bool, message: str) -> None:
+    if not condition:
+        raise BridgeError(message)
+
+
+def _safe_parent_directory(path: Path, parent: Path, metadata: os.stat_result) -> None:
+    _require(stat.S_ISDIR(metadata.st_mode), "required root-owned parent path is not a directory")
+    if path == CONFIG_PATH and parent == CONFIG_PATH.parent:
+        try:
+            writer_group_id = grp.getgrnam(WRITER_GROUP).gr_gid
+        except KeyError as exc:
+            raise BridgeError("required writer group is unavailable") from exc
+        _require(
+            metadata.st_uid == 0
+            and metadata.st_gid == writer_group_id
+            and stat.S_IMODE(metadata.st_mode) == 0o710,
+            "writer configuration parent has unsafe ownership or permissions",
+        )
+        return
+    _require(
+        metadata.st_uid == 0 and metadata.st_gid == 0 and stat.S_IMODE(metadata.st_mode) & 0o022 == 0,
+        "required root-owned parent directory is writable by another principal",
+    )
+
+
+def _safe_regular_root_file(path: Path, modes: set[int]) -> None:
+    parent = path.parent
+    while True:
+        try:
+            parent_metadata = parent.lstat()
+        except OSError as exc:
+            raise BridgeError("required root-owned parent directory is unavailable") from exc
+        _safe_parent_directory(path, parent, parent_metadata)
+        if parent == parent.parent:
+            break
+        parent = parent.parent
+    try:
+        metadata = path.lstat()
+    except OSError as exc:
+        raise BridgeError("required root-owned file is unavailable") from exc
+    _require(stat.S_ISREG(metadata.st_mode), "required root-owned path is not a regular file")
+    _require(metadata.st_uid == 0 and metadata.st_gid == 0, "required root-owned file has unsafe ownership")
+    _require(stat.S_IMODE(metadata.st_mode) in modes, "required root-owned file has unsafe permissions")
+
+
+def _validate_config(config: Any) -> dict[str, Any]:
+    _require(isinstance(config, dict), "writer configuration must be an object")
+    _require(
+        set(config) == {"managed-by", "schema_version", "admin_token_file", "apikey_url", "vault_url", "timeout_seconds"},
+        "writer configuration has unexpected fields",
+    )
+    _require(config.get("schema_version") == 1, "unsupported writer configuration schema")
+    _require(config.get("admin_token_file") == str(ADMIN_TOKEN_FILE), "admin token path changed")
+    _require(config.get("apikey_url") == APIKEY_URL, "API-key administration endpoint changed")
+    _require(config.get("vault_url") == VAULT_URL, "vault endpoint changed")
+    _require(config.get("timeout_seconds") == REQUEST_TIMEOUT_SECONDS, "request timeout changed")
+    return config
+
+
+def _load_config(path: Path, *, transaction: bool) -> dict[str, Any]:
+    if transaction:
+        _require(path == CONFIG_PATH, "transaction configuration path changed")
+    _safe_regular_root_file(path, {0o600})
+    try:
+        raw = path.read_bytes()
+        config = json.loads(raw)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise BridgeError("unable to load writer configuration") from exc
+    return _validate_config(config)
+
+
+def _read_admin_token() -> str:
+    _safe_regular_root_file(ADMIN_TOKEN_FILE, {0o400, 0o600})
+    try:
+        line = ADMIN_TOKEN_FILE.read_text(encoding="utf-8").splitlines()[0].strip()
+    except (OSError, UnicodeDecodeError, IndexError) as exc:
+        raise BridgeError("local API-key administration credential is unavailable") from exc
+    if line.startswith("ADMIN_TOKEN="):
+        line = line[len("ADMIN_TOKEN=") :]
+    elif line.startswith("TOKEN="):
+        line = line[len("TOKEN=") :]
+    _require(bool(line) and "\x00" not in line and "\r" not in line and "\n" not in line, "local API-key administration credential is invalid")
+    return line
+
+
+def _validate_payload(payload: Any) -> dict[str, Any]:
+    _require(isinstance(payload, dict) and set(payload) == {"schema_version", "secrets"}, "writer payload shape changed")
+    _require(payload.get("schema_version") == 1, "writer payload schema changed")
+    secrets = payload.get("secrets")
+    _require(isinstance(secrets, list) and len(secrets) == len(EXPECTED_BATCH), "writer requires exactly ten secret records")
+    total_value_bytes = 0
+    for secret, expected in zip(secrets, EXPECTED_BATCH, strict=True):
+        name, consumers, description = expected
+        _require(isinstance(secret, dict) and set(secret) == {"name", "value", "consumers", "description"}, "secret record shape changed")
+        _require(secret.get("name") == name, "secret record order or name changed")
+        _require(secret.get("consumers") == list(consumers), "secret record recipients changed")
+        _require(secret.get("description") == description, "secret record description changed")
+        value = secret.get("value")
+        _require(isinstance(value, str) and bool(value.strip()), "secret record has no material")
+        encoded_size = len(value.encode("utf-8"))
+        _require(encoded_size <= 128 * 1024, "secret record exceeds transaction boundary")
+        total_value_bytes += encoded_size
+    _require(total_value_bytes <= MAX_PAYLOAD_BYTES, "secret batch exceeds transaction boundary")
+    return payload
+
+
+def _opener() -> request.OpenerDirector:
+    # Ignore proxy environment variables so the local admin request and the
+    # HTTPS vault request cannot silently leave their intended trust boundary.
+    return request.build_opener(
+        request.ProxyHandler({}),
+        request.HTTPHandler(),
+        request.HTTPSHandler(context=ssl.create_default_context()),
+        NoRedirect(),
+    )
+
+
+def _post(url: str, body: bytes, headers: dict[str, str], *, read_limit: int | None = None) -> bytes:
+    req = request.Request(url, data=body, headers=headers, method="POST")
+    try:
+        with _opener().open(req, timeout=REQUEST_TIMEOUT_SECONDS) as response:
+            _require(response.status == 200, "unexpected transaction response status")
+            if read_limit is None:
+                return b""
+            content_length = response.headers.get("Content-Length")
+            if content_length is not None:
+                _require(content_length.isdigit() and int(content_length) <= read_limit, "response exceeds transaction boundary")
+            return response.read(read_limit + 1)
+    except (error.HTTPError, error.URLError, TimeoutError, OSError) as exc:
+        raise BridgeError("transaction endpoint request failed") from exc
+
+
+def _issue_writer() -> str:
+    body = json.dumps(
+        {
+            "user": WRITER_PRINCIPAL,
+            "ttl_seconds": WRITER_TTL_SECONDS,
+            "scope": WRITER_SCOPE,
+            "tier": WRITER_TIER,
+            "use_limit": WRITER_USE_LIMIT,
+            "note": "fleet-build-broker-pki-batch",
+        },
+        separators=(",", ":"),
+    ).encode("utf-8")
+    response_body = _post(
+        f"{APIKEY_URL}/issue",
+        body,
+        {"Content-Type": "application/json", "X-Admin-Token": _read_admin_token()},
+        read_limit=MAX_ISSUE_RESPONSE_BYTES,
+    )
+    _require(len(response_body) <= MAX_ISSUE_RESPONSE_BYTES, "writer issue response exceeds transaction boundary")
+    try:
+        envelope = json.loads(response_body)
+        data = envelope["data"]
+        key = data["key"]
+        _require(envelope.get("status") == "success" and isinstance(data, dict), "writer issue response is invalid")
+        _require(data.get("user") == WRITER_PRINCIPAL, "writer principal changed during issuance")
+        _require(data.get("scope") == WRITER_SCOPE and data.get("tier") == WRITER_TIER, "writer authority changed during issuance")
+        _require(data.get("use_limit") == WRITER_USE_LIMIT, "writer use limit changed during issuance")
+        _require(isinstance(key, str) and KEY_PATTERN.fullmatch(key) is not None, "writer issue response key is invalid")
+        return key
+    except (KeyError, TypeError, json.JSONDecodeError, BridgeError) as exc:
+        if isinstance(exc, BridgeError):
+            raise
+        raise BridgeError("writer issue response is invalid") from exc
+
+
+def _submit_batch(writer_key: str, payload: dict[str, Any]) -> None:
+    body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    _require(len(body) <= MAX_PAYLOAD_BYTES, "serialized secret batch exceeds transaction boundary")
+    _post(
+        f"{VAULT_URL}/broker-pki-batch",
+        body,
+        {
+            "Content-Type": "application/json",
+            "X-API-Key": writer_key,
+            "X-Expected-Scope": WRITER_SCOPE,
+            "X-Required-Tier": WRITER_TIER,
+        },
+    )
+
+
+def _revoke_writer(writer_key: str) -> None:
+    body = json.dumps({"key": writer_key}, separators=(",", ":")).encode("utf-8")
+    _post(
+        f"{APIKEY_URL}/revoke",
+        body,
+        {"Content-Type": "application/json", "X-Admin-Token": _read_admin_token()},
+    )
+
+
+def _transaction(config: dict[str, Any], payload: dict[str, Any]) -> None:
+    del config  # Config is validated before this point; no endpoint is configurable at runtime.
+    _require(os.geteuid() == 0, "transaction must run as root")
+    writer_key: str | None = None
+    transaction_error: BridgeError | None = None
+    try:
+        writer_key = _issue_writer()
+        _submit_batch(writer_key, payload)
+    except BridgeError as exc:
+        transaction_error = exc
+    revocation_error: BridgeError | None = None
+    if writer_key is not None:
+        try:
+            _revoke_writer(writer_key)
+        except BridgeError as exc:
+            revocation_error = exc
+    if revocation_error is not None:
+        raise BridgeError("writer revocation failed") from revocation_error
+    if transaction_error is not None:
+        raise transaction_error
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Fixed fleet-build-broker PKI vault transaction")
+    parser.add_argument("--config", type=Path, default=CONFIG_PATH)
+    parser.add_argument("--check-config", action="store_true")
+    parser.add_argument("command", nargs="?")
+    parser.add_argument("--principal")
+    parser.add_argument("--scope")
+    parser.add_argument("--ttl-seconds", type=int)
+    args = parser.parse_args(argv)
+    try:
+        check_only = args.check_config
+        if check_only:
+            _require(args.command is None and args.principal is None and args.scope is None and args.ttl_seconds is None, "check mode accepts no transaction arguments")
+            _load_config(args.config, transaction=False)
+            print(json.dumps({"status": "valid"}, sort_keys=True))
+            return 0
+        _require(args.command == "transaction", "only the fixed transaction command is permitted")
+        _require(args.principal == WRITER_PRINCIPAL, "writer principal changed")
+        _require(args.scope == WRITER_SCOPE, "writer scope changed")
+        _require(args.ttl_seconds == WRITER_TTL_SECONDS, "writer TTL changed")
+        config = _load_config(args.config, transaction=True)
+        raw_payload = sys.stdin.buffer.read(MAX_PAYLOAD_BYTES + 1)
+        _require(bool(raw_payload) and len(raw_payload) <= MAX_PAYLOAD_BYTES, "writer payload exceeds transaction boundary")
+        try:
+            payload = json.loads(raw_payload)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise BridgeError("writer payload is invalid") from exc
+        _transaction(config, _validate_payload(payload))
+        return 0
+    except BridgeError:
+        # Do not include exception details. HTTP, TLS, issuer, and payload
+        # failures can contain paths or values that do not belong in logs.
+        print("fleet-build-broker PKI vault transaction failed", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

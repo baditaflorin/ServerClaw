@@ -1,0 +1,99 @@
+# managed-by: role=fleet_build_broker_runtime adr=0296 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator', true) }}
+services:
+  render-runtime-secrets:
+    image: {{ fleet_build_broker_renderer_image }}
+    container_name: {{ fleet_build_broker_runtime_renderer_container_name }}
+    user: "0:0"
+    restart: "no"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: "0.25"
+    command: {{ fleet_build_broker_runtime_renderer_command | to_json }}
+    volumes:
+      - "{{ fleet_build_broker_runtime_renderer_api_key_dir }}:{{ fleet_build_broker_runtime_renderer_api_key_mount }}:ro"
+      - "{{ fleet_build_broker_runtime_renderer_manifest_file }}:{{ fleet_build_broker_runtime_renderer_manifest_mount }}:ro"
+      - "{{ fleet_build_broker_secret_dir }}:{{ fleet_build_broker_secret_mount }}:rw"
+
+  render-monitor-secrets:
+    image: {{ fleet_build_broker_renderer_image }}
+    container_name: {{ fleet_build_broker_monitor_renderer_container_name }}
+    user: "0:0"
+    restart: "no"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: "0.25"
+    command: {{ fleet_build_broker_monitor_renderer_command | to_json }}
+    volumes:
+      - "{{ fleet_build_broker_monitor_renderer_api_key_dir }}:{{ fleet_build_broker_monitor_renderer_api_key_mount }}:ro"
+      - "{{ fleet_build_broker_monitor_renderer_manifest_file }}:{{ fleet_build_broker_monitor_renderer_manifest_mount }}:ro"
+      - "{{ fleet_build_broker_probe_secret_dir }}:/run/broker-probe-secrets:rw"
+
+  fleet-build-broker:
+    image: {{ fleet_build_broker_image }}
+    container_name: {{ fleet_build_broker_container_name }}
+    user: "{{ fleet_build_broker_container_uid }}:{{ fleet_build_broker_container_gid }}"
+    restart: unless-stopped
+    init: true
+    depends_on:
+      render-runtime-secrets:
+        condition: service_completed_successfully
+      render-monitor-secrets:
+        condition: service_completed_successfully
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 512m
+    cpus: "0.50"
+    stop_grace_period: 15s
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+    ports:
+      - "{{ fleet_build_broker_bind_host }}:{{ fleet_build_broker_host_port }}:{{ fleet_build_broker_container_port }}"
+    environment:
+      PORT: "{{ fleet_build_broker_container_port }}"
+      BROKER_MODE: enabled
+      BROKER_ARTIFACT_DIR: /var/lib/fleet-build-broker
+      BROKER_GRANT_STATE_FILE: /var/lib/fleet-build-broker/grants.json
+      BROKER_AUDIT_FILE: /var/lib/fleet-build-broker/audit.jsonl
+      BROKER_TLS_CERT_FILE: {{ fleet_build_broker_secret_mount }}/server.crt
+      BROKER_TLS_KEY_FILE: {{ fleet_build_broker_secret_mount }}/server.key
+      BROKER_TLS_CLIENT_CA_FILE: {{ fleet_build_broker_secret_mount }}/client-ca.crt
+      BROKER_GITHUB_APP_ID_FILE: {{ fleet_build_broker_secret_mount }}/github-app-id
+      BROKER_GITHUB_APP_INSTALLATION_ID_FILE: {{ fleet_build_broker_secret_mount }}/github-app-installation-id
+      BROKER_GITHUB_APP_PRIVATE_KEY_FILE: {{ fleet_build_broker_secret_mount }}/github-app-private-key.pem
+      BROKER_GITHUB_PAT_FILE: {{ fleet_build_broker_secret_mount }}/github-pat-fallback
+    volumes:
+      - "{{ fleet_build_broker_data_dir }}:/var/lib/fleet-build-broker:rw"
+      - "{{ fleet_build_broker_secret_dir }}:{{ fleet_build_broker_secret_mount }}:ro"
+    healthcheck:
+      test: ["CMD", "/fleet-build-broker", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s

@@ -1,0 +1,29 @@
+---
+# ADR 0353: Service Integration Contract Registry
+# managed-by: adr=0491 role=authentik_runtime
+schema_version: "1.0.0"
+contract_id: authentik--mail-platform
+consumer: authentik_runtime
+provider: mail_platform_runtime
+integration_type: smtp
+adr: "0491"
+
+connection:
+  host_var: authentik_email_host
+  port_var: authentik_email_port
+  username_var: authentik_email_username
+  transport_security: private_authenticated_smtp_submission
+  delivery_path: stalwart_managed_delivery
+
+secrets:
+  - path: openbao/services/authentik/runtime-env
+    env_var: AUTHENTIK_EMAIL__PASSWORD
+
+health_check:
+  endpoint: smtp-auth
+  expected_status: authenticated
+  timeout_seconds: 10
+
+pre_flight:
+  - check: mail_platform_internal_submission_listener
+  - check: smtp_credentials_present

@@ -8,8 +8,8 @@ publishable values so the fixtures can live in-repo.
 | File | Purpose | Anchors a deployment with… |
 |------|---------|----------------------------|
 | `lv3-shape.yml`        | Current production shape          | DNS-label-only prefix (`lv3`) — exercises the path where `config_prefix == sql_prefix == pve_prefix == unix_prefix`. |
-| `retired-deployment-shape.yml`      | Fork shape (digit-prefixed label) | `retired-deployment` first label — exercises the path where SQL/Unix flavors must strip a leading digit (`fork`) but PVE/config keep the full label. |
-| `synthetic-shape.yml`  | Third unrelated identity          | `testfork.invalid` — catches lv3/retired-deployment coincidences that look generic but are not, and proves a third deployment can be added without code changes. |
+| `0fork-shape.yml`      | Fork shape (digit-prefixed label) | `0fork` first label — exercises the path where SQL/Unix flavors must strip a leading digit (`fork`) but PVE/config keep the full label. |
+| `synthetic-shape.yml`  | Third unrelated identity          | `testfork.invalid` — catches lv3/0fork coincidences that look generic but are not, and proves a third deployment can be added without code changes. |
 
 ## Contract
 

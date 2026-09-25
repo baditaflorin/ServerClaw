@@ -13,7 +13,7 @@
 #
 # Preconditions: .local/hetzner/dns.env exists and contains HETZNER_DNS_TOKEN=<old>.
 
-- name: Rotate Hetzner DNS API token for the retired-deployment zone
+- name: Rotate Hetzner DNS API token for the 0fork zone
   hosts: localhost
   gather_facts: false
   connection: local
@@ -21,7 +21,7 @@
   vars:
     hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
     hetzner_dns_zone_name: "{{ hetzner_dns_zone_name | default(platform_domain) }}"
-    hetzner_dns_env_path: "{{ lookup('ansible.builtin.env', 'RETIRED_DEPLOYMENT_DNS_ENV') | default(lookup('ansible.builtin.pipe', 'scripts/resolve_local_overlay_root.sh') + '/hetzner/dns.env', true) }}"
+    hetzner_dns_env_path: "{{ lookup('ansible.builtin.env', 'ZERO_FORK_DNS_ENV') | default(lookup('ansible.builtin.pipe', 'scripts/resolve_local_overlay_root.sh') + '/hetzner/dns.env', true) }}"
 
   tasks:
     - name: Assert both tokens are present in the environment

@@ -1,0 +1,271 @@
+#!/usr/bin/env python3
+"""Dockerhost-only bridge for one cache GHCR configuration read.
+
+The bridge has exactly one transaction. It authenticates only through the
+root-owned SSH forced-command boundary, mints a five-minute one-use key in
+memory, streams it across that existing SSH session, and revokes it once the
+cache renderer acknowledges either success or failure. No key is logged,
+persisted, returned to Ansible, or placed in an environment variable.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from pathlib import Path
+import re
+import select
+import ssl
+import stat
+import sys
+from typing import Any
+from urllib import error, request
+
+
+CONFIG_PATH = Path("/etc/artifact-cache-ghcr-reader-bridge/contract.json")
+ADMIN_TOKEN_FILE = Path("/opt/_shared/apikey-admin.env")
+APIKEY_URL = "http://127.0.0.1:18021"
+READER_PRINCIPAL = "artifact-cache-ghcr-config-renderer"
+READER_SCOPE = "infra-privileged"
+READER_TIER = "infra-privileged"
+READER_TTL_SECONDS = 300
+READER_USE_LIMIT = 1
+REQUEST_TIMEOUT_SECONDS = 15
+PROTOCOL_TIMEOUT_SECONDS = 20
+MAX_ISSUE_RESPONSE_BYTES = 16 * 1024
+KEY_PATTERN = re.compile(r"ak_[0-9a-f]{32}\Z")
+
+
+class BridgeError(RuntimeError):
+    """Safe failure classification with no credential-bearing details."""
+
+
+class NoRedirect(request.HTTPRedirectHandler):
+    """Authenticated administration requests may never follow redirects."""
+
+    def redirect_request(self, req: request.Request, fp: Any, code: int, msg: str, headers: Any, newurl: str) -> None:
+        del req, fp, code, msg, headers, newurl
+        return None
+
+
+def _require(condition: bool, message: str) -> None:
+    if not condition:
+        raise BridgeError(message)
+
+
+def _safe_regular_root_file(path: Path, modes: set[int]) -> None:
+    parent = path.parent
+    while True:
+        try:
+            parent_metadata = parent.lstat()
+        except OSError as exc:
+            raise BridgeError("required root-owned parent directory is unavailable") from exc
+        _require(stat.S_ISDIR(parent_metadata.st_mode), "required root-owned parent path is not a directory")
+        _require(
+            parent_metadata.st_uid == 0 and parent_metadata.st_gid == 0 and stat.S_IMODE(parent_metadata.st_mode) & 0o022 == 0,
+            "required root-owned parent directory is writable by another principal",
+        )
+        if parent == parent.parent:
+            break
+        parent = parent.parent
+    try:
+        metadata = path.lstat()
+    except OSError as exc:
+        raise BridgeError("required root-owned file is unavailable") from exc
+    _require(stat.S_ISREG(metadata.st_mode), "required root-owned path is not a regular file")
+    _require(metadata.st_uid == 0 and metadata.st_gid == 0, "required root-owned file has unsafe ownership")
+    _require(stat.S_IMODE(metadata.st_mode) in modes, "required root-owned file has unsafe permissions")
+
+
+def _validate_config(config: Any) -> dict[str, Any]:
+    _require(isinstance(config, dict), "bridge configuration must be an object")
+    _require(
+        set(config)
+        == {
+            "managed-by",
+            "schema_version",
+            "admin_token_file",
+            "apikey_url",
+            "reader_principal",
+            "reader_scope",
+            "reader_tier",
+            "reader_ttl_seconds",
+            "reader_use_limit",
+        },
+        "bridge configuration has unexpected fields",
+    )
+    _require(config.get("schema_version") == 1, "unsupported bridge configuration schema")
+    _require(config.get("admin_token_file") == str(ADMIN_TOKEN_FILE), "admin token path changed")
+    _require(config.get("apikey_url") == APIKEY_URL, "API-key administration endpoint changed")
+    _require(config.get("reader_principal") == READER_PRINCIPAL, "reader principal changed")
+    _require(config.get("reader_scope") == READER_SCOPE, "reader scope changed")
+    _require(config.get("reader_tier") == READER_TIER, "reader tier changed")
+    _require(config.get("reader_ttl_seconds") == READER_TTL_SECONDS, "reader lifetime changed")
+    _require(config.get("reader_use_limit") == READER_USE_LIMIT, "reader use limit changed")
+    return config
+
+
+def _load_config(path: Path, *, transaction: bool) -> dict[str, Any]:
+    if transaction:
+        _require(path == CONFIG_PATH, "bridge configuration path changed")
+    _safe_regular_root_file(path, {0o600})
+    try:
+        config = json.loads(path.read_bytes())
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise BridgeError("unable to load bridge configuration") from exc
+    return _validate_config(config)
+
+
+def _read_admin_token() -> str:
+    _safe_regular_root_file(ADMIN_TOKEN_FILE, {0o400, 0o600})
+    try:
+        line = ADMIN_TOKEN_FILE.read_text(encoding="utf-8").splitlines()[0].strip()
+    except (OSError, UnicodeDecodeError, IndexError) as exc:
+        raise BridgeError("local API-key administration credential is unavailable") from exc
+    if line.startswith("ADMIN_TOKEN="):
+        line = line[len("ADMIN_TOKEN=") :]
+    elif line.startswith("TOKEN="):
+        line = line[len("TOKEN=") :]
+    _require(bool(line) and "\x00" not in line and "\r" not in line and "\n" not in line, "local API-key administration credential is invalid")
+    return line
+
+
+def _opener() -> request.OpenerDirector:
+    return request.build_opener(
+        request.ProxyHandler({}),
+        request.HTTPHandler(),
+        request.HTTPSHandler(context=ssl.create_default_context()),
+        NoRedirect(),
+    )
+
+
+def _post(url: str, body: bytes, headers: dict[str, str], *, read_limit: int | None = None) -> bytes:
+    req = request.Request(url, data=body, headers=headers, method="POST")
+    try:
+        with _opener().open(req, timeout=REQUEST_TIMEOUT_SECONDS) as response:
+            _require(response.status == 200, "unexpected bridge transaction response")
+            if read_limit is None:
+                return b""
+            content_length = response.headers.get("Content-Length")
+            if content_length is not None:
+                _require(content_length.isdigit() and int(content_length) <= read_limit, "bridge response exceeds boundary")
+            body = response.read(read_limit + 1)
+            _require(len(body) <= read_limit, "bridge response exceeds boundary")
+            return body
+    except (error.HTTPError, error.URLError, TimeoutError, OSError) as exc:
+        raise BridgeError("bridge endpoint request failed") from exc
+
+
+def _issue_reader() -> str:
+    body = json.dumps(
+        {
+            "user": READER_PRINCIPAL,
+            "ttl_seconds": READER_TTL_SECONDS,
+            "scope": READER_SCOPE,
+            "tier": READER_TIER,
+            "use_limit": READER_USE_LIMIT,
+            "note": "artifact-cache-ghcr-proxy-config-read",
+        },
+        separators=(",", ":"),
+    ).encode("utf-8")
+    response_body = _post(
+        f"{APIKEY_URL}/issue",
+        body,
+        {"Content-Type": "application/json", "X-Admin-Token": _read_admin_token()},
+        read_limit=MAX_ISSUE_RESPONSE_BYTES,
+    )
+    try:
+        envelope = json.loads(response_body)
+        data = envelope["data"]
+        key = data["key"]
+        _require(envelope.get("status") == "success" and isinstance(data, dict), "reader issue response is invalid")
+        _require(data.get("user") == READER_PRINCIPAL, "reader principal changed during issuance")
+        _require(data.get("scope") == READER_SCOPE and data.get("tier") == READER_TIER, "reader authority changed during issuance")
+        _require(data.get("use_limit") == READER_USE_LIMIT, "reader use limit changed during issuance")
+        _require(isinstance(key, str) and KEY_PATTERN.fullmatch(key) is not None, "reader issue response key is invalid")
+        return key
+    except (KeyError, TypeError, json.JSONDecodeError, BridgeError) as exc:
+        if isinstance(exc, BridgeError):
+            raise
+        raise BridgeError("reader issue response is invalid") from exc
+
+
+def _revoke_reader(reader_key: str) -> None:
+    body = json.dumps({"key": reader_key}, separators=(",", ":")).encode("utf-8")
+    _post(
+        f"{APIKEY_URL}/revoke",
+        body,
+        {"Content-Type": "application/json", "X-Admin-Token": _read_admin_token()},
+    )
+
+
+def _read_protocol_line() -> bytes:
+    try:
+        ready, _, _ = select.select([sys.stdin.buffer], [], [], PROTOCOL_TIMEOUT_SECONDS)
+    except (OSError, ValueError) as exc:
+        raise BridgeError("bridge protocol is unavailable") from exc
+    _require(bool(ready), "bridge protocol timed out")
+    try:
+        line = sys.stdin.buffer.readline(128)
+    except OSError as exc:
+        raise BridgeError("bridge protocol read failed") from exc
+    _require(bool(line) and len(line) < 128, "bridge protocol frame is invalid")
+    return line
+
+
+def _reader_transaction(config: dict[str, Any]) -> None:
+    del config
+    _require(os.geteuid() == 0, "bridge transaction must run as root")
+    _require(_read_protocol_line() == b"REQUEST\n", "bridge request is invalid")
+    reader_key: str | None = None
+    transaction_error: BridgeError | None = None
+    try:
+        reader_key = _issue_reader()
+        # The key crosses only this already pinned SSH stdio channel. It is
+        # intentionally never placed in argv, a file, an environment variable,
+        # an Ansible result, or process diagnostics.
+        sys.stdout.buffer.write(b"READER " + reader_key.encode("ascii") + b"\n")
+        sys.stdout.buffer.flush()
+        acknowledgement = _read_protocol_line()
+        _require(acknowledgement in {b"CONSUMED\n", b"FAILED\n"}, "bridge acknowledgement is invalid")
+        _require(acknowledgement == b"CONSUMED\n", "cache renderer did not complete the fixed read")
+    except (BridgeError, OSError, ValueError) as exc:
+        transaction_error = exc if isinstance(exc, BridgeError) else BridgeError("bridge protocol write failed")
+    revocation_error: BridgeError | None = None
+    if reader_key is not None:
+        try:
+            _revoke_reader(reader_key)
+        except BridgeError as exc:
+            revocation_error = exc
+    if revocation_error is not None:
+        raise BridgeError("reader revocation failed") from revocation_error
+    if transaction_error is not None:
+        raise transaction_error
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Fixed artifact-cache GHCR reader bridge")
+    parser.add_argument("--config", type=Path, default=CONFIG_PATH)
+    parser.add_argument("--check-config", action="store_true")
+    parser.add_argument("command", nargs="?")
+    args = parser.parse_args(argv)
+    try:
+        if args.check_config:
+            _require(args.command is None, "check mode accepts no transaction command")
+            _load_config(args.config, transaction=False)
+            print(json.dumps({"status": "valid"}, sort_keys=True))
+            return 0
+        _require(args.command == "reader", "only the fixed reader command is permitted")
+        config = _load_config(args.config, transaction=True)
+        _reader_transaction(config)
+        return 0
+    except BridgeError:
+        # Do not include exception details: protocol, network, and key errors
+        # may contain values that must not become SSH or system logs.
+        print("artifact-cache GHCR reader bridge failed", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

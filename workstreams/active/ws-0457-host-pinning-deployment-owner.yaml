@@ -48,7 +48,7 @@ ownership_manifest:
       - workstreams/active/ws-0457-host-pinning-deployment-owner.yaml
     mode: exclusive
 notes: |
-  Closes Slice D from the ws-0448 postmortem (the lv3 ↔ retired-deployment
+  Closes Slice D from the ws-0448 postmortem (the lv3 ↔ 0fork
   oauth2-proxy@4180 collision class of bug).
 
   Phase 1 (this workstream) ships:

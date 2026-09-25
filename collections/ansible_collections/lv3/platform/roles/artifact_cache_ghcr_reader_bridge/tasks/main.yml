@@ -1,0 +1,129 @@
+---
+# Purpose: Install a Dockerhost-only forced-command bridge that mints one cache configuration reader over SSH stdio.
+# Use case: The root-only artifact-cache renderer needs the exact vault record without retaining API-key authority.
+# Inputs: One deployment-local renderer public key and an existing root-only Dockerhost API-key administration credential.
+# Outputs: Root-owned bridge code/config plus a restricted SSH account; converge does not issue a reader or read the vault.
+# Idempotency: Yes. Root-owned deterministic configuration is rendered and sshd/sudoers syntax is checked before activation.
+# Dependencies: go-apikey-service with atomic one-use claims and go-fleet-secrets consumer ACL enforcement.
+- name: Validate artifact-cache GHCR reader bridge inputs
+  ansible.builtin.assert:
+    that:
+      - inventory_hostname == 'docker-runtime'
+      - artifact_cache_ghcr_reader_bridge_name == 'artifact-cache-ghcr-reader-bridge'
+      - artifact_cache_ghcr_reader_bridge_user == 'artifact-cache-ghcr-reader'
+      - artifact_cache_ghcr_reader_bridge_group == 'artifact-cache-ghcr-reader'
+      - artifact_cache_ghcr_reader_bridge_binary_path == '/usr/local/libexec/artifact-cache-ghcr-reader-bridge'
+      - artifact_cache_ghcr_reader_bridge_config_dir == '/etc/artifact-cache-ghcr-reader-bridge'
+      - artifact_cache_ghcr_reader_bridge_config_path == (artifact_cache_ghcr_reader_bridge_config_dir ~ '/contract.json')
+      - artifact_cache_ghcr_reader_bridge_authorized_keys_path == (artifact_cache_ghcr_reader_bridge_config_dir ~ '/authorized_keys')
+      - artifact_cache_ghcr_reader_bridge_sshd_config_path == '/etc/ssh/sshd_config.d/90-artifact-cache-ghcr-reader.conf'
+      - artifact_cache_ghcr_reader_bridge_sudoers_path == '/etc/sudoers.d/artifact-cache-ghcr-reader'
+      - artifact_cache_ghcr_reader_bridge_allowed_source == hostvars['artifact-cache'].ansible_host
+      - artifact_cache_ghcr_reader_bridge_allowed_source is match('^(?:25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])){3}$')
+      - artifact_cache_ghcr_reader_bridge_authorized_public_key is match('^ssh-ed25519 [A-Za-z0-9+/]+={0,3} artifact-cache-ghcr-secret-renderer$')
+      - artifact_cache_ghcr_reader_bridge_admin_token_file == '/opt/_shared/apikey-admin.env'
+      - artifact_cache_ghcr_reader_bridge_apikey_url == 'http://127.0.0.1:18021'
+      - artifact_cache_ghcr_reader_bridge_reader_principal == 'artifact-cache-ghcr-config-renderer'
+      - artifact_cache_ghcr_reader_bridge_reader_scope == 'infra-privileged'
+      - artifact_cache_ghcr_reader_bridge_reader_tier == 'infra-privileged'
+      - artifact_cache_ghcr_reader_bridge_reader_ttl_seconds | int == 300
+      - artifact_cache_ghcr_reader_bridge_reader_use_limit | int == 1
+    fail_msg: >-
+      The cache reader bridge is Dockerhost-only and accepts one exact
+      artifact-cache transport key, reader identity, local API-key endpoint,
+      300-second lifetime, and one-use claim. It rejects arbitrary callers,
+      commands, endpoints, scopes, and persistent reader authority.
+
+- name: Ensure the dedicated cache reader bridge group exists
+  ansible.builtin.group:
+    name: "{{ artifact_cache_ghcr_reader_bridge_group }}"
+    system: true
+    state: present
+
+- name: Ensure the dedicated cache reader bridge account exists
+  ansible.builtin.user:
+    name: "{{ artifact_cache_ghcr_reader_bridge_user }}"
+    group: "{{ artifact_cache_ghcr_reader_bridge_group }}"
+    groups: ""
+    append: false
+    system: true
+    create_home: false
+    home: /nonexistent
+    shell: /bin/sh
+    password_lock: true
+    state: present
+
+- name: Ensure the root-only cache reader bridge configuration directory exists
+  ansible.builtin.file:
+    path: "{{ artifact_cache_ghcr_reader_bridge_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Install the root-only cache reader bridge executable
+  ansible.builtin.template:
+    src: artifact-cache-ghcr-reader-bridge.py.j2
+    dest: "{{ artifact_cache_ghcr_reader_bridge_binary_path }}"
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Render the root-only cache reader bridge contract
+  ansible.builtin.template:
+    src: contract.json.j2
+    dest: "{{ artifact_cache_ghcr_reader_bridge_config_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Validate the root-only cache reader bridge contract
+  ansible.builtin.command:
+    argv:
+      - "{{ artifact_cache_ghcr_reader_bridge_binary_path }}"
+      - --config
+      - "{{ artifact_cache_ghcr_reader_bridge_config_path }}"
+      - --check-config
+  changed_when: false
+  no_log: true
+
+- name: Render the dedicated cache reader forced SSH authorization
+  ansible.builtin.template:
+    src: authorized_keys.j2
+    dest: "{{ artifact_cache_ghcr_reader_bridge_authorized_keys_path }}"
+    owner: root
+    group: root
+    mode: "0400"
+
+- name: Render the dedicated cache reader sshd forced-command policy
+  ansible.builtin.template:
+    src: sshd-artifact-cache-ghcr-reader.conf.j2
+    dest: "{{ artifact_cache_ghcr_reader_bridge_sshd_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: artifact_cache_ghcr_reader_bridge_sshd_policy
+
+- name: Validate sshd configuration before activating the cache reader bridge
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/sshd
+      - -t
+  changed_when: false
+  when: artifact_cache_ghcr_reader_bridge_sshd_policy.changed
+
+- name: Render the exact sudo authorization for the cache reader bridge
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: "{{ artifact_cache_ghcr_reader_bridge_sudoers_path }}"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Reload sshd after validating the cache reader bridge policy
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded
+  when: artifact_cache_ghcr_reader_bridge_sshd_policy.changed

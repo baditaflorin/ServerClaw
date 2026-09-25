@@ -1,0 +1,4 @@
+# managed-by: role=fleet_build_broker_pki_vault_writer adr=0042,0047,0101
+# Deliberately no wildcard: the SSH key can elevate only the exact one-shot,
+# fixed-identity transaction. The executable independently validates argv.
+{{ fleet_build_broker_pki_vault_writer_user }} ALL=(root) NOPASSWD: {{ fleet_build_broker_pki_vault_writer_binary_path }} transaction --principal fleet-build-broker-pki-renewer --scope infra-privileged --ttl-seconds 300

@@ -6,6 +6,7 @@
       - mail_platform_observability_telegraf_config_file | length > 0
       - mail_platform_observability_metrics_script | length > 0
       - mail_platform_observability_gateway_state_file | length > 0
+      - mail_platform_observability_gateway_smtp_bridge_state_file | length > 0
       - mail_platform_observability_stalwart_api_url | length > 0
       - mail_platform_observability_mailbox_address | length > 0
     fail_msg: "mail_platform_observability requires Telegraf config, the metrics script path, and local mail platform credentials."

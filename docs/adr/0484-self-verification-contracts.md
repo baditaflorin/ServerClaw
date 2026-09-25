@@ -8,7 +8,7 @@
 
 ## Context
 
-### The retired-deployment Harbor incident, in one paragraph
+### The 0fork Harbor incident, in one paragraph
 
 On 2026-05-06, `harbor_runtime`'s `nginx` + `harbor-portal` containers exited with code 128 from a transient harbor-log syslog driver hiccup. `restart: always` doesn't fire on container-creation errors, so they stayed exited. Nothing surfaced this for **five days**. The most recent `converge-harbor` run had exited 0. The most recent `live-apply` receipt said "harbor deployed and verified UP." Both were technically true at the moment they were written. Neither caught the silent regression.
 
@@ -131,7 +131,7 @@ A first installment of `config/post_conditions.yml` covering the load-bearing se
 - `woodpecker.public-200`
 - `ntfy.public-200`
 - `dns.apex-points-at-edge`
-- `proxmox.host.swap-not-thrashing` (would have caught the retired-deployment memory pressure)
+- `proxmox.host.swap-not-thrashing` (would have caught the 0fork memory pressure)
 - `proxmox.guest.balloon-enabled` (would have caught balloon=0)
 
 This is the MVP — comprehensive coverage grows incrementally as new services are wired.
@@ -175,4 +175,4 @@ This is the MVP — comprehensive coverage grows incrementally as new services a
 - ADR 0482 — Capacity-aware dynamic sizing
 - ADR 0483 — Hands-off bootstrap (the consumer of this ADR's contracts)
 - ADR 0485 — Convergence idempotency tests (sibling)
-- Postmortem: 2026-05-11 retired-deployment Harbor 502 — the load-bearing motivator
+- Postmortem: 2026-05-11 0fork Harbor 502 — the load-bearing motivator

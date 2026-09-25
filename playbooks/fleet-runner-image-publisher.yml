@@ -1,0 +1,9 @@
+# Playbook: fleet-runner-image-publisher.yml
+# Purpose: Provide the governed root-level entrypoint for the Builder LXC108 image-publisher identity contract.
+# Use case: Use before fleet-runner image publishing once the dedicated builder inventory hostname is configured.
+# Inputs: An inventory containing only the designated `0docker_builder` host for this playbook run.
+# Outputs: Imports the collection playbook that writes the non-secret root-only identity contract.
+# Idempotency: Yes. This wrapper only imports an idempotent collection playbook.
+# Dependencies: ADR 0296 and lv3.platform.fleet_runner_image_publisher_identity.
+---
+- import_playbook: ../collections/ansible_collections/lv3/platform/playbooks/fleet-runner-image-publisher.yml

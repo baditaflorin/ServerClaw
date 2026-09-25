@@ -6,6 +6,15 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEDICATED_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "artifact-cache-vm.yml"
 CONSUMER_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "services" / "build-artifact-cache.yml"
+ENDPOINTS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "vars"
+    / "artifact_cache_registry_endpoints.yml"
+)
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -22,12 +31,21 @@ def test_artifact_cache_vm_playbook_provisions_then_converges_guest() -> None:
     ]
     assert playbook[0]["vars"]["artifact_cache_vm_vmid"] == 180
     assert [role["role"] for role in playbook[0]["roles"]] == ["lv3.platform.proxmox_guests"]
-    assert playbook[1]["vars"]["docker_runtime_insecure_registries"] == [
+    endpoints = yaml.safe_load(ENDPOINTS_PATH.read_text())
+    assert endpoints["artifact_cache_docker_runtime_insecure_registries"] == [
         "{{ ansible_host }}:5001",
         "{{ ansible_host }}:5002",
         "{{ ansible_host }}:5003",
         "{{ ansible_host }}:5004",
+        "127.0.0.1:5005",
     ]
+    assert playbook[1]["vars_files"] == [
+        "../collections/ansible_collections/lv3/platform/vars/artifact_cache_registry_endpoints.yml"
+    ]
+    assert (
+        playbook[1]["vars"]["docker_runtime_insecure_registries"]
+        == "{{ artifact_cache_docker_runtime_insecure_registries }}"
+    )
     assert [task["name"] for task in playbook[1]["pre_tasks"]] == [
         "Wait for the artifact cache VM SSH service to be reachable",
         "Gather facts after SSH is ready",

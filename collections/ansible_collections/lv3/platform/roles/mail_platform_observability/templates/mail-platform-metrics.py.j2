@@ -11,6 +11,7 @@ from pathlib import Path
 
 
 GATEWAY_STATE_FILE = Path("{{ mail_platform_observability_gateway_state_file }}")
+SMTP_BRIDGE_STATE_FILE = Path("{{ mail_platform_observability_gateway_smtp_bridge_state_file }}")
 API_BASE_URL = "{{ mail_platform_observability_stalwart_api_url }}"
 METRICS_URL = "{{ mail_platform_observability_stalwart_metrics_url }}"
 ADMIN_USER = "{{ mail_platform_observability_stalwart_admin_user }}"
@@ -61,6 +62,15 @@ def load_gateway_state() -> dict:
         return {"event_counters": {}, "send_counters": {}}
 
 
+def load_smtp_bridge_state() -> dict:
+    if not SMTP_BRIDGE_STATE_FILE.exists():
+        return {}
+    try:
+        return json.loads(SMTP_BRIDGE_STATE_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
 def queue_metrics() -> tuple[int, float, int]:
     try:
         response = http_json(f"{API_BASE_URL}/api/queue/messages?limit=100&max-total=1000&page=0", ADMIN_USER, ADMIN_PASSWORD)
@@ -98,6 +108,7 @@ def inbox_metrics() -> tuple[int, int]:
 
 
 gateway_state = load_gateway_state()
+smtp_bridge_state = load_smtp_bridge_state()
 event_counters = gateway_state.get("event_counters", {})
 send_counters = gateway_state.get("send_counters", {})
 
@@ -127,6 +138,11 @@ fields = {
     "brevo_success_total": int(send_counters.get("brevo_success_total", 0)),
     "brevo_failure_total": int(send_counters.get("brevo_failure_total", 0)),
     "fallback_total": int(send_counters.get("fallback_total", 0)),
+    "smtp_bridge_accepted_total": int(smtp_bridge_state.get("accepted_total", 0)),
+    "smtp_bridge_auth_failure_total": int(smtp_bridge_state.get("auth_failure_total", 0)),
+    "smtp_bridge_provider_failure_total": int(smtp_bridge_state.get("provider_failure_total", 0)),
+    "smtp_bridge_provider_success_total": int(smtp_bridge_state.get("provider_success_total", 0)),
+    "smtp_bridge_rejected_total": int(smtp_bridge_state.get("rejected_total", 0)),
     "queue_total": int(queue_total),
     "queue_oldest_seconds": float(queue_oldest_seconds),
     "mailbox_inbox_count": int(mailbox_inbox_count),

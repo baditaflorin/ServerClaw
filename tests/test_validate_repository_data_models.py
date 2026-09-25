@@ -4,6 +4,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -79,6 +81,7 @@ def test_platform_vars_validation_reuses_tracked_identity_snapshot(
 
     monkeypatch.setattr(models, "PLATFORM_VARS_PATH", platform_vars_path)
     monkeypatch.setattr(models, "load_sources", fake_load_sources)
+    monkeypatch.setattr(models, "missing_deployment_derived_platform_inputs", lambda: ())
     monkeypatch.setattr(
         models, "_load_generation_identity_overlay", lambda path: {"platform_domain": "tracked.example"}
     )
@@ -92,3 +95,43 @@ def test_platform_vars_validation_reuses_tracked_identity_snapshot(
         "skip_topology_override": True,
         "skip_generated_topology": True,
     }
+
+
+def test_platform_vars_validation_skips_only_equivalence_without_deployment_inputs(
+    monkeypatch,
+    tmp_path: Path,
+    capsys,
+) -> None:
+    platform_vars_path = tmp_path / "platform.yml"
+    platform_vars_path.write_text("sentinel: true\n", encoding="utf-8")
+    missing_path = tmp_path / "config" / "generated" / "dns-declarations.yaml"
+
+    monkeypatch.setattr(models, "PLATFORM_VARS_PATH", platform_vars_path)
+    monkeypatch.setattr(models, "missing_deployment_derived_platform_inputs", lambda: (missing_path,))
+    monkeypatch.setattr(
+        models,
+        "load_sources",
+        lambda **_kwargs: (_ for _ in ()).throw(AssertionError("equivalence generation must not run")),
+    )
+
+    models.validate_platform_vars()
+
+    assert "Skipping derived platform-vars equivalence check" in capsys.readouterr().out
+
+
+def test_platform_vars_validation_remains_strict_with_deployment_inputs(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    platform_vars_path = tmp_path / "platform.yml"
+    platform_vars_path.write_text("actual: true\n", encoding="utf-8")
+
+    monkeypatch.setattr(models, "PLATFORM_VARS_PATH", platform_vars_path)
+    monkeypatch.setattr(models, "missing_deployment_derived_platform_inputs", lambda: ())
+    monkeypatch.setattr(models, "load_sources", lambda **_kwargs: ({}, {}))
+    monkeypatch.setattr(models, "_load_generation_identity_overlay", lambda _path: {})
+    monkeypatch.setattr(models, "_apply_generation_identity_overlay", lambda _host_vars, _overlay: None)
+    monkeypatch.setattr(models, "build_platform_vars", lambda *, stack, host_vars: {"expected": True})
+
+    with pytest.raises(ValueError, match="must match"):
+        models.validate_platform_vars()

@@ -1,0 +1,29 @@
+---
+# Purpose: Converge the root-only Step-CA issuance and renewal handoff for the private fleet-build-broker.
+# Use case: Install the control-plane mTLS lifecycle only after its dedicated client CA and short-lived vault writer bridge exist.
+# Inputs: Existing Step-CA services provisioner, root-only dedicated broker client CA, and canonical fleet-secrets transaction bridge.
+# Outputs: Root-only handoff executable, configuration, and timer on the Step-CA control host.
+# Idempotency: Yes. The role renders deterministic files and starts one systemd timer; each renewal is independently locked.
+# Dependencies: ADR 0042, ADR 0047, ADR 0101, and the deployed go-fleet-secrets writer bridge.
+- name: Converge fleet-build-broker PKI handoff on the Step-CA control host
+  hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-control' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - security
+    - service-fleet-build-broker
+    - service-fleet-build-broker-pki
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.fleet-build-broker-pki
+        playbook_execution_audit_target: fleet_build_broker_pki
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.runtime_control[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.fleet_build_broker_pki_handoff

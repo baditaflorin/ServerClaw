@@ -78,7 +78,7 @@ registration or apply the `--deployment` scoping on the next push.
 
 ```bash
 # Validate a specific deployment regardless of active state:
-python3 scripts/certificate_validator.py --check-all --deployment retired-deployment
+python3 scripts/certificate_validator.py --check-all --deployment 0fork
 
 # When you legitimately can't fix the drift before pushing:
 SKIP_CERT_VALIDATION=1 \

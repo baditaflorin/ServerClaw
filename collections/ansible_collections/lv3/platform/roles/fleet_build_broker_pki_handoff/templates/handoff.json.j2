@@ -1,0 +1,76 @@
+{
+  "managed-by": "role=fleet_build_broker_pki_handoff adr=0042,0047,0101",
+  "schema_version": 1,
+  "lifecycle": {
+    "leaf_lifetime_seconds": 86400,
+    "renew_at_elapsed_seconds": 69120,
+    "timer_interval_seconds": 3600,
+    "state_file": "{{ fleet_build_broker_pki_handoff_state_path }}"
+  },
+  "step_ca": {
+    "command": {{ fleet_build_broker_pki_step_command | to_json }},
+    "ca_url": "{{ fleet_build_broker_pki_step_ca_url }}",
+    "root_certificate_file": "{{ fleet_build_broker_pki_step_root_certificate_file }}",
+    "provisioner": "{{ fleet_build_broker_pki_step_provisioner }}",
+    "provisioner_password_file": "{{ fleet_build_broker_pki_step_provisioner_password_file }}"
+  },
+  "client_ca": {
+    "directory": "{{ fleet_build_broker_pki_client_ca_directory }}",
+    "certificate_file": "{{ fleet_build_broker_pki_client_ca_certificate_file }}",
+    "key_file": "{{ fleet_build_broker_pki_client_ca_key_file }}",
+    "subject": "fleet-build-broker-client-ca",
+    "lifetime_seconds": 7776000,
+    "rotate_before_seconds": 604800,
+    "trust_secret": "fleet_build_broker_client_ca",
+    "trust_consumers": ["fleet-build-broker-runtime-renderer"]
+  },
+  "writer": {
+    "command": {{ fleet_build_broker_pki_vault_writer_command | to_json }},
+    "principal": "fleet-build-broker-pki-renewer",
+    "scope": "infra-privileged",
+    "ttl_seconds": 300
+  },
+  "server": {
+    "subject": "{{ fleet_build_broker_pki_server_dns }}",
+    "ip_san": "{{ fleet_build_broker_pki_server_ip }}",
+    "sans": ["{{ fleet_build_broker_pki_server_dns }}", "{{ fleet_build_broker_pki_server_ip }}"],
+    "cert_secret": "fleet_build_broker_server_cert",
+    "key_secret": "fleet_build_broker_server_key",
+    "consumers": ["fleet-build-broker-runtime-renderer"]
+  },
+  "server_trust": {
+    "source_file": "{{ fleet_build_broker_pki_step_root_certificate_file }}",
+    "secret": "fleet_build_broker_server_ca",
+    "consumers": [
+      "fleet-build-broker-monitor-renderer",
+      "fleet-build-broker-builder-0docker",
+      "fleet-build-broker-builder-0mcp"
+    ]
+  },
+  "clients": [
+    {
+      "id": "builder-0docker",
+      "spiffe_id": "spiffe://0exec.com/fleet/builder/0docker",
+      "consumer": "fleet-build-broker-builder-0docker",
+      "cert_secret": "fleet_build_broker_builder_0docker_cert",
+      "key_secret": "fleet_build_broker_builder_0docker_key",
+      "extended_key_usage": "clientAuth"
+    },
+    {
+      "id": "builder-0mcp",
+      "spiffe_id": "spiffe://example.org/fleet/builder/0mcp",
+      "consumer": "fleet-build-broker-builder-0mcp",
+      "cert_secret": "fleet_build_broker_builder_0mcp_cert",
+      "key_secret": "fleet_build_broker_builder_0mcp_key",
+      "extended_key_usage": "clientAuth"
+    },
+    {
+      "id": "monitor",
+      "spiffe_id": "spiffe://example.org/fleet/monitor/fleet-build-broker",
+      "consumer": "fleet-build-broker-monitor-renderer",
+      "cert_secret": "fleet_build_broker_monitor_cert",
+      "key_secret": "fleet_build_broker_monitor_key",
+      "extended_key_usage": "clientAuth"
+    }
+  ]
+}

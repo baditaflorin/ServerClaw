@@ -1,0 +1,303 @@
+# Purpose: Render and converge the private fleet-build-broker Compose stack with separately scoped root-only secret-render phases.
+# Use case: Run on VM180 only after the cache-owned GHCR private-package path is healthy and go-fleet-secrets has installed both scoped renderer API keys.
+# Inputs: Immutable cache-served broker digest, independent runtime/monitor API-key files and non-secret allowlisted manifests, and fixed private host/container ports.
+# Outputs: A non-root, read-only broker container after runtime and monitor renderers complete without cross-target secret access.
+# Idempotency: Re-runs both one-shot renderers before every converge; it never creates, copies, logs, or changes secret values.
+# Dependencies: ADR 0295/0296 cache plane, go-fleet-secrets destination-scoped consumer ACLs, and fleet-build-broker source operations contract.
+---
+- name: Validate fleet build broker runtime inputs
+  ansible.builtin.assert:
+    that:
+      - fleet_build_broker_state == 'present'
+      - fleet_build_broker_site_dir == '/opt/fleet-build-broker'
+      - fleet_build_broker_compose_file == (fleet_build_broker_site_dir ~ '/docker-compose.yml')
+      - fleet_build_broker_data_dir == '/var/lib/fleet-build-broker'
+      - fleet_build_broker_secret_dir == '/run/go-fleet-secrets/fleet-build-broker'
+      - fleet_build_broker_secret_mount == '/run/broker-secrets'
+      - fleet_build_broker_probe_secret_dir == '/run/go-fleet-secrets/fleet-build-broker-probe'
+      - fleet_build_broker_runtime_renderer_api_key_dir == '/etc/fleet-build-broker/renderer/runtime'
+      - fleet_build_broker_runtime_renderer_api_key_file == (fleet_build_broker_runtime_renderer_api_key_dir ~ '/api-key')
+      - fleet_build_broker_runtime_renderer_api_key_mount == '/run/broker-runtime-renderer-api-key'
+      - fleet_build_broker_monitor_renderer_api_key_dir == '/etc/fleet-build-broker/renderer/monitor'
+      - fleet_build_broker_monitor_renderer_api_key_file == (fleet_build_broker_monitor_renderer_api_key_dir ~ '/api-key')
+      - fleet_build_broker_monitor_renderer_api_key_mount == '/run/broker-monitor-renderer-api-key'
+      - fleet_build_broker_renderer_manifest_dir == (fleet_build_broker_site_dir ~ '/renderer-manifests')
+      - fleet_build_broker_runtime_renderer_manifest_file == (fleet_build_broker_renderer_manifest_dir ~ '/runtime.json')
+      - fleet_build_broker_monitor_renderer_manifest_file == (fleet_build_broker_renderer_manifest_dir ~ '/monitor.json')
+      - fleet_build_broker_runtime_renderer_manifest_mount == '/run/broker-runtime-renderer-manifest/runtime.json'
+      - fleet_build_broker_monitor_renderer_manifest_mount == '/run/broker-monitor-renderer-manifest/monitor.json'
+      - fleet_build_broker_image_mirror == '127.0.0.1:5005'
+      - fleet_build_broker_image is match('^' ~ (fleet_build_broker_image_mirror | regex_escape) ~ '/baditaflorin/go-fleet-build-broker@sha256:[0-9a-f]{64}$')
+      - fleet_build_broker_renderer_image == fleet_build_broker_image
+      - fleet_build_broker_container_name == 'fleet-build-broker'
+      - fleet_build_broker_runtime_renderer_container_name == 'fleet-build-broker-render-runtime-secrets'
+      - fleet_build_broker_monitor_renderer_container_name == 'fleet-build-broker-render-monitor-secrets'
+      - fleet_build_broker_bind_host == ansible_host
+      - fleet_build_broker_host_port | int == 18100
+      - fleet_build_broker_container_port | int == 5001
+      - fleet_build_broker_container_uid | int == 10001
+      - fleet_build_broker_container_gid | int == 10001
+      - fleet_build_broker_data_mode == '0750'
+      - fleet_build_broker_secret_dir_mode == '0750'
+      - fleet_build_broker_secret_file_mode == '0440'
+      - fleet_build_broker_probe_secret_dir_mode == '0700'
+      - fleet_build_broker_probe_secret_file_mode == '0400'
+      - fleet_build_broker_renderer_api_key_dir_mode == '0700'
+      - fleet_build_broker_renderer_api_key_file_mode == '0400'
+      - fleet_build_broker_required_secret_files | length == 7
+      - fleet_build_broker_required_probe_secret_files | length == 3
+      - (fleet_build_broker_required_secret_files + fleet_build_broker_required_probe_secret_files) | unique | list | length == 10
+      - (fleet_build_broker_required_secret_files + fleet_build_broker_required_probe_secret_files) | select('match', '^[A-Za-z0-9][A-Za-z0-9._-]*$') | list | length == 10
+      - fleet_build_broker_runtime_secret_manifest | length == 7
+      - fleet_build_broker_monitor_secret_manifest | length == 3
+      - fleet_build_broker_runtime_secret_manifest | dict2items | map(attribute='value') | list | sort == fleet_build_broker_required_secret_files | sort
+      - fleet_build_broker_monitor_secret_manifest | dict2items | map(attribute='value') | list | sort == fleet_build_broker_required_probe_secret_files | sort
+      - fleet_build_broker_runtime_renderer_command == ['render-secrets', '--target', 'runtime', '--manifest', '/run/broker-runtime-renderer-manifest/runtime.json', '--api-key-file', '/run/broker-runtime-renderer-api-key/api-key', '--vault-url', 'https://fleet-secrets.0exec.com', '--output-dir', '/run/broker-secrets', '--directory-gid', '10001', '--directory-mode', '0750', '--file-uid', '0', '--file-gid', '10001', '--file-mode', '0440']
+      - fleet_build_broker_monitor_renderer_command == ['render-secrets', '--target', 'monitor', '--manifest', '/run/broker-monitor-renderer-manifest/monitor.json', '--api-key-file', '/run/broker-monitor-renderer-api-key/api-key', '--vault-url', 'https://fleet-secrets.0exec.com', '--output-dir', '/run/broker-probe-secrets']
+    fail_msg: >-
+      fleet_build_broker_runtime requires the private VM180 cache endpoint, an
+      immutable cached broker digest, the fixed two-principal renderer
+      contract, fixed 18100:5001 mapping, and root-only go-fleet-secrets API
+      key paths. Direct GHCR images, mutable tags, arbitrary renderer commands,
+      arbitrary secret paths, and runtime/monitor cross-read are rejected.
+
+- name: Verify the cache-owned GHCR listener is reachable before broker pull
+  ansible.builtin.uri:
+    url: "http://{{ fleet_build_broker_image_mirror }}/v2/"
+    method: GET
+    status_code:
+      - 200
+      - 401
+  changed_when: false
+
+- name: Ensure the fleet build broker Compose directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_build_broker_site_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure the non-secret fleet build broker data directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_build_broker_data_dir }}"
+    state: directory
+    owner: "{{ fleet_build_broker_container_uid }}"
+    group: "{{ fleet_build_broker_container_gid }}"
+    mode: "{{ fleet_build_broker_data_mode }}"
+
+- name: Ensure the root-rendered broker runtime secret directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_build_broker_secret_dir }}"
+    state: directory
+    owner: root
+    group: "{{ fleet_build_broker_container_gid }}"
+    mode: "{{ fleet_build_broker_secret_dir_mode }}"
+
+- name: Ensure the root-only broker monitor probe secret directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_build_broker_probe_secret_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ fleet_build_broker_probe_secret_dir_mode }}"
+
+- name: Ensure the root-only runtime renderer API-key directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_build_broker_runtime_renderer_api_key_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ fleet_build_broker_renderer_api_key_dir_mode }}"
+
+- name: Ensure the root-only monitor renderer API-key directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_build_broker_monitor_renderer_api_key_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ fleet_build_broker_renderer_api_key_dir_mode }}"
+
+- name: Inspect the root-only runtime renderer API-key file
+  ansible.builtin.stat:
+    path: "{{ fleet_build_broker_runtime_renderer_api_key_file }}"
+  register: fleet_build_broker_runtime_renderer_api_key_stat
+  changed_when: false
+  no_log: true
+
+- name: Require the root-only runtime renderer API-key file
+  ansible.builtin.assert:
+    that:
+      - fleet_build_broker_runtime_renderer_api_key_stat.stat.exists
+      - fleet_build_broker_runtime_renderer_api_key_stat.stat.isreg
+      - fleet_build_broker_runtime_renderer_api_key_stat.stat.uid | int == 0
+      - fleet_build_broker_runtime_renderer_api_key_stat.stat.gid | int == 0
+      - fleet_build_broker_runtime_renderer_api_key_stat.stat.mode == fleet_build_broker_renderer_api_key_file_mode
+    fail_msg: >-
+      The go-fleet-secrets deployment path must provide a root-only runtime
+      renderer API-key file before the broker stack can start. This role never
+      creates a key or falls back to a host credential.
+  no_log: true
+
+- name: Inspect the root-only monitor renderer API-key file
+  ansible.builtin.stat:
+    path: "{{ fleet_build_broker_monitor_renderer_api_key_file }}"
+  register: fleet_build_broker_monitor_renderer_api_key_stat
+  changed_when: false
+  no_log: true
+
+- name: Require the root-only monitor renderer API-key file
+  ansible.builtin.assert:
+    that:
+      - fleet_build_broker_monitor_renderer_api_key_stat.stat.exists
+      - fleet_build_broker_monitor_renderer_api_key_stat.stat.isreg
+      - fleet_build_broker_monitor_renderer_api_key_stat.stat.uid | int == 0
+      - fleet_build_broker_monitor_renderer_api_key_stat.stat.gid | int == 0
+      - fleet_build_broker_monitor_renderer_api_key_stat.stat.mode == fleet_build_broker_renderer_api_key_file_mode
+    fail_msg: >-
+      The go-fleet-secrets deployment path must provide a root-only monitor
+      renderer API-key file before the broker stack can start. This role never
+      creates a key or lets the runtime renderer read monitor material.
+  no_log: true
+
+- name: Ensure the non-secret renderer manifest directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_build_broker_renderer_manifest_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the non-secret runtime renderer manifest
+  ansible.builtin.template:
+    src: runtime-secrets.json.j2
+    dest: "{{ fleet_build_broker_runtime_renderer_manifest_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: fleet_build_broker_runtime_manifest_render
+
+- name: Render the non-secret monitor renderer manifest
+  ansible.builtin.template:
+    src: monitor-secrets.json.j2
+    dest: "{{ fleet_build_broker_monitor_renderer_manifest_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: fleet_build_broker_monitor_manifest_render
+
+- name: Render the fleet build broker Compose baseline
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ fleet_build_broker_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: fleet_build_broker_compose_render
+
+- name: Remove the prior root-only broker secret renderer executions
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ fleet_build_broker_compose_file }}"
+      - rm
+      - --force
+      - --stop
+      - render-runtime-secrets
+      - render-monitor-secrets
+  args:
+    chdir: "{{ fleet_build_broker_site_dir }}"
+  register: fleet_build_broker_renderer_remove
+  changed_when: "'Removing' in fleet_build_broker_renderer_remove.stdout"
+  failed_when: fleet_build_broker_renderer_remove.rc not in [0, 1]
+
+- name: Converge the fleet build broker stack after root-only secret rendering
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: docker_compose_converge
+  vars:
+    common_docker_compose_converge_compose_file: "{{ fleet_build_broker_compose_file }}"
+    common_docker_compose_converge_site_dir: "{{ fleet_build_broker_site_dir }}"
+    common_docker_compose_converge_service_name: "{{ fleet_build_broker_container_name }}"
+    common_docker_compose_converge_template_results:
+      - "{{ fleet_build_broker_runtime_manifest_render }}"
+      - "{{ fleet_build_broker_monitor_manifest_render }}"
+      - "{{ fleet_build_broker_compose_render }}"
+      - "{{ fleet_build_broker_renderer_remove }}"
+    common_docker_compose_converge_health_port: 0
+    common_docker_compose_converge_health_url: ""
+    common_docker_compose_converge_force_recreate: true
+    common_docker_compose_converge_force_recreate_entire_stack: true
+
+- name: Inspect required root-rendered broker runtime secret files after rendering
+  ansible.builtin.stat:
+    path: "{{ fleet_build_broker_secret_dir }}/{{ item }}"
+  loop: "{{ fleet_build_broker_required_secret_files }}"
+  loop_control:
+    label: "{{ item }}"
+  register: fleet_build_broker_secret_stats
+  no_log: true
+
+- name: Require group-readable-only broker runtime secret files after rendering
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.isreg
+      - item.stat.uid | int == 0
+      - item.stat.gid | int == fleet_build_broker_container_gid | int
+      - item.stat.mode == fleet_build_broker_secret_file_mode
+    fail_msg: >-
+      Every runtime secret must be rendered by root as a root-owned file that
+      is readable only by the broker group. This role never relaxes
+      permissions or creates a fallback secret file.
+  loop: "{{ fleet_build_broker_secret_stats.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  no_log: true
+
+- name: Inspect root-only broker monitor probe secret files after rendering
+  ansible.builtin.stat:
+    path: "{{ fleet_build_broker_probe_secret_dir }}/{{ item }}"
+  loop: "{{ fleet_build_broker_required_probe_secret_files }}"
+  loop_control:
+    label: "{{ item }}"
+  register: fleet_build_broker_probe_secret_stats
+  no_log: true
+
+- name: Require root-only broker monitor probe secret files after rendering
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.isreg
+      - item.stat.uid | int == 0
+      - item.stat.gid | int == 0
+      - item.stat.mode == fleet_build_broker_probe_secret_file_mode
+    fail_msg: >-
+      Monitor client material must remain in the root-only host probe
+      directory. It is never mounted into the broker runtime.
+  loop: "{{ fleet_build_broker_probe_secret_stats.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  no_log: true
+
+- name: Read fleet build broker container internal health state
+  ansible.builtin.command:
+    argv:
+      - docker
+      - inspect
+      - --format
+      - "{{ '{{' }}.State.Health.Status{{ '}}' }}"
+      - "{{ fleet_build_broker_container_name }}"
+  register: fleet_build_broker_health
+  changed_when: false
+
+- name: Require the fleet build broker internal health check to pass
+  ansible.builtin.assert:
+    that:
+      - fleet_build_broker_health.stdout | trim == 'healthy'
+    fail_msg: >-
+      The fleet build broker internal health check did not pass after root-only
+      secret rendering. The deployment runner's separately managed root-only
+      host probe remains authoritative for mTLS behavior.

@@ -307,7 +307,7 @@ Phase 2:
 Phase 3:
 
 7. Author profiles for known fork archetypes: `ai_lab`, `knowledge`,
-   `minimal_blog`. Driven by the retired-deployment deployment's needs.
+   `minimal_blog`. Driven by the 0fork deployment's needs.
 8. Run a fresh converge against an empty `.local/deployments/test/` with
    a 10-service `profile.yml` to validate the small-deployment story.
 

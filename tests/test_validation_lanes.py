@@ -92,6 +92,8 @@ def test_adr_discovery_metadata_change_selects_docs_and_repo_lanes() -> None:
         "policy-validation",
         "alert-rule-validation",
         "dependency-direction",
+        "cross-catalog-integrity",
+        "waiver-escalation-proofs",
     )
 
 
@@ -169,6 +171,8 @@ def test_live_apply_receipt_change_stays_out_of_service_lane() -> None:
         manifest_checks,
         changed_files=(
             "receipts/live-applies/2026-03-29-adr-0264-failure-domain-isolated-validation-lanes-mainline-live-apply.json",
+            "receipts/live-applies/ws-0510-gitea-authentik-oidc-e2e-apply-receipt.yaml",
+            "receipts/restic-snapshots-latest.json",
         ),
         branch="codex/receipt-only",
         base_ref="origin/main",
@@ -181,6 +185,57 @@ def test_live_apply_receipt_change_stays_out_of_service_lane() -> None:
         "generated-artifact-and-canonical-truth",
     )
     assert "service-syntax-and-unit" not in selection.selected_lanes
+
+
+def test_generated_status_history_selects_docs_and_generated_lanes() -> None:
+    module = load_module("validation_lanes_status_history", "scripts/validation_lanes.py")
+    manifest_checks = module.load_manifest_checks(REPO_ROOT / "config" / "validation-gate.json")
+    catalog = module.load_catalog(
+        catalog_path=REPO_ROOT / "config" / "validation-lanes.yaml",
+        manifest_checks=manifest_checks,
+    )
+
+    selection = module.resolve_selection_from_changed_files(
+        catalog,
+        manifest_checks,
+        changed_files=("docs/status/history/merged-workstreams.md",),
+        branch="codex/generated-status-history",
+        base_ref="origin/main",
+    )
+
+    assert selection.widened_to_all_lanes is False
+    assert selection.unknown_files == ()
+    assert selection.selected_lanes == (
+        "documentation-and-adr",
+        "generated-artifact-and-canonical-truth",
+    )
+    assert "infrastructure-root-validation" not in selection.selected_lanes
+
+
+def test_publication_template_selects_relevant_lanes_without_infrastructure_roots() -> None:
+    module = load_module("validation_lanes_publication_template", "scripts/validation_lanes.py")
+    manifest_checks = module.load_manifest_checks(REPO_ROOT / "config" / "validation-gate.json")
+    catalog = module.load_catalog(
+        catalog_path=REPO_ROOT / "config" / "validation-lanes.yaml",
+        manifest_checks=manifest_checks,
+    )
+
+    selection = module.resolve_selection_from_changed_files(
+        catalog,
+        manifest_checks,
+        changed_files=("publication/templates/proxmox-host.yml",),
+        branch="codex/publication-template",
+        base_ref="origin/main",
+    )
+
+    assert selection.widened_to_all_lanes is False
+    assert selection.unknown_files == ()
+    assert selection.selected_lanes == (
+        "repository-structure-and-schema",
+        "generated-artifact-and-canonical-truth",
+        "service-syntax-and-unit",
+    )
+    assert "infrastructure-root-validation" not in selection.selected_lanes
 
 
 def test_explicit_checks_keep_fast_global_invariants() -> None:

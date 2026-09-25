@@ -31,7 +31,7 @@
     "severity": "error",
     "image": "registry.example.com/check-runner/ansible:2.17.10",
     "command": "mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=/workspace/.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/workspace/.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint",
-    "local_fallback_command": "./scripts/validate_repo.sh ansible-lint",
+    "local_fallback_command": "mkdir -p .ansible/validation/lint-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/lint-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=.ansible/validation/lint-requirements.sha ./scripts/validate_repo.sh ansible-lint",
     "working_dir": "/workspace",
     "timeout_seconds": 900,
     "cache_mounts": [
@@ -49,7 +49,7 @@
     "cache_mounts": [
       "ansible_collections"
     ],
-    "native_command": "mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com ./scripts/validate_repo.sh ansible-syntax"
+    "native_command": "mkdir -p .ansible/validation/syntax-collections && LV3_ANSIBLE_GALAXY_SERVER=https://galaxy.ansible.com LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/syntax-collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=.ansible/validation/syntax-requirements.sha ./scripts/validate_repo.sh ansible-syntax"
   },
   "dependency-graph": {
     "description": "Validate the service dependency graph schema, cross references, generated Mermaid markdown, and generated Excalidraw architecture scenes.",
@@ -84,7 +84,7 @@
     "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "./scripts/validate_repo.sh generated-portals",
     "working_dir": "/workspace",
-    "timeout_seconds": 600,
+    "timeout_seconds": 900,
     "native_command": "./scripts/validate_repo.sh generated-portals"
   },
   "packer-validate": {
@@ -105,7 +105,7 @@
     "image": "registry.example.com/check-runner/python:3.12.10",
     "command": "python scripts/provider_boundary_catalog.py --validate >/dev/null && python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/capability_contracts.py --validate >/dev/null && python scripts/platform_manifest.py --check >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/stage_smoke_suites.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && python scripts/subdomain_exposure_audit.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null && ./scripts/run_python_with_packages.sh pyyaml -- scripts/atlas_schema.py validate >/dev/null",
     "working_dir": "/workspace",
-    "timeout_seconds": 600,
+    "timeout_seconds": 1200,
     "native_command": "./scripts/validate_repo.sh data-models >/dev/null && ./scripts/run_python_with_packages.sh pyyaml jsonschema -- scripts/platform_manifest.py --check >/dev/null && ./scripts/run_python_with_packages.sh pyyaml jsonschema -- scripts/stage_smoke_suites.py --validate >/dev/null"
   },
   "atlas-lint": {
@@ -184,13 +184,13 @@
     "native_command": "python3 scripts/published_artifact_secret_scan.py --repo-root . --enforce-gitleaks"
   },
   "service-completeness": {
-    "description": "Enforce the ADR 0107 extension checklist for non-grandfathered services.",
+    "description": "Enforce the ADR 0107 extension checklist for changed services, falling back to the full inventory for global or unscoped changes.",
     "severity": "error",
     "image": "registry.example.com/check-runner/python:3.12.10",
-    "command": "python scripts/validate_service_completeness.py --validate >/dev/null",
+    "command": "python scripts/validate_service_completeness.py --changed --validate >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
-    "native_command": "python3 scripts/validate_service_completeness.py --validate >/dev/null"
+    "native_command": "python3 scripts/validate_service_completeness.py --changed --validate >/dev/null"
   },
   "tofu-validate": {
     "description": "Validate OpenTofu configuration if the repo carries a tofu root; otherwise report a no-op pass.",

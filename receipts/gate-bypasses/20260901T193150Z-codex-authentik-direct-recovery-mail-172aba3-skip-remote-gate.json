@@ -1,0 +1,24 @@
+{
+  "schema_version": "2.0.0",
+  "created_at": "2026-09-01T19:31:50Z",
+  "bypass": "skip_remote_gate",
+  "source": "codex-recovery",
+  "branch": "codex/authentik-direct-recovery-mail",
+  "commit": "172aba3f01757de2756094aaebe5d11cf684fb7c",
+  "waiver": {
+    "reason_code": "pre_existing_gate_failures",
+    "reason_summary": "All gate failures in this run are pre-existing on the target branch and demonstrably unrelated to the commits being pushed; the author has verified no new regressions were introduced.",
+    "detail": "The full local pre-push gate fails only on generated platform facts and HTTPS TLS assurance artifacts that were already stale before this recovery change; targeted Authentik tests and integration validation pass.",
+    "impacted_lanes": [
+      "remote-pre-push-gate"
+    ],
+    "substitute_evidence": [
+      "pytest -q tests/test_authentik_runtime_role.py (12 passed)",
+      "python scripts/validate_integrations.py --check-dead (8 contracts valid)",
+      "live Authentik recovery request returned 204 and Stalwart recorded delivery without rejection"
+    ],
+    "owner": "operator@example.com",
+    "expires_on": "2026-09-02",
+    "remediation_ref": "ws-0495-authentik-direct-smtp-recovery"
+  }
+}

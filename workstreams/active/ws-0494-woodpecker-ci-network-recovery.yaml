@@ -1,0 +1,55 @@
+id: ws-0494-woodpecker-ci-network-recovery
+adr: "0287"
+title: Restore the Woodpecker CI webhook runtime after bridge detachment
+status: ready
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/woodpecker-ci-network-recovery-20260901
+worktree_path: .worktrees/woodpecker-ci-network-recovery-20260901
+doc: docs/workstreams/ws-0494-woodpecker-ci-network-recovery.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+  - workstreams/active/ws-0494-woodpecker-ci-network-recovery.yaml
+  - docs/workstreams/ws-0494-woodpecker-ci-network-recovery.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - receipts/live-applies/ws-0494-woodpecker-ci-network-recovery-apply-receipt.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0494_tracking
+      paths:
+        - workstreams/active/ws-0494-woodpecker-ci-network-recovery.yaml
+        - docs/workstreams/ws-0494-woodpecker-ci-network-recovery.md
+      mode: exclusive
+    - id: ws_0494_live_apply_evidence
+      paths:
+        - receipts/live-applies/ws-0494-woodpecker-ci-network-recovery-apply-receipt.yaml
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    - id: ws_0494_generated_diagram
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-index-and-diagram-v1
+context: |
+  GitHub push and pull-request deliveries to the managed Woodpecker instance
+  received HTTP 502 while the server container lacked its declared Compose
+  bridge attachment. This workstream records the minimal live recovery and
+  the successful server-side validation that followed.
+tasks:
+  - id: t1
+    title: Isolate the CI webhook failure to the runtime bridge attachment
+    status: completed
+  - id: t2
+    title: Reattach the Woodpecker server to its declared Compose bridge
+    status: completed
+  - id: t3
+    title: Verify the public CI endpoint and a fresh pull-request pipeline
+    status: completed

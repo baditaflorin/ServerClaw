@@ -30,6 +30,7 @@ IDENTITY_FINGERPRINT_KEYS = {
     "management_ipv4",
     "management_ipv6",
     "management_ipv6_cidr",
+    "management_tailscale_ipv4",
     "platform_domain",
 }
 REQUIRED_IDENTITY_FINGERPRINT_KEYS = {

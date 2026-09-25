@@ -76,17 +76,15 @@
   hosts: artifact-cache
   become: true
   gather_facts: false
+  vars_files:
+    - ../vars/artifact_cache_registry_endpoints.yml
   tags:
     - tier-2
     - automation
     - service-artifact-cache-vm
   vars:
     proxmox_guest_ssh_connection_mode: proxmox_host_jump
-    docker_runtime_insecure_registries:
-      - "{{ ansible_host }}:5001"
-      - "{{ ansible_host }}:5002"
-      - "{{ ansible_host }}:5003"
-      - "{{ ansible_host }}:5004"
+    docker_runtime_insecure_registries: "{{ artifact_cache_docker_runtime_insecure_registries }}"
 
   pre_tasks:
     - name: Wait for the artifact cache VM SSH service to be reachable

@@ -263,9 +263,9 @@ Phase 2 (one PR, flips the flag):
 Phase 3 (one PR):
 
 9. Add `make new-deployment slug=<slug> apex=<apex>` scaffolding target.
-10. Bootstrap `.local/deployments/retired-deployment/` from the existing
-    `.local/identity.yml.retired-deployment` and `.local/retired-deployment/`.
-11. Verify `make generate deployment=retired-deployment` and `make generate deployment=prod`
+10. Bootstrap `.local/deployments/0fork/` from the existing
+    `.local/identity.yml.0fork` and `.local/0fork/`.
+11. Verify `make generate deployment=0fork` and `make generate deployment=prod`
     produce non-overlapping artifact trees.
 
 ### Rollback

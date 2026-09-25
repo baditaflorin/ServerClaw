@@ -60,6 +60,11 @@ argument_specs:
         required: false
         description:
           - Private SMTP submission port exposed only for local platform workloads on docker-runtime.
+      mail_platform_gateway_smtp_bridge_port:
+        type: int
+        required: false
+        description:
+          - Private SMTP compatibility port used by consumers that send through the transactional gateway.
       mail_platform_submission_auth_retries:
         type: int
         required: false

@@ -1,0 +1,16 @@
+# managed-by: role=artifact_cache_ghcr_reader_bridge adr=0296
+# This account has no shell or forwarding path. The root-owned authorized key
+# selects one exact sudo-approved reader transaction instead. Its root-owned
+# key uses restrict, so a Match-scoped PermitUserEnvironment directive is both
+# unnecessary and invalid in OpenSSH.
+Match User {{ artifact_cache_ghcr_reader_bridge_user }}
+    AuthorizedKeysFile {{ artifact_cache_ghcr_reader_bridge_authorized_keys_path }}
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    PermitTTY no
+    AllowTcpForwarding no
+    X11Forwarding no
+    PermitTunnel no
+    GatewayPorts no
+
+Match all

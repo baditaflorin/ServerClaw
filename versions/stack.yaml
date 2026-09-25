@@ -1,12 +1,12 @@
 schema_version: 1.0.0
 repo_version: 0.179.46
-platform_version: 0.178.222
+platform_version: 0.178.223
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
     coolify_runtime: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply
-    fork_services: 2026-04-27-ws-0372-retired-deployment-services-all-7-deployed
+    fork_services: 2026-04-27-ws-0372-0fork-services-all-7-deployed
     platform: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
     monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
     nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
@@ -1183,5 +1183,5 @@ release_tracks:
     current: 0.179.46
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.178.222
+    current: 0.178.223
     meaning: intended platform release for the actual server configuration

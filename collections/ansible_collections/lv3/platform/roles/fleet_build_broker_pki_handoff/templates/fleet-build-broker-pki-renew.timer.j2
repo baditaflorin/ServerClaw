@@ -1,0 +1,12 @@
+# managed-by: role=fleet_build_broker_pki_handoff adr=0101 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+[Unit]
+Description=Fleet build broker PKI renewal schedule
+
+[Timer]
+OnCalendar={{ fleet_build_broker_pki_handoff_on_calendar }}
+Persistent=true
+RandomizedDelaySec={{ fleet_build_broker_pki_handoff_randomized_delay_seconds }}
+Unit={{ fleet_build_broker_pki_handoff_name }}.service
+
+[Install]
+WantedBy=timers.target

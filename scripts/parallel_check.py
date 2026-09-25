@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import signal
 import subprocess
 import sys
 import tempfile
@@ -291,6 +292,54 @@ def should_use_native_command(check: CheckDefinition) -> bool:
     return bool(os.environ.get("LV3_NATIVE_EXECUTION") == "1" and check.native_command)
 
 
+def terminate_and_reap_timed_out_process(process: subprocess.Popen[str]) -> tuple[str, str]:
+    """Terminate a timed-out command and every process it started, then reap it."""
+
+    if os.name == "posix":
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+    else:
+        process.terminate()
+
+    try:
+        stdout, stderr = process.communicate(timeout=5)
+    except subprocess.TimeoutExpired:
+        if os.name == "posix":
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        else:
+            process.kill()
+        stdout, stderr = process.communicate()
+    return stdout, stderr
+
+
+def launch_timed_process(command: list[str], workspace: Path) -> subprocess.Popen[str]:
+    """Start a timed gate command in an isolated session when supported."""
+
+    if os.name == "posix":
+        # A timeout must clean up every child of shell-based gate commands, not
+        # only the shell process that subprocess directly launched.
+        return subprocess.Popen(
+            command,
+            cwd=workspace,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            start_new_session=True,
+        )
+    return subprocess.Popen(
+        command,
+        cwd=workspace,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+
 def execute_check(
     check: CheckDefinition,
     workspace: Path,
@@ -317,18 +366,12 @@ def execute_check(
     started = time.monotonic()
 
     try:
-        completed = subprocess.run(
-            docker_command,
-            cwd=workspace,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=check.timeout_seconds,
-        )
-        stdout = completed.stdout.strip()
-        stderr = completed.stderr.strip()
+        process = launch_timed_process(docker_command, workspace)
+        stdout, stderr = process.communicate(timeout=check.timeout_seconds)
+        stdout = stdout.strip()
+        stderr = stderr.strip()
         unavailable_reason = classify_runner_unavailable(stdout, stderr)
-        if completed.returncode == 0:
+        if process.returncode == 0:
             status = "passed"
         elif unavailable_reason is not None:
             status = "runner_unavailable"
@@ -337,17 +380,18 @@ def execute_check(
         return CheckResult(
             label=check.label,
             status=status,
-            returncode=completed.returncode,
+            returncode=process.returncode,
             duration_seconds=time.monotonic() - started,
             stdout=stdout,
             stderr=stderr,
             docker_command=docker_command,
         )
-    except subprocess.TimeoutExpired as exc:
+    except subprocess.TimeoutExpired:
+        stdout, stderr = terminate_and_reap_timed_out_process(process)
         cleanup_details = (
             cleanup_timed_out_container(docker_binary, workspace, cidfile_path) if cidfile_path is not None else ""
         )
-        stderr = normalize_process_output(exc.stderr)
+        stderr = normalize_process_output(stderr)
         if cleanup_details:
             stderr = "\n".join(part for part in (stderr, f"cleanup: {cleanup_details}") if part)
         return CheckResult(
@@ -355,7 +399,7 @@ def execute_check(
             status="timed_out",
             returncode=124,
             duration_seconds=time.monotonic() - started,
-            stdout=normalize_process_output(exc.stdout),
+            stdout=normalize_process_output(stdout),
             stderr=stderr,
             docker_command=docker_command,
         )

@@ -1,0 +1,8 @@
+# Purpose: Delegate the VM180 fleet-build-broker converge to the canonical LV3 platform collection playbook.
+# Use case: Run the private broker baseline through the repository root entrypoint.
+# Inputs: Same as ../collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker.yml.
+# Outputs: Canonical playbook import only; no direct infrastructure mutation is defined here.
+# Idempotency: Yes; imports an idempotent managed playbook.
+# Dependencies: canonical lv3.platform fleet-build-broker playbook source.
+---
+- import_playbook: ../collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker.yml

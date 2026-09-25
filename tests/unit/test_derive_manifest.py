@@ -95,12 +95,12 @@ class TestDeriveProvider:
                 "addr": "1.2.3.4",
                 "port": 22,
                 "user": "root",
-                "key": {"vault": "deployments/retired-deployment/ssh-key", "field": "private_key"},
+                "key": {"vault": "deployments/0fork/ssh-key", "field": "private_key"},
             }
         }
         provider, review = derive_provider(conn)
         assert any("vault" in r for r in review)
-        assert "vault:deployments/retired-deployment/ssh-key" in provider["initial_key_path"]
+        assert "vault:deployments/0fork/ssh-key" in provider["initial_key_path"]
 
     def test_missing_addr_triggers_review(self):
         conn = {"proxmox_host": {"port": 22, "user": "root", "key": "k"}}
@@ -163,7 +163,7 @@ class TestBuildManifest:
     def _make_inputs(self):
         identity = {
             "platform_domain": "example.org",
-            "platform_operator_name": "retired-deployment Operator",
+            "platform_operator_name": "0fork Operator",
             "platform_operator_email": "ops@example.org",
         }
         connection = {

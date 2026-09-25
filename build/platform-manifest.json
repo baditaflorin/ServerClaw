@@ -2,9 +2,9 @@
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
   "repo_version": "0.179.46",
-  "platform_version": "0.178.222",
-  "generated_at": "2026-08-31T21:08:14Z",
-  "next_refresh_at": "2026-08-31T22:08:14Z",
+  "platform_version": "0.178.223",
+  "generated_at": "2026-09-25T19:21:37Z",
+  "next_refresh_at": "2026-09-25T20:21:37Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",
@@ -6386,7 +6386,7 @@
   },
   "recent_changes": {
     "last_version": "0.179.45",
-    "deployed_at": "2026-08-31",
+    "deployed_at": "2026-09-25",
     "summary": "Complete the live-verified Authentik migration, cut over active OIDC consumers and edge authentication, and retire the Keycloak runtime with preserved rollback archives.",
     "release_notes_url": "docs/release-notes/0.179.46.md"
   },

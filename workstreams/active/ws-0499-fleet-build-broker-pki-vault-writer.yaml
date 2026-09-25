@@ -1,0 +1,75 @@
+id: ws-0499-fleet-build-broker-pki-vault-writer
+adr: "0047"
+title: Install a forced-command, one-shot Dockerhost writer for broker PKI material
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/fix-broker-pki-writer-config-validation
+worktree_path: .worktrees/fix-broker-pki-writer-config-validation
+doc: docs/workstreams/ws-0499-fleet-build-broker-pki-vault-writer.md
+depends_on:
+  - ws-0497-fleet-build-broker-vm180
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_pki_vault_writer/**
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker-pki-vault-writer.yml
+  - playbooks/fleet-build-broker-pki-vault-writer.yml
+  - docs/runbooks/fleet-build-broker-pki-vault-writer.md
+  - tests/test_fleet_build_broker_pki_vault_writer.py
+  - collections/ansible_collections/lv3/platform/roles/artifact_cache_ghcr_reader_bridge/templates/sshd-artifact-cache-ghcr-reader.conf.j2
+  - tests/test_artifact_cache_ghcr_secret_renderer.py
+  - docs/workstreams/ws-0499-fleet-build-broker-pki-vault-writer.md
+  - workstreams/active/ws-0499-fleet-build-broker-pki-vault-writer.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: fleet_build_broker_pki_vault_writer_runtime
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_pki_vault_writer/**
+        - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker-pki-vault-writer.yml
+        - playbooks/fleet-build-broker-pki-vault-writer.yml
+        - docs/runbooks/fleet-build-broker-pki-vault-writer.md
+        - tests/test_fleet_build_broker_pki_vault_writer.py
+      mode: exclusive
+    - id: ws_0499_tracking
+      paths:
+        - docs/workstreams/ws-0499-fleet-build-broker-pki-vault-writer.md
+        - workstreams/active/ws-0499-fleet-build-broker-pki-vault-writer.yaml
+      mode: exclusive
+    - id: forced_command_ssh_match_syntax
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/artifact_cache_ghcr_reader_bridge/templates/sshd-artifact-cache-ghcr-reader.conf.j2
+        - tests/test_artifact_cache_ghcr_secret_renderer.py
+      mode: exclusive
+    - id: completed_cache_delivery_tracking
+      paths:
+        - workstreams/active/ws-0504-cache-ghcr-secret-renderer.yaml
+        - workstreams/archive/2026/ws-0504-cache-ghcr-secret-renderer.yaml
+      mode: shared_contract
+      contract: completed-workstream-transition-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+context: |
+  The private broker PKI handoff needs one atomic ten-record vault batch but
+  must never receive persistent vault-write authority or Dockerhost API-key
+  administration material. This workstream installs only the narrow, remote
+  forced-command transaction boundary. The follow-up corrects an OpenSSH
+  Match-block directive, restores the minimum privilege-safe
+  AuthorizedKeysFile traversal that OpenSSH requires, and permits that exact
+  traversal-only parent in the root-only executable's fixed-config validator.
+  It does not create a client key, issue certificates, write a vault record,
+  expose a route, or broaden the restricted account's authority.
+tasks:
+  - id: t1
+    title: Install root-only transaction code with fixed one-use authority and batch validation
+    status: completed
+  - id: t2
+    title: Restrict Dockerhost SSH and sudo to the exact PKI transaction
+    status: completed
+  - id: t3
+    title: Correct the fail-closed SSH syntax, key traversal, and fixed-config validation invariants
+    status: in_progress

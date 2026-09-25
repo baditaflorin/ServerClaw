@@ -1,0 +1,19 @@
+workstream_id: ws-0494-woodpecker-ci-network-recovery
+state: completed
+schema_version: 1.1.0
+started_at: '2026-09-01T18:00:00Z'
+completed_at: '2026-09-01T18:06:00Z'
+applied_by: codex/woodpecker-ci-network-recovery-20260901
+repo_version: 0.179.46
+source_commit: 4e6c2a059aaea72789da87af0f0c611a74370959
+adr: '0287'
+summary: Restored the managed Woodpecker CI webhook runtime after its server container lost the declared Compose bridge attachment.
+targets:
+  - service: woodpecker
+    host_group: docker-runtime
+errors: []
+notes:
+  - The CI server and its existing bridge could independently reach the database once the runtime network was available.
+  - The server was attached only to its existing declared Compose bridge; no database, workflow, repository configuration, or secret was modified.
+  - The public CI endpoint returned HTTP 200 after recovery.
+  - A fresh pull-request webhook delivery completed the required Woodpecker pipeline successfully.

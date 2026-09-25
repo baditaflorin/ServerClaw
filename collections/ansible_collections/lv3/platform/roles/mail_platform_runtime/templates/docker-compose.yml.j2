@@ -16,6 +16,7 @@ services:
       - "{{ ansible_host }}:{{ mail_platform_internal_submission_port }}:{{ mail_platform_internal_submission_port }}"
 
   mail-gateway:
+    image: "{{ mail_platform_gateway_image }}"
     build: {{ mail_platform_gateway_app_dir }}
     container_name: {{ mail_platform_gateway_container_name }}
     restart: unless-stopped
@@ -31,3 +32,26 @@ services:
         condition: service_healthy
       stalwart:
         condition: service_started
+
+  mail-gateway-smtp:
+    image: "{{ mail_platform_gateway_image }}"
+    container_name: {{ mail_platform_gateway_smtp_bridge_container_name }}
+    restart: unless-stopped
+    command: ["python", "smtp_bridge.py"]
+    env_file:
+      - {{ mail_platform_gateway_env_file }}
+    volumes:
+      - {{ mail_platform_gateway_data_dir }}:/data
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import socket; connection = socket.create_connection(('127.0.0.1', {{ mail_platform_gateway_smtp_bridge_port }}), 5); banner = connection.recv(32); connection.close(); raise SystemExit(0 if banner.startswith(b'220') else 1)
+      interval: 10s
+      timeout: 5s
+      retries: 12

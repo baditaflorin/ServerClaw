@@ -1,0 +1,31 @@
+---
+# Purpose: Declare the fail-closed Dockerhost vault-writer contract for broker PKI material.
+argument_specs:
+  main:
+    short_description: Install the forced-command, one-shot broker PKI vault writer on Dockerhost.
+    options:
+      fleet_build_broker_pki_vault_writer_authorized_public_key:
+        type: str
+        required: true
+        description:
+          - Dedicated Step-CA-control-host Ed25519 public key; empty values are rejected.
+      fleet_build_broker_pki_vault_writer_allowed_source:
+        type: str
+        required: true
+        description:
+          - Exact private source address allowed to use the forced SSH command.
+      fleet_build_broker_pki_vault_writer_admin_token_file:
+        type: path
+        required: false
+        description:
+          - Existing root-only local API-key administration credential file; this role never creates it.
+      fleet_build_broker_pki_vault_writer_apikey_url:
+        type: str
+        required: false
+        description:
+          - Fixed Dockerhost loopback API-key service endpoint.
+      fleet_build_broker_pki_vault_writer_vault_url:
+        type: str
+        required: false
+        description:
+          - Fixed HTTPS fleet-secrets endpoint used only for the broker PKI batch.

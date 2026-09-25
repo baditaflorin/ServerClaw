@@ -8,12 +8,12 @@ platform_generation:
   host_vars_source: inventory/host_vars/proxmox-host.yml
   identity_overlay:
     platform_domain: example.org
+    host_public_hostname: debian-base-template
     management_interface: enp7s0
     management_ipv4: 203.0.113.1
     management_gateway4: 203.0.113.65
     management_ipv6: 2001:db8::2
     management_tailscale_ipv4: 100.120.234.7
-    host_public_hostname: debian-base-template
 platform_host:
   id: proxmox-host
   public_hostname: debian-base-template

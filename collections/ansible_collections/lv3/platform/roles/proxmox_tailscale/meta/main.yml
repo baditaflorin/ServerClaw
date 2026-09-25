@@ -5,4 +5,3 @@ dependencies:
       preflight_required_vars:
         - tailscale_apt_key_url
         - proxmox_tailscale_hostname
-        - proxmox_tailscale_provider

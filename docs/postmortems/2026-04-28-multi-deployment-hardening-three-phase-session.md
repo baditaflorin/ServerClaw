@@ -35,7 +35,7 @@ other agents during this session and required mid-session rebase.)
 ### Phase 1 — ADR 0445 — fork-shape matrix + late-bound lint
 
 - **Three publishable identity overlays** under `tests/fixtures/inventories/`
-  exercising the equal-flavor (lv3) and divergent-flavor (retired-deployment: leading
+  exercising the equal-flavor (lv3) and divergent-flavor (0fork: leading
   digit stripped from `sql_prefix` / `unix_prefix`) paths through the
   `platform_identity` filter, plus a third unrelated identity (`testfork.invalid`).
 - **`scripts/converge_dry_run.py`** runs `ansible-playbook --syntax-check`

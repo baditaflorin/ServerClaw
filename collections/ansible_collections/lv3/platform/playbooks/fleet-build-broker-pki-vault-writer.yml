@@ -1,0 +1,29 @@
+# Playbook: fleet-build-broker-pki-vault-writer.yml
+# Purpose: Converge the Dockerhost-only forced-command bridge for the broker PKI vault transaction.
+# Use case: Prepare the narrow writer boundary before enabling the Step-CA broker certificate renewal handoff.
+# Inputs: Deployment-local dedicated runtime-control public key and existing Dockerhost API-key administration credential.
+# Outputs: Root-owned transaction code and a noninteractive forced-command SSH account; it never issues a writer during converge.
+# Idempotency: Yes. Configuration-only; no certificate, API-key, or vault mutation occurs.
+# Dependencies: go-apikey-service >= 0.4.5 and go-fleet-secrets >= 0.3.6 must be deployed before the handoff uses it.
+---
+- name: Converge the Dockerhost broker PKI vault writer
+  hosts: docker-runtime
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - security
+    - service-fleet-build-broker
+    - service-fleet-build-broker-pki-writer
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - docker-runtime
+
+  roles:
+    - role: lv3.platform.fleet_build_broker_pki_vault_writer

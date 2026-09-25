@@ -1,0 +1,103 @@
+---
+# Purpose: Define the private VM180 runtime contract for the fleet build broker.
+#
+# The broker image must be supplied as an immutable digest through the managed
+# GHCR cache. This role creates only empty, non-secret mount directories. A
+# root-only `render-secrets` invocation supplies the files before the broker
+# starts; this role never creates, reads, or logs a secret value.
+fleet_build_broker_state: present
+fleet_build_broker_site_dir: /opt/fleet-build-broker
+fleet_build_broker_compose_file: "{{ fleet_build_broker_site_dir }}/docker-compose.yml"
+fleet_build_broker_data_dir: /var/lib/fleet-build-broker
+fleet_build_broker_secret_dir: /run/go-fleet-secrets/fleet-build-broker
+fleet_build_broker_secret_mount: /run/broker-secrets
+fleet_build_broker_probe_secret_dir: /run/go-fleet-secrets/fleet-build-broker-probe
+fleet_build_broker_runtime_renderer_api_key_dir: /etc/fleet-build-broker/renderer/runtime
+fleet_build_broker_runtime_renderer_api_key_file: "{{ fleet_build_broker_runtime_renderer_api_key_dir }}/api-key"
+fleet_build_broker_runtime_renderer_api_key_mount: /run/broker-runtime-renderer-api-key
+fleet_build_broker_monitor_renderer_api_key_dir: /etc/fleet-build-broker/renderer/monitor
+fleet_build_broker_monitor_renderer_api_key_file: "{{ fleet_build_broker_monitor_renderer_api_key_dir }}/api-key"
+fleet_build_broker_monitor_renderer_api_key_mount: /run/broker-monitor-renderer-api-key
+fleet_build_broker_renderer_manifest_dir: "{{ fleet_build_broker_site_dir }}/renderer-manifests"
+fleet_build_broker_runtime_renderer_manifest_file: "{{ fleet_build_broker_renderer_manifest_dir }}/runtime.json"
+fleet_build_broker_monitor_renderer_manifest_file: "{{ fleet_build_broker_renderer_manifest_dir }}/monitor.json"
+fleet_build_broker_runtime_renderer_manifest_mount: /run/broker-runtime-renderer-manifest/runtime.json
+fleet_build_broker_monitor_renderer_manifest_mount: /run/broker-monitor-renderer-manifest/monitor.json
+# The image is pulled by VM180's Docker daemon. It uses the loopback-only,
+# credentialed cache adapter; the broker container never receives that access.
+fleet_build_broker_image_mirror: 127.0.0.1:5005
+fleet_build_broker_image: ""
+fleet_build_broker_renderer_image: "{{ fleet_build_broker_image }}"
+fleet_build_broker_container_name: fleet-build-broker
+fleet_build_broker_runtime_renderer_container_name: fleet-build-broker-render-runtime-secrets
+fleet_build_broker_monitor_renderer_container_name: fleet-build-broker-render-monitor-secrets
+fleet_build_broker_bind_host: "{{ ansible_host }}"
+fleet_build_broker_host_port: 18100
+fleet_build_broker_container_port: 5001
+fleet_build_broker_container_uid: 10001
+fleet_build_broker_container_gid: 10001
+fleet_build_broker_data_mode: "0750"
+fleet_build_broker_secret_dir_mode: "0750"
+fleet_build_broker_secret_file_mode: "0440"
+fleet_build_broker_probe_secret_dir_mode: "0700"
+fleet_build_broker_probe_secret_file_mode: "0400"
+fleet_build_broker_renderer_api_key_dir_mode: "0700"
+fleet_build_broker_renderer_api_key_file_mode: "0400"
+fleet_build_broker_runtime_secret_manifest:
+  fleet_build_broker_server_certificate: server.crt
+  fleet_build_broker_server_private_key: server.key
+  fleet_build_broker_client_ca: client-ca.crt
+  fleet_build_broker_github_app_id: github-app-id
+  fleet_build_broker_github_app_installation_id: github-app-installation-id
+  fleet_build_broker_github_app_private_key: github-app-private-key.pem
+  fleet_build_broker_github_pat_fallback: github-pat-fallback
+fleet_build_broker_monitor_secret_manifest:
+  fleet_build_broker_server_ca: server-ca.crt
+  fleet_build_broker_monitor_certificate: monitor.crt
+  fleet_build_broker_monitor_private_key: monitor.key
+fleet_build_broker_runtime_renderer_command:
+  - render-secrets
+  - --target
+  - runtime
+  - --manifest
+  - /run/broker-runtime-renderer-manifest/runtime.json
+  - --api-key-file
+  - /run/broker-runtime-renderer-api-key/api-key
+  - --vault-url
+  - https://fleet-secrets.0exec.com
+  - --output-dir
+  - /run/broker-secrets
+  - --directory-gid
+  - "10001"
+  - --directory-mode
+  - "0750"
+  - --file-uid
+  - "0"
+  - --file-gid
+  - "10001"
+  - --file-mode
+  - "0440"
+fleet_build_broker_monitor_renderer_command:
+  - render-secrets
+  - --target
+  - monitor
+  - --manifest
+  - /run/broker-monitor-renderer-manifest/monitor.json
+  - --api-key-file
+  - /run/broker-monitor-renderer-api-key/api-key
+  - --vault-url
+  - https://fleet-secrets.0exec.com
+  - --output-dir
+  - /run/broker-probe-secrets
+fleet_build_broker_required_secret_files:
+  - server.crt
+  - server.key
+  - client-ca.crt
+  - github-app-id
+  - github-app-installation-id
+  - github-app-private-key.pem
+  - github-pat-fallback
+fleet_build_broker_required_probe_secret_files:
+  - server-ca.crt
+  - monitor.crt
+  - monitor.key

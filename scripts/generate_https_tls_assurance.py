@@ -14,6 +14,8 @@ corrupting the surrounding YAML (Amendment 5 — ADR 0396).
 Usage:
     python3 scripts/generate_https_tls_assurance.py --write
     python3 scripts/generate_https_tls_assurance.py --check    # exits 1 if files would change
+    python3 scripts/generate_https_tls_assurance.py --check-if-present
+                                                    # checks strictly when a runtime output exists
     python3 scripts/generate_https_tls_assurance.py --dry-run  # print diff without writing
 """
 
@@ -114,6 +116,14 @@ def build_parser() -> argparse.ArgumentParser:
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--write", action="store_true", help="Write generated files to disk.")
     group.add_argument("--check", action="store_true", help="Exit non-zero if files would change (CI mode).")
+    group.add_argument(
+        "--check-if-present",
+        action="store_true",
+        help=(
+            "Exit non-zero if the ignored HTTPS alert output exists and generated "
+            "content would change; accept a clean checkout without that runtime artifact."
+        ),
+    )
     group.add_argument("--dry-run", action="store_true", help="Print what would be written without writing.")
     parser.add_argument("--print-targets-json", action="store_true")
     return parser
@@ -144,10 +154,19 @@ def main(argv: list[str] | None = None) -> int:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(content, encoding="utf-8")
 
-    if args.check:
+    # The targets file is a tracked canonical artifact in a clean checkout.
+    # Only the deployment-local alerts file is intentionally ignored, so it is
+    # the presence signal for this optional validation mode. Once that alert
+    # output exists, retain strict comparison for both paired outputs.
+    alerts_output_present = PROMETHEUS_ALERTS_PATH.exists() or PROMETHEUS_ALERTS_PATH.is_symlink()
+    should_check = args.check or (args.check_if_present and alerts_output_present)
+    if should_check:
         if changed:
             for p in changed:
-                rel = str(p.relative_to(repo_root))
+                try:
+                    rel = str(p.relative_to(repo_root))
+                except ValueError:
+                    rel = str(p)
                 print(f"OUT OF DATE: {rel}; run generate_https_tls_assurance.py --write", file=sys.stderr)
             return 1
 

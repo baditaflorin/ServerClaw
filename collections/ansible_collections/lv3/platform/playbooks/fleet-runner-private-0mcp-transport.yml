@@ -1,0 +1,19 @@
+---
+# Converge the fixed private 0mcp transport on the dedicated Builder LXC108 only.
+- name: Converge the Builder-only private 0mcp fleet-runner transport
+  hosts: 0docker_builder
+  become: true
+  gather_facts: true
+  tags:
+    - automation
+    - fleet-runner
+    - private-0mcp
+    - builder-lxc-108
+  pre_tasks:
+    - name: Require the exact 0docker Builder LXC108 inventory hostname
+      ansible.builtin.assert:
+        that:
+          - inventory_hostname == '0docker_builder'
+        fail_msg: This playbook is closed to the dedicated 0docker Builder LXC108 inventory hostname.
+  roles:
+    - role: lv3.platform.fleet_runner_private_0mcp_transport

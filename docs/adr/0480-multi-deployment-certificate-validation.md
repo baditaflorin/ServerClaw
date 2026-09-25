@@ -49,7 +49,7 @@ The validator automatically detects deployment context from:
 Each deployment can have its own certificate catalog overlay:
 ```
 .local/deployments/lv3/certificate-catalog.json      (example.com certs)
-.local/deployments/retired-deployment/certificate-catalog.json    (example.org certs)
+.local/deployments/0fork/certificate-catalog.json    (example.org certs)
 ```
 
 ### Tier 3: Pre-Push Gate Enhancement

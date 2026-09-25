@@ -120,10 +120,10 @@ description  := slug-safe text (lowercase, hyphenated, no underscores)
 
 Examples (already conforming):
 
-- `2026-04-28-coolify-retired-deployment-runtime-live-apply` — **non-conforming**
+- `2026-04-28-coolify-0fork-runtime-live-apply` — **non-conforming**
   (missing `ref`); under this ADR, future receipts must include either
   `adr-NNNN` or `ws-NNNN` as the second token
-- `2026-04-27-ws-0372-retired-deployment-services-all-7-deployed` — conforming
+- `2026-04-27-ws-0372-0fork-services-all-7-deployed` — conforming
 - `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` — conforming
 
 **Inside the receipt JSON**, the same `ref` MUST appear in either:

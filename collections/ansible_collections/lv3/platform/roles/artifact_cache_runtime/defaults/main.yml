@@ -10,6 +10,17 @@ artifact_cache_bind_host: "{{ ansible_host }}"
 artifact_cache_network_mode: host
 artifact_cache_registry_image: docker.io/library/registry:2.8.3
 artifact_cache_seed_enabled: true
+# Private GHCR package reads are intentionally opt-in and use a second,
+# loopback-only adapter. The public GHCR adapter remains anonymous on :5002;
+# this role never creates, reads, or copies credential material.
+artifact_cache_ghcr_private_packages_enabled: false
+artifact_cache_ghcr_private_proxy_config_file: /etc/artifact-cache/ghcr-proxy/config.yml
+artifact_cache_ghcr_private_proxy_config_parent_dirs:
+  - /etc/artifact-cache
+  - /etc/artifact-cache/ghcr-proxy
+artifact_cache_ghcr_private_listener_host: 127.0.0.1
+artifact_cache_ghcr_private_listener_port: 5005
+artifact_cache_ghcr_private_storage_path: "{{ artifact_cache_data_root }}/ghcr-private"
 artifact_cache_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
 artifact_cache_seed_script: "{{ artifact_cache_repo_root }}/scripts/artifact_cache_seed.py"
 artifact_cache_seed_catalogs:

@@ -302,13 +302,21 @@ def main(argv: list[str] | None = None) -> int:
     try:
         declarations = load_declarations()
     except FileNotFoundError:
+        # Deployment DNS declarations contain environment-specific targets and
+        # are intentionally ignored.  Derive from the tracked registry first,
+        # then skip only the unavailable output comparison in a fresh worktree.
+        try:
+            derive_expected_declarations(registry)
+        except ValueError as exc:
+            print(f"ERROR: Registry schema error: {exc}", file=sys.stderr)
+            return 1
         print(
-            f"ERROR: {DNS_DECLARATIONS_PATH} not found.\n"
-            "Run: python scripts/generate_cross_cutting_artifacts.py --write --only dns",
-            file=sys.stderr,
+            "Skipping derived DNS declarations equality check because "
+            "deployment-specific dns-declarations.yaml is unavailable. "
+            "Tracked-source validation continues."
         )
-        return 1
-    except (OSError, ValueError) as exc:
+        return 0
+    except (OSError, yaml.YAMLError, ValueError) as exc:
         print(f"ERROR: Failed to load declarations: {exc}", file=sys.stderr)
         return 1
 

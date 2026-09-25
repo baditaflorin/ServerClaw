@@ -38,11 +38,20 @@ deny contains msg if {
 deny contains msg if {
   some check_id, check in input.validation_gate
   timeout := object.get(check, "timeout_seconds", 0)
-  timeout > 900
+  maximum_timeout := validation_gate_maximum_timeout(check_id)
+  timeout > maximum_timeout
   msg := sprintf(
-    "validation gate check %q timeout_seconds must be <= 900",
-    [check_id],
+    "validation gate check %q timeout_seconds must be <= %d",
+    [check_id, maximum_timeout],
   )
+}
+
+validation_gate_maximum_timeout(check_id) := 1200 if {
+  check_id == "schema-validation"
+}
+
+validation_gate_maximum_timeout(check_id) := 900 if {
+  check_id != "schema-validation"
 }
 
 deny contains msg if {

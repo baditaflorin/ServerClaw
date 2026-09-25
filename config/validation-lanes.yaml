@@ -42,13 +42,17 @@ lanes:
       - python-type-safety
   remote-builder:
     title: Remote builder lane
-    description: Validate build-runner images, infrastructure roots, and heavyweight scanner surfaces.
+    description: Validate heavyweight security and IaC scanner surfaces.
     checks:
-      - packer-validate
-      - tofu-validate
       - security-scan
       - semgrep-sast
       - iac-policy-scan
+  infrastructure-root-validation:
+    title: Infrastructure root validation lane
+    description: Validate Packer templates and OpenTofu roots only when their infrastructure surface changes.
+    checks:
+      - packer-validate
+      - tofu-validate
   live-apply-and-promotion:
     title: Live-apply and promotion lane
     description: Validate promotion-facing runtime verification and post-merge automation entrypoints.
@@ -85,7 +89,10 @@ surface_classes:
       - changelog.md
       - versions/*.yaml
       - docs/diagrams/*
+      - docs/status/history/*.md
+      - docs/status/history/**/*.md
       - build/platform-manifest.json
+      - scripts/topology-snapshot.json
       - scripts/build_docs_portal.py
       - scripts/canonical_truth.py
       - scripts/generate_changelog_portal.py
@@ -103,9 +110,12 @@ surface_classes:
       - receipts/atlas-drift/*
       - receipts/atlas-drift/**/*
       - receipts/live-applies/*.json
+      - receipts/live-applies/*.yaml
       - receipts/live-applies/*.md
+      - receipts/live-applies/**/*.yaml
       - receipts/live-applies/evidence/*
       - receipts/live-applies/evidence/**/*
+      - receipts/restic-snapshots-latest.json
     required_lanes:
       - repository-structure-and-schema
       - generated-artifact-and-canonical-truth
@@ -204,6 +214,22 @@ surface_classes:
     required_lanes:
       - repository-structure-and-schema
       - service-syntax-and-unit
+  - surface_id: self_hosted_ci_workflows
+    title: Self-hosted CI pipeline definitions
+    paths:
+      - .woodpecker.yml
+    required_lanes:
+      - repository-structure-and-schema
+      - service-syntax-and-unit
+  - surface_id: sanitized_publication_templates
+    title: Public Tier A templates and their generated deployment artifacts
+    paths:
+      - publication/templates/*.yml
+      - publication/templates/**/*.yml
+    required_lanes:
+      - repository-structure-and-schema
+      - generated-artifact-and-canonical-truth
+      - service-syntax-and-unit
   - surface_id: builder_runtime
     title: Builder images and infrastructure roots
     paths:
@@ -212,6 +238,7 @@ surface_classes:
       - tofu/**/*
     required_lanes:
       - remote-builder
+      - infrastructure-root-validation
   - surface_id: promotion_runtime
     title: Promotion and worker verification automation
     paths:

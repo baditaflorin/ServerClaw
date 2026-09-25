@@ -1,5 +1,5 @@
 services:
-{% for mirror in artifact_cache_registry_mirrors.values() %}
+{% for mirror_name, mirror in artifact_cache_registry_mirrors.items() %}
   {{ mirror.service_name }}:
     image: {{ artifact_cache_registry_image }}
     container_name: {{ mirror.container_name }}
@@ -18,3 +18,18 @@ services:
     volumes:
       - "{{ mirror.storage_path }}:/var/lib/registry"
 {% endfor %}
+{% if artifact_cache_ghcr_private_packages_enabled | bool %}
+  ghcr-private:
+    image: {{ artifact_cache_registry_image }}
+    container_name: artifact-cache-ghcr-private
+    restart: unless-stopped
+    ports:
+      - "{{ artifact_cache_ghcr_private_listener_host }}:{{ artifact_cache_ghcr_private_listener_port }}:5000"
+    labels:
+      # The non-secret mtime label recreates only this private adapter after
+      # the root-only renderer atomically replaces its upstream-auth config.
+      io.lv3.platform.ghcr-private-proxy-config-mtime: "{{ artifact_cache_ghcr_private_proxy_config_stat.stat.mtime }}"
+    volumes:
+      - "{{ artifact_cache_ghcr_private_storage_path }}:/var/lib/registry"
+      - "{{ artifact_cache_ghcr_private_proxy_config_file }}:/etc/docker/registry/config.yml:ro"
+{% endif %}

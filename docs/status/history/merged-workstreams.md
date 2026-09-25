@@ -10,7 +10,9 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | --- | --- | --- | --- |
 | `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](../../adr/0470-deployment-fixture-matrix.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](../../adr/0448-deployment-connection-registry-and-wrapper.md) |
+| `0409` | Accept clean ignored HTTPS alert outputs while rejecting present drift | `merged` | [ws-0500-https-alert-runtime-output-gate.md](../../workstreams/ws-0500-https-alert-runtime-output-gate.md) |
 | `0407` | Ops Portal Sibling-Link IaC Substitution | `merged` | [0407-generic-by-default-local-overlay-architecture.md](../../adr/0407-generic-by-default-local-overlay-architecture.md) |
+| `0374` | Resolve generic subdomain catalog entries for selected DNS checks | `merged` | [ws-0497-dns-catalog-selection.md](../../workstreams/ws-0497-dns-catalog-selection.md) |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](../../workstreams/ws-0374-status-repair.md) |
 | `0369` | Shared Python validation toolkit for catalog and registry scripts | `merged` | [adr-0369-python-validation-toolkit.md](../../workstreams/adr-0369-python-validation-toolkit.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
@@ -18,6 +20,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
+| `0296` | Deliver the cache-only GHCR proxy configuration through a one-shot reader bridge | `merged` | [ws-0504-cache-ghcr-secret-renderer.md](../../workstreams/ws-0504-cache-ghcr-secret-renderer.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](../../workstreams/ws-0295-live-apply.md) |
 | `0293` | Integrate ADR 0293 exact-main LiveKit replay onto main | `merged` | [ws-0293-main-integration.md](../../workstreams/ws-0293-main-integration.md) |
 | `0259` | Integrate ADR 0259 exact-main replay onto current origin/main | `merged` | [ws-0259-main-merge.md](../../workstreams/ws-0259-main-merge.md) |
@@ -60,6 +63,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0146` | Langfuse for agent observability | `live_applied` | [adr-0146-ai-observability.md](../../workstreams/adr-0146-ai-observability.md) |
 | `0145` | Ollama for local LLM inference | `live_applied` | [adr-0145-ollama.md](../../workstreams/adr-0145-ollama.md) |
 | `0144` | Headscale mesh control plane | `merged` | [adr-0144-headscale.md](../../workstreams/adr-0144-headscale.md) |
+| `0143` | Enable least-privilege Gitea Authentik OIDC and browser E2E verification | `merged` | [ws-0510-gitea-authentik-oidc-e2e.md](../../workstreams/ws-0510-gitea-authentik-oidc-e2e.md) |
 | `0143` | Private Gitea with self-hosted CI | `merged` | [adr-0143-gitea-ci.md](../../workstreams/adr-0143-gitea-ci.md) |
 | `0142` | Public surface automated security scan | `merged` | [adr-0142-public-surface-security-scan.md](../../workstreams/adr-0142-public-surface-security-scan.md) |
 | `0141` | API token lifecycle and exposure response | `merged` | [adr-0141-api-token-lifecycle.md](../../workstreams/adr-0141-api-token-lifecycle.md) |

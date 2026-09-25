@@ -1,0 +1,16 @@
+---
+# Purpose: Declare the root-only VM180 renderer for the private GHCR proxy configuration.
+argument_specs:
+  main:
+    short_description: Install the constrained artifact-cache GHCR configuration renderer.
+    options:
+      artifact_cache_ghcr_secret_renderer_bridge_known_hosts:
+        type: str
+        required: true
+        description:
+          - Root-owned pinned Dockerhost SSH host-key entries supplied by the deployment-local transport bootstrap.
+      artifact_cache_ghcr_secret_renderer_transport_key_path:
+        type: path
+        required: false
+        description:
+          - Existing root-only dedicated bridge private key; this role never creates, copies, or logs it.

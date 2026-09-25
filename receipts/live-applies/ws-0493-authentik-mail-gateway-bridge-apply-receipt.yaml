@@ -1,0 +1,24 @@
+workstream_id: ws-0493-authentik-mail-gateway-bridge
+state: completed
+schema_version: 1.1.0
+started_at: '2026-09-01T17:14:00Z'
+completed_at: '2026-09-01T17:27:06Z'
+applied_by: codex/mail-platform-brevo-live-apply-20260901
+repo_version: 0.179.46
+source_commit: e4ca98f55279d1f0ab949bcf9bdd491c4ffa0765
+adr: '0041'
+summary: Restored Authentik transactional recovery-email delivery through the managed private SMTP bridge.
+targets:
+  - service: mail-platform
+    host_group: runtime-control
+  - service: authentik
+    host_group: runtime-control
+  - service: nginx
+    host_group: nginx
+errors: []
+notes:
+  - The provider credential was validated without logging or storing its value in this receipt.
+  - The governed mail-platform apply completed and its required backup coverage report recorded all governed sources as protected.
+  - The Authentik worker completed a fresh recovery-email task after the bridge update.
+  - The bridge recorded provider acceptance for that delivery; recipient, message content, and recovery link are intentionally omitted.
+  - Public Authentik readiness and Outline OIDC discovery returned HTTP 200 after the apply.

@@ -26,8 +26,8 @@ def test_internal_ip_targets_use_hostname_override_when_certificate_server_name_
     proxmox_internal = discovered["proxmox-ui-internal"]
 
     assert proxmox_internal["probe_url"] == "https://100.64.0.1:8006/api2/json/version"
-    assert proxmox_internal["probe_hostname"] == "proxmox.example.com"
-    assert proxmox_internal["testssl_url"] == "https://proxmox.example.com:8006/"
+    assert proxmox_internal["probe_hostname"] == "proxmox.example.org"
+    assert proxmox_internal["testssl_url"] == "https://proxmox.example.org:8006/"
     assert proxmox_internal["testssl_ip"] == "100.64.0.1"
 
 

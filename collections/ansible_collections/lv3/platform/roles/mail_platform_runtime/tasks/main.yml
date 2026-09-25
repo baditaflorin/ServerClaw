@@ -955,6 +955,38 @@
     delay: 0
     timeout: 120
 
+- name: Verify the private transactional SMTP bridge accepts managed credentials
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - exec
+      - -T
+      - mail-gateway
+      - python
+      - -c
+      - |
+        import os
+        import smtplib
+
+        with smtplib.SMTP("mail-gateway-smtp", {{ mail_platform_gateway_smtp_bridge_port }}, timeout=10) as client:
+            client.ehlo()
+            if "starttls" in client.esmtp_features:
+                raise RuntimeError("private transactional SMTP bridge unexpectedly advertises STARTTLS")
+            code, _ = client.login(os.environ["LOCAL_SMTP_USERNAME"], os.environ["LOCAL_SMTP_PASSWORD"])
+            if code != 235:
+                raise RuntimeError("private transactional SMTP bridge did not accept managed credentials")
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_gateway_smtp_bridge_auth_check
+  changed_when: false
+  retries: "{{ mail_platform_submission_auth_retries }}"
+  delay: "{{ mail_platform_submission_auth_delay_seconds }}"
+  until: mail_platform_gateway_smtp_bridge_auth_check.rc == 0
+  no_log: true
+
 - name: Wait for the mail gateway CRUD API to answer before bootstrapping mail principals
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/domains"

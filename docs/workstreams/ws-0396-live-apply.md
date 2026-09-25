@@ -138,12 +138,12 @@ at `receipts/security-reports/20260421T112535Z.json`, after which
 
 On 2026-04-22, the branch was rebased onto `origin/main` `467fe6eef`.
 The merge-readiness pass also repaired current-main workstream metadata for
-`ws-0424-retired-deployment`: its generated-index claim used the obsolete
+`ws-0424-fork-clone-0fork`: its generated-index claim used the obsolete
 `shared` mode, which blocked the workstream surface validator. The source shard
 now uses `shared_contract` with `generated-index-surfaces-v1`.
 The same pass registered `playbooks/mail-platform-send-gmail.yml` and
 `playbooks/rotate-hetzner-dns-token.yml` as Ansible execution-scope leaves
-because the new `retired-deployment-full-day.yml` orchestrator imports them.
+because the new `0fork-full-day.yml` orchestrator imports them.
 It also made repository data-model validation alias-aware for ADR 0430/0431
 local overlays, so alias-only fork guest entries can share a consolidation
 target IP without being treated as real Proxmox guests.

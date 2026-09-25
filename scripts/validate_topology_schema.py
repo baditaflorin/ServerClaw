@@ -3,7 +3,7 @@
 
 ADR 0462 — pre-commit gate that catches malformed topology files before
 they reach the runtime loader. The 2026-04-28 incident
-(.local/deployments/retired-deployment/topology.yml missing `role` on each guest)
+(.local/deployments/0fork/topology.yml missing `role` on each guest)
 silently broke generate_platform_vars.py 30 minutes deep into a
 converge. ws-0448 patched the loader to auto-fill `role` from `name`,
 but the right move is to reject malformed shapes at commit time.

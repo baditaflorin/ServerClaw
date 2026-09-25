@@ -1,0 +1,199 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+# managed-by: adr=0491 role=authentik_runtime
+version: 1
+metadata:
+  name: Platform operator email recovery
+  labels:
+    blueprints.goauthentik.io/description: >-
+      Short-lived, rate-limited password recovery for the named platform operator.
+entries:
+  - identifiers:
+      slug: platform-operator-recovery
+    id: recovery-flow
+    model: authentik_flows.flow
+    attrs:
+      name: Platform operator recovery
+      title: Reset your password
+      designation: recovery
+      authentication: require_unauthenticated
+
+  - identifiers:
+      name: platform-operator-recovery-password
+    id: recovery-password-field
+    model: authentik_stages_prompt.prompt
+    attrs:
+      field_key: password
+      label: New password
+      type: password
+      required: true
+      placeholder: New password
+      order: 0
+      placeholder_expression: false
+
+  - identifiers:
+      name: platform-operator-recovery-password-repeat
+    id: recovery-password-repeat-field
+    model: authentik_stages_prompt.prompt
+    attrs:
+      field_key: password_repeat
+      label: New password (repeat)
+      type: password
+      required: true
+      placeholder: New password (repeat)
+      order: 1
+      placeholder_expression: false
+
+  - identifiers:
+      name: platform-operator-recovery-skip-restored
+    id: recovery-skip-restored-policy
+    model: authentik_policies_expression.expressionpolicy
+    attrs:
+      expression: |
+        return bool(request.context.get('is_restored', True))
+
+  - identifiers:
+      name: platform-operator-recovery-email
+    id: recovery-email-stage
+    model: authentik_stages_email.emailstage
+    attrs:
+      use_global_settings: true
+      host: localhost
+      port: 25
+      username: ""
+      use_tls: false
+      use_ssl: false
+      timeout: 10
+      from_address: authentik@localhost
+      token_expiry: minutes=20
+      subject: Reset your platform password
+      template: email/password_reset.html
+      activate_user_on_success: true
+      recovery_max_attempts: 3
+      recovery_cache_timeout: minutes=15
+
+  - identifiers:
+      name: platform-operator-recovery-user-write
+    id: recovery-user-write-stage
+    model: authentik_stages_user_write.userwritestage
+    attrs:
+      user_creation_mode: never_create
+
+  - identifiers:
+      name: platform-operator-recovery-identification
+    id: recovery-identification-stage
+    model: authentik_stages_identification.identificationstage
+    attrs:
+      user_fields:
+        - email
+        - username
+
+  - identifiers:
+      name: platform-operator-recovery-user-login
+    id: recovery-user-login-stage
+    model: authentik_stages_user_login.userloginstage
+
+  - identifiers:
+      name: Platform operator recovery password prompt
+    id: recovery-password-prompt-stage
+    model: authentik_stages_prompt.promptstage
+    attrs:
+      fields:
+        - !KeyOf recovery-password-field
+        - !KeyOf recovery-password-repeat-field
+      validation_policies: []
+
+  - identifiers:
+      target: !KeyOf recovery-flow
+      stage: !KeyOf recovery-identification-stage
+      order: 10
+    id: recovery-identification-binding
+    model: authentik_flows.flowstagebinding
+    attrs:
+      evaluate_on_plan: true
+      re_evaluate_policies: true
+      policy_engine_mode: any
+      invalid_response_action: retry
+
+  - identifiers:
+      target: !KeyOf recovery-flow
+      stage: !KeyOf recovery-email-stage
+      order: 20
+    id: recovery-email-binding
+    model: authentik_flows.flowstagebinding
+    attrs:
+      evaluate_on_plan: true
+      re_evaluate_policies: true
+      policy_engine_mode: any
+      invalid_response_action: retry
+
+  - identifiers:
+      target: !KeyOf recovery-flow
+      stage: !KeyOf recovery-password-prompt-stage
+      order: 30
+    model: authentik_flows.flowstagebinding
+    attrs:
+      evaluate_on_plan: true
+      re_evaluate_policies: false
+      policy_engine_mode: any
+      invalid_response_action: retry
+
+  - identifiers:
+      target: !KeyOf recovery-flow
+      stage: !KeyOf recovery-user-write-stage
+      order: 40
+    model: authentik_flows.flowstagebinding
+    attrs:
+      evaluate_on_plan: true
+      re_evaluate_policies: false
+      policy_engine_mode: any
+      invalid_response_action: retry
+
+  - identifiers:
+      target: !KeyOf recovery-flow
+      stage: !KeyOf recovery-user-login-stage
+      order: 100
+    model: authentik_flows.flowstagebinding
+    attrs:
+      evaluate_on_plan: true
+      re_evaluate_policies: false
+      policy_engine_mode: any
+      invalid_response_action: retry
+
+  - identifiers:
+      policy: !KeyOf recovery-skip-restored-policy
+      target: !KeyOf recovery-identification-binding
+      order: 0
+    model: authentik_policies.policybinding
+    attrs:
+      negate: false
+      enabled: true
+      timeout: 30
+
+  - identifiers:
+      policy: !KeyOf recovery-skip-restored-policy
+      target: !KeyOf recovery-email-binding
+      order: 0
+    state: absent
+    model: authentik_policies.policybinding
+    attrs:
+      negate: false
+      enabled: true
+      timeout: 30
+
+  - identifiers:
+      default: true
+    model: authentik_brands.brand
+    attrs:
+      flow_recovery: !KeyOf recovery-flow
+
+  - identifiers:
+      name: default-authentication-identification
+    model: authentik_stages_identification.identificationstage
+    attrs:
+      # Authentik validates this existing stage as a complete object when the
+      # recovery-flow relation is updated. Keep the normal operator login
+      # identifiers explicit so the blueprint stays valid across releases.
+      user_fields:
+        - email
+        - username
+      recovery_flow: !KeyOf recovery-flow

@@ -1,0 +1,3 @@
+# managed-by: role=artifact_cache_ghcr_reader_bridge adr=0296
+# No wildcard: this identity can invoke only the one-shot reader transaction.
+{{ artifact_cache_ghcr_reader_bridge_user }} ALL=(root) NOPASSWD: {{ artifact_cache_ghcr_reader_bridge_binary_path }} reader

@@ -21,9 +21,93 @@
       - artifact_cache_seed_script | length > 0
       - artifact_cache_seed_catalogs | length > 0
       - artifact_cache_registry_mirrors | length > 0
+      - artifact_cache_ghcr_private_packages_enabled is boolean
+      - artifact_cache_ghcr_private_proxy_config_file == '/etc/artifact-cache/ghcr-proxy/config.yml'
+      - artifact_cache_ghcr_private_proxy_config_parent_dirs == ['/etc/artifact-cache', '/etc/artifact-cache/ghcr-proxy']
+      - artifact_cache_ghcr_private_listener_host == '127.0.0.1'
+      - artifact_cache_ghcr_private_listener_port | int == 5005
+      - artifact_cache_ghcr_private_storage_path == (artifact_cache_data_root ~ '/ghcr-private')
     fail_msg: >-
       artifact_cache_runtime requires compose paths, a bind address, registry
       mirror definitions, and a controller-local seed planner.
+
+- name: Validate the private GHCR cache boundary when enabled
+  ansible.builtin.assert:
+    that:
+      - artifact_cache_network_mode == 'host'
+      - artifact_cache_registry_mirrors.ghcr_io is defined
+      - artifact_cache_registry_mirrors.ghcr_io.registry_host == 'ghcr.io'
+      - artifact_cache_registry_mirrors.ghcr_io.service_name == 'ghcr'
+      - artifact_cache_registry_mirrors.ghcr_io.bind_port == 5002
+      - artifact_cache_registry_mirrors.ghcr_io.upstream_registry == 'https://ghcr.io'
+      - artifact_cache_ghcr_private_listener_host == '127.0.0.1'
+      - artifact_cache_ghcr_private_listener_port | int == 5005
+      - artifact_cache_ghcr_private_storage_path == (artifact_cache_data_root ~ '/ghcr-private')
+    fail_msg: >-
+      Private GHCR upstream authentication is supported only by the dedicated
+      loopback-only GHCR cache listener on 127.0.0.1:5005. It cannot be
+      applied to the public :5002 adapter, another cache adapter, or an
+      arbitrary registry endpoint.
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_ghcr_private_packages_enabled | bool
+
+- name: Inspect the cache-owned rendered GHCR proxy configuration
+  ansible.builtin.stat:
+    path: "{{ artifact_cache_ghcr_private_proxy_config_file }}"
+    follow: false
+  register: artifact_cache_ghcr_private_proxy_config_stat
+  no_log: true
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_ghcr_private_packages_enabled | bool
+
+- name: Inspect the fixed parent directories for the private GHCR configuration
+  ansible.builtin.stat:
+    path: "{{ item }}"
+    follow: false
+  loop: "{{ artifact_cache_ghcr_private_proxy_config_parent_dirs }}"
+  register: artifact_cache_ghcr_private_proxy_parent_stats
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_ghcr_private_packages_enabled | bool
+
+- name: Require root-only non-symlink parent directories for private GHCR configuration
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.isdir
+      - not item.stat.islnk
+      - item.stat.uid == 0
+      - item.stat.gid == 0
+      - item.stat.mode == '0700'
+    fail_msg: >-
+      Private GHCR upstream authentication requires a fixed, root-only,
+      non-symlink configuration directory hierarchy.
+  loop: "{{ artifact_cache_ghcr_private_proxy_parent_stats.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_ghcr_private_packages_enabled | bool
+
+- name: Require a root-only regular GHCR proxy configuration
+  ansible.builtin.assert:
+    that:
+      - artifact_cache_ghcr_private_proxy_config_stat.stat.exists
+      - artifact_cache_ghcr_private_proxy_config_stat.stat.isreg
+      - not artifact_cache_ghcr_private_proxy_config_stat.stat.islnk
+      - artifact_cache_ghcr_private_proxy_config_stat.stat.uid == 0
+      - artifact_cache_ghcr_private_proxy_config_stat.stat.gid == 0
+      - artifact_cache_ghcr_private_proxy_config_stat.stat.mode == '0400'
+    fail_msg: >-
+      Private GHCR upstream authentication is fail-closed: its cache-only
+      Docker Distribution configuration must already be a root:root regular
+      file with mode 0400, rendered through the approved vault path.
+  no_log: true
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_ghcr_private_packages_enabled | bool
 
 - name: Check whether the artifact cache compose file already exists
   ansible.builtin.stat:
@@ -65,6 +149,15 @@
     label: "{{ item.value.registry_host }}"
   when: artifact_cache_state == 'absent'
 
+- name: Wait for the private GHCR loopback listener to stop when state=absent
+  ansible.builtin.wait_for:
+    host: "{{ artifact_cache_ghcr_private_listener_host }}"
+    port: "{{ artifact_cache_ghcr_private_listener_port }}"
+    state: stopped
+    delay: 0
+    timeout: 180
+  when: artifact_cache_state == 'absent'
+
 - name: Ensure artifact cache directories exist
   ansible.builtin.file:
     path: "{{ item }}"
@@ -78,6 +171,17 @@
       + (artifact_cache_registry_mirrors | dict2items | map(attribute='value.storage_path') | list)
     }}
   when: artifact_cache_state == 'present'
+
+- name: Ensure private GHCR cache storage is root-only
+  ansible.builtin.file:
+    path: "{{ artifact_cache_ghcr_private_storage_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_ghcr_private_packages_enabled | bool
 
 - name: Render the artifact cache compose file
   ansible.builtin.template:
@@ -134,6 +238,16 @@
   loop_control:
     label: "{{ item.value.registry_host }}"
   when: artifact_cache_state == 'present'
+
+- name: Wait for the loopback-only private GHCR listener
+  ansible.builtin.wait_for:
+    host: "{{ artifact_cache_ghcr_private_listener_host }}"
+    port: "{{ artifact_cache_ghcr_private_listener_port }}"
+    delay: 0
+    timeout: 180
+  when:
+    - artifact_cache_state == 'present'
+    - artifact_cache_ghcr_private_packages_enabled | bool
 
 - name: Generate the artifact cache seed plan from repo catalogs
   ansible.builtin.shell: >-

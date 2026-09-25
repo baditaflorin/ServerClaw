@@ -263,11 +263,11 @@ If managing multiple Proxmox deployments:
 ```bash
 # On Headscale server
 headscale users create lv3
-headscale users create retired-deployment
+headscale users create 0fork
 
 # Generate separate keys for each
 headscale preauthkeys create --user lv3 --reusable
-headscale preauthkeys create --user retired-deployment --reusable
+headscale preauthkeys create --user 0fork --reusable
 ```
 
 ### Register nodes to their respective namespaces:
@@ -276,15 +276,15 @@ headscale preauthkeys create --user retired-deployment --reusable
 # LV3 deployment nodes
 headscale nodes register --key LV3_KEY --user lv3
 
-# retired-deployment deployment nodes
-headscale nodes register --key retired-deployment_KEY --user retired-deployment
+# 0fork deployment nodes
+headscale nodes register --key 0FORK_KEY --user 0fork
 ```
 
 ### View namespace-specific nodes:
 
 ```bash
 headscale nodes list --user lv3
-headscale nodes list --user retired-deployment
+headscale nodes list --user 0fork
 ```
 
 ---

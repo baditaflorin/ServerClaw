@@ -1,0 +1,25 @@
+---
+# Dockerhost-only bridge for the cache's one-shot GHCR proxy configuration
+# reader. It never fetches or renders the configuration itself and never
+# persists the API key that it mints for the cache renderer.
+artifact_cache_ghcr_reader_bridge_name: artifact-cache-ghcr-reader-bridge
+artifact_cache_ghcr_reader_bridge_user: artifact-cache-ghcr-reader
+artifact_cache_ghcr_reader_bridge_group: artifact-cache-ghcr-reader
+artifact_cache_ghcr_reader_bridge_binary_path: /usr/local/libexec/artifact-cache-ghcr-reader-bridge
+artifact_cache_ghcr_reader_bridge_config_dir: /etc/artifact-cache-ghcr-reader-bridge
+artifact_cache_ghcr_reader_bridge_config_path: "{{ artifact_cache_ghcr_reader_bridge_config_dir }}/contract.json"
+artifact_cache_ghcr_reader_bridge_authorized_keys_path: "{{ artifact_cache_ghcr_reader_bridge_config_dir }}/authorized_keys"
+artifact_cache_ghcr_reader_bridge_sshd_config_path: /etc/ssh/sshd_config.d/90-artifact-cache-ghcr-reader.conf
+artifact_cache_ghcr_reader_bridge_sudoers_path: /etc/sudoers.d/artifact-cache-ghcr-reader
+# The private half is root-only artifact-cache state supplied through the
+# deployment-local transport bootstrap. This role never generates, copies, or
+# persists it.
+artifact_cache_ghcr_reader_bridge_authorized_public_key: ""
+artifact_cache_ghcr_reader_bridge_allowed_source: "{{ hostvars['artifact-cache'].ansible_host }}"
+artifact_cache_ghcr_reader_bridge_admin_token_file: /opt/_shared/apikey-admin.env
+artifact_cache_ghcr_reader_bridge_apikey_url: http://127.0.0.1:18021
+artifact_cache_ghcr_reader_bridge_reader_principal: artifact-cache-ghcr-config-renderer
+artifact_cache_ghcr_reader_bridge_reader_scope: infra-privileged
+artifact_cache_ghcr_reader_bridge_reader_tier: infra-privileged
+artifact_cache_ghcr_reader_bridge_reader_ttl_seconds: 300
+artifact_cache_ghcr_reader_bridge_reader_use_limit: 1

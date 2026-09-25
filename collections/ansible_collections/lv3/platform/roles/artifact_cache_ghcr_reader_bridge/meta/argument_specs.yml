@@ -1,0 +1,21 @@
+---
+# Purpose: Declare the fail-closed Dockerhost bridge that mints one cache-only GHCR configuration reader.
+argument_specs:
+  main:
+    short_description: Install the Dockerhost-only forced-command one-shot reader bridge for the artifact-cache renderer.
+    options:
+      artifact_cache_ghcr_reader_bridge_authorized_public_key:
+        type: str
+        required: true
+        description:
+          - Dedicated artifact-cache renderer Ed25519 public key supplied only through the deployment-local transport bootstrap.
+      artifact_cache_ghcr_reader_bridge_allowed_source:
+        type: str
+        required: true
+        description:
+          - Exact artifact-cache private source address permitted to use the forced SSH command.
+      artifact_cache_ghcr_reader_bridge_admin_token_file:
+        type: path
+        required: false
+        description:
+          - Existing root-only local API-key administration credential; this role never creates or reads it in Ansible.

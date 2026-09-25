@@ -1,0 +1,14 @@
+---
+# Fixed, non-secret Builder transport for the private 0mcp delivery lane.
+# No key, token, certificate, service image, or runtime configuration belongs here.
+fleet_runner_private_0mcp_transport_target_host: 0docker_builder
+fleet_runner_private_0mcp_transport_dir: /etc/fleet-runner
+fleet_runner_private_0mcp_transport_file: /etc/fleet-runner/private-0mcp-transport.json
+fleet_runner_private_0mcp_known_hosts_dir: /etc/fleet-runner/known_hosts
+fleet_runner_private_0mcp_known_hosts_file: /etc/fleet-runner/known_hosts/0mcp-vm180
+fleet_runner_private_0mcp_global_known_hosts_file: /etc/fleet-runner/known_hosts/empty-global
+fleet_runner_private_0mcp_ssh_config_file: /etc/ssh/ssh_config.d/90-fleet-runner-private-0mcp.conf
+fleet_runner_private_0mcp_wrapper_file: /usr/local/sbin/fleet-runner-private-0mcp
+fleet_runner_private_0mcp_bastion: root@203.0.113.1:2222
+fleet_runner_private_0mcp_dockerhost: claude-ops@10.10.10.80
+fleet_runner_private_0mcp_compose_root: /opt/services

@@ -1,0 +1,24 @@
+# managed-by: role=fleet_build_broker_pki_handoff adr=0042,0047,0101 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+[Unit]
+Description=Fleet build broker root-only PKI renewal
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+UMask=0077
+ExecStart={{ fleet_build_broker_pki_handoff_binary_path }} --config {{ fleet_build_broker_pki_handoff_config_path }} --renew
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ReadWritePaths={{ fleet_build_broker_pki_handoff_state_path | dirname }}
+SystemCallArchitectures=native
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true

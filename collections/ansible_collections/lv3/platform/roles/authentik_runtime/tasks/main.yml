@@ -19,6 +19,20 @@
       - authentik_container_port | int > 0
       - authentik_bootstrap_admin_token_remote_file | length > 0
       - authentik_bootstrap_admin_token_local_file | length > 0
+      - authentik_blueprints_dir | length > 0
+      - authentik_recovery_blueprint_file | length > 0
+      - authentik_recovery_blueprint_remote_file | length > 0
+      - authentik_recovery_verify_script | length > 0
+      - authentik_recovery_flow_slug | length > 0
+      - authentik_recovery_identification_stage_name | length > 0
+      - authentik_recovery_email_stage_name | length > 0
+      - authentik_email_host | length > 0
+      - authentik_email_port | int > 0
+      - authentik_email_username | length > 0
+      - authentik_email_password_local_file | length > 0
+      - authentik_email_timeout | int > 0
+      - authentik_email_from | length > 0
+      - not ((authentik_email_use_tls | bool) and (authentik_email_use_ssl | bool))
     fail_msg: "authentik_runtime requires runtime paths, port metadata, and bootstrap token paths."
 
 - name: Ensure Authentik runtime packages are present
@@ -41,6 +55,50 @@
       mode: "0755"
     - path: "{{ authentik_secret_dir }}"
       mode: "0700"
+    - path: "{{ authentik_blueprints_dir }}"
+      mode: "0755"
+
+- name: Inspect Authentik recovery blueprint and SMTP password source on the controller
+  ansible.builtin.stat:
+    path: "{{ item }}"
+    follow: false
+  loop:
+    - "{{ authentik_recovery_blueprint_file }}"
+    - "{{ authentik_recovery_verify_script }}"
+    - "{{ authentik_email_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_recovery_controller_inputs
+  no_log: true
+
+- name: Require protected Authentik recovery controller inputs
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists | default(false)
+      - item.stat.isreg | default(false)
+      - not (item.stat.islnk | default(false))
+      - item.stat.size | default(0) | int > 0
+      - >-
+        item.item != authentik_email_password_local_file
+        or (item.stat.mode | default('') == '0600')
+    fail_msg: >-
+      Authentik recovery requires a regular blueprint and verifier plus a
+      root-only SMTP password source on the controller.
+  loop: "{{ authentik_recovery_controller_inputs.results }}"
+  loop_control:
+    label: "{{ item.item | basename }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Publish the managed Authentik recovery blueprint
+  ansible.builtin.copy:
+    src: "{{ authentik_recovery_blueprint_file }}"
+    dest: "{{ authentik_recovery_blueprint_remote_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: authentik_recovery_blueprint_publish
 
 - name: Validate the Authentik secret bootstrap mode
   ansible.builtin.assert:
@@ -564,6 +622,7 @@
     authentik_postgres_password: "{{ (authentik_secrets_raw.results | selectattr('item.name', 'equalto', 'postgres_password') | first).content | b64decode | trim }}"
     authentik_bootstrap_token: "{{ (authentik_secrets_raw.results | selectattr('item.name', 'equalto', 'bootstrap_token') | first).content | b64decode | trim }}"
     authentik_bootstrap_admin_token: "{{ (authentik_secrets_raw.results | selectattr('item.name', 'equalto', 'bootstrap_admin_token') | first).content | b64decode | trim }}"
+    authentik_email_password: "{{ lookup('ansible.builtin.file', authentik_email_password_local_file) | trim }}"
   no_log: true
 
 - name: Record the Authentik OpenBao secret payload
@@ -573,6 +632,14 @@
       AUTHENTIK_POSTGRESQL__PASSWORD: "{{ authentik_postgres_password }}"
       AUTHENTIK_BOOTSTRAP_TOKEN: "{{ authentik_bootstrap_token }}"
       AUTHENTIK_BOOTSTRAP_PASSWORD: "{{ authentik_bootstrap_admin_token }}"
+      AUTHENTIK_EMAIL__HOST: "{{ authentik_email_host }}"
+      AUTHENTIK_EMAIL__PORT: "{{ authentik_email_port }}"
+      AUTHENTIK_EMAIL__USERNAME: "{{ authentik_email_username }}"
+      AUTHENTIK_EMAIL__PASSWORD: "{{ authentik_email_password }}"
+      AUTHENTIK_EMAIL__USE_TLS: "{{ 'true' if (authentik_email_use_tls | bool) else 'false' }}"
+      AUTHENTIK_EMAIL__USE_SSL: "{{ 'true' if (authentik_email_use_ssl | bool) else 'false' }}"
+      AUTHENTIK_EMAIL__TIMEOUT: "{{ authentik_email_timeout }}"
+      AUTHENTIK_EMAIL__FROM: "{{ authentik_email_from }}"
   no_log: true
 
 - name: Ensure the local Authentik artifact directory exists
@@ -857,6 +924,7 @@
     authentik_force_recreate_required: >-
       {{
         authentik_compose_template.changed
+        or (authentik_recovery_blueprint_publish.changed | default(false))
         or (authentik_legacy_secret_adoption.changed | default(false))
         or (authentik_secret_generation.changed | default(false))
         or (
@@ -896,3 +964,7 @@
 - name: Reconcile Authentik groups and initial internal users
   ansible.builtin.import_tasks: identities.yml
   when: authentik_identity_reconcile_enabled | bool
+
+- name: Verify the managed Authentik password-recovery flow
+  ansible.builtin.import_tasks: recovery_flow.yml
+  when: authentik_recovery_verification_enabled | bool

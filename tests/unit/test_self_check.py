@@ -68,7 +68,7 @@ def test_template_context_handles_missing_fields():
 
 
 def test_expand_string():
-    ctx = {"apex": "example.org", "apex_slug": "retired-deployment"}
+    ctx = {"apex": "example.org", "apex_slug": "0fork"}
     assert self_check.expand_templates(ctx, "https://registry.{apex}/v2/") == "https://registry.example.org/v2/"
 
 

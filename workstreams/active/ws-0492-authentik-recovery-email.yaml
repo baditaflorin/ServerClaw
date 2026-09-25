@@ -1,0 +1,90 @@
+id: ws-0492-authentik-recovery-email
+adr: "0491"
+title: Add governed Authentik operator recovery email
+status: ready_for_merge
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/authentik-recovery-final3-apply-20260901
+worktree_path: .worktrees/authentik-recovery-final3-apply-20260901
+doc: docs/workstreams/ws-0492-authentik-recovery-email.md
+depends_on:
+  - adr-0491-authentik-keycloak-sunset-2026-08-30
+conflicts_with: []
+shared_surfaces:
+  - config/authentik/recovery-flow.yaml
+  - config/integrations/authentik--mail-platform.yaml
+  - config/integrations/authentik--openbao.yaml
+  - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+  - build/platform-manifest.json
+  - inventory/group_vars/platform.yml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/configure-authentik.md
+  - docs/workstreams/ws-0492-authentik-recovery-email.md
+  - scripts/authentik_recovery.py
+  - receipts/live-applies/ws-0492-authentik-recovery-email-apply-receipt.yaml
+  - scripts/validate_deployment_selection.py
+  - tests/test_authentik_recovery.py
+  - tests/test_authentik_runtime_role.py
+  - tests/test_validate_deployment_selection.py
+  - workstreams/active/ws-0492-authentik-recovery-email.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: identity_migration_runtime
+      paths:
+        - config/authentik/recovery-flow.yaml
+        - config/integrations/authentik--mail-platform.yaml
+        - config/integrations/authentik--openbao.yaml
+        - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: identity_migration_governance
+      paths:
+        - inventory/group_vars/platform.yml
+        - docs/runbooks/configure-authentik.md
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: identity_migration_release_truth
+      paths:
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: release-truth-v1
+    - id: identity_migration_repository_integration
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+        - docs/workstreams/ws-0492-authentik-recovery-email.md
+        - scripts/authentik_recovery.py
+        - scripts/validate_deployment_selection.py
+        - tests/test_authentik_recovery.py
+        - tests/test_authentik_runtime_role.py
+        - tests/test_validate_deployment_selection.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: identity_migration_live_apply_evidence
+      paths:
+        - receipts/live-applies/ws-0492-authentik-recovery-email-apply-receipt.yaml
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    - id: ws_0492_workstream_shard
+      paths:
+        - workstreams/active/ws-0492-authentik-recovery-email.yaml
+      mode: exclusive
+context: |
+  Authentik is live and the operator account is valid. This workstream adds a
+  declarative, rate-limited recovery flow through the platform's authenticated
+  internal SMTP relay, bound to the active brand and default authentication
+  identification stage. The worker resolves that relay over the existing
+  private mail-platform Docker network, avoiding runtime-host SMTP hairpinning.
+tasks:
+  - id: t1
+    title: Add an idempotent Authentik recovery-flow blueprint and runtime mail configuration
+    status: completed
+  - id: t2
+    title: Validate the rendered runtime and recovery-flow state
+    status: completed
+  - id: t3
+    title: Merge and apply through the governed Authentik converge path
+    status: completed
+  - id: t4
+    title: Send and verify the operator password-recovery email
+    status: completed

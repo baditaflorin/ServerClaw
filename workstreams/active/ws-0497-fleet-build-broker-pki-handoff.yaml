@@ -1,0 +1,59 @@
+id: ws-0497-fleet-build-broker-pki-handoff
+adr: "0042"
+title: Add root-only fleet-build-broker PKI issuance and renewal handoff
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/fix-broker-pki-handoff-template
+worktree_path: .worktrees/fix-broker-pki-handoff-template
+doc: docs/workstreams/ws-0497-fleet-build-broker-pki-handoff.md
+depends_on:
+  - adr-0042-step-ca-for-ssh-and-internal-tls
+  - adr-0047-short-lived-credentials-and-internal-mtls
+  - adr-0101-automated-certificate-lifecycle-management
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_pki_handoff/**
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker-pki.yml
+  - inventory/host_vars/proxmox-host.yml
+  - inventory/hosts.yml
+  - tests/test_fleet_build_broker_pki_handoff.py
+  - docs/workstreams/ws-0497-fleet-build-broker-pki-handoff.md
+  - workstreams/active/ws-0497-fleet-build-broker-pki-handoff.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: fleet_build_broker_pki_handoff_role
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_pki_handoff/**
+        - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker-pki.yml
+        - tests/test_fleet_build_broker_pki_handoff.py
+      mode: exclusive
+    - id: fleet_build_broker_pki_handoff_tracking
+      paths:
+        - docs/workstreams/ws-0497-fleet-build-broker-pki-handoff.md
+        - workstreams/active/ws-0497-fleet-build-broker-pki-handoff.yaml
+      mode: exclusive
+    - id: fleet_build_broker_pki_writer_firewall
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: fleet-build-broker-vm180-v1
+    - id: fleet_build_broker_pki_writer_firewall_inventory
+      paths:
+        - inventory/hosts.yml
+      mode: shared_contract
+      contract: inventory-hosts-v1
+tasks:
+  - id: t1
+    title: Define the root-only Step-CA leaf and dedicated client-CA contract
+    status: completed
+  - id: t2
+    title: Implement fail-closed issuance and short-lived vault writer handoff
+    status: completed
+  - id: t3
+    title: Add offline contract and renewal-failure harness coverage
+    status: completed
+  - id: t4
+    title: Review, merge, and integrate the writer bridge, PKI prerequisites, private firewall path, and executable template delivery
+    status: in_progress

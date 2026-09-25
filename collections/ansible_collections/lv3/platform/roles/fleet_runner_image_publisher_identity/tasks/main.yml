@@ -1,0 +1,110 @@
+---
+# Purpose: Install the fixed root-only image-publisher identity on Builder LXC108.
+# Use case: Converge the dedicated builder's non-secret fleet-runner publishing attestation.
+# Inputs: None. The target host, identity, path, payload version, and permissions are fixed.
+# Outputs: /etc/fleet-runner/image-publisher.json exactly identifies builder-lxc-108.
+# Idempotency: Yes. The directory and immutable payload are safely reconciled on each run.
+# Dependencies: ADR 0296 private fleet delivery boundaries and the fleet-runner publisher contract.
+- name: Reject image publisher identity convergence on any host except the designated 0docker builder
+  ansible.builtin.assert:
+    that:
+      - inventory_hostname == '0docker_builder'
+      - fleet_runner_image_publisher_target_host == '0docker_builder'
+      - fleet_runner_image_publisher_identity == 'builder-lxc-108'
+      - fleet_runner_image_publisher_version | int == 1
+      - fleet_runner_image_publisher_config_dir == '/etc/fleet-runner'
+      - fleet_runner_image_publisher_config_file == '/etc/fleet-runner/image-publisher.json'
+      - fleet_runner_image_publisher_config_dir_mode == '0700'
+      - fleet_runner_image_publisher_config_file_mode == '0600'
+    fail_msg: >-
+      The fleet-runner image-publisher identity is a closed 0docker Builder
+      LXC108
+      contract. It cannot be retargeted, renamed, relaxed, or applied to a
+      platform docker-build guest.
+
+- name: Inspect the image publisher configuration parent before managing it
+  ansible.builtin.stat:
+    path: "{{ fleet_runner_image_publisher_config_dir }}"
+    follow: false
+  register: fleet_runner_image_publisher_config_dir_before
+  changed_when: false
+
+- name: Refuse a non-directory or symlink image publisher configuration parent
+  ansible.builtin.assert:
+    that:
+      - not (fleet_runner_image_publisher_config_dir_before.stat.exists | default(false)) or fleet_runner_image_publisher_config_dir_before.stat.isdir
+      - not (fleet_runner_image_publisher_config_dir_before.stat.islnk | default(false))
+    fail_msg: >-
+      /etc/fleet-runner must be absent or a real directory before this role
+      writes the root-only image-publisher identity contract.
+
+- name: Ensure the root-only image publisher configuration parent exists
+  ansible.builtin.file:
+    path: "{{ fleet_runner_image_publisher_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ fleet_runner_image_publisher_config_dir_mode }}"
+
+- name: Inspect the managed root-only image publisher configuration parent
+  ansible.builtin.stat:
+    path: "{{ fleet_runner_image_publisher_config_dir }}"
+    follow: false
+  register: fleet_runner_image_publisher_config_dir_after
+  changed_when: false
+
+- name: Require the managed root-only image publisher configuration parent
+  ansible.builtin.assert:
+    that:
+      - fleet_runner_image_publisher_config_dir_after.stat.exists
+      - fleet_runner_image_publisher_config_dir_after.stat.isdir
+      - not (fleet_runner_image_publisher_config_dir_after.stat.islnk | default(false))
+      - fleet_runner_image_publisher_config_dir_after.stat.pw_name == 'root'
+      - fleet_runner_image_publisher_config_dir_after.stat.gr_name == 'root'
+      - fleet_runner_image_publisher_config_dir_after.stat.mode == '0700'
+    fail_msg: >-
+      /etc/fleet-runner must remain a real root-owned owner-only directory
+      before this role writes the image-publisher identity contract.
+
+- name: Inspect the image publisher identity contract before writing it
+  ansible.builtin.stat:
+    path: "{{ fleet_runner_image_publisher_config_file }}"
+    follow: false
+  register: fleet_runner_image_publisher_config_file_before
+  changed_when: false
+
+- name: Refuse a symlink image publisher identity contract
+  ansible.builtin.assert:
+    that:
+      - not (fleet_runner_image_publisher_config_file_before.stat.islnk | default(false))
+    fail_msg: >-
+      /etc/fleet-runner/image-publisher.json must not be a symlink before this
+      role writes the fixed root-only identity contract.
+
+- name: Write the fixed root-only image publisher identity contract
+  ansible.builtin.copy:
+    dest: "{{ fleet_runner_image_publisher_config_file }}"
+    content: '{"version":1,"identity":"builder-lxc-108"}'
+    owner: root
+    group: root
+    mode: "{{ fleet_runner_image_publisher_config_file_mode }}"
+
+- name: Inspect the managed image publisher identity contract
+  ansible.builtin.stat:
+    path: "{{ fleet_runner_image_publisher_config_file }}"
+    follow: false
+  register: fleet_runner_image_publisher_config_file_after
+  changed_when: false
+
+- name: Require root-only image publisher identity permissions
+  ansible.builtin.assert:
+    that:
+      - fleet_runner_image_publisher_config_file_after.stat.exists
+      - fleet_runner_image_publisher_config_file_after.stat.isreg
+      - not (fleet_runner_image_publisher_config_file_after.stat.islnk | default(false))
+      - fleet_runner_image_publisher_config_file_after.stat.pw_name == 'root'
+      - fleet_runner_image_publisher_config_file_after.stat.gr_name == 'root'
+      - fleet_runner_image_publisher_config_file_after.stat.mode == '0600'
+    fail_msg: >-
+      The fleet-runner image-publisher identity contract must remain a regular,
+      root-owned, root-group, owner-only file.

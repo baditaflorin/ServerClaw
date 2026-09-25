@@ -32,7 +32,7 @@ monitored, and recoverable from a single repository.
 | Field | Value |
 | --- | --- |
 | Repository version | `0.179.46` |
-| Platform version | `0.178.222` |
+| Platform version | `0.178.223` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -58,7 +58,7 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
-| `fork_services` | `2026-04-27-ws-0372-retired-deployment-services-all-7-deployed` |
+| `fork_services` | `2026-04-27-ws-0372-0fork-services-all-7-deployed` |
 | `restic_config_backup` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `repo_intake` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `platform_ops` | `2026-04-21-adr-0391-cpu-only-operational-automation-live-apply` |
@@ -90,7 +90,7 @@ Showing 20 of 183 capability receipts. Full history: [live-apply evidence histor
 | Field | Value |
 | --- | --- |
 | Repository version | `0.179.46` |
-| Platform version | `0.178.222` |
+| Platform version | `0.178.223` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -133,8 +133,8 @@ assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
 
 - **[CLAUDE.md](CLAUDE.md)** — Claude Code session protocol with checklists and context
 - **[AGENTS.md](AGENTS.md)** — Multi-agent coordination rules and handoff protocol
-- **516+ ADRs** — Every architectural decision documented and indexed
-- **274+ runbooks** — Step-by-step procedures an AI agent can follow
+- **515+ ADRs** — Every architectural decision documented and indexed
+- **273+ runbooks** — Step-by-step procedures an AI agent can follow
 - **Workstream tracking** — Parallel agent sessions coordinate via YAML manifests
 
 Point Claude Code at this repo and it knows how to deploy, debug, and extend
@@ -168,10 +168,10 @@ self-hosted platform:
 
 | Layer | What | Count |
 |-------|------|-------|
-| Architecture decisions | `docs/adr/` | 516+ ADRs |
+| Architecture decisions | `docs/adr/` | 515+ ADRs |
 | Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 162 roles |
 | Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 60 playbooks |
-| Operational runbooks | `docs/runbooks/` | 274+ runbooks |
+| Operational runbooks | `docs/runbooks/` | 273+ runbooks |
 | Automation scripts | `scripts/` | 365+ scripts |
 | Validation tests | `tests/` | Automated regression suite |
 
@@ -286,8 +286,8 @@ variables from it — no manual IP editing.
 │   ├── minimal/         # Tier 1 compose (4 containers)
 │   └── full/            # Tier 2 compose (7 containers)
 ├── docs/
-│   ├── adr/             # 516+ architecture decision records
-│   ├── runbooks/        # 274+ operational runbooks
+│   ├── adr/             # 515+ architecture decision records
+│   ├── runbooks/        # 273+ operational runbooks
 │   └── templates/       # Jinja2 templates for generated docs (incl. this README)
 ├── scripts/             # 365+ automation scripts
 ├── local-overlay-template/  # Scaffold for .local/ secrets directory
@@ -357,13 +357,15 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 333 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 337 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](docs/adr/0470-deployment-fixture-matrix.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](docs/adr/0448-deployment-connection-registry-and-wrapper.md) |
+| `0409` | Accept clean ignored HTTPS alert outputs while rejecting present drift | `merged` | [ws-0500-https-alert-runtime-output-gate.md](docs/workstreams/ws-0500-https-alert-runtime-output-gate.md) |
 | `0407` | Ops Portal Sibling-Link IaC Substitution | `merged` | [0407-generic-by-default-local-overlay-architecture.md](docs/adr/0407-generic-by-default-local-overlay-architecture.md) |
+| `0374` | Resolve generic subdomain catalog entries for selected DNS checks | `merged` | [ws-0497-dns-catalog-selection.md](docs/workstreams/ws-0497-dns-catalog-selection.md) |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](docs/workstreams/ws-0374-status-repair.md) |
 | `0369` | Shared Python validation toolkit for catalog and registry scripts | `merged` | [adr-0369-python-validation-toolkit.md](docs/workstreams/adr-0369-python-validation-toolkit.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](docs/adr/0368-docker-compose-jinja2-macro-library.md) |
@@ -371,6 +373,7 @@ Showing 25 of 333 merged or live-applied workstreams. Full history: [merged work
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
+| `0296` | Deliver the cache-only GHCR proxy configuration through a one-shot reader bridge | `merged` | [ws-0504-cache-ghcr-secret-renderer.md](docs/workstreams/ws-0504-cache-ghcr-secret-renderer.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
 | `0293` | Integrate ADR 0293 exact-main LiveKit replay onto main | `merged` | [ws-0293-main-integration.md](docs/workstreams/ws-0293-main-integration.md) |
 | `0259` | Integrate ADR 0259 exact-main replay onto current origin/main | `merged` | [ws-0259-main-merge.md](docs/workstreams/ws-0259-main-merge.md) |
@@ -383,9 +386,6 @@ Showing 25 of 333 merged or live-applied workstreams. Full history: [merged work
 | `0181` | Off-host witness and control metadata replication | `live_applied` | [adr-0181-off-host-witness-replication.md](docs/workstreams/adr-0181-off-host-witness-replication.md) |
 | `0179` | Service redundancy tier matrix | `merged` | [adr-0179-service-redundancy-tier-matrix.md](docs/workstreams/adr-0179-service-redundancy-tier-matrix.md) |
 | `0178` | Dependency wave manifests for parallel apply | `merged` | [adr-0178-dependency-wave-manifests.md](docs/workstreams/adr-0178-dependency-wave-manifests.md) |
-| `0176` | Inventory sharding and host-scoped Ansible execution | `live_applied` | [adr-0176-inventory-sharding.md](docs/workstreams/adr-0176-inventory-sharding.md) |
-| `0173` | Workstream surface ownership manifest | `live_applied` | [adr-0173-workstream-surface-ownership-manifest.md](docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md) |
-| `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements
@@ -411,6 +411,6 @@ and merge procedures.
 
 ---
 
-*Generated 2026-09-24 by [scripts/generate_readme.py](scripts/generate_readme.py)
+*Generated 2026-08-31 by [scripts/generate_readme.py](scripts/generate_readme.py)
 from [docs/templates/README.md.j2](docs/templates/README.md.j2).
 Run `make generate-readme` to refresh.*

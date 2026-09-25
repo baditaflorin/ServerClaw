@@ -77,7 +77,7 @@ deployment".
 
 ### Deployment definition
 
-A deployment is uniquely identified by a short slug (`prod`, `retired-deployment`,
+A deployment is uniquely identified by a short slug (`prod`, `0fork`,
 `acme`, `customer-42`) and consists of:
 
 - **Identity** — apex domain, operator name/email, DNS provider zone,
@@ -107,7 +107,7 @@ A deployment is uniquely identified by a short slug (`prod`, `retired-deployment
 
 `deployment` and `environment` are **orthogonal** axes. A deployment
 named `prod` may have `env=production` and `env=staging`. A deployment
-named `retired-deployment` may have only `env=production`. Both run from the same
+named `0fork` may have only `env=production`. Both run from the same
 checkout without colliding because every artifact path includes the
 deployment slug.
 
@@ -140,7 +140,7 @@ repo/
 │   │   ├── profile.yml             # service allowlist (ADR 0441)
 │   │   ├── generated/              # platform.yml, hosts.yml, manifest — derived
 │   │   └── secrets/                # service credentials, openbao snapshots
-│   ├── retired-deployment/
+│   ├── 0fork/
 │   │   ├── identity.yml
 │   │   ├── topology.yml
 │   │   ├── profile.yml
@@ -247,9 +247,9 @@ A one-time migration of the existing prod deployment:
 This migration is automated by `scripts/migrate_to_multi_deployment.py`
 (introduced in ADR 0440 implementation Phase 1).
 
-The retired-deployment deployment is bootstrapped fresh under
-`.local/deployments/retired-deployment/` from `.local/identity.yml.retired-deployment` (which
-already exists) plus the existing `.local/retired-deployment/` secrets directory.
+The 0fork deployment is bootstrapped fresh under
+`.local/deployments/0fork/` from `.local/identity.yml.0fork` (which
+already exists) plus the existing `.local/0fork/` secrets directory.
 
 ---
 
@@ -257,7 +257,7 @@ already exists) plus the existing `.local/retired-deployment/` secrets directory
 
 1. **Cross-deployment shared state.** Today the build server
    (`10.10.10.30`) runs the pre-push gate for the `lv3` deployment.
-   Should the `retired-deployment` deployment have its own gate runner, or share?
+   Should the `0fork` deployment have its own gate runner, or share?
    *Tentative*: each deployment owns its own gate; the gate URL is a
    per-deployment identity field.
 

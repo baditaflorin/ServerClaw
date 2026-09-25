@@ -6,6 +6,7 @@ mail_platform_observability_hostname: "{{ inventory_hostname }}"
 mail_platform_observability_role: docker-runtime
 mail_platform_observability_service: mail-platform
 mail_platform_observability_gateway_state_file: /opt/mail-platform/gateway/data/state.json
+mail_platform_observability_gateway_smtp_bridge_state_file: /opt/mail-platform/gateway/data/smtp-bridge-state.json
 mail_platform_observability_stalwart_api_url: http://127.0.0.1:8080
 mail_platform_observability_stalwart_metrics_url: http://127.0.0.1:8080/metrics/prometheus
 mail_platform_observability_stalwart_admin_user: admin

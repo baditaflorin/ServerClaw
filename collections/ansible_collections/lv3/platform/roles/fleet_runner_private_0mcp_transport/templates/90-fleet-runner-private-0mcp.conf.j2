@@ -1,0 +1,5 @@
+# Managed by Ansible. The broker deployment path must always use pinned host keys.
+Host 203.0.113.1 10.10.10.80
+    UserKnownHostsFile {{ fleet_runner_private_0mcp_known_hosts_file }}
+    GlobalKnownHostsFile {{ fleet_runner_private_0mcp_global_known_hosts_file }}
+    StrictHostKeyChecking yes
