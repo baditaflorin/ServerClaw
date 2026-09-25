@@ -29,6 +29,26 @@ def test_gitea_defaults_reference_private_service_topology() -> None:
     assert "gitea_minio_bucket_name: gitea-lfs" in defaults
     assert "gitea_oidc_internal_discovery_url:" in defaults
     assert "{{ authentik_oidc_provider_base_url }}/gitea/.well-known/openid-configuration" in defaults
+    assert "gitea_oidc_required_claim_value: gitea-users" in defaults
+    assert '"{{ platform_identity.config_prefix }}-platform-admins":' in defaults
+    assert "      - Owners" in defaults
+    assert '  "gitea-users":' not in defaults
+
+
+def test_gitea_converge_requires_a_matched_deployment_and_forwards_overrides() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text()
+    start = makefile.index("converge-gitea:")
+    end = makefile.find("\n\n", start)
+    target = makefile[start:end]
+    assert "$(MAKE) preflight-gitea-deployment-selection" in target
+    assert "$(EXTRA_ARGS)" in target
+
+    guard_start = makefile.index("preflight-gitea-deployment-selection:")
+    guard_end = makefile.find("\n\n", guard_start)
+    guard = makefile[guard_start:guard_end]
+    assert "--service gitea" in guard
+    assert "--required-host postgres" in guard
+    assert "--required-host docker-build" in guard
 
 
 def test_gitea_compose_mounts_data_volume_and_openbao_env() -> None:

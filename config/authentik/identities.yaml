@@ -9,6 +9,11 @@ groups:
     attributes:
       identity_class: human_operator
       scope_boundary: platform_admin
+  - id: gitea-users
+    name: gitea-users
+    attributes:
+      identity_class: human_operator
+      scope_boundary: gitea_login_only
   - id: platform-read
     name: platform-read
     attributes:
@@ -51,6 +56,7 @@ users:
     groups:
       - authentik Admins
       - "{{ platform_config_prefix }}-platform-admins"
+      - gitea-users
       - platform-operator
       - platform-read
       - grafana-admins

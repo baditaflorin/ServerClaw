@@ -1,0 +1,17 @@
+version: 1
+
+# This file is intentionally excluded from the normal Authentik identity
+# reconcile. Operators invoke it explicitly only when provisioning the Gitea
+# end-to-end test identity.
+groups: []
+users:
+  - id: gitea-e2e
+    username: gitea-e2e
+    name: Gitea E2E Test
+    email: gitea-e2e@{{ platform_domain }}
+    provisioning: create_if_missing
+    password_file: authentik/gitea-e2e-initial-password.txt
+    groups:
+      - gitea-users
+    is_active: true
+    type: internal

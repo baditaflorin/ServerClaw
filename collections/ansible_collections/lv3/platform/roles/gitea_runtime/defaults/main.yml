@@ -57,7 +57,7 @@ gitea_oidc_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/git
 gitea_oidc_discovery_url: "{{ authentik_oidc_provider_base_url }}/gitea/.well-known/openid-configuration"
 gitea_oidc_internal_discovery_url: "{{ authentik_oidc_provider_base_url }}/gitea/.well-known/openid-configuration"
 gitea_oidc_required_claim_name: groups
-gitea_oidc_required_claim_value: "{{ platform_identity.config_prefix }}-platform-admins"
+gitea_oidc_required_claim_value: gitea-users
 gitea_oidc_group_team_map:
   "{{ platform_identity.config_prefix }}-platform-admins":
     ops:
