@@ -55,7 +55,7 @@ ownership_manifest:
         - docs/adr/.index.yaml
         - docs/adr/index/**
         - workstreams.yaml
-        - workstreams/active/ws-0482-retired-deployment-platform-not-bootstrapped.yaml
+        - workstreams/active/ws-0482-retired-deployment-not-bootstrapped.yaml
         - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
         - workstreams/active/ws-0484-self-verification-contracts.yaml
         - workstreams/active/ws-0485-convergence-idempotency-tests.yaml

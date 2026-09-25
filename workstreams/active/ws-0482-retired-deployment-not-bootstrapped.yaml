@@ -1,4 +1,4 @@
-id: ws-0482-retired-deployment-platform-not-bootstrapped
+id: ws-0482-retired-deployment-not-bootstrapped
 adr: "0482"
 title: example.org platform deployment never landed — registry.example.org 502 + others are catch-all illusions
 status: planned
@@ -6,21 +6,21 @@ ready_to_merge: false
 live_applied: false
 owner: unassigned
 deployment: retired-deployment
-branch: unassigned/ws-0482-retired-deployment-platform-not-bootstrapped
-worktree_path: unassigned/ws-0482-retired-deployment-platform-not-bootstrapped
+branch: unassigned/ws-0482-retired-deployment-not-bootstrapped
+worktree_path: unassigned/ws-0482-retired-deployment-not-bootstrapped
 doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
 depends_on:
   - ws-0481-explicit-deployment-context
 conflicts_with: []
 shared_surfaces:
-  - workstreams/active/ws-0482-retired-deployment-platform-not-bootstrapped.yaml
+  - workstreams/active/ws-0482-retired-deployment-not-bootstrapped.yaml
 ownership_manifest:
   owned_surfaces:
     - id: ws_0482_workstream
       paths:
-        - workstreams/active/ws-0482-retired-deployment-platform-not-bootstrapped.yaml
+        - workstreams/active/ws-0482-retired-deployment-not-bootstrapped.yaml
       mode: shared_contract
-      contract: ws-0482-retired-deployment-platform-not-bootstrapped-v1
+      contract: ws-0482-retired-deployment-not-bootstrapped-v1
 tasks:
   - id: t1
     title: Decide scope — bootstrap full platform on retired-deployment OR remove platform vhosts from nginx-proxy-manager

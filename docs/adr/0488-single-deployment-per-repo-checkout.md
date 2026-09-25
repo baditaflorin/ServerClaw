@@ -66,7 +66,7 @@ Removed in full:
 | `.deployment` worktree markers | gitignored, stop being written |
 | CLAUDE.md §0 (the `make whoami` ritual) | deleted |
 | 17 ADRs (0437, 0439-0443, 0445-0448, 0456-0460, 0462, 0470, 0480, 0481) | marked `Status: Superseded by ADR 0488` |
-| Workstreams `ws-0481`, `ws-0482-retired-deployment-platform-not-bootstrapped`, `ws-0486-hands-off-bootstrap` (the slug-aware parts) | retired; ws-0483/0484/0485 rebased to drop deployment scaffolding from `owned_surfaces` |
+| Workstreams `ws-0481`, `ws-0482-retired-deployment-not-bootstrapped`, `ws-0486-hands-off-bootstrap` (the slug-aware parts) | retired; ws-0483/0484/0485 rebased to drop deployment scaffolding from `owned_surfaces` |
 
 The 17 ADRs are preserved as historical record. The platform-manifest validator (ADR 0420) is updated so they do not register as "active decisions" against the current code.
 
