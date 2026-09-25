@@ -5,7 +5,7 @@ status: in_progress
 ready_to_merge: false
 live_applied: false
 owner: claude
-deployment: 0fork
+deployment: retired-deployment
 branch: claude/happy-maxwell-b79396
 worktree_path: .claude/worktrees/happy-maxwell-b79396
 doc: docs/adr/0485-convergence-idempotency-tests.md

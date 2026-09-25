@@ -39,7 +39,7 @@ Operator surface:
 ```bash
 # Drop a connection.yml under .local/deployments/<slug>/ — schema in
 # config/contracts/deployment-v1/connection.schema.json. Then:
-scripts/run_with_deployment.sh --deployment 0fork -- \
+scripts/run_with_deployment.sh --deployment retired-deployment -- \
     make configure-edge-publication env=production
 ```
 
@@ -66,7 +66,7 @@ to emit quoted form, or (b) add a string-coercion line to
 whoever owns that file (currently shared between ws-0445 / 0446 / 0447
 under the `release-bump-v1` contract).
 
-### 2. `receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json` now exists
+### 2. `receipts/live-applies/2026-04-28-coolify-retired-deployment-runtime-live-apply.json` now exists
 
 PR [#71](https://github.com/baditaflorin/platform_server/pull/71)
 registered this receipt id in
@@ -89,7 +89,7 @@ reconstructed body is intentionally minimal. Just preserve the
 Pushed with `--no-verify`. The cert-validation gate flags 44 example.com
 cert mismatches because `ops.example.com`, `grafana.example.com`, etc. now
 resolve to a host that serves example.org (yesterday's ops.example.org
-recovery converged that box to the 0fork overlay). This is **not**
+recovery converged that box to the retired-deployment overlay). This is **not**
 caused by ws-0448 and was already failing before this PR.
 
 The right follow-up is one of:
@@ -114,11 +114,11 @@ cert-validation / gate-bypass owner (likely ws-0414 or ws-0375).
 
 | Item | Owner | Notes |
 |---|---|---|
-| **Host-pinning (Slice D in the original plan).** Per-VM `deployment_owner` field so `nginx_edge_publication` doesn't install `lv3-ops-portal-oauth2-proxy` AND `0fork-ops-portal-oauth2-proxy` on the same VM (they fight for port 4180). | Unowned — needs new ws- | This is the underlying bug that produced yesterday's `oauth2-proxy@4180` collision on the 0fork box. Fix shape: `proxmox_guests[*].placement.deployment_owner: <slug>` + role-side guard. |
+| **Host-pinning (Slice D in the original plan).** Per-VM `deployment_owner` field so `nginx_edge_publication` doesn't install `lv3-ops-portal-oauth2-proxy` AND `retired-deployment-ops-portal-oauth2-proxy` on the same VM (they fight for port 4180). | Unowned — needs new ws- | This is the underlying bug that produced yesterday's `oauth2-proxy@4180` collision on the retired-deployment box. Fix shape: `proxmox_guests[*].placement.deployment_owner: <slug>` + role-side guard. |
 | **Cert validator deployment awareness** | Likely ws-0375 / ws-0414 | See item 3 above. |
 | **`make new-deployment` / `make use-deployment` / `make bind-worktree`** targets sketched in [ADR 0442](../adr/0442-multi-deployment-make-interface-and-worktree-binding.md) | Likely ws-0445 phase 4 or new ws- | ws-0448's `run_with_deployment.sh` is the leaf tool these targets would invoke. They do not exist yet. |
 | **`inventory/hosts.yml` parameterization** ([ADR 0445](../adr/0445-phase1-multi-deployment-hardening.md) item 5) | ws-0445 | Mentioned as planned in ADR 0445; ws-0448 explicitly stayed out of this surface. |
-| **`.local/deployments/0fork/topology.yml` is still incomplete** | Operator data, not code | Current overlay only has `runtime-control / postgres-vm / nginx / docker-runtime`. The committed schema has 12+ guests. `--deployment 0fork --write` now passes the role check (auto-filled) but next fails on `KeyError: 'monitoring'` because the guest just isn't in the overlay. Operator action — copy `inventory/host_vars/proxmox-host.yml`'s full guest list into `.local/deployments/0fork/topology.yml` and adjust the IPs. |
+| **`.local/deployments/retired-deployment/topology.yml` is still incomplete** | Operator data, not code | Current overlay only has `runtime-control / postgres-vm / nginx / docker-runtime`. The committed schema has 12+ guests. `--deployment retired-deployment --write` now passes the role check (auto-filled) but next fails on `KeyError: 'monitoring'` because the guest just isn't in the overlay. Operator action — copy `inventory/host_vars/proxmox-host.yml`'s full guest list into `.local/deployments/retired-deployment/topology.yml` and adjust the IPs. |
 
 ---
 

@@ -98,7 +98,7 @@ notes: |
 
   Out-of-scope for this slice (deferred to follow-ups):
   - Host-pinning so two deployments can't both install services on the
-    same VM (the lv3↔0fork port-4180 collision).
+    same VM (the lv3↔retired-deployment port-4180 collision).
   - inventory/hosts.yml parameterization (ws-0445 item 5 owns this).
-  - 0fork's topology.yml still needs more guests — operator data gap,
+  - retired-deployment's topology.yml still needs more guests — operator data gap,
     not a code change.

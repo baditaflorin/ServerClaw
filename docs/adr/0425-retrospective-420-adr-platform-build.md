@@ -28,8 +28,8 @@ single incidents; this one looks at the *shape of the whole build*.
 
 ### 1. `.local/` as the identity boundary
 ADR 0385 and ADR 0407 together produced a clean separation: committed code is
-generic, `.local/` holds deployment-specific values. Starting the 0fork clone
-required editing **one new file** (`.local/identity.yml.0fork`) plus selecting
+generic, `.local/` holds deployment-specific values. Starting the retired-deployment clone
+required editing **one new file** (`.local/identity.yml.retired-deployment`) plus selecting
 it at runtime. No committed Ansible needed to change. That's the success
 criterion for "forkable" and it held.
 
@@ -134,7 +134,7 @@ pattern where services kept falling over one at a time. That pattern is
 heavily weighted toward "fix this one thing that broke" rather than
 "build this one thing that is missing."
 
-The 0fork clone attempt is the forcing-function that exposes whether the
+The retired-deployment clone attempt is the forcing-function that exposes whether the
 fix-storm left the platform genuinely robust or just patched. Early signal
 from the clone session:
 
@@ -220,7 +220,7 @@ These are low-cost and directly unblock the next fork attempt.
 - That the 420-ADR count is a problem. It is not — the platform is large
   and deliberate about recording decisions.
 - That the agent-operator collaboration pattern is broken. It is not —
-  the 0fork clone session is proceeding in a single operator-absent window
+  the retired-deployment clone session is proceeding in a single operator-absent window
   on docs + verifications alone, and producing usable artifacts.
 - That the clone is going to succeed end-to-end. It might or might not.
   This ADR is about process, not about the clone's outcome.

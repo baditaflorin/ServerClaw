@@ -423,7 +423,7 @@ The `srvclaw_` prefix approach works because:
 - [ ] Create alerts for certificate expiration (now that domain context is explicit)
 
 ### Short Term (Next 2-3 Releases)
-- [ ] Implement `.local/deployments/{lv3,0fork}/certificate-catalog.json` overrides
+- [ ] Implement `.local/deployments/{lv3,retired-deployment}/certificate-catalog.json` overrides
 - [ ] Migrate remaining 50+ roles to use `| secret` Ansible filter
 - [ ] Add deployment context to CI/CD pipeline validation
 

@@ -165,7 +165,7 @@ else
 fi
 
 # ADR 0444 item 10 — per-service convergence dry-run across the fork-shape
-# fixture matrix (lv3 / 0fork / synthetic). Advisory through phase 4;
+# fixture matrix (lv3 / retired-deployment / synthetic). Advisory through phase 4;
 # ADR 0444 phase 5 promotes to required.
 #
 # Bypass while advisory: SKIP_CONVERGE_DRY_RUN=1 git push origin <branch>

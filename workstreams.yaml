@@ -138,7 +138,7 @@ workstreams:
   depends_on:
   - adr-0491-authentik-phase2-2026-08-28
   conflicts_with:
-  - ws-0424-fork-clone-0fork
+  - ws-0424-fork-clone-retired-deployment
   - ws-0438-generic-by-construction
   - ws-0439-deployment-profiles
   - ws-0443-topology-drift-detection
@@ -585,7 +585,7 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   owner: claude
-  deployment: 0fork
+  deployment: retired-deployment
   branch: claude/happy-maxwell-b79396
   worktree_path: .claude/worktrees/happy-maxwell-b79396
   doc: docs/adr/0485-convergence-idempotency-tests.md
@@ -672,7 +672,7 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   owner: claude
-  deployment: 0fork
+  deployment: retired-deployment
   branch: unassigned/ws-0484-self-verification-contracts
   worktree_path: unassigned/ws-0484-self-verification-contracts
   doc: docs/adr/0484-self-verification-contracts.md
@@ -759,7 +759,7 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   owner: claude
-  deployment: 0fork
+  deployment: retired-deployment
   branch: claude/happy-maxwell-b79396
   worktree_path: .claude/worktrees/happy-maxwell-b79396
   doc: docs/adr/0483-hands-off-bootstrap.md
@@ -818,7 +818,7 @@ workstreams:
       \ input format"
     status: completed
   - id: t2-derive-manifest
-    title: "scripts/derive_manifest.py \u2014 introspect lv3 + 0fork to emit draft\
+    title: "scripts/derive_manifest.py \u2014 introspect lv3 + retired-deployment to emit draft\
       \ manifests"
     status: completed
   - id: t3-bootstrap-steps
@@ -848,7 +848,7 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   owner: claude
-  deployment: 0fork
+  deployment: retired-deployment
   branch: unassigned/ws-0483-capacity-aware-dynamic-sizing
   worktree_path: unassigned/ws-0483-capacity-aware-dynamic-sizing
   doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
@@ -910,21 +910,21 @@ workstreams:
       a forkable deployment
     status: pending
   - id: t6-backfill
-    title: Re-probe and re-resolve lv3 and 0fork; diff against current topology and
+    title: Re-probe and re-resolve lv3 and retired-deployment; diff against current topology and
       document deltas
     status: pending
   - id: t7-apply
     title: Separate ADR for `make apply-topology` (live-resize semantics)
     status: pending
   findings:
-  - '2026-05-11 incident on 0fork showed the lv3-sized topology over-allocates RAM
+  - '2026-05-11 incident on retired-deployment showed the lv3-sized topology over-allocates RAM
     to 180GB on a 64GB host. The fix is structural, not parametric: sizing must be
     derived from probed host capacity, not copied from another deployment.'
-  - The 0fork-incident audit revealed every VM had balloon=0 (ballooning disabled).
-    Always-on ballooning (40% floor) is now part of the policy defaults; the 0fork
+  - The retired-deployment-incident audit revealed every VM had balloon=0 (ballooning disabled).
+    Always-on ballooning (40% floor) is now part of the policy defaults; the retired-deployment
     host has been queued to enable ballooning on next VM reboot, but new deployments
     will be ballooning-enabled from creation.
-- id: ws-0482-0fork-platform-not-bootstrapped
+- id: ws-0482-retired-deployment-platform-not-bootstrapped
   adr: 0482
   title: "example.org platform deployment never landed \u2014 registry.example.org\
     \ 502 + others are catch-all illusions"
@@ -932,30 +932,30 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   owner: unassigned
-  deployment: 0fork
-  branch: unassigned/ws-0482-0fork-platform-not-bootstrapped
-  worktree_path: unassigned/ws-0482-0fork-platform-not-bootstrapped
+  deployment: retired-deployment
+  branch: unassigned/ws-0482-retired-deployment-platform-not-bootstrapped
+  worktree_path: unassigned/ws-0482-retired-deployment-platform-not-bootstrapped
   doc: docs/adr/0482-capacity-aware-dynamic-sizing.md
   depends_on:
   - ws-0481-explicit-deployment-context
   conflicts_with: []
   shared_surfaces:
-  - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
+  - workstreams/active/ws-0482-retired-deployment-platform-not-bootstrapped.yaml
   ownership_manifest:
     owned_surfaces:
     - id: ws_0482_workstream
       paths:
-      - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
+      - workstreams/active/ws-0482-retired-deployment-platform-not-bootstrapped.yaml
       mode: shared_contract
-      contract: ws-0482-0fork-platform-not-bootstrapped-v1
+      contract: ws-0482-retired-deployment-platform-not-bootstrapped-v1
   tasks:
   - id: t1
-    title: "Decide scope \u2014 bootstrap full platform on 0fork OR remove platform\
+    title: "Decide scope \u2014 bootstrap full platform on retired-deployment OR remove platform\
       \ vhosts from nginx-proxy-manager"
     status: pending
   - id: t2
     title: "If bootstrap \u2014 resolve `hosts: runtime-control` hardcode in playbooks/harbor.yml\
-      \ (and likely others) since runtime-control VM does not exist on 0fork (collapsed\
+      \ (and likely others) since runtime-control VM does not exist on retired-deployment (collapsed\
       \ topology)"
     status: pending
   - id: t3
@@ -967,15 +967,15 @@ workstreams:
       \ 200/302 from catch-all (registry, ci, chat, wiki, analytics, errors, ntfy)"
     status: pending
   findings:
-  - "2026-05-11 status check found 0fork docker-runtime (10.10.10.20) hosts 78 personal-app\
+  - "2026-05-11 status check found retired-deployment docker-runtime (10.10.10.20) hosts 78 personal-app\
     \ /opt projects (wemeshup, badita_org, 0exec_com, scrapetheworld, \u2026) but\
     \ ZERO platform services (no /opt/harbor, /opt/outline, /opt/librechat, /opt/plausible,\
     \ /opt/glitchtip, /opt/woodpecker, /opt/ntfy)."
-  - "The 2026-04-27 receipt receipts/live-applies/2026-04-27-ws-0372-0fork-services-all-7-deployed.json\
+  - "The 2026-04-27 receipt receipts/live-applies/2026-04-27-ws-0372-retired-deployment-services-all-7-deployed.json\
     \ claims all 7 services were deployed and verified UP. That claim is incorrect\
     \ for the current host state \u2014 either the receipt was aspirational, the converge\
     \ silently failed but reported pass, or the deployment was rolled back manually."
-  - 'On 0fork the Proxmox host only runs 3 VMs (ubuntu-24-04 = 10.10.10.20, nginx-proxy-manager
+  - 'On retired-deployment the Proxmox host only runs 3 VMs (ubuntu-24-04 = 10.10.10.20, nginx-proxy-manager
     VM, stopped DNS VM). The runtime-control VM (10.10.10.92) that the committed service
     registry assigns Harbor + Keycloak + others to does not exist. The collapsed-topology
     pattern (ADR 0424) intended docker-runtime to be the only runtime, but the inventory
@@ -984,7 +984,7 @@ workstreams:
   - Symptoms visible from outside: registry.example.org returns 502 (nginx vhost upstream
       unreachable). chat / wiki / analytics / errors / ntfy / ci return 200/302 from
       the nginx catch-all but no real backend exists.
-  - This is not a "fix Harbor in 20 minutes" job. It is a "bootstrap 0fork's platform
+  - This is not a "fix Harbor in 20 minutes" job. It is a "bootstrap retired-deployment's platform
     from scratch" job.
 - id: ws-0481-pentest-fleet-migration
   adr: 0481
@@ -1068,7 +1068,7 @@ workstreams:
   - Makefile
   - CLAUDE.md
   - .local/deployments/lv3/
-  - .local/deployments/0fork/
+  - .local/deployments/retired-deployment/
   - .local/active-deployment
   ownership_manifest:
     owned_surfaces:
@@ -1097,7 +1097,7 @@ workstreams:
       - docs/adr/.index.yaml
       - docs/adr/index/**
       - workstreams.yaml
-      - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
+      - workstreams/active/ws-0482-retired-deployment-platform-not-bootstrapped.yaml
       - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
       - workstreams/active/ws-0484-self-verification-contracts.yaml
       - workstreams/active/ws-0485-convergence-idempotency-tests.yaml
@@ -1124,10 +1124,10 @@ workstreams:
     title: Backfill .local/deployments/lv3/ from the parked lv3-backup identity
     status: pending
   - id: t2
-    title: Remove or repurpose .local/deployments/prod/ (currently a stale 0fork duplicate)
+    title: Remove or repurpose .local/deployments/prod/ (currently a stale retired-deployment duplicate)
     status: pending
   - id: t3
-    title: "Write .local/active-deployment marker (defaults to 0fork \u2014 current\
+    title: "Write .local/active-deployment marker (defaults to retired-deployment \u2014 current\
       \ active)"
     status: pending
   - id: t4
@@ -1160,7 +1160,7 @@ workstreams:
     `make use-deployment slug=<s>`, `make bind-worktree slug=<s>`, `make sync-identity-link`,
     `make _require-deployment` all verified working end-to-end (both happy path and
     failure path) on 2026-05-11.
-  - "Side discovery (spawned ws-0482) \u2014 0fork's platform deployment from ws-0372\
+  - "Side discovery (spawned ws-0482) \u2014 retired-deployment's platform deployment from ws-0372\
     \ never actually landed. The Harbor 502 originally reported is not a transient\
     \ outage; it is a \"never deployed\" symptom amplified by stale nginx vhost entries."
 - id: adr-0481-multi-deployment-service-registry
@@ -2465,7 +2465,7 @@ workstreams:
       paths:
       - workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
       mode: exclusive
-  notes: "Phase 2 of ADR 0457. Closes the lv3 \u2194 0fork oauth2-proxy@4180\ncollision\
+  notes: "Phase 2 of ADR 0457. Closes the lv3 \u2194 retired-deployment oauth2-proxy@4180\ncollision\
     \ class of bug at converge time rather than at incident time.\n\nNew role `lv3.platform.host_pinning_guard`:\n\
     \ - Resolves the active deployment slug from active_deployment_slug,\n   $DEPLOYMENT,\
     \ or .local/active-deployment.\n - Looks up the host's deployment_owner from proxmox_guests.\n\
@@ -2572,7 +2572,7 @@ workstreams:
       paths:
       - workstreams/active/ws-0457-host-pinning-deployment-owner.yaml
       mode: exclusive
-  notes: "Closes Slice D from the ws-0448 postmortem (the lv3 \u2194 0fork\noauth2-proxy@4180\
+  notes: "Closes Slice D from the ws-0448 postmortem (the lv3 \u2194 retired-deployment\noauth2-proxy@4180\
     \ collision class of bug).\n\nPhase 1 (this workstream) ships:\n - config/contracts/deployment-v1/topology.schema.json:\
     \ optional\n   `deployment_owner` field on each proxmox_guests[*] entry,\n   pattern\
     \ ^[a-z0-9][a-z0-9_-]*$.\n - scripts/host_pinning_check.py: read-only audit primitive\
@@ -3374,7 +3374,7 @@ workstreams:
     \ surfaces. Captures three cross-cutting changes ws-0448 made\nthat other agents\
     \ need to know about:\n\n1. workstreams/active/**.yaml + workstreams/archive/2026/**.yaml\
     \ all\n   have their `adr:` field quoted now (YAML octal-int parser was\n   coercing\
-    \ 0447 -> 295). Don't revert.\n2. receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json\n\
+    \ 0447 -> 295). Don't revert.\n2. receipts/live-applies/2026-04-28-coolify-retired-deployment-runtime-live-apply.json\n\
     \   was reconstructed because PR #71 referenced it but never committed\n   the\
     \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n\
     \   now serves example.org after yesterday's recovery).\n\nPlus follow-ups not\
@@ -3519,7 +3519,7 @@ workstreams:
       paths:
       - workstreams/active/ws-0447-coolify-apps-self-healing.yaml
       mode: exclusive
-  context: "After the 0fork Coolify deployment (converges 16-25) and the first app\
+  context: "After the retired-deployment Coolify deployment (converges 16-25) and the first app\
     \ deploy\n(education_wemeshup), several manual steps were required:\n  1. nginx\
     \ was manually patched to point to coolify VM (10.10.10.70:80) instead\n     of\
     \ coolify-apps VM (10.10.10.71:443), because coolify-apps has no Traefik.\n  2.\
@@ -3623,7 +3623,7 @@ workstreams:
 
       '
   references:
-  - postmortem: docs/postmortems/2026-04-28-coolify-0fork-deployment-and-education-wemeshup.md
+  - postmortem: docs/postmortems/2026-04-28-coolify-retired-deployment-deployment-and-education-wemeshup.md
   - adr: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
   - adr: docs/adr/0340-coolify-vm-separation.md
   - template: publication/templates/proxmox-host.yml:2982
@@ -3767,7 +3767,7 @@ workstreams:
   - docs/adr/0445-phase1-multi-deployment-hardening.md
   - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
   - tests/fixtures/inventories/lv3-shape.yml
-  - tests/fixtures/inventories/0fork-shape.yml
+  - tests/fixtures/inventories/retired-deployment-shape.yml
   - tests/fixtures/inventories/synthetic-shape.yml
   - tests/fixtures/inventories/README.md
   - scripts/converge_dry_run.py
@@ -3800,7 +3800,7 @@ workstreams:
       target_version: 0.179.x
       done:
       - tests/fixtures/inventories/lv3-shape.yml (equal-flavor path)
-      - 'tests/fixtures/inventories/0fork-shape.yml (divergent-flavor path: leading
+      - 'tests/fixtures/inventories/retired-deployment-shape.yml (divergent-flavor path: leading
         digit stripped)'
       - tests/fixtures/inventories/synthetic-shape.yml (testfork.invalid third identity)
       - tests/fixtures/inventories/README.md documenting fixture contract
@@ -3846,7 +3846,7 @@ workstreams:
         \ loader, closing\nthe seam between phase 1.1 (fixtures) and ws-0439 (substrate).\n"
       done:
       - "test: tests/test_ws0445_deployment_loader_integration.py \u2014 7 cases proving\
-        \ lv3/0fork/synthetic identity shapes validate through scripts/deployment.py\
+        \ lv3/retired-deployment/synthetic identity shapes validate through scripts/deployment.py\
         \ against config/contracts/deployment-v1/ schemas"
       deferred_to_phase_2:
       - one-release deprecation warning for legacy `env=production` enum
@@ -3865,7 +3865,7 @@ workstreams:
     three fixtures
   - validate_no_hardcoded_topology.py flags default('<known-prod-IP-or-domain>') in
     role defaults
-  - make converge-X deployment=0fork and make converge-X deployment=lv3 are first-class
+  - make converge-X deployment=retired-deployment and make converge-X deployment=lv3 are first-class
     entry points
   - ws-0438 phase 6 is retired or restructured (no duplicate ownership)
   ownership_manifest:
@@ -3879,7 +3879,7 @@ workstreams:
     - id: ws_0444_fixtures
       paths:
       - tests/fixtures/inventories/lv3-shape.yml
-      - tests/fixtures/inventories/0fork-shape.yml
+      - tests/fixtures/inventories/retired-deployment-shape.yml
       - tests/fixtures/inventories/synthetic-shape.yml
       - tests/fixtures/inventories/README.md
       mode: shared_contract
@@ -4093,7 +4093,7 @@ workstreams:
       - config/subdomain-exposure-registry.json
       - inventory/group_vars/platform.yml
       - inventory/group_vars/platform_tls_certs.yml
-      - receipts/live-applies/2026-04-27-ws-0372-0fork-services-all-7-deployed.json
+      - receipts/live-applies/2026-04-27-ws-0372-retired-deployment-services-all-7-deployed.json
       mode: shared_contract
       contract: release-bump-v1
     - id: ws_0443_workstream
@@ -4126,7 +4126,7 @@ workstreams:
   doc: docs/adr/0439-deployment-profiles-subset-selection.md
   depends_on:
   - adr-0407-generic-by-default
-  - adr-0431-0fork-full-day-deploy
+  - adr-0431-retired-deployment-full-day-deploy
   - adr-0438-generic-by-construction
   conflicts_with: []
   shared_surfaces:
@@ -4263,7 +4263,7 @@ workstreams:
       target_version: 0.179.0
       done:
       - 'feat(identity): platform_identity filter plugin with 5 flavors (config/sql/pve/unix/dns_label)'
-      - 'test: 18 unit tests across lv3/0fork/UPPERCASE/edge-case inputs'
+      - 'test: 18 unit tests across lv3/retired-deployment/UPPERCASE/edge-case inputs'
       - 'fix(identity): migrate proxmox_notification_*, keycloak_realm_name, monitoring_influxdb_org
         to platform_identity'
       - 'fix(identity): migrate proxmox_api_automation_user to pve_prefix (was config_prefix)'
@@ -4289,7 +4289,7 @@ workstreams:
         template values'
       - 'fix(openbao): replace 4 !unsafe SQL grants with Jinja-escape pattern (Phase
         0 ef1445216)'
-      - 'fix(nomad): replace per-deployment lv3-/0fork- smoke job HCL files with single
+      - 'fix(nomad): replace per-deployment lv3-/retired-deployment- smoke job HCL files with single
         in-role Jinja template; job/service names derive from platform_identity.config_prefix'
       - 'fix(nomad): rewrite playbooks/nomad.yml multi-host-group hosts expression
         to single-line ternary (ansible_scope_runner regex parser does not handle
@@ -4341,7 +4341,7 @@ workstreams:
       - Promote from advisory to required
   acceptance_criteria:
   - Pre-push lint scanner green on main with zero allow-comments outside docs/tests
-  - PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make bootstrap completes without
+  - PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment make bootstrap completes without
     any lv3/prefix/credential hardcoding workaround in fork-overrides.yml
   - Generic-deploy CI job green against testfork.invalid synthetic identity
   ownership_manifest:
@@ -4399,7 +4399,7 @@ workstreams:
     alone.
 
     '
-- id: ws-0424-fork-clone-0fork
+- id: ws-0424-fork-clone-retired-deployment
   adr: '0424'
   title: "ADR 0424 \u2014 example.org Clone onto Hetzner AX41-NVMe"
   status: in_progress
@@ -4419,7 +4419,7 @@ workstreams:
   conflicts_with: []
   shared_surfaces:
   - workstreams.yaml
-  - workstreams/active/ws-0424-fork-clone-0fork.yaml
+  - workstreams/active/ws-0424-fork-clone-retired-deployment.yaml
   - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
   - docs/adr/0425-retrospective-420-adr-platform-build.md
   - docs/runbooks/hetzner-bare-metal-bootstrap.md
@@ -4428,7 +4428,7 @@ workstreams:
   surfaces:
   - example.org (full apex scope, apex wiped and repointed 2026-04-21)
   - Hetzner AX41-NVMe
-  - .local/identity.yml.0fork (new, not committed)
+  - .local/identity.yml.retired-deployment (new, not committed)
   - .local/hetzner/dns.env (new, not committed)
   summary: "First real fork-viability test. Stands up a collapsed nested-Proxmox topology\
     \ on a Hetzner AX41-NVMe using example.org (full apex) as the identity. Drives\
@@ -4441,7 +4441,7 @@ workstreams:
     owned_surfaces:
     - id: ws_0424_tracking
       paths:
-      - workstreams/active/ws-0424-fork-clone-0fork.yaml
+      - workstreams/active/ws-0424-fork-clone-retired-deployment.yaml
       - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
       - docs/adr/0425-retrospective-420-adr-platform-build.md
       - docs/runbooks/hetzner-bare-metal-bootstrap.md
@@ -4605,7 +4605,7 @@ workstreams:
     - ADR 0424 drafted
     - ADR 0425 retrospective drafted
     - Bootstrap runbook drafted
-    - Identity overlay .local/identity.yml.0fork written (apex scope confirmed)
+    - Identity overlay .local/identity.yml.retired-deployment written (apex scope confirmed)
     - example.org apex DNS wiped and repointed at 203.0.113.3 (backup saved)
     - Hostname set to debian-base-template.example.org on box
     - PVE repo + GPG key installed (pve-no-subscription trixie)
@@ -5233,7 +5233,7 @@ workstreams:
   - scripts/topology-snapshot.json
   - workstreams/archive/2026/ws-0391-live-apply.yaml
   - workstreams/archive/2026/ws-0391-live-apply.yaml
-  - workstreams/active/ws-0424-fork-clone-0fork.yaml
+  - workstreams/active/ws-0424-fork-clone-retired-deployment.yaml
   - receipts/live-applies/**
   ownership_manifest:
     owned_surfaces:
@@ -5310,7 +5310,7 @@ workstreams:
       - scripts/check_release_readiness.py
       - scripts/generate_cross_cutting_artifacts.py
       - scripts/topology-snapshot.json
-      - workstreams/active/ws-0424-fork-clone-0fork.yaml
+      - workstreams/active/ws-0424-fork-clone-retired-deployment.yaml
       mode: shared_contract
       contract: workstream-metadata-gate-repair-v1
   canonical_truth:

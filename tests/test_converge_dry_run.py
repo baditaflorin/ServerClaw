@@ -120,15 +120,15 @@ def test_roles_referenced_ignores_name_keys(cdr):
 def test_discover_fixtures_all_returns_committed_set(cdr):
     fixtures = cdr.discover_fixtures("all")
     names = sorted(p.name for p in fixtures)
-    assert names == ["0fork-shape.yml", "lv3-shape.yml", "synthetic-shape.yml"], (
+    assert names == ["retired-deployment-shape.yml", "lv3-shape.yml", "synthetic-shape.yml"], (
         f"discover_fixtures('all') returned unexpected set: {names}"
     )
 
 
 def test_discover_fixtures_selector_picks_subset(cdr):
-    fixtures = cdr.discover_fixtures("lv3,0fork")
+    fixtures = cdr.discover_fixtures("lv3,retired-deployment")
     names = sorted(p.name for p in fixtures)
-    assert names == ["0fork-shape.yml", "lv3-shape.yml"]
+    assert names == ["retired-deployment-shape.yml", "lv3-shape.yml"]
 
 
 def test_discover_fixtures_unknown_stem_raises(cdr):
@@ -144,7 +144,7 @@ def test_discover_fixtures_unknown_stem_raises(cdr):
 def test_format_matrix_groups_by_role(cdr):
     results = [
         cdr.CellResult("alpha", "lv3-shape.yml", "playbooks/alpha.yml", True, "ok"),
-        cdr.CellResult("alpha", "0fork-shape.yml", "playbooks/alpha.yml", False, "boom"),
+        cdr.CellResult("alpha", "retired-deployment-shape.yml", "playbooks/alpha.yml", False, "boom"),
         cdr.CellResult("beta", "lv3-shape.yml", "playbooks/beta.yml", True, "ok"),
     ]
     formatted = cdr._format_matrix(results)

@@ -113,7 +113,7 @@ This is the rule that, if violated, breaks resumability hardest. Every role curr
 
 ### 6. The fixture deployment
 
-Idempotency tests need a target. The "real" deployments (lv3, 0fork) are too slow / risky to use for nightly idempotency runs. A dedicated fixture:
+Idempotency tests need a target. The "real" deployments (lv3, retired-deployment) are too slow / risky to use for nightly idempotency runs. A dedicated fixture:
 
 ```
 .local/deployments/ci-ephemeral-001/

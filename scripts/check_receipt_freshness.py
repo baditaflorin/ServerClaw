@@ -102,7 +102,7 @@ def write_receipt_atomic(path: Path, payload: dict, *, indent: int = 2) -> None:
         raise
 
 # A receipt slug starts `YYYY-MM-DD-<rest>`. Examples from the live file:
-#   2026-04-27-ws-0372-0fork-services-all-7-deployed
+#   2026-04-27-ws-0372-retired-deployment-services-all-7-deployed
 #   2026-03-28-adr-0250-log-queryability-canary-live-apply
 _DATE_PREFIX_RE = re.compile(r"^(\d{4})-(\d{2})-(\d{2})-(.+)$")
 

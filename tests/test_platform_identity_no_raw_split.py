@@ -5,7 +5,7 @@ for a root-facts file to reach for `platform_domain | split('.') | first`:
 that expression picks the first DNS label with zero regard for the downstream
 identifier regime (SQL, PVE, POSIX, DNS). Every one of those raw splits is a
 latent fork-breaking bug — it worked for `lv3` by coincidence and failed
-silently for `0fork`.
+silently for `retired-deployment`.
 
 This test scans the Tier 0 root files and fails on any `split('.') | first`
 that is not inside a code comment or inside the platform_identity derivation

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0.0",
-  "receipt_id": "2026-04-27-ws-0372-0fork-services-all-7-deployed",
+  "receipt_id": "2026-04-27-ws-0372-retired-deployment-services-all-7-deployed",
   "environment": "production",
   "applied_on": "2026-04-27",
   "recorded_on": "2026-04-27",
@@ -8,7 +8,7 @@
   "recorded_by": "claude",
   "workflow_id": "converge-site",
   "workstream": "ws-0372",
-  "source_branch": "claude/ws-0372-0fork-services",
+  "source_branch": "claude/ws-0372-retired-deployment-services",
   "source_commit": "2417210269b940a84e123bf65cb286d044a54d61",
   "repo_version_context": "0.178.231",
   "platform_version_context": "0.178.222",

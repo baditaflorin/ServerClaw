@@ -22,7 +22,7 @@ shared_surfaces:
   - workstreams/active/ws-0445-phase1-multi-deployment-hardening.yaml
   # Item 12 — fork-shape fixture inventories
   - tests/fixtures/inventories/lv3-shape.yml
-  - tests/fixtures/inventories/0fork-shape.yml
+  - tests/fixtures/inventories/retired-deployment-shape.yml
   - tests/fixtures/inventories/synthetic-shape.yml
   - tests/fixtures/inventories/README.md
   # Item 10 — convergence dry-run helper + tests
@@ -66,7 +66,7 @@ phases:
     target_version: 0.179.x
     done:
       - "tests/fixtures/inventories/lv3-shape.yml (equal-flavor path)"
-      - "tests/fixtures/inventories/0fork-shape.yml (divergent-flavor path: leading digit stripped)"
+      - "tests/fixtures/inventories/retired-deployment-shape.yml (divergent-flavor path: leading digit stripped)"
       - "tests/fixtures/inventories/synthetic-shape.yml (testfork.invalid third identity)"
       - "tests/fixtures/inventories/README.md documenting fixture contract"
       - "tests/test_fixture_inventories.py — 12 cases covering parse, scalars, identity render, prefix uniqueness, shape-path coverage"
@@ -105,7 +105,7 @@ phases:
       fork-shape fixtures load + validate through that loader, closing
       the seam between phase 1.1 (fixtures) and ws-0439 (substrate).
     done:
-      - "test: tests/test_ws0445_deployment_loader_integration.py — 7 cases proving lv3/0fork/synthetic identity shapes validate through scripts/deployment.py against config/contracts/deployment-v1/ schemas"
+      - "test: tests/test_ws0445_deployment_loader_integration.py — 7 cases proving lv3/retired-deployment/synthetic identity shapes validate through scripts/deployment.py against config/contracts/deployment-v1/ schemas"
     deferred_to_phase_2:
       - one-release deprecation warning for legacy `env=production` enum
       - default-on of MULTI_DEPLOYMENT_ENABLED once all generators verified
@@ -120,7 +120,7 @@ acceptance_criteria:
   - "Three fixture inventories render full platform_service_registry without error"
   - "Pre-push gate runs ansible-playbook --check --diff per changed role across all three fixtures"
   - "validate_no_hardcoded_topology.py flags default('<known-prod-IP-or-domain>') in role defaults"
-  - "make converge-X deployment=0fork and make converge-X deployment=lv3 are first-class entry points"
+  - "make converge-X deployment=retired-deployment and make converge-X deployment=lv3 are first-class entry points"
   - "ws-0438 phase 6 is retired or restructured (no duplicate ownership)"
 ownership_manifest:
   owned_surfaces:
@@ -133,7 +133,7 @@ ownership_manifest:
     - id: ws_0444_fixtures
       paths:
         - tests/fixtures/inventories/lv3-shape.yml
-        - tests/fixtures/inventories/0fork-shape.yml
+        - tests/fixtures/inventories/retired-deployment-shape.yml
         - tests/fixtures/inventories/synthetic-shape.yml
         - tests/fixtures/inventories/README.md
       mode: shared_contract

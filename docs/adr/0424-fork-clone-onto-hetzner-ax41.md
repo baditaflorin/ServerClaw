@@ -4,7 +4,7 @@
 - Implementation Status: Pending provisioning (server delivered; no host-level changes yet)
 - Date: 2026-04-21
 - Concern: portability, disaster-recovery, fork-viability, operator-identity
-- Tags: clone, fork, proxmox, nested-virtualisation, identity-overlay, hetzner, 0fork
+- Tags: clone, fork, proxmox, nested-virtualisation, identity-overlay, hetzner, retired-deployment
 - Depends on:
   - ADR 0385 (Operator Identity Core)
   - ADR 0407 (Generic-By-Default — `.local/` Deployment Values)
@@ -112,7 +112,7 @@ The operator explicitly authorised wiping the `example.org` apex. The previous
 deployment at `88.198.219.246` (default Hetzner `your-server.de` mail infra,
 autoconfig, SRV records) was **destroyed** to free the apex. A full zone dump
 was captured first at
-`.local/hetzner/0fork-apex-pre-wipe-backup-2026-04-21.json` (15 records);
+`.local/hetzner/retired-deployment-apex-pre-wipe-backup-2026-04-21.json` (15 records);
 restoration is a single-script replay of that JSON if reversal is ever needed.
 
 **Apex records after wipe** (confirmed live at 2026-04-21):
@@ -134,12 +134,12 @@ execution order) so the records match the actual DKIM selector in use.
 
 ### 4. Identity overlay
 
-Create `.local/identity.yml.0fork` in the main worktree (gitignored, not in
+Create `.local/identity.yml.retired-deployment` in the main worktree (gitignored, not in
 this worktree — `.local/` is sacred, ADR 0376). Select it at runtime via an
 environment variable:
 
 ```bash
-export PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork
+export PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment
 make converge-<service> env=clone
 ```
 
@@ -159,10 +159,10 @@ management_interface: enp41s0
 host_public_hostname: debian-base-template
 proxmox_node_name: debian-base-template
 platform_guest_network_cidr: 10.10.10.0/24   # different from prod's 10.10.10.0/24
-platform_tailscale_tailnet_name: 0fork-clone  # new, isolated from prod tailnet
+platform_tailscale_tailnet_name: retired-deployment-clone  # new, isolated from prod tailnet
 ```
 
-Full overlay at `.local/identity.yml.0fork` (main worktree, not committed).
+Full overlay at `.local/identity.yml.retired-deployment` (main worktree, not committed).
 
 ### 5. Email path for this ADR's "confirmation email" deliverable
 
@@ -191,7 +191,7 @@ deployed**. It is not a one-liner.
 3. ⏳ Bootstrap host: hostname, Tailscale join, base hardening
    (see `docs/runbooks/hetzner-bare-metal-bootstrap.md`)
 4. ⏳ mdadm RAID1, install Proxmox VE
-5. ⏳ Create `.local/identity.yml.0fork`, add `clone` env to
+5. ⏳ Create `.local/identity.yml.retired-deployment`, add `clone` env to
    `inventory/group_vars/`
 6. ⏳ Provision the 8 VMs via existing `proxmox_guest` role
 7. ⏳ Converge `runtime-control` (Keycloak first — identity anchor)
@@ -246,7 +246,7 @@ deployed**. It is not a one-liner.
 3. ✅ **Gateway**: `203.0.113.66`, `/26` subnet base `203.0.113.192`
    (verified via `ssh root@203.0.113.3 'ip route'` on 2026-04-21).
 4. ✅ **RAID1** via mdadm before Proxmox install.
-5. ✅ **Tailscale**: new isolated tailnet `0fork-clone`, separate from prod.
+5. ✅ **Tailscale**: new isolated tailnet `retired-deployment-clone`, separate from prod.
 6. ⏳ **Account-holder name "Mr. Raabe"** on Hetzner emails — non-blocking
    but worth confirming it's not a reseller account.
 7. ⏳ **Token rotation**: the DNS token shared in chat should be rotated

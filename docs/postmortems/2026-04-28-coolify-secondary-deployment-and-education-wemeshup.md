@@ -1,4 +1,4 @@
-# Postmortem: Coolify 0fork Deployment + education_wemeshup First App Deploy
+# Postmortem: Coolify retired-deployment Deployment + education_wemeshup First App Deploy
 **Date:** 2026-04-28
 **Duration:** ~4 hours across multiple sessions (converges 16–25, then app deployment)
 **Author:** Claude (gallant-chebyshev-b0def1 worktree)
@@ -8,7 +8,7 @@
 
 ## Summary
 
-Deploying Coolify to the 0fork Hetzner server took 10 converge iterations (16–25) before reaching `failed=0`. Subsequently, deploying the first application (`education_wemeshup`) to the running Coolify instance required 6 manual steps that **must become IaC** before this workflow can be repeated unattended.
+Deploying Coolify to the retired-deployment Hetzner server took 10 converge iterations (16–25) before reaching `failed=0`. Subsequently, deploying the first application (`education_wemeshup`) to the running Coolify instance required 6 manual steps that **must become IaC** before this workflow can be repeated unattended.
 
 ---
 
@@ -18,7 +18,7 @@ Deploying Coolify to the 0fork Hetzner server took 10 converge iterations (16–
 
 | Converge | Failure | Root cause |
 |----------|---------|------------|
-| 16–18 | SSH unreachable | Wrong Proxmox host in inventory (LV3 IP instead of 0fork) |
+| 16–18 | SSH unreachable | Wrong Proxmox host in inventory (LV3 IP instead of retired-deployment) |
 | 19 | `tmpfs directory missing` | `derive_service_defaults` overwrote `coolify_env_file` to a tmpfs path that wasn't yet created |
 | 20 | Bridge subnet mismatch | `172.18.0.0/16` hardcoded in firewall role; Coolify Docker network uses `172.20.0.0/16` |
 | 21 | `/api/v1/teams/current` → 404 | `User::create()` skips the Coolify wizard; no `teams` row exists for `team_id=0` |
@@ -57,7 +57,7 @@ After Coolify was running, deploying `https://github.com/baditaflorin/education_
 
 5. **Patched nginx** on the nginx VM (VM 110) to proxy `*.apps.example.org` from `https://10.10.10.71:443` (coolify-apps VM, empty) to `http://10.10.10.70:80` (Coolify Traefik, running).
 
-6. **Fixed domain TLD** — initial deployment used `.0fork.org` (wrong); patched via API PATCH and redeployed to get `.example.org` Traefik labels.
+6. **Fixed domain TLD** — initial deployment used `.retired-deployment.org` (wrong); patched via API PATCH and redeployed to get `.example.org` Traefik labels.
 
 7. **Switched to http:// domain** — Coolify's default `https://` domain makes Traefik try HTTP-01 ACME cert validation. Since nginx redirects port 80 → 443, the challenge always 404s and Traefik hangs the HTTPS entrypoint. Switching to `http://` makes Traefik serve on the HTTP entrypoint without TLS; nginx handles TLS externally.
 
@@ -155,9 +155,9 @@ The tunnel approach is cleaner (no persistent whitelist change) and matches the 
 3. Registers coolify-apps as a Coolify server via API
 4. Validates the server (which installs Traefik on coolify-apps)
 
-#### 8. admin-auth.json is stale after 0fork clone
+#### 8. admin-auth.json is stale after retired-deployment clone
 
-**Problem:** `.local/coolify/admin-auth.json` retained LV3 values (`apps_public_url: https://apps.example.com`, `ssh_tunnel_host: 203.0.113.1`) after the 0fork identity overlay was applied. The converge role does not update this file on re-runs.
+**Problem:** `.local/coolify/admin-auth.json` retained LV3 values (`apps_public_url: https://apps.example.com`, `ssh_tunnel_host: 203.0.113.1`) after the retired-deployment identity overlay was applied. The converge role does not update this file on re-runs.
 
 **Fix needed:** `coolify_runtime` post-deploy task should regenerate `admin-auth.json` from template using `platform_domain`, `management_ipv4`, and `coolify_api_token_name`.
 

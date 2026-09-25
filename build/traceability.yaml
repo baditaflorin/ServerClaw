@@ -239,7 +239,7 @@ workstreams:
     currently_describes: current_state
     concern: platform
     path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
-- workstream_id: ws-0424-fork-clone-0fork
+- workstream_id: ws-0424-fork-clone-retired-deployment
   title: "ADR 0424 \u2014 example.org Clone onto Hetzner AX41-NVMe"
   status: in_progress
   ready_to_merge: false
@@ -286,7 +286,7 @@ workstreams:
   primary_adr: 0439
   depends_on:
   - adr-0407-generic-by-default
-  - adr-0431-0fork-full-day-deploy
+  - adr-0431-retired-deployment-full-day-deploy
   - adr-0438-generic-by-construction
   surfaces:
     total: 1

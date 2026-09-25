@@ -8,7 +8,7 @@
 
 ## What Happened
 
-Operator requested deploying karakeep (a self-hosted bookmark manager) to the 0fork
+Operator requested deploying karakeep (a self-hosted bookmark manager) to the retired-deployment
 Coolify instance. Three sequential blockers were encountered and resolved:
 
 1. **Coolify control-plane was down** — `/run/lv3-secrets/coolify/runtime.env` was

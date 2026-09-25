@@ -4,7 +4,7 @@ Covers the five flavors (config, sql, pve, unix, dns_label) across a matrix
 of identity inputs that exercise the real edge cases we have seen or expect:
 
   - `lv3`         — production deployment, all flavors equal
-  - `0fork`       — leading digit (triggers sql/pve/unix divergence)
+  - `retired-deployment`       — leading digit (triggers sql/pve/unix divergence)
   - `UPPERCASE`   — case folding divergence
   - `with-dashes` — dash handling
   - `_under_`     — leading underscore (sql-safe, not POSIX-safe-leading)
@@ -81,11 +81,11 @@ def plugin():
         (
             "example.org",
             {
-                "config_prefix": "0fork",
+                "config_prefix": "retired-deployment",
                 "sql_prefix": "fork",  # leading digit stripped
                 "pve_prefix": "fork",  # leading digit stripped
                 "unix_prefix": "fork",  # leading digit stripped
-                "dns_label": "0fork",
+                "dns_label": "retired-deployment",
             },
         ),
         (
@@ -150,11 +150,11 @@ def test_dict_shape(plugin):
 
 
 def test_individual_flavor_filters(plugin):
-    assert plugin.platform_identity_config_prefix("example.org") == "0fork"
+    assert plugin.platform_identity_config_prefix("example.org") == "retired-deployment"
     assert plugin.platform_identity_sql_prefix("example.org") == "fork"
     assert plugin.platform_identity_pve_prefix("example.org") == "fork"
     assert plugin.platform_identity_unix_prefix("example.org") == "fork"
-    assert plugin.platform_identity_dns_label("example.org") == "0fork"
+    assert plugin.platform_identity_dns_label("example.org") == "retired-deployment"
 
 
 def test_filter_module_exposes_all_filters(plugin):
@@ -246,13 +246,13 @@ def test_production_invariant_lv3(plugin):
 
 
 def test_fork_flavor_divergence(plugin):
-    """On the 0fork clone, config/dns keep '0fork' while sql/pve/unix strip digit."""
+    """On the retired-deployment clone, config/dns keep 'retired-deployment' while sql/pve/unix strip digit."""
     identity = plugin.platform_identity("example.org")
-    assert identity["config_prefix"] == "0fork"
-    assert identity["dns_label"] == "0fork"
+    assert identity["config_prefix"] == "retired-deployment"
+    assert identity["dns_label"] == "retired-deployment"
     assert identity["sql_prefix"] == "fork"
     assert identity["pve_prefix"] == "fork"
     assert identity["unix_prefix"] == "fork"
-    # The 0fork-automation@pve vs fork-automation@pve bug surfaced this session:
-    # sql and pve coincide for 0fork but they're semantically distinct and would
+    # The retired-deployment-automation@pve vs fork-automation@pve bug surfaced this session:
+    # sql and pve coincide for retired-deployment but they're semantically distinct and would
     # diverge on, e.g., 'lv3_fork' (sql: lv3_fork, pve: lv3_fork — both valid).

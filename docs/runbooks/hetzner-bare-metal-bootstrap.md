@@ -286,7 +286,7 @@ here because every fork will get bit by at least one of them.
 
 ## 11. Live-apply notes from the example.org clone (2026-04-21)
 
-The 0fork clone was bootstrapped without running the `env=clone` Ansible
+The retired-deployment clone was bootstrapped without running the `env=clone` Ansible
 targets (they don't exist yet in the Makefile/inventory). What *did* work,
 captured here so the next fork can copy it verbatim:
 

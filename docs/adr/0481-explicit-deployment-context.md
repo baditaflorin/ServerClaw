@@ -15,11 +15,11 @@
 
 The repository runs N parallel Proxmox deployments off a single generic-by-default codebase (ADR 0407). Today: `example.com` (Florin's primary) and `example.org` (public fork). The pattern is correct; the *selection mechanism* is not.
 
-Until this ADR, the active deployment was identified by **renaming `.local/identity.yml`** (parked copies live next to it as `.local/identity.yml.lv3-backup`, `.local/identity.yml.0fork-backup`, etc.). Whichever happened to be named `identity.yml` at any moment was "the deployment." This produced three concrete failure modes during a 2026-05-11 status-check session:
+Until this ADR, the active deployment was identified by **renaming `.local/identity.yml`** (parked copies live next to it as `.local/identity.yml.lv3-backup`, `.local/identity.yml.retired-deployment-backup`, etc.). Whichever happened to be named `identity.yml` at any moment was "the deployment." This produced three concrete failure modes during a 2026-05-11 status-check session:
 
 1. **Agents could not tell which deployment they were on.** Two subagents reading the same repo simultaneously reported different platform domains depending on what the symlink pointed to when each ran.
-2. **Truth was split across committed code (lv3-shaped) and `.local/` overlays (0fork-shaped).** The service registry assigned Harbor to `runtime-control` (10.10.10.92) — true on lv3, but that VM does not exist on 0fork. The agent could not reconcile the two without inspecting hidden state.
-3. **Stale deployment slots.** `.local/deployments/prod/` contained a duplicate of 0fork data. `.local/deployments/lv3/` did not exist at all. The intended layout (ADR 0440) was scaffolded but never populated for the real lv3 deployment.
+2. **Truth was split across committed code (lv3-shaped) and `.local/` overlays (retired-deployment-shaped).** The service registry assigned Harbor to `runtime-control` (10.10.10.92) — true on lv3, but that VM does not exist on retired-deployment. The agent could not reconcile the two without inspecting hidden state.
+3. **Stale deployment slots.** `.local/deployments/prod/` contained a duplicate of retired-deployment data. `.local/deployments/lv3/` did not exist at all. The intended layout (ADR 0440) was scaffolded but never populated for the real lv3 deployment.
 
 The infrastructure for explicit deployment selection already existed:
 
@@ -42,7 +42,7 @@ Deployment selection becomes **mandatory, explicit, and observable in one comman
 
 ### 1. The slug is the unit of identity
 
-Every deployment is a single slug (`lv3`, `0fork`, `mycorp`, …). The slug names a directory under `.local/deployments/<slug>/` that owns everything deployment-specific: identity, topology, secrets, receipts. The slug is the only thing a wrapper command needs.
+Every deployment is a single slug (`lv3`, `retired-deployment`, `mycorp`, …). The slug names a directory under `.local/deployments/<slug>/` that owns everything deployment-specific: identity, topology, secrets, receipts. The slug is the only thing a wrapper command needs.
 
 ### 2. Resolution precedence is unchanged but newly enforced
 
@@ -84,7 +84,7 @@ Rather than restructure existing directories, receipt JSON and workstream YAML a
 
 - Per-deployment SSH config generation. Today operators maintain `~/.ssh/config` by hand. A future ADR can add `make ssh-config-sync` once we standardize the connection schema.
 - Per-deployment publish pipelines. `scripts/publish_to_serverclaw.py` will read the active deployment but does not yet support publishing N deployments to N mirrors.
-- Renaming `prod` → `lv3`. The stale `.local/deployments/prod/` slot (a duplicate of 0fork) is removed in this ADR's implementation; the lv3 data is placed under the slug `lv3`. We do not introduce a `prod` slug going forward.
+- Renaming `prod` → `lv3`. The stale `.local/deployments/prod/` slot (a duplicate of retired-deployment) is removed in this ADR's implementation; the lv3 data is placed under the slug `lv3`. We do not introduce a `prod` slug going forward.
 
 ---
 
@@ -106,8 +106,8 @@ Rather than restructure existing directories, receipt JSON and workstream YAML a
 ### Migration
 
 1. Backfill `.local/deployments/lv3/` from `.local/identity.yml.lv3-backup`.
-2. Remove `.local/deployments/prod/` (stale duplicate of 0fork).
-3. Write `.local/active-deployment` → `0fork` (the current active deployment on this host).
+2. Remove `.local/deployments/prod/` (stale duplicate of retired-deployment).
+3. Write `.local/active-deployment` → `retired-deployment` (the current active deployment on this host).
 4. `make sync-identity-link` refreshes the legacy `.local/identity.yml` symlink.
 5. Existing `.local/identity.yml.<name>-backup` files stay where they are as raw archive copies; nothing reads them anymore.
 

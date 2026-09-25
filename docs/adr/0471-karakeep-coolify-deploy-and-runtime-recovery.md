@@ -9,8 +9,8 @@
 ## Context
 
 The operator requested deployment of [karakeep](https://github.com/karakeep-app/karakeep)
-(self-hosted bookmark manager with AI features) onto the 0fork Coolify instance
-(`apps.0fork.org`). During the deployment, two blocking problems surfaced:
+(self-hosted bookmark manager with AI features) onto the retired-deployment Coolify instance
+(`apps.retired-deployment.org`). During the deployment, two blocking problems surfaced:
 
 1. **Coolify control-plane was down.** The `coolify` container had stopped because
    `/run/lv3-secrets/coolify/runtime.env` was missing — a tmpfs-backed secret file
@@ -90,7 +90,7 @@ payload when updating an existing app. Rationale:
 Karakeep refuses to start in production without:
 - `NEXTAUTH_SECRET`: session signing secret (≥32 random bytes)
 - `MEILI_MASTER_KEY`: Meilisearch master key
-- `NEXTAUTH_URL`: public-facing URL (`https://karakeep.apps.0fork.org`)
+- `NEXTAUTH_URL`: public-facing URL (`https://karakeep.apps.retired-deployment.org`)
 
 These are set via `POST /api/v1/applications/{uuid}/envs` after app creation and
 persisted in `.local/karakeep/secrets.env`.
@@ -99,7 +99,7 @@ persisted in `.local/karakeep/secrets.env`.
 
 ## Consequences
 
-- Karakeep is deployed at `https://karakeep.apps.0fork.org` on the 0fork Coolify
+- Karakeep is deployed at `https://karakeep.apps.retired-deployment.org` on the retired-deployment Coolify
   instance, with three running services: `web`, `meilisearch`, `chrome`.
 - The Coolify runtime recovery procedure can now be executed without Ansible or
   Tailscale access (pure SSH via jump host + Docker commands).

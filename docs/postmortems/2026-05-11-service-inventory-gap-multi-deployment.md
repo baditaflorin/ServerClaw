@@ -144,8 +144,8 @@ Extend `platform_manifest.py` with `--identity-overlay`:
 python scripts/platform_manifest.py --write
 
 # Proposed (per-deployment):
-python scripts/platform_manifest.py --identity-overlay .local/identity.yml.0fork \
-  --out build/platform-manifest-0fork.json
+python scripts/platform_manifest.py --identity-overlay .local/identity.yml.retired-deployment \
+  --out build/platform-manifest-retired-deployment.json
 ```
 
 A CI step or Makefile target would regenerate manifests for each known deployment.

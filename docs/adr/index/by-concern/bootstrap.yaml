@@ -159,7 +159,7 @@ adrs:
       - nested-virtualisation
       - identity-overlay
       - hetzner
-      - 0fork
+      - retired-deployment
       - fork-clone
       - platform
       - onto

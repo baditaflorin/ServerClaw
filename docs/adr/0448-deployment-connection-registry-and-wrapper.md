@@ -13,7 +13,7 @@
   - ADR 0440 (Per-Deployment Identity & Artifact Isolation) — implemented (ws-0445)
   - ADR 0445 Phase 1 (Multi-Deployment Hardening) — `MULTI_DEPLOYMENT_ENABLED=1` opt-in landed
 - Supersedes (partially): the per-target SSH-key constants in `Makefile`
-  (`ZERO_FORK_SSH_KEY`, `ZERO_FORK_DNS_ENV`, `LV3_PROXMOX_HOST_ADDR`/`PORT`
+  (`RETIRED_DEPLOYMENT_SSH_KEY`, `RETIRED_DEPLOYMENT_DNS_ENV`, `LV3_PROXMOX_HOST_ADDR`/`PORT`
   scattered across one-off targets).
 
 ---
@@ -31,14 +31,14 @@ Two ergonomics gaps remain before "I want to converge ops-portal on the
 example.org server" is a one-line operator command:
 
 1. **SSH connection metadata is not per-deployment data.** Today an
-   operator running anything against the 0fork box has to remember:
+   operator running anything against the retired-deployment box has to remember:
    `LV3_PROXMOX_HOST_ADDR=203.0.113.3`, `LV3_PROXMOX_HOST_PORT=2222`,
    `LV3_BOOTSTRAP_SSH_PRIVATE_KEY=.local/ssh/bootstrap.id_ed25519` (the
    ops-on-VM key, *not* the Hetzner-host root key). Forgetting any one
    of those produces an opaque `Connection to UNKNOWN port 65535 timed
-   out` that took ~30 minutes to diagnose during the v0.179.5 ops.0fork
+   out` that took ~30 minutes to diagnose during the v0.179.5 ops.retired-deployment
    recovery (2026-04-28). The `Makefile` papers over this with named
-   constants (`ZERO_FORK_SSH_KEY`, `ZERO_FORK_DNS_ENV`) — one set per
+   constants (`RETIRED_DEPLOYMENT_SSH_KEY`, `RETIRED_DEPLOYMENT_DNS_ENV`) — one set per
    deployment, hardcoded into the committed file. Every new deployment
    = another set of constants and another bespoke target.
 
@@ -48,9 +48,9 @@ example.org server" is a one-line operator command:
    `inventory/host_vars/proxmox-host.yml` provides `role` for every
    guest, but the per-deployment overlay (designed to add or override
    only what differs from committed) ends up needing to copy the entire
-   structural skeleton just to clear the validator. The 0fork overlay
+   structural skeleton just to clear the validator. The retired-deployment overlay
    shipped with bare `{name, vmid, ipv4}` entries and silently fails
-   `--deployment 0fork --write` end-to-end.
+   `--deployment retired-deployment --write` end-to-end.
 
 Both of these block the user-stated goal: "I need to allow one or more
 domains and servers to be used from this repo."
@@ -99,14 +99,14 @@ A new CLI subcommand emits the connection details in operator-friendly
 formats:
 
 ```bash
-$ python3 scripts/deployment.py connection --slug 0fork --format=env
+$ python3 scripts/deployment.py connection --slug retired-deployment --format=env
 LV3_PROXMOX_HOST_ADDR=203.0.113.3
 LV3_PROXMOX_HOST_PORT=2222
 LV3_PROXMOX_HOST_USER=ops
 LV3_BOOTSTRAP_SSH_PRIVATE_KEY=/abs/path/.local/ssh/bootstrap.id_ed25519
-PLATFORM_IDENTITY_OVERLAY=/abs/path/.local/deployments/0fork/identity.yml
+PLATFORM_IDENTITY_OVERLAY=/abs/path/.local/deployments/retired-deployment/identity.yml
 
-$ python3 scripts/deployment.py connection --slug 0fork --format=json
+$ python3 scripts/deployment.py connection --slug retired-deployment --format=json
 { ... }
 ```
 
@@ -117,7 +117,7 @@ slug, loads the env-var block above, and `exec`s any inner command
 with that environment. Usage:
 
 ```bash
-./scripts/run_with_deployment.sh --deployment 0fork \
+./scripts/run_with_deployment.sh --deployment retired-deployment \
     make configure-edge-publication env=production
 
 ./scripts/run_with_deployment.sh \
@@ -149,7 +149,7 @@ is one line in the loader, not the schema.
   look for "how do I reach this deployment". When ssh fails, the
   diagnostic question is always "is my connection.yml right?" — not
   "which of the five LV3_* env vars did I forget?".
-- 0fork's topology.yml passes `--deployment 0fork --write` without
+- retired-deployment's topology.yml passes `--deployment retired-deployment --write` without
   needing to copy the full proxmox-host.yml schema.
 - The wrapper is intentionally a leaf — it does not parse Makefile
   syntax, does not introduce new Make targets, and does not modify
@@ -157,14 +157,14 @@ is one line in the loader, not the schema.
 
 ## Migration
 
-Existing deployments (`prod`, `0fork`):
+Existing deployments (`prod`, `retired-deployment`):
 
 1. Create `.local/deployments/<slug>/connection.yml` from the values
    currently hardcoded for that deployment.
 2. Drop the per-deployment `LV3_PROXMOX_HOST_ADDR/PORT/...` env exports
    from operator runbooks; replace with `run_with_deployment.sh`.
 
-The `Makefile`'s `ZERO_FORK_*` constants are not removed in this ADR —
+The `Makefile`'s `RETIRED_DEPLOYMENT_*` constants are not removed in this ADR —
 they continue to work; this ADR just provides a generic alternative.
 ws-0445 phase 2 (or a follow-up) can deprecate them once the wrapper
 has soaked.

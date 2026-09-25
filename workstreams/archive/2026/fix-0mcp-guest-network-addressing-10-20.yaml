@@ -42,7 +42,7 @@ description: |
 
   inventory/group_vars/platform.yml was deliberately left untouched here:
   regenerating it on this machine pulls in a stale, mismatched `.local`
-  overlay (active-deployment=0fork, pointing at a completely different
+  overlay (active-deployment=retired-deployment, pointing at a completely different
   physical server) that contaminates the output with example.org's real
   values. Confirmed via `git stash` that `make validate-generated-vars`
   already fails on clean main for the same reason, unrelated to this

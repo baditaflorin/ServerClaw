@@ -13,7 +13,7 @@
 # Template variables in url / record / etc. are expanded against the active
 # deployment's identity.yml:
 #   {apex}       -> platform_domain  (e.g. example.org)
-#   {apex_slug}  -> first label of apex (e.g. 0fork)
+#   {apex_slug}  -> first label of apex (e.g. retired-deployment)
 #   {operator_email}, {operator_name}
 
 schema_version: 1
@@ -47,7 +47,7 @@ post_conditions:
     type: command
     command: >-
       ssh -o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=no
-      0fork-jump hostname
+      retired-deployment-jump hostname
     expect_exit: 0
     timeout_s: 20
     retries: 1
@@ -58,7 +58,7 @@ post_conditions:
     after_step: install-proxmox
     tags: [bootstrap-only]
     type: pveapi
-    via_ssh: 0fork-jump
+    via_ssh: retired-deployment-jump
     command: "pveversion"
     expect_stdout: "pve-manager"
     expect_exit: 0
@@ -72,7 +72,7 @@ post_conditions:
     tags: [bootstrap-only]
     type: command
     command: >-
-      ssh -o BatchMode=yes -J 0fork-jump
+      ssh -o BatchMode=yes -J retired-deployment-jump
       -i .local/ssh/bootstrap.id_ed25519 ops@10.10.10.110
       "sudo ufw status | grep -q 'Status: active'"
     expect_exit: 0
@@ -149,7 +149,7 @@ post_conditions:
     after_step: converge-harbor
     tags: [bootstrap]
     type: docker
-    via_ssh: 0fork-jump  # TODO: derive from connection.yml in a follow-up
+    via_ssh: retired-deployment-jump  # TODO: derive from connection.yml in a follow-up
     container: nginx
     expect_running: true
     expect_health: any
@@ -160,7 +160,7 @@ post_conditions:
     after_step: converge-harbor
     tags: [bootstrap]
     type: docker
-    via_ssh: 0fork-jump
+    via_ssh: retired-deployment-jump
     container: harbor-portal
     expect_running: true
     expect_health: any
@@ -256,7 +256,7 @@ post_conditions:
     tags: [bootstrap, final-smoke]
     type: command
     command: >-
-      ssh -o BatchMode=yes -o ConnectTimeout=15 0fork-jump
+      ssh -o BatchMode=yes -o ConnectTimeout=15 retired-deployment-jump
       "ssh -o BatchMode=yes -o ConnectTimeout=10 -i /root/.ssh/bootstrap.id_ed25519
       ops@10.10.10.92 'curl -sf http://localhost:8200/v1/sys/health | grep -v sealed'"
     expect_exit: 0
@@ -329,7 +329,7 @@ post_conditions:
     after_step: provision-guests
     tags: [bootstrap, daily]
     type: pveapi
-    via_ssh: 0fork-jump
+    via_ssh: retired-deployment-jump
     command: "free -m | awk '/^Swap:/{if ($2>0 && $3/$2 > 0.2) exit 1; else exit 0}'"
     expect_exit: 0
     timeout_s: 20
@@ -341,7 +341,7 @@ post_conditions:
     after_step: provision-guests
     tags: [bootstrap]
     type: pveapi
-    via_ssh: 0fork-jump
+    via_ssh: retired-deployment-jump
     command: "qm list | awk 'NR>1{print $1}' | xargs -I{} qm config {} 2>/dev/null | grep -c '^balloon:' | grep -v '^0$'"
     expect_exit: 0
     timeout_s: 30

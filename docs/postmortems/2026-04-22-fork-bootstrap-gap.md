@@ -16,13 +16,13 @@ bootstrap` could stand up an identical deployment on the example.org clone.
 This undermined the ADR 0407 "generic by default" claim. From the outside,
 the private and public ServerClaw repos looked forkable; in practice the
 only path to a working fork was a hand-crafted wrapper
-(`make deploy-0fork`), because each gap failed silently rather than loudly.
+(`make deploy-retired-deployment`), because each gap failed silently rather than loudly.
 
 ## Timeline
 
 - **2026-04-21** — ADR 0424 fork attempt begins on Hetzner AX41-NVMe.
   Operator discovers Proxmox install works but service convergence
-  requires a separate `deploy-0fork` entry point. Wrapper added in ADR
+  requires a separate `deploy-retired-deployment` entry point. Wrapper added in ADR
   0431 as a stopgap.
 - **2026-04-22 14:00 UTC** — Hetzner host reinstalled from scratch to
   reset PVE state. Operator asks to validate that the documented
@@ -39,7 +39,7 @@ only path to a working fork was a hand-crafted wrapper
   BOOTSTRAP_KEY override, env=clone threading, proxmox_host_jump flag).
 - **2026-04-22 16:00 UTC** — ADR 0437 written. Fix implemented in
   `scripts/generate_inventory.py` + `Makefile` top-of-file conditional.
-  `scripts/timed.sh` promoted from `.local/0fork-timings/timed-ssh.sh`
+  `scripts/timed.sh` promoted from `.local/retired-deployment-timings/timed-ssh.sh`
   into the committed tree as a generic command-wrapper.
 
 ## What happened
@@ -51,7 +51,7 @@ path unreachable:
 
 The generator read only `inventory/host_vars/proxmox-host.yml` (the
 committed production host_vars). Even when the operator set
-`PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork` and wrote a matching
+`PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment` and wrote a matching
 `.local/host_vars/proxmox-host.yml` per ADR 0430, running `make
 generate-inventory` said "inventory/hosts.yml is up to date" because the
 generator wasn't looking at the overlay at all.
@@ -62,7 +62,7 @@ CIDR. `ansible_host: 10.10.10.50` for every guest.
 ### Gap 2 — `BOOTSTRAP_KEY` was hardcoded
 
 `BOOTSTRAP_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/bootstrap.id_ed25519`. The
-0fork clone's SSH key is `hetzner_llm_agents_ed25519` (provisioned via
+retired-deployment clone's SSH key is `hetzner_llm_agents_ed25519` (provisioned via
 Hetzner Robot). There was no path for a fork operator to swap keys
 without editing the Makefile, which the ADR 0407 "generic by default"
 rule forbids.
@@ -82,7 +82,7 @@ immediately on host selection.
 On a fresh fork with no mesh VPN, guests are only reachable via the
 proxmox host (ProxyJump). The ADR 0430 runtime machinery handles this
 but only when the `proxmox_guest_ssh_connection_mode=proxmox_host_jump`
-extra-var is passed. `deploy-0fork` passed it; `make bootstrap` did not.
+extra-var is passed. `deploy-retired-deployment` passed it; `make bootstrap` did not.
 
 ## Root cause
 
@@ -103,7 +103,7 @@ top-level operator command. The result: a working deployment required
 either the author's environment or a bespoke wrapper.
 
 Why the gap went undetected until now: the only fork attempt before this
-(ADR 0424) used `deploy-0fork` from the start, so the bootstrap path was
+(ADR 0424) used `deploy-retired-deployment` from the start, so the bootstrap path was
 never exercised against non-author hardware.
 
 ## Fix
@@ -143,24 +143,24 @@ Concrete changes:
    test exercised that promise. Adding a `make bootstrap --check` (or a
    Docker-dev-equivalent end-to-end test for fork mode) would have
    caught this earlier.
-3. **Bespoke wrappers like `deploy-0fork` are a smell.** If the fork
+3. **Bespoke wrappers like `deploy-retired-deployment` are a smell.** If the fork
    operator has to use a different Make target than the documented
    one, the core contract is broken. Every fork-specific wrapper is an
    open issue against ADR 0407 "generic by default".
 4. **Keep one command in the docs.** `CLAUDE.md` and `README.md` must
-   never list `deploy-0fork` alongside `make bootstrap`. The fork path
+   never list `deploy-retired-deployment` alongside `make bootstrap`. The fork path
    is the `PLATFORM_IDENTITY_OVERLAY=…` environment variable, not a
    different command.
 
 ## Follow-ups
 
-- [ ] Run `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make
+- [ ] Run `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment make
   bootstrap` against debian-base-template end-to-end; record wall-clock and rc per
   stage via `scripts/timed.sh`. Update this postmortem with the timings.
 - [ ] Add a CI check that exercises `make generate-inventory --check`
   under both production and an ephemeral overlay fixture.
-- [ ] Deprecate `deploy-0fork` / `converge-0fork-chain` /
-  `smoke-0fork-mail` / `preflight-0fork` targets. Replace with
+- [ ] Deprecate `deploy-retired-deployment` / `converge-retired-deployment-chain` /
+  `smoke-retired-deployment-mail` / `preflight-retired-deployment` targets. Replace with
   deprecation warnings that redirect to `make bootstrap` /
   `make converge-site` / equivalent under the overlay.
 - [ ] Extend `AGENTS.md` with a "when adding an overlay" checklist

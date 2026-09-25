@@ -20,7 +20,7 @@
 
 The 2026-04-28 ops.example.org recovery exposed a class of bug the IaC has
 no model for. Both `lv3-ops-portal-oauth2-proxy.service` and
-`0fork-ops-portal-oauth2-proxy.service` were installed on the same nginx
+`retired-deployment-ops-portal-oauth2-proxy.service` were installed on the same nginx
 edge VM, both bound to `127.0.0.1:4180`, and the systemd unit that
 started first won the port. The other crashlooped silently. The
 operator's only recourse was a manual `systemctl disable` against one
@@ -48,12 +48,12 @@ The deployment-v1 topology schema gains an optional field on each
 guest entry:
 
 ```yaml
-# .local/deployments/0fork/topology.yml
+# .local/deployments/retired-deployment/topology.yml
 proxmox_guests:
   - name: nginx
     vmid: 110
     ipv4: 10.10.10.10
-    deployment_owner: 0fork    # NEW — pins this VM to the 0fork deployment
+    deployment_owner: retired-deployment    # NEW — pins this VM to the retired-deployment deployment
 ```
 
 Slug pattern: `^[a-z0-9][a-z0-9_-]*$` (matches the directory name under
@@ -121,14 +121,14 @@ deferred — each playbook's author should review the change.
 ## Operational Notes
 
 ```bash
-# Add a deployment_owner field to the 0fork topology:
-$EDITOR .local/deployments/0fork/topology.yml
-# Set proxmox_guests[*].deployment_owner: 0fork on every guest you
+# Add a deployment_owner field to the retired-deployment topology:
+$EDITOR .local/deployments/retired-deployment/topology.yml
+# Set proxmox_guests[*].deployment_owner: retired-deployment on every guest you
 # want pinned. Leaving it absent on a guest preserves the legacy
 # shared-VM behavior.
 
 # Validate:
-python3 scripts/host_pinning_check.py --deployment 0fork
+python3 scripts/host_pinning_check.py --deployment retired-deployment
 
 # Cross-deployment audit:
 python3 scripts/host_pinning_check.py --all
