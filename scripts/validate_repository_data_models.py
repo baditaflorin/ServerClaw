@@ -3245,7 +3245,7 @@ def validate_replaceability_review_data() -> None:
 #
 # Postmortem 2026-04-23-digit-prefix-domain-identifier-compat.md describes a
 # class of breakage where a digit-leading platform_domain (e.g. "example.org")
-# causes platform_config_prefix = "0fork", which is injected into identifier
+# causes platform_config_prefix = "retired-deployment", which is injected into identifier
 # namespaces (PostgreSQL roles, PVE users/roles, POSIX usernames, Proxmox ACME
 # plugin IDs, Proxmox storage IDs) that all require a letter-leading value.
 #

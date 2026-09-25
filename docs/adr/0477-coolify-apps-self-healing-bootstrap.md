@@ -8,7 +8,7 @@
 
 ## Context
 
-After the 0fork Coolify deployment (converges 16–25, ADR 0340), every new application
+After the retired-deployment Coolify deployment (converges 16–25, ADR 0340), every new application
 deployment required three manual steps that broke on the next converge run:
 
 1. **nginx was patched by hand** to route `coolify.apps.*` → `http://10.10.10.70:80` (the

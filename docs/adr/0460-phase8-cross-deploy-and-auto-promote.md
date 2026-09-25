@@ -87,7 +87,7 @@ Two layers, only the first lands here:
   under `.local/deployments/<slug>/state/` (the static side that's
   reachable from any worktree) and synthesises a `deployment_drift`
   signal: per-receipt date skew between deployments, per-service
-  presence skew (running on lv3 but not 0fork, etc.). Output mirrors
+  presence skew (running on lv3 but not retired-deployment, etc.). Output mirrors
   `doctor.py`'s human + JSON shapes.
 - **Live probe via SSH** (deferred) — would require operator runtime
   access; out of scope this session.

@@ -8,7 +8,7 @@
 - Relates to:
   - ADR 0064 (health probe contracts for all services)
   - ADR 0407 (generic-by-default `.local/` overlay)
-  - ADR 0424 (0fork clone onto Hetzner AX41)
+  - ADR 0424 (retired-deployment clone onto Hetzner AX41)
   - ADR 0433 (topology-derived guest firewall `host_source`)
 
 ---
@@ -105,7 +105,7 @@ two-step: read + render. Rendering uses the service's `owning_vm` field
 
 A forked deployment running `ansible-playbook playbooks/gitea.yml` should
 see the liveness probe resolve to the fork's `owning_vm` IP, not the
-prod LV3 IP. The 0fork deployment on 2026-04-22 surfaced this defect
+prod LV3 IP. The retired-deployment deployment on 2026-04-22 surfaced this defect
 and workarounded it by killing the playbook after service-level health
 was confirmed; an ADR-compliant catalog would let the converge complete
 cleanly on the first run.

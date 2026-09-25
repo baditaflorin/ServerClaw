@@ -25,7 +25,7 @@ canonical_truth:
 depends_on:
   - adr-0491-authentik-phase2-2026-08-28
 conflicts_with:
-  - ws-0424-fork-clone-0fork
+  - ws-0424-retired-deployment
   - ws-0438-generic-by-construction
   - ws-0439-deployment-profiles
   - ws-0443-topology-drift-detection

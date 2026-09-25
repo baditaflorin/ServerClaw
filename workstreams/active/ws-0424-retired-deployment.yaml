@@ -1,13 +1,13 @@
-id: ws-0424-fork-clone-0fork
+id: ws-0424-retired-deployment
 adr: '0424'
-title: 'ADR 0424 — example.org Clone onto Hetzner AX41-NVMe'
+title: 'ADR 0424 — retired example.org deployment record'
 status: in_progress
 ready_to_merge: false
 live_applied: false
 owner: claude
 branch: claude/gallant-chebyshev-b0def1
 worktree_path: .claude/worktrees/gallant-chebyshev-b0def1
-doc: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+doc: docs/adr/0424-retired-deployment-record.md
 related_adrs:
   - docs/adr/0425-retrospective-420-adr-platform-build.md
 depends_on:
@@ -18,8 +18,8 @@ depends_on:
 conflicts_with: []
 shared_surfaces:
   - workstreams.yaml
-  - workstreams/active/ws-0424-fork-clone-0fork.yaml
-  - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+  - workstreams/active/ws-0424-retired-deployment.yaml
+  - docs/adr/0424-retired-deployment-record.md
   - docs/adr/0425-retrospective-420-adr-platform-build.md
   - docs/runbooks/hetzner-bare-metal-bootstrap.md
 started: '2026-04-21'
@@ -27,14 +27,14 @@ priority: p1
 surfaces:
   - example.org (full apex scope, apex wiped and repointed 2026-04-21)
   - Hetzner AX41-NVMe #0000000 (203.0.113.3, 2001:db8::4)
-  - .local/identity.yml.0fork (new, not committed)
+  - .local/identity.yml.retired-deployment (new, not committed)
   - .local/hetzner/dns.env (new, not committed)
 summary: >
-  First real fork-viability test. Stands up a collapsed nested-Proxmox topology
+  First real deployment-portability test. Stands up a collapsed nested-Proxmox topology
   on a Hetzner AX41-NVMe using example.org (full apex) as the identity. Drives
   ADR 0385 (identity core) and ADR 0407 (generic-by-default) to their limits.
   Also produces ADR 0425 — a retrospective on the 420-ADR build process and
-  what the clone attempt revealed about gaps in the platform's forkability
+  what the deployment exercise revealed about gaps in the platform's portability
   claim. ADR numbers collided with a parallel LSP-AI evaluation workstream
   (0422/0423) that landed on main while this one was in progress; renumbered
   to 0424/0425.
@@ -42,8 +42,8 @@ ownership_manifest:
   owned_surfaces:
     - id: ws_0424_tracking
       paths:
-        - workstreams/active/ws-0424-fork-clone-0fork.yaml
-        - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+        - workstreams/active/ws-0424-retired-deployment.yaml
+        - docs/adr/0424-retired-deployment-record.md
         - docs/adr/0425-retrospective-420-adr-platform-build.md
         - docs/runbooks/hetzner-bare-metal-bootstrap.md
       mode: exclusive
@@ -62,7 +62,7 @@ ownership_manifest:
         - docs/site-generated/architecture/dependency-graph.md
       mode: shared_contract
       contract: generated-index-and-diagram-v1
-    - id: ws_0424_clone_deploy_tactical_fixes
+    - id: ws_0424_secondary_deployment_tactical_fixes
       paths:
         - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2
         - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
@@ -92,8 +92,8 @@ ownership_manifest:
         - platform/ansible/execution_scopes.py
         - platform/repo.py
         - docs/adr/0437-overlay-aware-bootstrap.md
-        - docs/postmortems/2026-04-22-fork-bootstrap-gap.md
-        - docs/diaries/2026-04-22-fork-bootstrap.md
+        - docs/postmortems/2026-04-22-secondary-deployment-bootstrap-gap.md
+        - docs/diaries/2026-04-22-secondary-deployment-bootstrap.md
       mode: exclusive
     - id: ws_0424_fresh_host_bootstrap_fixes
       paths:
@@ -213,7 +213,7 @@ progress:
     - ADR 0424 drafted
     - ADR 0425 retrospective drafted
     - Bootstrap runbook drafted
-    - Identity overlay .local/identity.yml.0fork written (apex scope confirmed)
+    - Identity overlay .local/identity.yml.retired-deployment written (apex scope confirmed)
     - example.org apex DNS wiped and repointed at 203.0.113.3 (backup saved)
     - Hostname set to debian-base-template.example.org on box
     - PVE repo + GPG key installed (pve-no-subscription trixie)
@@ -225,13 +225,13 @@ progress:
     - Internal-only bridge vmbr10 (10.10.10.1/24) configured with NAT masquerade to enp41s0 (zero-WAN-risk alternative to vmbr0 swap)
     - iptables-persistent installed, ip_forward persisted via /etc/sysctl.d/99-proxmox-forward.conf
     - Debian 13 cloud-init template built as VMID 9000 (libguestfs-blocked; qemu-guest-agent injected via cloud-init user-data instead)
-    - 8 service VMs cloned and cloud-init-complete on 10.10.10.X (nginx-edge 110, runtime-apps 122, docker-build 130, monitoring 140, postgres 150, backup 160, mail-platform 181, runtime-control 192)
+    - 8 service VMs provisioned and cloud-init-complete on 10.10.10.X (nginx-edge 110, runtime-apps 122, docker-build 130, monitoring 140, postgres 150, backup 160, mail-platform 181, runtime-control 192)
     - Runbook section 11 appended with verbatim live-apply commands + provisioning receipt table
     - Direct-SMTP Gmail deliverability tested and documented as blocked on rDNS+SPF/DKIM (550-5.7.1 IPv6, 550-5.7.26 IPv4)
     - Hetzner DNS write API brownout observed (HTTP 200 + embedded 503) — read API still functional
   blocked_pending_operator:
     - Configure Hetzner WAN bridge vmbr0 (risk of lockout; needs Robot KVM standby)
-    - Deploy Headscale inside clone and enroll workstation
+    - Deploy Headscale inside secondary deployment and enroll workstation
     - Set rDNS on 203.0.113.3 via Hetzner Robot (no API path)
     - Rotate the DNS token shared in chat on 2026-04-21
     - Verify Hetzner account name "Mr. Raabe" (non-blocking)
@@ -248,6 +248,6 @@ notes: >
   This workstream was started while the operator was AFK. Destructive actions
   performed with explicit operator authorization (apex wipe). A RAID1 near-miss
   occurred during disk inventory — see ADR 0425 live postmortem. Recovery was
-  clean. The DNS token shared in chat should be rotated regardless of clone
+  clean. The DNS token shared in chat should be rotated regardless of secondary deployment
   outcome. See ADR 0424 open questions for the full list of decisions awaiting
   operator confirmation on return.

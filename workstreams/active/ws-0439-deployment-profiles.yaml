@@ -10,7 +10,7 @@ worktree_path: .claude/worktrees/brave-kowalevski-565b6c
 doc: docs/adr/0439-deployment-profiles-subset-selection.md
 depends_on:
   - adr-0407-generic-by-default
-  - adr-0431-0fork-full-day-deploy
+  - adr-0431-retired-deployment-full-day-deploy
   - adr-0438-generic-by-construction
 conflicts_with: []
 shared_surfaces:

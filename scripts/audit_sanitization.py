@@ -16,7 +16,7 @@ Blocklist:
 - `example.com`              — retired operator apex
 - `example.org`            — retired operator apex
 - `0mpc.com`             — current operator apex (must stay in .local/)
-- `203.0.113.3`        — 0fork host IPv4
+- `203.0.113.3`        — retired-deployment host IPv4
 - `203.0.113.1`        — lv3 host IPv4
 - `2a01:4f9:6b:4b47`     — operator IPv6 prefix
 

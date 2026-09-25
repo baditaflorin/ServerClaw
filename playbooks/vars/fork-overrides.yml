@@ -16,7 +16,7 @@
 #
 # Dependencies:
 #   - ADR 0407 (generic-by-default / .local overlay)
-#   - ADR 0424 (0fork clone topology)
+#   - ADR 0424 (retired-deployment clone topology)
 #   - ADR 0430 (topology host_vars overlay)
 
 # --- Public edge ---
@@ -28,7 +28,7 @@ service_needs_nginx_edge: false
 # --- Identity (ADR 0407) ---
 # Real deployment domain normally lives in .local/identity.yml, which
 # worktrees do not ship. Fork deploys set it explicitly.
-# Override on the CLI for non-0fork forks: -e platform_domain=<your-domain>.
+# Override on the CLI for non-retired-deployment forks: -e platform_domain=<your-domain>.
 platform_domain: example.org
 
 # --- OpenBao sidecar ---
@@ -53,8 +53,8 @@ common_openbao_systemd_credentials_api_host: runtime-control
 # ADR 0438 Phase 4: individual path overrides removed — role defaults now use
 # {{ openbao_local_artifact_dir }}/... resolved lazily at task time (not baked
 # by the shard generator). Only the base directory needs a fork-specific override.
-# Adjust the "0fork" component for non-0fork forks.
-openbao_local_artifact_dir: "{{ repo_shared_local_root }}/0fork/openbao"
+# Adjust the "retired-deployment" component for non-retired-deployment forks.
+openbao_local_artifact_dir: "{{ repo_shared_local_root }}/retired-deployment/openbao"
 
 # --- Nomad local artifact isolation ---
 # Two separate variable families cover the two Nomad plays:
@@ -67,11 +67,11 @@ openbao_local_artifact_dir: "{{ repo_shared_local_root }}/0fork/openbao"
 # 2. nomad_cluster_local_dir  — used by the nomad_cluster_member role when it
 #    converges the Nomad server on monitoring / worker VMs. On those remote
 #    hosts inventory_dir IS defined, so repo_shared_local_root resolves
-#    correctly. We just need to insert the fork's "0fork" path component.
+#    correctly. We just need to insert the fork's "retired-deployment" path component.
 #
 # Both overrides resolve to the same absolute path on disk, keeping bootstrap
 # output and member-role input in sync.
-# Adjust the "0fork" component for non-0fork forks.
+# Adjust the "retired-deployment" component for non-retired-deployment forks.
 nomad_cluster_bootstrap_local_dir: >-
   {{
     (
@@ -81,8 +81,8 @@ nomad_cluster_bootstrap_local_dir: >-
       )
       | dirname
     )
-  }}/.local/0fork/nomad
-nomad_cluster_local_dir: "{{ repo_shared_local_root }}/0fork/nomad"
+  }}/.local/retired-deployment/nomad
+nomad_cluster_local_dir: "{{ repo_shared_local_root }}/retired-deployment/nomad"
 
 # --- OpenBao legacy restore ---
 # The legacy migration path (openbao_runtime/tasks/main.yml) tries to reach
@@ -159,10 +159,10 @@ public_edge_skip_certbot: true
 # windmill_controller_local_root + '/openbao/atlas-approle.json'.
 #
 # On the fork, repo_shared_local_root/.local/openbao/atlas-approle.json is the
-# PRODUCTION lv3 file containing a raw token string (not JSON), not the 0fork
+# PRODUCTION lv3 file containing a raw token string (not JSON), not the retired-deployment
 # approle JSON. The length > 0 guard passes, then from_json fails on the
-# non-JSON content. Override to the 0fork-specific approle file.
-windmill_atlas_approle_local_file: "{{ repo_shared_local_root }}/0fork/openbao/atlas-approle.json"
+# non-JSON content. Override to the retired-deployment-specific approle file.
+windmill_atlas_approle_local_file: "{{ repo_shared_local_root }}/retired-deployment/openbao/atlas-approle.json"
 
 # --- Windmill remote verification ---
 # windmill_base_url uses management_tailscale_ipv4 (the Tailscale IP of runtime-control)
@@ -184,11 +184,11 @@ postgres_vm_client_allowed_sources_extra_bridge:
 
 # --- Public edge certificate name and ACME challenge method ---
 # The nginx_edge_publication role derives the cert name from
-# platform_identity.config_prefix, producing "0fork-edge". The cert at
-# /etc/letsencrypt/live/0fork-edge/ now covers all named subdomains plus
+# platform_identity.config_prefix, producing "retired-deployment-edge". The cert at
+# /etc/letsencrypt/live/retired-deployment-edge/ now covers all named subdomains plus
 # *.apps.{{ platform_domain }} (added 2026-04-28 via certbot-dns-hetzner v3.0.0).
 # The lv3-edge cert is a legacy alias from the original LV3 deployment; the
-# 0fork-edge cert is now the canonical cert for this deployment.
+# retired-deployment-edge cert is now the canonical cert for this deployment.
 #
 # DNS-01 via certbot-dns-hetzner is required because:
 #   1. *.apps.{{ platform_domain }} is a wildcard — HTTP-01 cannot validate it
@@ -224,25 +224,25 @@ api_gateway_typesense_controller_verify_enabled: false
 
 # --- Nomad health probe catalog overrides ---
 # config/health-probe-catalog.json hardcodes lv3-nomad for both the
-# liveness systemd unit and the readiness CLI argv.  On 0fork the systemd
-# service and wrapper are both named 0fork-nomad.  The post-verify task
+# liveness systemd unit and the readiness CLI argv.  On retired-deployment the systemd
+# service and wrapper are both named retired-deployment-nomad.  The post-verify task
 # deep-merges these overrides on top of the catalog entry before running.
 playbook_execution_health_probe_overrides:
   nomad:
     liveness:
-      unit: "0fork-nomad"
-      description: "The 0fork-nomad systemd unit is active on monitoring."
+      unit: "retired-deployment-nomad"
+      description: "The retired-deployment-nomad systemd unit is active on monitoring."
     readiness:
       argv:
-        - "/usr/local/bin/0fork-nomad"
+        - "/usr/local/bin/retired-deployment-nomad"
         - "node"
         - "status"
         - "-json"
   # mail_platform readiness probe hardcodes /etc/lv3/ in the catalog.
-  # On 0fork, derive_service_defaults sets mail_platform_secret_dir using
-  # platform_identity.unix_prefix (= 'fork', leading digit stripped from '0fork')
+  # On retired-deployment, derive_service_defaults sets mail_platform_secret_dir using
+  # platform_identity.unix_prefix (= 'fork', leading digit stripped from 'retired-deployment')
   # + service name with UNDERSCORES, producing /etc/fork/mail_platform/.
-  # This set_fact overrides the inventory group_var (/etc/0fork/mail-platform/).
+  # This set_fact overrides the inventory group_var (/etc/retired-deployment/mail-platform/).
   mail_platform:
     readiness:
       argv:
@@ -252,9 +252,9 @@ playbook_execution_health_probe_overrides:
 
 # --- Woodpecker artifact path isolation ---
 # The woodpecker bootstrap play resolves artifact paths from repo_shared_local_root/woodpecker/.
-# On 0fork the seed repo is ops/platform_server (not the production ops/platform),
-# so we redirect the bootstrap spec and output artifacts to the 0fork-specific paths
+# On retired-deployment the seed repo is ops/platform_server (not the production ops/platform),
+# so we redirect the bootstrap spec and output artifacts to the retired-deployment-specific paths
 # to avoid polluting or being confused by the production woodpecker local directory.
-woodpecker_bootstrap_spec_file: "{{ repo_shared_local_root }}/0fork/woodpecker/bootstrap-spec.json"
-woodpecker_auth_file: "{{ repo_shared_local_root }}/0fork/woodpecker/admin-auth.json"
-woodpecker_api_token_file: "{{ repo_shared_local_root }}/0fork/woodpecker/api-token.txt"
+woodpecker_bootstrap_spec_file: "{{ repo_shared_local_root }}/retired-deployment/woodpecker/bootstrap-spec.json"
+woodpecker_auth_file: "{{ repo_shared_local_root }}/retired-deployment/woodpecker/admin-auth.json"
+woodpecker_api_token_file: "{{ repo_shared_local_root }}/retired-deployment/woodpecker/api-token.txt"

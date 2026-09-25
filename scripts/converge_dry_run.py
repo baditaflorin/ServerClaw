@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Per-service convergence dry-run helper — ADR 0444 item 10.
 
-Pre-merge guard that catches the class of bugs the 0fork bootstrap loop
+Pre-merge guard that catches the class of bugs the retired-deployment bootstrap loop
 discovered the hard way (releases 0.178.222 → 0.179.4): a role works
 against the lv3 deployment because of a hardcoded `lv3_*` literal but
 fails the moment a different identity overlay is loaded.
@@ -166,7 +166,7 @@ def discover_fixtures(selector: str = "all") -> list[Path]:
     """Return the fixture overlay files to exercise.
 
     `selector` is "all" or a comma-separated list of fixture stems
-    (`lv3`, `0fork`, `synthetic`, …). Stems map to `<stem>-shape.yml`
+    (`lv3`, `retired-deployment`, `synthetic`, …). Stems map to `<stem>-shape.yml`
     under FIXTURE_DIR.
     """
     if not FIXTURE_DIR.is_dir():

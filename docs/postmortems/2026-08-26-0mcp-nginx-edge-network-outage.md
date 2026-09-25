@@ -204,7 +204,7 @@ and all 17 `proxmox_guests[].ipv4`/`.gateway4` entries (plus
 `ansible_host` collisions between the now-swapped production (`10.10.10.x`)
 and staging (`10.10.10.x`) host groups. `inventory/group_vars/platform.yml`
 was deliberately left unregenerated: this machine's `.local` overlay is
-pointed at an unrelated deployment (`active-deployment: 0fork`, a
+pointed at an unrelated deployment (`active-deployment: retired-deployment`, a
 different physical server entirely) and regenerating it here pulls in
 example.org's real values — confirmed via `git stash` that this validation
 already fails on clean `main` for the same reason, independent of this fix.

@@ -5,7 +5,7 @@ status: in_progress
 ready_to_merge: false
 live_applied: false
 owner: claude
-deployment: 0fork
+deployment: retired-deployment
 branch: unassigned/ws-0484-self-verification-contracts
 worktree_path: unassigned/ws-0484-self-verification-contracts
 doc: docs/adr/0484-self-verification-contracts.md

@@ -2730,14 +2730,14 @@ adrs:
     path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
     implemented_on: '2026-04-21'
   - adr: '0431'
-    title: 0fork Full-Day Deployment — Single-Command IaC Entry Point
+    title: retired-deployment Full-Day Deployment — Single-Command IaC Entry Point
     status: Accepted
     implementation_status: Accepted
     currently_describes: current_state
     date: '2026-04-21'
     concern: platform
     keywords:
-      - 0fork
+      - retired-deployment
       - fork-clone
       - full-day-deploy
       - iac
@@ -2747,9 +2747,9 @@ adrs:
       - full-day
       - deployment
       - single-command
-    summary: Ship a single orchestrator target — make deploy-0fork — that chains the
-    filename: 0431-0fork-full-day-deployment.md
-    path: docs/adr/0431-0fork-full-day-deployment.md
+    summary: Ship a single orchestrator target — make deploy-retired-deployment — that chains the
+    filename: 0431-retired-deployment-full-day-deployment.md
+    path: docs/adr/0431-retired-deployment-full-day-deployment.md
   - adr: '0441'
     title: Deployment-Scoped Service Subsetting via Service Profiles
     status: Deprecated

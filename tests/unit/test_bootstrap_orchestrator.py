@@ -77,7 +77,7 @@ class TestBuildTemplateCtx:
     def test_apex(self):
         ctx = build_template_ctx({"platform_domain": "example.org"})
         assert ctx["apex"] == "example.org"
-        assert ctx["apex_slug"] == "0fork"
+        assert ctx["apex_slug"] == "retired-deployment"
 
     def test_empty_identity(self):
         ctx = build_template_ctx({})
@@ -96,13 +96,13 @@ class TestBuildTemplateCtx:
 
 class TestExpandTemplates:
     def test_replaces_slug(self):
-        ctx = {"slug": "0fork", "apex": "example.org"}
-        assert expand_templates(ctx, "{slug}/manifest.yml") == "0fork/manifest.yml"
+        ctx = {"slug": "retired-deployment", "apex": "example.org"}
+        assert expand_templates(ctx, "{slug}/manifest.yml") == "retired-deployment/manifest.yml"
 
     def test_replaces_in_list(self):
-        ctx = {"slug": "0fork"}
+        ctx = {"slug": "retired-deployment"}
         result = expand_templates(ctx, ["{slug}.yml", "other"])
-        assert result == ["0fork.yml", "other"]
+        assert result == ["retired-deployment.yml", "other"]
 
     def test_replaces_in_dict(self):
         ctx = {"apex": "example.org"}
@@ -261,7 +261,7 @@ class TestFormatStatus:
             "step_results": [{"step_id": "0-derive", "status": "passed"}],
         }
         out = format_status(receipt)
-        assert "0fork" in out
+        assert "retired-deployment" in out
         assert "success" in out
         assert "14" in out
         assert "✓" in out
@@ -331,8 +331,8 @@ class TestOrchestrate:
         steps = self._make_steps(3)
         receipt = orchestrate(
             steps,
-            "0fork",
-            ctx={"apex": "example.org", "apex_slug": "0fork"},
+            "retired-deployment",
+            ctx={"apex": "example.org", "apex_slug": "retired-deployment"},
             gates={"fail_fast": True, "max_retries_per_step": 0},
             dry_run=True,
             write_receipt=False,
@@ -345,8 +345,8 @@ class TestOrchestrate:
         steps = self._make_steps(4)
         receipt = orchestrate(
             steps,
-            "0fork",
-            ctx={"apex": "example.org", "apex_slug": "0fork"},
+            "retired-deployment",
+            ctx={"apex": "example.org", "apex_slug": "retired-deployment"},
             gates={"fail_fast": True},
             resume_from="2-step",
             dry_run=True,
@@ -366,8 +366,8 @@ class TestOrchestrate:
         ]
         receipt = orchestrate(
             steps,
-            "0fork",
-            ctx={"apex": "example.org", "apex_slug": "0fork"},
+            "retired-deployment",
+            ctx={"apex": "example.org", "apex_slug": "retired-deployment"},
             gates={"fail_fast": True},
             dry_run=False,
             write_receipt=False,
@@ -390,8 +390,8 @@ class TestOrchestrate:
         ]
         receipt = orchestrate(
             steps,
-            "0fork",
-            ctx={"apex": "example.org", "apex_slug": "0fork"},
+            "retired-deployment",
+            ctx={"apex": "example.org", "apex_slug": "retired-deployment"},
             gates={"fail_fast": True},
             dry_run=False,
             write_receipt=False,
@@ -413,8 +413,8 @@ class TestOrchestrate:
         ]
         receipt = orchestrate(
             steps,
-            "0fork",
-            ctx={"apex": "example.org", "apex_slug": "0fork"},
+            "retired-deployment",
+            ctx={"apex": "example.org", "apex_slug": "retired-deployment"},
             gates={"fail_fast": False},
             dry_run=True,
             write_receipt=False,
@@ -430,8 +430,8 @@ class TestOrchestrate:
         receipts_dir = tmp_path / "receipts"
         receipt = orchestrate(
             steps,
-            "0fork",
-            ctx={"apex": "example.org", "apex_slug": "0fork"},
+            "retired-deployment",
+            ctx={"apex": "example.org", "apex_slug": "retired-deployment"},
             gates={},
             dry_run=True,
             write_receipt=True,
@@ -453,8 +453,8 @@ class TestOrchestrate:
         receipts_dir = tmp_path / "receipts"
         receipt = orchestrate(
             steps,
-            "0fork",
-            ctx={"apex": "example.org", "apex_slug": "0fork"},
+            "retired-deployment",
+            ctx={"apex": "example.org", "apex_slug": "retired-deployment"},
             gates={"fail_fast": True},
             dry_run=False,
             write_receipt=True,

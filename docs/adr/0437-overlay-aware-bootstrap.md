@@ -14,9 +14,9 @@
   - ADR 0407 (generic-by-default / `.local/` overlay)
   - ADR 0424 (example.org clone on Hetzner AX41-NVMe)
   - ADR 0430 (`.local/host_vars/proxmox-host.yml` overlay)
-  - ADR 0431 (0fork full-day deployment wrapper) — subsumed into `make
-    bootstrap`; the fork-specific `deploy-0fork` / `converge-0fork-chain` /
-    `smoke-0fork-mail` targets become deprecated shims
+  - ADR 0431 (retired-deployment full-day deployment wrapper) — subsumed into `make
+    bootstrap`; the fork-specific `deploy-retired-deployment` / `converge-retired-deployment-chain` /
+    `smoke-retired-deployment-mail` targets become deprecated shims
 
 ---
 
@@ -43,11 +43,11 @@ production Proxmox:
 
 1. **`scripts/generate_inventory.py` ignores the identity overlay.** It only
    reads `inventory/host_vars/proxmox-host.yml` — the committed production
-   file. Even with `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork` set,
+   file. Even with `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment` set,
    the generated `inventory/hosts.yml` still contains 10.10.10.X production
    IPs instead of the fork's 10.10.10.X CIDR.
 2. **`BOOTSTRAP_KEY` is hardcoded** to `.local/ssh/bootstrap.id_ed25519`.
-   The 0fork clone uses `hetzner_llm_agents_ed25519`; no override path
+   The retired-deployment clone uses `hetzner_llm_agents_ed25519`; no override path
    short of editing the Makefile.
 3. **`env=clone` is not threaded through Stages 2–4** of `make bootstrap`
    (`install-proxmox`, `configure-network`, `harden-access`,
@@ -60,9 +60,9 @@ production Proxmox:
    from the operator workstation — which isn't routable until the mesh
    VPN is live.
 
-The workaround had been to define parallel 0fork-specific Make targets
-(`deploy-0fork`, `converge-0fork-chain`, `smoke-0fork-mail`,
-`rotate-hetzner-dns-token`). That works for 0fork specifically but it:
+The workaround had been to define parallel retired-deployment-specific Make targets
+(`deploy-retired-deployment`, `converge-retired-deployment-chain`, `smoke-retired-deployment-mail`,
+`rotate-hetzner-dns-token`). That works for retired-deployment specifically but it:
 
 - Violates the "one canonical path" intent of ADR 0386.
 - Makes every future fork operator re-invent the wrapper with their own
@@ -128,19 +128,19 @@ is deterministic and check-able. Production uses the two-argument form
 Stage 1 of `make bootstrap` calls `make generate-inventory` unconditionally;
 in overlay mode that target passes the overlay flags automatically.
 
-### Deprecation of `deploy-0fork` family
+### Deprecation of `deploy-retired-deployment` family
 
-The four targets `deploy-0fork`, `converge-0fork-chain`, `smoke-0fork-mail`,
-and `preflight-0fork` become thin deprecation shims that:
+The four targets `deploy-retired-deployment`, `converge-retired-deployment-chain`, `smoke-retired-deployment-mail`,
+and `preflight-retired-deployment` become thin deprecation shims that:
 
 1. Print a deprecation warning referencing this ADR.
 2. Execute the equivalent `make bootstrap` / `make converge-site` /
    `make smoke-mail` flow under the overlay.
 
-`rotate-hetzner-dns-token` stays — it is genuinely 0fork-specific operator
+`rotate-hetzner-dns-token` stays — it is genuinely retired-deployment-specific operator
 tooling, not a bootstrap concern.
 
-The ADR 0431 playbook `playbooks/0fork-full-day.yml` is redundant (it just
+The ADR 0431 playbook `playbooks/retired-deployment-full-day.yml` is redundant (it just
 imports `proxmox-install.yml + site.yml + mail-platform-send-gmail.yml`, and
 `site.yml` already imports `proxmox-install.yml`). It remains committed as
 documentation of the 2026-04-21 deploy sequence but is no longer invoked by
@@ -183,14 +183,14 @@ the default path.
   mode shows `ANSIBLE_INVENTORY=inventory/hosts.yml`,
   `BOOTSTRAP_KEY=.local/ssh/bootstrap.id_ed25519`, `env=production`,
   `ANSIBLE_OVERLAY_EXTRA=` (empty).
-- Fork path: `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make -np`
+- Fork path: `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment make -np`
   shows `ANSIBLE_INVENTORY=.local/inventory/hosts.yml`,
   `BOOTSTRAP_KEY=.local/ssh/hetzner_llm_agents_ed25519`, `env=clone`,
   `ANSIBLE_OVERLAY_EXTRA=-e env=clone -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`,
   `LV3_PROXMOX_HOST_ADDR=203.0.113.3`.
-- `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make generate-inventory`
+- `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment make generate-inventory`
   produces a `.local/inventory/hosts.yml` whose 17 guest entries resolve
   to 10.10.10.X on the fork's internal bridge.
 
-End-to-end live-apply validation is pending on the 0fork clone (see
-`docs/postmortems/2026-04-22-fork-bootstrap-gap.md`).
+End-to-end live-apply validation is pending on the retired-deployment clone (see
+`docs/postmortems/2026-04-22-secondary-deployment-bootstrap-gap.md`).

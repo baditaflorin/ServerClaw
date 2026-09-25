@@ -12,7 +12,7 @@
 #
 # Examples:
 #   scripts/timed.sh bootstrap make bootstrap
-#   scripts/timed.sh pve-repo-install ssh 0fork-jump 'apt-get install -y proxmox-ve'
+#   scripts/timed.sh pve-repo-install ssh retired-deployment-jump 'apt-get install -y proxmox-ve'
 #
 # Journal:   <TIMING_DIR>/journal.ndjson    (1 line per step, JSON)
 # Per-step:  <TIMING_DIR>/<UTC-ts>-<label>.log  (stdout+stderr)

@@ -5,14 +5,14 @@ The local `scripts/doctor.py` inspects one repo's view of drift.
 Today's platform runs the same codebase against two deployments
 (example.com + example.org), and Phase 5–7's drift surfaces were blind to
 divergence BETWEEN those deployments. A receipt that's fresh on lv3
-but 3 months old on 0fork looks fine to the local doctor.
+but 3 months old on retired-deployment looks fine to the local doctor.
 
 This script reads the static side of each deployment under
 `.local/deployments/<slug>/state/` and computes:
 
   - per-receipt date skew (which deployment is ahead/behind for each
     service)
-  - per-service presence skew (running on lv3 but not 0fork, etc.)
+  - per-service presence skew (running on lv3 but not retired-deployment, etc.)
   - per-deployment "freshest receipt" and "oldest receipt" headlines
 
 The live SSH probe (querying running containers, NATS lag, etc.) is

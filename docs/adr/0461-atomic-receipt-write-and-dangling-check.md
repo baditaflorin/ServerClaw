@@ -13,9 +13,9 @@
 ## Context
 
 PR [#71](https://github.com/baditaflorin/platform_server/pull/71)
-(`coolify_runtime deployed on 0fork`) added `latest_receipts.coolify_runtime`
+(`coolify_runtime deployed on retired-deployment`) added `latest_receipts.coolify_runtime`
 to `versions/stack.yaml` but never committed the corresponding
-`receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json`
+`receipts/live-applies/2026-04-28-coolify-retired-deployment-runtime-live-apply.json`
 file. The schema-validation gate failed for every subsequent push to
 main between 2026-04-28 13:39 UTC and the ws-0448 reconstruction at
 14:30 UTC. Operators on that window saw `Repository data model error:

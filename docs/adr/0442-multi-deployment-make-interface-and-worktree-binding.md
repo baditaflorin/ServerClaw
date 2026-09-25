@@ -160,7 +160,7 @@ owns_surfaces:
 `scripts/workstream_registry.py` validates that `deployment` is set and
 that the slug exists. `workstreams.yaml` (the generated index) gets a
 new top-level grouping by deployment, so the operator can see at a
-glance "what's in flight on `prod` vs `0fork`".
+glance "what's in flight on `prod` vs `retired-deployment`".
 
 The cross-workstream surface ownership check
 (`config/contracts/workstream-registry-v1.yaml`) becomes
@@ -182,8 +182,8 @@ makes every Make invocation inside that worktree default to that
 deployment. An agent that tries to converge a different deployment
 from the same worktree gets:
 
-> Worktree is bound to deployment `prod`. To act on `0fork`, either
-> rebind (`make bind-worktree slug=0fork`) or use a separate worktree.
+> Worktree is bound to deployment `prod`. To act on `retired-deployment`, either
+> rebind (`make bind-worktree slug=retired-deployment`) or use a separate worktree.
 
 The bind is intentionally one-deployment-at-a-time per worktree —
 agents who need to act on multiple deployments use multiple worktrees,

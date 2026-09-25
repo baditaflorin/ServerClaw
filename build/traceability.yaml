@@ -239,8 +239,8 @@ workstreams:
     currently_describes: current_state
     concern: platform
     path: docs/adr/0422-evaluate-lsp-ai-editor-side-ai-language-server.md
-- workstream_id: ws-0424-fork-clone-0fork
-  title: "ADR 0424 \u2014 example.org Clone onto Hetzner AX41-NVMe"
+- workstream_id: ws-0424-retired-deployment
+  title: "ADR 0424 \u2014 retired example.org deployment record"
   status: in_progress
   ready_to_merge: false
   primary_adr: '0424'
@@ -257,7 +257,7 @@ workstreams:
     implementation_status: Implemented
     currently_describes: current_state
     concern: bootstrap
-    path: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+    path: docs/adr/0424-retired-deployment-record.md
 - workstream_id: ws-0438-generic-by-construction
   title: "Generic-by-construction \u2014 eliminate lv3-prefix and credential-variable\
     \ hardcoding"
@@ -286,7 +286,7 @@ workstreams:
   primary_adr: 0439
   depends_on:
   - adr-0407-generic-by-default
-  - adr-0431-0fork-full-day-deploy
+  - adr-0431-retired-deployment-full-day-deploy
   - adr-0438-generic-by-construction
   surfaces:
     total: 1

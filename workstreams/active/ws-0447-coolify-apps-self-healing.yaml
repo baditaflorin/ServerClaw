@@ -32,7 +32,7 @@ ownership_manifest:
       mode: exclusive
 
 context: |
-  After the 0fork Coolify deployment (converges 16-25) and the first app deploy
+  After the retired-deployment Coolify deployment (converges 16-25) and the first app deploy
   (education_wemeshup), several manual steps were required:
     1. nginx was manually patched to point to coolify VM (10.10.10.70:80) instead
        of coolify-apps VM (10.10.10.71:443), because coolify-apps has no Traefik.
@@ -183,7 +183,7 @@ tasks:
       overwritten.
 
 references:
-  - postmortem: docs/postmortems/2026-04-28-coolify-0fork-deployment-and-education-wemeshup.md
+  - postmortem: docs/postmortems/2026-04-28-coolify-retired-deployment-deployment-and-education-wemeshup.md
   - adr: docs/adr/0477-coolify-apps-self-healing-bootstrap.md
   - adr: docs/adr/0340-coolify-vm-separation.md
   - template: publication/templates/proxmox-host.yml:2982
