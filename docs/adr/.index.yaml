@@ -6,22 +6,22 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-09-24'
+generated: '2026-08-31'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 516
+total_adrs: 515
 adr_number_range:
   first: '0001'
-  last: 0492
-  next_available: 0493
+  last: 0491
+  next_available: 0492
 implementation_status_summary:
   Implemented: 378
-  Partial: 5
+  Partial: 4
   Not Implemented: 33
   Deprecated: 14
   Accepted: 31
   Proposed: 55
 decision_status_summary:
-  Accepted: 365
+  Accepted: 364
   Proposed: 62
   Deprecated: 38
   Implemented: 51
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 84
+      count: 83
       first_adr: '0400'
-      last_adr: 0492
+      last_adr: 0491
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -79,7 +79,7 @@ facets:
       count: 11
     - concern: identity
       path: docs/adr/index/by-concern/identity.yaml
-      count: 11
+      count: 10
     - concern: monitoring
       path: docs/adr/index/by-concern/monitoring.yaml
       count: 14
@@ -115,7 +115,7 @@ facets:
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 5
+      count: 4
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
@@ -137,14 +137,8 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0493
+  next_available_adr: 0492
 latest_adrs:
-  - adr: 0492
-    title: Provider-Neutral Tailnet Service Access
-    implementation_status: Partial
-    currently_describes: mixed_state
-    concern: identity
-    path: docs/adr/0492-provider-neutral-tailnet-service-access.md
   - adr: 0491
     title: Authentik For Operator And Agent SSO
     implementation_status: Implemented
@@ -200,6 +194,12 @@ latest_adrs:
     currently_describes: goal_state
     concern: testing
     path: docs/adr/0481-pentest-fleet-coolify-migration.md
+  - adr: 0481
+    title: Explicit Deployment Context (no implicit identity.yml swap)
+    implementation_status: Proposed
+    currently_describes: goal_state
+    concern: ci-cd
+    path: docs/adr/0481-explicit-deployment-context.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

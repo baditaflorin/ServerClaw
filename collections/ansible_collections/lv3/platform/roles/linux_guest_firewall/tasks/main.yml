@@ -10,7 +10,7 @@
   when: platform_environment | default('production') == 'docker-dev'
 
 # Collapsed topologies (ADR 0424) may define multiple inventory_hostname
-# aliases that all point at the same physical VM (e.g. retired-deployment's
+# aliases that all point at the same physical VM (e.g. 0fork's
 # docker-runtime / runtime-comms / runtime-ai all → runtime-apps).
 # The alias hosts are not in proxmox_guests, so the firewall policy has no
 # entry for them; they already get the real VM's firewall via the canonical

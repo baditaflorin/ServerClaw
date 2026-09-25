@@ -1,0 +1,54 @@
+id: ws-0501-https-alert-presence-contract
+adr: "0409"
+title: Gate optional HTTPS validation on the ignored alerts artifact
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/fix-https-alert-presence-gate
+worktree_path: .worktrees/fix-https-alert-presence-gate
+doc: docs/workstreams/ws-0501-https-alert-presence-contract.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - scripts/generate_https_tls_assurance.py
+  - scripts/validate_repo.sh
+  - tests/test_generate_https_tls_assurance.py
+  - docs/workstreams/ws-0501-https-alert-presence-contract.md
+  - workstreams/active/ws-0500-https-alert-runtime-output-gate.yaml
+  - workstreams/archive/2026/ws-0500-https-alert-runtime-output-gate.yaml
+  - workstreams/active/ws-0501-https-alert-presence-contract.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: https_alert_presence_contract
+      paths:
+        - scripts/generate_https_tls_assurance.py
+        - scripts/validate_repo.sh
+        - tests/test_generate_https_tls_assurance.py
+      mode: exclusive
+    - id: ws_0500_closeout
+      paths:
+        - workstreams/active/ws-0500-https-alert-runtime-output-gate.yaml
+        - workstreams/archive/2026/ws-0500-https-alert-runtime-output-gate.yaml
+      mode: exclusive
+    - id: ws_0501_tracking
+      paths:
+        - docs/workstreams/ws-0501-https-alert-presence-contract.md
+        - workstreams/active/ws-0501-https-alert-presence-contract.yaml
+      mode: exclusive
+context: |
+  The generator's tracked targets file exists in every clean checkout, while
+  only the deployment-local alerts file is ignored. Optional validation must
+  use the ignored alerts artifact as its presence signal and remain strict
+  once that artifact exists.
+tasks:
+  - id: t1
+    title: Correct optional presence detection to use only the ignored alerts file
+    status: completed
+  - id: t2
+    title: Cover clean tracked-target state and strict present-alert drift
+    status: completed
+  - id: t3
+    title: Run focused validation and open a review-only correction PR
+    status: in_progress

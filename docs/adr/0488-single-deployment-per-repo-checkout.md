@@ -20,9 +20,9 @@ The substrate works as designed. The problem is that the design was wrong for th
 
 2. **The cost of the abstraction was paid every operation.** Every `make converge-*` carries `_require-deployment`. Every script has a `--deployment <slug>` arg or reads `.deployment` markers. CLAUDE.md opens with a deployment-context check before anything else. New agents spend their first turn on `make whoami` instead of working.
 
-3. **The 2026-05-15 retired-deployment outage was caused by drift the substrate could not see.** The retired-deployment host filled its root filesystem; 16 of 18 VMs paused with `io-error`; the public edge went dark for 48 hours. None of `whoami`, `host_pinning_guard`, the cert validator, or the per-deployment receipts noticed. They were all checking that *operations went to the right deployment*. None of them were checking that *the deployment was alive*. That is ADR 0484's job (self-verification contracts) — which works fine without a slug.
+3. **The 2026-05-15 0fork outage was caused by drift the substrate could not see.** The 0fork host filled its root filesystem; 16 of 18 VMs paused with `io-error`; the public edge went dark for 48 hours. None of `whoami`, `host_pinning_guard`, the cert validator, or the per-deployment receipts noticed. They were all checking that *operations went to the right deployment*. None of them were checking that *the deployment was alive*. That is ADR 0484's job (self-verification contracts) — which works fine without a slug.
 
-4. **DNS drift went undetected for the same reason.** `example.com` A-record had been mistakenly pointed at the dead retired-deployment box. The substrate had no opinion on which IP a domain *should* resolve to — it only validated certificates after assuming the IP was right. So `example.com` was dark in DNS for an unknown number of days while the substrate happily said "your deployment is correctly identified."
+4. **DNS drift went undetected for the same reason.** `example.com` A-record had been mistakenly pointed at the dead 0fork box. The substrate had no opinion on which IP a domain *should* resolve to — it only validated certificates after assuming the IP was right. So `example.com` was dark in DNS for an unknown number of days while the substrate happily said "your deployment is correctly identified."
 
 5. **Forkability is the real goal, and forkability already lives in `.local/identity.yml`.** ADR 0385 established that operators rebrand the platform by editing one file: `.local/identity.yml`. ADR 0407 made the committed code generic. Both of those work *better* without the multi-deployment layer, because there is exactly one file to edit, not a `.local/deployments/<slug>/identity.yml` and a worktree marker and a CLI flag and an env var to remember.
 
@@ -66,7 +66,7 @@ Removed in full:
 | `.deployment` worktree markers | gitignored, stop being written |
 | CLAUDE.md §0 (the `make whoami` ritual) | deleted |
 | 17 ADRs (0437, 0439-0443, 0445-0448, 0456-0460, 0462, 0470, 0480, 0481) | marked `Status: Superseded by ADR 0488` |
-| Workstreams `ws-0481`, `ws-0482-retired-deployment-not-bootstrapped`, `ws-0486-hands-off-bootstrap` (the slug-aware parts) | retired; ws-0483/0484/0485 rebased to drop deployment scaffolding from `owned_surfaces` |
+| Workstreams `ws-0481`, `ws-0482-0fork-platform-not-bootstrapped`, `ws-0486-hands-off-bootstrap` (the slug-aware parts) | retired; ws-0483/0484/0485 rebased to drop deployment scaffolding from `owned_surfaces` |
 
 The 17 ADRs are preserved as historical record. The platform-manifest validator (ADR 0420) is updated so they do not register as "active decisions" against the current code.
 
@@ -117,7 +117,7 @@ ADR 0407 said "use `example.com` in docs, `{{ platform_domain }}` in templates."
 This ADR is delivered in one branch, mergeable in stages if review prefers:
 
 1. **Deletion stage:** remove `mk/multi-deployment.mk`, `scripts/deployment.py`, `scripts/migrate_to_multi_deployment.py`, `host_pinning_guard` role, `reference-deployments/`, multi-deploy test files and fixtures. Strip `_require-deployment` from every Make target. Drop `include $(REPO_ROOT)/mk/multi-deployment.mk` from `Makefile`.
-2. **Identity collapse stage:** move `.local/deployments/retired-deployment/identity.yml` content to `.local/identity.yml` on the operator's machine (manual, not in this PR — `.local/` is gitignored). Delete `.local/deployments/` from the substrate plan. Remove `PLATFORM_IDENTITY_OVERLAY` env-var handling.
+2. **Identity collapse stage:** move `.local/deployments/0fork/identity.yml` content to `.local/identity.yml` on the operator's machine (manual, not in this PR — `.local/` is gitignored). Delete `.local/deployments/` from the substrate plan. Remove `PLATFORM_IDENTITY_OVERLAY` env-var handling.
 3. **Capacity-aware rewire stage:** repoint `capacity_probe.py` and `resolve_topology.py` at `.local/identity.yml` and `inventory/host_vars/proxmox-host.generated.yml`. Add `make generate-platform-vars` step that includes the generated fragment.
 4. **Documentation stage:** rewrite CLAUDE.md (delete §0, simplify §1, fold relevant parts of §0 into a one-line "the deployment is configured in `.local/identity.yml`"). Mark superseded ADRs. Update `README.md` getting-started.
 5. **Enforcement stage:** extend `scripts/audit_sanitization.py` to block operator-specific strings in committed files outside `docs/adr/`.
@@ -125,7 +125,7 @@ This ADR is delivered in one branch, mergeable in stages if review prefers:
 ### Out of scope
 
 - Decommissioning the lv3 box (operational task, separate change ticket).
-- Rebuilding the retired-deployment box from scratch on the simplified branch (operational task — uses this branch but is not part of it).
+- Rebuilding the 0fork box from scratch on the simplified branch (operational task — uses this branch but is not part of it).
 - DNS flip for `example.com` (registrar change, not a repo change).
 
 ---

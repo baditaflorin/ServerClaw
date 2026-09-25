@@ -353,24 +353,3 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetz
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 "sudo qm guest exec 130 -- bash -lc 'sed -i \"s/bc:24:11:7c:4e:5b/bc:24:11:0f:8a:f2/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 "sudo qm guest exec 140 -- bash -lc 'sed -i \"s/bc:24:11:82:c6:38/bc:24:11:b1:76:a0/\" /etc/netplan/50-cloud-init.yaml && netplan apply'"
 ```
-## Grafana Authentik login connectivity
-
-Grafana performs OAuth token and user-info requests from the monitoring VM,
-while the user's browser follows the public authorization redirect. The
-monitoring VM must therefore resolve the Authentik hostname to the private
-NGINX edge address; sending server-side OIDC requests to the public edge can
-fail on networks without public-IP hairpin routing.
-
-The `grafana_sso` role manages this host-specific mapping from the generated
-`nginx_edge` topology, verifies the provider discovery endpoint over HTTPS, and
-performs a non-token-issuing client-authentication probe. The probe submits an
-intentionally invalid authorization code and expects Authentik to reject the
-grant as `invalid_grant`; an invalid client secret is reported as a failure.
-Before writing the host mapping, convergence also checks that the selected
-private edge accepts HTTPS, so stale topology fails before `/etc/hosts` changes.
-
-For manual diagnosis, from the monitoring VM check that `id.<platform-domain>`
-resolves to the private NGINX address and that the provider discovery URL
-`https://id.<platform-domain>/application/o/grafana/.well-known/openid-configuration`
-returns HTTP 200 with certificate verification enabled. Do not print or copy
-the client secret while troubleshooting.

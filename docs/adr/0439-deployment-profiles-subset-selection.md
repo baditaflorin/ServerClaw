@@ -18,7 +18,7 @@
   - ADR 0407 (generic-by-default `.local/` overlay) — substrate.
   - ADR 0424 (example.org clone) — first fork; took the full 73-service stack
     because no smaller shape was defined.
-  - ADR 0431 (retired-deployment full-day deployment) — single-command entry point;
+  - ADR 0431 (0fork full-day deployment) — single-command entry point;
     profiles slot in here as the selector.
   - ADR 0438 (generic-by-construction) — content-correctness layer; this
     ADR is the **scope-selection** layer above it.
@@ -239,5 +239,5 @@ shared data plane is not pulled in.
 - ADR 0407: Generic-by-default `.local/` overlay
 - ADR 0410: Docker isolation testing and IoC completion
 - ADR 0424: example.org clone on Hetzner AX41-NVMe
-- ADR 0431: retired-deployment full-day deployment — single-command IaC entry point
+- ADR 0431: 0fork full-day deployment — single-command IaC entry point
 - ADR 0438: Generic-by-construction — generative cascade IaC

@@ -1,0 +1,8 @@
+# Purpose: Delegate the Dockerhost broker PKI vault-writer converge to the canonical LV3 platform collection playbook.
+# Use case: Install the forced-command boundary before the broker PKI handoff is enabled.
+# Inputs: Same as ../collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker-pki-vault-writer.yml.
+# Outputs: Canonical playbook import only; no direct infrastructure mutation is defined here.
+# Idempotency: Yes; imports an idempotent managed playbook.
+# Dependencies: canonical lv3.platform fleet-build-broker-pki-vault-writer playbook source.
+---
+- import_playbook: ../collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker-pki-vault-writer.yml

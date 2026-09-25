@@ -86,7 +86,7 @@ phases:
     target_version: 0.179.0
     done:
       - "feat(identity): platform_identity filter plugin with 5 flavors (config/sql/pve/unix/dns_label)"
-      - "test: 18 unit tests across lv3/retired-deployment/UPPERCASE/edge-case inputs"
+      - "test: 18 unit tests across lv3/0fork/UPPERCASE/edge-case inputs"
       - "fix(identity): migrate proxmox_notification_*, keycloak_realm_name, monitoring_influxdb_org to platform_identity"
       - "fix(identity): migrate proxmox_api_automation_user to pve_prefix (was config_prefix)"
       - "fix(identity): migrate proxmox_acme_plugin_id to config_prefix (was sql_prefix)"
@@ -103,7 +103,7 @@ phases:
       - "fix(roles): parameterize lv3- identifiers in 68 role defaults (203 occurrences — container_name, policy_name, network_name, service_image_name)"
       - "fix(tests): update 6 role defaults test files to expect platform_identity template values"
       - "fix(openbao): replace 4 !unsafe SQL grants with Jinja-escape pattern (Phase 0 ef1445216)"
-      - "fix(nomad): replace per-deployment lv3-/retired-deployment- smoke job HCL files with single in-role Jinja template; job/service names derive from platform_identity.config_prefix"
+      - "fix(nomad): replace per-deployment lv3-/0fork- smoke job HCL files with single in-role Jinja template; job/service names derive from platform_identity.config_prefix"
       - "fix(nomad): rewrite playbooks/nomad.yml multi-host-group hosts expression to single-line ternary (ansible_scope_runner regex parser does not handle parenthesised folded scalars)"
       - "fix(nomad_oidc_auth): guard binding-rule equality checks with selectattr('AuthMethod','defined') and selectattr('BindName','defined') to handle Nomad list-rules dict shapes that omit fields"
       - "fix(postgres_vm): replace hard pgaudit table assertion with probe + deferred-grant pattern (loop only over to_regclass-confirmed tables) so postgres can converge before downstream services that own the schemas (windmill, etc.)"
@@ -144,7 +144,7 @@ phases:
       - Promote from advisory to required
 acceptance_criteria:
   - Pre-push lint scanner green on main with zero allow-comments outside docs/tests
-  - "PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment make bootstrap completes without any lv3/prefix/credential hardcoding workaround in fork-overrides.yml"
+  - "PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make bootstrap completes without any lv3/prefix/credential hardcoding workaround in fork-overrides.yml"
   - Generic-deploy CI job green against testfork.invalid synthetic identity
 ownership_manifest:
   owned_surfaces:

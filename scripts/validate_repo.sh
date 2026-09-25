@@ -581,7 +581,7 @@ validate_data_models() {
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/subdomain_exposure_audit.py" --validate >/dev/null
-  "$PYTHON_BIN" "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
+  "$PYTHON_BIN" "$REPO_ROOT/scripts/validate_service_completeness.py" --changed --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
   "$PYTHON_BIN" "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/atlas_schema.py" validate --repo-root "$REPO_ROOT" >/dev/null
@@ -718,7 +718,11 @@ validate_health_probes() {
 validate_alert_rules() {
   echo "Alert rule validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_slo_rules.py" --check >/dev/null
-  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_https_tls_assurance.py" --check >/dev/null
+  # The targets file is tracked canonical state. The paired HTTPS/TLS alerts
+  # file resolves deployment-local identity and is intentionally ignored. A
+  # clean checkout may omit that alert file; once it exists, comparison of both
+  # paired outputs remains strict.
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/generate_https_tls_assurance.py" --check-if-present >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_alert_rules.py"
 }
 

@@ -41,7 +41,7 @@ ownership_manifest:
       - workstreams/active/ws-0459-host-pinning-phase2-role-guard.yaml
     mode: exclusive
 notes: |
-  Phase 2 of ADR 0457. Closes the lv3 ↔ retired-deployment oauth2-proxy@4180
+  Phase 2 of ADR 0457. Closes the lv3 ↔ 0fork oauth2-proxy@4180
   collision class of bug at converge time rather than at incident time.
 
   New role `lv3.platform.host_pinning_guard`:

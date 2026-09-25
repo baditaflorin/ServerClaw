@@ -1,39 +1,32 @@
 # Workstream ws-0377-repo-intake-subdomain: Repo Intake as First-Class Subdomain
 
 - ADR: [ADR 0224](../adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md)
-- Title: Repo Intake first-class runtime and recovery
-- Status: in progress
-- Branch: `codex/repo-intake-preflight`
-- Worktree: `.worktrees/codex-repo-intake-preflight`
-- Owner: Codex
+- Title: repo-intake as a first-class subdomain
+- Status: ready
+- Branch: `claude/zen-agnesi`
+- Worktree: `.claude/worktrees/zen-agnesi`
+- Owner: platform-infrastructure
 - Depends On: `ADR 0224`
 - Conflicts With: none
 
 ## Scope
 
-- restore the missing Repo Intake runtime behind its existing Authentik edge
-- declare the NGINX-to-runtime firewall path and the derived edge upstream
-- repair the governed preflight metadata referenced by `make converge-repo-intake`
-- add a focused syntax check and use deployment-selected inventory for private probes
-- do not expose the service's private listener or bypass the shared Authentik boundary
+- promote repo-intake as a first-class surface with its own subdomain
+- align ops portal navigation with the new repo-intake entrypoint
+- ensure generated nginx upstreams and platform service registry stay in sync
 
 ## Verification Plan
 
-- `make preflight WORKFLOW=converge-repo-intake`
-- `make validate`
-- `make syntax-check-repo-intake`
-- `uv run --with pytest pytest -q tests/test_repo_intake_workflow.py tests/test_repo_intake_runtime_role.py`
-- private listener returns HTTP 200 for `/health` and `/`
-- public host remains behind Authentik and reaches the healthy upstream after login
+- `make generate-ops-portal`
+- `make validate-generated-cross-cutting`
+- `./scripts/validate_repo.sh generated-vars`
 
 ## Notes
 
-- Live observation: the public edge reaches the Authentik boundary but the upstream is absent/refused; the runtime is not installed on the selected host.
-- Current repo gate: `make preflight WORKFLOW=converge-repo-intake` reports an unknown workflow, and `make validate` fails generated platform-variable drift.
-- No live deployment or edge access-policy change is performed by this workstream until the selected topology is current and repository validation passes.
+- service will publish as `repo-intake.example.com` once applied in production
 
 ## Ownership Notes
 
 - This document was backfilled on `2026-04-11` so shared registry validation can
   resolve the active workstream entry cleanly.
-- Workstream ownership was reassigned because its former branch is no longer present on origin and no pull request is open.
+- Feature ownership remains with the declared workstream owner and branch.

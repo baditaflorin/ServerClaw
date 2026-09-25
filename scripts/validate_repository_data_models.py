@@ -59,7 +59,9 @@ from generate_platform_vars import (
     _apply_generation_identity_overlay,
     _load_generation_identity_overlay,
     build_platform_vars,
+    derived_platform_vars_equivalence_skip_message,
     load_sources,
+    missing_deployment_derived_platform_inputs,
 )
 from gate_bypass_waivers import load_catalog as load_gate_bypass_waiver_catalog
 from gate_bypass_waivers import summarize_receipts as summarize_gate_bypass_waivers
@@ -883,6 +885,10 @@ def validate_vm_template_manifest(template_catalog: dict[str, Any]) -> None:
 
 def validate_platform_vars() -> None:
     platform_vars = require_mapping(load_yaml(PLATFORM_VARS_PATH), str(PLATFORM_VARS_PATH))
+    missing_inputs = missing_deployment_derived_platform_inputs()
+    if missing_inputs:
+        print(derived_platform_vars_equivalence_skip_message(missing_inputs))
+        return
     # Reproduce the generator's repository-safe default: ignore untracked local
     # inputs, but retain the narrow identity snapshot recorded in the generated
     # file.  This keeps platform.yml deterministic on another operator machine
@@ -3245,7 +3251,7 @@ def validate_replaceability_review_data() -> None:
 #
 # Postmortem 2026-04-23-digit-prefix-domain-identifier-compat.md describes a
 # class of breakage where a digit-leading platform_domain (e.g. "example.org")
-# causes platform_config_prefix = "retired-deployment", which is injected into identifier
+# causes platform_config_prefix = "0fork", which is injected into identifier
 # namespaces (PostgreSQL roles, PVE users/roles, POSIX usernames, Proxmox ACME
 # plugin IDs, Proxmox storage IDs) that all require a letter-leading value.
 #

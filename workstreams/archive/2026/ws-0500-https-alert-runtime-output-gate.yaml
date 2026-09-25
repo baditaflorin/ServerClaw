@@ -1,0 +1,46 @@
+id: ws-0500-https-alert-runtime-output-gate
+adr: "0409"
+title: Accept clean ignored HTTPS alert outputs while rejecting present drift
+status: merged
+ready_to_merge: true
+live_applied: false
+owner: codex
+branch: codex/regenerate-https-alert-baseline
+worktree_path: .worktrees/regenerate-https-alert-baseline
+doc: docs/workstreams/ws-0500-https-alert-runtime-output-gate.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - scripts/generate_https_tls_assurance.py
+  - scripts/validate_repo.sh
+  - tests/test_generate_https_tls_assurance.py
+  - docs/workstreams/ws-0500-https-alert-runtime-output-gate.md
+  - workstreams/archive/2026/ws-0500-https-alert-runtime-output-gate.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: https_alert_runtime_output_gate
+      paths:
+        - scripts/generate_https_tls_assurance.py
+        - scripts/validate_repo.sh
+        - tests/test_generate_https_tls_assurance.py
+      mode: exclusive
+    - id: ws_0500_tracking
+      paths:
+        - docs/workstreams/ws-0500-https-alert-runtime-output-gate.md
+        - workstreams/archive/2026/ws-0500-https-alert-runtime-output-gate.yaml
+      mode: exclusive
+context: |
+  The initial alert runtime-output gate was merged in PR #224. Its follow-up
+  corrects the presence signal because the targets file is tracked while only
+  the paired alerts file is an ignored deployment-local artifact.
+tasks:
+  - id: t1
+    title: Add optional-presence strict generator check and gate integration
+    status: completed
+  - id: t2
+    title: Add regression coverage for absent clean outputs and present drift
+    status: completed
+  - id: t3
+    title: Run focused validation and open a review-only PR
+    status: completed

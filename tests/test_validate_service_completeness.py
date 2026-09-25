@@ -155,7 +155,7 @@ def test_legacy_service_uses_grandfathered_suppressions(tmp_path: Path, monkeypa
     completeness_path = tmp_path / "config" / "service-completeness.json"
     completeness = json.loads(completeness_path.read_text())
     completeness["suppression_presets"] = {
-        "legacy-service": dict.fromkeys(service_completeness.CHECKLIST_IDS, "2026-09-23")
+        "legacy-service": dict.fromkeys(service_completeness.CHECKLIST_IDS, "2099-12-31")
     }
     completeness["services"]["docker_runtime"]["suppression_preset"] = "legacy-service"
     completeness_path.write_text(json.dumps(completeness, indent=2) + "\n")
@@ -165,7 +165,7 @@ def test_legacy_service_uses_grandfathered_suppressions(tmp_path: Path, monkeypa
 
     assert result.passing
     grandfathered_items = {item.item_id: item.grandfathered_until for item in result.items if item.grandfathered_until}
-    assert grandfathered_items["api_gateway"] == "2026-09-23"
+    assert grandfathered_items["api_gateway"] == "2099-12-31"
 
 
 def test_find_adr_path_prefers_service_specific_match_when_ids_are_duplicated(
@@ -187,4 +187,47 @@ def test_find_adr_path_prefers_service_specific_match_when_ids_are_duplicated(
             service_name="Flagsmith",
         )
         == specific
+    )
+
+
+def test_changed_service_scope_maps_role_and_named_test_paths(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        [
+            "collections/ansible_collections/lv3/platform/roles/test_echo_runtime/defaults/main.yml",
+            "tests/test_test-echo_oidc.py",
+        ],
+        context,
+    )
+
+    assert selected == ["test_echo"]
+
+
+def test_changed_service_scope_falls_back_to_all_for_global_catalog_or_unknown_role(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    assert (
+        service_completeness.service_ids_for_changed_paths(
+            [
+                "collections/ansible_collections/lv3/platform/roles/test_echo_runtime/defaults/main.yml",
+                "config/service-completeness.json",
+            ],
+            context,
+        )
+        is None
+    )
+    assert (
+        service_completeness.service_ids_for_changed_paths(
+            ["collections/ansible_collections/lv3/platform/roles/unmapped_runtime/defaults/main.yml"],
+            context,
+        )
+        is None
     )

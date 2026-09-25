@@ -21,6 +21,8 @@ secrets:
     env_var: AUTHENTIK_POSTGRESQL__PASSWORD
   - path: openbao/services/authentik/runtime-env
     env_var: AUTHENTIK_BOOTSTRAP_PASSWORD
+  - path: openbao/services/authentik/runtime-env
+    env_var: AUTHENTIK_EMAIL__PASSWORD
 
 health_check:
   endpoint: /v1/sys/health

@@ -50,16 +50,38 @@ class FakePage:
         self.response = response
         self.script = ""
 
-    def evaluate(self, script: str) -> dict[str, object]:
+    def evaluate(self, script: str, argument: str) -> dict[str, object]:
         self.script = script
+        self.argument = argument
         return self.response
+
+    def locator(self, selector: str) -> "FakeLocator":
+        self.selector = selector
+        return FakeLocator()
+
+    def wait_for_function(self, script: str, *, arg: str, timeout: int) -> None:
+        self.wait_script = script
+        self.wait_argument = arg
+        assert timeout == 10_000
+
+
+class FakeLocator:
+    def wait_for(self, *, state: str, timeout: int) -> None:
+        assert state == "visible"
+        assert timeout == 10_000
 
 
 def test_browser_session_proves_expected_non_admin_user() -> None:
-    page = FakePage({"status": 200, "login": "gitea-e2e", "is_admin": False})
+    page = FakePage({"status": 200, "login": "gitea-e2e", "is_admin": False, "session_login": "gitea-e2e"})
     MODULE.verify_authenticated_user(page, username="gitea-e2e")
-    assert "fetch('/api/v1/user'" in page.script
+    assert "querySelectorAll('.gt-ellipsis')" in page.script
+    assert "node.textContent.trim() === expectedLogin" in page.script
+    assert "fetch(`/api/v1/users/${encodeURIComponent(sessionLogin)}`" in page.script
     assert "credentials: 'same-origin'" in page.script
+    assert page.argument == "gitea-e2e"
+    assert "querySelectorAll('.gt-ellipsis')" in page.wait_script
+    assert "node.textContent.trim() === expectedLogin" in page.wait_script
+    assert page.wait_argument == "gitea-e2e"
 
 
 def test_authentik_browser_errors_are_redacted(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -85,9 +107,16 @@ def test_authentik_browser_errors_are_redacted(monkeypatch: pytest.MonkeyPatch) 
     "response, message",
     [
         ({"status": 401}, "not authenticated"),
-        ({"status": 200, "login": "someone-else", "is_admin": False}, "different account"),
-        ({"status": 200, "login": "gitea-e2e", "is_admin": True}, "non-admin"),
-        ({"status": 200, "login": "gitea-e2e"}, "non-admin"),
+        (
+            {"status": 200, "login": "gitea-e2e", "is_admin": False, "session_login": "someone-else"},
+            "requested account",
+        ),
+        (
+            {"status": 200, "login": "someone-else", "is_admin": False, "session_login": "gitea-e2e"},
+            "different account",
+        ),
+        ({"status": 200, "login": "gitea-e2e", "is_admin": True, "session_login": "gitea-e2e"}, "non-admin"),
+        ({"status": 200, "login": "gitea-e2e", "session_login": "gitea-e2e"}, "non-admin"),
     ],
 )
 def test_browser_session_rejects_wrong_or_privileged_user(response: dict[str, object], message: str) -> None:
@@ -102,9 +131,13 @@ def test_e2e_manifest_creates_only_the_gitea_login_group() -> None:
     assert manifest["groups"] == []
     assert len(manifest["users"]) == 1
     user = manifest["users"][0]
+    assert user["username"] == "gitea-e2e"
     assert user["groups"] == ["gitea-users"]
     assert user["provisioning"] == "create_if_missing"
     assert user["type"] == "internal"
+    assert "is_admin" not in user
+    assert "platform-admins" not in user["groups"]
+    assert "authentik Admins" not in user["groups"]
 
 
 def test_tls_validation_is_not_disabled() -> None:

@@ -1,0 +1,46 @@
+# Playbook: fleet-runner-image-publisher.yml
+# Purpose: Converge the fixed non-secret fleet-runner publisher identity on Builder LXC108 only.
+# Use case: Establish the builder-side identity prerequisite before a fleet-runner image publish.
+#
+# Inputs (required):
+#   - An inventory containing the exact Builder LXC108 hostname `0docker_builder`.
+#
+# Inputs (optional):
+#   - None. The target, identity, path, JSON payload, and permissions are deliberately fixed.
+#
+# Outputs:
+#   - `/etc/fleet-runner/image-publisher.json` owned by root with mode `0600` on Builder LXC108 only.
+#
+# Idempotency: Yes. The role safely reconciles the fixed parent directory and fixed JSON payload.
+#
+# Dependencies:
+#   - ADR 0296: Private fleet delivery boundaries.
+#   - Role: lv3.platform.fleet_runner_image_publisher_identity.
+#
+# Related ADRs: 0296, 0165
+# Related Runbooks: docs/runbooks/fleet-runner-image-publisher.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-09-21
+---
+- name: Converge the dedicated 0docker Builder LXC108 fleet-runner image-publisher identity
+  hosts: 0docker_builder
+  become: true
+  gather_facts: true
+  tags:
+    - automation
+    - fleet-runner
+    - image-publisher
+    - builder-lxc-108
+
+  pre_tasks:
+    - name: Require the exact 0docker Builder LXC108 inventory hostname
+      ansible.builtin.assert:
+        that:
+          - inventory_hostname == '0docker_builder'
+        fail_msg: >-
+          This playbook is closed to the dedicated 0docker Builder LXC108
+          inventory hostname and must never target a general docker-build guest.
+
+  roles:
+    - role: lv3.platform.fleet_runner_image_publisher_identity

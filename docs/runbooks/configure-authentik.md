@@ -19,6 +19,49 @@ It does not rotate an adopted Authentik secret or authorize an unreviewed
 identity-client change. It reconciles only the manifest clients explicitly
 selected by the role.
 
+## Operator password recovery
+
+The managed recovery path delivers a short-lived, rate-limited reset link; it
+never emails an existing password. The non-secret blueprint lives at
+`config/authentik/recovery-flow.yaml` and is mounted at `/blueprints/` for the
+Authentik server and worker. Its Email stage uses global SMTP settings only.
+
+The SMTP password is read from the existing controller-local mail-platform
+secret source and stored only in Authentik's OpenBao runtime payload. It must
+not appear in the blueprint, an Ansible command line, a receipt, or logs.
+
+The Authentik worker joins the mail platform's existing private Docker network
+and resolves Stalwart's authenticated internal submission listener by service
+DNS. The listener accepts only the managed submission credentials and retains
+the message in the mail platform's managed delivery queue. Do not route this
+traffic through the runtime host's published SMTP port: container hairpinning
+can establish TCP without delivering the SMTP banner.
+
+After a normal Authentik converge, verify the live recovery bindings without
+sending an email:
+
+```bash
+uv run --no-project --with pyyaml python scripts/authentik_recovery.py check \
+  --base-url "https://id.${PLATFORM_DOMAIN}" \
+  --token-file "${LOCAL_ROOT}/authentik/bootstrap-token.txt"
+```
+
+To request a reset for the platform operator, use the same private identity
+overlay selected for the converge. The command prints only an acceptance result
+and never prints the email address or reset link:
+
+```bash
+uv run --no-project --with pyyaml python scripts/authentik_recovery.py send-email \
+  --base-url "https://id.${PLATFORM_DOMAIN}" \
+  --token-file "${LOCAL_ROOT}/authentik/bootstrap-token.txt" \
+  --identity-file "${IDENTITY_FILE}"
+```
+
+The link expires after 20 minutes and the recovery flow accepts at most three
+attempts per 15-minute window. A reset email is proof that Authentik accepted
+the request, not a substitute for confirming inbox delivery. Authentik did not
+inherit Keycloak's MFA factors; enrol a second factor after completing recovery.
+
 ## Secret modes
 
 `authentik_secret_bootstrap_mode` has three explicit modes:
@@ -74,12 +117,14 @@ Do not print, source, or interpolate secret-file contents into command-line
 arguments. Reconciliation accepts a token file and suppresses secret-bearing
 responses.
 
-Before any OpenBao, DNS, or service mutation, the Make entrypoint regenerates
-the expected platform facts in memory from both selected files and requires an
-exact match with tracked `platform_generation` and target-host facts. A mismatch
-means the repository was generated for another deployment; stop and select the
-correct files or regenerate reviewed repository state. Never proceed using the
-unselected shared `.local/identity.yml` default.
+Before any OpenBao, DNS, or service mutation, the Make entrypoint materializes
+the ignored DNS, proxy, SSO, and hairpin inputs from both selected files, then
+requires an exact match between tracked `platform_generation` and target-host
+facts. Tracked TLS and platform outputs remain check-only, so their drift still
+fails closed for review. A mismatch means the repository was generated for
+another deployment; stop and select the correct files or regenerate reviewed
+repository state. Never proceed using the unselected shared `.local/identity.yml`
+default.
 
 ## Preconditions
 

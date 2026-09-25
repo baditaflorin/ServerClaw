@@ -1,0 +1,5 @@
+---
+argument_specs:
+  main:
+    short_description: Install the fixed Builder-only private 0mcp fleet-runner transport.
+    options: {}

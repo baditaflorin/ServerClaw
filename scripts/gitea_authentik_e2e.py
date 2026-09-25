@@ -83,15 +83,35 @@ def prepare_password_file(path: Path = DEFAULT_PASSWORD_FILE) -> bool:
     return True
 
 
-def authenticated_user(page: Any) -> dict[str, Any]:
-    """Read only the minimal authenticated-user fields through the browser session."""
+def authenticated_user(page: Any, *, username: str) -> dict[str, Any]:
+    """Verify the visible browser identity and read the public profile's admin flag.
+
+    Gitea does not accept its browser cookie on ``/api/v1/user``. The signed-in
+    account is therefore read from the visible user-menu label, while the public
+    user endpoint supplies the minimal profile fields needed for the admin check.
+    """
     result = page.evaluate(
-        """async () => {
-          const response = await fetch('/api/v1/user', { credentials: 'same-origin' });
-          if (!response.ok) return { status: response.status };
+        """async (expectedLogin) => {
+          const identityLabels = Array.from(document.querySelectorAll('.gt-ellipsis'))
+            .filter((node) => node.getClientRects().length > 0
+              && node.textContent.trim() === expectedLogin);
+          const sessionLogin = identityLabels.length === 1
+            ? identityLabels[0].textContent.trim()
+            : '';
+          if (!sessionLogin) return { status: 401 };
+          const response = await fetch(`/api/v1/users/${encodeURIComponent(sessionLogin)}`, {
+            credentials: 'same-origin'
+          });
+          if (!response.ok) return { status: response.status, session_login: sessionLogin };
           const user = await response.json();
-          return { status: response.status, login: user.login, is_admin: user.is_admin };
-        }"""
+          return {
+            status: response.status,
+            login: user.login,
+            is_admin: user.is_admin,
+            session_login: sessionLogin
+          };
+        }""",
+        username,
     )
     if not isinstance(result, dict):
         raise VerificationError("Gitea did not return a valid current-user response")
@@ -101,7 +121,34 @@ def authenticated_user(page: Any) -> dict[str, Any]:
 
 
 def verify_authenticated_user(page: Any, *, username: str) -> None:
-    result = authenticated_user(page)
+    # The OIDC callback can finish before Gitea's client-side header has rendered.
+    # Wait for the exact expected visible identity before checking its profile.
+    try:
+        page.wait_for_function(
+            """expectedLogin => Array.from(document.querySelectorAll('.gt-ellipsis'))
+              .filter((node) => node.getClientRects().length > 0
+                && node.textContent.trim() === expectedLogin).length === 1""",
+            arg=username,
+            timeout=10_000,
+        )
+    except Exception as exc:
+        current = urlparse(page.url)
+        title = str(page.title() or "")[:100]
+        login_controls = page.locator('form[action*="/user/login"], input[name="user_name"]').count()
+        expected_label_visible = page.evaluate(
+            """expectedLogin => Array.from(document.querySelectorAll('.gt-ellipsis'))
+              .some((node) => node.getClientRects().length > 0
+                && node.textContent.trim() === expectedLogin)""",
+            username,
+        )
+        raise VerificationError(
+            "Gitea did not display an authenticated user menu "
+            f"(path={current.path or '/'}, title={title!r}, login_controls={login_controls > 0}, "
+            f"expected_label_visible={expected_label_visible}, wait_error={type(exc).__name__})"
+        ) from None
+    result = authenticated_user(page, username=username)
+    if result.get("session_login") != username:
+        raise VerificationError("Gitea browser session is not authenticated as the requested account")
     if result.get("login") != username:
         raise VerificationError("Gitea authenticated a different account than the requested test identity")
     if result.get("is_admin") is not False:

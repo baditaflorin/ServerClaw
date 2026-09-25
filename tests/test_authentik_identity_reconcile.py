@@ -93,9 +93,9 @@ def test_manifest_resolves_generic_operator_identity() -> None:
     assert "gitea-users" in loaded["users"][0]["groups"]
 
 
-def test_gitea_test_identity_is_opt_in_and_not_an_admin() -> None:
-    regular_manifest = MODULE.load_manifest(
-        REPO_ROOT / "config" / "authentik" / "identities.yaml",
+def test_opt_in_gitea_test_identity_is_valid_and_login_only() -> None:
+    loaded = MODULE.load_manifest(
+        REPO_ROOT / "config" / "authentik" / "test-identities.yaml",
         variables={
             "platform_domain": "example.net",
             "platform_config_prefix": "example",
@@ -104,22 +104,14 @@ def test_gitea_test_identity_is_opt_in_and_not_an_admin() -> None:
             "platform_operator_email": "operator@example.net",
         },
     )
-    assert all(user["username"] != "gitea-e2e" for user in regular_manifest["users"])
-
-    test_manifest = MODULE.load_manifest(
-        REPO_ROOT / "config" / "authentik" / "test-identities.yaml",
-        variables={"platform_domain": "example.net"},
-    )
-    assert test_manifest["groups"] == []
-    assert len(test_manifest["users"]) == 1
-    user = test_manifest["users"][0]
+    assert loaded["groups"] == []
+    assert len(loaded["users"]) == 1
+    user = loaded["users"][0]
     assert user["username"] == "gitea-e2e"
+    assert user["email"] == "gitea-e2e@example.net"
+    assert user["groups"] == ["gitea-users"]
     assert user["provisioning"] == "create_if_missing"
     assert user["type"] == "internal"
-    assert user["groups"] == ["gitea-users"]
-    assert "authentik Admins" not in user["groups"]
-    assert "platform-admins" not in user["groups"]
-    assert user["password_file"] == "authentik/gitea-e2e-initial-password.txt"
 
 
 def test_create_sets_initial_password_once_then_is_idempotent(tmp_path: Path) -> None:

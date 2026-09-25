@@ -127,12 +127,12 @@ on the committed file (test fixtures stay deterministic across forks).
 
 1. **Deep-merge overlay** — rejected. Surprise-prone for nested mappings
    where operator omits a key they thought was "implicit".
-2. **Environment-selected host_vars files** (`proxmox-host.retired-deployment.yml`
+2. **Environment-selected host_vars files** (`proxmox-host.0fork.yml`
    committed alongside `proxmox-host.yml`) — rejected. Forks should not need
    to commit deployment values to the public platform repo; violates ADR 0407.
 3. **Full templating** (Jinja2 in host_vars, rendered at generate time) —
    rejected. Adds a rendering step and complicates debugging. Overlay is a
-   simpler model that covers the retired-deployment case.
+   simpler model that covers the 0fork case.
 
 ## Implementation notes
 

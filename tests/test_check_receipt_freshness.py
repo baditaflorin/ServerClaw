@@ -42,7 +42,7 @@ def crf():
 
 
 def test_parse_receipt_date_real_slug(crf):
-    date, err = crf.parse_receipt_date("2026-04-27-ws-0372-retired-deployment-services-all-7-deployed")
+    date, err = crf.parse_receipt_date("2026-04-27-ws-0372-0fork-services-all-7-deployed")
     assert err is None
     assert date == dt.date(2026, 4, 27)
 

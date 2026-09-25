@@ -1,0 +1,22 @@
+---
+# VM180-only root renderer for the private, loopback GHCR adapter. The
+# transport key below can reach only Dockerhost's forced one-shot reader
+# command; it is not a vault/API key and remains deployment-local state.
+artifact_cache_ghcr_secret_renderer_name: artifact-cache-ghcr-secret-renderer
+artifact_cache_ghcr_secret_renderer_binary_path: /usr/local/libexec/artifact-cache-ghcr-secret-renderer
+artifact_cache_ghcr_secret_renderer_config_dir: /etc/artifact-cache/ghcr-proxy-renderer
+artifact_cache_ghcr_secret_renderer_config_path: "{{ artifact_cache_ghcr_secret_renderer_config_dir }}/contract.json"
+artifact_cache_ghcr_secret_renderer_transport_key_path: "{{ artifact_cache_ghcr_secret_renderer_config_dir }}/bridge-id_ed25519"
+artifact_cache_ghcr_secret_renderer_known_hosts_path: "{{ artifact_cache_ghcr_secret_renderer_config_dir }}/bridge-known_hosts"
+artifact_cache_ghcr_secret_renderer_bridge_known_hosts: ""
+artifact_cache_ghcr_secret_renderer_bridge_host: "{{ hostvars['docker-runtime'].ansible_host }}"
+artifact_cache_ghcr_secret_renderer_bridge_port: 22
+artifact_cache_ghcr_secret_renderer_bridge_user: artifact-cache-ghcr-reader
+artifact_cache_ghcr_secret_renderer_vault_url: https://fleet-secrets.0exec.com
+artifact_cache_ghcr_secret_renderer_secret_name: artifact_cache_ghcr_proxy_config
+artifact_cache_ghcr_secret_renderer_output_parent_dirs:
+  - /etc/artifact-cache
+  - /etc/artifact-cache/ghcr-proxy
+artifact_cache_ghcr_secret_renderer_output_path: /etc/artifact-cache/ghcr-proxy/config.yml
+artifact_cache_ghcr_secret_renderer_receipt_dir: /var/lib/artifact-cache/ghcr-proxy-renderer
+artifact_cache_ghcr_secret_renderer_receipt_path: "{{ artifact_cache_ghcr_secret_renderer_receipt_dir }}/last-render.json"

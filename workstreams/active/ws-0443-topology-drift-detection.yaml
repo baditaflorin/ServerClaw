@@ -125,7 +125,7 @@ ownership_manifest:
     - config/subdomain-exposure-registry.json
     - inventory/group_vars/platform.yml
     - inventory/group_vars/platform_tls_certs.yml
-    - receipts/live-applies/2026-04-27-ws-0372-retired-deployment-services-all-7-deployed.json
+    - receipts/live-applies/2026-04-27-ws-0372-0fork-services-all-7-deployed.json
     mode: shared_contract
     contract: release-bump-v1
   - id: ws_0443_workstream

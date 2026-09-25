@@ -1,0 +1,134 @@
+---
+# Purpose: Install a Dockerhost-only SSH forced-command bridge for the broker PKI vault transaction.
+# Use case: The Step-CA control host must publish the fixed broker PKI batch without receiving an API-key admin credential.
+# Inputs: One dedicated Ed25519 public key, the canonical root-only local API-key administration file, and fixed local/HTTPS endpoints.
+# Outputs: Root-owned transaction code/config and a locked service account that can invoke only the fixed transaction through sudo.
+# Idempotency: Yes. The role renders deterministic root-owned files and validates sshd/sudoers syntax before activation.
+# Dependencies: go-apikey-service >= 0.4.5 one-use claim semantics and go-fleet-secrets >= 0.3.6 /broker-pki-batch.
+- name: Validate fleet-build-broker PKI vault writer inputs
+  ansible.builtin.assert:
+    that:
+      - inventory_hostname == 'docker-runtime'
+      - fleet_build_broker_pki_vault_writer_name == 'fleet-build-broker-pki-vault-writer'
+      - fleet_build_broker_pki_vault_writer_user == 'fleet-build-broker-pki-writer'
+      - fleet_build_broker_pki_vault_writer_group == 'fleet-build-broker-pki-writer'
+      - fleet_build_broker_pki_vault_writer_binary_path == '/usr/local/libexec/fleet-build-broker-pki-vault-writer'
+      - fleet_build_broker_pki_vault_writer_config_dir == '/etc/fleet-build-broker-pki-vault-writer'
+      - fleet_build_broker_pki_vault_writer_config_path == (fleet_build_broker_pki_vault_writer_config_dir ~ '/transaction.json')
+      - fleet_build_broker_pki_vault_writer_authorized_keys_path == (fleet_build_broker_pki_vault_writer_config_dir ~ '/authorized_keys')
+      - fleet_build_broker_pki_vault_writer_sshd_config_path == '/etc/ssh/sshd_config.d/90-fleet-build-broker-pki-writer.conf'
+      - fleet_build_broker_pki_vault_writer_sudoers_path == '/etc/sudoers.d/fleet-build-broker-pki-writer'
+      - fleet_build_broker_pki_vault_writer_admin_token_file == '/opt/_shared/apikey-admin.env'
+      - fleet_build_broker_pki_vault_writer_apikey_url == 'http://127.0.0.1:18021'
+      - fleet_build_broker_pki_vault_writer_vault_url == 'https://fleet-secrets.0exec.com'
+      - fleet_build_broker_pki_vault_writer_timeout_seconds | int == 15
+      - fleet_build_broker_pki_vault_writer_allowed_source is match('^(?:25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])){3}$')
+      - fleet_build_broker_pki_vault_writer_authorized_public_key is match('^ssh-ed25519 [A-Za-z0-9+/]+={0,3} fleet-build-broker-pki-runtime-control$')
+    fail_msg: >-
+      fleet_build_broker_pki_vault_writer is Dockerhost-only and requires one
+      deployment-provided, exact-label Ed25519 public key from runtime-control.
+      It accepts no arbitrary endpoint, identity, user, command, or credential
+      path; the local API-key admin credential must already exist outside Git.
+
+- name: Ensure the dedicated forced-command group exists
+  ansible.builtin.group:
+    name: "{{ fleet_build_broker_pki_vault_writer_group }}"
+    system: true
+    state: present
+
+- name: Ensure the dedicated forced-command account exists with only the forced SSH path
+  ansible.builtin.user:
+    name: "{{ fleet_build_broker_pki_vault_writer_user }}"
+    group: "{{ fleet_build_broker_pki_vault_writer_group }}"
+    groups: ""
+    append: false
+    system: true
+    create_home: false
+    home: /nonexistent
+    # sshd starts a forced command through the account shell. /bin/sh is safe
+    # here because the Match block and root-owned authorized_keys file reject
+    # every shell/session authentication path before the shell is reached.
+    shell: /bin/sh
+    password_lock: true
+    state: present
+
+- name: Ensure the writer configuration directory permits only SSH key traversal
+  ansible.builtin.file:
+    path: "{{ fleet_build_broker_pki_vault_writer_config_dir }}"
+    state: directory
+    owner: root
+    group: "{{ fleet_build_broker_pki_vault_writer_group }}"
+    # sshd reads AuthorizedKeysFile after dropping to the target account. The
+    # account may traverse this known path but cannot list or modify it; the
+    # private transaction config remains root-only.
+    mode: "0710"
+
+- name: Install the root-only broker PKI vault writer executable
+  ansible.builtin.template:
+    src: fleet-build-broker-pki-vault-writer.py.j2
+    dest: "{{ fleet_build_broker_pki_vault_writer_binary_path }}"
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Render the root-only broker PKI vault writer configuration
+  ansible.builtin.template:
+    src: transaction.json.j2
+    dest: "{{ fleet_build_broker_pki_vault_writer_config_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Validate the root-only broker PKI vault writer configuration
+  ansible.builtin.command:
+    argv:
+      - "{{ fleet_build_broker_pki_vault_writer_binary_path }}"
+      - --config
+      - "{{ fleet_build_broker_pki_vault_writer_config_path }}"
+      - --check-config
+  changed_when: false
+  no_log: true
+
+- name: Render the dedicated forced SSH authorization
+  ansible.builtin.template:
+    src: authorized_keys.j2
+    dest: "{{ fleet_build_broker_pki_vault_writer_authorized_keys_path }}"
+    owner: root
+    group: "{{ fleet_build_broker_pki_vault_writer_group }}"
+    # The key is public material. Read access is required for sshd's
+    # privilege-dropped AuthorizedKeysFile lookup; neither the account nor its
+    # group receives write access.
+    mode: "0640"
+
+- name: Render the dedicated sshd forced-command policy
+  ansible.builtin.template:
+    src: sshd-fleet-build-broker-pki-writer.conf.j2
+    dest: "{{ fleet_build_broker_pki_vault_writer_sshd_config_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: fleet_build_broker_pki_vault_writer_sshd_policy
+
+- name: Validate sshd configuration before activating the forced-command policy
+  ansible.builtin.command:
+    argv:
+      - /usr/sbin/sshd
+      - -t
+  changed_when: false
+  when: fleet_build_broker_pki_vault_writer_sshd_policy.changed
+
+- name: Render the exact sudo authorization for the forced transaction
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: "{{ fleet_build_broker_pki_vault_writer_sudoers_path }}"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Reload sshd after validating the new forced-command policy
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded
+  when: fleet_build_broker_pki_vault_writer_sshd_policy.changed

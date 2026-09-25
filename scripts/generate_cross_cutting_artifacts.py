@@ -164,12 +164,34 @@ def _validate_fqdn(fqdn: str, path: str) -> str:
     return fqdn
 
 
-def _load_subdomain_catalog() -> dict:
-    """Load config/subdomain-catalog.json. Returns the full parsed object."""
+def _load_subdomain_catalog(identity_vars: dict[str, str] | None = None) -> dict:
+    """Load the generic catalog, resolving its domain for an explicit selector.
+
+    ``subdomain-catalog.json`` is committed with ``example.com`` placeholders
+    so the public reference repository remains deployment-neutral.  DNS
+    declarations, on the other hand, are interpolated from the selected
+    identity overlay.  Resolve the catalog only in memory before comparing
+    those two sources; never rewrite the generic tracked catalog.
+    """
     import json
 
     with SUBDOMAIN_CATALOG_PATH.open() as f:
-        return json.load(f)
+        catalog = json.load(f)
+
+    platform_domain = (identity_vars or {}).get("platform_domain", CATALOG_PLATFORM_DOMAIN)
+    if platform_domain == CATALOG_PLATFORM_DOMAIN:
+        return catalog
+
+    def resolve(value: object) -> object:
+        if isinstance(value, str):
+            return value.replace(CATALOG_PLATFORM_DOMAIN, platform_domain)
+        if isinstance(value, list):
+            return [resolve(item) for item in value]
+        if isinstance(value, dict):
+            return {key: resolve(item) for key, item in value.items()}
+        return value
+
+    return require_mapping(resolve(catalog), str(SUBDOMAIN_CATALOG_PATH))
 
 
 # ---------------------------------------------------------------------------
@@ -181,6 +203,7 @@ def generate_dns_declarations(
     registry: dict,
     write: bool = False,
     repo_root: Path = REPO_ROOT,
+    identity_vars: dict[str, str] | None = None,
 ) -> dict:
     """Generate DNS declarations from registry dns sections.
 
@@ -240,7 +263,7 @@ def generate_dns_declarations(
 
     # Cross-check against subdomain catalog (warnings only — does not fail)
     try:
-        catalog = _load_subdomain_catalog()
+        catalog = _load_subdomain_catalog(identity_vars)
         _warn_catalog_drift(declarations, catalog)
     except OSError as exc:
         print(f"  WARNING: could not load subdomain catalog for cross-check: {exc}")
@@ -916,13 +939,21 @@ def _write_hairpin_file(hosts: list[dict], repo_root: Path) -> None:
 
 
 def _check_hairpin_file(hosts: list[dict], repo_root: Path) -> None:
-    """Validate committed platform_hairpin.yml matches the derived set."""
+    """Validate a materialized platform_hairpin.yml matches the derived set.
+
+    The file contains deployment addresses and is intentionally ignored.  A fresh
+    worktree therefore has no materialized copy to compare, although all tracked
+    sources above have already been derived and validated.  In that case skip
+    only this output-equivalence comparison; a present file still fails closed
+    on malformed content or drift.
+    """
     committed_path = repo_root / "inventory" / "group_vars" / "platform_hairpin.yml"
     if not committed_path.exists():
-        raise ValueError(
-            "platform_hairpin.yml does not exist. Run --write to generate it: "
-            "python scripts/generate_cross_cutting_artifacts.py --write --only hairpin"
+        print(
+            "  Skipping derived hairpin equality check because deployment-specific "
+            "platform_hairpin.yml is unavailable. Tracked-source validation continues."
         )
+        return
 
     with committed_path.open() as f:
         committed_data = yaml.safe_load(f)
@@ -1046,7 +1077,12 @@ def main(argv: list[str] | None = None) -> int:
                     topology_path=args.topology_file,
                 )
             elif concern == "dns":
-                generate_dns_declarations(registry, write=write, repo_root=REPO_ROOT)
+                generate_dns_declarations(
+                    registry,
+                    write=write,
+                    repo_root=REPO_ROOT,
+                    identity_vars=identity_vars,
+                )
             elif concern == "tls":
                 generate_tls_certificates(registry, write=write, repo_root=REPO_ROOT)
             elif concern == "sso":

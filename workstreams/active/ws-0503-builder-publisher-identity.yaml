@@ -1,0 +1,67 @@
+id: ws-0503-builder-publisher-identity
+adr: "0296"
+title: Declare a root-only Builder LXC108 fleet-runner publisher identity
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/builder-publisher-identity-iac
+worktree_path: .worktrees/builder-publisher-identity-iac
+doc: docs/workstreams/ws-0503-builder-publisher-identity.md
+depends_on:
+  - ws-0497-fleet-build-broker-vm180
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/fleet_runner_image_publisher_identity/**
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-runner-image-publisher.yml
+  - playbooks/fleet-runner-image-publisher.yml
+  - docs/runbooks/fleet-runner-image-publisher.md
+  - tests/test_fleet_runner_image_publisher_identity_role.py
+  - docs/workstreams/ws-0499-builder-publisher-identity.md
+  - workstreams/active/ws-0499-builder-publisher-identity.yaml
+  - docs/workstreams/ws-0503-builder-publisher-identity.md
+  - workstreams/active/ws-0503-builder-publisher-identity.yaml
+  - docs/workstreams/ws-0498-builder-publisher-identity.md
+  - workstreams/active/ws-0498-builder-publisher-identity.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: builder_publisher_identity_contract
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/fleet_runner_image_publisher_identity/**
+        - collections/ansible_collections/lv3/platform/playbooks/fleet-runner-image-publisher.yml
+        - playbooks/fleet-runner-image-publisher.yml
+        - docs/runbooks/fleet-runner-image-publisher.md
+        - tests/test_fleet_runner_image_publisher_identity_role.py
+      mode: exclusive
+    - id: ws_0499_tracking_removal
+      paths:
+        - docs/workstreams/ws-0499-builder-publisher-identity.md
+        - workstreams/active/ws-0499-builder-publisher-identity.yaml
+      mode: exclusive
+    - id: ws_0498_tracking_removal
+      paths:
+        - docs/workstreams/ws-0498-builder-publisher-identity.md
+        - workstreams/active/ws-0498-builder-publisher-identity.yaml
+      mode: exclusive
+    - id: ws_0503_tracking
+      paths:
+        - docs/workstreams/ws-0503-builder-publisher-identity.md
+        - workstreams/active/ws-0503-builder-publisher-identity.yaml
+      mode: exclusive
+context: |
+  The dedicated 0docker Builder LXC108 needs a stable local non-secret identity
+  before it can be trusted as the fleet-runner image-publishing surface. The
+  contract must be unavailable to general docker-build guests and must not carry a
+  registry endpoint, credential, package token, image reference, or runtime
+  topology.
+tasks:
+  - id: t1
+    title: Add the fail-closed root-only Builder LXC108 publisher identity role and controlled entrypoint
+    status: completed
+  - id: t2
+    title: Add static role and playbook coverage for identity, path, mode, and host isolation
+    status: completed
+  - id: t3
+    title: Run focused and repository validation before review
+    status: completed

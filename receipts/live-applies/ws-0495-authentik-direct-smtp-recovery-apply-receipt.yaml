@@ -1,0 +1,26 @@
+workstream_id: ws-0495-authentik-direct-smtp-recovery
+state: completed
+schema_version: 1.1.0
+started_at: '2026-09-01T19:34:28Z'
+completed_at: '2026-09-01T19:44:38Z'
+applied_by: codex/ws-0495-live-apply
+source_commit: 577c5cb6ab37e5329a779fc621dd90601dd7abae
+adr: '0491'
+summary: Restored and verified Authentik password recovery through the private managed Stalwart submission route.
+targets:
+  - service: authentik
+    host_group: runtime-control
+    vmid: 192
+  - service: mail-platform
+    host_group: runtime-control
+    vmid: 192
+  - service: nginx
+    host_group: nginx
+errors: []
+notes:
+  - PR #218 was merged after both Woodpecker push and pull-request checks passed.
+  - The recovery email stage is persisted with direct internal Stalwart submission settings; the worker-only mail-network attachment is present and the temporary server test attachment was removed.
+  - The recovery request was accepted by Authentik with HTTP 204. The worker resolved the Stalwart service, reached its submission port, and authenticated successfully without exposing credentials.
+  - A prior scoped delivery check for this workstream recorded managed-mail acceptance without a rejection; message content, recipient, and recovery link are intentionally omitted.
+  - Public Authentik readiness and the Outline OIDC discovery endpoint both returned HTTP 200 after verification.
+  - The full Ansible converge was not run because its fail-closed preflight detects a separate stale generated DNS/SSO artifact set. No preflight gate was bypassed.

@@ -16,3 +16,44 @@
   delay: 5
   until: authentik_verify_health.status == 200
   changed_when: false
+
+- name: Verify Authentik worker SMTP authentication without sending an email
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ authentik_compose_file }}"
+      - exec
+      - -T
+      - authentik-worker
+      - python
+      - -c
+      - |
+        import os
+        import smtplib
+
+        use_ssl = os.environ["AUTHENTIK_EMAIL__USE_SSL"].strip().lower() == "true"
+        use_tls = os.environ["AUTHENTIK_EMAIL__USE_TLS"].strip().lower() == "true"
+        if use_ssl and use_tls:
+            raise RuntimeError("SMTP TLS and SSL cannot both be enabled")
+        client_type = smtplib.SMTP_SSL if use_ssl else smtplib.SMTP
+        with client_type(
+            os.environ["AUTHENTIK_EMAIL__HOST"],
+            int(os.environ["AUTHENTIK_EMAIL__PORT"]),
+            timeout=int(os.environ["AUTHENTIK_EMAIL__TIMEOUT"]),
+        ) as client:
+            client.ehlo()
+            if use_tls:
+                client.starttls()
+                client.ehlo()
+            code, _ = client.login(
+                os.environ["AUTHENTIK_EMAIL__USERNAME"],
+                os.environ["AUTHENTIK_EMAIL__PASSWORD"],
+            )
+            if code != 235:
+                raise RuntimeError("SMTP authentication was not accepted")
+  args:
+    chdir: "{{ authentik_site_dir }}"
+  changed_when: false
+  no_log: true

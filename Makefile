@@ -15,7 +15,7 @@ PLATFORM_INVENTORY_OVERLAY ?=
 # Agents often invoke `make bootstrap` from inside a .claude/worktrees/ copy
 # whose CWD has no `.local/` (per CLAUDE.md: "worktrees intentionally lack
 # .local/"). Relative PLATFORM_IDENTITY_OVERLAY paths like
-# `.local/identity.yml.retired-deployment` resolve against CWD by default and then fail
+# `.local/identity.yml.0fork` resolve against CWD by default and then fail
 # when passed to ansible-playbook. Normalize any relative path through
 # LOCAL_OVERLAY_ROOT (which resolve_local_overlay_root.sh already points at
 # the authoritative main-repo `.local/`).
@@ -162,13 +162,13 @@ ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_
 
 .PHONY: validate-local push-local prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-semgrep validate-compose-runtime-envs validate-dependency-direction validate-service-definitions validate-data-models validate-cross-catalog validate-types verify-waiver-escalation validate-policy validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-service-definitions generate-slo-rules validate-generated-slo generate-https-tls-assurance validate-generated-https-tls-assurance https-tls-assurance generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-edge-static-sites generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors generate-cross-cutting-artifacts validate-generated-cross-cutting docs deploy-ops-portal
 .PHONY: deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info capability-contracts capability-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness managed-image-gate sbom-refresh upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status atlas-validate atlas-lint atlas-refresh-snapshots atlas-drift-check
-.PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight preflight-authentik-deployment-selection preflight-gitea-deployment-selection preflight-glitchtip-deployment-selection preflight-outline-deployment-selection preflight-openbao-deployment-selection syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-authentik syntax-check-outline syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
+.PHONY: backup-coverage-ledger dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight materialize-selected-cross-cutting-inputs preflight-authentik-deployment-selection preflight-glitchtip-deployment-selection preflight-outline-deployment-selection preflight-openbao-deployment-selection syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-falco syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-browser-runner syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-artifact-cache-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-mailpit syntax-check-livekit syntax-check-paperless syntax-check-redpanda syntax-check-openbao syntax-check-openfga syntax-check-step-ca syntax-check-temporal syntax-check-headscale syntax-check-semaphore syntax-check-woodpecker syntax-check-windmill syntax-check-restic-config-backup syntax-check-authentik syntax-check-outline syntax-check-langfuse syntax-check-glitchtip syntax-check-minio syntax-check-netbox syntax-check-searxng syntax-check-typesense syntax-check-flagsmith syntax-check-crawl4ai
 .PHONY: syntax-check-ollama syntax-check-piper syntax-check-n8n syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit list-services diff-services list-service-deployments security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests
 .PHONY: harden-access harden-guest-access harden-security provision-api-access converge-site-parallel converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-falco converge-identity-core-watchdog converge-api-gateway converge-ops-portal converge-repo-intake converge-dify converge-gitea converge-browser-runner converge-docker-runtime converge-postgres-vm converge-mail-platform converge-mailpit converge-livekit converge-neko converge-paperless converge-redpanda converge-openbao bootstrap-openbao-runtime-secret-provisioner converge-openfga converge-step-ca converge-temporal converge-headscale converge-semaphore converge-woodpecker converge-windmill converge-restic-config-backup converge-control-plane-recovery converge-authentik converge-langfuse converge-glitchtip converge-minio converge-netbox converge-searxng converge-typesense converge-crawl4ai converge-ollama converge-piper converge-label-studio converge-n8n converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-flagsmith rotate-secret token-inventory-audit token-exposure-response rotate-authentik-client-secret
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage woodpecker-manage configure-backups configure-backup-vm configure-artifact-cache-vm database-dns route-dns-assertion-ledger provision-subdomain start-workstream capacity-report weekly-capacity-report disk-space-monitor k6-smoke k6-load k6-soak immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status restic-config-backup restic-config-restore-verify
 .PHONY: validate-certificates fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import syntax-check-matrix-synapse converge-matrix-synapse syntax-check-nomad converge-nomad remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server apply-gate-tools syntax-check-changedetection converge-changedetection syntax-check-gotenberg converge-gotenberg
-.PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko syntax-check-repo-intake
+.PHONY: syntax-check-tika converge-tika syntax-check-directus converge-directus syntax-check-label-studio converge-label-studio syntax-check-superset converge-superset syntax-check-sftpgo converge-sftpgo syntax-check-neko
 .PHONY: syntax-check-tesseract-ocr converge-tesseract-ocr
 .PHONY: migrate-service migrate-service-dry-run teardown-service detect-orphans purge-orphans
 .PHONY: syntax-check-litellm converge-litellm syntax-check-librechat converge-librechat converge-outline
@@ -909,18 +909,21 @@ preflight:
 		uv run --with pyyaml python $(REPO_ROOT)/scripts/preflight_controller_local.py --workflow $(WORKFLOW); \
 	fi
 
+# Materialize only ignored, selector-derived facts needed by platform.yml.
+# Tracked TLS and platform outputs remain check-only in the sensitive preflight
+# targets below, so repository drift still fails closed for review.
+materialize-selected-cross-cutting-inputs:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --write --only hairpin $(if $(strip $(PLATFORM_IDENTITY_OVERLAY)),--identity-file "$(PLATFORM_IDENTITY_OVERLAY)",) $(if $(strip $(PLATFORM_TOPOLOGY_OVERLAY)),--topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)",)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --write --only dns $(if $(strip $(PLATFORM_IDENTITY_OVERLAY)),--identity-file "$(PLATFORM_IDENTITY_OVERLAY)",) $(if $(strip $(PLATFORM_TOPOLOGY_OVERLAY)),--topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)",)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --write --only proxy $(if $(strip $(PLATFORM_IDENTITY_OVERLAY)),--identity-file "$(PLATFORM_IDENTITY_OVERLAY)",) $(if $(strip $(PLATFORM_TOPOLOGY_OVERLAY)),--topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)",)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_cross_cutting_artifacts.py --write --only sso $(if $(strip $(PLATFORM_IDENTITY_OVERLAY)),--identity-file "$(PLATFORM_IDENTITY_OVERLAY)",) $(if $(strip $(PLATFORM_TOPOLOGY_OVERLAY)),--topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)",)
+
 preflight-authentik-deployment-selection:
 	@test -n "$(strip $(PLATFORM_IDENTITY_OVERLAY))" || (echo "set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file" >&2; exit 1)
 	@test -n "$(strip $(PLATFORM_TOPOLOGY_OVERLAY))" || (echo "set PLATFORM_TOPOLOGY_OVERLAY to the intended deployment topology file" >&2; exit 1)
 	@test "$(env)" = "production" || (echo "set env=production for the guarded Authentik workflow" >&2; exit 1)
 	uv run --no-project --with pyyaml python $(REPO_ROOT)/scripts/validate_deployment_selection.py --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)" $(DEPLOYMENT_SELECTION_INVENTORY_ARGS) --environment "$(env)" --service authentik --required-host nginx
-	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --check --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)"
-
-preflight-gitea-deployment-selection:
-	@test -n "$(strip $(PLATFORM_IDENTITY_OVERLAY))" || (echo "set PLATFORM_IDENTITY_OVERLAY to the intended deployment identity file" >&2; exit 1)
-	@test -n "$(strip $(PLATFORM_TOPOLOGY_OVERLAY))" || (echo "set PLATFORM_TOPOLOGY_OVERLAY to the intended deployment topology file" >&2; exit 1)
-	@test "$(env)" = "production" || (echo "set env=production for the guarded Gitea workflow" >&2; exit 1)
-	uv run --no-project --with pyyaml python $(REPO_ROOT)/scripts/validate_deployment_selection.py --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)" $(DEPLOYMENT_SELECTION_INVENTORY_ARGS) --environment "$(env)" --service gitea --required-host postgres --required-host docker-build
+	$(MAKE) materialize-selected-cross-cutting-inputs
 	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --check --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)"
 
 preflight-glitchtip-deployment-selection:
@@ -928,6 +931,7 @@ preflight-glitchtip-deployment-selection:
 	@test -n "$(strip $(PLATFORM_TOPOLOGY_OVERLAY))" || (echo "set PLATFORM_TOPOLOGY_OVERLAY to the intended deployment topology file" >&2; exit 1)
 	@test "$(env)" = "production" || (echo "set env=production for the guarded GlitchTip workflow" >&2; exit 1)
 	uv run --no-project --with pyyaml python $(REPO_ROOT)/scripts/validate_deployment_selection.py --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)" $(DEPLOYMENT_SELECTION_INVENTORY_ARGS) --environment "$(env)" --service glitchtip --required-host nginx --required-host postgres
+	$(MAKE) materialize-selected-cross-cutting-inputs
 	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --check --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)"
 
 preflight-outline-deployment-selection:
@@ -935,6 +939,7 @@ preflight-outline-deployment-selection:
 	@test -n "$(strip $(PLATFORM_TOPOLOGY_OVERLAY))" || (echo "set PLATFORM_TOPOLOGY_OVERLAY to the intended deployment topology file" >&2; exit 1)
 	@test "$(env)" = "production" || (echo "set env=production for the guarded Outline workflow" >&2; exit 1)
 	uv run --no-project --with pyyaml python $(REPO_ROOT)/scripts/validate_deployment_selection.py --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)" $(DEPLOYMENT_SELECTION_INVENTORY_ARGS) --environment "$(env)" --service outline --required-host nginx --required-host postgres
+	$(MAKE) materialize-selected-cross-cutting-inputs
 	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --check --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)"
 
 preflight-openbao-deployment-selection:
@@ -942,6 +947,7 @@ preflight-openbao-deployment-selection:
 	@test -n "$(strip $(PLATFORM_TOPOLOGY_OVERLAY))" || (echo "set PLATFORM_TOPOLOGY_OVERLAY to the intended deployment topology file" >&2; exit 1)
 	@test "$(env)" = "production" || (echo "set env=production for the guarded OpenBao workflow" >&2; exit 1)
 	uv run --no-project --with pyyaml python $(REPO_ROOT)/scripts/validate_deployment_selection.py --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)" $(DEPLOYMENT_SELECTION_INVENTORY_ARGS) --environment "$(env)" --service openbao --required-host postgres
+	$(MAKE) materialize-selected-cross-cutting-inputs
 	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --check --identity-file "$(PLATFORM_IDENTITY_OVERLAY)" --topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)"
 
 syntax-check:
@@ -1066,9 +1072,6 @@ syntax-check-api-gateway:
 
 syntax-check-ops-portal:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ops-portal.yml --syntax-check
-
-syntax-check-repo-intake:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/repo-intake.yml --syntax-check
 
 syntax-check-dify:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/dify.yml --syntax-check
@@ -1576,9 +1579,8 @@ converge-crawl4ai:
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/crawl4ai.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 converge-gitea:
-	$(MAKE) preflight-gitea-deployment-selection
 	$(MAKE) preflight WORKFLOW=converge-gitea
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/gitea.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/gitea.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
 
 converge-gotenberg:
 	$(MAKE) preflight WORKFLOW=converge-gotenberg
@@ -2301,6 +2303,69 @@ audit-sanitization: ## Check publication sanitization coverage for drift
 
 audit-sanitization-strict: ## Same as audit-sanitization but exit 1 on any gap
 	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/audit_sanitization_coverage.py --strict
+
+# =============================================================================
+# 0fork full-day deployment (ADR 0431)
+# =============================================================================
+# One-command fork-clone deploy. Chains ADR 0424 execution order under
+# env=clone, reading .local/identity.yml.0fork + .local/host_vars/proxmox-host.yml
+# (ADR 0430) overlays. See docs/runbooks/0fork-full-day-deploy.md.
+
+.PHONY: preflight-0fork deploy-0fork converge-0fork-chain smoke-0fork-mail rotate-hetzner-dns-token
+
+ZERO_FORK_IDENTITY_OVERLAY ?= $(LOCAL_OVERLAY_ROOT)/identity.yml.0fork
+ZERO_FORK_HOST_OVERLAY ?= $(LOCAL_OVERLAY_ROOT)/host_vars/proxmox-host.yml
+ZERO_FORK_DNS_ENV ?= $(LOCAL_OVERLAY_ROOT)/hetzner/dns.env
+ZERO_FORK_SSH_KEY ?= $(LOCAL_OVERLAY_ROOT)/ssh/hetzner_llm_agents_ed25519
+
+preflight-0fork: ## Validate 0fork overlay, DNS token, SSH key, and host readiness
+	@echo "==> 0fork preflight (ADR 0431)"
+	@test -f "$(ZERO_FORK_IDENTITY_OVERLAY)" || (echo "MISSING: $(ZERO_FORK_IDENTITY_OVERLAY) (see ADR 0424 §4)"; exit 1)
+	@test -f "$(ZERO_FORK_HOST_OVERLAY)" || (echo "MISSING: $(ZERO_FORK_HOST_OVERLAY) (see ADR 0430)"; exit 1)
+	@test -f "$(ZERO_FORK_DNS_ENV)" || (echo "MISSING: $(ZERO_FORK_DNS_ENV) (HETZNER_DNS_TOKEN)"; exit 1)
+	@test -f "$(ZERO_FORK_SSH_KEY)" || (echo "MISSING: $(ZERO_FORK_SSH_KEY) (Hetzner bootstrap key)"; exit 1)
+	@PLATFORM_IDENTITY_OVERLAY=$(ZERO_FORK_IDENTITY_OVERLAY) \
+	 uv run --with pyyaml python -c "import sys; sys.path.insert(0, '$(REPO_ROOT)'); from platform.repo import load_topology_host_vars; d = load_topology_host_vars(); assert isinstance(d, dict) and d.get('proxmox_guests'), 'overlay missing proxmox_guests'" \
+	 || (echo "host_vars overlay failed to load via load_topology_host_vars() (ADR 0430)"; exit 1)
+	@echo "==> 0fork preflight passed"
+
+deploy-0fork: preflight-0fork ## ADR 0431 one-command fork deploy (bare metal -> confirmation email)
+	@echo "==> 0fork full-day deploy starting (ADR 0431)"
+	PLATFORM_IDENTITY_OVERLAY=$(ZERO_FORK_IDENTITY_OVERLAY) \
+	HETZNER_DNS_API_TOKEN=$$(grep -E '^HETZNER_DNS_TOKEN=' $(ZERO_FORK_DNS_ENV) | cut -d= -f2-) \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) \
+	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/0fork-full-day.yml --env clone -- \
+	  --private-key $(ZERO_FORK_SSH_KEY) \
+	  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+	  $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+	@echo "==> 0fork deploy complete"
+
+converge-0fork-chain: preflight-0fork ## Re-run service converge chain (skip host install) under env=clone
+	PLATFORM_IDENTITY_OVERLAY=$(ZERO_FORK_IDENTITY_OVERLAY) \
+	HETZNER_DNS_API_TOKEN=$$(grep -E '^HETZNER_DNS_TOKEN=' $(ZERO_FORK_DNS_ENV) | cut -d= -f2-) \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) \
+	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/site.yml --env clone -- \
+	  --private-key $(ZERO_FORK_SSH_KEY) \
+	  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+	  $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
+smoke-0fork-mail: ## Send the acceptance-test email from the 0fork mail platform to the operator
+	PLATFORM_IDENTITY_OVERLAY=$(ZERO_FORK_IDENTITY_OVERLAY) \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) \
+	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/mail-platform-send-gmail.yml --env clone -- \
+	  --private-key $(ZERO_FORK_SSH_KEY) \
+	  -e proxmox_guest_ssh_connection_mode=proxmox_host_jump \
+	  $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
+
+rotate-hetzner-dns-token: ## ADR 0424 item 7 — rotate the Hetzner DNS API token used by the fork
+	@test -f "$(ZERO_FORK_DNS_ENV)" || (echo "MISSING: $(ZERO_FORK_DNS_ENV)"; exit 1)
+	PLATFORM_IDENTITY_OVERLAY=$(ZERO_FORK_IDENTITY_OVERLAY) \
+	HETZNER_DNS_API_TOKEN=$$(grep -E '^HETZNER_DNS_TOKEN=' $(ZERO_FORK_DNS_ENV) | cut -d= -f2-) \
+	HETZNER_DNS_API_TOKEN_NEW=$${HETZNER_DNS_API_TOKEN_NEW:?set HETZNER_DNS_API_TOKEN_NEW to the replacement token} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) \
+	$(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/rotate-hetzner-dns-token.yml --env clone -- \
+	  --private-key $(ZERO_FORK_SSH_KEY) \
+	  $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 # Multi-deployment lifecycle (ADR 0439/0440/0442) — purely additive in Phase 1.
 

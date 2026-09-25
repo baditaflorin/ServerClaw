@@ -7,6 +7,7 @@ import datetime as dt
 import json
 import os
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,6 +29,17 @@ DEPENDENCY_GRAPH_PATH = REPO_ROOT / "config" / "dependency-graph.json"
 SLO_CATALOG_PATH = REPO_ROOT / "config" / "slo-catalog.json"
 DATA_CATALOG_PATH = REPO_ROOT / "config" / "data-catalog.json"
 SERVICE_COMPLETENESS_PATH = REPO_ROOT / "config" / "service-completeness.json"
+GLOBAL_COMPLETENESS_INPUTS = {
+    "config/api-gateway-catalog.json",
+    "config/data-catalog.json",
+    "config/dependency-graph.json",
+    "config/health-probe-catalog.json",
+    "config/secret-catalog.json",
+    "config/service-capability-catalog.json",
+    "config/service-completeness.json",
+    "config/slo-catalog.json",
+    "config/subdomain-catalog.json",
+}
 
 CHECKLIST = [
     ("adr", "ADR"),
@@ -605,9 +617,9 @@ def format_service_result(result: ServiceResult) -> str:
 
 
 def validate_services(
-    service_ids: list[str] | None = None, *, today: dt.date | None = None
+    service_ids: list[str] | None = None, *, today: dt.date | None = None, context: dict[str, Any] | None = None
 ) -> tuple[list[ServiceResult], list[str]]:
-    context = load_context()
+    context = context or load_context()
     today = today or dt.date.today()
     requested = service_ids or sorted(context["service_map"])
     results = [evaluate_service(service_id, today=today, context=context) for service_id in requested]
@@ -618,15 +630,117 @@ def validate_services(
     return results, failures
 
 
+def service_ids_for_changed_paths(changed_paths: list[str], context: dict[str, Any]) -> list[str] | None:
+    """Scope completeness checks to changed services; return None for global validation.
+
+    Catalog and validator changes affect the whole service inventory. Service-role,
+    service-named test, and service-named documentation changes can use the same
+    checklist for only the affected services.
+    """
+    if not changed_paths or any(
+        path == item or path.startswith(item.rstrip("/") + "/")
+        for path in changed_paths
+        for item in GLOBAL_COMPLETENESS_INPUTS
+    ):
+        return None
+
+    role_to_services: dict[str, set[str]] = {}
+    for service_id in context["service_map"]:
+        probe = context["health_services"].get(service_id)
+        role_name = probe.get("role") if isinstance(probe, dict) else None
+        if not isinstance(role_name, str) and context["profiles"][service_id].get("service_type") == "compose":
+            role_name = f"{service_id}_runtime"
+        if isinstance(role_name, str) and role_name.strip():
+            role_to_services.setdefault(role_name, set()).add(service_id)
+
+    service_slugs = {service_id: service_id.replace("_", "-").lower() for service_id in context["service_map"]}
+    affected: set[str] = set()
+    role_prefix = "collections/ansible_collections/lv3/platform/roles/"
+    for path in changed_paths:
+        normalized = path.replace("\\", "/")
+        if normalized.startswith(role_prefix):
+            role_name = normalized[len(role_prefix) :].split("/", maxsplit=1)[0]
+            matched_role_services = role_to_services.get(role_name)
+            if not matched_role_services:
+                return None
+            affected.update(matched_role_services)
+
+        if not normalized.startswith(
+            (
+                "config/alertmanager/rules/",
+                "config/grafana/dashboards/",
+                "config/integrations/",
+                "docs/runbooks/",
+                "docs/workstreams/",
+                "scripts/",
+                "tests/",
+            )
+        ):
+            continue
+        path_slug = Path(normalized).name.lower().replace("_", "-")
+        for service_id, slug in service_slugs.items():
+            if re.search(rf"(?:^|[^a-z0-9]){re.escape(slug)}(?:$|[^a-z0-9])", path_slug):
+                affected.add(service_id)
+
+    return sorted(affected) if affected else None
+
+
+def changed_paths_from_git(repo_root: Path, base_ref: str) -> list[str] | None:
+    """Return paths changed from a base ref, or None when Git cannot prove a scope."""
+    merge_base = subprocess.run(
+        ["git", "-C", str(repo_root), "merge-base", base_ref, "HEAD"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if merge_base.returncode != 0 or not merge_base.stdout.strip():
+        return None
+
+    changed: set[str] = set()
+    for args in (
+        ("diff", "--name-only", f"{merge_base.stdout.strip()}..HEAD"),
+        ("diff", "--name-only"),
+        ("diff", "--cached", "--name-only"),
+        ("ls-files", "--others", "--exclude-standard"),
+    ):
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), *args],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            return None
+        changed.update(line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip())
+    return sorted(changed)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validate service completeness against the ADR 0107 checklist.")
     parser.add_argument("--service", action="append", help="Validate one specific service id. May be repeated.")
+    parser.add_argument(
+        "--changed",
+        action="store_true",
+        help="Validate changed services only; validate all services when changes cannot be safely scoped.",
+    )
+    parser.add_argument(
+        "--base-ref",
+        default=os.environ.get("LV3_SERVICE_COMPLETENESS_BASE_REF", "origin/main"),
+        help="Git ref used to find changed paths with --changed (default: origin/main).",
+    )
     parser.add_argument("--validate", action="store_true", help="Run repository-wide completeness validation.")
     parser.add_argument("--json", action="store_true", help="Emit JSON instead of human-readable text.")
     args = parser.parse_args(argv or sys.argv[1:])
 
     try:
-        results, failures = validate_services(args.service)
+        if args.changed and args.service:
+            parser.error("--changed cannot be combined with --service")
+        context = load_context()
+        service_ids = args.service
+        if args.changed:
+            changed_paths = changed_paths_from_git(REPO_ROOT, args.base_ref)
+            service_ids = None if changed_paths is None else service_ids_for_changed_paths(changed_paths, context)
+        results, failures = validate_services(service_ids, context=context)
     except ValueError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

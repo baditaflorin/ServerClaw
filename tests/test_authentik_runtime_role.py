@@ -12,10 +12,12 @@ DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
 TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
 OAUTH_TASKS_PATH = ROLE_ROOT / "tasks" / "oauth_clients.yml"
 VERIFY_PATH = ROLE_ROOT / "tasks" / "verify.yml"
+RECOVERY_TASKS_PATH = ROLE_ROOT / "tasks" / "recovery_flow.yml"
 META_PATH = ROLE_ROOT / "meta" / "argument_specs.yml"
 COMPOSE_PATH = ROLE_ROOT / "templates" / "docker-compose.yml.j2"
 CTMPL_PATH = ROLE_ROOT / "templates" / "runtime.env.ctmpl.j2"
 STATIC_ENV_PATH = ROLE_ROOT / "templates" / "runtime.env.j2"
+RECOVERY_BLUEPRINT_PATH = REPO_ROOT / "config" / "authentik" / "recovery-flow.yaml"
 
 
 def load_yaml(path: Path) -> list[dict] | dict:
@@ -38,6 +40,15 @@ def test_defaults_are_generic_pinned_and_fail_safe() -> None:
     assert "@sha256:" in defaults["authentik_redis_image"]
     assert defaults["authentik_openbao_policy_name"].startswith("{{ platform_identity.config_prefix }}")
     assert defaults["authentik_oauth_reconcile_clients"] == []
+    assert defaults["authentik_recovery_blueprint_file"].endswith("config/authentik/recovery-flow.yaml")
+    assert defaults["authentik_recovery_blueprint_remote_file"] == (
+        "{{ authentik_blueprints_dir }}/platform-operator-recovery.yaml"
+    )
+    assert defaults["authentik_recovery_flow_slug"] == "platform-operator-recovery"
+    assert defaults["authentik_mail_platform_docker_network_name"] == "{{ smtp_docker_network_name }}"
+    assert defaults["authentik_email_host"] == "stalwart"
+    assert defaults["authentik_email_port"] == "{{ smtp_port }}"
+    assert defaults["authentik_email_password_local_file"] == "{{ mail_platform_mailbox_password_local_file }}"
 
 
 def test_secret_adoption_is_allowlisted_and_never_overwrites_drift() -> None:
@@ -449,7 +460,72 @@ def test_health_and_compose_contract_match_live_runtime() -> None:
     assert '"{{ ansible_host }}:{{ authentik_internal_port }}:{{ authentik_container_port }}"' in compose
     assert 'test "$(stat -c %a {{ authentik_env_file }})" = 600' in compose
     assert compose.count('AUTHENTIK_WEB__BASE_URL: "{{ authentik_public_url }}"') == 2
+    worker = compose[compose.index("  authentik-worker:") : compose.index("\nnetworks:")]
+    assert "networks:\n      - default\n      - mail_platform" in worker
+    assert (
+        'mail_platform:\n    external: true\n    name: "{{ authentik_mail_platform_docker_network_name }}"' in compose
+    )
     assert "kv/data/{{ authentik_openbao_secret_path }}" in ctmpl
+
+
+def test_recovery_blueprint_and_smtp_contract_are_managed_and_secret_safe() -> None:
+    tasks = load_yaml(TASKS_PATH)
+    recovery_tasks = load_yaml(RECOVERY_TASKS_PATH)
+    verify = load_yaml(VERIFY_PATH)
+    compose = COMPOSE_PATH.read_text(encoding="utf-8")
+    ctmpl = CTMPL_PATH.read_text(encoding="utf-8")
+    blueprint = RECOVERY_BLUEPRINT_PATH.read_text(encoding="utf-8")
+
+    source_guard = next(
+        task for task in tasks if task["name"] == "Require protected Authentik recovery controller inputs"
+    )
+    blueprint_publish = next(
+        task for task in tasks if task["name"] == "Publish the managed Authentik recovery blueprint"
+    )
+    secret_payload = next(task for task in tasks if task["name"] == "Record the Authentik OpenBao secret payload")
+    smtp_verify = next(
+        task
+        for task in verify
+        if task["name"] == "Verify Authentik worker SMTP authentication without sending an email"
+    )
+    recovery_wait = next(
+        task
+        for task in recovery_tasks
+        if task["name"] == "Wait for the managed Authentik recovery blueprint to converge"
+    )
+
+    assert source_guard["no_log"] is True
+    assert any("0600" in condition for condition in source_guard["ansible.builtin.assert"]["that"])
+    assert blueprint_publish["ansible.builtin.copy"]["mode"] == "0644"
+    assert blueprint_publish["ansible.builtin.copy"]["dest"] == "{{ authentik_recovery_blueprint_remote_file }}"
+    assert blueprint_publish["register"] == "authentik_recovery_blueprint_publish"
+    assert secret_payload["no_log"] is True
+    payload = secret_payload["ansible.builtin.set_fact"]["authentik_runtime_secret_payload"]
+    assert payload["AUTHENTIK_EMAIL__PASSWORD"] == "{{ authentik_email_password }}"
+    assert "AUTHENTIK_EMAIL__PASSWORD" in ctmpl
+    assert "AUTHENTIK_EMAIL__FROM" in ctmpl
+    assert "AUTHENTIK_EMAIL__PASSWORD" not in blueprint
+    assert "platform_operator_email" not in blueprint
+    assert "designation: recovery" in blueprint
+    assert "use_global_settings: true" in blueprint
+    assert "token_expiry: minutes=20" in blueprint
+    assert "recovery_max_attempts: 3" in blueprint
+    assert "recovery_flow: !KeyOf recovery-flow" in blueprint
+    default_identification = blueprint[blueprint.index("name: default-authentication-identification") :]
+    assert "user_fields:\n        - email\n        - username" in default_identification
+    assert compose.count(":/blueprints/platform-operator-recovery.yaml:ro") == 2
+    assert smtp_verify["no_log"] is True
+    assert "client.login(" in smtp_verify["ansible.builtin.command"]["argv"][-1]
+    assert recovery_wait["no_log"] is True
+    assert recovery_wait["retries"] == 24
+
+    recreate = next(
+        task
+        for task in tasks
+        if task["name"] == "Decide whether Authentik application services require forced recreation"
+    )
+    recreate_expression = recreate["ansible.builtin.set_fact"]["authentik_force_recreate_required"]
+    assert "authentik_recovery_blueprint_publish.changed" in recreate_expression
 
 
 def test_argument_spec_exposes_secret_source_and_oauth_contract() -> None:
@@ -460,3 +536,8 @@ def test_argument_spec_exposes_secret_source_and_oauth_contract() -> None:
     assert options["authentik_oauth_reconcile_enabled"]["type"] == "bool"
     assert options["authentik_oauth_manifest_file"]["type"] == "path"
     assert options["authentik_oauth_reconcile_clients"]["elements"] == "str"
+    assert options["authentik_recovery_blueprint_file"]["type"] == "path"
+    assert options["authentik_recovery_verification_enabled"]["type"] == "bool"
+    assert options["authentik_mail_platform_docker_network_name"]["type"] == "str"
+    assert options["authentik_email_port"]["type"] == "int"
+    assert options["authentik_email_password_local_file"]["type"] == "path"

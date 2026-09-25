@@ -175,6 +175,20 @@ def test_rejects_identity_from_a_different_deployment(tmp_path: Path) -> None:
         _validate(paths)
 
 
+def test_accepts_optional_tailscale_identity_fingerprint_field(tmp_path: Path) -> None:
+    paths = _selection_fixture(tmp_path)
+    identity = yaml.safe_load(paths["identity"].read_text(encoding="utf-8"))
+    tracked = yaml.safe_load(paths["tracked_platform"].read_text(encoding="utf-8"))
+    identity["management_tailscale_ipv4"] = "100.64.0.10"
+    tracked["platform_generation"]["identity_overlay"]["management_tailscale_ipv4"] = "100.64.0.10"
+    _write_yaml(paths["identity"], identity)
+    _write_yaml(paths["tracked_platform"], tracked)
+
+    result = _validate(paths)
+
+    assert result["platform_domain"] == "selected.example"
+
+
 def test_rejects_topology_from_a_different_deployment(tmp_path: Path) -> None:
     paths = _selection_fixture(tmp_path)
     topology = yaml.safe_load(paths["topology"].read_text(encoding="utf-8"))
@@ -311,6 +325,8 @@ def test_preflight_targets_check_both_explicit_selectors_before_validator() -> N
         assert '"$(env)" = "production"' in recipes[2]
         assert "validate_deployment_selection.py" in recipes[3]
         assert '--environment "$(env)"' in recipes[3]
+        assert recipes[4] == "$(MAKE) materialize-selected-cross-cutting-inputs"
+        assert "generate_platform_vars.py" in recipes[5]
 
 
 @pytest.mark.parametrize(

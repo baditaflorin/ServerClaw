@@ -1,0 +1,118 @@
+---
+# Purpose: Install the root-only VM180 renderer for the fixed private GHCR proxy configuration.
+# Use case: An explicit delivery playbook obtains one transient reader through the Dockerhost forced-command bridge.
+# Inputs: An existing root-only bridge transport key and pinned Dockerhost host keys supplied through deployment-local state.
+# Outputs: A root-only executable/contract, fixed output hierarchy, and a non-secret receipt path; role converge does not read a secret.
+# Idempotency: Yes. Installation is deterministic; rendering is a separate explicit one-shot command.
+# Dependencies: artifact_cache_ghcr_reader_bridge, one-use API-key claims, and fleet-secrets consumer ACLs.
+- name: Validate artifact-cache GHCR secret renderer inputs
+  ansible.builtin.assert:
+    that:
+      - inventory_hostname == 'artifact-cache'
+      - artifact_cache_ghcr_secret_renderer_name == 'artifact-cache-ghcr-secret-renderer'
+      - artifact_cache_ghcr_secret_renderer_binary_path == '/usr/local/libexec/artifact-cache-ghcr-secret-renderer'
+      - artifact_cache_ghcr_secret_renderer_config_dir == '/etc/artifact-cache/ghcr-proxy-renderer'
+      - artifact_cache_ghcr_secret_renderer_config_path == (artifact_cache_ghcr_secret_renderer_config_dir ~ '/contract.json')
+      - artifact_cache_ghcr_secret_renderer_transport_key_path == (artifact_cache_ghcr_secret_renderer_config_dir ~ '/bridge-id_ed25519')
+      - artifact_cache_ghcr_secret_renderer_known_hosts_path == (artifact_cache_ghcr_secret_renderer_config_dir ~ '/bridge-known_hosts')
+      - artifact_cache_ghcr_secret_renderer_bridge_host == hostvars['docker-runtime'].ansible_host
+      - artifact_cache_ghcr_secret_renderer_bridge_host is match('^(?:25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])(?:\\.(?:25[0-5]|2[0-4][0-9]|1?[0-9]?[0-9])){3}$')
+      - artifact_cache_ghcr_secret_renderer_bridge_port | int == 22
+      - artifact_cache_ghcr_secret_renderer_bridge_user == 'artifact-cache-ghcr-reader'
+      - artifact_cache_ghcr_secret_renderer_bridge_known_hosts is string
+      - artifact_cache_ghcr_secret_renderer_bridge_known_hosts | trim | length > 0
+      - artifact_cache_ghcr_secret_renderer_vault_url == 'https://fleet-secrets.0exec.com'
+      - artifact_cache_ghcr_secret_renderer_secret_name == 'artifact_cache_ghcr_proxy_config'
+      - artifact_cache_ghcr_secret_renderer_output_parent_dirs == ['/etc/artifact-cache', '/etc/artifact-cache/ghcr-proxy']
+      - artifact_cache_ghcr_secret_renderer_output_path == '/etc/artifact-cache/ghcr-proxy/config.yml'
+      - artifact_cache_ghcr_secret_renderer_receipt_dir == '/var/lib/artifact-cache/ghcr-proxy-renderer'
+      - artifact_cache_ghcr_secret_renderer_receipt_path == (artifact_cache_ghcr_secret_renderer_receipt_dir ~ '/last-render.json')
+    fail_msg: >-
+      The cache renderer is VM180-only and may use only a deployment-pinned
+      Dockerhost bridge, the fixed vault record, and the fixed private-adapter
+      output path. It rejects arbitrary host keys, endpoints, secret names,
+      output paths, or listener configuration.
+
+- name: Ensure the root-only cache renderer configuration directory exists
+  ansible.builtin.file:
+    path: "{{ artifact_cache_ghcr_secret_renderer_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Render pinned Dockerhost host keys for the cache reader bridge
+  ansible.builtin.copy:
+    content: "{{ artifact_cache_ghcr_secret_renderer_bridge_known_hosts | trim }}\n"
+    dest: "{{ artifact_cache_ghcr_secret_renderer_known_hosts_path }}"
+    owner: root
+    group: root
+    mode: "0444"
+  no_log: true
+
+- name: Inspect the existing root-only cache reader bridge transport key
+  ansible.builtin.stat:
+    path: "{{ artifact_cache_ghcr_secret_renderer_transport_key_path }}"
+    follow: false
+  register: artifact_cache_ghcr_secret_renderer_transport_key_stat
+  changed_when: false
+  no_log: true
+
+- name: Require the existing root-only cache reader bridge transport key
+  ansible.builtin.assert:
+    that:
+      - artifact_cache_ghcr_secret_renderer_transport_key_stat.stat.exists
+      - artifact_cache_ghcr_secret_renderer_transport_key_stat.stat.isreg
+      - not artifact_cache_ghcr_secret_renderer_transport_key_stat.stat.islnk
+      - artifact_cache_ghcr_secret_renderer_transport_key_stat.stat.uid | int == 0
+      - artifact_cache_ghcr_secret_renderer_transport_key_stat.stat.gid | int == 0
+      - artifact_cache_ghcr_secret_renderer_transport_key_stat.stat.mode == '0400'
+    fail_msg: >-
+      The deployment-local cache bridge transport key must exist as a root-only
+      regular file before rendering. This role does not create a fallback key
+      or use an API credential on VM180.
+  no_log: true
+
+- name: Ensure fixed root-only private GHCR proxy parent directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop: "{{ artifact_cache_ghcr_secret_renderer_output_parent_dirs }}"
+
+- name: Ensure the root-only cache renderer receipt directory exists
+  ansible.builtin.file:
+    path: "{{ artifact_cache_ghcr_secret_renderer_receipt_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Install the root-only cache GHCR secret renderer executable
+  ansible.builtin.template:
+    src: artifact-cache-ghcr-secret-renderer.py.j2
+    dest: "{{ artifact_cache_ghcr_secret_renderer_binary_path }}"
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Render the root-only cache GHCR secret renderer contract
+  ansible.builtin.template:
+    src: contract.json.j2
+    dest: "{{ artifact_cache_ghcr_secret_renderer_config_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Validate the root-only cache GHCR secret renderer contract
+  ansible.builtin.command:
+    argv:
+      - "{{ artifact_cache_ghcr_secret_renderer_binary_path }}"
+      - --config
+      - "{{ artifact_cache_ghcr_secret_renderer_config_path }}"
+      - --check-config
+  changed_when: false
+  no_log: true

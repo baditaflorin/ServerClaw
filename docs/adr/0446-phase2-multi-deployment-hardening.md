@@ -44,7 +44,7 @@ Two items have **no current owner** and are this ADR's scope:
 - **Item 11 — Molecule per-role tests.** 500+ pytest files cover
   Python helpers, scripts, validators, and integration. Zero exercise
   a single role's idempotence on a real container. The gap shows up
-  every retired-deployment bootstrap loop: a role works in production by accident
+  every 0fork bootstrap loop: a role works in production by accident
   because state on disk papers over a missing task. ADR 0445 phase 1.2
   catches the parse-time class with `--syntax-check`; Molecule is the
   runtime equivalent.
@@ -94,7 +94,7 @@ divergence fixes). Scaffold:
 - `roles/mail_platform_runtime/molecule/default/molecule.yml` —
   scenario config (driver: docker, platform: ubuntu-22.04)
 - `roles/mail_platform_runtime/molecule/default/converge.yml` —
-  apply the role with the `retired-deployment-shape.yml` fixture as `extra_vars`
+  apply the role with the `0fork-shape.yml` fixture as `extra_vars`
 - `roles/mail_platform_runtime/molecule/default/verify.yml` —
   assert role-specific invariants
 - `roles/mail_platform_runtime/molecule/README.md` —

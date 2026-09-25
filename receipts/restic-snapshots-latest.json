@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0.0",
-  "recorded_at": "2026-08-31T20:02:03Z",
-  "recorded_on": "2026-08-31",
+  "recorded_at": "2026-09-25T18:28:27Z",
+  "recorded_on": "2026-09-25",
   "recorded_by": "codex",
   "repository": {
     "bucket": "restic-config-backup",
-    "endpoint": "http://10.200.2.3:9000"
+    "endpoint": "http://10.200.2.2:9000"
   },
   "summary": {
     "governed_sources": 5,
@@ -31,13 +31,13 @@
         "keep_monthly": 12
       },
       "latest_snapshot": {
-        "snapshot_id": "66b0fe69427e0c42b9ed67b99a12b2ce7bc2225efbd8ed68acf83856a6eeef9f",
-        "recorded_at": "2026-08-31T20:01:51Z",
+        "snapshot_id": "69a4832acf43a5a38e9b0b57918af491c3e1cab75967d34da82de922e5b79abf",
+        "recorded_at": "2026-09-25T18:28:15Z",
         "host": "docker-runtime",
         "paths": [
           "receipts"
         ],
-        "files": 6
+        "files": 8
       },
       "last_restore_verification": null,
       "reasons": [
@@ -59,8 +59,8 @@
         "keep_monthly": 6
       },
       "latest_snapshot": {
-        "snapshot_id": "c943f847dba8f409e4514f4a55370126d7e8b9769d15fc3ea4565816731cb1b5",
-        "recorded_at": "2026-08-31T20:02:03Z",
+        "snapshot_id": "38ce861d1d40f0a3621eaf5236f2cfd16ea972b2263e0354098c49a5b4111e48",
+        "recorded_at": "2026-09-25T18:28:27Z",
         "host": "docker-runtime",
         "paths": [
           "config"
@@ -86,8 +86,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "fd6465d0a42668053d5be9726a341e2e57bd9baf9d0b2d78532209e888b4bf79",
-        "recorded_at": "2026-08-31T20:02:03Z",
+        "snapshot_id": "9cff5e7a0f0159ee5840d31da496dda2c64250ac4d306572cf750af491aa2584",
+        "recorded_at": "2026-09-25T18:28:27Z",
         "host": "docker-runtime",
         "paths": [
           "versions/stack.yaml"
@@ -113,8 +113,8 @@
         "keep_daily": 90
       },
       "latest_snapshot": {
-        "snapshot_id": "0f5b2ed878e51505f20aaac46e5edbead5c81dd8158f4d89648a012fe9ca2cec",
-        "recorded_at": "2026-08-31T20:01:53Z",
+        "snapshot_id": "ad4b62463b1364163bf27e01ec2584141494210d63ff662b1377617bbca0bbe5",
+        "recorded_at": "2026-09-25T18:28:17Z",
         "host": "docker-runtime",
         "paths": [
           "config/controller-local-secrets.json"
@@ -140,8 +140,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "c34d0e7938394b0a174b6fa2e4c60b1f18fb28c78dd1c8d4b6340df6fc3b5e1a",
-        "recorded_at": "2026-08-31T20:02:03Z",
+        "snapshot_id": "d48b3dc88b333470850856cbc6f28eb8e78017ed5bb58d8634ba44b777ec42da",
+        "recorded_at": "2026-09-25T18:28:27Z",
         "host": "docker-runtime",
         "paths": [
           "config/falco"

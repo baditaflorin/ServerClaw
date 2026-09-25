@@ -1,0 +1,20 @@
+{
+  "managed-by": "role=artifact_cache_ghcr_secret_renderer adr=0296",
+  "schema_version": 1,
+  "bridge": {
+    "host": "{{ artifact_cache_ghcr_secret_renderer_bridge_host }}",
+    "port": {{ artifact_cache_ghcr_secret_renderer_bridge_port | int }},
+    "user": "{{ artifact_cache_ghcr_secret_renderer_bridge_user }}",
+    "private_key": "{{ artifact_cache_ghcr_secret_renderer_transport_key_path }}",
+    "known_hosts": "{{ artifact_cache_ghcr_secret_renderer_known_hosts_path }}"
+  },
+  "vault": {
+    "url": "{{ artifact_cache_ghcr_secret_renderer_vault_url }}",
+    "secret_name": "{{ artifact_cache_ghcr_secret_renderer_secret_name }}"
+  },
+  "output": {
+    "parent_dirs": {{ artifact_cache_ghcr_secret_renderer_output_parent_dirs | to_json }},
+    "path": "{{ artifact_cache_ghcr_secret_renderer_output_path }}",
+    "receipt": "{{ artifact_cache_ghcr_secret_renderer_receipt_path }}"
+  }
+}

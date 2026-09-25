@@ -18,7 +18,7 @@ GROUP_VARS_ALL_PATH = REPO_ROOT / "inventory" / "group_vars" / "all" / "main.yml
 def test_defaults_define_private_submission_port() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     assert defaults["mail_platform_internal_submission_port"] == (
-        "{{ hostvars['proxmox-host'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
+        "{{ hostvars[platform_topology_host].platform_port_assignments.mail_platform_internal_submission_port }}"
     )
 
 
@@ -26,6 +26,8 @@ def test_defaults_define_submission_auth_retry_budget() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     assert defaults["mail_platform_submission_auth_retries"] == 12
     assert defaults["mail_platform_submission_auth_delay_seconds"] == 5
+    assert defaults["mail_platform_gateway_smtp_bridge_port"] == 1588
+    assert defaults["mail_platform_gateway_smtp_bridge_container_name"].endswith("-mail-gateway-smtp")
 
 
 def test_production_smtp_hostname_tracks_the_selected_deployment_prefix() -> None:
@@ -50,10 +52,19 @@ def test_compose_template_publishes_private_submission_port_on_vm_ip() -> None:
     )
 
 
+def test_compose_template_runs_a_private_authenticated_transactional_smtp_bridge() -> None:
+    template = COMPOSE_TEMPLATE_PATH.read_text()
+    assert "mail-gateway-smtp:" in template
+    assert 'command: ["python", "smtp_bridge.py"]' in template
+    assert "mail_platform_gateway_smtp_bridge_container_name" in template
+    assert "mail_platform_gateway_smtp_bridge_port" in template
+    assert "mail_platform_gateway_image" in template
+
+
 def test_host_firewall_only_opens_private_submission_for_local_docker_networks() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
     runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control"]["allowed_inbound"]
-    relay_rules = [rule for rule in runtime_control_rules if 1587 in rule["ports"]]
+    relay_rules = [rule for rule in runtime_control_rules if 1587 in rule.get("ports", [])]
     assert {rule["source"] for rule in relay_rules} >= {"172.16.0.0/12", "192.168.0.0/16"}
 
 
@@ -67,7 +78,7 @@ def test_control_plane_lane_points_at_private_submission_relay() -> None:
 def test_defaults_resolve_mail_gateway_otlp_endpoint_from_canonical_host_topology() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     assert defaults["mail_platform_gateway_trace_otlp_endpoint"] == (
-        "{{ hostvars['proxmox-host'].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
+        "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
     )
 
 
@@ -125,6 +136,22 @@ def test_mail_platform_runtime_verifies_plaintext_private_submission_auth() -> N
     assert verify_task["until"] == "mail_platform_submission_auth_check.rc == 0"
 
 
+def test_mail_platform_runtime_verifies_transactional_smtp_bridge_auth() -> None:
+    tasks = yaml.safe_load(TASKS_PATH.read_text())
+    verify_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Verify the private transactional SMTP bridge accepts managed credentials"
+    )
+    command = verify_task["ansible.builtin.command"]["argv"]
+    assert "mail-gateway-smtp" in command[-1]
+    assert "LOCAL_SMTP_USERNAME" in command[-1]
+    assert "LOCAL_SMTP_PASSWORD" in command[-1]
+    assert "mail_platform_gateway_smtp_bridge_port" in command[-1]
+    assert verify_task["register"] == "mail_platform_gateway_smtp_bridge_auth_check"
+    assert verify_task["until"] == "mail_platform_gateway_smtp_bridge_auth_check.rc == 0"
+
+
 def test_mail_platform_verify_role_checks_plaintext_private_submission_auth() -> None:
     verify_tasks = yaml.safe_load((REPO_ROOT / "roles" / "mail_platform_runtime" / "tasks" / "verify.yml").read_text())
     verify_task = next(
@@ -139,6 +166,21 @@ def test_mail_platform_verify_role_checks_plaintext_private_submission_auth() ->
     assert verify_task["retries"] == "{{ mail_platform_submission_auth_retries }}"
     assert verify_task["delay"] == "{{ mail_platform_submission_auth_delay_seconds }}"
     assert verify_task["until"] == "mail_platform_verify_submission_auth.rc == 0"
+
+
+def test_mail_platform_verify_role_checks_transactional_smtp_bridge_auth() -> None:
+    verify_tasks = yaml.safe_load((REPO_ROOT / "roles" / "mail_platform_runtime" / "tasks" / "verify.yml").read_text())
+    verify_task = next(
+        task
+        for task in verify_tasks
+        if task.get("name") == "Verify the private transactional SMTP bridge accepts managed credentials"
+    )
+    command = verify_task["ansible.builtin.command"]["argv"]
+    assert "mail-gateway-smtp" in command[-1]
+    assert "LOCAL_SMTP_USERNAME" in command[-1]
+    assert "LOCAL_SMTP_PASSWORD" in command[-1]
+    assert verify_task["register"] == "mail_platform_verify_gateway_smtp_bridge_auth"
+    assert verify_task["until"] == "mail_platform_verify_gateway_smtp_bridge_auth.rc == 0"
 
 
 def test_mail_platform_runtime_bootstraps_mail_principals_through_gateway_crud_api() -> None:

@@ -60,14 +60,14 @@ EXPECTED_FIXTURES = {
             "dns_label": "lv3",
         },
     },
-    "retired-deployment-shape.yml": {
-        "platform_domain": "retired-deployment.example.invalid",
+    "0fork-shape.yml": {
+        "platform_domain": "0fork.example.invalid",
         "identity": {
-            "config_prefix": "retired-deployment",
+            "config_prefix": "0fork",
             "sql_prefix": "fork",
             "pve_prefix": "fork",
             "unix_prefix": "fork",
-            "dns_label": "retired-deployment",
+            "dns_label": "0fork",
         },
     },
     "synthetic-shape.yml": {
@@ -192,7 +192,7 @@ def test_matrix_covers_distinct_shape_paths(platform_identity):
     - Equal-flavor: at least one fixture where every flavor produces the
       same string (lv3-shape, synthetic-shape).
     - Divergent-flavor: at least one fixture where sql/unix/pve diverge from
-      config_prefix (retired-deployment-shape — leading digit stripped).
+      config_prefix (0fork-shape — leading digit stripped).
 
     Without both, a regression in the digit-stripping path could land
     undetected.

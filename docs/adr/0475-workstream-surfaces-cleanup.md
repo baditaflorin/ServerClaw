@@ -64,7 +64,7 @@ rather than claiming exclusivity.
 - Cert-validation lane bypasses (the OTHER half of every Phase
   10/11/12 gate-bypass) are deferred until ADR 0414's
   `cert_lifecycle_manager.py sync-missing` runs from a session
-  with operator network access to the lv3 / retired-deployment edge hosts.
+  with operator network access to the lv3 / 0fork edge hosts.
 
 ## What this leaves open
 

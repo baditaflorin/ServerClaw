@@ -23,7 +23,7 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
 
 from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars, load_yaml
 
-from identity_yaml import load_yaml_with_identity, resolve_jinja2_vars
+from identity_yaml import load_identity_vars, load_yaml_with_identity, resolve_jinja2_vars
 from validation_toolkit import (
     resolve_public_domain_placeholders,
     require_bool,
@@ -182,7 +182,8 @@ def load_host_vars(
     merged = load_topology_host_vars() if include_local_overlay else load_yaml(TOPOLOGY_HOST_VARS_PATH)
     if not isinstance(merged, dict):
         raise TypeError(f"{TOPOLOGY_HOST_VARS_PATH}: expected top-level mapping")
-    return _resolve_identity_placeholders(merged, identity_vars)
+    resolved_identity_vars = identity_vars if identity_vars is not None else load_identity_vars()
+    return _resolve_identity_placeholders(merged, resolved_identity_vars)
 
 
 def load_public_edge_defaults(identity_vars: dict[str, str] | None = None) -> dict[str, Any]:

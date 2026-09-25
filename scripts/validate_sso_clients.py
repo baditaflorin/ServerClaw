@@ -163,7 +163,16 @@ This script does NOT make live Authentik API calls.
 
     try:
         clients = _load_sso_clients()
-    except (FileNotFoundError, yaml.YAMLError, ValueError) as exc:
+    except FileNotFoundError:
+        # This generated file contains deployment-specific client selections and
+        # is intentionally ignored.  Source declarations are still validated by
+        # generate_cross_cutting_artifacts.py in the generated-vars gate.
+        print(
+            "Skipping derived SSO clients equality check because deployment-specific "
+            "sso-clients.yaml is unavailable. Tracked-source validation continues."
+        )
+        return 0
+    except (yaml.YAMLError, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 

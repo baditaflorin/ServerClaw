@@ -1,0 +1,10 @@
+---
+# Purpose: The sole Docker daemon trust list for the artifact-cache guest.
+# The first four are anonymous shared-cache adapters. The loopback-only
+# private GHCR adapter is reserved for the VM180 broker image pull.
+artifact_cache_docker_runtime_insecure_registries:
+  - "{{ ansible_host }}:5001"
+  - "{{ ansible_host }}:5002"
+  - "{{ ansible_host }}:5003"
+  - "{{ ansible_host }}:5004"
+  - "127.0.0.1:5005"

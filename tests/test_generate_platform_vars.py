@@ -143,6 +143,7 @@ def test_default_check_ignores_untracked_topology_inputs(
         return {}, {"_platform_generation_identity_overlay": {}}
 
     monkeypatch.setattr(generate_platform_vars, "load_sources", fake_load_sources)
+    monkeypatch.setattr(generate_platform_vars, "missing_deployment_derived_platform_inputs", lambda: ())
     monkeypatch.setattr(generate_platform_vars, "_load_generation_identity_overlay", lambda path: {})
     monkeypatch.setattr(generate_platform_vars, "build_platform_vars", lambda **kwargs: {})
     monkeypatch.setattr(generate_platform_vars, "render_platform_vars", lambda payload: "sentinel\n")
@@ -153,6 +154,44 @@ def test_default_check_ignores_untracked_topology_inputs(
         "skip_topology_override": True,
         "skip_generated_topology": True,
     }
+
+
+def test_default_check_skips_derived_equivalence_when_deployment_inputs_are_missing(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    missing_path = tmp_path / "config" / "generated" / "dns-declarations.yaml"
+    monkeypatch.setattr(generate_platform_vars, "DEPLOYMENT_DERIVED_PLATFORM_INPUT_PATHS", (missing_path,))
+    monkeypatch.setattr(
+        generate_platform_vars,
+        "load_sources",
+        lambda **_kwargs: pytest.fail("equivalence generation must not run without deployment-derived inputs"),
+    )
+
+    assert generate_platform_vars.check_platform_vars(tmp_path / "platform.yml") == 0
+    assert "Skipping derived platform-vars equivalence check" in capsys.readouterr().out
+
+
+def test_default_check_remains_strict_when_deployment_inputs_are_present(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    input_path = tmp_path / "config" / "generated" / "dns-declarations.yaml"
+    input_path.parent.mkdir(parents=True)
+    input_path.write_text("dns_records: {}\n", encoding="utf-8")
+    output_path = tmp_path / "platform.yml"
+    output_path.write_text("actual: true\n", encoding="utf-8")
+
+    monkeypatch.setattr(generate_platform_vars, "DEPLOYMENT_DERIVED_PLATFORM_INPUT_PATHS", (input_path,))
+    monkeypatch.setattr(generate_platform_vars, "load_sources", lambda **_kwargs: ({}, {}))
+    monkeypatch.setattr(generate_platform_vars, "_load_generation_identity_overlay", lambda _path: {})
+    monkeypatch.setattr(generate_platform_vars, "build_platform_vars", lambda **_kwargs: {"expected": True})
+    monkeypatch.setattr(generate_platform_vars, "render_platform_vars", lambda _payload: "expected: true\n")
+
+    assert generate_platform_vars.check_platform_vars(output_path) == 2
+    assert "must match" in capsys.readouterr().err
 
 
 def test_default_check_reuses_tracked_identity_snapshot(
@@ -169,12 +208,12 @@ def test_default_check_reuses_tracked_identity_snapshot(
     )
     captured: dict[str, Any] = {}
 
-    def fake_build_platform_vars(*, stack, host_vars, previous_platform_vars_path=None):
+    def fake_build_platform_vars(*, stack, host_vars):
         captured.update(host_vars)
-        captured["previous_platform_vars_path"] = previous_platform_vars_path
         return {"sentinel": True}
 
     monkeypatch.setattr(generate_platform_vars, "build_platform_vars", fake_build_platform_vars)
+    monkeypatch.setattr(generate_platform_vars, "missing_deployment_derived_platform_inputs", lambda: ())
     monkeypatch.setattr(
         generate_platform_vars,
         "render_platform_vars",
@@ -184,7 +223,6 @@ def test_default_check_reuses_tracked_identity_snapshot(
     assert generate_platform_vars.check_platform_vars(output_path) == 0
     assert captured["platform_domain"] == "tracked.example.net"
     assert captured["management_ipv4"] == "198.51.100.42"
-    assert captured["previous_platform_vars_path"] == output_path
 
 
 def test_generation_identity_snapshot_rejects_unapproved_local_scalars() -> None:

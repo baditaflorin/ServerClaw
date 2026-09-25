@@ -1,0 +1,52 @@
+---
+# Purpose: Declare the fail-closed input contract for the VM180 fleet_build_broker_runtime role.
+argument_specs:
+  main:
+    short_description: Converge the private mTLS fleet build broker on the artifact-cache VM.
+    options:
+      fleet_build_broker_image:
+        type: str
+        required: true
+        description:
+          - Immutable broker image reference served through the local GHCR cache.
+      fleet_build_broker_secret_dir:
+        type: path
+        required: false
+        description:
+          - Root-managed go-fleet-secrets render directory mounted read-only into the broker.
+      fleet_build_broker_probe_secret_dir:
+        type: path
+        required: false
+        description:
+          - Root-only host probe directory for monitor client material; it is never mounted into the broker.
+      fleet_build_broker_runtime_renderer_api_key_file:
+        type: path
+        required: false
+        description:
+          - Owner-only API-key file for the runtime-only go-fleet-secrets renderer principal.
+      fleet_build_broker_monitor_renderer_api_key_file:
+        type: path
+        required: false
+        description:
+          - Owner-only API-key file for the monitor-only go-fleet-secrets renderer principal.
+      fleet_build_broker_renderer_image:
+        type: str
+        required: false
+        description:
+          - Must equal the immutable broker digest; it is invoked as root only for the render-secrets pre-start phase.
+      fleet_build_broker_runtime_secret_manifest:
+        type: dict
+        required: false
+        description:
+          - Non-secret, complete runtime-only allowlist mapping for server TLS/client CA and GitHub material.
+      fleet_build_broker_monitor_secret_manifest:
+        type: dict
+        required: false
+        description:
+          - Non-secret, complete monitor-only allowlist mapping for the root-only host probe directory.
+      fleet_build_broker_host_port:
+        type: int
+        required: false
+        default: 18100
+        description:
+          - Private host listener published to the broker container port.

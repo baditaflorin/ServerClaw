@@ -1,0 +1,128 @@
+id: ws-0510-gitea-authentik-oidc-e2e
+adr: "0143"
+title: Enable least-privilege Gitea Authentik OIDC and browser E2E verification
+status: merged
+ready_to_merge: false
+live_applied: true
+owner: codex
+branch: codex/gitea-authentik-live-receipt-20260925
+worktree_path: .worktrees/codex-gitea-authentik-live-postmerge-20260925
+doc: docs/workstreams/ws-0510-gitea-authentik-oidc-e2e.md
+canonical_truth:
+  changelog_entry: Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    gitea: ws-0510-gitea-authentik-oidc-e2e
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/authentik/identities.yaml
+  - config/authentik/test-identities.yaml
+  - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+  - scripts/gitea_authentik_e2e.py
+  - tests/test_authentik_identity_reconcile.py
+  - tests/test_gitea_authentik_e2e.py
+  - tests/test_gitea_runtime_role.py
+  - .woodpecker.yml
+  - config/validation-lanes.yaml
+  - config/validation-gate.json
+  - scripts/service_completeness.py
+  - tests/test_validate_service_completeness.py
+  - scripts/subdomain_catalog.py
+  - tests/test_subdomain_catalog.py
+  - tests/test_validation_lanes.py
+  - scripts/validate_repo.sh
+  - inventory/group_vars/platform.yml
+  - scripts/topology-snapshot.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/configure-gitea.md
+  - receipts/live-applies/ws-0510-gitea-authentik-oidc-e2e-apply-receipt.yaml
+  - README.md
+  - docs/status/history/merged-workstreams.md
+  - changelog.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+ownership_manifest:
+  owned_surfaces:
+    - id: gitea_authentik_login_contract
+      paths:
+        - config/authentik/identities.yaml
+        - config/authentik/test-identities.yaml
+        - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+        - scripts/gitea_authentik_e2e.py
+        - tests/test_authentik_identity_reconcile.py
+        - tests/test_gitea_authentik_e2e.py
+        - tests/test_gitea_runtime_role.py
+        - .woodpecker.yml
+        - docs/workstreams/ws-0510-gitea-authentik-oidc-e2e.md
+        - docs/runbooks/configure-gitea.md
+      mode: exclusive
+    - id: generated_deployment_artifacts
+      paths:
+        - inventory/group_vars/platform.yml
+        - scripts/topology-snapshot.json
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: validation_lane_routing
+      paths:
+        - config/validation-lanes.yaml
+        - tests/test_validation_lanes.py
+      mode: exclusive
+    - id: service_completeness_scope
+      paths:
+        - scripts/service_completeness.py
+        - tests/test_validate_service_completeness.py
+      mode: exclusive
+    - id: subdomain_validation_identity_cache
+      paths:
+        - scripts/subdomain_catalog.py
+        - tests/test_subdomain_catalog.py
+      mode: exclusive
+    - id: validate_repo_shell_contract
+      paths:
+        - scripts/validate_repo.sh
+      mode: shared_contract
+      contract: validate-repo-shell-v1
+    - id: validation_gate_runner
+      paths:
+        - config/validation-gate.json
+      mode: shared_contract
+      contract: validation-gate-runner-v1
+    - id: gitea_live_apply_evidence
+      paths:
+        - receipts/live-applies/ws-0510-gitea-authentik-oidc-e2e-apply-receipt.yaml
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    - id: current_main_generated_status
+      paths:
+        - README.md
+        - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+    - id: canonical_truth
+      paths:
+        - changelog.md
+        - versions/stack.yaml
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: release-truth-v1
+context: |
+  Gitea's configured OIDC group requirement currently allows only platform
+  administrators to authenticate. Add a dedicated login-only group for
+  ordinary users and a separately invoked non-admin test account so the full
+  Authentik redirect, authentication, callback, and Gitea session can be
+  verified without granting the account administrative access. The service
+  completeness gate scopes its existing checklist to changed services and
+  retains a full-inventory fallback for global or unscoped changes.
+tasks:
+  - id: t1
+    title: Implement login-only group, browser E2E, and service-scoped validation
+    status: completed
+  - id: t2
+    title: Run unit tests and repository CI, then merge the private-source PR
+    status: completed
+  - id: t3
+    title: Reconcile the Authentik group and test identity, converge Gitea, and verify browser login
+    status: completed

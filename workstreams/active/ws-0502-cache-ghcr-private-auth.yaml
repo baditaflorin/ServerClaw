@@ -1,0 +1,75 @@
+id: ws-0502-cache-ghcr-private-auth
+adr: "0295"
+title: Add a cache-only private GHCR upstream-auth contract
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/cache-ghcr-private-auth
+worktree_path: .worktrees/ws-0502-cache-ghcr-private-auth
+doc: docs/workstreams/ws-0502-cache-ghcr-private-auth.md
+depends_on:
+  - ws-0274-artifact-cache-plane
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_runtime/**
+  - collections/ansible_collections/lv3/platform/playbooks/artifact-cache-vm.yml
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker.yml
+  - collections/ansible_collections/lv3/platform/vars/artifact_cache_registry_endpoints.yml
+  - playbooks/artifact-cache-vm.yml
+  - tests/test_artifact_cache_runtime_role.py
+  - tests/test_artifact_cache_playbook.py
+  - tests/test_fleet_build_broker_runtime_role.py
+  - docs/runbooks/artifact-cache-runtime.md
+  - docs/workstreams/ws-0501-cache-ghcr-private-auth.md
+  - workstreams/active/ws-0501-cache-ghcr-private-auth.yaml
+  - docs/workstreams/ws-0502-cache-ghcr-private-auth.md
+  - workstreams/active/ws-0502-cache-ghcr-private-auth.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: artifact_cache_ghcr_private_auth
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/**
+        - collections/ansible_collections/lv3/platform/playbooks/artifact-cache-vm.yml
+        - collections/ansible_collections/lv3/platform/vars/artifact_cache_registry_endpoints.yml
+        - playbooks/artifact-cache-vm.yml
+        - tests/test_artifact_cache_runtime_role.py
+        - tests/test_artifact_cache_playbook.py
+        - docs/runbooks/artifact-cache-runtime.md
+      mode: exclusive
+    - id: broker_private_cache_endpoint
+      paths:
+        - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker.yml
+        - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_runtime/**
+        - tests/test_fleet_build_broker_runtime_role.py
+      mode: shared_contract
+      contract: fleet-build-broker-vm180-v1
+    - id: ws_0501_tracking_removal
+      paths:
+        - docs/workstreams/ws-0501-cache-ghcr-private-auth.md
+        - workstreams/active/ws-0501-cache-ghcr-private-auth.yaml
+      mode: exclusive
+    - id: ws_0502_tracking
+      paths:
+        - docs/workstreams/ws-0502-cache-ghcr-private-auth.md
+        - workstreams/active/ws-0502-cache-ghcr-private-auth.yaml
+      mode: exclusive
+context: |
+  The public GHCR pull-through cache remains anonymous on VM180:5002. A
+  separate `127.0.0.1:5005` adapter may receive one narrowly scoped
+  package-read identity through an approved cache-only vault renderer. The
+  credential must never be copied to the broker, a builder, public adapter,
+  Ansible output, Compose environment, or another cache adapter. Private pulls
+  are fail-closed unless a fixed root:root 0400 regular configuration beneath
+  fixed root:root 0700 directories is already present.
+tasks:
+  - id: t1
+    title: Add an opt-in root-only GHCR proxy configuration contract
+    status: in_progress
+  - id: t2
+    title: Add static role and rendered-Compose isolation tests
+    status: in_progress
+  - id: t3
+    title: Document the cache-only credential boundary and verification gate
+    status: in_progress

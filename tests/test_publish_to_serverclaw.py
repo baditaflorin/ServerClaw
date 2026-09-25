@@ -53,6 +53,19 @@ def test_publication_sanitizes_private_primary_guest_network() -> None:
     )
 
 
+def test_public_proxmox_template_keeps_repo_intake_edge_route() -> None:
+    """Keep the fork-ready Tier A host template aligned with the active edge catalog."""
+    host_vars = yaml.safe_load(
+        (REPO_ROOT / "publication" / "templates" / "proxmox-host.yml").read_text(encoding="utf-8")
+    )
+    repo_intake = host_vars["platform_service_topology"]["repo_intake"]
+
+    assert repo_intake["public_hostname"] == "repo-intake.{{ platform_domain }}"
+    assert repo_intake["edge"]["enabled"] is True
+    assert repo_intake["edge"]["kind"] == "proxy"
+    assert repo_intake["edge"]["upstream"].endswith(":8101")
+
+
 def test_publication_regenerates_derived_artifacts_after_template_replacement(monkeypatch, tmp_path: Path) -> None:
     calls: list[tuple[list[str], Path]] = []
 

@@ -176,3 +176,88 @@ argument_specs:
         required: true
         description:
           - Existing Authentik bootstrap administrator reconciled into platform groups.
+      authentik_blueprints_dir:
+        type: path
+        required: true
+        description:
+          - Guest-local directory that holds repository-managed Authentik blueprints.
+      authentik_recovery_blueprint_file:
+        type: path
+        required: true
+        description:
+          - Controller-side non-secret recovery-flow blueprint.
+      authentik_recovery_blueprint_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local recovery-flow blueprint mounted into Authentik.
+      authentik_recovery_verify_script:
+        type: path
+        required: true
+        description:
+          - Controller-side read-only verifier for recovery bindings.
+      authentik_recovery_flow_slug:
+        type: str
+        required: true
+        description:
+          - Stable slug of the managed Authentik recovery flow.
+      authentik_recovery_identification_stage_name:
+        type: str
+        required: true
+        description:
+          - Existing login identification stage that exposes recovery.
+      authentik_recovery_email_stage_name:
+        type: str
+        required: true
+        description:
+          - Managed email stage configured to use global SMTP settings.
+      authentik_recovery_verification_enabled:
+        type: bool
+        required: true
+        description:
+          - Verify recovery-flow bindings after Authentik starts.
+      authentik_mail_platform_docker_network_name:
+        type: str
+        required: true
+        description:
+          - Existing external Docker network that exposes the managed SMTP relay.
+      authentik_email_host:
+        type: str
+        required: true
+        description:
+          - SMTP relay DNS name resolved on the managed mail-platform network.
+      authentik_email_port:
+        type: int
+        required: true
+        description:
+          - Private authenticated SMTP relay port for Authentik global email.
+      authentik_email_username:
+        type: str
+        required: true
+        description:
+          - Managed SMTP mailbox login for Authentik global email.
+      authentik_email_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local root-only SMTP password source.
+      authentik_email_use_tls:
+        type: bool
+        required: true
+        description:
+          - Whether Authentik should negotiate STARTTLS with the private relay.
+      authentik_email_use_ssl:
+        type: bool
+        required: true
+        description:
+          - Whether Authentik should use implicit TLS with the private relay.
+      authentik_email_timeout:
+        type: int
+        required: true
+        description:
+          - SMTP connection timeout in seconds.
+      authentik_email_from:
+        type: str
+        required: true
+        description:
+          - Managed sender address used for Authentik recovery mail.

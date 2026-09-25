@@ -11,6 +11,7 @@ It covers:
 - the Stalwart mail runtime on `runtime-control`
 - a private SMTP submission relay on `10.10.10.92:1587` for VM-local platform workloads that can consume the runtime-control host address directly, with STARTTLS intentionally disabled
 - a shared-Docker-network submission path at `<config-prefix>-mail-stalwart:1587` for containerized workloads on `runtime-control`, also with STARTTLS intentionally disabled
+- a private authenticated SMTP compatibility bridge at `mail-gateway-smtp:1588` for SMTP-only transactional consumers such as Authentik; it has no host-published port and uses the gateway's provider-backed delivery path
 - the private mail gateway API used by platform services and automation agents
 - profile-scoped sender identities for operator alerts, platform transactional mail, and agent reports
 - Telegraf and Grafana mail telemetry
@@ -52,6 +53,7 @@ The workflow manages these live surfaces:
 - Stalwart mail server on `runtime-control`
 - private submission relay on `10.10.10.92:1587` for local platform workloads on `runtime-control`, with STARTTLS intentionally disabled
 - shared-network internal submission relay at `<config-prefix>-mail-stalwart:1587` for containerized platform workloads on `runtime-control`, with STARTTLS intentionally disabled
+- private transactional SMTP bridge at `mail-gateway-smtp:1588` on `mail-platform_default`, with no host-published port
 - private mail gateway API on `runtime-control:8081`
 - scoped notification-profile API keys under `/etc/lv3/mail-platform/profiles/`
 - Telegraf mail telemetry collector on `runtime-control`
@@ -86,7 +88,7 @@ The same converge also publishes a private SMTP submission relay for local platf
 - `10.10.10.92:1587`
 - `<config-prefix>-mail-stalwart:1587` from containers attached to `mail-platform_default`
 
-The host-address form is intended for VM-local platform workloads that can consume the runtime-control host address directly. The container-DNS form is intended for workloads that share the mail Docker network on `runtime-control`. STARTTLS stays disabled on this listener for plaintext-auth internal consumers. Authentik uses the shared-network hostname `<config-prefix>-mail-stalwart:1587` because both the host-private path and the public hostname path proved unreliable from another container network. Public client submission remains on TCP `587`.
+The host-address form is intended for VM-local platform workloads that can consume the runtime-control host address directly. The container-DNS form is intended for workloads that share the mail Docker network on `runtime-control`. STARTTLS stays disabled on this listener for plaintext-auth internal consumers. Authentik uses `mail-gateway-smtp:1588`, an authenticated internal compatibility bridge that submits through the gateway's transactional provider path; it is intentionally not published on the runtime host. Public client submission remains on TCP `587`.
 
 ## Non-Production SMTP Contract
 
@@ -177,9 +179,9 @@ Run these checks after converge:
 ## Notes
 
 - inbound mail for `server@example.com` depends on the public MX record and host NAT being active
-- outbound transactional delivery currently uses the Brevo HTTP API from the mail gateway
+- outbound transactional delivery uses the Brevo HTTP API from the mail gateway; SMTP-only consumers use the private `mail-gateway-smtp:1588` compatibility bridge rather than direct outbound port-25 delivery
 - the private SMTP submission relay on TCP `1587` exists specifically for VM-local platform workloads that need authenticated mail without depending on public STARTTLS certificate trust, so STARTTLS is intentionally disabled on that listener
-- containerized workloads on `runtime-control` should prefer the shared-network hostname `<config-prefix>-mail-stalwart:1587` over host-published mail ports when they need authenticated internal submission
+- containerized workloads on `runtime-control` should prefer the shared-network hostname `<config-prefix>-mail-stalwart:1587` for managed mailbox submission; Authentik and other provider-backed SMTP-only consumers should use `mail-gateway-smtp:1588`
 - if a replay hits `failed to create endpoint ... network ... does not exist` while recreating the mail-platform containers after Docker networking recovery, treat it as stale compose-network drift: rerun the repo-managed converge and let the role reset the stack with `docker compose down --remove-orphans` before retrying the startup
 - sender governance is enforced through notification-profile-specific mailbox identities and scoped API keys instead of one shared global send credential
 - the first distributed traces for this workflow come from inbound gateway requests plus outbound HTTP calls to Stalwart and Brevo, with `service.namespace=lv3` and `deployment.environment=lv3` exported through `OTEL_RESOURCE_ATTRIBUTES`

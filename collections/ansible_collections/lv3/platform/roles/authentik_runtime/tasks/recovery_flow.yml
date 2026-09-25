@@ -1,0 +1,69 @@
+---
+# Purpose: Verify the mounted Authentik recovery blueprint converged without changing credential state.
+# Use case: Run after Authentik runtime, OAuth, and identity reconciliation.
+# Inputs: Authentik public URL, bootstrap token file, and recovery-flow identifiers.
+# Outputs: The active brand and login stage reference the managed recovery flow and its Email stage uses global SMTP.
+# Idempotency: Read-only; safe to re-run and does not dispatch email.
+# Dependencies: ADR 0165 and ADR 0491.
+
+- name: Verify Authentik recovery verifier inputs exist on the controller
+  ansible.builtin.stat:
+    path: "{{ item }}"
+    follow: false
+  loop:
+    - "{{ authentik_recovery_verify_script }}"
+    - "{{ authentik_oauth_reconcile_token_file }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_recovery_verify_inputs
+  no_log: true
+
+- name: Assert Authentik recovery verifier inputs are present
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists | default(false)
+      - item.stat.isreg | default(false)
+      - not (item.stat.islnk | default(false))
+      - item.stat.size | default(0) | int > 0
+    fail_msg: "An Authentik recovery verifier or bootstrap token file is missing."
+  loop: "{{ authentik_recovery_verify_inputs.results }}"
+  loop_control:
+    label: "{{ item.item | basename }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Build the Authentik recovery verifier command
+  ansible.builtin.set_fact:
+    authentik_recovery_verify_argv:
+      - uv
+      - run
+      - --no-project
+      - --with
+      - pyyaml
+      - python
+      - "{{ authentik_recovery_verify_script }}"
+      - check
+      - --base-url
+      - "{{ authentik_public_url }}"
+      - --token-file
+      - "{{ authentik_oauth_reconcile_token_file }}"
+      - --recovery-flow-slug
+      - "{{ authentik_recovery_flow_slug }}"
+      - --identification-stage
+      - "{{ authentik_recovery_identification_stage_name }}"
+      - --email-stage
+      - "{{ authentik_recovery_email_stage_name }}"
+  no_log: true
+
+- name: Wait for the managed Authentik recovery blueprint to converge
+  ansible.builtin.command:
+    argv: "{{ authentik_recovery_verify_argv }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_recovery_verify
+  retries: 24
+  delay: 5
+  until: authentik_recovery_verify.rc == 0
+  changed_when: false
+  no_log: true

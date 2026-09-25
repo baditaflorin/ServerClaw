@@ -1,0 +1,35 @@
+# Playbook: fleet-build-broker.yml
+# Purpose: Converge the private mTLS fleet-build-broker canary on the dedicated artifact-cache VM.
+# Use case: Run only after the cache-owned private GHCR capability and root-only go-fleet-secrets render receipt are verified.
+# Inputs: Immutable image digest through VM180:5002; separate root-only renderer API keys and manifests for runtime/probe directories.
+# Outputs: A restricted VM180 listener on host port 18100 mapping to broker container port 5001.
+# Idempotency: Fully idempotent after root-rendered inputs exist; fail-closed before any broker start when they do not.
+# Dependencies: ADR 0295, ADR 0296, linux_guest_firewall, docker_runtime, fleet_build_broker_runtime.
+---
+- name: Converge the private fleet build broker on artifact-cache
+  hosts: artifact-cache
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../vars/artifact_cache_registry_endpoints.yml
+  tags:
+    - tier-2
+    - automation
+    - service-fleet-build-broker
+  vars:
+    proxmox_guest_ssh_connection_mode: proxmox_host_jump
+    docker_runtime_insecure_registries: "{{ artifact_cache_docker_runtime_insecure_registries }}"
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - artifact-cache
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.fleet_build_broker_runtime

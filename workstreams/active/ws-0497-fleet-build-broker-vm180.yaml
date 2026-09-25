@@ -1,0 +1,55 @@
+id: ws-0497-fleet-build-broker-vm180
+adr: "0296"
+title: Declare a fail-closed private fleet build broker baseline on VM180
+status: ready_for_merge
+ready_to_merge: true
+live_applied: false
+owner: codex
+branch: codex/broker-vm180-iac
+worktree_path: .worktrees/broker-vm180-iac
+doc: docs/workstreams/ws-0497-fleet-build-broker-vm180.md
+depends_on:
+  - ws-0274-artifact-cache-plane
+conflicts_with: []
+shared_surfaces:
+  - inventory/host_vars/proxmox-host.yml
+  - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker.yml
+  - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_runtime/**
+  - playbooks/fleet-build-broker.yml
+  - tests/test_fleet_build_broker_runtime_role.py
+  - docs/workstreams/ws-0497-fleet-build-broker-vm180.md
+  - workstreams/active/ws-0497-fleet-build-broker-vm180.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: fleet_build_broker_vm180_runtime
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+        - collections/ansible_collections/lv3/platform/playbooks/fleet-build-broker.yml
+        - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_runtime/**
+        - playbooks/fleet-build-broker.yml
+        - tests/test_fleet_build_broker_runtime_role.py
+      mode: shared_contract
+      contract: fleet-build-broker-vm180-v1
+    - id: ws_0497_tracking
+      paths:
+        - docs/workstreams/ws-0497-fleet-build-broker-vm180.md
+        - workstreams/active/ws-0497-fleet-build-broker-vm180.yaml
+      mode: exclusive
+context: |
+  The broker is a private mTLS-only builder control plane, not a public service.
+  Its credentials are rendered exclusively by go-fleet-secrets under a root-only
+  deployment contract. VM180 already reserves 5002 for the central GHCR cache;
+  the broker may use only that cache and must not install a VM-local package
+  credential. Private-GHCR cache authentication is a separate cache-owned
+  remediation and blocks an apply until verified.
+tasks:
+  - id: t1
+    title: Declare private VM180 host-port policy for the two named builders
+    status: completed
+  - id: t2
+    title: Add a cache-only immutable-image broker Compose baseline with root-rendered mounts
+    status: completed
+  - id: t3
+    title: Validate the static IaC and create a review-only pull request
+    status: completed

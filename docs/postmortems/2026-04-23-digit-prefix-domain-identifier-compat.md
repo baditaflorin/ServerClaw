@@ -11,7 +11,7 @@
 ## Summary
 
 `platform_config_prefix` is derived as the first DNS label of `platform_domain`
-(`example.org → "retired-deployment"`). When an operator's domain starts with a digit, this
+(`example.org → "0fork"`). When an operator's domain starts with a digit, this
 prefix is injected verbatim into six different identifier namespaces — PostgreSQL
 role names, PVE user/role names, POSIX system usernames, Proxmox ACME plugin IDs,
 and Proxmox storage IDs — all of which prohibit identifiers that begin with a
@@ -27,7 +27,7 @@ before the prefix is used as an identifier.
 
 | UTC | Event |
 |-----|-------|
-| 2026-04-23 09:40 | `converge-openbao` fails: `openbao_postgres_backend requires a safe admin role name`; role name `retired-deployment_openbao_connect_all` rejected by PostgreSQL `CREATEUSER` |
+| 2026-04-23 09:40 | `converge-openbao` fails: `openbao_postgres_backend requires a safe admin role name`; role name `0fork_openbao_connect_all` rejected by PostgreSQL `CREATEUSER` |
 | 2026-04-23 10:15 | Full audit of `platform_config_prefix` usages reveals 6 affected namespaces |
 | 2026-04-23 10:30 | `platform_sql_prefix` variable added to `identity.yml`; `openbao_postgres_connect_role` wired to it |
 | 2026-04-23 10:45 | Extended sweep: PVE role, PVE user, ACME plugin ID, Linux username, storage ID all updated |
@@ -50,12 +50,12 @@ The six affected namespaces and their grammars:
 
 | Namespace | Grammar | Broken value |
 |-----------|---------|--------------|
-| PostgreSQL role name | `^[a-z_][a-z0-9_]*$` | `retired-deployment_openbao_connect_all` |
-| Proxmox PVE role | `^[A-Za-z][A-Za-z0-9]*$` | `retired-deploymentAutomation` |
-| Proxmox PVE user | `^[A-Za-z0-9\.\-_]+@realm$` (alpha first) | `retired-deployment-automation@pve` |
-| POSIX `useradd` username | `^[a-z_][a-z0-9_\-]*$` | `retired-deployment-control-plane-backup` |
-| Proxmox ACME plugin ID | `^[A-Za-z][A-Za-z0-9\-_]*$` | `retired-deployment-hetzner-dns` |
-| Proxmox storage ID | `^[A-Za-z][A-Za-z0-9\-_]*$` | `retired-deployment-backup-offsite` |
+| PostgreSQL role name | `^[a-z_][a-z0-9_]*$` | `0fork_openbao_connect_all` |
+| Proxmox PVE role | `^[A-Za-z][A-Za-z0-9]*$` | `0forkAutomation` |
+| Proxmox PVE user | `^[A-Za-z0-9\.\-_]+@realm$` (alpha first) | `0fork-automation@pve` |
+| POSIX `useradd` username | `^[a-z_][a-z0-9_\-]*$` | `0fork-control-plane-backup` |
+| Proxmox ACME plugin ID | `^[A-Za-z][A-Za-z0-9\-_]*$` | `0fork-hetzner-dns` |
+| Proxmox storage ID | `^[A-Za-z][A-Za-z0-9\-_]*$` | `0fork-backup-offsite` |
 
 ---
 
@@ -68,7 +68,7 @@ Added to `inventory/group_vars/all/identity.yml`:
 ```yaml
 # SQL-safe identifier derived from platform_config_prefix.
 # PostgreSQL role names must start with [a-z_], so any leading digits or
-# punctuation are stripped (e.g. `retired-deployment` → `fork`, `lv3` → `lv3`).
+# punctuation are stripped (e.g. `0fork` → `fork`, `lv3` → `lv3`).
 # Used wherever the prefix appears in a database role or schema name.
 platform_sql_prefix: "{{ platform_config_prefix | regex_replace('^[^a-z_]+', '') }}"
 ```
@@ -96,9 +96,9 @@ All in `inventory/group_vars/all/main.yml`:
 These remain on `platform_config_prefix` because the destination namespace
 has no restriction on leading digits:
 
-- File paths (`/etc/ssh/sshd_config.d/90-retired-deployment-hardening.conf`, etc.)
+- File paths (`/etc/ssh/sshd_config.d/90-0fork-hardening.conf`, etc.)
 - Local `.local/` file paths (controller-side only)
-- Directory paths (`/run/retired-deployment-secrets`, `/etc/retired-deployment/windmill`, etc.)
+- Directory paths (`/run/0fork-secrets`, `/etc/0fork/windmill`, etc.)
 
 ---
 
@@ -114,7 +114,7 @@ has no restriction on leading digits:
 
 3. **The `| capitalize` filter was misleading.** Jinja2's `capitalize` makes
    the first character uppercase and the rest lowercase. For a string starting
-   with a digit (`retired-deployment`), it is a no-op — `retired-deployment | capitalize = retired-deployment`.
+   with a digit (`0fork`), it is a no-op — `0fork | capitalize = 0fork`.
    This looked like it was "fixing" the issue but was not.
 
 ---

@@ -38,7 +38,7 @@ The platform currently has:
 - **190+ literal `lv3-*` / `lv3_*` identifiers** across role defaults,
   templates, and `!unsafe` blocks (ADR 0438 audit).
 - **500+ pytest tests**, none of which answer "would `make converge-X
-  deployment=retired-deployment` succeed?" before merge.
+  deployment=0fork` succeed?" before merge.
 - **`inventory/hosts.yml` as a hardcoded enum** of `production` /
   `staging` / `clone` — does not scale to N deployments.
 - **`build/platform-manifest.json` and `build/onboarding/*` committed
@@ -47,7 +47,7 @@ The platform currently has:
 
 A 20-change review (2026-04-28) grouped the gaps into five themes and
 sequenced them into three phases. **This ADR opens Phase 1** — the
-items that stop new drift, make retired-deployment bootstrap reproducible, and
+items that stop new drift, make 0fork bootstrap reproducible, and
 unblock the remaining proposed multi-deployment ADRs (0440–0442).
 
 ---
@@ -74,7 +74,7 @@ items that have no current owner.
 Replace the hardcoded `production` / `staging` / `clone` groups in
 `inventory/hosts.yml` with generation from `deployment-model.yaml` keyed
 on a `deployment` parameter. Make `make converge-X deployment=lv3` and
-`make converge-X deployment=retired-deployment` first-class. Coordinated with ADR
+`make converge-X deployment=0fork` first-class. Coordinated with ADR
 0442 (Make interface) but do not block on its full design — the
 inventory generation is the load-bearing mechanism either way.
 
@@ -83,7 +83,7 @@ inventory generation is the load-bearing mechanism either way.
 Add an `ansible-playbook --check --diff` smoke run for every changed
 role to the pre-push gate, executed against the fork-shape fixture
 inventory (item 12). Catch the bulk of the 11 failure categories before
-merge instead of during retired-deployment live-apply. Lifts ws-0438 phase 6
+merge instead of during 0fork live-apply. Lifts ws-0438 phase 6
 (`generic_deploy_ci`) into a first-class workstream so it is not
 gated on the full 0438 sweep.
 
@@ -92,9 +92,9 @@ gated on the full 0438 sweep.
 Two synthetic deployments under `tests/fixtures/inventories/`:
 
 - `lv3-shape.yml` — current production identity, `lv3_*` prefix
-- `retired-deployment-shape.yml` — fork identity, `retired-deployment_*` / `fork_*` prefix
+- `0fork-shape.yml` — fork identity, `0fork_*` / `fork_*` prefix
 - `synthetic-shape.yml` — third unrelated identity (`testfork.invalid`)
-  to catch lv3/retired-deployment coincidences that look generic but are not
+  to catch lv3/0fork coincidences that look generic but are not
 
 Item 10's check runs against all three. A role passes only when all
 three render successfully.
@@ -122,7 +122,7 @@ Run advisory in the pre-push gate for one release; promote to required.
 ## Consequences
 
 **Positive.**
-- retired-deployment bootstrap stops being a discovery channel for regressions —
+- 0fork bootstrap stops being a discovery channel for regressions —
   the test matrix catches them.
 - Two deployments can converge concurrently without artifact collisions.
 - ADRs 0440–0442 unblock: their preconditions land here.
@@ -165,7 +165,7 @@ tracks their status but does not redefine their plans.
 
 ## Acceptance Criteria
 
-- `tests/fixtures/inventories/{lv3,retired-deployment,synthetic}-shape.yml` exist,
+- `tests/fixtures/inventories/{lv3,0fork,synthetic}-shape.yml` exist,
   each renders the full `platform_service_registry` without error.
 - `scripts/converge_dry_run.py` (or equivalent) executes
   `ansible-playbook --check --diff` for every changed role against the
@@ -175,7 +175,7 @@ tracks their status but does not redefine their plans.
   `default('<known-prod-IP-or-domain>')` patterns in role defaults,
   passes on `main` after Phase 1 cleanup, and is promoted to required
   by 0.181.
-- `make converge-X deployment=retired-deployment` and `make converge-X
+- `make converge-X deployment=0fork` and `make converge-X
   deployment=lv3` are first-class entry points; the legacy `env=...`
   enum is deprecated with a one-release warning window.
 - ADR 0438 phase 6 is retired or restructured to depend on this ADR's

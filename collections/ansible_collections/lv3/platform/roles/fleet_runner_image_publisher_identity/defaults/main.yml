@@ -1,0 +1,14 @@
+---
+# Purpose: Declare the fixed, non-secret publisher identity for Builder LXC108.
+# Use case: The dedicated Builder LXC108 must attest its approved fleet-runner image-publishing identity.
+# Inputs: None. All values are deliberately fixed to prevent a caller from retargeting this role.
+# Outputs: A root-only JSON identity contract at /etc/fleet-runner/image-publisher.json.
+# Idempotency: Yes. The fixed directory mode and fixed JSON payload converge on every run.
+# Dependencies: ADR 0296 private fleet delivery boundaries and the fleet-runner publisher contract.
+fleet_runner_image_publisher_target_host: 0docker_builder
+fleet_runner_image_publisher_config_dir: /etc/fleet-runner
+fleet_runner_image_publisher_config_file: /etc/fleet-runner/image-publisher.json
+fleet_runner_image_publisher_identity: builder-lxc-108
+fleet_runner_image_publisher_version: 1
+fleet_runner_image_publisher_config_dir_mode: "0700"
+fleet_runner_image_publisher_config_file_mode: "0600"

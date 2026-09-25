@@ -1,0 +1,97 @@
+---
+# Purpose: Install a root-only, fail-closed Step-CA issuance and fleet-secrets delivery handoff for fleet-build-broker.
+# Use case: A private mTLS broker needs 24-hour server/client leaves without granting CA or vault-write credentials to a workload.
+# Inputs: Broker private IP, existing Step-CA services provisioner, and canonical writer bridge.
+# Outputs: Root-only handoff configuration plus a systemd renewal timer; no certificate or credential values are rendered to logs.
+# Idempotency: Yes. The role only renders deterministic control-plane files and enables the timer.
+# Dependencies: ADR 0042, ADR 0047, ADR 0101, and the go-fleet-secrets short-lived writer transaction contract.
+- name: Validate fleet-build-broker PKI handoff inputs
+  ansible.builtin.assert:
+    that:
+      - fleet_build_broker_pki_server_dns == 'fleet-build-broker.internal'
+      - fleet_build_broker_pki_server_ip | regex_search('^[0-9A-Fa-f:.]+$')
+      - fleet_build_broker_pki_vault_writer_command | length > 0
+      - fleet_build_broker_pki_vault_writer_command[0].startswith('/')
+      - fleet_build_broker_pki_step_command | length > 0
+      - fleet_build_broker_pki_step_command[0].startswith('/')
+      - fleet_build_broker_pki_step_ca_url.startswith('https://')
+      - fleet_build_broker_pki_step_provisioner == 'services'
+    fail_msg: >-
+      fleet_build_broker_pki_handoff requires the exact broker DNS identity, a private IP SAN,
+      a Step-CA services provisioner, and the root-only short-lived writer bridge.
+
+- name: Ensure the broker PKI handoff configuration directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_build_broker_pki_handoff_config_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Ensure the broker PKI handoff state directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_build_broker_pki_handoff_state_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Install the root-only broker PKI handoff executable
+  ansible.builtin.template:
+    src: fleet-build-broker-pki-handoff.py
+    dest: "{{ fleet_build_broker_pki_handoff_binary_path }}"
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Render the broker PKI handoff contract
+  ansible.builtin.template:
+    src: handoff.json.j2
+    dest: "{{ fleet_build_broker_pki_handoff_config_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Validate the rendered broker PKI handoff contract without issuing material
+  ansible.builtin.command:
+    argv:
+      - "{{ fleet_build_broker_pki_handoff_binary_path }}"
+      - --config
+      - "{{ fleet_build_broker_pki_handoff_config_path }}"
+      - --check-config
+  changed_when: false
+  no_log: true
+
+- name: Bootstrap or validate the broker-exclusive client trust anchor
+  ansible.builtin.command:
+    argv:
+      - "{{ fleet_build_broker_pki_handoff_binary_path }}"
+      - --config
+      - "{{ fleet_build_broker_pki_handoff_config_path }}"
+      - --bootstrap-client-ca
+  changed_when: false
+  no_log: true
+
+- name: Render the broker PKI renewal systemd service
+  ansible.builtin.template:
+    src: fleet-build-broker-pki-renew.service.j2
+    dest: "{{ fleet_build_broker_pki_handoff_service_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the broker PKI renewal systemd timer
+  ansible.builtin.template:
+    src: fleet-build-broker-pki-renew.timer.j2
+    dest: "{{ fleet_build_broker_pki_handoff_timer_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable the broker PKI renewal timer
+  ansible.builtin.systemd:
+    name: "{{ fleet_build_broker_pki_handoff_name }}.timer"
+    enabled: true
+    state: started
+    daemon_reload: true

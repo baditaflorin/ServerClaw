@@ -1,0 +1,4 @@
+#!/bin/sh
+# Managed by Ansible. This is the only supported Builder entrypoint for the
+# private 0mcp lane; the root-owned transport path overrides inherited env.
+exec env FLEET_PRIVATE_0MCP_TRANSPORT_FILE={{ fleet_runner_private_0mcp_transport_file }} /usr/local/bin/fleet-runner "$@"

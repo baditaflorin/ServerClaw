@@ -1,0 +1,22 @@
+---
+# Root-only Dockerhost bridge for the broker PKI handoff. The bridge is reached
+# only through a forced SSH command from the Step-CA control host; it neither
+# stores nor renders certificate, API-key, or provisioner values.
+fleet_build_broker_pki_vault_writer_name: fleet-build-broker-pki-vault-writer
+fleet_build_broker_pki_vault_writer_user: fleet-build-broker-pki-writer
+fleet_build_broker_pki_vault_writer_group: fleet-build-broker-pki-writer
+fleet_build_broker_pki_vault_writer_binary_path: /usr/local/libexec/fleet-build-broker-pki-vault-writer
+fleet_build_broker_pki_vault_writer_config_dir: /etc/fleet-build-broker-pki-vault-writer
+fleet_build_broker_pki_vault_writer_config_path: "{{ fleet_build_broker_pki_vault_writer_config_dir }}/transaction.json"
+fleet_build_broker_pki_vault_writer_authorized_keys_path: "{{ fleet_build_broker_pki_vault_writer_config_dir }}/authorized_keys"
+fleet_build_broker_pki_vault_writer_sshd_config_path: /etc/ssh/sshd_config.d/90-fleet-build-broker-pki-writer.conf
+fleet_build_broker_pki_vault_writer_sudoers_path: /etc/sudoers.d/fleet-build-broker-pki-writer
+# The paired private key remains root-only Step-CA-control-host state. The
+# public half is supplied only by the deployment-local overlay and is never
+# generated, copied, or persisted by this role.
+fleet_build_broker_pki_vault_writer_authorized_public_key: ""
+fleet_build_broker_pki_vault_writer_allowed_source: "{{ hostvars['runtime-control'].ansible_host }}"
+fleet_build_broker_pki_vault_writer_admin_token_file: /opt/_shared/apikey-admin.env
+fleet_build_broker_pki_vault_writer_apikey_url: http://127.0.0.1:18021
+fleet_build_broker_pki_vault_writer_vault_url: https://fleet-secrets.0exec.com
+fleet_build_broker_pki_vault_writer_timeout_seconds: 15

@@ -1,23 +1,23 @@
-# ADR 0425: Retrospective on the 420-ADR Agent-Built Platform — Lessons from a Retired Deployment Exercise
+# ADR 0425: Retrospective on the 420-ADR Agent-Built Platform — What Breaks When You Try to Clone It
 
 - Status: Accepted
 - Implementation Status: N/A (retrospective)
 - Date: 2026-04-21
-- Concern: process, portability, agent-collaboration, platform-maturity
-- Tags: retrospective, postmortem, ADR-culture, portability, lessons-learned
+- Concern: process, forkability, agent-collaboration, platform-maturity
+- Tags: retrospective, postmortem, ADR-culture, forkability, lessons-learned
 - Relates to: ADR 0385 (Operator Identity Core), ADR 0407 (Generic-by-default),
   ADR 0376 (`.local/` is Sacred), ADR 0419 (PR-based integration), ADR 0421
-  (Service Watchdog), ADR 0424 (example.org secondary deployment)
+  (Service Watchdog), ADR 0424 (example.org Clone)
 
 ---
 
 ## Purpose
 
-The retired example.org deployment exercise (ADR 0424) is the first time an agent has been
+The example.org clone attempt (ADR 0424) is the first time an agent has been
 asked to stand up the full platform from scratch on a new server for a new
 domain, with the current operator unavailable. This retrospective records
 what the 420-ADR process produced that works, what didn't work, and what
-the deployment exercise immediately revealed as friction.
+the clone attempt immediately revealed as friction.
 
 This is a successor to several postmortems (ADR 0376, ADR 0415) that captured
 single incidents; this one looks at the *shape of the whole build*.
@@ -28,10 +28,10 @@ single incidents; this one looks at the *shape of the whole build*.
 
 ### 1. `.local/` as the identity boundary
 ADR 0385 and ADR 0407 together produced a clean separation: committed code is
-generic, `.local/` holds deployment-specific values. Starting the retired-deployment secondary deployment
-required editing **one new file** (`.local/identity.yml.retired-deployment`) plus selecting
+generic, `.local/` holds deployment-specific values. Starting the 0fork clone
+required editing **one new file** (`.local/identity.yml.0fork`) plus selecting
 it at runtime. No committed Ansible needed to change. That's the success
-criterion for "portable" and it held.
+criterion for "forkable" and it held.
 
 ### 2. Hetzner DNS token flow
 `.local/hetzner/dns.env` → used by `roles/hetzner_dns_record` → creates
@@ -57,13 +57,13 @@ parallel LSP-AI workstream). No duplicate numbering collisions.
 
 ---
 
-## What breaks when you try to secondary deployment
+## What breaks when you try to clone
 
 ### 1. Resource envelope is not documented anywhere
 Prod runs ~17 VMs requesting 84 cores and probably 100+ GiB RAM. The AX41-NVMe
 is 12 threads / 62 GiB. Nowhere in the 420 ADRs is there a "minimum host
-envelope" — a operator of a separate deployment has no way to know what hardware to buy. The
-secondary deployment ADR (0424) had to invent a collapsed-topology plan from scratch.
+envelope" — a fork operator has no way to know what hardware to buy. The
+clone ADR (0424) had to invent a collapsed-topology plan from scratch.
 
 **Action for a future ADR**: capture a "hardware envelope" doc listing
 minimum, recommended, and prod sizing, with a collapsed-topology reference
@@ -84,7 +84,7 @@ as stale, even if it means a slower first pass.
 ### 3. DNS-API token rotation has no protocol
 The operator shared the Hetzner DNS API token in chat (an acceptable
 informality for a trusted session). There is no documented procedure for
-"the token was exposed, rotate it." A operator of a separate deployment handed a repo with a
+"the token was exposed, rotate it." A fork operator handed a repo with a
 token in `.local/hetzner/dns.env` has no hint that rotating it requires both
 (a) regenerating in Hetzner Console and (b) updating the env file. Document.
 
@@ -100,7 +100,7 @@ record destruction.
 
 ### 5. rDNS has no automation path
 PTR records for Hetzner dedicated servers require manual Robot UI clicks (no
-legacy API endpoint). Every separate deployment that wants deliverable outbound mail needs
+legacy API endpoint). Every fork that wants deliverable outbound mail needs
 this. Currently nothing in the runbook flags it. Add a manual step with a
 TODO marker.
 
@@ -108,7 +108,7 @@ TODO marker.
 ADR 0041 acknowledged this and introduced the Brevo bridge. But ADR 0041 is
 a *planning* ADR; the concrete bridge wiring is split across `mail_platform_*`
 roles, `.local/mail-platform/brevo-api-key.txt`, and operator-provisioning
-scripts. A operator of a separate deployment reading ADR 0041 top-to-bottom does not end up with
+scripts. A fork operator reading ADR 0041 top-to-bottom does not end up with
 a working outbound path. This is documentation-as-scattered-jigsaw — a common
 anti-pattern that 420 incremental ADRs encourages.
 
@@ -116,7 +116,7 @@ anti-pattern that 420 incremental ADRs encourages.
 that references ADRs 0041, 0076 (subdomain governance), 0045 (lanes),
 and the `.local/mail-platform/` secret layout in one place.
 
-### 7. deployment target account-name mismatch (non-blocking observation)
+### 7. Fork-target account-name mismatch (non-blocking observation)
 The Hetzner order emails address "Mr. Raabe", not "Platform Operator". In
 a trusted session, this is clearly fine. In a less-trusted handoff, this is
 exactly the kind of signal that should trigger a "is this the right account?"
@@ -134,9 +134,9 @@ pattern where services kept falling over one at a time. That pattern is
 heavily weighted toward "fix this one thing that broke" rather than
 "build this one thing that is missing."
 
-The retired deployment exercise is the forcing-function that exposes whether the
+The 0fork clone attempt is the forcing-function that exposes whether the
 fix-storm left the platform genuinely robust or just patched. Early signal
-from the deployment exercise:
+from the clone session:
 
 - ✅ Identity overlay works without code changes (ADR 0385 held)
 - ✅ SSH + DNS + key provenance all worked first try
@@ -145,15 +145,15 @@ from the deployment exercise:
 - ⚠️  rDNS + mail deliverability are unautomated
 - ⚠️  Destructive DNS operations have no foreign-record guard
 
-Verdict: the platform is **portable for domain + identity**, **not yet
-portable for the full substrate**. The committed code is generic; the
+Verdict: the platform is **forkable for domain + identity**, **not yet
+forkable for the full substrate**. The committed code is generic; the
 runbooks and resource planning are not.
 
 ---
 
-## Live postmortem: near-miss during the secondary deployment bootstrap (2026-04-21)
+## Live postmortem: near-miss during the clone bootstrap (2026-04-21)
 
-During the example.org deployment exercise the agent (this agent) nearly broke the
+During the example.org clone session the agent (this agent) nearly broke the
 RAID1 mirror on the new Hetzner AX41-NVMe. Sequence:
 
 1. Operator said "fuck raid" — skip RAID1.
@@ -180,7 +180,7 @@ RAID1 mirror on the new Hetzner AX41-NVMe. Sequence:
 - **`lsblk -d` lies about RAID members.** The first disk-inventory command
   in any Hetzner-provisioning runbook should be `lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS`
   and `cat /proc/mdstat`, not `lsblk -d`.
-- **Hetzner default installimage is RAID1 on dual-disk systems.** A separate deployment
+- **Hetzner default installimage is RAID1 on dual-disk systems.** A fork
   operator who thinks they are skipping RAID by not running `installimage`
   manually is wrong — the default Hetzner Debian image already ran
   installimage with `SWRAID 1`. This deserves explicit callout in the
@@ -195,7 +195,7 @@ RAID1 mirror on the new Hetzner AX41-NVMe. Sequence:
 ### Immediate fix applied
 
 The bootstrap runbook (`docs/runbooks/hetzner-bare-metal-bootstrap.md`) now
-calls out this near-miss at its disk-layout section. The secondary deployment proceeds with
+calls out this near-miss at its disk-layout section. The clone proceeds with
 RAID1 (accidentally acquired) rather than the no-RAID the operator thought
 they were getting. This is strictly better from a data-safety perspective.
 
@@ -211,7 +211,7 @@ they were getting. This is strictly better from a data-safety perspective.
    version, package name, or IP must declare an assertion at the top and
    fail loudly if the environment doesn't match.
 
-These are low-cost and directly unblock the next separate deployment attempt.
+These are low-cost and directly unblock the next fork attempt.
 
 ---
 
@@ -220,10 +220,10 @@ These are low-cost and directly unblock the next separate deployment attempt.
 - That the 420-ADR count is a problem. It is not — the platform is large
   and deliberate about recording decisions.
 - That the agent-operator collaboration pattern is broken. It is not —
-  the retired deployment exercise is proceeding in a single operator-absent window
+  the 0fork clone session is proceeding in a single operator-absent window
   on docs + verifications alone, and producing usable artifacts.
-- That the secondary deployment is going to succeed end-to-end. It might or might not.
-  This ADR is about process, not about the secondary deployment's outcome.
+- That the clone is going to succeed end-to-end. It might or might not.
+  This ADR is about process, not about the clone's outcome.
 
 ---
 
@@ -235,4 +235,4 @@ These are low-cost and directly unblock the next separate deployment attempt.
 - ADR 0409 — Host-Specific Overrides
 - ADR 0415 — Cert-mismatch gate-forced `--no-verify` (postmortem)
 - ADR 0421 — Platform-wide service watchdog (postmortem)
-- ADR 0424 — example.org secondary deployment plan
+- ADR 0424 — example.org clone plan

@@ -55,7 +55,7 @@ We need both:
 
 Both are deployment-aware — they read the active deployment's profile
 (ADR 0441) so the prod reconciler doesn't false-positive on services
-retired-deployment doesn't run.
+0fork doesn't run.
 
 ---
 
@@ -152,7 +152,7 @@ ntfy/alertmanager forwarding by reading the JSON in their job runner.
 ```
 make validate-topology-templates       # write-time linter (pre-push)
 make detect-topology-drift             # one-shot runtime reconcile
-make detect-topology-drift deployment=retired-deployment
+make detect-topology-drift deployment=0fork
 make topology-probe-self               # run the probe on the local guest
                                        # (used by the reconciler over SSH)
 ```
@@ -160,9 +160,9 @@ make topology-probe-self               # run the probe on the local guest
 ### Per-deployment isolation
 
 The reconciler reads only the active deployment's enabled services. For
-deployment `retired-deployment` (which only runs `core + devtools`), the reconciler
+deployment `0fork` (which only runs `core + devtools`), the reconciler
 will not flag the absence of `langfuse` on `runtime-control` as drift,
-because langfuse is not in retired-deployment's profile.
+because langfuse is not in 0fork's profile.
 
 The drift report lives under
 `.local/deployments/<slug>/state/drift-report.json` so two deployments
@@ -182,7 +182,7 @@ reconciler runs against the same deployment.
 - The runtime reconciler catches drift introduced by anything outside
   the converge path: manual SSH, half-failed migrations, third-party
   changes, container restart on the wrong node.
-- Both work per-deployment, so retired-deployment's reconciler doesn't false-positive
+- Both work per-deployment, so 0fork's reconciler doesn't false-positive
   on services prod runs.
 - The probe is stdlib-only, so it works on any guest with Python 3
   without requiring an Ansible converge to install dependencies first.

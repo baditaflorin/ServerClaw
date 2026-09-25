@@ -21,7 +21,7 @@ shared_surfaces:
   - Makefile
   - CLAUDE.md
   - .local/deployments/lv3/
-  - .local/deployments/retired-deployment/
+  - .local/deployments/0fork/
   - .local/active-deployment
 ownership_manifest:
   owned_surfaces:
@@ -55,7 +55,7 @@ ownership_manifest:
         - docs/adr/.index.yaml
         - docs/adr/index/**
         - workstreams.yaml
-        - workstreams/active/ws-0482-retired-deployment-not-bootstrapped.yaml
+        - workstreams/active/ws-0482-0fork-platform-not-bootstrapped.yaml
         - workstreams/active/ws-0483-capacity-aware-dynamic-sizing.yaml
         - workstreams/active/ws-0484-self-verification-contracts.yaml
         - workstreams/active/ws-0485-convergence-idempotency-tests.yaml
@@ -82,10 +82,10 @@ tasks:
     title: Backfill .local/deployments/lv3/ from the parked lv3-backup identity
     status: pending
   - id: t2
-    title: Remove or repurpose .local/deployments/prod/ (currently a stale retired-deployment duplicate)
+    title: Remove or repurpose .local/deployments/prod/ (currently a stale 0fork duplicate)
     status: pending
   - id: t3
-    title: Write .local/active-deployment marker (defaults to retired-deployment — current active)
+    title: Write .local/active-deployment marker (defaults to 0fork — current active)
     status: pending
   - id: t4
     title: Add Makefile targets — whoami, deployments-list, use-deployment, bind-worktree, new-deployment, sync-identity-link
@@ -110,4 +110,4 @@ tasks:
     status: completed
 findings:
   - The structural refactor landed cleanly. `make whoami`, `make deployments-list`, `make use-deployment slug=<s>`, `make bind-worktree slug=<s>`, `make sync-identity-link`, `make _require-deployment` all verified working end-to-end (both happy path and failure path) on 2026-05-11.
-  - Side discovery (spawned ws-0482) — retired-deployment's platform deployment from ws-0372 never actually landed. The Harbor 502 originally reported is not a transient outage; it is a "never deployed" symptom amplified by stale nginx vhost entries.
+  - Side discovery (spawned ws-0482) — 0fork's platform deployment from ws-0372 never actually landed. The Harbor 502 originally reported is not a transient outage; it is a "never deployed" symptom amplified by stale nginx vhost entries.

@@ -722,7 +722,6 @@
       "internal_url": "http://100.64.0.1:3009",
       "subdomain": "git.example.com",
       "exposure": "private-only",
-      "mesh_access": "tailnet",
       "uptime_monitor_name": "Gitea Private",
       "health_probe_id": "gitea",
       "secret_catalog_ids": [

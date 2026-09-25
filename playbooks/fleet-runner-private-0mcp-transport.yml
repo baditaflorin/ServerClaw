@@ -1,0 +1,2 @@
+---
+- import_playbook: ../collections/ansible_collections/lv3/platform/playbooks/fleet-runner-private-0mcp-transport.yml

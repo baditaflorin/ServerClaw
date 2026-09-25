@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
+import shlex
+import signal
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import yaml  # type: ignore[import-untyped]
@@ -158,6 +162,26 @@ def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
         f".local/session-workspaces/{payload['session_workspace']['session_slug']}"
     )
     assert [check["id"] for check in payload["checks"]] == ["alpha", "beta"]
+
+
+def test_schema_validation_budget_retains_full_native_command() -> None:
+    manifest = json.loads((REPO_ROOT / "config" / "validation-gate.json").read_text(encoding="utf-8"))
+    schema_validation = manifest["schema-validation"]
+
+    assert schema_validation["timeout_seconds"] == 1200
+    assert schema_validation["native_command"] == (
+        "./scripts/validate_repo.sh data-models >/dev/null && "
+        "./scripts/run_python_with_packages.sh pyyaml jsonschema -- scripts/platform_manifest.py --check >/dev/null && "
+        "./scripts/run_python_with_packages.sh pyyaml jsonschema -- scripts/stage_smoke_suites.py --validate >/dev/null"
+    )
+
+
+def test_generated_portals_budget_retains_full_native_command() -> None:
+    manifest = json.loads((REPO_ROOT / "config" / "validation-gate.json").read_text(encoding="utf-8"))
+    generated_portals = manifest["generated-portals"]
+
+    assert generated_portals["timeout_seconds"] == 900
+    assert generated_portals["native_command"] == "./scripts/validate_repo.sh generated-portals"
 
 
 def test_run_gate_auto_selects_docs_lane_checks(tmp_path: Path) -> None:
@@ -417,6 +441,79 @@ def test_run_gate_executes_native_local_fallback_even_when_runner_contract_marks
     assert payload["checks"][0]["status"] == "passed"
     assert payload["checks"][0]["runner_unavailable_reason"] is None
     assert payload["runner"]["lane_evaluations"]["alpha"]["eligible"] is True
+
+
+def test_run_gate_timeout_reaps_local_fallback_process_group(tmp_path: Path) -> None:
+    if os.name != "posix":
+        return
+
+    run_gate = load_module("run_gate_timeout_process_group", "scripts/run_gate.py")
+    manifest_path = tmp_path / "validation-gate.json"
+    status_path = tmp_path / "last-run.json"
+    runner_contracts = tmp_path / "validation-runner-contracts.json"
+    child_pid_path = tmp_path / "child.pid"
+    survivor_path = tmp_path / "child-survived"
+    child_code = (
+        "import time; from pathlib import Path; time.sleep(2); "
+        f"Path({str(survivor_path)!r}).write_text('leaked', encoding='utf-8')"
+    )
+    parent_code = (
+        "import subprocess, sys, time; from pathlib import Path; "
+        f"child = subprocess.Popen([sys.executable, '-c', {child_code!r}]); "
+        f"Path({str(child_pid_path)!r}).write_text(str(child.pid), encoding='utf-8'); "
+        "time.sleep(60)"
+    )
+    local_command = f"{shlex.quote(sys.executable)} -c {shlex.quote(parent_code)}"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "alpha": {
+                    "description": "timeout cleanup",
+                    "severity": "error",
+                    "image": "example/alpha:latest",
+                    "command": "false",
+                    "local_fallback_command": local_command,
+                    "working_dir": "/workspace",
+                    "timeout_seconds": 1,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    write_runner_contracts(runner_contracts, lane_ids=["alpha"])
+
+    exit_code = run_gate.main(
+        [
+            "--manifest",
+            str(manifest_path),
+            "--workspace",
+            str(tmp_path),
+            "--status-file",
+            str(status_path),
+            "--source",
+            "local-timeout-cleanup",
+            "--runner-id",
+            "test-runner",
+            "--runner-contracts",
+            str(runner_contracts),
+        ]
+    )
+
+    assert exit_code == 1
+    payload = json.loads(status_path.read_text(encoding="utf-8"))
+    assert payload["checks"][0]["status"] == "timed_out"
+    assert payload["checks"][0]["returncode"] == 124
+    assert child_pid_path.is_file()
+
+    time.sleep(2.5)
+    try:
+        assert not survivor_path.exists()
+    finally:
+        if child_pid_path.exists():
+            try:
+                os.kill(int(child_pid_path.read_text(encoding="utf-8")), signal.SIGKILL)
+            except ProcessLookupError:
+                pass
 
 
 def test_log_gate_bypass_writes_receipt(tmp_path: Path) -> None:

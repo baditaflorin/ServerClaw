@@ -15,7 +15,7 @@
 # changes, update the url below or replace with the container name when
 # coolify-proxy gains DNS resolution for the app network.
 #
-# See: docs/postmortems/2026-04-28-coolify-retired-deployment-deployment-and-education-wemeshup.md
+# See: docs/postmortems/2026-04-28-coolify-0fork-deployment-and-education-wemeshup.md
 # Workstream: workstreams/active/ws-0447-coolify-apps-self-healing.yaml
 http:
   routers:

@@ -29,7 +29,7 @@ def _load_module():
         ("ops.example.org", ["*.example.org"], True),
         ("nested.api.example.org", ["*.example.org"], False),  # wildcard one-level only
         ("ops.example.org", ["other.example"], False),
-        ("Ops.retired-deployment.example.invalid", ["ops.example.org"], True),  # case-insensitive
+        ("Ops.0Fork.com", ["ops.example.org"], True),  # case-insensitive
         ("ops.example.org", [], False),
     ],
 )

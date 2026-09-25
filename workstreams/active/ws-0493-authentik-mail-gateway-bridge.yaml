@@ -1,0 +1,90 @@
+id: ws-0493-authentik-mail-gateway-bridge
+adr: "0041"
+title: Route Authentik transactional mail through the managed delivery gateway
+status: ready_for_merge
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/mail-platform-brevo-live-apply-20260901
+worktree_path: .worktrees/mail-platform-brevo-live-apply-20260901
+doc: docs/workstreams/ws-0493-authentik-mail-gateway-bridge.md
+depends_on:
+  - adr-0491-authentik-keycloak-sunset-2026-08-30
+  - ws-0492-authentik-recovery-email
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/mail_platform_observability/**
+  - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-mail-platform.json.j2
+  - config/validation-gate.json
+  - config/integrations/authentik--mail-platform.yaml
+  - docs/runbooks/configure-authentik.md
+  - docs/runbooks/configure-mail-platform.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/workstreams/ws-0493-authentik-mail-gateway-bridge.md
+  - receipts/live-applies/ws-0493-authentik-mail-gateway-bridge-apply-receipt.yaml
+  - receipts/ops-portal-snapshot.html
+  - receipts/restic-snapshots-latest.json
+  - tests/test_authentik_runtime_role.py
+  - tests/test_mail_gateway_smtp_bridge.py
+  - tests/test_mail_platform_runtime_role.py
+  - workstreams/active/ws-0493-authentik-mail-gateway-bridge.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: authentik_mail_delivery_contract
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+        - config/integrations/authentik--mail-platform.yaml
+        - docs/runbooks/configure-authentik.md
+        - tests/test_authentik_runtime_role.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: managed_mail_gateway_runtime
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/mail_platform_observability/**
+        - collections/ansible_collections/lv3/platform/roles/mail_platform_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-mail-platform.json.j2
+        - docs/runbooks/configure-mail-platform.md
+        - tests/test_mail_gateway_smtp_bridge.py
+        - tests/test_mail_platform_runtime_role.py
+      mode: shared_contract
+      contract: adr-0041-mail-platform-v1
+    - id: ws_0493_workstream_shard
+      paths:
+        - docs/workstreams/ws-0493-authentik-mail-gateway-bridge.md
+        - workstreams/active/ws-0493-authentik-mail-gateway-bridge.yaml
+        - receipts/live-applies/ws-0493-authentik-mail-gateway-bridge-apply-receipt.yaml
+        - receipts/ops-portal-snapshot.html
+        - receipts/restic-snapshots-latest.json
+      mode: exclusive
+    - id: ws_0493_generated_identity_truth
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: ws_0493_validation_runner
+      paths:
+        - config/validation-gate.json
+      mode: shared_contract
+      contract: validation-gate-runner-v1
+context: |
+  The governed Authentik recovery request reached Stalwart, but its queued
+  message repeatedly timed out during direct outbound SMTP delivery. ADR 0041
+  designates the private mail gateway's Brevo API route as the live
+  transactional delivery path. This workstream adds a private, authenticated
+  SMTP compatibility bridge inside that gateway so Authentik can retain its
+  supported SMTP interface without depending on blocked direct port-25 egress.
+tasks:
+  - id: t1
+    title: Capture the failed direct-delivery evidence and select the governed gateway path
+    status: completed
+  - id: t2
+    title: Implement and test the private authenticated SMTP-to-transactional gateway bridge
+    status: completed
+  - id: t3
+    title: Apply mail platform then Authentik through the governed converge path
+    status: completed
+  - id: t4
+    title: Dispatch a fresh recovery email and verify provider acceptance and public recovery flow
+    status: completed

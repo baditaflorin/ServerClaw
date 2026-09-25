@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-09-24'
+generated: '2026-08-31'
 facet: status
 implementation_status: Accepted
 slug: accepted
@@ -562,14 +562,14 @@ adrs:
     filename: 0430-topology-host-vars-local-overlay.md
     path: docs/adr/0430-topology-host-vars-local-overlay.md
   - adr: '0431'
-    title: retired-deployment Full-Day Deployment — Single-Command IaC Entry Point
+    title: 0fork Full-Day Deployment — Single-Command IaC Entry Point
     status: Accepted
     implementation_status: Accepted
     currently_describes: current_state
     date: '2026-04-21'
     concern: platform
     keywords:
-      - retired-deployment
+      - 0fork
       - fork-clone
       - full-day-deploy
       - iac
@@ -579,6 +579,6 @@ adrs:
       - full-day
       - deployment
       - single-command
-    summary: Ship a single orchestrator target — make deploy-retired-deployment — that chains the
-    filename: 0431-retired-deployment-full-day-deployment.md
-    path: docs/adr/0431-retired-deployment-full-day-deployment.md
+    summary: Ship a single orchestrator target — make deploy-0fork — that chains the
+    filename: 0431-0fork-full-day-deployment.md
+    path: docs/adr/0431-0fork-full-day-deployment.md

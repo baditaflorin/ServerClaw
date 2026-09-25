@@ -1,0 +1,77 @@
+id: ws-0511-serverclaw-public-route-template
+adr: "0407"
+title: Keep the ServerClaw host template aligned with the edge route catalog
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/serverclaw-public-route-template-20260925
+worktree_path: .worktrees/codex-serverclaw-public-route-template-20260925
+doc: docs/workstreams/ws-0511-serverclaw-public-route-template.md
+canonical_truth:
+  changelog_entry: Keep the sanitized ServerClaw host template consistent with active authenticated edge routes.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+depends_on:
+  - ws-0510-gitea-authentik-oidc-e2e
+conflicts_with: []
+shared_surfaces:
+  - publication/templates/proxmox-host.yml
+  - config/validation-lanes.yaml
+  - tests/test_publish_to_serverclaw.py
+  - tests/test_validation_lanes.py
+  - workstreams/active/ws-0511-serverclaw-public-route-template.yaml
+  - docs/workstreams/ws-0511-serverclaw-public-route-template.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams.yaml
+  - VERSION
+  - changelog.md
+  - build/platform-manifest.json
+ownership_manifest:
+  owned_surfaces:
+    - id: sanitized_edge_route_template
+      paths:
+        - publication/templates/proxmox-host.yml
+        - tests/test_publish_to_serverclaw.py
+        - docs/workstreams/ws-0511-serverclaw-public-route-template.md
+      mode: exclusive
+    - id: publication_template_validation_routing
+      paths:
+        - config/validation-lanes.yaml
+        - tests/test_validation_lanes.py
+      mode: exclusive
+    - id: workstream_tracking
+      paths:
+        - workstreams/active/ws-0511-serverclaw-public-route-template.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: generated_workstream_diagram
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: repository_release_truth
+      paths:
+        - VERSION
+        - changelog.md
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: release-truth-v1
+context: |
+  The sanitized ServerClaw snapshot retains the active repo-intake edge-auth
+  catalog entry, but its Tier A Proxmox host template omitted the corresponding
+  enabled edge route. The public Woodpecker pipeline therefore rejected the
+  generated snapshot. Keep the generic host template and its regression test in
+  sync so future sanitized publications remain valid without deployment values.
+tasks:
+  - id: t1
+    title: Add the generic edge route, regression test, and validation-lane routing
+    status: completed
+  - id: t2
+    title: Validate generated public snapshot and required repository checks
+    status: pending
+  - id: t3
+    title: Merge the private-source fix and refresh the ServerClaw publication PR
+    status: pending

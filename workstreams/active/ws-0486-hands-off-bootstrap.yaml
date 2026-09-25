@@ -5,7 +5,7 @@ status: in_progress
 ready_to_merge: false
 live_applied: false
 owner: claude
-deployment: retired-deployment
+deployment: 0fork
 branch: claude/happy-maxwell-b79396
 worktree_path: .claude/worktrees/happy-maxwell-b79396
 doc: docs/adr/0483-hands-off-bootstrap.md
@@ -63,7 +63,7 @@ tasks:
     title: config/contracts/deployment-v1/manifest.schema.json — single declarative input format
     status: completed
   - id: t2-derive-manifest
-    title: scripts/derive_manifest.py — introspect lv3 + retired-deployment to emit draft manifests
+    title: scripts/derive_manifest.py — introspect lv3 + 0fork to emit draft manifests
     status: completed
   - id: t3-bootstrap-steps
     title: config/bootstrap_steps.yml — the 14-step contract chain (preconditions + postconditions per step)

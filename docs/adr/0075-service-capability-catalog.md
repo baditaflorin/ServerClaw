@@ -76,7 +76,6 @@ We will define a canonical `config/service-capability-catalog.json` that is the 
 | `public_url` | string | no | Public edge URL if applicable |
 | `subdomain` | string | no | Canonical subdomain |
 | `exposure` | enum | yes | `edge-published`, `private-only`, `informational-only` |
-| `mesh_access` | enum | no | `tailnet` when network membership in the operator mesh is part of the service access boundary; requires `private-only` exposure and a managed tailnet path |
 | `health_probe_id` | string | no | Reference to health-probe-catalog.json entry |
 | `image_catalog_ids` | array | no | References to image-catalog.json entries |
 | `secret_catalog_ids` | array | no | References to secret-catalog.json entries |

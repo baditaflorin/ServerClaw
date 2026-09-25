@@ -11,8 +11,8 @@ SCRIPTS_DIR = REPO_ROOT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-import service_catalog  # noqa: E402
-import subdomain_catalog  # noqa: E402
+import service_catalog
+import subdomain_catalog
 
 
 class SubdomainCatalogTests(unittest.TestCase):
@@ -24,6 +24,27 @@ class SubdomainCatalogTests(unittest.TestCase):
         self.service_catalog = service_catalog.load_service_catalog()
         self.host_vars = subdomain_catalog.load_host_vars()
         self.public_edge_defaults = subdomain_catalog.load_public_edge_defaults()
+
+    def test_load_host_vars_resolves_identity_variables_once(self) -> None:
+        host_vars = {
+            "platform_service_topology": {
+                "gitea": {"public_hostname": "git.{{ platform_domain }}"},
+                "authentik": {"public_hostname": "id.{{ platform_domain }}"},
+            }
+        }
+        with (
+            patch.object(subdomain_catalog, "load_topology_host_vars", return_value=host_vars),
+            patch.object(
+                subdomain_catalog,
+                "load_identity_vars",
+                return_value={"platform_domain": "example.test"},
+            ) as load_identity,
+        ):
+            resolved = subdomain_catalog.load_host_vars()
+
+        self.assertEqual(load_identity.call_count, 1)
+        self.assertEqual(resolved["platform_service_topology"]["gitea"]["public_hostname"], "git.example.test")
+        self.assertEqual(resolved["platform_service_topology"]["authentik"]["public_hostname"], "id.example.test")
 
     def test_repo_catalog_validates(self) -> None:
         subdomain_catalog.validate_subdomain_catalog(

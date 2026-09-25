@@ -12,7 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- `0.179.47`: Add tailnet-only service declarations with managed tailnet DNS and an explicit Tailscale/Headscale control-plane selector.
+- Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
+- Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
 
 ## Latest Release
 

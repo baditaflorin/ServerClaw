@@ -1,0 +1,2 @@
+# managed-by: role=fleet_build_broker_pki_vault_writer adr=0042,0047,0101
+restrict,no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty,no-user-rc,from="{{ fleet_build_broker_pki_vault_writer_allowed_source }}",command="/usr/bin/sudo -n {{ fleet_build_broker_pki_vault_writer_binary_path }} transaction --principal fleet-build-broker-pki-renewer --scope infra-privileged --ttl-seconds 300" {{ fleet_build_broker_pki_vault_writer_authorized_public_key }}

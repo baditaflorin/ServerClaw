@@ -41,7 +41,7 @@ This is the difference between "we have IaC" (the code that converges to a state
 Idempotency tells you the converge *can* be re-run safely. It doesn't tell you:
 
 1. Whether the previous run actually achieved the declared state. (Ansible exits 0 on tasks that "completed" but produced unverified output.)
-2. Whether the step's external-facing contract holds. (`docker compose up -d` exits 0 even when one container has `Status: Exited` 5 minutes later. The retired-deployment Harbor incident is exactly this failure mode.)
+2. Whether the step's external-facing contract holds. (`docker compose up -d` exits 0 even when one container has `Status: Exited` 5 minutes later. The 0fork Harbor incident is exactly this failure mode.)
 3. Whether the deployment has drifted between converges. (No drift signal except a human noticing things look weird.)
 
 We need explicit post-condition contracts (ADR 0484) and an idempotency check that asserts "no work would be done if we ran again" (ADR 0485) — Ansible's `changed_when` is a hint, not a contract.
@@ -188,10 +188,10 @@ This is what an agent reads to decide "should I touch this deployment, or is it 
 
 ### 6. Two-way derivation for migration of existing deployments
 
-For lv3 and retired-deployment, which exist today without a manifest:
+For lv3 and 0fork, which exist today without a manifest:
 
 ```bash
-make derive-manifest deployment=retired-deployment  # introspects existing files, emits a draft manifest.yml
+make derive-manifest deployment=0fork  # introspects existing files, emits a draft manifest.yml
 ```
 
 Once the draft is reviewed and committed (or symlinked), the deployment is hands-off-capable from that point forward.
@@ -208,7 +208,7 @@ Once the draft is reviewed and committed (or symlinked), the deployment is hands
 
 ### Positive
 
-- **Wipe-and-reinstall is one command.** The "fresh Proxmox, give me example.org" flow becomes `gh repo clone … && cd … && operator drops manifest.yml && make bootstrap deployment=retired-deployment`. No keystrokes between then and verified-up.
+- **Wipe-and-reinstall is one command.** The "fresh Proxmox, give me example.org" flow becomes `gh repo clone … && cd … && operator drops manifest.yml && make bootstrap deployment=0fork`. No keystrokes between then and verified-up.
 - **Failures are resumable.** Steps 1–13 are idempotent and gated by post-conditions; an interrupted run picks up where it left off.
 - **Two agents can hand off work.** Receipts encode where the chain is, why it stopped, and what unblocks it. No chat-log archaeology.
 - **The platform tests itself.** Every step's post-condition is a test. `make self-check` is "does the deployment match what its manifest says it should be." `make doctor` (which already exists) aggregates these signals.
@@ -217,7 +217,7 @@ Once the draft is reviewed and committed (or symlinked), the deployment is hands
 ### Negative
 
 - **Surface area grows.** New ADRs (0484, 0485), new schemas, new scripts (`self_check.py`, `derive_manifest.py`, `bootstrap_orchestrator.py`), new contract file (`config/bootstrap_steps.yml`).
-- **Migration of existing deployments takes work.** lv3 and retired-deployment need `derive-manifest` runs and operator review before they're hands-off.
+- **Migration of existing deployments takes work.** lv3 and 0fork need `derive-manifest` runs and operator review before they're hands-off.
 - **Bad post-conditions are worse than no post-conditions.** A flaky smoke endpoint blocks the chain on every run. Mitigation: post-conditions ship with explicit retry/backoff and timeout. Anything intermittent is a bug to be fixed in the check, not absorbed by an operator.
 
 ### Migration
@@ -225,7 +225,7 @@ Once the draft is reviewed and committed (or symlinked), the deployment is hands
 1. Land ADR 0483 + 0484 + 0485 (this PR, design only).
 2. Land `scripts/self_check.py` + `config/post_conditions.yml` (this PR, MVP — a small initial set of checks).
 3. Land unit tests for the resolver + the self-check runner (this PR).
-4. Future PRs: `derive_manifest.py`, `bootstrap_orchestrator.py`, the full `bootstrap_steps.yml`, retro-application to lv3 + retired-deployment.
+4. Future PRs: `derive_manifest.py`, `bootstrap_orchestrator.py`, the full `bootstrap_steps.yml`, retro-application to lv3 + 0fork.
 
 ---
 
@@ -240,4 +240,4 @@ Once the draft is reviewed and committed (or symlinked), the deployment is hands
 - ADR 0482 — Capacity-aware dynamic VM sizing (the prerequisite)
 - ADR 0484 — Self-verification contracts (the partner)
 - ADR 0485 — Convergence idempotency tests (the partner)
-- Postmortem: 2026-05-11 retired-deployment Harbor 502 — the load-bearing motivator for ADR 0484
+- Postmortem: 2026-05-11 0fork Harbor 502 — the load-bearing motivator for ADR 0484

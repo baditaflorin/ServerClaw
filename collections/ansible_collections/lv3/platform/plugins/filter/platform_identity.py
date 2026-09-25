@@ -4,12 +4,12 @@ Exposes the canonical identity derivations used across the platform. A single
 anchor (`platform_domain`) + flavor-aware derivers produce prefix strings that
 are safe for each downstream consumer context:
 
-  - config_prefix: DNS-label shape, unrestricted (e.g. `retired-deployment`)
+  - config_prefix: DNS-label shape, unrestricted (e.g. `0fork`)
   - sql_prefix:    PostgreSQL identifier-safe (leading [a-z_]; strips leading
-                   non-[a-z_] characters — e.g. `fork` from `retired-deployment`)
+                   non-[a-z_] characters — e.g. `fork` from `0fork`)
   - pve_prefix:    Proxmox VE user-name-safe (leading [A-Za-z]; strips leading
                    digits only, preserves everything else — e.g. `fork` from
-                   `retired-deployment`)
+                   `0fork`)
   - unix_prefix:   POSIX user-name-safe ([a-z_][a-z0-9_-]*; lowercases,
                    strips non-POSIX characters, ensures leading [a-z_])
   - dns_label:     RFC 1123 label-safe (current semantic: == config_prefix,
@@ -91,7 +91,7 @@ def _sql_prefix(domain: str) -> str:
     Strips leading characters that aren't [a-z_]. Also lowercases to match
     PostgreSQL's case-folding behavior for unquoted identifiers.
 
-    Example: `retired-deployment` -> `fork`, `LV3` -> `lv3`, `123-test` -> `test`.
+    Example: `0fork` -> `fork`, `LV3` -> `lv3`, `123-test` -> `test`.
     """
     label = _config_prefix(domain).lower()
     result = re.sub(r"^[^a-z_]+", "", label)
@@ -109,7 +109,7 @@ def _pve_prefix(domain: str) -> str:
     PVE regex: `^[A-Za-z][A-Za-z0-9\\.\\-_]*`. Strips leading digits only
     (preserves case, preserves mid-string digits, preserves dashes/dots).
 
-    Example: `retired-deployment` -> `fork`, `Lv3` -> `Lv3`, `123test` -> `test`.
+    Example: `0fork` -> `fork`, `Lv3` -> `Lv3`, `123test` -> `test`.
     """
     label = _config_prefix(domain)
     result = re.sub(r"^[0-9]+", "", label)
@@ -134,7 +134,7 @@ def _unix_prefix(domain: str) -> str:
     Regex: `[a-z_][a-z0-9_-]*`. Lowercases, strips non-POSIX chars, ensures
     leading [a-z_].
 
-    Example: `retired-deployment` -> `fork`, `LV3` -> `lv3`, `my.domain` -> `mydomain`.
+    Example: `0fork` -> `fork`, `LV3` -> `lv3`, `my.domain` -> `mydomain`.
     """
     label = _config_prefix(domain).lower()
     # Keep [a-z0-9_-]

@@ -1,5 +1,7 @@
-import pytest
 from pathlib import Path
+
+import pytest
+import yaml
 
 import generate_cross_cutting_artifacts
 
@@ -29,6 +31,42 @@ proxmox_guests:
 
     assert catalog["nginx"]["ipv4"] == "10.10.10.10"
     assert catalog["coolify"]["ipv4"] == "10.10.10.70"
+
+
+def test_hairpin_check_skips_only_missing_deployment_output(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    host_vars_path = tmp_path / "inventory" / "host_vars" / "proxmox-host.yml"
+    host_vars_path.parent.mkdir(parents=True)
+    host_vars_path.write_text("proxmox_guests:\n  - name: nginx\n    ipv4: 10.10.10.10\n")
+    registry = {
+        "example": {
+            "hairpin": {
+                "publish": [
+                    {"hostname": "app.example.com", "address_host": "nginx"},
+                ],
+            },
+        },
+    }
+
+    hosts = generate_cross_cutting_artifacts.generate_hairpin(
+        registry,
+        repo_root=tmp_path,
+        identity_vars={"platform_domain": "example.com"},
+    )
+
+    assert hosts == [{"hostname": "app.example.com", "address": "10.10.10.10"}]
+    assert "Skipping derived hairpin equality check" in capsys.readouterr().out
+
+
+def test_hairpin_check_rejects_present_malformed_deployment_output(tmp_path: Path) -> None:
+    output_path = tmp_path / "inventory" / "group_vars" / "platform_hairpin.yml"
+    output_path.parent.mkdir(parents=True)
+    output_path.write_text("platform_hairpin_nat_hosts: [\n")
+
+    with pytest.raises(yaml.YAMLError):
+        generate_cross_cutting_artifacts._check_hairpin_file([], tmp_path)
 
 
 def test_explicit_topology_file_overrides_existing_platform_catalog(tmp_path: Path) -> None:
@@ -74,6 +112,23 @@ def test_generate_sso_clients_tracks_librechat_serverclaw_client() -> None:
 
     assert clients["serverclaw"]["service"] == "librechat"
     assert clients["serverclaw"]["redirect_uris"] == ["https://chat.example.com/oauth/openid/callback"]
+
+
+def test_dns_catalog_drift_resolves_the_explicit_identity_domain(capsys: pytest.CaptureFixture[str]) -> None:
+    identity = {"platform_domain": "example.org"}
+    registry = generate_cross_cutting_artifacts._load_registry(identity)
+
+    catalog = generate_cross_cutting_artifacts._load_subdomain_catalog(identity)
+    assert any(entry["fqdn"] == "id.example.org" for entry in catalog["subdomains"])
+
+    generate_cross_cutting_artifacts.generate_dns_declarations(
+        registry,
+        write=False,
+        repo_root=REPO_ROOT,
+        identity_vars=identity,
+    )
+
+    assert "declared in registry but NOT in config/subdomain-catalog.json" not in capsys.readouterr().out
 
 
 def test_explicit_identity_file_drives_registry_interpolation(tmp_path: Path) -> None:
@@ -282,7 +337,7 @@ def test_cross_cutting_generators_include_authentik_edge_surface() -> None:
     }
 
 
-def test_glitchtip_and_outline_select_authentik_with_per_client_rollback() -> None:
+def test_glitchtip_and_outline_select_authentik_without_legacy_keycloak_hairpins() -> None:
     registry = generate_cross_cutting_artifacts._load_registry()
 
     glitchtip_hairpins = registry["glitchtip"]["hairpin"]["publish"]
@@ -311,5 +366,4 @@ def test_glitchtip_and_outline_select_authentik_with_per_client_rollback() -> No
     assert {entry["hostname"] for entry in registry["outline"]["hairpin"]["publish"]} == {
         "wiki.example.com",
         "id.example.com",
-        "sso.example.com",
     }

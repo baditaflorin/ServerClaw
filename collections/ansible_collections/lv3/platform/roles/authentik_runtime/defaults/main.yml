@@ -42,6 +42,29 @@ authentik_postgres_data_dir: "{{ authentik_site_dir }}/data/postgres"
 authentik_redis_data_dir: "{{ authentik_site_dir }}/data/redis"
 authentik_media_dir: "{{ authentik_site_dir }}/media"
 authentik_templates_dir: "{{ authentik_site_dir }}/templates"
+authentik_blueprints_dir: "{{ authentik_site_dir }}/blueprints"
+authentik_recovery_blueprint_file: "{{ inventory_dir }}/../config/authentik/recovery-flow.yaml"
+authentik_recovery_blueprint_remote_file: "{{ authentik_blueprints_dir }}/platform-operator-recovery.yaml"
+authentik_recovery_verify_script: "{{ inventory_dir }}/../scripts/authentik_recovery.py"
+authentik_recovery_flow_slug: platform-operator-recovery
+authentik_recovery_identification_stage_name: default-authentication-identification
+authentik_recovery_email_stage_name: platform-operator-recovery-email
+authentik_recovery_verification_enabled: true
+# Authentik's worker joins the mail platform's private Docker network instead
+# of hairpinning through the runtime host's published SMTP port. This gives it
+# a stable service-DNS target and keeps authenticated SMTP traffic internal.
+authentik_mail_platform_docker_network_name: "{{ smtp_docker_network_name }}"
+# Authentik requires SMTP and uses the mail platform's private authenticated
+# submission listener. The worker reaches Stalwart by service DNS over the
+# shared Docker network, never by hairpinning through a host-published port.
+authentik_email_host: stalwart
+authentik_email_port: "{{ smtp_port }}"
+authentik_email_username: "{{ mail_platform_mailbox_login }}"
+authentik_email_password_local_file: "{{ mail_platform_mailbox_password_local_file }}"
+authentik_email_use_tls: "{{ smtp_starttls | bool }}"
+authentik_email_use_ssl: false
+authentik_email_timeout: 10
+authentik_email_from: "{{ mail_platform_mailbox_address }}"
 authentik_local_artifact_dir: "{{ repo_shared_local_root }}/authentik"
 # Django secret key -- required, used for session signing and cookie encryption.
 authentik_secret_key_remote_file: "{{ authentik_secret_dir }}/secret-key"

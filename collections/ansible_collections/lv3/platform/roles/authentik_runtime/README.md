@@ -14,3 +14,8 @@ application services can start.
 After health succeeds, `scripts/reconcile_authentik_oauth.py` applies the
 non-secret OAuth manifest and immediately proves a second apply has no changes.
 Provider/application IDs and client secrets are preserved during adoption.
+
+The role also mounts a managed recovery-flow blueprint and renders Authentik's
+global SMTP settings through the existing OpenBao runtime payload. Recovery
+links are short-lived and rate-limited; the SMTP password remains outside the
+repository and the flow blueprint.

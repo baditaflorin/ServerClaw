@@ -1,0 +1,48 @@
+id: ws-0495-authentik-direct-smtp-recovery
+adr: "0491"
+title: Restore Authentik recovery delivery through managed internal SMTP
+status: ready_for_merge
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/ws-0495-live-apply
+worktree_path: .worktrees/ws-0495-live-apply
+doc: docs/workstreams/ws-0495-authentik-direct-smtp-recovery.md
+depends_on:
+  - ws-0493-authentik-mail-gateway-bridge
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+  - config/integrations/authentik--mail-platform.yaml
+  - docs/runbooks/configure-authentik.md
+  - docs/workstreams/ws-0495-authentik-direct-smtp-recovery.md
+  - receipts/live-applies/ws-0495-authentik-direct-smtp-recovery-apply-receipt.yaml
+  - tests/test_authentik_runtime_role.py
+  - workstreams/active/ws-0495-authentik-direct-smtp-recovery.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: authentik_recovery_smtp_contract
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+        - config/integrations/authentik--mail-platform.yaml
+        - docs/runbooks/configure-authentik.md
+        - tests/test_authentik_runtime_role.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: ws_0495_tracking
+      paths:
+        - docs/workstreams/ws-0495-authentik-direct-smtp-recovery.md
+        - receipts/live-applies/ws-0495-authentik-direct-smtp-recovery-apply-receipt.yaml
+        - workstreams/active/ws-0495-authentik-direct-smtp-recovery.yaml
+      mode: exclusive
+tasks:
+  - id: t1
+    title: Verify the direct managed SMTP delivery path and record the provider rejection
+    status: completed
+  - id: t2
+    title: Make the verified SMTP route the governed Authentik recovery default
+    status: completed
+  - id: t3
+    title: Apply, request a new reset, and verify mail-server delivery evidence
+    status: completed

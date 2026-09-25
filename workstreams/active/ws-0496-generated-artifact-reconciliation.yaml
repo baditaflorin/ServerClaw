@@ -1,0 +1,58 @@
+id: ws-0496-generated-artifact-reconciliation
+adr: "0491"
+title: Reconcile stale 0mcp generated deployment artifacts
+status: ready_for_merge
+ready_to_merge: true
+live_applied: false
+owner: codex
+branch: codex/ws-0496-generated-artifact-reconciliation
+worktree_path: .worktrees/ws-0496-generated-artifact-reconciliation
+doc: docs/workstreams/ws-0496-generated-artifact-reconciliation.md
+depends_on:
+  - ws-0495-authentik-direct-smtp-recovery
+conflicts_with: []
+shared_surfaces:
+  - Makefile
+  - inventory/group_vars/platform.yml
+  - config/prometheus/rules/https_tls_alerts.yml
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/runbooks/configure-authentik.md
+  - tests/test_validate_deployment_selection.py
+  - docs/workstreams/ws-0496-generated-artifact-reconciliation.md
+  - workstreams/active/ws-0496-generated-artifact-reconciliation.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: generated_deployment_artifacts
+      paths:
+        - inventory/group_vars/platform.yml
+        - config/prometheus/rules/https_tls_alerts.yml
+        - build/platform-manifest.json
+        - docs/diagrams/agent-coordination-map.excalidraw
+        - Makefile
+        - docs/runbooks/configure-authentik.md
+        - tests/test_validate_deployment_selection.py
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ws_0496_tracking
+      paths:
+        - docs/workstreams/ws-0496-generated-artifact-reconciliation.md
+        - workstreams/active/ws-0496-generated-artifact-reconciliation.yaml
+      mode: exclusive
+tasks:
+  - id: t1
+    title: Reproduce the stale generated-artifact checks from explicit 0mcp selectors
+    status: completed
+  - id: t2
+    title: Regenerate the minimum stale artifact set and inspect every semantic delta
+    status: completed
+  - id: t3
+    title: Run the generation and deployment-selection validation suite
+    status: completed
+  - id: t4
+    title: Regenerate the stale platform manifest identified by the full validation gate
+    status: completed
+  - id: t5
+    title: Regenerate the stale agent-coordination diagram identified by the full validation gate
+    status: completed

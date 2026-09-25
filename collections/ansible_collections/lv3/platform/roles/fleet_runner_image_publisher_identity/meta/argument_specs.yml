@@ -1,0 +1,6 @@
+---
+# Purpose: Define the closed, non-secret Builder LXC108 publisher-identity role contract.
+argument_specs:
+  main:
+    short_description: Install the fixed fleet-runner image-publisher identity on the 0docker_builder LXC108 host only.
+    options: {}

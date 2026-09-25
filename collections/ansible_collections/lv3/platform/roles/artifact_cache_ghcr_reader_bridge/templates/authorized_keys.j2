@@ -1,0 +1,2 @@
+# managed-by: role=artifact_cache_ghcr_reader_bridge adr=0296
+restrict,no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty,no-user-rc,from="{{ artifact_cache_ghcr_reader_bridge_allowed_source }}",command="/usr/bin/sudo -n {{ artifact_cache_ghcr_reader_bridge_binary_path }} reader" {{ artifact_cache_ghcr_reader_bridge_authorized_public_key }}

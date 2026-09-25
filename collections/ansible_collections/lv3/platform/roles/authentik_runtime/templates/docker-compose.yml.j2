@@ -78,6 +78,7 @@ services:
     volumes:
       - {{ authentik_media_dir }}:/media
       - {{ authentik_templates_dir }}:/templates
+      - {{ authentik_recovery_blueprint_remote_file }}:/blueprints/platform-operator-recovery.yaml:ro
     ports:
       - "{{ ansible_host }}:{{ authentik_internal_port }}:{{ authentik_container_port }}"
       - "127.0.0.1:{{ authentik_internal_port }}:{{ authentik_container_port }}"
@@ -112,3 +113,13 @@ services:
     volumes:
       - {{ authentik_media_dir }}:/media
       - {{ authentik_templates_dir }}:/templates
+      - {{ authentik_recovery_blueprint_remote_file }}:/blueprints/platform-operator-recovery.yaml:ro
+    networks:
+      - default
+      - mail_platform
+
+networks:
+  default: {}
+  mail_platform:
+    external: true
+    name: "{{ authentik_mail_platform_docker_network_name }}"

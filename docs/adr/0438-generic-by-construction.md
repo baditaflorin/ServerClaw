@@ -45,7 +45,7 @@ unit names (`lv3-control-plane-restore-drill.timer`), container names
 OpenBao policy names (`lv3-service-semaphore-runtime`), Grafana dashboard
 UIDs, nginx variable names.
 
-Bootstrapping the retired-deployment clone surfaced these failures one at a time. Each
+Bootstrapping the 0fork clone surfaced these failures one at a time. Each
 fails at runtime (not at publish time), because the published code looks
 clean but the roles still assume `platform_sql_prefix == "lv3"`.
 
@@ -69,10 +69,10 @@ contract checks.
 ### The example.org Hetzner box is the acceptance test
 
 The fork clone isn't just a nice-to-have second environment. It is the
-end-to-end test that validates the entire cascade. "Green on retired-deployment from
+end-to-end test that validates the entire cascade. "Green on 0fork from
 `git clone` to `status.example.org` all-green" is the binary acceptance
 signal. Any code path that passes locally against `example.com` but breaks
-on retired-deployment is evidence of a generic-by-construction hole — and the
+on 0fork is evidence of a generic-by-construction hole — and the
 lint/contract layer must grow until it catches the hole *before* the
 code ships.
 
@@ -83,11 +83,11 @@ code ships.
 | 1 | `openbao_postgres_host` defaulted to production's 10.10.10.60 | `hostvars[…initial_primary].ansible_host` resolves via production inventory before overlay | late-bound lookup |
 | 2 | `common_openbao_compose_env_openbao_address` pointed at bootstrap-time IP `10.10.10.10` after re-IP | Bootstrap-phase address baked into env defaults | phase-aware address filter |
 | 3 | Two roles used different variable names for the same credential file (`openbao_postgres_admin_password_local_file` vs `openbao_postgres_rotator_password_local_file`) | Writer/reader variable divergence | unified credential naming |
-| 4 | `proxmox_api_automation_user = "{{ platform_sql_prefix }}-automation@pve"` produced `fork-automation@pve` for a `retired-deployment` deployment whose actual user is `retired-deployment-automation@pve` | `platform_sql_prefix` strips leading digit (valid for SQL identifier); PVE user names have no such restriction | explicit prefix flavor |
+| 4 | `proxmox_api_automation_user = "{{ platform_sql_prefix }}-automation@pve"` produced `fork-automation@pve` for a `0fork` deployment whose actual user is `0fork-automation@pve` | `platform_sql_prefix` strips leading digit (valid for SQL identifier); PVE user names have no such restriction | explicit prefix flavor |
 | 5 | Dynamic PostgreSQL role `creation_statements` hardcoded `GRANT lv3_openbao_connect_all …` inside `!unsafe` | `!unsafe` disables Jinja; literal prefix unreachable by override | Jinja-escape pattern + lint |
 | 6 | Overriding `openbao_local_artifact_dir` alone was insufficient — eight child paths had to be overridden individually | Shard generator (`scripts/ansible_scope_runner.py`) bakes child paths eagerly at shard-render time | shard emits template strings |
 | 7 | OpenBao's pg_hba entry was missing — its PostgreSQL user is provisioned by one role and consumed by another | No `platform_postgres_clients` entry for cross-role credential lifecycles | credentials registry expansion |
-| 8 | Nomad smoke jobs shipped as two committed `.hcl` files per deployment (`lv3-nomad-smoke-*.nomad.hcl`, `retired-deployment-nomad-smoke-*.nomad.hcl`); fork bootstrap referenced the wrong filename and `copy:` failed | Per-deployment HCL files duplicate the same content with only the prefix swapped — generic-by-construction violation | extract to single in-role Jinja `template:` rendering `{{ platform_identity.config_prefix }}-…` (Phase 2, this session) |
+| 8 | Nomad smoke jobs shipped as two committed `.hcl` files per deployment (`lv3-nomad-smoke-*.nomad.hcl`, `0fork-nomad-smoke-*.nomad.hcl`); fork bootstrap referenced the wrong filename and `copy:` failed | Per-deployment HCL files duplicate the same content with only the prefix swapped — generic-by-construction violation | extract to single in-role Jinja `template:` rendering `{{ platform_identity.config_prefix }}-…` (Phase 2, this session) |
 | 9 | `playbooks/nomad.yml` multi-host-group play used a folded-scalar (`>-`) parenthesised ternary for `hosts:`, which `scripts/ansible_scope_runner.py:201` cannot parse — bootstrap aborted before any task ran | Scope-runner regex predates multi-line ternary host expressions | rewrite as single-line ternary; longer term, the scope runner should evaluate via Ansible rather than regex (tracked under Phase 4) |
 | 10 | `nomad_oidc_auth` failed `BindName is undefined` on second converge | Nomad CLI `acl binding-rule list -json` returns dicts that omit absent fields (no `BindName` key when type ≠ `role`/`policy`); equality test on the missing key raised | guard with `selectattr('AuthMethod','defined') \| selectattr('BindName','defined')` before equality (general-purpose pattern for any Nomad/Consul list-output reconciler) |
 | 11 | `postgres_vm` hard-asserted Windmill schema tables exist before applying pgaudit grants — but Windmill converges *after* postgres in `site.yml`, so the assertion always failed on first run | Cross-role ordering coupling without a "deferred grant" mechanism — `fork-overrides.yml` workaround was to disable pgaudit entirely | replace assertion with `to_regclass` probe + `selectattr` filter; grant tasks loop only over confirmed-existing tables; subsequent converges pick up the rest idempotently |
@@ -201,7 +201,7 @@ label starts with a digit or contains uppercase:
 |---|---|---|---|
 | `proxmox_acme_plugin_id` | `sql_prefix` | `config_prefix` | Proxmox storage ID, not a SQL role |
 | `proxmox_api_token_role` | `sql_prefix \| capitalize` | `pve_prefix \| capitalize` | PVE role name — PVE regex allows digits mid-string but forbids leading digit |
-| `proxmox_notification_endpoint_name` | literal override in `.local/identity.yml` (hand-edited to `fork-ops-email` because `retired-deployment-ops-email` fails PVE regex) | `pve_prefix`-derived default | Workaround masks the missing flavor |
+| `proxmox_notification_endpoint_name` | literal override in `.local/identity.yml` (hand-edited to `fork-ops-email` because `0fork-ops-email` fails PVE regex) | `pve_prefix`-derived default | Workaround masks the missing flavor |
 | `proxmox_api_automation_user` | `sql_prefix`-derived (fixed this session to `config_prefix`) | `pve_prefix` | PVE username regex `^[A-Za-z]` forbids leading digits |
 
 Introduce `platform_identity` as a typed dict with **five** flavors:
@@ -209,7 +209,7 @@ Introduce `platform_identity` as a typed dict with **five** flavors:
 ```yaml
 platform_identity:
   domain:        "{{ platform_domain }}"                     # example.org
-  config_prefix: "{{ platform_domain | split('.') | first }}"  # retired-deployment
+  config_prefix: "{{ platform_domain | split('.') | first }}"  # 0fork
   sql_prefix:    "{{ config_prefix | regex_replace('^[^a-z_]+','') }}"  # fork
   pve_prefix:    "{{ config_prefix | regex_replace('^[0-9]+','') }}"    # fork (strip LEADING digits only)
   unix_prefix:   "{{ config_prefix | lower | regex_replace('[^a-z0-9_-]','') }}"  # fork
@@ -227,13 +227,13 @@ Flavor invariants:
   diverges if we ever allow uppercase in domain).
 
 For `example.com`, all five flavors equal `"lv3"` — production callsites
-unchanged. For `example.org`: `config_prefix="retired-deployment"`, `sql_prefix="fork"`,
-`pve_prefix="fork"`, `unix_prefix="retired-deployment"`, `dns_label="retired-deployment"`.
+unchanged. For `example.org`: `config_prefix="0fork"`, `sql_prefix="fork"`,
+`pve_prefix="fork"`, `unix_prefix="0fork"`, `dns_label="0fork"`.
 
 Derivation lives in a filter plugin
 (`collections/ansible_collections/lv3/platform/plugins/filter/platform_identity.py`)
 with unit tests for each flavor × 5 identity samples
-(`lv3`, `retired-deployment`, `UPPERCASE`, `with-dashes`, `_underscore`). The existing
+(`lv3`, `0fork`, `UPPERCASE`, `with-dashes`, `_underscore`). The existing
 top-level vars `platform_config_prefix` / `platform_sql_prefix` become
 thin aliases into `platform_identity.*` — no breaking change.
 
@@ -253,7 +253,7 @@ Pre-push gate runs a scanner:
 #   roles/**
 # Patterns:
 #   \blv3[_-]\w+   (literal lv3 identifier)
-#   \bretired-deployment[_-]\w+ (literal retired-deployment identifier — reverse of the same bug)
+#   \b0fork[_-]\w+ (literal 0fork identifier — reverse of the same bug)
 # Escape hatch: a file-local `# generic-lint: allow` comment on the line.
 ```
 
@@ -308,7 +308,7 @@ resolves once, and every downstream path that references
 the shard already has the resolved absolute path inlined.
 
 Children that reference parents via literal Jinja (e.g.
-`openbao_init_local_file: "{{ repo_shared_local_root }}/retired-deployment/openbao/init.json"`
+`openbao_init_local_file: "{{ repo_shared_local_root }}/0fork/openbao/init.json"`
 in `fork-overrides.yml`) DO stay lazy — Ansible re-evaluates them at
 task time. The bug is specifically at the `lookup()`-boundary level:
 once a variable's value comes out of a `lookup`, all its downstream
@@ -365,7 +365,7 @@ and #5 before they hit a live fork.
 - Introducing `platform_identity.pve_prefix` / `unix_prefix` / etc. as
   first-class fields requires deciding the flavor semantics up front; a
   wrong choice bakes in a new bug. Mitigation: each flavor has a unit
-  test with the inputs `lv3`, `retired-deployment`, `0_digit_start`, `CAPS`, `a-b-c`.
+  test with the inputs `lv3`, `0fork`, `0_digit_start`, `CAPS`, `a-b-c`.
 - Contract tests against a synthetic identity catch the common class but
   cannot catch "correct for synthetic, wrong for this specific fork's
   quirks". Live-apply verification on ≥1 non-author fork remains the
@@ -390,7 +390,7 @@ a measurable failure class.
 ### Phase 1 — `platform_identity` object + lint (target: v0.179.0)
 
 - [ ] Write `platform_identity` filter plugin with unit tests for the
-      five flavors × five identity samples (`lv3`, `retired-deployment`, `UPPERCASE`,
+      five flavors × five identity samples (`lv3`, `0fork`, `UPPERCASE`,
       `with-dashes`, `_underscore`).
 - [ ] Expose `platform_identity` as a derived top-level var in
       `inventory/group_vars/all/identity.yml`; add it to
@@ -403,7 +403,7 @@ a measurable failure class.
         remove the hand-edited `.local/identity.yml` override
       - `proxmox_api_automation_user`: `config_prefix` → `pve_prefix`
         (Phase 0 set this to config_prefix as a stopgap).
-- [ ] Add pre-push lint: scan for raw `lv3[_-]` / `retired-deployment[_-]` in role
+- [ ] Add pre-push lint: scan for raw `lv3[_-]` / `0fork[_-]` in role
       paths; scan `!unsafe` blocks; fail with per-file allow-comment escape.
 - [ ] Add lint binding table (callsite → required flavor) with coverage
       for the 30+ known prefix callsites.
@@ -483,8 +483,8 @@ acceptance:
    outside of `docs/`, `tests/`, and explicitly-declared exceptions.
 4. **Synthetic-identity CI green**: the generic-deploy job passes against
    `testfork.invalid` without any `--extra-vars` overrides.
-5. **retired-deployment end-to-end green (the acceptance test)**:
-   `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment make bootstrap`
+5. **0fork end-to-end green (the acceptance test)**:
+   `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.0fork make bootstrap`
    on the Hetzner AX41-NVMe from a fresh wipe produces an all-green
    `status.example.org` Uptime Kuma board — **without** any `lv3_*` /
    prefix / credential-path workaround in
@@ -494,7 +494,7 @@ acceptance:
    hardcoded-IP override must be gone.
 
 Once all five gates pass, this ADR moves from Proposed → Accepted and
-Implementation Status → Complete. **retired-deployment end-to-end is the binary
+Implementation Status → Complete. **0fork end-to-end is the binary
 acceptance signal.** No partial-credit.
 
 ## Open Questions

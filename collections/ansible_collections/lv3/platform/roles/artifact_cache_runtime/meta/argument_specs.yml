@@ -49,6 +49,31 @@ argument_specs:
         required: true
         description:
           - Whether the role should render and warm the repo-derived seed plan.
+      artifact_cache_ghcr_private_packages_enabled:
+        type: bool
+        required: false
+        description:
+          - Whether the GHCR mirror may use its cache-owned, root-rendered upstream authentication configuration.
+      artifact_cache_ghcr_private_proxy_config_file:
+        type: path
+        required: false
+        description:
+          - Fixed cache-owned path to the pre-rendered, root-owned Docker Distribution configuration for the private GHCR adapter only.
+      artifact_cache_ghcr_private_listener_host:
+        type: str
+        required: false
+        description:
+          - Fixed loopback host address used by the private GHCR adapter.
+      artifact_cache_ghcr_private_listener_port:
+        type: int
+        required: false
+        description:
+          - Fixed host-loopback port used by the private GHCR adapter.
+      artifact_cache_ghcr_private_storage_path:
+        type: path
+        required: false
+        description:
+          - Dedicated root-only storage directory for private GHCR cache content.
       artifact_cache_seed_script:
         type: path
         required: true

@@ -1,0 +1,11 @@
+{
+  "managed-by": "role=artifact_cache_ghcr_reader_bridge adr=0296",
+  "schema_version": 1,
+  "admin_token_file": "{{ artifact_cache_ghcr_reader_bridge_admin_token_file }}",
+  "apikey_url": "{{ artifact_cache_ghcr_reader_bridge_apikey_url }}",
+  "reader_principal": "{{ artifact_cache_ghcr_reader_bridge_reader_principal }}",
+  "reader_scope": "{{ artifact_cache_ghcr_reader_bridge_reader_scope }}",
+  "reader_tier": "{{ artifact_cache_ghcr_reader_bridge_reader_tier }}",
+  "reader_ttl_seconds": {{ artifact_cache_ghcr_reader_bridge_reader_ttl_seconds | int }},
+  "reader_use_limit": {{ artifact_cache_ghcr_reader_bridge_reader_use_limit | int }}
+}
