@@ -1,10 +1,10 @@
-# ADR 0424: Fork-Clone of the Platform onto a Hetzner AX41-NVMe at example.org
+# ADR 0424: Retired deployment record for the example.org environment
 
 - Status: Proposed
 - Implementation Status: Pending provisioning (server delivered; no host-level changes yet)
 - Date: 2026-04-21
-- Concern: portability, disaster-recovery, fork-viability, operator-identity
-- Tags: clone, fork, proxmox, nested-virtualisation, identity-overlay, hetzner, retired-deployment
+- Concern: portability, disaster-recovery, deployment-portability, operator-identity
+- Tags: secondary deployment, separate deployment, proxmox, nested-virtualisation, identity-overlay, hetzner, retired-deployment
 - Depends on:
   - ADR 0385 (Operator Identity Core)
   - ADR 0407 (Generic-By-Default — `.local/` Deployment Values)
@@ -19,13 +19,13 @@
 
 The platform has been built over ~420 ADRs as an interactive pair-programming
 session between one operator and an LLM agent. The central question this
-ADR answers: **is the platform actually forkable?** Can a second operator
-(or a disaster-recovery clone of the existing operator) stand up a semantic
+ADR answers: **is the platform actually portable?** Can a second operator
+(or a disaster-recovery secondary deployment of the existing operator) stand up a semantic
 equivalent of `example.com` on a new domain, on a new server, from the committed
 code plus the two overlay files (`.local/identity.yml`,
 `inventory/host_vars/proxmox-host.yml`), without hidden chat context?
 
-Until now the forkability claim rested entirely on ADR 0385 (operator identity
+Until now the portability claim rested entirely on ADR 0385 (operator identity
 core) and ADR 0407 (generic-by-default). It was never exercised end-to-end.
 
 ### The test deployment
@@ -47,9 +47,9 @@ core) and ADR 0407 (generic-by-default). It was never exercised end-to-end.
 - **Host key pinned in `known_hosts`** (ed25519
   `9xWVsKZxKXoBR3O9369Ixj/Ke/qwiLQ5SBDli/STwVk`)
 
-### Prod vs clone resource envelope
+### Primary vs secondary resource envelope
 
-| Resource | Prod (203.0.113.1) | Clone (203.0.113.3) | Ratio |
+| Resource | Prod (203.0.113.1) | Secondary deployment (203.0.113.3) | Ratio |
 |----------|----------------------|------------------------|-------|
 | Physical cores / threads | Unknown / likely 16–32 | 6c / 12t | ≈ 40 % |
 | RAM | ≈ 128 GiB | 62 GiB | ≈ 48 % |
@@ -57,7 +57,7 @@ core) and ADR 0407 (generic-by-default). It was never exercised end-to-end.
 | Declared VM cores (sum) | 84 (oversubscribed) | N/A | — |
 | VM count | 17 | ≤ 8 (collapsed) | ≤ 47 % |
 
-**Conclusion:** a faithful 1:1 clone does not fit. The clone must be a
+**Conclusion:** a faithful 1:1 deployment does not fit. The secondary deployment must be a
 **collapsed topology** — same Proxmox substrate, fewer and smaller VMs.
 
 ---
@@ -73,19 +73,19 @@ overlay and `inventory/host_vars/proxmox-host.yml` overlay.
 Follow `docs/runbooks/install-proxmox.md`, which already targets Debian 13 +
 PVE 9.1 (confirmed working 2026-03-21, kernel 6.17.13-2-pve). **No mdadm RAID
 is built** — the operator explicitly chose to trade disk redundancy for a
-simpler forkability story ("git clone the repo on a Debian, start
+simpler portability story ("git clone the repo on a Debian, start
 installing"). `/dev/nvme0n1` keeps the existing Debian install + Proxmox
 layered on top; `/dev/nvme1n1` is added as a plain PVE directory datastore
 for VM disks.
 
-If either NVMe fails, the clone is gone. Acceptable for a fork test;
+If either NVMe fails, the secondary environment is unavailable. Acceptable for a portability test;
 unacceptable for production.
 
 Rationale for nested Proxmox despite the tight resource envelope:
-- **Faithful clone**: same abstraction layer → Ansible playbooks behave the same
-- **Forkability proof**: if the clone works, the platform *is* forkable
+- **Faithful secondary deployment**: same abstraction layer → Ansible playbooks behave the same
+- **Portability evidence**: if the secondary deployment works, the platform *is* portable
 - **Disaster recovery dry-run**: rehearses the real prod-loss recovery path
-- **Isolation of the experiment**: the clone lives in VMs that can be destroyed
+- **Isolation of the experiment**: the secondary environment runs in VMs that can be destroyed
   without touching host config
 
 ### 2. Collapsed VM plan (≤ 8 VMs, fits 62 GiB)
@@ -104,7 +104,7 @@ Rationale for nested Proxmox despite the tight resource envelope:
 **Total requested**: 18 cores on 12 threads (1.5× oversub, fine for mostly-idle
 workloads), 55 GiB RAM (headroom for PVE itself). Postgres-replica, coolify,
 coolify-apps, artifact-cache are **dropped** — explicitly out of scope for the
-clone. ADR must not claim otherwise.
+secondary deployment. ADR must not claim otherwise.
 
 ### 3. Domain & DNS scope — apex takeover (confirmed 2026-04-21)
 
@@ -126,7 +126,7 @@ restoration is a single-script replay of that JSON if reversal is ever needed.
 
 Service identities land on `sso.example.org`, `chat.example.org`, `ops.example.org`,
 `proxmox.example.org`, etc. — a semantic 1:1 mapping of the prod `*.example.com`
-hostnames under the clone apex.
+hostnames under the secondary deployment apex.
 
 MX / DKIM / SPF / DMARC are intentionally **not** re-created at wipe time —
 they are published as part of the `mail-platform` VM converge (step 5 of the
@@ -140,10 +140,10 @@ environment variable:
 
 ```bash
 export PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment
-make converge-<service> env=clone
+make converge-<service> env=secondary
 ```
 
-Values overridden for the clone (apex scope):
+Values overridden for the secondary deployment (apex scope):
 
 ```yaml
 platform_domain: example.org
@@ -159,7 +159,7 @@ management_interface: enp41s0
 host_public_hostname: debian-base-template
 proxmox_node_name: debian-base-template
 platform_guest_network_cidr: 10.10.10.0/24   # different from prod's 10.10.10.0/24
-platform_tailscale_tailnet_name: retired-deployment-clone  # new, isolated from prod tailnet
+platform_tailscale_tailnet_name: retired-deployment-secondary  # new, isolated from prod tailnet
 ```
 
 Full overlay at `.local/identity.yml.retired-deployment` (main worktree, not committed).
@@ -167,16 +167,16 @@ Full overlay at `.local/identity.yml.retired-deployment` (main worktree, not com
 ### 5. Email path for this ADR's "confirmation email" deliverable
 
 The operator asked for a confirmation email from a newly-created address on
-the clone to `operator@example.com`. The clone uses the **same mail path as
+the secondary deployment to `operator@example.com`. The secondary deployment uses the **same mail path as
 prod**: Stalwart mail stack on `mail-platform` VM as primary outbound, Brevo
 API bridge (`.local/mail-platform/brevo-api-key.txt`) as the delivery transport
 that actually hits Gmail (new Hetzner IP reputation is poor for direct SMTP to
 Gmail, as documented in ADR 0041).
 
 Concrete flow:
-1. Stalwart hosts the mailbox `operator@clone.example.org`
-2. DKIM/SPF/DMARC TXT records published on `clone.example.org` via Hetzner DNS API
-3. rDNS set on `203.0.113.3` → `mail.clone.example.org` via Hetzner Robot
+1. Stalwart hosts the mailbox `operator@secondary.example.org`
+2. DKIM/SPF/DMARC TXT records published on `secondary.example.org` via Hetzner DNS API
+3. rDNS set on `203.0.113.3` → `mail.secondary.example.org` via Hetzner Robot
    (requires manual step — no API for rDNS in Hetzner Robot for dedicated
    servers on the legacy API; flag for operator)
 4. Outbound submission via Stalwart → Brevo bridge → Gmail
@@ -187,17 +187,17 @@ deployed**. It is not a one-liner.
 ### 6. Execution order (strict)
 
 1. ✅ **DONE**: DNS token + SSH access verified (this session)
-2. ⏳ Operator decides: subdomain (`clone.example.org`) vs full apex takeover
+2. ⏳ Operator decides: subdomain (`secondary.example.org`) vs full apex takeover
 3. ⏳ Bootstrap host: hostname, Tailscale join, base hardening
    (see `docs/runbooks/hetzner-bare-metal-bootstrap.md`)
 4. ⏳ mdadm RAID1, install Proxmox VE
-5. ⏳ Create `.local/identity.yml.retired-deployment`, add `clone` env to
+5. ⏳ Create `.local/identity.yml.retired-deployment`, add `secondary deployment` env to
    `inventory/group_vars/`
 6. ⏳ Provision the 8 VMs via existing `proxmox_guest` role
 7. ⏳ Converge `runtime-control` (Keycloak first — identity anchor)
 8. ⏳ Converge `postgres`, `mail-platform`, `runtime-apps`, `monitoring`
 9. ⏳ Converge `nginx-edge` + public DNS records (subdomain scope only)
-10. ⏳ Provision `operator@clone.example.org` mailbox, send confirmation email
+10. ⏳ Provision `operator@secondary.example.org` mailbox, send confirmation email
 11. ⏳ Write live-apply evidence + close workstream
 
 ---
@@ -205,37 +205,37 @@ deployed**. It is not a one-liner.
 ## Consequences
 
 ### Positive
-- First real test of the forkability claim — validates or invalidates ADR 0385.
+- First real test of the portability claim — validates or invalidates ADR 0385.
 - Produces a disaster-recovery rehearsal artifact (VM snapshots can be captured).
 - Surfaces concrete gaps (e.g. `install-proxmox.md` assumes bookworm, not trixie).
 - Exercises the full Hetzner DNS API integration path on a second zone.
 
 ### Negative
-- Collapsed topology means the clone cannot validate full prod behavior
+- Collapsed topology means the secondary deployment cannot validate full prod behavior
   (no postgres replica, no coolify — those prod-only surfaces stay unverified).
 - Running nested Proxmox on 12 threads / 62 GiB RAM is tight — expect
   noisy-neighbor-style slowdowns during converge storms.
 - rDNS cannot be set via API — manual Robot step is a gate (flagged in runbook).
-- `example.org` apex already serves something else; the clone is scoped to a
+- `example.org` apex already serves something else; the secondary deployment is scoped to a
   subdomain. Any future apex takeover is a separate, destructive decision.
 
 ### Neutral
-- This ADR does not claim the clone is production-grade. It is explicitly a
-  fork-viability exercise.
+- This ADR does not claim the secondary deployment is production-grade. It is explicitly a
+  deployment-portability exercise.
 
 ---
 
 ## Rejected alternatives
 
 - **Docker-only collapsed topology (no Proxmox)**: faster, simpler, but does
-  not exercise the Ansible Proxmox layer. Rejected because forkability must
+  not exercise the Ansible Proxmox layer. Rejected because portability must
   include the substrate.
 - **LXC-on-Debian without Proxmox**: similar objection.
 - **Matching prod 1:1**: does not fit 62 GiB / 12 threads.
 - **Apex takeover of example.org**: destructive, rejected pending explicit
   operator confirmation.
 - **Send confirmation email via Brevo directly (no Stalwart)**: sidesteps the
-  mail stack and defeats the point of proving the clone's mail path works.
+  mail stack and defeats the point of proving the secondary deployment's mail path works.
 
 ---
 
@@ -246,11 +246,11 @@ deployed**. It is not a one-liner.
 3. ✅ **Gateway**: `203.0.113.66`, `/26` subnet base `203.0.113.192`
    (verified via `ssh root@203.0.113.3 'ip route'` on 2026-04-21).
 4. ✅ **RAID1** via mdadm before Proxmox install.
-5. ✅ **Tailscale**: new isolated tailnet `retired-deployment-clone`, separate from prod.
+5. ✅ **Tailscale**: new isolated tailnet `retired-deployment-secondary`, separate from prod.
 6. ⏳ **Account-holder name "Mr. Raabe"** on Hetzner emails — non-blocking
    but worth confirming it's not a reseller account.
 7. ⏳ **Token rotation**: the DNS token shared in chat should be rotated
-   once the clone is live.
+   once the secondary deployment is live.
 
 ---
 
@@ -261,5 +261,5 @@ deployed**. It is not a one-liner.
 - `ssh -i .local/ssh/hetzner_llm_agents_ed25519 root@203.0.113.3 hostname`
   returns `debian-base-template` — ✅ verified 2026-04-21
 - `/dev/kvm` present on target host — ✅ verified 2026-04-21 (nested virt viable)
-- No existing DNS records on `clone.example.org` — ✅ verified (zone dump shows
+- No existing DNS records on `secondary.example.org` — ✅ verified (zone dump shows
   only apex, www, and default Hetzner mail records)

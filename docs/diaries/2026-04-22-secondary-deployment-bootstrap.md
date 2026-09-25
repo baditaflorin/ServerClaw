@@ -1,4 +1,4 @@
-# Fork-Operator Diary — 2026-04-22
+# separate deployment-Operator Diary — 2026-04-22
 
 **Author:** claude (session on branch `claude/gallant-chebyshev-b0def1`)
 **Context:** installing ServerClaw on a freshly reinstalled Debian 13
@@ -8,13 +8,13 @@ Hetzner AX41-NVMe, using the example.org identity, under the documented
 > This diary exists because the operator asked for it explicitly:
 > "you can start a diary from my opinion, but make sure we are converging
 > to this self-replicating repository structure." Future agents running
-> forks should append entries here, not rewrite the history.
+> separate deployments should append entries here, not rewrite the history.
 
 ## What I was trying to do
 
 Validate that a plain `make bootstrap` — the command in `README.md` and
 `CLAUDE.md` — works end-to-end on a host that isn't the author's
-production Proxmox. That is the single biggest forkability claim in the
+production Proxmox. That is the single biggest portability claim in the
 whole repo, and until now no one had actually tested it against a
 non-author environment.
 
@@ -23,7 +23,7 @@ non-author environment.
 Four silent gaps (full detail in the 2026-04-22 postmortem + ADR 0437).
 In short: `make bootstrap` was written for the author's environment and
 each successive overlay ADR (0407, 0430, 0431) added runtime machinery
-without retrofitting the top-level operator command. So forks had to use
+without retrofitting the top-level operator command. So separate deployments had to use
 a bespoke wrapper (`deploy-retired-deployment`), which silently contradicted the
 "one command" promise in the docs.
 
@@ -44,9 +44,9 @@ ones hide.
   key, env, and ansible extras in one place. All four bootstrap stage
   targets + three verify targets pick up the extras automatically.
 - `scripts/timed.sh` — generic instrumentation wrapper promoted from
-  `.local/retired-deployment-timings/timed-ssh.sh`. Every fork operator now gets
+  `.local/retired-deployment-timings/timed-ssh.sh`. Every operator of a separate deployment now gets
   wall-clock journaling for free under `.local/timings/journal.ndjson`.
-- ADR 0437 documents the new contract. The four fork-specific Make
+- ADR 0437 documents the new contract. The four deployment-specific Make
   targets (`deploy-retired-deployment`, `converge-retired-deployment-chain`, `smoke-retired-deployment-mail`,
   `preflight-retired-deployment`) become deprecated shims; they are not deleted
   yet because they are documented in ADR 0431 and runbooks that
@@ -60,7 +60,7 @@ ones hide.
   authorized_keys. Before `make bootstrap` can SSH as `ops`, something
   has to create the `ops` user and switch SSH away from root. Today
   that is implicit in the Hetzner installimage template the operator
-  selected. If a future fork uses a provider whose default user isn't
+  selected. If a future separate deployment uses a provider whose default user isn't
   `root`, `make bootstrap` Stage 2 will blow up on the first
   `become: true` task. This is out of scope for ADR 0437 but deserves
   its own note; possibly a `make init-remote` stage that idempotently
@@ -70,7 +70,7 @@ ones hide.
   returns HTTP 200 with a 503 body). The wildcard DNS01 certbot flow
   is blocked until 2026-05-20. retired-deployment's current workaround is to use
   HTTP-01 webroot (`public_edge_acme_challenge_method: webroot` in the
-  identity overlay). Any fork that depends on DNS-01 for wildcards
+  identity overlay). Any separate deployment that depends on DNS-01 for wildcards
   would hit the same wall. Consider documenting this in the Hetzner
   runbook's "known external failure modes" section.
 - I did not run `make bootstrap` end-to-end yet in this session. The
@@ -99,7 +99,7 @@ ones hide.
 
 ## Successor prompt (for the next agent)
 
-> You are continuing the fork-bootstrap validation on example.org. Read
+> You are continuing the separate deployment-bootstrap validation on example.org. Read
 > ADR 0437, the 2026-04-22 postmortem, and this diary entry first. The
 > code changes are in place but end-to-end live-apply is unvalidated.
 > Run `PLATFORM_IDENTITY_OVERLAY=.local/identity.yml.retired-deployment
@@ -179,7 +179,7 @@ Gaps closed in order of discovery:
 End state after PR #31: `make bootstrap` goes cleanly through Stage 2
 (install-proxmox), Stage 3 (configure-network, harden-access), and
 Stage 4 (provision-guests). On a fresh debian-base-template all 17 guests
-clone from template 9000, boot, and reach cloud-init-complete.
+secondary deployment from template 9000, boot, and reach cloud-init-complete.
 
 Stage 5 (converge-site) is untested. Expect more gaps there —
 PostgreSQL setup, docker runtime, service-specific secrets. Same
@@ -253,7 +253,7 @@ built from it violated their respective naming rules:
 - Proxmox storage ID `retired-deployment-backup-offsite` → Proxmox rejected
 
 Fix: introduced `platform_sql_prefix` in `identity.yml` that strips
-leading non-`[a-z_]` chars (e.g. `retired-deployment → fork`). Wired into all
+leading non-`[a-z_]` chars (e.g. `retired-deployment → separate deployment`). Wired into all
 affected slots. File paths retain `platform_config_prefix` (no
 constraints). PRs #47, #48. Full postmortem at
 `docs/postmortems/2026-04-23-digit-prefix-domain-identifier-compat.md`.
@@ -283,7 +283,7 @@ DNS A records for `*.example.org → 203.0.113.3` were set manually
 on 2026-04-21 and are live.
 
 **8. Proxmox proxmox-host unreachable via default Tailscale IP**
-The fork clone has no Tailscale enrollment. `ansible_host` defaults to
+The separate deployment secondary deployment has no Tailscale enrollment. `ansible_host` defaults to
 `100.64.0.1` (Tailscale). Fix: `LV3_PROXMOX_HOST_ADDR=203.0.113.3`
 env var overrides the host address. Already documented in ADR 0430/0437.
 

@@ -9,7 +9,7 @@ infrastructure-as-code.
 into the target during the deploy itself.
 
 **Companion ADRs:**
-- [ADR 0424](../adr/0424-fork-clone-onto-hetzner-ax41.md) — scope and VM plan
+- [ADR 0424](../adr/0424-retired-deployment-record.md) — scope and VM plan
 - [ADR 0430](../adr/0430-topology-host-vars-local-overlay.md) — host_vars overlay
 - [ADR 0431](../adr/0431-retired-deployment-full-day-deployment.md) — the orchestrator
 

@@ -5,7 +5,7 @@
 # installimage, stock Debian cloud images, etc.), `make bootstrap` cannot
 # SSH as `ops` until that account exists. This script is the one-shot
 # prerequisite that turns a root-only box into one the rest of bootstrap
-# can drive. Diary-flagged gap — see docs/diaries/2026-04-22-fork-bootstrap.md
+# can drive. Diary-flagged gap — see docs/diaries/2026-04-22-secondary-deployment-bootstrap.md
 # and the follow-up note in ADR 0437.
 #
 # Inputs (env or flags):

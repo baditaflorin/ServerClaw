@@ -138,7 +138,7 @@ workstreams:
   depends_on:
   - adr-0491-authentik-phase2-2026-08-28
   conflicts_with:
-  - ws-0424-fork-clone-retired-deployment
+  - ws-0424-retired-deployment
   - ws-0438-generic-by-construction
   - ws-0439-deployment-profiles
   - ws-0443-topology-drift-detection
@@ -530,7 +530,7 @@ workstreams:
     status: completed
   - id: t7-getting-started
     title: "docs/getting-started.md \u2014 clone, edit .local/identity.yml, make bootstrap\
-      \ (forkability surface)"
+      \ (portability surface)"
     status: completed
   - id: t8-gitignore
     title: Add inventory/host_vars/proxmox-host.generated.yml to .gitignore
@@ -1174,13 +1174,13 @@ workstreams:
   worktree_path: .claude/worktrees/friendly-pike-233883
   doc: docs/postmortems/2026-05-11-service-inventory-gap-multi-deployment.md
   related_adrs:
-  - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+  - docs/adr/0424-retired-deployment-record.md
   - docs/adr/0437-fork-bootstrap-gaps.md
   - docs/adr/0440-per-deployment-layout.md
   - docs/adr/0480-multi-deployment-certificate-validation.md
   depends_on:
   - adr-0407-generic-by-default
-  - adr-0424-fork-clone-onto-hetzner-ax41
+  - adr-0424-retired-deployment-record
   conflicts_with: []
   shared_surfaces:
   - workstreams.yaml
@@ -4399,16 +4399,16 @@ workstreams:
     alone.
 
     '
-- id: ws-0424-fork-clone-retired-deployment
+- id: ws-0424-retired-deployment
   adr: '0424'
-  title: "ADR 0424 \u2014 example.org Clone onto Hetzner AX41-NVMe"
+  title: "ADR 0424 \u2014 retired example.org deployment record"
   status: in_progress
   ready_to_merge: false
   live_applied: false
   owner: claude
   branch: claude/gallant-chebyshev-b0def1
   worktree_path: .claude/worktrees/gallant-chebyshev-b0def1
-  doc: docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+  doc: docs/adr/0424-retired-deployment-record.md
   related_adrs:
   - docs/adr/0425-retrospective-420-adr-platform-build.md
   depends_on:
@@ -4419,8 +4419,8 @@ workstreams:
   conflicts_with: []
   shared_surfaces:
   - workstreams.yaml
-  - workstreams/active/ws-0424-fork-clone-retired-deployment.yaml
-  - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+  - workstreams/active/ws-0424-retired-deployment.yaml
+  - docs/adr/0424-retired-deployment-record.md
   - docs/adr/0425-retrospective-420-adr-platform-build.md
   - docs/runbooks/hetzner-bare-metal-bootstrap.md
   started: '2026-04-21'
@@ -4430,19 +4430,19 @@ workstreams:
   - Hetzner AX41-NVMe
   - .local/identity.yml.retired-deployment (new, not committed)
   - .local/hetzner/dns.env (new, not committed)
-  summary: "First real fork-viability test. Stands up a collapsed nested-Proxmox topology\
+  summary: "First real deployment-portability test. Stands up a collapsed nested-Proxmox topology\
     \ on a Hetzner AX41-NVMe using example.org (full apex) as the identity. Drives\
     \ ADR 0385 (identity core) and ADR 0407 (generic-by-default) to their limits.\
     \ Also produces ADR 0425 \u2014 a retrospective on the 420-ADR build process and\
-    \ what the clone attempt revealed about gaps in the platform's forkability claim.\
+    \ what the deployment exercise revealed about gaps in the platform's portability claim.\
     \ ADR numbers collided with a parallel LSP-AI evaluation workstream (0422/0423)\
     \ that landed on main while this one was in progress; renumbered to 0424/0425.\n"
   ownership_manifest:
     owned_surfaces:
     - id: ws_0424_tracking
       paths:
-      - workstreams/active/ws-0424-fork-clone-retired-deployment.yaml
-      - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
+      - workstreams/active/ws-0424-retired-deployment.yaml
+      - docs/adr/0424-retired-deployment-record.md
       - docs/adr/0425-retrospective-420-adr-platform-build.md
       - docs/runbooks/hetzner-bare-metal-bootstrap.md
       mode: exclusive
@@ -4461,7 +4461,7 @@ workstreams:
       - docs/site-generated/architecture/dependency-graph.md
       mode: shared_contract
       contract: generated-index-and-diagram-v1
-    - id: ws_0424_clone_deploy_tactical_fixes
+    - id: ws_0424_secondary_deployment_tactical_fixes
       paths:
       - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2
       - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
@@ -4491,8 +4491,8 @@ workstreams:
       - platform/ansible/execution_scopes.py
       - platform/repo.py
       - docs/adr/0437-overlay-aware-bootstrap.md
-      - docs/postmortems/2026-04-22-fork-bootstrap-gap.md
-      - docs/diaries/2026-04-22-fork-bootstrap.md
+      - docs/postmortems/2026-04-22-secondary-deployment-bootstrap-gap.md
+      - docs/diaries/2026-04-22-secondary-deployment-bootstrap.md
       mode: exclusive
     - id: ws_0424_fresh_host_bootstrap_fixes
       paths:
@@ -5233,7 +5233,7 @@ workstreams:
   - scripts/topology-snapshot.json
   - workstreams/archive/2026/ws-0391-live-apply.yaml
   - workstreams/archive/2026/ws-0391-live-apply.yaml
-  - workstreams/active/ws-0424-fork-clone-retired-deployment.yaml
+  - workstreams/active/ws-0424-retired-deployment.yaml
   - receipts/live-applies/**
   ownership_manifest:
     owned_surfaces:
@@ -5310,7 +5310,7 @@ workstreams:
       - scripts/check_release_readiness.py
       - scripts/generate_cross_cutting_artifacts.py
       - scripts/topology-snapshot.json
-      - workstreams/active/ws-0424-fork-clone-retired-deployment.yaml
+      - workstreams/active/ws-0424-retired-deployment.yaml
       mode: shared_contract
       contract: workstream-metadata-gate-repair-v1
   canonical_truth:

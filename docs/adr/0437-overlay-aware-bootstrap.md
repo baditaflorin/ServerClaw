@@ -193,4 +193,4 @@ the default path.
   to 10.10.10.X on the fork's internal bridge.
 
 End-to-end live-apply validation is pending on the retired-deployment clone (see
-`docs/postmortems/2026-04-22-fork-bootstrap-gap.md`).
+`docs/postmortems/2026-04-22-secondary-deployment-bootstrap-gap.md`).

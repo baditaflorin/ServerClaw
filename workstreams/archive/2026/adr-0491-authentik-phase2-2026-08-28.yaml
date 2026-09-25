@@ -18,7 +18,7 @@ canonical_truth:
 depends_on:
   - adr-authentik-replace-keycloak-2026-08-27
 conflicts_with:
-  - ws-0424-fork-clone-retired-deployment
+  - ws-0424-retired-deployment
   - ws-0438-generic-by-construction
   - ws-0439-deployment-profiles
   - ws-0443-topology-drift-detection

@@ -138,7 +138,7 @@ at `receipts/security-reports/20260421T112535Z.json`, after which
 
 On 2026-04-22, the branch was rebased onto `origin/main` `467fe6eef`.
 The merge-readiness pass also repaired current-main workstream metadata for
-`ws-0424-fork-clone-retired-deployment`: its generated-index claim used the obsolete
+`ws-0424-retired-deployment`: its generated-index claim used the obsolete
 `shared` mode, which blocked the workstream surface validator. The source shard
 now uses `shared_contract` with `generated-index-surfaces-v1`.
 The same pass registered `playbooks/mail-platform-send-gmail.yml` and
