@@ -9,7 +9,7 @@ SCRIPTS_DIR = REPO_ROOT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-import session_logout_verify  # noqa: E402
+import session_logout_verify
 
 
 def test_discover_local_root_prefers_shared_repo_root_for_worktrees(tmp_path: Path) -> None:
@@ -28,6 +28,17 @@ def test_normalize_url_ignores_trailing_slashes_and_queries() -> None:
     )
 
 
+def test_safe_location_strips_credentials_and_callback_query_values() -> None:
+    location = "https://user:password@ops.example.com/oauth2/callback?code=one-time-code&state=oauth-state#fragment"
+
+    safe = session_logout_verify.safe_location(location)
+
+    assert safe == "https://ops.example.com/oauth2/callback"
+    assert "password" not in safe
+    assert "one-time-code" not in safe
+    assert "oauth-state" not in safe
+
+
 def test_assert_response_host_rejects_unexpected_host() -> None:
     with pytest.raises(session_logout_verify.VerificationError, match="should land"):
         session_logout_verify.assert_response_host(
@@ -35,6 +46,20 @@ def test_assert_response_host_rejects_unexpected_host() -> None:
             expected_host="home.example.com",
             label="shared edge login",
         )
+
+
+def test_assert_response_host_does_not_leak_callback_query_values() -> None:
+    location = "https://id.example.com/oauth2/callback?code=one-time-code&state=oauth-state"
+
+    with pytest.raises(session_logout_verify.VerificationError) as caught:
+        session_logout_verify.assert_response_host(
+            location,
+            expected_host="home.example.com",
+            label="shared edge login",
+        )
+
+    assert "one-time-code" not in str(caught.value)
+    assert "oauth-state" not in str(caught.value)
 
 
 def test_assert_page_requires_authentik_login_raises_when_identifier_never_appears() -> None:
@@ -62,6 +87,62 @@ def test_assert_page_requires_authentik_login_raises_when_identifier_never_appea
             timeout_milliseconds=1_000,
             playwright_timeout_error=FakeTimeoutError,
         )
+
+
+def test_authentik_login_returns_on_terminal_admin_gate_callback() -> None:
+    class FakeLocator:
+        def __init__(self, page, kind: str) -> None:
+            self.page = page
+            self.kind = kind
+
+        @property
+        def first(self):
+            return self
+
+        def wait_for(self, *, state: str, timeout: int) -> None:
+            assert state == "visible"
+            assert timeout == 1_000
+
+        def fill(self, _value: str, *, timeout: int) -> None:
+            assert timeout == 1_000
+
+        def click(self, *, timeout: int) -> None:
+            assert timeout == 1_000
+            if self.page.submit_count == 0:
+                self.page.url = "https://id.example.com/if/flow/default-authentication-flow/"
+            else:
+                self.page.url = "https://ops.example.com/oauth2/callback"
+            self.page.submit_count += 1
+
+        def is_visible(self) -> bool:
+            return False
+
+    class FakePage:
+        url = "https://id.example.com/if/flow/default-authentication-flow/"
+        submit_count = 0
+
+        def get_by_label(self, label: str, *, exact: bool):
+            assert exact is True
+            return FakeLocator(self, label)
+
+        def get_by_role(self, role: str, *, name):
+            assert role == "button"
+            return FakeLocator(self, "submit")
+
+        def evaluate(self, expression: str) -> str:
+            assert expression == "document.readyState"
+            return "complete"
+
+        def wait_for_timeout(self, _milliseconds: int) -> None:
+            raise AssertionError("a terminal callback should not be polled until timeout")
+
+    session_logout_verify.authenticate_authentik_session(
+        FakePage(),
+        username="gitea-e2e",
+        password="not-logged",
+        timeout_milliseconds=1_000,
+        playwright_timeout_error=TimeoutError,
+    )
 
 
 def test_outline_logout_accepts_authentik_provider_confirmation_and_continues() -> None:

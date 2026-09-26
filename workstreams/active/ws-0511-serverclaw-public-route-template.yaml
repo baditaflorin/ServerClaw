@@ -1,11 +1,11 @@
 id: ws-0511-serverclaw-public-route-template
 adr: "0407"
 title: Keep the ServerClaw host template aligned with the edge route catalog
-status: in_progress
+status: merged
 ready_to_merge: false
 live_applied: false
 owner: codex
-branch: codex/serverclaw-public-route-template-20260925
+branch: codex/ws-0511-serverclaw-closeout-20260925
 worktree_path: .worktrees/codex-serverclaw-public-route-template-20260925
 doc: docs/workstreams/ws-0511-serverclaw-public-route-template.md
 canonical_truth:
@@ -25,6 +25,8 @@ shared_surfaces:
   - docs/workstreams/ws-0511-serverclaw-public-route-template.md
   - docs/diagrams/agent-coordination-map.excalidraw
   - workstreams.yaml
+  - README.md
+  - docs/status/history/merged-workstreams.md
   - VERSION
   - changelog.md
   - build/platform-manifest.json
@@ -52,6 +54,12 @@ ownership_manifest:
         - docs/diagrams/agent-coordination-map.excalidraw
       mode: shared_contract
       contract: generated-artifacts-v1
+    - id: current_main_generated_status
+      paths:
+        - README.md
+        - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
     - id: repository_release_truth
       paths:
         - VERSION
@@ -70,8 +78,8 @@ tasks:
     title: Add the generic edge route, regression test, and validation-lane routing
     status: completed
   - id: t2
-    title: Validate generated public snapshot and required repository checks
-    status: pending
+    title: Validate the private source fix with local and Woodpecker checks
+    status: completed
   - id: t3
-    title: Merge the private-source fix and refresh the ServerClaw publication PR
-    status: pending
+    title: Merge the source fix and the passing ServerClaw snapshot PR
+    status: completed

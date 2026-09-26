@@ -97,6 +97,60 @@ def test_platform_vars_validation_reuses_tracked_identity_snapshot(
     }
 
 
+def test_platform_vars_validation_uses_exported_identity_and_topology_selectors(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    platform_vars_path = tmp_path / "platform.yml"
+    identity_file = tmp_path / "identity.yml"
+    topology_file = tmp_path / "topology.yml"
+    platform_vars_path.write_text("sentinel: true\n", encoding="utf-8")
+    identity_file.write_text("platform_domain: selected.example.net\n", encoding="utf-8")
+    topology_file.write_text("proxmox_internal_ipv4: 10.77.0.1\n", encoding="utf-8")
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(identity_file))
+    monkeypatch.setenv("PLATFORM_TOPOLOGY_OVERLAY", str(topology_file))
+    calls: dict[str, object] = {}
+
+    monkeypatch.setattr(models, "PLATFORM_VARS_PATH", platform_vars_path)
+    monkeypatch.setattr(models, "missing_deployment_derived_platform_inputs", lambda: ())
+    monkeypatch.setattr(
+        models,
+        "_apply_identity_override",
+        lambda path: calls.update(identity_path=path),
+    )
+    monkeypatch.setattr(
+        models,
+        "_apply_topology_override",
+        lambda path: calls.update(topology_path=path),
+    )
+
+    def fake_load_sources(
+        skip_local_override: bool = False,
+        *,
+        skip_topology_override: bool = False,
+        skip_generated_topology: bool = False,
+    ):
+        calls.update(
+            skip_local_override=skip_local_override,
+            skip_topology_override=skip_topology_override,
+            skip_generated_topology=skip_generated_topology,
+        )
+        return {}, {}
+
+    monkeypatch.setattr(models, "load_sources", fake_load_sources)
+    monkeypatch.setattr(models, "build_platform_vars", lambda *, stack, host_vars: {"sentinel": True})
+
+    models.validate_platform_vars()
+
+    assert calls == {
+        "identity_path": identity_file.resolve(),
+        "topology_path": topology_file.resolve(),
+        "skip_local_override": False,
+        "skip_topology_override": False,
+        "skip_generated_topology": True,
+    }
+
+
 def test_platform_vars_validation_skips_only_equivalence_without_deployment_inputs(
     monkeypatch,
     tmp_path: Path,

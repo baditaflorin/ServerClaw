@@ -73,6 +73,9 @@ argument_specs:
       glitchtip_oidc_client_id:
         type: str
         required: true
+      glitchtip_enable_social_apps_user_registration:
+        type: bool
+        required: true
       glitchtip_retired_oidc_provider_ids:
         type: list
         elements: str

@@ -103,6 +103,56 @@ def test_main_checks_against_explicit_identity_file(
     }
 
 
+def test_main_uses_exported_overlay_selectors_for_check(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    identity_file = tmp_path / "selected-identity.yml"
+    topology_file = tmp_path / "selected-topology.yml"
+    identity_file.write_text("platform_domain: selected.example.net\n", encoding="utf-8")
+    topology_file.write_text("proxmox_internal_ipv4: 10.77.0.1\n", encoding="utf-8")
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(identity_file))
+    monkeypatch.setenv("PLATFORM_TOPOLOGY_OVERLAY", str(topology_file))
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(
+        generate_platform_vars,
+        "_apply_identity_override",
+        lambda path: captured.update(identity_path=path),
+    )
+    monkeypatch.setattr(
+        generate_platform_vars,
+        "_apply_topology_override",
+        lambda path: captured.update(topology_path=path),
+    )
+
+    def fake_check(
+        output_path: Path,
+        *,
+        use_identity_override: bool = False,
+        use_topology_override: bool = False,
+    ) -> int:
+        captured.update(
+            output_path=output_path,
+            use_identity_override=use_identity_override,
+            use_topology_override=use_topology_override,
+        )
+        return 0
+
+    monkeypatch.setattr(generate_platform_vars, "check_platform_vars", fake_check)
+
+    result = generate_platform_vars.main(["--check"])
+
+    assert result == 0
+    assert captured == {
+        "identity_path": identity_file,
+        "topology_path": topology_file,
+        "output_path": generate_platform_vars.PLATFORM_VARS_PATH,
+        "use_identity_override": True,
+        "use_topology_override": True,
+    }
+
+
 def test_explicit_topology_file_avoids_shared_profile(
     tmp_path: Path,
 ) -> None:

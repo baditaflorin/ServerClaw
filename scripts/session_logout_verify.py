@@ -45,9 +45,25 @@ def normalize_url(url: str) -> str:
     return parsed._replace(path=path, query="", fragment="").geturl()
 
 
+def safe_location(url: str) -> str:
+    """Format a browser location without credentials, OAuth query values, or fragments."""
+    parsed = urlparse(url)
+    hostname = parsed.hostname or ""
+    try:
+        port = parsed.port
+    except ValueError:
+        port = None
+    if port and port != {"https": 443, "http": 80}.get(parsed.scheme):
+        hostname = f"{hostname}:{port}"
+    path = parsed.path or "/"
+    if parsed.scheme and hostname:
+        return f"{parsed.scheme}://{hostname}{path}"
+    return path
+
+
 def assert_response_host(current_url: str, *, expected_host: str, label: str) -> None:
     if urlparse(current_url).hostname != expected_host:
-        raise VerificationError(f"{label} should land on {expected_host}, landed on {current_url}")
+        raise VerificationError(f"{label} should land on {expected_host}, landed on {safe_location(current_url)}")
 
 
 def load_playwright_sync_api():
@@ -101,7 +117,9 @@ def assert_page_requires_authentik_login(
     try:
         _authentik_identifier(page).wait_for(state="visible", timeout=timeout_milliseconds)
     except playwright_timeout_error as exc:
-        raise VerificationError(f"{label} should require a fresh Authentik login, landed on {page.url}") from exc
+        raise VerificationError(
+            f"{label} should require a fresh Authentik login, landed on {safe_location(page.url)}"
+        ) from exc
 
 
 def authenticate_authentik_session(
@@ -144,12 +162,24 @@ def authenticate_authentik_session(
         # not sufficient: navigating again while oauth2-proxy is still
         # setting its session cookies can discard the just-created session.
         callback_in_flight = current.path.startswith("/oauth2/callback") or current.path.startswith("/oauth2/sign_in")
-        if current.hostname and current.hostname != identity_host and not callback_in_flight:
+        if callback_in_flight:
+            # A denied oauth2-proxy callback is a terminal HTTP response, not a
+            # slow login. Leave it to the caller to inspect the final status
+            # (for example, the expected 403 from an admin-only application).
+            try:
+                callback_document_ready = page.evaluate("document.readyState") == "complete"
+            except Exception:
+                callback_document_ready = False
+            if callback_document_ready:
+                break
+        elif current.hostname and current.hostname != identity_host:
             page.wait_for_timeout(500)
             break
         page.wait_for_timeout(250)
     else:
-        raise VerificationError(f"Authentik login did not complete a relying-party callback, landed on {page.url}")
+        raise VerificationError(
+            f"Authentik login did not complete a relying-party callback, landed on {safe_location(page.url)}"
+        )
     if authentik_login_page_present(page):
         raise VerificationError("Authentik login remained visible after submitting the supplied operator credential")
 
@@ -165,7 +195,9 @@ def wait_for_logged_out_destination(
         if normalize_url(page.url) == normalize_url(expected_url):
             return
         page.wait_for_timeout(250)
-    raise VerificationError(f"Logout should finish on {expected_url}, landed on {page.url}")
+    raise VerificationError(
+        f"Logout should finish on {safe_location(expected_url)}, landed on {safe_location(page.url)}"
+    )
 
 
 def wait_for_outline_logout_completion(
@@ -208,7 +240,9 @@ def wait_for_outline_logout_completion(
             if normalize_url(page.url) == expected:
                 return
         page.wait_for_timeout(250)
-    raise VerificationError(f"Logout should finish on {expected_url}, landed on {page.url}")
+    raise VerificationError(
+        f"Logout should finish on {safe_location(expected_url)}, landed on {safe_location(page.url)}"
+    )
 
 
 def trigger_outline_ui_logout(page, *, timeout_milliseconds: int, playwright_timeout_error) -> None:

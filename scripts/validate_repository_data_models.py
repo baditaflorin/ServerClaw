@@ -52,12 +52,20 @@ from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_recei
 from platform.circuit import load_circuit_policies
 from platform.faults import load_network_impairment_matrix
 from platform.interface_contracts import validate_contracts
-from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars, validate_repo_relative_path
+from platform.repo import (
+    TOPOLOGY_HOST,
+    TOPOLOGY_HOST_VARS_PATH,
+    load_topology_host_vars,
+    resolve_explicit_overlay_selector,
+    validate_repo_relative_path,
+)
 from generate_platform_vars import (
     PLATFORM_VARS_PATH,
     PORT_KEYS,
+    _apply_identity_override,
     _apply_generation_identity_overlay,
     _load_generation_identity_overlay,
+    _apply_topology_override,
     build_platform_vars,
     derived_platform_vars_equivalence_skip_message,
     load_sources,
@@ -889,17 +897,23 @@ def validate_platform_vars() -> None:
     if missing_inputs:
         print(derived_platform_vars_equivalence_skip_message(missing_inputs))
         return
-    # Reproduce the generator's repository-safe default: ignore untracked local
-    # inputs, but retain the narrow identity snapshot recorded in the generated
-    # file.  This keeps platform.yml deterministic on another operator machine
-    # without replacing the private deployment's nested generated facts with
-    # public placeholders (ADR 0407).
+    selected_identity = resolve_explicit_overlay_selector("PLATFORM_IDENTITY_OVERLAY")
+    selected_topology = resolve_explicit_overlay_selector("PLATFORM_TOPOLOGY_OVERLAY")
+    if selected_identity is not None:
+        _apply_identity_override(selected_identity)
+    if selected_topology is not None:
+        _apply_topology_override(selected_topology)
+
+    # Reproduce the generator's repository-safe default when no deployment
+    # selectors were named. For governed operations, validate the exact
+    # explicitly selected identity/topology pair supplied by the caller.
     stack, host_vars = load_sources(
-        skip_local_override=True,
-        skip_topology_override=True,
+        skip_local_override=selected_identity is None,
+        skip_topology_override=selected_topology is None,
         skip_generated_topology=True,
     )
-    _apply_generation_identity_overlay(host_vars, _load_generation_identity_overlay(PLATFORM_VARS_PATH))
+    if selected_identity is None:
+        _apply_generation_identity_overlay(host_vars, _load_generation_identity_overlay(PLATFORM_VARS_PATH))
     expected_platform_vars = build_platform_vars(stack=stack, host_vars=host_vars)
     if platform_vars != expected_platform_vars:
         raise ValueError("inventory/group_vars/platform.yml must match scripts/generate_platform_vars.py output")
@@ -2823,9 +2837,8 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> list[Path]:
         validate_ipv4(guest.get("ipv4"), f"versions/stack.yaml.observed_state.guests.instances[{index}].ipv4")
         require_bool(guest.get("running"), f"versions/stack.yaml.observed_state.guests.instances[{index}].running")
         instance_names.add(name)
-    if versions_stack_enforces_canonical_guest_fleet():
-        if instance_names != host_vars_context["guest_names"]:
-            raise ValueError("versions/stack.yaml.observed_state.guests.instances must contain the managed guest fleet")
+    if versions_stack_enforces_canonical_guest_fleet() and instance_names != host_vars_context["guest_names"]:
+        raise ValueError("versions/stack.yaml.observed_state.guests.instances must contain the managed guest fleet")
 
     monitoring = require_mapping(observed_state.get("monitoring"), "versions/stack.yaml.observed_state.monitoring")
     validate_ipv4(monitoring.get("vm"), "versions/stack.yaml.observed_state.monitoring.vm")

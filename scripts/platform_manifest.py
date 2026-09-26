@@ -142,7 +142,7 @@ def parse_release_note(path: Path) -> dict[str, Any]:
     in_summary = False
     for raw_line in path.read_text().splitlines():
         line = raw_line.strip()
-        if raw_line.startswith("Released on:"):
+        if raw_line.startswith("Released on:") or line.startswith("- Date:"):
             released_on = raw_line.partition(":")[2].strip()
             continue
         if raw_line.startswith("## "):

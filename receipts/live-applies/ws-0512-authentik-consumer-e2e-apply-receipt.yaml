@@ -1,0 +1,61 @@
+workstream_id: ws-0512-authentik-consumer-e2e
+state: completed
+schema_version: 1.1.0
+started_at: '2026-09-26T08:42:00Z'
+completed_at: '2026-09-26T09:26:57Z'
+applied_by: codex/authentik-live-closeout-20260926
+source_commit: 35b9160b3c7db8aa50566cc14f661c0542546ddc
+repo_version: 0.179.46
+adr: '0491'
+summary: >-
+  Applied the managed Authentik recovery-stage correction and least-privilege
+  test identity update, then ran fresh-browser checks across five OIDC consumers.
+  This receipt covers the completed checkpoint only; the workstream remains
+  blocked on security-gated consumer applies.
+targets:
+  - service: authentik
+    host_group: runtime-control
+    vmid: 192
+errors:
+  - >-
+    Grafana browser login reaches an authenticated session, but its user API
+    returns no orgRole; the Viewer assertion fails. Governed apply rejected
+    because monitoring has 3 warning findings against budget 2.
+  - >-
+    Outline realtime WebSocket handshake fails. Governed apply rejected by
+    stale host/image security evidence and unresolved critical findings.
+  - >-
+    GlitchTip browser login returns signup_closed. Governed apply rejected
+    because docker-runtime has 3 warning findings against budget 2 and both
+    image scans are 180 days old.
+  - >-
+    Mailbox delivery could not be independently verified because the connected
+    Gmail integration requires reauthentication; Authentik accepted the single
+    recovery-email request with HTTP 204.
+notes:
+  - >-
+    PR #244 is merged at source commit 35b9160b3c7db8aa50566cc14f661c0542546ddc.
+    The Authentik provider/application check found zero drift for Outline,
+    GlitchTip, Gitea, Grafana, and Harbor.
+  - >-
+    The initial SSH attempt used the default port and was unreachable. The
+    configured bastion on port 2222 reached runtime-control when the supported
+    LV3_PROXMOX_HOST_PORT override was set; the final narrow Ansible converge
+    completed with 14 tasks OK, 0 changed, and 0 failed.
+  - >-
+    Authentik health, worker SMTP authentication, managed recovery blueprint,
+    brand/login-flow bindings, and global SMTP-stage checks passed.
+  - >-
+    The test identity reconciliation changed only its group membership,
+    adding grafana-viewers alongside gitea-users; it remains non-admin.
+  - >-
+    Fresh strict-TLS Firefox OIDC checks passed for Gitea and Harbor with the
+    non-admin test identity.
+  - >-
+    Grafana's user API reported isGrafanaAdmin=false. Its missing orgRole
+    prevents declaring Viewer access until the managed Grafana role mapping is
+    applied and re-tested.
+  - >-
+    The Grafana, Outline, and GlitchTip service apply attempts were blocked by
+    their normal vulnerability-budget checks. No bypass, expired exception
+    renewal, or container replacement was used.

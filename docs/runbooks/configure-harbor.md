@@ -64,6 +64,19 @@ Run these checks after converge:
 5. `jq -r '.username + \":\" + .secret' /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/harbor/check-runner-robot.json`
 6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ops@100.64.0.1 -W %h:%p' ops@10.10.10.30 'docker pull registry.example.com/check-runner/python:3.12.10 && docker image inspect registry.example.com/check-runner/python:3.12.10 --format '"'"'{{index .RepoDigests 0}}'"'"''`
 
+For a fresh browser session through Authentik, run the non-admin consumer check:
+
+```bash
+uv run --with playwright python scripts/harbor_authentik_e2e.py \
+  --platform-domain "$PLATFORM_DOMAIN"
+```
+
+The check uses the local `gitea-e2e` test password and temporary Firefox CA
+trust, completes Harbor's OIDC callback, and verifies `/api/v2.0/users/current`
+reports that identity as non-admin. Keep the test identity outside
+`harbor-admins`; Harbor administrator access is reserved for the explicitly
+managed operator group.
+
 ## Troubleshooting
 
 - If `make converge-harbor` exits cleanly but `https://registry.example.com/api/v2.0/ping` still returns `502 Bad Gateway`, `http://127.0.0.1:8095/api/v2.0/ping` is connection refused on `runtime-control`, or `docker pull registry.example.com/check-runner/...` fails on `docker-build` with `received unexpected HTTP status: 502 Bad Gateway`, replay `make converge-docker-publication-assurance env=production` from the same checkout and rerun the full verification list above.

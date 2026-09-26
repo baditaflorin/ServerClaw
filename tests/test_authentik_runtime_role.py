@@ -482,6 +482,19 @@ def test_recovery_blueprint_and_smtp_contract_are_managed_and_secret_safe() -> N
     blueprint_publish = next(
         task for task in tasks if task["name"] == "Publish the managed Authentik recovery blueprint"
     )
+    recovery_preflight = next(
+        task
+        for task in tasks
+        if task["name"] == "Verify current Authentik health and global SMTP before a recovery-only apply"
+    )
+    controller_input_stat = next(
+        task
+        for task in tasks
+        if task["name"] == "Inspect Authentik recovery blueprint and SMTP password source on the controller"
+    )
+    controller_input_guard = next(
+        task for task in tasks if task["name"] == "Require protected Authentik recovery controller inputs"
+    )
     secret_payload = next(task for task in tasks if task["name"] == "Record the Authentik OpenBao secret payload")
     smtp_verify = next(
         task
@@ -496,9 +509,20 @@ def test_recovery_blueprint_and_smtp_contract_are_managed_and_secret_safe() -> N
 
     assert source_guard["no_log"] is True
     assert any("0600" in condition for condition in source_guard["ansible.builtin.assert"]["that"])
+    assert controller_input_stat["tags"] == ["authentik-recovery-flow"]
+    assert controller_input_guard["tags"] == ["authentik-recovery-flow"]
     assert blueprint_publish["ansible.builtin.copy"]["mode"] == "0644"
     assert blueprint_publish["ansible.builtin.copy"]["dest"] == "{{ authentik_recovery_blueprint_remote_file }}"
     assert blueprint_publish["register"] == "authentik_recovery_blueprint_publish"
+    assert blueprint_publish["tags"] == ["authentik-recovery-flow"]
+    recovery_import = next(
+        task for task in tasks if task["name"] == "Verify the managed Authentik password-recovery flow"
+    )
+    assert recovery_preflight["tags"] == ["authentik-recovery-flow"]
+    assert recovery_preflight["when"] == "'authentik-recovery-flow' in ansible_run_tags"
+    assert recovery_preflight["ansible.builtin.import_tasks"] == "verify.yml"
+    assert tasks.index(recovery_preflight) < tasks.index(blueprint_publish)
+    assert recovery_import["tags"] == ["authentik-recovery-flow"]
     assert secret_payload["no_log"] is True
     payload = secret_payload["ansible.builtin.set_fact"]["authentik_runtime_secret_payload"]
     assert payload["AUTHENTIK_EMAIL__PASSWORD"] == "{{ authentik_email_password }}"

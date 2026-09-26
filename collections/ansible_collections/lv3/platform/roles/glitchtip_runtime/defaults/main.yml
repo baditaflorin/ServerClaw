@@ -50,6 +50,9 @@ glitchtip_oidc_provider: openid_connect
 glitchtip_oidc_provider_id: authentik
 glitchtip_oidc_provider_name: Authentik
 glitchtip_oidc_client_id: glitchtip
+# Allow JIT account creation only through the configured social identity provider.
+# Local email/password registration and organization creation remain disabled.
+glitchtip_enable_social_apps_user_registration: true
 glitchtip_retired_oidc_provider_ids:
   - keycloak
 glitchtip_oidc_issuer_url: "https://id.{{ platform_domain }}/application/o/glitchtip"

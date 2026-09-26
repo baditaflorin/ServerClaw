@@ -62,6 +62,20 @@ attempts per 15-minute window. A reset email is proof that Authentik accepted
 the request, not a substitute for confirming inbox delivery. Authentik did not
 inherit Keycloak's MFA factors; enrol a second factor after completing recovery.
 
+If the runtime itself is already healthy and only the recovery blueprint has
+drifted, use the tagged, governed service apply to publish the declared
+blueprint, verify the worker's global SMTP authentication, and confirm the
+recovery bindings without recycling the Authentik containers:
+
+```bash
+make live-apply-service service=authentik env=production \
+  EXTRA_ARGS='--tags authentik-recovery-flow'
+```
+
+This narrower apply still requires the deployment selectors, host access, and
+controller-local secrets documented below. It intentionally does not reconcile
+OAuth clients, users, or the OpenBao runtime secret path.
+
 ## Secret modes
 
 `authentik_secret_bootstrap_mode` has three explicit modes:

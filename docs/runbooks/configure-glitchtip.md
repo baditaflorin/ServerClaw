@@ -111,6 +111,14 @@ because GlitchTip fetches OIDC discovery server-side; a container that resolves
 `id.example.com` to the public edge may otherwise fail on a non-hairpin-capable
 route even while the endpoint works from an operator workstation.
 
+The runtime keeps local email/password registration and organization creation
+disabled. `ENABLE_SOCIAL_APPS_USER_REGISTRATION` is enabled for the managed
+Authentik provider so an authenticated Authentik identity can receive a
+GlitchTip account on first sign-in. This does not grant membership in the
+`LV3` organization or access to its projects; membership remains an explicit
+organization-admin action. Do not enable local registration to work around an
+OIDC onboarding failure.
+
 ## Generated local artifacts
 
 The workflow maintains controller-local artifacts under `.local/glitchtip/`:
@@ -194,8 +202,10 @@ live-apply receipt:
 
 1. Open `https://errors.${PLATFORM_DOMAIN}/login`, choose the Authentik
    provider, and authenticate with an approved existing verification identity.
-2. Confirm the browser returns to GlitchTip and that an authenticated page for
-   the expected account and `lv3` organization loads successfully.
+2. Confirm the browser returns to GlitchTip and an authenticated page for the
+   expected account loads. Verify `lv3` organization access only when that
+   account is explicitly intended to be a member; JIT sign-in alone must not
+   grant organization or project access.
 3. Sign out through the GlitchTip UI and confirm the same browser context can no
    longer access the authenticated page without starting a new login.
 
@@ -204,6 +214,20 @@ pass/fail results. Do not record passwords, cookies, CSRF values, OAuth state,
 authorization codes, token responses, or credential-bearing screenshots. A
 successful redirect-only smoke is not a substitute for this gate, and Outline
 remains blocked until the login, session, and logout evidence is present.
+
+The repeatable fresh-profile login check is:
+
+```bash
+uv run --with playwright python scripts/glitchtip_authentik_e2e.py \
+  --base-url "https://errors.${PLATFORM_DOMAIN}" \
+  --username gitea-e2e \
+  --password-file "${LOCAL_ROOT}/authentik/gitea-e2e-initial-password.txt" \
+  --root-ca-file "${LOCAL_ROOT}/step-ca/certs/root_ca.crt"
+```
+
+It verifies a successful Authentik callback and an authenticated allauth browser
+session using strict TLS. Its output includes only the non-secret test identity,
+service name, and pass/fail state; callback query values are not logged.
 
 The converge also requires `/api/settings/` to return HTTP 200 and advertise
 the selected Authentik provider with a resolved authorization URL. It rejects
@@ -229,6 +253,10 @@ Authentik redirect or token exchange fails:
    reaches the identity provider.
 3. Reconcile only GlitchTip and repeat the headless redirect plus event smokes.
 4. Do not decommission Authentik as part of that emergency rollback.
+
+Public health and DSN-ingest presence alone is not rollback-health evidence;
+the interactive Authentik login/session gate must also pass before the
+application is considered recovered.
 
 ## Notes
 

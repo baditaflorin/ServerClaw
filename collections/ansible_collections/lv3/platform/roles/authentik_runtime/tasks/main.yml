@@ -70,6 +70,8 @@
   become: false
   register: authentik_recovery_controller_inputs
   no_log: true
+  tags:
+    - authentik-recovery-flow
 
 - name: Require protected Authentik recovery controller inputs
   ansible.builtin.assert:
@@ -90,6 +92,14 @@
   delegate_to: localhost
   become: false
   no_log: true
+  tags:
+    - authentik-recovery-flow
+
+- name: Verify current Authentik health and global SMTP before a recovery-only apply
+  ansible.builtin.import_tasks: verify.yml
+  when: "'authentik-recovery-flow' in ansible_run_tags"
+  tags:
+    - authentik-recovery-flow
 
 - name: Publish the managed Authentik recovery blueprint
   ansible.builtin.copy:
@@ -99,6 +109,8 @@
     group: root
     mode: "0644"
   register: authentik_recovery_blueprint_publish
+  tags:
+    - authentik-recovery-flow
 
 - name: Validate the Authentik secret bootstrap mode
   ansible.builtin.assert:
@@ -968,3 +980,5 @@
 - name: Verify the managed Authentik password-recovery flow
   ansible.builtin.import_tasks: recovery_flow.yml
   when: authentik_recovery_verification_enabled | bool
+  tags:
+    - authentik-recovery-flow
