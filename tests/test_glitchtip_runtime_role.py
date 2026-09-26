@@ -48,6 +48,7 @@ def test_glitchtip_runtime_defaults_reference_service_topology_images_and_local_
     assert defaults["glitchtip_oidc_provider_id"] == "authentik"
     assert defaults["glitchtip_oidc_provider_name"] == "Authentik"
     assert defaults["glitchtip_oidc_client_id"] == "glitchtip"
+    assert defaults["glitchtip_enable_social_apps_user_registration"] is True
     assert defaults["glitchtip_retired_oidc_provider_ids"] == ["keycloak"]
     assert not defaults["glitchtip_oidc_issuer_url"].endswith("/")
     assert defaults["glitchtip_mail_submission_password_local_file"] == (
@@ -351,6 +352,10 @@ def test_glitchtip_runtime_templates_render_public_oidc_and_mail_settings() -> N
     ctmpl_template = CTMPL_TEMPLATE.read_text(encoding="utf-8")
     bootstrap_template = BOOTSTRAP_TEMPLATE.read_text(encoding="utf-8")
     tasks = load_yaml(ROLE_TASKS)
+    runtime_secret_task = next(
+        task for task in tasks if task.get("name") == "Record the GlitchTip runtime and bootstrap secrets"
+    )
+    runtime_secret_payload = runtime_secret_task["ansible.builtin.set_fact"]["glitchtip_runtime_secret_payload"]
 
     assert "container_name: {{ glitchtip_container_name }}" in compose_template
     assert "{% from 'compose_macros.j2' import hairpin_hosts" in compose_template
@@ -363,6 +368,16 @@ def test_glitchtip_runtime_templates_render_public_oidc_and_mail_settings() -> N
     assert not (CTMPL_TEMPLATE.parent / "glitchtip.env.j2").exists()
     assert '[[ with secret "kv/data/{{ glitchtip_openbao_secret_path }}" ]]' in ctmpl_template
     assert 'EMAIL_URL=[[ with secret "kv/data/{{ glitchtip_openbao_secret_path }}" ]]' in ctmpl_template
+    assert runtime_secret_payload["ENABLE_USER_REGISTRATION"] == "false"
+    assert runtime_secret_payload["ENABLE_SOCIAL_APPS_USER_REGISTRATION"] == (
+        "{{ 'true' if glitchtip_enable_social_apps_user_registration | bool else 'false' }}"
+    )
+    assert runtime_secret_payload["ENABLE_ORGANIZATION_CREATION"] == "false"
+    assert (
+        "ENABLE_SOCIAL_APPS_USER_REGISTRATION={{ 'true' if glitchtip_enable_social_apps_user_registration | bool else 'false' }}"
+        in ctmpl_template
+    )
+    assert "ENABLE_ORGANIZATION_CREATION=false" in ctmpl_template
     assert "OrganizationUser" in bootstrap_template
     assert "OrganizationUser.objects.filter(organization=org, user=user).first()" in bootstrap_template
     assert "OrganizationSocialApp.objects.get_or_create" in bootstrap_template
@@ -393,6 +408,7 @@ def test_glitchtip_role_argument_specs_and_postgres_tasks_cover_runtime_contract
     assert options["glitchtip_oidc_client_secret_local_file"]["type"] == "path"
     assert options["glitchtip_oidc_provider_id"]["type"] == "str"
     assert options["glitchtip_oidc_client_id"]["type"] == "str"
+    assert options["glitchtip_enable_social_apps_user_registration"] == {"type": "bool", "required": True}
     assert options["glitchtip_retired_oidc_provider_ids"] == {
         "type": "list",
         "elements": "str",

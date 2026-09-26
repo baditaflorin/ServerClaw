@@ -24,7 +24,9 @@ ServerClaw Woodpecker. The snapshot is merged only after the required
 
 ## Status
 
-In progress; ServerClaw PR #55 exposed the mismatch. The generic route and
-regression test are implemented, and the publisher/subdomain tests pass
-locally. Private PR CI and the refreshed public snapshot checks are pending.
-No live service/runtime change is part of this workstream.
+Merged in private PR #241 and published to ServerClaw in PR #55 on
+2026-09-25. The refreshed snapshot passed both Woodpecker push and PR checks,
+including the subdomain-catalog tests that exposed the missing route. The
+GitHub Actions jobs were not started because the account was billing-locked;
+the active ServerClaw ruleset requires only the passing Woodpecker push
+context. No live service/runtime change was part of this workstream.

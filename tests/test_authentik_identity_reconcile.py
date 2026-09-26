@@ -109,7 +109,8 @@ def test_opt_in_gitea_test_identity_is_valid_and_login_only() -> None:
     user = loaded["users"][0]
     assert user["username"] == "gitea-e2e"
     assert user["email"] == "gitea-e2e@example.net"
-    assert user["groups"] == ["gitea-users"]
+    assert user["groups"] == ["gitea-users", "grafana-viewers"]
+    assert "grafana-admins" not in user["groups"]
     assert user["provisioning"] == "create_if_missing"
     assert user["type"] == "internal"
 

@@ -1,0 +1,206 @@
+id: ws-0512-authentik-consumer-e2e
+adr: "0491"
+title: Audit and repair live Authentik consumer sign-in paths end to end
+status: blocked
+ready_to_merge: false
+live_applied: true
+owner: codex
+branch: codex/authentik-live-closeout-20260926
+worktree_path: .worktrees/authentik-live-closeout-20260926
+doc: docs/workstreams/ws-0512-authentik-consumer-e2e.md
+canonical_truth:
+  changelog_entry: Verify and repair Authentik sign-in paths across active platform consumers.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    live_apply: receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
+depends_on:
+  - adr-0491-authentik-keycloak-sunset-2026-08-30
+  - ws-0510-gitea-authentik-oidc-e2e
+conflicts_with: []
+shared_surfaces:
+  - .woodpecker.yml
+  - config/authentik/oauth-clients.yaml
+  - config/authentik/identities.yaml
+  - config/authentik/test-identities.yaml
+  - config/grafana/dashboards/grafana.json
+  - config/alertmanager/rules/grafana.yml
+  - build/platform-manifest.json
+  - inventory/group_vars/platform.yml
+  - scripts/topology-snapshot.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - scripts/platform_manifest.py
+  - tests/test_platform_manifest.py
+  - scripts/generate_platform_vars.py
+  - scripts/validate_repository_data_models.py
+  - tests/test_generate_platform_vars.py
+  - tests/test_validate_repository_data_models.py
+  - inventory/group_vars/all/platform_services.yml
+  - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/outline_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/grafana_sso/**
+  - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/**
+  - collections/ansible_collections/lv3/platform/roles/librechat_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/repo_intake_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/**
+  - scripts/**authentik*e2e*.py
+  - tests/**authentik*e2e*.py
+  - tests/test_authentik_runtime_role.py
+  - tests/test_outline_runtime_role.py
+  - tests/test_authentik_identity_reconcile.py
+  - tests/test_gitea_authentik_e2e.py
+  - scripts/session_logout_verify.py
+  - tests/test_session_logout_verify.py
+  - tests/test_glitchtip_runtime_role.py
+  - docs/runbooks/configure-authentik.md
+  - docs/runbooks/configure-gitea.md
+  - docs/runbooks/configure-harbor.md
+  - docs/runbooks/configure-outline.md
+  - docs/runbooks/configure-glitchtip.md
+  - docs/workstreams/ws-0512-authentik-consumer-e2e.md
+  - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
+  - workstreams.yaml
+  - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: authentik_consumer_runtime_contract
+      paths:
+        - config/authentik/oauth-clients.yaml
+        - config/authentik/identities.yaml
+        - config/authentik/test-identities.yaml
+        - config/authentik/provider-logout-flow.yaml
+        - inventory/group_vars/all/platform_services.yml
+        - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/outline_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/grafana_sso/**
+        - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/**
+        - collections/ansible_collections/lv3/platform/roles/librechat_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/repo_intake_runtime/**
+        - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/**
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: authentik_consumer_e2e_harness
+      paths:
+        - scripts/**authentik*e2e*.py
+        - tests/**authentik*e2e*.py
+      mode: exclusive
+    - id: glitchtip_runtime_regression
+      paths:
+        - tests/test_glitchtip_runtime_role.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: authentik_runtime_regression
+      paths:
+        - tests/test_authentik_runtime_role.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: outline_runtime_regression
+      paths:
+        - tests/test_outline_runtime_role.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: grafana_observability_baseline
+      paths:
+        - config/grafana/dashboards/grafana.json
+        - config/alertmanager/rules/grafana.yml
+      mode: shared_contract
+      contract: grafana-observability-v1
+    - id: platform_manifest_artifact
+      paths:
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: generated_platform_facts
+      paths:
+        - inventory/group_vars/platform.yml
+        - scripts/topology-snapshot.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: platform_manifest_date_stability
+      paths:
+        - scripts/platform_manifest.py
+        - tests/test_platform_manifest.py
+      mode: shared_contract
+      contract: platform-manifest-generation-v1
+    - id: selected_platform_facts_validation
+      paths:
+        - scripts/generate_platform_vars.py
+        - scripts/validate_repository_data_models.py
+        - tests/test_generate_platform_vars.py
+        - tests/test_validate_repository_data_models.py
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: shared_test_identity_regression
+      paths:
+        - tests/test_authentik_identity_reconcile.py
+        - tests/test_gitea_authentik_e2e.py
+        - scripts/session_logout_verify.py
+        - tests/test_session_logout_verify.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: authentik_consumer_runbooks
+      paths:
+        - docs/runbooks/configure-authentik.md
+        - docs/runbooks/configure-gitea.md
+        - docs/runbooks/configure-harbor.md
+        - docs/runbooks/configure-outline.md
+        - docs/runbooks/configure-glitchtip.md
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: authentik_ci_workflow
+      paths:
+        - .woodpecker.yml
+      mode: shared_contract
+      contract: woodpecker-workflow-v1
+    - id: authentik_consumer_workstream
+      paths:
+        - docs/workstreams/ws-0512-authentik-consumer-e2e.md
+        - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
+      mode: exclusive
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: authentik_live_apply_evidence
+      paths:
+        - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+context: |
+  The Authentik migration record reports that all consumers and protected
+  browser paths passed, but the operator subsequently observed Outline
+  authorization-state/logout problems, failed Grafana token exchange, and
+  intermittent 502/login behavior on Repo Intake, Chat, Errors, and Ops Portal.
+  Recheck today's live state against current repository declarations and test
+  the complete browser redirect/callback/session path before treating the old
+  receipt as current proof. Keep credentials in the ignored local overlay and
+  use a non-admin identity for consumer testing.
+
+  2026-09-26 checkpoint: the recovery blueprint and dedicated test identity
+  were reconciled, and the narrow Authentik converge passed. Gitea and Harbor
+  browser OIDC checks pass. Grafana authenticates but returns no orgRole;
+  Outline realtime still fails its WebSocket handshake; GlitchTip still
+  reports signup_closed. Governed Grafana, GlitchTip, and Outline applies are
+  blocked by the vulnerability budget. Do not bypass the gate or renew expired
+  exceptions to finish this workstream.
+tasks:
+  - id: t1
+    title: Reconcile live provider/application state with declared clients and active deployments
+    status: in_progress
+  - id: t2
+    title: Add repeatable fresh-browser E2E coverage for active Authentik consumers
+    status: in_progress
+  - id: t3
+    title: Fix observed consumer, proxy, or logout defects and apply through governed converges
+    status: blocked
+  - id: t4
+    title: Run repository checks, capture live evidence, and merge/publish through PRs
+    status: in_progress

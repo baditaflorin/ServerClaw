@@ -15,8 +15,10 @@ steps:
       - python3 -m pip install --no-cache-dir uv ansible-core
       - python3 --version
       - uv --version
-      - make generate-platform-vars
-      - git diff --exit-code -- inventory/group_vars/platform.yml inventory/group_vars/platform_tls_certs.yml
+      # This clean CI checkout intentionally has no ignored deployment overlays.
+      # The validator checks tracked structure and skips only overlay-derived
+      # equivalence when those private generated inputs are unavailable. Do not
+      # regenerate deployment-specific facts from committed defaults here.
       - make validate-generated-vars
       - ANSIBLE_CONFIG="$PWD/ansible.cfg" ANSIBLE_COLLECTIONS_PATH="$PWD/collections" make syntax-check-woodpecker
       - ./scripts/validate_repo.sh json health-probes agent-standards

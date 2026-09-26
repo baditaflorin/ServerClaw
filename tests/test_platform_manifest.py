@@ -337,6 +337,19 @@ def test_build_manifest_generates_schema_compliant_payload(tmp_path: Path) -> No
     assert manifest["known_gaps"][0]["adr"] == "0128"
 
 
+def test_parse_release_note_uses_date_bullet_for_stable_manifest_date(tmp_path: Path) -> None:
+    module = load_module("platform_manifest_test_release_note_date", "scripts/platform_manifest.py")
+    release_note = tmp_path / "0.179.46.md"
+    release_note.write_text(
+        "# Release 0.179.46\n\n- Date: 2026-08-31\n\n## Summary\n\n- Release summary.\n",
+        encoding="utf-8",
+    )
+
+    parsed = module.parse_release_note(release_note)
+
+    assert parsed["released_on"] == "2026-08-31"
+
+
 def test_load_static_config_uses_tracked_generation_identity(monkeypatch, tmp_path: Path) -> None:
     module = load_module("platform_manifest_test_tracked_identity", "scripts/platform_manifest.py")
     repo_root = make_repo(tmp_path)

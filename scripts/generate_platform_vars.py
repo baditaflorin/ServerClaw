@@ -21,7 +21,7 @@ existing_platform = sys.modules.get("platform")
 if existing_platform is not None and not hasattr(existing_platform, "__path__"):
     del sys.modules["platform"]
 
-from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
+from platform.repo import TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars, resolve_explicit_overlay_selector
 
 from controller_automation_toolkit import emit_cli_error, load_yaml, repo_path
 
@@ -1624,28 +1624,41 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     output_path: Path = PLATFORM_VARS_PATH
+    use_identity_override = False
+    use_topology_override = False
     if args.deployment:
         output_path = _apply_deployment_overrides(args.deployment)
-    elif args.identity_file:
-        _apply_identity_override(args.identity_file)
-    if args.topology_file:
-        _apply_topology_override(args.topology_file)
+        use_identity_override = True
+        use_topology_override = True
+    else:
+        # Makefile workflows normalize these selectors to absolute paths and
+        # export them for every validator in the same invocation. Honor them
+        # here too so repository hooks can reproduce the exact selected
+        # deployment instead of silently comparing against committed defaults.
+        identity_path = args.identity_file or resolve_explicit_overlay_selector("PLATFORM_IDENTITY_OVERLAY")
+        topology_path = args.topology_file or resolve_explicit_overlay_selector("PLATFORM_TOPOLOGY_OVERLAY")
+        if identity_path:
+            _apply_identity_override(identity_path)
+            use_identity_override = True
+        if topology_path:
+            _apply_topology_override(topology_path)
+            use_topology_override = True
 
     try:
         if args.write:
             return write_platform_vars(
                 output_path,
-                use_topology_override=bool(args.deployment or args.topology_file),
+                use_topology_override=use_topology_override,
             )
         if args.check:
             return check_platform_vars(
                 output_path,
-                use_identity_override=bool(args.deployment or args.identity_file),
-                use_topology_override=bool(args.deployment or args.topology_file),
+                use_identity_override=use_identity_override,
+                use_topology_override=use_topology_override,
             )
         return dry_run(
             output_path,
-            use_topology_override=bool(args.deployment or args.topology_file),
+            use_topology_override=use_topology_override,
         )
     except (OSError, RuntimeError, ValueError) as exc:
         return emit_cli_error("Platform vars generator", exc)

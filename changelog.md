@@ -14,6 +14,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 - Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
 - Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
+- Keep the sanitized ServerClaw host template consistent with active authenticated edge routes.
 
 ## Latest Release
 

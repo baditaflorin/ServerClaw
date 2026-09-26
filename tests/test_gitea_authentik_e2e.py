@@ -55,7 +55,7 @@ class FakePage:
         self.argument = argument
         return self.response
 
-    def locator(self, selector: str) -> "FakeLocator":
+    def locator(self, selector: str) -> FakeLocator:
         self.selector = selector
         return FakeLocator()
 
@@ -124,7 +124,7 @@ def test_browser_session_rejects_wrong_or_privileged_user(response: dict[str, ob
         MODULE.verify_authenticated_user(FakePage(response), username="gitea-e2e")
 
 
-def test_e2e_manifest_creates_only_the_gitea_login_group() -> None:
+def test_e2e_manifest_limits_the_test_identity_to_non_admin_consumer_groups() -> None:
     import yaml
 
     manifest = yaml.safe_load((REPO_ROOT / "config/authentik/test-identities.yaml").read_text(encoding="utf-8"))
@@ -132,12 +132,13 @@ def test_e2e_manifest_creates_only_the_gitea_login_group() -> None:
     assert len(manifest["users"]) == 1
     user = manifest["users"][0]
     assert user["username"] == "gitea-e2e"
-    assert user["groups"] == ["gitea-users"]
+    assert user["groups"] == ["gitea-users", "grafana-viewers"]
     assert user["provisioning"] == "create_if_missing"
     assert user["type"] == "internal"
     assert "is_admin" not in user
     assert "platform-admins" not in user["groups"]
     assert "authentik Admins" not in user["groups"]
+    assert "grafana-admins" not in user["groups"]
 
 
 def test_tls_validation_is_not_disabled() -> None:

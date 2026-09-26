@@ -57,7 +57,10 @@ The normal `config/authentik/identities.yaml` reconciliation manages the stable
 group and the bootstrap operator. The separate
 `config/authentik/test-identities.yaml` manifest is intentionally opt-in and
 creates the `gitea-e2e` internal test identity only when explicitly reconciled.
-Its initial password is generated once into the ignored local overlay at
+Besides Gitea's login-only `gitea-users` group, it receives Grafana's
+read-only `grafana-viewers` role for the separate consumer E2E check; it is
+never a member of `grafana-admins` or a platform-admin group. Its initial
+password is generated once into the ignored local overlay at
 `.local/authentik/gitea-e2e-initial-password.txt`; never commit or print it.
 
 After applying the test manifest, run the browser-level check from the repo

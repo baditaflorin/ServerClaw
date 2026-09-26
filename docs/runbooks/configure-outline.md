@@ -87,14 +87,33 @@ operator, create a replacement scoped token in Outline, store it at that path,
 and rerun the converge. Do not create an unmanaged identity or write a token
 directly into the database.
 
-Outline logout remains app-local first, then the repo-managed
-`OIDC_LOGOUT_URI` hands the browser to Authentik's provider-scoped end-session
-endpoint.
+Outline logout remains app-local first, then `OIDC_LOGOUT_URI` hands the
+browser to Authentik's provider-scoped end-session flow. Authentik displays a
+confirmation card for the completed Outline logout. Its central SSO session
+remains active, so reopening Outline may silently sign the user back in. Use
+the separate Authentik account-menu logout action when the user wants to end
+the identity-provider session and sign out of all consumers.
 
-The real live logout path should be verified through the authenticated UI
-account menu, not by assuming `GET /logout` fully exercises the browser flow.
-Verify that the Authentik session is no longer sufficient to reopen Outline
-after logout.
+The Outline runtime must start all four managed services: `web`, `worker`,
+`websockets`, and `collaboration`. In particular, omitting `websockets` leaves
+the HTTP UI functional but causes `/realtime` upgrades to fail at the public
+edge. Keep the service list in both the static and OpenBao-rendered environment
+templates in sync.
+
+Verify login, the authenticated `/api/auth.info` session, the authenticated
+Engine.IO `/realtime` WebSocket handshake, app-local logout, and SSO re-entry
+with the repeatable clean-browser check:
+
+```bash
+uv run --no-project --with playwright python scripts/outline_authentik_e2e.py \
+  --base-url "https://wiki.${PLATFORM_DOMAIN}" \
+  --username gitea-e2e \
+  --password-file "${LOCAL_ROOT}/authentik/gitea-e2e-initial-password.txt"
+```
+
+The logout assertion checks that Outline's own session is invalidated. It does
+not require another Authentik password prompt, because provider-scoped logout
+does not end the central SSO session.
 
 ## Syncing knowledge surfaces
 
@@ -138,9 +157,10 @@ python3 scripts/sync_docs_to_outline.py verify --base-url https://wiki.example.c
 
 The redirect must select `https://id.example.com/application/o/authorize/` and
 client ID `outline`. The verify command asserts that all required collections
-and repo-managed landing documents exist. Finish with an authenticated browser
-journey: login through Authentik, open a protected collection, log out from the
-Outline account menu, and prove the same browser needs fresh Authentik login.
+and repo-managed landing documents exist. Finish with the clean-browser E2E
+command above. It exercises the Authentik callback, authenticated app session,
+realtime upgrade, logout session clearing, and SSO re-entry in one browser
+context.
 
 ## Mainline replay notes
 

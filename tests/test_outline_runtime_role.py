@@ -280,7 +280,9 @@ def test_outline_templates_enable_collaboration_and_private_s3_storage() -> None
     env_template = ENV_TEMPLATE_PATH.read_text()
     env_ctemplate = ENV_CTEMPLATE_PATH.read_text()
     compose_template = COMPOSE_TEMPLATE_PATH.read_text()
-    assert "SERVICES=web,worker,collaboration" in env_template
+    expected_services = "SERVICES=web,worker,websockets,collaboration"
+    assert expected_services in env_template
+    assert expected_services in env_ctemplate
     assert "FILE_STORAGE=s3" in env_template
     assert (
         "REDIS_URL=redis://:{{ outline_redis_password | urlencode | replace('/', '%2F') }}@redis:6379/0" in env_template

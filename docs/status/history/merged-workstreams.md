@@ -11,6 +11,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](../../adr/0470-deployment-fixture-matrix.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](../../adr/0448-deployment-connection-registry-and-wrapper.md) |
 | `0409` | Accept clean ignored HTTPS alert outputs while rejecting present drift | `merged` | [ws-0500-https-alert-runtime-output-gate.md](../../workstreams/ws-0500-https-alert-runtime-output-gate.md) |
+| `0407` | Keep the ServerClaw host template aligned with the edge route catalog | `merged` | [ws-0511-serverclaw-public-route-template.md](../../workstreams/ws-0511-serverclaw-public-route-template.md) |
 | `0407` | Ops Portal Sibling-Link IaC Substitution | `merged` | [0407-generic-by-default-local-overlay-architecture.md](../../adr/0407-generic-by-default-local-overlay-architecture.md) |
 | `0374` | Resolve generic subdomain catalog entries for selected DNS checks | `merged` | [ws-0497-dns-catalog-selection.md](../../workstreams/ws-0497-dns-catalog-selection.md) |
 | `0374` | Repair ADR 0374 status artifacts on latest origin/main | `merged` | [ws-0374-status-repair.md](../../workstreams/ws-0374-status-repair.md) |
