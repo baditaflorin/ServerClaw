@@ -1,8 +1,8 @@
 id: ws-0513-woodpecker-only-public-ci
 adr: "0287"
 title: Use Woodpecker as the public ServerClaw CI provider
-status: in_progress
-ready_to_merge: false
+status: merged
+ready_to_merge: true
 live_applied: false
 owner: codex
 branch: codex/retire-github-actions-20260927
@@ -11,7 +11,7 @@ doc: docs/workstreams/ws-0513-woodpecker-only-public-ci.md
 canonical_truth:
   changelog_entry: Use Woodpecker for public CI and keep the sanitized capacity model aligned with the fork inventory.
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.179.47
   latest_receipts: {}
 depends_on: []
 conflicts_with: []
@@ -90,7 +90,7 @@ shared_surfaces:
   - playbooks/_includes/dns_publication.yml
   - collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
   - tests/test_dns_publication_include.py
-  - workstreams/active/ws-0513-woodpecker-only-public-ci.yaml
+  - workstreams/archive/2026/ws-0513-woodpecker-only-public-ci.yaml
   - workstreams.yaml
 ownership_manifest:
   owned_surfaces:
@@ -186,7 +186,7 @@ ownership_manifest:
       mode: exclusive
     - id: workstream_tracking
       paths:
-        - workstreams/active/ws-0513-woodpecker-only-public-ci.yaml
+        - workstreams/archive/2026/ws-0513-woodpecker-only-public-ci.yaml
         - docs/workstreams/ws-0513-woodpecker-only-public-ci.md
         - workstreams.yaml
       mode: shared_contract
@@ -246,7 +246,7 @@ tasks:
     status: completed
   - id: t2
     title: Run focused local validation and verify the required Woodpecker check
-    status: in_progress
+    status: completed
   - id: t3
     title: Merge the private source PR and publish the sanitized ServerClaw snapshot
-    status: pending
+    status: completed

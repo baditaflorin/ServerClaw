@@ -21,9 +21,9 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 339
+  total_workstreams: 340
   by_year:
-    '2026': 339
+    '2026': 340
 workstreams:
 - id: ws-0512-authentik-consumer-e2e
   adr: 0491
@@ -6838,283 +6838,6 @@ workstreams:
   - id: t3
     title: Document the cache-only credential boundary and verification gate
     status: in_progress
-- id: ws-0513-woodpecker-only-public-ci
-  adr: 0287
-  title: Use Woodpecker as the public ServerClaw CI provider
-  status: in_progress
-  ready_to_merge: false
-  live_applied: false
-  owner: codex
-  branch: codex/retire-github-actions-20260927
-  worktree_path: .worktrees/retire-github-actions-20260927
-  doc: docs/workstreams/ws-0513-woodpecker-only-public-ci.md
-  canonical_truth:
-    changelog_entry: Use Woodpecker for public CI and keep the sanitized capacity
-      model aligned with the fork inventory.
-    release_bump: patch
-    included_in_repo_version: null
-    latest_receipts: {}
-  depends_on: []
-  conflicts_with: []
-  shared_surfaces:
-  - .github/workflows/validate.yml
-  - .woodpecker.yml
-  - AGENTS.md
-  - config/validation-lanes.yaml
-  - config/workflow-catalog.json
-  - config/service-completeness.json
-  - build/platform-manifest.json
-  - config/data-catalog.json
-  - config/slo-catalog.json
-  - catalog/services/api_gateway/service.yaml
-  - catalog/services/woodpecker/service.yaml
-  - collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/defaults/main.yml
-  - collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/templates/woodpecker.env.ctmpl.j2
-  - collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/templates/woodpecker.env.j2
-  - tests/test_woodpecker_runtime_role.py
-  - config/image-catalog.json
-  - receipts/image-scans/2026-09-27-woodpecker-agent-runtime.json
-  - receipts/image-scans/2026-09-27-woodpecker-server-runtime.json
-  - receipts/sbom/93235c148a9f.cdx.json
-  - receipts/sbom/0b8dbb53d379.cdx.json
-  - receipts/cve/93235c148a9f-20260927T220940Z.grype.json
-  - receipts/cve/0b8dbb53d379-20260927T220925Z.grype.json
-  - receipts/image-scans/2026-09-28-plausible-runtime.json
-  - receipts/image-scans/2026-09-28-plausible-postgres-runtime.json
-  - receipts/image-scans/2026-09-28-plausible-clickhouse-runtime.json
-  - receipts/sbom/7450d9df4bfc.cdx.json
-  - receipts/sbom/1a66d744c1b4.cdx.json
-  - receipts/sbom/4b68fbafc961.cdx.json
-  - receipts/cve/7450d9df4bfc-20260928T005251Z.grype.json
-  - receipts/cve/1a66d744c1b4-20260928T005351Z.grype.json
-  - receipts/cve/4b68fbafc961-20260928T005444Z.grype.json
-  - inventory/group_vars/proxmox_hosts.yml
-  - tests/test_proxmox_host_transport_inventory.py
-  - docs/runbooks/security-posture-reporting.md
-  - scripts/run_gate_fallback.py
-  - tests/test_run_gate_fallback.py
-  - config/prometheus/rules/slo_rules.yml
-  - config/prometheus/rules/slo_alerts.yml
-  - config/prometheus/file_sd/slo_targets.yml
-  - config/grafana/dashboards/slo-overview.json
-  - config/alertmanager/rules/api-gateway.yml
-  - config/alertmanager/rules/woodpecker.yml
-  - config/grafana/dashboards/woodpecker.json
-  - scripts/service_completeness.py
-  - tests/test_validate_service_completeness.py
-  - docs/adr/.index.yaml
-  - docs/adr/index/**
-  - docs/diagrams/agent-coordination-map.excalidraw
-  - docs/site-generated/architecture/dependency-graph.md
-  - .repo-structure.yaml
-  - .config-locations.yaml
-  - config/semgrep/rules/secrets.yaml
-  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
-  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
-  - tests/test_ci_provider_policy.py
-  - tests/test_api_gateway_runtime_role.py
-  - collections/ansible_collections/lv3/platform/roles/plausible_runtime/defaults/main.yml
-  - collections/ansible_collections/lv3/platform/roles/plausible_runtime/meta/argument_specs.yml
-  - collections/ansible_collections/lv3/platform/roles/plausible_runtime/tasks/main.yml
-  - collections/ansible_collections/lv3/platform/roles/plausible_runtime/templates/docker-compose.yml.j2
-  - tests/test_plausible_runtime_role.py
-  - docs/runbooks/configure-plausible.md
-  - docs/discovery/config-locations/validation-and-ci.yaml
-  - docs/discovery/repo-structure/runtime-and-delivery.yaml
-  - docs/adr/0419-pr-based-integration-flow.md
-  - docs/workstreams/ws-0513-woodpecker-only-public-ci.md
-  - docs/repository-map.md
-  - docs/runbooks/rebuild-manually-built-images.md
-  - config/publication-sanitization.yaml
-  - publication/templates/capacity-model.json
-  - tests/test_publish_to_serverclaw.py
-  - playbooks/_includes/dns_publication.yml
-  - collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
-  - tests/test_dns_publication_include.py
-  - workstreams/active/ws-0513-woodpecker-only-public-ci.yaml
-  - workstreams.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: public_ci_provider
-      paths:
-      - .github/workflows/validate.yml
-      - .woodpecker.yml
-      - tests/test_ci_provider_policy.py
-      - AGENTS.md
-      mode: exclusive
-    - id: sanitized_capacity_model_template
-      paths:
-      - config/publication-sanitization.yaml
-      - publication/templates/capacity-model.json
-      - tests/test_publish_to_serverclaw.py
-      mode: exclusive
-    - id: repo_metadata_and_api_gateway_bundle
-      paths:
-      - config/validation-lanes.yaml
-      - config/service-completeness.json
-      - build/platform-manifest.json
-      - config/data-catalog.json
-      - config/slo-catalog.json
-      - catalog/services/api_gateway/service.yaml
-      - catalog/services/woodpecker/service.yaml
-      - config/prometheus/rules/slo_rules.yml
-      - config/prometheus/rules/slo_alerts.yml
-      - config/prometheus/file_sd/slo_targets.yml
-      - config/grafana/dashboards/slo-overview.json
-      - config/alertmanager/rules/api-gateway.yml
-      - config/alertmanager/rules/woodpecker.yml
-      - config/grafana/dashboards/woodpecker.json
-      - scripts/service_completeness.py
-      - tests/test_validate_service_completeness.py
-      - config/semgrep/rules/secrets.yaml
-      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
-      - tests/test_api_gateway_runtime_role.py
-      - docs/discovery/config-locations/validation-and-ci.yaml
-      - docs/discovery/repo-structure/runtime-and-delivery.yaml
-      - docs/repository-map.md
-      - docs/adr/0419-pr-based-integration-flow.md
-      - docs/runbooks/rebuild-manually-built-images.md
-      mode: exclusive
-    - id: managed_runtime_image_pins_and_scan_evidence
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/templates/woodpecker.env.ctmpl.j2
-      - collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/templates/woodpecker.env.j2
-      - tests/test_woodpecker_runtime_role.py
-      - config/image-catalog.json
-      - receipts/image-scans/2026-09-27-woodpecker-agent-runtime.json
-      - receipts/image-scans/2026-09-27-woodpecker-server-runtime.json
-      - receipts/sbom/93235c148a9f.cdx.json
-      - receipts/sbom/0b8dbb53d379.cdx.json
-      - receipts/cve/93235c148a9f-20260927T220940Z.grype.json
-      - receipts/cve/0b8dbb53d379-20260927T220925Z.grype.json
-      - receipts/image-scans/2026-09-28-plausible-runtime.json
-      - receipts/image-scans/2026-09-28-plausible-postgres-runtime.json
-      - receipts/image-scans/2026-09-28-plausible-clickhouse-runtime.json
-      - receipts/sbom/7450d9df4bfc.cdx.json
-      - receipts/sbom/1a66d744c1b4.cdx.json
-      - receipts/sbom/4b68fbafc961.cdx.json
-      - receipts/cve/7450d9df4bfc-20260928T005251Z.grype.json
-      - receipts/cve/1a66d744c1b4-20260928T005351Z.grype.json
-      - receipts/cve/4b68fbafc961-20260928T005444Z.grype.json
-      mode: exclusive
-    - id: breakglass_ssh_port_inventory_support
-      paths:
-      - inventory/group_vars/proxmox_hosts.yml
-      - tests/test_proxmox_host_transport_inventory.py
-      - docs/runbooks/security-posture-reporting.md
-      mode: exclusive
-    - id: local_gate_fallback_native_execution
-      paths:
-      - scripts/run_gate_fallback.py
-      - tests/test_run_gate_fallback.py
-      mode: exclusive
-    - id: plausible_clickhouse_cpu_fairness
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/defaults/main.yml
-      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/meta/argument_specs.yml
-      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/tasks/main.yml
-      - collections/ansible_collections/lv3/platform/roles/plausible_runtime/templates/docker-compose.yml.j2
-      - tests/test_plausible_runtime_role.py
-      - docs/runbooks/configure-plausible.md
-      mode: exclusive
-    - id: dns_publication_identity_overlay_selection
-      paths:
-      - playbooks/_includes/dns_publication.yml
-      - collections/ansible_collections/lv3/platform/playbooks/_includes/dns_publication.yml
-      - tests/test_dns_publication_include.py
-      mode: exclusive
-    - id: workstream_tracking
-      paths:
-      - workstreams/active/ws-0513-woodpecker-only-public-ci.yaml
-      - docs/workstreams/ws-0513-woodpecker-only-public-ci.md
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-    - id: workflow_catalog_contract
-      paths:
-      - config/workflow-catalog.json
-      mode: shared_contract
-      contract: workflow-catalog-v1
-    - id: ws_0424_generated_indices
-      paths:
-      - docs/adr/.index.yaml
-      - docs/adr/index/**
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - docs/site-generated/architecture/dependency-graph.md
-      mode: shared_contract
-      contract: generated-index-and-diagram-v1
-    - id: discovery_generated_artifacts
-      paths:
-      - .repo-structure.yaml
-      - .config-locations.yaml
-      mode: shared_contract
-      contract: discovery-artifacts-v1
-    - id: environment_catalog_validation_performance
-      paths:
-      - scripts/environment_catalog.py
-      - tests/test_environment_catalog.py
-      mode: exclusive
-  context: 'GitHub Actions workflow checks on the sanitized public repository were
-    not
-
-    executed because the account has no available GitHub-hosted runner. Public
-
-    ServerClaw already has a governed Woodpecker status check and a pipeline
-
-    targeting the isolated self-hosted runner, so keep public CI on that supported
-    path
-
-    and remove the obsolete workflow and its runtime/catalog dependencies.
-
-
-    The changed API Gateway and Woodpecker completeness profiles now pass their
-
-    scoped validation without suppressions; focused tests pass. The canonical CI
-
-    API and edge are reachable, but the dedicated builder agent is rejecting
-
-    gRPC with `too_many_pings`; server keepalive and image configuration are being
-
-    repaired. The runtime VM is under memory pressure, so unrelated service
-
-    containers and the VM itself are being left running. A persistent, relative
-
-    CPU-share policy is being added to Plausible ClickHouse after a temporary
-
-    cgroup scheduler-weight mitigation. The Plausible image update uses fresh
-
-    scans and time-limited exceptions for critical findings without available
-
-    image-level fixes; it does not bypass the vulnerability gate. Do not merge
-
-    until the Woodpecker API, runner, webhook, and required branch check are
-
-    verified green.
-
-
-    The first governed Plausible apply safely stopped before mutation because the
-
-    DNS publication include loaded only the legacy .local/identity.yml path and
-
-    ignored the explicit deployment identity overlay used by worktrees. The
-
-    include and its collection copy now honor PLATFORM_IDENTITY_OVERLAY, including
-
-    the .local/deployments/<profile>/identity.yml layout.
-
-    '
-  tasks:
-  - id: t1
-    title: Remove GitHub Actions workflow and update Woodpecker-backed metadata
-    status: completed
-  - id: t2
-    title: Run focused local validation and verify the required Woodpecker check
-    status: in_progress
-  - id: t3
-    title: Merge the private source PR and publish the sanitized ServerClaw snapshot
-    status: pending
 - id: ws-0494-woodpecker-ci-network-recovery
   adr: 0287
   title: Restore the Woodpecker CI webhook runtime after bridge detachment
@@ -7496,6 +7219,91 @@ workstreams:
     title: Reconcile the Authentik group and test identity, converge Gitea, and verify
       browser login
     status: completed
+- id: ws-0514-repository-release-0-179-47
+  adr: '0110'
+  title: Cut repository release 0.179.47 for Woodpecker CI and service-completeness
+    fixes
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/release-0.179.47-20260928
+  worktree_path: .worktrees/serverclaw-publish-main-20260928
+  doc: docs/workstreams/ws-0514-repository-release-0-179-47.md
+  canonical_truth:
+    changelog_entry: Release Woodpecker-only public CI and scoped service-completeness
+      validation in 0.179.47.
+    release_bump: patch
+    included_in_repo_version: 0.179.47
+    latest_receipts: {}
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - VERSION
+  - changelog.md
+  - RELEASE.md
+  - docs/release-notes/**
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - README.md
+  - docs/status/history/merged-workstreams.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/adr/.index.yaml
+  - docs/adr/index/**
+  - docs/discovery/**
+  - .repo-structure.yaml
+  - .config-locations.yaml
+  - build/onboarding/**
+  - docs/workstreams/ws-0513-woodpecker-only-public-ci.md
+  - docs/workstreams/ws-0514-repository-release-0-179-47.md
+  - workstreams/archive/2026/ws-0513-woodpecker-only-public-ci.yaml
+  - workstreams/active/ws-0514-repository-release-0-179-47.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: repository_release_closeout
+      paths:
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/**
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - README.md
+      - docs/status/history/merged-workstreams.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+      - docs/discovery/**
+      - .repo-structure.yaml
+      - .config-locations.yaml
+      - build/onboarding/**
+      - docs/workstreams/ws-0513-woodpecker-only-public-ci.md
+      - docs/workstreams/ws-0514-repository-release-0-179-47.md
+      - workstreams/archive/2026/ws-0513-woodpecker-only-public-ci.yaml
+      - workstreams/active/ws-0514-repository-release-0-179-47.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: release-truth-v1
+  context: 'The merged Woodpecker and service-completeness changes require a patch
+    release
+
+    and a sanitized ServerClaw refresh. Regenerate all release/discovery surfaces
+
+    from the merged main state; do not change platform_version because no platform
+
+    runtime release was applied. Plane synchronization is skipped for this
+
+    single-commit release-metadata operation per AGENTS.md.
+
+    '
+  tasks:
+  - id: t1
+    title: Bump repository version and generate release metadata
+    status: completed
+  - id: t2
+    title: Publish and verify the 0.179.47 ServerClaw snapshot
+    status: pending
 - id: adr-0095-unified-search
   adr: 0095
   title: Unified search across platform services

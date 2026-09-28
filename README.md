@@ -31,7 +31,7 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.46` |
+| Repository version | `0.179.47` |
 | Platform version | `0.178.224` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
@@ -89,7 +89,7 @@ Showing 20 of 183 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.46` |
+| Repository version | `0.179.47` |
 | Platform version | `0.178.224` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -357,7 +357,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 339 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 340 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
