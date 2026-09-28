@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.46",
+  "repo_version": "0.179.47",
   "platform_version": "0.178.224",
-  "generated_at": "2026-09-28T08:39:13Z",
-  "next_refresh_at": "2026-09-28T09:39:13Z",
+  "generated_at": "2026-09-28T10:39:44Z",
+  "next_refresh_at": "2026-09-28T11:39:44Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",
@@ -6386,10 +6386,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.45",
-    "deployed_at": "2026-08-31",
-    "summary": "Complete the live-verified Authentik migration, cut over active OIDC consumers and edge authentication, and retire the Keycloak runtime with preserved rollback archives.",
-    "release_notes_url": "docs/release-notes/0.179.46.md"
+    "last_version": "0.179.46",
+    "deployed_at": "2026-09-28",
+    "summary": "Enable least-privilege Gitea Authentik login and verify a non-admin browser session. Allow the Builder metrics peer to scrape docker-build node-exporter over the private tailnet without disrupting Docker-managed firewall rules.",
+    "release_notes_url": "docs/release-notes/0.179.47.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

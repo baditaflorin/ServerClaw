@@ -150,3 +150,17 @@ the public inventory with generic `*-yourname` hostnames. This made both model
 schema validation and generated portal validation fail on active guest `nginx`.
 The publication map now substitutes an explicit generic capacity-model template
 and a regression test validates its active guest set against the public inventory.
+
+## Outcome — 2026-09-28
+
+The private source change merged in PR #248 after the full local push gate passed
+and both required Woodpecker push/PR checks succeeded. The refreshed ServerClaw
+snapshot merged in PR #60 after both Woodpecker checks passed; its merge-commit
+push check also passed. The public snapshot now has no GitHub Actions workflow
+files, and its generic capacity model validates against the generic inventory.
+The service-completeness regression lane passes and skips unrelated infrastructure
+changes while retaining a fail-closed full audit for ambiguous scope.
+
+The final Plane projection could not be synced: both locally stored Plane API
+tokens failed verification. No replacement token was minted; Git remains the
+authoritative workstream record until the Plane credentials are repaired.
