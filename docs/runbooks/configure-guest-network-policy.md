@@ -13,6 +13,18 @@ This runbook converges ADR 0067 by enforcing the canonical guest network policy 
 - preflight: `make preflight WORKFLOW=converge-guest-network-policy`
 - converge: `make converge-guest-network-policy`
 
+For a Proxmox-host-only policy change, preview or apply just the PVE firewall
+files without replaying guest-local nftables on every VM:
+
+```bash
+make converge-guest-network-policy env=production EXTRA_ARGS='--limit proxmox-host --check --diff'
+make converge-guest-network-policy env=production EXTRA_ARGS='--limit proxmox-host'
+```
+
+The target defaults Ansible host-key checking to enabled; keep it enabled for
+live applies. `EXTRA_ARGS` is appended to the governed scoped-runner command,
+so the host-only limit also applies to its execution-scope and mutation audit.
+
 ## Preconditions
 
 1. The controller SSH key exists at `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519`.

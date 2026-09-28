@@ -1,0 +1,47 @@
+workstream_id: ws-0513-builder-metrics-tailnet-firewall
+state: completed
+schema_version: 1.1.0
+started_at: '2026-09-28T07:11:40Z'
+completed_at: '2026-09-28T08:31:48Z'
+applied_by: codex
+repo_version: 0.179.46
+adr: 0296
+summary: 'Apply PR #252 merged VM130 firewall policy and verify Builder node-exporter
+  metrics path.'
+targets:
+- resource: guest:docker-build
+  vmid: 130
+  endpoint: example.org:2222
+  node: debian-base-template
+  firewall: /etc/pve/firewall/130.fw
+  allow:
+    source: 10.10.10.1/32
+    protocol: tcp
+    port: 9100
+- resource: host:proxmox-host
+  builder_peer: 100.114.37.21
+  metrics_target: 100.120.234.7:9100
+errors: []
+notes:
+- 'PR #252 merged as b3145e06e; Woodpecker PR and push checks passed.'
+- Replayed merged guest network policy on docker-build VM130 from origin/main at 2026-09-28
+  08:19 UTC; Ansible recap ok=37 changed=2 unreachable=0 failed=0 skipped=8 rescued=0.
+- The docker-build inet filter input chain now allows only host source 10.10.10.1
+  TCP/9100 for the node-exporter proxy backend. PVE cluster firewall exception for
+  100.114.37.21/32 TCP/9100 is compiled and active; the host proxy listens at 100.120.234.7:9100
+  and forwards to 10.10.10.30:9100.
+- 'End-to-end from 0docker-builder PCT108, Tailscale IP 100.114.37.21: using tailscaled
+  userspace SOCKS5 proxy 127.0.0.1:1055, GET http://100.120.234.7:9100/metrics returned
+  HTTP 200 and node_uname_info nodename=docker-build. Raw curl without the proxy does
+  not traverse Tailscale because this guest has no tailscale0 interface and routes
+  via 10.10.10.1; the SOCKS5 probe is the valid tailnet test.'
+- Before and after replay, Docker MainPID remained 2796695 and ActiveEnterTimestamp
+  remained Mon 2026-09-28 07:25:59 UTC. All 18 running container IDs/names were unchanged
+  and Up. Docker-managed ip/ip6 nat and filter nftables tables remained present. No
+  recovery rescue or Docker restart occurred.
+- From the 0mcp Proxmox host, direct backend http://10.10.10.30:9100/metrics and proxy
+  http://100.120.234.7:9100/metrics both returned HTTP 200.
+- The earlier pre-PR replay using a global nftables flush restarted Docker and left
+  seven codex-e2e containers exited because restart=no; those existing containers
+  were restored. The merged table-scoped policy replay above preserves the restored
+  healthy stack without repeating that disruption.

@@ -60,7 +60,8 @@ completeness:
   requires_oidc: true
   requires_secrets: false
   requires_compose_secrets: true
-  suppression_preset: legacy-service
+  oidc_provider: authentik
+  authentik_client_generated: true
 redundancy:
   tier: R1
   recovery_objective:
@@ -160,3 +161,24 @@ health:
       maxredirects: 5
       accepted_statuscodes:
         - 200-299
+data:
+  - id: api-gateway-runtime-state
+    service: api_gateway
+    name: API Gateway operational state and run receipts
+    class: internal
+    retention_days: null
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: medium
+    locations:
+      - API Gateway runtime data volume mounted at /data
+    notes: The gateway stores degradation state, NATS outbox records, drift receipts, and runbook execution outputs under its persistent data volume. No backup or retention contract is currently declared, so the catalog does not claim either.
+slos:
+  - id: api-gateway-availability
+    service_id: api_gateway
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: https://api.example.com/healthz
+    probe_module: http_2xx_follow_redirects
+    description: The API Gateway health endpoint remains reachable through the shared edge for authenticated platform API traffic.

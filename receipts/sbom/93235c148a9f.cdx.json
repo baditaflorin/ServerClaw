@@ -1,0 +1,4473 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:4d7bad17-8e2f-4153-8cd2-6cd4ee3e34b2",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-09-28T01:09:44+03:00",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "author": "anchore",
+          "name": "syft",
+          "version": "1.42.4"
+        }
+      ]
+    },
+    "component": {
+      "bom-ref": "80c2c41b3027083d",
+      "type": "container",
+      "name": "docker.io/woodpeckerci/woodpecker-agent:v3.18.1@sha256:93235c148a9f91aa455bd88dc788a12bed7921499f33fee1124ac50aad7b8e1a",
+      "version": "v3.18.1"
+    },
+    "properties": [
+      {
+        "name": "syft:image:labels:org.opencontainers.image.created",
+        "value": "2026-09-08T23:48:02Z"
+      },
+      {
+        "name": "syft:image:labels:org.opencontainers.image.revision",
+        "value": "128113e5efa7272a057b41288baf1d02f11de57b"
+      },
+      {
+        "name": "syft:image:labels:org.opencontainers.image.source",
+        "value": "https://github.com/woodpecker-ci/woodpecker.git"
+      },
+      {
+        "name": "syft:image:labels:org.opencontainers.image.url",
+        "value": "https://github.com/woodpecker-ci/woodpecker"
+      },
+      {
+        "name": "syft:image:labels:org.opencontainers.image.version",
+        "value": "3.18.1"
+      }
+    ]
+  },
+  "components": [
+    {
+      "bom-ref": "pkg:golang/al.essio.dev/pkg/shellescape@v1.6.1?package-id=083599bd9a109a62",
+      "type": "library",
+      "name": "al.essio.dev/pkg/shellescape",
+      "version": "v1.6.1",
+      "cpe": "cpe:2.3:a:pkg:shellescape:v1.6.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/al.essio.dev/pkg/shellescape@v1.6.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/6543/logfile-open@v1.2.1?package-id=a19677e815d5909c",
+      "type": "library",
+      "name": "github.com/6543/logfile-open",
+      "version": "v1.2.1",
+      "cpe": "cpe:2.3:a:6543:logfile-open:v1.2.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/6543/logfile-open@v1.2.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:6543:logfile_open:v1.2.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/cenkalti/backoff/v7@v7.0.0?package-id=14a5cc08929ee222",
+      "type": "library",
+      "name": "github.com/cenkalti/backoff/v7",
+      "version": "v7.0.0",
+      "cpe": "cpe:2.3:a:cenkalti:backoff\\/v7:v7.0.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/cenkalti/backoff/v7@v7.0.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/cespare/xxhash/v2@v2.3.0?package-id=72645f6f55b2bbd7",
+      "type": "library",
+      "name": "github.com/cespare/xxhash/v2",
+      "version": "v2.3.0",
+      "cpe": "cpe:2.3:a:cespare:xxhash\\/v2:v2.3.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/cespare/xxhash/v2@v2.3.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/containerd/errdefs@v1.0.0?package-id=514bc06c4407b6b6",
+      "type": "library",
+      "name": "github.com/containerd/errdefs",
+      "version": "v1.0.0",
+      "cpe": "cpe:2.3:a:containerd:errdefs:v1.0.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/containerd/errdefs@v1.0.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/containerd/errdefs/pkg@v0.3.0?package-id=82567e63e7657e78",
+      "type": "library",
+      "name": "github.com/containerd/errdefs/pkg",
+      "version": "v0.3.0",
+      "cpe": "cpe:2.3:a:containerd:errdefs\\/pkg:v0.3.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/containerd/errdefs/pkg@v0.3.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?package-id=a7e4816c741c905c",
+      "type": "library",
+      "name": "github.com/davecgh/go-spew",
+      "version": "v1.1.2-0.20180830191138-d8f796af33cc",
+      "cpe": "cpe:2.3:a:davecgh:go-spew:v1.1.2-0.20180830191138-d8f796af33cc:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:davecgh:go_spew:v1.1.2-0.20180830191138-d8f796af33cc:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/distribution/reference@v0.6.0?package-id=1d2c7ded9bcc46f6",
+      "type": "library",
+      "name": "github.com/distribution/reference",
+      "version": "v0.6.0",
+      "cpe": "cpe:2.3:a:distribution:reference:v0.6.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/distribution/reference@v0.6.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/docker/cli@v29.8.0%2Bincompatible?package-id=031ebbdfb3c466ab",
+      "type": "library",
+      "name": "github.com/docker/cli",
+      "version": "v29.8.0+incompatible",
+      "cpe": "cpe:2.3:a:docker:cli:v29.8.0\\+incompatible:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/docker/cli@v29.8.0%2Bincompatible",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/docker/docker-credential-helpers@v0.8.0?package-id=74b2ee44c9bdd199",
+      "type": "library",
+      "name": "github.com/docker/docker-credential-helpers",
+      "version": "v0.8.0",
+      "cpe": "cpe:2.3:a:docker:docker-credential-helpers:v0.8.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/docker/docker-credential-helpers@v0.8.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:docker:docker_credential_helpers:v0.8.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/docker/go-connections@v0.8.1?package-id=12fd1c02ba78e199",
+      "type": "library",
+      "name": "github.com/docker/go-connections",
+      "version": "v0.8.1",
+      "cpe": "cpe:2.3:a:docker:go-connections:v0.8.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/docker/go-connections@v0.8.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:docker:go_connections:v0.8.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/docker/go-units@v0.5.0?package-id=67d2ed0493c504de",
+      "type": "library",
+      "name": "github.com/docker/go-units",
+      "version": "v0.5.0",
+      "cpe": "cpe:2.3:a:docker:go-units:v0.5.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/docker/go-units@v0.5.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:docker:go_units:v0.5.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/drone/envsubst@v1.0.3?package-id=3085db805e650722",
+      "type": "library",
+      "name": "github.com/drone/envsubst",
+      "version": "v1.0.3",
+      "cpe": "cpe:2.3:a:drone:envsubst:v1.0.3:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/drone/envsubst@v1.0.3",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/emicklei/go-restful/v3@v3.13.0?package-id=1177e2c4aa1baed4",
+      "type": "library",
+      "name": "github.com/emicklei/go-restful/v3",
+      "version": "v3.13.0",
+      "cpe": "cpe:2.3:a:emicklei:go-restful\\/v3:v3.13.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/emicklei/go-restful/v3@v3.13.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:emicklei:go_restful\\/v3:v3.13.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/fatih/color@v1.18.0?package-id=5786b47e0873c723",
+      "type": "library",
+      "name": "github.com/fatih/color",
+      "version": "v1.18.0",
+      "cpe": "cpe:2.3:a:fatih:color:v1.18.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/fatih/color@v1.18.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/felixge/httpsnoop@v1.0.4?package-id=629b0bb326e91561",
+      "type": "library",
+      "name": "github.com/felixge/httpsnoop",
+      "version": "v1.0.4",
+      "cpe": "cpe:2.3:a:felixge:httpsnoop:v1.0.4:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/felixge/httpsnoop@v1.0.4",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/fxamacker/cbor/v2@v2.9.1?package-id=bb74292d7a97b3a7",
+      "type": "library",
+      "name": "github.com/fxamacker/cbor/v2",
+      "version": "v2.9.1",
+      "cpe": "cpe:2.3:a:fxamacker:cbor\\/v2:v2.9.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/fxamacker/cbor/v2@v2.9.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-logr/logr@v1.4.3?package-id=9d7093eec735f82a",
+      "type": "library",
+      "name": "github.com/go-logr/logr",
+      "version": "v1.4.3",
+      "cpe": "cpe:2.3:a:go-logr:logr:v1.4.3:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-logr/logr@v1.4.3",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_logr:logr:v1.4.3:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:logr:v1.4.3:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-logr/stdr@v1.2.2?package-id=01e5cd2201f05262",
+      "type": "library",
+      "name": "github.com/go-logr/stdr",
+      "version": "v1.2.2",
+      "cpe": "cpe:2.3:a:go-logr:stdr:v1.2.2:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-logr/stdr@v1.2.2",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_logr:stdr:v1.2.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:stdr:v1.2.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/jsonpointer@v1.0.0?package-id=b7350d1700837f4f",
+      "type": "library",
+      "name": "github.com/go-openapi/jsonpointer",
+      "version": "v1.0.0",
+      "cpe": "cpe:2.3:a:go-openapi:jsonpointer:v1.0.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/jsonpointer@v1.0.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:jsonpointer:v1.0.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:jsonpointer:v1.0.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/jsonreference@v1.0.0?package-id=16ebfc58ca51a02d",
+      "type": "library",
+      "name": "github.com/go-openapi/jsonreference",
+      "version": "v1.0.0",
+      "cpe": "cpe:2.3:a:go-openapi:jsonreference:v1.0.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/jsonreference@v1.0.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:jsonreference:v1.0.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:jsonreference:v1.0.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag@v0.27.1?package-id=5ca7aa30e3c8cf77",
+      "type": "library",
+      "name": "github.com/go-openapi/swag",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/cmdutils@v0.27.1?package-id=216e8fdccd4a96e7",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/cmdutils",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/cmdutils:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/cmdutils@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/cmdutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/cmdutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/conv@v0.27.1?package-id=f027c7ef43a628f5",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/conv",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/conv:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/conv@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/conv:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/conv:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/fileutils@v0.27.1?package-id=bd36015e522516bf",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/fileutils",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/fileutils:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/fileutils@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/fileutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/fileutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/jsonutils@v0.27.1?package-id=e8253f8c5ec0a5e1",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/jsonutils",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/jsonutils:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/jsonutils@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/jsonutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/jsonutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/loading@v0.27.1?package-id=8a7fc841f7716f3c",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/loading",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/loading:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/loading@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/loading:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/loading:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/mangling@v0.27.1?package-id=a5b574e25ea2c530",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/mangling",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/mangling:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/mangling@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/mangling:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/mangling:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/netutils@v0.27.1?package-id=88d859f546efcb5c",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/netutils",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/netutils:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/netutils@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/netutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/netutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/pools@v0.27.1?package-id=0831a2c44c511c94",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/pools",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/pools:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/pools@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/pools:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/pools:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/stringutils@v0.27.1?package-id=1c2dd44b0bc1d922",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/stringutils",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/stringutils:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/stringutils@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/stringutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/stringutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/typeutils@v0.27.1?package-id=df7b80dc30e8191c",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/typeutils",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/typeutils:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/typeutils@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/typeutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/typeutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-openapi/swag/yamlutils@v0.27.1?package-id=4aaaaff06d125ab7",
+      "type": "library",
+      "name": "github.com/go-openapi/swag/yamlutils",
+      "version": "v0.27.1",
+      "cpe": "cpe:2.3:a:go-openapi:swag\\/yamlutils:v0.27.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-openapi/swag/yamlutils@v0.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_openapi:swag\\/yamlutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:swag\\/yamlutils:v0.27.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/go-viper/mapstructure/v2@v2.5.0?package-id=ddaee7bc60560a49",
+      "type": "library",
+      "name": "github.com/go-viper/mapstructure/v2",
+      "version": "v2.5.0",
+      "cpe": "cpe:2.3:a:go-viper:mapstructure\\/v2:v2.5.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/go-viper/mapstructure/v2@v2.5.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go_viper:mapstructure\\/v2:v2.5.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:go:mapstructure\\/v2:v2.5.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/google/gnostic-models@v0.7.0?package-id=af7c625aa1fbad4a",
+      "type": "library",
+      "name": "github.com/google/gnostic-models",
+      "version": "v0.7.0",
+      "cpe": "cpe:2.3:a:google:gnostic-models:v0.7.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/google/gnostic-models@v0.7.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:google:gnostic_models:v0.7.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/google/uuid@v1.6.0?package-id=e25700f73cdb4db3",
+      "type": "library",
+      "name": "github.com/google/uuid",
+      "version": "v1.6.0",
+      "cpe": "cpe:2.3:a:google:uuid:v1.6.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/google/uuid@v1.6.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/hashicorp/go-hclog@v1.6.3?package-id=814960e5d9c44678",
+      "type": "library",
+      "name": "github.com/hashicorp/go-hclog",
+      "version": "v1.6.3",
+      "cpe": "cpe:2.3:a:hashicorp:go-hclog:v1.6.3:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/hashicorp/go-hclog@v1.6.3",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:hashicorp:go_hclog:v1.6.3:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/joho/godotenv@v1.5.1?package-id=ec4f711f0ca612c6",
+      "type": "library",
+      "name": "github.com/joho/godotenv",
+      "version": "v1.5.1",
+      "cpe": "cpe:2.3:a:joho:godotenv:v1.5.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/joho/godotenv@v1.5.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/json-iterator/go@v1.1.12?package-id=aa551b718832177d",
+      "type": "library",
+      "name": "github.com/json-iterator/go",
+      "version": "v1.1.12",
+      "cpe": "cpe:2.3:a:json-iterator:go:v1.1.12:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/json-iterator/go@v1.1.12",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:json_iterator:go:v1.1.12:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:json:go:v1.1.12:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/mattn/go-colorable@v0.1.14?package-id=11840927bea519a5",
+      "type": "library",
+      "name": "github.com/mattn/go-colorable",
+      "version": "v0.1.14",
+      "cpe": "cpe:2.3:a:mattn:go-colorable:v0.1.14:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/mattn/go-colorable@v0.1.14",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:mattn:go_colorable:v0.1.14:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/mattn/go-isatty@v0.0.20?package-id=325f143bcaa73d84",
+      "type": "library",
+      "name": "github.com/mattn/go-isatty",
+      "version": "v0.0.20",
+      "cpe": "cpe:2.3:a:mattn:go-isatty:v0.0.20:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/mattn/go-isatty@v0.0.20",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:mattn:go_isatty:v0.0.20:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/moby/docker-image-spec@v1.3.1?package-id=1d895b49dc680114",
+      "type": "library",
+      "name": "github.com/moby/docker-image-spec",
+      "version": "v1.3.1",
+      "cpe": "cpe:2.3:a:moby:docker-image-spec:v1.3.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/moby/docker-image-spec@v1.3.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:moby:docker_image_spec:v1.3.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/moby/moby/api@v1.56.0?package-id=edbbaabe795a26f6",
+      "type": "library",
+      "name": "github.com/moby/moby/api",
+      "version": "v1.56.0",
+      "cpe": "cpe:2.3:a:moby:moby\\/api:v1.56.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/moby/moby/api@v1.56.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/moby/moby/client@v0.6.0?package-id=d83aebba673d5e2e",
+      "type": "library",
+      "name": "github.com/moby/moby/client",
+      "version": "v0.6.0",
+      "cpe": "cpe:2.3:a:moby:moby\\/client:v0.6.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/moby/moby/client@v0.6.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/moby/term@v0.5.2?package-id=55b3c1f077792287",
+      "type": "library",
+      "name": "github.com/moby/term",
+      "version": "v0.5.2",
+      "cpe": "cpe:2.3:a:moby:term:v0.5.2:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/moby/term@v0.5.2",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/modern-go/concurrent@v0.0.0-20180306012644-bacd9c7ef1dd?package-id=826370ac08341e97",
+      "type": "library",
+      "name": "github.com/modern-go/concurrent",
+      "version": "v0.0.0-20180306012644-bacd9c7ef1dd",
+      "cpe": "cpe:2.3:a:modern-go:concurrent:v0.0.0-20180306012644-bacd9c7ef1dd:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/modern-go/concurrent@v0.0.0-20180306012644-bacd9c7ef1dd",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:modern_go:concurrent:v0.0.0-20180306012644-bacd9c7ef1dd:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:modern:concurrent:v0.0.0-20180306012644-bacd9c7ef1dd:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/modern-go/reflect2@v1.0.3-0.20250322232337-35a7c28c31ee?package-id=89ff1893bb7268f3",
+      "type": "library",
+      "name": "github.com/modern-go/reflect2",
+      "version": "v1.0.3-0.20250322232337-35a7c28c31ee",
+      "cpe": "cpe:2.3:a:modern-go:reflect2:v1.0.3-0.20250322232337-35a7c28c31ee:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/modern-go/reflect2@v1.0.3-0.20250322232337-35a7c28c31ee",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:modern_go:reflect2:v1.0.3-0.20250322232337-35a7c28c31ee:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:modern:reflect2:v1.0.3-0.20250322232337-35a7c28c31ee:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/munnerz/goautoneg@v0.0.0-20191010083416-a7dc8b61c822?package-id=1c9c1b06cfd11ede",
+      "type": "library",
+      "name": "github.com/munnerz/goautoneg",
+      "version": "v0.0.0-20191010083416-a7dc8b61c822",
+      "cpe": "cpe:2.3:a:munnerz:goautoneg:v0.0.0-20191010083416-a7dc8b61c822:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/munnerz/goautoneg@v0.0.0-20191010083416-a7dc8b61c822",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/oklog/ulid/v2@v2.1.2?package-id=3e1d3673b3d17163",
+      "type": "library",
+      "name": "github.com/oklog/ulid/v2",
+      "version": "v2.1.2",
+      "cpe": "cpe:2.3:a:oklog:ulid\\/v2:v2.1.2:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/oklog/ulid/v2@v2.1.2",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/opencontainers/go-digest@v1.0.0?package-id=ec451f0a71498211",
+      "type": "library",
+      "name": "github.com/opencontainers/go-digest",
+      "version": "v1.0.0",
+      "cpe": "cpe:2.3:a:opencontainers:go-digest:v1.0.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/opencontainers/go-digest@v1.0.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:opencontainers:go_digest:v1.0.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/opencontainers/image-spec@v1.1.1?package-id=aa2a4e465cdcd77f",
+      "type": "library",
+      "name": "github.com/opencontainers/image-spec",
+      "version": "v1.1.1",
+      "cpe": "cpe:2.3:a:opencontainers:image-spec:v1.1.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/opencontainers/image-spec@v1.1.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:opencontainers:image_spec:v1.1.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/pmezard/go-difflib@v1.0.1-0.20181226105442-5d4384ee4fb2?package-id=d94d754a4606c594",
+      "type": "library",
+      "name": "github.com/pmezard/go-difflib",
+      "version": "v1.0.1-0.20181226105442-5d4384ee4fb2",
+      "cpe": "cpe:2.3:a:pmezard:go-difflib:v1.0.1-0.20181226105442-5d4384ee4fb2:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/pmezard/go-difflib@v1.0.1-0.20181226105442-5d4384ee4fb2",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:pmezard:go_difflib:v1.0.1-0.20181226105442-5d4384ee4fb2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/rs/zerolog@v1.35.1?package-id=820d1e01ef6bac3d",
+      "type": "library",
+      "name": "github.com/rs/zerolog",
+      "version": "v1.35.1",
+      "cpe": "cpe:2.3:a:rs:zerolog:v1.35.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/rs/zerolog@v1.35.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/sirupsen/logrus@v1.9.4?package-id=b66388f864074b8e",
+      "type": "library",
+      "name": "github.com/sirupsen/logrus",
+      "version": "v1.9.4",
+      "cpe": "cpe:2.3:a:turbopuffer:logrus:v1.9.4:*:*:*:*:go:*:*",
+      "purl": "pkg:golang/github.com/sirupsen/logrus@v1.9.4",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/spf13/pflag@v1.0.10?package-id=f0068db66e966fda",
+      "type": "library",
+      "name": "github.com/spf13/pflag",
+      "version": "v1.0.10",
+      "cpe": "cpe:2.3:a:spf13:pflag:v1.0.10:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/spf13/pflag@v1.0.10",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/urfave/cli/v3@v3.11.0?package-id=25cfa0b0e766a2eb",
+      "type": "library",
+      "name": "github.com/urfave/cli/v3",
+      "version": "v3.11.0",
+      "cpe": "cpe:2.3:a:urfave:cli\\/v3:v3.11.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/urfave/cli/v3@v3.11.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/github.com/x448/float16@v0.8.4?package-id=20f3bf8b3b52054f",
+      "type": "library",
+      "name": "github.com/x448/float16",
+      "version": "v0.8.4",
+      "cpe": "cpe:2.3:a:x448:float16:v0.8.4:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/github.com/x448/float16@v0.8.4",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/go.opentelemetry.io/auto/sdk@v1.2.1?package-id=a60b33df290f50a6",
+      "type": "library",
+      "name": "go.opentelemetry.io/auto/sdk",
+      "version": "v1.2.1",
+      "cpe": "cpe:2.3:a:auto:sdk:v1.2.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/go.opentelemetry.io/auto/sdk@v1.2.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp@v0.63.0?package-id=4e9d33bb80385349",
+      "type": "library",
+      "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+      "version": "v0.63.0",
+      "cpe": "cpe:2.3:a:contrib:instrumentation\\/net\\/http\\/otelhttp:v0.63.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp@v0.63.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/go.opentelemetry.io/otel@v1.44.0?package-id=f314633b23f006a4",
+      "type": "library",
+      "name": "go.opentelemetry.io/otel",
+      "version": "v1.44.0",
+      "purl": "pkg:golang/go.opentelemetry.io/otel@v1.44.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/go.opentelemetry.io/otel/metric@v1.44.0?package-id=6c7f94f1145e18e9",
+      "type": "library",
+      "name": "go.opentelemetry.io/otel/metric",
+      "version": "v1.44.0",
+      "cpe": "cpe:2.3:a:otel:metric:v1.44.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/go.opentelemetry.io/otel/metric@v1.44.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/go.opentelemetry.io/otel/trace@v1.44.0?package-id=ac98187953198b9a",
+      "type": "library",
+      "name": "go.opentelemetry.io/otel/trace",
+      "version": "v1.44.0",
+      "cpe": "cpe:2.3:a:otel:trace:v1.44.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/go.opentelemetry.io/otel/trace@v1.44.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/go.uber.org/multierr@v1.11.0?package-id=689e0028e5903deb",
+      "type": "library",
+      "name": "go.uber.org/multierr",
+      "version": "v1.11.0",
+      "purl": "pkg:golang/go.uber.org/multierr@v1.11.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/go.woodpecker-ci.org/woodpecker/v3@v3.18.1?package-id=ad3128be262b3cee",
+      "type": "library",
+      "name": "go.woodpecker-ci.org/woodpecker/v3",
+      "version": "v3.18.1",
+      "cpe": "cpe:2.3:a:woodpecker:v3:v3.18.1:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/go.woodpecker-ci.org/woodpecker/v3@v3.18.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/go.yaml.in/yaml/v2@v2.4.4?package-id=74c31a4836694758",
+      "type": "library",
+      "name": "go.yaml.in/yaml/v2",
+      "version": "v2.4.4",
+      "cpe": "cpe:2.3:a:yaml:v2:v2.4.4:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/go.yaml.in/yaml/v2@v2.4.4",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/go.yaml.in/yaml/v3@v3.0.5?package-id=9ad409d9ca2e57fc",
+      "type": "library",
+      "name": "go.yaml.in/yaml/v3",
+      "version": "v3.0.5",
+      "cpe": "cpe:2.3:a:yaml:v3:v3.0.5:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/go.yaml.in/yaml/v3@v3.0.5",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/golang.org/x/net@v0.58.0?package-id=c892c46546951f99",
+      "type": "library",
+      "name": "golang.org/x/net",
+      "version": "v0.58.0",
+      "cpe": "cpe:2.3:a:golang:networking:v0.58.0:*:*:*:*:go:*:*",
+      "purl": "pkg:golang/golang.org/x/net@v0.58.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/golang.org/x/oauth2@v0.36.0?package-id=412a62574d47aaf5",
+      "type": "library",
+      "name": "golang.org/x/oauth2",
+      "version": "v0.36.0",
+      "cpe": "cpe:2.3:a:golang:x\\/oauth2:v0.36.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/golang.org/x/oauth2@v0.36.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/golang.org/x/sync@v0.22.0?package-id=9f2b8105cb5cd84e",
+      "type": "library",
+      "name": "golang.org/x/sync",
+      "version": "v0.22.0",
+      "cpe": "cpe:2.3:a:golang:x\\/sync:v0.22.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/golang.org/x/sync@v0.22.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/golang.org/x/sys@v0.47.0?package-id=459fa4aef1536396",
+      "type": "library",
+      "name": "golang.org/x/sys",
+      "version": "v0.47.0",
+      "cpe": "cpe:2.3:a:golang:x\\/sys:v0.47.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/golang.org/x/sys@v0.47.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/golang.org/x/term@v0.45.0?package-id=6ca55baa99ba6d93",
+      "type": "library",
+      "name": "golang.org/x/term",
+      "version": "v0.45.0",
+      "cpe": "cpe:2.3:a:golang:x\\/term:v0.45.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/golang.org/x/term@v0.45.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/golang.org/x/text@v0.41.0?package-id=c43df52257b6eb14",
+      "type": "library",
+      "name": "golang.org/x/text",
+      "version": "v0.41.0",
+      "cpe": "cpe:2.3:a:golang:text:v0.41.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/golang.org/x/text@v0.41.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/golang.org/x/time@v0.15.0?package-id=673512a000b1bdab",
+      "type": "library",
+      "name": "golang.org/x/time",
+      "version": "v0.15.0",
+      "cpe": "cpe:2.3:a:golang:x\\/time:v0.15.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/golang.org/x/time@v0.15.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/google.golang.org/genproto/googleapis/rpc@v0.0.0-20260526163538-3dc84a4a5aaa?package-id=1b2d404e53a2f0f2",
+      "type": "library",
+      "name": "google.golang.org/genproto/googleapis/rpc",
+      "version": "v0.0.0-20260526163538-3dc84a4a5aaa",
+      "cpe": "cpe:2.3:a:google:genproto:v0.0.0-20260526163538-3dc84a4a5aaa:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/google.golang.org/genproto/googleapis/rpc@v0.0.0-20260526163538-3dc84a4a5aaa",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/google.golang.org/grpc@v1.83.2?package-id=3810df39397a5257",
+      "type": "library",
+      "name": "google.golang.org/grpc",
+      "version": "v1.83.2",
+      "cpe": "cpe:2.3:a:google:grpc:v1.83.2:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/google.golang.org/grpc@v1.83.2",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/google.golang.org/protobuf@v1.36.12?package-id=54bd71454ed11aa0",
+      "type": "library",
+      "name": "google.golang.org/protobuf",
+      "version": "v1.36.12",
+      "cpe": "cpe:2.3:a:google:protobuf:v1.36.12:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/google.golang.org/protobuf@v1.36.12",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/gopkg.in/evanphx/json-patch.v4@v4.13.0?package-id=88eb50250fdab191",
+      "type": "library",
+      "name": "gopkg.in/evanphx/json-patch.v4",
+      "version": "v4.13.0",
+      "purl": "pkg:golang/gopkg.in/evanphx/json-patch.v4@v4.13.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/gopkg.in/inf.v0@v0.9.1?package-id=5f41fe0202ec45ad",
+      "type": "library",
+      "name": "gopkg.in/inf.v0",
+      "version": "v0.9.1",
+      "purl": "pkg:golang/gopkg.in/inf.v0@v0.9.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/k8s.io/api@v0.37.0?package-id=ec8f533fcf429026",
+      "type": "library",
+      "name": "k8s.io/api",
+      "version": "v0.37.0",
+      "purl": "pkg:golang/k8s.io/api@v0.37.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/k8s.io/apimachinery@v0.37.0?package-id=d014b876319d6a54",
+      "type": "library",
+      "name": "k8s.io/apimachinery",
+      "version": "v0.37.0",
+      "purl": "pkg:golang/k8s.io/apimachinery@v0.37.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/k8s.io/client-go@v0.37.0?package-id=c1c39e1802b4a784",
+      "type": "library",
+      "name": "k8s.io/client-go",
+      "version": "v0.37.0",
+      "purl": "pkg:golang/k8s.io/client-go@v0.37.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/k8s.io/klog/v2@v2.140.0?package-id=bb1b12da92d445f0",
+      "type": "library",
+      "name": "k8s.io/klog/v2",
+      "version": "v2.140.0",
+      "cpe": "cpe:2.3:a:klog:v2:v2.140.0:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/k8s.io/klog/v2@v2.140.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?package-id=abab69e1d08e7db6",
+      "type": "library",
+      "name": "k8s.io/kube-openapi",
+      "version": "v0.0.0-20260721132016-d427ff9ee9ad",
+      "purl": "pkg:golang/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/k8s.io/utils@v0.0.0-20260626114624-be93311217bd?package-id=882672ef6676045c",
+      "type": "library",
+      "name": "k8s.io/utils",
+      "version": "v0.0.0-20260626114624-be93311217bd",
+      "purl": "pkg:golang/k8s.io/utils@v0.0.0-20260626114624-be93311217bd",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/sigs.k8s.io/json@v0.0.0-20250730193827-2d320260d730?package-id=db70e81029877167",
+      "type": "library",
+      "name": "sigs.k8s.io/json",
+      "version": "v0.0.0-20250730193827-2d320260d730",
+      "purl": "pkg:golang/sigs.k8s.io/json@v0.0.0-20250730193827-2d320260d730",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/sigs.k8s.io/randfill@v1.0.0?package-id=0e16fafa047636c9",
+      "type": "library",
+      "name": "sigs.k8s.io/randfill",
+      "version": "v1.0.0",
+      "purl": "pkg:golang/sigs.k8s.io/randfill@v1.0.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/sigs.k8s.io/structured-merge-diff/v6@v6.4.2?package-id=32f2162b22a7c3e1",
+      "type": "library",
+      "name": "sigs.k8s.io/structured-merge-diff/v6",
+      "version": "v6.4.2",
+      "cpe": "cpe:2.3:a:structured-merge-diff:v6:v6.4.2:*:*:*:*:*:*:*",
+      "purl": "pkg:golang/sigs.k8s.io/structured-merge-diff/v6@v6.4.2",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:structured_merge_diff:v6:v6.4.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:structured-merge:v6:v6.4.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:structured_merge:v6:v6.4.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:structured:v6:v6.4.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/sigs.k8s.io/yaml@v1.6.0?package-id=a1bc7528931b9715",
+      "type": "library",
+      "name": "sigs.k8s.io/yaml",
+      "version": "v1.6.0",
+      "purl": "pkg:golang/sigs.k8s.io/yaml@v1.6.0",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:architecture",
+          "value": "amd64"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        },
+        {
+          "name": "syft:metadata:mainModule",
+          "value": "go.woodpecker-ci.org/woodpecker/v3"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:golang/stdlib@1.27.1?package-id=e69c9a03f6f0f113",
+      "type": "library",
+      "name": "stdlib",
+      "version": "go1.27.1",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "cpe": "cpe:2.3:a:golang:go:1.27.1:-:*:*:*:*:*:*",
+      "purl": "pkg:golang/stdlib@1.27.1",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "go-module-binary-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "go"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "go-module"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "go-module-buildinfo-entry"
+        },
+        {
+          "name": "syft:location:0:layerID",
+          "value": "sha256:d989b5a59ebb749e49281da41b7fe26f71814915b4a298d95598a475bb00a7c5"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/bin/woodpecker-agent"
+        },
+        {
+          "name": "syft:metadata:goCompiledVersion",
+          "value": "go1.27.1"
+        }
+      ]
+    },
+    {
+      "bom-ref": "bff93f9ec7f8a909",
+      "type": "file",
+      "name": "/bin/woodpecker-agent",
+      "hashes": [
+        {
+          "alg": "SHA-1",
+          "content": "4aec047392bdb5c2995d2a87838c740104582404"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "5e5e59e79f85424bdc770ee54763947c3f4144e9f4379e95aeee07daf82e0dd4"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "pkg:golang/go.woodpecker-ci.org/woodpecker/v3@v3.18.1?package-id=ad3128be262b3cee",
+      "dependsOn": [
+        "pkg:golang/al.essio.dev/pkg/shellescape@v1.6.1?package-id=083599bd9a109a62",
+        "pkg:golang/github.com/6543/logfile-open@v1.2.1?package-id=a19677e815d5909c",
+        "pkg:golang/github.com/cenkalti/backoff/v7@v7.0.0?package-id=14a5cc08929ee222",
+        "pkg:golang/github.com/cespare/xxhash/v2@v2.3.0?package-id=72645f6f55b2bbd7",
+        "pkg:golang/github.com/containerd/errdefs/pkg@v0.3.0?package-id=82567e63e7657e78",
+        "pkg:golang/github.com/containerd/errdefs@v1.0.0?package-id=514bc06c4407b6b6",
+        "pkg:golang/github.com/davecgh/go-spew@v1.1.2-0.20180830191138-d8f796af33cc?package-id=a7e4816c741c905c",
+        "pkg:golang/github.com/distribution/reference@v0.6.0?package-id=1d2c7ded9bcc46f6",
+        "pkg:golang/github.com/docker/cli@v29.8.0%2Bincompatible?package-id=031ebbdfb3c466ab",
+        "pkg:golang/github.com/docker/docker-credential-helpers@v0.8.0?package-id=74b2ee44c9bdd199",
+        "pkg:golang/github.com/docker/go-connections@v0.8.1?package-id=12fd1c02ba78e199",
+        "pkg:golang/github.com/docker/go-units@v0.5.0?package-id=67d2ed0493c504de",
+        "pkg:golang/github.com/drone/envsubst@v1.0.3?package-id=3085db805e650722",
+        "pkg:golang/github.com/emicklei/go-restful/v3@v3.13.0?package-id=1177e2c4aa1baed4",
+        "pkg:golang/github.com/fatih/color@v1.18.0?package-id=5786b47e0873c723",
+        "pkg:golang/github.com/felixge/httpsnoop@v1.0.4?package-id=629b0bb326e91561",
+        "pkg:golang/github.com/fxamacker/cbor/v2@v2.9.1?package-id=bb74292d7a97b3a7",
+        "pkg:golang/github.com/go-logr/logr@v1.4.3?package-id=9d7093eec735f82a",
+        "pkg:golang/github.com/go-logr/stdr@v1.2.2?package-id=01e5cd2201f05262",
+        "pkg:golang/github.com/go-openapi/jsonpointer@v1.0.0?package-id=b7350d1700837f4f",
+        "pkg:golang/github.com/go-openapi/jsonreference@v1.0.0?package-id=16ebfc58ca51a02d",
+        "pkg:golang/github.com/go-openapi/swag/cmdutils@v0.27.1?package-id=216e8fdccd4a96e7",
+        "pkg:golang/github.com/go-openapi/swag/conv@v0.27.1?package-id=f027c7ef43a628f5",
+        "pkg:golang/github.com/go-openapi/swag/fileutils@v0.27.1?package-id=bd36015e522516bf",
+        "pkg:golang/github.com/go-openapi/swag/jsonutils@v0.27.1?package-id=e8253f8c5ec0a5e1",
+        "pkg:golang/github.com/go-openapi/swag/loading@v0.27.1?package-id=8a7fc841f7716f3c",
+        "pkg:golang/github.com/go-openapi/swag/mangling@v0.27.1?package-id=a5b574e25ea2c530",
+        "pkg:golang/github.com/go-openapi/swag/netutils@v0.27.1?package-id=88d859f546efcb5c",
+        "pkg:golang/github.com/go-openapi/swag/pools@v0.27.1?package-id=0831a2c44c511c94",
+        "pkg:golang/github.com/go-openapi/swag/stringutils@v0.27.1?package-id=1c2dd44b0bc1d922",
+        "pkg:golang/github.com/go-openapi/swag/typeutils@v0.27.1?package-id=df7b80dc30e8191c",
+        "pkg:golang/github.com/go-openapi/swag/yamlutils@v0.27.1?package-id=4aaaaff06d125ab7",
+        "pkg:golang/github.com/go-openapi/swag@v0.27.1?package-id=5ca7aa30e3c8cf77",
+        "pkg:golang/github.com/go-viper/mapstructure/v2@v2.5.0?package-id=ddaee7bc60560a49",
+        "pkg:golang/github.com/google/gnostic-models@v0.7.0?package-id=af7c625aa1fbad4a",
+        "pkg:golang/github.com/google/uuid@v1.6.0?package-id=e25700f73cdb4db3",
+        "pkg:golang/github.com/hashicorp/go-hclog@v1.6.3?package-id=814960e5d9c44678",
+        "pkg:golang/github.com/joho/godotenv@v1.5.1?package-id=ec4f711f0ca612c6",
+        "pkg:golang/github.com/json-iterator/go@v1.1.12?package-id=aa551b718832177d",
+        "pkg:golang/github.com/mattn/go-colorable@v0.1.14?package-id=11840927bea519a5",
+        "pkg:golang/github.com/mattn/go-isatty@v0.0.20?package-id=325f143bcaa73d84",
+        "pkg:golang/github.com/moby/docker-image-spec@v1.3.1?package-id=1d895b49dc680114",
+        "pkg:golang/github.com/moby/moby/api@v1.56.0?package-id=edbbaabe795a26f6",
+        "pkg:golang/github.com/moby/moby/client@v0.6.0?package-id=d83aebba673d5e2e",
+        "pkg:golang/github.com/moby/term@v0.5.2?package-id=55b3c1f077792287",
+        "pkg:golang/github.com/modern-go/concurrent@v0.0.0-20180306012644-bacd9c7ef1dd?package-id=826370ac08341e97",
+        "pkg:golang/github.com/modern-go/reflect2@v1.0.3-0.20250322232337-35a7c28c31ee?package-id=89ff1893bb7268f3",
+        "pkg:golang/github.com/munnerz/goautoneg@v0.0.0-20191010083416-a7dc8b61c822?package-id=1c9c1b06cfd11ede",
+        "pkg:golang/github.com/oklog/ulid/v2@v2.1.2?package-id=3e1d3673b3d17163",
+        "pkg:golang/github.com/opencontainers/go-digest@v1.0.0?package-id=ec451f0a71498211",
+        "pkg:golang/github.com/opencontainers/image-spec@v1.1.1?package-id=aa2a4e465cdcd77f",
+        "pkg:golang/github.com/pmezard/go-difflib@v1.0.1-0.20181226105442-5d4384ee4fb2?package-id=d94d754a4606c594",
+        "pkg:golang/github.com/rs/zerolog@v1.35.1?package-id=820d1e01ef6bac3d",
+        "pkg:golang/github.com/sirupsen/logrus@v1.9.4?package-id=b66388f864074b8e",
+        "pkg:golang/github.com/spf13/pflag@v1.0.10?package-id=f0068db66e966fda",
+        "pkg:golang/github.com/urfave/cli/v3@v3.11.0?package-id=25cfa0b0e766a2eb",
+        "pkg:golang/github.com/x448/float16@v0.8.4?package-id=20f3bf8b3b52054f",
+        "pkg:golang/go.opentelemetry.io/auto/sdk@v1.2.1?package-id=a60b33df290f50a6",
+        "pkg:golang/go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp@v0.63.0?package-id=4e9d33bb80385349",
+        "pkg:golang/go.opentelemetry.io/otel/metric@v1.44.0?package-id=6c7f94f1145e18e9",
+        "pkg:golang/go.opentelemetry.io/otel/trace@v1.44.0?package-id=ac98187953198b9a",
+        "pkg:golang/go.opentelemetry.io/otel@v1.44.0?package-id=f314633b23f006a4",
+        "pkg:golang/go.uber.org/multierr@v1.11.0?package-id=689e0028e5903deb",
+        "pkg:golang/go.yaml.in/yaml/v2@v2.4.4?package-id=74c31a4836694758",
+        "pkg:golang/go.yaml.in/yaml/v3@v3.0.5?package-id=9ad409d9ca2e57fc",
+        "pkg:golang/golang.org/x/net@v0.58.0?package-id=c892c46546951f99",
+        "pkg:golang/golang.org/x/oauth2@v0.36.0?package-id=412a62574d47aaf5",
+        "pkg:golang/golang.org/x/sync@v0.22.0?package-id=9f2b8105cb5cd84e",
+        "pkg:golang/golang.org/x/sys@v0.47.0?package-id=459fa4aef1536396",
+        "pkg:golang/golang.org/x/term@v0.45.0?package-id=6ca55baa99ba6d93",
+        "pkg:golang/golang.org/x/text@v0.41.0?package-id=c43df52257b6eb14",
+        "pkg:golang/golang.org/x/time@v0.15.0?package-id=673512a000b1bdab",
+        "pkg:golang/google.golang.org/genproto/googleapis/rpc@v0.0.0-20260526163538-3dc84a4a5aaa?package-id=1b2d404e53a2f0f2",
+        "pkg:golang/google.golang.org/grpc@v1.83.2?package-id=3810df39397a5257",
+        "pkg:golang/google.golang.org/protobuf@v1.36.12?package-id=54bd71454ed11aa0",
+        "pkg:golang/gopkg.in/evanphx/json-patch.v4@v4.13.0?package-id=88eb50250fdab191",
+        "pkg:golang/gopkg.in/inf.v0@v0.9.1?package-id=5f41fe0202ec45ad",
+        "pkg:golang/k8s.io/api@v0.37.0?package-id=ec8f533fcf429026",
+        "pkg:golang/k8s.io/apimachinery@v0.37.0?package-id=d014b876319d6a54",
+        "pkg:golang/k8s.io/client-go@v0.37.0?package-id=c1c39e1802b4a784",
+        "pkg:golang/k8s.io/klog/v2@v2.140.0?package-id=bb1b12da92d445f0",
+        "pkg:golang/k8s.io/kube-openapi@v0.0.0-20260721132016-d427ff9ee9ad?package-id=abab69e1d08e7db6",
+        "pkg:golang/k8s.io/utils@v0.0.0-20260626114624-be93311217bd?package-id=882672ef6676045c",
+        "pkg:golang/sigs.k8s.io/json@v0.0.0-20250730193827-2d320260d730?package-id=db70e81029877167",
+        "pkg:golang/sigs.k8s.io/randfill@v1.0.0?package-id=0e16fafa047636c9",
+        "pkg:golang/sigs.k8s.io/structured-merge-diff/v6@v6.4.2?package-id=32f2162b22a7c3e1",
+        "pkg:golang/sigs.k8s.io/yaml@v1.6.0?package-id=a1bc7528931b9715",
+        "pkg:golang/stdlib@1.27.1?package-id=e69c9a03f6f0f113"
+      ]
+    }
+  ]
+}

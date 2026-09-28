@@ -20,6 +20,17 @@ Run the full workflow from the controller checkout:
 make security-posture-report
 ```
 
+When the normal management SSH endpoint is unavailable but the approved
+Proxmox break-glass endpoint is reachable, set `LV3_PROXMOX_HOST_ADDR` and
+`LV3_PROXMOX_HOST_PORT` for the scan process. The Proxmox-host group defaults
+to port 22; the environment override changes only that host's SSH port, while
+guest SSH continues to use its own port through the jump host.
+
+```bash
+LV3_PROXMOX_HOST_ADDR=proxmox.example.com LV3_PROXMOX_HOST_PORT=2222 \
+  make security-posture-report
+```
+
 Or call the Python entrypoint directly:
 
 ```bash

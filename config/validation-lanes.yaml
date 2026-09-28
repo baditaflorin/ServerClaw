@@ -160,7 +160,7 @@ surface_classes:
     title: Validation gate and remote execution automation
     paths:
       - .gitea/workflows/validate.yml
-      - .github/workflows/validate.yml
+      - .woodpecker.yml
       - .githooks/pre-push
       - Makefile
       - config/build-server.json

@@ -39,6 +39,9 @@ argument_specs:
       plausible_clickhouse_image:
         type: str
         required: true
+      plausible_clickhouse_cpu_shares:
+        type: int
+        required: true
       plausible_public_base_url:
         type: str
         required: true

@@ -380,9 +380,16 @@ def run_fallback_gate(argv: list[str] | None = None) -> int:
         all_lanes=args.all_lanes,
         checks=checks_to_run,
     )
+    fallback_env = os.environ.copy()
+    if args.source.strip().lower().startswith("local-"):
+        # Local fallback should use the repo's native toolchain when a check
+        # declares native_command, rather than re-entering an unavailable
+        # placeholder Docker image path.
+        fallback_env["LV3_NATIVE_EXECUTION"] = "1"
     completed = subprocess.run(
         command,
         cwd=workspace,
+        env=fallback_env,
         text=True,
         capture_output=True,
         check=False,

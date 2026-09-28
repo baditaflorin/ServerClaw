@@ -1,0 +1,4 @@
+---
+# Use the standard SSH port by default; allow the approved break-glass
+# endpoint to be selected without baking a deployment-specific port into Git.
+ansible_port: "{{ lookup('env', 'LV3_PROXMOX_HOST_PORT') | default(22, true) }}"

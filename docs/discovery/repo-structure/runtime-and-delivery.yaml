@@ -52,17 +52,15 @@ entries:
         - versions
         - python
       for_agents: Check Python dependencies and their versions
-    .github:
-      purpose: GitHub Actions workflows (legacy/external mirror)
-      contains: GitHub Actions YAML workflows
+    .woodpecker.yml:
+      purpose: Woodpecker CI workflow for the sanitized public mirror
+      contains: Build and repository-validation pipeline definition
       concern: ci, external-automation
       keywords:
-        - github
+        - woodpecker
         - ci
-        - actions
         - workflows
-        - external
-      for_agents: Legacy CI - primary CI runs on Gitea (.gitea/)
+      for_agents: Public ServerClaw CI runs on the 0mcp Woodpecker instance
     .gitea:
       purpose: Gitea Actions workflows (PRIMARY local CI)
       contains: Gitea Actions YAML workflows running on self-hosted runner

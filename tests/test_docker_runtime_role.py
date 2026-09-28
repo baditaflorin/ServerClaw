@@ -142,7 +142,9 @@ def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
         task for task in tasks if task["name"] == "Ensure Docker socket activation is enabled and listening"
     )
     assert defaults["docker_runtime_kernel_modules"] == ["iptable_nat"]
-    assert defaults["docker_runtime_kernel_modules_file"] == "/etc/modules-load.d/lv3-docker-runtime.conf"
+    assert defaults["docker_runtime_kernel_modules_file"] == (
+        "/etc/modules-load.d/{{ platform_identity.config_prefix }}-docker-runtime.conf"
+    )
     assert persist_modules["ansible.builtin.copy"]["dest"] == "{{ docker_runtime_kernel_modules_file }}"
     assert persist_modules["when"] == "docker_runtime_kernel_modules | length > 0"
     assert load_modules["ansible.builtin.command"]["argv"] == ["modprobe", "{{ item }}"]
@@ -1262,7 +1264,7 @@ def test_docker_runtime_defaults_pin_governed_resolvers_and_registry_mirror() ->
     )
     assert (
         defaults["docker_runtime_publication_assurance_script_path"]
-        == "/usr/local/bin/lv3-docker-publication-assurance"
+        == "/usr/local/bin/{{ platform_identity.config_prefix }}-docker-publication-assurance"
     )
     assert defaults["docker_runtime_publication_assurance_helper_source"] == (
         "{{ inventory_dir ~ '/../scripts/docker_publication_assurance.py' }}"

@@ -1,0 +1,2136 @@
+{
+  "schema_version": "1.0.0",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "generated_at": "2026-09-28T00:53:51Z",
+  "scanned_on": "2026-09-28",
+  "image_id": "plausible_postgres_runtime",
+  "image_ref": "docker.io/library/postgres:16.15-alpine@sha256:1a66d744c1b459e13b05a8fca341da84cb63383e99ce262210efee5a319d4551",
+  "runtime_host": "docker-runtime",
+  "sbom_receipt": "receipts/sbom/1a66d744c1b4.cdx.json",
+  "summary": {
+    "critical": 3,
+    "high": 54,
+    "medium": 45,
+    "low": 3,
+    "unknown": 0,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 105
+  },
+  "matches": [
+    {
+      "vulnerability_id": "CVE-2025-61726",
+      "aliases": [
+        "CVE-2025-61726"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The net/url package does not set a limit on the number of query parameters in a query. While the maximum size of query parameters in URLs is generally limited by the maximum request header size, the net/http.Request.ParseForm method can parse large URL-encoded forms. Parsing a large form containing many unique query parameters can cause excessive memory consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4341",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "The net/url package does not set a limit on the number of query parameters in a query.\n\nWhile the maximum size of query parameters in URLs is generally limited by the maximum request header size, the net/http.Request.ParseForm method can parse large URL-encoded forms. Parsing a large form containing many unique query parameters can cause excessive memory consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4337",
+      "aliases": [],
+      "severity": "CRITICAL",
+      "namespace": "govulndb:language:go",
+      "description": "During session resumption in crypto/tls, if the underlying Config has its ClientCAs or RootCAs fields mutated between the initial handshake and the resumed handshake, the resumed handshake may succeed when it should have failed. This may happen when a user calls Config.Clone and mutates the returned Config, or uses Config.GetConfigForClient. This can cause a client to resume a session with a server that it would not have resumed with during the initial handshake, or cause a server to resume a session with a client that it would not have resumed with during the initial handshake.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-68121",
+      "aliases": [
+        "CVE-2025-68121"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "nvd:cpe",
+      "description": "During session resumption in crypto/tls, if the underlying Config has its ClientCAs or RootCAs fields mutated between the initial handshake and the resumed handshake, the resumed handshake may succeed when it should have failed. This may happen when a user calls Config.Clone and mutates the returned Config, or uses Config.GetConfigForClient. This can cause a client to resume a session with a server that it would not have resumed with during the initial handshake, or cause a server to resume a session with a client that it would not have resumed with during the initial handshake.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27140",
+      "aliases": [
+        "CVE-2026-27140"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "SWIG file names containing 'cgo' and well-crafted payloads could lead to code smuggling and arbitrary code execution at build time due to trust layer bypass.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-33811",
+      "aliases": [
+        "CVE-2026-33811"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "When using LookupCNAME with the cgo DNS resolver, a very long CNAME response can trigger a double-free of C memory and a crash.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4981",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "When using LookupCNAME with the cgo DNS resolver, a very long CNAME response can trigger a double-free of C memory and a crash.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-39820",
+      "aliases": [
+        "CVE-2026-39820"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Well-crafted inputs reaching ParseAddress, ParseAddressList, and ParseDate were able to trigger excessive CPU exhaustion and memory allocations.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4986",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "Well-crafted inputs reaching ParseAddress, ParseAddressList, and ParseDate were able to trigger excessive CPU exhaustion and memory allocations.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27143",
+      "aliases": [
+        "CVE-2026-27143"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "nvd:cpe",
+      "description": "Arithmetic over induction variables in loops were not correctly checked for underflow or overflow. As a result, the compiler would allow for invalid indexing to occur at runtime, potentially leading to memory corruption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-25679",
+      "aliases": [
+        "CVE-2026-25679"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "url.Parse insufficiently validated the host/authority component and accepted some invalid URLs.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4601",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "url.Parse insufficiently validated the host/authority component and accepted some invalid URLs.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42499",
+      "aliases": [
+        "CVE-2026-42499"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Pathological inputs could cause DoS through consumePhrase when parsing an email address according to RFC 5322.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4977",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "Pathological inputs could cause DoS through consumePhrase when parsing an email address according to RFC 5322.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-33814",
+      "aliases": [
+        "CVE-2026-33814"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "When processing HTTP/2 SETTINGS frames, transport will enter an infinite loop of writing CONTINUATION frames if it receives a SETTINGS_MAX_FRAME_SIZE with a value of 0.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4918",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "When processing HTTP/2 SETTINGS frames, transport will enter an infinite loop of writing CONTINUATION frames if it receives a SETTINGS_MAX_FRAME_SIZE with a value of 0.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-5026",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "The ToASCII and ToUnicode functions incorrectly accept Punycode-encoded labels that decode to an ASCII-only label. For example, ToUnicode(\"xn--example-.com\") incorrectly returns the name \"example.com\" rather than an error.\n\nThis behavior can lead to privilege escalation in programs using the idna package. For example, a program which performs privilege checks on the ASCII hostname may reject \"example.com\" but permit \"xn--example-.com\". If that program subsequently converts the ASCII hostname to Unicode, it will inadvertently permits access to the Unicode name \"example.com\".",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32280",
+      "aliases": [
+        "CVE-2026-32280"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "During chain building, the amount of work that is done is not correctly limited when a large number of intermediate certificates are passed in VerifyOptions.Intermediates, which can lead to a denial of service. This affects both direct users of crypto/x509 and users of crypto/tls.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4947",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "During chain building, the amount of work that is done is not correctly limited when a large number of intermediate certificates are passed in VerifyOptions.Intermediates, which can lead to a denial of service. This affects both direct users of crypto/x509 and users of crypto/tls.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32283",
+      "aliases": [
+        "CVE-2026-32283"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "If one side of the TLS connection sends multiple key update messages post-handshake in a single record, the connection can deadlock, causing uncontrolled consumption of resources. This can lead to a denial of service. This only affects TLS 1.3.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4870",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "If one side of the TLS connection sends multiple key update messages post-handshake in a single record, the connection can deadlock, causing uncontrolled consumption of resources. This can lead to a denial of service.\n\nThis only affects TLS 1.3.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61731",
+      "aliases": [
+        "CVE-2025-61731"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Building a malicious file with cmd/go can cause can cause a write to an attacker-controlled file with partial control of the file content. The \"#cgo pkg-config:\" directive in a Go source file provides command-line arguments to provide to the Go pkg-config command. An attacker can provide a \"--log-file\" argument to this directive, causing pkg-config to write to an attacker-controlled location.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-46600",
+      "aliases": [
+        "CVE-2026-46600"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Parsing an invalid SVCB or HTTPS RR can panic when the size of a parameter value overflows the message buffer.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-39836",
+      "aliases": [
+        "CVE-2026-39836"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The Dial and LookupPort functions panic on Windows when provided with an input containing a NUL (0).",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4971",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "The Dial and LookupPort functions panic on Windows when provided with an input containing a NUL (0).",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61723",
+      "aliases": [
+        "CVE-2025-61723"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The processing time for parsing some invalid inputs scales non-linearly with respect to the size of the input. This affects programs which parse untrusted PEM inputs.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4009",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "The processing time for parsing some invalid inputs scales non-linearly with respect to the size of the input.\n\nThis affects programs which parse untrusted PEM inputs.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-85091",
+      "aliases": [
+        "CVE-2026-85091"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "zlib versions 1.3.1.2 through 1.3.2 contain a heap buffer overflow vulnerability in the gz_vacate() function when processing non-blocking gzwrite() operations with stale external buffer pointers. Attackers can trigger the overflow by calling gzprintf() or gzvprintf() after a write stall, causing an unchecked memmove() to write beyond the internal input buffer boundary.",
+      "package": {
+        "name": "zlib",
+        "version": "1.3.2-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61725",
+      "aliases": [
+        "CVE-2025-61725"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The ParseAddress function constructs domain-literal address components through repeated string concatenation. When parsing large domain-literal components, this can cause excessive CPU consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4006",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "The ParseAddress function constructs domain-literal address components through repeated string concatenation. When parsing large domain-literal components, this can cause excessive CPU consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-5037",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "(*x509.Certificate).VerifyHostname previously called matchHostnames in a loop over all DNS Subject Alternative Name (SAN) entries. This caused strings.Split(host, \".\") to execute repeatedly on the same input hostname.\n\nWith a large DNS SAN list, verification costs scaled quadratically based on the number of SAN entries multiplied by the hostname's label count. Because x509.Verify validates hostnames before building the certificate chain, this overhead occurred even for untrusted certificates.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61728",
+      "aliases": [
+        "CVE-2025-61728"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "archive/zip uses a super-linear file name indexing algorithm that is invoked the first time a file in an archive is opened. This can lead to a denial of service when consuming a maliciously constructed ZIP archive.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4342",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "archive/zip uses a super-linear file name indexing algorithm that is invoked the first time a file in an archive is opened. This can lead to a denial of service when consuming a maliciously constructed ZIP archive.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27145",
+      "aliases": [
+        "CVE-2026-27145"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "(*x509.Certificate).VerifyHostname previously called matchHostnames in a loop over all DNS Subject Alternative Name (SAN) entries. This caused strings.Split(host, \".\") to execute repeatedly on the same input hostname. With a large DNS SAN list, verification costs scaled quadratically based on the number of SAN entries multiplied by the hostname's label count. Because x509.Verify validates hostnames before building the certificate chain, this overhead occurred even for untrusted certificates.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56853",
+      "aliases": [
+        "CVE-2026-56853"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "When a server is configured to support unencrypted HTTP/2, it reads a few bytes from each new connection to see if they contain the HTTP/2 client preface. ReadHeaderTimeout is unexpectedly not being applied when doing this.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56859",
+      "aliases": [
+        "CVE-2026-56859"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Previously, DecodeElement would reset the depth counter causing it to never fire; this could lead to stack exhaustion.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56862",
+      "aliases": [
+        "CVE-2026-56862"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Handshake messages, such as KeyUpdate, are always considered as state-advancing, regardless of whether a handshake has been completed or not. As a result, a malicious client can keep sending KeyUpdate messages to force the server to keep performing key derivation operations indefinitely.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-6088",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "Previously, DecodeElement would reset the depth counter causing it to never fire; this could lead to stack exhaustion.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-6089",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "When a server is configured to support unencrypted HTTP/2, it reads a few bytes from each new connection to see if they contain the HTTP/2 client preface. ReadHeaderTimeout is unexpectedly not being applied when doing this.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-6090",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "Handshake messages, such as KeyUpdate, are always considered as state-advancing, regardless of whether a handshake has been completed or not. As a result, a malicious client can keep sending KeyUpdate messages to force the server to keep performing key derivation operations indefinitely.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-33818",
+      "aliases": [
+        "CVE-2026-33818"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Enforce a recursion limit in Unmarshal to prevent stack exhaustion when parsing deeply-nested, recursive structures.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-5972",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "Enforce a recursion limit in Unmarshal to prevent stack exhaustion when parsing deeply-nested, recursive structures.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42504",
+      "aliases": [
+        "CVE-2026-42504"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Decoding a maliciously-crafted MIME header containing many invalid encoded-words can consume excessive CPU.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-5038",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "Decoding a maliciously-crafted MIME header containing many invalid encoded-words can consume excessive CPU.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61732",
+      "aliases": [
+        "CVE-2025-61732"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A discrepancy between how Go and C/C++ comments were parsed allowed for code smuggling into the resulting cgo binary.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61729",
+      "aliases": [
+        "CVE-2025-61729"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Within HostnameError.Error(), when constructing an error string, there is no limit to the number of hosts that will be printed out. Furthermore, the error string is constructed by repeated string concatenation, leading to quadratic runtime. Therefore, a certificate provided by a malicious actor can result in excessive resource consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4155",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "Within HostnameError.Error(), when constructing an error string, there is no limit to the number of hosts that will be printed out. Furthermore, the error string is constructed by repeated string concatenation, leading to quadratic runtime. Therefore, a certificate provided by a malicious actor can result in excessive resource consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56860",
+      "aliases": [
+        "CVE-2026-56860"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Previously, resolving relative paths containing parent directory ('..') segments performed string conversions and buffer rewrites on each step, resulting in quadratic time complexity and high memory allocation overhead. Now, path resolution operates on a byte buffer using index-based backtracking for '..' segments, eliminating the quadratic time complexity and significantly reducing memory allocations.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-6218",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "Previously, resolving relative paths containing parent directory ('..') segments performed string conversions and buffer rewrites on each step, resulting in quadratic time complexity and high memory allocation overhead.\n\nNow, path resolution operates on a byte buffer using index-based backtracking for '..' segments, eliminating the quadratic time complexity and significantly reducing memory allocations.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58187",
+      "aliases": [
+        "CVE-2025-58187"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Due to the design of the name constraint checking algorithm, the processing time of some inputs scale non-linearly with respect to the size of the certificate. This affects programs which validate arbitrary certificate chains.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4007",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "Due to the design of the name constraint checking algorithm, the processing time of some inputs scale non-linearly with respect to the size of the certificate.\n\nThis affects programs which validate arbitrary certificate chains.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32281",
+      "aliases": [
+        "CVE-2026-32281"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Validating certificate chains which use policies is unexpectedly inefficient when certificates in the chain contain a very large number of policy mappings, possibly causing denial of service. This only affects validation of otherwise trusted certificate chains, issued by a root CA in the VerifyOptions.Roots CertPool, or in the system certificate pool.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4946",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "Validating certificate chains which use policies is unexpectedly inefficient when certificates in the chain contain a very large number of policy mappings, possibly causing denial of service.\n\nThis only affects validation of otherwise trusted certificate chains, issued by a root CA in the VerifyOptions.Roots CertPool, or in the system certificate pool.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58186",
+      "aliases": [
+        "CVE-2025-58186"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Despite HTTP headers having a default limit of 1MB, the number of cookies that can be parsed does not have a limit. By sending a lot of very small cookies such as \"a=;\", an attacker can make an HTTP server allocate a large amount of structs, causing large memory consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4012",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "Despite HTTP headers having a default limit of 1MB, the number of cookies that can be parsed does not have a limit. By sending a lot of very small cookies such as \"a=;\", an attacker can make an HTTP server allocate a large amount of structs, causing large memory consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58188",
+      "aliases": [
+        "CVE-2025-58188"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "Validating certificate chains which contain DSA public keys can cause programs to panic, due to a interface cast that assumes they implement the Equal method. This affects programs which validate arbitrary certificate chains.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4013",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "Validating certificate chains which contain DSA public keys can cause programs to panic, due to a interface cast that assumes they implement the Equal method.\n\nThis affects programs which validate arbitrary certificate chains.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61724",
+      "aliases": [
+        "CVE-2025-61724"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The Reader.ReadResponse function constructs a response string through repeated string concatenation of lines. When the number of lines in a response is large, this can cause excessive CPU consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4015",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "The Reader.ReadResponse function constructs a response string through repeated string concatenation of lines. When the number of lines in a response is large, this can cause excessive CPU consumption.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58185",
+      "aliases": [
+        "CVE-2025-58185"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Parsing a maliciously crafted DER payload could allocate large amounts of memory, causing memory exhaustion.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4011",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "Parsing a maliciously crafted DER payload could allocate large amounts of memory, causing memory exhaustion.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56864",
+      "aliases": [
+        "CVE-2026-56864"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A malicious GOSUMDB was capable of serving arbitrary module content not contained within the transparency log. This attack allows for a coordinating GOPROXY and GOSUMDB to serve a client malicious module content that cannot be detected by evaluating the transparency log. In order to determine if you have been affected:   rm -r go.sum go.work.sum vendor/ && go mod tidy",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-47912",
+      "aliases": [
+        "CVE-2025-47912"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The Parse function permits values other than IPv6 addresses to be included in square brackets within the host component of a URL. RFC 3986 permits IPv6 addresses to be included within the host component, enclosed within square brackets. For example: \"http://[::1]/\". IPv4 addresses and hostnames must not appear within square brackets. Parse did not enforce this requirement.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58189",
+      "aliases": [
+        "CVE-2025-58189"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "When Conn.Handshake fails during ALPN negotiation the error contains attacker controlled information (the ALPN protocols sent by the client) which is not escaped.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4008",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "When Conn.Handshake fails during ALPN negotiation the error contains attacker controlled information (the ALPN protocols sent by the client) which is not escaped.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4010",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "The Parse function permits values other than IPv6 addresses to be included in square brackets within the host component of a URL. RFC 3986 permits IPv6 addresses to be included within the host component, enclosed within square brackets. For example: \"http://[::1]/\". IPv4 addresses and hostnames must not appear within square brackets. Parse did not enforce this requirement.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-39826",
+      "aliases": [
+        "CVE-2026-39826"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "If a trusted template author were to write a <script> tag containing an empty 'type' attribute or a 'type' attribute with an ASCII whitespace, the execution of the template would incorrectly escape any data passed into the <script> block.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4980",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "If a trusted template author were to write a <script> tag containing an empty 'type' attribute or a 'type' attribute with an ASCII whitespace, the execution of the template would incorrectly escape any data passed into the <script> block.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42501",
+      "aliases": [
+        "CVE-2026-42501"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A malicious module proxy can exploit a flaw in the go command's validation of module checksums to bypass checksum database validation. This vulnerability affects any user using an untrusted module proxy (GOMODPROXY) or checksum database (GOSUMDB). A malicious module proxy can serve altered versions of the Go toolchain. When selecting a different version of the Go toolchain than the currently installed toolchain (due to the GOTOOLCHAIN environment variable, or a go.work or go.mod with a toolchain line), the go command will download and execute a toolchain provided by the module proxy. A malicious module proxy can bypass checksum database validation for this downloaded toolchain. Since this vulnerability affects the security of toolchain downloads, setting GOTOOLCHAIN to a fixed version is not sufficient. You must upgrade your base Go toolchain. The go tool always validates the hash of a toolchain before executing it, so fixed versions will refuse to execute any cached, altered versions of the toolchain. The go tool trusts go.sum files to contain accurate hashes of the current module's dependencies. A malicious proxy exploiting this vulnerability to serve an altered module will have caused an incorrect hash to be recorded in the go.sum. Users who have configured a non-trusted GOPROXY can determine if they have been affected by running \"rm go.sum ; go mod tidy ; go mod verify\", which will revalidate all dependencies of the current module. The specific flaw in more detail: The go command consults the checksum database to validate downloaded modules, when a module is not listed in the go.sum file. It verifies that the module hash reported by the checksum database matches the hash of the downloaded module. If, however, the checksum database returns a successful response that contains no entry for the module, the go command incorrectly permitted validation to succeed. A module proxy may mirror or proxy the checksum database, in which case the go command will not connect to the checksum database directly. Checksums reported by the checksum database are cryptographically signed, so a malicious proxy cannot alter the reported checksum for a module. However, a proxy which returns an empty checksum response, or a checksum response for an unrelated module, could cause the go command to proceed as if a downloaded module has been validated.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-39825",
+      "aliases": [
+        "CVE-2026-39825"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "ReverseProxy can forward queries containing parameters not visible to Rewrite functions. When used with a Rewrite function, or a Director function which parses query parameters, ReverseProxy sanitizes the forwarded request to remove query parameters which are not parsed by url.ParseQuery. ReverseProxy does not take ParseQuery's limit on the total number of query parameters (controlled by GODEBUG=urlmaxqueryparams=N) into account. This can permit ReverseProxy to forward a request containing a query parameter that is not visible to the Rewrite function. For example, the query \"a1=x&a2=x&...&a10000=x&hidden=y\" can forward the parameter \"hidden=y\" while hiding it from the proxy's Rewrite function.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42505",
+      "aliases": [
+        "CVE-2026-42505"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Handshakes which used Encrypted Client Hello could be de-anonymized by a passive network observer due to a disclosure of pre-shared key identities in the unencrypted client hello.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4976",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "ReverseProxy can forward queries containing parameters not visible to Rewrite functions.\n\nWhen used with a Rewrite function, or a Director function which parses query parameters, ReverseProxy sanitizes the forwarded request to remove query parameters which are not parsed by url.ParseQuery. ReverseProxy does not take ParseQuery's limit on the total number of query parameters (controlled by GODEBUG=urlmaxqueryparams=N) into account. This can permit ReverseProxy to forward a request containing a query parameter that is not visible to the Rewrite function.\n\nFor example, the query \"a1=x&a2=x&...&a10000=x&hidden=y\" can forward the parameter \"hidden=y\" while hiding it from the proxy's Rewrite function.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-5856",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "Handshakes which used Encrypted Client Hello could be de-anonymized by a passive network observer due to a disclosure of pre-shared key identities in the unencrypted client hello.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42507",
+      "aliases": [
+        "CVE-2026-42507"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "When returning errors, functions in the net/textproto package would include its input as part of the error. This might allow an attacker to inject misleading content to errors that are printed or logged.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-5039",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "When returning errors, functions in the net/textproto package would include its input as part of the error. This might allow an attacker to inject misleading content to errors that are printed or logged.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-58183",
+      "aliases": [
+        "CVE-2025-58183"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "tar.Reader does not set a maximum size on the number of sparse region data blocks in GNU tar pax 1.0 sparse files. A maliciously-crafted archive containing a large number of sparse regions can cause a Reader to read an unbounded amount of data from the archive into memory. When reading from a compressed source, a small compressed input can result in large allocations.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4014",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "tar.Reader does not set a maximum size on the number of sparse region data blocks in GNU tar pax 1.0 sparse files. A maliciously-crafted archive containing a large number of sparse regions can cause a Reader to read an unbounded amount of data from the archive into memory. When reading from a compressed source, a small compressed input can result in large allocations.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-39823",
+      "aliases": [
+        "CVE-2026-39823"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "CVE-2026-27142 fixed a vulnerability in which URLs were not correctly escaped inside of a <meta> tag's <content> attribute. If the URL content were to insert ASCII whitespaces around the '=' rune inside of the <content> attribute, the escaper would fail to similarly escape it, leading to XSS.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4982",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "CVE-2026-27142 fixed a vulnerability in which URLs were not correctly escaped inside of a <meta> tag's <content> attribute. If the URL content were to insert ASCII whitespaces around the '=' rune inside of the <content> attribute, the escaper would fail to similarly escape it, leading to XSS.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27142",
+      "aliases": [
+        "CVE-2026-27142"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Actions which insert URLs into the content attribute of HTML meta tags are not escaped. This can allow XSS if the meta tag also has an http-equiv attribute with the value \"refresh\". A new GODEBUG setting has been added, htmlmetacontenturlescape, which can be used to disable escaping URLs in actions in the meta content attribute which follow \"url=\" by setting htmlmetacontenturlescape=0.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32289",
+      "aliases": [
+        "CVE-2026-32289"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Context was not properly tracked across template branches for JS template literals, leading to possibly incorrect escaping of content when branches were used. Additionally template actions within JS template literals did not properly track the brace depth, leading to incorrect escaping being applied. These issues could cause actions within JS template literals to be incorrectly or improperly escaped, leading to XSS vulnerabilities.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4603",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "Actions which insert URLs into the content attribute of HTML meta tags are not escaped. This can allow XSS if the meta tag also has an http-equiv attribute with the value \"refresh\".\n\nA new GODEBUG setting has been added, htmlmetacontenturlescape, which can be used to disable escaping URLs in actions in the meta content attribute which follow \"url=\" by setting htmlmetacontenturlescape=0.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4865",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "Context was not properly tracked across template branches for JS template literals, leading to possibly incorrect escaping of content when branches were used. Additionally template actions within JS template literals did not properly track the brace depth, leading to incorrect escaping being applied.\n\nThese issues could cause actions within JS template literals to be incorrectly or improperly escaped, leading to XSS vulnerabilities.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56858",
+      "aliases": [
+        "CVE-2026-56858"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Previously, pathological inputs could close an unescaped '/' early, allowing for attack-controlled data to inject arbitrary content, potentially leading to XSS.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-6091",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "Previously, pathological inputs could close an unescaped '/' early, allowing for attack-controlled data to inject arbitrary content, potentially leading to XSS.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61730",
+      "aliases": [
+        "CVE-2025-61730"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "During the TLS 1.3 handshake if multiple messages are sent in records that span encryption level boundaries (for instance the Client Hello and Encrypted Extensions messages), the subsequent messages may be processed before the encryption level changes. This can cause some minor information disclosure if a network-local attacker can inject messages during the handshake.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4340",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "During the TLS 1.3 handshake if multiple messages are sent in records that span encryption level boundaries (for instance the Client Hello and Encrypted Extensions messages), the subsequent messages may be processed before the encryption level changes. This can cause some minor information disclosure if a network-local attacker can inject messages during the handshake.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "busybox",
+        "version": "1.37.0-r31",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "busybox-binsh",
+        "version": "1.37.0-r31",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "ssl_client",
+        "version": "1.37.0-r31",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-61727",
+      "aliases": [
+        "CVE-2025-61727"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "An excluded subdomain constraint in a certificate chain does not restrict the usage of wildcard SANs in the leaf certificate. For example a constraint that excludes the subdomain test.example.com does not prevent a leaf certificate from claiming the SAN *.example.com.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2025-4175",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "An excluded subdomain constraint in a certificate chain does not restrict the usage of wildcard SANs in the leaf certificate. For example a constraint that excludes the subdomain test.example.com does not prevent a leaf certificate from claiming the SAN *.example.com.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-39822",
+      "aliases": [
+        "CVE-2026-39822"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "On Unix systems, opening a file in an os.Root improperly follows symlinks to locations outside of the Root when the final path component of the a path is a symbolic link and the path ends in /. For example, 'root.Open(\"symlink/\")' will open \"symlink\" even when \"symlink\" is a symbolic link pointing outside of the root.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4970",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "govulndb:language:go",
+      "description": "On Unix systems, opening a file in an os.Root improperly follows symlinks to locations outside of the Root when the final path component of the a path is a symbolic link and the path ends in /.\n\nFor example, 'root.Open(\"symlink/\")' will open \"symlink\" even when \"symlink\" is a symbolic link pointing outside of the root.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27144",
+      "aliases": [
+        "CVE-2026-27144"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "The compiler is meant to unwrap pointers which are the operands of a memory move; a no-op interface conversion prevented the compiler from making the correct determination about non-overlapping moves, potentially leading to memory corruption at runtime.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56865",
+      "aliases": [
+        "CVE-2026-56865"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A malicious GOPROXY was previously capable of forging up to two sumdb tiles that allow for a requested module to bypass the GOSUMDB check and persist attacker-controlled module content to a local Go module cache. This attack allows for a malicious GOPROXY to serve malicious module content that cannot be detected by evaluating the transparency log. All tiles are now correctly verified against their parents. In order to determine if you have been affected:   rm -r go.sum go.work.sum vendor/ && go mod tidy",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32282",
+      "aliases": [
+        "CVE-2026-32282"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "On Linux, if the target of Root.Chmod is replaced with a symlink while the chmod operation is in progress, Chmod can operate on the target of the symlink, even when the target lies outside the root. The Linux fchmodat syscall silently ignores the AT_SYMLINK_NOFOLLOW flag, which Root.Chmod uses to avoid symlink traversal. Root.Chmod checks its target before acting and returns an error if the target is a symlink lying outside the root, so the impact is limited to cases where the target is replaced with a symlink between the check and operation.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4864",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "On Linux, if the target of Root.Chmod is replaced with a symlink while the chmod operation is in progress, Chmod can operate on the target of the symlink, even when the target lies outside the root.\n\nThe Linux fchmodat syscall silently ignores the AT_SYMLINK_NOFOLLOW flag, which Root.Chmod uses to avoid symlink traversal. Root.Chmod checks its target before acting and returns an error if the target is a symlink lying outside the root, so the impact is limited to cases where the target is replaced with a symlink between the check and operation.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-32288",
+      "aliases": [
+        "CVE-2026-32288"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "tar.Reader can allocate an unbounded amount of memory when reading a maliciously-crafted archive containing a large number of sparse regions encoded in the \"old GNU sparse map\" format.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4869",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "govulndb:language:go",
+      "description": "tar.Reader can allocate an unbounded amount of memory when reading a maliciously-crafted archive containing a large number of sparse regions encoded in the \"old GNU sparse map\" format.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-39817",
+      "aliases": [
+        "CVE-2026-39817"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The \"go tool pack\" subcommand (usually used only by the compiler as an internal tool with known-good inputs) does not sanitize output filenames. Extracting a malicious archive file with the \"pack\" subcommand can write files to arbitrary locations on the filesystem.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-39819",
+      "aliases": [
+        "CVE-2026-39819"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The \"go bug\" command writes to two files with predictable names in the system temporary directory (for example, \"/tmp\"). An attacker with access to the temporary directory can create a symlink in one of these names, causing \"go bug\" to overwrite the target of the symlink.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-5024",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "govulndb:language:go",
+      "description": "NewNTUnicodeString does not check for string length overflow. When provided with a string that overflows the maximum size of a NTUnicodeString (a 16-bit number of bytes), it returns a truncated string rather than an error.",
+      "package": {
+        "name": "golang.org/x/sys",
+        "version": "v0.1.0",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27139",
+      "aliases": [
+        "CVE-2026-27139"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "On Unix platforms, when listing the contents of a directory using File.ReadDir or File.Readdir the returned FileInfo could reference a file outside of the Root in which the File was opened. The impact of this escape is limited to reading metadata provided by lstat from arbitrary locations on the filesystem without permitting reading or writing files outside the root.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GO-2026-4602",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "govulndb:language:go",
+      "description": "On Unix platforms, when listing the contents of a directory using File.ReadDir or File.Readdir the returned FileInfo could reference a file outside of the Root in which the File was opened.\n\nThe impact of this escape is limited to reading metadata provided by lstat from arbitrary locations on the filesystem without permitting reading or writing files outside the root.",
+      "package": {
+        "name": "stdlib",
+        "version": "go1.24.6",
+        "type": "go-module",
+        "locations": [
+          "/usr/local/bin/gosu"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    }
+  ]
+}

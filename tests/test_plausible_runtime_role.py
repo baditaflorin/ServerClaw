@@ -41,6 +41,7 @@ def test_plausible_runtime_defaults_reference_service_topology_images_and_local_
         defaults["plausible_clickhouse_image"]
         == "{{ container_image_catalog.images.plausible_clickhouse_runtime.ref }}"
     )
+    assert defaults["plausible_clickhouse_cpu_shares"] == 640
     assert defaults["plausible_local_artifact_dir"] == "{{ repo_shared_local_root }}/plausible"
     assert (
         defaults["plausible_database_password_local_file"] == "{{ plausible_local_artifact_dir }}/database-password.txt"
@@ -60,6 +61,7 @@ def test_plausible_runtime_defaults_reference_service_topology_images_and_local_
 def test_plausible_runtime_tasks_manage_openbao_compose_and_port_recovery() -> None:
     tasks = load_tasks(TASKS_PATH)
 
+    validate_task = next(task for task in tasks if task.get("name") == "Validate Plausible runtime inputs")
     openbao_helper = next(
         task for task in tasks if task.get("name") == "Prepare OpenBao agent runtime secret injection for Plausible"
     )
@@ -92,6 +94,9 @@ def test_plausible_runtime_tasks_manage_openbao_compose_and_port_recovery() -> N
     )
     verify_task = next(task for task in tasks if task.get("name") == "Verify the Plausible runtime")
 
+    assertions = validate_task["ansible.builtin.assert"]["that"]
+    assert "plausible_clickhouse_cpu_shares | int >= 2" in assertions
+    assert "plausible_clickhouse_cpu_shares | int <= 262144" in assertions
     assert openbao_helper["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
     assert openbao_helper["ansible.builtin.include_role"]["tasks_from"] == "openbao_compose_env"
     assert converge_task["ansible.builtin.include_role"]["name"] == "lv3.platform.common"
@@ -177,6 +182,7 @@ def test_plausible_runtime_templates_render_public_urls_and_repo_managed_site_ch
     event_check_template = EVENT_CHECK_TEMPLATE_PATH.read_text(encoding="utf-8")
 
     assert "container_name: {{ plausible_container_name }}" in compose_template
+    assert "cpu_shares: {{ plausible_clickhouse_cpu_shares | int }}" in compose_template
     assert '- "{{ ansible_host }}:{{ plausible_internal_port }}:8000"' in compose_template
     assert '- "127.0.0.1:{{ plausible_internal_port }}:8000"' in compose_template
     assert "BASE_URL={{ plausible_public_base_url }}" in env_template

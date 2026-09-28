@@ -40,7 +40,7 @@ def test_validation_plan_maps_runtime_role_changes_to_ansible_and_service_gates(
     gates = gate_ids(plan)
     assert {"yaml", "ansible-syntax", "ansible-lint", "role-argument-specs", "service-completeness"} <= gates
     assert "./scripts/validate_repo.sh ansible-syntax" in plan["commands"]
-    assert "python3 scripts/validate_service_completeness.py --validate" in plan["commands"]
+    assert "python3 scripts/validate_service_completeness.py --changed --validate" in plan["commands"]
     assert plan["unmapped_files"] == []
 
 

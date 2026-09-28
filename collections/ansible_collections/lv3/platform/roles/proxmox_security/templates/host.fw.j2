@@ -5,3 +5,8 @@ protection_synflood: 1
 smurf_log_level: nolog
 log_level_in: info
 log_level_out: nolog
+
+[RULES]
+{% for rule in proxmox_host_additional_tcp_rules | default([]) %}
+IN ACCEPT{{ (' -i ' ~ rule.interface) if rule.interface is defined else '' }} -source {{ rule.source }}{{ (' -dest ' ~ rule.destination) if rule.destination is defined else '' }} -p tcp -dport {{ rule.port }}{{ (' # ' ~ rule.comment) if rule.comment is defined else '' }}
+{% endfor %}

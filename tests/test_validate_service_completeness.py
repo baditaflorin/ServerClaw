@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -102,6 +103,68 @@ def test_missing_dependency_health_gate_blocks_non_grandfathered_service(
 
     assert not result.passing
     assert any(item.item_id == "dependency_health_gate" for item in result.failing_items)
+
+
+def test_controller_rendered_compose_env_requires_root_only_mode_and_suppressed_output(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    role_dir = tmp_path / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "test_echo_runtime"
+    tasks_dir = role_dir / "tasks"
+    tasks_dir.mkdir(parents=True, exist_ok=True)
+    tasks_path = tasks_dir / "main.yml"
+    tasks_path.write_text(
+        "- name: Render runtime environment\n"
+        "  ansible.builtin.template:\n"
+        '    dest: "{{ test_echo_env_file }}"\n'
+        '    mode: "0600"\n'
+        "  no_log: true\n"
+        "  diff: false\n",
+        encoding="utf-8",
+    )
+
+    assert service_completeness.role_renders_root_only_env_file(role_dir, "test_echo")
+    tasks_path.write_text(tasks_path.read_text(encoding="utf-8").replace("0600", "0644"), encoding="utf-8")
+    assert not service_completeness.role_renders_root_only_env_file(role_dir, "test_echo")
+
+
+def test_changed_data_catalog_row_scopes_global_input_to_owning_service(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "-c",
+            "user.name=Completeness Test",
+            "-c",
+            "user.email=completeness-test@example.invalid",
+            "commit",
+            "-qm",
+            "baseline",
+        ],
+        check=True,
+    )
+
+    data_path = tmp_path / "config" / "data-catalog.json"
+    data_catalog = json.loads(data_path.read_text(encoding="utf-8"))
+    entry = next(store for store in data_catalog["data_stores"] if store["service"] == "test_echo")
+    entry["notes"] += " Updated as part of a scoped catalog test."
+    data_path.write_text(json.dumps(data_catalog, indent=2) + "\n", encoding="utf-8")
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        ["config/data-catalog.json"], context, base_ref="HEAD"
+    )
+    assert selected == ["test_echo"]
 
 
 def test_authentik_client_evidence_satisfies_provider_aware_oidc_check(
@@ -207,6 +270,22 @@ def test_changed_service_scope_maps_role_and_named_test_paths(tmp_path: Path, mo
     assert selected == ["test_echo"]
 
 
+def test_changed_service_scope_ignores_a_standalone_named_test_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        ["tests/test_test-echo_oidc.py"],
+        context,
+    )
+
+    assert selected == []
+
+
 def test_changed_service_scope_falls_back_to_all_for_global_catalog_or_unknown_role(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -231,3 +310,72 @@ def test_changed_service_scope_falls_back_to_all_for_global_catalog_or_unknown_r
         )
         is None
     )
+
+
+def test_changed_service_scope_ignores_platform_roles_and_unrelated_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    assert (
+        service_completeness.service_ids_for_changed_paths(
+            [
+                "collections/ansible_collections/lv3/platform/roles/proxmox_security/templates/cluster.fw.j2",
+                "inventory/group_vars/platform.yml",
+            ],
+            context,
+        )
+        == []
+    )
+    assert service_completeness.service_ids_for_changed_paths([], context) == []
+
+
+def test_changed_paths_use_precomputed_remote_validation_context(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    monkeypatch.setenv(
+        "LV3_VALIDATION_CHANGED_FILES_JSON",
+        '["inventory\\\\group_vars\\\\platform.yml", "tests/test_validate_service_completeness.py"]',
+    )
+
+    changed = service_completeness.changed_paths_from_git(tmp_path, "missing-origin-main")
+
+    assert changed == ["inventory/group_vars/platform.yml", "tests/test_validate_service_completeness.py"]
+
+
+def test_empty_remote_changed_path_context_fails_closed(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    build_repo(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    monkeypatch.setenv("LV3_VALIDATION_CHANGED_FILES_JSON", "[]")
+
+    assert service_completeness.changed_paths_from_git(tmp_path, "missing-origin-main") is None
+
+
+def test_validate_empty_service_scope_does_not_expand_to_all(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    build_repo(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+
+    results, failures = service_completeness.validate_services([])
+
+    assert results == []
+    assert failures == []
+
+
+@pytest.mark.parametrize("role_family", ["_runtime", "_postgres", "_vm"])
+def test_unknown_service_role_families_fail_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, role_family: str
+) -> None:
+    build_repo(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        [f"collections/ansible_collections/lv3/platform/roles/unmapped{role_family}/defaults/main.yml"],
+        context,
+    )
+
+    assert selected is None

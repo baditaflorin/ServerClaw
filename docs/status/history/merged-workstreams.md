@@ -21,6 +21,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
+| `0296` | Allow Builder metrics scraping over the private tailnet | `live_applied` | [ws-0513-builder-metrics-tailnet-firewall.md](../../workstreams/ws-0513-builder-metrics-tailnet-firewall.md) |
 | `0296` | Deliver the cache-only GHCR proxy configuration through a one-shot reader bridge | `merged` | [ws-0504-cache-ghcr-secret-renderer.md](../../workstreams/ws-0504-cache-ghcr-secret-renderer.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](../../workstreams/ws-0295-live-apply.md) |
 | `0293` | Integrate ADR 0293 exact-main LiveKit replay onto main | `merged` | [ws-0293-main-integration.md](../../workstreams/ws-0293-main-integration.md) |

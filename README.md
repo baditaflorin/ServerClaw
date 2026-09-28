@@ -32,7 +32,7 @@ monitored, and recoverable from a single repository.
 | Field | Value |
 | --- | --- |
 | Repository version | `0.179.46` |
-| Platform version | `0.178.223` |
+| Platform version | `0.178.224` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -90,7 +90,7 @@ Showing 20 of 183 capability receipts. Full history: [live-apply evidence histor
 | Field | Value |
 | --- | --- |
 | Repository version | `0.179.46` |
-| Platform version | `0.178.223` |
+| Platform version | `0.178.224` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -357,7 +357,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 338 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 339 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
@@ -374,6 +374,7 @@ Showing 25 of 338 merged or live-applied workstreams. Full history: [merged work
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
+| `0296` | Allow Builder metrics scraping over the private tailnet | `live_applied` | [ws-0513-builder-metrics-tailnet-firewall.md](docs/workstreams/ws-0513-builder-metrics-tailnet-firewall.md) |
 | `0296` | Deliver the cache-only GHCR proxy configuration through a one-shot reader bridge | `merged` | [ws-0504-cache-ghcr-secret-renderer.md](docs/workstreams/ws-0504-cache-ghcr-secret-renderer.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
 | `0293` | Integrate ADR 0293 exact-main LiveKit replay onto main | `merged` | [ws-0293-main-integration.md](docs/workstreams/ws-0293-main-integration.md) |
@@ -385,7 +386,6 @@ Showing 25 of 338 merged or live-applied workstreams. Full history: [merged work
 | `0232` | Integrate ADR 0232 live apply into origin/main | `merged` | [ws-0232-main-merge.md](docs/workstreams/ws-0232-main-merge.md) |
 | `0206` | Integrate ADR 0206 live apply into origin/main | `merged` | [ws-0206-main-merge.md](docs/workstreams/ws-0206-main-merge.md) |
 | `0181` | Off-host witness and control metadata replication | `live_applied` | [adr-0181-off-host-witness-replication.md](docs/workstreams/adr-0181-off-host-witness-replication.md) |
-| `0179` | Service redundancy tier matrix | `merged` | [adr-0179-service-redundancy-tier-matrix.md](docs/workstreams/adr-0179-service-redundancy-tier-matrix.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements

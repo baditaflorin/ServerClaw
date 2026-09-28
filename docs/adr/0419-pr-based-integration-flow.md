@@ -202,3 +202,12 @@ gh pr merge <number> --merge --delete-branch
 | PR template | `.github/pull_request_template.md` |
 | CI workflow | `.github/workflows/validate.yml` |
 | Agent instructions | `CLAUDE.md` section 4 |
+
+## Superseding CI implementation status (2026-09-27)
+
+The GitHub Actions workflow listed above is retired. Its GitHub-hosted jobs
+were unavailable and failed before executing validation. The public ServerClaw
+mirror now uses the governed self-hosted Woodpecker pipeline and keeps the
+required Woodpecker branch status. The private source repository's full
+validation remains available through its separately hosted Gitea workflow.
+The PR-based integration policy itself remains in force.

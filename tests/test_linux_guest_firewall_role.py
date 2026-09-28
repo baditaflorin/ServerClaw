@@ -26,6 +26,17 @@ ROLE_DEFAULTS = (
     / "defaults"
     / "main.yml"
 )
+ROLE_TEMPLATE = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "linux_guest_firewall"
+    / "templates"
+    / "nftables.conf.j2"
+)
 
 
 def load_tasks() -> list[dict]:
@@ -152,6 +163,13 @@ def test_linux_guest_firewall_only_resets_ssh_when_the_rendered_policy_changes()
     assert post_bridge_reset_task["ansible.builtin.include_tasks"] == "reset_connection.yml"
     assert post_bridge_reset_task["when"] == "linux_guest_firewall_post_bridge_config.changed"
     assert post_bridge_wait_task["when"] == "linux_guest_firewall_post_bridge_config.changed"
+
+
+def test_linux_guest_firewall_replaces_only_its_owned_nftables_table() -> None:
+    template = ROLE_TEMPLATE.read_text()
+
+    assert "destroy table inet filter" in template
+    assert "flush ruleset" not in template
 
 
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"

@@ -149,6 +149,26 @@ def test_late_bound_default_empty_known_ips_short_circuits(vnht, role_default_pa
     assert findings == []
 
 
+def test_candidate_scan_prunes_local_ansible_shards_and_nested_worktrees(vnht, tmp_path):
+    source_file = tmp_path / "scripts" / "example.py"
+    source_file.parent.mkdir(parents=True)
+    source_file.write_text("print('source')\n", encoding="utf-8")
+
+    ansible_cache = tmp_path / ".ansible" / "shards" / "cache.json"
+    ansible_cache.parent.mkdir(parents=True)
+    ansible_cache.write_text('{"ip":"10.10.10.92:8083"}\n', encoding="utf-8")
+
+    nested_worktree = tmp_path / ".worktrees" / "sibling" / "scripts" / "example.py"
+    nested_worktree.parent.mkdir(parents=True)
+    nested_worktree.write_text("print('nested')\n", encoding="utf-8")
+
+    candidates = {path.relative_to(tmp_path).as_posix() for path in vnht._iter_candidate_files(tmp_path)}
+
+    assert "scripts/example.py" in candidates
+    assert ".ansible/shards/cache.json" not in candidates
+    assert ".worktrees/sibling/scripts/example.py" not in candidates
+
+
 def test_late_bound_default_negative_lookahead_avoids_substring_ips(vnht, role_default_path):
     """`10.10.10.60` must not match if the literal is `10.10.10.600`
     (impossible IP, but a regex that lacks a boundary would still hit)."""

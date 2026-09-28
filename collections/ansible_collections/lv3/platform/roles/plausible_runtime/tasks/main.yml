@@ -27,6 +27,8 @@
       - plausible_runtime_image | length > 0
       - plausible_postgres_image | length > 0
       - plausible_clickhouse_image | length > 0
+      - plausible_clickhouse_cpu_shares | int >= 2
+      - plausible_clickhouse_cpu_shares | int <= 262144
       - plausible_public_base_url | length > 0
       - plausible_internal_base_url | length > 0
       - plausible_database_password_local_file | length > 0

@@ -177,6 +177,48 @@ def test_build_docker_command_forwards_validation_context(tmp_path: Path, monkey
     assert 'LV3_VALIDATION_CHANGED_FILES_JSON=["config/validation-gate.json", "scripts/run_gate.py"]' in command
 
 
+def test_build_docker_command_mounts_only_selected_topology_overlay_read_only(tmp_path: Path, monkeypatch) -> None:
+    parallel_check = load_parallel_check_module()
+    topology_file = tmp_path / ".local" / "deployments" / "sample" / "topology.yml"
+    topology_file.parent.mkdir(parents=True)
+    topology_file.write_text("proxmox_internal_ipv4: 10.77.0.1\n", encoding="utf-8")
+    monkeypatch.setenv("PLATFORM_TOPOLOGY_OVERLAY", str(topology_file))
+
+    check = parallel_check.CheckDefinition(
+        label="schema-validation",
+        image="registry.example.com/check-runner/python:3.12.10",
+        command="python scripts/validate_repository_data_models.py --validate",
+        working_dir="/workspace",
+        timeout_seconds=30,
+    )
+
+    command = parallel_check.build_docker_command(check, tmp_path, "docker")
+
+    assert f"{topology_file.resolve()}:/tmp/lv3-platform-topology.yml:ro" in command
+    assert "PLATFORM_TOPOLOGY_OVERLAY=/tmp/lv3-platform-topology.yml" in command
+    assert f"PLATFORM_TOPOLOGY_OVERLAY={topology_file.resolve()}" not in command
+
+
+def test_build_docker_command_rejects_missing_selected_topology_overlay(tmp_path: Path, monkeypatch) -> None:
+    parallel_check = load_parallel_check_module()
+    missing_topology_file = tmp_path / ".local" / "missing-topology.yml"
+    monkeypatch.setenv("PLATFORM_TOPOLOGY_OVERLAY", str(missing_topology_file))
+    check = parallel_check.CheckDefinition(
+        label="schema-validation",
+        image="registry.example.com/check-runner/python:3.12.10",
+        command="true",
+        working_dir="/workspace",
+        timeout_seconds=30,
+    )
+
+    try:
+        parallel_check.build_docker_command(check, tmp_path, "docker")
+    except ValueError as exc:
+        assert "selected platform topology overlay does not exist" in str(exc)
+    else:
+        raise AssertionError("missing topology selector must fail before launching a container")
+
+
 def test_build_docker_command_mounts_docker_socket_and_host_workspace(
     tmp_path: Path,
     monkeypatch,

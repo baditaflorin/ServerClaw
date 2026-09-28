@@ -54,10 +54,6 @@
       mode: "0755"
     - path: "{{ api_gateway_service_dir }}/.githooks"
       mode: "0755"
-    - path: "{{ api_gateway_service_dir }}/.github"
-      mode: "0755"
-    - path: "{{ api_gateway_service_dir }}/.github/workflows"
-      mode: "0755"
     - path: "{{ api_gateway_service_dir }}/api_gateway"
       mode: "0755"
     - path: "{{ api_gateway_service_dir }}/inventory"
@@ -252,7 +248,9 @@
     dest: "{{ api_gateway_env_file }}"
     owner: root
     group: root
-    mode: "0644"
+    mode: "0600"
+  no_log: true
+  diff: false
   register: api_gateway_env_template
 
 - name: Render the API gateway Dockerfile

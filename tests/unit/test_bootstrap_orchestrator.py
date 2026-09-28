@@ -14,6 +14,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
 
+import bootstrap_orchestrator
 from bootstrap_orchestrator import (
     BootstrapReceipt,
     ConditionResult,
@@ -24,6 +25,7 @@ from bootstrap_orchestrator import (
     format_status,
     load_last_failure_receipt,
     orchestrate,
+    run_step,
     select_steps,
     step_status,
 )
@@ -40,6 +42,58 @@ SAMPLE_STEPS = [
     {"id": "2-resolve-topology", "make_target": "resolve-topology"},
     {"id": "3-init-remote", "make_target": "init-remote"},
 ]
+
+
+def test_execute_step_uses_platform_retry_policy(monkeypatch, tmp_path):
+    results = iter([(1, "first attempt", "transient"), (0, "complete", "")])
+    calls = []
+    delays = []
+
+    def run_make(target, *, repo_root, timeout):
+        calls.append((target, repo_root, timeout))
+        return next(results)
+
+    monkeypatch.setattr(bootstrap_orchestrator, "_run_make", run_make)
+    monkeypatch.setattr(bootstrap_orchestrator.time, "sleep", delays.append)
+
+    result = run_step(
+        {"id": "retry-step", "make_target": "test-target", "retries": 2},
+        ctx={},
+        dry_run=False,
+        repo_root=tmp_path,
+    )
+
+    assert result.status == "passed"
+    assert result.make_exit_code == 0
+    assert result.make_stdout == "complete"
+    assert result.retries_used == 1
+    assert len(calls) == 2
+    assert delays == [10]
+
+
+def test_execute_step_preserves_terminal_failure_after_retry_budget(monkeypatch, tmp_path):
+    calls = []
+    delays = []
+
+    def run_make(target, *, repo_root, timeout):
+        calls.append(target)
+        return 7, "still failing", "failure"
+
+    monkeypatch.setattr(bootstrap_orchestrator, "_run_make", run_make)
+    monkeypatch.setattr(bootstrap_orchestrator.time, "sleep", delays.append)
+
+    result = run_step(
+        {"id": "retry-step", "make_target": "test-target", "retries": 1},
+        ctx={},
+        dry_run=False,
+        repo_root=tmp_path,
+    )
+
+    assert result.status == "failed"
+    assert result.make_exit_code == 7
+    assert result.retries_used == 2
+    assert calls == ["test-target", "test-target"]
+    assert delays == [10]
 
 
 class TestSelectSteps:

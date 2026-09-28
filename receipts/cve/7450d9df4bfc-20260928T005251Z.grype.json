@@ -1,0 +1,4068 @@
+{
+  "schema_version": "1.0.0",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "generated_at": "2026-09-28T00:52:51Z",
+  "scanned_on": "2026-09-28",
+  "image_id": "plausible_runtime",
+  "image_ref": "ghcr.io/plausible/community-edition:v3.2.1@sha256:7450d9df4bfce160541d65bdba6bd4bcdd9a6db07f13dde91060705fa242c650",
+  "runtime_host": "docker-runtime",
+  "sbom_receipt": "receipts/sbom/7450d9df4bfc.cdx.json",
+  "summary": {
+    "critical": 9,
+    "high": 98,
+    "medium": 69,
+    "low": 16,
+    "unknown": 1,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 193
+  },
+  "matches": [
+    {
+      "vulnerability_id": "CVE-2026-45447",
+      "aliases": [
+        "CVE-2026-45447"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45447",
+      "aliases": [
+        "CVE-2026-45447"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45447",
+      "aliases": [
+        "CVE-2026-45447"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-38jv-5279-wg99",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "Decompression-bomb safeguards bypassed when following HTTP redirects (streaming API)",
+      "package": {
+        "name": "urllib3",
+        "version": "1.26.20",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/RECORD",
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/top_level.txt"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63076",
+      "aliases": [
+        "CVE-2026-63076"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63076",
+      "aliases": [
+        "CVE-2026-63076"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63076",
+      "aliases": [
+        "CVE-2026-63076"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-18798",
+      "aliases": [
+        "CVE-2026-18798"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-18798",
+      "aliases": [
+        "CVE-2026-18798"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-18798",
+      "aliases": [
+        "CVE-2026-18798"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63073",
+      "aliases": [
+        "CVE-2026-63073"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63073",
+      "aliases": [
+        "CVE-2026-63073"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63073",
+      "aliases": [
+        "CVE-2026-63073"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-7210",
+      "aliases": [
+        "CVE-2026-7210"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-7210",
+      "aliases": [
+        "CVE-2026-7210"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-7210",
+      "aliases": [
+        "CVE-2026-7210"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-7210",
+      "aliases": [
+        "CVE-2026-7210"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34180",
+      "aliases": [
+        "CVE-2026-34180"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-54874",
+      "aliases": [
+        "CVE-2026-54874"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34180",
+      "aliases": [
+        "CVE-2026-34180"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-54874",
+      "aliases": [
+        "CVE-2026-54874"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34180",
+      "aliases": [
+        "CVE-2026-34180"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-54874",
+      "aliases": [
+        "CVE-2026-54874"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34182",
+      "aliases": [
+        "CVE-2026-34182"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34182",
+      "aliases": [
+        "CVE-2026-34182"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34182",
+      "aliases": [
+        "CVE-2026-34182"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4224",
+      "aliases": [
+        "CVE-2026-4224"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "When an Expat parser with a registered ElementDeclHandler parses an inline\ndocument type definition containing a deeply nested content model a C stack\noverflow occurs.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34183",
+      "aliases": [
+        "CVE-2026-34183"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34183",
+      "aliases": [
+        "CVE-2026-34183"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34183",
+      "aliases": [
+        "CVE-2026-34183"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-14457",
+      "aliases": [
+        "CVE-2026-14457"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-14457",
+      "aliases": [
+        "CVE-2026-14457"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-14457",
+      "aliases": [
+        "CVE-2026-14457"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63072",
+      "aliases": [
+        "CVE-2026-63072"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63072",
+      "aliases": [
+        "CVE-2026-63072"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63072",
+      "aliases": [
+        "CVE-2026-63072"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-9076",
+      "aliases": [
+        "CVE-2026-9076"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-9076",
+      "aliases": [
+        "CVE-2026-9076"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-9076",
+      "aliases": [
+        "CVE-2026-9076"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-5pwr-322w-8jr4",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "pyOpenSSL DTLS cookie callback buffer overflow",
+      "package": {
+        "name": "pyopenssl",
+        "version": "25.0.0",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/pyopenssl-25.0.0.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/pyopenssl-25.0.0.dist-info/RECORD",
+          "/usr/lib/python3.12/site-packages/pyopenssl-25.0.0.dist-info/top_level.txt"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2023-26112",
+      "aliases": [
+        "CVE-2023-26112"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "All versions of the package configobj are vulnerable to Regular Expression Denial of Service (ReDoS) via the validate function, using (.+?)\\((.*)\\).\r\r**Note:** This is only exploitable in the case of a developer, putting the offending value in a server side configuration file.",
+      "package": {
+        "name": "py3-configobj",
+        "version": "5.0.9-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42766",
+      "aliases": [
+        "CVE-2026-42766"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42766",
+      "aliases": [
+        "CVE-2026-42766"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42766",
+      "aliases": [
+        "CVE-2026-42766"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-66046",
+      "aliases": [
+        "CVE-2026-66046"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-6100",
+      "aliases": [
+        "CVE-2026-6100"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-6100",
+      "aliases": [
+        "CVE-2026-6100"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-6100",
+      "aliases": [
+        "CVE-2026-6100"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-6100",
+      "aliases": [
+        "CVE-2026-6100"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42764",
+      "aliases": [
+        "CVE-2026-42764"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63075",
+      "aliases": [
+        "CVE-2026-63075"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42764",
+      "aliases": [
+        "CVE-2026-42764"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63075",
+      "aliases": [
+        "CVE-2026-63075"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42764",
+      "aliases": [
+        "CVE-2026-42764"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63075",
+      "aliases": [
+        "CVE-2026-63075"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-11940",
+      "aliases": [
+        "CVE-2026-11940"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-11940",
+      "aliases": [
+        "CVE-2026-11940"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-11940",
+      "aliases": [
+        "CVE-2026-11940"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-11940",
+      "aliases": [
+        "CVE-2026-11940"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-11972",
+      "aliases": [
+        "CVE-2026-11972"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-11972",
+      "aliases": [
+        "CVE-2026-11972"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-11972",
+      "aliases": [
+        "CVE-2026-11972"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-11972",
+      "aliases": [
+        "CVE-2026-11972"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-gm62-xv2j-4w53",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "urllib3 allows an unbounded number of links in the decompression chain",
+      "package": {
+        "name": "urllib3",
+        "version": "1.26.20",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/RECORD",
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/top_level.txt"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-2xpw-w6gg-jr37",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "urllib3 streaming API improperly handles highly compressed data",
+      "package": {
+        "name": "urllib3",
+        "version": "1.26.20",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/RECORD",
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/top_level.txt"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-7383",
+      "aliases": [
+        "CVE-2026-7383"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-7383",
+      "aliases": [
+        "CVE-2026-7383"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-7383",
+      "aliases": [
+        "CVE-2026-7383"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-14456",
+      "aliases": [
+        "CVE-2026-14456"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-14456",
+      "aliases": [
+        "CVE-2026-14456"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-14456",
+      "aliases": [
+        "CVE-2026-14456"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45445",
+      "aliases": [
+        "CVE-2026-45445"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45445",
+      "aliases": [
+        "CVE-2026-45445"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45445",
+      "aliases": [
+        "CVE-2026-45445"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-58pv-8j8x-9vj2",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "jaraco.context Has a Path Traversal Vulnerability",
+      "package": {
+        "name": "jaraco-context",
+        "version": "5.3.0",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/setuptools/_vendor/jaraco.context-5.3.0.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/setuptools/_vendor/jaraco.context-5.3.0.dist-info/RECORD",
+          "/usr/lib/python3.12/site-packages/setuptools/_vendor/jaraco.context-5.3.0.dist-info/top_level.txt"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-76641",
+      "aliases": [
+        "CVE-2026-76641"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-3644",
+      "aliases": [
+        "CVE-2026-3644"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-3644",
+      "aliases": [
+        "CVE-2026-3644"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-3644",
+      "aliases": [
+        "CVE-2026-3644"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-3644",
+      "aliases": [
+        "CVE-2026-3644"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-15308",
+      "aliases": [
+        "CVE-2026-15308"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-15308",
+      "aliases": [
+        "CVE-2026-15308"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-15308",
+      "aliases": [
+        "CVE-2026-15308"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-15308",
+      "aliases": [
+        "CVE-2026-15308"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-9669",
+      "aliases": [
+        "CVE-2026-9669"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "bz2.BZ2Decompressor objects could be reused after a decompression error. If an application caught the resulting OSError and retried with the same decompressor, crafted input could cause the decompressor to resume from an invalid internal state and perform out-of-bounds writes to a stack buffer. This could crash the process when processing untrusted data.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-7774",
+      "aliases": [
+        "CVE-2026-7774"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "tarfile.data_filter could be bypassed using crafted link entries, including symlinks with empty or directory-like names, to redirect later archive members outside the intended extraction directory. This allowed a malicious tar archive to cause tarfile.extractall() to write files outside the destination directory, subject to the permissions of the extracting process.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-85091",
+      "aliases": [
+        "CVE-2026-85091"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "zlib versions 1.3.1.2 through 1.3.2 contain a heap buffer overflow vulnerability in the gz_vacate() function when processing non-blocking gzwrite() operations with stale external buffer pointers. Attackers can trigger the overflow by calling gzprintf() or gzvprintf() after a write stall, causing an unchecked memmove() to write beyond the internal input buffer boundary.",
+      "package": {
+        "name": "zlib",
+        "version": "1.3.2-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45186",
+      "aliases": [
+        "CVE-2026-45186"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-3276",
+      "aliases": [
+        "CVE-2026-3276"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "unicodedata.normalize() can take excessive CPU time when processing\nspecially crafted Unicode input containing long runs of combining characters\nwith alternating Canonical Combining Class values.\nThis affects all normalization forms.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-17084",
+      "aliases": [
+        "CVE-2026-17084"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The \"stringprep\" module didn't process characters from RFC 3454 tables \nB.2 or B.3 correctly: the latest Unicode codepoint attributes were used \ninstead of the specified Unicode 3.2.0. This behavior would cause \nmismatches when processing domain names using IDNA 2003 (the \"idna\" \ncodec) and the in_table_b2() function of the \"stringprep\" module. This \nonly affects domain names containing characters that were not previously\n registered or had their Unicode attributes such as case-folding \nbehavior updated since Unicode 3.2.0.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-8328",
+      "aliases": [
+        "CVE-2026-8328"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The ftpcp() function in Lib/ftplib.py was not updated when \nCVE-2021-4189 was fixed. While makepasv() was patched to replace \nserver-supplied PASV host addresses with the actual peer address \n(getpeername()[0]), ftpcp() still calls parse227() directly and passes \nthe raw attacker-controllable IP address and port to target.sendport(). This patch is related to\u00a0CVE-2021-4189.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4786",
+      "aliases": [
+        "CVE-2026-4786"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4786",
+      "aliases": [
+        "CVE-2026-4786"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4786",
+      "aliases": [
+        "CVE-2026-4786"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4786",
+      "aliases": [
+        "CVE-2026-4786"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-76956",
+      "aliases": [
+        "CVE-2026-76956"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-41080",
+      "aliases": [
+        "CVE-2026-41080"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-12781",
+      "aliases": [
+        "CVE-2025-12781"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "When passing data to the b64decode(), standard_b64decode(), and urlsafe_b64decode() functions in the \"base64\" module the characters \"+/\" will always be accepted, regardless of the value of \"altchars\" parameter, typically used to establish an \"alternative base64 alphabet\" such as the URL safe alphabet. This behavior matches what is recommended in earlier base64 RFCs, but newer RFCs now recommend either dropping characters outside the specified base64 alphabet or raising an error. The old behavior has the possibility of causing data integrity issues.\n\n\n\n\nThis behavior can only be insecure if your application uses an alternate base64 alphabet (without \"+/\"). If your application does not use the \"altchars\" parameter or the urlsafe_b64decode() function, then your application does not use an alternative base64 alphabet.\n\n\n\n\nThe attached patches DOES NOT make the base64-decode behavior raise an error, as this would be a change in behavior and break existing programs. Instead, the patch deprecates the behavior which will be replaced with the newly recommended behavior in a future version of Python.\u00a0Users are recommended to mitigate by verifying user-controlled inputs match the base64 \nalphabet they are expecting or verify that their application would not be \naffected if the b64decode() functions accepted \"+\" or \"/\" outside of altchars.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63074",
+      "aliases": [
+        "CVE-2026-63074"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63074",
+      "aliases": [
+        "CVE-2026-63074"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63074",
+      "aliases": [
+        "CVE-2026-63074"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-1502",
+      "aliases": [
+        "CVE-2026-1502"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-1502",
+      "aliases": [
+        "CVE-2026-1502"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-1502",
+      "aliases": [
+        "CVE-2026-1502"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-1502",
+      "aliases": [
+        "CVE-2026-1502"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-93990",
+      "aliases": [
+        "CVE-2026-93990"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-19672",
+      "aliases": [
+        "CVE-2026-19672"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The tarfile module's tar and data\n extraction filters created directories outside the destination for \nmembers whose name leaves the destination and returns to it, such as ../evil/../dest/sub/file. The containment check used the resolved path, but intermediate directories were created from the name as given.\n\nOnly\n empty directories are created outside the destination. Member contents \nare still extracted inside it. To return to the destination the member's\n name must contain the destination directory's own final component, so \nextraction into a secure randomised directory is not affected.\n\nThis affects POSIX platforms only. On Windows, .. components are collapsed before the path reaches the filesystem, so the directories outside the destination are never created.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-87910",
+      "aliases": [
+        "CVE-2026-87910"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "When tarfile extracts a link on a system that doesn't support links, it falls back to extracting a member from the archive. In this case, the filter function is run twice: once for the extracted member, and once with name set to the location of the link. For one of the calls, the return value was ignored. Instead, the member should be skipped if either call returns None.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-jwv3-5hgf-82ww",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "python-cryptography: Duplicate self-signed intermediates can cause exponential path-building",
+      "package": {
+        "name": "cryptography",
+        "version": "44.0.3",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/cryptography-44.0.3.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/cryptography-44.0.3.dist-info/RECORD"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r6ph-v2qm-q3c2",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "cryptography Vulnerable to a Subgroup Attack Due to Missing Subgroup Validation for SECT Curves",
+      "package": {
+        "name": "cryptography",
+        "version": "44.0.3",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/cryptography-44.0.3.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/cryptography-44.0.3.dist-info/RECORD"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-6019",
+      "aliases": [
+        "CVE-2026-6019"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "http.cookies.Morsel.js_output() returns an inline <script> snippet and only escapes \" for JavaScript string context. It does not neutralize the HTML parser-sensitive sequence </script> inside the generated script element. Mitigation base64-encodes the cookie value to disallow escaping using cookie value.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8rrh-rw8j-w5fx",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "Wheel Affected by Arbitrary File Permission Modification via Path Traversal in wheel unpack",
+      "package": {
+        "name": "wheel",
+        "version": "0.45.1",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/setuptools/_vendor/wheel-0.45.1.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/setuptools/_vendor/wheel-0.45.1.dist-info/RECORD"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-65pc-fj4g-8rjx",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:python",
+      "description": "Internationalized Domain Names in Applications (IDNA): Specially crafted inputs to idna.encode() can bypass CVE-2024-3651 fix",
+      "package": {
+        "name": "idna",
+        "version": "3.10",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/idna-3.10.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/idna-3.10.dist-info/RECORD"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-15806",
+      "aliases": [
+        "CVE-2026-15806"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The HTTPPasswordMgr class in the urllib.request module, along with its subclasses HTTPPasswordMgrWithDefaultRealm and HTTPPasswordMgrWithPriorAuth, did not take the URL scheme into account when matching stored credentials against a requested URL. Credentials added for an https:// URL were also used for requests to the same host over http://, so an attacker able to redirect or downgrade a client to plain HTTP (for example, via an HTTPS-to-HTTP redirect or an on-path position) could capture credentials in cleartext. Credentials added for http:// URLs could likewise be sent over https://.\n\nCredential matching is now scoped by URL scheme. Credentials registered with a URL that includes a scheme are only used for requests with the same scheme. Credentials registered with a bare authority (such as example.com or example.com:8080) continue to match any scheme, preserving compatibility with existing code, including proxy authentication.\n\nUsers who cannot upgrade immediately can mitigate by ensuring that applications never make plain http:// requests to hosts for which credentials are registered, for example by not following redirects to http:// URLs.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4360",
+      "aliases": [
+        "CVE-2026-4360"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4360",
+      "aliases": [
+        "CVE-2026-4360"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4360",
+      "aliases": [
+        "CVE-2026-4360"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4360",
+      "aliases": [
+        "CVE-2026-4360"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-pq67-6m6q-mj2v",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:python",
+      "description": "urllib3 redirects are not disabled when retries are disabled on PoolManager instantiation",
+      "package": {
+        "name": "urllib3",
+        "version": "1.26.20",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/RECORD",
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/top_level.txt"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-qccp-gfcp-xxvc",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "urllib3: Sensitive headers forwarded across origins in proxied low-level redirects",
+      "package": {
+        "name": "urllib3",
+        "version": "1.26.20",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/RECORD",
+          "/usr/lib/python3.12/site-packages/urllib3-1.26.20.dist-info/top_level.txt"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42767",
+      "aliases": [
+        "CVE-2026-42767"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42767",
+      "aliases": [
+        "CVE-2026-42767"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42767",
+      "aliases": [
+        "CVE-2026-42767"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-11822",
+      "aliases": [
+        "CVE-2026-11822"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "SQLite before 3.53.2 contains memory corruption vulnerabilities in the FTS5 full-text search extension that allow attackers to cause process crashes, memory exhaustion, or arbitrary code execution by supplying a crafted database with malformed FTS5 page data. Attackers can trigger an out-of-bounds read in fts5LeafSeek() via an attacker-controlled loop bound and a heap buffer overflow write in fts5ChunkIterate() through a crafted continuation page causing an integer underflow, exploitable when an FTS5 MATCH query is executed against the malicious database.",
+      "package": {
+        "name": "sqlite-libs",
+        "version": "3.49.2-r1",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-15366",
+      "aliases": [
+        "CVE-2025-15366"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The imaplib module, when passed a user-controlled command, can have additional commands injected using newlines. Mitigation rejects commands containing control characters.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-70873",
+      "aliases": [
+        "CVE-2025-70873"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "An information disclosure issue in the zipfileInflate function in the zipfile extension in SQLite v3.51.1 and earlier allows attackers to obtain heap memory via supplying a crafted ZIP file.",
+      "package": {
+        "name": "sqlite-libs",
+        "version": "3.49.2-r1",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-h35f-9h28-mq5c",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:python",
+      "description": "setuptools: MANIFEST.in exclusion bypass in sdist via Unicode normalization collision (NFC/NFD) on macOS APFS/HFS+",
+      "package": {
+        "name": "setuptools",
+        "version": "80.9.0",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/setuptools-80.9.0-py3.12.egg-info/PKG-INFO",
+          "/usr/lib/python3.12/site-packages/setuptools-80.9.0-py3.12.egg-info/top_level.txt"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-g6cj-pr64-35w5",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "cryptography: PKCS#7 EnvelopedData decryption exposes a Bleichenbacher oracle through distinguishable errors and timing",
+      "package": {
+        "name": "cryptography",
+        "version": "44.0.3",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/cryptography-44.0.3.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/cryptography-44.0.3.dist-info/RECORD"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-15367",
+      "aliases": [
+        "CVE-2025-15367"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "The poplib module, when passed a user-controlled command, can have\nadditional commands injected using newlines. Mitigation rejects commands\ncontaining control characters.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-75803",
+      "aliases": [
+        "CVE-2026-75803"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-75803",
+      "aliases": [
+        "CVE-2026-75803"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-75803",
+      "aliases": [
+        "CVE-2026-75803"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "busybox",
+        "version": "1.37.0-r20",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "busybox-binsh",
+        "version": "1.37.0-r20",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "ssl_client",
+        "version": "1.37.0-r20",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-82049",
+      "aliases": [
+        "CVE-2026-82049"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "In CPython 3.13 and earlier, the tarfile\u00a0module's data\u00a0and tar extraction filters are vulnerable to crafted archives containing a hard link to a symbolic link. Such archives may cause extraction to modify the permissions or modification time of a file outside the destination directory, or expose the contents of that file within the extracted tree.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-6879",
+      "aliases": [
+        "CVE-2026-6879"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "`Element.findall()` and fully-consumed `Element.iterfind()` exhibit `O(n^2)` time complexity when using XPath index predicates (e.g. `[1]`, `[last()]`, `[last()-N]`) on XML documents with many same-tag siblings. `Element.find()` is only affected when the first match is near the end\u00a0 of the sibling list, such as with `[last()]` or `[last()-N]`;\u00a0 `.//item[1]` short-circuits after the first match.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-11824",
+      "aliases": [
+        "CVE-2026-11824"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "SQLite before 3.53.2 contains a heap-based buffer overflow vulnerability in the FTS5 full-text search extension that allows attackers to cause a crash or execute arbitrary code by supplying a crafted database with malicious continuation page metadata specifying a szLeaf value smaller than 4. Attackers can trigger an integer underflow in fts5ChunkIterate() causing an inflated remaining byte count during FTS5 MATCH query processing, leading to a heap buffer overflow of attacker-controlled data in applications compiled with SQLITE_ENABLE_FTS5.",
+      "package": {
+        "name": "sqlite-libs",
+        "version": "3.49.2-r1",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34181",
+      "aliases": [
+        "CVE-2026-34181"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34181",
+      "aliases": [
+        "CVE-2026-34181"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34181",
+      "aliases": [
+        "CVE-2026-34181"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-15310",
+      "aliases": [
+        "CVE-2026-15310"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "When decompressing crafted zip files using the bzip/LZMA/Zstandard \n\ncompressions, Python could use an attacker-controlled size to \n\npre-allocate memory, possibly resulting in memory exhaustion.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-3446",
+      "aliases": [
+        "CVE-2026-3446"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "When calling base64.b64decode() or related functions the decoding process would stop after encountering the first padded quad regardless of whether there was more information to be processed. This can lead to data being accepted which may be processed differently by other implementations. Use \"validate=True\" to enable stricter processing of base64 data.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4519",
+      "aliases": [
+        "CVE-2026-4519"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4519",
+      "aliases": [
+        "CVE-2026-4519"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4519",
+      "aliases": [
+        "CVE-2026-4519"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-4519",
+      "aliases": [
+        "CVE-2026-4519"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42769",
+      "aliases": [
+        "CVE-2026-42769"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42769",
+      "aliases": [
+        "CVE-2026-42769"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42769",
+      "aliases": [
+        "CVE-2026-42769"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45446",
+      "aliases": [
+        "CVE-2026-45446"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45446",
+      "aliases": [
+        "CVE-2026-45446"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45446",
+      "aliases": [
+        "CVE-2026-45446"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-2297",
+      "aliases": [
+        "CVE-2026-2297"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-2297",
+      "aliases": [
+        "CVE-2026-2297"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-2297",
+      "aliases": [
+        "CVE-2026-2297"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-2297",
+      "aliases": [
+        "CVE-2026-2297"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-76957",
+      "aliases": [
+        "CVE-2026-76957"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-49762",
+      "aliases": [
+        "CVE-2026-49762"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Uncontrolled Resource Consumption vulnerability in the Elixir standard library's Version module allows an attacker who controls a version string to cause a denial of service through CPU and memory exhaustion.\n\nThe version parser converts numeric version components (major, minor, patch and numeric pre-release/build identifiers) to integers without bounding their length. A single large all-digit component therefore forces a super-linear, non-yielding base-10 to arbitrary-precision integer conversion (String.to_integer/1, i.e. :erlang.binary_to_integer/1) that pins a BEAM scheduler, and a larger component raises an uncaught SystemLimitError that crashes the calling process. A single moderately sized string (around one megabyte) is enough; no authentication is required.\n\nThis is reachable from the public entry points Version.parse/1, Version.parse!/1, Version.match?/3, Version.compare/2, and Version.parse_requirement/1, which applications routinely call on untrusted input such as HTTP parameters, dependency-manifest fields, and package metadata.\n\nThis vulnerability is associated with program files lib/version.ex and program routines 'Elixir.Version.Parser':parse_digits/2.\n\nThis issue affects Elixir: from 1.5.0 before 1.20.1.",
+      "package": {
+        "name": "elixir",
+        "version": "1.19.4",
+        "type": "binary",
+        "locations": [
+          "/app/releases/0.0.1/elixir"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42768",
+      "aliases": [
+        "CVE-2026-42768"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42768",
+      "aliases": [
+        "CVE-2026-42768"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42768",
+      "aliases": [
+        "CVE-2026-42768"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-75758",
+      "aliases": [
+        "CVE-2026-75758"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "Uncontrolled Recursion vulnerability in the Elixir standard library allows an attacker who controls a list passed to inspect/1, List.to_string/1, or List.to_charlist/1 to exhaust a BEAM node's memory.\n\nInspect.List's charlist branch in lib/elixir/lib/inspect.ex classifies a list as a charlist using List.ascii_printable?/2, which examines only the first :printable_limit (4096 by default) elements, and then calls IO.chardata_to_string/1 on the whole term. A list whose printable prefix exceeds that limit but which contains a later element that is not a code point (an atom, an out-of-range integer, or an improper tail) is therefore mis-classified, and the conversion raises ArgumentError. That conversion runs inside List.to_string/1, whose rescue clause builds its message by interpolating inspect(list), which re-enters the same branch and raises again. The nested inspection is an argument to raise, so the recursion is not in tail position and every level is retained: the process stack grows monotonically while each cycle re-walks the list, until the process is killed by max_heap_size or, by default, the node runs out of memory. List.to_charlist/1 has the same rescue shape.\n\nBelow the printable limit the inner inspect/1 sees the invalid element within its counter and renders the list in ordinary bracket form, so a single ArgumentError is raised and no recursion occurs.\n\nThis issue affects elixir: from 1.15.0-rc.0 before 1.18.5, from 1.19.0-rc.0 before 1.19.6, and from 1.20.0-rc.0 before 1.20.4.",
+      "package": {
+        "name": "elixir",
+        "version": "1.19.4",
+        "type": "binary",
+        "locations": [
+          "/app/releases/0.0.1/elixir"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-25645",
+      "aliases": [
+        "CVE-2026-25645"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "py3-requests",
+        "version": "2.32.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-25645",
+      "aliases": [
+        "CVE-2026-25645"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "py3-requests-pyc",
+        "version": "2.32.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-0864",
+      "aliases": [
+        "CVE-2026-0864"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-0864",
+      "aliases": [
+        "CVE-2026-0864"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-0864",
+      "aliases": [
+        "CVE-2026-0864"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pyc",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-0864",
+      "aliases": [
+        "CVE-2026-0864"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "python3-pycache-pyc0",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-vp96-hxj8-p424",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:python",
+      "description": "pyOpenSSL allows TLS connection bypass via unhandled callback exception in set_tlsext_servername_callback",
+      "package": {
+        "name": "pyopenssl",
+        "version": "25.0.0",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/pyopenssl-25.0.0.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/pyopenssl-25.0.0.dist-info/RECORD",
+          "/usr/lib/python3.12/site-packages/pyopenssl-25.0.0.dist-info/top_level.txt"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-gc5v-m9x4-r6x2",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:python",
+      "description": "Requests has Insecure Temp File Reuse in its extract_zipped_paths() utility function",
+      "package": {
+        "name": "requests",
+        "version": "2.32.5",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/requests-2.32.5.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/requests-2.32.5.dist-info/RECORD",
+          "/usr/lib/python3.12/site-packages/requests-2.32.5.dist-info/top_level.txt"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42770",
+      "aliases": [
+        "CVE-2026-42770"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42770",
+      "aliases": [
+        "CVE-2026-42770"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42770",
+      "aliases": [
+        "CVE-2026-42770"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "openssl",
+        "version": "3.5.6-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56403",
+      "aliases": [
+        "CVE-2026-56403"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56405",
+      "aliases": [
+        "CVE-2026-56405"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56408",
+      "aliases": [
+        "CVE-2026-56408"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56404",
+      "aliases": [
+        "CVE-2026-56404"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56410",
+      "aliases": [
+        "CVE-2026-56410"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56411",
+      "aliases": [
+        "CVE-2026-56411"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56406",
+      "aliases": [
+        "CVE-2026-56406"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56407",
+      "aliases": [
+        "CVE-2026-56407"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56409",
+      "aliases": [
+        "CVE-2026-56409"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-12003",
+      "aliases": [
+        "CVE-2026-12003"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "To allow builds of Python to be run from an in-tree layout (rather than\nan installed file layout), the VPATH variable is defined at build time\nand used to locate certain landmarks - specifically,\nModules/setup.local. When this landmark is found relative to VPATH\nrelative to the executable, Python assumes it is running in a source\ntree and generates a different default sys.path. This code remains in\nrelease builds, so that release-ready builds can be built in-tree.\n\nOn Windows, since builds are written to 'PCbuild/', the value of\nVPATH is set to '..\\..', which results in a landmark of\n'..\\..\\Modules\\setup.local'. This path is outside the install directory\nof Python, and may have different permissions, potentially allowing a\nlow-privilege user to create the landmark and an alternative `Lib`\nfolder that will be discovered by an otherwise restricted install.\n\nSuch a setup occurs with the legacy default install location for all\nusers (in the now superseded EXE installer), due to how Windows allows\nall users to create folders in the root directory of their OS drive.\n\nOur recommended mitigation on Windows is to migrate away from the\nlegacy installer and use the new [Python install\nmanager](https://www.python.org/downloads/latest/pymanager/) to install\nfor the current user. Installs where the directory two levels above the\nPython installation directory have equivalent permissions are unaffected\n(in general, a per-user install cannot be modified at all by other\nusers, removing any escalation of privilege risk, and could be directly\nmodified by a privileged user, making the potential tampering\nirrelevant). Alternative mitigations might include preemptively creating\nand restricting access to a `Modules` directory. Be aware that only 3.13\nand 3.14 will receive updated legacy installers - earlier fixes are only\nprovided as sources.\n\nPlatforms other than Windows allow VPATH to be overridden, but as they\ndon't usually use a separated directory in the build for binaries, are\nunlikely to have a landmark reference outside of the install directory.\n\nThe landmark detection involving VPATH is a fallback for when a more\nspecific landmark - .\\pybuilddir.txt - is absent, and was included for\ncompatibility. Future releases of Python will no longer include the\nfallback, and so builds will need to generate or preserve the\npybuilddir.txt file in order to work in-tree. This landmark file has\nbeen generated on Windows since 3.11, and on other platforms for longer.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-50219",
+      "aliases": [
+        "CVE-2026-50219"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56412",
+      "aliases": [
+        "CVE-2026-56412"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56132",
+      "aliases": [
+        "CVE-2026-56132"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56131",
+      "aliases": [
+        "CVE-2026-56131"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.22",
+      "description": null,
+      "package": {
+        "name": "libexpat",
+        "version": "2.7.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-m959-cc7f-wv43",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:python",
+      "description": "cryptography has incomplete DNS name constraint enforcement on peer names",
+      "package": {
+        "name": "cryptography",
+        "version": "44.0.3",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/cryptography-44.0.3.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/cryptography-44.0.3.dist-info/RECORD"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-13462",
+      "aliases": [
+        "CVE-2025-13462"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "The \"tarfile\" module would still apply normalization of AREGTYPE (\\x00) blocks to DIRTYPE, even while processing a multi-block member such as GNUTYPE_LONGNAME or GNUTYPE_LONGLINK. This could result in a crafted tar archive being misinterpreted by the tarfile module compared to other implementations.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-18503",
+      "aliases": [
+        "CVE-2026-18503"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "Attacker-controlled CSV samples can trigger super-linear \nregular-expression work during dialect sniffing and consume significant \nCPU when applications pass unbounded input to csv.Sniffer.sniff().",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-3479",
+      "aliases": [
+        "CVE-2026-3479"
+      ],
+      "severity": "NEGLIGIBLE",
+      "namespace": "nvd:cpe",
+      "description": "DISPUTED: The project has clarified that the documentation was incorrect, and that pkgutil.get_data() has the same security model as open(). The documentation has been updated to clarify this point. There is no vulnerability in the function if following the intended security model.\n\npkgutil.get_data() did not validate the resource argument as documented, allowing path traversals.",
+      "package": {
+        "name": "python3",
+        "version": "3.12.13-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-537c-gmf6-5ccf",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:python",
+      "description": "Vulnerable OpenSSL included in cryptography wheels",
+      "package": {
+        "name": "cryptography",
+        "version": "44.0.3",
+        "type": "python",
+        "locations": [
+          "/usr/lib/python3.12/site-packages/cryptography-44.0.3.dist-info/METADATA",
+          "/usr/lib/python3.12/site-packages/cryptography-44.0.3.dist-info/RECORD"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    }
+  ]
+}

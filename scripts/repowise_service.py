@@ -69,6 +69,7 @@ class OllamaEmbedder:
     def _embed_batch(self, texts: list[str]) -> list[list[float]]:
         if not texts:
             return []
+        # retry-guard: allow: this self-contained runtime retries batch requests before splitting failed batches.
         for attempt in range(5):
             try:
                 return self._extract(self._request("/api/embed", {"model": self.model_name, "input": texts}))
@@ -77,6 +78,7 @@ class OllamaEmbedder:
                     time.sleep(10 * (attempt + 1))
         # Final fallback: single-text endpoint
         if len(texts) == 1:
+            # retry-guard: allow: legacy Ollama endpoint has a distinct fallback contract and retry schedule.
             for attempt in range(3):
                 try:
                     return self._extract(

@@ -1,6 +1,8 @@
 #!/usr/sbin/nft -f
 
-flush ruleset
+# Replace only the table owned by this role. A global flush deletes Docker's
+# independently managed NAT/filter tables and forces a disruptive daemon restart.
+destroy table inet filter
 
 {% set policy = linux_guest_firewall_policy %}
 {% set guest_ip_map = linux_guest_firewall_guest_ip_map %}

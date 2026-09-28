@@ -70,10 +70,12 @@ def test_run_gate_fallback_reruns_only_remote_failures_and_merges_status(
         encoding="utf-8",
     )
     captured_command: list[str] = []
+    captured_env: dict[str, str] = {}
 
-    def fake_run(command, cwd, text, capture_output, check):
-        nonlocal captured_command
+    def fake_run(command, cwd, env, text, capture_output, check):
+        nonlocal captured_command, captured_env
         captured_command = command
+        captured_env = env
         temp_status_path = Path(command[command.index("--status-file") + 1])
         temp_status_path.write_text(
             json.dumps(
@@ -113,6 +115,7 @@ def test_run_gate_fallback_reruns_only_remote_failures_and_merges_status(
 
     assert rc == 0
     assert captured_command[-2:] == ["packer-validate", "tofu-validate"]
+    assert captured_env["LV3_NATIVE_EXECUTION"] == "1"
     merged = json.loads(status_path.read_text(encoding="utf-8"))
     assert merged["status"] == "passed"
     assert merged["requested_checks"] == [
@@ -148,7 +151,7 @@ def test_run_gate_fallback_ignores_stale_local_status_and_runs_requested_checks(
     )
     captured_command: list[str] = []
 
-    def fake_run(command, cwd, text, capture_output, check):
+    def fake_run(command, cwd, env, text, capture_output, check):
         nonlocal captured_command
         captured_command = command
         temp_status_path = Path(command[command.index("--status-file") + 1])
@@ -202,7 +205,7 @@ def test_run_gate_fallback_treats_empty_status_payload_as_missing(
     status_path.write_text("", encoding="utf-8")
     captured_command: list[str] = []
 
-    def fake_run(command, cwd, text, capture_output, check):
+    def fake_run(command, cwd, env, text, capture_output, check):
         nonlocal captured_command
         captured_command = command
         temp_status_path = Path(command[command.index("--status-file") + 1])

@@ -31,19 +31,27 @@ def test_repo_dns_publication_include_normalizes_real_domains_to_generic_catalog
     task_names = _task_names(REPO_INCLUDE_PATH)
     serialized = _serialized_tasks(REPO_INCLUDE_PATH)
 
-    assert "Derive the catalog lookup FQDN from the requested service hostname" in task_names
-    assert "catalog_placeholder_domain: example.com" in REPO_INCLUDE_PATH.read_text(encoding="utf-8")
-    assert "selected_subdomain.fqdn == catalog_lookup_fqdn" in serialized
-    assert "service_dns_fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]" in serialized
+    assert "Resolve the generic catalog FQDN for the requested service hostname" in task_names
+    assert "selected_subdomain_runtime_fqdn == service_dns_fqdn" in serialized
+    assert "service_dns_catalog_fqdn" in serialized
+    assert "platform_domain" in serialized
+    assert "Read the explicit deployment identity overlay selector" in task_names
+    assert "PLATFORM_IDENTITY_OVERLAY" in serialized
+    assert "regex_replace" in serialized
+    assert "identity.yml" in serialized
 
 
 def test_collection_dns_publication_include_keeps_generic_catalog_lookup_and_placeholder_resolution() -> None:
     task_names = _task_names(COLLECTION_INCLUDE_PATH)
     serialized = _serialized_tasks(COLLECTION_INCLUDE_PATH)
-    include_text = COLLECTION_INCLUDE_PATH.read_text(encoding="utf-8")
 
-    assert "Load local identity overlay (real deployment values — gitignored)" in task_names
-    assert "Derive the catalog lookup FQDN from the requested service hostname" in task_names
-    assert "catalog_placeholder_domain: example.com" in include_text
+    assert "Load local identity overlay" in task_names
+    assert "Resolve the generic catalog FQDN for the requested service hostname" in task_names
     assert "resolved_dns_target" in serialized
-    assert "service_dns_fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]" in serialized
+    assert "selected_subdomain_runtime_fqdn == service_dns_fqdn_resolved" in serialized
+    assert "service_dns_catalog_fqdn" in serialized
+    assert "platform_domain" in serialized
+    assert "Read the explicit deployment identity overlay selector" in task_names
+    assert "PLATFORM_IDENTITY_OVERLAY" in serialized
+    assert "regex_replace" in serialized
+    assert "identity.yml" in serialized
