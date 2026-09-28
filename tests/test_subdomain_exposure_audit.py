@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import ipaddress
 import os
+import re
 import shutil
 import ssl
 import sys
@@ -567,6 +569,70 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
         self.assertEqual(build_calls[-1], ({"platform_domain": "tracked.example"}, False))
         self.assertEqual(report_calls[-1], ({"platform_domain": "tracked.example"}, False))
+
+    def test_write_registry_uses_tracked_generation_identity(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="subdomain-exposure-write-tracked-"))
+        try:
+            registry_path = temp_dir / "subdomain-exposure-registry.json"
+            expected_registry = {"schema_version": "3.0.0", "publications": [], "summary": {}}
+            build_calls: list[tuple[dict[str, str] | None, bool]] = []
+
+            def build_with_identity(*_args, identity_vars=None, include_local_topology_overlay=True, **_kwargs):
+                build_calls.append((identity_vars, include_local_topology_overlay))
+                return expected_registry
+
+            original = audit.REGISTRY_PATH
+            audit.REGISTRY_PATH = registry_path
+            try:
+                with (
+                    patch.object(audit, "build_registry", side_effect=build_with_identity),
+                    patch.object(
+                        audit,
+                        "load_tracked_generation_identity_vars",
+                        return_value={"platform_domain": "tracked.example"},
+                    ),
+                    patch.object(audit, "build_report", return_value={"findings": []}),
+                ):
+                    self.assertEqual(audit.main(["--write-registry"]), 0)
+            finally:
+                audit.REGISTRY_PATH = original
+
+            self.assertEqual(json.loads(registry_path.read_text(encoding="utf-8")), expected_registry)
+        finally:
+            shutil.rmtree(temp_dir)
+
+        self.assertEqual(build_calls, [({"platform_domain": "tracked.example"}, False)])
+
+    def test_registry_uses_generic_inventory_templates_for_private_upstreams(self) -> None:
+        identity_vars = audit.load_tracked_generation_identity_vars()
+        registry = audit.build_registry(identity_vars=identity_vars, include_local_topology_overlay=False)
+        host_vars = audit.subdomain_catalog.load_host_vars(identity_vars, include_local_overlay=False)
+        publications = {
+            item["service_id"]: item
+            for item in registry["publications"]
+            if item["service_id"] and item["environment"] == "production"
+        }
+
+        for service_id in ("excalidraw", "ops_portal"):
+            serialized = json.dumps(publications[service_id])
+            self.assertIn("proxmox_guests", serialized)
+            topology = host_vars["platform_service_topology"][service_id]
+            edge = topology.get("edge", {})
+            upstreams = [edge.get("upstream")]
+            upstreams.extend(item.get("upstream") for item in edge.get("prefix_proxy_routes", []))
+            for upstream in upstreams:
+                match = re.match(r"^https?://(?P<host>[^/:?#]+)", upstream or "")
+                if match is None:
+                    continue
+                try:
+                    is_private_literal = ipaddress.ip_address(match.group("host")).is_private
+                except ValueError:
+                    is_private_literal = False
+                if is_private_literal:
+                    self.assertNotIn(match.group("host"), serialized)
+
+        excalidraw_metadata = publications["excalidraw"]["adapter"]["repo_route_metadata"]
+        self.assertIn("proxmox_guests", excalidraw_metadata["prefix_proxy_routes"][0]["upstream"])
 
     def test_wildcard_edge_alias_matches_catalog_hostname(self) -> None:
         route = {

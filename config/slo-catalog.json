@@ -234,6 +234,16 @@
       "description": "The edge reverse proxy remains reachable for published services."
     },
     {
+      "id": "openbao-availability",
+      "service_id": "openbao",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "http://{{ hostvars[playbook_execution_host_patterns.runtime_control[playbook_execution_env]].ansible_host }}:8201/v1/sys/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "OpenBao's private readiness endpoint remains reachable and unsealed from the monitoring guest network."
+    },
+    {
       "id": "openfga-availability",
       "service_id": "openfga",
       "indicator": "availability",

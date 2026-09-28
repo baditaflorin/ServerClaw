@@ -956,6 +956,48 @@ groups:
           description: The edge reverse proxy remains reachable for published services.
           runbook: docs/runbooks/slo-tracking.md
 # END SERVICE: nginx_edge
+# BEGIN SERVICE: openbao
+      - alert: SLOFastBurn_openbao_availability
+        expr: (slo:openbao_availability:error_rate_5m > (14 * 0.005000)) and (slo:openbao_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: openbao
+          slo_id: openbao-availability
+          indicator: availability
+        annotations:
+          summary: openbao-availability is burning its error budget at 14x
+          description: OpenBao's private readiness endpoint remains reachable and unsealed
+            from the monitoring guest network.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_openbao_availability
+        expr: slo:openbao_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: openbao
+          slo_id: openbao-availability
+          indicator: availability
+        annotations:
+          summary: openbao-availability is burning its error budget at 3x
+          description: OpenBao's private readiness endpoint remains reachable and unsealed
+            from the monitoring guest network.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_openbao_availability
+        expr: slo:openbao_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: openbao
+          slo_id: openbao-availability
+          indicator: availability
+        annotations:
+          summary: openbao-availability has less than 10% error budget remaining
+          description: OpenBao's private readiness endpoint remains reachable and unsealed
+            from the monitoring guest network.
+          runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: openbao
 # BEGIN SERVICE: openfga
       - alert: SLOFastBurn_openfga_availability
         expr: (slo:openfga_availability:error_rate_5m > (14 * 0.005000)) and (slo:openfga_availability:error_rate_1h

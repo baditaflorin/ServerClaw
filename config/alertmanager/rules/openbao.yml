@@ -1,0 +1,14 @@
+groups:
+  - name: openbao-alerts
+    rules:
+      - alert: OpenBaoUnavailable
+        expr: probe_success{service="openbao",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: openbao
+        annotations:
+          summary: OpenBao readiness is failing.
+          description: The private OpenBao readiness probe is failing; secret reads, writes, and authentication may be unavailable.
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-openbao/
+          dashboard_url: https://grafana.{{ platform_domain }}/d/lv3-openbao/lv3-openbao

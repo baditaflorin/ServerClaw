@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import yaml
+from jinja2 import Environment, FileSystemLoader
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -74,6 +75,49 @@ def test_inventory_explicitly_pins_private_prometheus_bind_for_live_k6_replays()
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
 
     assert host_vars["monitoring_prometheus_listen_address"] == "0.0.0.0:9090"
+
+
+def test_remote_localhost_health_probes_resolve_to_the_service_guest() -> None:
+    environment = Environment(loader=FileSystemLoader(ROLE_ROOT / "templates"))
+    environment.globals["lookup"] = lambda *_args, **_kwargs: "pytest"
+    template = environment.get_template("prometheus.yml.j2")
+    rendered = template.render(
+        monitoring_health_probe_catalog={
+            "services": {
+                "openbao": {
+                    "owning_vm": "runtime-control",
+                    "liveness": {"kind": "http", "url": "http://127.0.0.1:8201/v1/sys/seal-status"},
+                    "readiness": {"kind": "http", "url": "http://127.0.0.1:8201/v1/sys/health"},
+                },
+                "monitoring": {
+                    "owning_vm": "monitoring",
+                    "liveness": {"kind": "http", "url": "http://127.0.0.1:9090/-/healthy"},
+                    "readiness": {"kind": "http", "url": "http://127.0.0.1:9090/-/ready"},
+                },
+            }
+        },
+        playbook_execution_host_patterns={
+            "runtime_control": {"production": "runtime-control"},
+            "monitoring": {"production": "monitoring"},
+        },
+        playbook_execution_env="production",
+        hostvars={
+            "runtime-control": {"ansible_host": "192.0.2.92"},
+            "monitoring": {"ansible_host": "192.0.2.40"},
+        },
+        monitoring_blackbox_exporter_port=9115,
+    )
+    jobs = {job["job_name"]: job for job in yaml.safe_load(rendered)["scrape_configs"]}
+
+    assert jobs["openbao-readiness"]["static_configs"][0]["targets"] == [
+        "http://192.0.2.92:8201/v1/sys/health"
+    ]
+    assert jobs["openbao-liveness"]["static_configs"][0]["targets"] == [
+        "http://192.0.2.92:8201/v1/sys/seal-status"
+    ]
+    assert jobs["monitoring-readiness"]["static_configs"][0]["targets"] == [
+        "http://127.0.0.1:9090/-/ready"
+    ]
 
 
 def test_main_tasks_explicitly_disable_public_dashboards_and_embedding() -> None:

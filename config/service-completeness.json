@@ -513,8 +513,9 @@
       "requires_subdomain": false,
       "requires_oidc": false,
       "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
+      "requires_compose_secrets": false,
+      "dashboard_file": "config/grafana/dashboards/openbao.json",
+      "alert_rule_file": "config/alertmanager/rules/openbao.yml"
     },
     "openfga": {
       "service_type": "compose",

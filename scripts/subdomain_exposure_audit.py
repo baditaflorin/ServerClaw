@@ -6,6 +6,7 @@ import argparse
 import ipaddress
 import json
 import os
+import re
 import socket
 import ssl
 import tempfile
@@ -113,6 +114,19 @@ def _publication_entry(
     route: dict[str, Any] | None,
     service: dict[str, Any] | None,
 ) -> dict[str, Any]:
+    route_metadata = deepcopy(route["metadata"]) if route else {}
+    if route and service:
+        upstream = route_metadata.get("upstream")
+        route_metadata["upstream"] = _genericize_service_upstream(upstream, service)
+        prefix_routes = route_metadata.get("prefix_proxy_routes", [])
+        if isinstance(prefix_routes, list):
+            for prefix_route in prefix_routes:
+                if isinstance(prefix_route, dict):
+                    prefix_route["upstream"] = _genericize_service_upstream(
+                        prefix_route.get("upstream"),
+                        service,
+                    )
+
     route_mode = "edge" if route else "dns-only"
     delivery_model = publication_delivery_model(entry["exposure"])
     access_model = publication_access_model(entry["auth_requirement"])
@@ -132,7 +146,7 @@ def _publication_entry(
     route_target = entry["target"]
     if route:
         route_target = (
-            route["metadata"].get("upstream") or route["metadata"].get("redirect_target_hostname") or route_target
+            route_metadata.get("upstream") or route_metadata.get("redirect_target_hostname") or route_target
         )
     return {
         "fqdn": entry["fqdn"],
@@ -196,7 +210,7 @@ def _publication_entry(
                 "unauthenticated_prefix_paths": route["unauthenticated_prefix_paths"] if route else [],
             },
             "repo_route_service_id": route["service_id"] if route else None,
-            "repo_route_metadata": route["metadata"] if route else {},
+            "repo_route_metadata": route_metadata,
             "tls": deepcopy(entry["tls"]),
         },
         "live_tracking_expected": entry["status"] == "active"
@@ -204,6 +218,28 @@ def _publication_entry(
         and delivery_model != "private-network",
         "notes": entry.get("notes"),
     }
+
+
+def _genericize_service_upstream(upstream: Any, service: dict[str, Any]) -> Any:
+    """Replace a private literal upstream host with the service's inventory template.
+
+    Public-facing generated registries must not freeze an operator's private
+    address into a committed artifact when the service topology already carries
+    its portable ``private_ip`` template.
+    """
+    private_ip = service.get("private_ip")
+    if not isinstance(upstream, str) or not isinstance(private_ip, str) or "{{" not in private_ip:
+        return upstream
+    match = re.match(r"^(?P<scheme>https?://)(?P<host>[^/:?#]+)(?P<suffix>.*)$", upstream)
+    if match is None:
+        return upstream
+    try:
+        host_is_private = ipaddress.ip_address(match.group("host")).is_private
+    except ValueError:
+        return upstream
+    if not host_is_private:
+        return upstream
+    return f"{match.group('scheme')}{private_ip}{match.group('suffix')}"
 
 
 def build_edge_route_index(
@@ -1131,18 +1167,25 @@ def main(argv: list[str] | None = None) -> int:
     try:
         validation_registry = None
         validation_identity_vars = None
-        if args.check_registry or args.validate:
+        deterministic_registry_mode = args.check_registry or args.validate or args.write_registry
+        if deterministic_registry_mode:
             validation_identity_vars = load_tracked_generation_identity_vars() or None
+            if args.write_registry and validation_identity_vars is None:
+                raise ValueError(
+                    "cannot write the generated exposure registry without a tracked platform identity snapshot; "
+                    "run 'make generate-platform-vars' first"
+                )
             validation_registry = build_registry(
                 identity_vars=validation_identity_vars,
                 include_local_topology_overlay=False,
             )
+
+        if args.write_registry:
+            write_json(REGISTRY_PATH, validation_registry, indent=2, sort_keys=False)
+        elif args.check_registry or args.validate:
             check_registry_current(validation_registry)
 
         registry = validation_registry if validation_registry is not None else build_registry()
-
-        if args.write_registry:
-            write_json(REGISTRY_PATH, build_registry(), indent=2, sort_keys=False)
 
         report = build_report(
             registry,

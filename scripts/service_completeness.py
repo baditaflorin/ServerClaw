@@ -895,12 +895,32 @@ def main(argv: list[str] | None = None) -> int:
         context = load_context()
         service_ids = args.service
         if args.changed:
-            changed_paths = changed_paths_from_git(REPO_ROOT, args.base_ref)
-            service_ids = (
-                None
-                if changed_paths is None
-                else service_ids_for_changed_paths(changed_paths, context, base_ref=args.base_ref)
-            )
+            supplied_service_ids = os.environ.get("LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON")
+            if supplied_service_ids is not None:
+                try:
+                    payload = json.loads(supplied_service_ids)
+                except json.JSONDecodeError:
+                    payload = None
+                if payload is None:
+                    # Unknown or malformed scope fails closed to full validation.
+                    service_ids = None
+                elif (
+                    isinstance(payload, list)
+                    and all(isinstance(service_id, str) for service_id in payload)
+                    and set(payload).issubset(context["service_map"])
+                ):
+                    service_ids = sorted(set(payload))
+                else:
+                    # Reject malformed and unknown service IDs rather than
+                    # allowing a remote caller to hide affected services.
+                    service_ids = None
+            else:
+                changed_paths = changed_paths_from_git(REPO_ROOT, args.base_ref)
+                service_ids = (
+                    None
+                    if changed_paths is None
+                    else service_ids_for_changed_paths(changed_paths, context, base_ref=args.base_ref)
+                )
         results, failures = validate_services(service_ids, context=context)
     except ValueError as exc:
         print(f"error: {exc}", file=sys.stderr)

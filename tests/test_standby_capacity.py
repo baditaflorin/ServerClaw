@@ -157,6 +157,15 @@ def test_guest_backed_standby_is_approved(tmp_path: Path, monkeypatch) -> None:
     assert verdict["backing_source"]["type"] == "guest_budget"
 
 
+def test_repository_postgres_standby_contract_has_matching_capacity() -> None:
+    verdict = standby_capacity.evaluate_service_standby("postgres")
+
+    assert verdict["approved"] is True
+    assert verdict["backing_source"]["type"] == "guest_budget"
+    assert verdict["backing_source"]["guest"] == "postgres-replica"
+    assert verdict["backing_source"]["guest_status"] == "planned"
+
+
 def test_standby_rejects_namespace_and_data_path_conflicts(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(
         capacity_report,
