@@ -196,6 +196,7 @@ surface_classes:
   - surface_id: service_automation
     title: Service automation, inventory, and runtime code
     paths:
+      - catalog/services/**/*.yaml
       - "*.pyi"
       - collections/ansible_collections/**/*
       - inventory/*.yml

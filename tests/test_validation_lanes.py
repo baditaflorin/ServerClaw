@@ -158,6 +158,29 @@ def test_unknown_surface_widens_to_all_lanes() -> None:
     assert selection.selected_lanes == tuple(catalog.lanes)
 
 
+def test_service_definition_change_selects_service_validation_without_widening() -> None:
+    module = load_module("validation_lanes_service_definition", "scripts/validation_lanes.py")
+    manifest_checks = module.load_manifest_checks(REPO_ROOT / "config" / "validation-gate.json")
+    catalog = module.load_catalog(
+        catalog_path=REPO_ROOT / "config" / "validation-lanes.yaml",
+        manifest_checks=manifest_checks,
+    )
+
+    selection = module.resolve_selection_from_changed_files(
+        catalog,
+        manifest_checks,
+        changed_files=("catalog/services/openbao/service.yaml",),
+        branch="codex/service-definition-change",
+        base_ref="origin/main",
+    )
+
+    assert selection.widened_to_all_lanes is False
+    assert selection.unknown_files == ()
+    assert "service-syntax-and-unit" in selection.selected_lanes
+    assert "service-completeness" in selection.blocking_checks
+    assert "infrastructure-root-validation" not in selection.selected_lanes
+
+
 def test_live_apply_receipt_change_stays_out_of_service_lane() -> None:
     module = load_module("validation_lanes_receipts", "scripts/validation_lanes.py")
     manifest_checks = module.load_manifest_checks(REPO_ROOT / "config" / "validation-gate.json")

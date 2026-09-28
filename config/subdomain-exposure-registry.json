@@ -32,75 +32,6 @@
   },
   "publications": [
     {
-      "fqdn": "example.org",
-      "service_id": "nginx_edge",
-      "environment": "production",
-      "status": "active",
-      "owner_adr": "0021",
-      "publication": {
-        "delivery_model": "informational-edge",
-        "access_model": "open",
-        "audience": "public"
-      },
-      "assertions": {
-        "publication_class": "informational-only",
-        "environment": "production",
-        "audience": "public",
-        "auth_requirement": "none",
-        "route_target": {
-          "service_id": "nginx_edge",
-          "kind": "redirect",
-          "source": "public_edge_apex",
-          "target": "nginx.example.org",
-          "target_port": 443
-        }
-      },
-      "evidence_plan": {
-        "dns_resolution": true,
-        "dns_zone": true,
-        "http_auth": false,
-        "private_route": false,
-        "tls": true
-      },
-      "adapter": {
-        "dns": {
-          "target": "203.0.113.1",
-          "target_port": 443,
-          "record_type": "A",
-          "records": [
-            {
-              "type": "A",
-              "value": "203.0.113.1"
-            }
-          ],
-          "managed": true,
-          "visibility": "public",
-          "zone_expected": true
-        },
-        "routing": {
-          "mode": "edge",
-          "source": "public_edge_apex",
-          "kind": "redirect"
-        },
-        "edge_auth": {
-          "provider": "none",
-          "unauthenticated_paths": [],
-          "unauthenticated_prefix_paths": []
-        },
-        "repo_route_service_id": "nginx_edge",
-        "repo_route_metadata": {
-          "redirect_target_hostname": "nginx.example.org"
-        },
-        "tls": {
-          "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
-          "auto_renew": true
-        }
-      },
-      "live_tracking_expected": true,
-      "notes": "The apex hostname is governed as a crawl-suppressed informational redirect to the shared NGINX edge entrypoint."
-    },
-    {
       "fqdn": "agents.example.org",
       "service_id": "dify",
       "environment": "production",
@@ -167,7 +98,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -249,7 +180,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -322,7 +253,7 @@
         "tls": {
           "provider": "letsencrypt",
           "auto_renew": true,
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/"
+          "cert_path": "/etc/letsencrypt/live/example-edge/"
         }
       },
       "live_tracking_expected": true,
@@ -392,7 +323,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -466,7 +397,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -538,7 +469,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -616,7 +547,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -683,11 +614,12 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "description": "Neko uses a dedicated NGINX config template (nginx-site-neko.conf.j2) for per-instance WebSocket/WebRTC routing"
+          "description": "Neko uses a dedicated NGINX config template (nginx-site-neko.conf.j2) for per-instance WebSocket/WebRTC routing",
+          "upstream": null
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -757,11 +689,12 @@
           "slug": "build",
           "title": "Docker Build VM",
           "description": "The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.",
-          "meta": "Reach the build VM through the approved operator access path rather than the public edge."
+          "meta": "Reach the build VM through the approved operator access path rather than the public edge.",
+          "upstream": null
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -830,7 +763,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -902,7 +835,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -974,7 +907,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -1064,7 +997,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -1136,7 +1069,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -1209,7 +1142,7 @@
         "tls": {
           "provider": "letsencrypt",
           "auto_renew": true,
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/"
+          "cert_path": "/etc/letsencrypt/live/example-edge/"
         }
       },
       "live_tracking_expected": true,
@@ -1344,11 +1277,12 @@
           "slug": "docker",
           "title": "Docker Runtime VM",
           "description": "The Docker runtime VM does not currently publish a public web service at this hostname.",
-          "meta": "Public application endpoints should be published deliberately through the NGINX edge when needed."
+          "meta": "Public application endpoints should be published deliberately through the NGINX edge when needed.",
+          "upstream": null
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -1417,7 +1351,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -1444,7 +1378,7 @@
           "service_id": "excalidraw",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:{{ platform_port_assignments.excalidraw_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.excalidraw_port }}",
           "target_port": 443
         }
       },
@@ -1484,17 +1418,17 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:{{ platform_port_assignments.excalidraw_port }}",
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.excalidraw_port }}",
           "prefix_proxy_routes": [
             {
               "path": "/socket.io/",
-              "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:{{ platform_port_assignments.excalidraw_room_port }}"
+              "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.excalidraw_room_port }}"
             }
           ]
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -1566,12 +1500,82 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
       "live_tracking_expected": true,
       "notes": "Published through the shared NGINX edge while GlitchTip itself delegates browser sign-in to the repo-managed Authentik OIDC flow; health and DSN ingestion remain intentionally reachable for probes and SDK traffic."
+    },
+    {
+      "fqdn": "example.org",
+      "service_id": "nginx_edge",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0021",
+      "publication": {
+        "delivery_model": "informational-edge",
+        "access_model": "open",
+        "audience": "public"
+      },
+      "assertions": {
+        "publication_class": "informational-only",
+        "environment": "production",
+        "audience": "public",
+        "auth_requirement": "none",
+        "route_target": {
+          "service_id": "nginx_edge",
+          "kind": "redirect",
+          "source": "public_edge_apex",
+          "target": "nginx.example.org",
+          "target_port": 443
+        }
+      },
+      "evidence_plan": {
+        "dns_resolution": true,
+        "dns_zone": true,
+        "http_auth": false,
+        "private_route": false,
+        "tls": true
+      },
+      "adapter": {
+        "dns": {
+          "target": "203.0.113.1",
+          "target_port": 443,
+          "record_type": "A",
+          "records": [
+            {
+              "type": "A",
+              "value": "203.0.113.1"
+            }
+          ],
+          "managed": true,
+          "visibility": "public",
+          "zone_expected": true
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "public_edge_apex",
+          "kind": "redirect"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "nginx_edge",
+        "repo_route_metadata": {
+          "redirect_target_hostname": "nginx.example.org",
+          "upstream": null
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "The apex hostname is governed as a crawl-suppressed informational redirect to the shared NGINX edge entrypoint."
     },
     {
       "fqdn": "files.example.org",
@@ -1706,7 +1710,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -1854,7 +1858,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -1921,7 +1925,7 @@
         "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -1993,7 +1997,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2064,7 +2068,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2135,7 +2139,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2207,7 +2211,7 @@
         "tls": {
           "provider": "letsencrypt",
           "auto_renew": true,
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/"
+          "cert_path": "/etc/letsencrypt/live/example-edge/"
         }
       },
       "live_tracking_expected": true,
@@ -2280,7 +2284,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2354,7 +2358,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2426,7 +2430,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2496,11 +2500,12 @@
           "slug": "mail",
           "title": "LV3 Mail",
           "description": "The managed LV3 mail service accepts SMTP and IMAPS traffic on the published mail hostname without exposing a browser-facing mailbox UI.",
-          "meta": "Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname."
+          "meta": "Use the declared mail protocols on ports 587 and 993 instead of expecting a public web application at this hostname.",
+          "upstream": null
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2572,7 +2577,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2648,7 +2653,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2727,7 +2732,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2804,7 +2809,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2874,11 +2879,12 @@
           "slug": "nginx",
           "title": "LV3 Edge",
           "description": "NGINX is the public edge for published example.org services on this platform.",
-          "meta": "Use the named subdomains for the actual service entry points exposed at the edge."
+          "meta": "Use the named subdomains for the actual service entry points exposed at the edge.",
+          "upstream": null
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2953,7 +2959,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -2980,7 +2986,7 @@
           "service_id": "ops_portal",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:{{ platform_port_assignments.ops_portal_port }}",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.ops_portal_port }}",
           "target_port": 443
         }
       },
@@ -3024,11 +3030,11 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:{{ platform_port_assignments.ops_portal_port }}"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.ops_portal_port }}"
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -3095,7 +3101,7 @@
         "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -3173,7 +3179,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -3245,11 +3251,12 @@
           "description": "Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.",
           "action_url": "https://100.120.234.7:8006/",
           "action_label": "Open Private Proxmox UI",
-          "meta": "Use Tailscale host access for routine Proxmox administration."
+          "meta": "Use Tailscale host access for routine Proxmox administration.",
+          "upstream": null
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -3325,7 +3332,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -3352,7 +3359,7 @@
           "service_id": "repo_intake",
           "kind": "proxy",
           "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:8101",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:8101",
           "target_port": 443
         }
       },
@@ -3394,11 +3401,11 @@
         "repo_route_metadata": {
           "enabled": true,
           "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | list | first).ipv4 }}:8101"
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:8101"
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -3469,7 +3476,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -3745,7 +3752,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -3817,7 +3824,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -3888,7 +3895,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -3955,7 +3962,7 @@
         "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },
@@ -4094,7 +4101,7 @@
         },
         "tls": {
           "provider": "letsencrypt",
-          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "cert_path": "/etc/letsencrypt/live/example-edge/",
           "auto_renew": true
         }
       },

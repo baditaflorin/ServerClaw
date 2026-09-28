@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.179.47",
   "platform_version": "0.178.224",
-  "generated_at": "2026-09-28T10:39:44Z",
-  "next_refresh_at": "2026-09-28T11:39:44Z",
+  "generated_at": "2026-09-28T20:00:58Z",
+  "next_refresh_at": "2026-09-28T21:00:58Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",
@@ -563,10 +563,11 @@
         "score": 0.95,
         "safe_to_act": true,
         "source": "repo_evidence",
-        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8200",
-        "last_live_apply": "2026-08-31T00:00:00Z"
+        "last_live_apply": "2026-08-31T00:00:00Z",
+        "slo_status": "unknown"
       },
       "openfga": {
         "service_name": "OpenFGA",

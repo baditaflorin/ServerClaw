@@ -365,6 +365,51 @@ def test_validate_empty_service_scope_does_not_expand_to_all(tmp_path: Path, mon
     assert failures == []
 
 
+def test_precomputed_remote_service_scope_is_used_without_git_history(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    build_repo(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    selected: list[list[str] | None] = []
+    monkeypatch.setenv("LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON", '["docker_runtime"]')
+    monkeypatch.setattr(service_completeness, "changed_paths_from_git", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        service_completeness,
+        "validate_services",
+        lambda service_ids, **_kwargs: (selected.append(service_ids) or [], []),
+    )
+
+    exit_code = service_completeness.main(["--changed", "--json"])
+
+    payload = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert payload["services"] == []
+    assert selected == [["docker_runtime"]]
+
+
+@pytest.mark.parametrize("scope", ['null', '["not_a_service"]', '{"service":"test_echo"}', "invalid-json"])
+def test_invalid_precomputed_remote_service_scope_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], scope: str
+) -> None:
+    build_repo(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    selected: list[list[str] | None] = []
+    monkeypatch.setenv("LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON", scope)
+    monkeypatch.setattr(service_completeness, "changed_paths_from_git", lambda *_args, **_kwargs: pytest.fail())
+    monkeypatch.setattr(
+        service_completeness,
+        "validate_services",
+        lambda service_ids, **_kwargs: (selected.append(service_ids) or [], []),
+    )
+
+    exit_code = service_completeness.main(["--changed", "--json"])
+
+    payload = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert payload["services"] == []
+    assert selected == [None]
+
+
 @pytest.mark.parametrize("role_family", ["_runtime", "_postgres", "_vm"])
 def test_unknown_service_role_families_fail_closed(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, role_family: str

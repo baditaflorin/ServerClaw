@@ -60,6 +60,7 @@ REMOTE_RUN_ROOT=""
 SNAPSHOT_BUILD_DIR=""
 LV3_VALIDATION_BASE_REF="${LV3_VALIDATION_BASE_REF:-}"
 LV3_VALIDATION_CHANGED_FILES_JSON="${LV3_VALIDATION_CHANGED_FILES_JSON:-}"
+LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON="${LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON:-}"
 
 SSH_BASE_CMD=()
 
@@ -286,16 +287,17 @@ compute_validation_lane_context() {
       ;;
   esac
 
-  if [[ -n "$LV3_VALIDATION_BASE_REF" && -n "$LV3_VALIDATION_CHANGED_FILES_JSON" ]]; then
-    return 0
-  fi
+  # Never accept an operator-supplied scope for a gate run. Derive the service
+  # IDs below from the locally verified changed-path snapshot.
+  LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON=""
 
-  current_branch="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
-  if [[ "$current_branch" == "main" || "$current_branch" == "HEAD" || -z "$current_branch" ]]; then
-    return 0
-  fi
+  if [[ -z "$LV3_VALIDATION_BASE_REF" || -z "$LV3_VALIDATION_CHANGED_FILES_JSON" ]]; then
+    current_branch="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+    if [[ "$current_branch" == "main" || "$current_branch" == "HEAD" || -z "$current_branch" ]]; then
+      return 0
+    fi
 
-  base_ref="$("$PYTHON_BIN" - "$REPO_ROOT" <<'PY'
+    base_ref="$("$PYTHON_BIN" - "$REPO_ROOT" <<'PY'
 import subprocess
 import sys
 from pathlib import Path
@@ -308,10 +310,10 @@ remote_exists = subprocess.run(
 )
 print(remote_candidate if remote_exists.returncode == 0 else "main")
 PY
-)"
+    )"
 
-  LV3_VALIDATION_BASE_REF="$base_ref"
-  LV3_VALIDATION_CHANGED_FILES_JSON="$("$PYTHON_BIN" - "$REPO_ROOT" "$base_ref" <<'PY'
+    LV3_VALIDATION_BASE_REF="$base_ref"
+    LV3_VALIDATION_CHANGED_FILES_JSON="$("$PYTHON_BIN" - "$REPO_ROOT" "$base_ref" <<'PY'
 import json
 import subprocess
 import sys
@@ -354,7 +356,44 @@ for command in commands:
 
 print(json.dumps(sorted(changed)))
 PY
-)"
+    )"
+  fi
+
+  if [[ -n "$LV3_VALIDATION_BASE_REF" && -n "$LV3_VALIDATION_CHANGED_FILES_JSON" ]]; then
+    LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON="$("$PYTHON_BIN" - "$REPO_ROOT" "$LV3_VALIDATION_BASE_REF" "$LV3_VALIDATION_CHANGED_FILES_JSON" <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+repo_root = Path(sys.argv[1]).resolve()
+base_ref = sys.argv[2]
+try:
+    changed_paths = json.loads(sys.argv[3])
+    if not isinstance(changed_paths, list) or not changed_paths or any(not isinstance(path, str) for path in changed_paths):
+        print("null")
+        raise SystemExit(0)
+except json.JSONDecodeError:
+    print("null")
+    raise SystemExit(0)
+
+os.environ["LV3_REPO_ROOT"] = str(repo_root)
+sys.path.insert(0, str(repo_root / "scripts"))
+try:
+    import service_completeness
+
+    context = service_completeness.load_context()
+    service_ids = service_completeness.service_ids_for_changed_paths(
+        changed_paths,
+        context,
+        base_ref=base_ref,
+    )
+except Exception:
+    service_ids = None
+print(json.dumps(service_ids))
+PY
+    )"
+  fi
 }
 
 build_ssh_command() {
@@ -490,7 +529,8 @@ remote_env_exports() {
     LV3_SNAPSHOT_BRANCH \
     LV3_SNAPSHOT_FILE_COUNT \
     LV3_VALIDATION_BASE_REF \
-    LV3_VALIDATION_CHANGED_FILES_JSON; do
+    LV3_VALIDATION_CHANGED_FILES_JSON \
+    LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON; do
     if [[ -n "${!name:-}" ]]; then
       printf -v prefix "%sexport %s=%q; " "$prefix" "$name" "${!name}"
     fi
@@ -539,7 +579,8 @@ remote_docker_env_args() {
     LV3_SNAPSHOT_BRANCH \
     LV3_SNAPSHOT_FILE_COUNT \
     LV3_VALIDATION_BASE_REF \
-    LV3_VALIDATION_CHANGED_FILES_JSON; do
+    LV3_VALIDATION_CHANGED_FILES_JSON \
+    LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON; do
     if [[ -n "${!name:-}" ]]; then
       args+=("-e" "$name=${!name}")
     fi
@@ -724,6 +765,9 @@ run_local_command() {
   fi
   if [[ -n "$LV3_VALIDATION_CHANGED_FILES_JSON" ]]; then
     env_args+=("LV3_VALIDATION_CHANGED_FILES_JSON=$LV3_VALIDATION_CHANGED_FILES_JSON")
+  fi
+  if [[ -n "$LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON" ]]; then
+    env_args+=("LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON=$LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON")
   fi
   if [[ -n "$validate_python_bin" ]]; then
     env_args+=("LV3_VALIDATE_PYTHON_BIN=$validate_python_bin")

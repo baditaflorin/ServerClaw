@@ -1,3 +1,4 @@
+# managed-by: role=monitoring_vm adr=0011 agent={{ lookup('env','LV3_AGENT_SESSION') | default('operator') }}
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
@@ -93,6 +94,7 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: 127.0.0.1:{{ monitoring_blackbox_exporter_port }}
+{% from 'monitoring_probe_target.j2' import resolve_probe_target %}
 {% for service_id, service in monitoring_health_probe_catalog.services | dictsort %}
 {% for probe_kind in ['liveness', 'readiness'] %}
 {% set probe = service[probe_kind] %}
@@ -112,7 +114,7 @@ scrape_configs:
     static_configs:
       - targets:
 {% if probe.kind == 'http' %}
-          - {{ probe.url }}
+          - {{ resolve_probe_target(service, probe, playbook_execution_host_patterns, playbook_execution_env, hostvars) }}
 {% else %}
           - {{ probe.host }}:{{ probe.port }}
 {% endif %}

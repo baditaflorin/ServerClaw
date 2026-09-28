@@ -424,11 +424,11 @@
       "notes": "Optional planned guest example; customize before provisioning."
     },
     {
-      "vmid": 120,
-      "name": "postgres-replica-yourname",
+      "vmid": 151,
+      "name": "postgres-replica",
       "status": "planned",
       "environment": "production",
-      "metrics_host": "postgres-replica-yourname",
+      "metrics_host": "postgres-replica",
       "allocated": {
         "ram_gb": 8,
         "vcpu": 4,
@@ -443,7 +443,7 @@
       "disk_paths": [
         "/"
       ],
-      "notes": "Optional planned guest example; customize before provisioning."
+      "notes": "Planned guest capacity backing the PostgreSQL warm-standby contract; activate only after Patroni replication and failover are verified."
     },
     {
       "vmid": 121,
