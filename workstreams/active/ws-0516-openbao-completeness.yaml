@@ -1,12 +1,12 @@
 id: ws-0516-openbao-completeness
 adr: "0043"
 title: Resolve OpenBao completeness and pre-push gate blockers
-status: in_progress
+status: merged
 ready_to_merge: false
 live_applied: false
 owner: codex
-branch: codex/service-completeness-recovery-20260928
-worktree_path: .worktrees/codex-service-completeness-recovery-20260928
+branch: codex/ws0516-release-integration-20260928
+worktree_path: .worktrees/codex-ws0516-release-integration-20260928
 doc: docs/workstreams/ws-0516-openbao-completeness.md
 depends_on:
   - adr-0043-openbao-for-secrets-transit-and-dynamic-credentials
@@ -46,6 +46,11 @@ shared_surfaces:
   - tests/test_workflow_catalog_generated_refs.py
   - docs/workstreams/ws-0516-openbao-completeness.md
   - workstreams/active/ws-0516-openbao-completeness.yaml
+  - README.md
+  - changelog.md
+  - docs/status/history/merged-workstreams.md
+  - scripts/release_manager.py
+  - tests/test_release_manager.py
   - workstreams.yaml
 ownership_manifest:
   owned_surfaces:
@@ -82,6 +87,18 @@ ownership_manifest:
         - workstreams.yaml
       mode: shared_contract
       contract: workstream-registry-v1
+    - id: release_closeout_artifacts
+      paths:
+        - README.md
+        - changelog.md
+        - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: release_manager_fixture_safety
+      paths:
+        - scripts/release_manager.py
+        - tests/test_release_manager.py
+      mode: exclusive
     - id: standby_capacity_pre_push_gate
       paths:
         - config/capacity-model.json
@@ -163,7 +180,7 @@ tasks:
     status: completed
   - id: t3
     title: Submit the branch through Woodpecker PR checks and merge
-    status: in_progress
+    status: completed
   - id: t4
     title: Repair pre-push standby-capacity and deterministic exposure-registry blockers
     status: completed
@@ -185,8 +202,14 @@ tasks:
   - id: t10
     title: Keep private topology addresses out of generated public exposure registry
     status: completed
+  - id: t11
+    title: Correct post-merge canonical workstream and changelog state
+    status: completed
+  - id: t12
+    title: Make release readiness receipt lookup worktree-safe and isolate release tests from production side effects
+    status: completed
 canonical_truth:
-  changelog_entry: Complete OpenBao private readiness observability and retire its expired completeness suppression.
+  changelog_entry: Complete OpenBao readiness observability and repair service-completeness and remote push-gate validation.
   release_bump: patch
   included_in_repo_version: null
   latest_receipts: {}

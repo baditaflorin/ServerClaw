@@ -244,14 +244,15 @@ def required_service_results(semantics: dict[str, Any], *, timeout: float) -> li
 
 
 def dr_table_top_result(semantics: dict[str, Any]) -> CriterionResult:
-    receipt_dir = repo_path(semantics["readiness_targets"]["1.0.0"]["dr_table_top_review"]["receipt_dir"])
+    receipt_dir_value = Path(semantics["readiness_targets"]["1.0.0"]["dr_table_top_review"]["receipt_dir"])
+    receipt_dir = receipt_dir_value if receipt_dir_value.is_absolute() else REPO_ROOT / receipt_dir_value
     receipts = sorted(receipt_dir.glob("*")) if receipt_dir.exists() else []
     if not receipts:
         return CriterionResult(
             id="dr-table-top-review",
             label="DR table-top review",
             status="pending",
-            detail=f"pending (missing {receipt_dir.relative_to(REPO_ROOT)})",
+            detail=f"pending (missing {receipt_dir_value.as_posix()})",
             met=False,
         )
     latest = receipts[-1].name

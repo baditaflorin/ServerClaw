@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- Complete OpenBao readiness observability and repair service-completeness and remote push-gate validation.
 - Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
 - Allow the Builder metrics peer to scrape docker-build node-exporter over the private tailnet without disrupting Docker-managed firewall rules.
 - Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
