@@ -193,8 +193,10 @@ workstreams:
     monkeypatch.setattr(release_manager, "ADR_DIR", tmp_path / "docs" / "adr")
     monkeypatch.setattr(release_manager, "VERSION_SEMANTICS_PATH", tmp_path / "config" / "version-semantics.json")
     monkeypatch.setattr(release_manager, "OUTLINE_SYNC_SCRIPT", tmp_path / "scripts" / "sync_docs_to_outline.py")
+    monkeypatch.setattr(release_manager, "OUTLINE_TOOL_SCRIPT", tmp_path / "scripts" / "outline_tool.py")
     monkeypatch.setattr(release_manager, "OUTLINE_API_TOKEN_PATH", tmp_path / ".local" / "outline" / "api-token.txt")
     monkeypatch.setattr(release_manager, "OUTLINE_BASE_URL", "https://wiki.example.com")
+    monkeypatch.setattr(release_manager, "refresh_generated_truth_surfaces", lambda: None)
     monkeypatch.setattr(release_manager, "CHANGELOG_PATH", tmp_path / "changelog.md")
     monkeypatch.setattr(release_manager, "RELEASE_NOTES_INDEX_PATH", tmp_path / "docs" / "release-notes" / "README.md")
     monkeypatch.setattr(gate_bypass_waivers, "REPO_ROOT", tmp_path)
@@ -224,6 +226,7 @@ workstreams:
     monkeypatch.setattr(canonical_truth, "write_assembled_truth", lambda **kwargs: [])
 
     monkeypatch.setattr(generate_release_notes, "CHANGELOG_PATH", tmp_path / "changelog.md")
+    monkeypatch.setattr(generate_release_notes, "REPO_ROOT", tmp_path)
     monkeypatch.setattr(
         generate_release_notes, "RELEASE_NOTES_INDEX_PATH", tmp_path / "docs" / "release-notes" / "README.md"
     )
@@ -398,15 +401,32 @@ def test_release_cut_syncs_outline_when_bootstrap_artifacts_exist(
     script_path = release_manager.OUTLINE_SYNC_SCRIPT
     script_path.parent.mkdir(parents=True, exist_ok=True)
     script_path.write_text("#!/usr/bin/env python3\n")
+    outline_tool_path = release_manager.OUTLINE_TOOL_SCRIPT
+    outline_tool_path.write_text("#!/usr/bin/env python3\n")
     release_manager.OUTLINE_API_TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
     release_manager.OUTLINE_API_TOKEN_PATH.write_text("token\n")
     commands: list[list[str]] = []
+    document_publish_calls: list[dict[str, object]] = []
 
     def fake_run_command(command: list[str], *, cwd: Path, text: bool = True, capture_output: bool = True):
         commands.append(command)
         return subprocess.CompletedProcess(command, 0, stdout="synced\n", stderr="")
 
+    def fake_subprocess_run(
+        command: list[str],
+        *,
+        input: str,
+        capture_output: bool,
+        text: bool,
+        cwd: Path,
+    ) -> subprocess.CompletedProcess[str]:
+        document_publish_calls.append(
+            {"command": command, "input": input, "capture_output": capture_output, "text": text, "cwd": cwd}
+        )
+        return subprocess.CompletedProcess(command, 0, stdout="published\n", stderr="")
+
     monkeypatch.setattr(release_manager, "run_command", fake_run_command)
+    monkeypatch.setattr(release_manager.subprocess, "run", fake_subprocess_run)
 
     exit_code = release_manager.main(
         [
@@ -429,5 +449,34 @@ def test_release_cut_syncs_outline_when_bootstrap_artifacts_exist(
             "https://wiki.example.com",
             "--api-token-file",
             str(release_manager.OUTLINE_API_TOKEN_PATH),
-        ]
+        ],
+        [
+            "python3",
+            str(outline_tool_path),
+            "changelog.push",
+            "--title",
+            "Changelog (as of v0.1.1)",
+            "--base-url",
+            "https://wiki.example.com",
+            "--token-file",
+            str(release_manager.OUTLINE_API_TOKEN_PATH),
+        ],
     ]
+    assert len(document_publish_calls) == 1
+    publish_call = document_publish_calls[0]
+    assert publish_call["command"] == [
+        "python3",
+        str(outline_tool_path),
+        "document.publish",
+        "--collection",
+        "Changelogs",
+        "--title",
+        "Release Notes 0.1.1",
+        "--rewrite-links",
+        "--stdin",
+        "--base-url",
+        "https://wiki.example.com",
+        "--token-file",
+        str(release_manager.OUTLINE_API_TOKEN_PATH),
+    ]
+    assert "# Release 0.1.1" in str(publish_call["input"])

@@ -162,6 +162,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0046` | Identity classes for humans, services, agents, and break-glass | `live_applied` | [adr-0046-identity-classes.md](../../workstreams/adr-0046-identity-classes.md) |
 | `0045` | Control-plane communication lanes | `live_applied` | [adr-0045-communication-lanes.md](../../workstreams/adr-0045-communication-lanes.md) |
 | `0044` | Windmill for agent and operator workflows | `live_applied` | [adr-0044-windmill.md](../../workstreams/adr-0044-windmill.md) |
+| `0043` | Resolve OpenBao completeness and pre-push gate blockers | `merged` | [ws-0516-openbao-completeness.md](../../workstreams/ws-0516-openbao-completeness.md) |
 | `0043` | OpenBao for secrets, transit, and dynamic credentials | `live_applied` | [adr-0043-openbao.md](../../workstreams/adr-0043-openbao.md) |
 | `0042` | step-ca for SSH and internal TLS | `live_applied` | [adr-0042-step-ca.md](../../workstreams/adr-0042-step-ca.md) |
 | `0041` | Dockerized mail platform live rollout | `live_applied` | [adr-0041-email-platform-live.md](../../workstreams/adr-0041-email-platform-live.md) |

@@ -2,10 +2,11 @@
 
 ## Status
 
-`in_progress` — OpenBao's expired legacy suppression is removed in this branch.
-The private readiness SLO, generated Prometheus rules/target, Grafana dashboard,
-and Alertmanager rule are being added and tested. No production service was
-changed by this repository-only work.
+`merged` — PR #62 was squash-merged at `fb67e854` after the 0mcp builder gate and
+both Woodpecker checks passed. The private readiness SLO, generated Prometheus
+rules/target, Grafana dashboard, and Alertmanager rule are in `main`. No
+production service was changed by this repository-only work; live application
+remains separate.
 
 ## Decision
 
@@ -49,7 +50,22 @@ make the checklist green.
 - `uv run --with pyyaml --with jsonschema python scripts/generate_slo_rules.py --check`
 - `uv run --with pyyaml --with jsonschema python scripts/validate_alert_rules.py`
 - `LV3_VALIDATION_CHANGED_FILES_JSON='["config/service-completeness.json","config/slo-catalog.json","config/grafana/dashboards/openbao.json","config/alertmanager/rules/openbao.yml"]' uv run --with pyyaml --with jsonschema python scripts/validate_service_completeness.py --changed --validate`
-- Complete the repository push gate and required Woodpecker PR/push checks before merge.
+- The 0mcp builder pre-push gate passed all 26 blocking checks.
+- Woodpecker PR and push checks passed before PR #62 merged.
+- The follow-up changed-path gate selected 21 blocking checks; all passed on
+  the documented local fallback after the build-server runner was unreachable.
+- `uv run --with pytest pytest -q tests/test_release_manager.py` passed with
+  six tests; the Outline publication test now stubs the subprocess and generated
+  surface refresh so it cannot contact the real wiki or rewrite the checkout.
+
+## Release bookkeeping
+
+The repository-only patch candidate is `0.179.48`; the release manager refused
+to cut it because the current mainline contains 60 workstreams marked
+`in_progress` and 12 pre-existing gate-waiver blockers. No release files were
+written by the refused attempt. Keep this workstream merged and tracked as
+pending release until those repository-wide blockers are resolved; do not
+backdate it into `0.179.47` or treat the change as a live platform release.
 
 Live diagnosis on 2026-09-28 confirmed that the OpenBao container and its
 cross-guest private readiness endpoint returned HTTP 200, while Prometheus
