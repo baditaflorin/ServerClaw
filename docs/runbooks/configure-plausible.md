@@ -85,6 +85,7 @@ The last command verifies that one synthetic event has reached Plausible's Click
 
 ## Notes
 
+- ClickHouse uses a lower relative CPU scheduler weight (`plausible_clickhouse_cpu_shares`, default `640`) so latency-sensitive services can make progress under CPU contention. This is not a hard CPU quota; ClickHouse can use idle capacity. Check `docker stats` and guest CPU/memory/I/O pressure before tuning it.
 - Plausible Community Edition is deployed here without the enterprise-only service-native SSO path, so the dashboard is protected by the shared NGINX edge oauth2-proxy/Authentik boundary instead of an application-owned identity client
 - the repo-managed bootstrap Plausible user remains intentionally available as a break-glass recovery and verification identity even though normal browser access goes through the shared edge sign-in path
 - only the explicit `plausible_site_registrations` list is tracked; ADR 0316 intentionally reuses that allowlist by emitting canonical `ops.example.com` journey URLs from the private Windmill operator surface instead of trying to register a private `100.64.0.1:8005` site

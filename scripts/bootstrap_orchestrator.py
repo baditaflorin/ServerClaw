@@ -47,6 +47,11 @@ from typing import Any
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryClass, RetryPolicy, with_retry
+
 LOCAL_ROOT = REPO_ROOT / ".local"
 IDENTITY_PATH = LOCAL_ROOT / "identity.yml"
 MANIFEST_PATH = LOCAL_ROOT / "manifest.yml"
@@ -330,23 +335,47 @@ def run_step(
 
     # Run make target with retries.
     t0 = time.monotonic()
-    attempt = 0
+    attempt_count = 0
     rc, stdout, stderr = 0, "", ""
-    while attempt <= retries:
+
+    def run_make_with_retry() -> tuple[int, str, str]:
+        nonlocal attempt_count, rc, stdout, stderr
+        attempt_count += 1
         rc, stdout, stderr = _run_make(
             make_target,
             repo_root=repo_root,
             timeout=timeout,
         )
-        if rc == 0:
-            break
-        attempt += 1
-        if attempt <= retries:
-            time.sleep(min(10 * attempt, 60))
+        if rc != 0:
+            raise PlatformRetryError(
+                f"make {make_target} exited {rc}",
+                code="ansible:unreachable",
+                retry_class=RetryClass.BACKOFF,
+                retry_after=min(10 * attempt_count, 60),
+            )
+        return rc, stdout, stderr
+
+    try:
+        with_retry(
+            run_make_with_retry,
+            policy=RetryPolicy(
+                max_attempts=max(1, retries + 1),
+                base_delay_s=0,
+                max_delay_s=0,
+                multiplier=1,
+                jitter=False,
+                transient_max=0,
+            ),
+            error_context=f"bootstrap step {step_id}",
+            sleep_fn=time.sleep,
+        )
+    except MaxRetriesExceeded:
+        pass
+
     result.make_exit_code = rc
     result.make_stdout = stdout[-4000:] if len(stdout) > 4000 else stdout
     result.make_stderr = stderr[-4000:] if len(stderr) > 4000 else stderr
-    result.retries_used = attempt
+    result.retries_used = attempt_count if rc != 0 else max(0, attempt_count - 1)
     result.duration_s = time.monotonic() - t0
 
     if rc != 0:

@@ -89,7 +89,7 @@ These files are integration-owned and should normally be edited only during merg
 - [scripts/netbox_inventory_sync.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/netbox_inventory_sync.py): repo-local NetBox API synchronizer for the canonical topology, IPAM, and governed service inventory
 - [scripts/uptime_kuma_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/uptime_kuma_tool.py): repo-local client for Uptime Kuma bootstrap and monitor management
 - [scripts/portainer_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/portainer_tool.py): governed Portainer wrapper for container inspection, logs, and bounded restart actions
-- [.github/workflows/validate.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.github/workflows/validate.yml): CI path that runs the same `make validate` contract as local operators
+- [.woodpecker.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.woodpecker.yml): Woodpecker CI pipeline for the sanitized public repository
 
 ### Shared automation inputs
 

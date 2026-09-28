@@ -75,5 +75,4 @@ and `mcp-site-service` would need a fresh clone of
 `baditaflorin/mcp-site-service` at whatever commit was last actually
 deployed (not necessarily `main` — there's no deploy-tracking mechanism
 that records which commit is live). Worth deciding whether these deserve
-an actual CI publish step (Woodpecker already runs on this fleet and
-wouldn't cost GitHub Actions billing) rather than staying fully manual.
+an actual Woodpecker build/publish pipeline rather than staying fully manual.

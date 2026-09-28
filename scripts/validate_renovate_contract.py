@@ -66,6 +66,18 @@ def validate_renovate_config() -> None:
     )
 
 
+def validate_renovate_image_ref(image_ref: object) -> None:
+    if not isinstance(image_ref, str):
+        raise ValueError("Renovate workflow must define RENOVATE_IMAGE")
+    configured_harbor_prefix = "${{ vars.CONTAINER_REGISTRY }}/check-runner/renovate:"
+    local_harbor_prefix = "registry.localhost/check-runner/renovate:"
+    require(
+        image_ref.startswith((configured_harbor_prefix, local_harbor_prefix)),
+        "RENOVATE_IMAGE must use the configured Harbor check-runner project",
+    )
+    require("@sha256:" in image_ref, "RENOVATE_IMAGE must be pinned to an immutable digest")
+
+
 def validate_workflow() -> None:
     workflow = yaml.safe_load(RENOVATE_WORKFLOW_PATH.read_text(encoding="utf-8"))
     workflow_text = RENOVATE_WORKFLOW_PATH.read_text(encoding="utf-8")
@@ -79,11 +91,8 @@ def validate_workflow() -> None:
 
     job = workflow["jobs"]["renovate"]
     require(job.get("runs-on") == "self-hosted", "Renovate workflow must target the self-hosted runner")
-    require(
-        "registry.localhost/check-runner/renovate:" in workflow_text,
-        "Renovate workflow must pull the Renovate image through Harbor",
-    )
-    require("@sha256:" in workflow_text, "Renovate workflow must pin the Renovate image to a digest")
+    validate_renovate_image_ref(job.get("env", {}).get("RENOVATE_IMAGE"))
+    require('"${RENOVATE_IMAGE}"' in workflow_text, "Renovate workflow must run the pinned RENOVATE_IMAGE")
     require(
         "ghcr.io/renovatebot/renovate" not in workflow_text,
         "Renovate workflow must not pull the runtime image directly from GHCR",

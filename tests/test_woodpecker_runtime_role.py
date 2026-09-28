@@ -32,6 +32,10 @@ def test_woodpecker_templates_export_gitea_oauth_and_agent_settings() -> None:
     assert "WOODPECKER_EXPERT_FORGE_OAUTH_HOST={{ woodpecker_gitea_oauth_url }}" in env_template
     assert "WOODPECKER_GITEA_URL={{ woodpecker_gitea_internal_api_url }}" in env_template
     assert "WOODPECKER_AGENT_SECRET={{ woodpecker_agent_secret }}" in env_template
+    for template in (env_template, ctmpl_template):
+        assert "WOODPECKER_KEEPALIVE_MIN_TIME={{ woodpecker_grpc_keepalive_min_time }}" in template
+        assert "WOODPECKER_KEEPALIVE_TIME={{ woodpecker_agent_keepalive_time }}" in template
+        assert "WOODPECKER_KEEPALIVE_TIMEOUT={{ woodpecker_agent_keepalive_timeout }}" in template
     assert "[[ .Data.data.WOODPECKER_AGENT_SECRET ]]" in ctmpl_template
     assert "woodpecker-server" in compose_template
     assert "woodpecker-agent" in compose_template

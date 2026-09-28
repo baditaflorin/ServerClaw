@@ -92,6 +92,9 @@ woodpecker_secret_smoke_events:
 
 # Runtime configuration
 woodpecker_grpc_port: 9000
+woodpecker_grpc_keepalive_min_time: 10s
+woodpecker_agent_keepalive_time: 60s
+woodpecker_agent_keepalive_timeout: 150s
 woodpecker_backend_network: woodpecker_default
 woodpecker_max_workflows: 1
 woodpecker_healthcheck_path: /healthz

@@ -6,9 +6,9 @@
 #
 # IP placeholder substitution (ADR 0407):
 # The committed subdomain-catalog.json stores the generic placeholder IP 203.0.113.1
-# for all public-ingress A records. At runtime this include loads .local/identity.yml
-# (gitignored) to resolve management_ipv4 to the real deployment IP, so DNS records
-# are always set to the actual server address without any real IP ever touching git.
+# for all public-ingress A records. At runtime this include loads the explicitly
+# selected PLATFORM_IDENTITY_OVERLAY (or the legacy .local/identity.yml) to resolve
+# management_ipv4, so DNS records use deployment truth without putting it in git.
 
 - name: Ensure Hetzner DNS publication for service subdomain
   hosts: localhost
@@ -40,9 +40,29 @@
             )
           }}
 
+    - name: Read the explicit deployment identity overlay selector
+      ansible.builtin.set_fact:
+        controller_identity_overlay_selector: "{{ lookup('ansible.builtin.env', 'PLATFORM_IDENTITY_OVERLAY') | trim }}"
+
     - name: Resolve the local identity overlay path
       ansible.builtin.set_fact:
-        controller_local_identity_path: "{{ controller_repo_shared_root }}/.local/identity.yml"
+        controller_local_identity_path: >-
+          {{
+            (
+              controller_identity_overlay_selector
+              if controller_identity_overlay_selector.startswith('/')
+              else controller_repo_shared_root ~ '/.local/' ~ (controller_identity_overlay_selector | regex_replace('^\\.local/', ''))
+            )
+            if controller_identity_overlay_selector
+            else controller_repo_shared_root ~ '/.local/identity.yml'
+          }}
+
+    - name: Require the explicitly selected deployment identity overlay
+      ansible.builtin.assert:
+        that:
+          - controller_local_identity_path is file
+        fail_msg: "PLATFORM_IDENTITY_OVERLAY must select an existing deployment identity file."
+      when: controller_identity_overlay_selector | length > 0
 
     - name: Load local identity overlay (real deployment values — gitignored)
       ansible.builtin.include_vars:

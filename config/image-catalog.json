@@ -1525,19 +1525,13 @@
       "runtime_host": "docker-runtime",
       "container_name": "plausible-events-db",
       "registry_ref": "docker.io/clickhouse/clickhouse-server",
-      "tag": "24.12-alpine",
-      "digest": "sha256:58a8168a0a17a5694172cbe89b8d3f1f6c9a91182260c98e299e87da1b0d0d0b",
-      "ref": "docker.io/clickhouse/clickhouse-server:24.12-alpine@sha256:58a8168a0a17a5694172cbe89b8d3f1f6c9a91182260c98e299e87da1b0d0d0b",
+      "tag": "26.8-alpine",
+      "digest": "sha256:4b68fbafc961eb32f9aa2e22d38baeaaad90ec170053b3f2d54eec785f661d13",
+      "ref": "docker.io/clickhouse/clickhouse-server:26.8-alpine@sha256:4b68fbafc961eb32f9aa2e22d38baeaaad90ec170053b3f2d54eec785f661d13",
       "platform": "linux/amd64",
-      "pinned_on": "2026-03-30",
-      "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-30-plausible-clickhouse-runtime.json",
-      "exception": {
-        "reason": "The pinned upstream ClickHouse runtime image reports critical and high Alpine package findings; keep it digest-pinned for the ADR 0283 rollout and review on the next image refresh window.",
-        "owner": "Platform operations",
-        "approved_on": "2026-03-30",
-        "review_by": "2026-04-13"
-      },
+      "pinned_on": "2026-09-28",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-09-28-plausible-clickhouse-runtime.json",
       "consumers": [
         "roles/plausible_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",
@@ -1553,18 +1547,24 @@
       "runtime_host": "docker-runtime",
       "container_name": "plausible-db",
       "registry_ref": "docker.io/library/postgres",
-      "tag": "16-alpine",
-      "digest": "sha256:60b180625695e90b6e450405d5f0bcb74bc8c52c65d1cd11aeb3da46cac06dd8",
-      "ref": "docker.io/library/postgres:16-alpine@sha256:60b180625695e90b6e450405d5f0bcb74bc8c52c65d1cd11aeb3da46cac06dd8",
+      "tag": "16.15-alpine",
+      "digest": "sha256:1a66d744c1b459e13b05a8fca341da84cb63383e99ce262210efee5a319d4551",
+      "ref": "docker.io/library/postgres:16.15-alpine@sha256:1a66d744c1b459e13b05a8fca341da84cb63383e99ce262210efee5a319d4551",
       "platform": "linux/amd64",
-      "pinned_on": "2026-03-30",
+      "pinned_on": "2026-09-28",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-30-plausible-postgres-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-09-28-plausible-postgres-runtime.json",
       "exception": {
-        "reason": "The pinned upstream PostgreSQL runtime image reports critical and high findings in bundled gosu and Alpine packages; keep it digest-pinned for the ADR 0283 rollout and review on the next image refresh window.",
+        "justification": "The current upstream PostgreSQL 16.15 Alpine image still bundles gosu built with Go 1.24.6; the scanner reports three critical Go standard-library advisories with no fixed version metadata and no blocking finding with a fix. gosu is only invoked as the startup privilege-switch helper and is not exposed as a network service; retain only while a patched runtime is prepared.",
         "owner": "Platform operations",
-        "approved_on": "2026-03-30",
-        "review_by": "2026-04-13"
+        "compensating_controls": [
+          "PostgreSQL remains reachable only on the private Docker service network.",
+          "Keep the database image pinned to the scanned digest and do not publish its port.",
+          "Re-scan and re-evaluate before any image update."
+        ],
+        "approved_on": "2026-09-28",
+        "expires_on": "2026-10-05",
+        "remediation_plan": "Build or adopt a PostgreSQL 16 image whose gosu binary is rebuilt against a patched Go toolchain; scan it with Syft/Grype, remove this exception, and deploy before 2026-10-05."
       },
       "consumers": [
         "roles/plausible_runtime/templates/docker-compose.yml.j2",
@@ -1581,18 +1581,24 @@
       "runtime_host": "docker-runtime",
       "container_name": "plausible",
       "registry_ref": "ghcr.io/plausible/community-edition",
-      "tag": "v3.2.0",
-      "digest": "sha256:7bd1b7e6e474c84e223c7fc5a9bac6411da340bf30dddbd46527f13551b79d59",
-      "ref": "ghcr.io/plausible/community-edition:v3.2.0@sha256:7bd1b7e6e474c84e223c7fc5a9bac6411da340bf30dddbd46527f13551b79d59",
+      "tag": "v3.2.1",
+      "digest": "sha256:7450d9df4bfce160541d65bdba6bd4bcdd9a6db07f13dde91060705fa242c650",
+      "ref": "ghcr.io/plausible/community-edition:v3.2.1@sha256:7450d9df4bfce160541d65bdba6bd4bcdd9a6db07f13dde91060705fa242c650",
       "platform": "linux/amd64",
-      "pinned_on": "2026-03-30",
+      "pinned_on": "2026-09-28",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-30-plausible-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-09-28-plausible-runtime.json",
       "exception": {
-        "reason": "The pinned Plausible Community Edition runtime image reports critical and high Alpine package findings; keep it digest-pinned for the ADR 0283 rollout and review on the next image refresh window.",
+        "justification": "The current upstream v3.2.1 runtime removes the exposed Storybook endpoint, but its immutable Alpine 3.22 base still matches OpenSSL advisories with no fixed version reported by the image scanner. The affected CMS/CMP code paths are not part of the Plausible request surface; keep only for a tightly bounded rebuild window.",
         "owner": "Platform operations",
-        "approved_on": "2026-03-30",
-        "review_by": "2026-04-13"
+        "compensating_controls": [
+          "Use the v3.2.1 digest that removes the vulnerable Storybook endpoint.",
+          "Keep the dashboard behind the Authentik-protected shared edge and do not expose container ports directly.",
+          "Keep this exact digest pinned and rescan before any image change."
+        ],
+        "approved_on": "2026-09-28",
+        "expires_on": "2026-10-05",
+        "remediation_plan": "Rebuild a repository-managed derivative from this exact v3.2.1 digest with the fixed Alpine OpenSSL packages, scan it with Syft/Grype, replace this exception, and deploy before 2026-10-05."
       },
       "consumers": [
         "roles/plausible_runtime/templates/docker-compose.yml.j2",
@@ -2017,24 +2023,13 @@
       "runtime_host": "docker-runtime",
       "container_name": "woodpecker-agent",
       "registry_ref": "docker.io/woodpeckerci/woodpecker-agent",
-      "tag": "v3.13.0",
-      "digest": "sha256:92e1729d00334828ea6d0dc1762e55a0b93b72e01e8e2d4435fe2d91e4a30783",
-      "ref": "docker.io/woodpeckerci/woodpecker-agent:v3.13.0@sha256:92e1729d00334828ea6d0dc1762e55a0b93b72e01e8e2d4435fe2d91e4a30783",
+      "tag": "v3.18.1",
+      "digest": "sha256:93235c148a9f91aa455bd88dc788a12bed7921499f33fee1124ac50aad7b8e1a",
+      "ref": "docker.io/woodpeckerci/woodpecker-agent:v3.18.1@sha256:93235c148a9f91aa455bd88dc788a12bed7921499f33fee1124ac50aad7b8e1a",
       "platform": "linux/amd64",
-      "pinned_on": "2026-03-30",
-      "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-30-woodpecker-agent-runtime.json",
-      "exception": {
-        "owner": "Platform operations",
-        "justification": "The initial Woodpecker agent image rollout keeps the reviewed digest pinned until the vulnerability scan result is re-evaluated during the next image refresh window.",
-        "compensating_controls": [
-          "Digest pin keeps the deployed Woodpecker agent fixed to the reviewed upstream artifact while the exception is open.",
-          "The agent remains attached only to the repo-managed docker socket and Woodpecker runtime networks on docker-runtime."
-        ],
-        "approved_on": "2026-03-30",
-        "expires_on": "2026-04-13",
-        "remediation_plan": "Re-scan and refresh woodpecker_agent_runtime with make upgrade-container-image IMAGE_ID=woodpecker_agent_runtime WRITE=true APPLY=true before the exception expires."
-      },
+      "pinned_on": "2026-09-27",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-09-27-woodpecker-agent-runtime.json",
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",
@@ -2050,24 +2045,13 @@
       "runtime_host": "docker-runtime",
       "container_name": "woodpecker-server",
       "registry_ref": "docker.io/woodpeckerci/woodpecker-server",
-      "tag": "v3.13.0",
-      "digest": "sha256:268f891dd63f2e86f912fc3fbdff0b26552a79c4290b4be66b7c04acbe81fbb9",
-      "ref": "docker.io/woodpeckerci/woodpecker-server:v3.13.0@sha256:268f891dd63f2e86f912fc3fbdff0b26552a79c4290b4be66b7c04acbe81fbb9",
+      "tag": "v3.18.1",
+      "digest": "sha256:0b8dbb53d3795f470f524cdb186551f0ad383cc4bd0d299febb7f3d7c6a56771",
+      "ref": "docker.io/woodpeckerci/woodpecker-server:v3.18.1@sha256:0b8dbb53d3795f470f524cdb186551f0ad383cc4bd0d299febb7f3d7c6a56771",
       "platform": "linux/amd64",
-      "pinned_on": "2026-03-30",
-      "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-30-woodpecker-server-runtime.json",
-      "exception": {
-        "owner": "Platform operations",
-        "justification": "The initial Woodpecker server image rollout keeps the reviewed digest pinned until the vulnerability scan result is re-evaluated during the next image refresh window.",
-        "compensating_controls": [
-          "Digest pin keeps the deployed Woodpecker server fixed to the reviewed upstream artifact while the exception is open.",
-          "The service is published through the shared managed edge and its controller automation remains repo-governed."
-        ],
-        "approved_on": "2026-03-30",
-        "expires_on": "2026-04-13",
-        "remediation_plan": "Re-scan and refresh woodpecker_server_runtime with make upgrade-container-image IMAGE_ID=woodpecker_server_runtime WRITE=true APPLY=true before the exception expires."
-      },
+      "pinned_on": "2026-09-27",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-09-27-woodpecker-server-runtime.json",
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/woodpecker_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",

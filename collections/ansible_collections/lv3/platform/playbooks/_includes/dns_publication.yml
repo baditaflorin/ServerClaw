@@ -33,9 +33,29 @@
             )
           }}
 
+    - name: Read the explicit deployment identity overlay selector
+      ansible.builtin.set_fact:
+        controller_identity_overlay_selector: "{{ lookup('ansible.builtin.env', 'PLATFORM_IDENTITY_OVERLAY') | trim }}"
+
     - name: Resolve the local identity overlay path
       ansible.builtin.set_fact:
-        controller_local_identity_path: "{{ controller_repo_shared_root }}/.local/identity.yml"
+        controller_local_identity_path: >-
+          {{
+            (
+              controller_identity_overlay_selector
+              if controller_identity_overlay_selector.startswith('/')
+              else controller_repo_shared_root ~ '/.local/' ~ (controller_identity_overlay_selector | regex_replace('^\\.local/', ''))
+            )
+            if controller_identity_overlay_selector
+            else controller_repo_shared_root ~ '/.local/identity.yml'
+          }}
+
+    - name: Require the explicitly selected deployment identity overlay
+      ansible.builtin.assert:
+        that:
+          - controller_local_identity_path is file
+        fail_msg: "PLATFORM_IDENTITY_OVERLAY must select an existing deployment identity file."
+      when: controller_identity_overlay_selector | length > 0
 
     - name: Load local identity overlay
       ansible.builtin.include_vars:

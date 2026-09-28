@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,7 @@ def load_environment_topology(path: Path | None = None) -> dict[str, Any]:
     return apply_identity_domain_overlay(load_json(path or ENVIRONMENT_TOPOLOGY_PATH))
 
 
+@lru_cache(maxsize=32)
 def configured_environment_ids(
     path: Path | None = None,
     *,

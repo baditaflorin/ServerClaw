@@ -11,6 +11,15 @@ roles:
   artifact_cache_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  artifact_cache_ghcr_reader_bridge:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  artifact_cache_ghcr_secret_renderer:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  authentik_runtime:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   backup_vm:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -50,6 +59,9 @@ roles:
   coolify_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  coolify_app_deploy:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   crawl4ai_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -93,6 +105,21 @@ roles:
   falco_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  fleet_build_broker_pki_handoff:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  fleet_build_broker_pki_vault_writer:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  fleet_build_broker_runtime:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  fleet_runner_image_publisher_identity:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  fleet_runner_private_0mcp_transport:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   flagsmith_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -141,6 +168,9 @@ roles:
   label_studio_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  identity_core_watchdog:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   label_studio_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -165,6 +195,15 @@ roles:
   linux_keepalived:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  librechat_runtime:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  litellm_postgres:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  litellm_runtime:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   livekit_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -219,6 +258,9 @@ roles:
   netbox_sync:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  neko_runtime:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   nextcloud_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -228,6 +270,12 @@ roles:
   nginx_edge_publication:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  nginx_fragment_config:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  nginx_runtime:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   nginx_observability:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -240,6 +288,9 @@ roles:
   nomad_namespace:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  nomad_oidc_auth:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   ntfy_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -252,6 +303,18 @@ roles:
   openbao_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  plane_adr_provisioner:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  platform_service_watchdog:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  postgres_client:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  proxmox_base_template:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   openfga_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -356,6 +419,12 @@ roles:
   repo_deploy_image_cache:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  repo_intake_runtime:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  repowise_runtime:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   restic_config_backup:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

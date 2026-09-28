@@ -48,3 +48,24 @@ def test_configured_environment_ids_and_receipt_subdirectories_follow_catalog(tm
         "preview",
         "staging",
     }
+
+
+def test_configured_environment_ids_loads_catalog_once_per_process_snapshot(tmp_path: Path, monkeypatch) -> None:
+    topology_path = tmp_path / "environment-topology.json"
+    write_topology(topology_path, [{"id": "production", "status": "active"}])
+    original_loader = environment_catalog.load_environment_topology
+    loads = 0
+
+    def counted_loader(path: Path | None = None):
+        nonlocal loads
+        loads += 1
+        return original_loader(path)
+
+    monkeypatch.setattr(environment_catalog, "load_environment_topology", counted_loader)
+    environment_catalog.configured_environment_ids.cache_clear()
+
+    assert environment_catalog.configured_environment_ids(topology_path) == ("production",)
+    assert environment_catalog.configured_environment_ids(topology_path) == ("production",)
+    assert loads == 1
+
+    environment_catalog.configured_environment_ids.cache_clear()

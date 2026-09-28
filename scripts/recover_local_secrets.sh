@@ -20,16 +20,21 @@ PROXMOX_HOST="root@10.10.10.1"
 
 # ── SSH multiplexing: reuse a single TCP connection ──────────────────
 SSH_CONTROL_DIR=$(mktemp -d)
-SSH_OPTS="-o ControlMaster=auto -o ControlPath=$SSH_CONTROL_DIR/%r@%h:%p -o ControlPersist=120 -o ConnectTimeout=10"
+SSH_OPTS=(
+    -o ControlMaster=auto
+    -o "ControlPath=$SSH_CONTROL_DIR/%r@%h:%p"
+    -o ControlPersist=120
+    -o ConnectTimeout=10
+)
 
 cleanup() {
-    ssh -O exit $SSH_OPTS "$PROXMOX_HOST" 2>/dev/null || true
+    ssh -O exit "${SSH_OPTS[@]}" "$PROXMOX_HOST" 2>/dev/null || true
     rm -rf "$SSH_CONTROL_DIR"
 }
 trap cleanup EXIT
 
 # Warm up the control connection
-ssh $SSH_OPTS "$PROXMOX_HOST" true 2>/dev/null
+ssh "${SSH_OPTS[@]}" "$PROXMOX_HOST" true 2>/dev/null
 
 log() { echo "[recover] $*"; }
 warn() { echo "[recover] WARNING: $*" >&2; }
@@ -48,9 +53,11 @@ recover_from_vm_batch() {
 
     log "--- VM $vmid ($vm_name): ${#remote_paths[@]} files ---"
 
-    # Build a shell script that cats each file with delimiters
-    local read_script='
-for f in '"$(printf "'%s' " "${remote_paths[@]}")"'; do
+    # Keep paths as positional arguments to the guest-side script so paths
+    # never need to be interpolated into shell source.
+    local read_script
+    read_script=$(cat <<'SCRIPT'
+for f in "$@"; do
     printf "===FILE:%s===\n" "$f"
     if [ -f "$f" ]; then
         cat "$f" 2>/dev/null
@@ -60,11 +67,19 @@ for f in '"$(printf "'%s' " "${remote_paths[@]}")"'; do
     fi
 done
 printf "===END===\n"
-'
+SCRIPT
+)
+
+    local script_b64 path_args guest_command remote_command
+    script_b64=$(printf '%s' "$read_script" | base64 | tr -d '\n')
+    printf -v path_args ' %q' "${remote_paths[@]}"
+    guest_command="printf %s $script_b64 | base64 -d | bash -s --$path_args"
+    printf -v remote_command 'qm guest exec %q -- bash -c %q' "$vmid" "$guest_command"
 
     local raw_json
-    raw_json=$(ssh $SSH_OPTS "$PROXMOX_HOST" \
-        "qm guest exec $vmid -- bash -c '$(echo "$read_script" | sed "s/'/'\\\\''/g")'" 2>/dev/null) || {
+    # remote_command is intentionally shell-quoted locally before SSH sends it.
+    # shellcheck disable=SC2029
+    raw_json=$(ssh "${SSH_OPTS[@]}" "$PROXMOX_HOST" "$remote_command" 2>/dev/null) || {
         warn "Failed to connect to VM $vmid ($vm_name)"
         return 0
     }
@@ -87,7 +102,6 @@ except Exception:
 
     # Split the output by file delimiters and write each file
     local current_file="" current_content="" in_file=0
-    local i=0
 
     while IFS= read -r line; do
         if [[ "$line" =~ ^===FILE:(.+)===$  ]]; then

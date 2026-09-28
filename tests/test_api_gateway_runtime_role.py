@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -110,7 +111,7 @@ def test_api_gateway_role_uses_authentik_oidc_endpoints() -> None:
     assert "dest: environment-topology.json" in defaults
     assert "api_gateway_runtime_packaged_probe_paths" in defaults
     assert "/app/.gitea/workflows/release-bundle.yml" in defaults
-    assert "/app/.github/workflows/validate.yml" in defaults
+    assert "/app/.woodpecker.yml" in defaults
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
     assert "api_gateway_service_topology" in defaults
@@ -235,7 +236,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "scripts/canonical_errors.py" in defaults
     assert "api_gateway_tree_sync_specs" in defaults
     assert ".githooks/pre-push" in defaults
-    assert ".github/workflows/validate.yml" in defaults
+    assert ".woodpecker.yml" in defaults
     assert ".pre-commit-config.yaml" in defaults
     assert "README.md" in defaults
     assert "ansible.cfg" in defaults
@@ -421,6 +422,16 @@ def test_api_gateway_role_syncs_the_typesense_platform_catalog() -> None:
     assert "Sync the Typesense platform-services collection from the service catalog" in tasks
     assert "register: api_gateway_env_template" in tasks
     assert "or api_gateway_env_template.changed" in tasks
+    assert 'dest: "{{ api_gateway_env_file }}"' in tasks
+    assert '    mode: "0600"' in tasks
+    assert "  no_log: true\n  diff: false\n  register: api_gateway_env_template" in tasks
+    completeness = json.loads((REPO_ROOT / "config" / "service-completeness.json").read_text(encoding="utf-8"))
+    api_gateway_profile = completeness["services"]["api_gateway"]
+    assert api_gateway_profile["oidc_provider"] == "authentik"
+    assert api_gateway_profile["authentik_client_generated"] is True
+    oauth_clients = (REPO_ROOT / "config" / "authentik" / "oauth-clients.yaml").read_text(encoding="utf-8")
+    api_gateway_client = oauth_clients.split("  - id: api-gateway\n", maxsplit=1)[1].split("\n  - id:", maxsplit=1)[0]
+    assert "    enabled: true" in api_gateway_client
     assert "--typesense-url" in tasks
     assert "LV3_GATEWAY_TYPESENSE_BASE_URL={{ api_gateway_resolved_typesense_base_url }}" in env_template
     assert "LV3_GATEWAY_TYPESENSE_API_KEY={{ api_gateway_resolved_typesense_api_key }}" in env_template

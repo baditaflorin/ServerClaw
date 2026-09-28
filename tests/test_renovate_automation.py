@@ -46,7 +46,7 @@ def test_renovate_config_targets_main_and_custom_repo_surfaces() -> None:
 def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -> None:
     workflow = RENOVATE_WORKFLOW_PATH.read_text(encoding="utf-8")
 
-    assert "registry.example.com/check-runner/renovate:" in workflow
+    assert "RENOVATE_IMAGE: ${{ vars.CONTAINER_REGISTRY }}/check-runner/renovate:" in workflow
     assert "@sha256:" in workflow
     assert "ghcr.io/renovatebot/renovate" not in workflow
     assert "scripts/renovate_runtime_token.py create" in workflow
@@ -80,7 +80,16 @@ def test_renovate_workflow_uses_harbor_pinned_image_and_runtime_token_helper() -
     assert "-e RENOVATE_ONBOARDING \\" in workflow
     assert "RENOVATE_X_STATIC_REPO_CONFIG_FILE=/workspace/renovate.json" in workflow
     assert '-v "${bootstrap_host_dir}:/var/run/lv3/renovate:ro"' in workflow
-    assert "RENOVATE_HELPER_IMAGE: registry.example.com/check-runner/python:3.12.10@sha256:" in workflow
+    assert "RENOVATE_HELPER_IMAGE: ${{ vars.CONTAINER_REGISTRY }}/check-runner/python:3.12.10@sha256:" in workflow
+
+
+def test_renovate_contract_rejects_untrusted_runtime_registry() -> None:
+    module = load_module(VALIDATE_MODULE_PATH, "validate_renovate_contract_image_ref")
+
+    with pytest.raises(ValueError, match="configured Harbor check-runner project"):
+        module.validate_renovate_image_ref(
+            "ghcr.io/renovatebot/renovate:42.76.4@sha256:d203eba7da7a5d198363c3d96ac6f917a4ec630b3fc2bd12501efbb2b3aa8c7d"
+        )
 
 
 def test_validate_renovate_contract_passes_for_repo_files() -> None:

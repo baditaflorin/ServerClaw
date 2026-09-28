@@ -213,8 +213,8 @@ api_gateway_billing_rejection_subject: billing.events.rejected
 api_gateway_sources:
   - src: "{{ api_gateway_repo_root }}/.githooks/pre-push"
     dest: .githooks/pre-push
-  - src: "{{ api_gateway_repo_root }}/.github/workflows/validate.yml"
-    dest: .github/workflows/validate.yml
+  - src: "{{ api_gateway_repo_root }}/.woodpecker.yml"
+    dest: .woodpecker.yml
   - src: "{{ api_gateway_repo_root }}/.pre-commit-config.yaml"
     dest: .pre-commit-config.yaml
   - src: "{{ api_gateway_repo_root }}/Makefile"
@@ -305,7 +305,7 @@ api_gateway_runtime_recovery_probe_delay: 5
 api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml
 api_gateway_runtime_packaged_probe_paths:
   - /app/.gitea/workflows/release-bundle.yml
-  - /app/.github/workflows/validate.yml
+  - /app/.woodpecker.yml
 api_gateway_database_name: windmill
 api_gateway_database_user: windmill_admin
 api_gateway_database_inventory_host: >-

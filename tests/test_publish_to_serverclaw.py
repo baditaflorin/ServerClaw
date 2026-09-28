@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import json
 import re
 import sys
 from pathlib import Path
@@ -12,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 publisher = importlib.import_module("publish_to_serverclaw")
+capacity_report = importlib.import_module("capacity_report")
 
 
 def test_public_inventory_template_matches_sanitized_proxmox_host_name() -> None:
@@ -33,6 +35,7 @@ def test_public_tier_a_templates_do_not_bypass_private_name_sanitization() -> No
     private_name_patterns = {
         "platform_server",
         "proxmox[_-]florin",
+        "florin",
     }
 
     for entry in config["file_replacements"]:
@@ -64,6 +67,19 @@ def test_public_proxmox_template_keeps_repo_intake_edge_route() -> None:
     assert repo_intake["edge"]["enabled"] is True
     assert repo_intake["edge"]["kind"] == "proxy"
     assert repo_intake["edge"]["upstream"].endswith(":8101")
+
+
+def test_public_capacity_model_template_matches_public_inventory() -> None:
+    model_path = REPO_ROOT / "publication" / "templates" / "capacity-model.json"
+    inventory_path = REPO_ROOT / "publication" / "templates" / "hosts.yml"
+    model = json.loads(model_path.read_text(encoding="utf-8"))
+
+    capacity_report.validate_capacity_model_payload(model, inventory_path=inventory_path)
+
+    inventory_hosts = capacity_report.load_inventory_hosts(inventory_path)
+    active_guest_names = {guest["name"] for guest in model["guests"] if guest["status"] == "active"}
+    assert active_guest_names == set(inventory_hosts) - {"proxmox-host"}
+    assert model["host"]["name"] == "Example Proxmox host"
 
 
 def test_publication_regenerates_derived_artifacts_after_template_replacement(monkeypatch, tmp_path: Path) -> None:

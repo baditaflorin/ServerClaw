@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.179.46
-platform_version: 0.178.223
+platform_version: 0.178.224
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -1183,5 +1183,5 @@ release_tracks:
     current: 0.179.46
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.178.223
+    current: 0.178.224
     meaning: intended platform release for the actual server configuration

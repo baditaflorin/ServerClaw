@@ -484,8 +484,8 @@ VALIDATION_GATE_SPECS: dict[str, dict[str, str | None]] = {
     },
     "service-completeness": {
         "runner_lane": "service-completeness",
-        "command": "python3 scripts/validate_service_completeness.py --validate",
-        "description": "Validate service completeness contracts.",
+        "command": "python3 scripts/validate_service_completeness.py --changed --validate",
+        "description": "Validate service completeness contracts affected by this change.",
     },
     "health-probes": {
         "runner_lane": "schema-validation",

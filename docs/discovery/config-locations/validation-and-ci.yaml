@@ -32,14 +32,14 @@ entries:
   .gitea/workflows/:
     purpose: Gitea Actions CI workflows (PRIMARY CI)
     owner: human
-    format: GitHub Actions-compatible YAML
+    format: Gitea Actions workflow YAML
     use_for: Local CI on self-hosted Gitea runner
     runs_on: docker-build self-hosted runner
-  .github/workflows/:
-    purpose: "GitHub Actions workflows (LEGACY — mirrors Gitea)"
+  .woodpecker.yml:
+    purpose: Woodpecker CI pipeline for the sanitized public repository
     owner: human
-    format: GitHub Actions YAML
-    use_for: "External CI (not primary — Gitea is primary)"
+    format: Woodpecker YAML
+    use_for: Public ServerClaw validation on the 0mcp Woodpecker instance
   scripts/generate_discovery_artifacts.py:
     purpose: Assembler for ADR 0327 discovery entrypoints and generated
       onboarding packs

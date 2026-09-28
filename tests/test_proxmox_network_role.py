@@ -15,10 +15,22 @@ ROLE_TASKS = (
     / "tasks"
     / "main.yml"
 )
+MAKEFILE_PATH = REPO_ROOT / "Makefile"
 DEFAULTS_PATH = REPO_ROOT / "roles" / "proxmox_network" / "defaults" / "main.yml"
 META_PATH = REPO_ROOT / "roles" / "proxmox_network" / "meta" / "argument_specs.yml"
 TEMPLATE_PATH = REPO_ROOT / "roles" / "proxmox_network" / "templates" / "nftables.conf.j2"
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
+GUEST_FIREWALL_TEMPLATE = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "proxmox_network"
+    / "templates"
+    / "vm.fw.j2"
+)
 
 
 def test_proxmox_network_renders_vm_firewall_from_active_role_path() -> None:
@@ -65,8 +77,47 @@ def test_host_vars_define_livekit_public_tcp_and_udp_forwards() -> None:
     assert host_vars["platform_port_assignments"]["livekit_tcp_port"] == 7881
     assert host_vars["platform_port_assignments"]["livekit_udp_port"] == 7882
     assert 7881 in host_vars["proxmox_public_ingress_tcp_ports"]
-    assert {
-        "listen_port": 7882,
-        "target_host": "10.10.10.20",
-        "target_port": 7882,
-    } in host_vars["proxmox_public_ingress_udp_forwards"]
+    livekit_udp_forward = next(
+        forward for forward in host_vars["proxmox_public_ingress_udp_forwards"] if forward["listen_port"] == 7882
+    )
+    assert livekit_udp_forward["target_host"] == (
+        "{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-comms') | list | first).ipv4 }}"
+    )
+    assert livekit_udp_forward["target_port"] == 7882
+
+
+def test_docker_build_allows_the_proxmox_metrics_proxy_backend() -> None:
+    host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
+    docker_build_policy = host_vars["network_policy"]["guests"]["docker-build"]
+
+    rule = next(
+        rule
+        for rule in docker_build_policy["allowed_inbound"]
+        if rule.get("description") == "Proxmox host connection from the Tailscale metrics proxy"
+    )
+
+    assert rule["source"] == "host"
+    assert rule["protocol"] == "tcp"
+    assert rule["ports"] == [9100]
+
+    template = GUEST_FIREWALL_TEMPLATE.read_text(encoding="utf-8")
+    assert "{% elif rule.source == 'host' %}" in template
+    assert "render_line(rule, source=policy.host_source, port=port)" in template
+
+
+def test_runtime_control_preserves_nginx_minio_access() -> None:
+    host_vars = yaml.safe_load(HOST_VARS_PATH.read_text(encoding="utf-8"))
+    runtime_control_policy = host_vars["network_policy"]["guests"]["runtime-control"]
+
+    nginx_rules = [rule for rule in runtime_control_policy["allowed_inbound"] if rule.get("source") == "nginx"]
+
+    assert any(rule["protocol"] == "tcp" and 9000 in rule["ports"] for rule in nginx_rules)
+
+
+def test_guest_network_policy_target_allows_narrow_strict_converges() -> None:
+    makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
+    target = makefile.split("converge-guest-network-policy:\n", 1)[1].split("\n\n", 1)[0]
+
+    assert "$(EXTRA_ARGS)" in target
+    assert "ANSIBLE_HOST_KEY_CHECKING=False" not in target
+    assert "ANSIBLE_HOST_KEY_CHECKING=$${ANSIBLE_HOST_KEY_CHECKING:-True}" in target

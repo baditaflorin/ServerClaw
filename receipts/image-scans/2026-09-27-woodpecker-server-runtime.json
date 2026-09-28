@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "woodpecker_server_runtime",
+  "image_ref": "docker.io/woodpeckerci/woodpecker-server:v3.18.1@sha256:0b8dbb53d3795f470f524cdb186551f0ad383cc4bd0d299febb7f3d7c6a56771",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "scanned_on": "2026-09-27",
+  "sbom_receipt": "receipts/sbom/0b8dbb53d379.cdx.json",
+  "cve_receipt": "receipts/cve/0b8dbb53d379-20260927T220925Z.grype.json",
+  "summary": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0,
+    "unknown": 1,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 1
+  }
+}

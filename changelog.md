@@ -13,6 +13,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Unreleased
 
 - Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
+- Allow the Builder metrics peer to scrape docker-build node-exporter over the private tailnet without disrupting Docker-managed firewall rules.
 - Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
 - Keep the sanitized ServerClaw host template consistent with active authenticated edge routes.
 

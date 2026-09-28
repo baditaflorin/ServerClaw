@@ -12,6 +12,8 @@
       - proxmox_acme_domain | length > 0
       - proxmox_tfa_description | length > 0
     fail_msg: "proxmox_security requires firewall policy, notification, ACME, and TFA inputs."
+  tags:
+    - proxmox_firewall_policy
 
 - name: Ensure security support packages are present
   ansible.builtin.apt:
@@ -21,18 +23,24 @@
     state: present
     update_cache: true
     force_apt_get: true
+  tags:
+    - proxmox_firewall_policy
 
 - name: Ensure Proxmox firewall configuration directory exists
   ansible.builtin.file:
     path: /etc/pve/firewall
     state: directory
     mode: "0755"
+  tags:
+    - proxmox_firewall_policy
 
 - name: Render cluster-wide Proxmox firewall policy to staging file
   ansible.builtin.template:
     src: cluster.fw.j2
     dest: /root/.lv3-cluster.fw
     mode: "0644"
+  tags:
+    - proxmox_firewall_policy
 
 - name: Install cluster-wide Proxmox firewall policy
   ansible.builtin.shell: |
@@ -45,12 +53,16 @@
     executable: /bin/bash
   register: proxmox_cluster_firewall
   changed_when: "'changed' in proxmox_cluster_firewall.stdout"
+  tags:
+    - proxmox_firewall_policy
 
 - name: Render host-specific Proxmox firewall policy to staging file
   ansible.builtin.template:
     src: host.fw.j2
     dest: /root/.lv3-host.fw
     mode: "0644"
+  tags:
+    - proxmox_firewall_policy
 
 - name: Install host-specific Proxmox firewall policy
   ansible.builtin.shell: |
@@ -63,21 +75,29 @@
     executable: /bin/bash
   register: proxmox_host_firewall
   changed_when: "'changed' in proxmox_host_firewall.stdout"
+  tags:
+    - proxmox_firewall_policy
 
 - name: Enable and start Proxmox firewall service
   ansible.builtin.systemd:
     name: pve-firewall
     enabled: true
     state: started
+  tags:
+    - proxmox_firewall_policy
 
 - name: Compile Proxmox firewall configuration
   ansible.builtin.command: pve-firewall compile
   changed_when: false
+  tags:
+    - proxmox_firewall_policy
 
 - name: Restart Proxmox firewall if rules changed
   ansible.builtin.command: pve-firewall restart
   when: proxmox_cluster_firewall.changed or proxmox_host_firewall.changed
   changed_when: true
+  tags:
+    - proxmox_firewall_policy
 
 # Guard: after any restart, verify pve-firewall actually populated ACCEPT rules in the
 # PVEFW-HOST-IN iptables chain. pve-firewall uses iptables (not nftables) for host
@@ -102,6 +122,8 @@
   changed_when: false
   when: proxmox_cluster_firewall.changed or proxmox_host_firewall.changed
   failed_when: false
+  tags:
+    - proxmox_firewall_policy
 
 - name: Emergency recovery — stop pve-firewall if PVEFW-HOST-IN has no ACCEPT rules
   ansible.builtin.shell: |
@@ -116,6 +138,8 @@
     - _pve_fw_accept_check.rc != 0
   changed_when: true
   failed_when: true
+  tags:
+    - proxmox_firewall_policy
 
 - name: Render break-glass sshd port drop-in
   ansible.builtin.copy:

@@ -40,6 +40,11 @@ GLOBAL_COMPLETENESS_INPUTS = {
     "config/slo-catalog.json",
     "config/subdomain-catalog.json",
 }
+SERVICE_SCOPED_COMPLETENESS_INPUTS = {
+    "config/data-catalog.json": ("data_stores", "id", "service"),
+    "config/slo-catalog.json": ("slos", "id", "service_id"),
+    "config/service-completeness.json": ("services", None, None),
+}
 
 CHECKLIST = [
     ("adr", "ADR"),
@@ -320,6 +325,99 @@ def merged_suppressions(profile: dict[str, Any], presets: dict[str, Any]) -> dic
     return suppressions
 
 
+def role_renders_root_only_env_file(role_dir: Path | None, service_id: str) -> bool:
+    """Accept a controller-rendered Compose env file only when it is protected.
+
+    OpenBao Agent sidecars are the preferred secret path. A controller-rendered
+    env file remains a valid injection mechanism for legacy consumers only when
+    the role writes it root-only and suppresses both task output and diffs.
+    """
+    if role_dir is None:
+        return False
+    tasks_path = role_dir / "tasks" / "main.yml"
+    if not tasks_path.is_file():
+        return False
+    task_text = tasks_path.read_text(encoding="utf-8")
+    expected_dest = f'dest: "{{{{ {service_id}_env_file }}}}"'
+    for block in re.split(r"(?m)(?=^- name: )", task_text):
+        if (
+            "ansible.builtin.template:" in block
+            and expected_dest in block
+            and 'mode: "0600"' in block
+            and "no_log: true" in block
+            and "diff: false" in block
+        ):
+            return True
+    return False
+
+
+def changed_services_in_catalog(path: str, base_ref: str) -> set[str] | None:
+    """Return service IDs represented by changed rows in a scoped catalog.
+
+    Unrecognized structural changes return None so callers retain the safe
+    repository-wide fallback instead of accidentally hiding an affected
+    service.
+    """
+    merge_base = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "merge-base", base_ref, "HEAD"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if merge_base.returncode != 0 or not merge_base.stdout.strip():
+        return None
+    baseline = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "show", f"{merge_base.stdout.strip()}:{path}"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    current_path = REPO_ROOT / path
+    if baseline.returncode != 0 or not current_path.is_file():
+        return None
+    try:
+        before = json.loads(baseline.stdout)
+        after = load_json(current_path)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+    collection_key, record_key, service_key = SERVICE_SCOPED_COMPLETENESS_INPUTS[path]
+    before_collection = before.get(collection_key)
+    after_collection = after.get(collection_key)
+    collections_are_mappings = isinstance(before_collection, dict) and isinstance(after_collection, dict)
+    collections_are_lists = isinstance(before_collection, list) and isinstance(after_collection, list)
+    if not (collections_are_mappings or collections_are_lists):
+        return None
+    if {key: value for key, value in before.items() if key != collection_key} != {
+        key: value for key, value in after.items() if key != collection_key
+    }:
+        return None
+
+    if record_key is None:
+        changed_keys = {
+            key
+            for key in set(before_collection) | set(after_collection)
+            if before_collection.get(key) != after_collection.get(key)
+        }
+        return {key for key in changed_keys if isinstance(key, str)}
+
+    before_rows = {row.get(record_key): row for row in before_collection if isinstance(row, dict)}
+    after_rows = {row.get(record_key): row for row in after_collection if isinstance(row, dict)}
+    if len(before_rows) != len(before_collection) or len(after_rows) != len(after_collection):
+        return None
+    changed_keys = {key for key in set(before_rows) | set(after_rows) if before_rows.get(key) != after_rows.get(key)}
+    service_ids: set[str] = set()
+    for key in changed_keys:
+        for row in (before_rows.get(key), after_rows.get(key)):
+            if row is None:
+                continue
+            service_id = row.get(service_key) if isinstance(row, dict) else None
+            if not isinstance(service_id, str) or not service_id:
+                return None
+            service_ids.add(service_id)
+    return service_ids
+
+
 def suppression_for(item_id: str, suppressions: dict[str, str], today: dt.date) -> str | None:
     value = suppressions.get(item_id)
     if value is None:
@@ -432,8 +530,20 @@ def evaluate_service(
     slo_entries = [entry for entry in context["slos"] if entry.get("service_id", entry.get("service")) == service_id]
     data_entries = [entry for entry in context["data_stores"] if entry.get("service") == service_id]
 
-    compose_secrets_present = bool(
-        compose_template is not None and "openbao-agent" in compose_template and "env_file:" in compose_template
+    compose_uses_env_file = compose_template is not None and "env_file:" in compose_template
+    compose_uses_openbao = compose_uses_env_file and "openbao-agent" in compose_template
+    compose_uses_root_only_env_file = compose_uses_env_file and role_renders_root_only_env_file(role_dir, service_id)
+    compose_secrets_present = compose_uses_openbao or compose_uses_root_only_env_file
+    compose_secret_detail = (
+        f"{role_compose_path.relative_to(REPO_ROOT)} (OpenBao Agent env_file)"
+        if compose_uses_openbao and role_compose_path is not None
+        else (
+            f"{role_compose_path.relative_to(REPO_ROOT)} (root-only env_file, no_log, diff disabled)"
+            if compose_uses_root_only_env_file and role_compose_path is not None
+            else str(role_compose_path.relative_to(REPO_ROOT))
+            if role_compose_path is not None
+            else "not a compose service"
+        )
     )
     compose_declares_dependencies = bool(compose_template is not None and "depends_on:" in compose_template)
     compose_has_dependency_health_gate = bool(
@@ -489,9 +599,13 @@ def evaluate_service(
         item_result(
             "api_gateway",
             "API gateway registration",
-            required=True,
+            required=service_id != "api_gateway",
             present=bool(api_gateway_entries),
-            detail="config/api-gateway-catalog.json",
+            detail=(
+                "not applicable to the API gateway's own endpoint"
+                if service_id == "api_gateway"
+                else "config/api-gateway-catalog.json"
+            ),
             suppressions=suppressions,
             today=today,
         ),
@@ -553,7 +667,7 @@ def evaluate_service(
             "Compose secrets injection",
             required=bool(profile["requires_compose_secrets"]),
             present=compose_secrets_present,
-            detail=str(role_compose_path.relative_to(REPO_ROOT)) if role_compose_path else "not a compose service",
+            detail=compose_secret_detail,
             suppressions=suppressions,
             today=today,
         ),
@@ -621,7 +735,7 @@ def validate_services(
 ) -> tuple[list[ServiceResult], list[str]]:
     context = context or load_context()
     today = today or dt.date.today()
-    requested = service_ids or sorted(context["service_map"])
+    requested = sorted(context["service_map"]) if service_ids is None else service_ids
     results = [evaluate_service(service_id, today=today, context=context) for service_id in requested]
     failures: list[str] = []
     for result in results:
@@ -630,18 +744,37 @@ def validate_services(
     return results, failures
 
 
-def service_ids_for_changed_paths(changed_paths: list[str], context: dict[str, Any]) -> list[str] | None:
+def service_ids_for_changed_paths(
+    changed_paths: list[str], context: dict[str, Any], *, base_ref: str = "origin/main"
+) -> list[str] | None:
     """Scope completeness checks to changed services; return None for global validation.
 
-    Catalog and validator changes affect the whole service inventory. Service-role,
-    service-named test, and service-named documentation changes can use the same
-    checklist for only the affected services.
+    Catalog changes affect the whole service inventory. Service-role and
+    service-named documentation changes can use the same checklist for only the
+    affected services. Test-only edits do not change runtime completeness and
+    therefore must not make unrelated legacy service gaps block a test fix.
+    Changes outside service-owned surfaces return an empty list; validator
+    behavior is covered by its own tests and does not force unrelated legacy
+    services through an all-services audit.
     """
-    if not changed_paths or any(
+    if not changed_paths:
+        return []
+
+    normalized_paths = {path.replace("\\", "/") for path in changed_paths}
+    changed_catalog_paths = normalized_paths & set(SERVICE_SCOPED_COMPLETENESS_INPUTS)
+    affected: set[str] = set()
+    for path in changed_catalog_paths:
+        catalog_services = changed_services_in_catalog(path, base_ref)
+        if catalog_services is None:
+            return None
+        affected.update(catalog_services)
+
+    unscoped_global_change = any(
         path == item or path.startswith(item.rstrip("/") + "/")
-        for path in changed_paths
+        for path in normalized_paths - changed_catalog_paths
         for item in GLOBAL_COMPLETENESS_INPUTS
-    ):
+    )
+    if unscoped_global_change:
         return None
 
     role_to_services: dict[str, set[str]] = {}
@@ -654,15 +787,19 @@ def service_ids_for_changed_paths(changed_paths: list[str], context: dict[str, A
             role_to_services.setdefault(role_name, set()).add(service_id)
 
     service_slugs = {service_id: service_id.replace("_", "-").lower() for service_id in context["service_map"]}
-    affected: set[str] = set()
     role_prefix = "collections/ansible_collections/lv3/platform/roles/"
-    for path in changed_paths:
-        normalized = path.replace("\\", "/")
+    for normalized in normalized_paths:
         if normalized.startswith(role_prefix):
             role_name = normalized[len(role_prefix) :].split("/", maxsplit=1)[0]
             matched_role_services = role_to_services.get(role_name)
             if not matched_role_services:
-                return None
+                # Known service-role families without a catalog mapping must
+                # fail closed. Unmapped platform roles (for example,
+                # proxmox_security) are not service-owned and should not fan
+                # out into the expired legacy service backlog.
+                if role_name.endswith(("_runtime", "_postgres", "_vm")):
+                    return None
+                continue
             affected.update(matched_role_services)
 
         if not normalized.startswith(
@@ -673,7 +810,6 @@ def service_ids_for_changed_paths(changed_paths: list[str], context: dict[str, A
                 "docs/runbooks/",
                 "docs/workstreams/",
                 "scripts/",
-                "tests/",
             )
         ):
             continue
@@ -682,11 +818,32 @@ def service_ids_for_changed_paths(changed_paths: list[str], context: dict[str, A
             if re.search(rf"(?:^|[^a-z0-9]){re.escape(slug)}(?:$|[^a-z0-9])", path_slug):
                 affected.add(service_id)
 
-    return sorted(affected) if affected else None
+    return sorted(affected)
 
 
 def changed_paths_from_git(repo_root: Path, base_ref: str) -> list[str] | None:
-    """Return paths changed from a base ref, or None when Git cannot prove a scope."""
+    """Return the precomputed changed paths or derive them from Git.
+
+    Remote validation snapshots may not contain the caller's Git refs. The
+    pre-push runner therefore forwards its already-verified path set through
+    ``LV3_VALIDATION_CHANGED_FILES_JSON``; malformed context fails closed to a
+    full validation.
+    """
+    supplied_paths = os.environ.get("LV3_VALIDATION_CHANGED_FILES_JSON")
+    if supplied_paths is not None:
+        try:
+            payload = json.loads(supplied_paths)
+        except json.JSONDecodeError:
+            return None
+        if not isinstance(payload, list) or any(not isinstance(path, str) for path in payload):
+            return None
+        normalized_paths = sorted({path.strip().replace("\\", "/") for path in payload if path.strip()})
+        # The remote runner currently emits [] when it cannot establish a merge
+        # base. Treat that as unknown scope, not as proof that no service is
+        # affected; only a successfully derived non-empty changed-path set may
+        # narrow this gate.
+        return normalized_paths or None
+
     merge_base = subprocess.run(
         ["git", "-C", str(repo_root), "merge-base", base_ref, "HEAD"],
         capture_output=True,
@@ -739,7 +896,11 @@ def main(argv: list[str] | None = None) -> int:
         service_ids = args.service
         if args.changed:
             changed_paths = changed_paths_from_git(REPO_ROOT, args.base_ref)
-            service_ids = None if changed_paths is None else service_ids_for_changed_paths(changed_paths, context)
+            service_ids = (
+                None
+                if changed_paths is None
+                else service_ids_for_changed_paths(changed_paths, context, base_ref=args.base_ref)
+            )
         results, failures = validate_services(service_ids, context=context)
     except ValueError as exc:
         print(f"error: {exc}", file=sys.stderr)

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "plausible_runtime",
+  "image_ref": "ghcr.io/plausible/community-edition:v3.2.1@sha256:7450d9df4bfce160541d65bdba6bd4bcdd9a6db07f13dde91060705fa242c650",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "scanned_on": "2026-09-28",
+  "sbom_receipt": "receipts/sbom/7450d9df4bfc.cdx.json",
+  "cve_receipt": "receipts/cve/7450d9df4bfc-20260928T005251Z.grype.json",
+  "summary": {
+    "critical": 9,
+    "high": 98,
+    "medium": 69,
+    "low": 16,
+    "unknown": 1,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 193
+  }
+}

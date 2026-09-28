@@ -56,6 +56,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -72,8 +73,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 ALLOWLIST_DIRS: tuple[str, ...] = (
     ".git",
+    ".ansible",
     ".claude",
+    ".codex",
     ".local",
+    ".worktrees",
     "build",
     "catalog",
     "config",
@@ -280,15 +284,26 @@ class Finding:
 
 
 def _iter_candidate_files(root: Path) -> Iterable[Path]:
-    for path in root.rglob("*"):
-        if not path.is_file():
-            continue
-        if path.suffix.lower() not in TEXT_SUFFIXES:
-            continue
-        rel = path.relative_to(root)
-        if _is_allowlisted(rel):
-            continue
-        yield path
+    for current_root, dirnames, filenames in os.walk(root):
+        current_path = Path(current_root)
+        rel_dir = current_path.relative_to(root)
+        # Prune ignored/generated trees before walking them. Besides keeping
+        # worktree-local Ansible shards from being scanned as source, this
+        # avoids recursively traversing nested worktrees and tool caches.
+        dirnames[:] = [
+            dirname
+            for dirname in dirnames
+            if not _is_allowlisted(rel_dir / dirname)
+            and not any(part in ALLOWLIST_DIRS for part in (rel_dir / dirname).parts)
+        ]
+        for filename in filenames:
+            path = current_path / filename
+            if path.suffix.lower() not in TEXT_SUFFIXES:
+                continue
+            rel = path.relative_to(root)
+            if _is_allowlisted(rel):
+                continue
+            yield path
 
 
 def scan_file(

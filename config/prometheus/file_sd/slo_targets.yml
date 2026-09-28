@@ -1,3 +1,12 @@
+# BEGIN SERVICE: api_gateway
+- targets:
+    - https://api.example.com/healthz
+  labels:
+    service_id: api_gateway
+    slo_id: api-gateway-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+# END SERVICE: api_gateway
 # BEGIN SERVICE: authentik
 - targets:
     - https://id.example.com/-/health/ready/

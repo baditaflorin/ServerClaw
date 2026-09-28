@@ -2,6 +2,48 @@ groups:
   - name: slo_alert_rules
     interval: 1m
     rules:
+# BEGIN SERVICE: api_gateway
+      - alert: SLOFastBurn_api_gateway_availability
+        expr: (slo:api_gateway_availability:error_rate_5m > (14 * 0.005000)) and (slo:api_gateway_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: api_gateway
+          slo_id: api-gateway-availability
+          indicator: availability
+        annotations:
+          summary: api-gateway-availability is burning its error budget at 14x
+          description: The API Gateway health endpoint remains reachable through the shared
+            edge for authenticated platform API traffic.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_api_gateway_availability
+        expr: slo:api_gateway_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: api_gateway
+          slo_id: api-gateway-availability
+          indicator: availability
+        annotations:
+          summary: api-gateway-availability is burning its error budget at 3x
+          description: The API Gateway health endpoint remains reachable through the shared
+            edge for authenticated platform API traffic.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_api_gateway_availability
+        expr: slo:api_gateway_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: api_gateway
+          slo_id: api-gateway-availability
+          indicator: availability
+        annotations:
+          summary: api-gateway-availability has less than 10% error budget remaining
+          description: The API Gateway health endpoint remains reachable through the shared
+            edge for authenticated platform API traffic.
+          runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: api_gateway
 # BEGIN SERVICE: authentik
       - alert: SLOFastBurn_authentik_availability
         expr: (slo:authentik_availability:error_rate_5m > (14 * 0.005000)) and (slo:authentik_availability:error_rate_1h

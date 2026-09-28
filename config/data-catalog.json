@@ -3,6 +3,20 @@
   "schema_version": "1.0.0",
   "data_stores": [
     {
+      "id": "api-gateway-runtime-state",
+      "service": "api_gateway",
+      "name": "API Gateway operational state and run receipts",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "API Gateway runtime data volume mounted at /data"
+      ],
+      "notes": "The gateway stores degradation state, NATS outbox records, drift receipts, and runbook execution outputs under its persistent data volume. No backup or retention contract is currently declared, so the catalog does not claim either."
+    },
+    {
       "id": "authentik_primary_data",
       "service": "authentik",
       "name": "Authentik primary data",

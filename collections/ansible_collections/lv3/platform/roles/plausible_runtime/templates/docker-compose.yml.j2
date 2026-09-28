@@ -27,6 +27,7 @@ services:
     image: {{ plausible_clickhouse_image }}
     container_name: {{ plausible_clickhouse_container_name }}
     restart: unless-stopped
+    cpu_shares: {{ plausible_clickhouse_cpu_shares | int }}
     environment:
       CLICKHOUSE_SKIP_USER_SETUP: "1"
     ulimits:

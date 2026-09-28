@@ -28,6 +28,15 @@ Both ChatGPT and Claude may be used in this repo. Work as if another assistant w
 16. Keep everything structurally solid: separate concerns, prefer small reversible changes, and do not mix bootstrap, security, storage, and Proxmox object management in one opaque step.
 17. Every ADR must record both decision status and implementation state, including the first repo version, first platform version, and date where implementation became true.
 
+## CI Policy
+
+- Use the configured self-hosted Woodpecker CI for public ServerClaw validation.
+- Do not add or restore GitHub Actions workflows or depend on GitHub-hosted runners.
+- Keep the public branch ruleset's required Woodpecker status check enabled; a
+  missing GitHub Actions status is not a reason to weaken merge protection.
+- The private source repository may retain its separately governed self-hosted
+  Gitea validation workflow; do not confuse that with GitHub-hosted Actions.
+
 ## Public Repo Mode
 
 Treat this repository as a forkable reference implementation unless a

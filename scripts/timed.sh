@@ -61,4 +61,4 @@ printf '{"ts":"%s","label":"%s","duration_s":%d,"rc":%d,"cmd":"%s","log":"%s"}\n
   "$TS" "$LABEL_ESC" "$DURATION" "$RC" "$CMD_ESC" "$LOG_ESC" >> "$JOURNAL"
 
 printf '\n[timing] %s: %ds, rc=%d, log=%s\n' "$LABEL" "$DURATION" "$RC" "$LOG"
-exit $RC
+exit "$RC"

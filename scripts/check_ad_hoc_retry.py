@@ -17,8 +17,11 @@ SCAN_ROOTS = ("platform", "scripts")
 IGNORED_PATHS = {
     Path("platform/retry/classification.py"),
     Path("platform/retry/policy.py"),
+    # ADR 0464's canonical SSH wrapper classifies and receipts each subprocess attempt.
+    Path("scripts/ssh_with_retry.py"),
 }
 RETRY_TOKENS = ("attempt", "retry", "retries", "backoff", "max_attempts", "retry_delay")
+RETRY_GUARD_ALLOW_MARKER = "# retry-guard: allow:"
 
 
 @dataclass(frozen=True)
@@ -29,8 +32,9 @@ class Finding:
 
 
 class RetryLoopVisitor(ast.NodeVisitor):
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, *, source_lines: list[str] | None = None) -> None:
         self.path = path
+        self.source_lines = source_lines or []
         self.findings: list[Finding] = []
 
     def visit_For(self, node: ast.For) -> None:
@@ -45,6 +49,8 @@ class RetryLoopVisitor(ast.NodeVisitor):
         if not self._looks_retry_related(node):
             return
         if any(self._is_time_sleep(call) for call in ast.walk(node) if isinstance(call, ast.Call)):
+            if self._has_approved_exception(node):
+                return
             self.findings.append(
                 Finding(
                     path=self.path,
@@ -52,6 +58,14 @@ class RetryLoopVisitor(ast.NodeVisitor):
                     message="retry-like loop uses raw time.sleep; migrate to platform.retry.with_retry",
                 )
             )
+
+    def _has_approved_exception(self, node: ast.For | ast.While) -> bool:
+        if node.lineno < 2 or node.lineno - 2 >= len(self.source_lines):
+            return False
+        comment = self.source_lines[node.lineno - 2].strip()
+        if not comment.startswith(RETRY_GUARD_ALLOW_MARKER):
+            return False
+        return bool(comment[len(RETRY_GUARD_ALLOW_MARKER) :].strip())
 
     @staticmethod
     def _is_time_sleep(node: ast.Call) -> bool:
@@ -89,8 +103,9 @@ def iter_python_paths() -> list[Path]:
 def collect_findings() -> list[Finding]:
     findings: list[Finding] = []
     for path in iter_python_paths():
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        visitor = RetryLoopVisitor(path.relative_to(REPO_ROOT))
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(path))
+        visitor = RetryLoopVisitor(path.relative_to(REPO_ROOT), source_lines=source.splitlines())
         visitor.visit(tree)
         findings.extend(visitor.findings)
     return findings

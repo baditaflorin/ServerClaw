@@ -19,6 +19,7 @@ from collections.abc import Iterable
 
 DEFAULT_MANIFEST = Path("config/check-runner-manifest.json")
 SPINNER_FRAMES = "|/-\\"
+PLATFORM_TOPOLOGY_OVERLAY_CONTAINER_PATH = "/tmp/lv3-platform-topology.yml"
 PASSTHROUGH_ENV_VARS = (
     "LV3_SNAPSHOT_ID",
     "LV3_SNAPSHOT_GENERATED_AT",
@@ -161,6 +162,25 @@ def build_docker_command(
         workspace_mount_source = str(workspace.resolve())
     mount_args = ["-v", f"{workspace_mount_source}:/workspace"]
     env_args: list[str] = []
+    topology_overlay_value = os.environ.get("PLATFORM_TOPOLOGY_OVERLAY", "").strip()
+    if topology_overlay_value:
+        # Mount only the explicitly selected, non-secret topology document;
+        # never expose the operator's full .local directory to check images.
+        topology_overlay_path = Path(topology_overlay_value).expanduser().resolve()
+        if not topology_overlay_path.is_file():
+            raise ValueError(f"selected platform topology overlay does not exist: {topology_overlay_path}")
+        mount_args.extend(
+            [
+                "-v",
+                f"{topology_overlay_path}:{PLATFORM_TOPOLOGY_OVERLAY_CONTAINER_PATH}:ro",
+            ]
+        )
+        env_args.extend(
+            [
+                "-e",
+                f"PLATFORM_TOPOLOGY_OVERLAY={PLATFORM_TOPOLOGY_OVERLAY_CONTAINER_PATH}",
+            ]
+        )
     safe_directories = sorted({"/workspace", check.working_dir})
     env_args.extend(["-e", f"GIT_CONFIG_COUNT={len(safe_directories)}"])
     for index, safe_directory in enumerate(safe_directories):

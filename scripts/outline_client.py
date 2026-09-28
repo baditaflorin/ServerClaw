@@ -4,10 +4,18 @@
 from __future__ import annotations
 
 import json
+import sys
+import time
 import uuid
 from pathlib import Path
 from typing import Any
 from urllib import error, request
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from platform.retry import MaxRetriesExceeded, PlatformRetryError, RetryPolicy, with_retry
 
 DEFAULT_BASE_URL = "https://wiki.localhost"
 DEFAULT_TOKEN_FILE = Path(".local/outline/api-token.txt")
@@ -35,8 +43,6 @@ class OutlineClient:
         self.csrf_token = csrf_token
 
     def call(self, endpoint: str, payload: dict[str, Any], *, use_app_token: bool = False) -> dict[str, Any]:
-        import time
-
         body = json.dumps(payload).encode("utf-8")
         token = self.app_token if use_app_token else self.api_token
         headers = {
@@ -53,7 +59,10 @@ class OutlineClient:
             headers=headers,
             method="POST",
         )
-        for attempt in range(4):
+        retry_count = 0
+
+        def call_once() -> dict[str, Any]:
+            nonlocal retry_count
             try:
                 if self.opener is not None:
                     response_ctx = self.opener.open(req, timeout=60)
@@ -62,22 +71,45 @@ class OutlineClient:
                 with response_ctx as response:
                     return json.loads(response.read().decode("utf-8"))
             except error.HTTPError as exc:
-                if exc.code == 429 and attempt < 3:
-                    wait = 30 * (attempt + 1)
-                    time.sleep(wait)
-                    continue
+                if exc.code == 429:
+                    retry_count += 1
+                    raise PlatformRetryError(
+                        f"{endpoint} rate limited",
+                        code="http:429",
+                        retry_after=30 * retry_count,
+                    ) from exc
                 detail = exc.read().decode("utf-8", errors="replace")
                 raise OutlineError(f"{endpoint} failed with HTTP {exc.code}: {detail}") from exc
-        raise OutlineError(f"{endpoint} failed: exhausted retries")
+
+        try:
+            return with_retry(
+                call_once,
+                policy=RetryPolicy(
+                    max_attempts=4,
+                    base_delay_s=0,
+                    max_delay_s=0,
+                    multiplier=1,
+                    jitter=False,
+                    transient_max=0,
+                ),
+                error_context=f"Outline {endpoint}",
+                sleep_fn=time.sleep,
+            )
+        except MaxRetriesExceeded as exc:
+            rate_limit_error = exc.last_error
+            http_error = rate_limit_error.__cause__ if isinstance(rate_limit_error, PlatformRetryError) else None
+            if isinstance(http_error, error.HTTPError):
+                detail = http_error.read().decode("utf-8", errors="replace")
+                raise OutlineError(f"{endpoint} failed with HTTP 429: {detail}") from http_error
+            raise OutlineError(f"{endpoint} failed: exhausted retries") from exc
 
 
 # ---------------------------------------------------------------------------
 # Best-effort receipt publishing (ADR 0418)
 # ---------------------------------------------------------------------------
 
-_REPO_ROOT = Path(__file__).resolve().parents[1]
 _OUTLINE_TOOL = Path(__file__).resolve().parent / "outline_tool.py"
-_TOKEN_FILE = _REPO_ROOT / ".local" / "outline" / "api-token.txt"
+_TOKEN_FILE = REPO_ROOT / ".local" / "outline" / "api-token.txt"
 
 
 def publish_receipt_to_outline(receipt_path: Path) -> None:
