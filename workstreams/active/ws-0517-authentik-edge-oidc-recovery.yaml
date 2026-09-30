@@ -78,7 +78,7 @@ ownership_manifest:
       status: completed
     - id: t4
       title: Record sanitized live evidence and publish the branch through PR
-      status: in_progress
+      status: completed
     - id: t5
       title: Verify authorized callback and group behavior with a test identity
       status: pending

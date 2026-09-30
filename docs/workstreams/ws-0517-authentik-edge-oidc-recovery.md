@@ -81,5 +81,8 @@ workstream does not bypass those gates or claim those consumer issues are fixed.
   portal builds, and published-artifact secret scans passed. Certificate
   validation reported two private-only endpoint timeouts unrelated to public
   edge TLS; the other 46 hostnames validated.
+- Commit `3de86bc33` was pushed in PR #64, and both Woodpecker push and PR
+  pipelines passed. The PR remains open because the credentialed callback test
+  did not complete; do not mark the consumer migration fully verified yet.
 - The generated operations-portal snapshot is intentionally excluded from this
   branch unless a reviewed, deployment-neutral source change requires it.
