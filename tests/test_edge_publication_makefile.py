@@ -14,6 +14,21 @@ def test_configure_edge_publication_builds_shared_static_artifacts_first() -> No
     )
 
 
+def test_generate_platform_vars_refreshes_deployment_certificate_catalog() -> None:
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+
+    assert (
+        "generate-platform-vars:\n\t$(MAKE) generate-cross-cutting-artifacts\n"
+        "\tPYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py"
+        in makefile
+    )
+    assert "\t$(MAKE) generate-certificate-catalog\n" in makefile
+    assert (
+        "generate-certificate-catalog:\n\tuv run --with pyyaml python $(REPO_ROOT)/scripts/generate_certificate_catalog.py"
+        in makefile
+    )
+
+
 def test_converge_matrix_synapse_builds_and_validates_edge_publication_prerequisites() -> None:
     makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
 

@@ -25,6 +25,89 @@ archive_summary:
   by_year:
     '2026': 340
 workstreams:
+- id: ws-0517-authentik-edge-oidc-recovery
+  adr: 0491
+  title: Restore shared Authentik-protected edge sign-in
+  status: in_progress
+  ready_to_merge: false
+  live_applied: true
+  owner: codex
+  branch: codex/authentik-edge-oidc-recovery-20260930
+  worktree_path: .worktrees/authentik-edge-oidc-recovery-20260930
+  doc: docs/workstreams/ws-0517-authentik-edge-oidc-recovery.md
+  canonical_truth:
+    changelog_entry: Restore the shared Authentik-protected edge sign-in path.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      live_apply: receipts/live-applies/ws-0517-authentik-edge-oidc-recovery-apply-receipt.yaml
+  depends_on:
+  - ws-0512-authentik-consumer-e2e
+  conflicts_with: []
+  shared_surfaces:
+  - playbooks/public-edge.yml
+  - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/**
+  - Makefile
+  - scripts/generate_certificate_catalog.py
+  - tests/test_edge_publication_makefile.py
+  - docs/runbooks/configure-edge-publication.md
+  - tests/test_public_edge_oidc_auth_role.py
+  - docs/workstreams/ws-0517-authentik-edge-oidc-recovery.md
+  - workstreams/active/ws-0517-authentik-edge-oidc-recovery.yaml
+  - workstreams.yaml
+  - receipts/live-applies/ws-0517-authentik-edge-oidc-recovery-apply-receipt.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: shared_authentik_edge_runtime
+      paths:
+      - playbooks/public-edge.yml
+      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/**
+      - tests/test_public_edge_oidc_auth_role.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
+    - id: edge_certificate_catalog_generation
+      paths:
+      - Makefile
+      - scripts/generate_certificate_catalog.py
+      - tests/test_edge_publication_makefile.py
+      - docs/runbooks/configure-edge-publication.md
+      mode: exclusive
+    - id: authentik_edge_recovery_tracking
+      paths:
+      - docs/workstreams/ws-0517-authentik-edge-oidc-recovery.md
+      - workstreams/active/ws-0517-authentik-edge-oidc-recovery.yaml
+      mode: exclusive
+    - id: authentik_edge_recovery_receipt
+      paths:
+      - receipts/live-applies/ws-0517-authentik-edge-oidc-recovery-apply-receipt.yaml
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    context: Fresh unauthenticated probes returned 5xx for two applications protected
+      by the shared edge OAuth2 proxy. The proxy's OIDC configuration is valid and
+      points to Authentik, but discovery resolves the public issuer back to the host's
+      non-hairpinable public address. The managed role already pins the issuer hostname
+      to the local edge; the live host lacked that entry. No authentication gate will
+      be removed or bypassed. The live recovery preserves the existing proxy configuration
+      and credentials while applying the verified local firewall source and issuer
+      mapping. The existing non-admin browser harness did not reach the shared-proxy
+      callback, so its callback and least-privilege denial assertion remain pending
+      without any group widening.
+    tasks:
+    - id: t1
+      title: Confirm the live 5xx cause and test local TLS issuer discovery
+      status: completed
+    - id: t2
+      title: Apply the credential-preserving issuer and firewall recovery
+      status: completed
+    - id: t3
+      title: Verify proxy health and unauthenticated Authentik redirects
+      status: completed
+    - id: t4
+      title: Record sanitized live evidence and publish the branch through PR
+      status: in_progress
+    - id: t5
+      title: Verify authorized callback and group behavior with a test identity
+      status: pending
 - id: ws-0512-authentik-consumer-e2e
   adr: 0491
   title: Audit and repair live Authentik consumer sign-in paths end to end
