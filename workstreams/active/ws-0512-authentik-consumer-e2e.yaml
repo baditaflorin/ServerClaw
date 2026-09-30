@@ -58,6 +58,12 @@ shared_surfaces:
   - docs/runbooks/configure-harbor.md
   - docs/runbooks/configure-outline.md
   - docs/runbooks/configure-glitchtip.md
+  - docs/runbooks/security-posture-reporting.md
+  - inventory/group_vars/all/main.yml
+  - inventory/hosts.yml
+  - scripts/security_posture_report.py
+  - scripts/drift_lib.py
+  - tests/test_security_posture_report.py
   - docs/workstreams/ws-0512-authentik-consumer-e2e.md
   - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
   - workstreams.yaml
@@ -154,6 +160,16 @@ ownership_manifest:
         - docs/runbooks/configure-glitchtip.md
       mode: shared_contract
       contract: adr-0491-authentik-migration-v1
+    - id: security_posture_inventory_composition
+      paths:
+        - docs/runbooks/security-posture-reporting.md
+        - inventory/group_vars/all/main.yml
+        - inventory/hosts.yml
+        - scripts/security_posture_report.py
+        - scripts/drift_lib.py
+        - tests/test_security_posture_report.py
+      mode: shared_contract
+      contract: security-posture-report-v1
     - id: authentik_ci_workflow
       paths:
         - .woodpecker.yml
@@ -184,7 +200,13 @@ context: |
   receipt as current proof. Keep credentials in the ignored local overlay and
   use a non-admin identity for consumer testing.
 
-  2026-09-26 checkpoint: the recovery blueprint and dedicated test identity
+  2026-09-30 checkpoint: the aggregate host/image scan is fresh but critical,
+  per-image catalog receipts are stale, and vulnerability budgets still reject
+  consumer applies. Fresh Gitea/Harbor browser attempts did not reach callbacks
+  and were paused to avoid repeated credential submissions. The local
+  Authentik admin-token mirror required for safe identity/password reconciliation
+  is absent; do not guess credentials or bypass gates. The 2026-09-26 checkpoint:
+  the recovery blueprint and dedicated test identity
   were reconciled, and the narrow Authentik converge passed. Gitea and Harbor
   browser OIDC checks pass. Grafana authenticates but returns no orgRole;
   Outline realtime still fails its WebSocket handshake; GlitchTip still
@@ -203,4 +225,7 @@ tasks:
     status: blocked
   - id: t4
     title: Run repository checks, capture live evidence, and merge/publish through PRs
+    status: in_progress
+  - id: t5
+    title: Refresh host and image security evidence through the deployment inventory before runtime applies
     status: in_progress

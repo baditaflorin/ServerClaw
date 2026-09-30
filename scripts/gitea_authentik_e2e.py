@@ -209,7 +209,11 @@ def complete_authentik_login(
     timeout_ms: int,
     playwright_timeout_error: type[BaseException],
 ) -> None:
-    from session_logout_verify import authenticate_authentik_session
+    from session_logout_verify import (
+        authenticate_authentik_session,
+        safe_authentication_failure_code,
+        safe_location,
+    )
 
     try:
         authenticate_authentik_session(
@@ -219,11 +223,14 @@ def complete_authentik_login(
             timeout_milliseconds=timeout_ms,
             playwright_timeout_error=playwright_timeout_error,
         )
-    except Exception:
+    except Exception as exc:
         # The shared helper includes the current URL in some failures; that URL
-        # may contain OAuth state or authorization codes.
+        # may contain OAuth state or authorization codes. Keep only the
+        # exception class and query-free browser location for safe triage.
+        location = safe_location(getattr(page, "url", ""))
         raise VerificationError(
-            "Authentik browser login or callback failed; detailed diagnostics were redacted"
+            "Authentik browser login or callback failed; detailed diagnostics were redacted "
+            f"(stage={safe_authentication_failure_code(exc)}, exception={type(exc).__name__}, location={location})"
         ) from None
 
 

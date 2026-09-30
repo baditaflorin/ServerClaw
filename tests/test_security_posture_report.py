@@ -8,9 +8,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-import drift_lib  # noqa: E402
-import security_posture_report as report  # noqa: E402
-import platform.repo as platform_repo  # noqa: E402
+import drift_lib
+import security_posture_report as report
 
 
 def test_build_report_detects_new_lynis_findings_and_hardening_delta() -> None:
@@ -83,6 +82,7 @@ def test_default_lynis_hosts_reads_active_service_vms(monkeypatch) -> None:
             "services": [
                 {"vm": "docker-runtime", "environments": {"production": {"status": "active"}}},
                 {"vm": "coolify", "environments": {"production": {"status": "active"}}},
+                {"vm": "backup", "environments": {"production": {"status": "active"}}},
                 {"vm": "old-host", "environments": {"production": {"status": "retired"}}},
                 {"vm": "proxmox-host"},
             ]
@@ -90,6 +90,7 @@ def test_default_lynis_hosts_reads_active_service_vms(monkeypatch) -> None:
     )
 
     assert report.default_lynis_hosts("production") == [
+        "backup_guests",
         "coolify",
         "docker-runtime",
         "proxmox-host",
@@ -179,7 +180,7 @@ def test_run_ansible_security_scan_uses_bootstrap_key_and_jump_mode(monkeypatch,
     monkeypatch.setattr(report, "run_command", fake_run_command)
 
     report.run_ansible_security_scan(
-        inventory=tmp_path / "inventory.yml",
+        inventory=[tmp_path / "inventory.yml", tmp_path / "local-inventory.yml"],
         playbook=tmp_path / "playbook.yml",
         output_dir=tmp_path / "output",
         hosts=["proxmox-host", "docker-runtime"],
@@ -189,6 +190,11 @@ def test_run_ansible_security_scan_uses_bootstrap_key_and_jump_mode(monkeypatch,
 
     command = captured["command"]
     assert isinstance(command, list)
+    assert command[0] == "ansible-playbook"
+    assert [command[index + 1] for index, value in enumerate(command[:-1]) if value == "-i"] == [
+        str(tmp_path / "inventory.yml"),
+        str(tmp_path / "local-inventory.yml"),
+    ]
     assert "--private-key" in command
     assert "proxmox_guest_ssh_connection_mode=proxmox_host_jump" in command
     env = captured["env"]
@@ -197,24 +203,86 @@ def test_run_ansible_security_scan_uses_bootstrap_key_and_jump_mode(monkeypatch,
     assert env["LV3_PROXMOX_HOST_ADDR"] == "10.10.10.1"
 
 
+def test_security_report_parser_accepts_layered_inventory_sources(tmp_path: Path) -> None:
+    args = report.build_parser().parse_args(
+        ["--inventory", str(tmp_path / "repo.yml"), "--inventory", str(tmp_path / "local.yml")]
+    )
+
+    assert args.inventories == [tmp_path / "repo.yml", tmp_path / "local.yml"]
+
+
+def test_resolve_trivy_guest_addresses_uses_layered_inventory(monkeypatch, tmp_path: Path) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_run_command(command: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None):
+        captured["command"] = command
+        return drift_lib.CommandResult(
+            argv=command,
+            returncode=0,
+            stdout=json.dumps(
+                {
+                    "production": {
+                        "hosts": [
+                            "docker-runtime-yourname",
+                            "docker-runtime-lv3",
+                            "docker-build-yourname",
+                            "docker-build-lv3",
+                        ]
+                    },
+                    "_meta": {
+                        "hostvars": {
+                            "docker-runtime-yourname": {"ansible_host": "10.10.10.20"},
+                            "docker-runtime-lv3": {"ansible_host": "10.20.10.20"},
+                            "docker-build-yourname": {"ansible_host": "10.10.10.30"},
+                            "docker-build-lv3": {"ansible_host": "10.20.10.30"},
+                        }
+                    },
+                }
+            ),
+            stderr="",
+        )
+
+    monkeypatch.setattr(report, "run_command", fake_run_command)
+    inventory_paths = [tmp_path / "repo.yml", tmp_path / "local.yml"]
+
+    resolved = report.resolve_trivy_guest_addresses(inventory_paths, ["docker-runtime", "docker-build"], "production")
+
+    assert resolved == {"docker-runtime": "10.20.10.20", "docker-build": "10.20.10.30"}
+    command = captured["command"]
+    assert isinstance(command, list)
+    assert [command[index + 1] for index, value in enumerate(command[:-1]) if value == "-i"] == [
+        str(path) for path in inventory_paths
+    ]
+
+
 def test_build_guest_ssh_command_makes_proxy_non_interactive(tmp_path: Path) -> None:
+    context = {
+        "bootstrap_key": tmp_path / "worker.id_ed25519",
+        "host_user": "ops",
+        "host_addr": "100.64.0.1",
+        "host_port": "2222",
+        "guests": {"docker-runtime": "10.10.10.20"},
+    }
     command = drift_lib.build_guest_ssh_command(
-        {
-            "bootstrap_key": tmp_path / "worker.id_ed25519",
-            "host_user": "ops",
-            "host_addr": "100.64.0.1",
-            "host_port": "2222",
-            "guests": {"docker-runtime": "10.10.10.20"},
-        },
+        context,
         "docker-runtime",
         "true",
     )
+    tunnel_command = drift_lib.build_guest_ssh_tunnel_command(
+        context,
+        "docker-runtime",
+        local_bind="127.0.0.1:4222",
+        remote_bind="127.0.0.1:4222",
+    )
 
-    joined = " ".join(command)
-    assert "ProxyCommand=ssh" in joined
-    assert " -p 2222 " in joined
-    assert "StrictHostKeyChecking=no" in joined
-    assert "UserKnownHostsFile=/dev/null" in joined
+    for ssh_command in (command, tunnel_command):
+        joined = " ".join(ssh_command)
+        assert "ProxyCommand=ssh" in joined
+        assert " -p 2222 " in joined
+        assert " -W %h:%p " in joined
+        assert joined.index(" -W %h:%p ") < joined.index("ops@100.64.0.1")
+        assert "StrictHostKeyChecking=no" in joined
+        assert "UserKnownHostsFile=/dev/null" in joined
 
 
 def test_resolve_nats_tunnel_target_prefers_runtime_control() -> None:
@@ -245,8 +313,14 @@ def test_inventory_guest_proxy_command_is_non_interactive() -> None:
     group_vars = group_vars_path.read_text(encoding="utf-8")
 
     assert "proxmox_guest_ssh_proxy_command" in group_vars
-    assert "ProxyJump=" in group_vars
-    assert 'proxmox_host_jump: "-o IdentitiesOnly=yes {{ proxmox_guest_ssh_proxy_command }}"' in group_vars
+    assert (
+        'ProxyCommand="ssh -p {{ proxmox_guest_ssh_jump_port }} -W %h:%p -o IdentitiesOnly=yes -i {{ proxmox_guest_ssh_bootstrap_key_path }}'
+        in group_vars
+    )
+    assert (
+        'proxmox_host_jump: "-o IdentitiesOnly=yes -i {{ proxmox_guest_ssh_bootstrap_key_path }} {{ proxmox_guest_ssh_proxy_command }}"'
+        in group_vars
+    )
     assert "LV3_PROXMOX_HOST_ADDR" in group_vars
     assert "LV3_PROXMOX_HOST_PORT" in group_vars
 
@@ -255,6 +329,7 @@ def test_inventory_proxmox_host_is_env_overridable() -> None:
     inventory = (REPO_ROOT / "inventory" / "hosts.yml").read_text(encoding="utf-8")
 
     assert "lookup('env', 'LV3_PROXMOX_HOST_ADDR')" in inventory
+    assert "lookup('env', 'LV3_PROXMOX_HOST_PORT')" in inventory
 
 
 def test_skip_lynis_reuses_cached_reports(monkeypatch, tmp_path: Path) -> None:
