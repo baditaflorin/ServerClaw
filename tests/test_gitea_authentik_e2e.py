@@ -87,20 +87,28 @@ def test_browser_session_proves_expected_non_admin_user() -> None:
 def test_authentik_browser_errors_are_redacted(monkeypatch: pytest.MonkeyPatch) -> None:
     import session_logout_verify
 
+    class FakePageWithSensitiveQuery:
+        url = "https://id.example.net/if/flow/default/?state=do-not-log&code=also-do-not-log"
+
     def fail_with_sensitive_url(*_args: object, **_kwargs: object) -> None:
-        raise RuntimeError("authorization failed at https://id.example.net/flow/?state=do-not-log")
+        raise session_logout_verify.VerificationError("Authentik login remained visible; code=do-not-log")
 
     monkeypatch.setattr(session_logout_verify, "authenticate_authentik_session", fail_with_sensitive_url)
     with pytest.raises(MODULE.VerificationError, match="diagnostics were redacted") as caught:
         MODULE.complete_authentik_login(
-            object(),
+            FakePageWithSensitiveQuery(),
             username="gitea-e2e",
             password="not-for-output",
             timeout_ms=1000,
             playwright_timeout_error=TimeoutError,
         )
     assert "do-not-log" not in str(caught.value)
+    assert "also-do-not-log" not in str(caught.value)
+    assert "exception=VerificationError" in str(caught.value)
+    assert "stage=login_form_remained_visible" in str(caught.value)
+    assert "location=https://id.example.net/if/flow/default/" in str(caught.value)
     assert "not-for-output" not in str(caught.value)
+    assert "code=do-not-log" not in str(caught.value)
 
 
 @pytest.mark.parametrize(

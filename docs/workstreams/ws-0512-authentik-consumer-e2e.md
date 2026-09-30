@@ -147,6 +147,42 @@ explicitly least-privileged.
 - Code PR #244 is merged. This status/receipt PR and required ServerClaw
   publication remain to be completed after this checkpoint.
 
+## Live verification checkpoint — 2026-09-30
+
+- The public service front doors responded, but a fresh Gitea and Harbor
+  browser run did not reach either application's OIDC callback. Both remained
+  on Authentik's login flow after the test credential was submitted. The E2E
+  harness now reports only an allowlisted failure stage, exception class, and
+  query-free URL; no credential or OAuth query value is emitted. Further login
+  retries were stopped pending credential/API reconciliation.
+- A fresh host scan completed against 13 selected production hosts. Trivy also
+  completed against 70 running images; the aggregate report is critical, with
+  1,106 CRITICAL and 12,237 HIGH finding instances. These are per-image finding
+  counts, not a count of unique CVEs. The generated security report is local
+  ignored evidence; no raw receipt or secret was added to Git.
+- The image scanner now resolves each running container to its immutable local
+  Docker image ID, refuses an implicit pull if that image is unavailable, and
+  resolves the `docker-runtime`/`docker-build` selectors through the selected
+  environment's concrete inventory aliases. Regression tests cover both paths.
+- The live `vulnerability_budget.py` checks still reject the Authentik,
+  Gitea, Harbor, Grafana, Outline, and GlitchTip applies. The control,
+  monitoring, and Docker runtime hosts exceed their warning budgets; relevant
+  host/image exceptions have expired; and several service-image receipts are
+  stale or over the critical-finding budget. No exceptions were renewed and no
+  production consumer apply or gate bypass was performed.
+- Because the aggregate security report is not a substitute for the catalog's
+  per-image Grype/Syft receipts, those receipts must still be refreshed through
+  the governed image workflow. The separate local Authentik admin-token mirror
+  required for read-only identity reconciliation was absent, so the existing
+  non-admin account's local password file could not be reconciled against the
+  live user record in this pass.
+
+Current conclusion: Authentik and the consumer front doors are reachable, but
+the OIDC login/callback state is not currently proven end to end. The workstream
+remains blocked on safe test-identity reconciliation and vulnerability-budget
+remediation; the 2026-09-26 Gitea/Harbor success is historical, not current
+proof.
+
 ## Verification
 
 1. Compare the live Authentik application/provider catalog with the checked-in
