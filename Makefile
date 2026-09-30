@@ -641,6 +641,11 @@ validate-generated-readme: ## Exit 1 if README.md is out of sync with docs/templ
 generate-platform-vars:
 	$(MAKE) generate-cross-cutting-artifacts
 	PYTHONPATH=$(REPO_ROOT) uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --write $(DEPLOYMENT_ARG) $(if $(strip $(PLATFORM_IDENTITY_OVERLAY)),--identity-file "$(PLATFORM_IDENTITY_OVERLAY)",) $(if $(strip $(PLATFORM_TOPOLOGY_OVERLAY)),--topology-file "$(PLATFORM_TOPOLOGY_OVERLAY)",)
+	$(MAKE) generate-certificate-catalog
+
+.PHONY: generate-certificate-catalog
+generate-certificate-catalog:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_certificate_catalog.py
 
 generate-slo-rules:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --write

@@ -1,0 +1,30 @@
+workstream_id: ws-0517-authentik-edge-oidc-recovery
+state: completed
+schema_version: 1.1.0
+started_at: '2026-09-30T14:14:51Z'
+completed_at: '2026-09-30T15:41:22Z'
+applied_by: codex/authentik-edge-oidc-recovery-20260930
+repo_version: 0.179.47
+adr: 0491
+summary: Apply the managed Authentik issuer loopback pin and recover the shared edge
+  OAuth2 proxy.
+targets:
+- service: public_edge_oidc_auth
+  host_group: nginx
+  vmid: 110
+errors: []
+notes:
+- 'Scoped governed apply completed: persistent firewall and credential-preserving
+  issuer recovery only; no NGINX publication or proxy credential rendering.'
+- Verified issuer discovery HTTP 200, local proxy auth denial HTTP 401, active service
+  with zero restarts at follow-up, and both protected routes reaching the Authentik
+  login flow.
+- The verified live management gateway was added only to ignored local inventory;
+  firewall reload preserved SSH access.
+- The existing non-admin browser harness was attempted twice but did not reach the
+  shared-proxy callback. This is not a passing denial or authenticated-session result;
+  no group changes were made.
+- Full configuration reconciliation remains gated by the missing controller-local
+  OIDC client-secret artifact; no secret was retrieved, copied, rotated, or printed.
+- Certificate validation passed for 46 hostnames; two private-only endpoint connections
+  timed out.

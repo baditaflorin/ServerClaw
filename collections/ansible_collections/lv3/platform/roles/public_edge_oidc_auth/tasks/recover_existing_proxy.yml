@@ -1,0 +1,52 @@
+# Purpose: Recover an installed edge OIDC proxy after its issuer loopback mapping fails.
+# Use case: Repair local issuer resolution without rendering configuration or handling credentials.
+# Inputs: Existing proxy role defaults, the canonical issuer URL, and the target's Ansible address.
+# Outputs: Correct local issuer mapping, restarted proxy, and a verified unauthenticated auth response.
+# Idempotency: The hosts entry converges; the proxy is deliberately restarted to reload issuer discovery.
+# Dependencies: The public_edge_oidc_auth role defaults and an already-installed proxy configuration.
+---
+- name: Validate existing edge OIDC proxy recovery inputs
+  ansible.builtin.assert:
+    that:
+      - public_edge_oidc_auth_issuer_url is string
+      - public_edge_oidc_auth_issuer_url | length > 0
+      - public_edge_oidc_auth_service_name is string
+      - public_edge_oidc_auth_service_name | length > 0
+      - ansible_host | default('') | length > 0
+    fail_msg: "Existing edge OIDC recovery requires the issuer, service name, and target address."
+
+- name: Resolve the existing Authentik issuer hostname
+  ansible.builtin.set_fact:
+    public_edge_oidc_auth_recovery_issuer_hostname: "{{ public_edge_oidc_auth_issuer_url | urlsplit('hostname') }}"
+
+- name: Pin the existing Authentik issuer hostname to this NGINX edge
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^\s*[^#\s]+\s+{{ public_edge_oidc_auth_recovery_issuer_hostname | regex_escape }}(?:\s|$)'
+    line: "{{ ansible_host }} {{ public_edge_oidc_auth_recovery_issuer_hostname }}"
+    state: present
+    create: false
+
+- name: Restart the existing edge OIDC proxy to reload local issuer resolution
+  ansible.builtin.systemd_service:
+    name: "{{ public_edge_oidc_auth_service_name }}"
+    state: restarted
+  when: ansible_service_mgr == 'systemd'
+
+- name: Verify the existing edge OIDC proxy answers unauthenticated auth checks
+  ansible.builtin.uri:
+    url: "http://{{ public_edge_oidc_auth_http_address }}/oauth2/auth"
+    method: GET
+    headers:
+      Host: "{{ public_edge_oidc_auth_probe_hostname }}"
+      X-Forwarded-Proto: https
+      X-Forwarded-Host: "{{ public_edge_oidc_auth_probe_hostname }}"
+      X-Forwarded-Uri: /
+      X-Real-IP: 127.0.0.1
+    status_code: 401
+  register: public_edge_oidc_auth_recovery_verify
+  changed_when: false
+  retries: 10
+  delay: 2
+  until: public_edge_oidc_auth_recovery_verify.status == 401
+  when: ansible_service_mgr == 'systemd'
