@@ -61,6 +61,18 @@ def safe_location(url: str) -> str:
     return path
 
 
+def safe_authentication_failure_code(error: BaseException) -> str:
+    """Map browser-auth failures to a small, non-sensitive diagnostic code."""
+    message = str(error).lower()
+    if "did not present the password stage" in message:
+        return "password_stage_not_present"
+    if "did not complete a relying-party callback" in message:
+        return "callback_not_completed"
+    if "login remained visible" in message:
+        return "login_form_remained_visible"
+    return "flow_step_failed"
+
+
 def assert_response_host(current_url: str, *, expected_host: str, label: str) -> None:
     if urlparse(current_url).hostname != expected_host:
         raise VerificationError(f"{label} should land on {expected_host}, landed on {safe_location(current_url)}")

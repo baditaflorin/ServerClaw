@@ -37,6 +37,18 @@ Or call the Python entrypoint directly:
 python3 scripts/security_posture_report.py --env production --print-report-json
 ```
 
+When a deployment keeps its concrete Ansible hosts in the ignored local
+inventory overlay, pass both inventory sources. The local inventory is layered
+after the generic repo inventory so its host aliases and connection details
+take precedence:
+
+```bash
+python3 scripts/security_posture_report.py --env production \
+  --inventory inventory/hosts.yml \
+  --inventory .local/inventory/hosts.yml \
+  --print-report-json
+```
+
 If the Lynis collection step already completed and you only need to retry aggregation or downstream publication, reuse the fetched `*.dat` files in `.local/security-posture/lynis/`:
 
 ```bash
@@ -64,7 +76,7 @@ The workflow:
    `postgres`, `nginx-edge`, and `monitoring`)
 2. fetches each `report.dat` file into `.local/security-posture/lynis/`
 3. parses and suppresses known-acceptable Lynis findings
-4. SSHes to `docker-runtime` and `docker-build` and runs `scripts/trivy_scan_running_images.sh`
+4. SSHes to `docker-runtime` and `docker-build` and runs `scripts/trivy_scan_running_images.sh`, which scans immutable local image IDs and fails closed rather than implicitly pulling a missing image from a registry
 5. compares the new scan to the latest committed receipt in `receipts/security-reports/`
 6. writes a new JSON receipt under `receipts/security-reports/`
 

@@ -39,6 +39,19 @@ def test_safe_location_strips_credentials_and_callback_query_values() -> None:
     assert "oauth-state" not in safe
 
 
+@pytest.mark.parametrize(
+    "message,expected",
+    [
+        ("Authentik did not present the password stage", "password_stage_not_present"),
+        ("Authentik login did not complete a relying-party callback", "callback_not_completed"),
+        ("Authentik login remained visible", "login_form_remained_visible"),
+        ("sensitive unknown failure", "flow_step_failed"),
+    ],
+)
+def test_authentication_failure_diagnostics_are_allowlisted(message: str, expected: str) -> None:
+    assert session_logout_verify.safe_authentication_failure_code(RuntimeError(message)) == expected
+
+
 def test_assert_response_host_rejects_unexpected_host() -> None:
     with pytest.raises(session_logout_verify.VerificationError, match="should land"):
         session_logout_verify.assert_response_host(

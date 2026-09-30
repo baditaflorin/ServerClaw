@@ -119,9 +119,16 @@ def verify_login(
                 )
             except VerificationError:
                 raise
-            except Exception:
+            except Exception as exc:
                 # Browser exceptions can contain OAuth state, codes, or credentials.
-                raise VerificationError("Harbor Authentik browser flow failed; diagnostics redacted") from None
+                from session_logout_verify import safe_authentication_failure_code, safe_location
+
+                location = safe_location(page.url)
+                raise VerificationError(
+                    "Harbor Authentik browser flow failed; diagnostics redacted "
+                    f"(stage={safe_authentication_failure_code(exc)}, exception={type(exc).__name__}, "
+                    f"location={location})"
+                ) from None
 
             if urlparse(page.url).hostname != app_host:
                 raise VerificationError("Authentik did not return the browser to Harbor")
