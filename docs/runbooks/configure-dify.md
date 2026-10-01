@@ -1,6 +1,6 @@
 # Configure Dify
 
-This runbook covers the repo-managed Dify deployment introduced by [ADR 0197](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/docs/adr/0197-dify-visual-llm-workflow-canvas.md).
+This runbook covers the repo-managed Dify deployment introduced by [ADR 0197](../adr/0197-dify-visual-llm-workflow-canvas.md).
 
 ## Scope
 
@@ -70,8 +70,8 @@ idempotent admin and SSO bootstrap. The manual tunnel below is still required
 for the independent workflow/tool-provider smoke test.
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 \
-  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -W %h:%p ops@100.64.0.1" \
+ssh -i .local/ssh/hetzner_llm_agents_ed25519 \
+  -o ProxyCommand="ssh -i .local/ssh/hetzner_llm_agents_ed25519 -W %h:%p ops@100.64.0.1" \
   -L 18094:127.0.0.1:8094 ops@10.10.10.20
 
 curl -fsS http://127.0.0.1:18094/healthz
@@ -102,4 +102,6 @@ When you run the smoke flow from a linked git worktree, the script now falls bac
 - This workstream deploys a Dify-local Qdrant sidecar so the live apply can remain isolated from ADR 0198.
 - Shared `vectors.example.com` migration should happen only after ADR 0198 is merged and applied from `main`.
 - Dify remains the authoring surface. Production workflows should be exported and promoted into Windmill.
+- The NGINX container resolves Compose upstream names through Docker's embedded DNS at request time, so recreating `api`, `web`, or `plugin_daemon` does not require a manual NGINX edit. The Squid SSRF proxy keeps `/run` on an ephemeral tmpfs so its PID file is not retained across container restarts.
+- Dify's database, uploaded files, embeddings, and plugin state do not yet have a verified unified restore contract. See the data catalog; do not infer that the configuration backup alone protects Dify workload data.
 - The workstream required a one-time manual OpenBao policy upsert for `lv3-service-dify-runtime` before the repo replay could fully converge; that manual action is recorded in the live-apply receipt for this branch.

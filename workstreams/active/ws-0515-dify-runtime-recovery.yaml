@@ -1,0 +1,202 @@
+id: ws-0515-dify-runtime-recovery
+adr: "0197"
+title: Recover Dify proxy health and make completeness evidence accurate
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/ws-0515-dify-secret-source-guard-20260928
+worktree_path: .worktrees/ws-0515-dify-live-apply-20260928
+doc: docs/workstreams/ws-0515-dify-runtime-recovery.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/default.conf.template.j2
+  - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/ssrf-docker-entrypoint.sh.j2
+  - collections/ansible_collections/lv3/platform/roles/dify_runtime/tasks/main.yml
+  - config/service-completeness.json
+  - docs/schema/service-completeness.schema.json
+  - scripts/service_completeness.py
+  - tests/test_dify_runtime_role.py
+  - tests/test_validate_service_completeness.py
+  - catalog/services/dify/service.yaml
+  - config/data-catalog.json
+  - config/slo-catalog.json
+  - config/alertmanager/rules/dify.yml
+  - config/grafana/dashboards/dify.json
+  - config/grafana/dashboards/slo-overview.json
+  - build/platform-manifest.json
+  - config/prometheus/rules/slo_alerts.yml
+  - config/prometheus/rules/slo_rules.yml
+  - config/prometheus/file_sd/slo_targets.yml
+  - docs/runbooks/configure-dify.md
+  - docs/workstreams/ws-0515-dify-runtime-recovery.md
+  - workstreams/active/ws-0515-dify-runtime-recovery.yaml
+  - workstreams/active/ws-0513-builder-metrics-tailnet-firewall.yaml
+  - workstreams.yaml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - receipts/live-applies/ws-0515-dify-runtime-recovery-apply-receipt.yaml
+  - config/image-catalog.json
+  - config/vulnerability-budget-policy.json
+  - tests/test_security_posture_report.py
+  - config/validation-lanes.yaml
+  - tests/test_validation_lanes.py
+  - receipts/security-reports/20260928T*.json
+  - receipts/image-scans/2026-09-28-dify-*.json
+  - receipts/sbom/d1c73b3be4ba.cdx.json
+  - receipts/sbom/42a516af16b8.cdx.json
+  - receipts/sbom/0bf773413570.cdx.json
+  - receipts/sbom/15bd3cee31b3.cdx.json
+  - receipts/sbom/77697a75da9f.cdx.json
+  - receipts/sbom/a56b9ca13d7a.cdx.json
+  - receipts/sbom/6a097f68bae7.cdx.json
+  - receipts/sbom/f3f7d124cb02.cdx.json
+  - receipts/cve/d1c73b3be4ba-20260928T*.grype.json
+  - receipts/cve/42a516af16b8-20260928T*.grype.json
+  - receipts/cve/0bf773413570-20260928T*.grype.json
+  - receipts/cve/15bd3cee31b3-20260928T*.grype.json
+  - receipts/cve/77697a75da9f-20260928T*.grype.json
+  - receipts/cve/a56b9ca13d7a-20260928T*.grype.json
+  - receipts/cve/6a097f68bae7-20260928T*.grype.json
+  - receipts/cve/f3f7d124cb02-20260928T*.grype.json
+ownership_manifest:
+  owned_surfaces:
+    - id: dify_runtime_recovery
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/dify_runtime/tasks/main.yml
+        - scripts/seed_dify_runtime_secrets.py
+        - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/default.conf.template.j2
+        - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2
+        - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/ssrf-docker-entrypoint.sh.j2
+        - tests/test_dify_runtime_role.py
+        - tests/test_dify_runtime_secret_seed.py
+      mode: exclusive
+    - id: dify_completeness_profile
+      paths:
+        - docs/schema/service-completeness.schema.json
+        - catalog/services/dify/service.yaml
+      mode: exclusive
+    - id: generated_service_catalogs
+      paths:
+        - config/service-completeness.json
+        - config/slo-catalog.json
+      mode: shared_contract
+      contract: generated-service-catalogs-v1
+    - id: service_completeness_applicability
+      paths:
+        - scripts/service_completeness.py
+        - tests/test_validate_service_completeness.py
+      mode: shared_contract
+      contract: service-completeness-validation-v1
+    - id: dify_observability_and_data_catalog
+      paths:
+        - config/data-catalog.json
+        - config/alertmanager/rules/dify.yml
+        - config/grafana/dashboards/dify.json
+      mode: exclusive
+    - id: generated_slo_assets
+      paths:
+        - config/grafana/dashboards/slo-overview.json
+        - config/prometheus/rules/slo_alerts.yml
+        - config/prometheus/rules/slo_rules.yml
+        - config/prometheus/file_sd/slo_targets.yml
+      mode: shared_contract
+      contract: generated-slo-assets-v1
+    - id: dify_runbook
+      paths:
+        - docs/runbooks/configure-dify.md
+      mode: exclusive
+    - id: dify_workstream_tracking
+      paths:
+        - docs/workstreams/ws-0515-dify-runtime-recovery.md
+        - workstreams/active/ws-0515-dify-runtime-recovery.yaml
+      mode: exclusive
+    - id: ws_0513_completeness_handoff
+      paths:
+        - workstreams/active/ws-0513-builder-metrics-tailnet-firewall.yaml
+      mode: shared_contract
+      contract: workstream-ownership-transfer-v1
+    - id: workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: generated_platform_manifest
+      paths:
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: dify_live_apply_evidence
+      paths:
+        - receipts/live-applies/ws-0515-dify-runtime-recovery-apply-receipt.yaml
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    - id: dify_image_security_evidence
+      paths:
+        - config/image-catalog.json
+        - config/vulnerability-budget-policy.json
+        - tests/test_security_posture_report.py
+        - config/validation-lanes.yaml
+        - tests/test_validation_lanes.py
+        - receipts/security-reports/20260928T*.json
+        - receipts/image-scans/2026-09-28-dify-*.json
+        - receipts/sbom/d1c73b3be4ba.cdx.json
+        - receipts/sbom/42a516af16b8.cdx.json
+        - receipts/sbom/0bf773413570.cdx.json
+        - receipts/sbom/15bd3cee31b3.cdx.json
+        - receipts/sbom/77697a75da9f.cdx.json
+        - receipts/sbom/a56b9ca13d7a.cdx.json
+        - receipts/sbom/6a097f68bae7.cdx.json
+        - receipts/sbom/f3f7d124cb02.cdx.json
+        - receipts/cve/d1c73b3be4ba-20260928T*.grype.json
+        - receipts/cve/42a516af16b8-20260928T*.grype.json
+        - receipts/cve/0bf773413570-20260928T*.grype.json
+        - receipts/cve/15bd3cee31b3-20260928T*.grype.json
+        - receipts/cve/77697a75da9f-20260928T*.grype.json
+        - receipts/cve/a56b9ca13d7a-20260928T*.grype.json
+        - receipts/cve/6a097f68bae7-20260928T*.grype.json
+        - receipts/cve/f3f7d124cb02-20260928T*.grype.json
+      mode: shared_contract
+      contract: vulnerability-evidence-v1
+    - id: validation_lane_security_receipts
+      paths:
+        - config/validation-lanes.yaml
+        - tests/test_validation_lanes.py
+      mode: shared_contract
+      contract: validation-lanes-v1
+context: |
+  Dify's local NGINX config statically resolves Docker service names to the
+  current API, web, and plugin-daemon addresses. Recreating the API left NGINX
+  pointing at the former API IP, producing 502 responses even though Docker DNS
+  resolves the replacement correctly. Separately, the Squid SSRF proxy enters a
+  restart loop because its PID file under /run persists in the writable
+  container layer across restarts. Fix both in the repo-managed role, verify
+  the public Dify path, and replace the expired legacy completeness waiver with
+  truthful Authentik, observability, SLO, and data-catalog evidence. Dify's UI
+  is protected by the shared OIDC edge, while the gateway's Dify tool bridge is
+  an API implemented by the gateway itself; a generic OIDC-to-Dify API proxy is
+  not a valid upstream integration.
+tasks:
+  - id: t1
+    title: Repair Dify Docker DNS re-resolution and transient Squid runtime state
+    status: completed
+  - id: t2
+    title: Make Dify service-completeness requirements and evidence accurate
+    status: completed
+  - id: t3
+    title: Validate templates, catalogs, and Dify end-to-end health
+    status: in_progress
+  - id: t4
+    title: Merge the tested PR, converge Dify, and record live evidence
+    status: pending
+canonical_truth:
+  changelog_entry: Recover Dify readiness after container replacement and prevent stale Squid process state from breaking its SSRF proxy.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}

@@ -36,7 +36,7 @@
 - name: Pin the Authentik issuer hostname to the local NGINX edge
   ansible.builtin.lineinfile:
     path: /etc/hosts
-    regexp: '^\s*[^#\s]+\s+{{ public_edge_oidc_auth_issuer_hostname | regex_escape }}(?:\s|$)'
+    regexp: '^\\s*[^#\\s]+\\s+{{ public_edge_oidc_auth_issuer_hostname | regex_escape }}(?:\\s|$)'
     line: "{{ ansible_host }} {{ public_edge_oidc_auth_issuer_hostname }}"
     state: present
     create: false

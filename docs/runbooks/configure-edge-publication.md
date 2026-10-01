@@ -55,7 +55,5 @@ Expected result:
   the repo-side admission gate for public endpoint changes. Use it directly
   when validating a branch before a live replay.
 - `make configure-edge-publication` regenerates the shared `build/changelog-portal/` and `build/docs-portal/` artifacts before pushing them to the edge, so a fresh worktree does not need a separate manual portal/docs build step.
-- `make generate-platform-vars` also regenerates `config/certificate-catalog.json` from the selected identity before edge admission. Keep deployment-specific generated values out of commits; the committed source of the catalog is `config/certificate-catalog.template.json`.
-- For an edge-only recovery where the existing OAuth2 proxy credentials must remain untouched, use `make configure-edge-publication env=production EXTRA_ARGS="--tags public-edge-firewall,public-edge-oidc-recovery --skip-tags always"`. The Make preflight still runs; the Ansible tags converge the canonical guest firewall and run only the recovery OIDC tasks, without rendering proxy credentials or publishing NGINX configuration.
 - This runbook does not publish Proxmox UI itself. The `proxmox.example.com` edge page is intentionally informational because Proxmox administration remains private and Tailscale-based.
 - When only the NGINX edge config needs to change and the generated portal directories are already current on the guest, rerun `playbooks/public-edge.yml` from `Check whether the public edge certificate exists` to skip the slow static-directory copy and force the config render, validation, and reload path.

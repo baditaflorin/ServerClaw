@@ -207,11 +207,11 @@ def build_guest_ssh_command(context: dict[str, Any], target: str, remote_command
     host_login = f"{context['host_user']}@{context['host_addr']}"
     port = host_ssh_port(context)
     proxy_command = (
-        f"ssh -p {shlex.quote(port)} -W %h:%p -i {shlex.quote(key_path)} "
-        f"-o IdentitiesOnly=yes -o BatchMode=yes "
+        f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes "
         f"-o ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS} "
         f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
-        f"{shlex.quote(host_login)}"
+        f"-p {shlex.quote(port)} "
+        f"{shlex.quote(host_login)} -W %h:%p"
     )
     return [
         "ssh",
@@ -248,11 +248,11 @@ def build_guest_ssh_tunnel_command(
     host_login = f"{context['host_user']}@{context['host_addr']}"
     port = host_ssh_port(context)
     proxy_command = (
-        f"ssh -p {shlex.quote(port)} -W %h:%p -i {shlex.quote(key_path)} "
-        f"-o IdentitiesOnly=yes -o BatchMode=yes "
+        f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes "
         f"-o ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS} "
         f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
-        f"{shlex.quote(host_login)}"
+        f"-p {shlex.quote(port)} "
+        f"{shlex.quote(host_login)} -W %h:%p"
     )
     return [
         "ssh",
@@ -438,13 +438,10 @@ async def publish_nats_events_async(
                 or record.get("collected_at"),
             )
 
-            async def publish_current(
-                current_subject: str = subject,
-                current_envelope: dict[str, Any] = envelope,
-            ) -> None:
+            async def publish_current() -> None:
                 await nc.publish(
-                    current_subject,
-                    json.dumps(current_envelope, separators=(",", ":")).encode(),
+                    subject,
+                    json.dumps(envelope, separators=(",", ":")).encode(),
                 )
 
             await async_with_retry(

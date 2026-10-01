@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.47",
+  "repo_version": "0.179.48",
   "platform_version": "0.178.224",
-  "generated_at": "2026-09-28T20:00:58Z",
-  "next_refresh_at": "2026-09-28T21:00:58Z",
+  "generated_at": "2026-10-01T10:42:49Z",
+  "next_refresh_at": "2026-10-01T11:42:49Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",
@@ -138,10 +138,11 @@
         "score": 0.95,
         "safe_to_act": true,
         "source": "repo_evidence",
-        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://agents.example.com",
-        "last_live_apply": "2026-08-31T00:00:00Z"
+        "last_live_apply": "2026-08-31T00:00:00Z",
+        "slo_status": "unknown"
       },
       "directus": {
         "service_name": "Directus",
@@ -6387,10 +6388,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.46",
-    "deployed_at": "2026-09-28",
-    "summary": "Enable least-privilege Gitea Authentik login and verify a non-admin browser session. Allow the Builder metrics peer to scrape docker-build node-exporter over the private tailnet without disrupting Docker-managed firewall rules.",
-    "release_notes_url": "docs/release-notes/0.179.47.md"
+    "last_version": "0.179.47",
+    "deployed_at": "2026-10-01",
+    "summary": "Upgrade Authentik to 2026.8.3 by digest under the operator-approved seven-day exception and route account recovery through the transactional mail gateway. Enable least-privilege Gitea Authentik login and verify a non-admin browser session.",
+    "release_notes_url": "docs/release-notes/0.179.48.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

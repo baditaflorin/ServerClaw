@@ -46,8 +46,10 @@ def test_defaults_are_generic_pinned_and_fail_safe() -> None:
     )
     assert defaults["authentik_recovery_flow_slug"] == "platform-operator-recovery"
     assert defaults["authentik_mail_platform_docker_network_name"] == "{{ smtp_docker_network_name }}"
-    assert defaults["authentik_email_host"] == "stalwart"
-    assert defaults["authentik_email_port"] == "{{ smtp_port }}"
+    assert defaults["authentik_email_host"] == "mail-gateway-smtp"
+    assert defaults["authentik_email_port"] == 1588
+    assert defaults["authentik_email_use_tls"] is False
+    assert defaults["authentik_email_from"] == "{{ mail_platform_brevo_sender_email }}"
     assert defaults["authentik_email_password_local_file"] == "{{ mail_platform_mailbox_password_local_file }}"
 
 

@@ -3388,9 +3388,12 @@
       "owner_runbook": "docs/runbooks/https-tls-assurance.md",
       "implementation_refs": [
         "Makefile",
+        "config/prometheus/file_sd/https_tls_targets.yml",
+        "config/prometheus/rules/https_tls_alerts.yml",
         "config/windmill/scripts/https-tls-assurance.py",
         "config/workflow-catalog.json",
         "docs/runbooks/https-tls-assurance.md",
+        "receipts/https-tls-assurance",
         "scripts/generate_https_tls_assurance.py",
         "scripts/https_tls_assurance.py",
         "scripts/https_tls_assurance_targets.py"
@@ -4128,6 +4131,7 @@
         "scripts/matrix_admin_register.py",
         "scripts/matrix_bridge_smoke.py",
         "inventory/host_vars/proxmox-host.yml",
+        "config/uptime-kuma/monitors.json",
         "config/grafana/dashboards/matrix-synapse.json",
         "config/alertmanager/rules/matrix-synapse.yml"
       ],
@@ -4313,7 +4317,8 @@
         "collections/ansible_collections/lv3/platform/roles/n8n_postgres/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/n8n_runtime/tasks/main.yml",
         "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
-        "inventory/host_vars/proxmox-host.yml"
+        "inventory/host_vars/proxmox-host.yml",
+        "config/uptime-kuma/monitors.json"
       ],
       "outputs": [
         "A repo-managed n8n runtime on docker-runtime with PostgreSQL persistence, public webhook ingress for thin ServerClaw adapters, and a protected editor path behind the shared edge auth flow."
@@ -4370,7 +4375,8 @@
         "collections/ansible_collections/lv3/platform/roles/nextcloud_postgres",
         "collections/ansible_collections/lv3/platform/roles/nextcloud_runtime",
         "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
-        "inventory/host_vars/proxmox-host.yml"
+        "inventory/host_vars/proxmox-host.yml",
+        "config/uptime-kuma/monitors.json"
       ],
       "outputs": [
         "A repo-managed Nextcloud runtime on docker-runtime with PostgreSQL metadata, Redis-backed locking, cron execution, and the public cloud.example.com DAV surface through the shared edge."
@@ -5540,8 +5546,7 @@
       "implementation_refs": [
         "Makefile",
         "scripts/uptime_kuma_tool.py",
-        "config/health-probe-catalog.json",
-        "scripts/uptime_contract.py",
+        "config/uptime-kuma/monitors.json",
         "config/uptime-kuma/status-page.json",
         "scripts/maintenance_window_tool.py"
       ],

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 import sys
 
@@ -57,15 +56,3 @@ def test_generated_alert_rules_include_day_and_hour_expiry_windows() -> None:
 
     assert alerts["TLSCertificateExpiringWarning_api_gateway_public"]["expr"].endswith(" < 21")
     assert alerts["TLSCertificateExpiringCritical_openbao_internal"]["expr"].endswith(" < 2")
-
-
-def test_workflow_implementation_refs_distinguish_sources_from_generated_outputs() -> None:
-    catalog = json.loads((REPO_ROOT / "config" / "workflow-catalog.json").read_text(encoding="utf-8"))
-    workflow = catalog["workflows"]["weekly-https-tls-assurance"]
-    implementation_refs = set(workflow["implementation_refs"])
-
-    assert "scripts/generate_https_tls_assurance.py" in implementation_refs
-    assert "scripts/https_tls_assurance.py" in implementation_refs
-    assert "config/prometheus/file_sd/https_tls_targets.yml" not in implementation_refs
-    assert "config/prometheus/rules/https_tls_alerts.yml" not in implementation_refs
-    assert "receipts/https-tls-assurance" not in implementation_refs

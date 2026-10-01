@@ -77,6 +77,23 @@
       "notes": "Crawl4AI is stateless in this deployment and does not persist crawl history after each synchronous Markdown or extraction response completes."
     },
     {
+      "id": "dify-application-state",
+      "service": "dify",
+      "name": "Dify workflows, datasets, uploaded files, and plugin state",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "PostgreSQL database dify on postgres",
+        "Dify API storage under /opt/dify/data/storage on docker-runtime",
+        "Dify Qdrant storage under /opt/dify/data/qdrant on docker-runtime",
+        "Dify plugin storage under /opt/dify/data/plugin on docker-runtime"
+      ],
+      "notes": "Workflows, uploaded documents, prompts, and embeddings may contain confidential or personal data. A consistent service restore contract covering the database and Dockerhost file/vector state has not been verified, so this entry makes no backup or retention claim."
+    },
+    {
       "id": "directus_primary_data",
       "service": "directus",
       "name": "Directus operational metadata database",

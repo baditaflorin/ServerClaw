@@ -2333,11 +2333,11 @@
       },
       "liveness": {
         "kind": "http",
-        "description": "OpenBao exposes the local seal-status endpoint.",
+        "description": "Monitoring VM probes the OpenBao seal-status endpoint over its private service address.",
         "timeout_seconds": 60,
         "retries": 1,
         "delay_seconds": 0,
-        "url": "http://127.0.0.1:8201/v1/sys/seal-status",
+        "url": "http://10.10.10.92:8201/v1/sys/seal-status",
         "method": "GET",
         "expected_status": [
           200
@@ -2345,11 +2345,11 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "OpenBao reports the active node as ready on the local health endpoint.",
+        "description": "Monitoring VM probes OpenBao readiness over its private service address.",
         "timeout_seconds": 60,
         "retries": 30,
         "delay_seconds": 2,
-        "url": "http://127.0.0.1:8201/v1/sys/health",
+        "url": "http://10.10.10.92:8201/v1/sys/health",
         "method": "GET",
         "expected_status": [
           200

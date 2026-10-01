@@ -142,46 +142,10 @@ explicitly least-privileged.
   or exception was bypassed.
 - The final narrow Authentik Ansible run completed with 14 tasks OK, zero
   changes, and zero failures. The user-requested recovery email was accepted
-  by Authentik, but delivery to the mailbox remains unverified because the
-  connected Gmail app requires reauthentication.
+  by Authentik; at that time mailbox delivery was unverified because Gmail
+  required reauthentication.
 - Code PR #244 is merged. This status/receipt PR and required ServerClaw
   publication remain to be completed after this checkpoint.
-
-## Live verification checkpoint — 2026-09-30
-
-- The public service front doors responded, but a fresh Gitea and Harbor
-  browser run did not reach either application's OIDC callback. Both remained
-  on Authentik's login flow after the test credential was submitted. The E2E
-  harness now reports only an allowlisted failure stage, exception class, and
-  query-free URL; no credential or OAuth query value is emitted. Further login
-  retries were stopped pending credential/API reconciliation.
-- A fresh host scan completed against 13 selected production hosts. Trivy also
-  completed against 70 running images; the aggregate report is critical, with
-  1,106 CRITICAL and 12,237 HIGH finding instances. These are per-image finding
-  counts, not a count of unique CVEs. The generated security report is local
-  ignored evidence; no raw receipt or secret was added to Git.
-- The image scanner now resolves each running container to its immutable local
-  Docker image ID, refuses an implicit pull if that image is unavailable, and
-  resolves the `docker-runtime`/`docker-build` selectors through the selected
-  environment's concrete inventory aliases. Regression tests cover both paths.
-- The live `vulnerability_budget.py` checks still reject the Authentik,
-  Gitea, Harbor, Grafana, Outline, and GlitchTip applies. The control,
-  monitoring, and Docker runtime hosts exceed their warning budgets; relevant
-  host/image exceptions have expired; and several service-image receipts are
-  stale or over the critical-finding budget. No exceptions were renewed and no
-  production consumer apply or gate bypass was performed.
-- Because the aggregate security report is not a substitute for the catalog's
-  per-image Grype/Syft receipts, those receipts must still be refreshed through
-  the governed image workflow. The separate local Authentik admin-token mirror
-  required for read-only identity reconciliation was absent, so the existing
-  non-admin account's local password file could not be reconciled against the
-  live user record in this pass.
-
-Current conclusion: Authentik and the consumer front doors are reachable, but
-the OIDC login/callback state is not currently proven end to end. The workstream
-remains blocked on safe test-identity reconciliation and vulnerability-budget
-remediation; the 2026-09-26 Gitea/Harbor success is historical, not current
-proof.
 
 ## Verification
 
@@ -204,3 +168,88 @@ All reported authentication paths have an explicit passing result or a
 documented, intentional authorization denial; any discovered defects have a
 regression test; repository gates pass; live changes have a sanitized receipt;
 and the changes are merged through pull request.
+
+## Live verification checkpoint — 2026-10-01
+
+- The selected `0mcp` deployment preflight passed. Authentik's public ready
+  endpoint returned HTTP 200; `/opt/authentik/.env` metadata is a non-empty,
+  root-owned, regular mode-0600 file, and the local OpenBao provisioner
+  artifact/receipt plus Authentik token and test-password files passed
+  mode-0600 metadata checks. No secret contents were displayed.
+- Read-only identity and OAuth reconciliation both report zero drift. The live
+  catalog contains 22 applications/providers and no Keycloak-named object.
+  Runtime checks found no active Keycloak container on the former VM120 or
+  VM192 hosts; the tracked active service/integration/Authentik declarations
+  likewise contain no Keycloak consumer. Existing cold rollback archives were
+  not removed.
+- Fresh strict-TLS browser OIDC checks pass for Gitea and Harbor using the
+  existing non-admin `gitea-e2e` identity. Its Authentik test password remains
+  only in the ignored local credential file. Ops Portal and Repository Intake
+  return the expected 403 at the shared proxy callback with no server errors.
+- Outline still fails the authenticated realtime WebSocket handshake. Grafana
+  did not establish an authenticated browser session. GlitchTip still returns
+  `signup_closed`. Chat now loads its LibreChat login page (HTTP 200, not the
+  previously reported 502), but the Authentik callback returns HTTP 500 and
+  does not establish an app session. Its live issuer, client ID, callback,
+  social-registration policy, and client-secret equality check match the
+  managed configuration; the existing non-admin Mongo user is OpenID-linked.
+  A stale OpenID subject is a plausible migration cause, but the subject
+  comparison was not completed and no account record was changed.
+- The managed operator identity (`akadmin`) and groups reconcile without drift.
+  One fresh-browser attempt using the ignored local bootstrap-password file
+  recorded `login_failed`; that file is not a confirmed current operator
+  credential. A later reset request used the dedicated recovery flow; see the
+  recovery follow-up below.
+- Before the operator decision, the catalog pinned 2026.8.0; its 2026-08-30
+  receipt reported 8 critical and 58 high findings, was 32 days old, and had
+  an exception that expired on 2026-09-13.
+- On 2026-10-01, the governed image-upgrade workflow resolved stable 2026.8.3
+  to `ghcr.io/goauthentik/server:2026.8.3@sha256:09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442`
+  and rescanned it with pinned Syft 1.41.2 and Grype 0.110.0: 3 critical, 84
+  high, 94 medium, 29 low, 79 unknown, and zero HIGH/CRITICAL findings with a
+  known fix. The earlier 3/74 candidate count was from Trivy, not the current
+  Grype budget evidence.
+- The operator explicitly accepted both the 3 critical and 84 high findings
+  for seven days. The branch catalog now records a digest-pinned exception
+  through 2026-10-08 with a re-scan/remediation plan; the Authentik budget gate
+  passes using that exception. Do not extend it silently.
+- This is not yet a production deployment: VM192 still runs 2026.8.0 and
+  public readiness returns HTTP 200. The latest PBS backup is from 2026-09-29;
+  PBS has only about 6.3 MiB free, and its restore rehearsal did not reach
+  Authentik web readiness. A short-lived VM snapshot is the available
+  immediate rollback option; capture it before applying 2026.8.3 and remove it
+  only after the post-deploy checks pass.
+- A temporary, NIC-detached restore of
+  `backup-lv3:backup/vm/192/2026-09-29T00:18:41Z` restored 137,438,953,472 bytes
+  in 89.10 seconds and booted under guest-agent control. The restored Postgres
+  container accepted connections, but the Authentik web container exited 255
+  and local readiness returned HTTP 400. The temporary VM was stopped and
+  destroyed; production VM192 remained running. This is partial
+  disk/database-recovery evidence, not a passing Authentik service restore.
+  PBS had only 6,484 KiB available, so no new backup was attempted.
+- Current unauthenticated reachability checks return HTTP 200 for Authentik,
+  Outline, Gitea, Harbor, Grafana, GlitchTip, and Chat; Ops Portal and
+  Repository Intake return 302 to the shared login path. These status checks
+  are not counted as authenticated-session proof.
+- A fresh browser visit confirmed the dedicated `platform-operator-recovery`
+  page renders and accepts the account identifier. After one explicitly
+  requested reset submission, Authentik displayed its generic "Check your
+  Inbox" confirmation. Gmail is currently signed in; a focused `in:anywhere`
+  search for recent Authentik/reset mail returned no matching message. This is
+  evidence that the flow accepted the request, not proof of delivery.
+- A code audit found a concrete SMTP contract mismatch: Authentik defaults
+  pointed to Stalwart's `1587` listener, while the mail-platform runbook
+  requires the private provider-backed `mail-gateway-smtp:1588` bridge for
+  transactional mail. The Authentik defaults and regression test now match
+  that contract, but this correction has not been applied to production or
+  delivery-tested; treat it as a likely cause, not yet a confirmed fix.
+- A read-only Resend domain-list request using the newly supplied credential
+  returned an empty list, so no verified Resend sender was confirmed. No email
+  was sent and the credential was not persisted; the existing mail gateway is
+  still the supported Authentik delivery path.
+
+The workstream remains blocked on an Authentik image that meets the enforced
+security budget, a fully successful application-level restore rehearsal, and a
+current least-privilege operator credential. After those gates are resolved,
+repair and rerun the Grafana, Outline, GlitchTip, and Chat browser paths before
+claiming completion.

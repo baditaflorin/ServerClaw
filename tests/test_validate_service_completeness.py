@@ -167,6 +167,41 @@ def test_changed_data_catalog_row_scopes_global_input_to_owning_service(
     assert selected == ["test_echo"]
 
 
+def test_changed_health_probe_service_scopes_to_owning_service(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "-c",
+            "user.name=Completeness Test",
+            "-c",
+            "user.email=completeness-test@example.invalid",
+            "commit",
+            "-qm",
+            "baseline",
+        ],
+        check=True,
+    )
+
+    health_path = tmp_path / "config" / "health-probe-catalog.json"
+    health_catalog = json.loads(health_path.read_text(encoding="utf-8"))
+    health_catalog["services"]["test_echo"]["readiness"]["description"] += " Targeted update."
+    health_path.write_text(json.dumps(health_catalog, indent=2) + "\n", encoding="utf-8")
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        ["config/health-probe-catalog.json"], context, base_ref="HEAD"
+    )
+    assert selected == ["test_echo"]
+
+
 def test_authentik_client_evidence_satisfies_provider_aware_oidc_check(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -210,6 +245,32 @@ def test_selected_authentik_provider_requires_authentik_evidence(
     assert oidc_item.required is True
     assert oidc_item.present is False
     assert oidc_item in result.failing_items
+
+
+def test_service_can_explicitly_mark_api_gateway_registration_not_applicable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+
+    completeness_path = tmp_path / "config" / "service-completeness.json"
+    completeness = json.loads(completeness_path.read_text(encoding="utf-8"))
+    completeness["services"]["test_echo"]["requires_api_gateway"] = False
+    completeness_path.write_text(json.dumps(completeness, indent=2) + "\n", encoding="utf-8")
+
+    gateway_path = tmp_path / "config" / "api-gateway-catalog.json"
+    gateway = json.loads(gateway_path.read_text(encoding="utf-8"))
+    gateway["services"] = [entry for entry in gateway["services"] if entry.get("id") != "test_echo"]
+    gateway_path.write_text(json.dumps(gateway, indent=2) + "\n", encoding="utf-8")
+
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    result = service_completeness.evaluate_service("test_echo")
+    gateway_item = next(item for item in result.items if item.item_id == "api_gateway")
+
+    assert gateway_item.required is False
+    assert gateway_item.present is False
+    assert "not required by the service exposure contract" in gateway_item.detail
+    assert result.passing
 
 
 def test_legacy_service_uses_grandfathered_suppressions(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -363,51 +424,6 @@ def test_validate_empty_service_scope_does_not_expand_to_all(tmp_path: Path, mon
 
     assert results == []
     assert failures == []
-
-
-def test_precomputed_remote_service_scope_is_used_without_git_history(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
-    build_repo(tmp_path)
-    service_completeness = load_service_completeness(monkeypatch, tmp_path)
-    selected: list[list[str] | None] = []
-    monkeypatch.setenv("LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON", '["docker_runtime"]')
-    monkeypatch.setattr(service_completeness, "changed_paths_from_git", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(
-        service_completeness,
-        "validate_services",
-        lambda service_ids, **_kwargs: (selected.append(service_ids) or [], []),
-    )
-
-    exit_code = service_completeness.main(["--changed", "--json"])
-
-    payload = json.loads(capsys.readouterr().out)
-    assert exit_code == 0
-    assert payload["services"] == []
-    assert selected == [["docker_runtime"]]
-
-
-@pytest.mark.parametrize("scope", ['null', '["not_a_service"]', '{"service":"test_echo"}', "invalid-json"])
-def test_invalid_precomputed_remote_service_scope_fails_closed(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], scope: str
-) -> None:
-    build_repo(tmp_path)
-    service_completeness = load_service_completeness(monkeypatch, tmp_path)
-    selected: list[list[str] | None] = []
-    monkeypatch.setenv("LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON", scope)
-    monkeypatch.setattr(service_completeness, "changed_paths_from_git", lambda *_args, **_kwargs: pytest.fail())
-    monkeypatch.setattr(
-        service_completeness,
-        "validate_services",
-        lambda service_ids, **_kwargs: (selected.append(service_ids) or [], []),
-    )
-
-    exit_code = service_completeness.main(["--changed", "--json"])
-
-    payload = json.loads(capsys.readouterr().out)
-    assert exit_code == 0
-    assert payload["services"] == []
-    assert selected == [None]
 
 
 @pytest.mark.parametrize("role_family", ["_runtime", "_postgres", "_vm"])

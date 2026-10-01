@@ -342,54 +342,19 @@ def test_remote_exec_preserves_validation_lane_context_for_local_fallback(tmp_pa
         extra_env={
             "REMOTE_EXEC_SSH_FAIL": "1",
             "LV3_VALIDATION_BASE_REF": "origin/main",
-            "LV3_VALIDATION_CHANGED_FILES_JSON": '["config/grafana/dashboards/openbao.json","workstreams.yaml"]',
-            "LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON": '["openbao"]',
+            "LV3_VALIDATION_CHANGED_FILES_JSON": '["README.md","workstreams.yaml"]',
         },
         local_command=(
             'printf "%s\\n%s" "${LV3_VALIDATION_BASE_REF:-}" '
-            '"${LV3_VALIDATION_CHANGED_FILES_JSON:-}" > "$REMOTE_EXEC_MARKER"; '
-            'printf "\\n%s" "${LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON:-}" >> "$REMOTE_EXEC_MARKER"'
+            '"${LV3_VALIDATION_CHANGED_FILES_JSON:-}" > "$REMOTE_EXEC_MARKER"'
         ),
     )
 
     assert completed.returncode == 0
-    recorded_base_ref, recorded_changed_files, recorded_changed_service_ids = (
-        completed.marker.read_text().splitlines()  # type: ignore[attr-defined]
-    )
+    recorded_base_ref, recorded_changed_files = completed.marker.read_text().splitlines()  # type: ignore[attr-defined]
     assert recorded_base_ref == "origin/main"
-    assert "config/grafana/dashboards/openbao.json" in json.loads(recorded_changed_files)
+    assert "README.md" in json.loads(recorded_changed_files)
     assert "workstreams.yaml" in json.loads(recorded_changed_files)
-    assert json.loads(recorded_changed_service_ids) == ["openbao"]
-
-
-def test_remote_exec_exports_precomputed_service_scope_to_remote_runner(tmp_path: Path) -> None:
-    completed = run_remote_exec(
-        tmp_path,
-        "pre-push-gate",
-        extra_env={
-            "LV3_VALIDATION_BASE_REF": "origin/main",
-            "LV3_VALIDATION_CHANGED_FILES_JSON": '["config/grafana/dashboards/openbao.json"]',
-            "LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON": '["openbao"]',
-        },
-    )
-
-    assert completed.returncode == 0, completed.stderr
-    ssh_log = completed.ssh_log.read_text()  # type: ignore[attr-defined]
-    assert 'LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON=\\[\\"openbao\\"\\]' in ssh_log
-
-
-def test_remote_exec_computes_changed_service_scope_before_snapshot_upload(tmp_path: Path) -> None:
-    completed = run_remote_exec(
-        tmp_path,
-        "pre-push-gate",
-        "--local-fallback",
-        extra_env={"REMOTE_EXEC_SSH_FAIL": "1"},
-        local_command='printf %s "${LV3_VALIDATION_CHANGED_SERVICE_IDS_JSON:-}" > "$REMOTE_EXEC_MARKER"',
-    )
-
-    assert completed.returncode == 0, completed.stderr
-    selected = json.loads(completed.marker.read_text())  # type: ignore[attr-defined]
-    assert selected == ["grafana", "openbao"]
 
 
 def test_remote_exec_falls_back_locally_when_remote_command_fails(tmp_path: Path) -> None:

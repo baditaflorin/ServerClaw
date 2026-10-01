@@ -1,0 +1,13 @@
+groups:
+  - name: lv3-dify
+    rules:
+      - alert: DifyUnavailable
+        expr: probe_success{job="slo-blackbox",slo_id="dify-availability"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: dify
+        annotations:
+          summary: Dify readiness is failing on docker-runtime.
+          description: The private Dify health endpoint has been failing for at least two minutes.
+          runbook_url: https://docs.{{ platform_domain }}/runbooks/configure-dify/

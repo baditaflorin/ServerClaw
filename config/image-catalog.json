@@ -7,13 +7,13 @@
       "runtime_host": "runtime-control",
       "container_name": "authentik",
       "registry_ref": "ghcr.io/goauthentik/server",
-      "tag": "2026.8.0",
-      "digest": "sha256:5217eed4e86a3c6666ecf81c3430753ef958f97f93ac614070d458c10e0b2b33",
-      "ref": "ghcr.io/goauthentik/server:2026.8.0@sha256:5217eed4e86a3c6666ecf81c3430753ef958f97f93ac614070d458c10e0b2b33",
+      "tag": "2026.8.3",
+      "digest": "sha256:09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442",
+      "ref": "ghcr.io/goauthentik/server:2026.8.3@sha256:09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442",
       "platform": "linux/amd64",
-      "pinned_on": "2026-08-30",
+      "pinned_on": "2026-10-01",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-08-30-authentik-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-10-01-authentik-runtime.json",
       "consumers": [
         "roles/authentik_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",
@@ -23,15 +23,16 @@
         "live-apply-service service=authentik env=production"
       ],
       "exception": {
-        "justification": "The currently deployed Authentik 2026.5 image carries the same eight unfixed critical Debian base findings. The 2026.8.0 image has no available fixes for them, reduces high and medium findings, and contains the current-brand flag schema repair required for interactive SSO.",
+        "justification": "Operator-approved seven-day acceptance of the latest stable Authentik release after review of 3 Critical and 84 High findings; the currently deployed 2026.8.0 scan reports 8 Critical and 58 High. The current Grype scan reports no fixable High or Critical findings.",
         "owner": "Platform operations",
         "compensating_controls": [
-          "Pin the exact Linux/AMD64 digest to prevent unreviewed image drift.",
-          "Expose Authentik only through the managed TLS edge and retain health checks during deployment."
+          "Pin the exact linux/amd64 image digest so the stable tag cannot drift.",
+          "Keep Authentik reachable only through the managed TLS edge and verify readiness plus consumer login smoke tests after apply.",
+          "Use a short seven-day exception and retain an immediate rollback reference to the previous image."
         ],
-        "approved_on": "2026-08-30",
-        "expires_on": "2026-09-13",
-        "remediation_plan": "Re-scan and upgrade to the first upstream Authentik image that clears the critical findings before the exception expires."
+        "approved_on": "2026-10-01",
+        "expires_on": "2026-10-08",
+        "remediation_plan": "Re-scan before 2026-10-08. Move to the first stable upstream image that meets 0 Critical and at most 40 High; if unavailable by expiry, roll back or obtain a new explicit operator decision."
       }
     },
     "changedetection_runtime": {
@@ -102,17 +103,18 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-03-28",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-28-dify-api-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-09-28-dify-api-runtime.json",
       "exception": {
+        "justification": "Fresh Grype evidence on the currently pinned Dify API digest shows critical and high findings with no fixes reported for this digest. Restore availability under the existing SSO-only edge while preparing the patched Dify release.",
         "owner": "Platform operations",
-        "justification": "The pinned upstream Dify API image reports critical and high Trivy findings in bundled Debian, Node.js, and embedded utility binaries; keep it digest-pinned and review on the next image rotation window.",
         "compensating_controls": [
-          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
-          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+          "Dify app routes require the shared SSO sign-in path; unauthenticated /console/api/setup redirects to /oauth2/sign_in.",
+          "Docker inspection confirms only the Dify NGINX container publishes private host port 8094; API, web, and supporting data containers publish no host ports.",
+          "The current image digest remains pinned and this exception expires in seven days; upgrade and re-scan before renewal."
         ],
-        "approved_on": "2026-03-28",
-        "expires_on": "2026-04-11",
-        "remediation_plan": "Re-scan and refresh dify_api_runtime with make upgrade-container-image IMAGE_ID=dify_api_runtime WRITE=true APPLY=true before the exception expires."
+        "approved_on": "2026-09-28",
+        "expires_on": "2026-10-05",
+        "remediation_plan": "Upgrade Dify from 1.13.3 to a supported release with patched dependencies by 2026-10-05. Back up and verify PostgreSQL, Qdrant, and file storage first; apply required Dify migrations and re-scan every image before rollout."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
@@ -135,17 +137,18 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-03-28",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-28-dify-nginx-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-09-28-dify-nginx-runtime.json",
       "exception": {
+        "justification": "Fresh Grype evidence on the pinned Dify NGINX digest reports critical and high findings with no fixes available for this digest. Keep the existing fixed digest during the urgent availability repair while completing the Dify image refresh.",
         "owner": "Platform operations",
-        "justification": "The pinned upstream NGINX alpine image still reports critical and high Trivy findings in bundled Alpine packages; keep it digest-pinned and review at the next image refresh.",
         "compensating_controls": [
-          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
-          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+          "The NGINX container is only published on the private Docker-runtime host port 8094 and is reached through the shared SSO-protected public edge.",
+          "The current image digest remains pinned; no image version or digest is changing during this emergency repair.",
+          "This exception expires in seven days and requires a patched, freshly scanned Dify release before renewal."
         ],
-        "approved_on": "2026-03-28",
-        "expires_on": "2026-04-11",
-        "remediation_plan": "Re-scan and refresh dify_nginx_runtime with make upgrade-container-image IMAGE_ID=dify_nginx_runtime WRITE=true APPLY=true before the exception expires."
+        "approved_on": "2026-09-28",
+        "expires_on": "2026-10-05",
+        "remediation_plan": "Upgrade Dify and its NGINX image to a supported release by 2026-10-05 after reviewing official compose changes, backing up PostgreSQL, Qdrant, and file storage, and validating the database migration path."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
@@ -168,17 +171,18 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-03-28",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-28-dify-plugin-daemon-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-09-28-dify-plugin-daemon-runtime.json",
       "exception": {
+        "justification": "Fresh Grype evidence on the pinned Dify plugin-daemon digest reports critical and high findings with no fixes available for this digest. Keep the digest fixed while restoring Dify availability and completing the required image refresh.",
         "owner": "Platform operations",
-        "justification": "The pinned upstream Dify plugin daemon image reports critical and high Trivy findings in bundled Debian and Python components; keep it digest-pinned and review on the next image rotation window.",
         "compensating_controls": [
-          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
-          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+          "The plugin daemon is an internal Dify component and publishes no host port; it is only reachable over the Dify Compose network.",
+          "The current image digest remains pinned, and public requests reach the service only through the shared SSO-protected edge.",
+          "This exception expires in seven days and requires a patched, freshly scanned Dify release before renewal."
         ],
-        "approved_on": "2026-03-28",
-        "expires_on": "2026-04-11",
-        "remediation_plan": "Re-scan and refresh dify_plugin_daemon_runtime with make upgrade-container-image IMAGE_ID=dify_plugin_daemon_runtime WRITE=true APPLY=true before the exception expires."
+        "approved_on": "2026-09-28",
+        "expires_on": "2026-10-05",
+        "remediation_plan": "Upgrade Dify and its plugin daemon to a supported compatible release by 2026-10-05 after reviewing upstream compose changes, backing up PostgreSQL, Qdrant, and file storage, and validating migrations."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
@@ -201,17 +205,18 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-03-28",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-28-dify-qdrant-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-09-28-dify-qdrant-runtime.json",
       "exception": {
+        "justification": "Fresh Grype evidence on the pinned Qdrant digest reports critical and high findings with no fixes available for this digest. Keep vector data on the existing pinned runtime while restoring the Dify ingress and planning a supported image refresh.",
         "owner": "Platform operations",
-        "justification": "The pinned upstream Qdrant image reports critical and high Trivy findings in bundled Ubuntu packages and Rust-linked components; keep it digest-pinned and review on the next image rotation window.",
         "compensating_controls": [
-          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
-          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+          "Qdrant publishes no host port and is reachable only on Dify Compose networks; its persistent volume is not modified by this operation.",
+          "The current image digest remains pinned; no Qdrant upgrade or data migration occurs during this emergency repair.",
+          "This exception expires in seven days and requires a patched, freshly scanned compatible image before renewal."
         ],
-        "approved_on": "2026-03-28",
-        "expires_on": "2026-04-11",
-        "remediation_plan": "Re-scan and refresh dify_qdrant_runtime with make upgrade-container-image IMAGE_ID=dify_qdrant_runtime WRITE=true APPLY=true before the exception expires."
+        "approved_on": "2026-09-28",
+        "expires_on": "2026-10-05",
+        "remediation_plan": "Upgrade Dify and the compatible Qdrant image by 2026-10-05 only after verifying the Qdrant snapshot/restore path and Dify embedding compatibility; re-scan and run vector-search smoke tests before rollout."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
@@ -234,17 +239,18 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-03-28",
       "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-28-dify-redis-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-09-28-dify-redis-runtime.json",
       "exception": {
+        "justification": "Fresh Grype evidence on the pinned Redis digest reports critical and high findings with no fixes available for this digest. Preserve the existing Redis data and pinned runtime while recovering the Dify application and preparing a supported upgrade.",
         "owner": "Platform operations",
-        "justification": "The pinned upstream Redis alpine image reports critical and high Trivy findings in bundled Alpine packages; keep it digest-pinned and review on the next image rotation window.",
         "compensating_controls": [
-          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
-          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
+          "Redis publishes no host port and is only reachable on Dify Compose networks; its persistent data is not changed in this repair.",
+          "The image digest remains pinned, with no Redis upgrade or data-format migration during this emergency recovery.",
+          "This exception expires in seven days and requires a patched, freshly scanned compatible image before renewal."
         ],
-        "approved_on": "2026-03-28",
-        "expires_on": "2026-04-11",
-        "remediation_plan": "Re-scan and refresh dify_redis_runtime with make upgrade-container-image IMAGE_ID=dify_redis_runtime WRITE=true APPLY=true before the exception expires."
+        "approved_on": "2026-09-28",
+        "expires_on": "2026-10-05",
+        "remediation_plan": "Upgrade Dify and the compatible Redis image by 2026-10-05 after verifying the Redis persistence and recovery path and the Dify version requirements; re-scan and smoke-test before rollout."
       },
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
@@ -266,8 +272,8 @@
       "ref": "docker.io/langgenius/dify-sandbox:0.2.14@sha256:a56b9ca13d7aed8344a511cfc219aeaf12d589fa84f25d88875181285e69f560",
       "platform": "linux/amd64",
       "pinned_on": "2026-03-28",
-      "scan_status": "pass_no_critical",
-      "scan_receipt": "receipts/image-scans/2026-03-28-dify-sandbox-runtime.json",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-09-28-dify-sandbox-runtime.json",
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",
@@ -275,7 +281,19 @@
       ],
       "apply_targets": [
         "converge-dify"
-      ]
+      ],
+      "exception": {
+        "justification": "Fresh Grype evidence on the pinned Dify Sandbox digest reports critical and high findings with no fixes available for this digest. Preserve the current sandbox and filesystem behavior during availability recovery while preparing an upstream-compatible image refresh.",
+        "owner": "Platform operations",
+        "compensating_controls": [
+          "The sandbox publishes no host port and is reached only by internal Dify containers using the sandbox API key.",
+          "The current image digest and mounted sandbox configuration remain unchanged during this emergency repair.",
+          "This exception expires in seven days and requires a patched, freshly scanned Dify release before renewal."
+        ],
+        "approved_on": "2026-09-28",
+        "expires_on": "2026-10-05",
+        "remediation_plan": "Upgrade the Dify Sandbox image with the supported Dify release by 2026-10-05 after reviewing its required Python and Node paths and validating custom sandbox configuration; re-scan and run sandbox execution smoke tests before rollout."
+      }
     },
     "dify_ssrf_proxy_runtime": {
       "kind": "runtime",
@@ -289,7 +307,7 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-03-28",
       "scan_status": "pass_no_critical",
-      "scan_receipt": "receipts/image-scans/2026-03-28-dify-ssrf-proxy-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-09-28-dify-ssrf-proxy-runtime.json",
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",
@@ -310,8 +328,8 @@
       "ref": "docker.io/langgenius/dify-web:1.13.3@sha256:f3f7d124cb0264162e74cd528de5f5472acfa14d75e7d2a54b167a3b8b99beb5",
       "platform": "linux/amd64",
       "pinned_on": "2026-03-28",
-      "scan_status": "pass_no_critical",
-      "scan_receipt": "receipts/image-scans/2026-03-28-dify-web-runtime.json",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-09-28-dify-web-runtime.json",
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",
@@ -319,7 +337,19 @@
       ],
       "apply_targets": [
         "converge-dify"
-      ]
+      ],
+      "exception": {
+        "justification": "Fresh Grype evidence on the pinned Dify web digest reports critical and high findings with no fixes available for this digest. Keep the current fixed web bundle during availability recovery while preparing the patched Dify release.",
+        "owner": "Platform operations",
+        "compensating_controls": [
+          "The web container publishes no host port; it is reachable only through Dify NGINX on the private runtime network.",
+          "Public Dify routes redirect unauthenticated requests to the shared SSO sign-in path and the current image digest is unchanged.",
+          "This exception expires in seven days and requires a patched, freshly scanned Dify release before renewal."
+        ],
+        "approved_on": "2026-09-28",
+        "expires_on": "2026-10-05",
+        "remediation_plan": "Upgrade the Dify web image with a supported release by 2026-10-05 after reviewing the full release notes and checking API/web image compatibility; re-scan and complete authenticated browser smoke tests before rollout."
+      }
     },
     "directus_runtime": {
       "kind": "runtime",

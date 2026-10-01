@@ -42,6 +42,9 @@
           "requires_oidc": {
             "type": "boolean"
           },
+          "requires_api_gateway": {
+            "type": "boolean"
+          },
           "requires_secrets": {
             "type": "boolean"
           },

@@ -46,8 +46,9 @@ completeness:
   requires_oidc: false
   requires_secrets: true
   requires_compose_secrets: false
-  dashboard_file: config/grafana/dashboards/openbao.json
-  alert_rule_file: config/alertmanager/rules/openbao.yml
+  dashboard_file: config/grafana/dashboards/slo-overview.json
+  alert_rule_file: config/alertmanager/rules/platform.yml
+  suppression_preset: legacy-service
 redundancy:
   tier: R1
   recovery_objective:
@@ -91,21 +92,23 @@ health:
       - 200
   liveness:
     kind: http
-    description: OpenBao exposes the local seal-status endpoint.
+    description: Monitoring VM probes the OpenBao seal-status endpoint over its
+      private service address.
     timeout_seconds: 60
     retries: 1
     delay_seconds: 0
-    url: http://127.0.0.1:8201/v1/sys/seal-status
+    url: http://10.10.10.92:8201/v1/sys/seal-status
     method: GET
     expected_status:
       - 200
   readiness:
     kind: http
-    description: OpenBao reports the active node as ready on the local health endpoint.
+    description: Monitoring VM probes OpenBao readiness over its private service
+      address.
     timeout_seconds: 60
     retries: 30
     delay_seconds: 2
-    url: http://127.0.0.1:8201/v1/sys/health
+    url: http://10.10.10.92:8201/v1/sys/health
     method: GET
     expected_status:
       - 200
@@ -131,6 +134,16 @@ health:
     enabled: false
     reason: The operator-facing TLS surface requires client-certificate authentication,
       so Uptime Kuma only tracks this contract indirectly through role verification.
+slos:
+  - id: openbao-availability
+    service_id: openbao
+    indicator: availability
+    objective_percent: 99.5
+    window_days: 30
+    target_url: http://10.10.10.92:8201/v1/sys/health
+    probe_module: http_2xx
+    description: The private OpenBao health endpoint remains reachable from the
+      monitoring guest.
 data:
   - id: openbao-secrets
     service: openbao
@@ -145,14 +158,3 @@ data:
       - kv/controller/*
     notes: Secret material is retained until explicit deletion or rotation removes
       the prior value.
-slos:
-  - id: openbao-availability
-    service_id: openbao
-    indicator: availability
-    objective_percent: 99.5
-    window_days: 30
-    target_url: >-
-      http://{{ hostvars[playbook_execution_host_patterns.runtime_control[playbook_execution_env]].ansible_host }}:8201/v1/sys/health
-    probe_module: http_2xx_follow_redirects
-    description: OpenBao's private readiness endpoint remains reachable and unsealed
-      from the monitoring guest network.

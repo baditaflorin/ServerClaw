@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import yaml
@@ -41,10 +42,30 @@ def test_dify_runtime_declares_pre_validation_compatibility_defaults() -> None:
 
 def test_dify_runtime_repairs_init_password_and_bootstraps_through_a_private_tunnel() -> None:
     tasks = load_tasks(ROLE_TASKS)
+    admin_restore = next(
+        task
+        for task in tasks
+        if task.get("name") == "Restore a missing host-side Dify admin password from its controller copy"
+    )
+    seed_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Restore missing Dify runtime secret files from the current runtime environment"
+    )
     secret_task = next(task for task in tasks if task.get("name") == "Manage Dify runtime secrets")
     generated = secret_task["vars"]["common_manage_service_secrets_generate"]
     init_secret = next(secret for secret in generated if secret["label"] == "dify-init-password")
     assert init_secret["value"] == "{{ 'dify' | secret(length=dify_init_password_random_bytes) }}"
+    assert admin_restore["ansible.builtin.copy"]["force"] is False
+    assert admin_restore["ansible.builtin.copy"]["remote_src"] is False
+    assert admin_restore["no_log"] is True
+    assert tasks.index(admin_restore) < tasks.index(secret_task)
+    assert tasks.index(seed_task) < tasks.index(secret_task)
+    assert seed_task["ansible.builtin.script"].startswith("{{ dify_scripts_dir }}/seed_dify_runtime_secrets.py")
+    assert "--env-file {{ dify_env_file | quote }}" in seed_task["ansible.builtin.script"]
+    assert "--secret-dir {{ dify_secret_dir | quote }}" in seed_task["ansible.builtin.script"]
+    assert seed_task["become"] is True
+    assert seed_task["no_log"] is True
 
     task_names = {task.get("name") for task in tasks}
     assert "Detect a Dify initialization password that exceeds the live API limit" in task_names
@@ -82,6 +103,23 @@ def test_dify_runtime_renders_sandbox_config_before_startup() -> None:
     assert sandbox_task["ansible.builtin.template"]["dest"] == "{{ dify_sandbox_dir }}/conf/config.yaml"
 
 
+def test_nginx_is_restarted_only_when_managed_templates_change() -> None:
+    tasks = load_tasks(ROLE_TASKS)
+    render_task = next(task for task in tasks if task.get("name") == "Render the Dify nginx templates")
+    runtime_block = next(
+        task for task in tasks if task.get("name") == "Start the Dify runtime and recover Docker bridge-chain failures"
+    )
+    restart_task = next(
+        task
+        for task in runtime_block["block"]
+        if task.get("name") == "Restart Dify NGINX after managed template changes"
+    )
+
+    assert render_task["register"] == "dify_nginx_templates"
+    assert restart_task["when"] == "dify_nginx_templates.changed | default(false)"
+    assert restart_task["ansible.builtin.command"]["argv"][-2:] == ["restart", "nginx"]
+
+
 def test_dify_env_template_sets_plugin_and_code_execution_inputs() -> None:
     template = ENV_TEMPLATE.read_text()
 
@@ -101,6 +139,20 @@ def test_nginx_default_conf_uses_plain_envsubst_tokens() -> None:
     assert ":-" not in template
 
 
+def test_nginx_default_conf_re_resolves_compose_upstreams() -> None:
+    template = DEFAULT_CONF_TEMPLATE.read_text()
+
+    assert "resolver 127.0.0.11 valid=10s ipv6=off;" in template
+    assert "set $dify_api api:5001;" in template
+    assert "set $dify_web web:3000;" in template
+    assert "set $dify_plugin_daemon plugin_daemon:{{ dify_plugin_daemon_port }};" in template
+    assert "proxy_pass http://$dify_api/console/api/setup;" in template
+    assert "proxy_pass http://$dify_web;" in template
+    assert "proxy_pass http://$dify_plugin_daemon;" in template
+    assert "proxy_pass http://api:5001" not in template
+    assert "proxy_pass http://web:3000" not in template
+
+
 def test_nginx_proxy_conf_uses_plain_envsubst_tokens() -> None:
     template = PROXY_CONF_TEMPLATE.read_text()
 
@@ -116,3 +168,12 @@ def test_sandbox_config_template_matches_runtime_mount() -> None:
     assert "port: {{ dify_sandbox_port }}" in config
     assert "key: {{ dify_sandbox_api_key }}" in config
     assert "python_path: /opt/python/bin/python3" in config
+
+
+def test_ssrf_proxy_uses_ephemeral_runtime_state_for_squid_pid_file() -> None:
+    compose = (REPO_ROOT / "roles" / "dify_runtime" / "templates" / "docker-compose.yml.j2").read_text()
+    match = re.search(r"(?ms)^  ssrf_proxy:(.*?)(?=^  [a-zA-Z_][a-zA-Z0-9_]*:|^networks:)", compose)
+
+    assert match is not None
+    assert "tmpfs:" in match.group(1)
+    assert "/run:rw,nosuid,nodev,noexec,size=16m" in match.group(1)

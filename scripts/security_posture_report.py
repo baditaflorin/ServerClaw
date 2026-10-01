@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import ipaddress
 import json
 import os
 import shlex
@@ -12,7 +11,6 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -50,7 +48,7 @@ DEFAULT_LYNIS_HOSTS = {
         TOPOLOGY_HOST,
         "docker-build",
         "docker-runtime",
-        "backup_guests",
+        "backup",
         "coolify",
         "postgres",
         "nginx",
@@ -64,7 +62,6 @@ DEFAULT_LYNIS_HOSTS = {
         "monitoring-staging",
     ],
 }
-SERVICE_VM_HOST_PATTERN = {"backup": "backup_guests"}
 DEFAULT_TRIVY_HOSTS = {
     "production": ["docker-runtime", "docker-build"],
     "staging": ["docker-runtime-staging", "docker-build-staging"],
@@ -77,7 +74,7 @@ def default_lynis_hosts(environment: str) -> list[str]:
 
     payload = load_json(SERVICE_CATALOG_PATH)
     hosts = {
-        SERVICE_VM_HOST_PATTERN.get(str(service["vm"]), str(service["vm"]))
+        str(service["vm"])
         for service in payload.get("services", [])
         if isinstance(service, dict)
         and isinstance(service.get("vm"), str)
@@ -92,7 +89,7 @@ def default_lynis_hosts(environment: str) -> list[str]:
 
 def run_ansible_security_scan(
     *,
-    inventory: Path | Sequence[Path],
+    inventory: Path,
     playbook: Path,
     output_dir: Path,
     hosts: list[str],
@@ -102,21 +99,18 @@ def run_ansible_security_scan(
     output_dir.mkdir(parents=True, exist_ok=True)
     limit = ",".join(hosts)
     env = os.environ.copy()
-    inventory_paths = [inventory] if isinstance(inventory, Path) else list(inventory)
-    command = ["ansible-playbook"]
-    for inventory_path in inventory_paths:
-        command.extend(["-i", str(inventory_path)])
-    command.extend(
-        [
-            str(playbook),
-            "-l",
-            limit,
-            "-e",
-            f"security_scan_output_dir={output_dir}",
-            "-e",
-            "proxmox_guest_ssh_connection_mode=proxmox_host_jump",
-        ]
-    )
+    command = [
+        "ansible-playbook",
+        "-i",
+        str(inventory),
+        str(playbook),
+        "-l",
+        limit,
+        "-e",
+        f"security_scan_output_dir={output_dir}",
+        "-e",
+        "proxmox_guest_ssh_connection_mode=proxmox_host_jump",
+    ]
     if bootstrap_key is not None:
         command.extend(["--private-key", str(bootstrap_key)])
         env["LV3_BOOTSTRAP_SSH_PRIVATE_KEY"] = str(bootstrap_key)
@@ -125,51 +119,6 @@ def run_ansible_security_scan(
     result = run_command(command, cwd=REPO_ROOT, env=env if bootstrap_key is not None else None)
     if result.returncode != 0:
         raise RuntimeError(result.stderr or result.stdout or "security scan playbook failed")
-
-
-def resolve_trivy_guest_addresses(
-    inventories: Sequence[Path], service_names: Sequence[str], environment: str
-) -> dict[str, str]:
-    command = ["ansible-inventory"]
-    for inventory_path in inventories:
-        command.extend(["-i", str(inventory_path)])
-    command.append("--list")
-    result = run_command(command, cwd=REPO_ROOT)
-    if result.returncode != 0:
-        raise RuntimeError("unable to resolve Trivy targets from the selected Ansible inventory")
-    try:
-        payload = json.loads(result.stdout)
-    except json.JSONDecodeError as exc:
-        raise RuntimeError("Ansible returned invalid inventory data for Trivy target resolution") from exc
-
-    hostvars = payload.get("_meta", {}).get("hostvars", {})
-    environment_group = payload.get(environment, {})
-    environment_hosts = environment_group.get("hosts", []) if isinstance(environment_group, dict) else []
-    if not isinstance(environment_hosts, list):
-        environment_hosts = []
-    resolved: dict[str, str] = {}
-    for service_name in service_names:
-        candidates = [
-            name
-            for name in environment_hosts
-            if isinstance(name, str) and (name == service_name or name.startswith(f"{service_name}-"))
-        ]
-        concrete_candidates = [name for name in candidates if not name.endswith("-yourname")]
-        if concrete_candidates:
-            candidates = concrete_candidates
-        if len(candidates) != 1:
-            raise RuntimeError(
-                f"Trivy service '{service_name}' must resolve to exactly one host in the '{environment}' inventory"
-            )
-        host = hostvars.get(candidates[0], {}) if isinstance(hostvars, dict) else {}
-        address = host.get("ansible_host") if isinstance(host, dict) else None
-        try:
-            resolved[service_name] = str(ipaddress.IPv4Address(str(address)))
-        except ipaddress.AddressValueError as exc:
-            raise RuntimeError(
-                f"Trivy service '{service_name}' has no valid IPv4 address in the selected inventory"
-            ) from exc
-    return resolved
 
 
 def run_remote_script(
@@ -463,13 +412,7 @@ def warn_optional_delivery_failure(sink: str, exc: Exception) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0102 security posture workflow and write a receipt.")
     parser.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
-    parser.add_argument(
-        "--inventory",
-        type=Path,
-        action="append",
-        dest="inventories",
-        help="Ansible inventory source; repeat to layer deployment-local inventory over the repo inventory.",
-    )
+    parser.add_argument("--inventory", type=Path, default=DEFAULT_INVENTORY)
     parser.add_argument("--playbook", type=Path, default=DEFAULT_PLAYBOOK)
     parser.add_argument("--lynis-dir", type=Path, default=DEFAULT_LYNIS_DIR)
     parser.add_argument("--receipt-dir", type=Path, default=DEFAULT_RECEIPT_DIR)
@@ -493,10 +436,9 @@ def main(argv: list[str] | None = None) -> int:
         context = load_controller_context()
 
         host_reports: list[dict[str, Any]] = []
-        inventory_paths = args.inventories or [DEFAULT_INVENTORY]
         if not args.skip_lynis:
             run_ansible_security_scan(
-                inventory=inventory_paths,
+                inventory=args.inventory,
                 playbook=args.playbook,
                 output_dir=args.lynis_dir,
                 hosts=default_lynis_hosts(args.env),
@@ -519,9 +461,6 @@ def main(argv: list[str] | None = None) -> int:
 
         trivy_payloads: dict[str, list[dict[str, Any]]] = {}
         if not args.skip_trivy:
-            context["guests"].update(
-                resolve_trivy_guest_addresses(inventory_paths, DEFAULT_TRIVY_HOSTS[args.env], args.env)
-            )
             for host in DEFAULT_TRIVY_HOSTS[args.env]:
                 trivy_payloads[host] = run_remote_script(
                     context=context,

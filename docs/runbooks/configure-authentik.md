@@ -31,11 +31,13 @@ secret source and stored only in Authentik's OpenBao runtime payload. It must
 not appear in the blueprint, an Ansible command line, a receipt, or logs.
 
 The Authentik worker joins the mail platform's existing private Docker network
-and resolves Stalwart's authenticated internal submission listener by service
-DNS. The listener accepts only the managed submission credentials and retains
-the message in the mail platform's managed delivery queue. Do not route this
-traffic through the runtime host's published SMTP port: container hairpinning
-can establish TCP without delivering the SMTP banner.
+and sends through `mail-gateway-smtp:1588`, the authenticated transactional
+SMTP bridge. The bridge accepts the managed mailbox credentials, enforces the
+configured transactional sender, and submits through the mail gateway's
+provider-backed delivery path. Stalwart's `1587` listener is for other internal
+mail workloads; it is not the Authentik transactional delivery route. The
+bridge has no host-published port and intentionally does not advertise
+STARTTLS.
 
 After a normal Authentik converge, verify the live recovery bindings without
 sending an email:
