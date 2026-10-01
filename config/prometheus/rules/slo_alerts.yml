@@ -212,6 +212,48 @@ groups:
             for LLM-oriented Markdown extraction and bounded browser-assisted fetches.
           runbook: docs/runbooks/slo-tracking.md
 # END SERVICE: crawl4ai
+# BEGIN SERVICE: dify
+      - alert: SLOFastBurn_dify_availability
+        expr: (slo:dify_availability:error_rate_5m > (14 * 0.010000)) and (slo:dify_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: dify
+          slo_id: dify-availability
+          indicator: availability
+        annotations:
+          summary: dify-availability is burning its error budget at 14x
+          description: Dify's private readiness endpoint remains healthy on docker-runtime,
+            independently of the Authentik-protected public edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_dify_availability
+        expr: slo:dify_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: dify
+          slo_id: dify-availability
+          indicator: availability
+        annotations:
+          summary: dify-availability is burning its error budget at 3x
+          description: Dify's private readiness endpoint remains healthy on docker-runtime,
+            independently of the Authentik-protected public edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_dify_availability
+        expr: slo:dify_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: dify
+          slo_id: dify-availability
+          indicator: availability
+        annotations:
+          summary: dify-availability has less than 10% error budget remaining
+          description: Dify's private readiness endpoint remains healthy on docker-runtime,
+            independently of the Authentik-protected public edge.
+          runbook: docs/runbooks/slo-tracking.md
+# END SERVICE: dify
 # BEGIN SERVICE: directus
       - alert: SLOFastBurn_directus_availability
         expr: (slo:directus_availability:error_rate_5m > (14 * 0.005000)) and (slo:directus_availability:error_rate_1h
@@ -968,8 +1010,8 @@ groups:
           indicator: availability
         annotations:
           summary: openbao-availability is burning its error budget at 14x
-          description: OpenBao's private readiness endpoint remains reachable and unsealed
-            from the monitoring guest network.
+          description: The private OpenBao health endpoint remains reachable from the monitoring
+            guest.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOSlowBurn_openbao_availability
         expr: slo:openbao_availability:error_rate_1h > (3 * 0.005000)
@@ -981,8 +1023,8 @@ groups:
           indicator: availability
         annotations:
           summary: openbao-availability is burning its error budget at 3x
-          description: OpenBao's private readiness endpoint remains reachable and unsealed
-            from the monitoring guest network.
+          description: The private OpenBao health endpoint remains reachable from the monitoring
+            guest.
           runbook: docs/runbooks/slo-tracking.md
       - alert: SLOBudgetCritical_openbao_availability
         expr: slo:openbao_availability:budget_remaining < 0.10
@@ -994,8 +1036,8 @@ groups:
           indicator: availability
         annotations:
           summary: openbao-availability has less than 10% error budget remaining
-          description: OpenBao's private readiness endpoint remains reachable and unsealed
-            from the monitoring guest network.
+          description: The private OpenBao health endpoint remains reachable from the monitoring
+            guest.
           runbook: docs/runbooks/slo-tracking.md
 # END SERVICE: openbao
 # BEGIN SERVICE: openfga

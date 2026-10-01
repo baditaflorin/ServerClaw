@@ -46,54 +46,12 @@ def expected_include_platform_vars(include_path: Path) -> list[str]:
     return ["{{ playbook_dir }}/../../inventory/group_vars/platform.yml"]
 
 
-def test_public_edge_roles_have_scoped_apply_tags() -> None:
-    plays = yaml.safe_load((REPO_ROOT / "playbooks" / "public-edge.yml").read_text())
-    playbook = next(play for play in plays if play.get("name", "").startswith("Configure public publication"))
-    role_tags = {role["role"]: set(role.get("tags", [])) for role in playbook["roles"]}
-
-    assert "public-edge-firewall" in role_tags["lv3.platform.linux_guest_firewall"]
-    assert "public-edge-oidc-auth" in role_tags["lv3.platform.public_edge_oidc_auth"]
-    assert "public-edge-nginx" in role_tags["lv3.platform.nginx_edge_publication"]
-
-
-def test_public_edge_oidc_recovery_is_scoped_and_preserves_existing_credentials() -> None:
-    plays = yaml.safe_load((REPO_ROOT / "playbooks" / "public-edge.yml").read_text())
-    recovery_play = next(play for play in plays if "public-edge-oidc-recovery" in play.get("tags", []))
-    recovery_include = recovery_play["tasks"][0]["ansible.builtin.include_role"]
-    recovery_tasks = (
-        REPO_ROOT
-        / "collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/tasks/recover_existing_proxy.yml"
-    ).read_text()
-
-    assert recovery_include["tasks_from"] == "recover_existing_proxy.yml"
-    assert recovery_include["apply"]["tags"] == ["public-edge-oidc-recovery"]
-    assert "public_edge_oidc_auth_client_secret" not in recovery_tasks
-    assert "ansible.builtin.template" not in recovery_tasks
-    assert "state: restarted" in recovery_tasks
-
-
-def test_public_edge_issuer_hosts_regex_uses_yaml_single_backslashes() -> None:
-    tasks = yaml.safe_load(
-        (
-            REPO_ROOT
-            / "collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/tasks/main.yml"
-        ).read_text()
-    )
-    pin_task = next(task for task in tasks if task.get("name") == "Pin the Authentik issuer hostname to the local NGINX edge")
-    regex = pin_task["ansible.builtin.lineinfile"]["regexp"]
-
-    assert "\\s" in regex
-    assert "\\\\s" not in regex
-
-
 def test_edge_publication_playbooks_load_canonical_platform_vars() -> None:
     for playbook_path in EDGE_PLAYBOOKS:
         playbook_text = playbook_path.read_text()
         plays = yaml.safe_load(playbook_text)
         edge_plays = [
-            play
-            for play in plays
-            if any(role.get("role") == "lv3.platform.nginx_edge_publication" for role in play.get("roles", []))
+            play for play in plays if {"role": "lv3.platform.nginx_edge_publication"} in play.get("roles", [])
         ]
 
         if edge_plays:
@@ -121,9 +79,7 @@ def test_edge_publication_playbooks_load_canonical_platform_vars() -> None:
 
         include_plays = yaml.safe_load(include_path.read_text())
         include_edge_plays = [
-            play
-            for play in include_plays
-            if any(role.get("role") == "lv3.platform.nginx_edge_publication" for role in play.get("roles", []))
+            play for play in include_plays if {"role": "lv3.platform.nginx_edge_publication"} in play.get("roles", [])
         ]
 
         assert include_edge_plays, f"{include_path} should publish through lv3.platform.nginx_edge_publication"

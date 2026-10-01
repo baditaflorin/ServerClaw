@@ -178,4 +178,66 @@ After the guest is healthy again, restart the host-side socket activation pair i
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl stop lv3-tailscale-proxy-openbao.service && sudo systemctl start lv3-tailscale-proxy-openbao.socket'
 ```
 
+## Recovery Notes From The 2026-08-28 Admin Lockout
+
+`controller-automation`'s AppRole `secret_id` went stale (last generated
+`2026-04-28`, presumably an ordinary TTL expiry) and the two usual recovery
+paths were both found dead when we tried to fix it:
+
+- The root token recorded in `.local/openbao/init.json` returns
+  `permission denied` -- confirmed revoked.
+- **All three possible pairs** of the 3 recorded unseal keys in that same
+  `init.json` (threshold 2-of-3, so there are exactly 3 pairs) fail
+  `generate-root` identically with `cipher: message authentication
+  failed`. `bao status` at the time showed `sealed: false`,
+  `raft_applied_index: 420940` -- a long-lived, continuously-operating
+  store, not a fresh empty reinit -- so the most likely explanation is
+  that this instance was **rekeyed** at some point after `init.json` was
+  written, without the file ever being updated to match. A rekey does not
+  invalidate existing AppRole data (it only re-wraps the master key), so
+  this is very likely unrelated to why `controller-automation` itself went
+  stale.
+- The other 3 AppRole credential files from the same `2026-04-28` batch
+  (`atlas`, `mail-platform`, `secret-rotation`) were also tested and are
+  all dead the same way (`invalid role or secret ID`) -- this looks like a
+  batch-wide TTL expiry, not something specific to `controller-automation`.
+
+**What actually worked**: the `breakglass` userpass account (policy grants
+`sudo` on `path "*"`) is a genuinely separate recovery path from the
+Shamir unseal-key/root-token ceremony above, and it was still alive. The
+password in the live account did **not** match the current
+`.local/openbao/breakglass-password.txt` on this Mac -- it matched an
+older value from a since-superseded local file that had only survived by
+accident in an old email. That confirms `breakglass-password.txt` itself
+had drifted stale exactly like `controller-automation`'s AppRole; it has
+since been rotated via `auth/userpass/users/breakglass/password` (the
+password-only endpoint, so the account's existing policy/TTL were left
+untouched) and the local file now matches live OpenBao again. Treat this
+as the primary recovery path going forward, before reaching for
+`generate-root` -- and back up `breakglass-password.txt` somewhere more
+durable than this one gitignored local directory, since a single-Mac
+local file with no redundancy is exactly what let this drift unnoticed.
+
+Fix applied to `controller-automation` once inside via `breakglass`:
+`secret_id_ttl=0` and `secret_id_num_uses=0` on the role (previously
+whatever short-lived default caused the original expiry), so this
+specific credential should not go stale again on its own.
+
+Two SSH/curl gotchas hit while debugging this, worth knowing before
+reaching for `generate-root` or any userpass/approle login by hand again:
+
+- `ssh` inside a `while read line; do ssh ...; done < file` loop inherits
+  the loop's stdin by default and silently consumes the *rest of the
+  file* as its own input unless called with `ssh -n`. This is what made
+  an early unseal-key submission loop stop after 1 key instead of 2.
+- A JSON `-d` body sent through `ssh host "curl ... -d ..."` crosses two
+  shells (local, then whatever `sh -c` runs remotely). Only
+  single-quote-wrapping the JSON with its internal double quotes
+  backslash-escaped survives that intact: `-d '{\"key\":\"$VAL\"}'` built
+  as one local double-quoted string. Reassembling the curl invocation
+  through a generic `"$*"`-based helper strips that protection and the
+  remote shell mangles the JSON, which OpenBao reports back as a plain
+  `error parsing JSON` -- easy to misread as a wrong password/credential
+  when it isn't.
+
 The current host Tailscale IP is `100.64.0.1`, and both the OpenBao and `step-ca` proxy certificates now cover that address directly.

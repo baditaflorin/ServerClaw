@@ -16,6 +16,8 @@ non-secret OAuth manifest and immediately proves a second apply has no changes.
 Provider/application IDs and client secrets are preserved during adoption.
 
 The role also mounts a managed recovery-flow blueprint and renders Authentik's
-global SMTP settings through the existing OpenBao runtime payload. Recovery
-links are short-lived and rate-limited; the SMTP password remains outside the
-repository and the flow blueprint.
+global SMTP settings through the existing OpenBao runtime payload. Transactional
+mail uses the private `mail-gateway-smtp:1588` bridge and its provider-backed
+delivery path, with the configured gateway sender. Recovery links are
+short-lived and rate-limited; the SMTP password remains outside the repository
+and the flow blueprint.

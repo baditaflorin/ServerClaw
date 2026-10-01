@@ -105,10 +105,14 @@ surface_classes:
       - documentation-and-adr
       - generated-artifact-and-canonical-truth
   - surface_id: live_apply_receipts
-    title: Live-apply receipts and evidence payloads
+    title: Live-apply receipts and security evidence payloads
     paths:
       - receipts/atlas-drift/*
       - receipts/atlas-drift/**/*
+      - receipts/cve/*
+      - receipts/cve/**/*
+      - receipts/image-scans/*
+      - receipts/image-scans/**/*
       - receipts/live-applies/*.json
       - receipts/live-applies/*.yaml
       - receipts/live-applies/*.md
@@ -116,6 +120,10 @@ surface_classes:
       - receipts/live-applies/evidence/*
       - receipts/live-applies/evidence/**/*
       - receipts/restic-snapshots-latest.json
+      - receipts/sbom/*
+      - receipts/sbom/**/*
+      - receipts/security-reports/*
+      - receipts/security-reports/**/*
     required_lanes:
       - repository-structure-and-schema
       - generated-artifact-and-canonical-truth
@@ -196,7 +204,6 @@ surface_classes:
   - surface_id: service_automation
     title: Service automation, inventory, and runtime code
     paths:
-      - catalog/services/**/*.yaml
       - "*.pyi"
       - collections/ansible_collections/**/*
       - inventory/*.yml

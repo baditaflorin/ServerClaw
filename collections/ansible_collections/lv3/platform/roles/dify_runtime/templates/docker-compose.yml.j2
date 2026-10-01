@@ -123,6 +123,8 @@ services:
     volumes:
       - {{ dify_ssrf_proxy_dir }}/squid.conf.template:/etc/squid/squid.conf.template:ro
       - {{ dify_ssrf_proxy_dir }}/docker-entrypoint.sh:/docker-entrypoint-mount.sh:ro
+    tmpfs:
+      - /run:rw,nosuid,nodev,noexec,size=16m
     entrypoint:
       - sh
       - -c

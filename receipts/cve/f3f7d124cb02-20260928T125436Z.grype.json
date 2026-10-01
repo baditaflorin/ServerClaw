@@ -1,0 +1,3572 @@
+{
+  "schema_version": "1.0.0",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "generated_at": "2026-09-28T12:54:36Z",
+  "scanned_on": "2026-09-28",
+  "image_id": "dify_web_runtime",
+  "image_ref": "docker.io/langgenius/dify-web:1.13.3@sha256:f3f7d124cb0264162e74cd528de5f5472acfa14d75e7d2a54b167a3b8b99beb5",
+  "runtime_host": "docker-runtime",
+  "sbom_receipt": "receipts/sbom/f3f7d124cb02.cdx.json",
+  "summary": {
+    "critical": 13,
+    "high": 101,
+    "medium": 49,
+    "low": 14,
+    "unknown": 0,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 177
+  },
+  "matches": [
+    {
+      "vulnerability_id": "CVE-2026-21710",
+      "aliases": [
+        "CVE-2026-21710"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HTTP request handling causes an uncaught `TypeError` when a request is received with a header named `__proto__` and the application accesses `req.headersDistinct`.\r\n\r\nWhen this occurs, `dest[\"__proto__\"]` resolves to `Object.prototype` rather than `undefined`, causing `.push()` to be called on a non-array. This exception is thrown synchronously inside a property getter and cannot be intercepted by `error` event listeners, meaning it cannot be handled without wrapping every `req.headersDistinct` access in a `try/catch`.\r\n\r\n* This vulnerability affects all Node.js HTTP servers on **20.x, 22.x, 24.x, and v25.x**",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45447",
+      "aliases": [
+        "CVE-2026-45447"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45447",
+      "aliases": [
+        "CVE-2026-45447"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-5j98-mcp5-4vw2",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "glob CLI: Command injection via -c/--cmd executes matches with shell:true",
+      "package": {
+        "name": "glob",
+        "version": "10.4.5",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/glob/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-p293-qw3h-jr36",
+      "aliases": [],
+      "severity": "CRITICAL",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Unauthenticated Remote Code Execution on windows-hosted servers",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28388",
+      "aliases": [
+        "CVE-2026-28388"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28388",
+      "aliases": [
+        "CVE-2026-28388"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28389",
+      "aliases": [
+        "CVE-2026-28389"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28389",
+      "aliases": [
+        "CVE-2026-28389"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-c4j6-fc7j-m34r",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js vulnerable to server-side request forgery in applications using WebSocket upgrades",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63076",
+      "aliases": [
+        "CVE-2026-63076"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63076",
+      "aliases": [
+        "CVE-2026-63076"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-479c-33wc-g2pg",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "React Server Components have a Denial of Service Vulnerability",
+      "package": {
+        "name": "react-server-dom-webpack",
+        "version": "19.2.4",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/react-server-dom-webpack@19.2.4_react-dom@19.2.4_react@19.2.4__react@19.2.4_webpack@5.1_5b7bfdaf44b36798af97a45528cba94b/node_modules/react-server-dom-webpack/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-18798",
+      "aliases": [
+        "CVE-2026-18798"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-18798",
+      "aliases": [
+        "CVE-2026-18798"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-rv78-f8rc-xrxh",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Facebook React has a Denial of Service Vulnerability in React Server Components",
+      "package": {
+        "name": "react-server-dom-webpack",
+        "version": "19.2.4",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/react-server-dom-webpack@19.2.4_react-dom@19.2.4_react@19.2.4__react@19.2.4_webpack@5.1_5b7bfdaf44b36798af97a45528cba94b/node_modules/react-server-dom-webpack/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63073",
+      "aliases": [
+        "CVE-2026-63073"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63073",
+      "aliases": [
+        "CVE-2026-63073"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34180",
+      "aliases": [
+        "CVE-2026-34180"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-54874",
+      "aliases": [
+        "CVE-2026-54874"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34180",
+      "aliases": [
+        "CVE-2026-34180"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-54874",
+      "aliases": [
+        "CVE-2026-54874"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34182",
+      "aliases": [
+        "CVE-2026-34182"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34182",
+      "aliases": [
+        "CVE-2026-34182"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34183",
+      "aliases": [
+        "CVE-2026-34183"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34183",
+      "aliases": [
+        "CVE-2026-34183"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-31790",
+      "aliases": [
+        "CVE-2026-31790"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-31790",
+      "aliases": [
+        "CVE-2026-31790"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-14457",
+      "aliases": [
+        "CVE-2026-14457"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-14457",
+      "aliases": [
+        "CVE-2026-14457"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63072",
+      "aliases": [
+        "CVE-2026-63072"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63072",
+      "aliases": [
+        "CVE-2026-63072"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28387",
+      "aliases": [
+        "CVE-2026-28387"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28387",
+      "aliases": [
+        "CVE-2026-28387"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-9076",
+      "aliases": [
+        "CVE-2026-9076"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-9076",
+      "aliases": [
+        "CVE-2026-9076"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-m99w-x7hq-7vfj",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Denial of Service in App Router using Server Actions",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42766",
+      "aliases": [
+        "CVE-2026-42766"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42766",
+      "aliases": [
+        "CVE-2026-42766"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28390",
+      "aliases": [
+        "CVE-2026-28390"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-28390",
+      "aliases": [
+        "CVE-2026-28390"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42764",
+      "aliases": [
+        "CVE-2026-42764"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63075",
+      "aliases": [
+        "CVE-2026-63075"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42764",
+      "aliases": [
+        "CVE-2026-42764"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63075",
+      "aliases": [
+        "CVE-2026-63075"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-mg66-mrh9-m8jx",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js vulnerable to Denial of Service via connection exhaustion in applications using Cache Components",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-267c-6grr-h53f",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js has a Middleware / Proxy bypass in App Router applications via segment-prefetch routes",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-26hh-7cqf-hhc6",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js has a Middleware / Proxy bypass in App Router applications via segment-prefetch routes - Incomplete Fix Follow-Up",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-36qx-fr4f-26g5",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js has a Middleware / Proxy bypass in Pages Router applications using i18n",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-23hp-3jrh-7fpw",
+      "aliases": [],
+      "severity": "CRITICAL",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Decompression/parse DoS via unlimited input",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-23hp-3jrh-7fpw",
+      "aliases": [],
+      "severity": "CRITICAL",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Decompression/parse DoS via unlimited input",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-23hp-3jrh-7fpw",
+      "aliases": [],
+      "severity": "CRITICAL",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Decompression/parse DoS via unlimited input",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-7383",
+      "aliases": [
+        "CVE-2026-7383"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-7383",
+      "aliases": [
+        "CVE-2026-7383"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-14456",
+      "aliases": [
+        "CVE-2026-14456"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-14456",
+      "aliases": [
+        "CVE-2026-14456"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45445",
+      "aliases": [
+        "CVE-2026-45445"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45445",
+      "aliases": [
+        "CVE-2026-45445"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-492v-c6pp-mqqv",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js has a Middleware / Proxy bypass through dynamic route parameter injection",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-h64f-5h5j-jqjh",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Next.js has a Denial of Service in the Image Optimization API",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-mwp4-54f8-5fhr",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "ip-address: Address4 decodes leading-zero octets as decimal while resolvers decode them as octal, allowing SSRF and trust-boundary bypass",
+      "package": {
+        "name": "ip-address",
+        "version": "9.0.5",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/ip-address/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8x88-c5mf-7j5w",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Negative tar entry size causes infinite loop in archive replace",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8x88-c5mf-7j5w",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Negative tar entry size causes infinite loop in archive replace",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8x88-c5mf-7j5w",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Negative tar entry size causes infinite loop in archive replace",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-6gpp-xcg3-4w24",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Middleware / Proxy bypass in App Router applications using Turbopack and single locale",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-rgw5-rvv9-x895",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "brace-expansion: DoS via unbounded intermediate arrays, bypassing the CVE-2026-14257 mitigation",
+      "package": {
+        "name": "brace-expansion",
+        "version": "2.0.2",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-34x7-hfp2-rc4v",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Vulnerable to Arbitrary File Creation/Overwrite via Hardlink Path Traversal",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-34x7-hfp2-rc4v",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Vulnerable to Arbitrary File Creation/Overwrite via Hardlink Path Traversal",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-34x7-hfp2-rc4v",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Vulnerable to Arbitrary File Creation/Overwrite via Hardlink Path Traversal",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-mh99-v99m-4gvg",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "brace-expansion: DoS via unbounded expansion length causing an out-of-memory process crash",
+      "package": {
+        "name": "brace-expansion",
+        "version": "2.0.2",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-w4pp-8pjf-rmxw",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "pacote is vulnerable to Denial of Service (DoS) via the addGitSha function",
+      "package": {
+        "name": "pacote",
+        "version": "19.0.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/pacote/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-w4pp-8pjf-rmxw",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "pacote is vulnerable to Denial of Service (DoS) via the addGitSha function",
+      "package": {
+        "name": "pacote",
+        "version": "20.0.0",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/@npmcli/metavuln-calculator/node_modules/pacote/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-wx67-qw84-cm4g",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "react-server-dom: Denial of Service in Server Functions",
+      "package": {
+        "name": "react-server-dom-webpack",
+        "version": "19.2.4",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/react-server-dom-webpack@19.2.4_react-dom@19.2.4_react@19.2.4__react@19.2.4_webpack@5.1_5b7bfdaf44b36798af97a45528cba94b/node_modules/react-server-dom-webpack/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-7r86-cg39-jmmj",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "minimatch has ReDoS: matchOne() combinatorial backtracking via multiple non-adjacent GLOBSTAR segments",
+      "package": {
+        "name": "minimatch",
+        "version": "9.0.5",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/minimatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-3ppc-4f35-3m26",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "minimatch has a ReDoS via repeated wildcards with non-matching literal in pattern",
+      "package": {
+        "name": "minimatch",
+        "version": "9.0.5",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/minimatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-48937",
+      "aliases": [
+        "CVE-2026-48937"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HTTP/2 server API can cause servers to keep accepting data even after sending a `GOAWAY` frame. This vulnerability affects two supported release lines: **Node.js 22** and **Node.js 24**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r292-9mhp-454m",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Uncontrolled recursion in mapHas/filesFilter allows uncatchable stack-overflow DoS via crafted long-path tar with member selection",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r292-9mhp-454m",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Uncontrolled recursion in mapHas/filesFilter allows uncatchable stack-overflow DoS via crafted long-path tar with member selection",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r292-9mhp-454m",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Uncontrolled recursion in mapHas/filesFilter allows uncatchable stack-overflow DoS via crafted long-path tar with member selection",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-23c5-xmqv-rm74",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "minimatch ReDoS: nested *() extglobs generate catastrophically backtracking regular expressions",
+      "package": {
+        "name": "minimatch",
+        "version": "9.0.5",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/minimatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-q8wf-6r8g-63ch",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Denial of Service in the Image Optimization API using SVGs",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56846",
+      "aliases": [
+        "CVE-2026-56846"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HTTP/2 handling can cause HTTP/2 retained header blocks evade maxSessionMemory and enable remote memory exhaustion.\r\n\r\nThis vulnerability affects Node.js **24.x** and **22.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56848",
+      "aliases": [
+        "CVE-2026-56848"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HTTP/2 handling allows `nghttp2_session_mem_send()` to be called re-entrantly while `nghttp2_session_mem_recv()` is executing, resulting in a heap-use-after-free.\r\n\r\nThis vulnerability affects Node.js **26.x**, **24.x**, and **22.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-c2c7-rcm5-vvqj",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Picomatch has a ReDoS vulnerability via extglob quantifiers",
+      "package": {
+        "name": "picomatch",
+        "version": "4.0.2",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/picomatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-89xv-2m56-2m9x",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Server-Side Request Forgery in Server Actions on custom servers",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-f886-m6hf-6m8v",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "brace-expansion: Zero-step sequence causes process hang and memory exhaustion",
+      "package": {
+        "name": "brace-expansion",
+        "version": "2.0.2",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-w8wr-v893-vjvp",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Process crash via PAX numeric path type confusion",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-w8wr-v893-vjvp",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Process crash via PAX numeric path type confusion",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-w8wr-v893-vjvp",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Process crash via PAX numeric path type confusion",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-p9j2-gv94-2wf4",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Server-Side Request Forgery in rewrites via attacker-controlled destination hostname",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-31789",
+      "aliases": [
+        "CVE-2026-31789"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-31789",
+      "aliases": [
+        "CVE-2026-31789"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63074",
+      "aliases": [
+        "CVE-2026-63074"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-63074",
+      "aliases": [
+        "CVE-2026-63074"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-qffp-2rhf-9h96",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "tar has Hardlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-qffp-2rhf-9h96",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "tar has Hardlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-qffp-2rhf-9h96",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "tar has Hardlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8qq5-rm4j-mr97",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar is Vulnerable to Arbitrary File Overwrite and Symlink Poisoning via Insufficient Path Sanitization",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8qq5-rm4j-mr97",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar is Vulnerable to Arbitrary File Overwrite and Symlink Poisoning via Insufficient Path Sanitization",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8qq5-rm4j-mr97",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar is Vulnerable to Arbitrary File Overwrite and Symlink Poisoning via Insufficient Path Sanitization",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-4c39-4ccg-62r3",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Unbounded Server Action payload in Edge runtime",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-955p-x3mx-jcvp",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Unauthenticated disclosure of internal Server Function endpoints",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-2673",
+      "aliases": [
+        "CVE-2026-2673"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-2673",
+      "aliases": [
+        "CVE-2026-2673"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-v2v4-37r5-5v8g",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "ip-address has XSS in Address6 HTML-emitting methods",
+      "package": {
+        "name": "ip-address",
+        "version": "9.0.5",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/ip-address/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-3v7f-55p6-f55p",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Picomatch: Method Injection in POSIX Character Classes causes incorrect Glob Matching",
+      "package": {
+        "name": "picomatch",
+        "version": "4.0.2",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tinyglobby/node_modules/picomatch/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-gvwx-54wh-qm9j",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Uncaught Exception DoS via NUL byte in PAX path/linkpath records",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-gvwx-54wh-qm9j",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Uncaught Exception DoS via NUL byte in PAX path/linkpath records",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-gvwx-54wh-qm9j",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "node-tar: Uncaught Exception DoS via NUL byte in PAX path/linkpath records",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-3jxr-9vmj-r5cp",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "brace-expansion: DoS via exponential-time expansion of consecutive non-expanding {} groups",
+      "package": {
+        "name": "brace-expansion",
+        "version": "2.0.2",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/brace-expansion/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21714",
+      "aliases": [
+        "CVE-2026-21714"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A memory leak occurs in Node.js HTTP/2 servers when a client sends WINDOW_UPDATE frames on stream 0 (connection-level) that cause the flow control window to exceed the maximum value of 2\u00b3\u00b9-1. The server correctly sends a GOAWAY frame, but the Http2Session object is never cleaned up.\r\n\r\nThis vulnerability affects HTTP2 users on Node.js 20, 22, 24 and 25.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42767",
+      "aliases": [
+        "CVE-2026-42767"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42767",
+      "aliases": [
+        "CVE-2026-42767"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-58042",
+      "aliases": [
+        "CVE-2026-58042"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js can cause dns.resolveAny() Aborts the Node.js Process When a DNS Response Contains More Than 256 A Records.\r\n\r\nRepeated triggering of this condition can lead to denial of service.\r\n\r\nThis vulnerability affects Node.js **26.x**, **24.x**, and **22.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21713",
+      "aliases": [
+        "CVE-2026-21713"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HMAC verification uses a non-constant-time comparison when validating user-provided signatures, potentially leaking timing information proportional to the number of matching bytes. Under certain threat models where high-resolution timing measurements are possible, this behavior could be exploited as a timing oracle to infer HMAC values.\r\n\r\nNode.js already provides timing-safe comparison primitives used elsewhere in the codebase, indicating this is an oversight rather than an intentional design decision.\r\n\r\nThis vulnerability affects **20.x, 22.x, 24.x, and 25.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r6q2-hw4h-h46w",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Race Condition in node-tar Path Reservations via Unicode Ligature Collisions on macOS APFS",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r6q2-hw4h-h46w",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Race Condition in node-tar Path Reservations via Unicode Ligature Collisions on macOS APFS",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-r6q2-hw4h-h46w",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Race Condition in node-tar Path Reservations via Unicode Ligature Collisions on macOS APFS",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-75803",
+      "aliases": [
+        "CVE-2026-75803"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-75803",
+      "aliases": [
+        "CVE-2026-75803"
+      ],
+      "severity": "CRITICAL",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-48617",
+      "aliases": [
+        "CVE-2026-48617"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js Permission Model enforcement allows Bypass via `process.report.writeReport()` Path Misvalidation. This can lead to confidentiality impact or bypass of the intended security boundary under affected configurations. This vulnerability affects all supported release lines: **Node.js 22**, **Node.js 24**, and **Node.js 26**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-68g3-v927-f742",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Cache confusion of response bodies for requests with bodies",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-w9m9-85wc-3x92",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "postcss-selector-parser allows denial of service through uncontrolled AST recursion",
+      "package": {
+        "name": "postcss-selector-parser",
+        "version": "7.1.0",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/postcss-selector-parser/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-4633-3j49-mh5q",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Cache confusion of response bodies for requests with bodies containing invalid UTF-8 byte sequences",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-73rr-hh4g-fpgx",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch",
+      "package": {
+        "name": "diff",
+        "version": "5.2.0",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/diff/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-58040",
+      "aliases": [
+        "CVE-2026-58040"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "An incomplete fix has been identified in Node.js: HTTPS Agent TLS session reuse skips hostname verification across identity policies (incomplete fix of CVE-2026-48934).\r\n\r\nThis vulnerability affects Node.js **22.x**, **24.x**, and **26.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "busybox",
+        "version": "1.37.0-r30",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "busybox-binsh",
+        "version": "1.37.0-r30",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2025-60876",
+      "aliases": [
+        "CVE-2025-60876"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "BusyBox wget thru 1.3.7 accepted raw CR (0x0D)/LF (0x0A) and other C0 control bytes in the HTTP request-target (path/query), allowing the request line to be split and attacker-controlled headers to be injected. To preserve the HTTP/1.1 request-line shape METHOD SP request-target SP HTTP/1.1, a raw space (0x20) in the request-target must also be rejected (clients should use %20).",
+      "package": {
+        "name": "ssl_client",
+        "version": "1.37.0-r30",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-wfc6-r584-vfw7",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Next.js vulnerable to cache poisoning in React Server Component responses",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-58041",
+      "aliases": [
+        "CVE-2026-58041"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js node:sqlite allows a stale StatementSyncIterator created through DatabaseSync#createTagStore() to continue executing a cached prepared statement after it has been reset and rebound with new parameters. SQLTagStore resets cached statements using sqlite3_reset() directly, bypassing the iterator invalidation mechanism introduced for StatementSync in recent releases\r\n\r\nThis vulnerability affects Node.js **22.x**, **24.x**, and **26.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-83g3-92jg-28cx",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Arbitrary File Read/Write via Hardlink Target Escape Through Symlink Chain in node-tar Extraction",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-83g3-92jg-28cx",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Arbitrary File Read/Write via Hardlink Target Escape Through Symlink Chain in node-tar Extraction",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-83g3-92jg-28cx",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Arbitrary File Read/Write via Hardlink Target Escape Through Symlink Chain in node-tar Extraction",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21717",
+      "aliases": [
+        "CVE-2026-21717"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in V8's string hashing mechanism causes integer-like strings to be hashed to their numeric value, making hash collisions trivially predictable. By crafting a request that causes many such collisions in V8's internal string table, an attacker can significantly degrade performance of the Node.js process.\r\n\r\nThe most common trigger is any endpoint that calls `JSON.parse()` on attacker-controlled input, as JSON parsing automatically internalizes short strings into the affected hash table.\r\n\r\nThis vulnerability affects **20.x, 22.x, 24.x, and 25.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-9ppj-qmqm-q256",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Symlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-9ppj-qmqm-q256",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Symlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-9ppj-qmqm-q256",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "node-tar Symlink Path Traversal via Drive-Relative Linkpath",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-52v5-jr5w-gjxr",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "sigstore's `certificateOIDs` verification constraints are silently dropped and never enforced",
+      "package": {
+        "name": "sigstore",
+        "version": "3.1.0",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/sigstore/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-gx5p-jg67-6x7h",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Next.js has cross-site scripting in beforeInteractive scripts with untrusted input",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-jfc7-64v2-mr8c",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "@sigstore/core has DSSE payloadType type-binding failure",
+      "package": {
+        "name": "@sigstore/core",
+        "version": "2.0.0",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/sigstore/node_modules/@sigstore/core/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34181",
+      "aliases": [
+        "CVE-2026-34181"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-34181",
+      "aliases": [
+        "CVE-2026-34181"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-40200",
+      "aliases": [
+        "CVE-2026-40200"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "musl",
+        "version": "1.2.5-r21",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-40200",
+      "aliases": [
+        "CVE-2026-40200"
+      ],
+      "severity": "HIGH",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "musl-utils",
+        "version": "1.2.5-r21",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42769",
+      "aliases": [
+        "CVE-2026-42769"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42769",
+      "aliases": [
+        "CVE-2026-42769"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-ffhc-5mcf-pf4q",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "Next.js vulnerable to cross-site scripting in App Router applications using CSP nonces",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45446",
+      "aliases": [
+        "CVE-2026-45446"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-45446",
+      "aliases": [
+        "CVE-2026-45446"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-48931",
+      "aliases": [
+        "CVE-2026-48931"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HTTP Agent can cause a client to accept as valid a response that is send before the client has sent the request.\r\n\r\nThis vulnerability affects all supported release lines: **Node.js 22**, **Node.js 24**, and **Node.js 26**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42768",
+      "aliases": [
+        "CVE-2026-42768"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42768",
+      "aliases": [
+        "CVE-2026-42768"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-27171",
+      "aliases": [
+        "CVE-2026-27171"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "zlib",
+        "version": "1.3.1-r2",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-58043",
+      "aliases": [
+        "CVE-2026-58043"
+      ],
+      "severity": "HIGH",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js Permission Model enforcement can over-grant filesystem access across radix-tree prefix boundaries.\r\n\r\nUnder `--permission`, an attacker who is granted access to one path can abuse boundary handling to read from or write to paths outside the intended filesystem allowlist.\r\n\r\nThis vulnerability affects Node.js **main**, **22.x**, **24.x**, and **26.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-58045",
+      "aliases": [
+        "CVE-2026-58045"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js allows a spoofed `TypedArray` `byteLength` to trigger a reachable assertion in the synchronous `node:zlib` APIs, causing the entire process to crash. All 11 synchronous zlib functions are affected.\r\n\r\nRepeated exploitation of this condition can result in a denial of service.\r\n\r\nThis vulnerability affects Node.js **22.x**, **24.x**, and **26.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-vmf3-w455-68vh",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "node-tar applies PAX size override to intermediary GNU long-name/long-link headers, causing tar parser interpretation differential (file smuggling)",
+      "package": {
+        "name": "tar",
+        "version": "6.2.1",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-vmf3-w455-68vh",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "node-tar applies PAX size override to intermediary GNU long-name/long-link headers, causing tar parser interpretation differential (file smuggling)",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/node-gyp/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-vmf3-w455-68vh",
+      "aliases": [],
+      "severity": "MEDIUM",
+      "namespace": "github:language:javascript",
+      "description": "node-tar applies PAX size override to intermediary GNU long-name/long-link headers, causing tar parser interpretation differential (file smuggling)",
+      "package": {
+        "name": "tar",
+        "version": "7.4.3",
+        "type": "npm",
+        "locations": [
+          "/usr/local/lib/node_modules/npm/node_modules/cacache/node_modules/tar/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-48932",
+      "aliases": [
+        "CVE-2026-48932"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HTTP client can cause a request desynchronization for Node.js-based forwarding proxies that rebuild outbound headers from the visible `IncomingMessage` headers while piping the original body to a reused backend connection.\r\n\r\nNode.js can omit headers beyond `maxHeadersCount` / `maxHeaderPairs` from `req.headers`, `req.rawHeaders`, and `req.headersDistinct`, while still using those omitted headers internally for HTTP message framing. In particular, `Content-Length` can be hidden from userland while the request body is still delivered.\r\n\r\nThis vulnerability affects all supported release lines: **Node.js 22**, **Node.js 24**, and **Node.js 26**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-58044",
+      "aliases": [
+        "CVE-2026-58044"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HTTP client can cause a request desynchronization for Node.js-based forwarding proxies that rebuild outbound headers from the visible `IncomingMessage` headers while piping the original body to a reused backend connection.\r\n\r\nNode.js can omit headers beyond `maxHeadersCount` / `maxHeaderPairs` from `req.headers`, `req.rawHeaders`, and `req.headersDistinct`, while still using those omitted headers internally for HTTP message framing. In particular, `Content-Length` can be hidden from userland while the request body is still delivered.\r\n\r\nThis vulnerability affects all supported release lines: **Node.js 22**, **Node.js 24**, and **Node.js 26**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42770",
+      "aliases": [
+        "CVE-2026-42770"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libcrypto3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-42770",
+      "aliases": [
+        "CVE-2026-42770"
+      ],
+      "severity": "LOW",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "libssl3",
+        "version": "3.5.5-r0",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-6042",
+      "aliases": [
+        "CVE-2026-6042"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "musl",
+        "version": "1.2.5-r21",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-6042",
+      "aliases": [
+        "CVE-2026-6042"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "alpine:distro:alpine:3.23",
+      "description": null,
+      "package": {
+        "name": "musl-utils",
+        "version": "1.2.5-r21",
+        "type": "apk",
+        "locations": [
+          "/lib/apk/db/installed"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56847",
+      "aliases": [
+        "CVE-2026-56847"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js Permission Model enforcement allows `trace_events.createTracing().enable()` Writes Trace Logs Outside `--allow-fs-write`.\r\n\r\nThis can lead to confidentiality impact or bypass of the intended security boundary under affected configurations.\r\n\r\nThis vulnerability affects Node.js **22.x**, **24.x**, and **26.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-3g8h-86w9-wvmq",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "Next.js's Middleware / Proxy redirects can be cache-poisoned",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-vfv6-92ff-j949",
+      "aliases": [],
+      "severity": "LOW",
+      "namespace": "github:language:javascript",
+      "description": "Next.js vulnerable to cache poisoning via collisions in React Server Component cache-busting",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21715",
+      "aliases": [
+        "CVE-2026-21715"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js Permission Model filesystem enforcement leaves `fs.realpathSync.native()` without the required read permission checks, while all comparable filesystem functions correctly enforce them.\r\n\r\nAs a result, code running under `--permission` with restricted `--allow-fs-read` can still use `fs.realpathSync.native()` to check file existence, resolve symlink targets, and enumerate filesystem paths outside of permitted directories.\r\n\r\nThis vulnerability affects **20.x, 22.x, 24.x, and 25.x** processes using the Permission Model where `--allow-fs-read` is intentionally restricted.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-58039",
+      "aliases": [
+        "CVE-2026-58039"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js Permission Model enforcement allows process.report writes (and overwrites) files outside --allow-fs-write paths.\n\nThis can lead to confidentiality impact or bypass of the intended security boundary under affected configurations.\n\nThis vulnerability affects Node.js **22.x**, **24.x**, and **26.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-21716",
+      "aliases": [
+        "CVE-2026-21716"
+      ],
+      "severity": "LOW",
+      "namespace": "nvd:cpe",
+      "description": "An incomplete fix for CVE-2024-36137 leaves `FileHandle.chmod()` and `FileHandle.chown()` in the promises API without the required permission checks, while their callback-based equivalents (`fs.fchmod()`, `fs.fchown()`) were correctly patched.\r\n\r\nAs a result, code running under `--permission` with restricted `--allow-fs-write` can still use promise-based `FileHandle` methods to modify file permissions and ownership on already-open file descriptors, bypassing the intended write restrictions.\r\n\r\nThis vulnerability affects **20.x, 22.x, 24.x, and 25.x** processes using the Permission Model where `--allow-fs-write` is intentionally restricted.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "CVE-2026-56850",
+      "aliases": [
+        "CVE-2026-56850"
+      ],
+      "severity": "MEDIUM",
+      "namespace": "nvd:cpe",
+      "description": "A flaw in Node.js HTTPS Agent connection reuse can cause PFX object-array key collisions, allowing mutual TLS (mTLS) client identities to be reused across requests configured with different client certificates.\r\n\r\nThis vulnerability affects Node.js **26.x**, **24.x**, and **22.x**.",
+      "package": {
+        "name": "node",
+        "version": "22.22.1",
+        "type": "binary",
+        "locations": [
+          "/usr/local/bin/node"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-2xp9-vwfh-vxw4",
+      "aliases": [],
+      "severity": "CRITICAL",
+      "namespace": "github:language:javascript",
+      "description": "Next.js: Unauthenticated Remote Code Execution in Image Optimization API when AVIF files are used",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-8h8q-6873-q5fj",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js Vulnerable to Denial of Service with Server Components",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-q4gf-8mx6-v5v3",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "Next.js has a Denial of Service with Server Components",
+      "package": {
+        "name": "next",
+        "version": "16.2.1",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/next@16.2.1_@babel+core@7.29.0_react-dom@19.2.4_react@19.2.4__react@19.2.4_sass@1.98.0/node_modules/next/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-f88m-g3jw-g9cj",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "sharp inherited vulnerabilities in libvips: CVE-2026-33327, CVE-2026-33328, CVE-2026-35590, CVE-2026-35591",
+      "package": {
+        "name": "sharp",
+        "version": "0.34.5",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/sharp@0.34.5/node_modules/sharp/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    },
+    {
+      "vulnerability_id": "GHSA-rgj7-g3m4-5g8c",
+      "aliases": [],
+      "severity": "HIGH",
+      "namespace": "github:language:javascript",
+      "description": "sharp: Vulnerabilities in libheif: GHSA-g89c-p67h-r497 and GHSA-2jg2-4ch7-h545",
+      "package": {
+        "name": "sharp",
+        "version": "0.34.5",
+        "type": "npm",
+        "locations": [
+          "/app/web/node_modules/.pnpm/sharp@0.34.5/node_modules/sharp/package.json"
+        ]
+      },
+      "fix": {
+        "state": "unknown",
+        "versions": []
+      }
+    }
+  ]
+}

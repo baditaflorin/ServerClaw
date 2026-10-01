@@ -42,11 +42,15 @@ ownership_manifest:
   owned_surfaces:
     - id: ws_0424_tracking
       paths:
-        - workstreams/active/ws-0424-fork-clone-0fork.yaml
         - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
         - docs/adr/0425-retrospective-420-adr-platform-build.md
         - docs/runbooks/hetzner-bare-metal-bootstrap.md
       mode: exclusive
+    - id: ws_0424_tracking_handoff
+      paths:
+        - workstreams/active/ws-0424-fork-clone-0fork.yaml
+      mode: shared_contract
+      contract: workstream-ownership-transfer-v1
     - id: ws_0424_generated_indices
       paths:
         - workstreams.yaml
@@ -161,11 +165,15 @@ ownership_manifest:
     - id: ws_0424_schema_catalog_fixes
       paths:
         - config/command-catalog.json
-        - config/workflow-catalog.json
         - inventory/group_vars/platform.yml
         - scripts/generate_platform_vars.py
         - scripts/validate_repository_data_models.py
       mode: exclusive
+    - id: ws_0424_workflow_catalog_contract
+      paths:
+        - config/workflow-catalog.json
+      mode: shared_contract
+      contract: workflow-catalog-entry-v1
     - id: ws_0438_generic_by_construction
       description: >
         ADR 0438 — generative-cascade IaC refactor co-located on this branch.
@@ -262,6 +270,12 @@ notes: >
   independently scoped targets can coexist under makefile-target-registry-v1;
   the timed wrapper uses a shared shellcheck-clean contract for maintenance.
   The remaining exclusive workstream ownership is unchanged.
+  Ownership correction (2026-09-28): the workflow-catalog path metadata is now
+  maintained under the additive workflow-catalog-entry-v1 contract shared with
+  ws-0514. The recorded WS-0424 branch/worktree is absent and no remote branch
+  or open PR exists. Schema changes to its other catalog and platform-data
+  surfaces remain exclusive to WS-0424. The active workstream shard is shared
+  only for this ownership transfer, under workstream-ownership-transfer-v1.
   This workstream was started while the operator was AFK. Destructive actions
   performed with explicit operator authorization (apex wipe). A RAID1 near-miss
   occurred during disk inventory — see ADR 0425 live postmortem. Recovery was

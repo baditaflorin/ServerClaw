@@ -132,9 +132,12 @@
       "service_type": "compose",
       "requires_subdomain": true,
       "requires_oidc": true,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
+      "requires_api_gateway": false,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
+      "notes": "The Dify UI is protected by the shared Authentik OIDC edge. The gateway's Dify tool bridge is implemented by the gateway itself; Dify's app API is not an OIDC-JWT upstream."
     },
     "directus": {
       "service_type": "compose",
@@ -514,8 +517,9 @@
       "requires_oidc": false,
       "requires_secrets": true,
       "requires_compose_secrets": false,
-      "dashboard_file": "config/grafana/dashboards/openbao.json",
-      "alert_rule_file": "config/alertmanager/rules/openbao.yml"
+      "dashboard_file": "config/grafana/dashboards/slo-overview.json",
+      "alert_rule_file": "config/alertmanager/rules/platform.yml",
+      "suppression_preset": "legacy-service"
     },
     "openfga": {
       "service_type": "compose",

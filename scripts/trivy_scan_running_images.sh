@@ -8,45 +8,11 @@ TRIVY_SKIP_DB_UPDATE="${TRIVY_SKIP_DB_UPDATE:-false}"
 
 mkdir -p "$TRIVY_CACHE_DIR"
 
-running_containers=()
-while IFS= read -r container_id; do
-  [[ -n "$container_id" ]] && running_containers+=("$container_id")
-done < <(docker ps -q | awk 'NF' | sort -u)
-if [[ ${#running_containers[@]} -eq 0 ]]; then
+mapfile -t runtime_images < <(docker ps --format '{{.Image}}' | awk 'NF' | sort -u)
+if [[ ${#runtime_images[@]} -eq 0 ]]; then
   echo "[]"
   exit 0
 fi
-
-# A running container may still use an image after its original tag has been
-# removed. Resolve and scan Docker's immutable local image ID so Trivy does not
-# mistake that case for a remote image pull (which can fail on registry limits).
-scan_image_ids=()
-display_images=()
-for container_id in "${running_containers[@]}"; do
-  metadata="$(docker inspect --format '{{.Config.Image}}|{{.Image}}' "$container_id")"
-  display_image="${metadata%%|*}"
-  image_id="${metadata#*|}"
-  if [[ -z "$display_image" || -z "$image_id" || "$metadata" == "$image_id" ]]; then
-    echo "unable to resolve a local image ID for a running container" >&2
-    exit 1
-  fi
-
-  already_seen=false
-  for existing_image_id in "${scan_image_ids[@]}"; do
-    if [[ "$existing_image_id" == "$image_id" ]]; then
-      already_seen=true
-      break
-    fi
-  done
-  if [[ "$already_seen" == false ]]; then
-    if ! docker image inspect "$image_id" >/dev/null 2>&1; then
-      echo "running container image is unavailable locally; refusing an implicit registry pull" >&2
-      exit 1
-    fi
-    scan_image_ids+=("$image_id")
-    display_images+=("$display_image")
-  fi
-done
 
 tmpdir="$(mktemp -d)"
 cleanup() {
@@ -59,8 +25,8 @@ if [[ "$TRIVY_SKIP_DB_UPDATE" == "true" ]]; then
   extra_flags+=(--skip-db-update)
 fi
 
-for image_id in "${scan_image_ids[@]}"; do
-  safe_name="$(printf '%s' "$image_id" | tr '/:@' '___')"
+for image in "${runtime_images[@]}"; do
+  safe_name="$(printf '%s' "$image" | tr '/:@' '___')"
   docker run \
     --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
@@ -72,21 +38,19 @@ for image_id in "${scan_image_ids[@]}"; do
     --scanners vuln \
     --severity HIGH,CRITICAL \
     "${extra_flags[@]}" \
-    "$image_id" >"$tmpdir/$safe_name.json"
+    "$image" >"$tmpdir/$safe_name.json"
 done
 
-python3 - "$tmpdir" "${#scan_image_ids[@]}" "${scan_image_ids[@]}" "${display_images[@]}" <<'PY'
+python3 - "$tmpdir" "${runtime_images[@]}" <<'PY'
 import json
 import sys
 from pathlib import Path
 
 tmpdir = Path(sys.argv[1])
-count = int(sys.argv[2])
-image_ids = sys.argv[3 : 3 + count]
-images = sys.argv[3 + count :]
+images = sys.argv[2:]
 payload = []
-for image_id, image in zip(image_ids, images):
-    safe_name = image_id.translate(str.maketrans({"/": "_", ":": "_", "@": "_"}))
+for image in images:
+    safe_name = image.translate(str.maketrans({"/": "_", ":": "_", "@": "_"}))
     result = json.loads((tmpdir / f"{safe_name}.json").read_text(encoding="utf-8"))
     vulnerabilities = []
     severity_counts = {"HIGH": 0, "CRITICAL": 0}
@@ -111,7 +75,6 @@ for image_id, image in zip(image_ids, images):
     payload.append(
         {
             "image": image,
-            "image_id": image_id,
             "artifact_name": result.get("ArtifactName", image),
             "severity_counts": severity_counts,
             "vulnerabilities": vulnerabilities,

@@ -58,16 +58,15 @@ shared_surfaces:
   - docs/runbooks/configure-harbor.md
   - docs/runbooks/configure-outline.md
   - docs/runbooks/configure-glitchtip.md
-  - docs/runbooks/security-posture-reporting.md
-  - inventory/group_vars/all/main.yml
-  - inventory/hosts.yml
-  - scripts/security_posture_report.py
-  - scripts/drift_lib.py
-  - tests/test_security_posture_report.py
+  - docs/workstreams/adr-0491-authentik-keycloak-sunset.md
   - docs/workstreams/ws-0512-authentik-consumer-e2e.md
   - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
   - workstreams.yaml
   - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
+  - config/image-catalog.json
+  - receipts/image-scans/2026-10-01-authentik-runtime.json
+  - receipts/cve/09782fe56675-20261001T100019Z.grype.json
+  - receipts/sbom/09782fe56675.cdx.json
 ownership_manifest:
   owned_surfaces:
     - id: authentik_consumer_runtime_contract
@@ -85,6 +84,7 @@ ownership_manifest:
         - collections/ansible_collections/lv3/platform/roles/librechat_runtime/**
         - collections/ansible_collections/lv3/platform/roles/repo_intake_runtime/**
         - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/**
+        - docs/workstreams/adr-0491-authentik-keycloak-sunset.md
       mode: shared_contract
       contract: adr-0491-authentik-migration-v1
     - id: authentik_consumer_e2e_harness
@@ -160,16 +160,6 @@ ownership_manifest:
         - docs/runbooks/configure-glitchtip.md
       mode: shared_contract
       contract: adr-0491-authentik-migration-v1
-    - id: security_posture_inventory_composition
-      paths:
-        - docs/runbooks/security-posture-reporting.md
-        - inventory/group_vars/all/main.yml
-        - inventory/hosts.yml
-        - scripts/security_posture_report.py
-        - scripts/drift_lib.py
-        - tests/test_security_posture_report.py
-      mode: shared_contract
-      contract: security-posture-report-v1
     - id: authentik_ci_workflow
       paths:
         - .woodpecker.yml
@@ -190,6 +180,14 @@ ownership_manifest:
         - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
       mode: shared_contract
       contract: live-apply-evidence-v1
+    - id: authentik_image_security_evidence
+      paths:
+        - config/image-catalog.json
+        - receipts/image-scans/2026-10-01-authentik-runtime.json
+        - receipts/cve/09782fe56675-20261001T100019Z.grype.json
+        - receipts/sbom/09782fe56675.cdx.json
+      mode: shared_contract
+      contract: vulnerability-evidence-v1
 context: |
   The Authentik migration record reports that all consumers and protected
   browser paths passed, but the operator subsequently observed Outline
@@ -200,23 +198,47 @@ context: |
   receipt as current proof. Keep credentials in the ignored local overlay and
   use a non-admin identity for consumer testing.
 
-  2026-09-30 checkpoint: the aggregate host/image scan is fresh but critical,
-  per-image catalog receipts are stale, and vulnerability budgets still reject
-  consumer applies. Fresh Gitea/Harbor browser attempts did not reach callbacks
-  and were paused to avoid repeated credential submissions. The local
-  Authentik admin-token mirror required for safe identity/password reconciliation
-  is absent; do not guess credentials or bypass gates. The 2026-09-26 checkpoint:
-  the recovery blueprint and dedicated test identity
+  2026-09-26 checkpoint: the recovery blueprint and dedicated test identity
   were reconciled, and the narrow Authentik converge passed. Gitea and Harbor
   browser OIDC checks pass. Grafana authenticates but returns no orgRole;
   Outline realtime still fails its WebSocket handshake; GlitchTip still
   reports signup_closed. Governed Grafana, GlitchTip, and Outline applies are
   blocked by the vulnerability budget. Do not bypass the gate or renew expired
   exceptions to finish this workstream.
+
+  2026-10-01 checkpoint: current identity/OAuth catalog checks have zero
+  drift, the live catalog has 22 Authentik providers/apps and no
+  Keycloak-named objects, and no active Keycloak container remains on VM120 or
+  VM192. Fresh Gitea/Harbor browser flows pass; Ops and Repository Intake give
+  expected non-admin 403s. Outline WebSocket, Grafana session, GlitchTip
+  signup_closed, and Chat's HTTP-500 OIDC callback remain failing. The local
+  akadmin bootstrap password failed one browser attempt and is not confirmed
+  current. Authentik image scans remain over policy; the isolated VM192 restore
+  reached healthy Postgres but not Authentik web readiness. No identity,
+  application, service, or Keycloak-runtime mutation was made.
+
+  2026-10-01 recovery follow-up: the dedicated recovery page accepted an
+  explicitly requested reset and displayed the generic inbox confirmation;
+  a targeted Gmail search across all folders returned no matching recent mail.
+  Code review found Authentik's role default still pointed at Stalwart:1587,
+  contrary to the mail-platform contract requiring mail-gateway-smtp:1588 for
+  provider-backed transactional delivery. Repository defaults/docs/tests are
+  corrected, but the production payload was not changed because the Authentik
+  security and verified-restore gates remain blocked.
+
+  2026-10-01 operator security decision: the operator explicitly accepted the
+  latest stable Authentik image's 3 Critical and 84 High findings for seven
+  days. The branch pins digest
+  sha256:09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442,
+  includes fresh Syft/Grype receipts, and records an exception expiring
+  2026-10-08. The Authentik vulnerability-budget check passes via that
+  exception. Production still runs 2026.8.0; apply remains pending PR review,
+  a short-lived VM192 rollback snapshot, and post-apply readiness/consumer
+  smoke checks. Do not silently extend the exception.
 tasks:
   - id: t1
     title: Reconcile live provider/application state with declared clients and active deployments
-    status: in_progress
+    status: completed
   - id: t2
     title: Add repeatable fresh-browser E2E coverage for active Authentik consumers
     status: in_progress
@@ -225,7 +247,4 @@ tasks:
     status: blocked
   - id: t4
     title: Run repository checks, capture live evidence, and merge/publish through PRs
-    status: in_progress
-  - id: t5
-    title: Refresh host and image security evidence through the deployment inventory before runtime applies
     status: in_progress

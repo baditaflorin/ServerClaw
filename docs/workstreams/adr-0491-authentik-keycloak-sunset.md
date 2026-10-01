@@ -64,3 +64,16 @@ evidence is recorded in
 
 Repository integration is prepared for version `0.179.46`; the platform version
 remains unchanged until the merged automation has been converged from `main`.
+
+## Independent retirement verification — 2026-10-01
+
+The follow-up Authentik consumer audit rechecked the live state without
+changing it: no active Keycloak containers were found on the former runtime
+VMs 120 and 192; the Authentik provider/application catalog has no
+Keycloak-named objects; and current service, integration, and Authentik client
+declarations contain no active Keycloak dependency. The retained cold rollback
+archives remain untouched. This confirms the service-runtime retirement is
+still in effect; it does not mean the remaining Authentik consumer sign-in
+failures are resolved. See
+`docs/workstreams/ws-0512-authentik-consumer-e2e.md` for today's browser,
+security, and restore results.

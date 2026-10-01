@@ -1,17 +1,17 @@
-# Release 0.179.47
+# Release 0.179.48
 
-- Date: 2026-09-28
+- Date: 2026-10-01
 
 ## Summary
+- Upgrade Authentik to 2026.8.3 by digest under the operator-approved seven-day exception and route account recovery through the transactional mail gateway.
 - Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
+- Remove the unused GitHub Actions workflow and point validation metadata at Woodpecker while retaining the self-hosted Gitea validator.
 - Allow the Builder metrics peer to scrape docker-build node-exporter over the private tailnet without disrupting Docker-managed firewall rules.
 - Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
 - Keep the sanitized ServerClaw host template consistent with active authenticated edge routes.
-- Replace public GitHub Actions validation with self-hosted Woodpecker and align the sanitized capacity model with the generic fork inventory.
-- Scope service-completeness checks to affected services while preserving full validation when the change scope is ambiguous.
 
 ## Platform Impact
-- Repository automation release only; the live platform version remains unchanged.
+- no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

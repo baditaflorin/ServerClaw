@@ -25,89 +25,130 @@ archive_summary:
   by_year:
     '2026': 340
 workstreams:
-- id: ws-0517-authentik-edge-oidc-recovery
+- id: ws-0517-authentik-runtime-upgrade
   adr: 0491
-  title: Restore shared Authentik-protected edge sign-in
-  status: in_progress
-  ready_to_merge: false
-  live_applied: true
+  title: Upgrade the Authentik runtime to 2026.8.3 under a bounded operator-approved
+    exception
+  status: ready_for_merge
+  ready_to_merge: true
+  live_applied: false
   owner: codex
-  branch: codex/authentik-edge-oidc-recovery-20260930
-  worktree_path: .worktrees/authentik-edge-oidc-recovery-20260930
-  doc: docs/workstreams/ws-0517-authentik-edge-oidc-recovery.md
+  branch: codex/authentik-runtime-upgrade-20261001
+  worktree_path: .worktrees/authentik-live-closeout-20260926
+  doc: docs/workstreams/ws-0517-authentik-runtime-upgrade.md
   canonical_truth:
-    changelog_entry: Restore the shared Authentik-protected edge sign-in path.
+    changelog_entry: Pin Authentik 2026.8.3 by digest under the seven-day operator-approved
+      security exception.
     release_bump: patch
-    included_in_repo_version: null
+    included_in_repo_version: 0.179.48
     latest_receipts:
-      live_apply: receipts/live-applies/ws-0517-authentik-edge-oidc-recovery-apply-receipt.yaml
+      live_apply: receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.yaml
   depends_on:
-  - ws-0512-authentik-consumer-e2e
+  - adr-0491-authentik-keycloak-sunset-2026-08-30
   conflicts_with: []
   shared_surfaces:
-  - playbooks/public-edge.yml
-  - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/**
-  - Makefile
-  - scripts/generate_certificate_catalog.py
-  - tests/test_edge_publication_makefile.py
-  - docs/runbooks/configure-edge-publication.md
-  - tests/test_public_edge_oidc_auth_role.py
-  - docs/workstreams/ws-0517-authentik-edge-oidc-recovery.md
-  - workstreams/active/ws-0517-authentik-edge-oidc-recovery.yaml
+  - VERSION
+  - changelog.md
+  - RELEASE.md
+  - docs/release-notes/**
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - README.md
+  - docs/status/history/merged-workstreams.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/discovery/**
+  - build/onboarding/**
+  - config/image-catalog.json
+  - receipts/image-scans/2026-10-01-authentik-runtime.json
+  - receipts/cve/09782fe56675-20261001T100019Z.grype.json
+  - receipts/sbom/09782fe56675.cdx.json
+  - receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.yaml
+  - docs/workstreams/ws-0517-authentik-runtime-upgrade.md
+  - workstreams/active/ws-0517-authentik-runtime-upgrade.yaml
   - workstreams.yaml
-  - receipts/live-applies/ws-0517-authentik-edge-oidc-recovery-apply-receipt.yaml
   ownership_manifest:
     owned_surfaces:
-    - id: shared_authentik_edge_runtime
+    - id: authentik_image_security_evidence
       paths:
-      - playbooks/public-edge.yml
-      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/**
-      - tests/test_public_edge_oidc_auth_role.py
+      - config/image-catalog.json
+      - receipts/image-scans/2026-10-01-authentik-runtime.json
+      - receipts/cve/09782fe56675-20261001T100019Z.grype.json
+      - receipts/sbom/09782fe56675.cdx.json
       mode: shared_contract
-      contract: adr-0491-authentik-migration-v1
-    - id: edge_certificate_catalog_generation
+      contract: vulnerability-evidence-v1
+    - id: authentik_runtime_upgrade_release_truth
       paths:
-      - Makefile
-      - scripts/generate_certificate_catalog.py
-      - tests/test_edge_publication_makefile.py
-      - docs/runbooks/configure-edge-publication.md
-      mode: exclusive
-    - id: authentik_edge_recovery_tracking
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/**
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - README.md
+      - docs/status/history/merged-workstreams.md
+      - docs/discovery/**
+      - build/onboarding/**
+      mode: shared_contract
+      contract: release-truth-v1
+    - id: authentik_runtime_upgrade_generated_diagram
       paths:
-      - docs/workstreams/ws-0517-authentik-edge-oidc-recovery.md
-      - workstreams/active/ws-0517-authentik-edge-oidc-recovery.yaml
-      mode: exclusive
-    - id: authentik_edge_recovery_receipt
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: authentik_runtime_upgrade_live_apply_evidence
       paths:
-      - receipts/live-applies/ws-0517-authentik-edge-oidc-recovery-apply-receipt.yaml
+      - receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.yaml
       mode: shared_contract
       contract: live-apply-evidence-v1
-    context: Fresh unauthenticated probes returned 5xx for two applications protected
-      by the shared edge OAuth2 proxy. The proxy's OIDC configuration is valid and
-      points to Authentik, but discovery resolves the public issuer back to the host's
-      non-hairpinable public address. The managed role already pins the issuer hostname
-      to the local edge; the live host lacked that entry. No authentication gate will
-      be removed or bypassed. The live recovery preserves the existing proxy configuration
-      and credentials while applying the verified local firewall source and issuer
-      mapping. The existing non-admin browser harness did not reach the shared-proxy
-      callback, so its callback and least-privilege denial assertion remain pending
-      without any group widening.
-    tasks:
-    - id: t1
-      title: Confirm the live 5xx cause and test local TLS issuer discovery
-      status: completed
-    - id: t2
-      title: Apply the credential-preserving issuer and firewall recovery
-      status: completed
-    - id: t3
-      title: Verify proxy health and unauthenticated Authentik redirects
-      status: completed
-    - id: t4
-      title: Record sanitized live evidence and publish the branch through PR
-      status: completed
-    - id: t5
-      title: Verify authorized callback and group behavior with a test identity
-      status: pending
+    - id: authentik_runtime_upgrade_workstream
+      paths:
+      - docs/workstreams/ws-0517-authentik-runtime-upgrade.md
+      - workstreams/active/ws-0517-authentik-runtime-upgrade.yaml
+      mode: exclusive
+    - id: authentik_runtime_upgrade_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  context: 'PR 261 merged the Authentik 2026.8.3 linux/amd64 digest pin, current Syft
+    and
+
+    Grype evidence, and the explicitly approved seven-day exception for 3 Critical
+
+    and 84 High findings. Production was not changed by that merge. This separate
+
+    workstream owns the repository release integration, guarded VM192 rollout,
+
+    and post-apply evidence. The previous broad consumer workstream has a
+
+    completed apply receipt and must not be reused for a second apply.
+
+
+    The exception expires on 2026-10-08. Re-scan before expiry; do not extend it
+
+    silently. The last restore rehearsal restored PostgreSQL but did not reach
+
+    Authentik web readiness. A short-lived VM disk snapshot is the immediate
+
+    rollback mechanism for this rollout, not proof of off-host recoverability.
+
+    '
+  tasks:
+  - id: t1
+    title: Merge the reviewed image pin and fresh security evidence
+    status: completed
+  - id: t2
+    title: Prepare repository release metadata for 0.179.48
+    status: completed
+  - id: t3
+    title: Pass CI and merge the release pull request
+    status: in_progress
+  - id: t4
+    title: Snapshot VM192 and apply Authentik through the guarded production target
+    status: pending
+  - id: t5
+    title: Verify image digest, health, recovery-mail delivery, and browser consumers
+    status: pending
 - id: ws-0512-authentik-consumer-e2e
   adr: 0491
   title: Audit and repair live Authentik consumer sign-in paths end to end
@@ -169,16 +210,15 @@ workstreams:
   - docs/runbooks/configure-harbor.md
   - docs/runbooks/configure-outline.md
   - docs/runbooks/configure-glitchtip.md
-  - docs/runbooks/security-posture-reporting.md
-  - inventory/group_vars/all/main.yml
-  - inventory/hosts.yml
-  - scripts/security_posture_report.py
-  - scripts/drift_lib.py
-  - tests/test_security_posture_report.py
+  - docs/workstreams/adr-0491-authentik-keycloak-sunset.md
   - docs/workstreams/ws-0512-authentik-consumer-e2e.md
   - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
   - workstreams.yaml
   - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
+  - config/image-catalog.json
+  - receipts/image-scans/2026-10-01-authentik-runtime.json
+  - receipts/cve/09782fe56675-20261001T100019Z.grype.json
+  - receipts/sbom/09782fe56675.cdx.json
   ownership_manifest:
     owned_surfaces:
     - id: authentik_consumer_runtime_contract
@@ -196,6 +236,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/librechat_runtime/**
       - collections/ansible_collections/lv3/platform/roles/repo_intake_runtime/**
       - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/**
+      - docs/workstreams/adr-0491-authentik-keycloak-sunset.md
       mode: shared_contract
       contract: adr-0491-authentik-migration-v1
     - id: authentik_consumer_e2e_harness
@@ -271,16 +312,6 @@ workstreams:
       - docs/runbooks/configure-glitchtip.md
       mode: shared_contract
       contract: adr-0491-authentik-migration-v1
-    - id: security_posture_inventory_composition
-      paths:
-      - docs/runbooks/security-posture-reporting.md
-      - inventory/group_vars/all/main.yml
-      - inventory/hosts.yml
-      - scripts/security_posture_report.py
-      - scripts/drift_lib.py
-      - tests/test_security_posture_report.py
-      mode: shared_contract
-      contract: security-posture-report-v1
     - id: authentik_ci_workflow
       paths:
       - .woodpecker.yml
@@ -301,6 +332,14 @@ workstreams:
       - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
       mode: shared_contract
       contract: live-apply-evidence-v1
+    - id: authentik_image_security_evidence
+      paths:
+      - config/image-catalog.json
+      - receipts/image-scans/2026-10-01-authentik-runtime.json
+      - receipts/cve/09782fe56675-20261001T100019Z.grype.json
+      - receipts/sbom/09782fe56675.cdx.json
+      mode: shared_contract
+      contract: vulnerability-evidence-v1
   context: 'The Authentik migration record reports that all consumers and protected
 
     browser paths passed, but the operator subsequently observed Outline
@@ -318,19 +357,7 @@ workstreams:
     use a non-admin identity for consumer testing.
 
 
-    2026-09-30 checkpoint: the aggregate host/image scan is fresh but critical,
-
-    per-image catalog receipts are stale, and vulnerability budgets still reject
-
-    consumer applies. Fresh Gitea/Harbor browser attempts did not reach callbacks
-
-    and were paused to avoid repeated credential submissions. The local
-
-    Authentik admin-token mirror required for safe identity/password reconciliation
-
-    is absent; do not guess credentials or bypass gates. The 2026-09-26 checkpoint:
-
-    the recovery blueprint and dedicated test identity
+    2026-09-26 checkpoint: the recovery blueprint and dedicated test identity
 
     were reconciled, and the narrow Authentik converge passed. Gitea and Harbor
 
@@ -344,12 +371,69 @@ workstreams:
 
     exceptions to finish this workstream.
 
+
+    2026-10-01 checkpoint: current identity/OAuth catalog checks have zero
+
+    drift, the live catalog has 22 Authentik providers/apps and no
+
+    Keycloak-named objects, and no active Keycloak container remains on VM120 or
+
+    VM192. Fresh Gitea/Harbor browser flows pass; Ops and Repository Intake give
+
+    expected non-admin 403s. Outline WebSocket, Grafana session, GlitchTip
+
+    signup_closed, and Chat''s HTTP-500 OIDC callback remain failing. The local
+
+    akadmin bootstrap password failed one browser attempt and is not confirmed
+
+    current. Authentik image scans remain over policy; the isolated VM192 restore
+
+    reached healthy Postgres but not Authentik web readiness. No identity,
+
+    application, service, or Keycloak-runtime mutation was made.
+
+
+    2026-10-01 recovery follow-up: the dedicated recovery page accepted an
+
+    explicitly requested reset and displayed the generic inbox confirmation;
+
+    a targeted Gmail search across all folders returned no matching recent mail.
+
+    Code review found Authentik''s role default still pointed at Stalwart:1587,
+
+    contrary to the mail-platform contract requiring mail-gateway-smtp:1588 for
+
+    provider-backed transactional delivery. Repository defaults/docs/tests are
+
+    corrected, but the production payload was not changed because the Authentik
+
+    security and verified-restore gates remain blocked.
+
+
+    2026-10-01 operator security decision: the operator explicitly accepted the
+
+    latest stable Authentik image''s 3 Critical and 84 High findings for seven
+
+    days. The branch pins digest
+
+    sha256:09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442,
+
+    includes fresh Syft/Grype receipts, and records an exception expiring
+
+    2026-10-08. The Authentik vulnerability-budget check passes via that
+
+    exception. Production still runs 2026.8.0; apply remains pending PR review,
+
+    a short-lived VM192 rollback snapshot, and post-apply readiness/consumer
+
+    smoke checks. Do not silently extend the exception.
+
     '
   tasks:
   - id: t1
     title: Reconcile live provider/application state with declared clients and active
       deployments
-    status: in_progress
+    status: completed
   - id: t2
     title: Add repeatable fresh-browser E2E coverage for active Authentik consumers
     status: in_progress
@@ -360,10 +444,6 @@ workstreams:
   - id: t4
     title: Run repository checks, capture live evidence, and merge/publish through
       PRs
-    status: in_progress
-  - id: t5
-    title: Refresh host and image security evidence through the deployment inventory
-      before runtime applies
     status: in_progress
 - id: ws-0498-https-tls-test-baseline
   adr: 0491
@@ -1479,8 +1559,8 @@ workstreams:
     will be ballooning-enabled from creation.
 - id: ws-0482-0fork-platform-not-bootstrapped
   adr: 0482
-  title: "example.org platform deployment never landed \u2014 registry.example.org\
-    \ 502 + others are catch-all illusions"
+  title: "example.org platform deployment never landed \u2014 registry.example.org 502\
+    \ + others are catch-all illusions"
   status: planned
   ready_to_merge: false
   live_applied: false
@@ -3929,12 +4009,11 @@ workstreams:
     \ all\n   have their `adr:` field quoted now (YAML octal-int parser was\n   coercing\
     \ 0447 -> 295). Don't revert.\n2. receipts/live-applies/2026-04-28-coolify-0fork-runtime-live-apply.json\n\
     \   was reconstructed because PR #71 referenced it but never committed\n   the\
-    \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n\
-    \   now serves example.org after yesterday's recovery).\n\nPlus follow-ups not\
-    \ in ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n\
-    \ - Deployment-aware cert validation.\n - `make new-deployment` / `make use-deployment`\
-    \ (ADR 0442) \u2014 the\n   `run_with_deployment.sh` wrapper is the leaf they\
-    \ would invoke.\n"
+    \ file.\n3. Pre-existing cert-validation drift on example.com domains (the box\n \
+    \  now serves example.org after yesterday's recovery).\n\nPlus follow-ups not in\
+    \ ws-0448 scope:\n - Host-pinning per VM (Slice D in the original plan).\n - Deployment-aware\
+    \ cert validation.\n - `make new-deployment` / `make use-deployment` (ADR 0442)\
+    \ \u2014 the\n   `run_with_deployment.sh` wrapper is the leaf they would invoke.\n"
 - id: ws-0447-phase3-llm-ergonomics-and-traceability
   adr: '0447'
   title: "Phase 3 LLM ergonomics + traceability \u2014 currently_describes field on\
@@ -4984,21 +5063,25 @@ workstreams:
   - .local/identity.yml.0fork (new, not committed)
   - .local/hetzner/dns.env (new, not committed)
   summary: "First real fork-viability test. Stands up a collapsed nested-Proxmox topology\
-    \ on a Hetzner AX41-NVMe using example.org (full apex) as the identity. Drives\
-    \ ADR 0385 (identity core) and ADR 0407 (generic-by-default) to their limits.\
-    \ Also produces ADR 0425 \u2014 a retrospective on the 420-ADR build process and\
-    \ what the clone attempt revealed about gaps in the platform's forkability claim.\
-    \ ADR numbers collided with a parallel LSP-AI evaluation workstream (0422/0423)\
-    \ that landed on main while this one was in progress; renumbered to 0424/0425.\n"
+    \ on a Hetzner AX41-NVMe using example.org (full apex) as the identity. Drives ADR\
+    \ 0385 (identity core) and ADR 0407 (generic-by-default) to their limits. Also\
+    \ produces ADR 0425 \u2014 a retrospective on the 420-ADR build process and what\
+    \ the clone attempt revealed about gaps in the platform's forkability claim. ADR\
+    \ numbers collided with a parallel LSP-AI evaluation workstream (0422/0423) that\
+    \ landed on main while this one was in progress; renumbered to 0424/0425.\n"
   ownership_manifest:
     owned_surfaces:
     - id: ws_0424_tracking
       paths:
-      - workstreams/active/ws-0424-fork-clone-0fork.yaml
       - docs/adr/0424-fork-clone-onto-hetzner-ax41.md
       - docs/adr/0425-retrospective-420-adr-platform-build.md
       - docs/runbooks/hetzner-bare-metal-bootstrap.md
       mode: exclusive
+    - id: ws_0424_tracking_handoff
+      paths:
+      - workstreams/active/ws-0424-fork-clone-0fork.yaml
+      mode: shared_contract
+      contract: workstream-ownership-transfer-v1
     - id: ws_0424_generated_indices
       paths:
       - workstreams.yaml
@@ -5113,11 +5196,15 @@ workstreams:
     - id: ws_0424_schema_catalog_fixes
       paths:
       - config/command-catalog.json
-      - config/workflow-catalog.json
       - inventory/group_vars/platform.yml
       - scripts/generate_platform_vars.py
       - scripts/validate_repository_data_models.py
       mode: exclusive
+    - id: ws_0424_workflow_catalog_contract
+      paths:
+      - config/workflow-catalog.json
+      mode: shared_contract
+      contract: workflow-catalog-entry-v1
     - id: ws_0438_generic_by_construction
       description: "ADR 0438 \u2014 generative-cascade IaC refactor co-located on\
         \ this branch. Eliminates /etc/lv3/ prefix hardcoding + introduces platform_identity\
@@ -5157,7 +5244,8 @@ workstreams:
   progress:
     completed_2026_04_21:
     - Hetzner DNS API token verified against zone example.org (id EXAMPLE0ZoneId00000000)
-    - SSH access to 203.0.113.3 confirmed with llm-agents@platform_server key
+    - SSH access to 203.0.113.3 confirmed with llm-agents@platform_server
+      key
     - Host key fingerprint pinned (ED25519 9xWVsKZxKXoBR3O9369Ixj/Ke/qwiLQ5SBDli/STwVk)
     - Hardware inventory captured (Ryzen 3600, 62 GiB, 2x476 GB NVMe, /dev/kvm present)
     - ADR 0424 drafted
@@ -5199,8 +5287,8 @@ workstreams:
     - Configure vmbr0 Hetzner WAN bridge (after operator KVM standby)
     - Converge runtime-control (Keycloak + step-ca + OpenBao + Headscale)
     - Converge postgres, mail-platform, runtime-apps, monitoring, nginx-edge
-    - Create DNS records on example.org (wildcard already covers them; blocked on
-      API brownout)
+    - Create DNS records on example.org (wildcard already covers them; blocked on API
+      brownout)
     - Provision operator@example.org mailbox
     - Send confirmation email from operator@example.org to operator@example.com
     - Capture live-apply evidence and close workstream
@@ -5214,12 +5302,18 @@ workstreams:
     \ Its ownership claim has been released. The Makefile is declared as a shared\
     \ target registry so independently scoped targets can coexist under makefile-target-registry-v1;\
     \ the timed wrapper uses a shared shellcheck-clean contract for maintenance. The\
-    \ remaining exclusive workstream ownership is unchanged. This workstream was started\
-    \ while the operator was AFK. Destructive actions performed with explicit operator\
-    \ authorization (apex wipe). A RAID1 near-miss occurred during disk inventory\
-    \ \u2014 see ADR 0425 live postmortem. Recovery was clean. The DNS token shared\
-    \ in chat should be rotated regardless of clone outcome. See ADR 0424 open questions\
-    \ for the full list of decisions awaiting operator confirmation on return.\n"
+    \ remaining exclusive workstream ownership is unchanged. Ownership correction\
+    \ (2026-09-28): the workflow-catalog path metadata is now maintained under the\
+    \ additive workflow-catalog-entry-v1 contract shared with ws-0514. The recorded\
+    \ WS-0424 branch/worktree is absent and no remote branch or open PR exists. Schema\
+    \ changes to its other catalog and platform-data surfaces remain exclusive to\
+    \ WS-0424. The active workstream shard is shared only for this ownership transfer,\
+    \ under workstream-ownership-transfer-v1. This workstream was started while the\
+    \ operator was AFK. Destructive actions performed with explicit operator authorization\
+    \ (apex wipe). A RAID1 near-miss occurred during disk inventory \u2014 see ADR\
+    \ 0425 live postmortem. Recovery was clean. The DNS token shared in chat should\
+    \ be rotated regardless of clone outcome. See ADR 0424 open questions for the\
+    \ full list of decisions awaiting operator confirmation on return.\n"
 - id: ws-0422-lsp-ai-decision
   title: "ADR 0422/0423 \u2014 lsp-ai editor-side AI language server decision (do\
     \ not deploy)"
@@ -5356,8 +5450,8 @@ workstreams:
       - playbooks/platform-service-watchdog.yml
       mode: exclusive
   notes: 'Service health audit: 73 services, 5 VMs without watchdog coverage. SSH
-    to servers unavailable at time of audit (connection timeout to 203.0.113.1). All
-    service probe URLs derived from config/health-probe-catalog.json. Deploy with:
+    to servers unavailable at time of audit (connection timeout to 203.0.113.1).
+    All service probe URLs derived from config/health-probe-catalog.json. Deploy with:
     make converge-platform-watchdog env=production Or per-VM: ansible-playbook playbooks/platform-service-watchdog.yml
     -e env=production -e watchdog_vm=docker-runtime
 
@@ -5539,8 +5633,7 @@ workstreams:
       - workstreams/archive/2026/audit-0mcp-guest-network-drift-2026-08-27.yaml
       - workstreams/archive/2026/fix-0mcp-guest-network-addressing-10-20.yaml
       mode: exclusive
-  description: 'Operator confirmed 10.10.10.x is the real example.org addressing,
-    flipping
+  description: 'Operator confirmed 10.10.10.x is the real example.org addressing, flipping
 
     the direction of the 2026-08-26/27 postmortem (which had framed
 
@@ -6561,10 +6654,14 @@ workstreams:
     - id: changed_service_completeness_scope
       paths:
       - scripts/platform_ops.py
-      - scripts/service_completeness.py
       - tests/test_platform_ops.py
-      - tests/test_validate_service_completeness.py
       mode: exclusive
+    - id: service_completeness_applicability
+      paths:
+      - scripts/service_completeness.py
+      - tests/test_validate_service_completeness.py
+      mode: shared_contract
+      contract: service-completeness-applicability-v1
     - id: selected_topology_validation_context
       paths:
       - scripts/parallel_check.py
@@ -6607,9 +6704,17 @@ workstreams:
     - id: ws_0513_tracking
       paths:
       - docs/workstreams/ws-0513-builder-metrics-tailnet-firewall.md
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - workstreams/active/ws-0513-builder-metrics-tailnet-firewall.yaml
       mode: exclusive
+    - id: ws_0513_agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ws_0513_completeness_handoff
+      paths:
+      - workstreams/active/ws-0513-builder-metrics-tailnet-firewall.yaml
+      mode: shared_contract
+      contract: workstream-ownership-transfer-v1
     - id: ws_0513_live_apply_receipts
       paths:
       - receipts/live-applies/**
@@ -6954,6 +7059,117 @@ workstreams:
   - id: t3
     title: Document the cache-only credential boundary and verification gate
     status: in_progress
+- id: ws-0514-retire-github-actions
+  adr: 0287
+  title: Retire GitHub-hosted validation in favor of Woodpecker CI
+  status: ready_for_merge
+  ready_to_merge: true
+  live_applied: false
+  owner: codex
+  branch: codex/ws-0514-retire-github-actions-rebased-20260928
+  worktree_path: .worktrees/ws-0514-retire-github-actions-rebased-20260928
+  doc: docs/workstreams/ws-0514-retire-github-actions.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - .github/workflows/validate.yml
+  - .woodpecker.yml
+  - .gitea/workflows/validate.yml
+  - config/workflow-catalog.json
+  - workstreams/active/ws-0514-retire-github-actions.yaml
+  - workstreams/active/ws-0424-fork-clone-0fork.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0514-retire-github-actions.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - README.md
+  - changelog.md
+  - docs/status/history/**
+  - docs/release-notes/index/**
+  ownership_manifest:
+    owned_surfaces:
+    - id: github_actions_validation_removal
+      paths:
+      - .github/workflows/validate.yml
+      mode: exclusive
+    - id: existing_woodpecker_ci
+      paths:
+      - .woodpecker.yml
+      mode: read_only
+    - id: ws_0424_workflow_catalog_contract
+      paths:
+      - config/workflow-catalog.json
+      mode: shared_contract
+      contract: workflow-catalog-entry-v1
+    - id: ws_0424_tracking_handoff
+      paths:
+      - workstreams/active/ws-0424-fork-clone-0fork.yaml
+      mode: shared_contract
+      contract: workstream-ownership-transfer-v1
+    - id: ws_0514_tracking
+      paths:
+      - workstreams/active/ws-0514-retire-github-actions.yaml
+      - docs/workstreams/ws-0514-retire-github-actions.md
+      mode: exclusive
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0514_generated_status
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - README.md
+      - changelog.md
+      - docs/status/history/**
+      - docs/release-notes/index/**
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+  canonical_truth:
+    changelog_entry: Remove the unused GitHub Actions workflow and point validation
+      metadata at Woodpecker while retaining the self-hosted Gitea validator.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'The repository has a root Woodpecker workflow and required Woodpecker
+    status
+
+    checks, but also retains a GitHub Actions Validate workflow. On the public
+
+    sanitized snapshot, its validate and release-readiness jobs failed before
+
+    any job steps started, while both required Woodpecker checks passed. The
+
+    operator has directed that GitHub Actions not be used. Disable the duplicate
+
+    workflow during transition, remove its tracked source file through the normal
+
+    PR path, and update canonical metadata to reference the current Woodpecker
+
+    workflow. Preserve the separate self-hosted Gitea validation workflow.
+
+    '
+  tasks:
+  - id: t1
+    title: Disable the legacy Validate workflow in the private and public repositories
+    status: completed
+  - id: t2
+    title: Remove the tracked GitHub Actions workflow and validate the source tree
+    status: completed
+  notes: 'The GitHub Actions Validate workflow is absent from the current source and
+
+    public baselines. This branch completes the metadata cleanup by replacing
+
+    the stale workflow-catalog path with .woodpecker.yml and retaining the
+
+    separate self-hosted Gitea validator. The local changed-service completeness
+
+    gate, workstream ownership checks, catalog checks, generated-doc checks, and
+
+    focused regression tests pass. The required Woodpecker PR and push contexts
+
+    must still pass on this rebased branch before merge.
+
+    '
 - id: ws-0494-woodpecker-ci-network-recovery
   adr: 0287
   title: Restore the Woodpecker CI webhook runtime after bridge detachment
@@ -7123,6 +7339,221 @@ workstreams:
     homepage and ops_portal to link to the new surface.
 
     '
+- id: ws-0515-dify-runtime-recovery
+  adr: 0197
+  title: Recover Dify proxy health and make completeness evidence accurate
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/ws-0515-dify-secret-source-guard-20260928
+  worktree_path: .worktrees/ws-0515-dify-live-apply-20260928
+  doc: docs/workstreams/ws-0515-dify-runtime-recovery.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/default.conf.template.j2
+  - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/ssrf-docker-entrypoint.sh.j2
+  - collections/ansible_collections/lv3/platform/roles/dify_runtime/tasks/main.yml
+  - config/service-completeness.json
+  - docs/schema/service-completeness.schema.json
+  - scripts/service_completeness.py
+  - tests/test_dify_runtime_role.py
+  - tests/test_validate_service_completeness.py
+  - catalog/services/dify/service.yaml
+  - config/data-catalog.json
+  - config/slo-catalog.json
+  - config/alertmanager/rules/dify.yml
+  - config/grafana/dashboards/dify.json
+  - config/grafana/dashboards/slo-overview.json
+  - build/platform-manifest.json
+  - config/prometheus/rules/slo_alerts.yml
+  - config/prometheus/rules/slo_rules.yml
+  - config/prometheus/file_sd/slo_targets.yml
+  - docs/runbooks/configure-dify.md
+  - docs/workstreams/ws-0515-dify-runtime-recovery.md
+  - workstreams/active/ws-0515-dify-runtime-recovery.yaml
+  - workstreams/active/ws-0513-builder-metrics-tailnet-firewall.yaml
+  - workstreams.yaml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - receipts/live-applies/ws-0515-dify-runtime-recovery-apply-receipt.yaml
+  - config/image-catalog.json
+  - config/vulnerability-budget-policy.json
+  - tests/test_security_posture_report.py
+  - config/validation-lanes.yaml
+  - tests/test_validation_lanes.py
+  - receipts/security-reports/20260928T*.json
+  - receipts/image-scans/2026-09-28-dify-*.json
+  - receipts/sbom/d1c73b3be4ba.cdx.json
+  - receipts/sbom/42a516af16b8.cdx.json
+  - receipts/sbom/0bf773413570.cdx.json
+  - receipts/sbom/15bd3cee31b3.cdx.json
+  - receipts/sbom/77697a75da9f.cdx.json
+  - receipts/sbom/a56b9ca13d7a.cdx.json
+  - receipts/sbom/6a097f68bae7.cdx.json
+  - receipts/sbom/f3f7d124cb02.cdx.json
+  - receipts/cve/d1c73b3be4ba-20260928T*.grype.json
+  - receipts/cve/42a516af16b8-20260928T*.grype.json
+  - receipts/cve/0bf773413570-20260928T*.grype.json
+  - receipts/cve/15bd3cee31b3-20260928T*.grype.json
+  - receipts/cve/77697a75da9f-20260928T*.grype.json
+  - receipts/cve/a56b9ca13d7a-20260928T*.grype.json
+  - receipts/cve/6a097f68bae7-20260928T*.grype.json
+  - receipts/cve/f3f7d124cb02-20260928T*.grype.json
+  ownership_manifest:
+    owned_surfaces:
+    - id: dify_runtime_recovery
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/dify_runtime/tasks/main.yml
+      - scripts/seed_dify_runtime_secrets.py
+      - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/default.conf.template.j2
+      - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/docker-compose.yml.j2
+      - collections/ansible_collections/lv3/platform/roles/dify_runtime/templates/ssrf-docker-entrypoint.sh.j2
+      - tests/test_dify_runtime_role.py
+      - tests/test_dify_runtime_secret_seed.py
+      mode: exclusive
+    - id: dify_completeness_profile
+      paths:
+      - docs/schema/service-completeness.schema.json
+      - catalog/services/dify/service.yaml
+      mode: exclusive
+    - id: generated_service_catalogs
+      paths:
+      - config/service-completeness.json
+      - config/slo-catalog.json
+      mode: shared_contract
+      contract: generated-service-catalogs-v1
+    - id: service_completeness_applicability
+      paths:
+      - scripts/service_completeness.py
+      - tests/test_validate_service_completeness.py
+      mode: shared_contract
+      contract: service-completeness-validation-v1
+    - id: dify_observability_and_data_catalog
+      paths:
+      - config/data-catalog.json
+      - config/alertmanager/rules/dify.yml
+      - config/grafana/dashboards/dify.json
+      mode: exclusive
+    - id: generated_slo_assets
+      paths:
+      - config/grafana/dashboards/slo-overview.json
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      mode: shared_contract
+      contract: generated-slo-assets-v1
+    - id: dify_runbook
+      paths:
+      - docs/runbooks/configure-dify.md
+      mode: exclusive
+    - id: dify_workstream_tracking
+      paths:
+      - docs/workstreams/ws-0515-dify-runtime-recovery.md
+      - workstreams/active/ws-0515-dify-runtime-recovery.yaml
+      mode: exclusive
+    - id: ws_0513_completeness_handoff
+      paths:
+      - workstreams/active/ws-0513-builder-metrics-tailnet-firewall.yaml
+      mode: shared_contract
+      contract: workstream-ownership-transfer-v1
+    - id: workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: generated_platform_manifest
+      paths:
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: dify_live_apply_evidence
+      paths:
+      - receipts/live-applies/ws-0515-dify-runtime-recovery-apply-receipt.yaml
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    - id: dify_image_security_evidence
+      paths:
+      - config/image-catalog.json
+      - config/vulnerability-budget-policy.json
+      - tests/test_security_posture_report.py
+      - config/validation-lanes.yaml
+      - tests/test_validation_lanes.py
+      - receipts/security-reports/20260928T*.json
+      - receipts/image-scans/2026-09-28-dify-*.json
+      - receipts/sbom/d1c73b3be4ba.cdx.json
+      - receipts/sbom/42a516af16b8.cdx.json
+      - receipts/sbom/0bf773413570.cdx.json
+      - receipts/sbom/15bd3cee31b3.cdx.json
+      - receipts/sbom/77697a75da9f.cdx.json
+      - receipts/sbom/a56b9ca13d7a.cdx.json
+      - receipts/sbom/6a097f68bae7.cdx.json
+      - receipts/sbom/f3f7d124cb02.cdx.json
+      - receipts/cve/d1c73b3be4ba-20260928T*.grype.json
+      - receipts/cve/42a516af16b8-20260928T*.grype.json
+      - receipts/cve/0bf773413570-20260928T*.grype.json
+      - receipts/cve/15bd3cee31b3-20260928T*.grype.json
+      - receipts/cve/77697a75da9f-20260928T*.grype.json
+      - receipts/cve/a56b9ca13d7a-20260928T*.grype.json
+      - receipts/cve/6a097f68bae7-20260928T*.grype.json
+      - receipts/cve/f3f7d124cb02-20260928T*.grype.json
+      mode: shared_contract
+      contract: vulnerability-evidence-v1
+    - id: validation_lane_security_receipts
+      paths:
+      - config/validation-lanes.yaml
+      - tests/test_validation_lanes.py
+      mode: shared_contract
+      contract: validation-lanes-v1
+  context: 'Dify''s local NGINX config statically resolves Docker service names to
+    the
+
+    current API, web, and plugin-daemon addresses. Recreating the API left NGINX
+
+    pointing at the former API IP, producing 502 responses even though Docker DNS
+
+    resolves the replacement correctly. Separately, the Squid SSRF proxy enters a
+
+    restart loop because its PID file under /run persists in the writable
+
+    container layer across restarts. Fix both in the repo-managed role, verify
+
+    the public Dify path, and replace the expired legacy completeness waiver with
+
+    truthful Authentik, observability, SLO, and data-catalog evidence. Dify''s UI
+
+    is protected by the shared OIDC edge, while the gateway''s Dify tool bridge is
+
+    an API implemented by the gateway itself; a generic OIDC-to-Dify API proxy is
+
+    not a valid upstream integration.
+
+    '
+  tasks:
+  - id: t1
+    title: Repair Dify Docker DNS re-resolution and transient Squid runtime state
+    status: completed
+  - id: t2
+    title: Make Dify service-completeness requirements and evidence accurate
+    status: completed
+  - id: t3
+    title: Validate templates, catalogs, and Dify end-to-end health
+    status: in_progress
+  - id: t4
+    title: Merge the tested PR, converge Dify, and record live evidence
+    status: pending
+  canonical_truth:
+    changelog_entry: Recover Dify readiness after container replacement and prevent
+      stale Squid process state from breaking its SSRF proxy.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
 - id: ws-realtime-dynamic-children
   adr: 0196
   title: Auto-discover all production hosts as Netdata streaming children
@@ -7720,76 +8151,50 @@ workstreams:
     status: in_progress
 - id: ws-0516-openbao-completeness
   adr: '0043'
-  title: Resolve OpenBao completeness and pre-push gate blockers
-  status: merged
+  title: Restore OpenBao monitoring and complete its service evidence
+  status: in_progress
   ready_to_merge: false
   live_applied: false
   owner: codex
-  branch: codex/ws0516-release-integration-20260928
-  worktree_path: .worktrees/codex-ws0516-release-integration-20260928
+  branch: codex/openbao-completeness-20260928
+  worktree_path: .worktrees/openbao-completeness-20260928
   doc: docs/workstreams/ws-0516-openbao-completeness.md
-  depends_on:
-  - adr-0043-openbao-for-secrets-transit-and-dynamic-credentials
+  depends_on: []
   conflicts_with: []
   shared_surfaces:
-  - config/service-completeness.json
   - catalog/services/openbao/service.yaml
+  - config/service-completeness.json
+  - config/health-probe-catalog.json
   - config/slo-catalog.json
-  - config/grafana/dashboards/slo-overview.json
-  - config/prometheus/rules/slo_alerts.yml
-  - config/prometheus/rules/slo_rules.yml
   - config/prometheus/file_sd/slo_targets.yml
-  - config/grafana/dashboards/openbao.json
-  - config/alertmanager/rules/openbao.yml
-  - tests/test_openbao_completeness.py
-  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus.yml.j2
-  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/monitoring_probe_target.j2
-  - tests/test_monitoring_vm_role.py
-  - config/capacity-model.json
-  - tests/test_standby_capacity.py
-  - config/subdomain-exposure-registry.json
-  - scripts/subdomain_exposure_audit.py
-  - tests/test_subdomain_exposure_audit.py
-  - docs/adr/.index.yaml
-  - docs/adr/index/**
-  - docs/diagrams/network-topology.excalidraw
-  - docs/diagrams/agent-coordination-map.excalidraw
-  - build/platform-manifest.json
-  - config/validation-lanes.yaml
-  - tests/test_validation_lanes.py
+  - config/prometheus/rules/slo_rules.yml
+  - config/prometheus/rules/slo_alerts.yml
+  - config/grafana/dashboards/slo-overview.json
+  - inventory/host_vars/proxmox-host.yml
   - scripts/service_completeness.py
   - tests/test_validate_service_completeness.py
-  - scripts/remote_exec.sh
-  - tests/test_remote_exec.py
-  - config/workflow-catalog.json
-  - tests/test_https_tls_assurance_targets.py
-  - tests/test_workflow_catalog_generated_refs.py
+  - tests/test_openbao_monitoring_contract.py
+  - docs/runbooks/configure-openbao.md
   - docs/workstreams/ws-0516-openbao-completeness.md
+  - workstreams/active/ws-0515-dify-runtime-recovery.yaml
   - workstreams/active/ws-0516-openbao-completeness.yaml
-  - README.md
-  - changelog.md
-  - docs/status/history/merged-workstreams.md
-  - scripts/release_manager.py
-  - tests/test_release_manager.py
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
   - workstreams.yaml
   ownership_manifest:
     owned_surfaces:
-    - id: openbao_completeness_and_observability
+    - id: openbao_service_evidence
       paths:
       - catalog/services/openbao/service.yaml
+      mode: exclusive
+    - id: generated_service_catalogs
+      paths:
+      - config/health-probe-catalog.json
       - config/service-completeness.json
       - config/slo-catalog.json
-      - config/grafana/dashboards/openbao.json
-      - config/alertmanager/rules/openbao.yml
-      - tests/test_openbao_completeness.py
-      mode: exclusive
-    - id: inventory_aware_monitoring_targets
-      paths:
-      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus.yml.j2
-      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/monitoring_probe_target.j2
-      - tests/test_monitoring_vm_role.py
-      mode: exclusive
-    - id: generated_slo_outputs
+      mode: shared_contract
+      contract: generated-service-catalogs-v1
+    - id: generated_slo_assets
       paths:
       - config/grafana/dashboards/slo-overview.json
       - config/prometheus/rules/slo_alerts.yml
@@ -7797,162 +8202,39 @@ workstreams:
       - config/prometheus/file_sd/slo_targets.yml
       mode: shared_contract
       contract: generated-slo-assets-v1
-    - id: openbao_completeness_tracking
+    - id: openbao_probe_network_policy
       paths:
-      - docs/workstreams/ws-0516-openbao-completeness.md
-      - workstreams/active/ws-0516-openbao-completeness.yaml
-      mode: exclusive
-    - id: workstream_registry
-      paths:
-      - workstreams.yaml
+      - inventory/host_vars/proxmox-host.yml
       mode: shared_contract
-      contract: workstream-registry-v1
-    - id: release_closeout_artifacts
-      paths:
-      - README.md
-      - changelog.md
-      - docs/status/history/merged-workstreams.md
-      mode: shared_contract
-      contract: release-bump-v1
-    - id: release_manager_fixture_safety
-      paths:
-      - scripts/release_manager.py
-      - tests/test_release_manager.py
-      mode: exclusive
-    - id: standby_capacity_pre_push_gate
-      paths:
-      - config/capacity-model.json
-      - tests/test_standby_capacity.py
-      mode: exclusive
-    - id: adr_0481_config
-      paths:
-      - config/subdomain-exposure-registry.json
-      mode: shared_contract
-      contract: multi-deployment-service-registry-v3
-    - id: adr_0481_audit_patch
-      paths:
-      - scripts/subdomain_exposure_audit.py
-      - tests/test_subdomain_exposure_audit.py
-      mode: shared_contract
-      contract: adr-0481-audit-extension-v1
-    - id: ws_0481_umbrella_adr_0482_0485
-      paths:
-      - docs/adr/.index.yaml
-      - docs/adr/index/**
-      mode: shared_contract
-      contract: deployment-context-umbrella-v1
-    - id: release_artifacts_0_179_0
-      paths:
-      - docs/diagrams/network-topology.excalidraw
-      - docs/diagrams/agent-coordination-map.excalidraw
-      - build/platform-manifest.json
-      mode: shared_contract
-      contract: release-bump-v1
-    - id: validation_gate_timeout_cleanup
-      paths:
-      - config/validation-lanes.yaml
-      - tests/test_validation_lanes.py
-      mode: shared_contract
-      contract: validation-gate-runner-v1
-    - id: remote_pre_push_scope_forwarding
-      paths:
-      - scripts/remote_exec.sh
-      - tests/test_remote_exec.py
-      mode: shared_contract
-      contract: pre-push-gate-v1
-    - id: workflow_catalog_refs
-      paths:
-      - config/workflow-catalog.json
-      mode: shared_contract
-      contract: workflow-catalog-v1
-    - id: workflow_catalog_regression
-      paths:
-      - tests/test_https_tls_assurance_targets.py
-      mode: exclusive
-    - id: generated_uptime_monitor_refs
-      paths:
-      - tests/test_workflow_catalog_generated_refs.py
-      mode: exclusive
-    - id: remote_changed_service_scope
+      contract: guest-network-policy-v1
+    - id: service_completeness_scope
       paths:
       - scripts/service_completeness.py
       - tests/test_validate_service_completeness.py
+      mode: shared_contract
+      contract: service-completeness-validation-v1
+    - id: openbao_monitoring_regression
+      paths:
+      - tests/test_openbao_monitoring_contract.py
       mode: exclusive
-  context: 'OpenBao is an active private secrets authority. Its profile was still
-    using an
-
-    expired legacy suppression for missing monitoring assets. Add a real private
-
-    readiness SLO, dashboard, and alert rule so this service passes the current
-
-    completeness contract without extending suppressions. OpenBao receives
-
-    database credentials through its authenticated control API and does not
-
-    consume a Compose env_file, so requires_compose_secrets is false while
-
-    requires_secrets remains true. The same push-gate run also exposed unrelated
-
-    repository-state defects: PostgreSQL''s planned standby budget did not match
-
-    its declared guest identity, and exposure-registry regeneration consumed the
-
-    workstation''s shared private identity rather than the tracked generation
-
-    snapshot. Both are being corrected so the branch can pass the actual gate
-
-    without claiming that PostgreSQL replication is live.
-
-    '
-  tasks:
-  - id: t1
-    title: Add OpenBao readiness SLO, generated Prometheus assets, dashboard, and
-      alert
-    status: completed
-  - id: t2
-    title: Remove the expired suppression, resolve monitoring targets from inventory,
-      and validate
-    status: completed
-  - id: t3
-    title: Submit the branch through Woodpecker PR checks and merge
-    status: completed
-  - id: t4
-    title: Repair pre-push standby-capacity and deterministic exposure-registry blockers
-    status: completed
-  - id: t5
-    title: Refresh stale generated indexes, architecture diagrams, and platform manifest
-      from tracked inputs
-    status: completed
-  - id: t6
-    title: Route service definition files to service validation instead of widening
-      to all lanes
-    status: completed
-  - id: t7
-    title: Preserve changed-service scope through remote validation snapshots
-    status: completed
-  - id: t8
-    title: Remove generated TLS outputs from workflow implementation references
-    status: completed
-  - id: t9
-    title: Remove ignored generated Uptime Kuma outputs from workflow implementation
-      references
-    status: completed
-  - id: t10
-    title: Keep private topology addresses out of generated public exposure registry
-    status: completed
-  - id: t11
-    title: Correct post-merge canonical workstream and changelog state
-    status: completed
-  - id: t12
-    title: Make release readiness receipt lookup worktree-safe and isolate release
-      tests from production side effects
-    status: completed
-  canonical_truth:
-    changelog_entry: Complete OpenBao readiness observability and repair service-completeness
-      and remote push-gate validation.
-    release_bump: patch
-    included_in_repo_version: null
-    latest_receipts: {}
+    - id: openbao_runbook
+      paths:
+      - docs/runbooks/configure-openbao.md
+      mode: exclusive
+    - id: openbao_workstream_tracking
+      paths:
+      - docs/workstreams/ws-0516-openbao-completeness.md
+      - workstreams/active/ws-0515-dify-runtime-recovery.yaml
+      - workstreams/active/ws-0516-openbao-completeness.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: generated_repository_surfaces
+      paths:
+      - build/platform-manifest.json
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
 - id: ws-0497-fleet-build-broker-pki-handoff
   adr: '0042'
   title: Add root-only fleet-build-broker PKI issuance and renewal handoff

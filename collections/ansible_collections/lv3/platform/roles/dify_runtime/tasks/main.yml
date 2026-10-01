@@ -92,6 +92,51 @@
     - path: "{{ dify_secret_dir }}"
       mode: "0700"
 
+- name: Check for the existing controller-side Dify admin password
+  ansible.builtin.stat:
+    path: "{{ dify_admin_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: dify_admin_password_local_stat
+  no_log: true
+
+- name: Check the host-side Dify admin password file
+  ansible.builtin.stat:
+    path: "{{ dify_admin_password_remote_file }}"
+  register: dify_admin_password_remote_stat
+  no_log: true
+
+- name: Reject an empty host-side Dify admin password file
+  ansible.builtin.assert:
+    that:
+      - not dify_admin_password_remote_stat.stat.exists or dify_admin_password_remote_stat.stat.size | int > 0
+    fail_msg: "The host-side Dify admin password file is empty; refusing to generate a replacement."
+    quiet: true
+
+- name: Restore a missing host-side Dify admin password from its controller copy
+  ansible.builtin.copy:
+    src: "{{ dify_admin_password_local_file }}"
+    dest: "{{ dify_admin_password_remote_file }}"
+    remote_src: false
+    force: false
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - dify_admin_password_local_stat.stat.exists
+    - not dify_admin_password_remote_stat.stat.exists
+  no_log: true
+
+- name: Restore missing Dify runtime secret files from the current runtime environment
+  ansible.builtin.script: >-
+    {{ dify_scripts_dir }}/seed_dify_runtime_secrets.py
+    --env-file {{ dify_env_file | quote }}
+    --secret-dir {{ dify_secret_dir | quote }}
+  register: dify_runtime_secret_seed
+  changed_when: dify_runtime_secret_seed.stdout is search('created=[1-9][0-9]*')
+  become: true
+  no_log: true
+
 - name: Manage Dify runtime secrets
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -282,6 +327,7 @@
     owner: root
     group: root
     mode: "{{ item.mode }}"
+  register: dify_nginx_templates
   loop:
     - src: nginx.conf.template.j2
       dest: "{{ dify_nginx_dir }}/nginx.conf.template"
@@ -354,6 +400,21 @@
         'Creating' in dify_up.stdout
         or 'Recreating' in dify_up.stdout
         or 'Starting' in dify_up.stdout
+
+    - name: Restart Dify NGINX after managed template changes
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ dify_compose_file }}"
+          - restart
+          - nginx
+      args:
+        chdir: "{{ dify_site_dir }}"
+      register: dify_nginx_restart
+      changed_when: true
+      when: dify_nginx_templates.changed | default(false)
 
     - name: Wait for Dify to listen locally
       ansible.builtin.wait_for:

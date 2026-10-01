@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "dify_redis_runtime",
+  "image_ref": "docker.io/library/redis:6.2.20-alpine@sha256:77697a75da9f94e9357b61fcaf8345f69e3d9d32e9d15032c8415c21263977dc",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "scanned_on": "2026-09-28",
+  "sbom_receipt": "receipts/sbom/77697a75da9f.cdx.json",
+  "cve_receipt": "receipts/cve/77697a75da9f-20260928T125301Z.grype.json",
+  "summary": {
+    "critical": 25,
+    "high": 152,
+    "medium": 110,
+    "low": 19,
+    "unknown": 0,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 306
+  }
+}

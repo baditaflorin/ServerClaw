@@ -12,18 +12,19 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- Complete OpenBao readiness observability and repair service-completeness and remote push-gate validation.
 - Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
+- Remove the unused GitHub Actions workflow and point validation metadata at Woodpecker while retaining the self-hosted Gitea validator.
 - Allow the Builder metrics peer to scrape docker-build node-exporter over the private tailnet without disrupting Docker-managed firewall rules.
 - Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
 - Keep the sanitized ServerClaw host template consistent with active authenticated edge routes.
 
 ## Latest Release
 
-- [0.179.47 release notes](docs/release-notes/0.179.47.md)
+- [0.179.48 release notes](docs/release-notes/0.179.48.md)
 
 ## Previous Releases
 
+- [0.179.47 release notes](docs/release-notes/0.179.47.md)
 - [0.179.46 release notes](docs/release-notes/0.179.46.md)
 - [0.179.45 release notes](docs/release-notes/0.179.45.md)
 - [0.179.44 release notes](docs/release-notes/0.179.44.md)
@@ -35,7 +36,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.38 release notes](docs/release-notes/0.179.38.md)
 - [0.179.37 release notes](docs/release-notes/0.179.37.md)
 - [0.179.36 release notes](docs/release-notes/0.179.36.md)
-- [0.179.35 release notes](docs/release-notes/0.179.35.md)
 - [0.179.31 release notes](docs/release-notes/0.179.31.md)
 - [0.179.30 release notes](docs/release-notes/0.179.30.md)
 - [0.179.29 release notes](docs/release-notes/0.179.29.md)
@@ -44,4 +44,4 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (558 releases)](docs/release-notes/index/2026.md)
+- [2026 (559 releases)](docs/release-notes/index/2026.md)

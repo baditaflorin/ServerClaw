@@ -58,9 +58,12 @@ completeness:
   service_type: compose
   requires_subdomain: true
   requires_oidc: true
+  oidc_provider: authentik
+  authentik_client_generated: true
+  requires_api_gateway: false
   requires_secrets: true
   requires_compose_secrets: true
-  suppression_preset: legacy-service
+  notes: The Dify UI is protected by the shared Authentik OIDC edge. The gateway's Dify tool bridge is implemented by the gateway itself; Dify's app API is not an OIDC-JWT upstream.
 redundancy:
   tier: R1
   recovery_objective:
@@ -121,6 +124,30 @@ dependency:
       type: hard
       description: Dify stores application state, accounts, knowledge metadata, and
         workflow definitions in Postgres.
+data:
+  - id: dify-application-state
+    service: dify
+    name: Dify workflows, datasets, uploaded files, and plugin state
+    class: confidential
+    retention_days: null
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - PostgreSQL database dify on postgres
+      - Dify API storage under /opt/dify/data/storage on docker-runtime
+      - Dify Qdrant storage under /opt/dify/data/qdrant on docker-runtime
+      - Dify plugin storage under /opt/dify/data/plugin on docker-runtime
+    notes: Workflows, uploaded documents, prompts, and embeddings may contain confidential or personal data. A consistent service restore contract covering the database and Dockerhost file/vector state has not been verified, so this entry makes no backup or retention claim.
+slos:
+  - id: dify-availability
+    service_id: dify
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.20:8094/healthz
+    probe_module: http_2xx_follow_redirects
+    description: Dify's private readiness endpoint remains healthy on docker-runtime, independently of the Authentik-protected public edge.
 health:
   service_name: dify
   owning_vm: docker-runtime
