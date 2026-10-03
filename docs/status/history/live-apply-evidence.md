@@ -190,4 +190,4 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `semaphore` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
 | `public_edge_publication` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
 | `identity_provider` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
-| `authentik` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
+| `authentik` | `ws-0517-authentik-runtime-upgrade-apply-receipt` |

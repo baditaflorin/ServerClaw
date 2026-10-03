@@ -21,134 +21,10 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 340
+  total_workstreams: 341
   by_year:
-    '2026': 340
+    '2026': 341
 workstreams:
-- id: ws-0517-authentik-runtime-upgrade
-  adr: 0491
-  title: Upgrade the Authentik runtime to 2026.8.3 under a bounded operator-approved
-    exception
-  status: ready_for_merge
-  ready_to_merge: true
-  live_applied: false
-  owner: codex
-  branch: codex/authentik-runtime-upgrade-20261001
-  worktree_path: .worktrees/authentik-live-closeout-20260926
-  doc: docs/workstreams/ws-0517-authentik-runtime-upgrade.md
-  canonical_truth:
-    changelog_entry: Pin Authentik 2026.8.3 by digest under the seven-day operator-approved
-      security exception.
-    release_bump: patch
-    included_in_repo_version: 0.179.48
-    latest_receipts:
-      live_apply: receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.yaml
-  depends_on:
-  - adr-0491-authentik-keycloak-sunset-2026-08-30
-  conflicts_with: []
-  shared_surfaces:
-  - VERSION
-  - changelog.md
-  - RELEASE.md
-  - docs/release-notes/**
-  - versions/stack.yaml
-  - build/platform-manifest.json
-  - README.md
-  - docs/status/history/merged-workstreams.md
-  - docs/diagrams/agent-coordination-map.excalidraw
-  - docs/discovery/**
-  - build/onboarding/**
-  - config/image-catalog.json
-  - receipts/image-scans/2026-10-01-authentik-runtime.json
-  - receipts/cve/09782fe56675-20261001T100019Z.grype.json
-  - receipts/sbom/09782fe56675.cdx.json
-  - receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.yaml
-  - docs/workstreams/ws-0517-authentik-runtime-upgrade.md
-  - workstreams/active/ws-0517-authentik-runtime-upgrade.yaml
-  - workstreams.yaml
-  ownership_manifest:
-    owned_surfaces:
-    - id: authentik_image_security_evidence
-      paths:
-      - config/image-catalog.json
-      - receipts/image-scans/2026-10-01-authentik-runtime.json
-      - receipts/cve/09782fe56675-20261001T100019Z.grype.json
-      - receipts/sbom/09782fe56675.cdx.json
-      mode: shared_contract
-      contract: vulnerability-evidence-v1
-    - id: authentik_runtime_upgrade_release_truth
-      paths:
-      - VERSION
-      - changelog.md
-      - RELEASE.md
-      - docs/release-notes/**
-      - versions/stack.yaml
-      - build/platform-manifest.json
-      - README.md
-      - docs/status/history/merged-workstreams.md
-      - docs/discovery/**
-      - build/onboarding/**
-      mode: shared_contract
-      contract: release-truth-v1
-    - id: authentik_runtime_upgrade_generated_diagram
-      paths:
-      - docs/diagrams/agent-coordination-map.excalidraw
-      mode: shared_contract
-      contract: generated-artifacts-v1
-    - id: authentik_runtime_upgrade_live_apply_evidence
-      paths:
-      - receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.yaml
-      mode: shared_contract
-      contract: live-apply-evidence-v1
-    - id: authentik_runtime_upgrade_workstream
-      paths:
-      - docs/workstreams/ws-0517-authentik-runtime-upgrade.md
-      - workstreams/active/ws-0517-authentik-runtime-upgrade.yaml
-      mode: exclusive
-    - id: authentik_runtime_upgrade_registry
-      paths:
-      - workstreams.yaml
-      mode: shared_contract
-      contract: workstream-registry-v1
-  context: 'PR 261 merged the Authentik 2026.8.3 linux/amd64 digest pin, current Syft
-    and
-
-    Grype evidence, and the explicitly approved seven-day exception for 3 Critical
-
-    and 84 High findings. Production was not changed by that merge. This separate
-
-    workstream owns the repository release integration, guarded VM192 rollout,
-
-    and post-apply evidence. The previous broad consumer workstream has a
-
-    completed apply receipt and must not be reused for a second apply.
-
-
-    The exception expires on 2026-10-08. Re-scan before expiry; do not extend it
-
-    silently. The last restore rehearsal restored PostgreSQL but did not reach
-
-    Authentik web readiness. A short-lived VM disk snapshot is the immediate
-
-    rollback mechanism for this rollout, not proof of off-host recoverability.
-
-    '
-  tasks:
-  - id: t1
-    title: Merge the reviewed image pin and fresh security evidence
-    status: completed
-  - id: t2
-    title: Prepare repository release metadata for 0.179.48
-    status: completed
-  - id: t3
-    title: Pass CI and merge the release pull request
-    status: in_progress
-  - id: t4
-    title: Snapshot VM192 and apply Authentik through the guarded production target
-    status: pending
-  - id: t5
-    title: Verify image digest, health, recovery-mail delivery, and browser consumers
-    status: pending
 - id: ws-0512-authentik-consumer-e2e
   adr: 0491
   title: Audit and repair live Authentik consumer sign-in paths end to end
@@ -7909,6 +7785,96 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 3dc83890-945f-41eb-9ca7-b21f7ff54c40
+- id: ws-0517-validation-host-route
+  adr: 0082
+  title: Restore the remote validation-host route to the declared build VM
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/ws-0517-validation-host-route
+  worktree_path: .worktrees/codex-validation-route-20261003
+  doc: docs/workstreams/ws-0517-validation-host-route.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/build-server.json
+  - inventory/build_server.yml
+  - config/publication-sanitization.yaml
+  - docs/runbooks/remote-build-gateway.md
+  - tests/test_build_server_route.py
+  - tests/test_publish_to_serverclaw.py
+  - scripts/topology-snapshot.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/workstreams/ws-0517-validation-host-route.md
+  - workstreams/active/ws-0517-validation-host-route.yaml
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: remote_validation_route
+      paths:
+      - config/build-server.json
+      - inventory/build_server.yml
+      mode: shared_contract
+      contract: build-server-route-matches-declared-docker-build-guest-v1
+    - id: remote_validation_route_regression
+      paths:
+      - tests/test_build_server_route.py
+      mode: exclusive
+    - id: publication_alias_regression
+      paths:
+      - tests/test_publish_to_serverclaw.py
+      mode: exclusive
+    - id: bastion_alias_publication_sanitization
+      paths:
+      - config/publication-sanitization.yaml
+      mode: shared_contract
+      contract: tier-c-sanitization-replacements-v1
+    - id: generated_topology_snapshot
+      paths:
+      - scripts/topology-snapshot.json
+      mode: shared_contract
+      contract: topology-snapshot-v1
+    - id: generated_coordination_diagram
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: remote_validation_route_runbook
+      paths:
+      - docs/runbooks/remote-build-gateway.md
+      mode: exclusive
+    - id: remote_validation_route_tracking
+      paths:
+      - docs/workstreams/ws-0517-validation-host-route.md
+      - workstreams/active/ws-0517-validation-host-route.yaml
+      mode: exclusive
+    - id: active_workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  context: The gateway targeted ops@10.10.10.30 through ops@100.64.0.1. Live topology
+    confirms the actual docker-build guest is Proxmox VM 130 at 10.10.10.30; 10.10.10.30
+    belongs to a different private network. The old jump is not reachable. The bootstrap
+    key and ops account work through the existing operator-bastion SSH alias, and the
+    target workspace exists.
+  tasks:
+  - id: t1
+    title: Identify the live validation guest and verify an authenticated route
+    status: completed
+  - id: t2
+    title: Align the remote gateway, Ansible inventory, and runbook
+    status: completed
+  - id: t3
+    title: Add route-drift regression coverage and run safe connectivity checks
+    status: completed
+  - id: t4
+    title: Push the branch, pass CI, and merge through the required PR workflow
+    status: in_progress
+  - id: t5
+    title: Publish the sanitized ServerClaw snapshot after merge
+    status: pending
 - id: adr-0066-mutation-audit-log
   adr: '0066'
   title: Structured mutation audit log

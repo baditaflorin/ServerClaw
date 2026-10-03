@@ -14,6 +14,7 @@ Exit codes:
   2 = auth or connection failure
 """
 
+import json
 import sys
 from pathlib import Path
 from typing import Optional
@@ -215,6 +216,66 @@ def sync_adr_to_plane(plane_client: PlaneClient, adr_num: str, adr_path: Path, d
     except Exception as e:
         print(f"ERROR: Failed to sync ADR {adr_num}: {e}", file=sys.stderr)
         return False
+
+
+def sync_adrs(
+    *,
+    auth_file: str,
+    adr_dir: str,
+    adr_ids: list[str] | None = None,
+    summary_output: str | None = None,
+) -> dict:
+    """Synchronize selected ADRs through the shared Plane client and issue model."""
+    if PlaneClient is None:
+        raise RuntimeError("PlaneClient is unavailable; run this command from the repository environment")
+
+    from platform.ansible.plane import ensure_issue_for_adr, parse_adr
+
+    auth = json.loads(Path(auth_file).expanduser().read_text(encoding="utf-8"))
+    client = PlaneClient(
+        auth["base_url"],
+        auth["api_token"],
+        verify_ssl=bool(auth.get("verify_ssl", True)),
+        timeout=120,
+        max_rate_limit_retries=8,
+    )
+    if not client.verify_api_key():
+        raise RuntimeError(f"Plane API token in {auth_file} is not valid")
+
+    workspace_slug = auth["workspace_slug"]
+    project_id = auth.get("project_id")
+    if not project_id:
+        identifier = auth.get("project_identifier")
+        project = next(
+            (item for item in client.list_projects(workspace_slug) if item.get("identifier") == identifier),
+            None,
+        )
+        if project is None:
+            raise RuntimeError(f"Plane project not found: {identifier}")
+        project_id = project["id"]
+
+    requested_ids = {str(value).removeprefix("adr-") for value in adr_ids or []}
+    states_by_name = {state["name"]: state["id"] for state in client.list_states(workspace_slug, project_id)}
+    synced: list[dict[str, str]] = []
+    for path in sorted(Path(adr_dir).expanduser().glob("[0-9][0-9][0-9][0-9]-*.md")):
+        record = parse_adr(path)
+        if requested_ids and record.adr_id not in requested_ids:
+            continue
+        issue = ensure_issue_for_adr(
+            client,
+            workspace_slug=workspace_slug,
+            project_id=project_id,
+            states_by_name=states_by_name,
+            record=record,
+        )
+        synced.append({"adr_id": record.adr_id, "issue_id": str(issue["id"])})
+
+    summary = {"count": len(synced), "synced": synced}
+    if summary_output:
+        output_path = Path(summary_output).expanduser()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return summary
 
 
 def main() -> int:

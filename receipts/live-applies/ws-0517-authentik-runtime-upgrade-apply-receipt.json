@@ -1,0 +1,32 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "ws-0517-authentik-runtime-upgrade-apply-receipt",
+  "applied_on": "2026-10-01",
+  "recorded_on": "2026-10-01",
+  "recorded_by": "codex",
+  "source_commit": "bdef401acf729cd76e529d63314ac4a8cdb12c38",
+  "repo_version_context": "0.179.48",
+  "workflow_id": "live-apply-service",
+  "summary": "Authentik 2026.8.3 verified at the approved immutable digest.",
+  "targets": [
+    {
+      "kind": "container",
+      "name": "authentik",
+      "vmid": "192",
+      "image": "ghcr.io/goauthentik/server:2026.8.3",
+      "image_digest": "sha256:09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Authentik digest",
+      "result": "pass",
+      "observed": "Approved 2026.8.3 digest confirmed."
+    }
+  ],
+  "evidence_refs": ["versions/stack.yaml"],
+  "notes": [
+    "3C / 84H accepted through 2026-10-08."
+  ]
+}

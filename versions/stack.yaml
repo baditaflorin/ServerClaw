@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.179.48
-platform_version: 0.178.224
+platform_version: 0.178.225
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -185,7 +185,7 @@ live_apply_evidence:
     repo_intake: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
     platform_ops: 2026-04-21-adr-0391-cpu-only-operational-automation-live-apply
     public_edge_publication: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
-    authentik: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
+    authentik: ws-0517-authentik-runtime-upgrade-apply-receipt
     semaphore: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
     identity_provider: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
 desired_state:
@@ -930,6 +930,8 @@ observed_state:
     public_url: https://id.example.com
     readiness_url: https://id.example.com/-/health/ready/
     container_running: true
+    runtime_version: 2026.8.3
+    image_digest: sha256:09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442
     public_discovery_verified: true
     public_dns_verified_via_authoritative_resolver: true
     named_operator_present: true
@@ -1183,5 +1185,5 @@ release_tracks:
     current: 0.179.48
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.178.224
+    current: 0.178.225
     meaning: intended platform release for the actual server configuration

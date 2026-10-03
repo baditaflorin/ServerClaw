@@ -5,11 +5,9 @@
     "-o",
     "IdentitiesOnly=yes",
     "-o",
-    "StrictHostKeyChecking=accept-new",
-    "-o",
-    "UserKnownHostsFile=/dev/null",
+    "StrictHostKeyChecking=yes",
     "-J",
-    "ops@100.64.0.1"
+    "operator-bastion"
   ],
   "workspace_root": "/home/ops/builds/serverclaw-platform",
   "default_timeout_seconds": 900,
@@ -57,8 +55,8 @@
       "skip_docker": true,
       "status_file": ".local/validation-gate/last-run.json",
       "validation_lanes": "all-validation-gate-checks",
-      "command": "mkdir -p .local/validation-gate .local/trivy-cache /opt/builds/.policy-toolchain && LV3_NATIVE_EXECUTION=1 LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=/opt/builds/.policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source build-server-native",
-      "local_fallback_command": "mkdir -p .local/validation-gate .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate_fallback.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback"
+      "command": "mkdir -p .local/validation-gate .local/trivy-cache /opt/builds/.policy-toolchain && LV3_NATIVE_EXECUTION=1 LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=/opt/builds/.policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source build-server-native --jobs 2",
+      "local_fallback_command": "mkdir -p .local/validation-gate .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate_fallback.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback --jobs 2"
     },
     "remote-pre-push": {
       "runner_id": "build-server-validation",
@@ -66,8 +64,8 @@
       "skip_docker": true,
       "status_file": ".local/validation-gate/last-run.json",
       "validation_lanes": "all-validation-gate-checks",
-      "command": "mkdir -p .local/validation-gate .local/trivy-cache /opt/builds/.policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=/opt/builds/.policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source build-server",
-      "local_fallback_command": "mkdir -p .local/validation-gate .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate_fallback.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback"
+      "command": "mkdir -p .local/validation-gate .local/trivy-cache /opt/builds/.policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=/opt/builds/.policy-toolchain python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source build-server --jobs 2",
+      "local_fallback_command": "mkdir -p .local/validation-gate .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections .local/policy-toolchain && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_TRIVY_CACHE_DIR=.local/trivy-cache LV3_POLICY_TOOLCHAIN_ROOT=.local/policy-toolchain python3 scripts/run_gate_fallback.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback --jobs 2"
     },
     "remote-packer-build": {
       "runner_id": "build-server-validation",

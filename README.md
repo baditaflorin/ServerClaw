@@ -32,7 +32,7 @@ monitored, and recoverable from a single repository.
 | Field | Value |
 | --- | --- |
 | Repository version | `0.179.48` |
-| Platform version | `0.178.224` |
+| Platform version | `0.178.225` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -90,7 +90,7 @@ Showing 20 of 183 capability receipts. Full history: [live-apply evidence histor
 | Field | Value |
 | --- | --- |
 | Repository version | `0.179.48` |
-| Platform version | `0.178.224` |
+| Platform version | `0.178.225` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -134,7 +134,7 @@ assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
 - **[CLAUDE.md](CLAUDE.md)** — Claude Code session protocol with checklists and context
 - **[AGENTS.md](AGENTS.md)** — Multi-agent coordination rules and handoff protocol
 - **515+ ADRs** — Every architectural decision documented and indexed
-- **273+ runbooks** — Step-by-step procedures an AI agent can follow
+- **278+ runbooks** — Step-by-step procedures an AI agent can follow
 - **Workstream tracking** — Parallel agent sessions coordinate via YAML manifests
 
 Point Claude Code at this repo and it knows how to deploy, debug, and extend
@@ -169,10 +169,10 @@ self-hosted platform:
 | Layer | What | Count |
 |-------|------|-------|
 | Architecture decisions | `docs/adr/` | 515+ ADRs |
-| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 162 roles |
-| Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 60 playbooks |
-| Operational runbooks | `docs/runbooks/` | 273+ runbooks |
-| Automation scripts | `scripts/` | 365+ scripts |
+| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 169 roles |
+| Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 66 playbooks |
+| Operational runbooks | `docs/runbooks/` | 278+ runbooks |
+| Automation scripts | `scripts/` | 373+ scripts |
 | Validation tests | `tests/` | Automated regression suite |
 
 ### Services included
@@ -271,8 +271,8 @@ variables from it — no manual IP editing.
 ```
 .
 ├── collections/ansible_collections/lv3/platform/
-│   ├── roles/           # 162 Ansible roles
-│   ├── playbooks/       # 60 playbooks
+│   ├── roles/           # 169 Ansible roles
+│   ├── playbooks/       # 66 playbooks
 │   └── plugins/         # Custom filters and callbacks
 ├── inventory/
 │   ├── hosts.yml        # GENERATED — see scripts/generate_inventory.py
@@ -287,9 +287,9 @@ variables from it — no manual IP editing.
 │   └── full/            # Tier 2 compose (7 containers)
 ├── docs/
 │   ├── adr/             # 515+ architecture decision records
-│   ├── runbooks/        # 273+ operational runbooks
+│   ├── runbooks/        # 278+ operational runbooks
 │   └── templates/       # Jinja2 templates for generated docs (incl. this README)
-├── scripts/             # 365+ automation scripts
+├── scripts/             # 373+ automation scripts
 ├── local-overlay-template/  # Scaffold for .local/ secrets directory
 └── Makefile             # 35+ automation targets
 ```
@@ -357,7 +357,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 340 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 341 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
@@ -411,6 +411,6 @@ and merge procedures.
 
 ---
 
-*Generated 2026-08-31 by [scripts/generate_readme.py](scripts/generate_readme.py)
+*Generated 2026-10-01 by [scripts/generate_readme.py](scripts/generate_readme.py)
 from [docs/templates/README.md.j2](docs/templates/README.md.j2).
 Run `make generate-readme` to refresh.*

@@ -1,11 +1,13 @@
 id: ws-0517-authentik-runtime-upgrade
+plane_issue_id: 1825f552-2b02-4f16-b2ff-8f485eab59c5
 adr: "0491"
 title: Upgrade the Authentik runtime to 2026.8.3 under a bounded operator-approved exception
-status: ready_for_merge
-ready_to_merge: true
-live_applied: false
+status: live_applied
+ready_to_merge: false
+live_applied: true
 owner: codex
-branch: codex/authentik-runtime-upgrade-20261001
+branch: codex/plane-auth-workstream-fix
+previous_branch: codex/authentik-workstream-closeout-20261001
 worktree_path: .worktrees/authentik-live-closeout-20260926
 doc: docs/workstreams/ws-0517-authentik-runtime-upgrade.md
 canonical_truth:
@@ -13,7 +15,7 @@ canonical_truth:
   release_bump: patch
   included_in_repo_version: 0.179.48
   latest_receipts:
-    live_apply: receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.yaml
+    authentik: ws-0517-authentik-runtime-upgrade-apply-receipt
 depends_on:
   - adr-0491-authentik-keycloak-sunset-2026-08-30
 conflicts_with: []
@@ -34,9 +36,21 @@ shared_surfaces:
   - receipts/cve/09782fe56675-20261001T100019Z.grype.json
   - receipts/sbom/09782fe56675.cdx.json
   - receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.yaml
+  - receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.json
+  - docs/status/history/live-apply-evidence.md
+  - receipts/restic-snapshots-latest.json
+  - inventory/host_vars/proxmox-host.yml
+  - inventory/group_vars/platform.yml
+  - playbooks/mail-platform.yml
   - docs/workstreams/ws-0517-authentik-runtime-upgrade.md
-  - workstreams/active/ws-0517-authentik-runtime-upgrade.yaml
+  - workstreams/archive/2026/ws-0517-authentik-runtime-upgrade.yaml
   - workstreams.yaml
+  - platform/ansible/plane.py
+  - scripts/plane_tool.py
+  - scripts/sync_adrs_to_plane.py
+  - scripts/sync_plane_agent_issues.py
+  - tests/test_operator_tool_contract.py
+  - tests/test_plane_client.py
 ownership_manifest:
   owned_surfaces:
     - id: authentik_image_security_evidence
@@ -69,30 +83,59 @@ ownership_manifest:
     - id: authentik_runtime_upgrade_live_apply_evidence
       paths:
         - receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.yaml
+        - receipts/live-applies/ws-0517-authentik-runtime-upgrade-apply-receipt.json
+        - docs/status/history/live-apply-evidence.md
       mode: shared_contract
       contract: live-apply-evidence-v1
+    - id: authentik_recovery_mail_delivery_prerequisite
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+        - inventory/group_vars/platform.yml
+        - playbooks/mail-platform.yml
+        - receipts/restic-snapshots-latest.json
+      mode: shared_contract
+      contract: mail-platform-dns-v1
     - id: authentik_runtime_upgrade_workstream
       paths:
         - docs/workstreams/ws-0517-authentik-runtime-upgrade.md
-        - workstreams/active/ws-0517-authentik-runtime-upgrade.yaml
+        - workstreams/archive/2026/ws-0517-authentik-runtime-upgrade.yaml
       mode: exclusive
     - id: authentik_runtime_upgrade_registry
       paths:
         - workstreams.yaml
       mode: shared_contract
       contract: workstream-registry-v1
+    - id: workstream_archive_branch_resolution
+      paths:
+        - scripts/workstream_surface_ownership.py
+        - scripts/validate_repo.sh
+        - tests/test_workstream_surface_ownership.py
+      mode: exclusive
+    - id: plane_authentik_closeout_sync
+      paths:
+        - platform/ansible/plane.py
+        - scripts/plane_tool.py
+        - scripts/sync_adrs_to_plane.py
+        - scripts/sync_plane_agent_issues.py
+        - tests/test_operator_tool_contract.py
+        - tests/test_plane_client.py
+      mode: exclusive
 context: |
-  PR 261 merged the Authentik 2026.8.3 linux/amd64 digest pin, current Syft and
-  Grype evidence, and the explicitly approved seven-day exception for 3 Critical
+  PR 263 merged the Authentik 2026.8.3 runtime upgrade at
+  7063709d1ac1d9ca693043c63772dd045955e030. PR 261 merged the linux/amd64
+  digest pin, current Syft and Grype evidence, and the explicitly approved seven-day exception for 3 Critical
   and 84 High findings. Production was not changed by that merge. This separate
   workstream owns the repository release integration, guarded VM192 rollout,
   and post-apply evidence. The previous broad consumer workstream has a
-  completed apply receipt and must not be reused for a second apply.
+  completed apply receipt and must not be reused for a second apply. A prerequisite
+  mail DNS repair was applied narrowly so the approved recovery email could be
+  verified end-to-end.
 
   The exception expires on 2026-10-08. Re-scan before expiry; do not extend it
   silently. The last restore rehearsal restored PostgreSQL but did not reach
   Authentik web readiness. A short-lived VM disk snapshot is the immediate
-  rollback mechanism for this rollout, not proof of off-host recoverability.
+  rollback mechanism for the rollout; it was removed after verification. This is
+  not proof of off-host recoverability.
 tasks:
   - id: t1
     title: Merge the reviewed image pin and fresh security evidence
@@ -102,10 +145,10 @@ tasks:
     status: completed
   - id: t3
     title: Pass CI and merge the release pull request
-    status: in_progress
+    status: completed
   - id: t4
     title: Snapshot VM192 and apply Authentik through the guarded production target
-    status: pending
+    status: completed
   - id: t5
     title: Verify image digest, health, recovery-mail delivery, and browser consumers
-    status: pending
+    status: completed

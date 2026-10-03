@@ -71,7 +71,7 @@ def command_whoami(args) -> int:
 
 
 def command_list_workspaces(args) -> int:
-    auth = load_auth(args.auth_file)
+    auth = load_operator_auth(args.auth_file)
     session = PlaneSessionClient(auth["base_url"], verify_ssl=bool(auth.get("verify_ssl", True)))
     sign_in_error = session.sign_in_admin(auth["email"], auth["password"])
     if sign_in_error:
@@ -114,7 +114,7 @@ def command_create_issue(args) -> int:
         payload["external_id"] = args.external_id
         payload["external_source"] = args.external_source
     if args.state and args.state in states:
-        payload["state_id"] = states[args.state]
+        payload["state"] = states[args.state]
     created = client.create_issue(workspace, project["id"], payload)
     print(json.dumps(created, indent=2, sort_keys=True))
     return 0

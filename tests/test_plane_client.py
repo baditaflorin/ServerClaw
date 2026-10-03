@@ -260,6 +260,7 @@ def test_sync_adrs_reuses_issue_index_for_repo_adr_updates(tmp_path, monkeypatch
     class FakeClient:
         def __init__(self, *args, **kwargs):
             self.list_issues_calls = 0
+            self.update_issue_calls = []
             self.timeout = kwargs["timeout"]
             self.max_rate_limit_retries = kwargs["max_rate_limit_retries"]
 
@@ -274,7 +275,8 @@ def test_sync_adrs_reuses_issue_index_for_repo_adr_updates(tmp_path, monkeypatch
             return [{"id": "issue-1", "external_source": "repo_adr", "external_id": "adr-0193"}]
 
         def update_issue(self, workspace_slug, project_id, issue_id, payload):
-            return {"id": issue_id, "name": payload["name"], "state_id": payload["state_id"]}
+            self.update_issue_calls.append({"payload": payload})
+            return {"id": issue_id, "name": payload["name"], "state": payload["state"]}
 
     captured: dict[str, FakeClient] = {}
 
@@ -292,6 +294,8 @@ def test_sync_adrs_reuses_issue_index_for_repo_adr_updates(tmp_path, monkeypatch
     assert captured["client"].list_issues_calls == 1
     assert captured["client"].timeout == 120
     assert captured["client"].max_rate_limit_retries == 8
+    assert captured["client"].update_issue_calls[0]["payload"]["state"] == "state-done"
+    assert "state_id" not in captured["client"].update_issue_calls[0]["payload"]
 
 
 def test_ensure_issue_for_adr_skips_patch_when_issue_already_matches() -> None:
@@ -325,3 +329,60 @@ def test_ensure_issue_for_adr_skips_patch_when_issue_already_matches() -> None:
     )
 
     assert issue is existing_issue
+
+
+def test_ensure_issue_for_adr_uses_plane_state_field() -> None:
+    captured: dict[str, dict] = {}
+    record = plane.AdrRecord(
+        adr_id="0193",
+        title="Plane Kanban Task Board",
+        status="Accepted",
+        implementation_status="Not Implemented",
+        path=Path("docs/adr/0193-plane-kanban-task-board.md"),
+        summary="Track ADRs in Plane.",
+    )
+
+    class FakeClient:
+        def list_issues(self, workspace_slug, project_id):
+            return []
+
+        def create_issue(self, workspace_slug, project_id, payload):
+            captured["payload"] = payload
+            return {"id": "issue-1", **payload}
+
+    issue = plane.ensure_issue_for_adr(
+        FakeClient(),
+        workspace_slug="lv3-platform",
+        project_id="project-1",
+        states_by_name={"Todo": "state-todo"},
+        record=record,
+    )
+
+    assert issue["state"] == "state-todo"
+    assert captured["payload"]["state"] == "state-todo"
+    assert "state_id" not in captured["payload"]
+
+
+def test_ensure_issue_for_workstream_uses_plane_state_field() -> None:
+    captured: dict[str, dict] = {}
+
+    class FakeClient:
+        def list_issues(self, workspace_slug, project_id):
+            return []
+
+        def create_issue(self, workspace_slug, project_id, payload):
+            captured["payload"] = payload
+            return {"id": "issue-1", **payload}
+
+    issue = plane.ensure_issue_for_workstream(
+        FakeClient(),
+        workspace_slug="lv3-platform",
+        project_id="project-1",
+        states_by_name={"Done": "state-done"},
+        labels_by_name={},
+        ws={"id": "ws-1", "title": "Archived work", "owner": "codex", "status": "live_applied"},
+    )
+
+    assert issue["state"] == "state-done"
+    assert captured["payload"]["state"] == "state-done"
+    assert "state_id" not in captured["payload"]

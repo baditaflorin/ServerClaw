@@ -23,14 +23,23 @@ extend the exception.
 ## Repository and production status
 
 PR 261 merged the image pin, recovery-mail route correction, and security
-evidence. At the time of that merge, production still ran Authentik 2026.8.0
-and its public readiness endpoint returned HTTP 200. The previous isolated
-restore rehearsal recovered PostgreSQL but did not reach Authentik web
-readiness, so this workstream does not claim verified PBS disaster recovery.
+evidence. PR 262 merged repository version 0.179.48 at
+`bdef401acf729cd76e529d63314ac4a8cdb12c38`. That exact merged-main release was
+applied to production VM192 and verified. The previous isolated restore
+rehearsal recovered PostgreSQL but did not reach Authentik web readiness, so
+this workstream does not claim verified PBS disaster recovery.
 
-The guarded rollout uses a short-lived VM disk snapshot immediately before the
-apply. That snapshot is an immediate rollback aid only; retain the PBS restore
-finding until a full restore rehearsal reaches Authentik readiness.
+PR 263 merged the Authentik runtime and post-apply evidence at
+`7063709d1ac1d9ca693043c63772dd045955e030`. This closeout fixes branch
+ownership validation to resolve workstreams from both active and archived
+shards, because the generated compatibility registry intentionally omits
+archived entries. Regression coverage verifies the archive transition and
+continues to reject edits outside the branch's declared surfaces.
+
+The guarded rollout used a short-lived VM disk snapshot immediately before the
+apply. After all post-upgrade checks passed, the named snapshot was removed.
+Retain the PBS restore finding until a full restore rehearsal reaches Authentik
+readiness.
 
 ## Rollout and verification
 
@@ -49,7 +58,26 @@ finding until a full restore rehearsal reaches Authentik readiness.
 
 ## Current state
 
-- Image catalog, scan receipts, and exception merged through PR 261.
-- Repository release metadata is being prepared under PR review.
-- Production apply and post-upgrade verification are pending.
-- Exception expiry: 2026-10-08.
+- Image catalog, scan receipts, and exception merged through PR 261. The
+  operator explicitly accepted both **3 Critical and 84 High** findings through
+  2026-10-08; the scan reported zero High/Critical findings with a known fix.
+- PR 262 merged repository version 0.179.48. Authentik server and worker are
+  running `ghcr.io/goauthentik/server:2026.8.3` at digest
+  `sha256:09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442`
+  and healthy; `https://id.example.org/-/health/ready/` returned HTTP 200.
+- Strict-TLS fresh-browser login checks passed for Gitea and Harbor with the
+  non-admin `gitea-e2e` test identity. Authentik recovery mail was accepted and
+  independently verified delivered to Gmail; no reset link is recorded here.
+- The corrected two Brevo DKIM CNAME records are authoritative and resolve via
+  three public resolvers. Brevo reports the domain and DKIM records authenticated;
+  SPF, MX, and DMARC were not changed. The follow-up recovery-flow check passed.
+- The pre-upgrade VM snapshot was removed after verification. This is not a
+  claim of completed PBS disaster-recovery rehearsal. Outline, Grafana,
+  GlitchTip, and Chat remain outside this verification scope.
+- Outline, Grafana, GlitchTip, and Chat are intentionally deferred, not
+  implicitly migrated. If retained, each needs its own integration contract,
+  scoped change, and end-to-end test before Keycloak retirement is claimed for
+  that consumer.
+- Platform version is advanced to 0.178.225 to record this merged-main live
+  apply. Re-scan before the exception expires on 2026-10-08; do not extend the
+  exception without a new explicit decision.

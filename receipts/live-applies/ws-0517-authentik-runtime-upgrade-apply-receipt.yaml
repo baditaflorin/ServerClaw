@@ -1,0 +1,57 @@
+workstream_id: ws-0517-authentik-runtime-upgrade
+state: completed
+schema_version: 1.1.0
+started_at: '2026-10-01T11:15:26Z'
+completed_at: '2026-10-01T12:44:41Z'
+applied_by: codex/authentik-runtime-live-apply-20261001
+repo_version: 0.179.48
+adr: 0491
+summary: Apply Authentik 2026.8.3 pinned digest to production VM192 under the approved
+  seven-day exception.
+targets:
+- service: authentik
+  host_group: runtime-control
+  vmid: 192
+  from_image: ghcr.io/goauthentik/server:2026.8.0
+  to_image_digest: sha256:09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442
+  rollback_snapshot: pre-authentik-2026-8-3-20261001
+errors: []
+notes:
+- Proxmox rejected the dotted snapshot name at command validation; no snapshot was
+  created and no VM change occurred.
+- The first snapshot precheck also stopped before PVE mutation because qm was not
+  in the operator PATH; subsequent commands use sudo qm.
+- A dotted snapshot name was rejected before snapshot creation; the valid hyphenated
+  snapshot was subsequently created.
+- Apply retry uses canonical HCLOUD_TOKEN mapped only to HETZNER_DNS_API_TOKEN in
+  this process after the previous DNS query returned HTTP 401.
+- The exact id.example.org A record was checked against the selected management IP and
+  Authentik readiness was HTTP 200. The authorized HCLOUD_TOKEN has no example.org zone;
+  the idempotent DNS-only first play was skipped via --start-at-task, while all service
+  gates, Authentik runtime tasks, and edge publication remain enabled.
+- 'Immediately before apply: id.example.org resolved only to the selected management
+  IP, public readiness returned HTTP 200, VM192 was running, and the pre-upgrade disk
+  snapshot was present. Apply is limited to runtime-control and nginx so the already-verified
+  localhost DNS record is not rewritten by an API token without the example.org zone;
+  both service plays remain included.'
+- Stale Restic repository lock was cleared only after confirming the recorded PID
+  and all Restic processes were absent. Managed 0mcp-restic-config-backup.service
+  then completed successfully; latest snapshot summary reports five governed sources
+  protected and zero uncovered.
+- The merged source was repository version 0.179.48 at commit
+  bdef401acf729cd76e529d63314ac4a8cdb12c38 (PR 262). The production Authentik
+  server and worker both run 2026.8.3 at the approved immutable digest; both are
+  healthy and the public readiness endpoint returned HTTP 200.
+- OIDC discovery and login handoffs passed for Gitea and Harbor. Fresh strict-TLS
+  browser sign-in completed for both with the non-admin gitea-e2e identity.
+- Brevo domain authentication and both DKIM records verified true after the two
+  CNAME targets were corrected. The CNAMEs resolve through three public resolvers;
+  SPF, MX, and DMARC records were not changed.
+- Authentik recovery-flow checks passed. One password-reset email request was
+  accepted (HTTP 204), independently found in Gmail, and reported delivered by
+  Brevo at 2026-10-01T15:44:41+03:00. The message body and reset link are not stored.
+- The VM192 pre-upgrade snapshot was removed after all runtime, browser, and mail
+  checks passed. PBS restore readiness remains unproven and is not claimed here.
+- Operator explicitly accepted both 3 Critical and 84 High findings until
+  2026-10-08; the reviewed scan reported zero High/Critical findings with a known
+  fix. Re-scan before expiry; this receipt does not extend the exception.

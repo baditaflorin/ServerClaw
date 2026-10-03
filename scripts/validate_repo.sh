@@ -834,15 +834,29 @@ _validate_workstream_entry() {
   [[ "$current_branch" == "HEAD" ]] && return 0
   [[ "${CI:-}" == "true" ]] && return 0
 
-  local workstreams_file="$REPO_ROOT/workstreams.yaml"
-  [[ ! -f "$workstreams_file" ]] && return 0
-
   local entry_count
-  entry_count=$(grep -Ec "^[[:space:]]*branch:[[:space:]]*\"?$current_branch\"?[[:space:]]*$" "$workstreams_file" 2>/dev/null || true)
+  local workstreams_active="$REPO_ROOT/workstreams/active"
+  local workstreams_archive="$REPO_ROOT/workstreams/archive"
+
+  if [[ -d "$workstreams_active" && -d "$workstreams_archive" ]]; then
+    # The generated compatibility registry intentionally omits archived
+    # workstreams. Check the authoritative shards so completed branches remain
+    # recognized during post-merge closeout.
+    if grep -R -F -x -q -- "branch: $current_branch" "$workstreams_active" "$workstreams_archive" 2>/dev/null \
+      || grep -R -F -x -q -- "branch: \"$current_branch\"" "$workstreams_active" "$workstreams_archive" 2>/dev/null; then
+      entry_count=1
+    else
+      entry_count=0
+    fi
+  else
+    local workstreams_file="$REPO_ROOT/workstreams.yaml"
+    [[ ! -f "$workstreams_file" ]] && return 0
+    entry_count=$(grep -Ec "^[[:space:]]*branch:[[:space:]]*\"?$current_branch\"?[[:space:]]*$" "$workstreams_file" 2>/dev/null || true)
+  fi
   entry_count="${entry_count:-0}"
 
   if [[ "$entry_count" -eq 0 ]]; then
-    echo "WARNING: Branch '$current_branch' not found in workstreams.yaml (ADR 0167)" >&2
+    echo "WARNING: Branch '$current_branch' not found in workstream registry or source shards (ADR 0167)" >&2
     echo "  Add an entry: docs/adr/0167-agent-handoff-and-context-preservation.md" >&2
     # Warning only — do not block push
   fi

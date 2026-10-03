@@ -257,7 +257,7 @@ def repair_orphans(*, auth_file: Path, aw_identifier: str) -> dict[str, Any]:
             continue
         # Close if the workstream is no longer active AND the branch is gone
         if ws_id not in active_ws_ids:
-            client.update_issue(workspace_slug, project_id, issue["id"], {"state_id": done_id})
+            client.update_issue(workspace_slug, project_id, issue["id"], {"state": done_id})
             client.add_comment(
                 workspace_slug,
                 project_id,

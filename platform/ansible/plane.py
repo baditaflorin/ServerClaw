@@ -88,7 +88,10 @@ class PlaneClient:
         self._retry_policy = RetryPolicy(
             max_attempts=self.max_rate_limit_retries + 1,
             base_delay_s=self.rate_limit_backoff_seconds,
-            max_delay_s=max(self.rate_limit_backoff_seconds * (2 ** max(self.max_rate_limit_retries - 1, 0)), self.rate_limit_backoff_seconds),
+            max_delay_s=max(
+                self.rate_limit_backoff_seconds * (2 ** max(self.max_rate_limit_retries - 1, 0)),
+                self.rate_limit_backoff_seconds,
+            ),
             multiplier=2.0,
             jitter=False,
             transient_max=0,
@@ -225,7 +228,9 @@ class PlaneClient:
         )
         return response
 
-    def update_issue(self, workspace_slug: str, project_id: str, issue_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    def update_issue(
+        self, workspace_slug: str, project_id: str, issue_id: str, payload: dict[str, Any]
+    ) -> dict[str, Any]:
         _status, response = self._request(
             f"/api/v1/workspaces/{workspace_slug}/projects/{project_id}/issues/{issue_id}/",
             method="PATCH",
@@ -258,17 +263,22 @@ class PlaneClient:
         )
         return response
 
-    def ensure_project_by_identifier(self, workspace_slug: str, name: str, identifier: str, description: str = "") -> dict[str, Any]:
+    def ensure_project_by_identifier(
+        self, workspace_slug: str, name: str, identifier: str, description: str = ""
+    ) -> dict[str, Any]:
         """Return existing project matching identifier, or create it."""
         for project in self.list_projects(workspace_slug):
             if project.get("identifier") == identifier:
                 return project
-        return self.create_project(workspace_slug, {
-            "name": name,
-            "identifier": identifier,
-            "description": description,
-            "network": 0,
-        })
+        return self.create_project(
+            workspace_slug,
+            {
+                "name": name,
+                "identifier": identifier,
+                "description": description,
+                "network": 0,
+            },
+        )
 
 
 class PlaneSessionClient:
@@ -633,7 +643,7 @@ def ensure_issue_for_adr(
         "description_html": render_adr_description(record),
         "external_source": "repo_adr",
         "external_id": record.external_id,
-        "state_id": wanted_state_id,
+        "state": wanted_state_id,
     }
     issue = existing_issue
     if issue is None:
@@ -649,7 +659,7 @@ def ensure_issue_for_adr(
         if (
             issue.get("name") == payload["name"]
             and issue.get("description_html") == payload["description_html"]
-            and current_state == payload["state_id"]
+            and current_state == payload["state"]
         ):
             return issue
         return client.update_issue(workspace_slug, project_id, issue_id, payload)
@@ -745,7 +755,7 @@ def ensure_issue_for_workstream(
         "description_html": render_workstream_description(ws),
         "external_source": "repo_workstream",
         "external_id": ws_id,
-        "state_id": state_id,
+        "state": state_id,
         "label_ids": label_ids,
     }
 
@@ -757,10 +767,7 @@ def ensure_issue_for_workstream(
         if candidate.get("external_source") == "repo_workstream" and candidate.get("external_id") == ws_id:
             issue_id = candidate["id"]
             current_state = candidate.get("state_id") or candidate.get("state")
-            if (
-                candidate.get("name") == payload["name"]
-                and current_state == state_id
-            ):
+            if candidate.get("name") == payload["name"] and current_state == state_id:
                 return candidate
             return client.update_issue(workspace_slug, project_id, issue_id, payload)
 
