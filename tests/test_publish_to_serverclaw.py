@@ -56,6 +56,16 @@ def test_publication_sanitizes_private_primary_guest_network() -> None:
     )
 
 
+def test_publication_sanitizes_live_build_bastion_alias() -> None:
+    config = yaml.safe_load((REPO_ROOT / "config" / "publication-sanitization.yaml").read_text(encoding="utf-8"))
+    alias_replacement = next(entry for entry in config["string_replacements"] if entry["pattern"] == "operator-bastion")
+
+    assert re.sub(alias_replacement["pattern"], alias_replacement["replacement"], "-J operator-bastion") == (
+        "-J operator-bastion"
+    )
+    assert "operator-bastion" in config["leak_markers"]
+
+
 def test_public_proxmox_template_keeps_repo_intake_edge_route() -> None:
     """Keep the fork-ready Tier A host template aligned with the active edge catalog."""
     host_vars = yaml.safe_load(

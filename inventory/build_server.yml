@@ -20,6 +20,5 @@ all:
           ansible_ssh_private_key_file: "{{ build_server_shared_local_root }}/ssh/bootstrap.id_ed25519"
           ansible_ssh_common_args: >-
             -o IdentitiesOnly=yes
-            -o StrictHostKeyChecking=accept-new
-            -o UserKnownHostsFile=/dev/null
-            -o ProxyJump=ops@100.64.0.1
+            -o StrictHostKeyChecking=yes
+            -o ProxyJump=operator-bastion

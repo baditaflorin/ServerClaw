@@ -7,6 +7,7 @@
     - tier-2
     - communication
     - service-mail-platform
+    - mail-dns
 
   tasks:
     - name: Ensure Hetzner DNS records are present for the mail platform

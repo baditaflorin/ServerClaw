@@ -16,14 +16,14 @@ import yaml
 
 from controller_automation_toolkit import repo_path
 from platform.repo import validate_repo_relative_path
-from platform.workstream_registry import find_workstream
+from platform.workstream_registry import find_workstream, load_shard_workstreams
 
 
 REPO_ROOT = repo_path()
 WORKSTREAMS_PATH = REPO_ROOT / "workstreams.yaml"
 MUTABLE_SURFACE_MODES = {"exclusive", "shared_contract"}
 ALL_SURFACE_MODES = MUTABLE_SURFACE_MODES | {"generated", "read_only"}
-TERMINAL_WORKSTREAM_STATUSES = {"merged", "live_applied"}
+TERMINAL_WORKSTREAM_STATUSES = {"implemented", "merged", "live_applied"}
 
 
 @dataclass(frozen=True)
@@ -290,17 +290,31 @@ def validate_branch_ownership(
 ) -> list[str]:
     repo_root = repo_root.resolve()
     registry = registry or load_registry(repo_root / "workstreams.yaml")
+    # workstreams.yaml intentionally omits archived records. Keep conflict
+    # validation scoped to active claims, then add archived shards only for
+    # branch lookup so historical ownership does not reserve live surfaces.
     ownerships = validate_registry(registry)
+    archived_records = load_shard_workstreams(
+        repo_root=repo_root,
+        include_active=False,
+        include_archive=True,
+    )
+    ownerships.extend(parse_workstream_ownerships({"workstreams": [record.payload for record in archived_records]}))
     current_branch = current_branch or detect_current_branch(repo_root)
 
     if current_branch in {"main", "HEAD"}:
         return []
 
-    ownership = next((item for item in ownerships if item.branch == current_branch), None)
-    if ownership is None:
+    branch_ownerships = [item for item in ownerships if item.branch == current_branch]
+    if not branch_ownerships:
         raise ValueError(f"branch '{current_branch}' is not registered in workstreams.yaml")
+    if len(branch_ownerships) > 1:
+        ids = ", ".join(item.workstream_id for item in branch_ownerships)
+        raise ValueError(f"branch '{current_branch}' maps to multiple workstreams: {ids}")
+    ownership = branch_ownerships[0]
     if not ownership.is_active and not ownership.owned_surfaces:
         raise ValueError(f"branch '{current_branch}' maps to terminal workstream '{ownership.workstream_id}'")
+    source_record = find_workstream(ownership.workstream_id, repo_root=repo_root, include_archive=True)
 
     resolved_base_ref = resolve_base_ref(repo_root, registry, base_ref)
     changed_files = _collect_changed_files(repo_root, resolved_base_ref)
@@ -308,9 +322,9 @@ def validate_branch_ownership(
         return []
 
     implicit_mutable_paths: set[str] = set()
-    source_record = find_workstream(ownership.workstream_id, repo_root=repo_root, include_archive=True)
     if source_record is not None and source_record.location != "compatibility":
         implicit_mutable_paths.add(source_record.path.relative_to(repo_root).as_posix())
+        implicit_mutable_paths.add(f"workstreams/active/{ownership.workstream_id}.yaml")
 
     global_mutable_patterns: tuple[str, ...] = tuple(
         str(p) for p in (registry.get("surface_ownership") or {}).get("global_mutable_paths", [])

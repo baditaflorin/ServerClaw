@@ -7,6 +7,7 @@ import pytest
 import yaml
 
 import workstream_surface_ownership as ownership
+from platform.workstream_registry import write_assembled_registry, write_workstream
 
 
 def write(path: Path, content: str) -> None:
@@ -76,6 +77,36 @@ def init_repo(tmp_path: Path) -> Path:
     return repo
 
 
+def init_closeout_repo(tmp_path: Path) -> Path:
+    repo = init_repo(tmp_path)
+    git(repo, "checkout", "main")
+
+    registry = build_registry()
+    workstream = registry["workstreams"][0]
+    workstream["status"] = "ready_for_merge"
+    policy = {
+        "schema_version": "1.0.0",
+        "delivery_model": registry["delivery_model"],
+        "release_policy": {"breaking_change_criteria": "config/version-semantics.json"},
+        "surface_ownership": {"global_mutable_paths": ["workstreams.yaml"]},
+    }
+    write(repo / "workstreams" / "policy.yaml", yaml.safe_dump(policy, sort_keys=False))
+    (repo / "workstreams" / "archive").mkdir(parents=True, exist_ok=True)
+    active_path = repo / "workstreams" / "active" / f"{workstream['id']}.yaml"
+    write(active_path, yaml.safe_dump(workstream, sort_keys=False))
+    write_assembled_registry(repo_root=repo)
+    git(repo, "add", ".")
+    git(repo, "commit", "-m", "Register source workstream before closeout")
+    git(repo, "checkout", "-b", "codex/adr-0173-closeout")
+
+    workstream["branch"] = "codex/adr-0173-closeout"
+    workstream["status"] = "merged"
+    workstream["ready_to_merge"] = False
+    write_workstream(workstream, repo_root=repo, current_path=active_path, archive_year="2026")
+    write_assembled_registry(repo_root=repo)
+    return repo
+
+
 def test_validate_registry_requires_manifest_for_active_workstream() -> None:
     registry = build_registry(include_manifest=False)
 
@@ -83,12 +114,21 @@ def test_validate_registry_requires_manifest_for_active_workstream() -> None:
         ownership.validate_registry(registry)
 
 
+def test_parse_archive_implemented_workstream_as_terminal_without_manifest() -> None:
+    registry = build_registry(include_manifest=False)
+    registry["workstreams"][0]["status"] = "implemented"
+
+    parsed = ownership.parse_workstream_ownerships(registry)
+
+    assert parsed[0].is_active is False
+
+
 def test_validate_registry_rejects_duplicate_exclusive_surface_across_active_workstreams() -> None:
     registry = build_registry()
     registry["workstreams"].append(
         {
             "id": "adr-9999-another",
-            "status": "implemented",
+            "status": "in_progress",
             "branch": "codex/adr-9999-another",
             "doc": "docs/workstreams/adr-9999.md",
             "ownership_manifest": {
@@ -237,3 +277,25 @@ def test_validate_branch_allows_editing_its_own_workstream_shard(
     changed_files = ownership.validate_branch_ownership(repo_root=repo, base_ref="main")
 
     assert changed_files == ["workstreams/active/adr-0173-workstream-surface-ownership-manifest.yaml"]
+
+
+def test_validate_branch_resolves_archived_record_after_it_leaves_compatibility_registry(
+    tmp_path: Path,
+) -> None:
+    repo = init_closeout_repo(tmp_path)
+
+    changed_files = ownership.validate_branch_ownership(repo_root=repo, base_ref="main")
+
+    assert changed_files == [
+        "workstreams.yaml",
+        "workstreams/active/adr-0173-workstream-surface-ownership-manifest.yaml",
+        "workstreams/archive/2026/adr-0173-workstream-surface-ownership-manifest.yaml",
+    ]
+
+
+def test_validate_archiving_branch_still_rejects_unowned_edits(tmp_path: Path) -> None:
+    repo = init_closeout_repo(tmp_path)
+    write(repo / "notes.txt", "unrelated change\n")
+
+    with pytest.raises(ValueError, match="outside declared owned surfaces"):
+        ownership.validate_branch_ownership(repo_root=repo, base_ref="main")

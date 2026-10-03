@@ -333,6 +333,78 @@ class TestPlaneToolContract:
             plane_tool.build_client(str(tmp_path / "nonexistent.json"))
         assert exc.value.code == 1
 
+    def test_list_workspaces_uses_toolkit_auth_loader(self, monkeypatch, capsys):
+        import argparse
+        import plane_tool
+
+        expected_auth = {
+            "base_url": "http://plane.invalid",
+            "email": "operator@example.com",
+            "password": "not-a-real-password",
+            "verify_ssl": False,
+        }
+
+        class FakeSession:
+            def __init__(self, base_url, verify_ssl=True):
+                assert base_url == expected_auth["base_url"]
+                assert verify_ssl is False
+
+            def sign_in_admin(self, email, password):
+                assert email == expected_auth["email"]
+                assert password == expected_auth["password"]
+                return None
+
+            def list_workspaces(self):
+                return [{"slug": "lv3-platform"}]
+
+        monkeypatch.setattr(plane_tool, "load_operator_auth", lambda _path: expected_auth)
+        monkeypatch.setattr(plane_tool, "PlaneSessionClient", FakeSession)
+
+        result = plane_tool.command_list_workspaces(argparse.Namespace(auth_file="auth.json"))
+
+        assert result == 0
+        assert '"slug": "lv3-platform"' in capsys.readouterr().out
+
+    def test_create_issue_uses_plane_state_field(self, monkeypatch, capsys):
+        import argparse
+        import plane_tool
+
+        captured = {}
+
+        class FakeClient:
+            def list_projects(self, workspace):
+                return [{"id": "project-1", "identifier": "AW"}]
+
+            def list_states(self, workspace, project_id):
+                return [{"id": "state-done", "name": "Done"}]
+
+            def create_issue(self, workspace, project_id, payload):
+                captured["payload"] = payload
+                return {"id": "issue-1", **payload}
+
+        monkeypatch.setattr(
+            plane_tool,
+            "build_client",
+            lambda _path: (FakeClient(), {"workspace_slug": "lv3-platform", "project_identifier": "AW"}),
+        )
+        args = argparse.Namespace(
+            auth_file="auth.json",
+            workspace=None,
+            project=None,
+            name="Archived workstream",
+            description="Closeout",
+            state="Done",
+            external_id="ws-1",
+            external_source="repo_workstream",
+        )
+
+        result = plane_tool.command_create_issue(args)
+
+        assert result == 0
+        assert captured["payload"]["state"] == "state-done"
+        assert "state_id" not in captured["payload"]
+        assert '"id": "issue-1"' in capsys.readouterr().out
+
 
 # ---------------------------------------------------------------------------
 # semaphore_tool — ADR 0343 load_auth compliance

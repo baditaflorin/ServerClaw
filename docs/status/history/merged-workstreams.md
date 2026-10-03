@@ -189,6 +189,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `` | Fix example.org guest network addressing — swap internal/staging to match reality | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
 | `` | Audit — example.org fleet-wide guest network identity drift | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
 | `` | ADR 0491: replace Keycloak with Authentik (Phase 0 -- decision + client audit) | `merged` | [0491-authentik-for-operator-and-agent-sso.md](../../adr/0491-authentik-for-operator-and-agent-sso.md) |
+| `0491` | Upgrade the Authentik runtime to 2026.8.3 under a bounded operator-approved exception | `live_applied` | [ws-0517-authentik-runtime-upgrade.md](../../workstreams/ws-0517-authentik-runtime-upgrade.md) |
 | `0287` | Use Woodpecker as the public ServerClaw CI provider | `merged` | [ws-0513-woodpecker-only-public-ci.md](../../workstreams/ws-0513-woodpecker-only-public-ci.md) |
 | `0491` | Authentik Phase 2: reconcile GlitchTip and migrate Outline | `live_applied` | [adr-0491-authentik-phase2.md](../../workstreams/adr-0491-authentik-phase2.md) |
 | `0391` | CPU-only operational automation live apply | `live_applied` | [ws-0391-live-apply.md](../../workstreams/ws-0391-live-apply.md) |
