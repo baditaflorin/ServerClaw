@@ -6389,6 +6389,79 @@ workstreams:
   notes: "Plane API was returning 502 when this workstream was created. The sync_plane_agent_issues.py\n\
     step was skipped. Run it to register in Plane once the service recovers:\n  python\
     \ scripts/sync_plane_agent_issues.py --workstream ws-0364-service-api-agent-tools\n"
+- id: ws-0518-plane-api-access
+  adr: '0360'
+  title: Restore the governed Plane API access path for workstream sync
+  status: merged
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/ws-0518-plane-closeout-20261004
+  worktree_path: .worktrees/ws-0518-plane-closeout-20261004
+  doc: docs/workstreams/ws-0518-plane-api-access.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - docs/runbooks/configure-plane.md
+  - docs/workstreams/ws-0518-plane-api-access.md
+  - workstreams/active/ws-0518-plane-api-access.yaml
+  - workstreams.yaml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - README.md
+  - docs/status/history/merged-workstreams.md
+  - changelog.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: plane_controller_access_runbook
+      paths:
+      - docs/runbooks/configure-plane.md
+      mode: exclusive
+    - id: plane_workstream_tracking
+      paths:
+      - docs/workstreams/ws-0518-plane-api-access.md
+      - workstreams/active/ws-0518-plane-api-access.yaml
+      mode: exclusive
+    - id: active_workstream_registry
+      paths:
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: merged_workstream_generated_status
+      paths:
+      - README.md
+      - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+    - id: merged_workstream_release_truth
+      paths:
+      - changelog.md
+      mode: shared_contract
+      contract: release-truth-v1
+  canonical_truth:
+    changelog_entry: Restore governed Plane API access through a loopback-only SSH
+      forward and document the procedure.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  plane_issue_id: b19bd486-7c30-4f42-b0c8-97d5bbfba9b1
+  tasks:
+  - id: t1
+    title: Verify Plane runtime, private proxy listener, and API-token access
+    status: completed
+  - id: t2
+    title: Document the loopback-only SSH forward and remove stale access assumptions
+    status: completed
+  - id: t3
+    title: Push, pass Woodpecker, and merge the private-source PR
+    status: completed
+  - id: t4
+    title: Synchronize the merged workstream and canonical status records
+    status: completed
 - id: adr-0360-openbao-cert-hardening
   adr: '0360'
   title: "Harden OpenBao TLS cert renewal \u2014 72h lifetime and expiry alert"
@@ -7788,13 +7861,19 @@ workstreams:
 - id: ws-0517-validation-host-route
   adr: 0082
   title: Restore the remote validation-host route to the declared build VM
-  status: in_progress
+  status: merged
   ready_to_merge: false
   live_applied: false
   owner: codex
-  branch: codex/ws-0517-validation-host-route
-  worktree_path: .worktrees/codex-validation-route-20261003
+  branch: codex/ws-0517-closeout
+  worktree_path: .worktrees/codex-ws-0517-closeout
   doc: docs/workstreams/ws-0517-validation-host-route.md
+  canonical_truth:
+    changelog_entry: Restore the remote validation gateway route to the declared build
+      VM and cap pre-push validation concurrency.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
   depends_on: []
   conflicts_with: []
   shared_surfaces:
@@ -7809,6 +7888,11 @@ workstreams:
   - docs/workstreams/ws-0517-validation-host-route.md
   - workstreams/active/ws-0517-validation-host-route.yaml
   - workstreams.yaml
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - docs/status/history/merged-workstreams.md
+  - changelog.md
+  - versions/stack.yaml
   ownership_manifest:
     owned_surfaces:
     - id: remote_validation_route
@@ -7854,6 +7938,19 @@ workstreams:
       - workstreams.yaml
       mode: shared_contract
       contract: workstream-registry-v1
+    - id: merged_workstream_generated_status
+      paths:
+      - README.md
+      - docs/status/history/live-apply-evidence.md
+      - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+    - id: merged_workstream_release_truth
+      paths:
+      - changelog.md
+      - versions/stack.yaml
+      mode: shared_contract
+      contract: release-truth-v1
   context: The gateway targeted ops@10.10.10.30 through ops@100.64.0.1. Live topology
     confirms the actual docker-build guest is Proxmox VM 130 at 10.10.10.30; 10.10.10.30
     belongs to a different private network. The old jump is not reachable. The bootstrap
@@ -7871,10 +7968,10 @@ workstreams:
     status: completed
   - id: t4
     title: Push the branch, pass CI, and merge through the required PR workflow
-    status: in_progress
+    status: completed
   - id: t5
     title: Publish the sanitized ServerClaw snapshot after merge
-    status: pending
+    status: completed
 - id: adr-0066-mutation-audit-log
   adr: '0066'
   title: Structured mutation audit log

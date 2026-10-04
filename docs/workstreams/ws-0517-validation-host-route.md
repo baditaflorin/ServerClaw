@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`. The configured gateway pointed to `ops@10.10.10.30` through
+`merged`. The configured gateway pointed to `ops@10.10.10.30` through
 `ops@100.64.0.1`. Those values no longer identify the validation host or a
 reachable jump. Live Proxmox inspection confirmed VM 130 `docker-build` at
 `10.10.10.30`; the `ops` account, configured bootstrap key, and workspace are
@@ -34,22 +34,25 @@ authenticates with the existing scoped bootstrap key.
 - The Ansible connectivity probe passed (`ansible -i inventory/build_server.yml
   build -m ping`). One initial attempt hit a transient SSH banner timeout; an
   immediate verbose retry connected and returned `pong`.
-- `tests/test_build_server_route.py` passed (2 tests).
-- Defer the full remote validation workload while the builder is resource
-  constrained. At inspection it had load averages above 30, about 545 MiB of
-  available memory, and 86% disk usage. Do not run a full gate until capacity
-  improves; no cleanup or process termination is in scope.
-- The gate selects 24 checks for this change. Its first full-gate attempt was
-  stopped before completion while competing Woodpecker jobs were active;
-  capacity probes during that contention reached load averages up to 54 and
-  available memory as low as 330 MiB. The configured native and fallback gates
-  now cap concurrency at two; the complete gate must still pass before the
-  branch can be pushed.
-- The configured Plane API endpoint timed out during the required workstream
-  sync. No Plane issue ID was recorded; the active workstream YAML is the
-  authoritative fallback until Plane becomes reachable.
-- No numbered release or version bump is prepared: the release manager
-  reports 63 existing release blockers and refuses to cut a release. The
-  change remains recorded under `Unreleased`.
-- Merge through the private repository PR workflow, then publish the
-  sanitized ServerClaw snapshot using the repository's publication pipeline.
+- Focused regression suite passed: 11 tests across the remote-route and
+  publication-sanitization checks. JSON validation and formatting checks passed.
+- The complete pre-push gate passed. The shared validator became overloaded
+  during its run (load peaked above 145 and available memory fell below 1 GiB),
+  so only this gate's process groups were stopped; the required local fallback
+  then passed all selected checks, including Ansible lint/syntax, IaC policy,
+  security, Semgrep, schema, generated-artifact, and workstream-ownership checks.
+- Private PR #266 merged on 2026-10-03 at
+  `0fd430749467ce58041d6ad2ca822705be18cee6`; both required Woodpecker push and
+  PR checks passed.
+- The sanitized-publication coverage audit and leak scan passed. The publisher
+  replaced five deployment-specific files, deleted two private-only paths,
+  sanitized 3,959 files, and regenerated public derived artifacts. ServerClaw
+  PR #67 merged on 2026-10-03 at
+  `f02a428356a08353877a2b4170b94a30ca374454`; both Woodpecker checks passed.
+- Plane synchronization was attempted for the merged workstream, but the
+  configured API endpoint did not establish a TCP connection; no Plane issue
+  ID was created. Git remains authoritative, as documented by ADR 0360.
+- This workstream changes validation routing/configuration only; it did not
+  change service credentials, user accounts, or running service workloads.
+- The release bump remains pending the repository's governed release flow;
+  `canonical_truth` records the patch note for that flow.

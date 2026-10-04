@@ -1,0 +1,72 @@
+id: ws-0518-plane-api-access
+adr: '0360'
+title: Restore the governed Plane API access path for workstream sync
+status: merged
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/ws-0518-plane-closeout-20261004
+worktree_path: .worktrees/ws-0518-plane-closeout-20261004
+doc: docs/workstreams/ws-0518-plane-api-access.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - docs/runbooks/configure-plane.md
+  - docs/workstreams/ws-0518-plane-api-access.md
+  - workstreams/active/ws-0518-plane-api-access.yaml
+  - workstreams.yaml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - README.md
+  - docs/status/history/merged-workstreams.md
+  - changelog.md
+ownership_manifest:
+  owned_surfaces:
+    - id: plane_controller_access_runbook
+      paths:
+        - docs/runbooks/configure-plane.md
+      mode: exclusive
+    - id: plane_workstream_tracking
+      paths:
+        - docs/workstreams/ws-0518-plane-api-access.md
+        - workstreams/active/ws-0518-plane-api-access.yaml
+      mode: exclusive
+    - id: active_workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: merged_workstream_generated_status
+      paths:
+        - README.md
+        - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+    - id: merged_workstream_release_truth
+      paths:
+        - changelog.md
+      mode: shared_contract
+      contract: release-truth-v1
+canonical_truth:
+  changelog_entry: Restore governed Plane API access through a loopback-only SSH forward and document the procedure.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+plane_issue_id: b19bd486-7c30-4f42-b0c8-97d5bbfba9b1
+tasks:
+  - id: t1
+    title: Verify Plane runtime, private proxy listener, and API-token access
+    status: completed
+  - id: t2
+    title: Document the loopback-only SSH forward and remove stale access assumptions
+    status: completed
+  - id: t3
+    title: Push, pass Woodpecker, and merge the private-source PR
+    status: completed
+  - id: t4
+    title: Synchronize the merged workstream and canonical status records
+    status: completed
