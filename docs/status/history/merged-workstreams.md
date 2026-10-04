@@ -18,6 +18,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0369` | Shared Python validation toolkit for catalog and registry scripts | `merged` | [adr-0369-python-validation-toolkit.md](../../workstreams/adr-0369-python-validation-toolkit.md) |
 | `0368` | DRY Centralization — ADRs 0368–0374 | `merged` | [0368-docker-compose-jinja2-macro-library.md](../../adr/0368-docker-compose-jinja2-macro-library.md) |
 | `0364` | Outline agent tools: list/search/get/create documents (ADR 0362 + 0364) | `merged` | [0362-agent-service-api-gateway-pattern.md](../../adr/0362-agent-service-api-gateway-pattern.md) |
+| `0360` | Restore the governed Plane API access path for workstream sync | `merged` | [ws-0518-plane-api-access.md](../../workstreams/ws-0518-plane-api-access.md) |
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
@@ -126,6 +127,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0085` | Declarative VM provisioning with OpenTofu | `merged` | [adr-0085-opentofu-vm-lifecycle.md](../../workstreams/adr-0085-opentofu-vm-lifecycle.md) |
 | `0084` | Packer VM template pipeline | `merged` | [adr-0084-packer-pipeline.md](../../workstreams/adr-0084-packer-pipeline.md) |
 | `0083` | Docker-based check runner | `merged` | [adr-0083-docker-check-runner.md](../../workstreams/adr-0083-docker-check-runner.md) |
+| `0082` | Restore the remote validation-host route to the declared build VM | `merged` | [ws-0517-validation-host-route.md](../../workstreams/ws-0517-validation-host-route.md) |
 | `0082` | Remote build execution gateway | `live_applied` | [adr-0082-remote-build-gateway.md](../../workstreams/adr-0082-remote-build-gateway.md) |
 | `0081` | Platform changelog and deployment history portal | `live_applied` | [adr-0081-changelog-portal.md](../../workstreams/adr-0081-changelog-portal.md) |
 | `0080` | Maintenance window and change suppression protocol | `merged` | [adr-0080-maintenance-windows.md](../../workstreams/adr-0080-maintenance-windows.md) |

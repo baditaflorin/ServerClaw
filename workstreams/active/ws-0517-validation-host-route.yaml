@@ -1,13 +1,18 @@
 id: ws-0517-validation-host-route
 adr: "0082"
 title: Restore the remote validation-host route to the declared build VM
-status: in_progress
+status: merged
 ready_to_merge: false
 live_applied: false
 owner: codex
-branch: codex/ws-0517-validation-host-route
-worktree_path: .worktrees/codex-validation-route-20261003
+branch: codex/ws-0517-closeout
+worktree_path: .worktrees/codex-ws-0517-closeout
 doc: docs/workstreams/ws-0517-validation-host-route.md
+canonical_truth:
+  changelog_entry: Restore the remote validation gateway route to the declared build VM and cap pre-push validation concurrency.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
 depends_on: []
 conflicts_with: []
 shared_surfaces:
@@ -22,6 +27,11 @@ shared_surfaces:
   - docs/workstreams/ws-0517-validation-host-route.md
   - workstreams/active/ws-0517-validation-host-route.yaml
   - workstreams.yaml
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - docs/status/history/merged-workstreams.md
+  - changelog.md
+  - versions/stack.yaml
 ownership_manifest:
   owned_surfaces:
     - id: remote_validation_route
@@ -67,6 +77,19 @@ ownership_manifest:
         - workstreams.yaml
       mode: shared_contract
       contract: workstream-registry-v1
+    - id: merged_workstream_generated_status
+      paths:
+        - README.md
+        - docs/status/history/live-apply-evidence.md
+        - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+    - id: merged_workstream_release_truth
+      paths:
+        - changelog.md
+        - versions/stack.yaml
+      mode: shared_contract
+      contract: release-truth-v1
 context: >-
   The gateway targeted ops@10.10.10.30 through ops@100.64.0.1. Live topology
   confirms the actual docker-build guest is Proxmox VM 130 at 10.10.10.30;
@@ -85,7 +108,7 @@ tasks:
     status: completed
   - id: t4
     title: Push the branch, pass CI, and merge through the required PR workflow
-    status: in_progress
+    status: completed
   - id: t5
     title: Publish the sanitized ServerClaw snapshot after merge
-    status: pending
+    status: completed
