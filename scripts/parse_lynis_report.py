@@ -79,7 +79,13 @@ def normalize_entry(entry: str) -> list[str]:
     return [entry.strip()]
 
 
-def parse_finding_entry(entry: str, finding_type: str, suppressions: dict[str, dict[str, Any]]) -> dict[str, Any]:
+def parse_finding_entry(
+    entry: str,
+    finding_type: str,
+    suppressions: dict[str, dict[str, Any]],
+    *,
+    host: str | None = None,
+) -> dict[str, Any]:
     parts = normalize_entry(entry)
     match = FINDING_ID_PATTERN.search(parts[0] if parts else entry)
     finding_id = match.group(1) if match else "UNKNOWN"
@@ -93,9 +99,14 @@ def parse_finding_entry(entry: str, finding_type: str, suppressions: dict[str, d
         "suggestion": parts[2] if len(parts) > 2 else "",
         "raw": entry,
     }
-    if finding_id in suppressions:
+    suppression = suppressions.get(finding_id)
+    scoped_hosts = suppression.get("hosts") if suppression else None
+    host_scope_matches = scoped_hosts is None or (
+        isinstance(scoped_hosts, list) and host is not None and host in scoped_hosts
+    )
+    if suppression is not None and host_scope_matches:
         finding["suppressed"] = True
-        finding["suppression"] = suppressions[finding_id]
+        finding["suppression"] = suppression
     else:
         finding["suppressed"] = False
     return finding
@@ -113,8 +124,12 @@ def parse_report_text(
     resolved_host = host or scalar_values.get("hostname") or scalar_values.get("host") or "unknown"
     hardening_index = extract_hardening_index(scalar_values)
 
-    findings = [parse_finding_entry(entry, "warning", suppressions) for entry in list_values.get("warning", [])] + [
-        parse_finding_entry(entry, "suggestion", suppressions) for entry in list_values.get("suggestion", [])
+    findings = [
+        parse_finding_entry(entry, "warning", suppressions, host=resolved_host)
+        for entry in list_values.get("warning", [])
+    ] + [
+        parse_finding_entry(entry, "suggestion", suppressions, host=resolved_host)
+        for entry in list_values.get("suggestion", [])
     ]
 
     visible_findings = findings if include_suppressed else [item for item in findings if not item["suppressed"]]

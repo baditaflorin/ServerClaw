@@ -91,14 +91,16 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
-    owner: root
-    group: root
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
     mode: "{{ item.mode }}"
   loop:
     - path: "{{ minio_site_dir }}"
       mode: "0755"
     - path: "{{ minio_data_dir }}"
-      mode: "0755"
+      owner: "{{ minio_runtime_uid }}"
+      group: "{{ minio_runtime_gid }}"
+      mode: "0750"
     - path: "{{ minio_policy_dir }}"
       mode: "0755"
     - path: "{{ minio_secret_dir }}"
@@ -107,7 +109,6 @@
       mode: "0755"
     - path: "{{ minio_mc_config_dir }}"
       mode: "0700"
-
 - name: Resolve the managed MinIO secret migration contracts
   ansible.builtin.set_fact:
     minio_managed_secret_contracts: >-
@@ -298,6 +299,9 @@
     'Pulling' in minio_pull.stdout
     or 'Downloaded newer image' in minio_pull.stdout
     or 'Pull complete' in minio_pull.stdout
+
+- name: Migrate the MinIO data directory to its unprivileged runtime identity
+  ansible.builtin.import_tasks: migrate_data_owner.yml
 
 - name: Start the MinIO runtime and recover stale compose-network or task-state failures
   block:

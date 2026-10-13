@@ -26,7 +26,7 @@ glitchtip_container_name: glitchtip
 glitchtip_valkey_container_name: glitchtip-valkey
 glitchtip_compose_network_name: glitchtip_default
 glitchtip_image: "{{ container_image_catalog.images.glitchtip_runtime.ref }}"
-glitchtip_valkey_image: "{{ container_image_catalog.images.glitchtip_valkey_runtime.ref }}"
+glitchtip_valkey_image: "{{ container_image_catalog.images.shared_valkey_runtime.ref }}"
 glitchtip_database_name: glitchtip
 glitchtip_database_user: glitchtip
 glitchtip_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"
@@ -90,3 +90,9 @@ glitchtip_mail_username: "{{ smtp_username }}"
 glitchtip_alert_ntfy_username: alertmanager
 glitchtip_alert_ntfy_topic: platform-alerts
 glitchtip_instance_name: LV3 Error Tracking
+
+# Container memory caps (hard limit / memory+swap). Sized at ~1.5x observed steady-state usage
+# on docker-runtime (2026-10-12); the host has swap (docker_runtime_swap_size_mb) so cold pages can
+# be paged out instead of OOM-killing a neighbour.
+glitchtip_mem_limit: 512m
+glitchtip_memswap_limit: 1g

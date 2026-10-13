@@ -1,0 +1,11 @@
+[Unit]
+Description=pgBackRest daily backup (weekly full on Sunday, diff otherwise) + metrics
+After=postgresql@18-main.service
+Wants=postgresql@18-main.service
+
+[Service]
+Type=oneshot
+ExecStart={{ fleet_pg_backup_pgbackrest_wrapper_path }}
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=12h

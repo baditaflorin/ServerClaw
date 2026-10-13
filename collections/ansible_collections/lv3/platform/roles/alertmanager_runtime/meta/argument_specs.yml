@@ -33,11 +33,44 @@ argument_specs:
         required: true
         description:
           - Controller-local path to Ntfy notification password.
-      alertmanager_runtime_mattermost_webhook_manifest_local_file:
-        type: path
-        required: true
+      alertmanager_runtime_listen_address:
+        type: str
+        required: false
         description:
-          - Controller-local path to Mattermost incoming webhooks manifest.
+          - Alertmanager web listen address (host:port). Defaults to loopback on the Alertmanager port; widen it only together
+            with an explicit nftables allow rule for the readers.
+      alertmanager_runtime_ntfy_base_url:
+        type: str
+        required: false
+        description:
+          - Internal ntfy base URL Alertmanager publishes to (derived from the ntfy service topology by default).
+      alertmanager_runtime_ntfy_username:
+        type: str
+        required: false
+        description:
+          - ntfy user Alertmanager authenticates as (default alertmanager-notify).
+      alertmanager_runtime_ntfy_topics:
+        type: dict
+        required: false
+        description:
+          - ntfy topics keyed by critical, warning, and watchdog.
+      alertmanager_runtime_triage_webhook_url:
+        type: str
+        required: false
+        description:
+          - >-
+            fleet-triage webhook URL (shadow-mode read-only triage). Empty (default) renders no triage receiver; when set an
+            additional receiver with continue true is rendered and the bearer token file is installed.
+      alertmanager_runtime_triage_token_file:
+        type: path
+        required: false
+        description:
+          - Remote path of the root:prometheus 0640 bearer token file used by the fleet-triage receiver.
+      alertmanager_runtime_triage_token_local_file:
+        type: path
+        required: false
+        description:
+          - Controller-local file holding the fleet-triage webhook token (never committed).
       alertmanager_runtime_pgaudit_relay_enabled:
         type: bool
         required: false

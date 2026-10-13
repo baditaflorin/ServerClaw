@@ -1,3 +1,9 @@
+# Purpose: Configure Grafana's Generic OAuth client to authenticate through Authentik.
+# Use case: Run as part of the governed Grafana convergence after its security gate passes.
+# Inputs: grafana_sso_* settings, local-edge address, and an operator-approved client secret file.
+# Outputs: Grafana OAuth configuration, private-edge Authentik host mapping, restart, and redirect check.
+# Idempotency: Yes; ini_file, lineinfile, and validation tasks converge deterministically.
+# Dependencies: ADR 0491 Authentik migration, Grafana runtime, private NGINX edge, and configured OIDC provider.
 ---
 - name: Validate Grafana SSO inputs
   ansible.builtin.assert:
@@ -10,6 +16,15 @@
       - grafana_sso_oidc_userinfo_url | length > 0
       - grafana_sso_service_topology.public_hostname | length > 0
     fail_msg: "grafana_sso requires a client id, client secret, Authentik OIDC endpoints, and a public hostname."
+
+- name: Pin Authentik server-side OIDC requests to the private edge
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^\s*[^#\s]+\s+{{ grafana_sso_oidc_hostname | regex_escape }}(?:\s|$)'
+    line: "{{ grafana_sso_internal_edge_ipv4 }} {{ grafana_sso_oidc_hostname }}"
+    state: present
+    create: false
+  notify: Restart Grafana
 
 - name: Ensure Grafana knows its public root URL
   community.general.ini_file:
@@ -39,7 +54,7 @@
     - option: client_secret
       value: "{{ grafana_sso_client_secret }}"
     - option: scopes
-      value: openid profile email groups
+      value: openid profile email grafana-groups
     - option: email_attribute_path
       value: email
     - option: login_attribute_path

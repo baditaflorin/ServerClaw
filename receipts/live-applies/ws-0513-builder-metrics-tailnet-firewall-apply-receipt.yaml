@@ -20,7 +20,7 @@ targets:
     port: 9100
 - resource: host:proxmox-host
   builder_peer: 100.114.37.21
-  metrics_target: 100.120.234.7:9100
+  metrics_target: 203.0.113.6:9100
 errors: []
 notes:
 - 'PR #252 merged as b3145e06e; Woodpecker PR and push checks passed.'
@@ -28,10 +28,10 @@ notes:
   08:19 UTC; Ansible recap ok=37 changed=2 unreachable=0 failed=0 skipped=8 rescued=0.
 - The docker-build inet filter input chain now allows only host source 10.10.10.1
   TCP/9100 for the node-exporter proxy backend. PVE cluster firewall exception for
-  100.114.37.21/32 TCP/9100 is compiled and active; the host proxy listens at 100.120.234.7:9100
+  100.114.37.21/32 TCP/9100 is compiled and active; the host proxy listens at 203.0.113.6:9100
   and forwards to 10.10.10.30:9100.
 - 'End-to-end from 0docker-builder PCT108, Tailscale IP 100.114.37.21: using tailscaled
-  userspace SOCKS5 proxy 127.0.0.1:1055, GET http://100.120.234.7:9100/metrics returned
+  userspace SOCKS5 proxy 127.0.0.1:1055, GET http://203.0.113.6:9100/metrics returned
   HTTP 200 and node_uname_info nodename=docker-build. Raw curl without the proxy does
   not traverse Tailscale because this guest has no tailscale0 interface and routes
   via 10.10.10.1; the SOCKS5 probe is the valid tailnet test.'
@@ -40,7 +40,7 @@ notes:
   and Up. Docker-managed ip/ip6 nat and filter nftables tables remained present. No
   recovery rescue or Docker restart occurred.
 - From the 0mcp Proxmox host, direct backend http://10.10.10.30:9100/metrics and proxy
-  http://100.120.234.7:9100/metrics both returned HTTP 200.
+  http://203.0.113.6:9100/metrics both returned HTTP 200.
 - The earlier pre-PR replay using a global nftables flush restarted Docker and left
   seven codex-e2e containers exited because restart=no; those existing containers
   were restored. The merged table-scoped policy replay above preserves the restored

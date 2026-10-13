@@ -1,0 +1,83 @@
+id: ws-0520-plausible-clickhouse-log-retention
+adr: '0493'
+title: Bound Plausible ClickHouse diagnostic log storage
+status: live_applied
+ready_to_merge: false
+live_applied: true
+owner: codex
+branch: codex/plausible-clickhouse-retention-live
+worktree_path: .worktrees/plausible-clickhouse-retention-live
+doc: docs/workstreams/ws-0520-plausible-clickhouse-log-retention.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/plausible_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/plausible_runtime/templates/clickhouse/logs.xml.j2
+  - docs/runbooks/configure-plausible.md
+  - docs/adr/0493-bounded-plausible-clickhouse-diagnostic-logs.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - README.md
+  - changelog.md
+  - versions/stack.yaml
+  - build/platform-manifest.json
+  - docs/status/history/**
+  - docs/release-notes/index/**
+  - docs/workstreams/ws-0520-plausible-clickhouse-log-retention.md
+  - receipts/live-applies/ws-0520-plausible-clickhouse-log-retention-apply-receipt.json
+  - workstreams/active/ws-0520-plausible-clickhouse-log-retention.yaml
+  - workstreams.yaml
+  - tests/test_plausible_playbook.py
+  - .woodpecker.yml
+ownership_manifest:
+  owned_surfaces:
+    - id: plausible_clickhouse_retention
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/plausible_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/plausible_runtime/templates/clickhouse/logs.xml.j2
+        - docs/runbooks/configure-plausible.md
+        - docs/adr/0493-bounded-plausible-clickhouse-diagnostic-logs.md
+        - docs/workstreams/ws-0520-plausible-clickhouse-log-retention.md
+        - receipts/live-applies/ws-0520-plausible-clickhouse-log-retention-apply-receipt.json
+        - tests/test_plausible_playbook.py
+        - .woodpecker.yml
+      mode: exclusive
+    - id: active_workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: generated_adr_index
+      paths:
+        - docs/adr/.index.yaml
+        - docs/adr/index/**
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: generated_agent_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ws_0520_release_integration
+      paths:
+        - workstreams.yaml
+        - README.md
+        - changelog.md
+        - versions/stack.yaml
+        - build/platform-manifest.json
+        - docs/status/history/**
+        - docs/release-notes/index/**
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+canonical_truth:
+  changelog_entry: Cap Plausible ClickHouse diagnostic system logs at one day without changing analytics event retention.
+  release_bump: patch
+tasks:
+  - id: t1
+    title: Configure one-day TTL for persistent ClickHouse diagnostic logs
+    status: completed
+  - id: t2
+    title: Add regression coverage and operator runbook details
+    status: completed
+  - id: t3
+    title: Validate, merge, and converge the managed configuration
+    status: completed

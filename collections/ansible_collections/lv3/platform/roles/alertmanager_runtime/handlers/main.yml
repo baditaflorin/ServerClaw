@@ -8,6 +8,17 @@
     name: "{{ alertmanager_runtime_service_name }}"
     state: restarted
 
+# alertmanager.yml is validated with amtool before it is written. SIGHUP (the package unit's ExecReload) re-reads the
+# routing tree and the ntfy password file without restarting the process; reload-or-restart starts the unit when it is
+# not running yet (first install).
+- name: Reload Alertmanager
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - reload-or-restart
+      - "{{ alertmanager_runtime_service_name }}"
+  changed_when: true
+
 - name: Restart pgaudit alert relay
   ansible.builtin.systemd:
     name: "{{ alertmanager_runtime_pgaudit_relay_service_name }}"

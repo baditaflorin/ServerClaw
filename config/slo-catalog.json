@@ -14,6 +14,16 @@
       "description": "The API Gateway health endpoint remains reachable through the shared edge for authenticated platform API traffic."
     },
     {
+      "id": "artifact-cache-availability",
+      "service_id": "artifact_cache",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.80:5001/v2/",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Docker Hub pull-through registry v2 endpoint remains reachable by approved build consumers."
+    },
+    {
       "id": "authentik-availability",
       "service_id": "authentik",
       "indicator": "availability",

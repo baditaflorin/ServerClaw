@@ -1,0 +1,64 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "ws-0512-artifact-cache-prometheus-slo-20261012",
+  "applied_on": "2026-10-12",
+  "recorded_on": "2026-10-12",
+  "recorded_by": "codex",
+  "source_commit": "f2da314ebcfab37cb27a9ca2614a5702ce5354cb",
+  "repo_version_context": "0.179.51",
+  "workflow_id": "live-apply-service",
+  "adr": "0295",
+  "service_ids": [
+    "artifact_cache"
+  ],
+  "summary": "Deployed and live-verified the artifact-cache availability SLO in Prometheus and its Grafana overview dashboard.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "monitoring",
+      "vmid": "140",
+      "address": "10.10.10.40"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Artifact-cache Blackbox target",
+      "result": "pass",
+      "observed": "Prometheus /api/v1/targets reports artifact-cache-availability healthy/up for the private registry v2 endpoint, and probe_success is 1."
+    },
+    {
+      "check": "Artifact-cache SLO recording rule",
+      "result": "pass",
+      "observed": "The slo_recording_rules group evaluated without error; an instant query of slo:artifact_cache_availability:success_ratio_5m returned 1 for the artifact-cache target."
+    },
+    {
+      "check": "Artifact-cache SLO alerts",
+      "result": "pass",
+      "observed": "Prometheus reports the fast-burn, slow-burn, and budget-critical artifact-cache alerts healthy and inactive."
+    },
+    {
+      "check": "Grafana SLO dashboard",
+      "result": "pass",
+      "observed": "The monitoring playbook imported and verified the SLO overview dashboard and its deployment-specific datasource references."
+    },
+    {
+      "check": "Full monitoring service converge",
+      "result": "fail",
+      "observed": "The SLO-specific tasks completed, but the broader play ended with ok=267 changed=19 unreachable=0 failed=1 because the controller-local .local/ntfy/alertmanager-notify-password.txt prerequisite is absent."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0512-authentik-consumer-e2e.md",
+    "docs/runbooks/slo-tracking.md",
+    "receipts/live-applies/ws-0512-artifact-cache-monitoring-20261012.json",
+    "config/prometheus/file_sd/slo_targets.yml",
+    "config/prometheus/rules/slo_rules.yml",
+    "config/prometheus/rules/slo_alerts.yml"
+  ],
+  "notes": [
+    "The narrow in-place apply used the documented ADR 0191 exception for the reversible monitoring change; the exception and failed broad-wrapper status are retained here.",
+    "No notification password was generated, copied, or substituted. The missing ntfy credential is an independent prerequisite for completing the remaining Alertmanager portion of a full monitoring converge.",
+    "The artifact-cache SLO itself is live and verified; this receipt does not claim the entire monitoring role converged successfully."
+  ]
+}

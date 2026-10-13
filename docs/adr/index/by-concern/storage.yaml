@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-09-28'
+generated: '2026-10-12'
 facet: concern
 concern: storage
-total_adrs: 7
+total_adrs: 8
 adrs:
   - adr: '0020'
     title: Initial Storage And Backup Model
@@ -140,3 +140,22 @@ adrs:
     summary: 'Implement a three-layer architecture with a single shared query module:'
     filename: 0386-unified-disk-monitoring.md
     path: docs/adr/0386-unified-disk-monitoring.md
+  - adr: 0493
+    title: Bound Plausible ClickHouse diagnostic log storage
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-10-07'
+    concern: storage
+    keywords:
+      - bound
+      - plausible
+      - clickhouse
+      - diagnostic
+      - log
+      - storage
+    summary: Set a one-day TTL on Plausible ClickHouse's persistent diagnostic system log
+    filename: 0493-bounded-plausible-clickhouse-diagnostic-logs.md
+    path: docs/adr/0493-bounded-plausible-clickhouse-diagnostic-logs.md
+    implemented_in_platform_version: 0.178.226
+    implemented_on: '2026-10-07'

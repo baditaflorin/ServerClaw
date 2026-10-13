@@ -1,0 +1,64 @@
+#!/bin/bash
+# Managed by lv3.platform.fleet_pg_backup (inventory/fleet-observability.yml). Do not edit on the host.
+# Daily pgBackRest job + node-exporter textfile metrics.  Run as root (drops to postgres) from a systemd timer.
+# Weekly full (Sunday), diff on other days.  Emits:
+#   pg_backup_last_success_timestamp_seconds{method="pgbackrest"}   end time of newest successful backup
+#   pg_backup_last_attempt_timestamp_seconds / pg_backup_last_status (1 ok, 0 failed)
+#   pg_backup_size_bytes{method="pgbackrest"}       database size covered by newest backup
+#   pg_backup_repo_size_bytes{method="pgbackrest"}  compressed repo size of newest backup set
+#   pg_backup_duration_seconds
+#   pg_backup_wal_last_archived_timestamp_seconds   from pg_stat_archiver (PITR freshness)
+#   pg_backup_wal_failed_count                      from pg_stat_archiver
+set -u
+STANZA="${STANZA:-{{ fleet_pg_backup_pgbackrest_stanza }}}"
+CONF="${PGBR_CONF:-{{ fleet_pg_backup_pgbackrest_conf_dir }}/pgbackrest.conf}"
+OUTDIR="${TEXTFILE_DIR:-{{ fleet_pg_backup_pgbackrest_textfile_dir }}}"
+PSQL="${PSQL_CMD:-sudo -u postgres psql -qAt -d postgres}"
+OUT="$OUTDIR/pg_backup_pgbackrest.prom"
+STATE="${STATE_DIR:-{{ fleet_pg_backup_state_dir }}}"
+mkdir -p "$STATE" "$OUTDIR"
+TYPE="${BACKUP_TYPE:-}"
+[ -z "$TYPE" ] && { [ "$(date +%u)" = 7 ] && TYPE=full || TYPE=diff; }
+now=$(date +%s)
+echo "$now" > "$STATE/pgbr_last_attempt"
+PBR="sudo -u postgres nice -n 10 ionice -c3 pgbackrest --config=$CONF --stanza=$STANZA"
+$PBR --type="$TYPE" backup; rc=$?
+if [ $rc -eq 0 ]; then echo 1 > "$STATE/pgbr_last_status"; else echo 0 > "$STATE/pgbr_last_status"; fi
+sudo -u postgres pgbackrest --config="$CONF" --stanza="$STANZA" --output=json info > "$STATE/pgbr_info.json" 2>/dev/null
+python3 -I - "$STATE" <<'PY'
+import json,sys
+st=sys.argv[1]
+try:
+    d=json.load(open(st+"/pgbr_info.json"))[0]
+    b=d["backup"][-1]
+    open(st+"/pgbr_last_success","w").write(str(b["timestamp"]["stop"]))
+    open(st+"/pgbr_size","w").write(str(b["info"]["size"]))
+    open(st+"/pgbr_repo_size","w").write(str(b["info"]["repository"]["size"]))
+    open(st+"/pgbr_duration","w").write(str(b["timestamp"]["stop"]-b["timestamp"]["start"]))
+except Exception as e:
+    print("info parse failed:",e,file=sys.stderr)
+PY
+arch=$($PSQL -c "select coalesce(extract(epoch from last_archived_time)::bigint,0)||' '||failed_count from pg_stat_archiver" 2>/dev/null)
+la=${arch% *}; fc=${arch#* }; la=${la:-0}; fc=${fc:-0}
+g() { cat "$STATE/$1" 2>/dev/null || echo 0; }
+tmp=$(mktemp "$OUT.XXXXXX")
+cat > "$tmp" <<M
+# TYPE pg_backup_last_success_timestamp_seconds gauge
+pg_backup_last_success_timestamp_seconds{method="pgbackrest",stanza="$STANZA"} $(g pgbr_last_success)
+# TYPE pg_backup_last_attempt_timestamp_seconds gauge
+pg_backup_last_attempt_timestamp_seconds{method="pgbackrest",stanza="$STANZA"} $(g pgbr_last_attempt)
+# TYPE pg_backup_last_status gauge
+pg_backup_last_status{method="pgbackrest",stanza="$STANZA",type="$TYPE"} $(g pgbr_last_status)
+# TYPE pg_backup_size_bytes gauge
+pg_backup_size_bytes{method="pgbackrest",stanza="$STANZA"} $(g pgbr_size)
+# TYPE pg_backup_repo_size_bytes gauge
+pg_backup_repo_size_bytes{method="pgbackrest",stanza="$STANZA"} $(g pgbr_repo_size)
+# TYPE pg_backup_duration_seconds gauge
+pg_backup_duration_seconds{method="pgbackrest",stanza="$STANZA"} $(g pgbr_duration)
+# TYPE pg_backup_wal_last_archived_timestamp_seconds gauge
+pg_backup_wal_last_archived_timestamp_seconds{method="pgbackrest",stanza="$STANZA"} $la
+# TYPE pg_backup_wal_failed_count gauge
+pg_backup_wal_failed_count{method="pgbackrest",stanza="$STANZA"} $fc
+M
+chmod 644 "$tmp"; mv -f "$tmp" "$OUT"
+exit $rc

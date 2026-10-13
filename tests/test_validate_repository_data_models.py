@@ -26,6 +26,61 @@ def load_module(name: str, relative_path: str):
 models = load_module("validate_repository_data_models", "scripts/validate_repository_data_models.py")
 
 
+def test_network_policy_validates_container_snat_as_narrow_ipv4_tuples() -> None:
+    policy = {
+        "guest_management_sources": ["10.10.10.0/24"],
+        "host_source": "10.10.10.1",
+        "guests": {
+            "coolify": {
+                "allowed_inbound": [
+                    {
+                        "source": "monitoring",
+                        "protocol": "tcp",
+                        "ports": [9100],
+                        "forward": False,
+                        "description": "Prometheus scrape",
+                    }
+                ],
+                "container_snat_rules": [
+                    {
+                        "source": "172.20.0.6/32",
+                        "destination": "coolify-apps",
+                        "protocol": "tcp",
+                        "ports": [22],
+                        "description": "Deployment SSH",
+                    }
+                ],
+            },
+            "coolify-apps": {
+                "allowed_inbound": [
+                    {
+                        "source": "management",
+                        "protocol": "tcp",
+                        "ports": [22],
+                        "description": "SSH",
+                    }
+                ]
+            },
+            "monitoring": {
+                "allowed_inbound": [
+                    {
+                        "source": "management",
+                        "protocol": "tcp",
+                        "ports": [22],
+                        "description": "SSH",
+                    }
+                ]
+            },
+        },
+    }
+
+    models.validate_network_policy(policy, "network_policy", {"coolify", "coolify-apps", "monitoring"})
+
+    policy["guests"]["coolify"]["container_snat_rules"][0]["destination"] = "2001:db8::1"
+    with pytest.raises(ValueError, match="guest name or IPv4 network"):
+        models.validate_network_policy(policy, "network_policy", {"coolify", "coolify-apps", "monitoring"})
+
+
 def test_proxmox_guest_aliases_do_not_require_real_vm_macaddr() -> None:
     vmid, name, ipv4, template_key, is_alias = models.validate_proxmox_guest(
         {
@@ -60,7 +115,10 @@ def test_platform_vars_validation_reuses_tracked_identity_snapshot(
     tmp_path: Path,
 ) -> None:
     platform_vars_path = tmp_path / "platform.yml"
+    topology_file = tmp_path / "topology.yml"
     platform_vars_path.write_text("sentinel: true\n", encoding="utf-8")
+    topology_file.write_text("proxmox_internal_ipv4: 10.77.0.1\n", encoding="utf-8")
+    monkeypatch.setenv("PLATFORM_TOPOLOGY_OVERLAY", str(topology_file))
     calls: dict[str, object] = {}
 
     def fake_load_sources(
@@ -82,6 +140,7 @@ def test_platform_vars_validation_reuses_tracked_identity_snapshot(
     monkeypatch.setattr(models, "PLATFORM_VARS_PATH", platform_vars_path)
     monkeypatch.setattr(models, "load_sources", fake_load_sources)
     monkeypatch.setattr(models, "missing_deployment_derived_platform_inputs", lambda: ())
+    monkeypatch.setattr(models, "_apply_topology_override", lambda path: calls.update(topology_path=path))
     monkeypatch.setattr(
         models, "_load_generation_identity_overlay", lambda path: {"platform_domain": "tracked.example"}
     )
@@ -91,8 +150,9 @@ def test_platform_vars_validation_reuses_tracked_identity_snapshot(
     models.validate_platform_vars()
 
     assert calls == {
+        "topology_path": topology_file.resolve(),
         "skip_local_override": True,
-        "skip_topology_override": True,
+        "skip_topology_override": False,
         "skip_generated_topology": True,
     }
 
@@ -173,15 +233,41 @@ def test_platform_vars_validation_skips_only_equivalence_without_deployment_inpu
     assert "Skipping derived platform-vars equivalence check" in capsys.readouterr().out
 
 
+def test_platform_vars_validation_skips_equivalence_without_topology_selector(
+    monkeypatch,
+    tmp_path: Path,
+    capsys,
+) -> None:
+    platform_vars_path = tmp_path / "platform.yml"
+    platform_vars_path.write_text("sentinel: true\n", encoding="utf-8")
+
+    monkeypatch.delenv("PLATFORM_TOPOLOGY_OVERLAY", raising=False)
+    monkeypatch.setattr(models, "PLATFORM_VARS_PATH", platform_vars_path)
+    monkeypatch.setattr(models, "missing_deployment_derived_platform_inputs", lambda: ())
+    monkeypatch.setattr(
+        models,
+        "load_sources",
+        lambda **_kwargs: (_ for _ in ()).throw(AssertionError("equivalence generation must not run")),
+    )
+
+    models.validate_platform_vars()
+
+    assert "PLATFORM_TOPOLOGY_OVERLAY not selected" in capsys.readouterr().out
+
+
 def test_platform_vars_validation_remains_strict_with_deployment_inputs(
     monkeypatch,
     tmp_path: Path,
 ) -> None:
     platform_vars_path = tmp_path / "platform.yml"
+    topology_file = tmp_path / "topology.yml"
     platform_vars_path.write_text("actual: true\n", encoding="utf-8")
+    topology_file.write_text("proxmox_internal_ipv4: 10.77.0.1\n", encoding="utf-8")
+    monkeypatch.setenv("PLATFORM_TOPOLOGY_OVERLAY", str(topology_file))
 
     monkeypatch.setattr(models, "PLATFORM_VARS_PATH", platform_vars_path)
     monkeypatch.setattr(models, "missing_deployment_derived_platform_inputs", lambda: ())
+    monkeypatch.setattr(models, "_apply_topology_override", lambda _path: None)
     monkeypatch.setattr(models, "load_sources", lambda **_kwargs: ({}, {}))
     monkeypatch.setattr(models, "_load_generation_identity_overlay", lambda _path: {})
     monkeypatch.setattr(models, "_apply_generation_identity_overlay", lambda _host_vars, _overlay: None)

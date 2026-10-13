@@ -260,7 +260,7 @@
       "fqdn": "annotate.example.org",
       "service_id": "label_studio",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0289",
       "publication": {
         "delivery_model": "shared-edge",
@@ -274,18 +274,18 @@
         "auth_requirement": "edge_oidc",
         "route_target": {
           "service_id": "label_studio",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.label_studio_port }}",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
       "evidence_plan": {
         "dns_resolution": true,
         "dns_zone": true,
-        "http_auth": true,
+        "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -303,30 +303,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
-          "provider": "oauth2_proxy",
+          "provider": "none",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "label_studio",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.label_studio_port }}"
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "auto_renew": true,
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/"
         }
       },
-      "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Authentik boundary; repo-managed Label Studio tokens remain the current app-local automation path."
+      "live_tracking_expected": false,
+      "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Authentik boundary; repo-managed Label Studio tokens remain the current app-local automation path. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "api.example.org",
@@ -477,7 +472,7 @@
       "fqdn": "bi.example.org",
       "service_id": "superset",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0292",
       "publication": {
         "delivery_model": "shared-edge",
@@ -491,9 +486,9 @@
         "auth_requirement": "upstream_auth",
         "route_target": {
           "service_id": "superset",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.superset_port }}",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -502,7 +497,7 @@
         "dns_zone": true,
         "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -520,30 +515,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
           "provider": "none",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "superset",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.superset_port }}"
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
           "auto_renew": true
         }
       },
-      "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Authentik OIDC client."
+      "live_tracking_expected": false,
+      "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Authentik OIDC client. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "billing.example.org",
@@ -985,7 +975,7 @@
       "fqdn": "cloud.example.org",
       "service_id": "nextcloud",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0260",
       "publication": {
         "delivery_model": "shared-edge",
@@ -999,9 +989,9 @@
         "auth_requirement": "upstream_auth",
         "route_target": {
           "service_id": "nextcloud",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.nextcloud_port }}",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -1010,7 +1000,7 @@
         "dns_zone": true,
         "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -1028,48 +1018,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
           "provider": "none",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "nextcloud",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.nextcloud_port }}",
-          "client_max_body_size": "16g",
-          "proxy_request_buffering": false,
-          "proxy_read_timeout_seconds": 3600,
-          "proxy_send_timeout_seconds": 3600,
-          "security_headers_enabled": false,
-          "preserve_upstream_security_headers": true,
-          "exact_redirects": [
-            {
-              "path": "/.well-known/carddav",
-              "location": "/remote.php/dav/",
-              "status": 301
-            },
-            {
-              "path": "/.well-known/caldav",
-              "location": "/remote.php/dav/",
-              "status": 301
-            }
-          ]
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
           "auto_renew": true
         }
       },
-      "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects."
+      "live_tracking_expected": false,
+      "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "coolify.example.org",
@@ -1147,7 +1114,7 @@
       "fqdn": "data.example.org",
       "service_id": "directus",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0289",
       "publication": {
         "delivery_model": "shared-edge",
@@ -1161,9 +1128,9 @@
         "auth_requirement": "upstream_auth",
         "route_target": {
           "service_id": "directus",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -1172,7 +1139,7 @@
         "dns_zone": true,
         "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -1190,30 +1157,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
           "provider": "none",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "directus",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.directus_port }}"
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "auto_renew": true,
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/"
         }
       },
-      "live_tracking_expected": true,
-      "notes": "The shared NGINX edge publishes data.example.org directly to Directus. Browser users authenticate upstream through Authentik and API consumers authenticate with Directus-issued bearer tokens."
+      "live_tracking_expected": false,
+      "notes": "The shared NGINX edge publishes data.example.org directly to Directus. Browser users authenticate upstream through Authentik and API consumers authenticate with Directus-issued bearer tokens. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "database.example.org",
@@ -1241,7 +1203,7 @@
       },
       "evidence_plan": {
         "dns_resolution": true,
-        "dns_zone": true,
+        "dns_zone": false,
         "http_auth": false,
         "private_route": true,
         "tls": false
@@ -1259,7 +1221,7 @@
           ],
           "managed": true,
           "visibility": "tailnet",
-          "zone_expected": true
+          "zone_expected": false
         },
         "routing": {
           "mode": "dns-only",
@@ -1599,7 +1561,7 @@
       },
       "evidence_plan": {
         "dns_resolution": true,
-        "dns_zone": true,
+        "dns_zone": false,
         "http_auth": false,
         "private_route": true,
         "tls": false
@@ -1617,7 +1579,7 @@
           ],
           "managed": true,
           "visibility": "tailnet",
-          "zone_expected": true
+          "zone_expected": false
         },
         "routing": {
           "mode": "dns-only",
@@ -1643,7 +1605,7 @@
       "fqdn": "flags.example.org",
       "service_id": "flagsmith",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0288",
       "publication": {
         "delivery_model": "shared-edge",
@@ -1657,18 +1619,18 @@
         "auth_requirement": "edge_oidc",
         "route_target": {
           "service_id": "flagsmith",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.flagsmith_port }}",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
       "evidence_plan": {
         "dns_resolution": true,
         "dns_zone": true,
-        "http_auth": true,
+        "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -1686,32 +1648,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
-          "provider": "oauth2_proxy",
-          "unauthenticated_paths": [
-            "/health"
-          ],
+          "provider": "none",
+          "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "flagsmith",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.flagsmith_port }}"
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
           "auto_renew": true
         }
       },
-      "live_tracking_expected": true,
-      "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Authentik."
+      "live_tracking_expected": false,
+      "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Authentik. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "git.example.org",
@@ -1731,53 +1686,65 @@
         "auth_requirement": "private_network",
         "route_target": {
           "service_id": "gitea",
-          "kind": "tailscale-tcp-proxy",
-          "source": "tailscale-tcp-proxy",
-          "target": "100.64.0.1",
-          "target_port": 3009
+          "kind": "private-proxy",
+          "source": "service_topology_private_edge",
+          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.gitea_http_port }}",
+          "target_port": 443
         }
       },
       "evidence_plan": {
         "dns_resolution": true,
-        "dns_zone": true,
+        "dns_zone": false,
         "http_auth": false,
         "private_route": true,
-        "tls": false
+        "tls": true
       },
       "adapter": {
         "dns": {
-          "target": "100.64.0.1",
-          "target_port": 3009,
+          "target": "192.0.2.10",
+          "target_port": 443,
           "record_type": "A",
           "records": [
             {
               "type": "A",
-              "value": "100.64.0.1"
+              "value": "192.0.2.10"
             }
           ],
           "managed": true,
           "visibility": "tailnet",
-          "zone_expected": true
+          "zone_expected": false
         },
         "routing": {
-          "mode": "dns-only",
-          "source": "dns-only",
-          "kind": null
+          "mode": "private-edge",
+          "source": "service_topology_private_edge",
+          "kind": "private-proxy"
         },
         "edge_auth": {
           "provider": "none",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": null,
-        "repo_route_metadata": {},
+        "repo_route_service_id": "gitea",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.gitea_http_port }}",
+          "allow_cidrs": [
+            "{{ proxmox_internal_ipv4 }}/32"
+          ],
+          "client_max_body_size": 0,
+          "proxy_request_buffering": false,
+          "proxy_read_timeout_seconds": 3600,
+          "proxy_send_timeout_seconds": 3600
+        },
         "tls": {
-          "provider": "none",
-          "auto_renew": false
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
+          "auto_renew": true
         }
       },
       "live_tracking_expected": false,
-      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime."
+      "notes": "Private HTTPS route for Gitea; the NGINX source allowlist admits only the trusted tailnet subnet-router path. The controller-only TCP proxy remains separate."
     },
     {
       "fqdn": "grafana.example.org",
@@ -1932,7 +1899,7 @@
       "fqdn": "grist.example.org",
       "service_id": "grist",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0279",
       "publication": {
         "delivery_model": "shared-edge",
@@ -1946,9 +1913,9 @@
         "auth_requirement": "upstream_auth",
         "route_target": {
           "service_id": "grist",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.grist_port }}",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -1957,7 +1924,7 @@
         "dns_zone": true,
         "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -1975,30 +1942,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
           "provider": "none",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "grist",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.grist_port }}"
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
           "auto_renew": true
         }
       },
-      "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Authentik OIDC client."
+      "live_tracking_expected": false,
+      "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Authentik OIDC client. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "headscale.example.org",
@@ -2217,7 +2179,7 @@
       "fqdn": "langfuse.example.org",
       "service_id": "langfuse",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0146",
       "publication": {
         "delivery_model": "shared-edge",
@@ -2231,18 +2193,18 @@
         "auth_requirement": "edge_oidc",
         "route_target": {
           "service_id": "langfuse",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
       "evidence_plan": {
         "dns_resolution": true,
         "dns_zone": true,
-        "http_auth": true,
+        "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -2260,32 +2222,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
-          "provider": "oauth2_proxy",
+          "provider": "none",
           "unauthenticated_paths": [],
-          "unauthenticated_prefix_paths": [
-            "/api/public/"
-          ]
+          "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "langfuse",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
           "auto_renew": true
         }
       },
-      "live_tracking_expected": true,
-      "notes": null
+      "live_tracking_expected": false,
+      "notes": "Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "livekit.example.org",
@@ -2511,7 +2466,7 @@
       "fqdn": "matrix.example.org",
       "service_id": "matrix_synapse",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0255",
       "publication": {
         "delivery_model": "shared-edge",
@@ -2525,9 +2480,9 @@
         "auth_requirement": "upstream_auth",
         "route_target": {
           "service_id": "matrix_synapse",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.matrix_synapse_port }}",
+          "kind": "tailscale-tcp-proxy",
+          "source": "tailscale-tcp-proxy",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -2536,7 +2491,7 @@
         "dns_zone": true,
         "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -2554,30 +2509,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
           "provider": "none",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "matrix_synapse",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.matrix_synapse_port }}"
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
           "auto_renew": true
         }
       },
-      "live_tracking_expected": true,
-      "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR."
+      "live_tracking_expected": false,
+      "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "minio-console.example.org",
@@ -2738,7 +2688,7 @@
       "fqdn": "n8n.example.org",
       "service_id": "n8n",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0151",
       "publication": {
         "delivery_model": "shared-edge",
@@ -2752,18 +2702,18 @@
         "auth_requirement": "edge_oidc",
         "route_target": {
           "service_id": "n8n",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
       "evidence_plan": {
         "dns_resolution": true,
         "dns_zone": true,
-        "http_auth": true,
+        "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -2781,35 +2731,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
-          "provider": "oauth2_proxy",
-          "unauthenticated_paths": [
-            "/healthz"
-          ],
-          "unauthenticated_prefix_paths": [
-            "/webhook/",
-            "/webhook-test/",
-            "/webhook-waiting/"
-          ]
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "n8n",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
           "auto_renew": true
         }
       },
-      "live_tracking_expected": true,
-      "notes": "The editor is protected by the shared oauth2-proxy and Authentik edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
+      "live_tracking_expected": false,
+      "notes": "The editor is protected by the shared oauth2-proxy and Authentik edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "nginx.example.org",
@@ -3106,7 +3046,7 @@
       "fqdn": "paperless.example.org",
       "service_id": "paperless",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0285",
       "publication": {
         "delivery_model": "shared-edge",
@@ -3120,9 +3060,9 @@
         "auth_requirement": "upstream_auth",
         "route_target": {
           "service_id": "paperless",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.paperless_port }}",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -3131,7 +3071,7 @@
         "dns_zone": true,
         "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -3149,36 +3089,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
           "provider": "none",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "paperless",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "noindex": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.paperless_port }}",
-          "client_max_body_size": "256m",
-          "proxy_request_buffering": false,
-          "proxy_read_timeout_seconds": 3600,
-          "proxy_send_timeout_seconds": 3600,
-          "security_headers_enabled": false,
-          "preserve_upstream_security_headers": true
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
           "auto_renew": true
         }
       },
-      "live_tracking_expected": true,
-      "notes": "Published through the shared NGINX edge; docs.example.org remains reserved for the developer portal from ADR 0094."
+      "live_tracking_expected": false,
+      "notes": "Published through the shared NGINX edge; docs.example.org remains reserved for the developer portal from ADR 0094. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "proxmox.example.org",
@@ -3243,7 +3172,7 @@
           "slug": "proxmox",
           "title": "Proxmox Administration",
           "description": "Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.",
-          "action_url": "https://100.120.234.7:8006/",
+          "action_url": "https://203.0.113.6:8006/",
           "action_label": "Open Private Proxmox UI",
           "meta": "Use Tailscale host access for routine Proxmox administration."
         },
@@ -3409,7 +3338,7 @@
       "fqdn": "repowise.example.org",
       "service_id": "repowise",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "owner_adr": "0346",
       "publication": {
         "delivery_model": "shared-edge",
@@ -3423,9 +3352,9 @@
         "auth_requirement": "upstream_auth",
         "route_target": {
           "service_id": "repowise",
-          "kind": "proxy",
-          "source": "service_topology",
-          "target": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:7070",
+          "kind": "dns-only",
+          "source": "dns-only",
+          "target": "203.0.113.1",
           "target_port": 443
         }
       },
@@ -3434,7 +3363,7 @@
         "dns_zone": true,
         "http_auth": false,
         "private_route": false,
-        "tls": true
+        "tls": false
       },
       "adapter": {
         "dns": {
@@ -3452,29 +3381,25 @@
           "zone_expected": true
         },
         "routing": {
-          "mode": "edge",
-          "source": "service_topology",
-          "kind": "proxy"
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
         },
         "edge_auth": {
           "provider": "none",
           "unauthenticated_paths": [],
           "unauthenticated_prefix_paths": []
         },
-        "repo_route_service_id": "repowise",
-        "repo_route_metadata": {
-          "enabled": true,
-          "tls": true,
-          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime') | map(attribute='ipv4') | first) }}:7070"
-        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
         "tls": {
           "provider": "letsencrypt",
           "cert_path": "/etc/letsencrypt/live/0mcp-edge/",
           "auto_renew": true
         }
       },
-      "live_tracking_expected": true,
-      "notes": "Local semantic code search over the repository using Ollama embeddings and Qdrant vector storage. No third-party APIs required."
+      "live_tracking_expected": false,
+      "notes": "Local semantic code search over the repository using Ollama embeddings and Qdrant vector storage. No third-party APIs required. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "s3.example.org",
@@ -3640,7 +3565,7 @@
       },
       "evidence_plan": {
         "dns_resolution": true,
-        "dns_zone": true,
+        "dns_zone": false,
         "http_auth": false,
         "private_route": true,
         "tls": false
@@ -3658,7 +3583,7 @@
           ],
           "managed": true,
           "visibility": "tailnet",
-          "zone_expected": true
+          "zone_expected": false
         },
         "routing": {
           "mode": "dns-only",
@@ -3741,7 +3666,7 @@
           "enabled": true,
           "tls": true,
           "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-general') | map(attribute='ipv4') | first) }}:3001",
-          "root_proxy_path": "/status/lv3-platform"
+          "root_proxy_path": "/status/0mcp-platform"
         },
         "tls": {
           "provider": "letsencrypt",
@@ -3988,7 +3913,7 @@
       },
       "evidence_plan": {
         "dns_resolution": true,
-        "dns_zone": true,
+        "dns_zone": false,
         "http_auth": false,
         "private_route": true,
         "tls": true
@@ -4006,7 +3931,7 @@
           ],
           "managed": true,
           "visibility": "tailnet",
-          "zone_expected": true
+          "zone_expected": false
         },
         "routing": {
           "mode": "dns-only",
@@ -4104,8 +4029,8 @@
   ],
   "summary": {
     "catalog_total": 56,
-    "active_total": 53,
-    "active_public_total": 47,
+    "active_total": 42,
+    "active_public_total": 36,
     "active_private_total": 6,
     "planned_total": 3,
     "shared_edge_total": 45,

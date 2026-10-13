@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- Add guarded, no-restart Prometheus scraping for the 0own Proxmox host.
 - Restore the remote validation gateway route to the declared build VM and cap pre-push validation concurrency.
 - Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
 - Remove the unused GitHub Actions workflow and point validation metadata at Woodpecker while retaining the self-hosted Gitea validator.
@@ -19,13 +20,18 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - Restore governed Plane API access through a loopback-only SSH forward and document the procedure.
 - Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
 - Keep the sanitized ServerClaw host template consistent with active authenticated edge routes.
+- Allow an explicitly configured operator email to access Plausible through a dedicated Authentik OAuth client and proxy.
+- Cap Plausible ClickHouse diagnostic system logs at one day without changing analytics event retention.
 
 ## Latest Release
 
-- [0.179.48 release notes](docs/release-notes/0.179.48.md)
+- [0.179.51 release notes](docs/release-notes/0.179.51.md)
 
 ## Previous Releases
 
+- [0.179.50 release notes](docs/release-notes/0.179.50.md)
+- [0.179.49 release notes](docs/release-notes/0.179.49.md)
+- [0.179.48 release notes](docs/release-notes/0.179.48.md)
 - [0.179.47 release notes](docs/release-notes/0.179.47.md)
 - [0.179.46 release notes](docs/release-notes/0.179.46.md)
 - [0.179.45 release notes](docs/release-notes/0.179.45.md)
@@ -35,9 +41,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.41 release notes](docs/release-notes/0.179.41.md)
 - [0.179.40 release notes](docs/release-notes/0.179.40.md)
 - [0.179.39 release notes](docs/release-notes/0.179.39.md)
-- [0.179.38 release notes](docs/release-notes/0.179.38.md)
-- [0.179.37 release notes](docs/release-notes/0.179.37.md)
-- [0.179.36 release notes](docs/release-notes/0.179.36.md)
 - [0.179.31 release notes](docs/release-notes/0.179.31.md)
 - [0.179.30 release notes](docs/release-notes/0.179.30.md)
 - [0.179.29 release notes](docs/release-notes/0.179.29.md)
@@ -46,4 +49,4 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (559 releases)](docs/release-notes/index/2026.md)
+- [2026 (562 releases)](docs/release-notes/index/2026.md)

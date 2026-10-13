@@ -1,0 +1,115 @@
+schema_version: 1.0.0
+service:
+  id: artifact_cache
+  name: Artifact Cache
+  description: Private pull-through container registry mirrors for platform build and validation workloads.
+  category: infrastructure
+  lifecycle_status: active
+  vm: artifact-cache
+  vmid: 180
+  internal_url: http://10.10.10.80:5001/v2/
+  exposure: private-only
+  health_probe_id: artifact_cache
+  adr: '0296'
+  runbook: docs/runbooks/artifact-cache-runtime.md
+  runtime_pool: dedicated-build
+  deployment_surface: playbooks/artifact-cache-vm.yml
+  restart_domain: artifact-cache-core
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-build
+  mobility_tier: anchor
+  tags:
+    - build
+    - cache
+    - registry
+  notes: Private cache endpoint; the registry v2 API is used for availability verification. It is not published through the public edge.
+  environments:
+    production:
+      status: active
+      url: http://10.10.10.80:5001/v2/
+      notes: Internal-only registry health endpoint; consumer wiring is managed separately on approved builders.
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_api_gateway: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  requires_dashboard: false
+  requires_data_catalog: true
+  requires_alert_rules: false
+  notes: Docker Distribution does not expose service-specific metrics or a dedicated dashboard. Its private registry v2 endpoint is verified from the monitoring VM and covered by the shared Prometheus blackbox availability SLO and generated burn alerts.
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 240
+    rpo_minutes: 1440
+  backup_sources:
+    - git_repository
+  standby:
+    kind: cold
+    location: artifact-cache
+    failover_trigger: Rebuild the guest or registry containers after a host or cache-volume failure; cached layers are re-fetchable and are not authoritative artifacts.
+    failback_method: Converge the artifact-cache guest from git and allow approved consumers to repopulate cache content from upstream registries.
+  notes: The cache volumes are not backed up; only the runtime configuration is version controlled. Cache loss causes a cold re-fetch, not loss of authoritative artifacts.
+dependency:
+  node:
+    id: artifact_cache
+    service: artifact_cache
+    name: Artifact Cache
+    vm: artifact-cache
+    tier: 1
+    category: infrastructure
+    adr: '0296'
+  outbound_edges: []
+health:
+  service_name: artifact-cache
+  owning_vm: artifact-cache
+  role: artifact_cache_runtime
+  verify_file: roles/artifact_cache_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The primary private registry mirror answers the Docker Registry v2 API on the artifact-cache guest.
+    timeout_seconds: 60
+    retries: 12
+    delay_seconds: 5
+    url: http://127.0.0.1:5001/v2/
+    method: GET
+    expected_status:
+      - 200
+  readiness:
+    kind: http
+    description: The primary Docker Hub pull-through mirror is ready for internal build consumers.
+    timeout_seconds: 90
+    retries: 18
+    delay_seconds: 5
+    url: http://127.0.0.1:5001/v2/
+    method: GET
+    expected_status:
+      - 200
+  uptime_kuma:
+    enabled: false
+    reason: The cache is private-only; continuous availability is monitored by Prometheus blackbox from the monitoring VM, while public Uptime Kuma monitoring remains disabled.
+data:
+  - id: artifact-cache-registry-content
+    service: artifact_cache
+    name: Pull-through registry cache content
+    class: internal
+    retention_days: null
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: low
+    locations:
+      - /opt/artifact-cache/data/docker-hub
+      - /opt/artifact-cache/data/ghcr
+      - /opt/artifact-cache/data/plane
+      - /opt/artifact-cache/data/n8n
+    notes: Regenerable pull-through cache layers from upstream registries. No retention or backup contract is configured; this cache is not the authoritative copy of these artifacts.
+slos:
+  - id: artifact-cache-availability
+    service_id: artifact_cache
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.80:5001/v2/
+    probe_module: http_2xx_follow_redirects
+    description: The private Docker Hub pull-through registry v2 endpoint remains reachable by approved build consumers.

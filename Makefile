@@ -2051,7 +2051,7 @@ live-apply-train-rollback:
 	$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/live_apply_merge_train.py --repo-root $(REPO_ROOT) rollback --bundle "$(BUNDLE)"
 
 ## Remote build execution (ADR 0082)
-.PHONY: remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
+.PHONY: remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-image-build-strict remote-exec check-build-server remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
 
 remote-lint:
 	$(REPO_ROOT)/scripts/remote_exec.sh remote-lint --local-fallback
@@ -2077,6 +2077,11 @@ packer-template-rebuild:
 remote-image-build:
 	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id>"; exit 1)
 	$(RUN_ID_ENV) SERVICE="$(SERVICE)" COMMAND="$(COMMAND)" $(REPO_ROOT)/scripts/remote_exec.sh remote-image-build --local-fallback
+
+remote-image-build-strict:
+	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id>"; exit 1)
+	@test -n "$(COMMAND)" || (echo "set COMMAND='bash build/patched-images/build_remote.sh ...'"; exit 1)
+	$(RUN_ID_ENV) SERVICE="$(SERVICE)" COMMAND="$(COMMAND)" $(REPO_ROOT)/scripts/remote_exec.sh remote-image-build
 
 remote-exec:
 	@test -n "$(COMMAND)" || (echo "set COMMAND=<shell-command>"; exit 1)

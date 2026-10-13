@@ -49,6 +49,7 @@ plausible_public_base_url: "https://{{ plausible_service_topology.public_hostnam
 plausible_container_name: plausible
 plausible_db_container_name: plausible-db
 plausible_clickhouse_container_name: plausible-events-db
+plausible_clickhouse_system_log_retention_days: 1
 plausible_runtime_image: "{{ container_image_catalog.images.plausible_runtime.ref }}"
 plausible_postgres_image: "{{ container_image_catalog.images.plausible_postgres_runtime.ref }}"
 plausible_clickhouse_image: "{{ container_image_catalog.images.plausible_clickhouse_runtime.ref }}"
@@ -76,3 +77,9 @@ plausible_disable_registration: true
 plausible_enable_email_verification: false
 plausible_verify_site_domain: "{{ (plausible_site_registrations | first).site_domain }}"
 plausible_site_registrations: "{{ hostvars[platform_topology_host].plausible_site_registrations | default([]) }}"
+
+# Container memory caps (hard limit / memory+swap). Sized at ~1.5x observed steady-state usage
+# on docker-runtime (2026-10-12); the host has swap (docker_runtime_swap_size_mb) so cold pages can
+# be paged out instead of OOM-killing a neighbour.
+plausible_mem_limit: 768m
+plausible_memswap_limit: 1536m

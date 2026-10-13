@@ -14,11 +14,11 @@ Both ChatGPT and Claude may be used in this repo. Work as if another assistant w
 3. Record operational procedures in `docs/runbooks/`.
 4. Prefer committed automation over ad hoc shell changes on the server.
 5. If a manual server change is unavoidable, document it immediately in the same turn.
-6. Keep README status and next steps current when the server state materially changes.
+6. Keep canonical state (`versions/stack.yaml`, workstream shards, receipts) current when the server state materially changes. `README.md` is generated: never hand-edit it; regenerate with `make generate-readme` and `make generate-status-docs`.
 7. Run parallel implementation through `workstreams.yaml` and `docs/workstreams/`, not through hidden chat context.
 8. One chat thread should normally own one workstream, one branch, and preferably one git worktree.
 9. Workstream branches must not rewrite shared release files unless the task is explicitly the integration step.
-10. The protected integration files are `VERSION`, release sections in `changelog.md`, canonical observed state in `versions/stack.yaml`, and top-level status summaries in `README.md`.
+10. The protected integration files are listed in `workstreams/policy.yaml` under `surface_ownership.global_mutable_paths` (for example `VERSION`, `changelog.md`, `workstreams.yaml`), plus `versions/stack.yaml`; touch them only in the integration or release step.
 11. Bump `VERSION` when work is merged to `main`, not for every branch-local change.
 12. Bump `platform_version` in `versions/stack.yaml` only when merged work is actually applied live from `main`.
 13. Update `changelog.md` whenever `VERSION` changes, and use the `Unreleased` section for merged notes that have not yet been cut into a numbered release.
@@ -39,9 +39,10 @@ Both ChatGPT and Claude may be used in this repo. Work as if another assistant w
 
 ## Public Repo Mode
 
-Treat this repository as a forkable reference implementation unless a
-workstream explicitly states it is integrating verified live state from the
-current deployment.
+Treat the committed generic files as a forkable reference implementation (the
+public ServerClaw mirror is sanitised from this repo by
+`scripts/publish_to_serverclaw.py`) unless a workstream explicitly states it is
+integrating verified live state from the current deployment.
 
 - Do not commit workstation-specific absolute paths.
 - Do not put operator-specific hostnames, domains, IP addresses, or secrets in
@@ -55,7 +56,9 @@ current deployment.
 
 This codebase is designed to be **nearly identical** between the private repo
 and the public `github.com/baditaflorin/ServerClaw` repo. Deployment-specific
-values live in `.local/` (gitignored), not in committed code.
+values in hand-written files live in `.local/` (gitignored). The generated
+`inventory/group_vars/platform.yml` and some inventory/config files in the
+private repo carry real values; the publish pipeline sanitises them.
 
 ### The Rule: Generic in Git, Specific in .local/
 
@@ -71,18 +74,19 @@ values live in `.local/` (gitignored), not in committed code.
 
 ### How Ansible picks up real values at runtime
 
-`platform/ansible/execution_scopes.py` auto-injects `-e @.local/identity.yml`
-(Ansible extra-vars, highest precedence) into every playbook run. This means:
+`platform/ansible/execution_scopes.py` injects the selected identity overlay as
+`-e @<file>` (Ansible extra-vars, highest precedence) into scoped playbook runs:
+`$PLATFORM_IDENTITY_OVERLAY` when set, otherwise `.local/identity.yml`. This means:
 - Committed code can use `example.com` or `{{ platform_domain }}`
 - At runtime, `platform_domain` resolves to the real domain from `.local/identity.yml`
-- Fork operators only edit `.local/identity.yml` — everything else derives from it
+- Fork operators edit `.local/identity.yml` and, when their topology differs from the reference, the Proxmox host's `.local/host_vars/<host>.yml` and `.local/inventory/hosts.yml` (ADR 0430, ADR 0437) — everything else derives from those
 
 ### ⚠️ CRITICAL: platform.yml must contain real IPs in the private repo
 
 `inventory/group_vars/platform.yml` is a **generated** file produced by
 `scripts/generate_platform_vars.py`. It contains deeply-nested derived
-structures (e.g. `platform_host.management.ipv4`, DNS targets, monitoring
-scrape targets) that are **not flat Ansible variables** — Ansible extra-vars
+structures (e.g. `platform_host.management.ipv4`, `platform_dns_records`,
+`platform_service_topology`) that are **not flat Ansible variables** — Ansible extra-vars
 cannot override nested dict keys, so the `-e @.local/identity.yml` injection
 that works for flat vars does NOT fix baked-in nested values.
 
@@ -96,7 +100,7 @@ ServerClaw mirror.
 | Situation | Required action |
 |-----------|-----------------|
 | After any change to `.local/identity.yml` | `make generate-platform-vars` + commit |
-| After any change to `inventory/host_vars/platform-host.yml` | `make generate-platform-vars` + commit |
+| After any change to `inventory/host_vars/<host>.yml` | `make generate-platform-vars` + commit |
 | You see `203.0.113.1` inside `inventory/group_vars/platform.yml` | **BUG** — re-run the generator; `.local/identity.yml` was not applied |
 | You see `example.com` inside `inventory/group_vars/platform.yml` | **BUG** — re-run the generator |
 | Publishing to ServerClaw | Publish pipeline sanitises real values automatically |
@@ -104,8 +108,10 @@ ServerClaw mirror.
 **Never** assume that `203.0.113.1` or `example.com` appearing in
 `platform.yml` is correct. Those are sanitisation placeholders — they must
 not appear in the private repo's generated output. If `.local/identity.yml`
-is missing, the generator falls back to committed placeholders; treat that
-state as broken.
+is missing, the generator re-applies the identity overlay recorded under
+`platform_generation.identity_overlay` in the existing `platform.yml`; only
+when that record is empty does it fall back to committed placeholders, and that
+state is broken.
 
 > **Incident reference**: This gap caused `headscale.example.com` to have a DNS
 > A record pointing to `203.0.113.1` (a non-routable documentation IP), which
@@ -129,7 +135,7 @@ public_url: "https://grafana.example.com"
 Visit https://grafana.example.com to view dashboards.
 
 # BAD: deployment-specific domain
-Visit https://grafana.example.com to view dashboards.
+Visit https://grafana.<your-real-domain> to view dashboards.
 ```
 
 **In inventory/config** — Real values are acceptable here (the publish pipeline
@@ -145,33 +151,40 @@ When you need the actual domain, IPs, or operator identity:
 ## Publication Pipeline (ServerClaw)
 
 This private repo publishes a sanitized copy to the public
-`github.com/baditaflorin/ServerClaw` repo. The pipeline is automated —
-never manually edit or push to the public repo.
+`github.com/baditaflorin/ServerClaw` repo. The pipeline is scripted (`scripts/publish_to_serverclaw.py`, run by an
+operator) — never manually edit or push to the public repo.
 
 ### How it works
 
 1. **Drift audit** — `scripts/audit_sanitization_coverage.py` verifies all
    sensitive values have replacement patterns. Aborts on CRITICAL gaps.
-2. **Tier A** — Four deployment-specific files (identity, hosts, operators,
-   host_vars) replaced with fork-ready templates from `publication/templates/`.
+2. **Tier A** — The files listed under `file_replacements` in
+   `config/publication-sanitization.yaml` (identity, hosts, operators,
+   host_vars, capacity-model) are replaced with fork-ready templates from
+   `publication/templates/`.
 3. **Tier C** — Regex patterns replace domains, VM names, IPs, and PII across
-   remaining text files (~588 files after ADR 0407 generalization).
+   remaining text files (the dry run prints the sanitized-file count).
 4. **Leak check** — Scans for leak markers. Aborts if any found.
-5. **Force-push** — Commits sanitized snapshot to `serverclaw/main`.
+5. **Push** — Commits the sanitized snapshot (parented on the public `main`) and
+   pushes a publish branch with `--branch <name>`; merge it via PR once the
+   required Woodpecker check passes. A direct force-push to `main` cannot satisfy
+   that check.
 
 ### Commands
 
 | Task | Command |
 |------|---------|
 | Dry-run (sanitize + leak check, no push) | `make publish-serverclaw` |
-| Sanitize + push to public repo | `make publish-serverclaw-push` |
+| Sanitize + push a publish branch, then merge via PR (`make publish-serverclaw-push` passes no `--branch`, so it force-pushes `main`) | `uv run --with pyyaml python3 scripts/publish_to_serverclaw.py --push --branch <name>` |
 | Check sanitization coverage for drift | `make audit-sanitization` |
-| Strict audit (exit 1 on any gap) | `make audit-sanitization-strict` |
+| Strict audit (exit 1 on WARNING gaps, 2 on CRITICAL gaps) | `make audit-sanitization-strict` |
 | Generalize docs/tests in-place | `python3 scripts/generalize_committed_files.py --apply` |
 
 ### When to publish
 
-Run `make publish-serverclaw-push` after merging meaningful changes to `main`.
+After merging meaningful changes to `main`, run
+`uv run --with pyyaml python3 scripts/publish_to_serverclaw.py --push --branch <name>`
+and merge the resulting branch via a public PR once Woodpecker passes.
 
 ### When adding new sensitive values
 
@@ -190,7 +203,7 @@ If you add a new VM, operator, public IP, or domain reference:
 | `scripts/audit_sanitization_coverage.py` | Drift detector |
 | `scripts/generalize_committed_files.py` | In-place generalization (ADR 0407) |
 | `config/publication-sanitization.yaml` | Replacement patterns + leak markers |
-| `publication/templates/` | Tier A replacement files (4 files) |
+| `publication/templates/` | Tier A replacement files (one per `file_replacements` entry) |
 
 ## Deployment Context
 
@@ -211,13 +224,13 @@ When making meaningful infrastructure decisions, update:
 - `docs/adr/`
 - `docs/runbooks/`
 - `docs/workstreams/` when the change is part of an active workstream
-- `workstreams.yaml`
+- `workstreams/active/<id>.yaml` (then regenerate the generated `workstreams.yaml` with `python3 scripts/workstream_registry.py --write`)
 - `VERSION` when merging to `main`
 - `changelog.md` when `VERSION` changes
 - `versions/stack.yaml` only for merged truth or verified live state
 - a Git push if the change was applied live
 
-When adding automation later, prefer a structure like:
+When adding automation, follow the existing layout:
 
 - `inventory/`
 - `playbooks/`
@@ -240,13 +253,13 @@ Do not claim the platform is ready for routine production use until:
 
 ## Agent Onboarding (ADR 0163-0168)
 
-New agent? Read these files in order - all six take under 2 minutes:
+New agent? Read these files in order. `workstreams.yaml` is a generated 9k-line registry, so grep it or open `workstreams/active/<id>.yaml` instead of reading it whole:
 
 1. **README.md** - current platform status and deployment state
 2. **AGENTS.md** - this file; rules and conventions
-3. **.repo-structure.yaml** - full directory map; find any path instantly
-4. **.config-locations.yaml** - where every configuration file lives
-5. **docs/adr/.index.yaml** - searchable index of all ADRs by keyword
+3. **.repo-structure.yaml** - generated section map; follow it to `docs/discovery/repo-structure/<section>.yaml` for path detail
+4. **.config-locations.yaml** - generated section index; open `docs/discovery/config-locations/<section>.yaml` for exact config locations
+5. **docs/adr/.index.yaml** - root ADR manifest; concern, range and status lookups are in the shards under `docs/adr/index/by-concern/`, `by-range/` and `by-status/` (each entry carries a keywords field; grep the shards for keywords)
 6. **workstreams.yaml** - parallel work in flight; check before starting
 
 > Token tip: These six reads replace hours of tree exploration.
@@ -283,7 +296,8 @@ python scripts/sync_plane_agent_issues.py --workstream <id> \
 
 ### On completion / merge
 
-The workstream close step (updating `status: merged`) triggers a final sync:
+On completion/merge, run the sync below by hand while the shard is still in `workstreams/active/`.
+No hook, CI step or script triggers it:
 
 ```bash
 python scripts/sync_plane_agent_issues.py --workstream <id> \
@@ -297,8 +311,11 @@ python scripts/sync_plane_agent_issues.py --workstream <id> \
 - `plane_issue_id` is written into the workstream YAML after issue creation.
   Subsequent calls use it directly (no re-scan of the issue list).
 - Agents **do not** create issues manually in the Plane UI. The script is the
-  only write path so external_id stays canonical.
-- Humans can add Plane comments to interact with a running agent. Agents read
+  only writer of workstream issues (`external_source=repo_workstream`,
+  `external_id=<workstream id>`); the `create-plane-task` tool and
+  `scripts/plane_tool.py create-issue` add other issues without that `external_id`.
+- Plane comments added by humans are not read back by any script or agent tool, so
+  they do not reach a running agent. Agents read
   their own issue at session start if `plane_issue_id` is present.
 - Skip Plane for single-commit housekeeping (version bumps, manifest regen).
 
@@ -331,7 +348,7 @@ Pass `"project": "ADR"` to operate on the architecture decisions project.
 Follow this before ending any session:
 
 **Starting work:**
-- Create a git worktree: `git worktree add .worktrees/<name> main && git checkout -b <branch>`
+- Create a git worktree: `git worktree add -b <branch> .worktrees/<name> main && cd .worktrees/<name>`
 - Add an entry to `workstreams/active/<id>.yaml` with `status: in_progress`
 - Run `python scripts/sync_plane_agent_issues.py --workstream <id>` to register in Plane
 - Create `docs/workstreams/adr-XXXX-<name>.md` for major decisions
@@ -351,10 +368,10 @@ Follow this before ending any session:
 
 **Ending a session:**
 - [ ] All work committed, branch pushed to origin
-- [ ] `workstreams.yaml` updated with current status
+- [ ] Status updated in `workstreams/active/<id>.yaml`, then `python3 scripts/workstream_registry.py --write` run to regenerate `workstreams.yaml`
 - [ ] Plane issue updated: `python scripts/sync_plane_agent_issues.py --workstream <id> --comment "Session end: <summary>"`
-- [ ] README.md updated if deployed state changed
-- [ ] Blockers documented in workstreams.yaml if any
+- [ ] README.md is a protected integration file: update it only on main (or when the workstream's ownership manifest declares it)
+- [ ] Blockers documented in the workstream shard (`workstreams/active/<id>.yaml` notes) and workstream doc; regenerate `workstreams.yaml`
 - [ ] Receipts created in `receipts/live-applies/` for any live changes
 - [ ] If merging to main: bump `VERSION`, update `changelog.md`
 
@@ -365,7 +382,7 @@ Follow this before ending any session:
 | Starting new work | Create branch + worktree, add to workstreams/active/, sync to Plane |
 | Making a change | Commit with Purpose/Scope/Status/Next |
 | Infrastructure change | Create receipt in receipts/live-applies/ |
-| Major decision | Create ADR in docs/workstreams/ |
+| Major decision | Create an ADR in docs/adr/ (then regenerate the ADR index) and link a workstream doc in docs/workstreams/ |
 | Merging to main | Bump VERSION, update changelog, clear commit |
 | Work blocked | Mark status: blocked, document blocker, push branch, sync to Plane |
 
@@ -420,8 +437,8 @@ Copy from `playbooks/.metadata-template.yml`. Required fields:
 ## Automated Validation (ADR 0168)
 
 The pre-push gate (`scripts/validate_repo.sh agent-standards`) enforces:
-- New playbooks must have `# Purpose:` header
-- Branch must appear in `workstreams.yaml`
+- Playbook and role YAML files staged for commit must have a `# Purpose:` header (checked against the git index only, so not enforced at pre-push or CI)
+- Branch must be registered as a workstream shard (`workstreams/active/` or `archive/`). `workstream-surfaces` fails validation if it is not; `agent-standards` only warns.
 - `docs/adr/.index.yaml` must be current when ADR files change
   - Regenerate: `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`
 
@@ -446,16 +463,20 @@ gh pr merge <number> --squash --delete-branch
 
 ### Release PRs vs. feature PRs
 
-- **`[release]` in title**: CI enforces all release-readiness checks
-  (VERSION bump, changelog, release notes, manifest, discovery artifacts)
-- **No `[release]`**: checks run as advisory only — use for WIP or feature PRs
+- **`[release]` in title**: convention for release PRs. No CI job enforces the
+  release-readiness checks (VERSION bump, changelog, release notes, ADR index,
+  platform manifest, discovery artifacts); run
+  `python3 scripts/check_release_readiness.py --enforce` locally before merging.
+- **No `[release]`**: no release-readiness job runs; the Woodpecker pipeline runs
+  `validate_repo.sh agent-standards`, which includes a discovery-artifact check.
 
 ### Emergency direct push
 
 Admins can bypass branch protection for genuine emergencies:
 ```bash
 SKIP_REMOTE_GATE=1 GATE_BYPASS_REASON_CODE=emergency_hotfix \
-  GATE_BYPASS_DETAIL="<describe>" git push origin main
+  GATE_BYPASS_DETAIL="<describe>" GATE_BYPASS_SUBSTITUTE_EVIDENCE="<passed check or note>" \
+  GATE_BYPASS_REMEDIATION_REF="<workstream or issue>" git push origin main
 ```
 Follow up with a retroactive PR or incident note.
 
@@ -471,7 +492,9 @@ python3 scripts/check_release_readiness.py --enforce
 
 ## Agent Coordination Patterns (ADR 0347, 0350, 0353, 0355, 0357)
 
-These patterns are **Accepted** and implemented. Use them for all new work.
+These patterns are **Accepted**. Library or role code exists for each, but the ADRs
+are marked 'Not Implemented' and no playbook or role calls the lock or receipt
+helpers; do not assume existing playbooks use them. Use them for all new work.
 
 ### File-Domain Locking (ADR 0347) + Apply Serialization (ADR 0355)
 
@@ -485,12 +508,12 @@ registry = ResourceLockRegistry()
 # Lock a specific config file (ADR 0347)
 with file_domain_lock(registry, vmid="101", role="authentik_runtime",
                       filename="docker-compose.yml", holder="ws-0347"):
-    # safe to write — no other agent can write this file concurrently
+    # advisory: other agents that also take this lock are blocked; roles and playbooks do not check it
     ...
 
 # Lock a full VM apply (ADR 0355) — serializes playbook runs
 with apply_lock(registry, vmid="101", holder="ws-0355"):
-    # safe to run full playbook against vm:101
+    # serialized only against other apply_lock holders on the same vmid
     ...
 ```
 
@@ -498,7 +521,7 @@ Lock key convention: `vm:{vmid}:config:{role}:{filename}` and `vm:{vmid}:apply`
 
 ### Service Integration Contracts (ADR 0353)
 
-All cross-service dependencies are declared in `config/integrations/<consumer>--<provider>.yaml`.
+Known cross-service dependencies are declared in `config/integrations/<consumer>--<provider>.yaml` (8 contracts; coverage is partial, so also grep `roles/` and inventory).
 Check here **before** changing any service port, database name, or secret path — changing one endpoint can break multiple consumers.
 
 ```bash
@@ -506,7 +529,7 @@ Check here **before** changing any service port, database name, or secret path �
 python3 scripts/validate_integrations.py --check-dead
 
 # Find all consumers of postgres_vm
-grep -l "provider: postgres_vm" config/integrations/
+grep -rl "provider: postgres_vm" config/integrations/
 ```
 
 ### Workstream Apply Receipts (ADR 0357)
@@ -518,7 +541,7 @@ from platform.workstream_receipts import WorkstreamApplyReceipts
 
 receipts = WorkstreamApplyReceipts()
 receipts.guard_not_completed("ws-0353")   # raises if already applied
-receipts.guard_not_in_progress("ws-0353") # raises if another agent is mid-apply
+receipts.guard_not_in_progress("ws-0353") # raises if an apply is already in_progress in this checkout (receipts are local, not shared across worktrees)
 
 receipt = receipts.start("ws-0353", applied_by="claude/eager-buck", adr="0353")
 try:
@@ -532,7 +555,8 @@ Receipt files live in `receipts/live-applies/<workstream-id>-apply-receipt.yaml`
 
 ### Nginx Fragment Config (ADR 0350)
 
-To add/update a service's nginx config atomically (write-validate-rename-reload):
+To add/update a service's nginx config: the role writes `<name>.conf.new`, runs `nginx -t`, renames it and reloads.
+The staged file is outside the `*.conf` include glob, so `nginx -t` does not validate it; validate the fragment separately.
 
 ```yaml
 - name: publish authentik nginx fragment
@@ -571,7 +595,7 @@ internal jobs. Agents and operators can view, dispatch, and manage jobs.
 | **API proxy** | Tailscale mesh management proxy (requires management token) |
 | **Server** | monitoring (see inventory for host details) |
 | **Clients** | docker-runtime, runtime-general, runtime-ai, runtime-control, docker-build |
-| **CLI wrapper** | `/usr/local/bin/lv3-nomad` on all cluster nodes (auto-loads token) |
+| **CLI wrapper** | `/usr/local/bin/<config_prefix>-nomad` (`platform_identity.config_prefix`, derived from the deployment apex domain) on all cluster nodes; it auto-loads the management token only on the Nomad server node `monitoring`, where the token file is mirrored |
 | **Playbook** | `playbooks/nomad.yml` |
 | **Job definitions** | In-role Jinja templates (e.g. `collections/ansible_collections/lv3/platform/roles/nomad_cluster_bootstrap/templates/nomad-smoke-*.nomad.hcl.j2`) |
 | **Bootstrap token** | `.local/nomad/tokens/bootstrap-management.token` |
@@ -588,7 +612,7 @@ that pattern was retired by ADR 0438.
 
 ## Service VM Migration (ADR 0416 + ADR 0417) — CRITICAL
 
-Moving a service to a different VM touches **three independent registries** that
+Moving a service to a different VM touches **three registry fields** that
 must stay in sync. Editing any of them manually without the others causes
 topology drift and production failures (pg_hba.conf blocks DB connections,
 nginx routes to the wrong IP, etc.).
@@ -597,27 +621,29 @@ nginx routes to the wrong IP, etc.).
 
 ```bash
 # Preview: show exactly what will change and which converges will run
-make migrate-service-dry-run svc=authentik to=runtime-control
+make migrate-service-dry-run svc=<service> to=<target-vm>
 
 # Execute: update all registries + ordered converge + write receipt
-make migrate-service svc=authentik to=runtime-control env=production
+make migrate-service svc=<service> to=<target-vm> env=production
 ```
 
-The script updates all three registry fields atomically:
+The script rewrites the three fields in one run, but not transactionally: if a later step fails the edits stay in the working tree and must be rolled back with `git checkout`.
 
 | Registry | Field | Authority |
 |----------|-------|-----------|
 | `inventory/group_vars/all/platform_services.yml` | `host_group` | **AUTHORITATIVE** |
-| `inventory/group_vars/all/platform_services.yml` | `proxy.upstream_host` | derived — kept in sync |
-| `inventory/host_vars/<topology-host>.yml` | `lv3_service_topology[svc].owning_vm` | derived — kept in sync |
+| `inventory/group_vars/all/platform_services.yml` | `proxy.upstream_host` | hand-maintained duplicate of `host_group` — updated by `make migrate-service`, not checked by `validate_topology_consistency.py` |
+| `inventory/host_vars/<topology-host>.yml` | `platform_service_topology[svc].owning_vm` | derived — kept in sync |
 
 Then runs converges in the correct dependency order:
 `postgres-vm` → `teardown-service (stop old)` → `converge-<svc>` → `nginx-edge`
 
+`converge-<svc>` must already exist as a Make target: check with `grep '^converge-<svc>:' Makefile` before migrating (the script does not check, and it runs after the old container is stopped). The `nginx-edge` step runs `make converge-nginx-edge`, which only reconciles edge certificate SANs and does not change upstreams.
+
 **Why order matters:**
 - postgres BEFORE service: pg_hba.conf must allow the new VM before the service starts
 - stop-old BEFORE start-new: prevents split-brain (two containers writing to same DB)
-- nginx AFTER service: traffic only routes to new VM once it's healthy
+- nginx AFTER service: re-render the edge upstreams with `make configure-edge-publication` once the new VM is healthy
 
 **Orphaned container cleanup** (containers left behind by old migrations):
 
@@ -626,9 +652,9 @@ make detect-orphans   # list containers running on the wrong VM
 make purge-orphans    # stop and remove them (SSH-based, requires prod access)
 ```
 
-**Pre-push gate enforces consistency** — manually editing one registry file without
-the others will fail `validate_topology_consistency.py --check` at push time.
-The gate is the backstop; `make migrate-service` is the preventive tool.
+**No push-time gate checks registry consistency** — the pre-push hook does not run
+`validate_topology_consistency.py`; run it manually (`make migrate-service` runs it as step 1).
+Do not rely on the pre-push hook as a backstop; `make migrate-service` is the preventive tool.
 
 **Teardown only** (stop a container without full migration):
 
@@ -639,12 +665,11 @@ make teardown-service svc=<service> on_vm=<vm> env=production
 ## Cross-Service Wiring Rules
 
 Some services derive their configuration dynamically from the inventory host list.
-After any change to `inventory/hosts.yml` that adds or removes a VM from `lv3_guests`,
-re-converge the services below or the running state will drift from inventory truth.
+After adding or removing a VM in `proxmox_guests` (in the Proxmox host's `inventory/host_vars/<host>.yml`) and
+regenerating `inventory/hosts.yml` with `make generate-inventory`, re-converge the services below or the running state will drift from inventory truth.
 
 | Trigger | Required follow-up | Why |
 |---|---|---|
-| VM added to / removed from `lv3_guests` | `make live-apply-service service=realtime` | Netdata child topology derived from `lv3_guests`; new VMs invisible in the realtime monitoring dashboard until Netdata is installed |
 | VM added to / removed from `lv3_guests` | `make live-apply-service service=guest-log-shipping` | Loki log-agent topology derived from `lv3_guests`; new VMs produce no log streams until the agent is deployed |
 
 Running `site.yml` (full-stack converge) satisfies all of the above automatically because
@@ -657,10 +682,9 @@ For targeted VM-only runs (`make provision-guests`), apply each service in the t
 - For managed guests, pin the MAC address in repo config and keep it stable across reruns. Treat the MAC as part of the guest identity, not as disposable runtime state.
 - After changing guest cloud-init inputs such as `net0`, `ipconfig0`, or `cicustom`, refresh the seed data with `qm cloudinit update <vmid>` before restarting the guest. Do not assume `qm set` alone is enough.
 - On first boot or early bootstrap, prefer a Proxmox stop/start cycle over `qm reboot` when the guest agent may not be running yet. `qm reboot` can fail with a qga timeout even when the VM itself is otherwise healthy.
-- NEVER create symlinks to `.local/` or any credential directory. A symlink named `.local` bypasses `.gitignore` (which only ignores the directory), and committing it destroys the real credential store when checked out. (See ADR 0376.)
+- NEVER create symlinks to `.local/` or any credential directory. A symlink named `.local` is not matched by a directory-only ignore pattern, and committing it destroys the real credential store when checked out; `.gitignore` lists both `.local/` and bare `.local`, and a pre-commit hook blocks any staged `.local` path. (See ADR 0376.)
 - NEVER run `git add .local`, `git add -A`, or `git add .` in any directory containing `.local`. Always name specific files or directories when staging.
 - Agents in worktrees do NOT have `.local/` — this is intentional. If credentials are needed, read from the main worktree path directly. Do not create symlinks, copies, or placeholder credentials.
 - Never hand-maintain a security boundary list (like sanitization patterns) without an automated audit. The initial publication sanitization config missed 7 of 25 VMs (28% miss rate) and an IPv6 address in a template file. The drift detector (`make audit-sanitization`) catches these gaps automatically.
-- Regex patterns for VM names with staging variants need `(-staging)?` optionality — `monitoring` does NOT match `monitoring-staging` because `-staging-` is in the middle.
-- NEVER manually edit `platform_service_registry.host_group`, `proxy.upstream_host`, or `lv3_service_topology[svc].owning_vm` in isolation when migrating a service. All three must change together. Use `make migrate-service svc=X to=Y` — it updates all registries atomically and runs converges in the correct dependency order. Manual multi-step edits caused three drift incidents in 72 hours (ADR 0416 postmortem).
+- NEVER manually edit `platform_service_registry.host_group`, `proxy.upstream_host`, or `platform_service_topology[svc].owning_vm` in isolation when migrating a service. All three must change together. Use `make migrate-service svc=X to=Y` — it updates the registry fields in one run (not transactionally) and then runs the converges in dependency order. Manual multi-step edits caused three drift incidents in 72 hours (ADR 0416 postmortem).
 - If a service fails to connect to PostgreSQL after a VM migration, the cause is almost always a stale pg_hba.conf entry. Run `make converge-postgres-vm env=production` — since ADR 0416 Phase 2, pg_hba.conf derives client IPs from `platform_service_registry.host_group` automatically. You only need to ensure `host_group` is correct.

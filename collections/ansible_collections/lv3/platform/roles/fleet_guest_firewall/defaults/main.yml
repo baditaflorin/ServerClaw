@@ -1,0 +1,16 @@
+---
+fleet_guest_firewall_config_file: /etc/nftables.conf
+fleet_guest_firewall_service: nftables
+# Inbound rules for the input chain, same vocabulary as network_policy.guests.<name>.allowed_inbound in
+# inventory/host_vars/proxmox-host.yml (protocol, ports, source, description), plus an optional interface.
+#   protocol: tcp | udp | icmp | icmpv6
+#   ports:    list of ports (tcp/udp only)
+#   source:   optional IPv4 address or CIDR
+#   interface: optional input interface name (matched with iifname)
+#   description: rendered as a comment line above the rule
+# Policy is drop for input and forward, accept for output.
+fleet_guest_firewall_allowed_inbound: []
+# Debian's stock /etc/nftables.conf starts with "flush ruleset"; the live guest keeps it. Use "table" on guests that
+# run Docker or anything else that owns its own nftables tables (only `inet filter` is then replaced).
+fleet_guest_firewall_flush_mode: ruleset
+fleet_guest_firewall_reconnect_timeout: 120

@@ -1,0 +1,20 @@
+workstream_id: ws-0512-authentik-builder-managed-20261012
+state: failed
+schema_version: 1.1.0
+started_at: '2026-10-12T13:59:48Z'
+completed_at: '2026-10-12T14:05:32Z'
+applied_by: codex
+repo_version: 0.179.48
+adr: 0089
+summary: Reconcile the managed remote BuildKit daemon after verifying the named legacy
+  daemons are idle.
+targets:
+- service: build-artifact-cache
+  host: docker-build
+  vmid: '130'
+errors:
+- Docker runtime recovery verification failed after a transient Woodpecker step container
+  disappeared; Ansible reported changed=0 and did not reach BuildKit reconciliation.
+notes:
+- 'Post-run checks: Docker active; managed BuildKit unit inactive; both explicitly
+  listed legacy BuildKit containers remain running with empty histories.'

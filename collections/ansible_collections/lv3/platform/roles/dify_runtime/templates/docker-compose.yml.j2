@@ -6,6 +6,8 @@ services:
     image: {{ dify_api_image }}
     container_name: {{ dify_api_container_name }}
     restart: unless-stopped
+    mem_limit: {{ dify_api_mem_limit }}
+    memswap_limit: {{ dify_api_memswap_limit }}
     environment:
       MODE: api
     env_file:
@@ -27,6 +29,8 @@ services:
     image: {{ dify_api_image }}
     container_name: {{ dify_worker_container_name }}
     restart: unless-stopped
+    mem_limit: {{ dify_worker_mem_limit }}
+    memswap_limit: {{ dify_worker_memswap_limit }}
     environment:
       MODE: worker
     env_file:
@@ -48,6 +52,8 @@ services:
     image: {{ dify_api_image }}
     container_name: {{ dify_worker_beat_container_name }}
     restart: unless-stopped
+    mem_limit: {{ dify_worker_beat_mem_limit }}
+    memswap_limit: {{ dify_worker_beat_memswap_limit }}
     environment:
       MODE: beat
     env_file:

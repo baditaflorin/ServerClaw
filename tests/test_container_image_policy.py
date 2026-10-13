@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import pytest
 import sys
 from pathlib import Path
@@ -8,7 +9,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-import container_image_policy as policy  # noqa: E402
+import container_image_policy as policy
 
 
 def test_split_image_reference_supports_generic_registry_hosts() -> None:
@@ -82,3 +83,70 @@ def test_validate_scan_receipt_accepts_grype_summary_with_backing_receipts(
     policy.validate_scan_receipt(
         receipt, repo_root / "receipts" / "image-scans" / "example.json", "example_runtime", ref
     )
+
+
+@pytest.mark.parametrize(
+    ("scan_status", "expected_error"),
+    [("blocked", None), ("pass_no_critical", "scan_status must be 'blocked'")],
+)
+def test_catalog_records_critical_image_without_exception_as_blocked(
+    tmp_path: Path,
+    monkeypatch,
+    scan_status: str,
+    expected_error: str | None,
+) -> None:
+    repo_root = tmp_path / "repo"
+    image_receipt = repo_root / "receipts" / "image-scans" / "example.json"
+    sbom_receipt = repo_root / "receipts" / "sbom" / "example.cdx.json"
+    cve_receipt = repo_root / "receipts" / "cve" / "example.grype.json"
+    consumer = repo_root / "docs" / "consumer.md"
+    for path in (image_receipt, sbom_receipt, cve_receipt, consumer):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}\n", encoding="utf-8")
+
+    ref = "ghcr.io/example/runtime:1.0.0@sha256:" + ("1" * 64)
+    image_receipt.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "image_id": "example_runtime",
+                "image_ref": ref,
+                "scanner": "grype",
+                "scanned_on": "2026-10-12",
+                "sbom_receipt": "receipts/sbom/example.cdx.json",
+                "cve_receipt": "receipts/cve/example.grype.json",
+                "summary": {
+                    "critical": 1,
+                    "high": 0,
+                    "blocking_findings_with_fix": 0,
+                    "total_matches": 1,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    catalog = {
+        "schema_version": "1.0.0",
+        "images": {
+            "example_runtime": {
+                "kind": "runtime",
+                "registry_ref": "ghcr.io/example/runtime",
+                "tag": "1.0.0",
+                "digest": "sha256:" + ("1" * 64),
+                "ref": ref,
+                "platform": "linux/amd64",
+                "pinned_on": "2026-10-12",
+                "scan_status": scan_status,
+                "scan_receipt": "receipts/image-scans/example.json",
+                "consumers": ["docs/consumer.md"],
+                "apply_targets": ["converge-example"],
+            }
+        },
+    }
+    monkeypatch.setattr(policy, "repo_path", lambda *parts: repo_root.joinpath(*parts))
+
+    if expected_error:
+        with pytest.raises(ValueError, match=expected_error):
+            policy.validate_image_catalog(catalog)
+    else:
+        policy.validate_image_catalog(catalog)

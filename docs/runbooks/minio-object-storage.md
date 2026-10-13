@@ -16,21 +16,21 @@ The managed runtime lives on `docker-runtime`, publishes the S3-compatible API a
 Syntax-check the dedicated workflow:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
+cd "$(git rev-parse --show-toplevel)"
 make syntax-check-minio
 ```
 
 Converge the shared runtime, DNS, and edge publication:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
+cd "$(git rev-parse --show-toplevel)"
 make converge-minio
 ```
 
 Or use the full service live-apply path:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server
+cd "$(git rev-parse --show-toplevel)"
 ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=minio env=production
 ```
 
@@ -38,11 +38,11 @@ ALLOW_IN_PLACE_MUTATION=true make live-apply-service service=minio env=productio
 
 The managed MinIO workflow mirrors these secrets outside git:
 
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/minio/root-password.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/langfuse/minio-secret-key.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/minio-secret-key.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/monitoring/loki-minio-secret-key.txt`
-- `/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/platform-context/minio-secret-key.txt`
+- `.local/minio/root-password.txt`
+- `.local/langfuse/minio-secret-key.txt`
+- `.local/gitea/minio-secret-key.txt`
+- `.local/monitoring/loki-minio-secret-key.txt`
+- `.local/platform-context/minio-secret-key.txt`
 
 If any of these files are missing in a fresh worktree, rerun `make converge-minio` before replaying the dependent consumer service.
 
@@ -68,23 +68,23 @@ Expected result:
 Verify the MinIO container and local listeners on `docker-runtime`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/minio/docker-compose.yml ps && curl -fsS http://127.0.0.1:9010/minio/health/live && curl -fsS http://127.0.0.1:9010/minio/health/ready >/dev/null'
+ssh <minio-host> 'docker compose --file /opt/minio/docker-compose.yml ps && curl -fsS http://127.0.0.1:9010/minio/health/live && curl -fsS http://127.0.0.1:9010/minio/health/ready >/dev/null'
 ```
 
 Verify the managed buckets, the Langfuse default CORS behavior, and the `rag-staging` lifecycle rule:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'tmp=$(mktemp) && trap "rm -f \"$tmp\"" EXIT && printf "lv3-langfuse-cors-smoke\n" > "$tmp" && sudo mc --config-dir /opt/minio/mc cp "$tmp" local/langfuse-exports/__lv3-langfuse-cors-smoke.txt >/dev/null && url=$(sudo mc --config-dir /opt/minio/mc share download --json --expire 5m local/langfuse-exports/__lv3-langfuse-cors-smoke.txt | python3 -c '"'"'import json,sys; lines=[line for line in sys.stdin.read().splitlines() if line.strip()]; data=json.loads(lines[-1]); print(data.get("share") or data.get("url") or data.get("shareURL") or "")'"'"') && curl -sS -D - -o /dev/null -H "Origin: https://langfuse.example.com" "$url" | grep -i "access-control-allow-origin" && sudo mc --config-dir /opt/minio/mc ls local/langfuse-exports && sudo mc --config-dir /opt/minio/mc ls local/gitea-lfs && sudo mc --config-dir /opt/minio/mc ls local/loki-chunks && sudo mc --config-dir /opt/minio/mc ls local/rag-staging && sudo mc --config-dir /opt/minio/mc ilm rule list --json local/rag-staging && sudo mc --config-dir /opt/minio/mc rm --force local/langfuse-exports/__lv3-langfuse-cors-smoke.txt >/dev/null'
+make converge-minio
 ```
 
 Verify the mirrored controller-local secrets exist:
 
 ```bash
-test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/minio/root-password.txt
-test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/langfuse/minio-secret-key.txt
-test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/gitea/minio-secret-key.txt
-test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/monitoring/loki-minio-secret-key.txt
-test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/platform-context/minio-secret-key.txt
+test -s .local/minio/root-password.txt
+test -s .local/langfuse/minio-secret-key.txt
+test -s .local/gitea/minio-secret-key.txt
+test -s .local/monitoring/loki-minio-secret-key.txt
+test -s .local/platform-context/minio-secret-key.txt
 ```
 
 ## Operating Notes
@@ -101,5 +101,20 @@ test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/platfor
 - If `make live-apply-service service=minio env=production` fails after the
   Docker-runtime recovery path has restarted shared services, check
   `docker-runtime` disk headroom and recover the guest with
-  [docker-runtime-disk-pressure.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.worktrees/ws-0274-mainline-refresh-v6/docs/runbooks/docker-runtime-disk-pressure.md)
+  [docker-runtime-disk-pressure.md](docker-runtime-disk-pressure.md)
   before replaying the managed workflow.
+
+## Non-root runtime migration
+
+The patched MinIO image runs as UID/GID `10001:10001`. On the first converge
+with that runtime identity, the role stops only the MinIO service, recursively
+changes ownership under the configured MinIO data directory, records a
+UID/GID-specific marker, and then starts MinIO as the unprivileged user. The
+object contents are not copied or deleted. This one-time pass causes a MinIO
+maintenance interruption; allow it to finish before retrying other consumers.
+
+If the ownership pass fails, the role restores the Compose user to root,
+restarts MinIO, and fails the converge rather than claiming the security change
+landed. After a successful migration, root-run rollback images can still read
+the volume; a future non-root image must use the same UID/GID or perform a
+separately reviewed ownership migration.

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import ipaddress
 import re
 import socket
 import sys
@@ -291,6 +292,8 @@ def collect_edge_route_hostnames(
             )
         )
 
+    hostnames.update(collect_private_edge_route_hostnames(host_vars))
+
     for index, site in enumerate(
         require_list(public_edge_defaults.get("public_edge_extra_sites", []), "public_edge_extra_sites")
     ):
@@ -301,6 +304,76 @@ def collect_edge_route_hostnames(
     if apex_hostname is not None:
         hostnames.add(require_hostname(apex_hostname, "public_edge_apex_hostname"))
 
+    return hostnames
+
+
+def collect_private_edge_route_hostnames(host_vars: dict[str, Any]) -> set[str]:
+    hostnames: set[str] = set()
+    service_topology = require_mapping(
+        host_vars.get("platform_service_topology"),
+        "inventory/host_vars/proxmox-host.yml.platform_service_topology",
+    )
+    for service_id, service in service_topology.items():
+        service = require_mapping(
+            service,
+            f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}",
+        )
+        private_edge = service.get("private_edge")
+        if private_edge is None:
+            continue
+        private_edge = require_mapping(
+            private_edge,
+            f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.private_edge",
+        )
+        enabled = private_edge.get("enabled", False)
+        if not isinstance(enabled, bool):
+            raise ValueError(
+                f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.private_edge.enabled must be boolean"
+            )
+        if not enabled:
+            continue
+        if private_edge.get("tls", True) is not True:
+            raise ValueError(
+                f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.private_edge must use TLS"
+            )
+        allow_cidrs = require_string_list(
+            private_edge.get("allow_cidrs"),
+            f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.private_edge.allow_cidrs",
+        )
+        if not allow_cidrs:
+            raise ValueError(
+                f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.private_edge.allow_cidrs must not be empty"
+            )
+        for cidr in allow_cidrs:
+            if _is_jinja2_expression(cidr):
+                continue  # Deployment overlays resolve this value at Ansible runtime.
+            try:
+                network = ipaddress.ip_network(cidr, strict=False)
+            except ValueError as exc:
+                raise ValueError(
+                    f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.private_edge.allow_cidrs contains invalid CIDR {cidr!r}"
+                ) from exc
+            if (
+                not network.is_private
+                or network.is_loopback
+                or network.is_link_local
+                or network.is_multicast
+                or network.is_unspecified
+            ):
+                raise ValueError(
+                    f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.private_edge.allow_cidrs must contain private unicast networks"
+                )
+        route = {
+            "hostname": service.get("public_hostname"),
+            "aliases": private_edge.get("aliases", []),
+        }
+        hostnames.update(
+            collect_site_hostnames(
+                route,
+                f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.private_edge",
+                allow_wildcards=True,
+            )
+        )
     return hostnames
 
 
@@ -324,7 +397,16 @@ def get_subdomain_entry(catalog: dict[str, Any], fqdn: str) -> dict[str, Any]:
     raise ValueError(f"subdomain '{fqdn}' is missing from the catalog")
 
 
-def route_mode_for_entry(entry: dict[str, Any], edge_route_hostnames: set[str]) -> str:
+def route_mode_for_entry(
+    entry: dict[str, Any],
+    edge_route_hostnames: set[str],
+    private_edge_route_hostnames: set[str] | None = None,
+) -> str:
+    if any(
+        hostname_matches_route(entry["fqdn"], route_hostname)
+        for route_hostname in private_edge_route_hostnames or set()
+    ):
+        return "private-edge"
     return (
         "edge"
         if any(hostname_matches_route(entry["fqdn"], route_hostname) for route_hostname in edge_route_hostnames)
@@ -332,14 +414,18 @@ def route_mode_for_entry(entry: dict[str, Any], edge_route_hostnames: set[str]) 
     )
 
 
-def validate_provisionable_subdomain(entry: dict[str, Any], edge_route_hostnames: set[str]) -> str:
+def validate_provisionable_subdomain(
+    entry: dict[str, Any],
+    edge_route_hostnames: set[str],
+    private_edge_route_hostnames: set[str] | None = None,
+) -> str:
     fqdn = require_hostname(entry.get("fqdn"), "selected_subdomain.fqdn")
     status = require_str(entry.get("status"), "selected_subdomain.status")
     if status not in PROVISIONABLE_STATUSES:
         raise ValueError(f"subdomain '{fqdn}' has status '{status}' and cannot be provisioned")
 
     exposure = require_str(entry.get("exposure"), "selected_subdomain.exposure")
-    route_mode = route_mode_for_entry(entry, edge_route_hostnames)
+    route_mode = route_mode_for_entry(entry, edge_route_hostnames, private_edge_route_hostnames)
     if exposure == "edge-published" and route_mode != "edge":
         raise ValueError(f"subdomain '{fqdn}' is marked edge-published but no repo-managed NGINX route exists yet")
 
@@ -362,9 +448,11 @@ def validate_subdomain_catalog(
         raise ValueError("subdomains must not be empty")
 
     edge_route_hostnames: set[str] = set()
+    private_edge_route_hostnames: set[str] = set()
     authenticated_edge_hostnames: set[str] = set()
     if host_vars is not None and public_edge_defaults is not None:
         edge_route_hostnames = collect_edge_route_hostnames(host_vars, public_edge_defaults)
+        private_edge_route_hostnames = collect_private_edge_route_hostnames(host_vars)
         authenticated_edge_hostnames = collect_authenticated_edge_hostnames(public_edge_defaults)
 
     seen_fqdns: set[str] = set()
@@ -423,7 +511,7 @@ def validate_subdomain_catalog(
 
         if exposure == "edge-published" and provider == "none":
             raise ValueError(f"subdomains[{index}] edge-published hostnames must declare a TLS provider")
-        if exposure == "private-only" and provider == "letsencrypt":
+        if exposure == "private-only" and provider == "letsencrypt" and fqdn not in private_edge_route_hostnames:
             raise ValueError(f"subdomains[{index}] private-only hostnames must not use Let's Encrypt")
         if exposure == "private-only" and auth_requirement != "private_network":
             raise ValueError(
@@ -514,7 +602,12 @@ def main(argv: list[str] | None = None) -> int:
                 raise ValueError("--fqdn is required for --provision-check and --print-field")
             entry = get_subdomain_entry(catalog, args.fqdn)
             edge_route_hostnames = collect_edge_route_hostnames(host_vars, public_edge_defaults)
-            route_mode = validate_provisionable_subdomain(entry, edge_route_hostnames)
+            private_edge_route_hostnames = collect_private_edge_route_hostnames(host_vars)
+            route_mode = validate_provisionable_subdomain(
+                entry,
+                edge_route_hostnames,
+                private_edge_route_hostnames,
+            )
 
             if args.print_field:
                 if args.print_field == "route_mode":

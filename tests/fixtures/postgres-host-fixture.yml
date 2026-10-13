@@ -5,7 +5,8 @@
   "network": {
     "bridge": "vmbr20",
     "ip_cidr": "10.10.10.110/24",
-    "gateway": "10.10.10.1"
+    "gateway": "10.10.10.1",
+    "isolated": false
   },
   "resources": {
     "cores": 2,

@@ -10,6 +10,42 @@
     - access
     - service-public-edge
 
+  pre_tasks:
+    - name: Configure Plausible's email-scoped OIDC proxy
+      ansible.builtin.include_role:
+        name: lv3.platform.public_edge_oidc_auth
+        allow_duplicates: true
+      vars:
+        public_edge_oidc_auth_service_name: "{{ platform_identity.config_prefix }}-plausible-oauth2-proxy"
+        public_edge_oidc_auth_service_description: "{{ platform_identity.config_prefix | upper }} Plausible analytics oauth2-proxy"
+        public_edge_oidc_auth_http_address: 127.0.0.1:4181
+        public_edge_oidc_auth_config_file: "{{ public_edge_oidc_auth_config_dir }}/plausible.cfg"
+        public_edge_oidc_auth_cookie_secret_local_file: "{{ repo_shared_local_root }}/authentik/plausible-edge-oauth2-proxy-cookie-secret.txt"
+        public_edge_oidc_auth_cookie_name: _lv3_plausible_proxy
+        public_edge_oidc_auth_client_id: plausible-edge
+        public_edge_oidc_auth_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/plausible-edge-client-secret.txt"
+        public_edge_oidc_auth_issuer_url: "{{ authentik_oidc_provider_base_url }}/plausible-edge/"
+        public_edge_oidc_auth_redirect_url: "https://analytics.{{ platform_domain }}/oauth2/callback"
+        public_edge_oidc_auth_allowed_groups: []
+        public_edge_oidc_auth_authenticated_emails_local_file: "{{ repo_shared_local_root }}/authentik/plausible-edge-allowed-emails.txt"
+        public_edge_oidc_auth_authenticated_emails_file: "{{ public_edge_oidc_auth_config_dir }}/plausible-allowed-emails.txt"
+        public_edge_oidc_auth_probe_hostname: "analytics.{{ platform_domain }}"
+        public_edge_oidc_auth_watchdog_script_path: "/usr/local/libexec/{{ platform_identity.config_prefix }}-plausible-oauth2-proxy-watchdog.sh"
+        public_edge_oidc_auth_watchdog_service_name: "{{ platform_identity.config_prefix }}-plausible-oauth2-proxy-watchdog"
+        public_edge_oidc_auth_watchdog_state_dir: "/run/{{ platform_identity.config_prefix }}-plausible-oauth2-proxy-watchdog"
+        public_edge_oidc_auth_watchdog_ntfy_title: "Plausible OAuth2 Proxy Watchdog"
+
+    - name: Route only analytics authentication through the Plausible proxy
+      ansible.builtin.set_fact:
+        public_edge_authenticated_sites: >-
+          {{
+            public_edge_authenticated_sites
+            | combine(
+                {'analytics.{{ platform_domain }}': {'auth_proxy_upstream': 'http://127.0.0.1:4181'}},
+                recursive=True
+              )
+          }}
+
   roles:
     - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.public_edge_oidc_auth

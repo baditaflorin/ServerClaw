@@ -1,0 +1,114 @@
+---
+monitoring_prometheus_service_name: 0mcp-prometheus
+monitoring_prometheus_0own_node_exporter_target:
+  job_name: pve_0own_host_node_exporter_via_tailscale
+  address: 203.0.113.3:9100
+  labels:
+    monitored_host: proxmox-node
+
+# Prometheus scrape surface for production. The monitoring_vm role renders these
+# into /etc/prometheus/prometheus.yml; inventory-derived node_exporter and
+# blackbox targets come from the Scanopy file_sd jobs, not from this list.
+# Prometheus is restarted only when the unit or its credential drop-in changes;
+# prometheus.yml changes are validated with promtool and applied with SIGHUP.
+monitoring_scanopy_sd_enabled: true
+monitoring_scanopy_retag_enabled: true
+# Daily discovery of the Docker VMs, started from outside Scanopy (its own scheduler is unreliable). UTC, one start per
+# 15-minute run; the large Docker host (vm-0docker-ubuntu-24-04) gets a 45-minute window to itself.
+monitoring_scanopy_discover_enabled: true
+monitoring_scanopy_discover_schedule:
+  vm-0mcp-171-coolify-apps-lv3: "01:00"
+  vm-0docker-101-docker-prod: "01:15"
+  vm-0mcp-120-docker-runtime-lv3: "01:30"
+  vm-0mcp-130-docker-build-lv3: "01:45"
+  vm-0docker-ubuntu-24-04: "02:00"
+  vm-0mcp-192-runtime-control-lv3: "02:45"
+  vm-0mcp-191-runtime-general-lv3: "03:00"
+  vm-0mcp-170-coolify-lv3: "03:15"
+  vm-0mcp-121-runtime-comms-lv3: "03:30"
+  vm-0mcp-140-monitoring-lv3: "03:45"
+  vm-0mcp-artifact-cache: "04:00"
+  vm-0mcp-190-runtime-ai-lv3: "04:15"
+  vm-0own-610-0own-build-worker: "04:30"
+  vm-0own-630-0own-openobserve: "04:45"
+  vm-pve01-101-pve01-amd64-builder: "05:00"
+  vm-pve01-runtime-1: "05:15"
+  # Proxmox hypervisor daemons: keep the Proxmox VE inventory (guests, nodes) fresh. Each needs a Scheduled discovery in Scanopy.
+  pve-0docker: "05:30"
+  pve-0mcp: "05:45"
+  pve-0own: "06:00"
+  pve-pve01: "06:15"
+monitoring_scanopy_sd_extra_endpoints:
+  - target: http://10.10.10.20:8102/healthz
+    module: http_2xx
+    service: woodpecker
+    host: docker-runtime-lv3
+    why: >-
+      real Woodpecker server endpoint (open, healthy); not in Scanopy port data.
+      Previously hard-coded as 127.0.0.1:8102 (wrong host).
+# Only these catalog services keep liveness/readiness probes rendered into
+# prometheus.yml. The other catalog entries point at 127.0.0.1, retired
+# 10.10.10.x addresses, or example.com placeholders that the monitoring VM
+# cannot reach.
+monitoring_prometheus_health_probe_service_ids:
+  - alertmanager
+  - gitea
+  - grafana
+  - openbao
+# Placeholder catalog domains, retired 0mcp 10.10.10.x guests and the retired
+# 100.64.0.1 tailnet address in the generated SLO and TLS file_sd sources.
+monitoring_prometheus_blackbox_drop_address_regex: 'https?://([^/:]*\.example\.com|10\.10\.10\.[0-9]+|100\.64\.0\.1)(:[0-9]+)?(/.*)?'
+# file_sd list is maintained on the host (not rendered by this role).
+monitoring_prometheus_public_edge_targets_file: /etc/prometheus/file_sd/public-critical-targets.yml
+# Hypervisor and guest node exporters are not listed here: Scanopy publishes them (the hypervisor hosts keep their
+# legacy pve_*_host_* job names through the scanopy_job label). Only exporters Scanopy does not discover stay static.
+monitoring_prometheus_extra_scrape_jobs:
+  - job_name: pve_0docker_via_tailscale
+    metrics_path: /pve
+    params:
+      target: ["10.10.10.1"]
+      module: [default]
+      cluster: ["1"]
+      node: ["1"]
+    static_configs:
+      - targets: ["10.10.10.107:9221"]
+        labels:
+          monitored_host: "0docker"
+  - job_name: cadvisor-runtime-general-lv3
+    scrape_interval: 30s
+    scrape_timeout: 5s
+    static_configs:
+      - targets: ["10.10.10.91:9280"]
+        labels:
+          cluster: lv3
+          host: runtime-general-lv3
+# OpenObserve remote_write. The password never lives in git: the unit loads the
+# encrypted credential /etc/credstore.encrypted/openobserve_password (created
+# out of band with systemd-creds) and Prometheus reads it from
+# /run/credentials/<unit>/openobserve_password.
+monitoring_prometheus_remote_write_credentials:
+  - name: openobserve_password
+    encrypted_file: /etc/credstore.encrypted/openobserve_password
+monitoring_prometheus_remote_write_targets:
+  - url: https://openobserve.0own.com/api/default/prometheus/api/v1/write
+    basic_auth:
+      username: openobserve-ingest@monitoring.internal
+      password_file: "/run/credentials/{{ monitoring_prometheus_service_name }}.service/openobserve_password"
+    queue_config:
+      capacity: 10000
+      max_shards: 4
+# Alertmanager authenticates to ntfy as the dedicated runtime user alertmanager-notify (created with the ntfy CLI, so it
+# is not in ntfy server.yml). Its password is only ever read from the controller-local file below and is installed as
+# /etc/alertmanager/ntfy-password (root:prometheus 0640).
+alertmanager_runtime_ntfy_username: alertmanager-notify
+# fleet-triage runs on the 0docker Builder (CT108); reached over the tailnet via `tailscale serve --tcp 18322` there
+# (grants: monitoring-lv3 -> CT108 tcp:18322, config/tailscale/policy.hujson). The token file is controller-local.
+alertmanager_runtime_triage_webhook_url: "http://100.114.37.21:18322/webhook/alertmanager?source=0mcp"
+# Read-only access for the Builder (CT108): Alertmanager listens on all addresses (Prometheus already does, see
+# monitoring_prometheus_listen_address); guest nftables accepts 9090/9093 only from 100.114.37.21/32
+# (inventory/host_vars/proxmox-host.yml network_policy.guests.monitoring) and the Tailscale grant is single-pair.
+alertmanager_runtime_listen_address: "0.0.0.0:9093"
+alertmanager_runtime_ntfy_password_local_file: "{{ repo_shared_local_root }}/ntfy/alertmanager-notify-password.txt"
+# Alertmanager restarts the unit that actually runs on this guest (the generic
+# default derives from platform_identity.config_prefix and would not match).
+alertmanager_runtime_prometheus_service_name: "{{ monitoring_prometheus_service_name }}"

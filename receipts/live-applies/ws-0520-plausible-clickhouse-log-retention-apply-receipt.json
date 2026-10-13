@@ -1,0 +1,68 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "ws-0520-plausible-clickhouse-log-retention-apply-receipt",
+  "applied_on": "2026-10-07",
+  "recorded_on": "2026-10-07",
+  "recorded_by": "codex",
+  "source_commit": "490b74499da3cb800ed1b5994af848346593bfb4",
+  "repo_version_context": "0.179.48",
+  "workflow_id": "converge-plausible",
+  "adr": "0493",
+  "summary": "Bound Plausible ClickHouse diagnostic logs to one day and limited structured text logging to warnings without changing analytics event retention.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-runtime",
+      "vmid": "120",
+      "address": "10.10.10.20",
+      "compose_project": "plausible",
+      "containers_recreated": [
+        "plausible",
+        "plausible-db",
+        "plausible-events-db",
+        "plausible-openbao-agent"
+      ],
+      "pull_request": "https://github.com/baditaflorin/platform_server/pull/275"
+    }
+  ],
+  "verification": [
+    {
+      "check": "ClickHouse diagnostic TTL metadata",
+      "result": "pass",
+      "observed": "All 11 managed system log tables report a one-day TTL."
+    },
+    {
+      "check": "Plausible health",
+      "result": "pass",
+      "observed": "Local and public /api/health report sessions, Postgres, ClickHouse, and sites_cache healthy."
+    },
+    {
+      "check": "Public tracker script",
+      "result": "pass",
+      "observed": "https://analytics.example.org/js/script.js returned HTTP 200."
+    },
+    {
+      "check": "Analytics event storage",
+      "result": "pass",
+      "observed": "events_v2 contains 1,257 rows (71.46 KiB) after the converge's synthetic pageview was observed."
+    },
+    {
+      "check": "Runtime root capacity",
+      "result": "pass",
+      "observed": "123 GiB free of 252 GiB; 50% used."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0493-bounded-plausible-clickhouse-diagnostic-logs.md",
+    "docs/workstreams/ws-0520-plausible-clickhouse-log-retention.md",
+    "workstreams/active/ws-0520-plausible-clickhouse-log-retention.yaml",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The canonical Plausible playbook ran through the scoped runner limited to docker-runtime VM120; DNS and NGINX plays were skipped. Ansible recap: ok=246 changed=2 unreachable=0 failed=0 skipped=54 rescued=0.",
+    "The historical diagnostic buildup was cleaned before this durable managed policy was deployed.",
+    "Earlier pre-mutation attempts stopped on the stale DNS token and runtime-control SSH timeout. The successful scoped run executed OpenBao API checks from docker-runtime after verifying the API was reachable there.",
+    "Repository release 0.179.49 remains gated by 62 unrelated in-progress workstreams and 12 pre-existing gate-bypass waivers. The repository version remains 0.179.48; the live platform version is recorded separately as 0.178.226."
+  ]
+}

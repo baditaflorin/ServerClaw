@@ -59,6 +59,12 @@ uv run --no-project --with pyyaml python scripts/authentik_recovery.py send-emai
   --identity-file "${IDENTITY_FILE}"
 ```
 
+The helper selects exactly one active superuser by both the configured
+operator email and `authentik_bootstrap_admin_username` (default `akadmin`).
+This avoids sending a reset to a separate non-admin account if identities
+share an email address. If the deployment overrides that username, pass the
+same value with `--operator-username`.
+
 The link expires after 20 minutes and the recovery flow accepts at most three
 attempts per 15-minute window. A reset email is proof that Authentik accepted
 the request, not a substitute for confirming inbox delivery. Authentik did not
@@ -254,17 +260,28 @@ HETZNER_DNS_API_TOKEN=... make converge-authentik env=production
 
 Do not leave `adopt_legacy` or `generate` in a persistent inventory override.
 
-### 5. Prove OAuth reconciliation is idempotent
+### 5. Reconcile OAuth claims and prove idempotency
 
-The role applies the selected GlitchTip and Outline manifest clients and then performs a separate,
-read-only `--check --expect-no-change` pass. It adopts existing
-provider/application objects and the existing client secret; it must not
-replace object identities or rotate client material.
+The role reconciles `config/authentik/scope-mappings.yaml` before OAuth
+providers, then applies `config/authentik/oauth-clients.yaml` and performs a
+separate, read-only `--check --expect-no-change` pass for each. It adopts
+existing provider/application objects and the existing client secret; it must
+not replace object identities or rotate client material. Custom scope mappings
+must carry the `managed-by: serverclaw` ownership marker. A scope name already
+owned by another mapping is rejected rather than overwritten.
 
 The same no-change assertion can be repeated from any linked worktree without
 putting a token value in argv:
 
 ```bash
+uv run --no-project --with pyyaml python scripts/reconcile_authentik_scope_mappings.py \
+  --manifest config/authentik/scope-mappings.yaml \
+  --base-url "https://id.${PLATFORM_DOMAIN}" \
+  --token-file "${LOCAL_ROOT}/authentik/bootstrap-token.txt" \
+  --mapping grafana-groups \
+  --check \
+  --expect-no-change
+
 uv run --no-project --with pyyaml python scripts/reconcile_authentik_oauth.py \
   --base-url "https://id.${PLATFORM_DOMAIN}" \
   --platform-domain "${PLATFORM_DOMAIN}" \
@@ -274,6 +291,25 @@ uv run --no-project --with pyyaml python scripts/reconcile_authentik_oauth.py \
   --check \
   --expect-no-change
 ```
+
+## Plausible edge access
+
+Plausible may use a separate `oauth2-proxy` instance when its access policy
+differs from the shared operations proxy. The dedicated Authentik provider is
+declared as `plausible-edge` in `config/authentik/oauth-clients.yaml`. Its
+controller-local client secret and cookie secret are kept under
+`.local/authentik/`. For an email-scoped deployment, place one exact email
+address per line in `.local/authentik/plausible-edge-allowed-emails.txt` with
+mode `0600`; the edge role copies it to a root-only file and configures
+`authenticated_emails_file`. Never add this address to the shared platform
+administrator group to fix a Plausible-only login.
+
+The proxy listens on loopback port `4181`; only the analytics hostname routes
+its `/oauth2/*` endpoints there. Tracking and health paths retain the existing
+publication rules. Roll back by restoring the analytics auth proxy upstream to
+the shared proxy on port `4180`, removing the dedicated proxy include, then
+reconverging `configure-edge-publication`. Do not change the shared proxy's
+group policy during this rollback.
 
 ## Verification and evidence
 

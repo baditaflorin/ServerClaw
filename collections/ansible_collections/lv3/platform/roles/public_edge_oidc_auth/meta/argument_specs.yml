@@ -74,6 +74,16 @@ argument_specs:
         required: true
         description:
           - Authentik groups that may authenticate to the protected portal.
+      public_edge_oidc_auth_authenticated_emails_local_file:
+        type: path
+        required: false
+        description:
+          - Optional controller-local exact email allowlist copied to the edge host.
+      public_edge_oidc_auth_authenticated_emails_file:
+        type: path
+        required: false
+        description:
+          - Optional edge-local oauth2-proxy authenticated email allowlist path.
       public_edge_oidc_auth_email_domains:
         type: list
         elements: str
@@ -105,3 +115,8 @@ argument_specs:
         required: true
         description:
           - One protected hostname used for the local unauthenticated auth-check probe.
+      public_edge_oidc_auth_watchdog_state_dir:
+        type: path
+        required: false
+        description:
+          - Runtime directory used to keep this proxy watchdog's failure counter isolated.

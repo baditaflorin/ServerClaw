@@ -123,7 +123,11 @@ def missing_deployment_derived_platform_inputs() -> tuple[Path, ...]:
     return tuple(path for path in DEPLOYMENT_DERIVED_PLATFORM_INPUT_PATHS if not path.exists())
 
 
-def derived_platform_vars_equivalence_skip_message(missing_inputs: tuple[Path, ...]) -> str:
+def derived_platform_vars_equivalence_skip_message(
+    missing_inputs: tuple[Path, ...],
+    *,
+    missing_selectors: tuple[str, ...] = (),
+) -> str:
     """Explain why only the deployment-derived equivalence comparison is skipped."""
 
     labels: list[str] = []
@@ -132,9 +136,10 @@ def derived_platform_vars_equivalence_skip_message(missing_inputs: tuple[Path, .
             labels.append(str(path.relative_to(REPO_ROOT)))
         except ValueError:
             labels.append(str(path))
-    missing_paths = ", ".join(labels)
+    labels.extend(f"{selector} not selected" for selector in missing_selectors)
+    missing_paths = ", ".join(labels) or "deployment-specific inputs unavailable"
     return (
-        "Skipping derived platform-vars equivalence check because deployment-specific generated inputs are unavailable: "
+        "Skipping derived platform-vars equivalence check because deployment-specific inputs cannot be reproduced: "
         f"{missing_paths}. Tracked-source validation continues."
     )
 
@@ -1472,10 +1477,20 @@ def check_platform_vars(
 ) -> int:
     # The default repository gate uses committed inputs only so it passes on any
     # operator machine. An explicitly selected identity is intentional deployment
-    # state and must participate in the comparison.
+    # state and must participate in the comparison. Topology overlays have no
+    # tracked snapshot, so equality is meaningful only when the selected overlay
+    # is explicitly available to this invocation.
     missing_inputs = missing_deployment_derived_platform_inputs()
-    if missing_inputs:
-        print(derived_platform_vars_equivalence_skip_message(missing_inputs))
+    topology_selector_missing = (
+        not use_topology_override and resolve_explicit_overlay_selector("PLATFORM_TOPOLOGY_OVERLAY") is None
+    )
+    if missing_inputs or topology_selector_missing:
+        print(
+            derived_platform_vars_equivalence_skip_message(
+                missing_inputs,
+                missing_selectors=("PLATFORM_TOPOLOGY_OVERLAY",) if topology_selector_missing else (),
+            )
+        )
         return 0
 
     stack, host_vars = load_sources(

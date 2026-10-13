@@ -1,0 +1,62 @@
+---
+# Purpose: Converge node_exporter listeners, the textfile directory, socket proxies and tailscale serve ports on one fleet host.
+# Use case: Run from playbooks/fleet-observability.yml with an explicit --limit; never as part of a fleet-wide converge.
+# Inputs: fleet_node_exporter_* host variables (see defaults/main.yml and meta/argument_specs.yml).
+# Outputs: ARGS line in the exporter defaults file, textfile directory, optional systemd socket proxies, optional tailscale serve TCP forwards.
+# Idempotency: Idempotent. The exporter restarts only when its ARGS line changes; proxies restart only when their unit text changes.
+# Dependencies: The prometheus-node-exporter package (installed here when fleet_node_exporter_manage_package is true) and, for proxies or serve ports, tailscaled.
+
+- name: Validate node exporter inputs
+  ansible.builtin.assert:
+    that:
+      - fleet_node_exporter_listen_addresses | length > 0
+      - fleet_node_exporter_listen_addresses | select('match', '^[0-9a-fA-F.:]+:[0-9]+$') | list | length == fleet_node_exporter_listen_addresses | length
+      - fleet_node_exporter_listen_addresses | select('match', '^(0\.0\.0\.0|::|\[::\]):') | list | length == 0
+      - fleet_node_exporter_textfile_dir | length == 0 or fleet_node_exporter_textfile_dir is match('^/')
+    fail_msg: >-
+      fleet_node_exporter_listen_addresses must list explicit "address:port" entries and must never be a wildcard
+      address; fleet_node_exporter_textfile_dir must be empty or absolute.
+
+- name: Check the exporter port plan for collisions
+  ansible.builtin.include_tasks: port_plan.yml
+
+- name: Ensure the node exporter package is present
+  ansible.builtin.apt:
+    name: "{{ fleet_node_exporter_package }}"
+    state: present
+  when: fleet_node_exporter_manage_package | bool
+
+- name: Ensure the textfile collector directory exists with its declared ownership
+  ansible.builtin.file:
+    path: "{{ fleet_node_exporter_textfile_dir }}"
+    state: directory
+    owner: "{{ fleet_node_exporter_textfile_owner }}"
+    group: "{{ fleet_node_exporter_textfile_group }}"
+    mode: "{{ fleet_node_exporter_textfile_mode }}"
+  when: fleet_node_exporter_textfile_dir | length > 0
+
+- name: Set the exporter ARGS line
+  ansible.builtin.lineinfile:
+    path: "{{ fleet_node_exporter_defaults_file }}"
+    regexp: '^ARGS='
+    line: "{{ lookup('ansible.builtin.template', 'node-exporter-args.j2') | trim }}"
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+  notify: Restart fleet node exporter
+
+- name: Ensure the node exporter service is enabled and running
+  ansible.builtin.systemd:
+    name: "{{ fleet_node_exporter_service }}"
+    enabled: true
+    state: started
+
+- name: Converge systemd socket proxies
+  ansible.builtin.include_tasks: proxies.yml
+  when: fleet_node_exporter_socket_proxies | length > 0
+
+- name: Converge tailscale serve TCP forwards
+  ansible.builtin.include_tasks: tailscale_serve.yml
+  when: fleet_node_exporter_tailscale_serve_tcp | length > 0

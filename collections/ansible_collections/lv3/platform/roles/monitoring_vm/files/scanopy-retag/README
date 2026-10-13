@@ -1,0 +1,18 @@
+scanopy-retag: keep every Docker bridge subnet in Scanopy tagged `docker-bridge`
+
+Why: the Scanopy topology hides subnets by tag (options.local.tag_filter.hidden_subnet_tag_ids = the
+`docker-bridge` tag). Discovery creates new Docker networks untagged; this job tags them.
+
+Files
+  /opt/scanopy-retag/scanopy_retag.py   job (python3 stdlib); additive only, never removes tags or deletes
+  /etc/scanopy-retag/api-key            Scanopy API key (root 0600); needs permission to assign tags (Member or higher)
+  /var/lib/prometheus/node-exporter/scanopy_retag.prom   metrics scanopy_retag_*
+  systemd: scanopy-retag.service (oneshot) + scanopy-retag.timer (15 min)
+
+Behaviour
+  - fails (exit 1, last_attempt_success 0) if the key is missing, the tag `docker-bridge` does not exist,
+    or more than 500 subnets would be tagged in one run (RETAG_MAX_PER_RUN)
+Manual run:  sudo systemctl start scanopy-retag.service ; journalctl -u scanopy-retag -n 20
+Dry run:     sudo python3 /opt/scanopy-retag/scanopy_retag.py --dry-run
+Rollback:    systemctl disable --now scanopy-retag.timer   (tags already applied stay)
+Managed by the monitoring_vm role (tasks/scanopy_retag.yml); see docs/runbooks/scanopy-service-discovery.md.

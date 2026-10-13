@@ -174,7 +174,7 @@ clients:
       grant_types: [authorization_code]
       authorization_flow: default-provider-authorization-implicit-consent
       invalidation_flow: default-provider-invalidation-flow
-      scopes: [openid, profile, email]
+      scopes: [openid, profile, email, grafana-groups]
       redirect_uris:
         - https://grafana.{{ platform_domain }}/login/generic_oauth
       include_claims_in_id_token: true
@@ -278,6 +278,26 @@ clients:
       scopes: [openid, profile, email]
       redirect_uris:
         - https://ops.{{ platform_domain }}/oauth2/callback
+      include_claims_in_id_token: true
+      sub_mode: hashed_user_id
+      issuer_mode: per_provider
+  - id: plausible-edge
+    enabled: true
+    client_secret_file: authentik/plausible-edge-client-secret.txt
+    application:
+      name: Plausible Analytics Edge
+      slug: plausible-edge
+      launch_url: https://analytics.{{ platform_domain }}
+    provider:
+      name: plausible-edge
+      client_id: plausible-edge
+      client_type: confidential
+      grant_types: [authorization_code]
+      authorization_flow: default-provider-authorization-implicit-consent
+      invalidation_flow: default-provider-invalidation-flow
+      scopes: [openid, profile, email]
+      redirect_uris:
+        - https://analytics.{{ platform_domain }}/oauth2/callback
       include_claims_in_id_token: true
       sub_mode: hashed_user_id
       issuer_mode: per_provider

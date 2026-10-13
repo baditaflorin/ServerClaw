@@ -1,0 +1,113 @@
+id: ws-0519-plausible-email-sso
+adr: '0492'
+title: Scope Plausible analytics SSO to the operator email identity
+status: live_applied
+ready_to_merge: false
+live_applied: true
+owner: codex
+branch: codex/plausible-secret-key-base-minimum
+worktree_path: .worktrees/plausible-sso
+doc: docs/workstreams/ws-0519-plausible-email-sso.md
+depends_on:
+  - adr-0491-authentik-for-operator-and-agent-sso
+conflicts_with: []
+shared_surfaces:
+  - config/authentik/oauth-clients.yaml
+  - config/service-completeness.json
+  - catalog/services/plausible/service.yaml
+  - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/**
+  - collections/ansible_collections/lv3/platform/roles/plausible_runtime/tasks/main.yml
+  - playbooks/public-edge.yml
+  - docs/runbooks/configure-authentik.md
+  - docs/workstreams/adr-0492-plausible-email-sso.md
+  - workstreams/active/ws-0519-plausible-email-sso.yaml
+  - workstreams.yaml
+  - README.md
+  - changelog.md
+  - docs/status/history/merged-workstreams.md
+  - inventory/group_vars/platform.yml
+  - config/controller-local-secrets.json
+  - config/token-inventory.yaml
+  - docs/diagrams/agent-coordination-map.excalidraw
+ownership_manifest:
+  owned_surfaces:
+    - id: plausible_scoped_oidc_client
+      paths:
+        - config/authentik/oauth-clients.yaml
+        - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/**
+        - playbooks/public-edge.yml
+      mode: exclusive
+    - id: plausible_sso_documentation
+      paths:
+        - docs/runbooks/configure-authentik.md
+        - docs/workstreams/adr-0492-plausible-email-sso.md
+        - docs/workstreams/ws-0519-plausible-email-sso.md
+        - workstreams/active/ws-0519-plausible-email-sso.yaml
+      mode: exclusive
+    - id: plausible_secret_catalogs
+      paths:
+        - config/controller-local-secrets.json
+        - config/token-inventory.yaml
+      mode: exclusive
+    - id: plausible_service_definition
+      paths:
+        - catalog/services/plausible/service.yaml
+      mode: exclusive
+    - id: plausible_runtime_secret_contract
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/plausible_runtime/tasks/main.yml
+      mode: exclusive
+    - id: active_workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: generated_service_catalogs
+      paths:
+        - config/service-completeness.json
+      mode: shared_contract
+      contract: generated-service-catalogs-v1
+    - id: integration_truth
+      paths:
+        - README.md
+        - changelog.md
+      mode: shared_contract
+      contract: canonical-truth-v1
+    - id: generated_workstream_status
+      paths:
+        - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+    - id: generated_platform_inventory
+      paths:
+        - inventory/group_vars/platform.yml
+      mode: shared_contract
+      contract: generated-artifacts-v1
+canonical_truth:
+  changelog_entry: Allow an explicitly configured operator email to access Plausible through a dedicated Authentik OAuth client and proxy.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    live_apply: receipts/live-applies/ws-0519-plausible-email-sso-apply-receipt.yaml
+tasks:
+  - id: t1
+    title: Add a dedicated Plausible OAuth client and exact-email proxy allowlist
+    status: completed
+  - id: t2
+    title: Validate the scoped edge configuration and document rollback
+    status: completed
+  - id: t3
+    title: Merge through private-source PR and apply the analytics-only change
+    status: completed
+  - id: t4
+    title: Verify analytics login, bootstrap account, and unaffected shared SSO routes
+    status: in_progress
+  - id: t5
+    title: Publish the runtime cookie-key minimum through the private source gate
+    status: in_progress
+plane_issue_id: 5bb23678-8e91-448c-a634-4f4b8359aabf

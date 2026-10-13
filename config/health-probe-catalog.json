@@ -102,6 +102,40 @@
         }
       }
     },
+    "artifact_cache": {
+      "service_name": "artifact-cache",
+      "owning_vm": "artifact-cache",
+      "role": "artifact_cache_runtime",
+      "verify_file": "roles/artifact_cache_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The primary private registry mirror answers the Docker Registry v2 API on the artifact-cache guest.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5001/v2/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The primary Docker Hub pull-through mirror is ready for internal build consumers.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5001/v2/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The cache is private-only; continuous availability is monitored by Prometheus blackbox from the monitoring VM, while public Uptime Kuma monitoring remains disabled."
+      }
+    },
     "authentik": {
       "service_name": "authentik",
       "owning_vm": "runtime-control",

@@ -1,0 +1,101 @@
+---
+# Purpose: Install the vzdump metrics hook and keep the PBS storage entry and the pg-primary backup job equal to the declaration.
+# Use case: Included from main.yml on the 0database hypervisor.
+# Inputs: fleet_pg_backup_pve_storage, fleet_pg_backup_pve_jobs, fleet_pg_backup_hook_* and fleet_pg_backup_state_dir.
+# Outputs: Hook script, state directory, storage settings and job settings applied with pvesh.
+# Idempotency: Idempotent; pvesh set runs only for keys whose live value differs.
+# Dependencies: pvesh. The storage entry and its secret file must already exist; this role never creates or reads the secret.
+
+- name: Validate PBS storage and job declarations
+  ansible.builtin.assert:
+    that:
+      - fleet_pg_backup_pve_storage.id is defined
+      - fleet_pg_backup_pve_storage.type == 'pbs'
+      - fleet_pg_backup_pve_storage.password_file is match('^/etc/pve/priv/storage/[^/]+\.pw$')
+      - fleet_pg_backup_pve_jobs | length > 0
+      - fleet_pg_backup_pve_jobs | map(attribute='storage') | unique | list == [fleet_pg_backup_pve_storage.id]
+      - fleet_pg_backup_pve_jobs | map(attribute='script') | unique | list == [fleet_pg_backup_hook_path]
+    fail_msg: "fleet_pg_backup_pve_storage must be a pbs storage with a /etc/pve/priv/storage/<id>.pw reference, and every job must use it and the managed hook."
+
+- name: Ensure the hook state directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_pg_backup_state_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the vzdump metrics hook
+  ansible.builtin.template:
+    src: vzdump-pg-metrics-hook.j2
+    dest: "{{ fleet_pg_backup_hook_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    backup: true
+
+- name: Check that the PBS secret file exists (its content is never read)
+  ansible.builtin.stat:
+    path: "{{ fleet_pg_backup_pve_storage.password_file }}"
+  register: fleet_pg_backup_storage_secret
+
+- name: Require the PBS secret file
+  ansible.builtin.assert:
+    that:
+      - fleet_pg_backup_storage_secret.stat.exists
+      - fleet_pg_backup_storage_secret.stat.mode == '0600'
+    fail_msg: >-
+      {{ fleet_pg_backup_pve_storage.password_file }} is missing or not 0600. Create the storage with `pvesm add pbs`
+      (operator step, the token secret comes from own-pbs) before running this role.
+
+- name: Read the live PBS storage entry
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - get
+      - "/storage/{{ fleet_pg_backup_pve_storage.id }}"
+      - --output-format
+      - json
+  register: fleet_pg_backup_storage_live
+  changed_when: false
+  check_mode: false
+
+- name: Resolve the declared and live storage settings
+  ansible.builtin.set_fact:
+    fleet_pg_backup_storage_declared:
+      server: "{{ fleet_pg_backup_pve_storage.server }}"
+      datastore: "{{ fleet_pg_backup_pve_storage.datastore }}"
+      namespace: "{{ fleet_pg_backup_pve_storage.namespace }}"
+      username: "{{ fleet_pg_backup_pve_storage.username }}"
+      fingerprint: "{{ fleet_pg_backup_pve_storage.fingerprint }}"
+      content: "{{ fleet_pg_backup_pve_storage.content }}"
+    fleet_pg_backup_storage_current: "{{ fleet_pg_backup_storage_live.stdout | from_json }}"
+
+- name: Report PBS storage drift
+  ansible.builtin.debug:
+    msg: "DRIFT storage {{ fleet_pg_backup_pve_storage.id }}: {{ item.key }} is {{ fleet_pg_backup_storage_current[item.key] | default('unset') }}, declared {{ item.value }}."
+  loop: "{{ fleet_pg_backup_storage_declared | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: (fleet_pg_backup_storage_current[item.key] | default('') | string) != (item.value | string)
+
+- name: Apply PBS storage settings
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - set
+      - "/storage/{{ fleet_pg_backup_pve_storage.id }}"
+      - "--{{ item.key }}"
+      - "{{ item.value }}"
+  loop: "{{ fleet_pg_backup_storage_declared | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: (fleet_pg_backup_storage_current[item.key] | default('') | string) != (item.value | string)
+  changed_when: true
+
+- name: Converge each declared backup job
+  ansible.builtin.include_tasks: pve_backup_job.yml
+  loop: "{{ fleet_pg_backup_pve_jobs }}"
+  loop_control:
+    loop_var: fleet_pg_backup_job
+    label: "{{ fleet_pg_backup_job.id }}"

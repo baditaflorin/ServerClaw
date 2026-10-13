@@ -222,6 +222,21 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             task for task in self.tasks if task["name"] == "Check whether the public edge certificate exists"
         )
         self.assertIn("public_edge_effective_cert_name", check_task["ansible.builtin.stat"]["path"])
+        private_site_request = next(
+            task
+            for task in self.tasks
+            if task["name"]
+            == "Derive site-local certificate requests for hostnames missing from the shared certificate"
+        )
+        self.assertIn("not (item.private_only | default(false))", private_site_request["when"])
+
+        private_cert_check = next(
+            task
+            for task in self.tasks
+            if task["name"] == "Verify that the shared edge certificate covers private-edge hostnames"
+        )
+        self.assertEqual(private_cert_check["ansible.builtin.command"]["argv"][-2:], ["-checkhost", "{{ item }}"])
+        self.assertEqual(private_cert_check["loop"], "{{ public_edge_private_certificate_hostnames }}")
 
     def test_tasks_resolve_edge_catalogs_before_validation(self) -> None:
         task_names = [task["name"] for task in self.tasks]
@@ -235,6 +250,9 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("public_edge_extra_sites", resolved_facts["public_edge_certificate_domains"])
         self.assertIn("service_topology_edge_sites", resolved_facts["public_edge_sites"])
         self.assertIn("public_edge_extra_sites", resolved_facts["public_edge_sites"])
+        self.assertIn("service_topology_private_edge_sites", resolved_facts["public_edge_private_sites"])
+        self.assertIn("public_edge_sites", resolved_facts["public_edge_all_sites"])
+        self.assertIn("public_edge_private_sites", resolved_facts["public_edge_all_sites"])
 
     def test_tasks_resolve_shared_certificate_lineage_fallbacks(self) -> None:
         discover_task = next(
@@ -416,6 +434,11 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("location ^~ {{ route.path }} {", self.template)
         self.assertIn("proxy_buffering off;", self.template)
         self.assertIn("site_tls_enabled = public_edge_tls_enabled or", self.template)
+        self.assertIn("private_site_source_policy(site)", self.template)
+        self.assertIn("allow {{ cidr }};", self.template)
+        self.assertIn("deny all;", self.template)
+        self.assertIn("if not (site.private_only | default(false))", self.template)
+        self.assertIn("public_edge_all_sites", self.template)
         self.assertIn(
             "ssl_certificate /etc/letsencrypt/live/{{ shared_tls_certificate_name() }}/fullchain.pem;",
             self.template,

@@ -1,0 +1,50 @@
+schema_version: 1.0.0
+receipt_id: ws-0519-plausible-email-sso-apply-receipt
+applied_on: '2026-10-05'
+recorded_on: '2026-10-05'
+recorded_by: codex
+source_commit: 7152a8a848d7c9435453f82a24474ee051bda9eb
+repo_version_context: 0.179.48
+workflow_id: configure-edge-publication
+adr: '0492'
+summary: >-
+  Published a dedicated exact-email OAuth2 Proxy for analytics.example.org and routed
+  only Plausible authentication through it, resolving the shared-group 403 path.
+targets:
+  - kind: vm
+    name: 0mcp NGINX edge VM
+  - kind: host_service
+    name: Plausible scoped oauth2-proxy on 127.0.0.1:4181
+verification:
+  - check: Scoped oauth2-proxy health
+    result: pass
+    observed: Local /oauth2/auth on 127.0.0.1:4181 returned HTTP 401 as expected without a session.
+  - check: Plausible authorization redirect
+    result: pass
+    observed: analytics.example.org redirected through Authentik with client_id plausible-edge and the registered analytics callback.
+  - check: Plausible readiness
+    result: pass
+    observed: GET https://analytics.example.org/api/system/health/ready returned HTTP 200.
+  - check: Shared Operations Portal SSO unchanged
+    result: pass
+    observed: ops.example.org continued to redirect through Authentik with client_id ops-portal-oauth.
+  - check: Full interactive account callback
+    result: warn
+    observed: Browser is on the Plausible Authentik login screen; operator credential entry and final callback remain for the user.
+evidence_refs:
+  - https://github.com/baditaflorin/platform_server/pull/270
+  - https://github.com/baditaflorin/platform_server/pull/271
+  - https://github.com/baditaflorin/platform_server/pull/272
+notes:
+  - >-
+    The first edge attempt stopped before NGINX publication because the role rejected
+    an email-only restriction; a follow-up PR fixed role validation.
+  - >-
+    Production requires platform_domain=example.org. A later PR corrected the route
+    lookup to use the hostname key expected by the edge template.
+  - >-
+    Only analytics.example.org was switched to port 4181. The prior malformed
+    example-prefixed proxy unit was stopped and disabled; the 0mcp-scoped unit is active.
+  - >-
+    The repo release manager refused the patch release because unrelated repository
+    readiness blockers remain; no release-version bypass was used.

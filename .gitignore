@@ -47,6 +47,8 @@ build/*
 !build/platform-manifest.json
 !build/traceability.yaml
 !build/validator-catalogue.yaml
+!build/patched-images/
+!build/patched-images/**
 !build/onboarding/
 build/onboarding/*
 !build/onboarding/*.yaml

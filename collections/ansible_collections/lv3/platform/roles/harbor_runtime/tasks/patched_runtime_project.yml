@@ -1,0 +1,169 @@
+---
+# Purpose: Maintain a private Harbor project for reviewed, locally patched runtime images.
+# Publisher can push/pull; runtime credentials can only pull. Harbor-generated secret material is mirrored locally.
+- name: Query the private patched-runtime Harbor project
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects?name={{ harbor_patched_runtime_project_name | urlencode }}
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    return_content: true
+    status_code: 200
+  register: harbor_patched_runtime_project_query
+  changed_when: false
+  no_log: true
+
+- name: Create the private patched-runtime Harbor project when missing
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects"
+    method: POST
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      project_name: "{{ harbor_patched_runtime_project_name }}"
+      metadata:
+        public: "{{ 'true' if harbor_patched_runtime_project_public else 'false' }}"
+        auto_scan: "true"
+        reuse_sys_cve_allowlist: "false"
+      storage_limit: -1
+    status_code:
+      - 201
+      - 409
+  when: (harbor_patched_runtime_project_query.json | default([])) | length == 0
+  no_log: true
+
+- name: Re-query the patched-runtime Harbor project after create
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects?name={{ harbor_patched_runtime_project_name | urlencode }}
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    return_content: true
+    status_code: 200
+  register: harbor_patched_runtime_project_query_after
+  changed_when: false
+  no_log: true
+
+- name: Record the patched-runtime Harbor project ID
+  ansible.builtin.set_fact:
+    harbor_patched_runtime_project_id: "{{ (harbor_patched_runtime_project_query_after.json | first).project_id | int }}"
+  no_log: true
+
+- name: Query patched-runtime project metadata before reconciliation
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects/{{ harbor_patched_runtime_project_name | urlencode }}/metadatas/
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    return_content: true
+    status_code: 200
+  register: harbor_patched_runtime_project_metadata_before
+  changed_when: false
+  no_log: true
+
+- name: Merge the desired patched-runtime policy into existing project metadata
+  ansible.builtin.set_fact:
+    harbor_patched_runtime_project_metadata_desired: >-
+      {{
+        (harbor_patched_runtime_project_metadata_before.json | default({}))
+        | combine({
+            'public': ('true' if harbor_patched_runtime_project_public else 'false'),
+            'auto_scan': 'true',
+            'reuse_sys_cve_allowlist': 'false'
+          })
+      }}
+  no_log: true
+
+- name: Reconcile patched-runtime policy through Harbor's project update API
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects/{{ harbor_patched_runtime_project_name | urlencode }}
+    method: PUT
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      metadata: "{{ harbor_patched_runtime_project_metadata_desired }}"
+    status_code: 200
+  when: >-
+    (harbor_patched_runtime_project_metadata_before.json | default({}))
+    != harbor_patched_runtime_project_metadata_desired
+  changed_when: true
+  no_log: true
+
+- name: Verify patched-runtime project metadata after reconciliation
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/projects/{{ harbor_patched_runtime_project_name | urlencode }}/metadatas/
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    return_content: true
+    status_code: 200
+  register: harbor_patched_runtime_project_metadata_after
+  changed_when: false
+  no_log: true
+
+- name: Assert patched-runtime project metadata matches the security policy
+  ansible.builtin.assert:
+    that:
+      - harbor_patched_runtime_project_metadata_after.json.public == ('true' if harbor_patched_runtime_project_public else 'false')
+      - harbor_patched_runtime_project_metadata_after.json.auto_scan == 'true'
+      - harbor_patched_runtime_project_metadata_after.json.reuse_sys_cve_allowlist == 'false'
+    fail_msg: "Harbor did not persist the expected patched-runtime project security metadata."
+  no_log: true
+
+- name: Reconcile the patched-runtime Harbor publisher and puller robots
+  ansible.builtin.include_tasks: reconcile_patched_runtime_robot.yml
+  loop:
+    - name: "{{ harbor_patched_runtime_publisher_robot_name }}"
+      description: "{{ harbor_patched_runtime_publisher_robot_description }}"
+      local_file: "{{ harbor_patched_runtime_publisher_local_file }}"
+      actions:
+        - resource: repository
+          action: pull
+        - resource: repository
+          action: push
+    - name: "{{ harbor_patched_runtime_puller_robot_name }}"
+      description: "{{ harbor_patched_runtime_puller_robot_description }}"
+      local_file: "{{ harbor_patched_runtime_puller_local_file }}"
+      actions:
+        - resource: repository
+          action: pull
+  loop_control:
+    label: "{{ item.name }}"
+  vars:
+    harbor_patched_runtime_robot: "{{ item }}"
+
+- name: Read the controller-local patched-runtime puller credential
+  ansible.builtin.slurp:
+    src: "{{ harbor_patched_runtime_puller_local_file }}"
+  register: harbor_patched_runtime_puller_secret_raw
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Record the patched-runtime puller credential for Docker login
+  ansible.builtin.set_fact:
+    harbor_patched_runtime_puller_secret: "{{ harbor_patched_runtime_puller_secret_raw.content | b64decode | from_json }}"
+  no_log: true
+
+- name: Store pull-only Harbor credentials in the Docker runtime config
+  community.docker.docker_login:
+    registry_url: "https://{{ harbor_public_hostname }}"
+    username: "{{ harbor_patched_runtime_puller_secret.username }}"
+    password: "{{ harbor_patched_runtime_puller_secret.secret }}"
+    reauthorize: false
+    config_path: "{{ harbor_runtime_docker_config_path }}"
+    state: present
+  no_log: true

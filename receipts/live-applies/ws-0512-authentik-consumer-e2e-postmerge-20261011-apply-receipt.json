@@ -1,0 +1,42 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "ws-0512-authentik-consumer-e2e-postmerge-20261011-apply-receipt",
+  "applied_on": "2026-10-11",
+  "recorded_on": "2026-10-11",
+  "recorded_by": "codex",
+  "source_commit": "0bd6804f912c314214894d314c8dc774ff8cf67f",
+  "repo_version_context": "0.179.48",
+  "workflow_id": "live-apply-service",
+  "summary": "Applied the merged Grafana sign-out correction and verified a non-admin Viewer session and a new session after sign-out.",
+  "targets": [
+    {
+      "kind": "container",
+      "name": "grafana",
+      "vmid": "140"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Grafana converge",
+      "result": "pass",
+      "observed": "The play reported 290 OK, 18 updates, zero failures, and 72 skipped; Grafana settings updated and the process reloaded."
+    },
+    {
+      "check": "Grafana user session",
+      "result": "pass",
+      "observed": "A fresh session returned HTTP 200; isGrafanaAdmin=false and organization role Viewer were confirmed."
+    },
+    {
+      "check": "Grafana sign-out and new session",
+      "result": "pass",
+      "observed": "The sign-out confirmation returned HTTP 200; the user endpoint returned HTTP 401 afterward. A second session showed the Viewer role; a second sign-out again returned HTTP 401."
+    }
+  ],
+  "evidence_refs": [
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "This receipt covers only the completed Grafana consumer checks. Other consumer work remains open and is not represented as complete."
+  ]
+}

@@ -28,7 +28,7 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 IDENTIFIER_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_]*$")
 ALLOWED_KINDS = {"runtime", "build_base"}
-ALLOWED_SCAN_STATUSES = {"pass_no_critical", "exception_open"}
+ALLOWED_SCAN_STATUSES = {"pass_no_critical", "exception_open", "blocked"}
 ALLOWED_SCANNERS = {"grype", "trivy"}
 
 
@@ -155,7 +155,11 @@ def validate_image_catalog(catalog: dict) -> None:
         critical_count = receipt["summary"]["critical"]
         if exception is None:
             if critical_count > 0:
-                raise ValueError(f"images.{image_id}.exception is required when critical findings are present")
+                if scan_status == "blocked":
+                    continue
+                raise ValueError(
+                    f"images.{image_id}.scan_status must be 'blocked' when critical findings have no active exception"
+                )
             if scan_status != "pass_no_critical":
                 raise ValueError(
                     f"images.{image_id}.scan_status must be 'pass_no_critical' when no active exception is recorded"

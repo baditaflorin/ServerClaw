@@ -1,0 +1,21 @@
+workstream_id: ws-0512-authentik-builder-managed-retry-20261012
+state: failed
+schema_version: 1.1.0
+started_at: '2026-10-12T14:53:58Z'
+completed_at: '2026-10-12T14:54:18Z'
+applied_by: codex/live-apply
+repo_version: 1ecd355d5
+adr: 0355/0357
+summary: Reconcile managed BuildKit on VM 130 after verifying idle CI and preserved
+  shared cache.
+targets:
+- service: build-artifact-cache
+  vmid: '130'
+  legacy_containers:
+  - 0mcp-buildkitd
+  - 0mpc-buildkitd
+  managed_unit: lv3-buildkitd
+errors:
+- make live-apply-service returned exit code 2
+notes:
+- Full command output was not printed to avoid exposing unrelated sensitive values.

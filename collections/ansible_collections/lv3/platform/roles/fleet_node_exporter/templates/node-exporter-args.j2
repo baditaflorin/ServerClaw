@@ -1,0 +1,12 @@
+{# One ARGS line for /etc/default/prometheus-node-exporter. Order is listen addresses, textfile flag, extra flags. #}
+{% set ns = namespace(args=[]) %}
+{% for address in fleet_node_exporter_listen_addresses %}
+{% set ns.args = ns.args + ['--web.listen-address=' ~ address] %}
+{% endfor %}
+{% if fleet_node_exporter_textfile_dir | length > 0 %}
+{% set ns.args = ns.args + ['--collector.textfile.directory=' ~ fleet_node_exporter_textfile_dir] %}
+{% endif %}
+{% for flag in fleet_node_exporter_extra_args %}
+{% set ns.args = ns.args + [flag] %}
+{% endfor %}
+ARGS={{ fleet_node_exporter_args_quote }}{{ fleet_node_exporter_args_prefix }}{{ ns.args | join(' ') }}{{ fleet_node_exporter_args_quote }}

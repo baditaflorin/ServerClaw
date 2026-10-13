@@ -82,6 +82,22 @@ checks the public profile's `is_admin` field; Gitea does not authenticate the
 account non-admin; remove it and its local password file when the verification
 account is no longer needed.
 
+### Browser path versus controller path
+
+The operator browser URL is `https://git.example.com`. It is served by the
+managed NGINX edge through the explicitly declared `private_edge` route in the
+deployment topology. That route uses TLS, a shared edge certificate whose SAN
+must cover the Git hostname, and an NGINX source allowlist for the trusted
+private-network ingress. It is not a public Gitea publication. Do not add a
+public DNS record or broaden the Tailscale ACL to make browser sign-in work.
+
+The raw host TCP proxy is a separate controller/automation path. A healthy
+controller URL or `/user/login` response proves only upstream reachability; it
+does not prove browser TLS, Authentik callback handling, or a Gitea session.
+Run the fresh-profile browser E2E only after the private HTTPS route has been
+converged, then require strict certificate validation and the non-admin
+`gitea-e2e` session assertion before recording browser OIDC as passing.
+
 ## Verify
 
 1. Confirm the controller login page responds:

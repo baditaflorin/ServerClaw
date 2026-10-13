@@ -1,0 +1,7 @@
+---
+# Complete list of subnet routes this node advertises. `tailscale set --advertise-routes` replaces the whole list, so
+# every route that is live today must be listed, not only the new one.
+fleet_tailscale_node_advertise_routes: []
+# The tailnet policy auto-approves single /32 routes only. A wider route needs console approval and a policy change, so
+# the role refuses it unless the operator opts in.
+fleet_tailscale_node_allow_wider_routes: false

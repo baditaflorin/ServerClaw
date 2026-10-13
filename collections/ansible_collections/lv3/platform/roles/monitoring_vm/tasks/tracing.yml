@@ -129,6 +129,45 @@
     mode: "0640"
   notify: Restart Loki
 
+- name: Verify encrypted systemd credentials for Prometheus exist on the host
+  ansible.builtin.stat:
+    path: "{{ item.encrypted_file }}"
+  loop: "{{ monitoring_prometheus_remote_write_credentials }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_prometheus_credential_stat
+
+- name: Refuse to continue when an encrypted Prometheus credential is missing
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+    fail_msg: >-
+      {{ item.item.encrypted_file }} is missing on the host. Prometheus would fail to start with
+      LoadCredentialEncrypted; create the credential out of band (systemd-creds encrypt) before converging.
+    quiet: true
+  loop: "{{ monitoring_prometheus_credential_stat.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Ensure the Prometheus unit drop-in directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_prometheus_credentials_dropin_file | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: monitoring_prometheus_remote_write_credentials | length > 0
+
+- name: Render Prometheus encrypted-credential drop-in
+  ansible.builtin.template:
+    src: prometheus-credentials-dropin.conf.j2
+    dest: "{{ monitoring_prometheus_credentials_dropin_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: monitoring_prometheus_remote_write_credentials | length > 0
+  notify: Restart Prometheus
+
 - name: Render Prometheus configuration
   ansible.builtin.template:
     src: prometheus.yml.j2
@@ -136,7 +175,8 @@
     owner: root
     group: prometheus
     mode: "0640"
-  notify: Restart Prometheus
+    validate: "{{ monitoring_prometheus_config_validate_command }}"
+  notify: Reload Prometheus configuration
 
 - name: Render managed Prometheus service unit
   ansible.builtin.template:

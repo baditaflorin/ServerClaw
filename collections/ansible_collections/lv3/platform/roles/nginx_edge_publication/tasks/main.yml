@@ -35,6 +35,8 @@
         )
         | unique(attribute='hostname')
       }}
+    public_edge_private_sites: "{{ public_edge_service_topology | service_topology_private_edge_sites }}"
+    public_edge_all_sites: "{{ (public_edge_sites + public_edge_private_sites) | unique(attribute='hostname') }}"
 
 - name: Validate public edge publication inputs
   ansible.builtin.assert:
@@ -216,6 +218,32 @@
     path: "/etc/letsencrypt/live/{{ public_edge_effective_cert_name }}/fullchain.pem"
   register: public_edge_certificate
 
+- name: Verify that the shared edge certificate covers private-edge hostnames
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - x509
+      - -in
+      - "/etc/letsencrypt/live/{{ public_edge_effective_cert_name }}/fullchain.pem"
+      - -noout
+      - -checkhost
+      - "{{ item }}"
+  loop: "{{ public_edge_private_certificate_hostnames }}"
+  when:
+    - public_edge_private_sites | length > 0
+    - public_edge_certificate.stat.exists
+  changed_when: false
+
+- name: Require the shared edge certificate when private TLS routes are configured
+  ansible.builtin.assert:
+    that:
+      - public_edge_certificate.stat.exists
+    fail_msg: >-
+      Private-edge routes require an existing shared TLS certificate whose SANs
+      cover their private hostnames. They are intentionally excluded from
+      public ACME issuance.
+  when: public_edge_private_sites | length > 0
+
 - name: Read current public edge certificate SANs
   ansible.builtin.command:
     argv:
@@ -270,9 +298,10 @@
             }
           ]
       }}
-  loop: "{{ public_edge_sites }}"
+  loop: "{{ public_edge_all_sites }}"
   when: >-
     public_edge_certificate.stat.exists
+    and not (item.private_only | default(false))
     and (
       (
         ([item.hostname] + (item.aliases | default([])))

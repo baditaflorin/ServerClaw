@@ -140,6 +140,11 @@ def evidence_ref_exists(ref: str, *, source_commit: str) -> bool:
             return True
         return False
     if not git_commit_exists(source_commit):
+        snapshot_commit = snapshot_source_commit()
+        if snapshot_commit is not None and not commits_refer_to_same_revision(source_commit, snapshot_commit):
+            # The current snapshot has no object for this historical source commit,
+            # so its tree cannot verify evidence that was present at that revision.
+            return True
         return git_path_exists_in_history(ref)
     if git_path_exists_in_commit(source_commit, ref):
         return True

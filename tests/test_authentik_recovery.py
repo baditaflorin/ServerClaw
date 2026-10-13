@@ -42,7 +42,16 @@ def resources() -> dict[str, list[dict[str, Any]]]:
             }
         ],
         MODULE.EMAIL_STAGES_PATH: [{"pk": "email-1", "name": MODULE.DEFAULT_EMAIL_STAGE, "use_global_settings": True}],
-        MODULE.USERS_PATH: [{"pk": 101, "email": "operator@example.com", "is_active": True, "type": "internal"}],
+        MODULE.USERS_PATH: [
+            {
+                "pk": 101,
+                "username": MODULE.DEFAULT_OPERATOR_USERNAME,
+                "email": "operator@example.com",
+                "is_active": True,
+                "is_superuser": True,
+                "type": "internal",
+            }
+        ],
     }
 
 
@@ -72,6 +81,16 @@ def test_send_email_uses_configured_operator_without_reporting_email(tmp_path: P
     identity_file.write_text("platform_operator_email: operator@example.com\n", encoding="utf-8")
     identity_file.chmod(0o600)
     api = FakeAPI(resources())
+    api.resources[MODULE.USERS_PATH].append(
+        {
+            "pk": 102,
+            "username": "secondary-user",
+            "email": "operator@example.com",
+            "is_active": True,
+            "is_superuser": False,
+            "type": "internal",
+        }
+    )
 
     result = MODULE.send_recovery_email(api, identity_file=identity_file)
 
@@ -98,6 +117,17 @@ def test_send_email_rejects_inactive_operator(tmp_path: Path) -> None:
     state[MODULE.USERS_PATH][0]["is_active"] = False
 
     with pytest.raises(MODULE.RecoveryError, match="inactive"):
+        MODULE.send_recovery_email(FakeAPI(state), identity_file=identity_file)
+
+
+def test_send_email_rejects_non_admin_operator_username(tmp_path: Path) -> None:
+    identity_file = tmp_path / "identity.yml"
+    identity_file.write_text("platform_operator_email: operator@example.com\n", encoding="utf-8")
+    identity_file.chmod(0o600)
+    state = resources()
+    state[MODULE.USERS_PATH][0]["is_superuser"] = False
+
+    with pytest.raises(MODULE.RecoveryError, match="not an administrator"):
         MODULE.send_recovery_email(FakeAPI(state), identity_file=identity_file)
 
 

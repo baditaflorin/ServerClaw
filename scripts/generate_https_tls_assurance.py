@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Generate Prometheus HTTPS/TLS assurance targets and alert rules with block markers.
 
+Targets are the edge endpoints verified in config/slo-probe-overlay.json (tls: true); see docs/runbooks/slo-tracking.md.
+
 Generates:
   - config/prometheus/file_sd/https_tls_targets.yml
   - config/prometheus/rules/https_tls_alerts.yml
@@ -38,14 +40,19 @@ from https_tls_assurance_targets import (
     PROMETHEUS_TARGETS_PATH,
     build_prometheus_alert_rules,
     build_prometheus_targets,
-    discover_https_tls_targets,
+    discover_overlay_https_tls_targets,
 )
 
 
 GENERATED_HEADER = (
-    "# AUTO-GENERATED from config/certificate-catalog.json — do not edit manually\n"
+    "# AUTO-GENERATED from config/slo-catalog.json + config/slo-probe-overlay.json — do not edit manually\n"
     "# Run: python3 scripts/generate_https_tls_assurance.py --write\n"
 )
+
+
+def discover_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[dict[str, Any]]:
+    """Targets rendered into Prometheus: the edge endpoints verified in config/slo-probe-overlay.json."""
+    return discover_overlay_https_tls_targets(environment=environment)
 
 
 def _group_targets_by_service(targets: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:

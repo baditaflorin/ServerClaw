@@ -669,9 +669,34 @@ def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> Non
                 rule.get("description"),
                 f"{path}.guests.{guest_name}.allowed_inbound[{index}].description",
             )
+            if "forward" in rule:
+                require_bool(rule.get("forward"), f"{path}.guests.{guest_name}.allowed_inbound[{index}].forward")
             if source in allowed_source_tokens or source in guest_names:
                 continue
             validate_network(source, f"{path}.guests.{guest_name}.allowed_inbound[{index}].source")
+
+        container_snat_rules = require_list(
+            guest_policy.get("container_snat_rules", []),
+            f"{path}.guests.{guest_name}.container_snat_rules",
+        )
+        for index, rule in enumerate(container_snat_rules):
+            rule_path = f"{path}.guests.{guest_name}.container_snat_rules[{index}]"
+            rule = require_mapping(rule, rule_path)
+            source = validate_network(rule.get("source"), f"{rule_path}.source")
+            if ipaddress.ip_network(source, strict=False).version != 4:
+                raise ValueError(f"{rule_path}.source must be an IPv4 network")
+            destination = require_str(rule.get("destination"), f"{rule_path}.destination")
+            if destination not in guest_names:
+                destination = validate_network(destination, f"{rule_path}.destination")
+                if ipaddress.ip_network(destination, strict=False).version != 4:
+                    raise ValueError(f"{rule_path}.destination must be a guest name or IPv4 network")
+            require_enum(rule.get("protocol"), f"{rule_path}.protocol", {"tcp", "udp"})
+            ports = require_list(rule.get("ports"), f"{rule_path}.ports")
+            if not ports:
+                raise ValueError(f"{rule_path}.ports must not be empty")
+            for port_index, port in enumerate(ports):
+                validate_port_or_range(port, f"{rule_path}.ports[{port_index}]")
+            require_str(rule.get("description"), f"{rule_path}.description")
 
 
 def validate_host_vars() -> dict[str, Any]:
@@ -894,11 +919,16 @@ def validate_vm_template_manifest(template_catalog: dict[str, Any]) -> None:
 def validate_platform_vars() -> None:
     platform_vars = require_mapping(load_yaml(PLATFORM_VARS_PATH), str(PLATFORM_VARS_PATH))
     missing_inputs = missing_deployment_derived_platform_inputs()
-    if missing_inputs:
-        print(derived_platform_vars_equivalence_skip_message(missing_inputs))
-        return
     selected_identity = resolve_explicit_overlay_selector("PLATFORM_IDENTITY_OVERLAY")
     selected_topology = resolve_explicit_overlay_selector("PLATFORM_TOPOLOGY_OVERLAY")
+    if missing_inputs or selected_topology is None:
+        print(
+            derived_platform_vars_equivalence_skip_message(
+                missing_inputs,
+                missing_selectors=("PLATFORM_TOPOLOGY_OVERLAY",) if selected_topology is None else (),
+            )
+        )
+        return
     if selected_identity is not None:
         _apply_identity_override(selected_identity)
     if selected_topology is not None:

@@ -20,7 +20,7 @@
 # ServerClaw Platform
 
 Forkable infrastructure-as-code for taking a bare Debian 13 server to a
-fully managed Proxmox VE platform with 77+ self-hosted services — deployed,
+fully managed Proxmox VE platform with 78+ self-hosted services — deployed,
 monitored, and recoverable from a single repository.
 
 ## Platform Status
@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.48` |
-| Platform version | `0.178.225` |
+| Repository version | `0.179.51` |
+| Platform version | `0.179.50` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -79,7 +79,7 @@ monitored, and recoverable from a single repository.
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 | `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 
-Showing 20 of 183 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 186 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 ## Version Summary
@@ -89,8 +89,8 @@ Showing 20 of 183 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.48` |
-| Platform version | `0.178.225` |
+| Repository version | `0.179.51` |
+| Platform version | `0.179.50` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -133,8 +133,8 @@ assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
 
 - **[CLAUDE.md](CLAUDE.md)** — Claude Code session protocol with checklists and context
 - **[AGENTS.md](AGENTS.md)** — Multi-agent coordination rules and handoff protocol
-- **515+ ADRs** — Every architectural decision documented and indexed
-- **278+ runbooks** — Step-by-step procedures an AI agent can follow
+- **516+ ADRs** — Every architectural decision documented and indexed
+- **281+ runbooks** — Step-by-step procedures an AI agent can follow
 - **Workstream tracking** — Parallel agent sessions coordinate via YAML manifests
 
 Point Claude Code at this repo and it knows how to deploy, debug, and extend
@@ -168,11 +168,11 @@ self-hosted platform:
 
 | Layer | What | Count |
 |-------|------|-------|
-| Architecture decisions | `docs/adr/` | 515+ ADRs |
-| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 169 roles |
+| Architecture decisions | `docs/adr/` | 516+ ADRs |
+| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 174 roles |
 | Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 66 playbooks |
-| Operational runbooks | `docs/runbooks/` | 278+ runbooks |
-| Automation scripts | `scripts/` | 373+ scripts |
+| Operational runbooks | `docs/runbooks/` | 281+ runbooks |
+| Automation scripts | `scripts/` | 378+ scripts |
 | Validation tests | `tests/` | Automated regression suite |
 
 ### Services included
@@ -271,7 +271,7 @@ variables from it — no manual IP editing.
 ```
 .
 ├── collections/ansible_collections/lv3/platform/
-│   ├── roles/           # 169 Ansible roles
+│   ├── roles/           # 174 Ansible roles
 │   ├── playbooks/       # 66 playbooks
 │   └── plugins/         # Custom filters and callbacks
 ├── inventory/
@@ -286,10 +286,10 @@ variables from it — no manual IP editing.
 │   ├── minimal/         # Tier 1 compose (4 containers)
 │   └── full/            # Tier 2 compose (7 containers)
 ├── docs/
-│   ├── adr/             # 515+ architecture decision records
-│   ├── runbooks/        # 278+ operational runbooks
+│   ├── adr/             # 516+ architecture decision records
+│   ├── runbooks/        # 281+ operational runbooks
 │   └── templates/       # Jinja2 templates for generated docs (incl. this README)
-├── scripts/             # 373+ automation scripts
+├── scripts/             # 378+ automation scripts
 ├── local-overlay-template/  # Scaffold for .local/ secrets directory
 └── Makefile             # 35+ automation targets
 ```
@@ -357,10 +357,12 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 343 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 346 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0493` | Bound Plausible ClickHouse diagnostic log storage | `live_applied` | [ws-0520-plausible-clickhouse-log-retention.md](docs/workstreams/ws-0520-plausible-clickhouse-log-retention.md) |
+| `0492` | Scope Plausible analytics SSO to the operator email identity | `live_applied` | [ws-0519-plausible-email-sso.md](docs/workstreams/ws-0519-plausible-email-sso.md) |
 | `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](docs/adr/0470-deployment-fixture-matrix.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](docs/adr/0448-deployment-connection-registry-and-wrapper.md) |
 | `0409` | Accept clean ignored HTTPS alert outputs while rejecting present drift | `merged` | [ws-0500-https-alert-runtime-output-gate.md](docs/workstreams/ws-0500-https-alert-runtime-output-gate.md) |
@@ -384,8 +386,6 @@ Showing 25 of 343 merged or live-applied workstreams. Full history: [merged work
 | `0238` | Integrate ADR 0238 operator grid into origin/main | `merged` | [ws-0238-main-integration.md](docs/workstreams/ws-0238-main-integration.md) |
 | `0237` | Live apply schema-first human forms via React Hook Form and Zod | `live_applied` | [ws-0237-live-apply.md](docs/workstreams/ws-0237-live-apply.md) |
 | `0236` | Live apply TanStack Query server-state conventions on the Windmill operator admin app | `live_applied` | [ws-0236-live-apply.md](docs/workstreams/ws-0236-live-apply.md) |
-| `0232` | Integrate ADR 0232 live apply into origin/main | `merged` | [ws-0232-main-merge.md](docs/workstreams/ws-0232-main-merge.md) |
-| `0206` | Integrate ADR 0206 live apply into origin/main | `merged` | [ws-0206-main-merge.md](docs/workstreams/ws-0206-main-merge.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements
@@ -411,6 +411,6 @@ and merge procedures.
 
 ---
 
-*Generated 2026-10-01 by [scripts/generate_readme.py](scripts/generate_readme.py)
+*Generated 2026-10-13 by [scripts/generate_readme.py](scripts/generate_readme.py)
 from [docs/templates/README.md.j2](docs/templates/README.md.j2).
 Run `make generate-readme` to refresh.*

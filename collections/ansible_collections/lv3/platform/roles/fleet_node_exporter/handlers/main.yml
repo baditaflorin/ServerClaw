@@ -1,0 +1,5 @@
+---
+- name: Restart fleet node exporter
+  ansible.builtin.systemd:
+    name: "{{ fleet_node_exporter_service }}"
+    state: restarted

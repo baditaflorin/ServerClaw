@@ -25,6 +25,10 @@ def make_fake_ssh(path: Path) -> None:
         """#!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >> "${REMOTE_EXEC_SSH_LOG:?}"
+secret_fd_target="$(readlink "/proc/$$/fd/3" 2>/dev/null || true)"
+if [[ "$secret_fd_target" == *remote-stdin* ]]; then
+  printf 'FD3_SECRET_LEAK\n' >> "${REMOTE_EXEC_SSH_LOG:?}"
+fi
 stdin_payload="$(cat || true)"
 if [[ -n "$stdin_payload" ]]; then
   printf 'STDIN<<EOF\n%s\nEOF\n' "$stdin_payload" >> "${REMOTE_EXEC_SSH_LOG:?}"
@@ -283,6 +287,26 @@ def test_remote_exec_uses_docker_runner_metadata(tmp_path: Path) -> None:
     assert "--checksum" in rsync_log
     assert "repository-snapshot-" in rsync_log
     assert ".lv3-snapshots" in rsync_log
+
+
+def test_remote_exec_passes_protected_stdin_only_to_final_remote_command(tmp_path: Path) -> None:
+    secret = "registry-password-sentinel"
+    secret_file = tmp_path / "remote-stdin"
+    secret_file.write_text(secret + "\n", encoding="utf-8")
+    secret_file.chmod(0o600)
+
+    completed = run_remote_exec(
+        tmp_path,
+        "remote-lint",
+        extra_env={"REMOTE_EXEC_STDIN_FILE": str(secret_file)},
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert not secret_file.exists()
+    ssh_log = completed.ssh_log.read_text()  # type: ignore[attr-defined]
+    assert ssh_log.count(secret) == 1
+    assert ssh_log.count(f"STDIN<<EOF\n{secret}\nEOF") == 1
+    assert "FD3_SECRET_LEAK" not in ssh_log
 
 
 def test_remote_exec_falls_back_locally_when_requested(tmp_path: Path) -> None:

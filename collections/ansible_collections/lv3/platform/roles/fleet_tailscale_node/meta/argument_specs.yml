@@ -1,0 +1,17 @@
+---
+argument_specs:
+  main:
+    short_description: Keep one fleet node's advertised Tailscale subnet routes equal to the declaration.
+    options:
+      fleet_tailscale_node_advertise_routes:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Complete list of advertised IPv4 routes (the whole list is replaced by `tailscale set`).
+      fleet_tailscale_node_allow_wider_routes:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Allow routes wider than /32. Off by default because the tailnet policy only auto-approves /32 routes.

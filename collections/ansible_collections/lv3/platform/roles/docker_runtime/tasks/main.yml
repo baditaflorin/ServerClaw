@@ -156,6 +156,10 @@
     force_apt_get: true
   when: docker_runtime_missing_engine_packages | length > 0
 
+- name: Manage the swap file for memory-constrained Docker guests
+  ansible.builtin.include_tasks: swap.yml
+  when: docker_runtime_swap_size_mb | int > 0
+
 - name: Ensure docker admin group exists
   ansible.builtin.group:
     name: docker
@@ -1237,6 +1241,8 @@
                 all_running = all_running and healthy
                 continue
 
+            # One-shot jobs may finish and be removed between the two snapshots.
+            # Persistent containers (for example, restart=always) must still exist.
             healthy = not require_running
 
             statuses.append(
@@ -1249,10 +1255,10 @@
                     "running": False,
                     "status": "missing",
                     "exit_code": None,
-                    "healthy": False,
+                    "healthy": healthy,
                 }
             )
-            all_running = False
+            all_running = all_running and healthy
 
         print(json.dumps(statuses))
         sys.exit(0 if all_running else 1)

@@ -1,0 +1,123 @@
+---
+# Purpose: Keep the pgBackRest configuration, daily wrapper and prepared timer/service on pg-primary equal to the declaration.
+# Use case: Included from main.yml on pg-primary. The backup path stays dormant: no repository, no archive_command, timer not installed.
+# Inputs: fleet_pg_backup_pgbackrest_* and fleet_pg_backup_state_dir.
+# Outputs: /etc/pgbackrest layout, pgbackrest.conf, the wrapper, the prepared directory (units + runbook); optionally the installed timer.
+# Idempotency: Idempotent.
+# Dependencies: The pgbackrest package from the PGDG repository (installed here when missing). This role never changes Postgres settings
+# (archive_mode and archive_command stay as they are) and never creates the repository encryption passphrase.
+
+- name: Validate the pgBackRest declaration
+  ansible.builtin.assert:
+    that:
+      - fleet_pg_backup_pgbackrest_stanza is match('^[A-Za-z0-9_-]+$')
+      - fleet_pg_backup_pgbackrest_global_settings | length > 0
+      - >-
+        fleet_pg_backup_pgbackrest_repo.keys() | list
+        | select('search', '(?i)(pass|secret|-key$)') | list | length == 0
+      - >-
+        not (fleet_pg_backup_pgbackrest_timer_enabled | bool)
+        or (
+          fleet_pg_backup_pgbackrest_repo | length > 0
+          and fleet_node_exporter_textfile_dir | default('') | length > 0
+        )
+    fail_msg: >-
+      The stanza name must be a plain identifier, repository settings must not carry secrets (use a key file path, e.g. sftp-private-key-file), and the
+      timer can only be enabled when a repository is configured and the node exporter textfile collector is on.
+
+- name: Ensure the pgbackrest package is present
+  ansible.builtin.apt:
+    name: pgbackrest
+    state: present
+
+- name: Ensure the pgBackRest directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ fleet_pg_backup_pgbackrest_user }}"
+    group: "{{ fleet_pg_backup_pgbackrest_group }}"
+    mode: "0750"
+  loop:
+    - "{{ fleet_pg_backup_pgbackrest_conf_dir }}"
+    - "{{ fleet_pg_backup_pgbackrest_conf_dir }}/conf.d"
+    - "{{ fleet_pg_backup_pgbackrest_spool_path }}"
+    - "{{ fleet_pg_backup_pgbackrest_prepared_dir }}"
+
+- name: Check that the repository passphrase file exists (its content is never read)
+  ansible.builtin.stat:
+    path: "{{ fleet_pg_backup_pgbackrest_conf_dir }}/{{ fleet_pg_backup_pgbackrest_cipher_file }}"
+  register: fleet_pg_backup_cipher_file
+
+- name: Require the repository passphrase file and keep it private
+  ansible.builtin.assert:
+    that:
+      - fleet_pg_backup_cipher_file.stat.exists
+      - fleet_pg_backup_cipher_file.stat.mode == '0600'
+      - fleet_pg_backup_cipher_file.stat.pw_name == fleet_pg_backup_pgbackrest_user
+    fail_msg: >-
+      {{ fleet_pg_backup_pgbackrest_conf_dir }}/{{ fleet_pg_backup_pgbackrest_cipher_file }} is missing, not 0600 or not owned
+      by {{ fleet_pg_backup_pgbackrest_user }}. It holds repo1-cipher-pass and is created out of band (see the runbook); backups
+      are unreadable without it, so keep a copy in the password manager.
+
+- name: Render pgbackrest.conf
+  ansible.builtin.template:
+    src: pgbackrest.conf.j2
+    dest: "{{ fleet_pg_backup_pgbackrest_conf_dir }}/pgbackrest.conf"
+    owner: "{{ fleet_pg_backup_pgbackrest_user }}"
+    group: "{{ fleet_pg_backup_pgbackrest_group }}"
+    mode: "0640"
+    backup: true
+
+- name: Install the daily wrapper
+  ansible.builtin.template:
+    src: pgbackrest-daily.j2
+    dest: "{{ fleet_pg_backup_pgbackrest_wrapper_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    backup: true
+
+- name: Place the prepared units and the runbook in the prepared directory
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ fleet_pg_backup_pgbackrest_prepared_dir }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - pgbackrest-daily.service
+    - pgbackrest-daily.timer
+
+- name: Place the prepared runbook
+  ansible.builtin.copy:
+    src: pgbackrest-RUNBOOK.txt
+    dest: "{{ fleet_pg_backup_pgbackrest_prepared_dir }}/RUNBOOK.txt"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install and enable the timer (only when explicitly requested)
+  when: fleet_pg_backup_pgbackrest_timer_enabled | bool
+  block:
+    - name: Install the service and timer units
+      ansible.builtin.template:
+        src: "{{ item }}.j2"
+        dest: "/etc/systemd/system/{{ item }}"
+        owner: root
+        group: root
+        mode: "0644"
+      loop:
+        - pgbackrest-daily.service
+        - pgbackrest-daily.timer
+      register: fleet_pg_backup_pgbackrest_units
+
+    - name: Reload systemd after installing the units
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when: fleet_pg_backup_pgbackrest_units is changed
+
+    - name: Enable and start the timer
+      ansible.builtin.systemd:
+        name: pgbackrest-daily.timer
+        enabled: true
+        state: started

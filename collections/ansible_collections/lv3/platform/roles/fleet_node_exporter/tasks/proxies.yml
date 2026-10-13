@@ -1,0 +1,58 @@
+---
+# Purpose: Render and start the declared systemd socket proxies that publish an exporter on a tailnet address.
+# Use case: Included from main.yml when fleet_node_exporter_socket_proxies is not empty.
+# Inputs: fleet_node_exporter_managed_proxies (from port_plan.yml), fleet_node_exporter_proxyd_path, fleet_node_exporter_unit_dir.
+# Outputs: <name>.socket and <name>.service units, enabled socket, started socket; stale sockets (state: disabled) stopped and disabled.
+# Idempotency: Idempotent. A socket is restarted only when its unit text changed; a disabled socket is only touched while it is still enabled or active.
+# Dependencies: tailscaled.service on the host, port_plan.yml having run.
+
+- name: Render socket proxy socket units
+  ansible.builtin.template:
+    src: metrics-proxy.socket.j2
+    dest: "{{ fleet_node_exporter_unit_dir }}/{{ item.name }}.socket"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ fleet_node_exporter_managed_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: fleet_node_exporter_proxy_sockets
+
+- name: Render socket proxy service units
+  ansible.builtin.template:
+    src: metrics-proxy.service.j2
+    dest: "{{ fleet_node_exporter_unit_dir }}/{{ item.name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ fleet_node_exporter_managed_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: fleet_node_exporter_proxy_services
+
+- name: Reload systemd when a proxy unit changed
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: >-
+    fleet_node_exporter_proxy_sockets is changed
+    or fleet_node_exporter_proxy_services is changed
+
+- name: Enable the socket proxies and start them (restart when the socket unit changed)
+  ansible.builtin.systemd:
+    name: "{{ item.item.name }}.socket"
+    enabled: true
+    state: "{{ 'restarted' if item is changed else 'started' }}"
+  loop: "{{ fleet_node_exporter_proxy_sockets.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+# Stale sockets that would collide with a managed proxy after a reboot. Only the socket is stopped and disabled; its unit
+# files are left on disk.
+- name: Keep stale socket proxies stopped and disabled
+  ansible.builtin.systemd:
+    name: "{{ item.name }}.socket"
+    enabled: false
+    state: stopped
+  loop: "{{ fleet_node_exporter_disabled_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,0 +1,23 @@
+[Unit]
+Description=Start Scanopy discovery for hosts whose daily slot has passed (independent of Scanopy's own scheduler)
+Documentation=file://{{ monitoring_scanopy_discover_readme_file }}
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+{% for key, value in monitoring_scanopy_discover_environment | dictsort %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+ExecStart=/usr/bin/python3 {{ monitoring_scanopy_discover_script_file }}
+TimeoutStartSec=120
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths={{ monitoring_scanopy_discover_textfile_dir }}
+ReadOnlyPaths={{ monitoring_scanopy_discover_api_key_file | dirname }} {{ monitoring_scanopy_discover_install_dir }}
+CapabilityBoundingSet=CAP_CHOWN CAP_FOWNER CAP_DAC_OVERRIDE
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

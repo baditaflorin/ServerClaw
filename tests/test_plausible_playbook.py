@@ -1,7 +1,9 @@
 import json
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import yaml
+from jinja2 import Template
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -9,6 +11,60 @@ PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "plausible.yml"
 SERVICE_WRAPPER_PATH = REPO_ROOT / "playbooks" / "services" / "plausible.yml"
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
+CLICKHOUSE_LOGS_TEMPLATE_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "plausible_runtime"
+    / "templates"
+    / "clickhouse"
+    / "logs.xml.j2"
+)
+PLAUSIBLE_ROLE_DEFAULTS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "plausible_runtime"
+    / "defaults"
+    / "main.yml"
+)
+PLAUSIBLE_CATALOG_PATH = REPO_ROOT / "catalog" / "services" / "plausible" / "service.yaml"
+
+
+def test_clickhouse_diagnostic_logs_have_one_day_retention() -> None:
+    rendered = Template(CLICKHOUSE_LOGS_TEMPLATE_PATH.read_text()).render(
+        plausible_clickhouse_system_log_retention_days=1
+    )
+    root = ET.fromstring(rendered)
+    defaults = yaml.safe_load(PLAUSIBLE_ROLE_DEFAULTS_PATH.read_text())
+    expected_logs = {
+        "text_log",
+        "trace_log",
+        "metric_log",
+        "asynchronous_metric_log",
+        "part_log",
+        "error_log",
+        "background_schedule_pool_log",
+        "processors_profile_log",
+        "query_log",
+        "query_metric_log",
+        "asynchronous_insert_log",
+    }
+
+    assert defaults["plausible_clickhouse_system_log_retention_days"] == 1
+    assert {node.tag for node in root if node.tag != "logger"} == expected_logs
+    assert all(root.findtext(f"{table}/ttl") == "event_time + INTERVAL 1 DAY DELETE" for table in expected_logs)
+    assert root.findtext("text_log/level") == "warning"
+
+    catalog = yaml.safe_load(PLAUSIBLE_CATALOG_PATH.read_text())
+    analytics_events = next(item for item in catalog["data"] if item["id"] == "plausible-analytics-events")
+    assert analytics_events["retention_days"] == 365
 
 
 def test_plausible_playbook_imports_standard_includes() -> None:

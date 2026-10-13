@@ -1,0 +1,57 @@
+---
+# Purpose: Install a daily systemd timer that prunes unused Docker images and old BuildKit cache on one fleet build host.
+# Use case: Run from playbooks/fleet-observability.yml with --limit on the 0mcp docker-build guest, whose `/` filled up and failed a Woodpecker step.
+# Inputs: fleet_docker_prune_image_max_age, fleet_docker_prune_builder_cache_max_age, fleet_docker_prune_on_calendar, fleet_docker_prune_textfile_dir.
+# Outputs: the prune script, one systemd service and timer, and (optionally) two node_exporter textfile metrics after each run.
+# Idempotency: Idempotent. Files are templated and the timer is only enabled/started, so a second run changes nothing.
+# Dependencies: Docker installed on the host. fleet_node_exporter provides the textfile directory when the metrics are enabled.
+
+- name: Validate prune inputs
+  ansible.builtin.assert:
+    that:
+      - fleet_docker_prune_image_max_age is match('^[0-9]+h$')
+      - fleet_docker_prune_builder_cache_max_age is match('^[0-9]+h$')
+      - fleet_docker_prune_script_path is match('^/')
+      - fleet_docker_prune_unit_name is match('^[a-z0-9-]+$')
+      - fleet_docker_prune_textfile_dir == '' or fleet_docker_prune_textfile_dir is match('^/')
+    fail_msg: >-
+      fleet_docker_prune ages must be whole hours (for example 168h), the script path and textfile directory
+      absolute paths, and the unit name lowercase letters, digits and dashes.
+    quiet: true
+
+- name: Install the prune script
+  ansible.builtin.template:
+    src: fleet-docker-prune.sh.j2
+    dest: "{{ fleet_docker_prune_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the prune service unit
+  ansible.builtin.template:
+    src: fleet-docker-prune.service.j2
+    dest: "/etc/systemd/system/{{ fleet_docker_prune_unit_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd for fleet docker prune
+
+- name: Install the prune timer unit
+  ansible.builtin.template:
+    src: fleet-docker-prune.timer.j2
+    dest: "/etc/systemd/system/{{ fleet_docker_prune_unit_name }}.timer"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd for fleet docker prune
+
+- name: Apply pending systemd unit changes
+  ansible.builtin.meta: flush_handlers
+
+# In --check mode the unit files above are not written, so systemd cannot find the timer yet.
+- name: Enable and start the prune timer
+  ansible.builtin.systemd:
+    name: "{{ fleet_docker_prune_unit_name }}.timer"
+    enabled: true
+    state: started
+  when: not ansible_check_mode

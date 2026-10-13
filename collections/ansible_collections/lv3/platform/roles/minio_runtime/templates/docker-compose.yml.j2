@@ -20,6 +20,7 @@ services:
   minio:
     image: {{ minio_image }}
     container_name: {{ minio_container_name }}
+    user: "{{ minio_runtime_user }}"
     restart: unless-stopped
     depends_on:
       openbao-agent:

@@ -13,7 +13,12 @@ build_server_apt_cacher_port: 3142
 build_server_apt_cacher_report_url: http://127.0.0.1:3142/acng-report.html
 build_server_apt_proxy_url: "http://{{ hostvars[playbook_execution_host_patterns.docker_build[playbook_execution_env]].ansible_host }}:3142"
 build_server_buildkit_service_name: "{{ platform_identity.config_prefix }}-buildkitd"
-build_server_buildkit_container_name: "{{ platform_identity.config_prefix }}-buildkitd"
+# Keep the container distinct from the service's pre-existing legacy name so
+# an explicitly guarded migration can stop the old container before systemd
+# creates the managed one.
+build_server_buildkit_container_name: "{{ platform_identity.config_prefix }}-buildkitd-managed"
+build_server_buildkit_legacy_container_names: []
+build_server_buildkit_legacy_containers_idle_confirmed: false
 build_server_buildkit_image: moby/buildkit:buildx-stable-1
 build_server_buildkit_builder_name: >-
   {{
@@ -28,6 +33,9 @@ build_server_buildkit_socket_file: /run/buildkit/buildkitd.sock
 build_server_buildkit_cache_dir: /opt/builds/.buildkit-cache
 build_server_buildkit_cache_gb: 50
 build_server_buildkit_registry_mirrors: {}
+build_server_registry_hosts:
+  - hostname: "registry.{{ platform_domain }}"
+    address: "{{ hostvars[playbook_execution_host_patterns.nginx_edge[playbook_execution_env]].ansible_host }}"
 build_server_buildkit_keep_duration_hours: 336
 build_server_buildkit_keep_bytes: "{{ build_server_buildkit_cache_gb | int * 1024 * 1024 * 1024 }}"
 build_server_managed_directories:

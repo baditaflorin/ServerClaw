@@ -1,0 +1,48 @@
+---
+# Purpose: Keep one fleet node's advertised subnet routes equal to the declaration, without re-running `tailscale up`.
+# Use case: Run from playbooks/fleet-observability.yml with --limit on the 0docker and 0own hypervisors (CT109 and VM650 /32 routes).
+# Inputs: fleet_tailscale_node_advertise_routes, fleet_tailscale_node_allow_wider_routes.
+# Outputs: AdvertiseRoutes preference of the local tailscaled. Nothing else (no tags, no SSH, no DNS, no exit node settings).
+# Idempotency: Idempotent. `tailscale set` runs only when the live route list differs.
+# Dependencies: tailscaled running and logged in. The tailnet policy (not managed here) must auto-approve the routes.
+
+- name: Validate advertised routes
+  ansible.builtin.assert:
+    that:
+      - fleet_tailscale_node_advertise_routes | length > 0
+      - fleet_tailscale_node_advertise_routes | select('match', '^[0-9]{1,3}(\.[0-9]{1,3}){3}/[0-9]{1,2}$') | list | length == fleet_tailscale_node_advertise_routes | length
+      - fleet_tailscale_node_allow_wider_routes | bool or (fleet_tailscale_node_advertise_routes | reject('match', '^.*/32$') | list | length == 0)
+    fail_msg: >-
+      fleet_tailscale_node_advertise_routes must be IPv4 CIDRs and, unless fleet_tailscale_node_allow_wider_routes is
+      true, single /32 addresses (the tailnet policy only auto-approves /32 routes).
+
+- name: Read the live tailscale preferences
+  ansible.builtin.command:
+    argv:
+      - tailscale
+      - debug
+      - prefs
+  register: fleet_tailscale_node_prefs
+  changed_when: false
+  check_mode: false
+
+- name: Compare live and declared routes
+  ansible.builtin.set_fact:
+    fleet_tailscale_node_live_routes: "{{ ((fleet_tailscale_node_prefs.stdout | from_json).AdvertiseRoutes | default([], true)) | sort }}"
+    fleet_tailscale_node_declared_routes: "{{ fleet_tailscale_node_advertise_routes | sort }}"
+
+- name: Report advertised route drift
+  ansible.builtin.debug:
+    msg: >-
+      DRIFT: advertised routes are {{ fleet_tailscale_node_live_routes | join(',') }},
+      declared {{ fleet_tailscale_node_declared_routes | join(',') }}.
+  when: fleet_tailscale_node_live_routes != fleet_tailscale_node_declared_routes
+
+- name: Set the advertised routes
+  ansible.builtin.command:
+    argv:
+      - tailscale
+      - set
+      - "--advertise-routes={{ fleet_tailscale_node_declared_routes | join(',') }}"
+  when: fleet_tailscale_node_live_routes != fleet_tailscale_node_declared_routes
+  changed_when: true

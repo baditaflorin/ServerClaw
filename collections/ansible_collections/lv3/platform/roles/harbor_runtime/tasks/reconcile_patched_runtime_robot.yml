@@ -1,0 +1,168 @@
+---
+- name: Record the patched-runtime robot permission name and actions
+  ansible.builtin.set_fact:
+    harbor_patched_runtime_robot_permission_name: "{{ harbor_patched_runtime_project_name ~ '+' ~ harbor_patched_runtime_robot.name }}"
+    harbor_patched_runtime_robot_permissions:
+      - kind: project
+        namespace: "{{ harbor_patched_runtime_project_name }}"
+        access: "{{ harbor_patched_runtime_robot.actions }}"
+  no_log: true
+
+- name: Query patched-runtime Harbor project robots
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/robots?q=Level=project,ProjectID={{ harbor_patched_runtime_project_id }}
+    method: GET
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    return_content: true
+    status_code: 200
+  register: harbor_patched_runtime_robot_query
+  changed_when: false
+  no_log: true
+
+- name: Record existing patched-runtime robot metadata
+  ansible.builtin.set_fact:
+    harbor_patched_runtime_robot_existing: >-
+      {{
+        (
+          harbor_patched_runtime_robot_query.json
+          | selectattr('name', 'search', (harbor_patched_runtime_robot_permission_name | regex_escape) ~ '$')
+          | list
+          | first
+        ) | default({})
+      }}
+  no_log: true
+
+- name: Check for a controller-local patched-runtime robot secret
+  ansible.builtin.stat:
+    path: "{{ harbor_patched_runtime_robot.local_file }}"
+  register: harbor_patched_runtime_robot_local_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read the controller-local patched-runtime robot secret
+  ansible.builtin.slurp:
+    src: "{{ harbor_patched_runtime_robot.local_file }}"
+  register: harbor_patched_runtime_robot_local_raw
+  when: harbor_patched_runtime_robot_local_stat.stat.exists
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Record the controller-local patched-runtime robot payload
+  ansible.builtin.set_fact:
+    harbor_patched_runtime_robot_local: >-
+      {{ harbor_patched_runtime_robot_local_raw.content | b64decode | from_json
+         if harbor_patched_runtime_robot_local_stat.stat.exists else {} }}
+  no_log: true
+
+- name: Record whether patched-runtime robot secret reconciliation is needed
+  ansible.builtin.set_fact:
+    harbor_patched_runtime_robot_needs_secret: >-
+      {{ harbor_patched_runtime_robot_existing == {}
+         or (harbor_patched_runtime_robot_local.username | default('')) != harbor_patched_runtime_robot_existing.name
+         or (harbor_patched_runtime_robot_local.secret | default('') | length) == 0 }}
+  no_log: true
+
+- name: Create a patched-runtime Harbor robot when missing
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/robots"
+    method: POST
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      name: "{{ harbor_patched_runtime_robot.name }}"
+      description: "{{ harbor_patched_runtime_robot.description }}"
+      duration: -1
+      level: project
+      disable: false
+      permissions: "{{ harbor_patched_runtime_robot_permissions }}"
+    return_content: true
+    status_code: 201
+  register: harbor_patched_runtime_robot_create
+  when: harbor_patched_runtime_robot_existing == {}
+  no_log: true
+
+- name: Reconcile the patched-runtime Harbor robot permission set
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/robots/{{ harbor_patched_runtime_robot_existing.id }}
+    method: PUT
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      name: "{{ harbor_patched_runtime_robot_existing.name }}"
+      description: "{{ harbor_patched_runtime_robot.description }}"
+      duration: -1
+      level: project
+      disable: false
+      permissions: "{{ harbor_patched_runtime_robot_permissions }}"
+    status_code: 200
+  changed_when: false
+  when: harbor_patched_runtime_robot_existing != {}
+  no_log: true
+
+- name: Generate a replacement patched-runtime Harbor robot secret when missing locally
+  ansible.builtin.set_fact:
+    harbor_patched_runtime_robot_secret_generated: >-
+      {{ lookup('ansible.builtin.password', '/dev/null', length=48, chars=['ascii_letters', 'digits']) }}
+  when:
+    - harbor_patched_runtime_robot_existing != {}
+    - harbor_patched_runtime_robot_needs_secret | bool
+  no_log: true
+
+- name: Refresh a patched-runtime Harbor robot secret when local state is missing
+  ansible.builtin.uri:
+    url: >-
+      http://127.0.0.1:{{ harbor_http_port }}/api/v2.0/robots/{{ harbor_patched_runtime_robot_existing.id }}
+    method: PATCH
+    user: admin
+    password: "{{ harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      secret: "{{ harbor_patched_runtime_robot_secret_generated }}"
+    status_code: 200
+  when:
+    - harbor_patched_runtime_robot_existing != {}
+    - harbor_patched_runtime_robot_needs_secret | bool
+  no_log: true
+
+- name: Record the reconciled patched-runtime Harbor robot credential
+  ansible.builtin.set_fact:
+    harbor_patched_runtime_robot_username: >-
+      {{ harbor_patched_runtime_robot_create.json.name
+         if harbor_patched_runtime_robot_existing == {}
+         else harbor_patched_runtime_robot_existing.name }}
+    harbor_patched_runtime_robot_secret: >-
+      {{ harbor_patched_runtime_robot_create.json.secret
+         if harbor_patched_runtime_robot_existing == {}
+         else (harbor_patched_runtime_robot_secret_generated
+               if harbor_patched_runtime_robot_needs_secret | bool
+               else harbor_patched_runtime_robot_local.secret) }}
+  no_log: true
+
+- name: Mirror the patched-runtime Harbor robot secret to the controller
+  ansible.builtin.copy:
+    dest: "{{ harbor_patched_runtime_robot.local_file }}"
+    content: >-
+      {{
+        {
+          'project': harbor_patched_runtime_project_name,
+          'project_id': harbor_patched_runtime_project_id,
+          'robot_name': harbor_patched_runtime_robot.name,
+          'username': harbor_patched_runtime_robot_username,
+          'secret': harbor_patched_runtime_robot_secret,
+          'actions': harbor_patched_runtime_robot.actions
+        } | to_nice_json
+      }}
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true

@@ -98,6 +98,14 @@ map $http_authorization $lv3_logout_id_token {
 {% macro site_tls_certificate_name(site) -%}
 {{ public_edge_site_tls_materials.get(site.hostname, shared_tls_certificate_name()) if public_edge_site_tls_materials is mapping else shared_tls_certificate_name() }}
 {%- endmacro %}
+{% macro private_site_source_policy(site) -%}
+{% if site.private_only | default(false) %}
+{% for cidr in site.allow_cidrs | default([]) %}
+    allow {{ cidr }};
+{% endfor %}
+    deny all;
+{% endif %}
+{%- endmacro %}
 
 server {
     listen 80 default_server;
@@ -107,11 +115,13 @@ server {
 {{ crawl_policy_headers() }}
 {{ robots_txt_location() }}
 
+{% if not (site.private_only | default(false)) %}
     location /.well-known/acme-challenge/ {
         root {{ public_edge_acme_root }};
         allow all;
         try_files $uri =404;
     }
+{% endif %}
 
     location / {
 {% if public_edge_tls_enabled %}
@@ -166,7 +176,7 @@ server {
 }
 {% endif %}
 
-{% for site in public_edge_sites %}
+{% for site in public_edge_all_sites %}
 {% set _pd_placeholder = '{{' + ' platform_domain ' + '}}' %}
 {% set _raw_key = site.hostname | replace(platform_domain, _pd_placeholder) %}
 {% set protected_site = public_edge_authenticated_sites[_raw_key] if _raw_key in public_edge_authenticated_sites else none %}
@@ -194,6 +204,7 @@ server {
     listen [::]:80;
     server_name {{ site.hostname }}{% if site.aliases is defined and site.aliases | length > 0 %} {{ site.aliases | join(' ') }}{% endif %};
 
+{{ private_site_source_policy(site) }}
 {% if site.crawl_policy_enabled | default(true) %}
 {{ crawl_policy_headers() }}
 {{ robots_txt_location() }}
@@ -349,6 +360,7 @@ server {
     http2 on;
     server_name {{ site.hostname }}{% if site.aliases is defined and site.aliases | length > 0 %} {{ site.aliases | join(' ') }}{% endif %};
 
+{{ private_site_source_policy(site) }}
 {% if site.crawl_policy_enabled | default(true) %}
 {{ crawl_policy_headers() }}
 {{ robots_txt_location() }}

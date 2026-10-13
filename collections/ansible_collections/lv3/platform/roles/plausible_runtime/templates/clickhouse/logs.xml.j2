@@ -5,4 +5,11 @@
     <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
     <console>true</console>
   </logger>
+  <!-- Keep diagnostic system logs bounded; analytics events use their own retention policy. -->
+  {% for table in ['text_log', 'trace_log', 'metric_log', 'asynchronous_metric_log', 'part_log', 'error_log', 'background_schedule_pool_log', 'processors_profile_log', 'query_log', 'query_metric_log', 'asynchronous_insert_log'] %}
+  <{{ table }}>
+    {% if table == 'text_log' %}<level>warning</level>{% endif %}
+    <ttl>event_time + INTERVAL {{ plausible_clickhouse_system_log_retention_days }} DAY DELETE</ttl>
+  </{{ table }}>
+  {% endfor %}
 </clickhouse>

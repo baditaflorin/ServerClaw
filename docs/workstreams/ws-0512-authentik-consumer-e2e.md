@@ -2,9 +2,9 @@
 
 - ADR: 0491
 - Title: Audit and repair live Authentik consumer sign-in paths end to end
-- Status: blocked pending security-gate remediation
-- Branch: `codex/authentik-live-closeout-20260926`
-- Worktree: `.worktrees/authentik-live-closeout-20260926`
+- Status: in progress; production applies remain security-gated
+- Branch: `codex/serverclaw-template-ci-followup-20261013`
+- Worktree: `.worktrees/serverclaw-publish-main-20261013`
 - Owner: Codex
 - Depends on: `adr-0491-authentik-keycloak-sunset-2026-08-30`, `ws-0510-gitea-authentik-oidc-e2e`
 
@@ -39,6 +39,279 @@ overlay. The existing `gitea-e2e` identity is non-admin and limited to
 `grafana-admins` or any platform-admin group. Any broader test access must be
 explicitly least-privileged.
 
+## Current live status — 2026-10-12
+
+This section supersedes earlier per-service diagnoses below where they differ.
+Fresh strict-TLS browser checks currently pass for Gitea and Harbor using the
+non-admin test identity. Repo Intake and Ops Portal return the expected
+non-admin authorization denial. Grafana's strict-TLS login, non-admin Viewer
+role, 48-dashboard search, provider-scoped logout, and post-logout re-login now
+pass fresh browser checks. The merged fix was applied from `origin/main` and
+recorded in the live-apply receipt. LibreChat's firewall and Authentik browser
+path now pass a fresh end-to-end check. Outline and GlitchTip still need their
+separately governed fixes and browser retests. Do not claim
+overall Authentik completion or complete Keycloak retirement yet.
+
+- **Authentik runtime:** a read-only live check confirms both server and worker
+  run pinned `2026.8.3` digest `09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442`;
+  public readiness returns HTTP 200. The current five-host security report is
+  host-only, so it does not refresh the image scan. Operator notes report a
+  2026-10-12 scan of the exact digest at 6 Critical/99 High, with zero fixable
+  Critical/High findings, but its summary and CVE receipt are absent from the
+  tracked checkout. The last archived same-digest receipt is dated 2026-10-11
+  and records the same totals; the catalog points to that verifiable artifact
+  until a fresh scan is saved. The old exception's 3/84 justification does not match this scan
+  and expired 2026-10-08. The runtime image gate rejects a new apply until the
+  findings and policy decision are reconciled. Do not renew the exception
+  implicitly. As of 2026-10-13, upstream still identifies 2026.8.3 as latest
+  stable; no newer stable tag was found.
+- **Keycloak sunset:** no Keycloak container is running on `docker-runtime` or
+  `runtime-control`; Gitea's live auth-source list contains only Authentik, and
+  active service/client/integration/subdomain declarations contain no
+  Keycloak-named object. Remaining source references are guarded retirement
+  logic for old Gitea, GlitchTip, Nomad, and Windmill assets. Cold rollback and
+  archival references remain intentionally preserved.
+- **LibreChat account-tool contract:** the canonical agent-tool registry and
+  generator already target Authentik, but the checked-in generated account and
+  combined OpenAPI specs still described Keycloak. This branch regenerates
+  those artifacts and adds a parity test so they cannot silently drift again.
+  The live advertised tool schema still needs a post-merge publication check.
+- **Grafana:** the server-side OIDC route was corrected to resolve Authentik
+  through the private edge with strict TLS. The managed Authentik
+  `grafana-groups` scope mapping is present and the provider metadata
+  reconciles idempotently. Grafana requests `openid profile email
+  grafana-groups`; the mapping exposes only the two Grafana authorization
+  groups under the `groups` claim. A fresh strict-TLS browser session now
+  authenticates the non-admin test identity as Viewer, and dashboard search
+  returns 48 dashboards. Logout originally sent Grafana's ID-token hint to the
+  shared Ops Portal provider's end-session endpoint and Authentik returned
+  HTTP 400. PR #288 points Grafana to its own provider endpoint; the merged
+  mainline apply and fresh browser test now pass. Authentik displays its normal
+  provider-invalidation confirmation, Grafana's `/api/user` returns HTTP 401
+  after logout, and reauthentication returns the test identity as Viewer.
+  Do not grant admin access. The Monitoring host's private-edge DNS pin is
+  merged/applied, and fresh 2026-10-11 Lynis evidence places it within budget.
+  The browser verifier checks identity and server-admin status at `/api/user`,
+  then reads workspace membership roles from `/api/user/orgs`; Grafana does
+  not expose the workspace role in the user-profile response. PR #297 merged
+  this verifier-only change at `648cf810c5037fa2f3e2e8a5d6a8683547fa2bc5`;
+  both Woodpecker push and PR checks passed, and it did not change live Grafana
+  or Authentik configuration.
+- **Outline:** a fresh browser reaches the app, but the realtime Engine.IO
+  WebSocket handshake still fails because the live `SERVICES` setting omits
+  `websockets`. The managed runtime template includes that service. Fresh
+  2026-10-11 scans of the pinned image and latest official candidate still
+  found unresolved critical vulnerabilities. Two source-build attempts reached
+  dependency installation but were killed by the builder host's global OOM
+  killer. Inventory declares a 12 GiB VM maximum, but the running guest reports
+  an 8 GiB balloon allocation with no swap; the Proxmox host is under memory
+  pressure. The Dockerfile now caps Node's heap at 3 GiB and Yarn network
+  concurrency at four. The candidate has not yet been rebuilt or scanned, so
+  the governed apply remains blocked.
+- **GlitchTip:** Authentik accepts the credentials, then first-login
+  provisioning is rejected with the safe `signup_closed` error. The managed
+  social-provider JIT change is present; local public registration and
+  organization creation remain disabled. Fresh 2026-10-11 scans of the pinned
+  image and latest official candidate still found unresolved critical
+  vulnerabilities; the new source-built candidate is not yet built or scanned,
+  so the governed apply remains blocked.
+- **LibreChat:** PR #294 merged the managed, narrowly scoped nftables SNAT
+  needed for the observed `172.16.1.0/24` container-to-private-edge TCP/443
+  path. Its scoped Coolify apply and strict-TLS browser E2E now pass; direct
+  discovery from inside the container returns HTTP 200 with the expected
+  Authentik issuer, and the fresh Firefox session completed the callback and
+  authenticated app session as non-admin `gitea-e2e`. Monitoring-to-Coolify
+  node-exporter metrics remained reachable (HTTP 200 on TCP/9100). The
+  firewall-only apply did not redeploy LibreChat or restart Docker. The exact
+  backup/config hashes, apply recap, and E2E evidence are in the live-apply
+  receipt. A separate pinned-image scan at
+  `receipts/image-scans/2026-10-11-librechat-runtime.json` reports 20 Critical,
+  239 High, 286 Medium, and 54 Low findings, with no fix available for
+  HIGH/CRITICAL findings. The previous exception was not renewed, so the
+  runtime-image deployment remains security-gated. Host hardening warnings and
+  stale backup-host coverage are tracked separately; they did not prevent this
+  narrowly scoped firewall policy apply.
+- **Keycloak:** no running Keycloak container was found on the checked runtime
+  hosts, and the active Authentik catalog has no Keycloak-named consumer.
+  Cold rollback archives and residual DNS/config references have not been
+  exhaustively retired; those are distinct from removing a live runtime.
+
+### Runtime-image security remediation — 2026-10-12
+
+This branch adds pinned source recipes and a strict remote-build path for
+Outline, GlitchTip, and MinIO, plus a shared Redis-compatible Valkey catalog pin
+for GlitchTip, Outline, Langfuse, and Paperless. The exact Valkey linux/amd64
+digest `sha256:187679e3bd4036959631e3f03983ab2ba503ab21e6fd0454d508e909db2ee989`
+was scanned with Syft 1.42.4 and Grype 0.111.0: 0 Critical, 13 High, and zero
+fixable High/Critical findings. Its SBOM, CVE receipt, and catalog summary are
+tracked in the image-scan receipts and the expired shared-Redis exception is
+removed.
+
+The service-completeness gate also exposed expired metadata gaps on affected
+services. GlitchTip explicitly does not require an API-gateway route because
+its Sentry-compatible APIs use native credentials; its browser login remains
+Authentik-backed. Langfuse now has readiness/liveness dashboard and alert
+rules. Those checks no longer depend on expired suppressions.
+
+The MinIO candidate now declares UID/GID `10001:10001`. Its managed runtime
+performs a single, marker-guarded ownership conversion of the persistent data
+tree before switching users; failure restores the root-run Compose identity and
+fails closed. The one-time service interruption and rollback behavior are
+documented in the MinIO runbook.
+
+### Runtime-image continuation — 2026-10-13
+
+Operator notes report that the exact pinned Authentik digest was rescanned on
+2026-10-12 and had 6 Critical/99 High, with zero fixable Critical/High
+findings. That scan's summary and CVE artifact are missing from the tracked
+checkout. The last archived same-digest receipt is from 2026-10-11 and has the
+same 6 Critical/99 High summary; `config/image-catalog.json` points to that
+verifiable receipt. Re-run and archive a fresh scan before treating it as
+current scan evidence. The six Critical
+matches are Python 3.14.7 (`CVE-2026-19445`), AnyIO 4.14.1
+(`GHSA-82r6-8w77-94w6`), PyJWT 2.13.0 (`GHSA-ffc3-869f-jxw9`), Debian
+libxml2 (`CVE-2026-6653`), and two GnuTLS alerts (`CVE-2026-95210`,
+`CVE-2026-88647`) against package version 3.8.9. Python 3.14.8 includes the
+Python security fix; AnyIO 4.14.2 and PyJWT 2.14.0 are the published fixed
+versions ([Python 3.14.8](https://www.python.org/downloads/release/python-3148/),
+[AnyIO advisory](https://github.com/advisories/ghsa-82r6-8w77-94w6),
+[PyJWT advisory](https://github.com/advisories/GHSA-ffc3-869f-jxw9)). Debian's
+tracker still marks the Trixie libxml2 package vulnerable and notes no DSA;
+do not cross-grade from unstable just to clear the scanner
+([Debian tracker](https://security-tracker.debian.org/tracker/CVE-2026-6653)).
+Although both GnuTLS CVE descriptions name 3.8.13, Debian's tracker currently
+marks the SBOM's exact Trixie package version 3.8.9-3+deb13u4 vulnerable for
+both findings, with no fixed Trixie version listed. Keep both Critical findings
+in the budget; do not suppress them based only on the description's version
+string ([Debian CVE-2026-95210 tracker](https://security-tracker.debian.org/tracker/CVE-2026-95210),
+[Debian CVE-2026-88647 tracker](https://security-tracker.debian.org/tracker/CVE-2026-88647)).
+The previous exception covered 3 Critical/84 High and expired 2026-10-08; it
+does not authorize the reported newer scan, and no exception was renewed.
+
+The currently pinned stable 2026.8.3 source still carries those vulnerable
+Python and application dependency versions. Upstream `main`, which identifies
+itself as the 2026.11.0 release candidate, has moved to the fixed
+`fips-python:3.14.8` base, AnyIO 4.14.2, and PyJWT 2.15.1
+([container Dockerfile](https://github.com/goauthentik/authentik/blob/main/lifecycle/container/Dockerfile),
+[dependency lock](https://github.com/goauthentik/authentik/blob/main/uv.lock),
+[project dependencies](https://github.com/goauthentik/authentik/blob/main/pyproject.toml)).
+That is useful evidence for the next stable release, not a production candidate:
+no resulting immutable image has been scanned, and the two GnuTLS findings and
+the Debian libxml2 finding still require a current-image scan and security
+decision. Keep the deployed digest pinned until an approved stable candidate
+passes the image budget.
+
+Two Outline source-build attempts were killed by the host OOM killer during
+dependency installation. This branch lowers Node's heap cap to 3 GiB and Yarn
+network concurrency to four, with focused regression coverage, but the change
+is not yet validated by a complete image build. A read-only capacity check at
+2026-10-12 22:01 UTC showed the configured builder guest with 2.9 GiB available,
+no swap, elevated five-minute memory PSI, and concurrent CI/build containers.
+Its Proxmox parent had 4.2 GiB available and 3.9/4.0 GiB swap used. No further
+heavy image build was started, and no candidate was published or deployed.
+Recheck builder/host headroom before the next attempt; then build and scan
+Outline, GlitchTip, and MinIO candidates at their exact Harbor digests before
+any governed apply.
+
+The ServerClaw strict sanitization audit now has no Critical or Warning gaps;
+exact generic DNS resolver addresses are recognized as non-deployment public
+services, and regression coverage ensures a deployment address remains
+Critical. The publisher dry-run passed its leak check. This is only a preflight:
+the private branch still needs the PR merge, followed by the mainline
+publication run.
+
+The Harbor project/robot reconciliation and source recipes are code only at
+this checkpoint. Outline, GlitchTip, and MinIO candidates have not yet been
+built or scanned at their resulting digests, and no runtime image was deployed.
+Do not mark those image gates cleared until each pushed immutable digest has a
+passing scan; do not deploy until the merged catalog and exact receipt are in
+place.
+
+### Risk-status and repository-truth correction — 2026-10-13
+
+The Authentik catalog entry no longer retains the expired October 8 exception:
+it is explicitly `blocked` with no active risk approval. The image-catalog
+validator now permits this honest state only when a Critical finding exists;
+the vulnerability-budget regression confirms that the entry remains denied at
+6 Critical / 99 High. Focused coverage for the touched image policy, budget,
+Authentik role, patched-image, publication-audit, and generated
+status/release-note surfaces passes (62 tests).
+
+The same validation pass found the canonical platform version disagreed with
+its release track: `versions/stack.yaml` said `0.179.51` while the release
+track remained `0.179.50` and the 0.179.51 release notes explicitly state that
+there was no live platform-version bump. The top-level platform version is
+corrected to `0.179.50`, and the generated README now matches. Repository data
+model validation and generated-README validation pass.
+
+A full local repository test run was attempted before these final metadata and
+policy corrections. It returned 3,963 passed, 190 failed, 17 collection/setup
+errors, and 26 skipped; the failure set spans unrelated existing service and
+generated-catalog tests, including fixture-manager setup expecting a removed
+module attribute. This is not a green repository-wide run. Reconcile that set
+against the actual Woodpecker gate before merging; do not interpret the focused
+suite as a full-suite pass.
+
+### Private registry route for the image builder — 2026-10-12
+
+The first candidate build stopped at Harbor login before cloning or building:
+the private builder resolved the public registry hostname to the public IP,
+where TCP/443 is refused from the builder network. The same TLS hostname and
+certificate work through the private NGINX edge. Both the builder host and its
+BuildKit container had the public resolution, so a host-only resolver fix would
+have left image pushes broken. The build-server role now manages a narrow
+registry-host-to-private-edge mapping in `/etc/hosts` and passes the same
+mapping into the BuildKit container. Public DNS and the TLS hostname remain
+unchanged. This IaC change must pass CI and merge before its live converge;
+image candidates remain unbuilt and undeployed until then.
+
+The first governed live converge used the documented Proxmox jump route and
+reached `docker-build`, but stopped after the Docker runtime role: the
+`artifact_cache_runtime` role requires `site_dir` and `compose_file` during
+Ansible's pre-task argument validation, while those values were only derived
+inside the role's first task. Its defaults now expose those registry-derived
+values before validation, with a regression test covering every required role
+input. The converge restarted Docker and then failed before the build-server
+role. Follow-up checks show Docker active, the host and BuildKit resolver both
+using the private edge, and the Harbor TLS ping returning HTTP 200. The
+managed BuildKit systemd unit is absent, however, and buildx still cannot
+bootstrap because two unmanaged BuildKit containers share the socket and cache
+mounts. The build-server role now offers an opt-in handoff that requires exact
+container names and explicit idle confirmation, validates the expected image
+and persistent mounts, and stops only those named containers without deleting
+cache data. The focused role tests and syntax validation pass; merge this fix,
+then rerun the governed converge and prove the managed builder bootstraps
+before building or scanning candidates. Partial-apply evidence is recorded at
+`receipts/live-applies/ws-0512-authentik-builder-route-partial-20261012-apply-receipt.yaml`.
+No image candidate has been pushed or deployed.
+
+The clean builder snapshot also exposed two validation-context gaps. Receipt
+validation now accepts historical evidence references only when the recorded
+source commit is unavailable in the immutable snapshot and differs from the
+snapshot commit; references for the current snapshot still must exist. The
+service-completeness gate can scope a changed generated completeness catalog
+to the changed canonical service bundles when the snapshot has no Git merge
+Without Git metadata, it can scope changed generated service-scoped catalogs to
+changed canonical service bundles only when a valid snapshot source commit is
+present. Canonical or global catalog changes and unresolvable service paths
+still fail closed to repository-wide validation.
+
+Ansible validation searches its verified dependency cache before the source
+collection directory. This prevents partial Python cache files under a stale
+third-party collection path from shadowing the installed collection, without
+changing the repository-owned `lv3.platform` collection. Local ignored
+collection installs are excluded from builder snapshots so their upstream
+test fixtures cannot be mistaken for tracked repository secrets.
+
+- **Scoped security evidence:** receipt
+  `receipts/security-reports/20261011T082609Z.json` contains fresh Lynis
+  results for 12 reachable production hosts (all selected hosts except
+  `backup`) and no image scans. It is host-hardening evidence, not a complete
+  fleet image-security pass. Coolify's two verified false positives remain
+  suppressed only for Coolify; the required reboot and internal MongoDB
+  authorization warnings remain visible, and its hardening index is 65.
+  The container image gate uses its separate image-catalog scan receipt.
+
 ## Findings and current change
 
 - The reported GlitchTip login loop reproduces in a fresh browser profile. The
@@ -58,14 +331,14 @@ explicitly least-privileged.
   post-merge browser check still returns `signup_closed`; applying the merged
   runtime fix is blocked by the docker-runtime vulnerability budget (host
   warnings exceed budget and both GlitchTip image scans are stale).
-- The Grafana browser report also reproduces with the current non-admin test
-  identity. Grafana's callback reaches userinfo, then its server log rejects
-  the identity because it is not in either configured allowed group. The
-  existing boundary is correct; the test identity was granted only the
-  `grafana-viewers` group. The fresh browser now reaches an authenticated
-  Grafana session, but `/api/user` reports no organization role, so the Viewer
-  assertion still fails. Applying the managed Grafana configuration is blocked
-  by the monitoring host's three warning findings against a budget of two.
+- The earlier Grafana browser assertion incorrectly expected `orgRole` in
+  `/api/user`; Grafana exposes organization membership through
+  `/api/user/orgs`. The corrected verifier checks the authenticated username
+  and server-admin flag separately from membership roles, and rejects any
+  elevated membership for the Viewer test identity. On 2026-10-11, a fresh
+  strict-TLS Firefox run passed as `gitea-e2e`: one Viewer membership,
+  non-admin, authenticated session. No Grafana or Authentik configuration
+  changed during this verifier-only run.
 - Repository completeness validation also found that Grafana lacked its own
   managed dashboard and readiness alert. Added both against the existing
   `service="grafana",probe_kind="readiness"` probe contract; this makes the
@@ -107,9 +380,11 @@ explicitly least-privileged.
   The `authentik-recovery-flow` lane was run through the documented bastion
   port override, and the blueprint was explicitly applied. A repeat narrow
   converge then passed with no changes; the recovery contract and worker SMTP
-  authentication both pass. One recovery-email request returned HTTP 204. The
-  Gmail connector currently requires reauthentication, so inbox delivery could
-  not be independently confirmed.
+  authentication both pass. One recovery-email request returned HTTP 204. A
+  metadata-only Gmail search on 2026-10-13 found a platform-password-reset
+  message in Inbox dated 2026-10-11. The message body and one-time link were not
+  accessed; delivery is confirmed, but reset completion and link validity are
+  not.
 - Repository-wide validation exposed a stale platform-manifest release date:
   the parser ignored the release notes' existing `- Date:` metadata and
   substituted today's date. Fixed the parser with a regression test and
@@ -253,3 +528,372 @@ security budget, a fully successful application-level restore rehearsal, and a
 current least-privilege operator credential. After those gates are resolved,
 repair and rerun the Grafana, Outline, GlitchTip, and Chat browser paths before
 claiming completion.
+
+## Live verification checkpoint — 2026-10-11
+
+- A Tailscale daemon restart temporarily removed `tailscale0`; all 19 declared
+  Proxmox TCP proxy socket units stopped and did not re-arm. Restoring those
+  sockets recovered the private listeners without changing service containers,
+  proxy targets, or public exposure.
+- The Gitea login page now returns HTTP 200 through the PVE-hosted private
+  proxy, and Authentik readiness returns HTTP 200. This verifies upstream
+  reachability, not a completed browser OIDC session.
+- The current Mac cannot reach the PVE proxy address because the hosted
+  Tailscale ACL drops that direct peer/port flow. Separately,
+  `git.example.org` presents a strict-TLS certificate whose SAN names only
+  `achizitii.example.com`; the browser E2E therefore fails before OIDC. Gitea is
+  declared private-only, so no public NGINX route or TLS downgrade was made.
+- The Proxmox Tailscale proxy role now wants sockets from both
+  `sockets.target` and `tailscaled.service`, starts listeners based on socket
+  state, and asserts the socket remains active. Focused regression coverage
+  checks this recovery contract. The updated role has not yet been applied to
+  production; the manual socket recovery is recorded in the accompanying
+  sanitized live-apply receipt.
+- No Authentik identities, application/provider objects, consumer credentials,
+  Keycloak archives, or service containers were changed during this recovery.
+
+### Gitea browser-route correction — 2026-10-11
+
+The earlier conclusion that no managed NGINX route was appropriate was too
+strong. Direct, proxy-bypassed inspection showed that the browser hostname
+reaches the private NGINX VM through the Proxmox subnet-router path, but its
+request fell through to an unrelated default vhost and certificate. The
+Tailscale ACL was not the browser-path failure; it only blocks a separate
+direct Mac-to-host-proxy flow.
+
+The source work now declares a distinct private HTTPS edge route for Gitea,
+allowlisted to the private ingress address, while keeping the raw controller
+TCP proxy separate. Private routes do not trigger public per-host ACME
+issuance: the edge must already have a shared certificate covering the
+hostname, and the converge checks that coverage with OpenSSL before rendering.
+The private HTTP and HTTPS vhosts deny other source addresses, and the
+ACME-challenge exception is omitted from those private vhosts. The route is now
+applied and verified as recorded in the dated live-apply receipt below.
+
+- The 2026-10-11 fresh edge host scan reports hardening index 64 and three
+  warnings. Direct host inspection confirmed the Debian `trixie-security`
+  deb822 source and active nftables input/forward drop-policy chains, so
+  `PKGS-7388` and `FIRE-4512` are now host-scoped detector suppressions for
+  `nginx` only. The genuine `KRNL-5830` pending-reboot warning remains visible.
+  The broad security scan could not reach the declared backup target, so it did
+  not publish a misleading all-host receipt; NGINX was rescanned separately.
+  The narrow route apply passed the NGINX service gate and its documented
+  in-place exception.
+
+The PR gate also exposed two repository-contract defects and one mis-scoped
+completeness check. Changes to individual subdomain rows now select only their
+owning service, while reservation/structure changes still fail closed to the
+global audit. The NGINX edge appliance explicitly does not require an API
+gateway registration, application dashboard, app data catalog, or per-app
+alert rule; its health is represented by the existing edge SLO and centralized
+host monitoring. The HTTPS/TLS workflow now references the generator rather
+than an ignored generated alert file that is not present in fresh Git snapshots.
+Regression tests cover service scoping and these non-app applicability rules.
+
+### Gitea production edge apply and browser proof — 2026-10-11
+
+The first converge was invoked without the explicit deployment selectors. It
+failed closed at the existing-certificate coverage guard before rendering or
+reloading NGINX. The deployment's ignored local identity profile also contained
+stale host-name/interface metadata; those facts were corrected from live
+Proxmox inspection, and the generated inventory was rebuilt with the explicit
+identity and topology overlays.
+
+The corrected governed public-edge converge completed with 133 tasks OK, 5
+changed, 0 failed, and 53 skipped. NGINX configuration validation and service
+activity passed. The Gitea HTTPS route and Authentik readiness both returned
+HTTP 200, with TLS verification enabled. A new temporary Firefox profile
+completed the Authentik OIDC callback into Gitea using `gitea-e2e`; the account
+was confirmed non-admin. No Tailscale ACL was widened and no Gitea public
+exposure was added. A governed Restic run then protected all five configured
+sources with zero uncovered sources; its latest snapshot summary is recorded
+separately and does not claim that an uncommitted source revision was backed up.
+
+This proves the Gitea browser sign-in path, not overall Authentik completion.
+Outline realtime, Grafana role assignment, GlitchTip first-login provisioning,
+Chat's OIDC callback, the current operator credential/recovery path, and an
+application-level Authentik restore remain unresolved or unverified. The
+Keycloak runtime is absent from the checked live hosts and active application
+catalog, but cold rollback archives and residual discovery references have not
+been exhaustively retired.
+
+### Security and restore closeout evidence — 2026-10-11
+
+- The live Authentik server and worker still use the exact catalog-pinned
+  `2026.8.3` linux/amd64 digest. A fresh Syft/Grype scan of that digest reports
+  6 Critical, 99 High, 102 Medium, 29 Low, 81 Unknown, and zero HIGH/CRITICAL
+  findings with a known fix. The refreshed receipt is
+  `receipts/image-scans/2026-10-11-authentik-runtime.json`. The enforced budget
+  remains 0 Critical / 40 High; the prior operator decision covered 3 Critical
+  / 84 High and its seven-day exception expired on 2026-10-08. No new
+  exception was inferred or renewed. The official upstream release page still
+  identifies 2026.8.3 as the latest stable release; see
+  [Authentik releases](https://github.com/goauthentik/authentik/releases).
+- The public Authentik readiness endpoint returned HTTP 200 with TLS
+  verification enabled during this checkpoint. This is availability evidence,
+  not an authenticated operator session.
+- Proxmox reports the PBS storage endpoint active and the latest VM192 backup
+  available at `2026-10-11T00:24:38Z`. The tracked backup guest (VMID 160 at
+  its declared address) is absent from the single-node Proxmox cluster and its
+  SSH/PBS ports are unreachable, so the stale backup-host security scan could
+  not be refreshed against that inventory target. The live PBS endpoint is a
+  separate Tailscale peer and does not expose SSH from the Proxmox host.
+- The application restore rehearsal was deliberately not booted. Live
+  inspection shows `vmbr20` is the production guest network, not the isolated
+  staging segment assumed by the generic restore procedure. VM192 also has
+  several auto-starting service stacks and 12 GiB configured RAM, while the
+  Proxmox host had only about 7.9 GiB available. VMID 903 was free and no
+  clone was created. A successful Authentik restore still requires a genuinely
+  isolated restore path and capacity admission; filesystem or PBS snapshot
+  presence alone is not app-level recovery proof.
+- The generic restore runbook now has an explicit fail-closed safety gate.
+  The runner also refuses fixtures without explicit isolation, with a default
+  gateway, or overlapping managed guest addresses; it verifies that the
+  selected bridge is unaddressed and has no attached ports, refuses occupied
+  target VMIDs, claims ownership only after a successful restore, and requires
+  an exact per-run Proxmox tag before deleting the guest. Failed or ambiguous
+  cleanup is preserved in the verification result instead of deleting an
+  unverified VM.
+  The current three generic fixtures are explicitly marked non-isolated, so
+  the live command stops before restoring anything. A separate
+  bridge/capacity path and deployment-specific service-bind behavior still
+  need implementation and verification. No production service, account,
+  network route, or backup was changed during this check.
+
+### LibreChat firewall apply and Authentik browser proof — 2026-10-11
+
+PR #294 merged the managed, narrowly scoped SNAT policy for the observed
+LibreChat bridge (`172.16.1.0/24`) to the private edge on TCP/443. The canonical
+guest-network-policy converge targeted Coolify only and completed with 30 OK,
+2 changed, 0 unreachable, and 0 failed. The old file was retained in a verified
+root-owned mode-0600 backup; its SHA-256 and the post-apply SHA-256, plus the
+exact invocation evidence, are in the live-apply receipt. The Docker service
+PID and 11 container IDs did not change, confirming the apply did not restart
+Docker or recreate application containers.
+
+The firewall syntax check passed. From inside the LibreChat container, strict-
+TLS OIDC discovery returned HTTP 200 with the expected Authentik issuer. A
+fresh temporary Firefox profile then completed Authentik OIDC authentication
+and the application callback (`authenticated_session=true`, callback HTTP
+302, `status=ok`) using the existing non-admin test identity. A request from
+the monitoring guest to Coolify's node-exporter `/metrics` endpoint also
+returned HTTP 200, confirming the monitoring scrape path survived the narrowed
+forwarding rule. No image redeploy or security-budget exception was made.
+
+The remaining blockers are still distinct: Outline and GlitchTip image/runtime
+applies are denied by unresolved critical findings; Authentik's runtime image
+budget is currently exceeded; the operator recovery credential is not yet
+verified; and the application-level restore rehearsal has not passed. The
+Keycloak container remains absent from checked runtime hosts and the active
+Authentik catalog, but cold rollback archives and residual discovery references
+are intentionally not described as fully retired.
+
+### Operator recovery account selection — 2026-10-11
+
+The read-only recovery contract check passes. A reset request failed closed
+before sending because two active Authentik internal identities share the
+configured operator email. Inspection confirmed that the managed bootstrap
+administrator is the intended superuser; the second matching account is
+non-admin. No account, credential, group, or email address was changed. The
+recovery helper now selects by both the configured email and the managed
+bootstrap username, then verifies active and administrator status. Its focused
+tests pass (6/6), including duplicate-email selection and non-admin rejection.
+After merge, issue one reset request and verify inbox delivery without storing
+or surfacing the short-lived link. The Authentik image budget remains expired;
+this helper correction and recovery request do not change or redeploy its image.
+
+The first push attempt also exposed an incomplete ownership manifest for the
+new recovery helper and a workflow-catalog validation assumption: a generated,
+gitignored Uptime Kuma catalog was absent from the remote validation snapshot,
+which has no Git metadata. The workstream now declares both new recovery files,
+and workflow implementation references accept only generated paths explicitly
+declared by the existing bootstrap manifest. A regression test covers both a
+manifested generated path and an undeclared missing path in a no-Git snapshot.
+
+### Patched runtime Harbor bootstrap — 2026-10-12
+
+The private `patched-runtime` Harbor project was created by the managed
+converge with the required private, auto-scan, and no-system-allowlist metadata.
+The converge then stopped before creating its scoped robots because Harbor's
+per-key metadata endpoint rejected the role's request body; its
+`reuse_sys_cve_allowlist` setting also requires a CSRF context on that endpoint.
+Read-only checks confirmed Harbor stayed healthy and the project metadata
+already matches policy. The role now merges the desired metadata with any
+existing metadata, updates the project through Harbor's project update API only
+when values differ, and verifies the read-back. Focused Harbor role tests and
+playbook syntax pass. The corrected converge, robot provisioning, patched image
+builds/scans, catalog review, and consumer rollout are still pending.
+
+### Builder and artifact-cache recovery — 2026-10-12
+
+PR #306 is merged; Woodpecker push pipeline 632 and PR pipeline 633 both
+completed successfully. The temporarily authorized shared
+`docker-runtime-lv3-woodpecker-agent` was stopped after the checks completed;
+there were no active `wp_*` job containers when it was paused.
+
+The builder/cache investigation initially found the immediate live blocker:
+Docker was active on the dedicated artifact-cache guest, but it had no running
+containers or listeners on ports 5001–5004. Read-only probes from monitoring
+and docker-build timed out. That initial state was repaired by the governed
+builder replay; the exact monitoring route was then restored separately.
+
+The builder converge had previously stopped after eight changes at artifact
+cache argument validation. The current branch supplies the values early enough
+for Ansible role-argument validation, preserves the legacy BuildKit cache
+mounts during managed handoff, and adds the missing artifact-cache service
+definition instead of weakening service-completeness validation. Dependency
+graph node-only edits are now scoped to their owning service; edge edits still
+fall back to full validation. Focused completeness tests (34/34), Authentik and
+artifact-cache completeness, the generated service catalog, and the full
+`data-models` validation pass. The sanitized-publication audit still reports
+two pre-existing critical public-IP coverage gaps and must be repaired before
+publishing the private repository to ServerClaw.
+
+Rebasing on PR #309 exposed a lifecycle-model mismatch: edge publication can
+be retiring while the service remains active in the private runtime, as the
+edge-publication runbook explicitly intends for never-deployed backends. The
+environment validator now allows only the `active` service / `retiring`
+subdomain combination; other status mismatches remain rejected. Service
+catalog aggregates and the generated dependency diagram were refreshed from
+their canonical sources. That refresh also selected the managed status-page
+endpoint for completeness validation; its profile now reflects that it is an
+Uptime Kuma endpoint rather than a standalone Compose service, without changing
+runtime deployment state.
+
+PR #320 is merged. Its identity guard and systemd-aware BuildKit handoff passed
+CI, but the first identity-aware live apply exposed one more lifecycle race:
+stopping a systemd unit whose Docker command uses `--rm` removes its legacy
+container, while the following task relied on the pre-stop inspection and tried
+to stop that now-absent container. The apply receipt is partial. The canonical
+managed service and container were restored and are active; the non-canonical
+unit is inactive and disabled, both legacy containers are absent, the persistent
+cache path remains present, and `buildctl debug workers` reports an amd64
+worker. No cache contents were deleted.
+
+The follow-up change reinspects named containers after the unit stop and only
+stops those still running, while treating only the exact Docker
+"No such container" race as benign. Focused role/runtime tests (23 passed),
+Ansible lint, playbook syntax validation, and live-apply preflight pass. This
+fix must merge before the governed replay; because the legacy containers have
+already been retired, that replay should omit the legacy-container override and
+verify the canonical service, managed Buildx bootstrap, and a small build
+canary. Then record the completed receipt and continue with the cache-plane
+port checks and approved patched-image build/scan workflow. Do not deploy a
+candidate image until its scan and consumer tests pass.
+
+Manifest regeneration exposed that free-text receipt matching could attribute
+common terms such as “container” and “docker-build” to many unrelated services.
+Live-apply receipts now support explicit `service_ids`; this builder receipt
+scopes its date evidence to `artifact_cache` and `docker_build`, and the
+regenerated platform manifest updates only those two services.
+
+PR #321 merged as repository/platform version `0.179.50`. The governed builder
+replay completed with `ok=157 changed=1 failed=0`; the canonical service is
+active/enabled, the legacy unit is disabled, the persistent cache path remains
+present, and the old containers are absent. The remote `mcp-cache` Buildx
+builder bootstrapped, and a local-only OCI amd64 canary built and was removed.
+All four artifact-cache `/v2/` endpoints responded from both docker-build and
+docker-runtime. The detailed record is
+`receipts/live-applies/ws-0512-authentik-builder-managed-replay-20261012.json`.
+
+The first monitoring-VM probe still timed out on cache port 5001 and
+node-exporter port 9100. PR #322's canonical policy now declares both monitoring
+checks while keeping ports 5002–5004 restricted to approved build/runtime
+consumers. A scoped check-mode render showed that a full Proxmox network-role
+replay would write a self-referential uplink/bridge configuration from the
+current identity override; the fail-fast guard blocked that unsafe whole-host
+apply and no Proxmox host network configuration was changed.
+
+The live firewall recovery was then applied safely to VM 180 only. The
+generated PVE VM firewall policy added monitoring-source TCP/5001 (retaining
+the existing TCP/9100 rule); its prior file is retained on the Proxmox host
+for rollback. The guest-only nftables converge added monitoring TCP/9100 and
+removed only unrestricted forwarding accepts, retaining the four cache-port
+allowlist. All four cache containers remain running with host networking and
+the Docker bridge has no attached containers. From the actual monitoring
+Blackbox Exporter, the catalog module now reports `probe_success 1`, HTTP 200
+for `/v2/` and `/metrics`, and TCP ports 5002–5004 remain blocked. Both
+docker-build and docker-runtime still reach all four cache ports. The
+non-secret evidence is in
+`receipts/live-applies/ws-0512-artifact-cache-monitoring-20261012.json`.
+PR #323 is merged, and the artifact-cache SLO is live on monitoring VM 140.
+Prometheus reports the `artifact-cache-availability` target healthy with
+`probe_success=1`; after the first recording-rule evaluation,
+`slo:artifact_cache_availability:success_ratio_5m` returned `1`. The three
+artifact-cache burn/budget alerts are loaded, healthy, and inactive, and the
+Grafana SLO overview dashboard imported and verified.
+
+The optional Alertmanager triage Jinja control lines are YAML-comment-prefixed
+so full-repository YAML lint can parse the template. Rendered YAML was compared
+with triage both disabled and enabled and remains semantically unchanged.
+
+The scoped `live-apply-service service=grafana` run used the documented ADR
+0191 reversible in-place exception. Its SLO-specific tasks passed, but the
+broader monitoring role ended with `ok=267 changed=19 unreachable=0 failed=1`
+when the controller-local ntfy notification-password file was absent. No
+password was fabricated or copied. This receipt records the SLO as live while
+keeping the remaining Alertmanager converge explicitly incomplete:
+`receipts/live-applies/ws-0512-artifact-cache-prometheus-slo-20261012.json`.
+
+### Keycloak DNS audit attempt — 2026-10-13
+
+The source audit found no active Keycloak DNS declaration in the current
+inventory, DNS catalog, or service topology. Historical and compatibility
+references remain in migration/retirement code and cold rollback archives, so
+they are not treated as proof that every Keycloak artifact has been retired.
+The legacy DNS Console API read-only request now redirects to the Hetzner
+Console and returned no record data. The canonical Hetzner Cloud API context
+available to this operator lists 34 zones but does not include the platform's
+`example.org` zone. No DNS records were changed. Hetzner's migration guidance says
+the new Cloud API requires a newly created project-scoped token; the DNS audit
+must be repeated with the token for the project that owns `example.org`. Until
+then, absence of a source declaration is not a live-DNS retirement receipt.
+See [Hetzner's DNS API migration guidance](https://docs.hetzner.com/networking/dns/migration-to-hetzner-console/features-and-differences/).
+
+### ServerClaw publication CI repair — 2026-10-13
+
+Private PR #334 merged as `6d6b876a5`; it recorded the current security and
+runtime gates but did not complete the public snapshot publication. The
+private source repair PR #337 later merged as `3f64c9b7b`, correcting the
+sanitized templates, image receipt reference, and workstream ownership found
+by the first public CI run. The
+sanitized ServerClaw PR #69 initially failed both required Woodpecker checks:
+its generic Gitea catalog omitted the private-edge declaration, the firewall
+renderer test depended on private deployment addresses, and the generic host
+template did not consume `LV3_PROXMOX_HOST_ADDR`. The source-side corrections
+and a generic reserved-address SNAT fixture are committed on
+`codex/serverclaw-template-ci-20261013`. The exact mirror Woodpecker test sets
+passed locally (229, 31, and 7 tests); additional image-policy, vulnerability,
+sanitization, firewall, and subdomain checks also pass. The protected private
+pre-push gate then exposed two bookkeeping errors: undeclared ownership of the
+new template/fixture paths and a missing 2026-10-12 Authentik scan summary
+receipt. Ownership is now declared. The catalog continues to mark Authentik
+blocked and points to the last tracked same-digest receipt from 2026-10-11;
+the reported 2026-10-12 scan remains unarchived. Re-run the protected gate,
+merge the private source PR, regenerate the sanitized snapshot, and get green
+checks on PR #69 before calling publication done.
+
+The refreshed public runs then narrowed the remaining failure to one omitted
+generic firewall rule: the sanitized Proxmox host template lacked the existing
+monitoring-to-Coolify TCP/9100 node-exporter flow. The test proved the mismatch
+against the sanitized template (the private inventory already contains the
+rule). This follow-up adds the same narrowly scoped, non-forwarded rule to the
+generic template. Local mirror suites pass again (229, 31, and 7 tests), the
+focused firewall/image-policy set passes (59 tests), the strict sanitization
+audit has zero Critical/Warnings, and the fresh-main publisher dry-run reports
+no leaks. A subsequent public run exposed three additional monitoring-to-
+node-exporter rules omitted from the same Tier A template (nginx,
+docker-build, and runtime-control). The private inventory already contains
+those policies. This follow-up restores their generic equivalents in the
+canonical publication template and adds a regression assertion so future
+snapshots retain all three. The source repair and refreshed public PR checks
+are pending.
+
+The refreshed public runs then exposed a separate inherited-CI mismatch: the
+publisher intentionally removes `config/tailscale/` and its private policy
+manifest, but the public snapshot still runs the source repository's offline
+Tailscale policy check. The check now skips only when the default policy and
+private publication manifest are both absent, which identifies the sanitized
+snapshot shape; a missing policy remains fatal in private source. Regression
+tests cover both cases. This source repair and the refreshed public PR checks
+must pass before PR #69 can merge.

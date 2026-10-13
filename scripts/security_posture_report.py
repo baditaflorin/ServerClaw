@@ -87,6 +87,20 @@ def default_lynis_hosts(environment: str) -> list[str]:
     return sorted(hosts) if hosts else DEFAULT_LYNIS_HOSTS[environment]
 
 
+def select_lynis_hosts(environment: str, requested: str | None) -> list[str]:
+    available = default_lynis_hosts(environment)
+    if not requested:
+        return available
+
+    selected = list(dict.fromkeys(host.strip() for host in requested.split(",") if host.strip()))
+    if not selected:
+        raise ValueError("--hosts must name at least one active inventory host")
+    unknown = sorted(set(selected) - set(available))
+    if unknown:
+        raise ValueError(f"--hosts includes hosts outside the active {environment} scan set: {', '.join(unknown)}")
+    return selected
+
+
 def run_ansible_security_scan(
     *,
     inventory: Path,
@@ -96,6 +110,9 @@ def run_ansible_security_scan(
     bootstrap_key: Path | None = None,
     jump_host_addr: str | None = None,
 ) -> None:
+    if not output_dir.is_absolute():
+        output_dir = REPO_ROOT / output_dir
+    output_dir = output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     limit = ",".join(hosts)
     env = os.environ.copy()
@@ -420,6 +437,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--trivy-script", type=Path, default=DEFAULT_TRIVY_SCRIPT)
     parser.add_argument("--skip-lynis", action="store_true")
     parser.add_argument("--skip-trivy", action="store_true")
+    parser.add_argument(
+        "--hosts",
+        help="comma-separated active inventory hosts for a scoped Lynis scan (use an isolated --lynis-dir)",
+    )
     parser.add_argument("--publish-nats", action="store_true")
     parser.add_argument("--mattermost-webhook-url")
     parser.add_argument("--glitchtip-event-url")
@@ -436,12 +457,14 @@ def main(argv: list[str] | None = None) -> int:
         context = load_controller_context()
 
         host_reports: list[dict[str, Any]] = []
+        if args.hosts and args.skip_lynis:
+            raise ValueError("--hosts selects fresh Lynis targets and cannot be combined with --skip-lynis")
         if not args.skip_lynis:
             run_ansible_security_scan(
                 inventory=args.inventory,
                 playbook=args.playbook,
                 output_dir=args.lynis_dir,
-                hosts=default_lynis_hosts(args.env),
+                hosts=select_lynis_hosts(args.env, args.hosts),
                 bootstrap_key=context["bootstrap_key"],
                 jump_host_addr=context["host_addr"],
             )

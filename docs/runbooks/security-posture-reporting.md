@@ -37,6 +37,25 @@ Or call the Python entrypoint directly:
 python3 scripts/security_posture_report.py --env production --print-report-json
 ```
 
+For a scoped host refresh, pass a comma-separated subset of the active host
+catalog and an isolated report directory. The resulting receipt covers only
+those hosts; `--skip-trivy` keeps this host-hardening refresh distinct from
+runtime-image scanning:
+
+```bash
+uv run --with ansible-core --with pyyaml --with nats-py python scripts/security_posture_report.py \
+  --env production \
+  --hosts docker-runtime,monitoring,nginx \
+  --lynis-dir "$PWD/.local/security-posture/lynis/authentik-consumers" \
+  --receipt-dir receipts/security-reports \
+  --skip-trivy \
+  --print-report-json
+```
+
+The selector rejects hosts that are not active for the chosen environment.
+Use a clean, isolated `--lynis-dir` so previously fetched host reports cannot
+silently widen the scope of a partial receipt.
+
 If the Lynis collection step already completed and you only need to retry aggregation or downstream publication, reuse the fetched `*.dat` files in `.local/security-posture/lynis/`:
 
 ```bash
@@ -120,6 +139,10 @@ Add a suppression only when:
 - the platform intentionally accepts the risk or cannot remediate it in repo automation yet
 
 Prefer suppressing by Lynis finding id, not by raw text.
+When evidence is specific to one machine or service, include a `hosts` list in
+the suppression entry. The parser then suppresses that finding only for the
+listed inventory hosts; it remains visible everywhere else. Record the direct
+evidence and the condition that requires revalidation alongside the reason.
 
 ## Verification
 

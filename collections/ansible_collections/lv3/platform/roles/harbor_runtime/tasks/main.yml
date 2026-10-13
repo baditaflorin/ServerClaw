@@ -1331,5 +1331,8 @@
   become: false
   no_log: true
 
+- name: Reconcile the private patched-runtime project and scoped robots
+  ansible.builtin.import_tasks: patched_runtime_project.yml
+
 - name: Import Harbor verification tasks
   ansible.builtin.import_tasks: verify.yml

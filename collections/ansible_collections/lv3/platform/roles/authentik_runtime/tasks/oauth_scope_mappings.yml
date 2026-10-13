@@ -1,0 +1,62 @@
+# Purpose: Reconcile the repository-owned OAuth scope mappings required by OIDC clients.
+# Use case: Run before OAuth provider reconciliation so requested custom claims are available.
+# Inputs: Non-secret scope manifest, Authentik API URL, and ignored controller-local API token.
+# Outputs: Authentik scope mapping objects match config/authentik/scope-mappings.yaml.
+# Idempotency: Yes; check mode proves a second API pass has no changes.
+# Dependencies: Authentik API is healthy; ADR 0491.
+---
+- name: Verify Authentik scope mapping reconciler inputs exist on the controller
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ authentik_scope_mapping_manifest_file }}"
+    - "{{ authentik_scope_mapping_reconcile_script }}"
+    - "{{ authentik_scope_mapping_reconcile_token_file }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_scope_mapping_reconcile_inputs
+  no_log: true
+
+- name: Assert Authentik scope mapping reconciler inputs are present
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists | default(false)
+      - item.stat.size | default(0) | int > 0
+    fail_msg: "An Authentik scope mapping manifest, script, or token file is missing."
+  loop: "{{ authentik_scope_mapping_reconcile_inputs.results }}"
+  loop_control:
+    label: "{{ item.item | basename }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Build the Authentik scope mapping reconciler command
+  ansible.builtin.set_fact:
+    authentik_scope_mapping_reconcile_argv: >-
+      {{
+        [
+          'uv', 'run', '--no-project', '--with', 'pyyaml', 'python',
+          authentik_scope_mapping_reconcile_script,
+          '--manifest', authentik_scope_mapping_manifest_file,
+          '--base-url', authentik_public_url,
+          '--token-file', authentik_scope_mapping_reconcile_token_file
+        ]
+      }}
+  no_log: true
+
+- name: Apply managed Authentik OAuth scope mappings
+  ansible.builtin.command:
+    argv: "{{ authentik_scope_mapping_reconcile_argv + ['--apply'] }}"
+  delegate_to: localhost
+  become: false
+  register: authentik_scope_mapping_reconcile_apply
+  changed_when: (authentik_scope_mapping_reconcile_apply.stdout | from_json).changed | bool
+  no_log: true
+
+- name: Prove Authentik OAuth scope mapping reconciliation is idempotent
+  ansible.builtin.command:
+    argv: "{{ authentik_scope_mapping_reconcile_argv + ['--check', '--expect-no-change'] }}"
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  no_log: true

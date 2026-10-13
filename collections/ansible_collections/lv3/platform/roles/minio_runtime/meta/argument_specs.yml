@@ -19,6 +19,15 @@ argument_specs:
       minio_data_dir:
         type: path
         required: true
+      minio_runtime_uid:
+        type: int
+        required: false
+      minio_runtime_gid:
+        type: int
+        required: false
+      minio_data_owner_migration_marker_file:
+        type: path
+        required: false
       minio_policy_dir:
         type: path
         required: true

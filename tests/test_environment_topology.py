@@ -89,8 +89,33 @@ def test_validate_environment_references_allows_declared_shared_subdomain() -> N
     )
 
 
+def test_validate_environment_references_allows_retiring_subdomain_for_active_service() -> None:
+    subdomains = build_subdomain_catalog("serverclaw")
+    subdomains["subdomains"][0]["status"] = "retiring"
+
+    environment_topology.validate_environment_references(
+        build_environment_catalog(),
+        build_service_catalog("serverclaw"),
+        subdomains,
+        build_host_vars(),
+    )
+
+
+def test_validate_environment_references_rejects_other_service_subdomain_status_mismatch() -> None:
+    subdomains = build_subdomain_catalog("serverclaw")
+    subdomains["subdomains"][0]["status"] = "planned"
+
+    with pytest.raises(ValueError, match="does not match subdomain status 'planned'"):
+        environment_topology.validate_environment_references(
+            build_environment_catalog(),
+            build_service_catalog("serverclaw"),
+            subdomains,
+            build_host_vars(),
+        )
+
+
 def test_validate_environment_references_rejects_unrelated_subdomain_owner() -> None:
-    with pytest.raises(ValueError, match="subdomain 'chat.example.com' must reference service_id 'librechat'"):
+    with pytest.raises(ValueError, match=r"subdomain 'chat\.example\.com' must reference service_id 'librechat'"):
         environment_topology.validate_environment_references(
             build_environment_catalog(),
             build_service_catalog("librechat"),
@@ -136,7 +161,6 @@ def test_main_validate_resolves_placeholder_domains_for_private_overlay(monkeypa
     }
 
     monkeypatch.setattr(environment_topology, "load_environment_topology", lambda: environment_catalog)
-    monkeypatch.setattr(environment_topology, "load_yaml", lambda _path: build_host_vars())
     # ADR 0430 — production code now reads host_vars via load_topology_host_vars
     # (overlay-aware). Patch the overlay-aware loader too so the test sees the
     # fake host_vars instead of the real file on disk.

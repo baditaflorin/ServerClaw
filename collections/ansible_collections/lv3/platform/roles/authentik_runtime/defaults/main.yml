@@ -87,6 +87,9 @@ authentik_oauth_reconcile_enabled: true
 authentik_oauth_manifest_file: "{{ inventory_dir }}/../config/authentik/oauth-clients.yaml"
 authentik_oauth_reconcile_script: "{{ inventory_dir }}/../scripts/reconcile_authentik_oauth.py"
 authentik_oauth_reconcile_token_file: "{{ authentik_bootstrap_token_local_file }}"
+authentik_scope_mapping_manifest_file: "{{ inventory_dir }}/../config/authentik/scope-mappings.yaml"
+authentik_scope_mapping_reconcile_script: "{{ inventory_dir }}/../scripts/reconcile_authentik_scope_mappings.py"
+authentik_scope_mapping_reconcile_token_file: "{{ authentik_bootstrap_token_local_file }}"
 # Empty means reconcile the complete declared manifest.  A narrowly scoped
 # rollout can still pass an explicit list while a normal converge makes every
 # consumer's Authentik client contract durable.

@@ -1,0 +1,104 @@
+---
+argument_specs:
+  main:
+    short_description: Converge node_exporter listeners, textfile directory, socket proxies and tailscale serve ports on one fleet host.
+    options:
+      fleet_node_exporter_manage_package:
+        type: bool
+        required: false
+        default: true
+        description:
+          - Install the exporter package when it is missing (state present only, never an upgrade).
+      fleet_node_exporter_package:
+        type: str
+        required: false
+        default: prometheus-node-exporter
+        description:
+          - Package name.
+      fleet_node_exporter_service:
+        type: str
+        required: false
+        default: prometheus-node-exporter
+        description:
+          - systemd unit name of the exporter.
+      fleet_node_exporter_defaults_file:
+        type: path
+        required: false
+        default: /etc/default/prometheus-node-exporter
+        description:
+          - EnvironmentFile read by the packaged unit. Only its ARGS line is managed.
+      fleet_node_exporter_listen_addresses:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Explicit "address:port" entries the exporter binds. Wildcard addresses are rejected.
+      fleet_node_exporter_textfile_dir:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Textfile collector directory. Empty means the flag is not passed and nothing is managed.
+      fleet_node_exporter_textfile_owner:
+        type: str
+        required: false
+        default: prometheus
+        description:
+          - Owner of the textfile directory (not of the files the writers drop into it).
+      fleet_node_exporter_textfile_group:
+        type: str
+        required: false
+        default: prometheus
+        description:
+          - Group of the textfile directory.
+      fleet_node_exporter_textfile_mode:
+        type: str
+        required: false
+        default: "0755"
+        description:
+          - Mode of the textfile directory.
+      fleet_node_exporter_extra_args:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description:
+          - Extra exporter flags appended after the listen and textfile flags.
+      fleet_node_exporter_args_quote:
+        type: str
+        required: false
+        default: '"'
+        description:
+          - Quote character around the ARGS value (matches the live file so the first converge is a no-op).
+      fleet_node_exporter_args_prefix:
+        type: str
+        required: false
+        default: ""
+        description:
+          - String placed inside the quotes before the first flag (one hypervisor has a leading space).
+      fleet_node_exporter_socket_proxies:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description:
+          - Socket proxy declarations. state is present (managed), unmanaged (documented, never touched) or disabled (a stale socket kept stopped and disabled, never rendered). free_bind renders FreeBind=true.
+      fleet_node_exporter_proxyd_path:
+        type: path
+        required: false
+        default: /usr/lib/systemd/systemd-socket-proxyd
+        description:
+          - Path of systemd-socket-proxyd used in the proxy service units.
+      fleet_node_exporter_unit_dir:
+        type: path
+        required: false
+        default: /etc/systemd/system
+        description:
+          - Directory the proxy units are written to.
+      fleet_node_exporter_tailscale_serve_tcp:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description:
+          - tailscale serve TCP forwards, each with port and target.

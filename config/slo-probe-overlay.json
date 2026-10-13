@@ -1,0 +1,247 @@
+{
+  "schema_version": "1.0.0",
+  "review_note": "Deployment overlay for config/slo-catalog.json: only endpoints verified to answer from the monitoring VM are rendered into Prometheus. Re-verify before adding an entry; every catalog SLO must be listed under endpoints or excluded.",
+  "verified_on": "2026-10-12",
+  "verified_from": "monitoring VM, blackbox exporter probe using http_2xx_follow_redirects, 2xx required; direct endpoints use their private URL, and edge probes resolve through the edge private address with the public hostname as SNI/Host",
+  "edge_connect_host": "{{ monitoring_slo_edge_connect_host }}",
+  "tls_policy": {
+    "warn_days": 21,
+    "critical_days": 7
+  },
+  "min_history": {
+    "fast_burn_minutes": 30,
+    "slow_burn_hours": 6,
+    "budget_hours": 24
+  },
+  "endpoints": [
+    {
+      "slo_id": "api-gateway-availability",
+      "via": "edge",
+      "target_url": "https://api.{{ platform_domain }}/healthz",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "artifact-cache-availability",
+      "via": "direct",
+      "target_url": "http://10.10.10.80:5001/v2/"
+    },
+    {
+      "slo_id": "authentik-availability",
+      "via": "edge",
+      "target_url": "https://id.{{ platform_domain }}/-/health/ready/",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "gitea-availability",
+      "via": "edge",
+      "target_url": "https://git.{{ platform_domain }}/api/healthz",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "glitchtip-availability",
+      "via": "edge",
+      "target_url": "https://errors.{{ platform_domain }}/api/0/internal/health/",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "grafana-availability",
+      "via": "edge",
+      "target_url": "https://grafana.{{ platform_domain }}/login",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "harbor-availability",
+      "via": "edge",
+      "target_url": "https://registry.{{ platform_domain }}/api/v2.0/ping",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "minio-availability",
+      "via": "edge",
+      "target_url": "https://minio.{{ platform_domain }}/minio/health/live",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "nginx-edge-availability",
+      "via": "edge",
+      "target_url": "https://nginx.{{ platform_domain }}/healthz",
+      "tls": true,
+      "objective_percent": 99.9
+    },
+    {
+      "slo_id": "outline-availability",
+      "via": "edge",
+      "target_url": "https://wiki.{{ platform_domain }}/_health",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "plausible-availability",
+      "via": "edge",
+      "target_url": "https://analytics.{{ platform_domain }}/api/system/health/ready",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "serverclaw-availability",
+      "via": "edge",
+      "target_url": "https://chat.{{ platform_domain }}/",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "woodpecker-availability",
+      "via": "edge",
+      "target_url": "https://ci.{{ platform_domain }}/healthz",
+      "tls": true,
+      "objective_percent": 99.5
+    },
+    {
+      "slo_id": "openbao-availability",
+      "via": "direct",
+      "target_url": "http://10.10.10.92:8201/v1/sys/health",
+      "objective_percent": 99.0
+    },
+    {
+      "slo_id": "browser-runner-availability",
+      "via": "direct",
+      "target_url": "http://10.10.10.20:8096/healthz",
+      "objective_percent": 99.0
+    },
+    {
+      "slo_id": "dify-availability",
+      "via": "direct",
+      "target_url": "http://10.10.10.20:8094/healthz",
+      "objective_percent": 99.0
+    },
+    {
+      "slo_id": "dozzle-availability",
+      "via": "direct",
+      "target_url": "http://10.10.10.20:8089/healthcheck",
+      "objective_percent": 99.0
+    },
+    {
+      "slo_id": "windmill-availability",
+      "via": "direct",
+      "target_url": "http://10.10.10.92:8000/api/version",
+      "objective_percent": 99.0
+    }
+  ],
+  "excluded": [
+    {
+      "slo_id": "changedetection-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "crawl4ai-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "directus-availability",
+      "reason": "HTTP 502 from the edge (upstream down)"
+    },
+    {
+      "slo_id": "excalidraw-availability",
+      "reason": "Edge answers 302 to the SSO sign-in page; no unauthenticated health path is published, so the probe cannot see the application"
+    },
+    {
+      "slo_id": "gotenberg-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "grist-availability",
+      "reason": "Edge vhost times out (upstream hangs)"
+    },
+    {
+      "slo_id": "homepage-availability",
+      "reason": "Edge answers 302 to the SSO sign-in page; no unauthenticated health path is published, so the probe cannot see the application"
+    },
+    {
+      "slo_id": "label-studio-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "langfuse-availability",
+      "reason": "Edge vhost times out (upstream hangs)"
+    },
+    {
+      "slo_id": "mailpit-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "matrix-synapse-availability",
+      "reason": "HTTP 502 from the edge (upstream down)"
+    },
+    {
+      "slo_id": "netbox-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "nextcloud-availability",
+      "reason": "HTTP 502 from the edge (upstream down)"
+    },
+    {
+      "slo_id": "openfga-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "openfga-latency",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "paperless-availability",
+      "reason": "HTTP 502 from the edge (upstream down)"
+    },
+    {
+      "slo_id": "piper-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "plane-availability",
+      "reason": "Edge answers 302 to the SSO sign-in page; no unauthenticated health path is published, so the probe cannot see the application"
+    },
+    {
+      "slo_id": "platform-context-api-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "semaphore-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "status-page-availability",
+      "reason": "HTTP 502 from the edge (upstream down)"
+    },
+    {
+      "slo_id": "superset-availability",
+      "reason": "HTTP 502 from the edge (upstream down)"
+    },
+    {
+      "slo_id": "tesseract-ocr-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "tika-availability",
+      "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
+    },
+    {
+      "slo_id": "typesense-availability",
+      "reason": "Catalog target is the retired 100.64.0.1 tailnet address; nothing answers /health on the runtime host"
+    },
+    {
+      "slo_id": "uptime-kuma-availability",
+      "reason": "HTTP 502 from the edge (upstream down)"
+    },
+    {
+      "slo_id": "vaultwarden-availability",
+      "reason": "No edge vhost and no certificate for the hostname; the service is not deployed"
+    }
+  ]
+}

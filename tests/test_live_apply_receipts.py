@@ -242,6 +242,47 @@ def test_validate_receipt_accepts_historical_evidence_ref_in_immutable_snapshot(
     )
 
 
+def test_validate_receipt_accepts_historical_evidence_when_snapshot_lacks_source_commit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_lookup_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_exists", lambda _commit: False)
+    monkeypatch.setattr(live_apply_receipts, "git_path_exists_in_history", lambda _ref: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+    monkeypatch.setenv("LV3_SNAPSHOT_SOURCE_COMMIT", "a" * 40)
+
+    receipt = build_receipt("b" * 40)
+    receipt["evidence_refs"] = ["receipts/gate-bypasses/historical-evidence.json"]
+
+    live_apply_receipts.validate_receipt(
+        receipt,
+        Path("2026-03-23-test-receipt.json"),
+        {"workflows": {"test-workflow": {}}},
+    )
+
+
+def test_validate_receipt_rejects_missing_evidence_from_current_snapshot_commit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_lookup_available", lambda: True)
+    monkeypatch.setattr(live_apply_receipts, "git_commit_exists", lambda _commit: False)
+    monkeypatch.setattr(live_apply_receipts, "git_path_exists_in_history", lambda _ref: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+    monkeypatch.setenv("LV3_SNAPSHOT_SOURCE_COMMIT", "a" * 40)
+
+    receipt = build_receipt("a" * 40)
+    receipt["evidence_refs"] = ["receipts/gate-bypasses/missing-current-evidence.json"]
+
+    with pytest.raises(ValueError, match="evidence ref"):
+        live_apply_receipts.validate_receipt(
+            receipt,
+            Path("2026-03-23-test-receipt.json"),
+            {"workflows": {"test-workflow": {}}},
+        )
+
+
 def test_validate_receipt_rejects_missing_current_evidence_ref_in_immutable_snapshot(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

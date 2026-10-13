@@ -115,7 +115,6 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `local_search_and_indexing_fabric` | `2026-03-29-adr-0239-browser-local-search-post-merge-replay` |
 | `https_tls_assurance` | `2026-03-29-adr-0255-matrix-synapse-mainline-live-apply` |
 | `backup_coverage` | `2026-03-29-adr-0271-backup-coverage-ledger-mainline-live-apply` |
-| `artifact_cache_plane` | `2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply` |
 | `signed_release_bundles` | `2026-03-28-adr-0233-signed-release-bundles-mainline-live-apply` |
 | `shared_policy_packs` | `2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply` |
 | `server_resident_reconciliation` | `2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply` |
@@ -189,5 +188,9 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `semaphore` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
 | `public_edge_publication` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
+| `plausible` | `ws-0520-plausible-clickhouse-log-retention-apply-receipt` |
 | `identity_provider` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
+| `grafana_sso` | `ws-0512-authentik-consumer-e2e-postmerge-20261011-apply-receipt` |
 | `authentik` | `ws-0517-authentik-runtime-upgrade-apply-receipt` |
+| `artifact_cache_slo` | `ws-0512-artifact-cache-prometheus-slo-20261012` |
+| `artifact_cache_plane` | `ws-0512-artifact-cache-monitoring-20261012` |

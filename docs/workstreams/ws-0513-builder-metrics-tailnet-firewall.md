@@ -101,7 +101,7 @@ digest pin.
 ## Live evidence (2026-09-28)
 
 - The Proxmox node reports `pve-firewall` enabled/running. Its Tailscale address
-  is `100.120.234.7`; the Builder peer `100.114.37.21` responds to `tailscale
+  is `203.0.113.6`; the Builder peer `100.114.37.21` responds to `tailscale
   ping`.
 - PR #250's cluster rule is compiled for `100.114.37.21/32` to TCP/9100. The
   pre-existing node rules for TCP/9101 and TCP/18021 remain present.
@@ -125,7 +125,7 @@ digest pin.
   changed=2 unreachable=0 failed=0 skipped=8 rescued=0 ignored=0`.
 - The final guest policy permits the Proxmox host source `10.10.10.1/32` to
   TCP/9100. The active PVE host rule permits Builder peer `100.114.37.21/32`
-  to the tailnet-bound proxy at `100.120.234.7:9100`, which forwards to
+  to the tailnet-bound proxy at `203.0.113.6:9100`, which forwards to
   `10.10.10.30:9100`.
 - The Builder PCT108 request through `socks5h://127.0.0.1:1055` returned HTTP
   200 and a `node_uname_info` sample with `nodename="docker-build"`. Direct

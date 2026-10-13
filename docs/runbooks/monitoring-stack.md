@@ -112,6 +112,52 @@ Verify the Grafana health endpoint locally on the guest:
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3000/api/health'
 ```
 
+## 0own Proxmox host metrics
+
+Keep the 0own exporter bound to its Tailscale address and allow TCP 9100 only
+from monitoring-lv3. Do not publish node exporter on a public or general LAN
+interface. The target is declared in
+`inventory/host_vars/monitoring.yml` and, when discovery is disabled, applied with the narrow playbook
+`playbooks/services/prometheus-0own-node-exporter.yml`.
+
+The 0own host exporter is published by Scanopy service discovery under the
+`pve_0own_host_node_exporter_via_tailscale` job (see
+`docs/runbooks/scanopy-service-discovery.md`). The general monitoring role
+template now also renders the fleet scrape jobs, the public-edge probe job, and
+the OpenObserve `remote_write` block from `inventory/host_vars/monitoring.yml`,
+so a full `grafana.yml` convergence no longer erases them. Every rendered
+`prometheus.yml` is validated with `promtool` and applied with SIGHUP.
+
+The narrow playbook `playbooks/services/prometheus-0own-node-exporter.yml`
+remains for deployments that do not enable discovery
+(`monitoring_scanopy_sd_enabled: false`). It validates the active
+configuration, adds one managed scrape block before `remote_write`, validates
+with `promtool`, sends Prometheus SIGHUP only if the file changed, and restores
+its automatic backup if reload or target verification fails. While discovery is
+enabled it is a no-op, because adding the static job would scrape the exporter
+twice.
+
+The 0own Proxmox host runs Debian's `prometheus-node-exporter` package. Its
+systemd drop-in at
+`/etc/systemd/system/prometheus-node-exporter.service.d/10-tailscale-only.conf`
+binds the exporter to `203.0.113.3:9100`. The host firewall accepts
+Tailscale interface traffic, and the tailnet policy restricts this metrics port
+to the monitoring VM. If the host's Tailscale address changes, update both the
+drop-in and the production target/grant before restarting the exporter.
+
+Apply and verify the 0own target:
+
+```bash
+python3 scripts/ansible_scope_runner.py plan --playbook playbooks/services/prometheus-0own-node-exporter.yml --env production
+python3 scripts/ansible_scope_runner.py run --playbook playbooks/services/prometheus-0own-node-exporter.yml --env production -- --limit monitoring -e '{"ansible_host":"0mcp_monitoring"}'
+ssh 0mcp_monitoring 'curl -fsS --get --data-urlencode "query=up{job=\"pve_0own_host_node_exporter_via_tailscale\",monitored_host=\"proxmox-node\"}" http://127.0.0.1:9090/api/v1/query'
+```
+
+The target query should have value `1`. Useful host metrics include
+`node_filesystem_avail_bytes`, `node_load1`, `node_cpu_seconds_total`, and
+`node_memory_MemAvailable_bytes`. A target with value `0` indicates a scrape
+or exporter availability problem; it does not by itself identify the cause.
+
 Verify the managed overview dashboard exists and has the expected title:
 
 ```bash

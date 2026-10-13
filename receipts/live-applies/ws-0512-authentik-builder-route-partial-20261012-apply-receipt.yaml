@@ -1,0 +1,28 @@
+workstream_id: ws-0512-authentik-builder-route-partial-20261012
+state: partial
+schema_version: 1.1.0
+started_at: '2026-10-12T11:09:54Z'
+completed_at: '2026-10-12T11:10:42Z'
+applied_by: codex
+repo_version: 0.179.48
+adr: 0491
+summary: Governed builder convergence partially applied Docker/firewall configuration,
+  then exposed missing artifact-cache role defaults before BuildKit service reconciliation.
+targets:
+- service: build-artifact-cache
+  host: docker-build
+errors:
+- The artifact_cache_runtime role argument validation failed because artifact_cache_site_dir
+  and artifact_cache_compose_file were not defined before role tasks.
+- The managed BuildKit systemd unit remains absent and mcp-cache did not bootstrap;
+  patched image candidates were not built or deployed.
+notes:
+- The first SSH attempt stopped before tasks with zero changes. The retry used the
+  documented Proxmox jump route and completed 128 tasks before one failure, with 8
+  tasks changed and zero unreachable hosts.
+- Follow-up checks confirmed Docker active, the host and BuildKit container resolve
+  the Harbor hostname through the private edge, and the Harbor TLS ping returns HTTP
+  200.
+- The Docker runtime converge restarted Docker. Focused artifact-cache/build-server
+  tests now pass 15/15; syntax and agent-standards checks pass. The governed service
+  converge has not yet been rerun.

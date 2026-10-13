@@ -1,0 +1,12 @@
+# Added 2026-10-11 (claude-code for florin). New standalone file; does not modify existing rule files.
+# Always-firing dead-man's-switch: Alertmanager routes it to ntfy topic platform-monitoring-watchdog every 6h.
+# If those heartbeats stop arriving, Prometheus->Alertmanager->ntfy is broken.
+groups:
+  - name: alertmanager_watchdog
+    rules:
+      - alert: Watchdog
+        expr: vector(1)
+        labels:
+          severity: none
+        annotations:
+          summary: "Heartbeat: Prometheus -> Alertmanager -> ntfy pipeline is alive"

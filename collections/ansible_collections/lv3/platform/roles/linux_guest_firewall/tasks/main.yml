@@ -35,6 +35,21 @@
       - inventory_hostname in hostvars[linux_guest_firewall_host_id].network_policy.guests
     fail_msg: "linux_guest_firewall requires canonical host vars and a network policy entry for the current guest."
 
+- name: Require an explicit source allowlist for private-edge container SNAT
+  ansible.builtin.assert:
+    that:
+      - >-
+        not (hostvars[linux_guest_firewall_host_id].network_policy.guests[inventory_hostname]
+        .allow_container_private_edge_https_snat | default(false) | bool)
+        or
+        (hostvars[linux_guest_firewall_host_id].network_policy.guests[inventory_hostname]
+        .container_private_edge_https_snat_source_cidrs is defined
+        and hostvars[linux_guest_firewall_host_id].network_policy.guests[inventory_hostname]
+        .container_private_edge_https_snat_source_cidrs is sequence
+        and hostvars[linux_guest_firewall_host_id].network_policy.guests[inventory_hostname]
+        .container_private_edge_https_snat_source_cidrs | length > 0)
+    fail_msg: "Private-edge container SNAT must declare at least one source CIDR."
+
 - name: Inspect nftables package status on the guest
   ansible.builtin.command:
     argv:

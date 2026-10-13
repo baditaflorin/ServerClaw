@@ -4,6 +4,7 @@ public_edge_oidc_auth_download_url: >-
   https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v{{ public_edge_oidc_auth_version }}/oauth2-proxy-v{{ public_edge_oidc_auth_version }}.linux-amd64.tar.gz
 public_edge_oidc_auth_binary_path: /usr/local/bin/oauth2-proxy
 public_edge_oidc_auth_service_name: "{{ platform_identity.config_prefix }}-ops-portal-oauth2-proxy"
+public_edge_oidc_auth_service_description: LV3 Operations Portal oauth2-proxy
 public_edge_oidc_auth_http_address: 127.0.0.1:4180
 public_edge_oidc_auth_config_dir: "/etc/{{ platform_identity.unix_prefix }}/oauth2-proxy"
 public_edge_oidc_auth_config_file: "{{ public_edge_oidc_auth_config_dir }}/ops-portal.cfg"
@@ -18,6 +19,8 @@ public_edge_oidc_auth_allowed_groups:
   - "{{ platform_identity.config_prefix }}-platform-admins"
 public_edge_oidc_auth_email_domains:
   - "*"
+public_edge_oidc_auth_authenticated_emails_local_file: ""
+public_edge_oidc_auth_authenticated_emails_file: ""
 # Authentik's stock email scope mapping deliberately marks local addresses as
 # unverified.  The edge still requires the deployment's platform-admin group;
 # this opt-in only permits oauth2-proxy to accept that Authentik identity claim.
@@ -37,6 +40,7 @@ public_edge_oidc_auth_watchdog_enabled: true
 public_edge_oidc_auth_watchdog_interval_sec: 30
 public_edge_oidc_auth_watchdog_script_path: /usr/local/libexec/{{ platform_identity.config_prefix }}-ops-portal-oauth2-proxy-watchdog.sh
 public_edge_oidc_auth_watchdog_service_name: "{{ platform_identity.config_prefix }}-ops-portal-oauth2-proxy-watchdog"
+public_edge_oidc_auth_watchdog_state_dir: /run/{{ platform_identity.config_prefix }}-oauth2-proxy-watchdog
 public_edge_oidc_auth_watchdog_failure_threshold: 2
 public_edge_oidc_auth_watchdog_ntfy_url: "http://127.0.0.1:2586"
 public_edge_oidc_auth_watchdog_ntfy_topic: platform-identity-critical

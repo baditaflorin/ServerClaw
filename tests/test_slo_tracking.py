@@ -21,6 +21,16 @@ def test_generated_slo_assets_are_current() -> None:
     assert generate_slo_rules.outputs_match(load_slo_catalog())
 
 
+def test_artifact_cache_private_registry_slo_is_verified_and_enabled() -> None:
+    catalog = load_slo_catalog()
+    overlay = generate_slo_rules.load_slo_probe_overlay(catalog)
+    endpoint = next(entry for entry in overlay["endpoints"] if entry["slo_id"] == "artifact-cache-availability")
+
+    assert endpoint["via"] == "direct"
+    assert endpoint["target_url"] == "http://10.10.10.80:5001/v2/"
+    assert not any(entry["slo_id"] == "artifact-cache-availability" for entry in overlay["excluded"])
+
+
 def test_slo_status_entries_map_budget_to_health() -> None:
     def fake_query(expr: str) -> float:
         if expr.endswith(":budget_remaining"):

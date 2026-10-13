@@ -57,3 +57,29 @@ Expected result:
 - `make configure-edge-publication` regenerates the shared `build/changelog-portal/` and `build/docs-portal/` artifacts before pushing them to the edge, so a fresh worktree does not need a separate manual portal/docs build step.
 - This runbook does not publish Proxmox UI itself. The `proxmox.example.com` edge page is intentionally informational because Proxmox administration remains private and Tailscale-based.
 - When only the NGINX edge config needs to change and the generated portal directories are already current on the guest, rerun `playbooks/public-edge.yml` from `Check whether the public edge certificate exists` to skip the slow static-directory copy and force the config render, validation, and reload path.
+
+## Unpublished edge vhosts for never-deployed apps (2026-10-12)
+
+The 0mcp fleet was bootstrapped on 2026-05-19 and the following backends were
+never deployed on it (the docker-runtime watchdog has reported
+`compose directory /opt/<app> does not exist` since the first probe, and their
+edge upstreams have refused connections since 2026-05-20): `data` (directus),
+`cloud` (nextcloud), `bi` (superset), `matrix` (matrix-synapse), `paperless`,
+`grist`, `langfuse`, `n8n`, `flags` (flagsmith), `annotate` (label-studio) and
+`repowise`.
+
+Their edge publication is therefore disabled:
+
+- `platform_service_topology.<svc>.edge.enabled: false` in
+  `inventory/host_vars/proxmox-host.yml` (and the committed generated copy in
+  `inventory/group_vars/platform.yml`) so `service_topology_edge_sites` and
+  `service_topology_edge_certificate_domains` no longer emit a vhost or SAN.
+- The matching `config/subdomain-catalog.json` entries are `retiring` (not a
+  public-endpoint status) and `config/subdomain-exposure-registry.json` was
+  regenerated with `scripts/subdomain_exposure_audit.py --write-registry`.
+- Service definitions, DNS records, certificates and Authentik clients are
+  intentionally left in place.
+
+To re-publish an app after it is really deployed: flip `edge.enabled` back to
+`true` (both files), set the catalog entry back to `active`, regenerate the
+registry, and run the edge publication.

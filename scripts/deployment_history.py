@@ -249,7 +249,15 @@ def collect_live_apply_entries(
             " ".join(str(note) for note in receipt.get("notes", [])),
             " ".join(str(ref) for ref in receipt.get("evidence_refs", [])),
         ]
-        service_ids = infer_service_ids(text_parts, matchers, adr=receipt.get("adr"))
+        explicit_service_ids = receipt.get("service_ids")
+        if explicit_service_ids is None:
+            service_ids = infer_service_ids(text_parts, matchers, adr=receipt.get("adr"))
+        else:
+            if not isinstance(explicit_service_ids, list) or any(
+                not isinstance(service_id, str) or not service_id.strip() for service_id in explicit_service_ids
+            ):
+                raise ValueError(f"{path.name}: service_ids must be a list of non-empty strings when present")
+            service_ids = sorted(set(explicit_service_ids))
         environment = receipt_environment(path, receipts_dir)
         entries.append(
             {

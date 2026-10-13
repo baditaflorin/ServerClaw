@@ -18,7 +18,7 @@ service:
     - langfuse_runtime
     - langfuse_worker_runtime
     - langfuse_clickhouse_runtime
-    - langfuse_redis_runtime
+    - shared_valkey_runtime
   secret_catalog_ids:
     - langfuse_database_password
     - langfuse_bootstrap_user_password
@@ -50,7 +50,9 @@ completeness:
   requires_compose_secrets: true
   oidc_provider: authentik
   authentik_client_generated: true
-  suppression_preset: legacy-service
+  dashboard_file: config/grafana/dashboards/langfuse.json
+  alert_rule_file: config/alertmanager/rules/langfuse.yml
+  suppressed_checks: {}
 redundancy:
   tier: R1
   recovery_objective:

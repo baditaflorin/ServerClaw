@@ -40,6 +40,11 @@ def test_defaults_are_generic_pinned_and_fail_safe() -> None:
     assert "@sha256:" in defaults["authentik_redis_image"]
     assert defaults["authentik_openbao_policy_name"].startswith("{{ platform_identity.config_prefix }}")
     assert defaults["authentik_oauth_reconcile_clients"] == []
+    assert defaults["authentik_scope_mapping_manifest_file"].endswith("config/authentik/scope-mappings.yaml")
+    assert defaults["authentik_scope_mapping_reconcile_script"].endswith(
+        "scripts/reconcile_authentik_scope_mappings.py"
+    )
+    assert defaults["authentik_scope_mapping_reconcile_token_file"] == ("{{ authentik_bootstrap_token_local_file }}")
     assert defaults["authentik_recovery_blueprint_file"].endswith("config/authentik/recovery-flow.yaml")
     assert defaults["authentik_recovery_blueprint_remote_file"] == (
         "{{ authentik_blueprints_dir }}/platform-operator-recovery.yaml"
@@ -51,6 +56,18 @@ def test_defaults_are_generic_pinned_and_fail_safe() -> None:
     assert defaults["authentik_email_use_tls"] is False
     assert defaults["authentik_email_from"] == "{{ mail_platform_brevo_sender_email }}"
     assert defaults["authentik_email_password_local_file"] == "{{ mail_platform_mailbox_password_local_file }}"
+
+
+def test_oauth_scope_mappings_reconcile_before_oauth_providers() -> None:
+    oauth_tasks = load_yaml(OAUTH_TASKS_PATH)
+    assert oauth_tasks[0]["ansible.builtin.import_tasks"] == "oauth_scope_mappings.yml"
+
+    scope_tasks = load_yaml(ROLE_ROOT / "tasks" / "oauth_scope_mappings.yml")
+    names = [task["name"] for task in scope_tasks]
+    assert names.index("Apply managed Authentik OAuth scope mappings") < names.index(
+        "Prove Authentik OAuth scope mapping reconciliation is idempotent"
+    )
+    assert all(task.get("no_log") is True for task in scope_tasks if any(key.endswith(".command") for key in task))
 
 
 def test_secret_adoption_is_allowlisted_and_never_overwrites_drift() -> None:

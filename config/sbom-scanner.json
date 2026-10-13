@@ -2,14 +2,14 @@
   "schema_version": "1.0.0",
   "docker_network": "host",
   "syft": {
-    "version": "1.41.2",
-    "container_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
-    "linux_amd64_tarball": "https://github.com/anchore/syft/releases/download/v1.41.2/syft_1.41.2_linux_amd64.tar.gz"
+    "version": "1.42.4",
+    "container_image": "docker.io/anchore/syft:v1.42.4@sha256:e9f29bec38cc856bfd3a7966d2f99711b5b244a531bf121da9de3b47789eecfa",
+    "linux_amd64_tarball": "https://github.com/anchore/syft/releases/download/v1.42.4/syft_1.42.4_linux_amd64.tar.gz"
   },
   "grype": {
-    "version": "0.110.0",
-    "container_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
-    "linux_amd64_tarball": "https://github.com/anchore/grype/releases/download/v0.110.0/grype_0.110.0_linux_amd64.tar.gz",
+    "version": "0.111.0",
+    "container_image": "docker.io/anchore/grype:v0.111.0@sha256:af9f30d1de4ecfbbcd2b674371e8df787879e16832af8ab81551b0bf1ec0ad5b",
+    "linux_amd64_tarball": "https://github.com/anchore/grype/releases/download/v0.111.0/grype_0.111.0_linux_amd64.tar.gz",
     "database_schema": 6
   },
   "artifact_cache": {

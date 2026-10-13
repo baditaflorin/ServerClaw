@@ -17,6 +17,17 @@
       - proxmox_internal_network | length > 0
     fail_msg: "proxmox_network requires management and internal bridge topology inputs."
 
+- name: SAFETY GUARD — Reject a management interface that aliases the WAN bridge
+  ansible.builtin.assert:
+    that:
+      - management_interface != proxmox_wan_bridge
+    fail_msg: >-
+      SAFETY GUARD TRIGGERED: management_interface={{ management_interface }} is the
+      same as proxmox_wan_bridge={{ proxmox_wan_bridge }}. The WAN bridge must use
+      the physical uplink as bridge-ports; self-referencing it can disconnect the
+      Proxmox host. Remove the interface override from the identity overlay or set
+      it to the verified physical uplink before applying this role.
+
 # SAFETY GUARD: Writing a placeholder IP to /etc/network/interfaces causes total host
 # lockout on the next reboot or ifreload — the host gets the wrong IP and all traffic
 # to the real IP is dropped at the network level. This guard aborts convergence before

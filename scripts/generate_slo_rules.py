@@ -18,11 +18,15 @@ from slo_tracking import (
     PROMETHEUS_TARGETS_PATH,
     SLO_CATALOG_PATH,
     default_grafana_url,
+    effective_slo_catalog,
     error_budget_ratio,
     load_slo_catalog,
+    load_slo_probe_overlay,
     metric_slug,
+    min_history_samples,
     slo_metric_queries,
     slo_success_expr,
+    split_probe_url,
 )
 
 
@@ -30,6 +34,13 @@ FAST_BURN_MULTIPLIER = 14
 SLOW_BURN_MULTIPLIER = 3
 RECORDING_RULES_PER_SLO = 9
 ALERT_RULES_PER_SLO = 3
+# Defaults for catalogs that carry no overlay (config/slo-probe-overlay.json.min_history).
+DEFAULT_MIN_HISTORY = {"fast_burn_minutes": 30, "slow_burn_hours": 6, "budget_hours": 24}
+
+
+def effective_catalog(catalog: dict[str, Any]) -> dict[str, Any]:
+    """The catalog narrowed to the endpoints verified for this deployment (see config/slo-probe-overlay.json)."""
+    return effective_slo_catalog(catalog, load_slo_probe_overlay(catalog))
 
 
 def promql_string(expr: str) -> str:
@@ -187,7 +198,21 @@ def build_recording_rules(catalog: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def history_guard(slo: dict[str, Any], window: str, seconds: int) -> str:
+    """Require the probe series to hold enough samples in ``window`` to cover ``seconds`` of history.
+
+    Young series (a freshly added target) have no meaningful 5m/1h/30d ratios yet; one failed probe would look like a
+    large burn. The guard is joined with ``on(slo_id, instance)`` so it applies per series.
+    """
+    metric = "probe_success" if slo["indicator"] == "availability" else "probe_duration_seconds"
+    return (
+        f"count_over_time({metric}{{job=\"slo-blackbox\",slo_id=\"{slo['id']}\"}}[{window}])"
+        f" >= {min_history_samples(seconds)}"
+    )
+
+
 def build_alert_rules(catalog: dict[str, Any]) -> dict[str, Any]:
+    history = {**DEFAULT_MIN_HISTORY, **catalog.get("min_history", {})}
     rules: list[dict[str, Any]] = []
     for slo in catalog["slos"]:
         queries = slo_metric_queries(slo)
@@ -198,12 +223,18 @@ def build_alert_rules(catalog: dict[str, Any]) -> dict[str, Any]:
             "slo_id": slo["id"],
             "indicator": slo["indicator"],
         }
+        fast_guard = history_guard(slo, "1h", int(history["fast_burn_minutes"]) * 60)
+        slow_guard = history_guard(slo, f"{int(history['slow_burn_hours'])}h", int(history["slow_burn_hours"]) * 3600)
+        budget_guard = history_guard(slo, f"{int(history['budget_hours'])}h", int(history["budget_hours"]) * 3600)
+        # Only fast burn pages. Slow burn and budget exhaustion are lagging signals that need a human next working
+        # day, not a page; the alert names are kept so dashboards, silences and runbooks keep matching.
         rules.append(
             {
                 "alert": f"SLOFastBurn_{metric_slug(slo['id'])}",
                 "expr": (
-                    f"({queries['error_5m']} > ({FAST_BURN_MULTIPLIER} * {error_budget:.6f}))"
-                    f" and ({queries['error_1h']} > ({FAST_BURN_MULTIPLIER} * {error_budget:.6f}))"
+                    f"(({queries['error_5m']} > ({FAST_BURN_MULTIPLIER} * {error_budget:.6f}))"
+                    f" and ({queries['error_1h']} > ({FAST_BURN_MULTIPLIER} * {error_budget:.6f})))"
+                    f" and on(slo_id, instance) ({fast_guard})"
                 ),
                 "for": "2m",
                 "labels": {**base_labels, "severity": "critical"},
@@ -217,9 +248,12 @@ def build_alert_rules(catalog: dict[str, Any]) -> dict[str, Any]:
         rules.append(
             {
                 "alert": f"SLOSlowBurn_{metric_slug(slo['id'])}",
-                "expr": f"{queries['error_1h']} > ({SLOW_BURN_MULTIPLIER} * {error_budget:.6f})",
+                "expr": (
+                    f"({queries['error_1h']} > ({SLOW_BURN_MULTIPLIER} * {error_budget:.6f}))"
+                    f" and on(slo_id, instance) ({slow_guard})"
+                ),
                 "for": "60m",
-                "labels": base_labels,
+                "labels": dict(base_labels),
                 "annotations": {
                     "summary": f"{slo['id']} is burning its error budget at {SLOW_BURN_MULTIPLIER}x",
                     "description": slo["description"],
@@ -230,9 +264,9 @@ def build_alert_rules(catalog: dict[str, Any]) -> dict[str, Any]:
         rules.append(
             {
                 "alert": f"SLOBudgetCritical_{metric_slug(slo['id'])}",
-                "expr": f"{queries['budget_remaining']} < 0.10",
+                "expr": f"({queries['budget_remaining']} < 0.10) and on(slo_id, instance) ({budget_guard})",
                 "for": "10m",
-                "labels": {**base_labels, "severity": "critical"},
+                "labels": dict(base_labels),
                 "annotations": {
                     "summary": f"{slo['id']} has less than 10% error budget remaining",
                     "description": slo["description"],
@@ -254,17 +288,22 @@ def build_alert_rules(catalog: dict[str, Any]) -> dict[str, Any]:
 def build_targets(catalog: dict[str, Any]) -> list[dict[str, Any]]:
     targets = []
     for slo in catalog["slos"]:
-        targets.append(
-            {
-                "targets": [slo["target_url"]],
-                "labels": {
-                    "service_id": slo["service_id"],
-                    "slo_id": slo["id"],
-                    "indicator": slo["indicator"],
-                    "probe_module": slo["probe_module"],
-                },
-            }
-        )
+        labels = {
+            "service_id": slo["service_id"],
+            "slo_id": slo["id"],
+            "indicator": slo["indicator"],
+            "probe_module": slo["probe_module"],
+        }
+        target_url = slo["target_url"]
+        if slo.get("probe_via") == "edge":
+            # The public name is not reachable from the monitoring VM (no hairpin NAT), so the probe connects to the
+            # edge's private address and presents the public name as Host/SNI (blackbox "hostname" parameter, set by
+            # the slo-blackbox relabel rules in prometheus.yml.j2).
+            scheme, host, path = split_probe_url(target_url)
+            labels["probe_hostname"] = host
+            labels["display_url"] = target_url
+            target_url = f"{scheme}://{catalog['edge_connect_host']}{path}"
+        targets.append({"targets": [target_url], "labels": labels})
     return targets
 
 
@@ -431,9 +470,10 @@ def write_dashboard(path: Path, dashboard: dict[str, Any]) -> None:
 
 
 def outputs_match(catalog: dict[str, Any]) -> bool:
-    expected_rules = build_recording_rules(catalog)
-    expected_alerts = build_alert_rules(catalog)
-    expected_targets = build_targets(catalog)
+    live = effective_catalog(catalog)
+    expected_rules = build_recording_rules(live)
+    expected_alerts = build_alert_rules(live)
+    expected_targets = build_targets(live)
     expected_dashboard = build_dashboard(catalog)
     if not PROMETHEUS_RULES_PATH.exists() or not PROMETHEUS_ALERTS_PATH.exists():
         return False
@@ -456,21 +496,23 @@ def outputs_match(catalog: dict[str, Any]) -> bool:
 
 def generate() -> None:
     catalog = load_slo_catalog(SLO_CATALOG_PATH)
-    rules = build_recording_rules(catalog)
-    alerts = build_alert_rules(catalog)
-    targets = build_targets(catalog)
+    live = effective_catalog(catalog)
+    rules = build_recording_rules(live)
+    alerts = build_alert_rules(live)
+    targets = build_targets(live)
     PROMETHEUS_RULES_PATH.parent.mkdir(parents=True, exist_ok=True)
     PROMETHEUS_RULES_PATH.write_text(
-        build_marked_rule_file(catalog, rules, rules_per_slo=RECORDING_RULES_PER_SLO),
+        build_marked_rule_file(live, rules, rules_per_slo=RECORDING_RULES_PER_SLO),
         encoding="utf-8",
     )
     PROMETHEUS_ALERTS_PATH.parent.mkdir(parents=True, exist_ok=True)
     PROMETHEUS_ALERTS_PATH.write_text(
-        build_marked_rule_file(catalog, alerts, rules_per_slo=ALERT_RULES_PER_SLO),
+        build_marked_rule_file(live, alerts, rules_per_slo=ALERT_RULES_PER_SLO),
         encoding="utf-8",
     )
     PROMETHEUS_TARGETS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    PROMETHEUS_TARGETS_PATH.write_text(build_marked_targets_file(catalog, targets), encoding="utf-8")
+    PROMETHEUS_TARGETS_PATH.write_text(build_marked_targets_file(live, targets), encoding="utf-8")
+    # The dashboard keeps the full design-intent catalog; panels for endpoints that are not verified stay empty.
     write_dashboard(GRAFANA_DASHBOARD_PATH, build_dashboard(catalog))
 
 

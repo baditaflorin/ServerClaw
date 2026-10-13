@@ -1,0 +1,38 @@
+---
+argument_specs:
+  main:
+    short_description: Render a small data-driven nftables input policy on a fleet guest.
+    options:
+      fleet_guest_firewall_config_file:
+        type: path
+        required: false
+        default: /etc/nftables.conf
+        description:
+          - Destination of the managed nftables file.
+      fleet_guest_firewall_service:
+        type: str
+        required: false
+        default: nftables
+        description:
+          - systemd unit that loads the file at boot.
+      fleet_guest_firewall_allowed_inbound:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Input chain rules (protocol, ports, source, interface, description). Must keep tcp 22 reachable.
+      fleet_guest_firewall_flush_mode:
+        type: str
+        required: false
+        default: ruleset
+        choices:
+          - ruleset
+          - table
+        description:
+          - ruleset renders "flush ruleset" (matches the live guest); table replaces only table inet filter.
+      fleet_guest_firewall_reconnect_timeout:
+        type: int
+        required: false
+        default: 120
+        description:
+          - Seconds to wait for SSH after a reload.

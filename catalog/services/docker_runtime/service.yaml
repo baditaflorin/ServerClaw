@@ -35,7 +35,15 @@ completeness:
   requires_oidc: false
   requires_secrets: false
   requires_compose_secrets: false
-  suppression_preset: legacy-service
+  requires_api_gateway: false
+  requires_dashboard: false
+  requires_slo: false
+  requires_data_catalog: false
+  requires_alert_rules: false
+  notes: >-
+    Docker Runtime is an infrastructure guest, not a published application or application data owner. Its
+    command-based Docker readiness probe and host-level observability are managed through the guest inventory; no
+    per-service API-gateway route, dedicated dashboard, HTTP SLO, data-store record, or alert file applies.
 redundancy:
   tier: R1
   recovery_objective:

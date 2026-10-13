@@ -1,0 +1,41 @@
+// Synthetic fixture policy (documentation addresses only); mirrors the shape of the real policy.
+{
+	"groups": {"group:admins": ["operator@example.com"]},
+
+	"tagOwners": {
+		"tag:admin":      ["group:admins"],
+		"tag:monitoring": ["group:admins"],
+		"tag:db":         ["group:admins"],
+	},
+
+	"grants": [
+		{
+			"src": ["tag:monitoring"],
+			"dst": ["tag:db"],
+			"ip":  ["tcp:9100"],
+		}, // scrape, a "//" inside a string is not a comment: "http://example.com"
+		{
+			"src": ["group:admins", "tag:admin"],
+			"dst": ["tag:db", "198.51.100.0/24"],
+			"ip":  ["*"],
+		},
+	],
+
+	"autoApprovers": {
+		"routes": {"198.51.100.7/32": ["tag:admin"]},
+	},
+
+	"tests": [
+		{
+			"src":    "tag:monitoring",
+			"accept": ["tag:db:9100"],
+			"deny":   ["tag:db:22"],
+			"proto":  "tcp",
+		},
+		{
+			"src":    "203.0.113.10",
+			"accept": ["203.0.113.20:22", "203.0.113.21:22"],
+			"proto":  "tcp",
+		},
+	],
+}

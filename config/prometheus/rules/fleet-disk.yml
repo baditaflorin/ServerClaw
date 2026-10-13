@@ -1,0 +1,117 @@
+# Added 2026-10-12 after a Woodpecker step failed with "no space left on device" on the docker-build guest.
+# Root-filesystem alerts for every host whose node_exporter this Prometheus scrapes (the Scanopy-derived targets),
+# plus a staleness alert for the fleet_docker_prune timer. Virtual filesystems are excluded.
+groups:
+  - name: fleet_disk
+    rules:
+      - alert: FleetRootFilesystemLow
+        expr: >-
+          (node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay|squashfs|ramfs"}
+            / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay|squashfs|ramfs"}) < 0.15
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_disk
+        annotations:
+          summary: "Root filesystem on {{ $labels.instance }} has under 15% free"
+          description: "{{ $labels.instance }} has {{ $value | humanizePercentage }} of / free for 30 minutes. CI steps and builds start failing with 'no space left on device' as it approaches zero. On a Docker build host check unused images and build cache first."
+          runbook_url: docs/runbooks/docker-runtime-disk-pressure.md
+
+      - alert: FleetRootFilesystemCritical
+        expr: >-
+          (node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay|squashfs|ramfs"}
+            / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay|squashfs|ramfs"}) < 0.07
+        for: 10m
+        labels:
+          severity: critical
+          service: fleet_disk
+        annotations:
+          summary: "Root filesystem on {{ $labels.instance }} has under 7% free"
+          description: "{{ $labels.instance }} has {{ $value | humanizePercentage }} of / free. Builds and package installs are about to fail; free space now."
+          runbook_url: docs/runbooks/docker-runtime-disk-pressure.md
+
+      - alert: FleetRootFilesystemFillingFast
+        expr: >-
+          predict_linear(node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay|squashfs|ramfs"}[6h], 24 * 3600) < 0
+          and
+          (node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay|squashfs|ramfs"}
+            / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay|squashfs|ramfs"}) < 0.4
+        for: 1h
+        labels:
+          severity: warning
+          service: fleet_disk
+        annotations:
+          summary: "Root filesystem on {{ $labels.instance }} is on track to fill within 24 hours"
+          description: "At the rate of the last 6 hours / on {{ $labels.instance }} runs out of space within a day, and less than 40% is free now."
+          runbook_url: docs/runbooks/docker-runtime-disk-pressure.md
+
+  - name: fleet_docker_prune
+    rules:
+      - alert: FleetDockerPruneStale
+        expr: (time() - fleet_docker_prune_last_success_timestamp_seconds) > 3 * 86400
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_disk
+        annotations:
+          summary: "Docker prune has not succeeded on {{ $labels.instance }} for 3 days"
+          description: "The fleet-docker-prune timer on {{ $labels.instance }} has not completed a successful run for more than 3 days. Check `systemctl status fleet-docker-prune.service` and `journalctl -u fleet-docker-prune`."
+          runbook_url: docs/runbooks/docker-runtime-disk-pressure.md
+
+  # Added 2026-10-13. The own-pbs datastore (/mnt/pbs-datastore, ext4 on its own virtual disk) holds every fleet's backups:
+  # when it fills, all backups fail. The series comes from the own-pbs node_exporter, whose Debian default
+  # --collector.filesystem.mount-points-exclude hides /mnt (inventory/fleet-observability.yml overrides it for 0own_pbs).
+  - name: pbs_datastore_capacity
+    rules:
+      - alert: PBSDatastoreFilesystemHigh
+        expr: >-
+          (1 - node_filesystem_avail_bytes{mountpoint="/mnt/pbs-datastore"}
+            / node_filesystem_size_bytes{mountpoint="/mnt/pbs-datastore"}) > 0.80
+        for: 30m
+        labels:
+          severity: warning
+          service: pbs_datastore
+        annotations:
+          summary: "PBS datastore on {{ $labels.host }} is over 80% full"
+          description: "The backup datastore on {{ $labels.instance }} is {{ $value | humanizePercentage }} full. Run garbage collection, review prune jobs and namespaces (proxmox-backup-manager prune-job list), or grow the disk (qm resize on the 0own hypervisor, then growpart and resize2fs in the guest). At 100% every fleet's backups fail."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: PBSDatastoreFilesystemCritical
+        expr: >-
+          (1 - node_filesystem_avail_bytes{mountpoint="/mnt/pbs-datastore"}
+            / node_filesystem_size_bytes{mountpoint="/mnt/pbs-datastore"}) > 0.90
+        for: 10m
+        labels:
+          severity: critical
+          service: pbs_datastore
+        annotations:
+          summary: "PBS datastore on {{ $labels.host }} is over 90% full"
+          description: "The backup datastore on {{ $labels.instance }} is {{ $value | humanizePercentage }} full. Backups from every fleet will start failing; free or add space now."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: PBSDatastoreWillFillWithin5Days
+        expr: >-
+          predict_linear(node_filesystem_avail_bytes{mountpoint="/mnt/pbs-datastore"}[2d], 5 * 86400) < 0
+          and
+          (node_filesystem_avail_bytes{mountpoint="/mnt/pbs-datastore"}
+            / node_filesystem_size_bytes{mountpoint="/mnt/pbs-datastore"}) < 0.5
+        for: 2h
+        labels:
+          severity: warning
+          service: pbs_datastore
+        annotations:
+          summary: "PBS datastore on {{ $labels.host }} is on track to fill within 5 days"
+          description: "At the rate of the last 2 days the datastore on {{ $labels.instance }} runs out of space within 5 days, and less than half of it is free now."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: PBSDatastoreMetricMissing
+        expr: >-
+          absent(node_filesystem_size_bytes{host="own-pbs",mountpoint="/mnt/pbs-datastore"})
+        for: 30m
+        labels:
+          severity: warning
+          service: pbs_datastore
+        annotations:
+          summary: "No filesystem metrics for the own-pbs datastore mount"
+          description: "node_filesystem_size_bytes for /mnt/pbs-datastore on own-pbs is absent. Check that the exporter ARGS still override --collector.filesystem.mount-points-exclude (the Debian default hides /mnt) and that the host is scraped, otherwise the capacity alerts are blind."
+          runbook_url: docs/runbooks/fleet-observability.md

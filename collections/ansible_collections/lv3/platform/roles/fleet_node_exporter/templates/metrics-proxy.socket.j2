@@ -1,0 +1,16 @@
+[Unit]
+Description={{ item.socket_description }}
+After=network-online.target tailscaled.service
+Wants=network-online.target
+Requires=tailscaled.service
+
+[Socket]
+ListenStream={{ item.listen_address }}:{{ item.listen_port }}
+NoDelay=true
+{% if item.free_bind | default(false) | bool %}
+FreeBind=true
+{% endif %}
+Service={{ item.name }}.service
+
+[Install]
+WantedBy=sockets.target

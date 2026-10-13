@@ -121,3 +121,9 @@ docker_runtime_container_forward_source_cidrs:
   - 172.16.0.0/12
   - 192.168.0.0/16
   - 10.200.0.0/16
+
+# Swap file (disabled by default; set per host in inventory/host_vars). docker-runtime-lv3 runs ~85
+# containers in 16 GB with no swap, so it opts in via inventory/host_vars/docker-runtime.yml.
+docker_runtime_swap_size_mb: 0
+docker_runtime_swap_file: /swapfile
+docker_runtime_swappiness: 20

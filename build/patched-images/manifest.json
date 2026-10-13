@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "platform": "linux/amd64",
+  "registry_project": "patched-runtime",
+  "images": {
+    "outline": {
+      "kind": "build",
+      "catalog_ids": ["outline_runtime"],
+      "source_repository": "https://github.com/outline/outline.git",
+      "source_ref": "v1.10.1",
+      "source_commit": "4a5a616a21be800257dc11cef4263d0dd0412156",
+      "patch": "build/patched-images/outline/source.patch",
+      "dockerfile": "build/patched-images/outline/Dockerfile",
+      "tag_prefix": "1.10.1-patched-20261012",
+      "repositories": ["outline"]
+    },
+    "glitchtip": {
+      "kind": "build",
+      "catalog_ids": ["glitchtip_runtime"],
+      "source_repository": "https://github.com/glitchtip/glitchtip.git",
+      "source_ref": "v6.2.6",
+      "source_commit": "d3039088e913a591a8e6544a2d2fffc865a9711a",
+      "patch": "build/patched-images/glitchtip/source.patch",
+      "tag_prefix": "6.2.6-patched-20261012",
+      "repositories": ["glitchtip"]
+    },
+    "minio": {
+      "kind": "build",
+      "catalog_ids": ["minio_runtime"],
+      "source_repository": "https://github.com/minio/minio.git",
+      "source_ref": "RELEASE.2025-10-15T17-29-55Z",
+      "source_commit": "9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a",
+      "dockerfile": "build/patched-images/minio/Dockerfile",
+      "tag_prefix": "RELEASE.2025-10-15T17-29-55Z-patched-20261012",
+      "repositories": ["minio"]
+    },
+    "valkey": {
+      "kind": "external",
+      "catalog_ids": ["shared_valkey_runtime"],
+      "registry_ref": "docker.io/valkey/valkey",
+      "tag": "9.0.6-alpine",
+      "digest": "sha256:187679e3bd4036959631e3f03983ab2ba503ab21e6fd0454d508e909db2ee989",
+      "platform": "linux/amd64"
+    }
+  },
+  "build_bases": {
+    "node": "node:26.11.1-bookworm@sha256:f1233c415b41ffcf237c717b3dea92e9d4ea006e0e4c71edcb790605d74f5404",
+    "node_slim": "node:26.11.1-bookworm-slim@sha256:86f07bc9c5dce4578cf37e5a418b7bfc7f817cda25cde66e2b66e95ed86c4567",
+    "python": "python:3.14.8@sha256:b9767f56a1cc620aa72d38cc3557d26412e38a4597c92953476136b78894ccbd",
+    "python_slim": "python:3.14.8-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170",
+    "uv": "ghcr.io/astral-sh/uv:0.11.26@sha256:3d868e555f8f1dbc324afa005066cd11e1053fc4743b9808ca8025283e65efa5",
+    "go": "golang:1.25.7-trixie@sha256:2b174ffcf56c7ad0c47d30d2630693265639ddf2a5141149c2da34db921791b4",
+    "ubi_micro": "registry.access.redhat.com/ubi9/ubi-micro@sha256:ff30602252a3e92706585c7c34cd3c74028eaac4ab815e6b19f8b27562bdd7e3"
+  }
+}

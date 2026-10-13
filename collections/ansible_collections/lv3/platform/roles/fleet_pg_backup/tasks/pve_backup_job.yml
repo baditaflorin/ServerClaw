@@ -1,0 +1,89 @@
+---
+# Purpose: Keep one vzdump job equal to its declaration.
+# Use case: Included once per job from pve_backup.yml.
+# Inputs: fleet_pg_backup_job (one item of fleet_pg_backup_pve_jobs).
+# Outputs: The job created when missing, then each differing key set with pvesh.
+# Idempotency: Idempotent.
+# Dependencies: pvesh; the job's storage entry exists.
+
+- name: Read the live job
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - get
+      - "/cluster/backup/{{ fleet_pg_backup_job.id }}"
+      - --output-format
+      - json
+  register: fleet_pg_backup_job_live
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Create the job when it does not exist
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - create
+      - /cluster/backup
+      - --id
+      - "{{ fleet_pg_backup_job.id }}"
+      - --vmid
+      - "{{ fleet_pg_backup_job.vmid }}"
+      - --storage
+      - "{{ fleet_pg_backup_job.storage }}"
+      - --schedule
+      - "{{ fleet_pg_backup_job.schedule }}"
+      - --enabled
+      - "0"
+  when: fleet_pg_backup_job_live.rc != 0
+  changed_when: true
+
+- name: Re-read the job after creation
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - get
+      - "/cluster/backup/{{ fleet_pg_backup_job.id }}"
+      - --output-format
+      - json
+  register: fleet_pg_backup_job_after
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Resolve the declared and live job settings
+  ansible.builtin.set_fact:
+    fleet_pg_backup_job_declared:
+      vmid: "{{ fleet_pg_backup_job.vmid }}"
+      storage: "{{ fleet_pg_backup_job.storage }}"
+      mode: "{{ fleet_pg_backup_job.mode }}"
+      schedule: "{{ fleet_pg_backup_job.schedule }}"
+      bwlimit: "{{ fleet_pg_backup_job.bwlimit }}"
+      compress: "{{ fleet_pg_backup_job.compress }}"
+      script: "{{ fleet_pg_backup_job.script }}"
+      notes-template: "{{ fleet_pg_backup_job.notes_template }}"
+      comment: "{{ fleet_pg_backup_job.comment }}"
+      enabled: "{{ 1 if (fleet_pg_backup_job.enabled | bool) else 0 }}"
+    fleet_pg_backup_job_current: "{{ (fleet_pg_backup_job_after.stdout | default('{}', true) | from_json) if fleet_pg_backup_job_after.rc == 0 else {} }}"
+
+- name: Report job drift
+  ansible.builtin.debug:
+    msg: "DRIFT job {{ fleet_pg_backup_job.id }}: {{ item.key }} is {{ fleet_pg_backup_job_current[item.key] | default('unset') }}, declared {{ item.value }}."
+  loop: "{{ fleet_pg_backup_job_declared | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: (fleet_pg_backup_job_current[item.key] | default('') | string) != (item.value | string)
+
+- name: Apply job settings
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - set
+      - "/cluster/backup/{{ fleet_pg_backup_job.id }}"
+      - "--{{ item.key }}"
+      - "{{ item.value }}"
+  loop: "{{ fleet_pg_backup_job_declared | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: (fleet_pg_backup_job_current[item.key] | default('') | string) != (item.value | string)
+  changed_when: true

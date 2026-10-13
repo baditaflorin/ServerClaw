@@ -1,0 +1,15 @@
+version: 1
+mappings:
+  - id: grafana-groups
+    name: ServerClaw Grafana role groups
+    scope_name: grafana-groups
+    description: >-
+      managed-by: serverclaw; expose only Grafana authorization groups to Grafana.
+    expression: |
+      return {
+          "groups": [
+              group.name
+              for group in request.user.ak_groups.all()
+              if group.name in ["grafana-admins", "grafana-viewers"]
+          ]
+      }

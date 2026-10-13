@@ -89,6 +89,8 @@ def test_converge_authentik_target_and_controller_catalogs_cover_safe_adoption()
     assert "syntax-check-authentik" in workflow["validation_targets"]
     assert "preflight-authentik-deployment-selection" in workflow["validation_targets"]
     assert "scripts/reconcile_authentik_oauth.py" in workflow["implementation_refs"]
+    assert "config/authentik/scope-mappings.yaml" in workflow["implementation_refs"]
+    assert "scripts/reconcile_authentik_scope_mappings.py" in workflow["implementation_refs"]
     required_secrets = set(workflow["preflight"]["required_secret_ids"])
     assert "openbao_runtime_secret_provisioner_approle" in required_secrets
     assert "openbao_runtime_secret_provisioner_bootstrap_receipt" in required_secrets
@@ -126,6 +128,7 @@ def test_converge_authentik_target_and_controller_catalogs_cover_safe_adoption()
     assert "service:glitchtip" in scope["shared_surfaces"]
     assert "service:outline" in scope["shared_surfaces"]
     assert "config/authentik/oauth-clients.yaml" in scope["shared_surfaces"]
+    assert "scripts/reconcile_authentik_scope_mappings.py" in scope["shared_surfaces"]
     assert "config/integrations/glitchtip--authentik.yaml" in scope["shared_surfaces"]
     assert "config/integrations/outline--authentik.yaml" in scope["shared_surfaces"]
 

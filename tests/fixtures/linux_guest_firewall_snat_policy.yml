@@ -1,0 +1,31 @@
+# Reserved example addresses keep renderer tests deployment-independent.
+coolify_snat_policy:
+  allow_container_private_edge_https_snat: true
+  container_private_edge_https_snat_source_cidrs:
+    - 172.18.4.0/24
+  container_snat_rules:
+    - source: 172.19.0.6/32
+      destination: coolify-apps
+      protocol: tcp
+      ports:
+        - 22
+    - source: 172.19.0.6/32
+      destination: 192.0.2.53/32
+      protocol: udp
+      ports:
+        - 53
+    - source: 172.19.0.6/32
+      destination: 192.0.2.53/32
+      protocol: tcp
+      ports:
+        - 53
+    - source: 172.19.0.6/32
+      destination: 198.51.100.53/32
+      protocol: udp
+      ports:
+        - 53
+    - source: 172.19.0.6/32
+      destination: 198.51.100.53/32
+      protocol: tcp
+      ports:
+        - 53

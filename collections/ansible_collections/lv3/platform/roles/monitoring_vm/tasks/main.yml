@@ -221,6 +221,36 @@
     group: prometheus
     mode: "0755"
 
+- name: Install Scanopy service discovery for Prometheus
+  ansible.builtin.include_tasks: scanopy_sd.yml
+  when: monitoring_scanopy_sd_enabled | bool
+
+- name: Install the Scanopy Docker bridge subnet tagging job
+  ansible.builtin.include_tasks: scanopy_retag.yml
+  when: monitoring_scanopy_retag_enabled | bool
+
+- name: Install the external Scanopy discovery trigger
+  ansible.builtin.include_tasks: scanopy_discover.yml
+  when: monitoring_scanopy_discover_enabled | bool
+
+- name: Copy the fleet disk alert rules
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_fleet_disk_rules_source_file }}"
+    dest: "{{ monitoring_prometheus_fleet_disk_rules_file }}"
+    owner: root
+    group: prometheus
+    mode: "0640"
+  notify: Reload Prometheus configuration
+
+- name: Copy the Alertmanager Watchdog heartbeat rule
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_watchdog_rules_source_file }}"
+    dest: "{{ monitoring_prometheus_watchdog_rules_file }}"
+    owner: root
+    group: prometheus
+    mode: "0640"
+  notify: Reload Prometheus configuration
+
 - name: Include tracing infrastructure tasks
   ansible.builtin.include_tasks: tracing.yml
 

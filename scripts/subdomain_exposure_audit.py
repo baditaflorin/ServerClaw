@@ -113,7 +113,13 @@ def _publication_entry(
     route: dict[str, Any] | None,
     service: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    route_mode = "edge" if route else "dns-only"
+    route_mode = (
+        "private-edge"
+        if route and route.get("route_source") == "service_topology_private_edge"
+        else "edge"
+        if route
+        else "dns-only"
+    )
     delivery_model = publication_delivery_model(entry["exposure"])
     access_model = publication_access_model(entry["auth_requirement"])
     audience = publication_audience(
@@ -129,6 +135,11 @@ def _publication_entry(
         if service
         else {}
     )
+    dns_visibility = service_dns.get(
+        "visibility",
+        "public" if delivery_model != "private-network" else "tailnet",
+    )
+    public_dns_zone_expected = bool(service_dns.get("managed", True)) and dns_visibility == "public"
     route_target = entry["target"]
     if route:
         route_target = (
@@ -160,7 +171,7 @@ def _publication_entry(
         },
         "evidence_plan": {
             "dns_resolution": bool(service_dns.get("managed", True)),
-            "dns_zone": bool(service_dns.get("managed", True)),
+            "dns_zone": public_dns_zone_expected,
             "http_auth": entry["status"] == "active"
             and entry["environment"] == "production"
             and access_model == "platform-sso",
@@ -179,11 +190,8 @@ def _publication_entry(
                 "record_type": dns_records[0]["type"],
                 "records": dns_records,
                 "managed": bool(service_dns.get("managed", True)),
-                "visibility": service_dns.get(
-                    "visibility",
-                    "public" if delivery_model != "private-network" else "tailnet",
-                ),
-                "zone_expected": bool(service_dns.get("managed", True)),
+                "visibility": dns_visibility,
+                "zone_expected": public_dns_zone_expected,
             },
             "routing": {
                 "mode": route_mode,
@@ -251,6 +259,30 @@ def build_edge_route_index(
                 route_kind=edge.get("kind", "unknown"),
                 service_id=service_id,
                 site=site,
+                authenticated_sites=authenticated_sites,
+            )
+
+    for service_id, service in service_topology.items():
+        private_edge = service.get("private_edge")
+        if not private_edge or not private_edge.get("enabled"):
+            continue
+        private_site = {
+            "hostname": service.get("public_hostname"),
+            "aliases": private_edge.get("aliases", []),
+            "kind": "proxy",
+            **private_edge,
+        }
+        for hostname in subdomain_catalog.collect_site_hostnames(
+            private_site,
+            f"inventory/host_vars/proxmox-host.yml.platform_service_topology.{service_id}.private_edge",
+            allow_wildcards=True,
+        ):
+            routes[hostname] = _route_entry(
+                hostname=hostname,
+                route_source="service_topology_private_edge",
+                route_kind="private-proxy",
+                service_id=service_id,
+                site=private_site,
                 authenticated_sites=authenticated_sites,
             )
 

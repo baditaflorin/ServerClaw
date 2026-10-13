@@ -43,10 +43,11 @@ completeness:
   service_type: compose
   requires_subdomain: true
   requires_oidc: false
+  requires_api_gateway: false
   requires_secrets: true
   requires_compose_secrets: true
-  suppressed_checks:
-    api_gateway: '2026-09-23'
+  suppressed_checks: {}
+  notes: The S3 API uses native SigV4 credentials and is not an OIDC-JWT gateway upstream; the browser console remains separately protected by the shared edge OIDC gate.
 redundancy:
   tier: R1
   recovery_objective:

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Managed by lv3.platform.fleet_docker_prune. Removes only unused Docker images and old BuildKit cache.
+set -euo pipefail
+
+root="$(docker info --format '{% raw %}{{.DockerRootDir}}{% endraw %}')"
+used_before="$(df --output=used -B1 "$root" | tail -n 1 | tr -d ' ')"
+
+docker image prune -af --filter "until={{ fleet_docker_prune_image_max_age }}"
+docker builder prune -af --filter "until={{ fleet_docker_prune_builder_cache_max_age }}"
+
+used_after="$(df --output=used -B1 "$root" | tail -n 1 | tr -d ' ')"
+reclaimed=$(( used_before > used_after ? used_before - used_after : 0 ))
+echo "fleet-docker-prune: reclaimed ${reclaimed} bytes under ${root}"
+{% if fleet_docker_prune_textfile_dir | length > 0 %}
+
+tmp="$(mktemp "{{ fleet_docker_prune_textfile_dir }}/.fleet_docker_prune.XXXXXX")"
+cat > "$tmp" <<METRICS
+# HELP fleet_docker_prune_last_success_timestamp_seconds Unix time of the last successful Docker prune.
+# TYPE fleet_docker_prune_last_success_timestamp_seconds gauge
+fleet_docker_prune_last_success_timestamp_seconds $(date +%s)
+# HELP fleet_docker_prune_reclaimed_bytes Bytes freed under the Docker root by the last prune.
+# TYPE fleet_docker_prune_reclaimed_bytes gauge
+fleet_docker_prune_reclaimed_bytes ${reclaimed}
+METRICS
+chmod 0644 "$tmp"
+mv -f "$tmp" "{{ fleet_docker_prune_textfile_dir }}/fleet_docker_prune.prom"
+{% endif %}

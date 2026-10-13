@@ -1,0 +1,61 @@
+---
+- name: Add the 0own Proxmox host to the active Prometheus scrape config
+  hosts: monitoring
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - observability
+    - prometheus-0own-node-exporter
+
+  pre_tasks:
+    - name: Run shared monitoring-host preflight checks
+      ansible.builtin.import_tasks: ../tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.prometheus_0own_node_exporter
+        playbook_execution_audit_target: monitoring_prometheus
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.monitoring[playbook_execution_env] }}"
+
+  tasks:
+    - name: Explain why the static 0own scrape job is skipped
+      ansible.builtin.debug:
+        msg: >-
+          Scanopy service discovery (monitoring_scanopy_sd_enabled) already publishes the 0own host exporter under the
+          pve_0own_host_node_exporter_via_tailscale job. Adding the static job as well would scrape it twice, so this
+          playbook is a no-op while discovery is enabled.
+      when: monitoring_scanopy_sd_enabled | default(false) | bool
+
+    - name: Apply the 0own scrape-target tasks from the monitoring role
+      ansible.builtin.include_role:
+        name: lv3.platform.monitoring_vm
+        tasks_from: 0own_node_exporter_target.yml
+      when: not (monitoring_scanopy_sd_enabled | default(false) | bool)
+
+  post_tasks:
+    - name: Emit a best-effort completion audit event
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ playbook_execution_mutation_audit_script }}"
+          - --emit
+          - --actor-class
+          - automation
+          - --actor-id
+          - ansible-playbook
+          - --surface
+          - ansible
+          - --action
+          - playbook.verify.prometheus_0own_node_exporter
+          - --target
+          - monitoring_prometheus
+          - --outcome
+          - success
+          - --correlation-id
+          - "{{ playbook_execution_correlation_id }}"
+      delegate_to: localhost
+      become: false
+      run_once: true
+      changed_when: false
+      failed_when: false

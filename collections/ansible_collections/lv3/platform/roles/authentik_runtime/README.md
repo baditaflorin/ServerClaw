@@ -11,9 +11,12 @@ rotates an existing value. The transient runtime environment is deleted before
 each OpenBao Agent start and must be freshly rendered with mode `0600` before
 application services can start.
 
-After health succeeds, `scripts/reconcile_authentik_oauth.py` applies the
-non-secret OAuth manifest and immediately proves a second apply has no changes.
-Provider/application IDs and client secrets are preserved during adoption.
+After health succeeds, the role first reconciles repository-owned OAuth scope
+mappings, then `scripts/reconcile_authentik_oauth.py` applies the non-secret
+provider/application manifest and immediately proves both passes have no
+changes. Provider/application IDs and client secrets are preserved during
+adoption. The Grafana-only groups scope exposes only its two Grafana role
+groups; it does not add those claims to other OAuth clients.
 
 The role also mounts a managed recovery-flow blueprint and renders Authentik's
 global SMTP settings through the existing OpenBao runtime payload. Transactional

@@ -1,0 +1,85 @@
+---
+# Purpose: Stop MinIO once and transfer its persistent object tree to the non-root runtime UID/GID.
+# Use case: Run before starting a patched image whose Docker USER is unprivileged.
+# Inputs: minio_data_dir, minio_data_owner_migration_marker_file, minio_runtime_uid, minio_runtime_gid.
+# Outputs: Existing objects are owned by the runtime identity and a marker prevents repeated tree walks.
+# Idempotency: The ownership walk runs once per UID/GID marker; the service is restored as root if it fails.
+# Dependencies: ADR 0165 metadata standard, minio_runtime compose file, and a recoverable pinned MinIO image.
+- name: Check the MinIO data-owner migration marker
+  ansible.builtin.stat:
+    path: "{{ minio_data_owner_migration_marker_file }}"
+  register: minio_data_owner_migration_marker
+  changed_when: false
+
+- name: Convert the MinIO data ownership before switching to the non-root user
+  block:
+    - name: Stop MinIO for the one-time object ownership conversion
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ minio_compose_file }}"
+          - stop
+          - minio
+      args:
+        chdir: "{{ minio_site_dir }}"
+      register: minio_stop_for_owner_migration
+      changed_when: >-
+        'Stopping' in minio_stop_for_owner_migration.stdout
+        or 'Stopped' in minio_stop_for_owner_migration.stdout
+
+    - name: Transfer existing MinIO objects to the unprivileged UID and GID
+      ansible.builtin.command:
+        argv:
+          - chown
+          - --recursive
+          - --no-dereference
+          - "{{ minio_runtime_uid }}:{{ minio_runtime_gid }}"
+          - "{{ minio_data_dir }}"
+      async: 3600
+      poll: 5
+      changed_when: true
+
+    - name: Mark MinIO data-owner migration complete
+      ansible.builtin.file:
+        path: "{{ minio_data_owner_migration_marker_file }}"
+        state: touch
+        owner: root
+        group: root
+        mode: "0600"
+        access_time: preserve
+        modification_time: preserve
+  when: not minio_data_owner_migration_marker.stat.exists
+  rescue:
+    - name: Restore the MinIO Compose identity to root after migration failure
+      ansible.builtin.template:
+        src: docker-compose.yml.j2
+        dest: "{{ minio_compose_file }}"
+        owner: root
+        group: root
+        mode: "0644"
+      vars:
+        minio_runtime_user: "0:0"
+        ansible_search_path:
+          - "{{ role_path + '/../common' }}"
+
+    - name: Restore MinIO availability after migration failure
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ minio_compose_file }}"
+          - up
+          - -d
+          - minio
+      args:
+        chdir: "{{ minio_site_dir }}"
+      changed_when: true
+
+    - name: Report the failed MinIO ownership conversion
+      ansible.builtin.fail:
+        msg: >-
+          MinIO data ownership conversion failed. MinIO was restored with its root runtime identity;
+          no objects were deleted. Resolve the filesystem error and rerun the MinIO converge.

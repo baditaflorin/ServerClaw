@@ -1,0 +1,10 @@
+[Unit]
+Description={{ item.service_description }}
+After=network-online.target tailscaled.service
+Wants=network-online.target
+Requires=tailscaled.service {{ item.name }}.socket
+
+[Service]
+ExecStart={{ fleet_node_exporter_proxyd_path }} {{ item.upstream }}
+DynamicUser=yes
+PrivateTmp=yes

@@ -1,0 +1,144 @@
+# Role Task File: monitoring_vm/tasks/scanopy_retag.yml
+# Purpose: Install the job that keeps every Docker bridge subnet in Scanopy tagged `docker-bridge`, plus its systemd timer.
+# Use case: Included by the monitoring_vm role when monitoring_scanopy_retag_enabled is true. The Scanopy topology hides
+#           subnets by tag, and discovery creates new Docker networks untagged, so without this job they reappear in the
+#           topology view after every scan.
+#
+# Inputs (required):
+#   - monitoring_scanopy_retag_* role defaults: install, config, textfile, and unit paths.
+#
+# Inputs (optional):
+#   - monitoring_scanopy_retag_api_key_local_file: controller-local Scanopy API key (never stored in git). The key must be
+#     allowed to assign tags (Member or higher); it is a different key from the Viewer key used by scanopy-sd.
+#   - monitoring_scanopy_retag_environment: job overrides (SCANOPY_URL, RETAG_TAG_NAME, RETAG_MAX_PER_RUN).
+#
+# Outputs:
+#   - /opt/scanopy-retag job + README, /etc/scanopy-retag/api-key, scanopy-retag.service and scanopy-retag.timer.
+#   - scanopy_retag_* metrics in the node_exporter textfile directory (alerts live in config/prometheus/rules/inventory.yml).
+#
+# Idempotency: Fully idempotent
+#              Files are compared by content and mode; the timer is only enabled, never restarted.
+#
+# Dependencies:
+#   - docs/runbooks/scanopy-service-discovery.md: describes the flow, the prerequisites, and the rollback.
+#   - Requires: python3 on the guest, a reachable Scanopy API, and the `docker-bridge` tag to exist in Scanopy.
+#
+# Related Runbooks: docs/runbooks/scanopy-service-discovery.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-10-12
+---
+- name: Validate Scanopy retag inputs
+  ansible.builtin.assert:
+    that:
+      - monitoring_scanopy_retag_install_dir | length > 0
+      - monitoring_scanopy_retag_config_dir | length > 0
+      - monitoring_scanopy_retag_api_key_file | length > 0
+      - monitoring_scanopy_retag_textfile_dir | length > 0
+    fail_msg: "monitoring_scanopy_retag_enabled requires the Scanopy retag install, config, and textfile paths."
+    quiet: true
+
+- name: Check whether a controller-local Scanopy retag API key is available
+  ansible.builtin.stat:
+    path: "{{ monitoring_scanopy_retag_api_key_local_file }}"
+    get_checksum: false
+  delegate_to: localhost
+  become: false
+  register: monitoring_scanopy_retag_api_key_local_stat
+
+- name: Check whether a Scanopy retag API key is already provisioned on the host
+  ansible.builtin.stat:
+    path: "{{ monitoring_scanopy_retag_api_key_file }}"
+    get_checksum: false
+  register: monitoring_scanopy_retag_api_key_remote_stat
+
+# An empty or missing controller-local file is never installed: it would replace a working host key with nothing and
+# turn every retag run into a keyless failure.
+- name: Decide whether the controller-local Scanopy retag API key is usable
+  ansible.builtin.set_fact:
+    monitoring_scanopy_retag_api_key_local_usable: "{{ monitoring_scanopy_retag_api_key_local_stat.stat.exists and monitoring_scanopy_retag_api_key_local_stat.stat.size > 0 }}"
+
+- name: Refuse to run the retag job without any non-empty Scanopy API key
+  ansible.builtin.assert:
+    that:
+      - >-
+        monitoring_scanopy_retag_api_key_local_usable | bool
+        or (monitoring_scanopy_retag_api_key_remote_stat.stat.exists and monitoring_scanopy_retag_api_key_remote_stat.stat.size > 0)
+    fail_msg: >-
+      No usable Scanopy retag API key found. Put a key that may assign tags (Member or higher) in
+      {{ monitoring_scanopy_retag_api_key_local_file }} on the control machine, or provision a non-empty
+      {{ monitoring_scanopy_retag_api_key_file }} (root, 0600) on the monitoring host. An empty file is never installed and
+      the key is never stored in git.
+    quiet: true
+
+- name: Ensure the Scanopy retag directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ monitoring_scanopy_retag_install_dir }}"
+      mode: "0755"
+    - path: "{{ monitoring_scanopy_retag_config_dir }}"
+      mode: "0700"
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Install the Scanopy retag API key from the controller-local secret file
+  ansible.builtin.copy:
+    src: "{{ monitoring_scanopy_retag_api_key_local_file }}"
+    dest: "{{ monitoring_scanopy_retag_api_key_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  when: monitoring_scanopy_retag_api_key_local_usable | bool
+
+- name: Keep an existing host-provisioned Scanopy retag API key private
+  ansible.builtin.file:
+    path: "{{ monitoring_scanopy_retag_api_key_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: not (monitoring_scanopy_retag_api_key_local_usable | bool)
+
+- name: Install the Scanopy retag job
+  ansible.builtin.copy:
+    src: scanopy-retag/scanopy_retag.py
+    dest: "{{ monitoring_scanopy_retag_script_file }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the Scanopy retag operator README
+  ansible.builtin.copy:
+    src: scanopy-retag/README
+    dest: "{{ monitoring_scanopy_retag_readme_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Scanopy retag systemd service
+  ansible.builtin.template:
+    src: scanopy-retag.service.j2
+    dest: "{{ monitoring_scanopy_retag_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Scanopy retag systemd timer
+  ansible.builtin.template:
+    src: scanopy-retag.timer.j2
+    dest: "{{ monitoring_scanopy_retag_timer_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable the Scanopy retag timer
+  ansible.builtin.systemd:
+    name: "{{ monitoring_scanopy_retag_timer_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true

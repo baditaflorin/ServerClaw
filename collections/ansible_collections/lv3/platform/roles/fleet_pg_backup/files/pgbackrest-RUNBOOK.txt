@@ -1,0 +1,36 @@
+pg-primary PITR backup -- PREPARED RUNBOOK (nothing below has been applied to Postgres)
+=========================================================================================
+State now: pgbackrest 2.59.3 installed; /etc/pgbackrest/pgbackrest.conf + conf.d/10-repo-cipher.conf (aes-256-cbc,
+random passphrase, root/postgres 0600 -- COPY IT TO A PASSWORD MANAGER, backups are unreadable without it);
+/usr/local/sbin/pgbackrest-daily (backup + node-exporter metrics); unit files in this dir (not installed).
+archive_mode=off, archive_command unset, repo NOT configured.  Do NOT run these until the repo is chosen.
+
+1. Choose + configure repo (edit /etc/pgbackrest/pgbackrest.conf [global]).  Needs ~1.5-2 TB (see report).
+   Example, Hetzner Storage Box over SFTP (port 23):
+     repo1-type=sftp
+     repo1-path=/pgbackrest/main
+     repo1-sftp-host=uXXXXXX.your-storagebox.de
+     repo1-sftp-host-port=23
+     repo1-sftp-host-user=uXXXXXX
+     repo1-sftp-private-key-file=/etc/pgbackrest/storagebox_ed25519   (dedicated key, 0600 postgres)
+     repo1-sftp-host-key-hash-type=sha256   (+ repo1-sftp-host-key-check-type=strict with pinned fingerprint)
+2. Prove repo BEFORE touching Postgres:
+     sudo -u postgres pgbackrest --stanza=main stanza-create      # works with archive_mode=off
+     (stanza-create writes/reads/deletes a test file in the repo = repo write proof)
+3. MAINTENANCE WINDOW (restart, est. 1-4 min of downtime; fast shutdown checkpoints up to 24GB shared_buffers):
+     sudo -u postgres psql -c "CHECKPOINT"          # shortens the shutdown checkpoint; run twice
+     sudo -u postgres psql -c "ALTER SYSTEM SET archive_mode=on"
+     sudo -u postgres psql -c "ALTER SYSTEM SET archive_command='pgbackrest --stanza=main archive-push %p'"
+     systemctl restart postgresql@18-main
+     sudo -u postgres pgbackrest --stanza=main check   # must succeed
+     sudo -u postgres psql -c "select * from pg_stat_archiver"   # failed_count must stay flat
+   Rollback: ALTER SYSTEM RESET archive_mode; ALTER SYSTEM RESET archive_command; restart (or reload for command only).
+4. First full backup (nice/ionice, ~1-3h, 4 procs):  
+     nice -n10 ionice -c3 sudo -u postgres pgbackrest --stanza=main --type=full backup
+5. Install timer:  cp pgbackrest-daily.service pgbackrest-daily.timer /etc/systemd/system/;
+     systemctl daemon-reload; systemctl enable --now pgbackrest-daily.timer
+6. Restore test (never on / ): restore to a scratch volume with >=470GB free:
+     pgbackrest --stanza=main --pg1-path=/scratch/restore --type=time --target='...' restore
+PRE-CONDITIONS: (a) free >=100GB on / or move pg_wal to its own volume -- at the 7-day average of ~300GB WAL/day a
+failed archiver fills the 101GB free in ~8h (bursts: minutes). archive-push-queue-max=25GiB is the backstop.
+(b) lower max_slot_wal_keep_size (100GB >= free disk!) before any replica slot is re-created.

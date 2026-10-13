@@ -79,3 +79,6 @@ Compatibility topics retained during rollout:
   including `platform.security.critical` and `platform.slo.warn`.
 - Treat `.local/ntfy/` as secret material and keep it outside git.
 - If a publisher still uses a compatibility topic or direct basic-auth publish path, keep that exception documented until it is migrated onto the governed registry helper.
+- `base-url` in the rendered `server.yml` comes from `ntfy_runtime_base_url`, which defaults to the topology public URL (`ntfy.{{ platform_domain }}`). A wrong `base-url` does not stop publishing; it breaks the absolute URLs ntfy emits (attachment URLs, iOS poll URLs). Changing it needs a container restart because `server.yml` is a read-only single-file bind mount.
+- If the controller-local `.local/identity.yml` carries a mistyped `platform_domain`, the converge renders a wrong `base-url` again and reverts a hand fix. Do not change `platform_domain` for this (other consumers depend on it) and do not hardcode a real domain in a tracked file (ADR 0409). Override only this role variable from the controller-local overlay or on the command line, e.g. `-e ntfy_runtime_base_url=https://ntfy.<real-domain>`, then replay `playbooks/ntfy.yml`.
+- Users and ACLs live in `/var/lib/ntfy/user.db` on the host (bind mount) and survive a container restart: a restart on 2026-10-12 left the user list and access matrix identical.

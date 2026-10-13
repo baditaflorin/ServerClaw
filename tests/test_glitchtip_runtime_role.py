@@ -35,7 +35,7 @@ def test_glitchtip_runtime_defaults_reference_service_topology_images_and_local_
     assert defaults["glitchtip_public_base_url"] == "https://{{ glitchtip_service_topology.public_hostname }}"
     assert defaults["glitchtip_compose_network_name"] == "glitchtip_default"
     assert defaults["glitchtip_image"] == "{{ container_image_catalog.images.glitchtip_runtime.ref }}"
-    assert defaults["glitchtip_valkey_image"] == "{{ container_image_catalog.images.glitchtip_valkey_runtime.ref }}"
+    assert defaults["glitchtip_valkey_image"] == "{{ container_image_catalog.images.shared_valkey_runtime.ref }}"
     assert defaults["glitchtip_database_password_local_file"] == (
         "{{ repo_shared_local_root }}/glitchtip/database-password.txt"
     )

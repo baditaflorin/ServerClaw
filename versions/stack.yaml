@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.179.48
-platform_version: 0.178.225
+repo_version: 0.179.51
+platform_version: 0.179.50
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -8,6 +8,7 @@ live_apply_evidence:
     coolify_runtime: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply
     fork_services: 2026-04-27-ws-0372-0fork-services-all-7-deployed
     platform: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
+    plausible: ws-0520-plausible-clickhouse-log-retention-apply-receipt
     monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
     nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
@@ -18,7 +19,8 @@ live_apply_evidence:
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     identity_core_watchdog: 2026-04-12-adr-0381-login-service-contracts-mainline-live-apply
     api_gateway: 2026-04-05-ws-0331-runtime-pool-mainline-live-apply
-    artifact_cache_plane: 2026-03-29-adr-0295-shared-artifact-cache-plane-mainline-live-apply
+    artifact_cache_plane: ws-0512-artifact-cache-monitoring-20261012
+    artifact_cache_slo: ws-0512-artifact-cache-prometheus-slo-20261012
     docker_publication: 2026-03-30-adr-0270-docker-publication-self-healing-and-port-programming-assertions-mainline-live-apply
     docker_runtime: 2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply
     dozzle: 2026-04-04-adr-0346-compose-dependency-health-gates-live-apply
@@ -188,6 +190,7 @@ live_apply_evidence:
     authentik: ws-0517-authentik-runtime-upgrade-apply-receipt
     semaphore: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
     identity_provider: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
+    grafana_sso: ws-0512-authentik-consumer-e2e-postmerge-20261011-apply-receipt
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
@@ -1182,8 +1185,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.179.48
+    current: 0.179.51
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.178.225
+    current: 0.179.50
     meaning: intended platform release for the actual server configuration

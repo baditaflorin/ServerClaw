@@ -21,6 +21,15 @@
       "adr": "0092"
     },
     {
+      "id": "artifact_cache",
+      "service": "artifact_cache",
+      "name": "Artifact Cache",
+      "vm": "artifact-cache",
+      "tier": 1,
+      "category": "infrastructure",
+      "adr": "0296"
+    },
+    {
       "id": "authentik",
       "service": "authentik",
       "vm": "runtime-control",

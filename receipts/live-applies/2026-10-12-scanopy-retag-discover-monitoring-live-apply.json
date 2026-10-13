@@ -1,0 +1,79 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-10-12-scanopy-retag-discover-monitoring-live-apply",
+  "applied_on": "2026-10-12",
+  "recorded_on": "2026-10-12",
+  "recorded_by": "claude",
+  "source_commit": "f2da314ebcfab37cb27a9ca2614a5702ce5354cb",
+  "repo_version_context": "0.179.51",
+  "workflow_id": "converge-monitoring",
+  "service_ids": [
+    "monitoring"
+  ],
+  "summary": "Deployed the scanopy-retag job, the scanopy-discover timer and their five Prometheus alerts to the monitoring VM, by syncing the files the monitoring_vm role renders from main. Targeted manual sync, not an Ansible run.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "monitoring-lv3",
+      "vmid": "140",
+      "address": "10.10.10.40",
+      "pull_request": "https://github.com/baditaflorin/platform_server/pull/316"
+    },
+    {
+      "kind": "other",
+      "name": "prometheus-rules-inventory.yml",
+      "pull_request": "https://github.com/baditaflorin/platform_server/pull/324"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Deployed files match main",
+      "result": "pass",
+      "observed": "SHA-256 of scanopy_retag.py, scanopy_discover.py, both services, scanopy-discover.timer, schedule.json and both READMEs equal the files rendered from the role templates and files at main fad5f19 (release commit f2da314 changes metadata only). scanopy-retag.timer differed only in its Description line and was synced."
+    },
+    {
+      "check": "Alert rules validated before install",
+      "result": "pass",
+      "observed": "promtool check rules on the new inventory.yml: SUCCESS, 13 rules (8 before + 5 new). The live file differed from main only by those 5 alerts; the previous file is kept as inventory.yml.pre-retag-discover-<timestamp>."
+    },
+    {
+      "check": "Prometheus reload",
+      "result": "pass",
+      "observed": "SIGHUP via systemctl kill; prometheus_config_last_reload_successful=1; the service was not restarted; rule groups scanopy_retag (2 rules) and scanopy_discover (3 rules) loaded."
+    },
+    {
+      "check": "Timers",
+      "result": "pass",
+      "observed": "scanopy-retag.timer (15 min) and scanopy-discover.timer (minute 02/17/32/47) active; both services exit 0 and write their scanopy_retag_* / scanopy_discover_* textfile metrics."
+    },
+    {
+      "check": "scanopy-retag end to end",
+      "result": "pass",
+      "observed": "With one Docker bridge subnet untagged the next run tagged it; 234 of 234 DockerBridge subnets carry the docker-bridge tag."
+    },
+    {
+      "check": "scanopy-discover end to end",
+      "result": "pass",
+      "observed": "A due host was started exactly once through POST /api/v1/discovery/start-session and an immediate second run skipped it; the HTTP 409 (already running) path was exercised against a scan still in progress."
+    },
+    {
+      "check": "Ansible converge",
+      "result": "partial",
+      "observed": "Not run: ansible is not installed on the operator machine or the Builder, and the controller-local secret files the role expects are not present. A later converge should be a no-op for these files, which were verified identical to the rendered output."
+    }
+  ],
+  "evidence_refs": [
+    "docs/runbooks/scanopy-service-discovery.md",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/scanopy_retag.yml",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/scanopy_discover.yml",
+    "config/prometheus/rules/inventory.yml",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The two jobs were first installed by hand on 2026-10-12, then codified in #316 and released in #324; this receipt records syncing the live VM to main.",
+    "Both jobs read the Scanopy API key from /etc/scanopy-retag/api-key (root 0600). The live key is an Admin-level key by operator choice; a Member-level key is preferred.",
+    "Scanopy-side runtime settings (docker-bridge tag, topology hidden tag, DockerSocket credential assignments, per-daemon Scheduled discoveries) live in the Scanopy database and are documented in the runbook, not in git.",
+    "ScanopyDiscoveryOverdue is expected to fire once, about an hour after the rules loaded, for hosts last scanned on 2026-10-08, and to clear after their first nightly slot."
+  ]
+}

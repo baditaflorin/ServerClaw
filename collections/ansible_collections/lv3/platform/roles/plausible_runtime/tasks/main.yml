@@ -91,7 +91,7 @@
         value: "{{ 'plausible' | secret(length=32) }}"
         label: "plausible-database-password"
       - path: "{{ plausible_secret_key_base_remote_file }}"
-        value: "{{ 'plausible' | secret }}"
+        value: "{{ 'plausible' | secret(length=64) }}"
         label: "plausible-secret-key-base"
       - path: "{{ plausible_bootstrap_user_password_remote_file }}"
         value: "{{ 'plausible' | secret(length=32) }}"

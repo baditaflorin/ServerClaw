@@ -161,6 +161,108 @@ monitoring_prometheus_enable_features:
 monitoring_prometheus_listen_address: 0.0.0.0:9090
 monitoring_prometheus_remote_write_url: >-
   http://{{ hostvars[groups['proxmox_hosts'][0]].platform_service_topology.grafana.private_ip }}:9090/api/v1/write
+# --- Prometheus scrape surface that is data-driven instead of hard-coded in prometheus.yml.j2 ---
+# Catalog-derived liveness/readiness blackbox jobs (config/health-probe-catalog.json). An empty list renders every
+# http/tcp probe in the catalog (legacy behaviour); a non-empty list restricts the jobs to these service ids.
+monitoring_prometheus_health_probe_service_ids: []
+# RE2 regex matched against __address__ of the slo-blackbox and https-tls-blackbox file_sd targets. Matching targets
+# are dropped at relabel time (the generated file_sd source files stay untouched). Empty string disables the rule.
+monitoring_prometheus_blackbox_drop_address_regex: ""
+# Private address of the nginx edge. The SLO and TLS file_sd sources (config/slo-probe-overlay.json) probe edge-published
+# endpoints through it with the public hostname as Host/SNI, because the monitoring VM cannot reach the public address.
+monitoring_slo_edge_connect_host: "{{ hostvars[groups['proxmox_hosts'][0]].platform_service_topology.nginx_edge.private_ip }}"
+# file_sd file feeding the public-edge-critical blackbox job. Empty string disables the job. The file itself is not
+# managed by this role.
+monitoring_prometheus_public_edge_targets_file: ""
+# Extra scrape_config entries rendered verbatim (as YAML) after the catalog jobs. Use for static fleet exporters that
+# inventory discovery does not cover. Each item is a normal Prometheus scrape_config mapping.
+monitoring_prometheus_extra_scrape_jobs: []
+# remote_write destinations rendered at the end of prometheus.yml. Each item: url (required), basic_auth
+# {username, password_file}, queue_config {capacity, max_shards}. Never put a password in this list: reference a
+# password_file (see monitoring_prometheus_remote_write_credentials).
+monitoring_prometheus_remote_write_targets: []
+# systemd encrypted credentials handed to the Prometheus unit through a drop-in so password_file can point at
+# /run/credentials/<unit>/<name>. The encrypted blob must already exist on the host; it is never created or stored here.
+# Each item: name, encrypted_file.
+monitoring_prometheus_remote_write_credentials: []
+monitoring_prometheus_credentials_dropin_file: "{{ monitoring_prometheus_service_file }}.d/openobserve.conf"
+# promtool validates every rendered prometheus.yml before it replaces the live file.
+monitoring_prometheus_config_validate_command: promtool check config %s
+# --- Scanopy-driven service discovery (see docs/runbooks/scanopy-service-discovery.md) ---
+monitoring_scanopy_sd_enabled: false
+monitoring_scanopy_sd_install_dir: /opt/scanopy-sd
+monitoring_scanopy_sd_script_file: "{{ monitoring_scanopy_sd_install_dir }}/scanopy_sd.py"
+monitoring_scanopy_sd_readme_file: "{{ monitoring_scanopy_sd_install_dir }}/README"
+monitoring_scanopy_sd_extra_endpoints_file: "{{ monitoring_scanopy_sd_install_dir }}/extra-endpoints.json"
+monitoring_scanopy_sd_state_dir: /var/lib/scanopy-sd
+monitoring_scanopy_sd_config_dir: /etc/scanopy-sd
+monitoring_scanopy_sd_api_key_file: "{{ monitoring_scanopy_sd_config_dir }}/api-key"
+# Controller-local source for the Scanopy Viewer API key (the vault secret scanopy-inventory-reader-api-key, shared with
+# fleet-runner). The key is never stored in git. When this file is absent or empty the role requires an already-provisioned
+# non-empty key on the host (root 0600) and leaves its content untouched.
+monitoring_scanopy_sd_api_key_local_file: "{{ repo_shared_local_root }}/scanopy/api-key.txt"
+monitoring_scanopy_sd_textfile_dir: /var/lib/prometheus/node-exporter
+monitoring_scanopy_sd_node_targets_file: "{{ monitoring_prometheus_file_sd_dir }}/scanopy-node.json"
+monitoring_scanopy_sd_blackbox_targets_file: "{{ monitoring_prometheus_file_sd_dir }}/scanopy-blackbox.json"
+monitoring_scanopy_sd_service_name: scanopy-sd.service
+monitoring_scanopy_sd_timer_name: scanopy-sd.timer
+monitoring_scanopy_sd_service_file: /etc/systemd/system/scanopy-sd.service
+monitoring_scanopy_sd_timer_file: /etc/systemd/system/scanopy-sd.timer
+monitoring_scanopy_sd_interval: 5min
+# Optional Environment= overrides for the generator (SCANOPY_URL, SD_MIN_RATIO, ...). Empty keeps the script defaults.
+monitoring_scanopy_sd_environment: {}
+# Known-real endpoints Scanopy has no port data for; rendered into extra-endpoints.json.
+monitoring_scanopy_sd_extra_endpoints: []
+# RE2 regex matched against __address__ of scanopy-node targets. Matching targets are dropped so that exporters kept
+# as static jobs in monitoring_prometheus_extra_scrape_jobs are never scraped twice. Empty string disables the rule.
+monitoring_scanopy_sd_node_drop_address_regex: ""
+# --- Scanopy Docker bridge subnet tagging (see docs/runbooks/scanopy-service-discovery.md) ---
+# Tags every Docker bridge subnet with `docker-bridge` so the Scanopy topology (which hides subnets by that tag) stays tidy.
+monitoring_scanopy_retag_enabled: false
+monitoring_scanopy_retag_install_dir: /opt/scanopy-retag
+monitoring_scanopy_retag_script_file: "{{ monitoring_scanopy_retag_install_dir }}/scanopy_retag.py"
+monitoring_scanopy_retag_readme_file: "{{ monitoring_scanopy_retag_install_dir }}/README"
+monitoring_scanopy_retag_config_dir: /etc/scanopy-retag
+monitoring_scanopy_retag_api_key_file: "{{ monitoring_scanopy_retag_config_dir }}/api-key"
+# Controller-local source for the retag API key. It must be allowed to assign tags (Member or higher), so it is NOT the
+# Viewer key used by scanopy-sd. Never stored in git. When this file is absent or empty the role requires an
+# already-provisioned non-empty key on the host (root 0600) and leaves its content untouched.
+monitoring_scanopy_retag_api_key_local_file: "{{ repo_shared_local_root }}/scanopy/retag-api-key.txt"
+monitoring_scanopy_retag_textfile_dir: "{{ monitoring_scanopy_sd_textfile_dir }}"
+monitoring_scanopy_retag_service_name: scanopy-retag.service
+monitoring_scanopy_retag_timer_name: scanopy-retag.timer
+monitoring_scanopy_retag_service_file: /etc/systemd/system/scanopy-retag.service
+monitoring_scanopy_retag_timer_file: /etc/systemd/system/scanopy-retag.timer
+monitoring_scanopy_retag_interval: 15min
+# Optional Environment= overrides for the job (SCANOPY_URL, RETAG_TAG_NAME, RETAG_MAX_PER_RUN). Empty keeps the script defaults.
+monitoring_scanopy_retag_environment: {}
+# --- External Scanopy discovery trigger (see docs/runbooks/scanopy-service-discovery.md) ---
+# Scanopy's own scheduler does not fire reliably, so a timer starts each daemon's discovery at a fixed daily UTC slot via the API.
+monitoring_scanopy_discover_enabled: false
+monitoring_scanopy_discover_install_dir: /opt/scanopy-discover
+monitoring_scanopy_discover_script_file: "{{ monitoring_scanopy_discover_install_dir }}/scanopy_discover.py"
+monitoring_scanopy_discover_readme_file: "{{ monitoring_scanopy_discover_install_dir }}/README"
+monitoring_scanopy_discover_schedule_file: "{{ monitoring_scanopy_discover_install_dir }}/schedule.json"
+# Reuses the key the retag tasks install; this role never installs or replaces a key.
+monitoring_scanopy_discover_api_key_file: "{{ monitoring_scanopy_retag_api_key_file }}"
+monitoring_scanopy_discover_textfile_dir: "{{ monitoring_scanopy_sd_textfile_dir }}"
+monitoring_scanopy_discover_service_name: scanopy-discover.service
+monitoring_scanopy_discover_timer_name: scanopy-discover.timer
+monitoring_scanopy_discover_service_file: /etc/systemd/system/scanopy-discover.service
+monitoring_scanopy_discover_timer_file: /etc/systemd/system/scanopy-discover.timer
+# Minutes 2/17/32/47: just after the quarter-hour slots, so Scanopy's own scheduler (if it fires) has already updated last_run.
+monitoring_scanopy_discover_on_calendar: "*:02/15"
+# Optional Environment= overrides for the job (SCANOPY_URL, DISCOVER_CATCHUP_HOURS, DISCOVER_MAX_STARTS_PER_RUN).
+monitoring_scanopy_discover_environment: {}
+# {Scanopy daemon name: "HH:MM" UTC}; set per host in inventory/host_vars.
+monitoring_scanopy_discover_schedule: {}
+# Prometheus rule files shipped from config/prometheus/rules/ for the discovery pipeline and the Alertmanager heartbeat.
+monitoring_prometheus_inventory_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/inventory.yml"
+monitoring_prometheus_inventory_rules_file: "{{ monitoring_prometheus_rules_dir }}/inventory.yml"
+monitoring_prometheus_fleet_disk_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/fleet-disk.yml"
+monitoring_prometheus_fleet_disk_rules_file: "{{ monitoring_prometheus_rules_dir }}/fleet-disk.yml"
+monitoring_prometheus_watchdog_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/zz-alertmanager-watchdog.yml"
+monitoring_prometheus_watchdog_rules_file: "{{ monitoring_prometheus_rules_dir }}/zz-alertmanager-watchdog.yml"
 monitoring_prometheus_url: http://127.0.0.1:9090
 monitoring_blackbox_exporter_service_name: prometheus-blackbox-exporter
 monitoring_blackbox_exporter_env_file: /etc/default/prometheus-blackbox-exporter

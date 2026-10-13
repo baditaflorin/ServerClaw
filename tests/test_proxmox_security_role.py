@@ -81,10 +81,12 @@ def test_host_firewall_preserves_existing_live_host_rules() -> None:
 
     assert any(rule["port"] == 18021 for rule in rules)
     assert any(rule["port"] == 9101 for rule in rules)
+    assert any(rule["port"] == 9103 for rule in rules)
     rendered_rules = [line for line in rendered.splitlines() if line.startswith("IN ACCEPT")]
     assert rendered_rules == [
         "IN ACCEPT -i vmbr20 -source 10.10.10.71/32 -dest 10.10.10.1 -p tcp -dport 18021 # Allow the Coolify app VM to reach the private Tailscale-relayed API key verifier",
         "IN ACCEPT -source 100.114.37.21/32 -p tcp -dport 9101 # Allow capacity-controller access to the Proxmox metrics proxy",
+        "IN ACCEPT -source 100.114.37.21/32 -dest 203.0.113.6 -p tcp -dport 9103 # Allow the 0docker builder (CT108) load controller to read the docker-build node-exporter via the build-metrics proxy",
     ]
 
 

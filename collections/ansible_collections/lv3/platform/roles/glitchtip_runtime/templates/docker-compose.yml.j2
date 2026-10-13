@@ -19,6 +19,8 @@ services:
     image: {{ glitchtip_image }}
     container_name: {{ glitchtip_container_name }}
     restart: unless-stopped
+    mem_limit: {{ glitchtip_mem_limit }}
+    memswap_limit: {{ glitchtip_memswap_limit }}
     command:
       - ./bin/run-all-in-one.sh
     depends_on:

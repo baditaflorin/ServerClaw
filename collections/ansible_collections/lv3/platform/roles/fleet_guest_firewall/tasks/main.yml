@@ -1,0 +1,69 @@
+---
+# Purpose: Render and apply a small, data-driven nftables input policy on a fleet guest that the 0mcp network_policy does not cover.
+# Use case: Run from playbooks/fleet-observability.yml with --limit on the 0own github-mirror guest (the monitoring-only tcp 9100 rule).
+# Inputs: fleet_guest_firewall_allowed_inbound, fleet_guest_firewall_flush_mode, fleet_guest_firewall_config_file.
+# Outputs: /etc/nftables.conf (validated with nft -c before it replaces the live file), enabled nftables service, reloaded ruleset when the file changed.
+# Idempotency: Idempotent. The ruleset is reloaded only when the rendered file differs.
+# Dependencies: nftables on the guest (installed here when missing). The 0mcp guests keep using lv3.platform.linux_guest_firewall via network_policy in inventory/host_vars/proxmox-host.yml.
+
+- name: Validate guest firewall inputs
+  ansible.builtin.assert:
+    that:
+      - fleet_guest_firewall_flush_mode in ['ruleset', 'table']
+      - fleet_guest_firewall_allowed_inbound | length > 0
+      - fleet_guest_firewall_allowed_inbound | selectattr('protocol', 'defined') | list | length == fleet_guest_firewall_allowed_inbound | length
+      - >-
+        fleet_guest_firewall_allowed_inbound
+        | selectattr('protocol', 'in', ['tcp', 'udp'])
+        | selectattr('ports', 'defined') | list | length
+        == fleet_guest_firewall_allowed_inbound | selectattr('protocol', 'in', ['tcp', 'udp']) | list | length
+      - >-
+        fleet_guest_firewall_allowed_inbound
+        | selectattr('protocol', 'equalto', 'tcp')
+        | selectattr('ports', 'defined')
+        | map(attribute='ports') | flatten | map('int') | select('equalto', 22) | list | length > 0
+    fail_msg: >-
+      Guest firewall rules need a protocol (and ports for tcp/udp), and at least one tcp rule must keep port 22 open so
+      a bad edit cannot lock the guest out.
+
+- name: Ensure nftables is installed
+  ansible.builtin.apt:
+    name: nftables
+    state: present
+
+- name: Render the guest nftables policy (validated before it replaces the live file)
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: "{{ fleet_guest_firewall_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+    validate: /usr/sbin/nft -c -f %s
+  register: fleet_guest_firewall_config
+
+- name: Ensure nftables is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ fleet_guest_firewall_service }}"
+    enabled: true
+    state: started
+
+- name: Reload the nftables policy when the file changed
+  ansible.builtin.command:
+    argv:
+      - nft
+      - -f
+      - "{{ fleet_guest_firewall_config_file }}"
+  when: fleet_guest_firewall_config is changed
+  changed_when: true
+
+- name: Reset the SSH connection after a policy reload
+  ansible.builtin.meta: reset_connection
+  when: fleet_guest_firewall_config is changed
+
+- name: Wait for SSH after a policy reload
+  ansible.builtin.wait_for_connection:
+    timeout: "{{ fleet_guest_firewall_reconnect_timeout }}"
+    connect_timeout: 5
+    sleep: 2
+  when: fleet_guest_firewall_config is changed

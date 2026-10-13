@@ -1,0 +1,101 @@
+workstream_id: ws-0512-authentik-consumer-e2e-postmerge-20261011
+state: completed
+schema_version: 1.1.0
+started_at: '2026-10-11T03:37:32Z'
+completed_at: '2026-10-11T12:31:50Z'
+applied_by: codex/authentik-librachat-live-closeout-20261011
+repo_version: 0.179.48
+adr: 0491
+summary: Apply and verify the merged Grafana logout and LibreChat Authentik callback-path
+  changes under current security gates, with non-secret browser and service evidence.
+targets:
+- service: grafana
+  host: monitoring
+  vmid: 140
+- service: librechat
+  host: coolify
+  vmid: 170
+- service: librechat
+  host: nginx
+  vmid: 110
+errors: []
+notes:
+  - >-
+    The merged Grafana monitoring converge completed with 295 tasks OK, 33
+    changed, 0 unreachable, and 0 failed. Strict-TLS browser OIDC reaches an
+    authenticated Grafana session as the non-admin test identity, but its user
+    API reports no orgRole, so the Viewer assertion fails.
+  - >-
+    Read-only live Authentik reconciliation confirmed the managed
+    grafana-groups OAuth scope mapping is absent; Grafana provider reconciliation
+    correctly refuses to proceed until that dependency exists. This receipt
+    records no Authentik API mutation. The mapping and provider-scope fix is in
+    the review branch and awaits repository CI/merge before the narrow apply.
+  - >-
+    Follow-up after PR #286: the Authentik mapping was created and the
+    grafana-oauth provider now references it; both managed-object checks report
+    zero drift. A strict-TLS fresh browser still reached Grafana without an
+    orgRole. Sanitized redirect inspection showed the running Grafana client
+    requests the built-in groups scope instead of grafana-groups. This PR fixes
+    the managed Grafana scopes setting; the service converge and Viewer browser
+    retest remain pending merge and governed apply.
+  - >-
+    PR #288 merged as 0bd6804f912c314214894d314c8dc774ff8cf67f. The governed
+    apply from merged origin/main completed on monitoring: 290 OK, 18 changed,
+    0 unreachable, 0 failed, and 72 skipped. The Grafana SSO task updated its
+    provider-scoped end-session URL and restarted Grafana; the local Authentik
+    redirect assertion and service health checks passed. The vulnerability
+    budget approved the apply. The monitoring redundancy report remains
+    unproven (declared R1, implemented R0) and was recorded as a warning, not
+    bypassed.
+  - >-
+    Fresh strict-TLS browser E2E after the apply authenticated the dedicated
+    non-admin test identity. Grafana /api/user returned HTTP 200 with
+    isGrafanaAdmin=false; /api/user/orgs returned Main Org. role Viewer; and
+    dashboard search returned 48 dashboards. Logout reached Authentik's
+    provider-invalidation flow, which rendered the expected Grafana logout
+    confirmation with HTTP 200. Grafana /api/user then returned HTTP 401.
+    Selecting Sign in with Authentik established a new Grafana session for the
+    same non-admin Viewer identity, and a second logout again left Grafana at
+    HTTP 401.
+  - >-
+    The post-apply Restic hook completed successfully: all 5 governed sources
+    were protected and 0 were uncovered. The latest snapshot receipt was
+    refreshed at 2026-10-11T05:48:35Z. This records backup coverage, not a
+    restore rehearsal.
+  - >-
+    PR #294 merged the narrow Coolify nftables policy needed for LibreChat's
+    container-to-private-edge Authentik discovery/callback path. The scoped
+    governed apply on Coolify completed with 30 OK, 2 changed, 0 unreachable,
+    0 failed, 16 skipped, 0 rescued, and 0 ignored. Pre-apply validation
+    confirmed the Docker NAT/forward chains were already absent in both nft
+    and iptables-legacy while Docker was active. To avoid a disruptive Docker
+    restart, only the legacy missing-chain recovery/assertion checks were
+    disabled for this invocation; Docker was not restarted. The daemon PID,
+    all 11 container IDs, and their SHA-256 inventory remained unchanged.
+  - >-
+    The previous nftables file was backed up root-owned mode 0600 at
+    /var/backups/lv3-nftables/nftables.conf.20261011T122638Z. Its SHA-256 was
+    61d86f0c9c1cfa4703b9870f192da1b74cce7fff3dc814ec7ea9fb7f109f469e; the
+    applied file SHA-256 is
+    9e613d3212c1e6d9490b0758c962ca18566073df0b921b6586f95005d732db3b.
+    `nft -c -f /etc/nftables.conf` passed after apply. The owned SNAT table
+    contains the exact LibreChat 172.16.1.0/24 to private-edge TCP/443 tuple
+    plus the pre-existing Coolify app-SSH and DNS tuples; the superseded
+    Coolify-only tables are absent.
+  - >-
+    Strict-TLS OIDC discovery from inside the running LibreChat container
+    returned HTTP 200 with issuer
+    https://id.example.org/application/o/serverclaw/. A new temporary Firefox
+    profile completed the Authentik callback and authenticated LibreChat
+    session with TLS validation enabled; the harness reported callback HTTP
+    302, authenticated_session=true, and status=ok for the non-admin
+    gitea-e2e identity. From the monitoring guest, the Coolify node-exporter
+    metrics endpoint returned HTTP 200 on TCP/9100 after the forwarding-policy
+    narrowing.
+  - >-
+    This receipt completes its Grafana and LibreChat apply/verification scope.
+    It does not clear the separate Outline or GlitchTip image-security gates,
+    Authentik runtime image budget, application-level restore rehearsal, or
+    Keycloak archival/DNS-reference cleanup; the parent workstream remains
+    in progress.

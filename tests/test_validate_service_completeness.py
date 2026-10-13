@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -62,6 +63,40 @@ def test_scaffolded_service_passes_completeness_check(tmp_path: Path, monkeypatc
     assert results[0].passing
 
 
+def test_managed_endpoint_can_explicitly_omit_its_own_ansible_role(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+
+    completeness_path = tmp_path / "config" / "service-completeness.json"
+    completeness = json.loads(completeness_path.read_text(encoding="utf-8"))
+    profile = completeness["services"]["test_echo"]
+    profile.update(
+        {
+            "service_type": "nginx-plugin",
+            "requires_ansible_role": False,
+            "requires_compose_secrets": False,
+            "requires_api_gateway": False,
+            "requires_dashboard": False,
+            "requires_data_catalog": False,
+            "requires_alert_rules": False,
+        }
+    )
+    completeness_path.write_text(json.dumps(completeness, indent=2) + "\n", encoding="utf-8")
+
+    role_dir = tmp_path / "collections" / "ansible_collections" / "lv3" / "platform" / "roles" / "test_echo_runtime"
+    shutil.rmtree(role_dir)
+
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    result = service_completeness.evaluate_service("test_echo")
+    role_item = next(item for item in result.items if item.item_id == "ansible_role")
+
+    assert result.passing
+    assert not role_item.required
+    assert not role_item.present
+
+
 def test_missing_generated_artifact_blocks_non_grandfathered_service(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -74,6 +109,38 @@ def test_missing_generated_artifact_blocks_non_grandfathered_service(
 
     assert not result.passing
     assert any(item.item_id == "grafana_dashboard" for item in result.failing_items)
+
+
+def test_non_app_service_can_mark_app_observability_artifacts_not_required(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+
+    completeness_path = tmp_path / "config" / "service-completeness.json"
+    completeness = json.loads(completeness_path.read_text(encoding="utf-8"))
+    profile = completeness["services"]["test_echo"]
+    profile["requires_dashboard"] = False
+    profile["requires_data_catalog"] = False
+    profile["requires_alert_rules"] = False
+    completeness_path.write_text(json.dumps(completeness, indent=2) + "\n", encoding="utf-8")
+
+    (tmp_path / "config" / "grafana" / "dashboards" / "test-echo.json").unlink()
+    data_path = tmp_path / "config" / "data-catalog.json"
+    data_catalog = json.loads(data_path.read_text(encoding="utf-8"))
+    data_catalog["data_stores"] = [row for row in data_catalog["data_stores"] if row.get("service") != "test_echo"]
+    data_path.write_text(json.dumps(data_catalog, indent=2) + "\n", encoding="utf-8")
+    (tmp_path / "config" / "alertmanager" / "rules" / "test-echo.yml").unlink()
+
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    result = service_completeness.evaluate_service("test_echo")
+    optional_items = [
+        item for item in result.items if item.item_id in {"grafana_dashboard", "data_catalog", "alert_rules"}
+    ]
+
+    assert result.passing
+    assert len(optional_items) == 3
+    assert all(not item.required and not item.present for item in optional_items)
 
 
 def test_missing_dependency_health_gate_blocks_non_grandfathered_service(
@@ -167,6 +234,172 @@ def test_changed_data_catalog_row_scopes_global_input_to_owning_service(
     assert selected == ["test_echo"]
 
 
+def test_changed_dependency_graph_node_scopes_to_owning_service(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "-c",
+            "user.name=Completeness Test",
+            "-c",
+            "user.email=completeness-test@example.invalid",
+            "commit",
+            "-qm",
+            "baseline",
+        ],
+        check=True,
+    )
+
+    graph_path = tmp_path / "config" / "dependency-graph.json"
+    graph = json.loads(graph_path.read_text(encoding="utf-8"))
+    node = next(row for row in graph["nodes"] if row["id"] == "test_echo")
+    node["tier"] += 1
+    graph_path.write_text(json.dumps(graph, indent=2) + "\n", encoding="utf-8")
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        ["config/dependency-graph.json"], context, base_ref="HEAD"
+    )
+
+    assert selected == ["test_echo"]
+
+
+def test_changed_dependency_graph_edges_keep_global_completeness_scope(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "-c",
+            "user.name=Completeness Test",
+            "-c",
+            "user.email=completeness-test@example.invalid",
+            "commit",
+            "-qm",
+            "baseline",
+        ],
+        check=True,
+    )
+
+    graph_path = tmp_path / "config" / "dependency-graph.json"
+    graph = json.loads(graph_path.read_text(encoding="utf-8"))
+    graph["edges"].append(
+        {
+            "from": "test_echo",
+            "to": "docker_runtime",
+            "type": "soft",
+            "description": "Test edge keeps graph relationship changes global.",
+        }
+    )
+    graph_path.write_text(json.dumps(graph, indent=2) + "\n", encoding="utf-8")
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        ["config/dependency-graph.json"], context, base_ref="HEAD"
+    )
+
+    assert selected is None
+
+
+def test_changed_subdomain_row_scopes_global_input_to_owning_service(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "-c",
+            "user.name=Completeness Test",
+            "-c",
+            "user.email=completeness-test@example.invalid",
+            "commit",
+            "-qm",
+            "baseline",
+        ],
+        check=True,
+    )
+
+    subdomain_path = tmp_path / "config" / "subdomain-catalog.json"
+    catalog = json.loads(subdomain_path.read_text(encoding="utf-8"))
+    entry = next(row for row in catalog["subdomains"] if row["service_id"] == "test_echo")
+    entry["notes"] += " Scoped route metadata update."
+    subdomain_path.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        ["config/subdomain-catalog.json"], context, base_ref="HEAD"
+    )
+    assert selected == ["test_echo"]
+
+
+def test_reserved_subdomain_catalog_change_keeps_global_completeness_scope(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "-c",
+            "user.name=Completeness Test",
+            "-c",
+            "user.email=completeness-test@example.invalid",
+            "commit",
+            "-qm",
+            "baseline",
+        ],
+        check=True,
+    )
+
+    subdomain_path = tmp_path / "config" / "subdomain-catalog.json"
+    catalog = json.loads(subdomain_path.read_text(encoding="utf-8"))
+    catalog["reserved_prefixes"].append(
+        {
+            "prefix": "extra",
+            "owner_adr": "0002",
+            "allowed_fqdns": ["extra.example.invalid"],
+            "notes": "Global reservation change.",
+        }
+    )
+    subdomain_path.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        ["config/subdomain-catalog.json"], context, base_ref="HEAD"
+    )
+    assert selected is None
+
+
 def test_changed_health_probe_service_scopes_to_owning_service(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     build_repo(tmp_path)
     scaffold_demo_service(tmp_path)
@@ -198,6 +431,44 @@ def test_changed_health_probe_service_scopes_to_owning_service(tmp_path: Path, m
 
     selected = service_completeness.service_ids_for_changed_paths(
         ["config/health-probe-catalog.json"], context, base_ref="HEAD"
+    )
+    assert selected == ["test_echo"]
+
+
+def test_changed_service_capability_row_scopes_to_owning_service(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "-c",
+            "user.name=Completeness Test",
+            "-c",
+            "user.email=completeness-test@example.invalid",
+            "commit",
+            "-qm",
+            "baseline",
+        ],
+        check=True,
+    )
+
+    catalog_path = tmp_path / "config" / "service-capability-catalog.json"
+    catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+    service = next(row for row in catalog["services"] if row["id"] == "test_echo")
+    service["description"] += " Scoped catalog update."
+    catalog_path.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        ["config/service-capability-catalog.json"], context, base_ref="HEAD"
     )
     assert selected == ["test_echo"]
 
@@ -270,6 +541,29 @@ def test_service_can_explicitly_mark_api_gateway_registration_not_applicable(
     assert gateway_item.required is False
     assert gateway_item.present is False
     assert "not required by the service exposure contract" in gateway_item.detail
+    assert result.passing
+
+
+def test_service_can_explicitly_mark_http_slo_not_applicable(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    completeness_path = tmp_path / "config" / "service-completeness.json"
+    completeness = json.loads(completeness_path.read_text(encoding="utf-8"))
+    completeness["services"]["test_echo"]["requires_slo"] = False
+    completeness_path.write_text(json.dumps(completeness, indent=2) + "\n", encoding="utf-8")
+
+    slo_path = tmp_path / "config" / "slo-catalog.json"
+    slo_catalog = json.loads(slo_path.read_text(encoding="utf-8"))
+    slo_catalog["slos"] = [item for item in slo_catalog["slos"] if item.get("service_id") != "test_echo"]
+    slo_path.write_text(json.dumps(slo_catalog, indent=2) + "\n", encoding="utf-8")
+
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    result = service_completeness.evaluate_service("test_echo")
+    slo_item = next(item for item in result.items if item.item_id == "slo_definition")
+
+    assert slo_item.required is False
+    assert slo_item.present is False
+    assert "not required by the service observability contract" in slo_item.detail
     assert result.passing
 
 
@@ -371,6 +665,79 @@ def test_changed_service_scope_falls_back_to_all_for_global_catalog_or_unknown_r
         )
         is None
     )
+
+
+@pytest.mark.parametrize(
+    "catalog_path",
+    [
+        "config/data-catalog.json",
+        "config/health-probe-catalog.json",
+        "config/service-capability-catalog.json",
+        "config/service-completeness.json",
+        "config/slo-catalog.json",
+    ],
+)
+def test_remote_snapshot_scopes_generated_service_catalogs_to_changed_bundles(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, catalog_path: str
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+    monkeypatch.setenv("LV3_SNAPSHOT_SOURCE_COMMIT", "a" * 40)
+    monkeypatch.setattr(service_completeness, "changed_services_in_catalog", lambda *_args: None)
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        [
+            catalog_path,
+            "catalog/services/test-echo/service.yaml",
+        ],
+        context,
+    )
+
+    assert selected == ["test_echo"]
+
+
+def test_remote_snapshot_without_source_commit_fails_closed_for_generated_catalogs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+    monkeypatch.delenv("LV3_SNAPSHOT_SOURCE_COMMIT", raising=False)
+    monkeypatch.setattr(service_completeness, "changed_services_in_catalog", lambda *_args: None)
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        [
+            "config/service-capability-catalog.json",
+            "catalog/services/test-echo/service.yaml",
+        ],
+        context,
+    )
+
+    assert selected is None
+
+
+def test_remote_snapshot_does_not_scope_canonical_subdomain_catalog_to_bundles(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+    monkeypatch.setenv("LV3_SNAPSHOT_SOURCE_COMMIT", "a" * 40)
+    monkeypatch.setattr(service_completeness, "changed_services_in_catalog", lambda *_args: None)
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        [
+            "config/subdomain-catalog.json",
+            "catalog/services/test-echo/service.yaml",
+        ],
+        context,
+    )
+
+    assert selected is None
 
 
 def test_changed_service_scope_ignores_platform_roles_and_unrelated_paths(

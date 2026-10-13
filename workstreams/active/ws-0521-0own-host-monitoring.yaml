@@ -1,0 +1,91 @@
+id: ws-0521-0own-host-monitoring
+adr: '0011'
+title: Add private Prometheus host metrics for 0own
+status: merged
+ready_to_merge: false
+live_applied: true
+owner: codex
+branch: codex/0own-node-monitoring
+worktree_path: .worktrees/0own-node-monitoring
+doc: docs/workstreams/ws-0521-0own-host-monitoring.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/0own_node_exporter_target.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/0own-node-exporter-scrape.yml.j2
+  - playbooks/services/prometheus-0own-node-exporter.yml
+  - config/ansible-execution-scopes.yaml
+  - config/publication-sanitization.yaml
+  - docs/runbooks/monitoring-stack.md
+  - inventory/host_vars/monitoring.yml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - tests/test_monitoring_vm_role.py
+  - docs/workstreams/ws-0521-0own-host-monitoring.md
+  - workstreams/active/ws-0521-0own-host-monitoring.yaml
+  - workstreams.yaml
+  - README.md
+  - changelog.md
+  - docs/status/history/merged-workstreams.md
+ownership_manifest:
+  owned_surfaces:
+    - id: prometheus_node_exporter_scrape_config
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/meta/argument_specs.yml
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus.yml.j2
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/0own_node_exporter_target.yml
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/0own-node-exporter-scrape.yml.j2
+        - playbooks/services/prometheus-0own-node-exporter.yml
+        - config/ansible-execution-scopes.yaml
+        - inventory/host_vars/monitoring.yml
+        - tests/test_monitoring_vm_role.py
+      mode: exclusive
+    - id: exporter_address_publication_sanitization
+      paths:
+        - config/publication-sanitization.yaml
+      mode: shared_contract
+      contract: tier-c-sanitization-replacements-v1
+    - id: monitoring_operator_runbook
+      paths:
+        - docs/runbooks/monitoring-stack.md
+        - docs/workstreams/ws-0521-0own-host-monitoring.md
+        - workstreams/active/ws-0521-0own-host-monitoring.yaml
+      mode: exclusive
+    - id: active_workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: merged_workstream_generated_status
+      paths:
+        - README.md
+        - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+    - id: merged_workstream_release_truth
+      paths:
+        - changelog.md
+      mode: shared_contract
+      contract: release-truth-v1
+    - id: generated_deployment_artifacts
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+canonical_truth:
+  changelog_entry: Add guarded, no-restart Prometheus scraping for the 0own Proxmox host.
+  release_bump: patch
+tasks:
+  - id: t1
+    title: Restore OpenObserve guest-agent visibility
+    status: completed
+  - id: t2
+    title: Add the 0own exporter and narrow Tailscale scrape path
+    status: completed
+  - id: t3
+    title: Add guarded Prometheus config apply, rollback, and regression checks
+    status: completed
+  - id: t4
+    title: Merge and deploy the monitoring role, then verify live metrics
+    status: completed

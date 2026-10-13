@@ -40,12 +40,15 @@ def test_build_snapshot_writes_archive_and_manifest(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     init_git_repo(repo)
-    (repo / ".rsync-exclude").write_text(".local/\n*.vault\n", encoding="utf-8")
+    (repo / ".rsync-exclude").write_text(".local/\n*.vault\nbuild/collection-install/\n", encoding="utf-8")
     (repo / "README.md").write_text("snapshot test\n", encoding="utf-8")
     (repo / "config").mkdir()
     (repo / "config" / "app.json").write_text('{"ok": true}\n', encoding="utf-8")
     (repo / ".local").mkdir()
     (repo / ".local" / "secret.txt").write_text("hidden\n", encoding="utf-8")
+    generated_collection_env = repo / "build" / "collection-install" / "ansible_collections" / "community" / "docker"
+    generated_collection_env.mkdir(parents=True)
+    (generated_collection_env / "test.env").write_text("third-party fixture\n", encoding="utf-8")
     (repo / "secrets.vault").write_text("hidden\n", encoding="utf-8")
     commit_all(repo, "initial")
 
@@ -63,6 +66,7 @@ def test_build_snapshot_writes_archive_and_manifest(tmp_path: Path) -> None:
     assert manifest["source_commit"] != "unknown"
     assert all(entry["path"] != ".local/secret.txt" for entry in manifest["entries"])
     assert all(entry["path"] != "secrets.vault" for entry in manifest["entries"])
+    assert all(not entry["path"].startswith("build/collection-install/") for entry in manifest["entries"])
 
     with tarfile.open(archive_path, "r:gz") as archive:
         names = sorted(member.name for member in archive.getmembers())
@@ -71,6 +75,7 @@ def test_build_snapshot_writes_archive_and_manifest(tmp_path: Path) -> None:
     assert "repo/config/app.json" in names
     assert "repo/.local/secret.txt" not in names
     assert "repo/secrets.vault" not in names
+    assert all(not name.startswith("repo/build/collection-install/") for name in names)
 
 
 def test_snapshot_id_is_stable_for_same_repo_content(tmp_path: Path) -> None:

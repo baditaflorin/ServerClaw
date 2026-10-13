@@ -1,5 +1,7 @@
 from pathlib import Path
+import ipaddress
 
+from jinja2 import Template
 import yaml
 
 
@@ -45,6 +47,23 @@ def load_tasks() -> list[dict]:
 
 def load_defaults() -> dict:
     return yaml.safe_load(ROLE_DEFAULTS.read_text())
+
+
+def test_sanitized_host_template_preserves_node_exporter_guest_firewall_rules() -> None:
+    host_vars = yaml.safe_load((REPO_ROOT / "publication" / "templates" / "proxmox-host.yml").read_text())
+    policy = host_vars["network_policy"]["guests"]
+
+    for guest in ("nginx", "docker-build", "runtime-control"):
+        rules = [
+            rule
+            for rule in policy[guest]["allowed_inbound"]
+            if rule.get("source") == "monitoring"
+            and rule.get("protocol") == "tcp"
+            and 9100 in (rule.get("ports") or [])
+        ]
+        assert len(rules) == 1, f"the sanitized {guest} template must preserve its node-exporter scrape rule"
+        if guest != "nginx":
+            assert rules[0].get("forward") is False
 
 
 def test_linux_guest_firewall_reasserts_docker_bridge_chains_after_firewall_evaluation() -> None:
@@ -173,6 +192,7 @@ def test_linux_guest_firewall_replaces_only_its_owned_nftables_table() -> None:
 
 
 HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
+SNAT_FIXTURE_PATH = REPO_ROOT / "tests" / "fixtures" / "linux_guest_firewall_snat_policy.yml"
 TEMPLATE_PATH = (
     REPO_ROOT
     / "collections"
@@ -192,6 +212,85 @@ def test_container_forwarding_guests_use_the_source_only_forward_path() -> None:
     assert "guest_policy.allow_container_forwarding | default(false)" in template
     assert "docker_runtime_container_forward_source_cidrs" in template
     assert "linux_guest_firewall_container_forward_source_cidrs" in template
+
+
+def test_container_snat_is_opt_in_and_limited_to_explicit_flows() -> None:
+    template = TEMPLATE_PATH.read_text()
+    host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
+    source_guest_policies = host_vars["network_policy"]["guests"]
+    source_coolify_policy = source_guest_policies.get("coolify", {})
+
+    assert "guest_policy.allow_container_private_edge_https_snat | default(false)" in template
+    assert all(
+        not policy.get("allow_container_private_edge_https_snat", False) and not policy.get("container_snat_rules", [])
+        for guest, policy in source_guest_policies.items()
+        if guest != "coolify"
+    )
+
+    # Production inventory can opt in only for narrow bridge networks and
+    # host-specific flows. The separate fixture below keeps renderer coverage
+    # stable when publication replaces deployment inventory with fork defaults.
+    if source_coolify_policy.get("allow_container_private_edge_https_snat", False):
+        source_cidrs = source_coolify_policy.get("container_private_edge_https_snat_source_cidrs", [])
+        source_rules = source_coolify_policy.get("container_snat_rules", [])
+        assert source_cidrs
+        assert source_rules
+        assert all(ipaddress.ip_network(cidr, strict=False).prefixlen >= 24 for cidr in source_cidrs)
+        assert all(ipaddress.ip_network(rule["source"], strict=False).prefixlen >= 32 for rule in source_rules)
+
+    fixture = yaml.safe_load(SNAT_FIXTURE_PATH.read_text())
+    policy = dict(host_vars["network_policy"])
+    policy["guests"] = dict(policy["guests"])
+    policy["guests"]["coolify"] = {
+        **policy["guests"].get("coolify", {}),
+        **fixture["coolify_snat_policy"],
+    }
+
+    guest_ip_map = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
+    guest_role_map = {guest["name"]: guest["role"] for guest in host_vars["proxmox_guests"]}
+    rendered = Template(template).render(
+        inventory_hostname="coolify",
+        linux_guest_firewall_host_id="proxmox-host",
+        linux_guest_firewall_policy=policy,
+        linux_guest_firewall_guest_ip_map=guest_ip_map,
+        linux_guest_firewall_guest_role_map=guest_role_map,
+        linux_guest_firewall_container_forward_source_cidrs=["172.16.0.0/12", "192.168.0.0/16", "10.200.0.0/16"],
+        hostvars={"proxmox-host": host_vars},
+    )
+
+    edge_ip = host_vars["proxmox_public_edge_ipv4"]
+    coolify_ip = guest_ip_map["coolify"]
+    for cidr in fixture["coolify_snat_policy"]["container_private_edge_https_snat_source_cidrs"]:
+        assert f"ip saddr {cidr} ip daddr {edge_ip} tcp dport 443 snat to {coolify_ip}" in rendered
+    assert "table ip lv3_container_snat" in rendered
+    for rule in fixture["coolify_snat_policy"]["container_snat_rules"]:
+        destination = guest_ip_map.get(rule["destination"], rule["destination"])
+        ports = ", ".join(str(port) for port in rule["ports"])
+        assert (
+            f"ip saddr {rule['source']} ip daddr {destination} {rule['protocol']} "
+            f"dport {{ {ports} }} snat to {coolify_ip}"
+        ) in rendered
+    assert "destroy table ip coolify_egress" in rendered
+    assert "destroy table ip coolify_dns_egress" in rendered
+    monitoring_ip = guest_ip_map["monitoring"]
+    assert f"ip saddr {monitoring_ip}/32 tcp dport {{ 9100 }} accept" in rendered
+    forward_chain = rendered.split("chain forward {", maxsplit=1)[1].split("chain output {", maxsplit=1)[0]
+    assert f"{monitoring_ip}/32" not in forward_chain
+    for broad_cidr in ("172.16.0.0/12", "192.168.0.0/16", "10.200.0.0/16"):
+        assert f"ip saddr {broad_cidr} ip daddr {edge_ip} tcp dport 443" not in rendered
+    assert f"ip daddr {edge_ip} tcp dport {{ 80, 443 }}" not in rendered
+
+    non_coolify_render = Template(template).render(
+        inventory_hostname="docker-runtime",
+        linux_guest_firewall_host_id="proxmox-host",
+        linux_guest_firewall_policy=policy,
+        linux_guest_firewall_guest_ip_map=guest_ip_map,
+        linux_guest_firewall_guest_role_map=guest_role_map,
+        linux_guest_firewall_container_forward_source_cidrs=["172.16.0.0/12", "192.168.0.0/16", "10.200.0.0/16"],
+        hostvars={"proxmox-host": host_vars},
+    )
+    assert "destroy table ip coolify_egress" not in non_coolify_render
+    assert "destroy table ip coolify_dns_egress" not in non_coolify_render
 
 
 def test_linux_guest_firewall_defaults_cover_all_governed_docker_bridge_cidrs() -> None:

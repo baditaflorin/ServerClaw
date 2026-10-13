@@ -118,6 +118,7 @@
       "phase": "already-dedicated",
       "summary": "Dedicated build and artifact-cache plane for repo automation and image builds.",
       "services": [
+        "artifact_cache",
         "docker_build"
       ]
     },

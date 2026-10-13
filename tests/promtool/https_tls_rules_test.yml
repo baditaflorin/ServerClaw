@@ -1,0 +1,105 @@
+# promtool unit tests for the generated HTTPS/TLS assurance rules (config/prometheus/rules/https_tls_alerts.yml).
+# That file is generated and git-ignored; tests/test_slo_promtool_rules.py renders it into a temporary directory and
+# runs this file against it. Policy under test: warn below 21 days, critical below 7 days.
+#
+# promtool starts its clock at the Unix epoch, so an expiry sample of N seconds means "expires N seconds from t=0".
+
+rule_files:
+  - rules/https_tls_alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: certificate with plenty of time left raises no alert
+    interval: 1m
+    input_series:
+      - series: 'probe_ssl_earliest_cert_expiry{job="https-tls-blackbox", assurance_id="grafana-public"}'
+        values: "2592000x120" # 30 days
+      - series: 'probe_success{job="https-tls-blackbox", assurance_id="grafana-public"}'
+        values: "1x120"
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: TLSCertificateExpiringWarning_grafana_public
+        exp_alerts: []
+      - eval_time: 1h
+        alertname: TLSCertificateExpiringCritical_grafana_public
+        exp_alerts: []
+      - eval_time: 1h
+        alertname: HTTPSProbeFailed_grafana_public
+        exp_alerts: []
+
+  - name: certificate under 21 days warns but does not page
+    interval: 1m
+    input_series:
+      - series: 'probe_ssl_earliest_cert_expiry{job="https-tls-blackbox", assurance_id="grafana-public"}'
+        values: "1814400x120" # 21 days at t=0, 20.96 days left at 1h
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: TLSCertificateExpiringWarning_grafana_public
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: https-tls-blackbox
+              assurance_id: grafana-public
+              service_id: grafana
+              environment: production
+              scope: public
+            exp_annotations:
+              summary: grafana-public TLS certificate is approaching expiry.
+              description: The grafana public HTTPS endpoint has less than 21 days remaining before certificate expiry.
+              runbook_url: docs/runbooks/https-tls-assurance.md
+      - eval_time: 1h
+        alertname: TLSCertificateExpiringCritical_grafana_public
+        exp_alerts: []
+
+  - name: certificate under 7 days pages
+    interval: 1m
+    input_series:
+      - series: 'probe_ssl_earliest_cert_expiry{job="https-tls-blackbox", assurance_id="grafana-public"}'
+        values: "518400x120" # 6 days at t=0
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: TLSCertificateExpiringCritical_grafana_public
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: https-tls-blackbox
+              assurance_id: grafana-public
+              service_id: grafana
+              environment: production
+              scope: public
+            exp_annotations:
+              summary: grafana-public TLS certificate is within the critical expiry window.
+              description: The grafana public HTTPS endpoint has less than 7 days remaining before certificate expiry.
+              runbook_url: docs/runbooks/https-tls-assurance.md
+
+  # A refused or timed-out connection exports no certificate (or a zero expiry). That is a probe failure, not a
+  # certificate that expired in 1970, so the expiry alerts must stay quiet and only the probe-failed warning fires.
+  - name: failed probe without a certificate does not read as an expired certificate
+    interval: 1m
+    input_series:
+      - series: 'probe_success{job="https-tls-blackbox", assurance_id="grafana-public"}'
+        values: "0x120"
+      - series: 'probe_ssl_earliest_cert_expiry{job="https-tls-blackbox", assurance_id="grafana-public"}'
+        values: "0x120"
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: TLSCertificateExpiringCritical_grafana_public
+        exp_alerts: []
+      - eval_time: 1h
+        alertname: TLSCertificateExpiringWarning_grafana_public
+        exp_alerts: []
+      - eval_time: 1h
+        alertname: HTTPSProbeFailed_grafana_public
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: https-tls-blackbox
+              assurance_id: grafana-public
+              service_id: grafana
+              environment: production
+              scope: public
+            exp_annotations:
+              summary: grafana-public HTTPS probe is failing.
+              description: The grafana public HTTPS endpoint is no longer completing a healthy probe through blackbox exporter.
+              runbook_url: docs/runbooks/https-tls-assurance.md
