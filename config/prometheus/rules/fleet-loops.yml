@@ -1,0 +1,99 @@
+# Added 2026-10-13. Dead-man and finding alerts for the two unattended loops that run on the 0docker builder (CT108):
+# `fleet-runner pool-guardian` (timer every 10 minutes) and `fleet-runner horizon` (timer every 6 hours). Both write
+# node_exporter textfile metrics, which the builder's exporter serves (scraped as 100.114.37.21:9100). A loop that stops
+# is otherwise silent, so staleness is alerted from here, off the builder.
+#
+# Two failure shapes need two alerts: when the series exists but its timestamp is old, the loop stopped running
+# (`*Silent`); when the series is gone (target down, file unreadable, exporter misconfigured) a staleness expression
+# returns nothing and would resolve by itself, so `absent()` covers it (`*NotReporting`). The builder is stopped for
+# about 10 minutes each night by its vzdump job (`ct108-nightly`); every `for:` below outlasts that.
+groups:
+  - name: fleet_loops
+    rules:
+      - alert: FleetPoolGuardianSilent
+        expr: (time() - fleet_pool_guardian_last_run_timestamp_seconds) > 45 * 60
+        for: 10m
+        labels:
+          severity: critical
+          service: fleet_loops
+        annotations:
+          summary: "The pool guardian on {{ $labels.instance }} has not run for 45 minutes"
+          description: "fleet-pool-guardian.timer fires every 10 minutes. Nothing has observed or repaired the service pools for {{ $value | humanizeDuration }}. On the builder check `systemctl status fleet-pool-guardian.timer fleet-pool-guardian.service` and `journalctl -u fleet-pool-guardian.service`."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: FleetPoolGuardianNotReporting
+        expr: absent(fleet_pool_guardian_last_run_timestamp_seconds)
+        for: 30m
+        labels:
+          severity: critical
+          service: fleet_loops
+        annotations:
+          summary: "No pool guardian metrics are visible to Prometheus"
+          description: "fleet_pool_guardian_last_run_timestamp_seconds has been absent for 30 minutes: the builder (CT108) or its node exporter is down, or the textfile is missing or not readable by the exporter user (it must be mode 0644; fleet-runner before v0.7.340 wrote it 0600)."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: FleetPoolGuardianCriticalFinding
+        expr: fleet_pool_guardian_findings{severity="critical"} > 0
+        for: 1h
+        labels:
+          severity: critical
+          service: fleet_loops
+        annotations:
+          summary: "A service pool has had a critical finding for an hour"
+          description: "{{ $value }} critical pool finding(s) on {{ $labels.instance }} for 1 hour. The guardian repairs what is safe within minutes, so a finding this old is one it cannot or may not repair (credentials, capacity, an open circuit). Run `fleet-runner pool-guardian` (without --apply) on the builder for the findings."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: FleetPoolGuardianCircuitOpen
+        expr: fleet_pool_guardian_circuits_open > 0
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_loops
+        annotations:
+          summary: "The pool guardian stopped repairing {{ $value }} service(s)"
+          description: "The repair circuit is open for {{ $value }} service(s) on {{ $labels.instance }}: three repairs failed within 24 hours, so the guardian leaves them alone until the hold passes. Read the failure output in /root/fleet-state/state/pool-guardian/events.jsonl."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: FleetPoolGuardianPaused
+        expr: fleet_pool_guardian_paused == 1
+        for: 24h
+        labels:
+          severity: warning
+          service: fleet_loops
+        annotations:
+          summary: "The pool guardian kill switch has been on for 24 hours"
+          description: "Repairs are off on {{ $labels.instance }} (PAUSE file or FLEET_GUARDIAN_PAUSE) and have been for a day. The kill switch is meant for short interventions; remove it when the intervention is over."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: FleetHorizonSilent
+        expr: (time() - fleet_horizon_last_run_timestamp_seconds) > 13 * 3600
+        for: 15m
+        labels:
+          severity: warning
+          service: fleet_loops
+        annotations:
+          summary: "The horizon watch on {{ $labels.instance }} has not run for 13 hours"
+          description: "fleet-horizon.timer fires every 6 hours; two runs were missed ({{ $value | humanizeDuration }} since the last one). Nothing is watching expiring certificates, tokens, domains, RAID or backups. On the builder check `systemctl status fleet-horizon.timer fleet-horizon.service` and `journalctl -u fleet-horizon.service`."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: FleetHorizonNotReporting
+        expr: absent(fleet_horizon_last_run_timestamp_seconds)
+        for: 1h
+        labels:
+          severity: warning
+          service: fleet_loops
+        annotations:
+          summary: "No horizon watch metrics are visible to Prometheus"
+          description: "fleet_horizon_last_run_timestamp_seconds has been absent for an hour: the builder or its node exporter is down, or the textfile is missing or not readable by the exporter user (it must be mode 0644)."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: FleetHorizonCriticalFinding
+        expr: fleet_horizon_findings{severity="critical"} > 0
+        for: 1h
+        labels:
+          severity: critical
+          service: fleet_loops
+        annotations:
+          summary: "The horizon watch has {{ $value }} critical finding(s)"
+          description: "Something that expires or degrades slowly has crossed its critical threshold (a degraded RAID array, a disk or backup problem, an expiry inside two weeks). Run `fleet-runner horizon` on the builder for the list; the horizon verb also pages its own ntfy topic, this is the independent second path."
+          runbook_url: docs/runbooks/fleet-observability.md

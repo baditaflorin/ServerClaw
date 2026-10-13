@@ -106,6 +106,7 @@ line changes, which is not expected on any host today.
 | own-pbs realm user, ACLs on the `0database` namespace, prune job `prune-0database` | `fleet_pg_backup` (`pbs_server`) | `fleet_pg_backup_pbs_*` |
 | `fleet-docker-prune` script, service and daily timer (04:30 UTC, unused images and BuildKit cache older than 7 days; textfile metrics `fleet_docker_prune_*`) on the 0mcp docker-build guest | `fleet_docker_prune` | `fleet_docker_prune_*`; host `0mcp_docker_build` in group `fleet_docker_prune_hosts` |
 | Root-filesystem alerts (`FleetRootFilesystemLow` <15% free 30m, `FleetRootFilesystemCritical` <7% 10m, `FleetRootFilesystemFillingFast` predicted full within 24h) and `FleetDockerPruneStale` | `monitoring_vm` | `config/prometheus/rules/fleet-disk.yml` (copied to `/etc/prometheus/rules/fleet-disk.yml` on the monitoring VM) |
+| Dead-man and finding alerts for the pool guardian and horizon loops on the 0docker builder (`FleetPoolGuardianSilent`, `FleetPoolGuardianNotReporting`, `FleetPoolGuardianCriticalFinding`, `FleetPoolGuardianCircuitOpen`, `FleetPoolGuardianPaused`, `FleetHorizonSilent`, `FleetHorizonNotReporting`, `FleetHorizonCriticalFinding`) | `monitoring_vm` | `config/prometheus/rules/fleet-loops.yml` (copied to `/etc/prometheus/rules/fleet-loops.yml` on the monitoring VM) |
 | the nginx guest's tcp 9100 rule | already in PR #299: `network_policy.guests.nginx` rendered by `linux_guest_firewall` | `inventory/host_vars/proxmox-host.yml` |
 
 ### Docker prune and disk alerts
@@ -227,6 +228,7 @@ scripts/tailscale-policy-ct108.sh plan        # semantic changes must be empty
 | PBS storage or job settings | the DRIFT line prints the old value: `pvesh set /storage/<id> --<key> <old>` or `pvesh set /cluster/backup/<id> --<key> <old>` |
 | Docker prune timer | `systemctl disable --now fleet-docker-prune.timer`, remove the two unit files and `/usr/local/sbin/fleet-docker-prune`, `systemctl daemon-reload`; pruned images are re-pulled on demand |
 | Disk alert rules | delete `/etc/prometheus/rules/fleet-disk.yml` on the monitoring VM and reload Prometheus |
+| Fleet loops rules | delete `/etc/prometheus/rules/fleet-loops.yml` on the monitoring VM and reload Prometheus |
 | PBS ACL / prune job | `proxmox-backup-manager acl update <path> NoAccess --auth-id <id>` / `prune-job update` with the old value; user and token deletion is deliberately not automated |
 
 ## Validation
@@ -250,3 +252,13 @@ The datastore `own-pbs` (`/mnt/pbs-datastore/store`, ext4 on the second virtual 
 - Growing the disk: `qm resize 620 scsi1 +<n>T` on the 0own hypervisor, then in the guest `growpart /dev/sdb 1 && resize2fs /dev/sdb1` (online). The zvol keeps its 3T refreservation, so the added space is thin-provisioned on `rpool`; keep `zpool list rpool` under 80%.
 - Garbage collection runs daily at 05:30 (after the 04:00/04:15/04:30 prune jobs). Chunks younger than 24h5m are never freed, so a GC run right after a backup frees little.
 - Prune jobs: `own-pbs-retention` is limited to the root namespace (`max_depth: 0`). A prune job without `max_depth` recurses into every namespace, which used to apply keep-daily 7 to `0database` on top of the tighter `prune-0database` job. `0docker` has its own job; `0mcp-legacy` is frozen and unpruned.
+
+## Fleet loops: pool guardian and horizon (added 2026-10-13)
+
+Two unattended loops run on the 0docker builder (CT108) from systemd timers; both come from the `go_fleet_runner` repository (`docs/architecture/pool-guardian.md`, `docs/architecture/horizon.md`).
+
+- `fleet-pool-guardian.timer` (every 10 minutes) observes the service pools, repairs what is safe and escalates the rest. `fleet-horizon.timer` (every 6 hours) watches what expires or degrades slowly: certificates, the GitHub token, domains, Tailscale keys, RAID, disks, backups.
+- Each loop writes a textfile (`/var/lib/prometheus-node-exporter/textfile/fleet_pool_guardian.prom`, `fleet_horizon.prom`) that the builder's node exporter serves; this Prometheus scrapes it as `100.114.37.21:9100`. The files must be mode 0644: the exporter runs as another user, and `fleet-runner` before v0.7.340 wrote them 0600, which hid both loops from this Prometheus.
+- Alerts live in `config/prometheus/rules/fleet-loops.yml`. `*Silent` fires when the heartbeat timestamp is old (guardian 45 minutes, horizon 13 hours). `*NotReporting` fires when the series is absent: a staleness expression returns nothing when the target is down, so without `absent()` a dead builder would silence its own alert. The nightly `ct108-nightly` backup stops the builder for about 10 minutes, which every `for:` outlasts.
+- `FleetHorizonCriticalFinding` and `FleetPoolGuardianCriticalFinding` repeat what the loops page through their own ntfy topic, as an independent second path. While the 0docker hypervisor runs on one NVMe (four degraded md arrays), `FleetHorizonCriticalFinding` fires; it resolves when the missing disk is replaced and re-added.
+- Triage on the builder: `systemctl status fleet-pool-guardian.timer fleet-horizon.timer`, `journalctl -u fleet-pool-guardian.service -u fleet-horizon.service`, state under `/root/fleet-state/state/pool-guardian/` and `.../horizon/` (`latest.json`, `events.jsonl`). The guardian's kill switch is a `PAUSE` file in its state directory (or `FLEET_GUARDIAN_PAUSE`); the horizon's accepted problems are acknowledged in the `ACK` file there, one per line, each with a mandatory `until=YYYY-MM-DD`.

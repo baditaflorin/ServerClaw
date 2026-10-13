@@ -242,6 +242,15 @@
     mode: "0640"
   notify: Reload Prometheus configuration
 
+- name: Copy the fleet loops (pool guardian and horizon) dead-man rules
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_fleet_loops_rules_source_file }}"
+    dest: "{{ monitoring_prometheus_fleet_loops_rules_file }}"
+    owner: root
+    group: prometheus
+    mode: "0640"
+  notify: Reload Prometheus configuration
+
 - name: Copy the Alertmanager Watchdog heartbeat rule
   ansible.builtin.copy:
     src: "{{ monitoring_prometheus_watchdog_rules_source_file }}"
