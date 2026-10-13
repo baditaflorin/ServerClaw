@@ -78,6 +78,9 @@ def test_api_gateway_role_uses_authentik_oidc_endpoints() -> None:
 
     assert "api_gateway_authentik_provider_slug: agent-hub" in defaults
     assert "api_gateway_authentik_jwks_url" in defaults
+    assert "api_gateway_authentik_service_topology" in defaults
+    assert "api_gateway_authentik_service_topology.urls.internal" in defaults
+    assert "api_gateway_authentik_jwks_base_url" in defaults
     assert "api_gateway_authentik_issuer_url" in defaults
     assert "api_gateway_authentik_discovery_url" in defaults
     assert "api_gateway_authentik_token_url" in defaults
@@ -93,7 +96,8 @@ def test_api_gateway_role_uses_authentik_oidc_endpoints() -> None:
     assert "api_gateway_structured_search_verify_delay: 5" in defaults
     assert "api_gateway_tree_sync_become_timeout: 60" in defaults
     assert "api_gateway_network_mode: host" in defaults
-    assert "{{ authentik_oidc_provider_base_url }}/{{ api_gateway_authentik_provider_slug }}/jwks/" in defaults
+    assert "{{ api_gateway_authentik_jwks_base_url | regex_replace('/+$', '') }}" in defaults
+    assert "{{ authentik_oidc_provider_base_url }}/{{ api_gateway_authentik_provider_slug }}/" in defaults
     assert "api_gateway_nats_url: nats://127.0.0.1:4222" in defaults
     assert "/.local/nats/jetstream-admin-password.txt" in defaults
     assert "api_gateway_ledger_event_types_src" in defaults
@@ -362,6 +366,7 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY .gitea ./.gitea" in tasks
     assert "COPY .github ./.github" in tasks
     assert "COPY .pre-commit-config.yaml ./.pre-commit-config.yaml" in tasks
+    assert "COPY .woodpecker.yml ./.woodpecker.yml" in tasks
     assert "COPY README.md ./README.md" in tasks
     assert "COPY ansible.cfg ./ansible.cfg" in tasks
     assert "COPY canonical_errors.py ./canonical_errors.py" in tasks

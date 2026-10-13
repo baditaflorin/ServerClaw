@@ -13,7 +13,7 @@
       "platform": "linux/amd64",
       "pinned_on": "2026-10-01",
       "scan_status": "blocked",
-      "scan_receipt": "receipts/image-scans/2026-10-11-authentik-runtime.json",
+      "scan_receipt": "receipts/image-scans/2026-10-13-authentik-runtime.json",
       "consumers": [
         "roles/authentik_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",

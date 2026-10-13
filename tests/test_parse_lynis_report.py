@@ -69,17 +69,21 @@ def test_live_platform_suppressions_are_limited_to_verified_hosts() -> None:
     suppressions = parser.load_suppressions()
 
     for finding_id in ("PKGS-7388", "FIRE-4512"):
-        expected_hosts = ["nginx", "coolify", "runtime-control"] if finding_id == "PKGS-7388" else ["nginx", "coolify"]
+        expected_hosts = (
+            ["nginx", "coolify", "runtime-control", "runtime-comms"]
+            if finding_id == "PKGS-7388"
+            else ["nginx", "coolify", "runtime-comms"]
+        )
         assert suppressions[finding_id]["hosts"] == expected_hosts
 
-    for host in ("nginx", "coolify", "runtime-control"):
+    for host in ("nginx", "coolify", "runtime-control", "runtime-comms"):
         report = parser.parse_report_text(
             "warning[]=PKGS-7388|Can't find any security repository\n"
             "warning[]=FIRE-4512|iptables module(s) loaded, but no rules active\n",
             host=host,
             suppressions=suppressions,
         )
-        expected_suppressed = 2 if host in {"nginx", "coolify"} else 1
+        expected_suppressed = 2 if host in {"nginx", "coolify", "runtime-comms"} else 1
         assert report["finding_counts"]["warning"] == 2 - expected_suppressed
         assert report["finding_counts"]["suppressed"] == expected_suppressed
 

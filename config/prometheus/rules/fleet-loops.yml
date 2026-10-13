@@ -1,6 +1,6 @@
 # Added 2026-10-13. Dead-man and finding alerts for the two unattended loops that run on the 0docker builder (CT108):
 # `fleet-runner pool-guardian` (timer every 10 minutes) and `fleet-runner horizon` (timer every 6 hours). Both write
-# node_exporter textfile metrics, which the builder's exporter serves (scraped as 100.114.37.21:9100). A loop that stops
+# node_exporter textfile metrics, which the builder's exporter serves (scraped through the builder's tailscale serve forward on port 9100). A loop that stops
 # is otherwise silent, so staleness is alerted from here, off the builder.
 #
 # Two failure shapes need two alerts: when the series exists but its timestamp is old, the loop stopped running

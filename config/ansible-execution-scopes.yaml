@@ -5,6 +5,7 @@ playbooks:
     execution_class: mutation
   playbooks/api-gateway.yml:
     playbook_id: api-gateway
+    canonical_service_id: api_gateway
     mutation_scope: lane
     target_lane: lane:runtime-control
     shared_surfaces:

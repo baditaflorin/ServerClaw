@@ -43,7 +43,10 @@ rules in `config/prometheus/rules/inventory.yml` alert on staleness, shrinkage a
 | `/etc/scanopy-retag/api-key` | controller-local `monitoring_scanopy_retag_api_key_local_file` | `monitoring_vm` | root `0600`. See "Secrets". |
 | `scanopy_discover.py`, `schedule.json`, README | `roles/monitoring_vm/files/scanopy-discover/`, `monitoring_scanopy_discover_schedule` | `monitoring_vm` (`scanopy_discover.yml`) | Starts the daily Docker VM discoveries through the API. See "External discovery trigger". |
 | `scanopy-discover.service` / `.timer` | `roles/monitoring_vm/templates/scanopy-discover.*.j2` | `monitoring_vm` | Timer runs every 15 minutes (minute 02/17/32/47); enabled, never restarted by a converge. Reuses `/etc/scanopy-retag/api-key`. |
-| `rules/inventory.yml`, `rules/zz-alertmanager-watchdog.yml` | `config/prometheus/rules/` | `monitoring_vm` | Reload only. `inventory.yml` also carries the `scanopy_retag` and `scanopy_discover` alert groups. |
+| `scanopy_onboard.py`, `scanopy_onboard_hv.py`, `fleets.json`, README | `roles/monitoring_vm/files/scanopy-onboard/`, `monitoring_scanopy_onboard_*` | `monitoring_vm` (`scanopy_onboard.yml`) | Installs the daemon in new Proxmox guests. See "Automatic onboarding of new guests". |
+| `scanopy-onboard.service` / `.timer` | `roles/monitoring_vm/templates/scanopy-onboard.*.j2` | `monitoring_vm` | Timer runs every 15 minutes (minute 07/22/37/52); enabled, never restarted by a converge. Reuses `/etc/scanopy-retag/api-key`. |
+| `/etc/scanopy-onboard/id_ed25519` | generated once by the role (`ssh-keygen`, `creates:`) | `monitoring_vm` | Dedicated key; its public half is a forced-command line on each hypervisor. |
+| `rules/inventory.yml`, `rules/zz-alertmanager-watchdog.yml` | `config/prometheus/rules/` | `monitoring_vm` | Reload only. `inventory.yml` also carries the `scanopy_retag`, `scanopy_discover` (incl. `ScanopyDaemonDown`) and `scanopy_onboard` alert groups. |
 | `/etc/alertmanager/alertmanager.yml` | `config/alertmanager/alertmanager.yml` | `alertmanager_runtime` | ntfy-only routing, validated with `amtool check-config`, applied with a reload. |
 | `/etc/alertmanager/ntfy-password` | controller-local `alertmanager_runtime_ntfy_password_local_file` | `alertmanager_runtime` | root:prometheus `0640` (Alertmanager runs as `prometheus`). |
 
@@ -218,7 +221,16 @@ The schedule covers the 16 Docker VM daemons (01:00 to 05:15 UTC) and the four P
 To add or move a host, edit `monitoring_scanopy_discover_schedule` in
 `inventory/host_vars/monitoring.yml` (keep slots on distinct quarter hours) and
 converge. The host's daemon must already have a `Scheduled` discovery definition in
-Scanopy; the job does not create one.
+Scanopy; the job does not create one. A daemon that is **not** in the schedule but whose
+`Scheduled` definition is enabled with a daily quarter-hour cron (`0 M H * * *`, UTC) is
+scheduled too (the inventory slot wins when both exist): that is how the onboarding job
+hands over a new guest, so it is scanned every day without an inventory edit.
+
+The same run reports **daemon liveness**: `scanopy_daemon_last_seen_age_seconds{daemon}` for
+every daemon Scanopy knows (a healthy daemon polls about every 30 s), `scanopy_daemons_total`
+and `scanopy_daemons_unreachable`. `ScanopyDaemonDown` fires when a daemon has been silent for
+more than 10 minutes for 5 minutes: check the guest, `journalctl -u scanopy-daemon` inside it,
+and the fleet's relay and host firewall.
 
 Metrics (textfile `scanopy_discover.prom`): `scanopy_discover_last_attempt_success`,
 `scanopy_discover_last_success_timestamp_seconds`, `scanopy_discover_targets`,
@@ -240,22 +252,126 @@ Roll back with `sudo systemctl disable --now scanopy-discover.timer` or
 disk). Discovery then only runs when someone starts it by hand or when Scanopy's own
 scheduler happens to fire.
 
-### Scanopy daemons (installed by hand, not managed by a role)
+### Scanopy daemons (one per guest and hypervisor)
 
-Every guest and hypervisor runs a Scanopy daemon (DaemonPoll mode, polls the server every 30 s; the server is on the 0docker
-hypervisor). There is no role for them, so this is the layout to restore or extend:
+Every running Proxmox guest (VM and container) and every hypervisor runs a Scanopy daemon (DaemonPoll mode, polls the server every
+30 s; the server is on the 0docker hypervisor), 41 in all as of 2026-10-13. No role installs them; use this layout and procedure.
 
 - Unit `scanopy-daemon.service`, `ExecStart=/usr/local/bin/scanopy-daemon --config-dir /etc/scanopy/daemon/scanopy-daemon
-  --log-file /var/log/scanopy/scanopy-daemon.log`, `Restart=always`, user root. Config `config.json` per directory (daemon name,
-  `daemon_port`, server URL, site id, API key; keep it root-readable only in practice).
-- A host that needs a second daemon identity (a Proxmox credential is assigned to a daemon, so the pve01 hypervisor has
-  `Scanopy daemon pve01` on port 60073 and `pve-pve01` on port 60074) uses a second unit with its own config directory and log:
-  `scanopy-daemon-2.service` with `--config-dir /etc/scanopy/daemon/scanopy-daemon-2 --log-file
-  /var/log/scanopy/scanopy-daemon-2.log`. That unit was missing until 2026-10-12, so every discovery addressed to `pve-pve01`
-  stayed `Pending` and its Proxmox data stopped refreshing on 2026-10-08.
-- Proxmox discovery reads its API-token secret from `/root/.config/scanopy/proxmox-token.secret` on the daemon's own host, so
-  only the hypervisor daemons can use the Proxmox credentials; VM daemons log harmless "credential malformed" warnings.
+  --log-file /var/log/scanopy/scanopy-daemon.log`, `Restart=always`, user root. `config.json` holds the daemon name, port, server URL,
+  site id and the daemon's own API key (root-only in practice). `scanopy-daemon install` writes all of this.
+- **Server URL per fleet.** Guests do not call the server directly: each hypervisor publishes it on its gateway address, and the daemon's
+  `server_url` is that address on port 60072: `http://10.10.10.1:60072` (0docker, the server itself), `http://10.10.10.1:60072` (0mcp),
+  `http://10.60.10.1:60072` (0own), `http://10.50.0.1:60072` (pve01). On 0mcp, 0own and pve01 this is a `scanopy-relay.socket` +
+  `systemd-socket-proxyd` forwarding to the server's tailnet address.
+- **Relay rule.** The 0mcp hypervisor's `host.fw` lets the guest LAN reach the relay with one rule (`IN ACCEPT -i vmbr20 -source
+  10.10.10.0/24 -dest 10.10.10.1 -p tcp -dport 60072`), rendered from `proxmox_host_additional_tcp_rules`
+  (`inventory/host_vars/proxmox-host.yml`). It used to be one rule per guest; that blocked every guest the onboarding job installs
+  without anyone listing it first (the daemon logs "Still unreachable"). The relay only forwards to a server that needs a per-daemon
+  API key. The other hypervisors have no such list. `tests/test_monitoring_prometheus_codification.py` keeps the rule in the policy.
+- **New guests are onboarded automatically** (see "Automatic onboarding of new guests"). To install one by hand, for example a VM whose
+  guest agent does not answer, use `scripts/scanopy_daemon_rollout.py` (see its docstring for the targets file). It provisions the daemon through
+  `POST /api/v1/daemons/provision`, which mints a key **bound 1:1** to the daemon record, and installs with only `--server-url` and
+  `--daemon-api-key`. Do not create the key with `POST /api/v1/auth/daemon`: that makes a legacy site-shared key, the daemon keeps the nil
+  id, and the server answers "Daemon context required" (HTTP 403). Reach for guests without an ssh alias through the hypervisor's guest
+  agent (`qm guest exec`) to authorise a key, or `pct exec` for containers.
+- **After a manual install:** a new daemon gets a weekly `Scheduled` discovery by default. Move it to a daily quarter-hour slot (the
+  trigger adopts it, or add it to `monitoring_scanopy_discover_schedule`), and attach the `docker-socket-1` credential to the host
+  of every guest that runs Docker. The onboarding job does both itself.
+- A host that needs a second daemon identity (a Proxmox credential is assigned to a daemon, so the pve01 hypervisor has `Scanopy daemon pve01`
+  on port 60073 and `pve-pve01` on port 60074) uses a second unit with its own config directory and log: `scanopy-daemon-2.service` with
+  `--config-dir /etc/scanopy/daemon/scanopy-daemon-2 --log-file /var/log/scanopy/scanopy-daemon-2.log`. That unit was missing until
+  2026-10-12, so discoveries addressed to `pve-pve01` stayed `Pending` and its Proxmox data stopped refreshing on 2026-10-08.
+- Proxmox discovery reads its API-token secret from `/root/.config/scanopy/proxmox-token.secret` on the daemon's own host, so only the
+  hypervisor daemons can use the Proxmox credentials; VM daemons log harmless "credential malformed" warnings.
 - A daemon only runs a discovery for which a `Scheduled` definition exists in Scanopy; `scanopy-discover` starts those definitions.
+
+### Automatic onboarding of new guests
+
+`scanopy-onboard` (systemd timer on the monitoring VM, every 15 minutes at minute 07/22/37/52) puts a Scanopy daemon on every running
+Proxmox guest that has none. Per run:
+
+1. For each hypervisor in `monitoring_scanopy_onboard_fleets` it runs `list` through the forced-command key (running, non-template
+   VMs and containers with their MACs and real-interface IPv4 addresses; whether the guest is manageable) and asks Scanopy for its
+   daemons and hosts.
+2. A guest is **covered** when a daemon that has checked in is named after it (`<vm|ct>-<fleet>-<id>-<name>` or ending in its name),
+   or one of its MACs, or an IPv4 address that belongs to exactly one daemon host, is on a daemon host. Addresses shared by several
+   hosts (Docker bridges, the 10.10.10.0/24 range that exists in two fleets) prove nothing and are ignored.
+3. A guest uncovered in two runs in a row (so a guest still being provisioned is left alone) is onboarded: `POST /api/v1/daemons/provision`
+   mints a daemon record and a 1:1 key (re-provisioned when a record that never checked in exists), the hypervisor installs the daemon in
+   the guest (`install`: containers through `pct exec`, VMs through the guest agent `qm guest exec --pass-stdin`; the key travels on stdin
+   only), the job waits for the check-in (150 s), gives the daemon's `Scheduled` discovery the first free daily quarter-hour from 12:00 UTC
+   (`scanopy-discover` adopts it), and attaches the `docker-socket-1` credential when the guest has Docker.
+4. Guards: at most 2 installs per run; a failing guest backs off 30 minutes, doubling up to 24 hours (state in
+   `/var/lib/scanopy-onboard/state.json`); a guest that already runs an active `scanopy-daemon` service but is unknown to Scanopy is
+   reported, not reinstalled; `monitoring_scanopy_onboard_exclude` (`"<fleet>:<vm|ct>:<id>"`) skips a guest on purpose; the daemon version
+   follows the fleet's most common version.
+
+Metrics (textfile `scanopy_onboard.prom`): `scanopy_onboard_last_success_timestamp_seconds` (every hypervisor listed, no fatal error),
+`scanopy_onboard_fleet_list_ok{hypervisor}`, `scanopy_onboard_guests_running{hypervisor}`, `scanopy_onboard_guests_uncovered`,
+`scanopy_onboard_guests_unmanageable`, `scanopy_onboard_installs_this_run`, `scanopy_onboard_install_failures`. Alerts:
+`ScanopyGuestWithoutDaemon` (uncovered or unmanageable guests for 3h), `ScanopyOnboardStale` (no clean run for 2h) and
+`ScanopyOnboardMetricsAbsent`. A VM whose QEMU guest agent does not answer cannot be reached from its hypervisor: it is counted as
+unmanageable, never touched, and needs the manual install.
+
+**Hypervisor side (one-time per hypervisor, outside the role).** The monitoring VM reaches the hypervisors over their public SSH
+(`root@example.net`, `root@10.10.10.1`, `root@203.0.113.14`, `root@proxmox.0database.com`); the tailnet does not allow tcp/22 from
+it. On every hypervisor:
+
+```bash
+install -m 0755 scanopy_onboard_hv.py /usr/local/sbin/scanopy-onboard-hv        # copy kept at /opt/scanopy-onboard/ on the monitoring VM
+# /root/.ssh/authorized_keys, one line, public key from /etc/scanopy-onboard/id_ed25519.pub on the monitoring VM:
+command="/usr/local/sbin/scanopy-onboard-hv",no-pty,no-port-forwarding,no-agent-forwarding,no-X11-forwarding,from="10.10.10.40,203.0.113.1" ssh-ed25519 AAAA... scanopy-onboard
+```
+
+`from=` is the monitoring VM's LAN address (0mcp's own hypervisor sees it) and the 0mcp public address its traffic leaves from. The key
+can run `list` and `install <vm|ct> <id> <relay-url> <name> <version>` and nothing else; arguments are validated, the relay must be a
+`http://10.x.x.x:60072` address. After changing the wrapper, copy it to all four hypervisors again (`list` reports `wrapper_version`).
+
+On the monitoring VM:
+
+```bash
+sudo python3 /opt/scanopy-onboard/scanopy_onboard.py --dry-run          # what it would do, changes nothing
+sudo systemctl start scanopy-onboard.service && journalctl -u scanopy-onboard -n 30
+sudo cat /var/lib/scanopy-onboard/state.json                            # sightings, failures, backoff per guest
+```
+
+Verified end to end on 2026-10-13: the daemon was stopped and deleted in Scanopy for container 107 (pve-exporter, 0docker) and VM 200
+(0mcp-staging-runtime); the next run re-installed both, they checked in, got slots 12:00 and 12:15 UTC, and VM 200 got the Docker
+credential. Roll back with `sudo systemctl disable --now scanopy-onboard.timer` or `monitoring_scanopy_onboard_enabled: false`.
+
+### Recovery after the Scanopy server or the 0docker hypervisor is rebuilt
+
+The Scanopy server, its Postgres and the hypervisor-local daemon run as a compose project on the **0docker hypervisor** (not in a
+guest), so a PBS restore of the guests does not bring them back; `/root/scanopy-backups` is on the same host. While that hypervisor is
+down every daemon is unable to poll and the jobs on the monitoring VM fail safe: `scanopy-discover` and `scanopy-onboard` exit 1 on
+the first API call and change nothing, and `ScanopyDiscoverStale`, `ScanopyOnboardStale`, `ScanopySDStale` and the `*MetricsAbsent`
+alerts fire after their delays. `ScanopyDaemonDown` stays silent on purpose in that case: the liveness metrics come from the API, so
+they disappear with it. Do not read the missing alert as "all daemons fine".
+
+When the hypervisor is back:
+
+1. **Host key.** The onboarding key pins each hypervisor in `/etc/scanopy-onboard/known_hosts` (`accept-new`: a changed key is
+   refused, never auto-accepted). A rebuilt 0docker hypervisor has new host keys. Verify the new fingerprint out of band (Hetzner
+   console), then remove the old `example.net` line on the monitoring VM (`sudo ssh-keygen -f /etc/scanopy-onboard/known_hosts -R
+   example.net`); the next run records the new key. Never remove it just to make the alert stop.
+2. **Hypervisor side.** A reinstalled hypervisor lost `/usr/local/sbin/scanopy-onboard-hv` and the forced-command line in
+   `/root/.ssh/authorized_keys`; reinstall both as described above (the wrapper copy is `/opt/scanopy-onboard/scanopy_onboard_hv.py`).
+3. **Server data.** If the Scanopy database was restored, nothing else is needed: daemons reconnect with their existing keys. If it
+   was **lost**, every daemon key is invalid: create the organization, site, admin API key (store it as vault `admin_api` and in
+   `/etc/scanopy-retag/api-key`), the `docker-socket-1` credential (update `monitoring_scanopy_onboard_docker_credential_id` and
+   `monitoring_scanopy_onboard_site_id`), then re-enroll each guest with `scripts/scanopy_daemon_rollout.py` (it removes the old
+   service and config and installs a freshly provisioned daemon). `scanopy-onboard` will not do this itself: it reports a guest that
+   already runs an active `scanopy-daemon` but is unknown to Scanopy as a failure (`already active`) and leaves it alone.
+4. **Daemons that started during the outage stay down.** A daemon that boots while the server is unreachable logs `Daemon NOT ready
+   (Startup announcement failed)` and never retries (seen on 2026-10-13 with VM 650 after a reboot at the same time as the outage).
+   `ScanopyDaemonDown` fires for it; run `sudo systemctl restart scanopy-daemon` inside the guest.
+5. **0mcp relay rule.** The hypervisor's `host.fw` is rendered from `proxmox_host_additional_tcp_rules`; on 2026-10-13 a different render
+   replaced the live file at 09:48 UTC and dropped the Scanopy relay rule and the monitoring 9102 scrape rules, which cut all 18 0mcp
+   daemons off. If `scanopy_daemon_last_seen_age_seconds` is high only for 0mcp guests, check `grep 60072 /etc/pve/nodes/*/host.fw`
+   on the 0mcp hypervisor first.
+6. Check `sudo python3 /opt/scanopy-onboard/scanopy_onboard.py --dry-run` and `sudo python3 /opt/scanopy-discover/scanopy_discover.py
+   --dry-run` before the next timer run; both should report no errors.
 
 ### Scanopy-side runtime settings (not in git)
 

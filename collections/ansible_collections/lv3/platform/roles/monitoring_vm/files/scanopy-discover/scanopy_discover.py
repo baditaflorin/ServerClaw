@@ -18,6 +18,12 @@ Safety properties
   * writes node_exporter textfile metrics scanopy_discover_*
 
 Config (JSON, rendered from inventory): {"<daemon name>": "HH:MM", ...}, times in UTC.
+Daemons that are not in the file but whose Scanopy Scheduled definition is enabled with a daily cron on a quarter hour
+("0 M H * * *", UTC) are scheduled too: that is how the onboarding job (scanopy_onboard.py) hands over a new daemon, so the
+inventory does not need an edit before a new guest is scanned.
+
+It also reports daemon liveness: scanopy_daemon_last_seen_age_seconds{daemon} for every daemon Scanopy knows (a healthy
+daemon polls every ~30 s), which the ScanopyDaemonDown alert reads.
 
 Usage
   scanopy_discover.py            # start what is due
@@ -27,6 +33,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -94,6 +101,33 @@ def last_slot(now, hhmm):
     return slot if slot <= now else slot - dt.timedelta(days=1)
 
 
+DAILY_CRON = re.compile(r"^0 ([0-5]?[0-9]) ([01]?[0-9]|2[0-3]) \* \* \*$")
+
+
+def auto_slots(daemons, discoveries, known):
+    """{daemon name: "HH:MM"} for daemons absent from the inventory schedule with an enabled daily quarter-hour cron."""
+    out = {}
+    for name, daemon_id in daemons.items():
+        if name in known:
+            continue
+        disc = pick_discovery(discoveries, daemon_id)
+        if disc is None or not disc["run_type"].get("enabled"):
+            continue
+        m = DAILY_CRON.match((disc["run_type"].get("cron_schedule") or "").strip())
+        if m and int(m.group(1)) % 15 == 0:
+            out[name] = f"{int(m.group(2)):02d}:{int(m.group(1)):02d}"
+    return out
+
+
+def liveness(daemon_rows, now):
+    """[(daemon name, seconds since last_seen)]; a daemon that never checked in reports NEVER_RAN_AGE."""
+    out = []
+    for d in daemon_rows:
+        seen = parse_ts(d.get("last_seen"))
+        out.append((d["name"], (now - seen).total_seconds() if seen else NEVER_RAN_AGE))
+    return sorted(out)
+
+
 def pick_discovery(discoveries, daemon_id):
     """The Scheduled definition of this daemon; an enabled one wins over a disabled leftover."""
     mine = [d for d in discoveries if d["daemon_id"] == daemon_id and d["run_type"]["type"] == "Scheduled"]
@@ -101,7 +135,7 @@ def pick_discovery(discoveries, daemon_id):
     return mine[0] if mine else None
 
 
-def write_metrics(ok, targets, started, due, errors, oldest_age, dry_run):
+def write_metrics(ok, targets, started, due, errors, oldest_age, dry_run, alive=None, unreachable=None):
     if dry_run:
         return
     now = int(time.time())
@@ -121,6 +155,13 @@ def write_metrics(ok, targets, started, due, errors, oldest_age, dry_run):
     ]
     if oldest_age is not None:
         lines.append(f"scanopy_discover_oldest_last_run_age_seconds {int(oldest_age)}")
+    if alive is not None:
+        lines += [
+            "# HELP scanopy_daemon_last_seen_age_seconds Seconds since the Scanopy daemon last polled the server",
+            "# TYPE scanopy_daemon_last_seen_age_seconds gauge",
+        ]
+        lines += [f'scanopy_daemon_last_seen_age_seconds{{daemon="{n}"}} {int(a)}' for n, a in alive]
+        lines += [f"scanopy_daemons_total {len(alive)}", f"scanopy_daemons_unreachable {unreachable or 0}"]
     tmp = CONF["textfile"] + ".tmp"
     try:
         with open(tmp, "w") as f:
@@ -135,6 +176,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
     targets, started, due, errors, oldest_age, fatal = 0, 0, 0, 0, None, False
+    alive, unreachable = None, None
     try:
         try:
             key = open(CONF["key_file"]).read().strip()
@@ -145,10 +187,14 @@ def main():
         schedule = json.load(open(CONF["schedule_file"]))
         if not isinstance(schedule, dict) or not schedule:
             raise RuntimeError(f"{CONF['schedule_file']} must be a non-empty JSON object")
-        targets = len(schedule)
         now = utcnow()
-        daemons = {d["name"]: d["id"] for d in get_all(key, "/api/v1/daemons")}
+        daemon_rows = get_all(key, "/api/v1/daemons")
+        alive = liveness(daemon_rows, now)
+        unreachable = sum(1 for d in daemon_rows if d.get("is_unreachable"))
+        daemons = {d["name"]: d["id"] for d in daemon_rows}
         discoveries = get_all(key, "/api/v1/discovery")
+        schedule = {**auto_slots(daemons, discoveries, schedule), **schedule}
+        targets = len(schedule)
         for name in sorted(schedule, key=lambda n: schedule[n]):
             if name not in daemons:
                 log(f"ERROR {name}: no such daemon in Scanopy")
@@ -192,7 +238,7 @@ def main():
         fatal = True
     ok = not fatal and errors == 0
     log(f"targets={targets} due={due} started={started} errors={errors}" + (" (dry run)" if args.dry_run else ""))
-    write_metrics(ok, targets, started, due, errors, oldest_age, args.dry_run)
+    write_metrics(ok, targets, started, due, errors, oldest_age, args.dry_run, alive, unreachable)
     sys.exit(0 if ok else 1)
 
 

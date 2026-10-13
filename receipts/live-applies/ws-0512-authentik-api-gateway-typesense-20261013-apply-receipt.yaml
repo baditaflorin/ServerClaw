@@ -1,0 +1,32 @@
+workstream_id: ws-0512-authentik-api-gateway-typesense-20261013
+state: completed
+schema_version: 1.1.0
+started_at: '2026-10-13T10:46:49Z'
+completed_at: '2026-10-13T10:46:49Z'
+applied_by: codex/authentik-closeout-20261013
+repo_version: 0.179.51
+adr: 0491
+summary: Restore Typesense and verify Authentik-protected API Gateway catalog/search
+  on the declared production VMs.
+targets:
+- service: typesense
+  host_group: docker-runtime
+  vmid: 120
+  environment: production
+- service: api-gateway
+  host_group: runtime-control
+  environment: production
+errors: []
+notes:
+- Governed API Gateway apply completed with Ansible recap ok=414 changed=149 failed=0
+  unreachable=0; Authentik discovery issuer matched, client-credentials token was
+  obtained without logging it, anonymous protected health returned canonical 401,
+  and authenticated services/runtime-assurance/search assertions passed.
+- Typesense health returned HTTP 200; platform-services collection was readable with
+  78 documents; public API Gateway /healthz returned HTTP 200.
+- Managed post-apply Restic hook protected 5/5 sources with 0 uncovered and 0 inactive;
+  local generated receipt receipts/restic-backups/20261013T102251Z.json.
+- Temporary SSH tunnel to Typesense was closed and local listener removal verified.
+- Apply ran from codex/authentik-closeout-20261013 before this branch was committed
+  or merged; the first attempt stopped on a trailing newline in the local API-key
+  file, then the consumer normalization fix was deployed successfully.

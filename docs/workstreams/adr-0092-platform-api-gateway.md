@@ -1,5 +1,13 @@
 # Workstream ADR 0092: Unified Platform API Gateway
 
+> Historical note: the Keycloak-specific client setup and acceptance checks in
+> this original rollout record describe the March 2026 deployment. ADR 0491
+> supersedes Keycloak as the identity provider. Current Authentik runtime
+> behavior and the 2026-10-13 repair are tracked in
+> `docs/workstreams/ws-0512-authentik-consumer-e2e.md`; do not use this record
+> as evidence that Keycloak is still the gateway's provider or that Keycloak
+> can be shut down.
+
 - ADR: [ADR 0092](../adr/0092-unified-platform-api-gateway.md)
 - Title: FastAPI gateway aggregating all platform service APIs behind a single authenticated endpoint at api.example.com
 - Status: live_applied

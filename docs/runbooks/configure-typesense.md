@@ -11,7 +11,6 @@ collection replayable from git.
 - `playbooks/typesense.yml`
 - `playbooks/services/typesense.yml`
 - `roles/typesense_runtime`
-- `roles/api_gateway_runtime`
 - `scripts/typesense_catalog_sync.py`
 - `config/service-capability-catalog.json`
 - `config/api-gateway-catalog.json`
@@ -46,11 +45,17 @@ The converge flow:
 - generates and mirrors the controller-local Typesense API key into the
   OpenBao-backed runtime env contract
 - deploys the Typesense runtime on `docker-runtime`
-- refreshes the repo-managed `platform-services` collection through
-  `scripts/typesense_catalog_sync.py`
-- re-verifies the authenticated
-  `/v1/platform/search/structured?q=...&collection=platform-services` route on
-  the shared API gateway
+
+After Typesense is healthy, converge the API Gateway on its declared
+`runtime-control` host to refresh the `platform-services` collection and verify
+the authenticated search route:
+
+```bash
+make live-apply-service service=api_gateway env=production
+```
+
+This separation prevents the Typesense playbook from creating a second API
+Gateway on `docker-runtime`.
 
 ## Verify
 
@@ -85,8 +90,11 @@ Expected results:
 
 - Re-run `make converge-typesense` instead of hand-editing the runtime,
   collection schema, or Proxmox host proxy rules.
+- Re-run the API Gateway live apply separately after Typesense is healthy so
+  catalog synchronization and authenticated search checks run on
+  `runtime-control`.
 - If the controller-local API key is lost, delete
   `.local/typesense/api-key.txt` and replay the converge from git.
 - The platform service catalog is derived state. After restoring the guest or
-  the `typesense-data` volume, replay the Typesense converge and let the API
-  gateway role repopulate `platform-services`.
+  the `typesense-data` volume, replay the Typesense converge, then replay the
+  API Gateway converge so it repopulates `platform-services`.

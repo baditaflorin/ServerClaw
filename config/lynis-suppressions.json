@@ -3,16 +3,16 @@
   "suppressions": [
     {
       "id": "PKGS-7388",
-      "hosts": ["nginx", "coolify", "runtime-control"],
+      "hosts": ["nginx", "coolify", "runtime-control", "runtime-comms"],
       "reason": "Lynis does not detect the active Debian deb822 security sources on these hosts.",
-      "evidence": "Fresh 2026-10-11 host inspections confirmed the trixie-security suite in nginx /etc/apt/sources.list.d/*.sources and coolify/runtime-control /etc/apt/sources.list.d/debian.sources; the finding checks only legacy sources.list formats.",
+      "evidence": "Fresh 2026-10-11 inspections confirmed the trixie-security suite in nginx /etc/apt/sources.list.d/*.sources and coolify/runtime-control /etc/apt/sources.list.d/debian.sources. A fresh 2026-10-13 runtime-comms inspection also confirmed trixie-security in /etc/apt/sources.list.d/*.sources; this finding checks only legacy sources.list formats.",
       "recheck_when": "Revalidate if the Debian source format or Lynis package-source detection changes."
     },
     {
       "id": "FIRE-4512",
-      "hosts": ["nginx", "coolify"],
+      "hosts": ["nginx", "coolify", "runtime-comms"],
       "reason": "The host is managed with nftables, not legacy iptables rules.",
-      "evidence": "Fresh 2026-10-11 host inspections confirmed active inet filter input and forward chains with drop policies and rules on both hosts; nginx had 11/10 input/forward rules and Coolify's chains also contained explicit rules. The empty legacy iptables rule set is expected.",
+      "evidence": "Fresh 2026-10-11 inspections confirmed active inet filter input and forward chains with drop policies and rules on nginx and Coolify. A fresh 2026-10-13 runtime-comms inspection confirmed nftables input and forward chains both have drop policies and a non-empty ruleset; its empty legacy iptables rules are expected.",
       "recheck_when": "Revalidate if the guest firewall backend or nftables policy changes."
     }
   ]

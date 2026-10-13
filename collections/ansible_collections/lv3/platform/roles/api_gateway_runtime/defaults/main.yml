@@ -173,6 +173,26 @@ api_gateway_dify_tools_api_key_local_file: "{{ api_gateway_shared_local_root }}/
 api_gateway_billing_ingest_producers_local_file: "{{ api_gateway_shared_local_root }}/lago/producer-catalog.json"
 api_gateway_lago_org_api_key_local_file: "{{ api_gateway_shared_local_root }}/lago/org-api-key.txt"
 api_gateway_dify_tools_api_key_header: X-LV3-Dify-Api-Key
+api_gateway_authentik_service_topology: >-
+  {{
+    (
+      platform_service_topology | service_topology_get('authentik')
+    )
+    if (platform_service_topology is defined)
+    else (
+      hostvars[platform_topology_host].platform_service_topology | service_topology_get('authentik')
+    )
+  }}
+api_gateway_authentik_jwks_base_url: >-
+  {{
+    api_gateway_authentik_service_topology.urls.internal
+    if (
+      api_gateway_authentik_service_topology is mapping
+      and api_gateway_authentik_service_topology.urls is defined
+      and api_gateway_authentik_service_topology.urls.internal is defined
+    )
+    else authentik_oidc_base_url
+  }}
 api_gateway_typesense_service_topology: >-
   {{
     (
@@ -283,7 +303,8 @@ api_gateway_config_sources:
   - src: "{{ api_gateway_platform_vars_src }}"
     dest: platform.yml
 api_gateway_authentik_provider_slug: agent-hub
-api_gateway_authentik_jwks_url: "{{ authentik_oidc_provider_base_url }}/{{ api_gateway_authentik_provider_slug }}/jwks/"
+api_gateway_authentik_jwks_url: >-
+  {{ api_gateway_authentik_jwks_base_url | regex_replace('/+$', '') }}/application/o/{{ api_gateway_authentik_provider_slug }}/jwks/
 api_gateway_authentik_issuer_url: "{{ authentik_oidc_provider_base_url }}/{{ api_gateway_authentik_provider_slug }}/"
 api_gateway_authentik_discovery_url: "{{ authentik_oidc_provider_base_url }}/{{ api_gateway_authentik_provider_slug }}/.well-known/openid-configuration"
 api_gateway_authentik_token_url: "{{ authentik_oidc_provider_base_url }}/token/"

@@ -16,7 +16,20 @@ monitoring_scanopy_retag_enabled: true
 # Daily discovery of the Docker VMs, started from outside Scanopy (its own scheduler is unreliable). UTC, one start per
 # 15-minute run; the large Docker host (vm-0docker-ubuntu-24-04) gets a 45-minute window to itself.
 monitoring_scanopy_discover_enabled: true
+# Automatic onboarding: a running Proxmox guest without a Scanopy daemon gets one (about 30 minutes after it appears), a free daily
+# discovery slot and, when it runs Docker, the Docker credential. The 0mcp relay accepts the whole guest LAN for this reason.
+monitoring_scanopy_onboard_enabled: true
+monitoring_scanopy_onboard_site_id: a3122d15-3bec-44c1-b684-a2af1ec8df16
+monitoring_scanopy_onboard_docker_credential_id: dbe3353a-5d4b-4b1e-a723-1a87e90e4738
+monitoring_scanopy_onboard_exclude: []
+monitoring_scanopy_onboard_fleets:
+  - {name: 0docker, ssh: root@example.net, port: 22, relay_url: "http://10.10.10.1:60072"}
+  - {name: 0mcp, ssh: root@10.10.10.1, port: 22, relay_url: "http://10.10.10.1:60072"}
+  - {name: 0own, ssh: root@203.0.113.14, port: 22, relay_url: "http://10.60.10.1:60072"}
+  - {name: pve01, ssh: root@proxmox.0database.com, port: 22, relay_url: "http://10.50.0.1:60072"}
 monitoring_scanopy_discover_schedule:
+  # Slots are UTC and distinct quarter hours (one start per 15-minute run). Order: Docker VMs 01:00-05:15, Proxmox hypervisor daemons
+  # 05:30-06:15, then the guests added in the full rollout (containers, staging runtimes, pdm, spire) and the VMs without Docker.
   vm-0mcp-171-coolify-apps-lv3: "01:00"
   vm-0docker-101-docker-prod: "01:15"
   vm-0mcp-120-docker-runtime-lv3: "01:30"
@@ -33,11 +46,31 @@ monitoring_scanopy_discover_schedule:
   vm-0own-630-0own-openobserve: "04:45"
   vm-pve01-101-pve01-amd64-builder: "05:00"
   vm-pve01-runtime-1: "05:15"
-  # Proxmox hypervisor daemons: keep the Proxmox VE inventory (guests, nodes) fresh. Each needs a Scheduled discovery in Scanopy.
   pve-0docker: "05:30"
   pve-0mcp: "05:45"
   pve-0own: "06:00"
   pve-pve01: "06:15"
+  ct-0docker-107-pve-exporter: "06:30"
+  ct-0docker-108-0docker-builder: "06:45"
+  ct-0docker-109-scrapetheworld: "07:00"
+  vm-0mcp-200-0mcp-staging-runtime: "07:15"
+  vm-0own-650-pyroscope-canary: "07:30"
+  vm-0own-660-0own-staging-runtime: "07:45"
+  vm-0own-670-pdm: "08:00"
+  vm-pve01-103-spire-prod-0exec: "08:15"
+  Scanopy daemon pve01: "08:30"
+  scanopy-daemon: "08:45"
+  vm-0docker-104-debian-nginx-proxy-manager: "09:00"
+  vm-0mcp-100-hermes-agent: "09:15"
+  vm-0mcp-110-nginx-lv3: "09:30"
+  vm-0mcp-122-runtime-apps-lv3: "09:45"
+  vm-0mcp-150-postgres-lv3: "10:00"
+  vm-0mcp-151-postgres-replica-lv3: "10:15"
+  vm-0mcp-152-postgres-apps-lv3: "10:30"
+  vm-0mcp-154-postgres-data-lv3: "10:45"
+  vm-0own-github-mirror: "11:00"
+  vm-0own-own-pbs: "11:15"
+  vm-pve01-100-pg-primary: "11:30"
 monitoring_scanopy_sd_extra_endpoints:
   - target: http://10.10.10.20:8102/healthz
     module: http_2xx

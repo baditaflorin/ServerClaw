@@ -1,0 +1,65 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "ws-0512-authentik-api-gateway-typesense-20261013",
+  "applied_on": "2026-10-13",
+  "recorded_on": "2026-10-13",
+  "recorded_by": "codex",
+  "source_commit": "7bbd3e93e",
+  "repo_version_context": "0.179.51",
+  "workflow_id": "live-apply-service",
+  "adr": "0491",
+  "service_ids": [
+    "typesense",
+    "api_gateway"
+  ],
+  "summary": "Restored Typesense and verified the Authentik-protected API Gateway catalog, runtime-assurance, and search flow on the declared production VMs.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-runtime",
+      "vmid": "120"
+    },
+    {
+      "kind": "vm",
+      "name": "runtime-control"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Governed API Gateway apply",
+      "result": "pass",
+      "observed": "Ansible completed with 414 OK, 149 changed, zero failures, and zero unreachable hosts."
+    },
+    {
+      "check": "Authentik-protected API routes",
+      "result": "pass",
+      "observed": "Issuer discovery matched; client-credentials authentication succeeded without logging the token; anonymous access returned 401 and authenticated service/runtime-assurance routes returned 200."
+    },
+    {
+      "check": "Typesense catalog and search",
+      "result": "pass",
+      "observed": "Typesense health returned 200, the platform-services collection contained 78 documents, and authenticated structured search returned results from the Typesense backend."
+    },
+    {
+      "check": "Public API Gateway health",
+      "result": "pass",
+      "observed": "The public /healthz route returned HTTP 200."
+    },
+    {
+      "check": "Post-apply backup coverage",
+      "result": "pass",
+      "observed": "The managed Restic hook protected all 5 governed sources with zero uncovered and zero inactive sources."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0512-authentik-consumer-e2e.md",
+    "docs/runbooks/configure-typesense.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The live apply was executed before the source changes were committed; this commit records the exact applied implementation and adds the header-normalization regression test.",
+    "The first apply attempt stopped before its catalog request because the local API-key file had a trailing newline. Consumer-side normalization was added and the governed apply then passed.",
+    "The temporary SSH tunnel was closed and its local listener removal verified. This receipt covers only Typesense and API Gateway, not completion of every Authentik consumer migration."
+  ]
+}

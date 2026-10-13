@@ -150,3 +150,47 @@ groups:
         annotations:
           summary: "A scheduled Scanopy discovery has not run for more than 36h"
           description: "At least one daemon in monitoring_scanopy_discover_schedule has a discovery whose last run is older than 36h (daily schedule plus 12h of grace), so its containers and networks are going stale. A missed slot is only made up within 3h, so after a long Scanopy or monitoring outage it waits for the next slot. Run `sudo python3 /opt/scanopy-discover/scanopy_discover.py --dry-run` on monitoring-lv3 to see what is due, and check the Scanopy daemon of the oldest host."
+
+      - alert: ScanopyDaemonDown
+        expr: scanopy_daemon_last_seen_age_seconds > 600
+        for: 5m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "Scanopy daemon {{ $labels.daemon }} has not polled for more than 10 minutes"
+          description: "A healthy Scanopy daemon polls the server about every 30 s; {{ $labels.daemon }} last did {{ $value | humanizeDuration }} ago, so its host stops being scanned and its containers go stale in the inventory. Check that the guest is running, `systemctl status scanopy-daemon` and `journalctl -u scanopy-daemon -n 30` inside it, and that the fleet's relay (10.<fleet>:60072 on the hypervisor, scanopy-relay.socket) and host firewall still let it reach the server. A daemon that never checked in reports 10 years."
+
+  # Added 2026-10-13 (scanopy-onboard). A timer on the monitoring VM installs the Scanopy daemon in Proxmox guests that have none;
+  # scanopy_onboard_* metrics come from the same textfile collector.
+  - name: scanopy_onboard
+    rules:
+      - alert: ScanopyGuestWithoutDaemon
+        expr: (scanopy_onboard_guests_uncovered + scanopy_onboard_guests_unmanageable) > 0
+        for: 3h
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "{{ $value }} running Proxmox guest(s) have no Scanopy daemon after 3h"
+          description: "The onboarding job installs the daemon in a new guest within about 30 minutes. A guest still uncovered after 3 hours is either failing to install (see `journalctl -u scanopy-onboard` and /var/lib/scanopy-onboard/state.json on monitoring-lv3 for the error and backoff), a VM whose QEMU guest agent does not answer (install the daemon by hand with scripts/scanopy_daemon_rollout.py), or a guest that should be listed under monitoring_scanopy_onboard_exclude."
+
+      - alert: ScanopyOnboardStale
+        expr: (time() - scanopy_onboard_last_success_timestamp_seconds) > 7200
+        for: 5m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "The Scanopy onboarding job has not listed every hypervisor cleanly for 2h"
+          description: "scanopy-onboard runs every 15m and either failed or could not list the guests of at least one hypervisor (scanopy_onboard_fleet_list_ok == 0) for two hours, so new guests are not being onboarded. Check `journalctl -u scanopy-onboard` on monitoring-lv3, SSH from it to the hypervisors with /etc/scanopy-onboard/id_ed25519 (forced command `list`), and the Scanopy API at 10.10.10.1:60072."
+
+      - alert: ScanopyOnboardMetricsAbsent
+        expr: absent(scanopy_onboard_last_success_timestamp_seconds)
+        for: 30m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "scanopy_onboard_* metrics are missing"
+          description: "The scanopy-onboard textfile metrics are not being scraped (timer not running, no clean run yet, textfile removed, or monitoring-lv3 node_exporter not scraped). Check `systemctl status scanopy-onboard.timer` on monitoring-lv3."

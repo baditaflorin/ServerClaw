@@ -194,3 +194,4 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `authentik` | `ws-0517-authentik-runtime-upgrade-apply-receipt` |
 | `artifact_cache_slo` | `ws-0512-artifact-cache-prometheus-slo-20261012` |
 | `artifact_cache_plane` | `ws-0512-artifact-cache-monitoring-20261012` |
+| `api_gateway_typesense` | `ws-0512-authentik-api-gateway-typesense-20261013` |

@@ -20,7 +20,6 @@
 #   - Role: lv3.platform.proxmox_tailscale_proxy — publishes the operator-only proxy on the host.
 #   - Role: lv3.platform.proxmox_security — keeps the host firewall aligned with the declared management ports.
 #   - Role: lv3.platform.typesense_runtime — manages the Typesense runtime and controller-local API key.
-#   - Role: lv3.platform.api_gateway_runtime — refreshes the platform-services structured-search collection.
 #
 # Related ADRs: 0077, 0165, 0277
 # Related Runbooks: docs/runbooks/configure-typesense.md
@@ -36,7 +35,7 @@
     - role: lv3.platform.proxmox_tailscale_proxy
     - role: lv3.platform.proxmox_security
 
-- name: Converge Typesense and refresh the API gateway structured-search catalog on the Docker runtime VM
+- name: Converge the Typesense runtime on the Docker runtime VM
   hosts: docker-runtime
   become: true
   gather_facts: true
@@ -54,4 +53,3 @@
         linux_guest_firewall_recover_missing_docker_bridge_chains: true
     - role: lv3.platform.docker_runtime
     - role: lv3.platform.typesense_runtime
-    - role: lv3.platform.api_gateway_runtime

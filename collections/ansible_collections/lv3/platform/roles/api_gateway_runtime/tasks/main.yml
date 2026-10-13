@@ -270,6 +270,7 @@
       COPY Makefile ./Makefile
       COPY .github ./.github
       COPY .pre-commit-config.yaml ./.pre-commit-config.yaml
+      COPY .woodpecker.yml ./.woodpecker.yml
       COPY README.md ./README.md
       COPY ansible.cfg ./ansible.cfg
       COPY controller_automation_toolkit.py ./controller_automation_toolkit.py

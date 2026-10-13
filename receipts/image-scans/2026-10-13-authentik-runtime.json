@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "authentik_runtime",
+  "image_ref": "ghcr.io/goauthentik/server:2026.8.3@sha256:09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.111.0@sha256:af9f30d1de4ecfbbcd2b674371e8df787879e16832af8ab81551b0bf1ec0ad5b",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.42.4@sha256:e9f29bec38cc856bfd3a7966d2f99711b5b244a531bf121da9de3b47789eecfa",
+  "scanned_on": "2026-10-13",
+  "sbom_receipt": "receipts/sbom/09782fe56675.cdx.json",
+  "cve_receipt": "receipts/cve/09782fe56675-20261013T121937Z.grype.json",
+  "summary": {
+    "critical": 4,
+    "high": 96,
+    "medium": 102,
+    "low": 29,
+    "unknown": 86,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 317
+  }
+}

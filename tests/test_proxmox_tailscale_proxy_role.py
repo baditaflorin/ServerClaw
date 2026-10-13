@@ -44,7 +44,10 @@ def test_role_restarts_socket_listeners_after_tailscaled_restarts() -> None:
         "proxmox_tailscale_proxy_unit_states.results" in start_task["vars"]["proxmox_tailscale_proxy_unit_state_lines"]
     )
     assert "^socket=" in start_task["vars"]["proxmox_tailscale_socket_active_state"]
-    assert start_task["when"] == "proxmox_tailscale_socket_active_state != 'active'"
+    assert start_task["when"] == [
+        "proxmox_tailscale_socket_active_state != 'active'",
+        "proxmox_tailscale_service_active_state != 'active'",
+    ]
     assert "BindToDevice=tailscale0" in socket_template
     assert "Requires=tailscaled.service" in socket_template
     assert "WantedBy=sockets.target tailscaled.service" in socket_template
@@ -57,7 +60,10 @@ def test_role_asserts_proxy_listener_remains_available_after_converge() -> None:
         for task in tasks
         if task.get("name") == "Assert Proxmox Tailscale proxy listeners remain active after converge"
     )
-    assert assert_task["ansible.builtin.assert"]["that"][0] == "proxmox_tailscale_socket_active_state == 'active'"
+    availability_check = assert_task["ansible.builtin.assert"]["that"][0]
+    assert "proxmox_tailscale_socket_active_state == 'active'" in availability_check
+    assert "proxmox_tailscale_service_active_state == 'active'" in availability_check
+    assert "proxmox_tailscale_running_cmdline" in availability_check
 
 
 def test_host_inventory_proxy_ports_reference_platform_port_assignments() -> None:
@@ -88,6 +94,16 @@ def test_role_rearms_or_restarts_changed_proxy_units_after_rendering() -> None:
         for task in tasks
         if task.get("name") == "Start Proxmox Tailscale proxy sockets after re-arming changed proxy listeners"
     )
+    stopped_service_rearm_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Re-arm changed Proxmox Tailscale proxy sockets after stopping active services"
+    )
+    start_inactive_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Start Proxmox Tailscale proxy sockets when the listener is inactive"
+    )
     cmdline_task = next(
         task for task in tasks if task.get("name") == "Read active Proxmox Tailscale proxy service command lines"
     )
@@ -99,21 +115,33 @@ def test_role_rearms_or_restarts_changed_proxy_units_after_rendering() -> None:
         "proxmox_tailscale_proxy_sockets.results"
         in changed_socket_rearm_task["vars"]["proxmox_tailscale_socket_unit_changed"]
     )
-    assert changed_socket_rearm_task["when"] == "proxmox_tailscale_socket_unit_changed"
+    assert changed_socket_rearm_task["when"] == [
+        "proxmox_tailscale_socket_unit_changed",
+        "proxmox_tailscale_service_active_state != 'active'",
+    ]
     assert cmdline_task["become"] is False
     assert stop_task["ansible.builtin.systemd"]["state"] == "stopped"
     assert "proxmox_tailscale_proxy_cmdlines.results" in stop_task["vars"]["proxmox_tailscale_running_cmdline"]
     assert stop_task["when"] == [
         "proxmox_tailscale_restart_required",
         "proxmox_tailscale_service_active_state == 'active'",
+    ]
+    assert stopped_service_rearm_task["ansible.builtin.systemd"]["state"] == "restarted"
+    assert stopped_service_rearm_task["when"] == [
+        "proxmox_tailscale_socket_unit_changed",
+        "proxmox_tailscale_restart_required",
+        "proxmox_tailscale_service_active_state == 'active'",
+    ]
+    assert tasks.index(stop_task) < tasks.index(stopped_service_rearm_task)
+    assert start_inactive_task["when"] == [
         "proxmox_tailscale_socket_active_state != 'active'",
+        "proxmox_tailscale_service_active_state != 'active'",
     ]
     assert rearm_task["ansible.builtin.systemd"]["state"] == "started"
     assert "proxmox_tailscale_proxy_cmdlines.results" in rearm_task["vars"]["proxmox_tailscale_running_cmdline"]
     assert rearm_task["when"] == [
         "proxmox_tailscale_restart_required",
         "proxmox_tailscale_service_active_state == 'active'",
-        "proxmox_tailscale_socket_active_state != 'active'",
     ]
     assert restart_task["ansible.builtin.systemd"]["state"] == "restarted"
     assert "proxmox_tailscale_proxy_sockets.results" in restart_task["vars"]["proxmox_tailscale_socket_unit_changed"]
@@ -121,6 +149,22 @@ def test_role_rearms_or_restarts_changed_proxy_units_after_rendering() -> None:
     assert "proxmox_tailscale_proxy_cmdlines.results" in restart_task["vars"]["proxmox_tailscale_running_cmdline"]
     assert "proxmox_tailscale_restart_required" in restart_task["when"]
     assert "proxmox_tailscale_socket_active_state == 'active'" in restart_task["when"]
+
+    final_cmdline_task = next(
+        task for task in tasks if task.get("name") == "Read active final Proxmox Tailscale proxy service command lines"
+    )
+    listener_assert_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Assert Proxmox Tailscale proxy listeners remain active after converge"
+    )
+    assert final_cmdline_task["register"] == "proxmox_tailscale_proxy_final_cmdlines"
+    assert tasks.index(final_cmdline_task) < tasks.index(listener_assert_task)
+    assert (
+        "proxmox_tailscale_service_active_state == 'active'"
+        in listener_assert_task["ansible.builtin.assert"]["that"][0]
+    )
+    assert "proxmox_tailscale_running_cmdline" in listener_assert_task["vars"]
 
 
 def test_role_removes_units_that_are_not_in_the_declared_proxy_catalog() -> None:
