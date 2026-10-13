@@ -12,6 +12,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0492` | Scope Plausible analytics SSO to the operator email identity | `live_applied` | [ws-0519-plausible-email-sso.md](../../workstreams/ws-0519-plausible-email-sso.md) |
 | `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](../../adr/0470-deployment-fixture-matrix.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](../../adr/0448-deployment-connection-registry-and-wrapper.md) |
+| `0409` | Keep sanitized ServerClaw snapshots compatible with source validation | `merged` | [ws-0524-serverclaw-snapshot-ci-compat.md](../../workstreams/ws-0524-serverclaw-snapshot-ci-compat.md) |
 | `0409` | Accept clean ignored HTTPS alert outputs while rejecting present drift | `merged` | [ws-0500-https-alert-runtime-output-gate.md](../../workstreams/ws-0500-https-alert-runtime-output-gate.md) |
 | `0407` | Keep the ServerClaw host template aligned with the edge route catalog | `merged` | [ws-0511-serverclaw-public-route-template.md](../../workstreams/ws-0511-serverclaw-public-route-template.md) |
 | `0407` | Ops Portal Sibling-Link IaC Substitution | `merged` | [0407-generic-by-default-local-overlay-architecture.md](../../adr/0407-generic-by-default-local-overlay-architecture.md) |

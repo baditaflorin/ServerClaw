@@ -20,4 +20,4 @@ Keep the generic ServerClaw Proxmox host template compatible with the source rep
 
 ## Next
 
-Finish the private full-gate run and merge through its PR, regenerate the sanitized snapshot, then require green Woodpecker push and PR checks before merging the public snapshot PR.
+Complete. Private PR #349 merged to `main` at `bbc8ab5f3`; the sanitized snapshot passed both Woodpecker checks and public PR #72 merged at `4db0a679`. The patch release bump remains pending the canonical release process, which is blocked by active workstreams elsewhere in the repository.

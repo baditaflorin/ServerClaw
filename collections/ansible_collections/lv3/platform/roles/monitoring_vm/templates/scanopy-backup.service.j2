@@ -1,0 +1,24 @@
+[Unit]
+Description=Pull a dump of the Scanopy database from the 0docker hypervisor
+Documentation=file://{{ monitoring_scanopy_backup_readme_file }}
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+{% for key, value in monitoring_scanopy_backup_environment | dictsort %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+ExecStart=/usr/bin/python3 {{ monitoring_scanopy_backup_script_file }}
+TimeoutStartSec=900
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+# known_hosts is written under the config dir the first time the hypervisor is contacted (accept-new).
+ReadWritePaths={{ monitoring_scanopy_backup_dir }} {{ monitoring_scanopy_backup_textfile_dir }} {{ monitoring_scanopy_backup_config_dir }}
+ReadOnlyPaths={{ monitoring_scanopy_backup_install_dir }}
+UMask=0077
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

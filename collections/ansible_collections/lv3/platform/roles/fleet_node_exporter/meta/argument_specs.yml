@@ -27,6 +27,18 @@ argument_specs:
         default: /etc/default/prometheus-node-exporter
         description:
           - EnvironmentFile read by the packaged unit. Only its ARGS line is managed.
+      fleet_node_exporter_restart_forever:
+        type: bool
+        required: false
+        default: true
+        description:
+          - Render a systemd drop-in so a failed exporter is retried forever (an exporter bound to a tailnet address fails until tailscaled is up).
+      fleet_node_exporter_retry_seconds:
+        type: int
+        required: false
+        default: 15
+        description:
+          - Seconds between restart attempts in that drop-in.
       fleet_node_exporter_listen_addresses:
         type: list
         elements: str

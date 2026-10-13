@@ -262,3 +262,33 @@ Two unattended loops run on the 0docker builder (CT108) from systemd timers; bot
 - Alerts live in `config/prometheus/rules/fleet-loops.yml`. `*Silent` fires when the heartbeat timestamp is old (guardian 45 minutes, horizon 13 hours). `*NotReporting` fires when the series is absent: a staleness expression returns nothing when the target is down, so without `absent()` a dead builder would silence its own alert. The nightly `ct108-nightly` backup stops the builder for about 10 minutes, which every `for:` outlasts.
 - `FleetHorizonCriticalFinding` and `FleetPoolGuardianCriticalFinding` repeat what the loops page through their own ntfy topic, as an independent second path. While the 0docker hypervisor runs on one NVMe (four degraded md arrays), `FleetHorizonCriticalFinding` fires; it resolves when the missing disk is replaced and re-added.
 - Triage on the builder: `systemctl status fleet-pool-guardian.timer fleet-horizon.timer`, `journalctl -u fleet-pool-guardian.service -u fleet-horizon.service`, state under `/root/fleet-state/state/pool-guardian/` and `.../horizon/` (`latest.json`, `events.jsonl`). The guardian's kill switch is a `PAUSE` file in its state directory (or `FLEET_GUARDIAN_PAUSE`); the horizon's accepted problems are acknowledged in the `ACK` file there, one per line, each with a mandatory `until=YYYY-MM-DD`.
+
+## Boot ordering of the tailnet socket proxies (added 2026-10-13)
+
+A socket unit that is ordered `After=tailscaled.service` forms a cycle with systemd's implicit ordering: every socket is
+`Before=sockets.target`, `sockets.target` is before `basic.target`, and `tailscaled.service` starts after `basic.target`.
+systemd breaks such a cycle at boot by deleting start jobs. When the 0docker hypervisor was reset on 2026-10-13 it deleted
+the start jobs of the tailnet proxy sockets (the node-exporter proxy and the Woodpecker 9000 proxy) and of
+`tailscaled.service` itself: the host came up without the tailnet, its metrics were unreachable (`PveHostNodeExporterUnavailable`)
+and CI agents could not reach the Woodpecker server until the units were started by hand.
+
+- Fix: socket templates ordered after `tailscaled.service` carry `DefaultDependencies=no` (plus the shutdown conflict that
+  default dependencies would have added): `fleet_node_exporter/templates/metrics-proxy.socket.j2` and
+  `proxmox_tailscale_proxy/templates/lv3-tailscale-proxy.socket.j2`. `tests/test_fleet_observability_roles.py` pins it.
+- Check any host without rebooting it: `systemd-analyze verify default.target 2>&1 | grep -i cycle`. Empty output means
+  the boot transaction has no ordering cycle; `Found ordering cycle` lines name the units involved.
+- Live state on 2026-10-13: the 0docker hypervisor has the same lines as a drop-in
+  (`/etc/systemd/system/<socket>.d/10-no-default-deps.conf`, also for `woodpecker-exec-proxy@.socket`); the check above is
+  clean there. A role converge renders the same text into the unit itself; the drop-in is then redundant and harmless.
+  The 0mcp hypervisor still showed the cycle before this change (20 `lv3-tailscale-proxy-*` sockets); apply the role or the
+  drop-in there before its next reboot.
+- Rollback: delete the drop-in (or restore the previous unit text), `systemctl daemon-reload`. Running sockets are not
+  restarted by either step.
+
+A second boot-time failure of the same family: an exporter bound to a tailnet address cannot start until `tailscaled`
+has the address. The packaged unit (`Restart=on-failure`, 100 ms, 5 starts in 10 s) gave up for good when the 0docker
+hypervisor was reset on 2026-10-13, and the nginx guest was no longer scraped (`NodeExporterMissing`).
+`fleet_node_exporter` now renders a drop-in (`/etc/systemd/system/prometheus-node-exporter.service.d/10-retry-until-tailnet.conf`:
+ordered after `tailscaled.service`, `Restart=always`, `RestartSec=15`, no start limit); switch it off per host with
+`fleet_node_exporter_restart_forever: false`. Rollback: delete the drop-in and `systemctl daemon-reload`.
+

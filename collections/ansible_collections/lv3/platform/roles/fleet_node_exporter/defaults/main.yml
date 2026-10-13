@@ -6,6 +6,13 @@ fleet_node_exporter_package: prometheus-node-exporter
 fleet_node_exporter_service: prometheus-node-exporter
 fleet_node_exporter_defaults_file: /etc/default/prometheus-node-exporter
 
+# The packaged unit restarts a failed exporter 5 times in 10 seconds (Restart=on-failure, 100ms) and then gives up for good.
+# An exporter bound to a tailnet address fails until tailscaled is up, so after a reboot it can stay dead (the nginx VM on the
+# 0docker hypervisor did on 2026-10-13). true renders a drop-in that retries every fleet_node_exporter_retry_seconds, with no
+# start limit and ordered after tailscaled.
+fleet_node_exporter_restart_forever: true
+fleet_node_exporter_retry_seconds: 15
+
 # Every address the exporter itself binds, as "address:port". Required, no
 # default: an exporter without an explicit address would listen on all
 # interfaces, which this fleet never wants. Several entries need an exporter

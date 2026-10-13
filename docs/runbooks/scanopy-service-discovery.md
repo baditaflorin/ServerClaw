@@ -46,6 +46,8 @@ rules in `config/prometheus/rules/inventory.yml` alert on staleness, shrinkage a
 | `scanopy_onboard.py`, `scanopy_onboard_hv.py`, `fleets.json`, README | `roles/monitoring_vm/files/scanopy-onboard/`, `monitoring_scanopy_onboard_*` | `monitoring_vm` (`scanopy_onboard.yml`) | Installs the daemon in new Proxmox guests. See "Automatic onboarding of new guests". |
 | `scanopy-onboard.service` / `.timer` | `roles/monitoring_vm/templates/scanopy-onboard.*.j2` | `monitoring_vm` | Timer runs every 15 minutes (minute 07/22/37/52); enabled, never restarted by a converge. Reuses `/etc/scanopy-retag/api-key`. |
 | `/etc/scanopy-onboard/id_ed25519` | generated once by the role (`ssh-keygen`, `creates:`) | `monitoring_vm` | Dedicated key; its public half is a forced-command line on each hypervisor. |
+| `scanopy_backup.py`, `scanopy_backup_hv.sh`, README | `roles/monitoring_vm/files/scanopy-backup/`, `monitoring_scanopy_backup_*` | `monitoring_vm` (`scanopy_backup.yml`) | Nightly pull of the Scanopy database. See "Database backup". |
+| `scanopy-backup.service` / `.timer` | `roles/monitoring_vm/templates/scanopy-backup.*.j2` | `monitoring_vm` | Daily 03:20 UTC; enabled, never restarted by a converge. |
 | `rules/inventory.yml`, `rules/zz-alertmanager-watchdog.yml` | `config/prometheus/rules/` | `monitoring_vm` | Reload only. `inventory.yml` also carries the `scanopy_retag`, `scanopy_discover` (incl. `ScanopyDaemonDown`) and `scanopy_onboard` alert groups. |
 | `/etc/alertmanager/alertmanager.yml` | `config/alertmanager/alertmanager.yml` | `alertmanager_runtime` | ntfy-only routing, validated with `amtool check-config`, applied with a reload. |
 | `/etc/alertmanager/ntfy-password` | controller-local `alertmanager_runtime_ntfy_password_local_file` | `alertmanager_runtime` | root:prometheus `0640` (Alertmanager runs as `prometheus`). |
@@ -340,6 +342,39 @@ Verified end to end on 2026-10-13: the daemon was stopped and deleted in Scanopy
 (0mcp-staging-runtime); the next run re-installed both, they checked in, got slots 12:00 and 12:15 UTC, and VM 200 got the Docker
 credential. Roll back with `sudo systemctl disable --now scanopy-onboard.timer` or `monitoring_scanopy_onboard_enabled: false`.
 
+### Database backup
+
+The Scanopy Postgres is part of the compose project on the 0docker hypervisor, which PBS does not back up (it backs up guests); until
+2026-10-13 the only copy was one dump from 2026-10-08 on the same host. `scanopy-backup` (systemd timer on the monitoring VM, daily
+03:20 UTC) pulls a fresh `pg_dump` to the monitoring VM, which lives in another fleet (0mcp) and is itself in the nightly PBS job to
+`own-pbs` (02:00), so there are two further copies one night later.
+
+- The pull is `ssh root@example.net dump` with `/etc/scanopy-backup/id_ed25519`. On the hypervisor that key is a forced command
+  (`/usr/local/sbin/scanopy-backup-hv`, the copy of `scanopy_backup_hv.sh` kept in `/opt/scanopy-backup/`) that only streams
+  `docker exec scanopy-postgres-1 pg_dump ... | gzip`: `command="/usr/local/sbin/scanopy-backup-hv",no-pty,no-port-forwarding,
+  no-agent-forwarding,no-X11-forwarding,from="10.10.10.40,203.0.113.1" ssh-ed25519 AAAA... scanopy-backup` in `/root/.ssh/authorized_keys`.
+  Reinstall both after the hypervisor is rebuilt (see the next section for the host key).
+- The dump is verified before it is kept: gzip integrity, at least 10 kB, the `PostgreSQL database dump complete` trailer, and the
+  core tables (`daemons`, `hosts`, `discovery`, `api_keys`, `credentials`). It lands in `/var/backups/scanopy/scanopy-<UTC>.sql.gz`
+  (root only, `0600`: it holds credential material), the newest 14 are kept, and a failed run changes nothing. Metrics
+  (`scanopy_backup.prom`): `scanopy_backup_last_success_timestamp_seconds` (kept across failed runs, so its age keeps growing),
+  `scanopy_backup_last_attempt_success`, `scanopy_backup_last_size_bytes`, `scanopy_backup_files`. Alerts: `ScanopyBackupStale`
+  (no verified dump for 36 h) and `ScanopyBackupMetricsAbsent`.
+- Manual: `sudo systemctl start scanopy-backup.service`, `sudo python3 /opt/scanopy-backup/scanopy_backup.py --dry-run`.
+  Roll back with `sudo systemctl disable --now scanopy-backup.timer` or `monitoring_scanopy_backup_enabled: false`.
+
+**Restore** (verified on 2026-10-13 into a scratch database: 41 daemons, 81 hosts, 154 discoveries, 41 API keys and 5 credentials,
+equal to live). The dump is plain SQL made with `--clean --if-exists`. Copy it to the new Scanopy host, stop the server container
+(`docker compose stop server` in `/Users/live`), then load it into the (empty or existing) database and start the server again:
+
+```bash
+zcat scanopy-<UTC>.sql.gz | docker exec -i scanopy-postgres-1 sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -q'
+```
+
+To rehearse without touching the live database, create a scratch database first (`create database scanopy_restore_test`), load into
+that with `-d scanopy_restore_test`, compare row counts, and drop it. A restored database keeps every daemon key, so the daemons
+reconnect on their own; only a lost database needs the re-enrolment in the next section.
+
 ### Recovery after the Scanopy server or the 0docker hypervisor is rebuilt
 
 The Scanopy server, its Postgres and the hypervisor-local daemon run as a compose project on the **0docker hypervisor** (not in a
@@ -357,8 +392,8 @@ When the hypervisor is back:
    example.net`); the next run records the new key. Never remove it just to make the alert stop.
 2. **Hypervisor side.** A reinstalled hypervisor lost `/usr/local/sbin/scanopy-onboard-hv` and the forced-command line in
    `/root/.ssh/authorized_keys`; reinstall both as described above (the wrapper copy is `/opt/scanopy-onboard/scanopy_onboard_hv.py`).
-3. **Server data.** If the Scanopy database was restored, nothing else is needed: daemons reconnect with their existing keys. If it
-   was **lost**, every daemon key is invalid: create the organization, site, admin API key (store it as vault `admin_api` and in
+3. **Server data.** If the Scanopy database was restored (from `/var/backups/scanopy`, see "Database backup"), nothing else is needed:
+   daemons reconnect with their existing keys. If it was **lost** (no usable dump), every daemon key is invalid: create the organization, site, admin API key (store it as vault `admin_api` and in
    `/etc/scanopy-retag/api-key`), the `docker-socket-1` credential (update `monitoring_scanopy_onboard_docker_credential_id` and
    `monitoring_scanopy_onboard_site_id`), then re-enroll each guest with `scripts/scanopy_daemon_rollout.py` (it removes the old
    service and config and installs a freshly provisioned daemon). `scanopy-onboard` will not do this itself: it reports a guest that

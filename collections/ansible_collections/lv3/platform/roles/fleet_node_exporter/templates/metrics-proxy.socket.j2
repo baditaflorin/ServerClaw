@@ -1,8 +1,15 @@
+{# After=tailscaled.service plus the implicit Before=sockets.target of every socket unit is an ordering cycle
+   (tailscaled starts after basic.target, which starts after sockets.target). systemd breaks it at boot by deleting
+   start jobs: on 2026-10-13 the 0docker hypervisor came up without these proxies and without tailscaled. A socket
+   without default dependencies is not ordered Before=sockets.target, so there is no cycle. #}
 [Unit]
 Description={{ item.socket_description }}
 After=network-online.target tailscaled.service
 Wants=network-online.target
 Requires=tailscaled.service
+DefaultDependencies=no
+Conflicts=shutdown.target
+Before=shutdown.target
 
 [Socket]
 ListenStream={{ item.listen_address }}:{{ item.listen_port }}

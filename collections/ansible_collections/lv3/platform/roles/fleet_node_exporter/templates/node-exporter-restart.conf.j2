@@ -1,0 +1,11 @@
+# Added 2026-10-13. The exporter listens on the tailnet address, which does not exist until tailscaled is up. The stock unit
+# (Restart=on-failure, 100ms, 5 starts per 10s) gave up for good at the 2026-10-13 reboot and nothing scraped this host.
+# Retry every {{ fleet_node_exporter_retry_seconds }}s without a start limit; remove this file and `systemctl daemon-reload` to undo.
+[Unit]
+After=tailscaled.service network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Restart=always
+RestartSec={{ fleet_node_exporter_retry_seconds }}

@@ -357,7 +357,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 346 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 347 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
@@ -365,6 +365,7 @@ Showing 25 of 346 merged or live-applied workstreams. Full history: [merged work
 | `0492` | Scope Plausible analytics SSO to the operator email identity | `live_applied` | [ws-0519-plausible-email-sso.md](docs/workstreams/ws-0519-plausible-email-sso.md) |
 | `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](docs/adr/0470-deployment-fixture-matrix.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](docs/adr/0448-deployment-connection-registry-and-wrapper.md) |
+| `0409` | Keep sanitized ServerClaw snapshots compatible with source validation | `merged` | [ws-0524-serverclaw-snapshot-ci-compat.md](docs/workstreams/ws-0524-serverclaw-snapshot-ci-compat.md) |
 | `0409` | Accept clean ignored HTTPS alert outputs while rejecting present drift | `merged` | [ws-0500-https-alert-runtime-output-gate.md](docs/workstreams/ws-0500-https-alert-runtime-output-gate.md) |
 | `0407` | Keep the ServerClaw host template aligned with the edge route catalog | `merged` | [ws-0511-serverclaw-public-route-template.md](docs/workstreams/ws-0511-serverclaw-public-route-template.md) |
 | `0407` | Ops Portal Sibling-Link IaC Substitution | `merged` | [0407-generic-by-default-local-overlay-architecture.md](docs/adr/0407-generic-by-default-local-overlay-architecture.md) |
@@ -385,7 +386,6 @@ Showing 25 of 346 merged or live-applied workstreams. Full history: [merged work
 | `0252` | Integrate ADR 0252 exact-main replay onto current origin/main | `merged` | [ws-0252-main-merge.md](docs/workstreams/ws-0252-main-merge.md) |
 | `0238` | Integrate ADR 0238 operator grid into origin/main | `merged` | [ws-0238-main-integration.md](docs/workstreams/ws-0238-main-integration.md) |
 | `0237` | Live apply schema-first human forms via React Hook Form and Zod | `live_applied` | [ws-0237-live-apply.md](docs/workstreams/ws-0237-live-apply.md) |
-| `0236` | Live apply TanStack Query server-state conventions on the Windmill operator admin app | `live_applied` | [ws-0236-live-apply.md](docs/workstreams/ws-0236-live-apply.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements

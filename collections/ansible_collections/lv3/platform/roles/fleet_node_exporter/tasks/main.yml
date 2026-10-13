@@ -3,7 +3,7 @@
 # Use case: Run from playbooks/fleet-observability.yml with an explicit --limit; never as part of a fleet-wide converge.
 # Inputs: fleet_node_exporter_* host variables (see defaults/main.yml and meta/argument_specs.yml).
 # Outputs: ARGS line in the exporter defaults file, textfile directory, optional systemd socket proxies, optional tailscale serve TCP forwards.
-# Idempotency: Idempotent. The exporter restarts only when its ARGS line changes; proxies restart only when their unit text changes.
+# Idempotency: Idempotent. The exporter restarts only when its ARGS line changes (the retry drop-in only reloads systemd); proxies restart only when their unit text changes.
 # Dependencies: The prometheus-node-exporter package (installed here when fleet_node_exporter_manage_package is true) and, for proxies or serve ports, tailscaled.
 
 - name: Validate node exporter inputs
@@ -46,6 +46,30 @@
     mode: "0644"
     backup: true
   notify: Restart fleet node exporter
+
+- name: Ensure the exporter unit drop-in directory exists
+  ansible.builtin.file:
+    path: "{{ fleet_node_exporter_unit_dir }}/{{ fleet_node_exporter_service }}.service.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: fleet_node_exporter_restart_forever | bool
+
+- name: Render the exporter retry drop-in (restart forever, ordered after tailscaled)
+  ansible.builtin.template:
+    src: node-exporter-restart.conf.j2
+    dest: "{{ fleet_node_exporter_unit_dir }}/{{ fleet_node_exporter_service }}.service.d/10-retry-until-tailnet.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  register: fleet_node_exporter_restart_dropin
+  when: fleet_node_exporter_restart_forever | bool
+
+- name: Reload systemd when the retry drop-in changed
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: fleet_node_exporter_restart_dropin is changed
 
 - name: Ensure the node exporter service is enabled and running
   ansible.builtin.systemd:

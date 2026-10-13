@@ -164,6 +164,19 @@ def exporter_artifacts(host: str, context: dict[str, Any]) -> list[Artifact]:
         )
     line = _render(role, "node-exporter-args.j2", context).strip()
     artifacts.append(Artifact(host, role, context["fleet_node_exporter_defaults_file"], "line", content=line + "\n"))
+    if context["fleet_node_exporter_restart_forever"]:
+        artifacts.append(
+            Artifact(
+                host,
+                role,
+                f"{context['fleet_node_exporter_unit_dir']}/{context['fleet_node_exporter_service']}.service.d/10-retry-until-tailnet.conf",
+                "file",
+                content=_render(role, "node-exporter-restart.conf.j2", context),
+                mode="644",
+                owner="root",
+                group="root",
+            )
+        )
     for proxy in context["fleet_node_exporter_socket_proxies"]:
         if proxy.get("state") == "disabled":
             artifacts.append(
