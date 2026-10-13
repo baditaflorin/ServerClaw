@@ -261,6 +261,8 @@ monitoring_prometheus_inventory_rules_source_file: "{{ monitoring_repo_root }}/c
 monitoring_prometheus_inventory_rules_file: "{{ monitoring_prometheus_rules_dir }}/inventory.yml"
 monitoring_prometheus_fleet_disk_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/fleet-disk.yml"
 monitoring_prometheus_fleet_disk_rules_file: "{{ monitoring_prometheus_rules_dir }}/fleet-disk.yml"
+monitoring_prometheus_fleet_loops_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/fleet-loops.yml"
+monitoring_prometheus_fleet_loops_rules_file: "{{ monitoring_prometheus_rules_dir }}/fleet-loops.yml"
 monitoring_prometheus_watchdog_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/zz-alertmanager-watchdog.yml"
 monitoring_prometheus_watchdog_rules_file: "{{ monitoring_prometheus_rules_dir }}/zz-alertmanager-watchdog.yml"
 monitoring_prometheus_url: http://127.0.0.1:9090
