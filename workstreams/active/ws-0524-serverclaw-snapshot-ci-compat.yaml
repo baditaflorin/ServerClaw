@@ -1,11 +1,11 @@
 id: ws-0524-serverclaw-snapshot-ci-compat
 adr: 0409
 title: Keep sanitized ServerClaw snapshots compatible with source validation
-status: in_progress
-ready_to_merge: false
+status: merged
+ready_to_merge: true
 live_applied: false
 owner: codex
-branch: codex/serverclaw-snapshot-ci-compat-20261013
+branch: codex/ws-0524-closeout-20261013
 worktree_path: .worktrees/authentik-release-0.179.52-20261013
 doc: docs/workstreams/ws-0524-serverclaw-snapshot-ci-compat.md
 depends_on: []
@@ -46,6 +46,12 @@ ownership_manifest:
     - changelog.md
     mode: shared_contract
     contract: release-truth-v1
+  - id: merged_workstream_status_projection
+    paths:
+    - README.md
+    - docs/status/history/merged-workstreams.md
+    mode: shared_contract
+    contract: generated-status-docs-v1
   - id: active_workstream_registry
     paths:
     - workstreams.yaml
@@ -78,5 +84,5 @@ tasks:
 - id: t1
   title: Make generic host template validation explicit and regenerate the sanitized
     public snapshot
-  status: in_progress
+  status: completed
 plane_issue_id: 8b08f723-44a5-47c4-9d23-5d223fe53439

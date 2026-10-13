@@ -253,6 +253,21 @@ argument_specs:
         required: false
         description:
           - Optional Environment= overrides for the onboard unit (ONBOARD_MAX_INSTALLS_PER_RUN, ONBOARD_MIN_UNCOVERED_RUNS, ONBOARD_SLOT_FROM).
+      monitoring_scanopy_backup_enabled:
+        type: bool
+        required: false
+        description:
+          - Install the job and timer that pull a nightly dump of the Scanopy database from the 0docker hypervisor to this VM.
+      monitoring_scanopy_backup_on_calendar:
+        type: str
+        required: false
+        description:
+          - systemd OnCalendar expression of the timer (default every day 03:20 UTC).
+      monitoring_scanopy_backup_environment:
+        type: dict
+        required: false
+        description:
+          - Optional Environment= overrides for the backup unit (BACKUP_SSH, BACKUP_SSH_PORT, BACKUP_KEEP, BACKUP_MIN_BYTES).
       monitoring_influxdb_url:
         type: str
         required: true

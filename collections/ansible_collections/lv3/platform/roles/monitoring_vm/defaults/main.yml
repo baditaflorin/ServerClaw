@@ -285,6 +285,26 @@ monitoring_scanopy_onboard_docker_credential_id: ""
 monitoring_scanopy_onboard_exclude: []
 # [{name, ssh: "root@host", port, relay_url}] one per hypervisor; set per host in inventory/host_vars.
 monitoring_scanopy_onboard_fleets: []
+# --- Nightly Scanopy database backup (see docs/runbooks/scanopy-service-discovery.md, "Database backup") ---
+# The Scanopy Postgres lives on the 0docker hypervisor, which PBS does not back up. The monitoring VM (another fleet) pulls a
+# pg_dump every night through a forced-command SSH key; the hypervisor side (scanopy_backup_hv.sh + key line) is installed outside
+# this role.
+monitoring_scanopy_backup_enabled: false
+monitoring_scanopy_backup_install_dir: /opt/scanopy-backup
+monitoring_scanopy_backup_script_file: "{{ monitoring_scanopy_backup_install_dir }}/scanopy_backup.py"
+monitoring_scanopy_backup_hv_script_file: "{{ monitoring_scanopy_backup_install_dir }}/scanopy_backup_hv.sh"
+monitoring_scanopy_backup_readme_file: "{{ monitoring_scanopy_backup_install_dir }}/README"
+monitoring_scanopy_backup_config_dir: /etc/scanopy-backup
+monitoring_scanopy_backup_ssh_key_file: "{{ monitoring_scanopy_backup_config_dir }}/id_ed25519"
+monitoring_scanopy_backup_dir: /var/backups/scanopy
+monitoring_scanopy_backup_textfile_dir: "{{ monitoring_scanopy_sd_textfile_dir }}"
+monitoring_scanopy_backup_service_name: scanopy-backup.service
+monitoring_scanopy_backup_timer_name: scanopy-backup.timer
+monitoring_scanopy_backup_service_file: /etc/systemd/system/scanopy-backup.service
+monitoring_scanopy_backup_timer_file: /etc/systemd/system/scanopy-backup.timer
+monitoring_scanopy_backup_on_calendar: "*-*-* 03:20:00 UTC"
+# Optional Environment= overrides (BACKUP_SSH, BACKUP_SSH_PORT, BACKUP_KEEP, BACKUP_MIN_BYTES).
+monitoring_scanopy_backup_environment: {}
 # Prometheus rule files shipped from config/prometheus/rules/ for the discovery pipeline and the Alertmanager heartbeat.
 monitoring_prometheus_inventory_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/inventory.yml"
 monitoring_prometheus_inventory_rules_file: "{{ monitoring_prometheus_rules_dir }}/inventory.yml"

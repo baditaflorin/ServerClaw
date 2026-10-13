@@ -1,0 +1,24 @@
+scanopy-backup: nightly pull of the Scanopy database to the monitoring VM
+
+Why: the Scanopy server, Postgres and hypervisor-local daemon run on the 0docker hypervisor, which PBS does not back up (it backs
+up guests). Losing that host would lose every daemon key, credential assignment, tag and schedule. The monitoring VM lives in another
+fleet (0mcp), so a dump kept here survives the loss of 0docker.
+
+Each night (03:20 UTC) the job runs `ssh root@example.net dump` with /etc/scanopy-backup/id_ed25519. The key is a forced command
+(/usr/local/sbin/scanopy-backup-hv on the hypervisor) that can only stream `pg_dump | gzip`. The dump is written as .part, verified
+(gzip integrity, size, pg_dump completion trailer, the core tables), moved to /var/backups/scanopy/scanopy-<UTC>.sql.gz (0600) and
+the newest 14 are kept. A failed run leaves older dumps untouched.
+
+Files
+  /opt/scanopy-backup/scanopy_backup.py        the job (python3 stdlib)
+  /opt/scanopy-backup/scanopy_backup_hv.sh     copy of the hypervisor wrapper (install as /usr/local/sbin/scanopy-backup-hv)
+  /etc/scanopy-backup/id_ed25519(.pub)         dedicated key; known_hosts is kept next to it
+  /var/backups/scanopy/                        the dumps (root only; they hold credential material)
+  /var/lib/prometheus/node-exporter/scanopy_backup.prom   metrics scanopy_backup_*
+  systemd: scanopy-backup.service (oneshot) + scanopy-backup.timer
+
+Manual run:  sudo systemctl start scanopy-backup.service ; journalctl -u scanopy-backup -n 20
+Dry run:     sudo python3 /opt/scanopy-backup/scanopy_backup.py --dry-run
+Restore:     see docs/runbooks/scanopy-service-discovery.md, "Database backup".
+Rollback:    systemctl disable --now scanopy-backup.timer
+Managed by the monitoring_vm role (tasks/scanopy_backup.yml).

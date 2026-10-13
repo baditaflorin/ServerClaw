@@ -20,6 +20,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - Restore governed Plane API access through a loopback-only SSH forward and document the procedure.
 - Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
 - Keep the sanitized ServerClaw host template consistent with active authenticated edge routes.
+- Keep sanitized ServerClaw snapshots compatible with validation without publishing deployment-specific firewall exceptions.
 - Allow an explicitly configured operator email to access Plausible through a dedicated Authentik OAuth client and proxy.
 - Cap Plausible ClickHouse diagnostic system logs at one day without changing analytics event retention.
 

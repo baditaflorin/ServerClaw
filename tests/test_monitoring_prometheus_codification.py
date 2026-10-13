@@ -334,6 +334,8 @@ def test_discovery_and_watchdog_rules_are_shipped_from_the_repo() -> None:
         "ScanopyGuestWithoutDaemon",
         "ScanopyOnboardStale",
         "ScanopyOnboardMetricsAbsent",
+        "ScanopyBackupStale",
+        "ScanopyBackupMetricsAbsent",
     }
     assert [rule["alert"] for rule in watchdog_rules] == ["Watchdog"]
     assert watchdog_rules[0]["expr"] == "vector(1)"
@@ -712,6 +714,39 @@ def test_scanopy_onboard_alerts_cover_uncovered_guests_stale_runs_and_missing_me
     assert rules["ScanopyOnboardMetricsAbsent"]["expr"] == "absent(scanopy_onboard_last_success_timestamp_seconds)"
     for rule in rules.values():
         assert rule["labels"] == {"severity": "warning", "service": "inventory"}
+
+
+def test_scanopy_backup_is_off_by_default_hardened_and_alerted() -> None:
+    defaults = yaml.safe_load((MONITORING_ROLE / "defaults" / "main.yml").read_text())
+    host_vars = yaml.safe_load(MONITORING_HOST_VARS.read_text())
+    main_tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "main.yml").read_text())
+    include = next(task for task in main_tasks if task.get("name") == "Install the nightly Scanopy database backup pull")
+    tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "scanopy_backup.yml").read_text())
+    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"]["options"]
+    context = _context(MONITORING_ROLE / "defaults" / "main.yml", host_vars)
+    env = _environment(MONITORING_ROLE / "templates")
+    service = env.get_template("scanopy-backup.service.j2").render(**context)
+    timer = env.get_template("scanopy-backup.timer.j2").render(**context)
+    inventory = yaml.safe_load((RULES_DIR / "inventory.yml").read_text())
+    group = next(group for group in inventory["groups"] if group["name"] == "scanopy_backup")
+    rules = {rule["alert"]: rule for rule in group["rules"]}
+
+    assert defaults["monitoring_scanopy_backup_enabled"] is False and host_vars["monitoring_scanopy_backup_enabled"] is True
+    assert include["ansible.builtin.include_tasks"] == "scanopy_backup.yml"
+    assert include["when"] == "monitoring_scanopy_backup_enabled | bool"
+    keygen = next(task for task in tasks if task["name"] == "Generate the dedicated backup SSH key (only when missing)")
+    assert keygen["ansible.builtin.command"]["creates"] == "{{ monitoring_scanopy_backup_ssh_key_file }}"
+    private_dirs = [item for task in tasks if "ansible.builtin.file" in task for item in task["loop"] if item["path"].endswith("backup_dir }}")]
+    assert private_dirs and all(item["mode"] == "0700" for item in private_dirs)  # dumps hold credential material
+    for name in ("monitoring_scanopy_backup_enabled", "monitoring_scanopy_backup_on_calendar", "monitoring_scanopy_backup_environment"):
+        assert name in specs
+    for hardening in ("NoNewPrivileges=yes", "ProtectSystem=strict", "PrivateTmp=yes", "ProtectHome=yes", "UMask=0077"):
+        assert hardening in service
+    assert "ReadWritePaths=/var/backups/scanopy /var/lib/prometheus/node-exporter /etc/scanopy-backup\n" in service
+    assert "OnCalendar=*-*-* 03:20:00 UTC" in timer
+    assert set(rules) == {"ScanopyBackupStale", "ScanopyBackupMetricsAbsent"}
+    assert rules["ScanopyBackupStale"]["expr"] == "(time() - scanopy_backup_last_success_timestamp_seconds) > 36 * 3600"
+    assert rules["ScanopyBackupMetricsAbsent"]["expr"] == "absent(scanopy_backup_last_success_timestamp_seconds)"
 
 
 def test_guests_scraped_for_node_metrics_allow_the_monitoring_guest_on_9100() -> None:

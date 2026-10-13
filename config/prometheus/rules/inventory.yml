@@ -194,3 +194,27 @@ groups:
         annotations:
           summary: "scanopy_onboard_* metrics are missing"
           description: "The scanopy-onboard textfile metrics are not being scraped (timer not running, no clean run yet, textfile removed, or monitoring-lv3 node_exporter not scraped). Check `systemctl status scanopy-onboard.timer` on monitoring-lv3."
+
+  # Added 2026-10-13 (scanopy-backup). The Scanopy database lives on the 0docker hypervisor, which PBS does not cover; a nightly
+  # timer on the monitoring VM pulls a verified pg_dump. scanopy_backup_* metrics come from the same textfile collector.
+  - name: scanopy_backup
+    rules:
+      - alert: ScanopyBackupStale
+        expr: (time() - scanopy_backup_last_success_timestamp_seconds) > 36 * 3600
+        for: 10m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "No verified Scanopy database dump for more than 36h"
+          description: "scanopy-backup pulls a pg_dump of the Scanopy database from the 0docker hypervisor every night at 03:20 UTC and the last verified one is older than 36 hours. Losing that hypervisor now would lose daemon keys, credentials, tags and schedules. Check `journalctl -u scanopy-backup` on monitoring-lv3, SSH from it with /etc/scanopy-backup/id_ed25519 to the hypervisor (forced command `dump`; the host key is pinned in /etc/scanopy-backup/known_hosts), and that the scanopy-postgres-1 container runs."
+
+      - alert: ScanopyBackupMetricsAbsent
+        expr: absent(scanopy_backup_last_success_timestamp_seconds)
+        for: 1h
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "scanopy_backup_* metrics are missing"
+          description: "The scanopy-backup textfile metrics are not being scraped (timer not running, no successful run yet, textfile removed, or monitoring-lv3 node_exporter not scraped). Check `systemctl status scanopy-backup.timer` on monitoring-lv3."

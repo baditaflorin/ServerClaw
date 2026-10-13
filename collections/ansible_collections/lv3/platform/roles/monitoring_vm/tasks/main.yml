@@ -237,6 +237,10 @@
   ansible.builtin.include_tasks: scanopy_onboard.yml
   when: monitoring_scanopy_onboard_enabled | bool
 
+- name: Install the nightly Scanopy database backup pull
+  ansible.builtin.include_tasks: scanopy_backup.yml
+  when: monitoring_scanopy_backup_enabled | bool
+
 - name: Copy the Tier-0 replication alert rules
   ansible.builtin.copy:
     src: "{{ monitoring_prometheus_tier0_rules_source_file }}"

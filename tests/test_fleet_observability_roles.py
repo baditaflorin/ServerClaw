@@ -154,6 +154,9 @@ def test_socket_proxy_units_match_the_live_text() -> None:
         "After=network-online.target tailscaled.service\n"
         "Wants=network-online.target\n"
         "Requires=tailscaled.service\n"
+        "DefaultDependencies=no\n"
+        "Conflicts=shutdown.target\n"
+        "Before=shutdown.target\n"
         "\n"
         "[Socket]\n"
         "ListenStream=192.0.2.11:9100\n"
@@ -223,6 +226,9 @@ def test_build_metrics_proxy_socket_renders_freebind_on_the_tailnet_address_and_
         "After=network-online.target tailscaled.service\n"
         "Wants=network-online.target\n"
         "Requires=tailscaled.service\n"
+        "DefaultDependencies=no\n"
+        "Conflicts=shutdown.target\n"
+        "Before=shutdown.target\n"
         "\n"
         "[Socket]\n"
         "ListenStream=203.0.113.6:9103\n"
@@ -529,7 +535,7 @@ def test_pgbackrest_config_stays_dormant_and_free_of_secrets() -> None:
     assert 'STANZA="${STANZA:-main}"' in wrapper  # was "prod": a stanza the config does not define
     assert "OnCalendar=" in timer and "ExecStart=/usr/local/sbin/pgbackrest-daily" in service
     # The units are only prepared: nothing renders into /etc/systemd/system unless the timer is explicitly enabled.
-    assert all(not path.startswith("/etc/systemd/system") for path in artifacts)
+    assert all(not path.startswith("/etc/systemd/system") for path, artifact in artifacts.items() if artifact.role == "fleet_pg_backup")
     defaults = fleet.role_defaults("fleet_pg_backup")
     assert defaults["fleet_pg_backup_pgbackrest_timer_enabled"] is False
     assert defaults["fleet_pg_backup_pgbackrest_repo"] == {}
@@ -741,3 +747,57 @@ def test_tasks_only_use_fully_qualified_builtin_modules() -> None:
         for task_file in (ROLES / role / "tasks").glob("*.yml"):
             walk(yaml.safe_load(task_file.read_text(encoding="utf-8")), f"{role}/{task_file.name}")
     walk(yaml.safe_load(PLAYBOOK.read_text(encoding="utf-8"))[0]["tasks"], "playbook")
+
+
+def test_every_socket_proxy_template_ordered_after_tailscaled_has_no_default_dependencies() -> None:
+    """After=tailscaled.service plus the implicit Before=sockets.target is an ordering cycle (tailscaled starts after
+    basic.target, which starts after sockets.target). At the 2026-10-13 reboot of the 0docker hypervisor systemd broke it
+    by deleting the start jobs of these sockets and of tailscaled itself. DefaultDependencies=no removes the implicit
+    ordering, so every such socket template must carry it (with the shutdown conflict it loses)."""
+    roles = REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "roles"
+    templates = [
+        roles / "fleet_node_exporter" / "templates" / "metrics-proxy.socket.j2",
+        roles / "proxmox_tailscale_proxy" / "templates" / "lv3-tailscale-proxy.socket.j2",
+    ]
+    for template in templates:
+        text = template.read_text(encoding="utf-8")
+        unit = text.split("[Socket]", 1)[0]
+        assert "After=network-online.target tailscaled.service" in unit, template
+        assert "DefaultDependencies=no\n" in unit, f"{template.name} reintroduces the tailscaled/sockets.target ordering cycle"
+        assert "Conflicts=shutdown.target\n" in unit and "Before=shutdown.target\n" in unit, template
+
+
+def test_exporter_retry_dropin_restarts_forever_after_tailscaled() -> None:
+    """The packaged unit gives up after 5 starts in 10s; an exporter bound to a tailnet address fails until tailscaled is
+    up, so after the 2026-10-13 reboot the nginx VM exporter stayed dead and nothing scraped the host."""
+    role = "fleet_node_exporter"
+    context = _context(role, **STUB_EXPORTER)
+    text = fleet._render(role, "node-exporter-restart.conf.j2", context)
+    unit, service = text.split("[Service]")
+    assert "After=tailscaled.service network-online.target\n" in unit
+    assert "StartLimitIntervalSec=0\n" in unit
+    assert "Restart=always\n" in service and "RestartSec=15\n" in service
+    assert "RestartSec=30\n" in fleet._render(role, "node-exporter-restart.conf.j2", {**context, "fleet_node_exporter_retry_seconds": 30})
+
+
+def test_every_exporter_host_gets_the_retry_dropin_unless_switched_off() -> None:
+    groups, hostvars, all_vars = fleet.inventory_model()
+    suffix = "/prometheus-node-exporter.service.d/10-retry-until-tailnet.conf"
+    for host in groups["fleet_node_exporter_hosts"]:
+        context = fleet._context("fleet_node_exporter", hostvars[host], all_vars)
+        paths = [a.path for a in fleet.exporter_artifacts(host, context)]
+        assert any(path.endswith(suffix) for path in paths) == bool(context["fleet_node_exporter_restart_forever"]), host
+    off = fleet._context("fleet_node_exporter", {**hostvars[next(iter(groups["fleet_node_exporter_hosts"]))], "fleet_node_exporter_restart_forever": False}, all_vars)
+    assert not any(a.path.endswith(suffix) for a in fleet.exporter_artifacts("example", off))
+
+
+def test_exporter_retry_dropin_is_in_place_before_the_service_is_started_and_reloads_only_on_change() -> None:
+    tasks = _tasks("fleet_node_exporter", "main.yml")
+    names = [task["name"] for task in tasks]
+    render = names.index("Render the exporter retry drop-in (restart forever, ordered after tailscaled)")
+    reload_ = names.index("Reload systemd when the retry drop-in changed")
+    started = names.index("Ensure the node exporter service is enabled and running")
+    assert render < reload_ < started
+    assert tasks[reload_]["when"] == "fleet_node_exporter_restart_dropin is changed"
+    assert tasks[render]["when"] == "fleet_node_exporter_restart_forever | bool"
+

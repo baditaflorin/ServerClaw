@@ -1,0 +1,95 @@
+# Role Task File: monitoring_vm/tasks/scanopy_backup.yml
+# Purpose: Install the job that pulls a nightly dump of the Scanopy database from the 0docker hypervisor, plus its systemd timer.
+# Use case: Included by the monitoring_vm role when monitoring_scanopy_backup_enabled is true. The Scanopy Postgres is on the
+#           0docker hypervisor itself and is not covered by PBS; this keeps 14 verified dumps on the monitoring VM (another fleet).
+#
+# Inputs (required):
+#   - monitoring_scanopy_backup_* role defaults: install, config, backup, textfile, and unit paths.
+#
+# Inputs (optional):
+#   - monitoring_scanopy_backup_on_calendar, monitoring_scanopy_backup_environment (BACKUP_SSH, BACKUP_KEEP, ...).
+#
+# Outputs:
+#   - /opt/scanopy-backup job, hypervisor wrapper copy and README; a dedicated SSH key under /etc/scanopy-backup (generated once,
+#     never replaced); /var/backups/scanopy (0700); scanopy-backup.service and scanopy-backup.timer.
+#   - scanopy_backup_* metrics in the node_exporter textfile directory (alerts live in config/prometheus/rules/inventory.yml).
+#
+# Idempotency: Fully idempotent
+#              Files are compared by content and mode; the key is only generated when missing; the timer is only enabled.
+#
+# Dependencies:
+#   - The 0docker hypervisor must have /usr/local/sbin/scanopy-backup-hv (the copy of scanopy_backup_hv.sh kept here) and the
+#     public key of {{ monitoring_scanopy_backup_ssh_key_file }}.pub as a forced-command line in root's authorized_keys. That step
+#     lives outside this role; see the runbook.
+#   - docs/runbooks/scanopy-service-discovery.md: describes the flow, the hypervisor install, the restore and the rollback.
+#
+# Related Runbooks: docs/runbooks/scanopy-service-discovery.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-10-13
+---
+- name: Validate Scanopy backup inputs
+  ansible.builtin.assert:
+    that:
+      - monitoring_scanopy_backup_install_dir | length > 0
+      - monitoring_scanopy_backup_dir | length > 0
+      - monitoring_scanopy_backup_config_dir | length > 0
+      - monitoring_scanopy_backup_textfile_dir | length > 0
+    fail_msg: monitoring_scanopy_backup_enabled requires the install, backup, config, and textfile paths.
+    quiet: true
+
+- name: Ensure the Scanopy backup directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - {path: "{{ monitoring_scanopy_backup_install_dir }}", mode: "0755"}
+    - {path: "{{ monitoring_scanopy_backup_dir }}", mode: "0700"}
+    - {path: "{{ monitoring_scanopy_backup_config_dir }}", mode: "0700"}
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Generate the dedicated backup SSH key (only when missing)
+  ansible.builtin.command:
+    argv: [ssh-keygen, -q, -t, ed25519, -N, "", -C, scanopy-backup, -f, "{{ monitoring_scanopy_backup_ssh_key_file }}"]
+    creates: "{{ monitoring_scanopy_backup_ssh_key_file }}"
+
+- name: Install the Scanopy backup job and the hypervisor wrapper it drives
+  ansible.builtin.copy:
+    src: "scanopy-backup/{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - {src: scanopy_backup.py, dest: "{{ monitoring_scanopy_backup_script_file }}", mode: "0755"}
+    - {src: scanopy_backup_hv.sh, dest: "{{ monitoring_scanopy_backup_hv_script_file }}", mode: "0644"}
+    - {src: README, dest: "{{ monitoring_scanopy_backup_readme_file }}", mode: "0644"}
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Render the Scanopy backup systemd service
+  ansible.builtin.template:
+    src: scanopy-backup.service.j2
+    dest: "{{ monitoring_scanopy_backup_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Scanopy backup systemd timer
+  ansible.builtin.template:
+    src: scanopy-backup.timer.j2
+    dest: "{{ monitoring_scanopy_backup_timer_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable the Scanopy backup timer
+  ansible.builtin.systemd:
+    name: "{{ monitoring_scanopy_backup_timer_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
