@@ -1,0 +1,8 @@
+  - job_name: {{ monitoring_prometheus_0own_node_exporter_target.job_name }}
+    static_configs:
+      - targets:
+          - {{ monitoring_prometheus_0own_node_exporter_target.address }}
+        labels:
+{% for label, value in monitoring_prometheus_0own_node_exporter_target.labels | dictsort %}
+          {{ label }}: {{ value | to_json }}
+{% endfor %}

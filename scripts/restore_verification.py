@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from ipaddress import ip_address, ip_network
 import json
 import os
 import random
@@ -14,7 +15,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections.abc import Callable
+import uuid
 from dataclasses import dataclass
 from datetime import timedelta
 from pathlib import Path
@@ -72,6 +73,7 @@ class RestoreTarget:
     mac_address: str
     smoke_kind: str
     resources: ResourceAmount
+    network_isolated: bool = False
 
 
 @dataclass(frozen=True)
@@ -184,9 +186,101 @@ def load_restore_targets() -> list[RestoreTarget]:
                     vcpu=float(fixture["resources"]["cores"]),
                     disk_gb=float(fixture["resources"]["disk_gb"]),
                 ),
+                network_isolated=bool(fixture["network"].get("isolated", False)),
             )
         )
     return targets
+
+
+def validate_restore_target_isolation(targets: list[RestoreTarget], host_vars: dict[str, Any]) -> None:
+    managed_guest_addresses = {
+        ip_address(str(guest["ipv4"])): str(guest.get("name", "unknown"))
+        for guest in host_vars.get("proxmox_guests", [])
+        if guest.get("ipv4")
+    }
+    if host_vars.get("proxmox_internal_ipv4"):
+        managed_guest_addresses[ip_address(str(host_vars["proxmox_internal_ipv4"]))] = "proxmox-host"
+    for target in targets:
+        if not target.network_isolated:
+            raise RuntimeError(
+                f"restore target {target.vm_name} is not explicitly marked as isolated; "
+                "refusing to attach a restored guest to a network"
+            )
+        if target.gateway.strip():
+            raise RuntimeError(
+                f"restore target {target.vm_name} declares a gateway; isolated restore guests must have no default route"
+            )
+        network = ip_network(target.ip_cidr, strict=False)
+        conflicting_guests = sorted(
+            name
+            for address, name in managed_guest_addresses.items()
+            if address.version == network.version and address in network
+        )
+        if conflicting_guests:
+            raise RuntimeError(
+                f"restore target {target.vm_name} overlaps managed guest addresses "
+                f"({', '.join(conflicting_guests)}); refusing a production-subnet restore"
+            )
+
+
+def validate_restore_bridge_snapshot(
+    target: RestoreTarget,
+    *,
+    bridge_kind: str,
+    bridge_operstate: str,
+    host_ipv4_addresses: list[str],
+    attached_ports: list[str],
+) -> None:
+    if bridge_kind != "bridge":
+        raise RuntimeError(f"restore bridge {target.bridge} is not a Linux bridge")
+    if bridge_operstate.upper() != "UP":
+        raise RuntimeError(f"restore bridge {target.bridge} is not up")
+    if host_ipv4_addresses:
+        raise RuntimeError(
+            f"restore bridge {target.bridge} has host IPv4 addresses; isolated restore bridges must not route traffic"
+        )
+    if attached_ports:
+        raise RuntimeError(
+            f"restore bridge {target.bridge} already has attached ports; refusing to share its Layer-2 segment"
+        )
+
+
+def validate_restore_bridge_isolated(context: dict[str, Any], target: RestoreTarget) -> None:
+    bridge = shlex.quote(target.bridge)
+    link = require_host_command(
+        context,
+        f"sudo ip -j -d link show dev {bridge}",
+        action=f"inspect restore bridge {target.bridge}",
+    )
+    addresses = require_host_command(
+        context,
+        f"sudo ip -j addr show dev {bridge}",
+        action=f"inspect restore bridge addresses {target.bridge}",
+    )
+    ports = require_host_command(
+        context,
+        f"sudo bridge -j link show master {bridge}",
+        action=f"inspect restore bridge ports {target.bridge}",
+    )
+    link_payload = json.loads(link.stdout or "[]")
+    address_payload = json.loads(addresses.stdout or "[]")
+    port_payload = json.loads(ports.stdout or "[]")
+    if len(link_payload) != 1 or len(address_payload) != 1:
+        raise RuntimeError(f"restore bridge {target.bridge} did not resolve to exactly one interface")
+    bridge_kind = str(link_payload[0].get("linkinfo", {}).get("info_kind", ""))
+    host_ipv4_addresses = [
+        str(address.get("local", ""))
+        for address in address_payload[0].get("addr_info", [])
+        if address.get("family") == "inet" and address.get("local")
+    ]
+    attached_ports = [str(port.get("ifname", "unknown")) for port in port_payload]
+    validate_restore_bridge_snapshot(
+        target,
+        bridge_kind=bridge_kind,
+        bridge_operstate=str(link_payload[0].get("operstate", "")),
+        host_ipv4_addresses=host_ipv4_addresses,
+        attached_ports=attached_ports,
+    )
 
 
 def load_restore_readiness_profiles() -> dict[str, RestoreReadinessProfile]:
@@ -357,6 +451,13 @@ def wait_for_guest_access(
     deadline = started + timeout_seconds
     ip_address = target.ip_cidr.split("/", 1)[0]
     while time.monotonic() < deadline:
+        if target.network_isolated:
+            if guest_agent_ready(context, target.target_vmid):
+                qga_outcome = run_restored_guest_agent_command(context, target.target_vmid, "true")
+                if qga_outcome.returncode == 0:
+                    return "qga", int(time.monotonic() - started)
+            time.sleep(5)
+            continue
         outcome = run_restored_guest_command(context, ip_address, "true")
         if outcome.returncode == 0:
             return "ssh", int(time.monotonic() - started)
@@ -390,10 +491,15 @@ def stage_seed_snapshot(
     )
 
 
-def list_backups_for_vmid(context: dict[str, Any], source_vmid: int) -> list[dict[str, Any]]:
+def list_backups_for_vmid(
+    context: dict[str, Any],
+    source_vmid: int,
+    *,
+    storage_id: str = STORAGE_ID,
+) -> list[dict[str, Any]]:
     outcome = require_host_command(
         context,
-        f"sudo pvesm list {STORAGE_ID}",
+        f"sudo pvesm list {shlex.quote(storage_id)}",
         action=f"list backups for VMID {source_vmid}",
     )
     rows = parse_pvesm_rows(outcome.stdout)
@@ -430,39 +536,93 @@ def select_backup(
     return rng.choice(candidates)
 
 
+def claim_restore_target_vmid(context: dict[str, Any], target_vmid: int) -> None:
+    outcome = require_host_command(
+        context,
+        "sudo pvesh get /cluster/resources --type vm --output-format json",
+        action="inspect current VMIDs before restore",
+    )
+    try:
+        resources = json.loads(outcome.stdout or "[]")
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("Proxmox returned invalid cluster resource JSON while checking restore VMID") from exc
+    existing_vmids = {int(resource["vmid"]) for resource in resources if resource.get("vmid") is not None}
+    if target_vmid in existing_vmids:
+        raise RuntimeError(f"restore target VMID {target_vmid} is already occupied; it was left untouched")
+
+
 def destroy_restored_vm(context: dict[str, Any], target_vmid: int) -> None:
-    run_host_command(
+    owned_vmids = context.setdefault("restore_owned_vmids", {})
+    ownership_tag = owned_vmids.get(target_vmid)
+    if not ownership_tag:
+        return
+    config = run_host_command(context, f"sudo qm config {target_vmid}")
+    if config.returncode != 0:
+        detail = config.stderr or config.stdout or "could not verify restored VM ownership"
+        raise RuntimeError(f"refusing cleanup of VMID {target_vmid}: {detail}")
+    tags = {
+        tag.strip()
+        for line in config.stdout.splitlines()
+        if line.partition(":")[0].strip() == "tags"
+        for tag in line.partition(":")[2].split(";")
+    }
+    if ownership_tag not in tags:
+        raise RuntimeError(
+            f"refusing cleanup of VMID {target_vmid}: run ownership tag is missing; VM was left untouched"
+        )
+    outcome = run_host_command(
         context,
         (
             f"if sudo qm status {target_vmid} >/dev/null 2>&1; then "
-            f"sudo qm stop {target_vmid} --skiplock 1 >/dev/null 2>&1 || true; "
-            f"sudo qm destroy {target_vmid} --purge 1 --skiplock 1 >/dev/null 2>&1 || true; "
+            f"sudo qm stop {target_vmid} >/dev/null 2>&1 || true; "
+            f"sudo qm destroy {target_vmid} --purge 1; "
             "fi"
         ),
     )
+    if outcome.returncode != 0:
+        detail = outcome.stderr or outcome.stdout or "Proxmox cleanup command failed"
+        raise RuntimeError(f"cleanup of restore-owned VMID {target_vmid} failed: {detail}")
+    owned_vmids.pop(target_vmid, None)
 
 
-def restore_backup(context: dict[str, Any], target: RestoreTarget, backup: dict[str, Any]) -> int:
-    destroy_restored_vm(context, target.target_vmid)
+def restore_backup(
+    context: dict[str, Any],
+    target: RestoreTarget,
+    backup: dict[str, Any],
+    *,
+    restore_storage: str = "local",
+) -> int:
+    claim_restore_target_vmid(context, target.target_vmid)
     started = time.monotonic()
     require_host_command(
         context,
-        (f"sudo qmrestore {shlex.quote(backup['volid'])} {target.target_vmid} --storage local --unique 1"),
+        (
+            f"sudo qmrestore {shlex.quote(backup['volid'])} {target.target_vmid} "
+            f"--storage {shlex.quote(restore_storage)} --unique 1"
+        ),
         action=f"restore {target.vm_name}",
     )
+    ownership_tag = f"restore-run-{uuid.uuid4().hex}"
+    context.setdefault("restore_owned_vmids", {})[target.target_vmid] = ownership_tag
     return int(time.monotonic() - started)
 
 
 def configure_restored_vm(context: dict[str, Any], target: RestoreTarget) -> None:
     ip_address = target.ip_cidr.split("/", 1)[0]
+    ipconfig = f"ip={target.ip_cidr}"
+    if target.gateway.strip():
+        ipconfig += f",gw={target.gateway}"
+    ownership_tag = context.setdefault("restore_owned_vmids", {}).get(target.target_vmid)
+    if not ownership_tag:
+        raise RuntimeError(f"restore target VMID {target.target_vmid} has no successful restore ownership marker")
     require_host_command(
         context,
         (
             f"sudo qm set {target.target_vmid} "
             f"--name {shlex.quote('restore-verify-' + target.vm_name)} "
-            f"--tags {shlex.quote('restore-verification;' + compact_timestamp())} "
+            f"--tags {shlex.quote('restore-verification;' + ownership_tag)} "
             f"--net0 {shlex.quote('virtio=' + target.mac_address + ',bridge=' + target.bridge)} "
-            f"--ipconfig0 {shlex.quote('ip=' + target.ip_cidr + ',gw=' + target.gateway)} "
+            f"--ipconfig0 {shlex.quote(ipconfig)} "
             "--onboot 0"
         ),
         action=f"configure restored VM {target.vm_name}",
@@ -622,14 +782,13 @@ def execute_smoke_tests(
     execution_mode: str,
 ) -> list[dict[str, Any]]:
     ip_address = context["restored_guests"][target.vm_name]
-    if execution_mode == "ssh":
-        command_runner: Callable[[str], CommandOutcome] = lambda command: run_restored_guest_command(
-            context, ip_address, command
-        )
-    elif execution_mode == "qga":
-        command_runner = lambda command: run_restored_guest_agent_command(context, target.target_vmid, command)
-    else:
+    if execution_mode not in {"ssh", "qga"}:
         raise ValueError(f"unsupported execution mode: {execution_mode}")
+
+    def command_runner(command: str) -> CommandOutcome:
+        if execution_mode == "ssh":
+            return run_restored_guest_command(context, ip_address, command)
+        return run_restored_guest_agent_command(context, target.target_vmid, command)
 
     if target.smoke_kind == "postgres":
         return postgres_smoke.run_smoke_tests(command_runner)
@@ -782,14 +941,14 @@ def execute_synthetic_replay(
     if not profile.synthetic_replay_enabled or not profile.synthetic_replay_target:
         return None
     ip_address = context["restored_guests"][target.vm_name]
-    if execution_mode == "ssh":
-        command_runner: Callable[[str], CommandOutcome] = lambda command: run_restored_guest_command(
-            context, ip_address, command
-        )
-    elif execution_mode == "qga":
-        command_runner = lambda command: run_restored_guest_agent_command(context, target.target_vmid, command)
-    else:
+    if execution_mode not in {"ssh", "qga"}:
         raise ValueError(f"unsupported execution mode: {execution_mode}")
+
+    def command_runner(command: str) -> CommandOutcome:
+        if execution_mode == "ssh":
+            return run_restored_guest_command(context, ip_address, command)
+        return run_restored_guest_agent_command(context, target.target_vmid, command)
+
     report = synthetic_transaction_replay.run_target_profile(
         profile.synthetic_replay_target,
         execute_command=command_runner,
@@ -1083,6 +1242,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lookback-days", type=int, default=7)
     parser.add_argument("--selection-strategy", default="random", choices=sorted(ALLOWED_SELECTION_STRATEGIES))
     parser.add_argument(
+        "--storage-id", default=STORAGE_ID, help="PBS storage identifier configured on the Proxmox host."
+    )
+    parser.add_argument("--restore-storage", default="local", help="Proxmox storage for restored VM disks.")
+    parser.add_argument(
         "--targets",
         help="Comma-separated target guest names to replay, for example docker-runtime or postgres,docker-runtime.",
     )
@@ -1107,6 +1270,9 @@ def main(argv: list[str] | None = None) -> int:
         results: list[dict[str, Any]] = []
         selected_names = args.targets.split(",") if args.targets else None
         targets = select_restore_targets(selected_names)
+        validate_restore_target_isolation(targets, context["host_vars"])
+        for target in targets:
+            validate_restore_bridge_isolated(context, target)
         capacity_verdict = check_capacity_class_request(
             load_capacity_model(),
             requester_class="restore-verification",
@@ -1126,14 +1292,19 @@ def main(argv: list[str] | None = None) -> int:
             latest_tests: list[dict[str, Any]] = []
             warm_up_outcome: WarmUpOutcome | None = None
             try:
-                backups = list_backups_for_vmid(context, target.source_vmid)
+                backups = list_backups_for_vmid(context, target.source_vmid, storage_id=args.storage_id)
                 selected_backup = select_backup(
                     backups,
                     lookback_days=args.lookback_days,
                     selection_strategy=args.selection_strategy,
                     rng=rng,
                 )
-                restore_duration_seconds = restore_backup(context, target, selected_backup)
+                restore_duration_seconds = restore_backup(
+                    context,
+                    target,
+                    selected_backup,
+                    restore_storage=args.restore_storage,
+                )
                 update_readiness_ladder_stage(
                     ladder,
                     "restore_completed",
@@ -1359,7 +1530,21 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 )
             finally:
-                destroy_restored_vm(context, target.target_vmid)
+                try:
+                    destroy_restored_vm(context, target.target_vmid)
+                except Exception as cleanup_error:
+                    if results and results[-1].get("vm") == target.vm_name:
+                        cleanup_result = results[-1]
+                        cleanup_result["overall"] = "fail"
+                        cleanup_result["cleanup_error"] = str(cleanup_error)
+                        cleanup_result.setdefault("tests", []).append(
+                            {
+                                "name": "temporary_vm_cleanup",
+                                "status": "fail",
+                                "required": True,
+                                "error": str(cleanup_error),
+                            }
+                        )
 
         report = build_report(
             results,

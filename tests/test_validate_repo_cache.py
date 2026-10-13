@@ -11,12 +11,15 @@ PYTHON_WITH_PACKAGES_SCRIPT = REPO_ROOT / "scripts" / "run_python_with_packages.
 
 def test_validate_repo_supports_shared_ansible_collection_cache() -> None:
     script = VALIDATE_REPO_SCRIPT.read_text()
+    config = (REPO_ROOT / "ansible.cfg").read_text()
 
     assert "LV3_ANSIBLE_COLLECTIONS_DIR" in script
     assert "LV3_ANSIBLE_COLLECTIONS_SHA_FILE" in script
     assert "LV3_ANSIBLE_GALAXY_SERVER" in script
     assert 'sha256sum "$requirements_file"' in script
     assert 'galaxy_server_args=(--server "$LV3_ANSIBLE_GALAXY_SERVER")' in script
+    assert 'export ANSIBLE_COLLECTIONS_PATH="$ANSIBLE_COLLECTIONS_DIR:$REPO_ROOT/collections"' in script
+    assert "collections_path = ./build/collection-install:./collections:" in config
     assert "cmp -s" in script
     assert '"MANIFEST.json"' in script
     assert '"galaxy.yml"' in script

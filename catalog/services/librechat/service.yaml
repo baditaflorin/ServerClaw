@@ -14,7 +14,8 @@ service:
   exposure: edge-published
   uptime_monitor_name: LibreChat Public
   health_probe_id: librechat
-  image_catalog_ids: []
+  image_catalog_ids:
+    - librechat_runtime
   secret_catalog_ids: []
   adr: 0380
   runbook: docs/runbooks/configure-librechat.md

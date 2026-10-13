@@ -30,11 +30,20 @@ service:
       url: https://status.example.com
       subdomain: status.example.com
 completeness:
-  service_type: compose
+  service_type: nginx-plugin
   requires_subdomain: true
   requires_oidc: false
   requires_secrets: false
-  requires_compose_secrets: true
+  requires_compose_secrets: false
+  requires_ansible_role: false
+  requires_api_gateway: false
+  requires_dashboard: false
+  requires_data_catalog: false
+  requires_alert_rules: false
+  notes: >-
+    This is a managed public endpoint provided by Uptime Kuma, not a standalone
+    workload; runtime, SLO, and external availability are covered by the Uptime
+    Kuma and edge-publication contracts.
   suppression_preset: legacy-service
 redundancy:
   tier: R1

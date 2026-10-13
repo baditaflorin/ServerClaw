@@ -18,6 +18,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import yaml
+
 from adr_discovery import (
     ADR_DIR,
     INDEX_PATH,
@@ -54,6 +56,21 @@ def generated_date() -> dt.date:
             generated_on = result.stdout.strip()
             if generated_on:
                 return dt.date.fromisoformat(generated_on)
+    # Isolated validation snapshots may not carry Git history. Preserve the
+    # canonical date from the committed artifact rather than replacing it with
+    # today's date and making every generated ADR shard appear stale.
+    if INDEX_PATH.exists():
+        try:
+            payload = yaml.safe_load(INDEX_PATH.read_text(encoding="utf-8"))
+        except (OSError, yaml.YAMLError):
+            payload = None
+        if isinstance(payload, dict):
+            generated_on = payload.get("generated")
+            if isinstance(generated_on, str):
+                try:
+                    return dt.date.fromisoformat(generated_on)
+                except ValueError:
+                    pass
     return dt.datetime.now(dt.UTC).date()
 
 

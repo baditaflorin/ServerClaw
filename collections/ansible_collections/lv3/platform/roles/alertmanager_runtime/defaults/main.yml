@@ -12,11 +12,39 @@ alertmanager_runtime_config_template: "{{ inventory_dir | dirname }}/config/aler
 alertmanager_runtime_rules_dir: /etc/prometheus/rules
 alertmanager_runtime_platform_rules_source: "{{ inventory_dir | dirname }}/config/alertmanager/rules/platform.yml"
 alertmanager_runtime_prometheus_service_name: "{{ platform_identity.config_prefix }}-prometheus"
+# Alertmanager publishes to ntfy only (Mattermost/Slack receivers were retired). ntfy is reached on its internal
+# listener; the credential is a ntfy user whose password lives in a controller-local file and is installed as a
+# root:prometheus 0640 file (Alertmanager runs as prometheus). Nothing secret is rendered into alertmanager.yml.
+# The defaults use the ntfy user provisioned by ntfy_runtime; production overrides both values with the dedicated
+# runtime user (see inventory/host_vars/monitoring.yml). Every user used here needs read-write access to the topics
+# below, including platform-monitoring-warning and platform-monitoring-watchdog, which ntfy_runtime does not provision.
+alertmanager_runtime_ntfy_base_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('ntfy', 'internal') }}"
 alertmanager_runtime_ntfy_username: alertmanager
-alertmanager_runtime_ntfy_publish_url: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_url('ntfy', 'internal') }}/platform-monitoring-critical"
 alertmanager_runtime_ntfy_password_local_file: "{{ repo_shared_local_root }}/ntfy/alertmanager-password.txt"
 alertmanager_runtime_ntfy_password_file: /etc/alertmanager/ntfy-password
-alertmanager_runtime_mattermost_webhook_manifest_local_file: "{{ repo_shared_local_root }}/mattermost/incoming-webhooks.json"
+# Alertmanager listen address (host:port). Loopback by default; production monitoring overrides it to 0.0.0.0:9093 so the
+# Builder (CT108) can read /api/v2 over the tailnet. The guest nftables policy (network_policy.guests.monitoring) is what
+# restricts 9093 to that single tailnet identity; keep both changes together.
+alertmanager_runtime_listen_address: "127.0.0.1:{{ alertmanager_runtime_port }}"
+alertmanager_runtime_ntfy_topics:
+  critical: platform-monitoring-critical
+  warning: platform-monitoring-warning
+  watchdog: platform-monitoring-watchdog
+# URL-encoded ntfy templates (tpl=yes). Decoded title:
+#   {{.status|upper}} ({{len .alerts}}): {{(index .alerts 0).labels.alertname}}{{if gt (len .alerts) 1}} +{{sub (len .alerts) 1}} more{{end}}
+# Decoded message: one "- alertname [host]: summary" line per alert, capped at 12, then "...and N more".
+alertmanager_runtime_ntfy_title_query: >-
+  %7B%7B.status%7Cupper%7D%7D%20%28%7B%7Blen%20.alerts%7D%7D%29%3A%20%7B%7B%28index%20.alerts%200%29.labels.alertname%7D%7D%7B%7Bif%20gt%20%28len%20.alerts%29%201%7D%7D%20%2B%7B%7Bsub%20%28len%20.alerts%29%201%7D%7D%20more%7B%7Bend%7D%7D
+alertmanager_runtime_ntfy_message_query: >-
+  %7B%7Brange%20%24i%2C%20%24a%20%3A%3D%20.alerts%7D%7D%7B%7Bif%20lt%20%24i%2012%7D%7D-%20%7B%7B%24a.labels.alertname%7D%7D%7B%7Bwith%20%24a.labels.host%7D%7D%20%5B%7B%7B.%7D%7D%5D%7B%7Bend%7D%7D%7B%7Bwith%20%24a.annotations.summary%7D%7D%3A%20%7B%7B.%7D%7D%7B%7Bend%7D%7D%7B%7B%22%5Cn%22%7D%7D%7B%7Bend%7D%7D%7B%7Bend%7D%7D%7B%7Bif%20gt%20%28len%20.alerts%29%2012%7D%7D...and%20%7B%7Bsub%20%28len%20.alerts%29%2012%7D%7D%20more%20%28full%20list%20in%20Alertmanager%29%7B%7Bend%7D%7D
+alertmanager_runtime_ntfy_query: "tpl=yes&t={{ alertmanager_runtime_ntfy_title_query }}&m={{ alertmanager_runtime_ntfy_message_query }}"
+# fleet-triage (baditaflorin/go-fleet-triage): SHADOW-MODE, read-only alert triage on the Builder (CT108). An ADDITIONAL
+# receiver (continue: true) that never replaces the ntfy routes. Disabled unless a webhook URL is set (production sets
+# it in inventory/host_vars/monitoring.yml). The bearer token is read from a controller-local file (never committed) and
+# installed as a root:prometheus 0640 file that Alertmanager reads through http_config.authorization.credentials_file.
+alertmanager_runtime_triage_webhook_url: ""
+alertmanager_runtime_triage_token_file: /etc/alertmanager/triage-token
+alertmanager_runtime_triage_token_local_file: "{{ repo_shared_local_root }}/fleet-triage/webhook-token.txt"
 alertmanager_runtime_pgaudit_relay_enabled: true
 alertmanager_runtime_pgaudit_relay_service_name: pgaudit-alert-relay
 alertmanager_runtime_pgaudit_relay_service_file: /etc/systemd/system/pgaudit-alert-relay.service

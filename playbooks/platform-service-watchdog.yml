@@ -138,7 +138,7 @@
         playbook_execution_notification_service: platform_service_watchdog
 
 # ---------------------------------------------------------------------------
-# docker-runtime (P1 — highest density application VM, 35 HTTP services)
+# docker-runtime (P1 — highest density application VM)
 # ---------------------------------------------------------------------------
 - name: Deploy service watchdog on docker-runtime
   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'docker-runtime' }}"
@@ -164,111 +164,41 @@
       vars:
         service_watchdog_name: docker-runtime
         service_watchdog_ntfy_topic: platform-service-watchdog-docker-runtime
+        # Only list apps that are actually deployed under /opt/<app> on docker-runtime.
+        # directus, nextcloud, superset, matrix-synapse, paperless, grist, langfuse, n8n,
+        # flagsmith, label-studio and repowise were never deployed here (removed 2026-10-12);
+        # changedetection, crawl4ai, lago, litellm, mattermost, netbox, ollama, piper, searxng
+        # and typesense have no /opt/<app> and no container on docker-runtime (removed 2026-10-12).
         service_watchdog_services:
           - name: browser-runner
             compose_dir: /opt/browser-runner
             compose_service: browser-runner
             health_url: "http://127.0.0.1:8096/healthz"
             expected_status: "200"
-          - name: changedetection
-            compose_dir: /opt/changedetection
-            compose_service: changedetection
-            health_url: "http://127.0.0.1:5000/"
-            expected_status: "200"
-          - name: crawl4ai
-            compose_dir: /opt/crawl4ai
-            compose_service: crawl4ai
-            health_url: "http://127.0.0.1:11235/health"
-            expected_status: "200"
           - name: dify
             compose_dir: /opt/dify
             compose_service: api
             health_url: "http://127.0.0.1:8094/healthz"
-            expected_status: "200"
-          - name: directus
-            compose_dir: /opt/directus
-            compose_service: directus
-            health_url: "http://127.0.0.1:8055/server/health"
             expected_status: "200"
           - name: dozzle
             compose_dir: /opt/dozzle
             compose_service: dozzle
             health_url: "http://127.0.0.1:8089/healthcheck"
             expected_status: "200"
-          - name: flagsmith
-            compose_dir: /opt/flagsmith
-            compose_service: flagsmith
-            health_url: "http://127.0.0.1:8017/health"
-            expected_status: "200"
           - name: glitchtip
             compose_dir: /opt/glitchtip
             compose_service: web
             health_url: "http://127.0.0.1:3005/api/0/internal/health/"
-            expected_status: "200"
-          - name: grist
-            compose_dir: /opt/grist
-            compose_service: grist
-            health_url: "http://127.0.0.1:8484/status"
-            expected_status: "200"
-          - name: label-studio
-            compose_dir: /opt/label-studio
-            compose_service: label-studio
-            health_url: "http://127.0.0.1:8110/api/version"
-            expected_status: "200"
-          - name: lago
-            compose_dir: /opt/lago
-            compose_service: front
-            health_url: "http://127.0.0.1:8099/health"
-            expected_status: "200"
-          - name: langfuse
-            compose_dir: /opt/langfuse
-            compose_service: langfuse-web
-            health_url: "http://127.0.0.1:3002/api/public/health"
-            expected_status: "200"
-          - name: litellm
-            compose_dir: /opt/litellm
-            compose_service: litellm
-            health_url: "http://127.0.0.1:4000/health/liveliness"
-            expected_status: "200"
-          - name: matrix-synapse
-            compose_dir: /opt/matrix-synapse
-            compose_service: synapse
-            health_url: "http://127.0.0.1:8008/health"
-            expected_status: "200"
-          - name: mattermost
-            compose_dir: /opt/mattermost
-            compose_service: mattermost
-            health_url: "http://127.0.0.1:8065/api/v4/system/ping"
             expected_status: "200"
           - name: minio
             compose_dir: /opt/minio
             compose_service: minio
             health_url: "http://127.0.0.1:9010/minio/health/live"
             expected_status: "200"
-          - name: n8n
-            compose_dir: /opt/n8n
-            compose_service: n8n
-            health_url: "http://127.0.0.1:5678/healthz"
-            expected_status: "200"
-          - name: netbox
-            compose_dir: /opt/netbox
-            compose_service: netbox
-            health_url: "http://127.0.0.1:8082/login/"
-            expected_status: "200"
-          - name: nextcloud
-            compose_dir: /opt/nextcloud
-            compose_service: nextcloud
-            health_url: "http://127.0.0.1:8084/status.php"
-            expected_status: "200"
           - name: ntfy
             compose_dir: /opt/ntfy
             compose_service: ntfy
             health_url: "http://127.0.0.1:2586/v1/health"
-            expected_status: "200"
-          - name: ollama
-            compose_dir: /opt/ollama
-            compose_service: ollama
-            health_url: "http://127.0.0.1:11434/api/version"
             expected_status: "200"
           - name: ops-portal
             compose_dir: /opt/ops-portal
@@ -279,16 +209,6 @@
             compose_dir: /opt/outline
             compose_service: outline
             health_url: "http://127.0.0.1:3006/_health"
-            expected_status: "200"
-          - name: paperless
-            compose_dir: /opt/paperless
-            compose_service: paperless
-            health_url: "http://127.0.0.1:8018/"
-            expected_status: "200"
-          - name: piper
-            compose_dir: /opt/piper
-            compose_service: piper
-            health_url: "http://127.0.0.1:8100/healthz"
             expected_status: "200"
           - name: plane
             compose_dir: /opt/plane
@@ -304,26 +224,6 @@
             compose_dir: /opt/repo-intake
             compose_service: repo-intake
             health_url: "http://127.0.0.1:8101/health"
-            expected_status: "200"
-          - name: repowise
-            compose_dir: /opt/repowise
-            compose_service: repowise
-            health_url: "http://127.0.0.1:7070/health"
-            expected_status: "200"
-          - name: searxng
-            compose_dir: /opt/searxng
-            compose_service: searxng
-            health_url: "http://127.0.0.1:8881/"
-            expected_status: "200"
-          - name: superset
-            compose_dir: /opt/superset
-            compose_service: superset
-            health_url: "http://127.0.0.1:8105/health"
-            expected_status: "200"
-          - name: typesense
-            compose_dir: /opt/typesense
-            compose_service: typesense
-            health_url: "http://127.0.0.1:8108/health"
             expected_status: "200"
           - name: woodpecker
             compose_dir: /opt/woodpecker

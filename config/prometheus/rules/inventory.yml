@@ -1,0 +1,152 @@
+# Added 2026-10-11 (scanopy-sd rollout). New standalone file; no existing rule file modified.
+# Source of truth for targets: Scanopy via /opt/scanopy-sd (see /opt/scanopy-sd/README).
+# NOTE: scanopy_sd_* metrics come from the monitoring VM's node_exporter textfile collector; label names that
+# would collide with target labels are prefixed (inv_*, inventory_source) to avoid exported_* renames.
+groups:
+  - name: scanopy_inventory
+    rules:
+      - alert: ScanopySDStale
+        expr: (time() - scanopy_sd_last_success_timestamp_seconds) > 1800
+        for: 2m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "Scanopy-derived monitoring targets have not refreshed for 30m"
+          description: "scanopy-sd has not completed a successful pull (last-good targets are being kept, so nothing is dropped). Check `journalctl -u scanopy-sd` on monitoring-lv3, the Scanopy API at 10.10.10.1:60072, and that /etc/scanopy-sd/api-key is present and valid."
+
+      - alert: ScanopySDMetricsAbsent
+        expr: absent(scanopy_sd_last_success_timestamp_seconds)
+        for: 15m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "scanopy_sd_* metrics are missing"
+          description: "The scanopy-sd textfile metrics are not being scraped (timer not running, textfile removed, or monitoring-lv3 node_exporter not scraped)."
+
+      - alert: ScanopyDiscoveryStale
+        expr: (time() - max(scanopy_sd_inventory_newest_seen_timestamp_seconds)) > 2 * 86400
+        for: 6h
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "Scanopy has not re-observed any host for more than 2 days"
+          description: "The newest last_seen_at over all Scanopy host records is older than 2 days. Discovery now runs daily (the scanopy-discover timer starts the Docker VM and hypervisor discoveries every night, 01:00 to 06:15 UTC), so two days without a single host observed means discovery has stopped: check `journalctl -u scanopy-discover` on monitoring-lv3, the ScanopyDiscover* and ScanopyDiscoveryOverdue alerts, and the Scanopy server and daemons."
+
+      - alert: TargetCountDrop
+        expr: scanopy_sd_guard_tripped == 1
+        for: 5m
+        labels:
+          severity: warning
+          service: inventory
+          check: guard
+        annotations:
+          summary: "scanopy-sd refused to publish a >20% smaller {{ $labels.kind }} target set"
+          description: "The shrink guard kept the last-good file_sd file. If the shrink is real: `touch /var/lib/scanopy-sd/accept-shrink` on monitoring-lv3 (consumed on next run); otherwise investigate the Scanopy inventory."
+
+      - alert: TargetCountDrop
+        expr: |
+          scanopy_sd_targets < 0.8 * max_over_time(scanopy_sd_targets[1d])
+        for: 10m
+        labels:
+          severity: warning
+          service: inventory
+          check: published
+        annotations:
+          summary: "Published {{ $labels.kind }} target count is >20% below its 24h maximum"
+          description: "scanopy_sd_targets{kind=\"{{ $labels.kind }}\"} dropped by more than 20% versus the last 24h."
+
+      - alert: TargetCountDrop
+        expr: |
+          count by (source) (up{source=~"scanopy_node|scanopy_blackbox"})
+            < 0.8 * max_over_time((count by (source) (up{source=~"scanopy_node|scanopy_blackbox"}))[1d:5m])
+        for: 10m
+        labels:
+          severity: warning
+          service: inventory
+          check: scraped
+        annotations:
+          summary: "Scraped {{ $labels.source }} target count is >20% below its 24h maximum"
+          description: "Prometheus is scraping >20% fewer Scanopy-derived targets than in the last 24h."
+
+      - alert: NodeExporterMissing
+        expr: |
+          scanopy_sd_host_info{expected_node_exporter="1"}
+            unless on (inv_host)
+          label_replace(up{source="scanopy_node"} == 1, "inv_host", "$1", "host", "(.+)")
+        for: 15m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "Inventory host {{ $labels.inv_host }} ({{ $labels.inv_fleet }}) has no working node_exporter scrape"
+          description: "Scanopy lists {{ $labels.inv_host }} ({{ $labels.inv_address }}) and it is reachable from monitoring-lv3 (reason={{ $labels.reason }}), but no node_exporter target is up. Hosts that are not reachable from monitoring-lv3 at all are listed as expected_node_exporter=0 (scanopy_sd_hosts_uncovered{reason=\"unreachable\"})."
+
+      - alert: ScanopyEndpointDown
+        expr: probe_success{source="scanopy_blackbox"} == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "Discovered endpoint {{ $labels.instance }} ({{ $labels.host }} {{ $labels.service }}) is not accepting connections"
+          description: "An endpoint that Scanopy discovered and that was connectable from monitoring-lv3 is now failing its blackbox probe."
+
+  # Added 2026-10-12 (scanopy-retag). scanopy_retag_* metrics come from the same node_exporter textfile collector.
+  - name: scanopy_retag
+    rules:
+      - alert: ScanopyRetagStale
+        expr: (time() - scanopy_retag_last_success_timestamp_seconds) > 3600
+        for: 5m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "Scanopy Docker bridge subnet tagging has not succeeded for 1h"
+          description: "scanopy-retag runs every 15m and has not completed successfully for an hour, so new Docker networks will reappear in the Scanopy topology (they are hidden by the docker-bridge tag). Check `journalctl -u scanopy-retag` on monitoring-lv3, that /etc/scanopy-retag/api-key is present, valid and allowed to assign tags, that the docker-bridge tag still exists in Scanopy, and the Scanopy API at 10.10.10.1:60072. A run also fails on purpose when more than RETAG_MAX_PER_RUN subnets would be tagged at once."
+
+      - alert: ScanopyRetagMetricsAbsent
+        expr: absent(scanopy_retag_last_success_timestamp_seconds)
+        for: 30m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "scanopy_retag_* metrics are missing"
+          description: "The scanopy-retag textfile metrics are not being scraped (timer not running, no successful run yet, textfile removed, or monitoring-lv3 node_exporter not scraped). Check `systemctl status scanopy-retag.timer` on monitoring-lv3."
+
+  # Added 2026-10-13 (scanopy-discover). Scanopy's own scheduler is unreliable, so a timer on the monitoring VM starts the
+  # daily Docker VM discoveries through the API; scanopy_discover_* metrics come from the same textfile collector.
+  - name: scanopy_discover
+    rules:
+      - alert: ScanopyDiscoverStale
+        expr: (time() - scanopy_discover_last_success_timestamp_seconds) > 3600
+        for: 5m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "The external Scanopy discovery trigger has not completed a clean run for 1h"
+          description: "scanopy-discover runs every 15m and has not finished without errors for an hour, so the daily Docker VM discoveries may not be starting. Check `journalctl -u scanopy-discover` on monitoring-lv3, that /etc/scanopy-retag/api-key is valid and allowed to start discovery, that the daemon names in monitoring_scanopy_discover_schedule still exist in Scanopy and each has a Scheduled discovery definition, and the Scanopy API at 10.10.10.1:60072."
+
+      - alert: ScanopyDiscoverMetricsAbsent
+        expr: absent(scanopy_discover_last_success_timestamp_seconds)
+        for: 30m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "scanopy_discover_* metrics are missing"
+          description: "The scanopy-discover textfile metrics are not being scraped (timer not running, no clean run yet, textfile removed, or monitoring-lv3 node_exporter not scraped). Check `systemctl status scanopy-discover.timer` on monitoring-lv3."
+
+      - alert: ScanopyDiscoveryOverdue
+        expr: scanopy_discover_oldest_last_run_age_seconds > 36 * 3600
+        for: 1h
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "A scheduled Scanopy discovery has not run for more than 36h"
+          description: "At least one daemon in monitoring_scanopy_discover_schedule has a discovery whose last run is older than 36h (daily schedule plus 12h of grace), so its containers and networks are going stale. A missed slot is only made up within 3h, so after a long Scanopy or monitoring outage it waits for the next slot. Run `sudo python3 /opt/scanopy-discover/scanopy_discover.py --dry-run` on monitoring-lv3 to see what is due, and check the Scanopy daemon of the oldest host."

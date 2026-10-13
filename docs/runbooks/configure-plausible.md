@@ -85,6 +85,21 @@ The last command verifies that one synthetic event has reached Plausible's Click
 
 ## Notes
 
+- ClickHouse diagnostic system tables are configured with a one-day TTL in the
+  managed `clickhouse/logs.xml` file. This applies to text, trace, metric,
+  asynchronous metric, part, error, background scheduler, processor profile,
+  query, query metric, and asynchronous insert logs. ClickHouse enforces TTL
+  during background merges, so bytes can remain on disk beyond 24 hours until
+  parts merge; the policy bounds retained history but is not a minute-exact
+  deletion timer. This does not change the 365-day analytics event retention.
+- The structured ClickHouse `text_log` is limited to warning-level messages;
+  ClickHouse otherwise records every message there when no table-specific level
+  is set. The filesystem logger remains at its existing warning level.
+- A config change is applied by the Plausible runtime converge, which currently
+  force-recreates the Plausible Compose project, including its four current
+  containers. Schedule that converge
+  with the expected brief dashboard/tracker interruption in mind and confirm
+  active Plausible event ingestion is healthy afterward.
 - ClickHouse uses a lower relative CPU scheduler weight (`plausible_clickhouse_cpu_shares`, default `640`) so latency-sensitive services can make progress under CPU contention. This is not a hard CPU quota; ClickHouse can use idle capacity. Check `docker stats` and guest CPU/memory/I/O pressure before tuning it.
 - Plausible Community Edition is deployed here without the enterprise-only service-native SSO path, so the dashboard is protected by the shared NGINX edge oauth2-proxy/Authentik boundary instead of an application-owned identity client
 - the repo-managed bootstrap Plausible user remains intentionally available as a break-glass recovery and verification identity even though normal browser access goes through the shared edge sign-in path

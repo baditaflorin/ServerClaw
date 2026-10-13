@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "ws-0512-artifact-cache-monitoring-20261012",
+  "applied_on": "2026-10-12",
+  "recorded_on": "2026-10-12",
+  "recorded_by": "codex",
+  "source_commit": "b996654123a7d0b7bc33517eac6aaa612caa5b0d",
+  "repo_version_context": "0.179.50",
+  "workflow_id": "converge-guest-network-policy",
+  "adr": "0295",
+  "service_ids": [
+    "artifact_cache"
+  ],
+  "summary": "Restored monitoring-only access to the private artifact-cache v2 endpoint and node-exporter while preserving the cache-port allowlist for approved build/runtime consumers.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "artifact-cache",
+      "vmid": "180",
+      "address": "10.10.10.80"
+    }
+  ],
+  "verification": [
+    {
+      "check": "PVE VM firewall compile and service",
+      "result": "pass",
+      "observed": "The VM 180 policy was rendered from vm.fw.j2, the existing file was backed up, the policy compiled, pve-firewall restarted, and the service reports enabled/running."
+    },
+    {
+      "check": "Monitoring Blackbox SLO probe",
+      "result": "pass",
+      "observed": "From the monitoring VM, Blackbox Exporter using http_2xx_follow_redirects returned probe_http_status_code 200 and probe_success 1 for the private registry v2 endpoint."
+    },
+    {
+      "check": "Monitoring node-exporter scrape",
+      "result": "pass",
+      "observed": "From the monitoring VM, the artifact-cache /metrics endpoint on TCP/9100 returned HTTP 200."
+    },
+    {
+      "check": "Monitoring least-privilege port scope",
+      "result": "pass",
+      "observed": "The monitoring VM can reach TCP/5001 and TCP/9100; TCP/5002, TCP/5003, and TCP/5004 remain blocked."
+    },
+    {
+      "check": "Build and runtime cache consumers",
+      "result": "pass",
+      "observed": "Both docker-build and docker-runtime can reach artifact-cache TCP ports 5001 through 5004."
+    },
+    {
+      "check": "Artifact-cache runtime health",
+      "result": "pass",
+      "observed": "All four cache containers are running in host network mode, the Docker bridge has zero attached containers, and the local registry v2 endpoint returns HTTP 200."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0512-authentik-consumer-e2e.md",
+    "docs/runbooks/artifact-cache-runtime.md",
+    "inventory/host_vars/proxmox-host.yml",
+    "config/slo-probe-overlay.json"
+  ],
+  "notes": [
+    "Only the artifact-cache VM firewall file and the artifact-cache guest nftables policy were applied; the whole Proxmox network role was intentionally not run because the current identity overlay fails its self-referential uplink safety guard.",
+    "The prior VM firewall file is retained on the Proxmox host at /root/.lv3-vm-180.fw.backup-20261012T1744Z; its SHA-256 was cc41aa2a2a9b3b471ad325d8e783d106698d42edf11daaeec7ae92b69488908f."
+  ]
+}

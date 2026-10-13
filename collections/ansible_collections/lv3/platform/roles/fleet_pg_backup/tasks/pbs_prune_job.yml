@@ -1,0 +1,88 @@
+---
+# Purpose: Keep one PBS prune job equal to its declaration.
+# Use case: Included once per job from pbs_server.yml.
+# Inputs: fleet_pg_backup_prune_job with id, store, schedule, keep_last, keep_weekly, comment and, optionally, ns (empty or
+#   omitted means the root namespace), keep_daily, keep_monthly and max_depth.
+# Outputs: The job created when missing, then each differing key updated.
+# Idempotency: Idempotent.
+# Dependencies: proxmox-backup-manager.
+
+- name: Read the live prune jobs
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - prune-job
+      - list
+      - --output-format
+      - json
+  register: fleet_pg_backup_prune_jobs_live
+  changed_when: false
+  check_mode: false
+
+- name: Resolve the declared and live prune job
+  ansible.builtin.set_fact:
+    fleet_pg_backup_prune_declared: >-
+      {{
+        {
+          'schedule': fleet_pg_backup_prune_job.schedule,
+          'keep-last': fleet_pg_backup_prune_job.keep_last,
+          'keep-weekly': fleet_pg_backup_prune_job.keep_weekly,
+          'comment': fleet_pg_backup_prune_job.comment
+        }
+        | combine({'keep-daily': fleet_pg_backup_prune_job.keep_daily} if fleet_pg_backup_prune_job.keep_daily is defined else {})
+        | combine({'keep-monthly': fleet_pg_backup_prune_job.keep_monthly} if fleet_pg_backup_prune_job.keep_monthly is defined else {})
+        | combine({'max-depth': fleet_pg_backup_prune_job.max_depth} if fleet_pg_backup_prune_job.max_depth is defined else {})
+      }}
+    fleet_pg_backup_prune_current: >-
+      {{
+        (fleet_pg_backup_prune_jobs_live.stdout | from_json
+        | selectattr('id', 'equalto', fleet_pg_backup_prune_job.id) | list | first) | default({})
+      }}
+
+- name: Create the prune job when missing
+  ansible.builtin.command:
+    argv: >-
+      {{
+        ['proxmox-backup-manager', 'prune-job', 'create', fleet_pg_backup_prune_job.id, '--store', fleet_pg_backup_prune_job.store]
+        + (['--ns', fleet_pg_backup_prune_job.ns] if (fleet_pg_backup_prune_job.ns | default('')) | length > 0 else [])
+        + (fleet_pg_backup_prune_declared | dict2items | map(attribute='key') | map('regex_replace', '^', '--') | zip(fleet_pg_backup_prune_declared | dict2items | map(attribute='value') | map('string')) | map('list') | sum(start=[]))
+      }}
+  when: fleet_pg_backup_prune_current | length == 0
+  changed_when: true
+
+- name: Refuse to change the store or namespace of an existing prune job
+  ansible.builtin.assert:
+    that:
+      - (fleet_pg_backup_prune_current.store | default('')) == fleet_pg_backup_prune_job.store
+      - (fleet_pg_backup_prune_current.ns | default('')) == (fleet_pg_backup_prune_job.ns | default(''))
+    fail_msg: >-
+      Prune job {{ fleet_pg_backup_prune_job.id }} exists for a different store or namespace. Remove or rename it on
+      own-pbs first; this role only creates a job or updates its schedule, keep settings and comment.
+  when: fleet_pg_backup_prune_current | length > 0
+
+- name: Report prune job drift
+  ansible.builtin.debug:
+    msg: "DRIFT prune job {{ fleet_pg_backup_prune_job.id }}: {{ item.key }} is {{ fleet_pg_backup_prune_current[item.key] | default('unset') }}, declared {{ item.value }}."
+  loop: "{{ fleet_pg_backup_prune_declared | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: >-
+    fleet_pg_backup_prune_current | length > 0
+    and (fleet_pg_backup_prune_current[item.key] | default('') | string) != (item.value | string)
+
+- name: Update differing prune job settings
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - prune-job
+      - update
+      - "{{ fleet_pg_backup_prune_job.id }}"
+      - "--{{ item.key }}"
+      - "{{ item.value }}"
+  loop: "{{ fleet_pg_backup_prune_declared | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: >-
+    fleet_pg_backup_prune_current | length > 0
+    and (fleet_pg_backup_prune_current[item.key] | default('') | string) != (item.value | string)
+  changed_when: true

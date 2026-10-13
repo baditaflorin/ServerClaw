@@ -1,0 +1,33 @@
+{% if fleet_guest_firewall_flush_mode == 'ruleset' %}
+flush ruleset
+{% else %}
+destroy table inet filter
+{% endif %}
+{% macro match(rule) -%}
+{% if rule.protocol == 'icmp' -%}
+ip protocol icmp
+{%- elif rule.protocol == 'icmpv6' -%}
+ip6 nexthdr ipv6-icmp
+{%- else -%}
+{{ rule.protocol }} dport {% if rule.ports | length == 1 %}{{ rule.ports[0] }}{% else %}{ {{ rule.ports | join(', ') }} }{% endif %}
+{%- endif %}
+{%- endmacro %}
+table inet filter {
+  chain input {
+    type filter hook input priority filter; policy drop;
+    ct state established,related accept
+    iif lo accept
+{% for rule in fleet_guest_firewall_allowed_inbound %}
+{% if rule.description | default('') | length > 0 %}
+    # {{ rule.description }}
+{% endif %}
+    {% if rule.interface | default('') | length > 0 %}iifname "{{ rule.interface }}" {% endif %}{% if rule.source | default('') | length > 0 %}ip saddr {{ rule.source }} {% endif %}{{ match(rule) }} accept
+{% endfor %}
+  }
+  chain forward {
+    type filter hook forward priority filter; policy drop;
+  }
+  chain output {
+    type filter hook output priority filter; policy accept;
+  }
+}

@@ -21,11 +21,11 @@ if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
     if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
         sys.modules.pop("platform", None)
 
-from platform.repo import TOPOLOGY_HOST, TOPOLOGY_HOST_VARS_PATH, load_topology_host_vars
+from platform.repo import TOPOLOGY_HOST, load_topology_host_vars
 
 from validation_toolkit import require_list, require_mapping, require_str, resolve_public_domain_placeholders
 
-from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 from shared_policy_packs import load_shared_policy_packs
 
 
@@ -307,10 +307,16 @@ def validate_environment_references(
                 )
                 if owner_subdomain != subdomain:
                     raise ValueError(f"subdomain '{subdomain}' must reference service_id '{service_id}'")
-            if entry.get("status") != status:
+            subdomain_status = entry.get("status")
+            # A workload can remain active while its public hostname is
+            # intentionally retired. The service catalog tracks workload
+            # lifecycle; the subdomain catalog tracks publication lifecycle.
+            # Keep other status mismatches fail-closed.
+            active_service_with_retiring_host = status == "active" and subdomain_status == "retiring"
+            if subdomain_status != status and not active_service_with_retiring_host:
                 raise ValueError(
                     f"service '{service_id}' environment '{env_id}' status '{status}' "
-                    f"does not match subdomain status '{entry.get('status')}'"
+                    f"does not match subdomain status '{subdomain_status}'"
                 )
 
     for (env_id, fqdn), entry in subdomain_index.items():

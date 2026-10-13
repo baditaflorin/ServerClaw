@@ -1,0 +1,205 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Postgres backup stack (vzdump hook and job, pgBackRest preparation, PBS user/ACL/prune job).
+    options:
+      fleet_pg_backup_components:
+        type: list
+        elements: str
+        required: true
+        choices:
+          - pve_backup
+          - pgbackrest
+          - pbs_server
+        description:
+          - Which parts of the stack the host carries.
+      fleet_pg_backup_state_dir:
+        type: path
+        required: false
+        default: /var/lib/pg-backup-metrics
+        description:
+          - Directory holding the metric state files read by the hook and the pgBackRest wrapper.
+      fleet_pg_backup_hook_path:
+        type: path
+        required: false
+        default: /usr/local/sbin/vzdump-pg-metrics-hook
+        description:
+          - Installed path of the vzdump hook script.
+      fleet_pg_backup_hook_textfile_dir:
+        type: path
+        required: false
+        default: /var/lib/prometheus/node-exporter/textfile
+        description:
+          - node_exporter textfile directory the hook writes its .prom file into.
+      fleet_pg_backup_hook_metrics_file:
+        type: str
+        required: false
+        default: pg_backup_vzdump.prom
+        description:
+          - File name of the hook's metrics file.
+      fleet_pg_backup_hook_vzdump_log_dir:
+        type: path
+        required: false
+        default: /var/log/vzdump
+        description:
+          - Directory where vzdump keeps the task log of a PBS backup (read by the log-end phase).
+      fleet_pg_backup_hook_default_vmid:
+        type: str
+        required: false
+        default: "100"
+        description:
+          - vmid label used when the hook is called without a vmid argument.
+      fleet_pg_backup_pve_storage:
+        type: dict
+        required: false
+        default: {}
+        description:
+          - PBS storage entry (id, type, server, datastore, namespace, username, fingerprint, content, password_file). password_file is a reference only.
+      fleet_pg_backup_pve_jobs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description:
+          - vzdump jobs (id, vmid, storage, mode, schedule, bwlimit, compress, enabled, script, notes_template, comment).
+      fleet_pg_backup_pgbackrest_user:
+        type: str
+        required: false
+        default: postgres
+        description:
+          - Owner of the pgBackRest configuration.
+      fleet_pg_backup_pgbackrest_group:
+        type: str
+        required: false
+        default: postgres
+        description:
+          - Group of the pgBackRest configuration.
+      fleet_pg_backup_pgbackrest_conf_dir:
+        type: path
+        required: false
+        default: /etc/pgbackrest
+        description:
+          - pgBackRest configuration directory.
+      fleet_pg_backup_pgbackrest_cipher_file:
+        type: str
+        required: false
+        default: conf.d/10-repo-cipher.conf
+        description:
+          - Path, relative to the configuration directory, of the file holding repo1-cipher-pass. Referenced only, never read.
+      fleet_pg_backup_pgbackrest_stanza:
+        type: str
+        required: false
+        default: main
+        description:
+          - Stanza name.
+      fleet_pg_backup_pgbackrest_pg_path:
+        type: path
+        required: false
+        default: /var/lib/postgresql/18/main
+        description:
+          - Postgres data directory.
+      fleet_pg_backup_pgbackrest_pg_socket_path:
+        type: path
+        required: false
+        default: /var/run/postgresql
+        description:
+          - Postgres socket directory.
+      fleet_pg_backup_pgbackrest_pg_user:
+        type: str
+        required: false
+        default: postgres
+        description:
+          - Postgres user pgBackRest connects as.
+      fleet_pg_backup_pgbackrest_spool_path:
+        type: path
+        required: false
+        default: /var/spool/pgbackrest
+        description:
+          - Spool directory for asynchronous WAL archiving.
+      fleet_pg_backup_pgbackrest_prepared_dir:
+        type: path
+        required: false
+        default: /root/pgbackrest-prepared
+        description:
+          - Directory holding the prepared (not installed) service, timer and runbook.
+      fleet_pg_backup_pgbackrest_wrapper_path:
+        type: path
+        required: false
+        default: /usr/local/sbin/pgbackrest-daily
+        description:
+          - Installed path of the daily backup wrapper.
+      fleet_pg_backup_pgbackrest_textfile_dir:
+        type: path
+        required: false
+        default: /var/lib/prometheus/node-exporter/textfile
+        description:
+          - Textfile directory the wrapper writes pg_backup_pgbackrest.prom into.
+      fleet_pg_backup_pgbackrest_repo:
+        type: dict
+        required: false
+        default: {}
+        description:
+          - repo1-<key> settings. Empty means no repository chosen yet. Keys that look like secrets are refused.
+      fleet_pg_backup_pgbackrest_global_settings:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description:
+          - Verbatim non-secret lines of the [global] section after the repository block.
+      fleet_pg_backup_pgbackrest_timer_enabled:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Install and enable the daily timer. Requires a repository and the textfile collector.
+      fleet_pg_backup_pgbackrest_timer_oncalendar:
+        type: str
+        required: false
+        default: "*-*-* 02:30:00 UTC"
+        description:
+          - OnCalendar expression of the prepared timer.
+      fleet_pg_backup_pbs_datastore:
+        type: str
+        required: false
+        default: ""
+        description:
+          - PBS datastore name (own-pbs side).
+      fleet_pg_backup_pbs_datastore_path:
+        type: path
+        required: false
+        default: ""
+        description:
+          - Filesystem path of the datastore, used to verify the namespace directory.
+      fleet_pg_backup_pbs_namespace:
+        type: str
+        required: false
+        default: ""
+        description:
+          - Namespace the hypervisor backs up into. Verified, not created.
+      fleet_pg_backup_pbs_user:
+        type: dict
+        required: false
+        default: {}
+        description:
+          - Realm user (id, comment) that owns the API token.
+      fleet_pg_backup_pbs_token_name:
+        type: str
+        required: false
+        default: ""
+        description:
+          - API token name of the user. Verified, never generated.
+      fleet_pg_backup_pbs_acls:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description:
+          - ACL entries (path, role, auth_id) that must exist.
+      fleet_pg_backup_pbs_prune_jobs:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description:
+          - Prune jobs (id, store, schedule, keep_last, keep_weekly, comment; optional ns (omit for the root namespace), keep_daily, keep_monthly, max_depth).

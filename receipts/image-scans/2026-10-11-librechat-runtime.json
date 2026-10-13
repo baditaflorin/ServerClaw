@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "librechat_runtime",
+  "image_ref": "ghcr.io/danny-avila/librechat:v0.8.4@sha256:89b0008e610e1dad635d866c09e007e308a145ce764d1eba7c8c6de7414d934b",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.41.2@sha256:962c5626d30cdfb814802598cbb7b63cb690bf979a4bc0ff1d9c6e0cb441db7f",
+  "scanned_on": "2026-10-11",
+  "sbom_receipt": "receipts/sbom/89b0008e610e.cdx.json",
+  "cve_receipt": "receipts/cve/89b0008e610e-20261011T090357Z.grype.json",
+  "summary": {
+    "critical": 20,
+    "high": 239,
+    "medium": 286,
+    "low": 54,
+    "unknown": 1,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 600
+  }
+}

@@ -101,6 +101,121 @@ argument_specs:
         required: false
         description:
           - Explicit legacy Prometheus systemd units to stop and disable before starting the canonical unit.
+      monitoring_prometheus_0own_node_exporter_target:
+        type: dict
+        required: false
+        description:
+          - Production-only 0own node-exporter target applied by the narrow scrape-target playbook.
+      monitoring_prometheus_health_probe_service_ids:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Catalog service ids whose liveness and readiness blackbox jobs are rendered; an empty list renders every http and tcp probe.
+      monitoring_prometheus_blackbox_drop_address_regex:
+        type: str
+        required: false
+        description:
+          - RE2 regex; slo-blackbox and https-tls-blackbox targets whose address matches are dropped at relabel time.
+      monitoring_slo_edge_connect_host:
+        type: str
+        required: false
+        description:
+          - Private address of the nginx edge, substituted into the SLO and HTTPS/TLS probe targets of edge-published endpoints.
+      monitoring_prometheus_public_edge_targets_file:
+        type: str
+        required: false
+        description:
+          - file_sd file for the public-edge-critical blackbox job; empty disables the job. The file is maintained outside this role.
+      monitoring_prometheus_extra_scrape_jobs:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Extra Prometheus scrape_config mappings rendered verbatim for static exporters that inventory discovery does not cover.
+      monitoring_prometheus_remote_write_targets:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - remote_write destinations (url, basic_auth.username, basic_auth.password_file, queue_config). Secrets are referenced by password_file only.
+      monitoring_prometheus_remote_write_credentials:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Encrypted systemd credentials (name, encrypted_file) loaded into the Prometheus unit; the encrypted blob must already exist on the host.
+      monitoring_prometheus_config_validate_command:
+        type: str
+        required: false
+        description:
+          - Validation command (with a %s placeholder) run against every rendered prometheus.yml before it replaces the live file.
+      monitoring_scanopy_sd_enabled:
+        type: bool
+        required: false
+        description:
+          - Install the Scanopy service-discovery generator and render the Scanopy file_sd scrape jobs.
+      monitoring_scanopy_sd_api_key_local_file:
+        type: path
+        required: false
+        description:
+          - Controller-local Scanopy Viewer API key; when absent the host must already hold a root-only 0600 key.
+      monitoring_scanopy_sd_extra_endpoints:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Known-real endpoints that Scanopy has no port data for, written to extra-endpoints.json.
+      monitoring_scanopy_sd_node_drop_address_regex:
+        type: str
+        required: false
+        description:
+          - RE2 regex; Scanopy node targets matching it are dropped because the exporter is kept as a static job.
+      monitoring_scanopy_sd_environment:
+        type: dict
+        required: false
+        description:
+          - Optional Environment= overrides for the generator unit (for example SCANOPY_URL).
+      monitoring_scanopy_retag_enabled:
+        type: bool
+        required: false
+        description:
+          - Install the job that tags Docker bridge subnets in Scanopy as docker-bridge (hidden in the topology) and its timer.
+      monitoring_scanopy_retag_api_key_local_file:
+        type: path
+        required: false
+        description:
+          - Controller-local Scanopy API key allowed to assign tags (Member or higher); when absent the host must already hold a root-only 0600 key.
+      monitoring_scanopy_retag_interval:
+        type: str
+        required: false
+        description:
+          - systemd time span between retag runs (default 15min).
+      monitoring_scanopy_retag_environment:
+        type: dict
+        required: false
+        description:
+          - Optional Environment= overrides for the retag unit (for example SCANOPY_URL, RETAG_TAG_NAME, RETAG_MAX_PER_RUN).
+      monitoring_scanopy_discover_enabled:
+        type: bool
+        required: false
+        description:
+          - Install the job and timer that start Scanopy discovery at a fixed daily UTC slot per daemon, independent of Scanopy's scheduler.
+      monitoring_scanopy_discover_schedule:
+        type: dict
+        required: false
+        description:
+          - Map of Scanopy daemon name to the UTC start time (HH:MM) of its daily discovery.
+      monitoring_scanopy_discover_on_calendar:
+        type: str
+        required: false
+        description:
+          - systemd OnCalendar expression of the timer (default *:02/15, every 15 minutes).
+      monitoring_scanopy_discover_environment:
+        type: dict
+        required: false
+        description:
+          - Optional Environment= overrides for the discover unit (for example SCANOPY_URL, DISCOVER_CATCHUP_HOURS).
       monitoring_influxdb_url:
         type: str
         required: true

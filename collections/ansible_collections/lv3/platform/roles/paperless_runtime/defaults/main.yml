@@ -18,7 +18,7 @@ paperless_public_hostname_overrides:
   - hostname: "{{ hostvars[platform_topology_host].platform_service_topology.authentik.public_hostname }}"
     address: "{{ paperless_public_edge_private_ip }}"
 paperless_redis_container_name: paperless-redis
-paperless_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
+paperless_redis_image: "{{ container_image_catalog.images.shared_valkey_runtime.ref }}"
 paperless_image_pull_retries: 5
 paperless_image_pull_delay_seconds: 5
 paperless_database_name: paperless

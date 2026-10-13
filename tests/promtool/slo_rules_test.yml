@@ -1,0 +1,150 @@
+# promtool unit tests for the generated SLO rules (config/prometheus/rules/slo_rules.yml + slo_alerts.yml).
+#
+#   promtool test rules tests/promtool/slo_rules_test.yml
+#
+# promtool evaluates every group at evaluation_interval (1m here). In production the recording group runs every 5m, so
+# real alerts can lag the times asserted below by up to one recording interval. The probe series use the production
+# cadence (15s scrape interval), so the sample-count guards behave exactly as they do live. promtool caps a query at
+# 10000 samples, so the histories below are just long enough (24h30m) to satisfy the 24h minimum-history guard.
+#
+# Series under test: grafana-availability (99.5% / 30d, edge endpoint, fast burn at 14 x 0.005 = 7% errors).
+
+rule_files:
+  - ../../config/prometheus/rules/slo_rules.yml
+  - ../../config/prometheus/rules/slo_alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  # (a) A healthy service never alerts, even with a single failed probe in the hour.
+  - name: healthy service raises no SLO alert
+    interval: 15s
+    input_series:
+      - series: 'probe_success{job="slo-blackbox", slo_id="grafana-availability", service_id="grafana", indicator="availability", probe_module="http_2xx_follow_redirects", instance="https://grafana.example.com/login"}'
+        values: "1x5879 0 1x2000"
+    alert_rule_test:
+      - eval_time: 12h
+        alertname: SLOFastBurn_grafana_availability
+        exp_alerts: []
+      - eval_time: 24h
+        alertname: SLOSlowBurn_grafana_availability
+        exp_alerts: []
+      - eval_time: 24h31m
+        alertname: SLOBudgetCritical_grafana_availability
+        exp_alerts: []
+      - eval_time: 24h31m
+        alertname: SLOFastBurn_grafana_availability
+        exp_alerts: []
+    promql_expr_test:
+      - expr: slo:grafana_availability:success_ratio_1h
+        eval_time: 24h31m
+        exp_samples:
+          - labels: 'slo:grafana_availability:success_ratio_1h{job="slo-blackbox", slo_id="grafana-availability", service_id="grafana", indicator="availability", probe_module="http_2xx_follow_redirects", instance="https://grafana.example.com/login"}'
+            value: 0.9958333333333333
+
+  # (b) A hard-down service with a full day of history pages (critical) after the 14x burn threshold is crossed and the
+  # 2m "for" elapsed, and raises the slow-burn and budget warnings later, never as critical.
+  - name: hard-down service fires fast burn after the expected time
+    interval: 15s
+    input_series:
+      - series: 'probe_success{job="slo-blackbox", slo_id="grafana-availability", service_id="grafana", indicator="availability", probe_module="http_2xx_follow_redirects", instance="https://grafana.example.com/login"}'
+        values: "1x5879 0x400"
+    alert_rule_test:
+      # outage starts at 24h30m; 7% of the last hour is 4.2 minutes of failures, plus the 2 minute "for"
+      - eval_time: 24h33m
+        alertname: SLOFastBurn_grafana_availability
+        exp_alerts: []
+      - eval_time: 24h40m
+        alertname: SLOFastBurn_grafana_availability
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              service_id: grafana
+              slo_id: grafana-availability
+              indicator: availability
+              job: slo-blackbox
+              probe_module: http_2xx_follow_redirects
+              instance: https://grafana.example.com/login
+            exp_annotations:
+              summary: grafana-availability is burning its error budget at 14x
+              description: Grafana remains reachable through the public LV3 edge.
+              runbook: docs/runbooks/slo-tracking.md
+      - eval_time: 25h
+        alertname: SLOSlowBurn_grafana_availability
+        exp_alerts: []
+      - eval_time: 25h40m
+        alertname: SLOSlowBurn_grafana_availability
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              service_id: grafana
+              slo_id: grafana-availability
+              indicator: availability
+              job: slo-blackbox
+              probe_module: http_2xx_follow_redirects
+              instance: https://grafana.example.com/login
+            exp_annotations:
+              summary: grafana-availability is burning its error budget at 3x
+              description: Grafana remains reachable through the public LV3 edge.
+              runbook: docs/runbooks/slo-tracking.md
+      - eval_time: 25h
+        alertname: SLOBudgetCritical_grafana_availability
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              service_id: grafana
+              slo_id: grafana-availability
+              indicator: availability
+              job: slo-blackbox
+              probe_module: http_2xx_follow_redirects
+              instance: https://grafana.example.com/login
+            exp_annotations:
+              summary: grafana-availability has less than 10% error budget remaining
+              description: Grafana remains reachable through the public LV3 edge.
+              runbook: docs/runbooks/slo-tracking.md
+
+  # (c) A young series (twenty minutes of probes, all failing) must not alert: the ratios have no meaningful history
+  # yet. Once the series holds enough samples the guards lift and a real outage is reported.
+  - name: young series raises no alert until it has enough history
+    interval: 15s
+    input_series:
+      - series: 'probe_success{job="slo-blackbox", slo_id="grafana-availability", service_id="grafana", indicator="availability", probe_module="http_2xx_follow_redirects", instance="https://grafana.example.com/login"}'
+        values: "0x400"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: SLOFastBurn_grafana_availability
+        exp_alerts: []
+      - eval_time: 20m
+        alertname: SLOSlowBurn_grafana_availability
+        exp_alerts: []
+      - eval_time: 20m
+        alertname: SLOBudgetCritical_grafana_availability
+        exp_alerts: []
+      - eval_time: 90m
+        alertname: SLOBudgetCritical_grafana_availability
+        exp_alerts: []
+      - eval_time: 90m
+        alertname: SLOSlowBurn_grafana_availability
+        exp_alerts: []
+
+  # (d) A retired target keeps its old series (and a bad 30 day average) for the whole window. It must not keep
+  # alerting once nothing is probing it any more: this is the false-alert pattern that the catalog rewrite removes.
+  - name: retired target with stale history raises no alert
+    interval: 15s
+    input_series:
+      - series: 'probe_success{job="slo-blackbox", slo_id="grafana-availability", service_id="grafana", indicator="availability", probe_module="http_2xx_follow_redirects", instance="https://grafana.old.example.com/login"}'
+        values: "0x5880 _x1000"
+    alert_rule_test:
+      - eval_time: 24h50m
+        alertname: SLOBudgetCritical_grafana_availability
+        exp_alerts: []
+      - eval_time: 25h
+        alertname: SLOFastBurn_grafana_availability
+        exp_alerts: []
+      - eval_time: 26h
+        alertname: SLOSlowBurn_grafana_availability
+        exp_alerts: []
+    promql_expr_test:
+      - expr: slo:grafana_availability:budget_remaining
+        eval_time: 25h
+        exp_samples: []

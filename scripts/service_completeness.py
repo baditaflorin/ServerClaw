@@ -32,18 +32,26 @@ SERVICE_COMPLETENESS_PATH = REPO_ROOT / "config" / "service-completeness.json"
 GLOBAL_COMPLETENESS_INPUTS = {
     "config/api-gateway-catalog.json",
     "config/data-catalog.json",
-    "config/dependency-graph.json",
     "config/secret-catalog.json",
-    "config/service-capability-catalog.json",
     "config/service-completeness.json",
     "config/slo-catalog.json",
     "config/subdomain-catalog.json",
 }
 SERVICE_SCOPED_COMPLETENESS_INPUTS = {
     "config/data-catalog.json": ("data_stores", "id", "service"),
+    "config/dependency-graph.json": ("nodes", "id", "service"),
     "config/health-probe-catalog.json": ("services", None, None),
+    "config/service-capability-catalog.json": ("services", "id", "id"),
     "config/slo-catalog.json": ("slos", "id", "service_id"),
+    "config/subdomain-catalog.json": ("subdomains", "fqdn", "service_id"),
     "config/service-completeness.json": ("services", None, None),
+}
+SNAPSHOT_GENERATED_SERVICE_CATALOGS = {
+    "config/data-catalog.json",
+    "config/health-probe-catalog.json",
+    "config/service-capability-catalog.json",
+    "config/service-completeness.json",
+    "config/slo-catalog.json",
 }
 
 CHECKLIST = [
@@ -167,6 +175,11 @@ def load_context() -> dict[str, Any]:
                 profile.get("requires_api_gateway"),
                 f"config/service-completeness.json.services.{service_id}.requires_api_gateway",
             )
+        if "requires_ansible_role" in profile:
+            require_bool(
+                profile.get("requires_ansible_role"),
+                f"config/service-completeness.json.services.{service_id}.requires_ansible_role",
+            )
         require_bool(
             profile.get("requires_secrets"), f"config/service-completeness.json.services.{service_id}.requires_secrets"
         )
@@ -174,6 +187,11 @@ def load_context() -> dict[str, Any]:
             profile.get("requires_compose_secrets"),
             f"config/service-completeness.json.services.{service_id}.requires_compose_secrets",
         )
+        if "requires_slo" in profile:
+            require_bool(
+                profile.get("requires_slo"),
+                f"config/service-completeness.json.services.{service_id}.requires_slo",
+            )
         if "suppression_preset" in profile:
             preset_name = require_string(
                 profile.get("suppression_preset"),
@@ -568,9 +586,17 @@ def evaluate_service(
         item_result(
             "ansible_role",
             "Ansible role",
-            required=True,
+            required=bool(profile.get("requires_ansible_role", True)),
             present=role_dir is not None and role_dir.is_dir(),
-            detail=str(role_dir.relative_to(REPO_ROOT)) if role_dir and role_dir.is_dir() else "missing role directory",
+            detail=(
+                str(role_dir.relative_to(REPO_ROOT))
+                if role_dir and role_dir.is_dir()
+                else (
+                    "not required by the service deployment contract"
+                    if not bool(profile.get("requires_ansible_role", True))
+                    else "missing role directory"
+                )
+            ),
             suppressions=suppressions,
             today=today,
         ),
@@ -652,7 +678,7 @@ def evaluate_service(
         item_result(
             "grafana_dashboard",
             "Grafana dashboard",
-            required=True,
+            required=bool(profile.get("requires_dashboard", True)),
             present=dashboard_path.exists(),
             detail=str(dashboard_path.relative_to(REPO_ROOT)),
             suppressions=suppressions,
@@ -661,9 +687,13 @@ def evaluate_service(
         item_result(
             "slo_definition",
             "SLO definition",
-            required=True,
+            required=bool(profile.get("requires_slo", True)),
             present=bool(slo_entries),
-            detail="config/slo-catalog.json",
+            detail=(
+                "not required by the service observability contract"
+                if not bool(profile.get("requires_slo", True))
+                else "config/slo-catalog.json"
+            ),
             suppressions=suppressions,
             today=today,
         ),
@@ -692,7 +722,7 @@ def evaluate_service(
         item_result(
             "data_catalog",
             "Data catalog entry",
-            required=True,
+            required=bool(profile.get("requires_data_catalog", True)),
             present=bool(data_entries),
             detail="config/data-catalog.json",
             suppressions=suppressions,
@@ -701,7 +731,7 @@ def evaluate_service(
         item_result(
             "alert_rules",
             "Alert rules",
-            required=True,
+            required=bool(profile.get("requires_alert_rules", True)),
             present=alert_rule_path.exists(),
             detail=str(alert_rule_path.relative_to(REPO_ROOT)),
             suppressions=suppressions,
@@ -767,11 +797,27 @@ def service_ids_for_changed_paths(
 
     normalized_paths = {path.replace("\\", "/") for path in changed_paths}
     changed_catalog_paths = normalized_paths & set(SERVICE_SCOPED_COMPLETENESS_INPUTS)
+    snapshot_commit = os.environ.get("LV3_SNAPSHOT_SOURCE_COMMIT", "").strip()
+    snapshot_context = bool(re.fullmatch(r"[0-9a-f]{40}", snapshot_commit)) and not (REPO_ROOT / ".git").exists()
     affected: set[str] = set()
     for path in changed_catalog_paths:
         catalog_services = changed_services_in_catalog(path, base_ref)
         if catalog_services is None:
-            return None
+            if path not in SNAPSHOT_GENERATED_SERVICE_CATALOGS or not snapshot_context:
+                return None
+            service_slugs = {service_id.replace("_", "-").lower(): service_id for service_id in context["service_map"]}
+            bundle_paths = sorted(path for path in normalized_paths if path.startswith("catalog/services/"))
+            bundle_services: set[str] = set()
+            for bundle_path in bundle_paths:
+                parts = bundle_path.split("/")
+                service_id = service_slugs.get(parts[2].lower()) if len(parts) >= 4 else None
+                if service_id is None:
+                    return None
+                bundle_services.add(service_id)
+            if not bundle_services:
+                return None
+            affected.update(bundle_services)
+            continue
         affected.update(catalog_services)
 
     unscoped_global_change = any(

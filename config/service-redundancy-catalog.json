@@ -60,6 +60,23 @@
         "failback_method": "Restore or rebuild runtime-control, then rerun the API gateway converge from git."
       }
     },
+    "artifact_cache": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 240,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "artifact-cache",
+        "failover_trigger": "Rebuild the guest or registry containers after a host or cache-volume failure; cached layers are re-fetchable and are not authoritative artifacts.",
+        "failback_method": "Converge the artifact-cache guest from git and allow approved consumers to repopulate cache content from upstream registries."
+      },
+      "notes": "The cache volumes are not backed up; only the runtime configuration is version controlled. Cache loss causes a cold re-fetch, not loss of authoritative artifacts."
+    },
     "authentik": {
       "tier": "R1",
       "recovery_objective": {

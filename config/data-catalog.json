@@ -17,6 +17,23 @@
       "notes": "The gateway stores degradation state, NATS outbox records, drift receipts, and runbook execution outputs under its persistent data volume. No backup or retention contract is currently declared, so the catalog does not claim either."
     },
     {
+      "id": "artifact-cache-registry-content",
+      "service": "artifact_cache",
+      "name": "Pull-through registry cache content",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "low",
+      "locations": [
+        "/opt/artifact-cache/data/docker-hub",
+        "/opt/artifact-cache/data/ghcr",
+        "/opt/artifact-cache/data/plane",
+        "/opt/artifact-cache/data/n8n"
+      ],
+      "notes": "Regenerable pull-through cache layers from upstream registries. No retention or backup contract is configured; this cache is not the authoritative copy of these artifacts."
+    },
+    {
       "id": "authentik_primary_data",
       "service": "authentik",
       "name": "Authentik primary data",

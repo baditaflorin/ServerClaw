@@ -6,22 +6,22 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-09-28'
+generated: '2026-10-12'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 515
+total_adrs: 516
 adr_number_range:
   first: '0001'
-  last: 0491
-  next_available: 0492
+  last: 0493
+  next_available: 0494
 implementation_status_summary:
-  Implemented: 378
+  Implemented: 379
   Partial: 4
   Not Implemented: 33
   Deprecated: 14
   Accepted: 31
   Proposed: 55
 decision_status_summary:
-  Accepted: 364
+  Accepted: 365
   Proposed: 62
   Deprecated: 38
   Implemented: 51
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 83
+      count: 84
       first_adr: '0400'
-      last_adr: 0491
+      last_adr: 0493
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -100,7 +100,7 @@ facets:
       count: 49
     - concern: storage
       path: docs/adr/index/by-concern/storage.yaml
-      count: 7
+      count: 8
     - concern: testing
       path: docs/adr/index/by-concern/testing.yaml
       count: 6
@@ -111,7 +111,7 @@ facets:
     - implementation_status: Implemented
       slug: implemented
       path: docs/adr/index/by-status/implemented.yaml
-      count: 378
+      count: 379
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
@@ -137,8 +137,15 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0492
+  next_available_adr: 0494
 latest_adrs:
+  - adr: 0493
+    title: Bound Plausible ClickHouse diagnostic log storage
+    implementation_status: Implemented
+    currently_describes: current_state
+    concern: storage
+    path: docs/adr/0493-bounded-plausible-clickhouse-diagnostic-logs.md
+    implemented_on: '2026-10-07'
   - adr: 0491
     title: Authentik For Operator And Agent SSO
     implementation_status: Implemented
@@ -194,12 +201,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: testing
     path: docs/adr/0481-pentest-fleet-coolify-migration.md
-  - adr: 0481
-    title: Explicit Deployment Context (no implicit identity.yml swap)
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: ci-cd
-    path: docs/adr/0481-explicit-deployment-context.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

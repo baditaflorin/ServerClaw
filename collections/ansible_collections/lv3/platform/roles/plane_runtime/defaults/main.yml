@@ -129,3 +129,13 @@ plane_oidc_discovery_url: "{{ authentik_oidc_provider_base_url }}/plane/.well-kn
 plane_oidc_callback_url: "{{ plane_public_base_url }}/auth/callback/authentik"
 plane_oidc_scopes: "openid profile email"
 plane_oidc_auto_signup: true
+
+# Container memory caps (hard limit / memory+swap). Sized at ~1.5x observed steady-state usage
+# on docker-runtime (2026-10-12); the host has swap (docker_runtime_swap_size_mb) so cold pages can
+# be paged out instead of OOM-killing a neighbour.
+plane_api_mem_limit: 512m
+plane_api_memswap_limit: 1g
+plane_worker_mem_limit: 1200m
+plane_worker_memswap_limit: 2400m
+plane_beat_worker_mem_limit: 384m
+plane_beat_worker_memswap_limit: 768m

@@ -21,7 +21,7 @@ service:
   health_probe_id: glitchtip
   image_catalog_ids:
     - glitchtip_runtime
-    - glitchtip_valkey_runtime
+    - shared_valkey_runtime
   secret_catalog_ids:
     - glitchtip_database_password
     - glitchtip_secret_key
@@ -63,8 +63,9 @@ completeness:
   authentik_client_generated: true
   dashboard_file: config/grafana/dashboards/glitchtip.json
   alert_rule_file: config/alertmanager/rules/glitchtip.yml
-  suppressed_checks:
-    api_gateway: '2026-09-30'
+  requires_api_gateway: false
+  suppressed_checks: {}
+  notes: GlitchTip's Sentry-compatible API and DSN use service-native credentials; an OIDC-JWT gateway route would not replace that authorization. Browser sign-in remains Authentik-backed.
 redundancy:
   tier: R1
   backup_sources:

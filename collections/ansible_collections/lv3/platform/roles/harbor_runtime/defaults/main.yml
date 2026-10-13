@@ -12,6 +12,8 @@
 #   - harbor_installer_version (str, optional, default=2.15.0): Harbor release used for online installer downloads.
 #   - harbor_prepare_with_trivy (bool, optional, default=true): Enables Harbor's Trivy-backed prepare flow.
 #   - harbor_check_runner_project_name (str, optional, default=check-runner): Managed Harbor project for check-runner images.
+#   - harbor_patched_runtime_project_name (str, optional, default=patched-runtime): Private project for scanned patched images.
+#   - harbor_patched_runtime_*_robot_name (str, optional): Separate publisher and pull-only robot names.
 #
 # Outputs:
 #   - Default variable values consumed by the Harbor runtime role tasks and templates.
@@ -68,6 +70,15 @@ harbor_check_runner_retention_days: 90
 harbor_check_runner_retention_cron: 0 0 0 * * *
 harbor_check_runner_robot_name: check-runner-publisher
 harbor_check_runner_robot_description: Managed push and pull robot for the check-runner Harbor project.
+harbor_patched_runtime_project_name: patched-runtime
+harbor_patched_runtime_project_public: false
+harbor_patched_runtime_publisher_robot_name: patched-runtime-publisher
+harbor_patched_runtime_puller_robot_name: patched-runtime-puller
+harbor_patched_runtime_publisher_robot_description: Project-scoped publisher for reviewed patched runtime images.
+harbor_patched_runtime_puller_robot_description: Pull-only runtime credential for reviewed patched images.
+harbor_patched_runtime_publisher_local_file: "{{ harbor_local_artifact_dir }}/patched-runtime-publisher.json"
+harbor_patched_runtime_puller_local_file: "{{ harbor_local_artifact_dir }}/patched-runtime-puller.json"
+harbor_runtime_docker_config_path: /root/.docker/config.json
 harbor_runtime_container_names:
   - harbor-log
   - harbor-db

@@ -1,0 +1,22 @@
+scanopy-discover: start Scanopy discovery on a fixed daily schedule, from outside Scanopy
+
+Why: Scanopy's own scheduler does not fire reliably (schedules saved before a server restart never ran). A systemd timer
+runs this job every 15 minutes (minute 02/17/32/47) and it starts the discovery of every daemon whose daily UTC slot
+has passed and which has not run since.
+
+Files
+  /opt/scanopy-discover/scanopy_discover.py   job (python3 stdlib); only POSTs /api/v1/discovery/start-session
+  /opt/scanopy-discover/schedule.json         {"<daemon name>": "HH:MM", ...} in UTC, rendered from inventory
+  /etc/scanopy-retag/api-key                  shared with scanopy-retag (root 0600); must be allowed to start discovery
+  /var/lib/prometheus/node-exporter/scanopy_discover.prom   metrics scanopy_discover_*
+  systemd: scanopy-discover.service (oneshot) + scanopy-discover.timer
+
+Behaviour
+  - skips a target whose discovery ran since its slot (also when Scanopy's own scheduler ran it); 409 = already running = skipped
+  - catch-up window 3h (DISCOVER_CATCHUP_HOURS): a slot missed for longer waits for the next day; the overdue alert reports it
+  - at most one session started per run (DISCOVER_MAX_STARTS_PER_RUN), so large hosts are never scanned together
+  - exit 1 / last_attempt_success 0 on a missing key, empty schedule, unknown daemon or missing definition
+Manual run:  sudo systemctl start scanopy-discover.service ; journalctl -u scanopy-discover -n 20
+Dry run:     sudo python3 /opt/scanopy-discover/scanopy_discover.py --dry-run
+Rollback:    systemctl disable --now scanopy-discover.timer
+Managed by the monitoring_vm role (tasks/scanopy_discover.yml); see docs/runbooks/scanopy-service-discovery.md.

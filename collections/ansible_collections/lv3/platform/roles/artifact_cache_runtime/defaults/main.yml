@@ -4,7 +4,12 @@
 # from platform_service_registry — ADR 0373.
 # Purpose: Define the filesystem layout, upstream registry mappings, and seed-plan inputs for the shared artifact cache runtime.
 artifact_cache_state: present
+# The role argument spec runs before tasks, so values that are ordinarily
+# derived by common/tasks/derive_service_defaults must also exist at validation
+# time. Keep these fallbacks aligned with the service registry derivation.
+artifact_cache_site_dir: "{{ platform_service_registry.artifact_cache.site_dir }}"
 artifact_cache_data_root: "{{ artifact_cache_site_dir }}/data"
+artifact_cache_compose_file: "{{ artifact_cache_site_dir }}/docker-compose.yml"
 artifact_cache_seed_plan_file: "{{ artifact_cache_site_dir }}/seed-plan.json"
 artifact_cache_bind_host: "{{ ansible_host }}"
 artifact_cache_network_mode: host

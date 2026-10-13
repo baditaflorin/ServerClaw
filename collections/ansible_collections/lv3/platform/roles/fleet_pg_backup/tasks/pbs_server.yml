@@ -1,0 +1,139 @@
+---
+# Purpose: Keep the PBS user, its ACLs and the per-namespace prune job on own-pbs equal to the declaration.
+# Use case: Included from main.yml on own-pbs.
+# Inputs: fleet_pg_backup_pbs_* variables.
+# Outputs: User created when missing, ACL entries added when missing, prune job created or updated.
+# Idempotency: Idempotent; every proxmox-backup-manager write is preceded by a list and runs only on a difference.
+# Dependencies: proxmox-backup-manager. The namespace directory and the API token are operator-managed: the role verifies
+# that they exist and fails otherwise; it never generates a token or touches a secret.
+
+- name: Validate the own-pbs declaration
+  ansible.builtin.assert:
+    that:
+      - fleet_pg_backup_pbs_datastore | length > 0
+      - fleet_pg_backup_pbs_datastore_path is match('^/')
+      - fleet_pg_backup_pbs_namespace is match('^[A-Za-z0-9_-]+$')
+      - fleet_pg_backup_pbs_user.id is match('^[^!]+@pbs$')
+      - fleet_pg_backup_pbs_token_name | length > 0
+      - fleet_pg_backup_pbs_acls | length > 0
+    fail_msg: "own-pbs needs a datastore, its path, a namespace, a realm user, a token name and ACL entries."
+
+- name: Verify the namespace directory exists
+  ansible.builtin.stat:
+    path: "{{ fleet_pg_backup_pbs_datastore_path }}/ns/{{ fleet_pg_backup_pbs_namespace }}"
+  register: fleet_pg_backup_pbs_ns_dir
+
+- name: Require the namespace
+  ansible.builtin.assert:
+    that:
+      - fleet_pg_backup_pbs_ns_dir.stat.exists
+      - fleet_pg_backup_pbs_ns_dir.stat.isdir
+    fail_msg: >-
+      Namespace {{ fleet_pg_backup_pbs_namespace }} does not exist in datastore {{ fleet_pg_backup_pbs_datastore }}.
+      Create it through PBS first; this role does not create namespaces.
+
+- name: Read the PBS users
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - user
+      - list
+      - --output-format
+      - json
+  register: fleet_pg_backup_pbs_users
+  changed_when: false
+  check_mode: false
+
+- name: Report a missing PBS user
+  ansible.builtin.debug:
+    msg: "DRIFT: PBS user {{ fleet_pg_backup_pbs_user.id }} does not exist."
+  when: fleet_pg_backup_pbs_user.id not in (fleet_pg_backup_pbs_users.stdout | from_json | map(attribute='userid') | list)
+
+- name: Create the PBS user when missing
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - user
+      - create
+      - "{{ fleet_pg_backup_pbs_user.id }}"
+      - --comment
+      - "{{ fleet_pg_backup_pbs_user.comment }}"
+      - --enable
+      - "true"
+  when: fleet_pg_backup_pbs_user.id not in (fleet_pg_backup_pbs_users.stdout | from_json | map(attribute='userid') | list)
+  changed_when: true
+
+- name: Read the PBS API tokens of the user
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - user
+      - list-tokens
+      - "{{ fleet_pg_backup_pbs_user.id }}"
+      - --output-format
+      - json
+  register: fleet_pg_backup_pbs_tokens
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Require the API token (its secret is operator-managed)
+  ansible.builtin.assert:
+    that:
+      - fleet_pg_backup_pbs_tokens.rc == 0
+      - (fleet_pg_backup_pbs_user.id ~ '!' ~ fleet_pg_backup_pbs_token_name) in (fleet_pg_backup_pbs_tokens.stdout | from_json | map(attribute='tokenid') | list)
+    fail_msg: >-
+      Token {{ fleet_pg_backup_pbs_user.id }}!{{ fleet_pg_backup_pbs_token_name }} does not exist. Generate it on own-pbs
+      (`proxmox-backup-manager user generate-token`), store the secret only in the hypervisor's PBS storage secret file and
+      in the password manager, then rerun.
+
+- name: Read the PBS ACL list
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - acl
+      - list
+      - --output-format
+      - json
+  register: fleet_pg_backup_pbs_acl_list
+  changed_when: false
+  check_mode: false
+
+- name: Report missing ACL entries
+  ansible.builtin.debug:
+    msg: "DRIFT: ACL {{ item.role }} for {{ item.auth_id }} on {{ item.path }} is missing."
+  loop: "{{ fleet_pg_backup_pbs_acls }}"
+  loop_control:
+    label: "{{ item.path }} {{ item.role }} {{ item.auth_id }}"
+  when: >-
+    (fleet_pg_backup_pbs_acl_list.stdout | from_json
+    | selectattr('path', 'equalto', item.path)
+    | selectattr('roleid', 'equalto', item.role)
+    | selectattr('ugid', 'equalto', item.auth_id) | list | length) == 0
+
+- name: Add missing ACL entries
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - acl
+      - update
+      - "{{ item.path }}"
+      - "{{ item.role }}"
+      - --auth-id
+      - "{{ item.auth_id }}"
+  loop: "{{ fleet_pg_backup_pbs_acls }}"
+  loop_control:
+    label: "{{ item.path }} {{ item.role }} {{ item.auth_id }}"
+  when: >-
+    (fleet_pg_backup_pbs_acl_list.stdout | from_json
+    | selectattr('path', 'equalto', item.path)
+    | selectattr('roleid', 'equalto', item.role)
+    | selectattr('ugid', 'equalto', item.auth_id) | list | length) == 0
+  changed_when: true
+
+- name: Converge each declared prune job
+  ansible.builtin.include_tasks: pbs_prune_job.yml
+  loop: "{{ fleet_pg_backup_pbs_prune_jobs }}"
+  loop_control:
+    loop_var: fleet_pg_backup_prune_job
+    label: "{{ fleet_pg_backup_prune_job.id }}"

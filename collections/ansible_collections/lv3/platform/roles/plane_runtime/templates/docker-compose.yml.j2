@@ -63,6 +63,8 @@ services:
     image: {{ plane_backend_image }}
     container_name: {{ plane_api_container_name }}
     restart: unless-stopped
+    mem_limit: {{ plane_api_mem_limit }}
+    memswap_limit: {{ plane_api_memswap_limit }}
     command: ./bin/docker-entrypoint-api.sh
     env_file:
       - {{ plane_env_file }}
@@ -99,6 +101,8 @@ services:
     image: {{ plane_backend_image }}
     container_name: {{ plane_worker_container_name }}
     restart: unless-stopped
+    mem_limit: {{ plane_worker_mem_limit }}
+    memswap_limit: {{ plane_worker_memswap_limit }}
     command: ./bin/docker-entrypoint-worker.sh
     env_file:
       - {{ plane_env_file }}
@@ -122,6 +126,8 @@ services:
     image: {{ plane_backend_image }}
     container_name: {{ plane_beat_worker_container_name }}
     restart: unless-stopped
+    mem_limit: {{ plane_beat_worker_mem_limit }}
+    memswap_limit: {{ plane_beat_worker_memswap_limit }}
     command: ./bin/docker-entrypoint-beat.sh
     env_file:
       - {{ plane_env_file }}

@@ -1,0 +1,78 @@
+id: ws-0523-fleet-observability-roles
+adr: '0011'
+title: Codify the 2026-10-12 exporter, firewall, Tailscale node and Postgres backup changes on the 0docker, 0database and 0own fleets
+status: in_progress
+ready_to_merge: false
+live_applied: true
+owner: claude
+branch: fleet-observability-roles
+worktree_path: .worktrees/fleet-observability-roles
+doc: docs/workstreams/ws-0523-fleet-observability-roles.md
+depends_on:
+  - ws-0522-monitoring-live-changes-codify
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/fleet_node_exporter
+  - collections/ansible_collections/lv3/platform/roles/fleet_guest_firewall
+  - collections/ansible_collections/lv3/platform/roles/fleet_tailscale_node
+  - collections/ansible_collections/lv3/platform/roles/fleet_pg_backup
+  - inventory/fleet-observability.yml
+  - playbooks/fleet-observability.yml
+  - scripts/fleet_observability_render.py
+  - config/ansible-role-idempotency.yml
+  - config/publication-sanitization.yaml
+  - docs/runbooks/fleet-observability.md
+  - docs/runbooks/tailscale-metrics-grants.md
+  - tests/test_fleet_observability_roles.py
+  - docs/workstreams/ws-0523-fleet-observability-roles.md
+  - workstreams/active/ws-0523-fleet-observability-roles.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: fleet_observability_roles
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/fleet_node_exporter
+        - collections/ansible_collections/lv3/platform/roles/fleet_guest_firewall
+        - collections/ansible_collections/lv3/platform/roles/fleet_tailscale_node
+        - collections/ansible_collections/lv3/platform/roles/fleet_pg_backup
+        - inventory/fleet-observability.yml
+        - playbooks/fleet-observability.yml
+        - scripts/fleet_observability_render.py
+        - tests/test_fleet_observability_roles.py
+        - docs/runbooks/fleet-observability.md
+        - docs/workstreams/ws-0523-fleet-observability-roles.md
+        - workstreams/active/ws-0523-fleet-observability-roles.yaml
+      mode: exclusive
+    - id: exporter_listener_runbook
+      paths:
+        - docs/runbooks/tailscale-metrics-grants.md
+      mode: shared_contract
+      contract: tailscale-metrics-grants-runbook-v1
+    - id: role_idempotency_policy
+      paths:
+        - config/ansible-role-idempotency.yml
+      mode: shared_contract
+      contract: ansible-role-idempotency-policy-v1
+    - id: exporter_address_publication_sanitization
+      paths:
+        - config/publication-sanitization.yaml
+      mode: shared_contract
+      contract: tier-c-sanitization-replacements-v1
+    - id: active_workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: Add the fleet observability roles and playbook (explicit --limit only) that codify the live exporter, firewall, Tailscale route and Postgres backup changes on the 0docker, 0database and 0own fleets.
+  release_bump: patch
+tasks:
+  - id: t1
+    title: Seed an inventory per fleet and add the node_exporter, guest firewall, Tailscale node and Postgres backup roles
+    status: completed
+  - id: t2
+    title: Fix the vzdump metrics hook so size and duration are recorded for a PBS target
+    status: completed
+  - id: t3
+    title: Decide the woodpecker-0exec-build-metrics-proxy port conflict, then converge host by host in check mode first
+    status: in_progress

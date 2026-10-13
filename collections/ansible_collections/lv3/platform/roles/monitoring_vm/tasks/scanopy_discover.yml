@@ -1,0 +1,115 @@
+# Role Task File: monitoring_vm/tasks/scanopy_discover.yml
+# Purpose: Install the job that starts Scanopy discovery on a fixed daily UTC schedule, plus its systemd timer.
+# Use case: Included by the monitoring_vm role when monitoring_scanopy_discover_enabled is true. Scanopy's own scheduler is
+#           unreliable (schedules stored before a server restart never fire), so the fleet's daily discovery is driven from
+#           here through the API instead of relying on it.
+#
+# Inputs (required):
+#   - monitoring_scanopy_discover_* role defaults: install, key, textfile, and unit paths.
+#   - monitoring_scanopy_discover_schedule: {daemon name: "HH:MM"} in UTC (inventory/host_vars).
+#
+# Inputs (optional):
+#   - monitoring_scanopy_discover_environment: job overrides (SCANOPY_URL, DISCOVER_CATCHUP_HOURS, ...).
+#
+# Outputs:
+#   - /opt/scanopy-discover job + schedule.json + README, scanopy-discover.service and scanopy-discover.timer.
+#   - scanopy_discover_* metrics in the node_exporter textfile directory (alerts live in config/prometheus/rules/inventory.yml).
+#
+# Idempotency: Fully idempotent
+#              Files are compared by content and mode; the timer is only enabled, never restarted.
+#
+# Dependencies:
+#   - scanopy_retag.yml: the job reuses the API key that role installs (monitoring_scanopy_retag_api_key_file by default).
+#     The key must be allowed to start discovery sessions. This file never installs or replaces a key.
+#   - docs/runbooks/scanopy-service-discovery.md: describes the flow, the guards, and the rollback.
+#
+# Related Runbooks: docs/runbooks/scanopy-service-discovery.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-10-13
+---
+- name: Validate Scanopy discover inputs
+  ansible.builtin.assert:
+    that:
+      - monitoring_scanopy_discover_install_dir | length > 0
+      - monitoring_scanopy_discover_api_key_file | length > 0
+      - monitoring_scanopy_discover_textfile_dir | length > 0
+      - monitoring_scanopy_discover_schedule | length > 0
+      - >-
+        (monitoring_scanopy_discover_schedule | dict2items | map(attribute='value')
+        | select('match', '^([01][0-9]|2[0-3]):[0-5][0-9]$') | list | length) == (monitoring_scanopy_discover_schedule | length)
+    fail_msg: >-
+      monitoring_scanopy_discover_enabled requires the install, key, and textfile paths and a non-empty
+      monitoring_scanopy_discover_schedule whose values are UTC times in HH:MM form.
+    quiet: true
+
+- name: Check that the Scanopy API key shared with the retag job is provisioned on the host
+  ansible.builtin.stat:
+    path: "{{ monitoring_scanopy_discover_api_key_file }}"
+    get_checksum: false
+  register: monitoring_scanopy_discover_api_key_stat
+
+- name: Refuse to run the discover job without a non-empty Scanopy API key
+  ansible.builtin.assert:
+    that:
+      - monitoring_scanopy_discover_api_key_stat.stat.exists
+      - monitoring_scanopy_discover_api_key_stat.stat.size > 0
+    fail_msg: >-
+      No non-empty Scanopy API key at {{ monitoring_scanopy_discover_api_key_file }}. It is installed by the
+      scanopy_retag tasks (monitoring_scanopy_retag_enabled) from the controller-local retag key file; enable that first.
+    quiet: true
+
+- name: Ensure the Scanopy discover install directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_scanopy_discover_install_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the Scanopy discover job
+  ansible.builtin.copy:
+    src: scanopy-discover/scanopy_discover.py
+    dest: "{{ monitoring_scanopy_discover_script_file }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the Scanopy discover operator README
+  ansible.builtin.copy:
+    src: scanopy-discover/README
+    dest: "{{ monitoring_scanopy_discover_readme_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Scanopy discover schedule
+  ansible.builtin.template:
+    src: scanopy-discover-schedule.json.j2
+    dest: "{{ monitoring_scanopy_discover_schedule_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Scanopy discover systemd service
+  ansible.builtin.template:
+    src: scanopy-discover.service.j2
+    dest: "{{ monitoring_scanopy_discover_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Scanopy discover systemd timer
+  ansible.builtin.template:
+    src: scanopy-discover.timer.j2
+    dest: "{{ monitoring_scanopy_discover_timer_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable the Scanopy discover timer
+  ansible.builtin.systemd:
+    name: "{{ monitoring_scanopy_discover_timer_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true

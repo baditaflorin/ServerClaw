@@ -1,0 +1,12 @@
+---
+# Unused images older than this are removed (Docker duration, e.g. 168h = 7 days).
+fleet_docker_prune_image_max_age: 168h
+# BuildKit build cache older than this is removed.
+fleet_docker_prune_builder_cache_max_age: 168h
+# systemd OnCalendar expression and random spread for the daily run.
+fleet_docker_prune_on_calendar: "*-*-* 04:30:00"
+fleet_docker_prune_randomized_delay: 30m
+fleet_docker_prune_script_path: /usr/local/sbin/fleet-docker-prune
+fleet_docker_prune_unit_name: fleet-docker-prune
+# node_exporter textfile directory for the result metrics; empty disables them.
+fleet_docker_prune_textfile_dir: ""

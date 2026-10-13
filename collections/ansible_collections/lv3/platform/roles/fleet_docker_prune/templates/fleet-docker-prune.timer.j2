@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Docker image and build cache prune
+
+[Timer]
+OnCalendar={{ fleet_docker_prune_on_calendar }}
+RandomizedDelaySec={{ fleet_docker_prune_randomized_delay }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

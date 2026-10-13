@@ -8,12 +8,14 @@ ROLE_ROOT = REPO_ROOT / "roles" / "minio_runtime"
 DEFAULTS_PATH = ROLE_ROOT / "defaults" / "main.yml"
 TASKS_PATH = ROLE_ROOT / "tasks" / "main.yml"
 MIGRATE_SECRET_PATH = ROLE_ROOT / "tasks" / "migrate_secret.yml"
+MIGRATE_DATA_OWNER_PATH = ROLE_ROOT / "tasks" / "migrate_data_owner.yml"
 VERIFY_PATH = ROLE_ROOT / "tasks" / "verify.yml"
 COMPOSE_TEMPLATE = ROLE_ROOT / "templates" / "docker-compose.yml.j2"
 ENV_TEMPLATE = ROLE_ROOT / "templates" / "runtime.env.j2"
 ENV_CTEMPLATE = ROLE_ROOT / "templates" / "runtime.env.ctmpl.j2"
 MINIO_VARS_PATH = REPO_ROOT / "playbooks" / "vars" / "minio.yml"
 MINIO_SERVICE_PLAYBOOK_PATH = REPO_ROOT / "playbooks" / "services" / "minio.yml"
+PATCHED_MINIO_DOCKERFILE = REPO_ROOT / "build" / "patched-images" / "minio" / "Dockerfile"
 
 
 def load_yaml(path: Path) -> list[dict]:
@@ -69,6 +71,38 @@ def test_secret_migration_prefers_existing_remote_authority_without_rotation() -
     assert "| secret(length=20)" in tasks_text
     assert "force: false" in tasks_text
     assert "no_log: true" in tasks_text
+
+
+def test_nonroot_minio_migration_is_single_shot_and_recovers_on_failure() -> None:
+    defaults = DEFAULTS_PATH.read_text()
+    tasks = load_yaml(MIGRATE_DATA_OWNER_PATH)
+    task_names = [task["name"] for task in tasks]
+    migration_block = next(
+        task
+        for task in tasks
+        if task.get("name") == "Convert the MinIO data ownership before switching to the non-root user"
+    )
+    migration_names = [task["name"] for task in migration_block["block"]]
+    rollback_names = [task["name"] for task in migration_block["rescue"]]
+    dockerfile = PATCHED_MINIO_DOCKERFILE.read_text()
+    compose = COMPOSE_TEMPLATE.read_text()
+
+    assert "minio_runtime_uid: 10001" in defaults
+    assert "minio_runtime_gid: 10001" in defaults
+    assert "minio_data_owner_migration_marker_file" in defaults
+    assert task_names[0] == "Check the MinIO data-owner migration marker"
+    assert (
+        migration_names.index("Stop MinIO for the one-time object ownership conversion")
+        < migration_names.index("Transfer existing MinIO objects to the unprivileged UID and GID")
+        < migration_names.index("Mark MinIO data-owner migration complete")
+    )
+    assert "--recursive" in str(migration_block["block"][1]["ansible.builtin.command"]["argv"])
+    assert "Restore MinIO availability after migration failure" in rollback_names
+    assert "Report the failed MinIO ownership conversion" in rollback_names
+    assert "ansible_search_path | default([])" not in MIGRATE_DATA_OWNER_PATH.read_text()
+    assert 'user: "{{ minio_runtime_user }}"' in compose
+    assert "USER 10001:10001" in dockerfile
+    assert "MINIO_ROOT_PASSWORD_FILE" not in dockerfile
 
 
 def test_playbooks_use_the_registered_minio_openbao_contract() -> None:

@@ -145,6 +145,21 @@ argument_specs:
         required: true
         description:
           - Ignored controller-local Authentik API token file.
+      authentik_scope_mapping_manifest_file:
+        type: path
+        required: true
+        description:
+          - Controller-side non-secret OAuth scope mapping manifest.
+      authentik_scope_mapping_reconcile_script:
+        type: path
+        required: true
+        description:
+          - Controller-side idempotent scope mapping API reconciler.
+      authentik_scope_mapping_reconcile_token_file:
+        type: path
+        required: true
+        description:
+          - Ignored controller-local Authentik API token file.
       authentik_oauth_reconcile_clients:
         type: list
         elements: str

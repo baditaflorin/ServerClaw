@@ -1,0 +1,25 @@
+scanopy-sd: Scanopy inventory -> Prometheus file_sd (node_exporter + blackbox targets)
+
+Files
+  /opt/scanopy-sd/scanopy_sd.py        generator (python3 stdlib)
+  /opt/scanopy-sd/extra-endpoints.json small list of known-real endpoints Scanopy has no port data for
+  /opt/scanopy-sd/promq                helper: PromQL on stdin -> Prometheus API (auth from root-only file)
+  /etc/scanopy-sd/api-key              Scanopy Viewer API key (root 0600) - REQUIRED for live pulls
+  /var/lib/scanopy-sd/state.json       last-good counts, stickiness, identity cache
+  /etc/prometheus/file_sd/scanopy-node.json, scanopy-blackbox.json   outputs (atomic writes)
+  /var/lib/prometheus/node-exporter/scanopy_sd.prom   scanopy_sd_* metrics
+  systemd: scanopy-sd.service (oneshot) + scanopy-sd.timer (5 min)
+
+Behaviour
+  - pull fails / key missing  -> last-good files kept, last_success timestamp NOT advanced (ScanopySDStale fires after 30m)
+  - inventory or a target class shrinks >20% vs last-good -> files kept, guard_tripped=1
+    accept a real shrink with:  touch /var/lib/scanopy-sd/accept-shrink   (consumed on next run)
+  - exporter identity = node_uname_info nodename equal to an inventory name, OR the first DNS label of one (e.g.
+    scrapetheworld.org -> scrapetheworld) when that label is unique among inventory hosts; an ambiguous label is never
+    accepted. Optional explicit map for other cases: /opt/scanopy-sd/node-aliases.json = {"inventory name": ["nodename"]}
+    (not managed by the role; absent = no aliases).
+  - only endpoints connectable from this VM (now or within 7d) are published; node_exporter identity is
+    checked against node_uname_info so a mis-pointed proxy cannot be scraped under the wrong host.
+Manual run:   sudo systemctl start scanopy-sd.service ; journalctl -u scanopy-sd -n 20
+Seed from CLI output:  sudo python3 /opt/scanopy-sd/scanopy_sd.py --snapshot FILE   (fleet-runner scanopy --format json --limit 1000)
+Rollback: systemctl disable --now scanopy-sd.timer; restore /etc/prometheus/prometheus.yml.pre-scanopy-sd-*; reload.

@@ -1,0 +1,67 @@
+#!/bin/bash
+# vzdump hook: publish backup freshness metrics for node-exporter's textfile collector.
+# Managed by lv3.platform.fleet_pg_backup (inventory/fleet-observability.yml). Do not edit on the host.
+# Metrics (method="vzdump", vmid label):
+#   pg_backup_last_success_timestamp_seconds, pg_backup_last_attempt_timestamp_seconds,
+#   pg_backup_last_status (1 ok / 0 failed), pg_backup_size_bytes (logical bytes read by last
+#   successful run), pg_backup_duration_seconds
+# Installed for the 0database pg-primary (VM 100) vzdump->PBS job.
+#
+# vzdump calls: <hook> <phase> <mode> <vmid>. VMTYPE, HOSTNAME, TARGET and STOREID are exported; LOGFILE is exported only
+# when the backup target is a directory. For a Proxmox Backup Server target vzdump keeps the task log in
+# <log dir>/<vmtype>-<vmid>.log (uploaded to PBS afterwards) and never sets LOGFILE, so the log-end phase must fall back to
+# that path. Without the fallback size_bytes and duration_seconds stay at their old value (0 on a fresh install).
+PHASE="${1:-}"
+DEFAULT_VMID={{ fleet_pg_backup_hook_default_vmid }}
+VMID_L="${3:-$DEFAULT_VMID}"
+STATE={{ fleet_pg_backup_state_dir }}
+OUT={{ fleet_pg_backup_hook_textfile_dir }}/{{ fleet_pg_backup_hook_metrics_file }}
+LOGDIR={{ fleet_pg_backup_hook_vzdump_log_dir }}
+mkdir -p "$STATE"
+now=$(date +%s)
+get() { cat "$STATE/$1" 2>/dev/null || echo 0; }
+case "$PHASE" in
+  backup-start) echo "$now" > "$STATE/last_attempt"; echo "$now" > "$STATE/last_start" ;;
+  backup-end)
+    echo "$now" > "$STATE/last_success"; echo 1 > "$STATE/last_status"; echo "$now" > "$STATE/last_attempt"
+    # Wall clock fallback; log-end replaces it with the figure vzdump logged when it can be read.
+    start=$(get last_start)
+    if [ "$start" -gt 0 ] 2>/dev/null; then echo $((now - start)) > "$STATE/duration_seconds"; fi ;;
+  backup-abort) echo 0 > "$STATE/last_status"; echo "$now" > "$STATE/last_attempt" ;;
+  log-end)
+    LOG="${LOGFILE:-}"
+    if [ -z "$LOG" ] || [ ! -r "$LOG" ]; then LOG="$LOGDIR/${VMTYPE:-qemu}-$VMID_L.log"; fi
+    if [ "$(get last_status)" = 1 ] && [ -r "$LOG" ]; then
+      # e.g. "INFO: transferred 466.00 GiB in 4210 seconds (113.4 MiB/s)"
+      line=$(grep -E 'transferred [0-9.]+ [KMGT]i?B in [0-9]+ seconds' "$LOG" | tail -1)
+      if [ -n "$line" ]; then
+        num=$(echo "$line" | sed -E 's/.*transferred ([0-9.]+) ([KMGT])i?B in ([0-9]+) seconds.*/\1/')
+        unit=$(echo "$line" | sed -E 's/.*transferred ([0-9.]+) ([KMGT])i?B in ([0-9]+) seconds.*/\2/')
+        secs=$(echo "$line" | sed -E 's/.*transferred ([0-9.]+) ([KMGT])i?B in ([0-9]+) seconds.*/\3/')
+        case "$unit" in K) m=1024;; M) m=1048576;; G) m=1073741824;; T) m=1099511627776;; esac
+        awk -v n="$num" -v m="$m" 'BEGIN{printf "%.0f\n", n*m}' > "$STATE/size_bytes"
+        echo "$secs" > "$STATE/duration_seconds"
+      fi
+    fi ;;
+  *) exit 0 ;;
+esac
+tmp=$(mktemp "$OUT.XXXXXX")
+cat > "$tmp" <<M
+# HELP pg_backup_last_success_timestamp_seconds Unix time of the last successful backup.
+# TYPE pg_backup_last_success_timestamp_seconds gauge
+pg_backup_last_success_timestamp_seconds{method="vzdump",vmid="$VMID_L"} $(get last_success)
+# HELP pg_backup_last_attempt_timestamp_seconds Unix time of the last backup attempt.
+# TYPE pg_backup_last_attempt_timestamp_seconds gauge
+pg_backup_last_attempt_timestamp_seconds{method="vzdump",vmid="$VMID_L"} $(get last_attempt)
+# HELP pg_backup_last_status 1 if the last attempt succeeded, 0 if it failed.
+# TYPE pg_backup_last_status gauge
+pg_backup_last_status{method="vzdump",vmid="$VMID_L"} $(get last_status)
+# HELP pg_backup_size_bytes Logical bytes read by the last successful backup.
+# TYPE pg_backup_size_bytes gauge
+pg_backup_size_bytes{method="vzdump",vmid="$VMID_L"} $(get size_bytes)
+# HELP pg_backup_duration_seconds Duration of the last successful backup.
+# TYPE pg_backup_duration_seconds gauge
+pg_backup_duration_seconds{method="vzdump",vmid="$VMID_L"} $(get duration_seconds)
+M
+chmod 644 "$tmp"; mv -f "$tmp" "$OUT"
+exit 0

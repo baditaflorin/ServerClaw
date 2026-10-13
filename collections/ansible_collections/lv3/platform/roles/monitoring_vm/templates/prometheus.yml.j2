@@ -68,11 +68,24 @@ scrape_configs:
       - files:
           - {{ monitoring_prometheus_slo_targets_file }}
     relabel_configs:
+{% if monitoring_prometheus_blackbox_drop_address_regex | length > 0 %}
+      # Drop catalog placeholder and retired-subnet targets; live targets come from the Scanopy file_sd jobs.
+      - source_labels: [__address__]
+        regex: {{ monitoring_prometheus_blackbox_drop_address_regex | to_json }}
+        action: drop
+{% endif %}
       - source_labels: [__address__]
         target_label: __param_target
       - source_labels: [probe_module]
         target_label: __param_module
       - source_labels: [__param_target]
+        target_label: instance
+      # Edge-published endpoints are probed through the edge's private address with the public name as Host/SNI
+      # (blackbox "hostname" parameter); the monitoring VM cannot reach the public address (no hairpin NAT).
+      - source_labels: [probe_hostname]
+        target_label: __param_hostname
+      - source_labels: [display_url]
+        regex: (.+)
         target_label: instance
       - target_label: __address__
         replacement: 127.0.0.1:{{ monitoring_blackbox_exporter_port }}
@@ -83,6 +96,12 @@ scrape_configs:
       - files:
           - {{ monitoring_prometheus_https_tls_targets_file }}
     relabel_configs:
+{% if monitoring_prometheus_blackbox_drop_address_regex | length > 0 %}
+      # Drop catalog placeholder and retired-subnet targets; live targets come from the Scanopy file_sd jobs.
+      - source_labels: [__address__]
+        regex: {{ monitoring_prometheus_blackbox_drop_address_regex | to_json }}
+        action: drop
+{% endif %}
       - source_labels: [__address__]
         target_label: __param_target
       - source_labels: [probe_module]
@@ -96,7 +115,7 @@ scrape_configs:
 {% for service_id, service in monitoring_health_probe_catalog.services | dictsort %}
 {% for probe_kind in ['liveness', 'readiness'] %}
 {% set probe = service[probe_kind] %}
-{% if probe.kind in ['http', 'tcp'] %}
+{% if probe.kind in ['http', 'tcp'] and (monitoring_prometheus_health_probe_service_ids | length == 0 or service_id in monitoring_prometheus_health_probe_service_ids) %}
 
   - job_name: {{ service_id }}-{{ probe_kind }}
     metrics_path: /probe
@@ -130,3 +149,92 @@ scrape_configs:
 {% endif %}
 {% endfor %}
 {% endfor %}
+{% if monitoring_prometheus_public_edge_targets_file | length > 0 %}
+
+  - job_name: public-edge-critical
+    metrics_path: /probe
+    file_sd_configs:
+      - files:
+          - {{ monitoring_prometheus_public_edge_targets_file }}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [probe_module]
+        target_label: __param_module
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 127.0.0.1:{{ monitoring_blackbox_exporter_port }}
+{% endif %}
+{% if monitoring_prometheus_extra_scrape_jobs | length > 0 %}
+
+{{ monitoring_prometheus_extra_scrape_jobs | to_nice_yaml(indent=2) | indent(2, true) }}
+{% endif %}
+{% if monitoring_scanopy_sd_enabled | bool %}
+
+  # BEGIN scanopy-sd: targets are generated from the Scanopy inventory by {{ monitoring_scanopy_sd_script_file }}.
+  # The per-host `scanopy_job` label keeps job names that existing rule selectors depend on.
+  - job_name: node_exporter
+    scrape_interval: 30s
+    scrape_timeout: 15s
+    file_sd_configs:
+      - files:
+          - {{ monitoring_scanopy_sd_node_targets_file }}
+        refresh_interval: 1m
+    relabel_configs:
+{% if monitoring_scanopy_sd_node_drop_address_regex | length > 0 %}
+      # Exporters kept as static jobs above win; never scrape the same address twice.
+      - source_labels: [__address__]
+        regex: {{ monitoring_scanopy_sd_node_drop_address_regex | to_json }}
+        action: drop
+{% endif %}
+      - source_labels: [scanopy_job]
+        regex: (.+)
+        target_label: job
+      - regex: scanopy_job
+        action: labeldrop
+    metric_relabel_configs:
+      # cardinality guard: systemd and container-veth families
+      - source_labels: [__name__]
+        regex: node_systemd_.*
+        action: drop
+      - source_labels: [__name__, device]
+        regex: 'node_network_.*;(veth.*|br-.*|docker0)'
+        action: drop
+
+  - job_name: scanopy-blackbox
+    metrics_path: /probe
+    scrape_interval: 30s
+    scrape_timeout: 15s
+    file_sd_configs:
+      - files:
+          - {{ monitoring_scanopy_sd_blackbox_targets_file }}
+        refresh_interval: 1m
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [probe_module]
+        target_label: __param_module
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 127.0.0.1:{{ monitoring_blackbox_exporter_port }}
+  # END scanopy-sd
+{% endif %}
+{% if monitoring_prometheus_remote_write_targets | length > 0 %}
+remote_write:
+{% for target in monitoring_prometheus_remote_write_targets %}
+  - url: {{ target.url }}
+{% if target.basic_auth is defined %}
+    basic_auth:
+      username: {{ target.basic_auth.username }}
+      password_file: {{ target.basic_auth.password_file }}
+{% endif %}
+{% if target.queue_config is defined %}
+    queue_config:
+{% for key, value in target.queue_config | dictsort %}
+      {{ key }}: {{ value }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}

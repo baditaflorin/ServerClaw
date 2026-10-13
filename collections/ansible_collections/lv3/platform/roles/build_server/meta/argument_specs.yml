@@ -53,6 +53,12 @@ argument_specs:
         default: lv3-buildkitd
         description:
           - Systemd unit name for the managed BuildKit daemon.
+      build_server_buildkit_container_name:
+        type: str
+        required: false
+        default: lv3-buildkitd-managed
+        description:
+          - Distinct managed Docker container name used by the BuildKit systemd unit; legacy daemon containers keep their existing names during handoff.
       build_server_buildkit_builder_name:
         type: str
         required: false
@@ -83,3 +89,25 @@ argument_specs:
         default: {}
         description:
           - Optional upstream-registry mirror definitions keyed by canonical registry host for BuildKit pulls.
+      build_server_registry_hosts:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Registry hostname to private edge IPv4 mappings shared by the build host and its BuildKit container.
+      build_server_buildkit_legacy_container_names:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description:
+          - >-
+            Explicit legacy BuildKit containers to validate and stop. Their
+            same-named systemd units are stopped, and non-canonical units are
+            disabled so they cannot respawn the daemons.
+      build_server_buildkit_legacy_containers_idle_confirmed:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Operator confirmation that explicitly listed legacy BuildKit containers have no active builds.

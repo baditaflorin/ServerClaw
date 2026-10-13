@@ -166,6 +166,34 @@ class SubdomainCatalogTests(unittest.TestCase):
                 self.public_edge_defaults,
             )
 
+    def test_private_edge_route_is_collected_and_rejects_public_allowlists(self) -> None:
+        host_vars = {
+            "platform_service_topology": {
+                "gitea": {
+                    "public_hostname": "git.example.com",
+                    "private_edge": {
+                        "enabled": True,
+                        "tls": True,
+                        "allow_cidrs": ["10.10.10.1/32"],
+                    },
+                }
+            }
+        }
+        defaults = {"public_edge_extra_sites": [], "public_edge_apex_hostname": None}
+        self.assertIn("git.example.com", subdomain_catalog.collect_edge_route_hostnames(host_vars, defaults))
+        self.assertEqual(
+            subdomain_catalog.route_mode_for_entry(
+                {"fqdn": "git.example.com"},
+                subdomain_catalog.collect_edge_route_hostnames(host_vars, defaults),
+                subdomain_catalog.collect_private_edge_route_hostnames(host_vars),
+            ),
+            "private-edge",
+        )
+
+        host_vars["platform_service_topology"]["gitea"]["private_edge"]["allow_cidrs"] = ["0.0.0.0/0"]
+        with self.assertRaisesRegex(ValueError, "private unicast networks"):
+            subdomain_catalog.collect_edge_route_hostnames(host_vars, defaults)
+
     def test_provision_check_rejects_unrouted_edge_hostname(self) -> None:
         edge_route_hostnames = subdomain_catalog.collect_edge_route_hostnames(
             self.host_vars,

@@ -6,7 +6,7 @@ This runbook defines how LV3 pins, scans, refreshes, and upgrades every managed 
 
 ## Managed Sources
 
-The machine-readable source of truth is [config/image-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/config/image-catalog.json).
+The machine-readable source of truth is [config/image-catalog.json](../../config/image-catalog.json).
 
 Each entry records:
 
@@ -17,8 +17,8 @@ Each entry records:
 - the scan receipt path
 - the converge targets that make the new pin live
 
-Current catalog summary receipts live under [receipts/image-scans](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/image-scans).
-Underlying Syft and Grype artifacts live under [receipts/sbom](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/sbom) and [receipts/cve](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/cve).
+Current catalog summary receipts live under [receipts/image-scans](../../receipts/image-scans).
+Underlying Syft and Grype artifacts live under [receipts/sbom](../../receipts/sbom) and [receipts/cve](../../receipts/cve).
 
 ## Policy
 
@@ -31,6 +31,13 @@ Underlying Syft and Grype artifacts live under [receipts/sbom](/Users/live/Docum
 7. Managed converges read image refs from the catalog instead of hand-maintained per-role strings.
 8. ADR 0269 exceptions must also record a justification, compensating controls,
    an expiry date, and an explicit remediation plan.
+
+`scan_status` distinguishes three states: `pass_no_critical` means no Critical
+findings and no active exception; `exception_open` means a time-bounded
+exception is recorded; `blocked` means Critical findings remain and no active
+exception authorizes them. A blocked image remains pinned for evidence and
+rollback only—the vulnerability-budget gate must continue to reject it. Remove
+expired exception metadata rather than leaving it labeled `exception_open`.
 
 ## Verification
 
@@ -94,6 +101,48 @@ make upgrade-container-image \
   EXCEPTION_REMEDIATION_PLAN="Re-scan and refresh portainer_runtime before the exception expires."
 ```
 
+## Repository-owned patched runtime images
+
+For images whose upstream builds fail the zero-Critical or fixable-High gate,
+review the pinned source commits, source patches, and Dockerfiles under
+`build/patched-images/`. The manifest distinguishes source-built candidates
+from an upstream digest candidate such as Valkey.
+
+The source-built images are pushed only from the configured remote BuildKit
+host. This workflow uses the no-local-fallback `remote-image-build-strict`
+target. Harbor's private `patched-runtime` project has separate project-scoped
+robots: the builder can push and pull; the Docker runtime can only pull. The
+robot JSON files live only in the ignored `.local/harbor/` overlay and must
+never be copied into Git, output, or chat.
+
+After the Harbor project and scoped robots have been converged from the managed
+Harbor playbook, build and scan the exact candidate digests:
+
+```bash
+uv run --with pyyaml python scripts/build_patched_images.py \
+  --image all \
+  --registry <Harbor-hostname>
+```
+
+Without `--update-catalog`, this build-and-scan-only mode publishes candidates
+to the private Harbor project and writes candidate SBOM/CVE material to ignored
+`.local/` storage, but leaves the image catalog unchanged. Only use
+`--update-catalog` after reviewing the scan output; it writes immutable
+receipts and updates the catalog only when every selected digest has zero
+Critical findings and no fixable High/Critical findings:
+
+```bash
+uv run --with pyyaml python scripts/build_patched_images.py \
+  --image all \
+  --registry <Harbor-hostname> \
+  --update-catalog
+```
+
+Building and scanning does not deploy an image. Merge the catalog and source
+changes through the normal PR gate, then converge only the affected consumers
+through their documented service workflows. If any exact digest fails policy,
+leave it out of the catalog and do not deploy it.
+
 ## Windmill Surface
 
 Windmill seeds `f/lv3/upgrade_container_image` as the governed operator-facing wrapper for this workflow.
@@ -125,4 +174,5 @@ Catalog exceptions record:
 - If `make check-image-freshness` shows drift, do not update the digest without fresh Syft and Grype receipts.
 - If Grype reports any critical findings, do not commit the new digest without an explicit exception update in the catalog.
 - If the managed-image gate reports HIGH or CRITICAL findings with an available fix, do not commit the new digest.
+- If Critical findings remain without an active approved exception, set the catalog status to `blocked`, omit exception metadata, and leave all governed applies denied.
 - If an apply target fails after a catalog update, revert the catalog change or complete the rollout before merging to `main`.

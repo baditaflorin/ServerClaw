@@ -143,6 +143,7 @@ def test_manifest_resolves_identity_without_committing_deployment_values() -> No
     assert clients["outline"]["application"]["launch_url"] == "https://wiki.example.net"
     assert clients["outline"]["provider"]["redirect_uris"] == ["https://wiki.example.net/auth/oidc.callback"]
     assert clients["ops-portal-oauth"]["provider"]["redirect_uris"] == ["https://ops.example.net/oauth2/callback"]
+    assert "grafana-groups" in clients["grafana-oauth"]["provider"]["scopes"]
     assert clients["agent-hub"]["provider"]["client_id"] == "example-agent-hub"
     assert clients["serverclaw-runtime"]["provider"]["grant_types"] == ["client_credentials"]
 

@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh Scanopy-derived Prometheus targets every 5 minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec={{ monitoring_scanopy_sd_interval }}
+AccuracySec=15s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

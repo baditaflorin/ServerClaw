@@ -247,11 +247,11 @@
                 "properties": {
                   "mode": {
                     "type": "string",
-                    "enum": ["edge", "dns-only"]
+                    "enum": ["edge", "private-edge", "dns-only"]
                   },
                   "source": {
                     "type": "string",
-                    "enum": ["service_topology", "public_edge_extra_sites", "public_edge_apex", "dns-only"]
+                    "enum": ["service_topology", "service_topology_private_edge", "public_edge_extra_sites", "public_edge_apex", "dns-only"]
                   },
                   "kind": {
                     "type": ["string", "null"]

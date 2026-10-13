@@ -530,6 +530,126 @@ exit 1
     ]
 
 
+def test_docker_runtime_accepts_removed_ephemeral_nonpersistent_container_after_restart(tmp_path: Path) -> None:
+    tasks = load_tasks()
+    confirm_recovery = next(
+        task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts"
+    )
+    script = confirm_recovery["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
+    fake_docker = tmp_path / "docker"
+    fake_docker.write_text(
+        """#!/bin/sh
+if [ "$1" = "inspect" ] && [ "$2" = "wp_01M4R6S01M7YGN0C1J01TGGTPR" ]; then
+  echo "Error: No such object: $2" >&2
+  exit 1
+fi
+echo "unexpected command: $*" >&2
+exit 1
+"""
+    )
+    fake_docker.chmod(0o755)
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        input=json.dumps(
+            [
+                {
+                    "Name": "/wp_01M4R6S01M7YGN0C1J01TGGTPR",
+                    "HostConfig": {"RestartPolicy": {"Name": "no"}},
+                    "Config": {"Labels": {"wp_step": "test", "wp_uuid": "01M4R6S01M7YGN0C1J01TGGTPR"}},
+                }
+            ]
+        ),
+        text=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "PATH": f"{tmp_path}:{os.environ['PATH']}",
+        },
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr or result.stdout
+    statuses = json.loads(result.stdout)
+    assert statuses == [
+        {
+            "requested_name": "wp_01M4R6S01M7YGN0C1J01TGGTPR",
+            "full_name": "/wp_01M4R6S01M7YGN0C1J01TGGTPR",
+            "exists": False,
+            "restart_policy_name": "no",
+            "require_running": False,
+            "running": False,
+            "status": "missing",
+            "exit_code": None,
+            "healthy": True,
+        }
+    ]
+
+
+def test_docker_runtime_rejects_removed_persistent_container_after_restart(tmp_path: Path) -> None:
+    tasks = load_tasks()
+    confirm_recovery = next(
+        task for task in tasks if task["name"] == "Confirm pre-restart containers recovered after Docker restarts"
+    )
+    script = confirm_recovery["ansible.builtin.command"]["argv"][2]
+    script = script.replace(
+        "{{ docker_runtime_nonpersistent_restart_policies | to_json }}",
+        json.dumps(load_defaults()["docker_runtime_nonpersistent_restart_policies"]),
+    )
+    fake_docker = tmp_path / "docker"
+    fake_docker.write_text(
+        """#!/bin/sh
+if [ "$1" = "inspect" ] && [ "$2" = "critical-service" ]; then
+  echo "Error: No such object: $2" >&2
+  exit 1
+fi
+echo "unexpected command: $*" >&2
+exit 1
+"""
+    )
+    fake_docker.chmod(0o755)
+
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        input=json.dumps(
+            [
+                {
+                    "Name": "/critical-service",
+                    "HostConfig": {"RestartPolicy": {"Name": "always"}},
+                    "Config": {"Labels": {}},
+                }
+            ]
+        ),
+        text=True,
+        capture_output=True,
+        env={
+            **os.environ,
+            "PATH": f"{tmp_path}:{os.environ['PATH']}",
+        },
+        check=False,
+    )
+
+    assert result.returncode == 1
+    statuses = json.loads(result.stdout)
+    assert statuses == [
+        {
+            "requested_name": "critical-service",
+            "full_name": "/critical-service",
+            "exists": False,
+            "restart_policy_name": "always",
+            "require_running": True,
+            "running": False,
+            "status": "missing",
+            "exit_code": None,
+            "healthy": False,
+        }
+    ]
+
+
 def test_docker_runtime_accepts_compose_managed_replacement_container_after_restart(tmp_path: Path) -> None:
     tasks = load_tasks()
     confirm_recovery = next(

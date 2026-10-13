@@ -30,6 +30,8 @@ playbooks:
       - service:glitchtip
       - service:outline
       - config/authentik/oauth-clients.yaml
+      - config/authentik/scope-mappings.yaml
+      - scripts/reconcile_authentik_scope_mappings.py
       - config/integrations/glitchtip--authentik.yaml
       - config/integrations/outline--authentik.yaml
       - inventory/host_vars/proxmox-host.yml
@@ -739,6 +741,13 @@ playbooks:
     shared_surfaces:
       - service:grafana
       - inventory/host_vars/proxmox-host.yml
+  playbooks/services/prometheus-0own-node-exporter.yml:
+    playbook_id: prometheus-0own-node-exporter
+    mutation_scope: host
+    shared_surfaces:
+      - inventory/host_vars/monitoring.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/0own_node_exporter_target.yml
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/0own-node-exporter-scrape.yml.j2
   playbooks/services/mailpit.yml:
     playbook_id: mailpit
     mutation_scope: lane

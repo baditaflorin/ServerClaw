@@ -1,0 +1,72 @@
+---
+# Purpose: Codify the fleet observability and Postgres backup changes made by hand on the 0mcp, 0docker, 0database and 0own hosts.
+# Use case: Run by an operator against ONE host at a time, check mode first. Never part of a fleet-wide converge or a default make target.
+# Inputs: inventory/fleet-observability.yml (explicit -i), --limit <host>, the fleet_* host variables in that inventory.
+# Outputs: node_exporter listeners and socket proxies, guest nftables, advertised Tailscale routes, the Postgres backup stack pieces.
+# Idempotency: Every role reads before it writes and reports drift as DRIFT lines; a second run is a no-op.
+# Dependencies: docs/runbooks/fleet-observability.md (order of hosts, rollback, what stays operator-managed).
+#
+#   ansible-playbook -i inventory/fleet-observability.yml playbooks/fleet-observability.yml \
+#     --limit 0own_github_mirror --check --diff
+#
+# Nothing here is wired into playbooks/site.yml, Makefile targets or the Semaphore/Windmill catalogs.
+
+- name: Refuse to run without an explicit, small --limit
+  hosts: all
+  gather_facts: false
+  run_once: true
+  tags: [always]
+  tasks:
+    - name: Require --limit and a bounded host count
+      ansible.builtin.assert:
+        that:
+          - ansible_limit is defined
+          - (ansible_limit | string | trim) not in ['', 'all', '*', 'fleet_observability']
+          - ansible_play_hosts_all | length <= (fleet_observability_max_hosts | default(1) | int)
+        fail_msg: >-
+          playbooks/fleet-observability.yml must be run with --limit naming at most
+          {{ fleet_observability_max_hosts | default(1) }} host(s) (now {{ ansible_play_hosts_all | length }} matched; limit is
+          '{{ ansible_limit | default('<none>') }}'). Run it with --check --diff first, one host at a time. See
+          docs/runbooks/fleet-observability.md. Raise the cap deliberately with -e fleet_observability_max_hosts=N.
+        quiet: true
+      delegate_to: localhost
+
+- name: Fleet node_exporter, textfile directory, socket proxies and tailscale serve
+  hosts: fleet_node_exporter_hosts
+  serial: 1
+  gather_facts: false
+  tags: [exporter]
+  roles:
+    - role: lv3.platform.fleet_node_exporter
+
+- name: Fleet Tailscale node settings (advertised routes only)
+  hosts: fleet_tailscale_node_hosts
+  serial: 1
+  gather_facts: false
+  tags: [tailscale]
+  roles:
+    - role: lv3.platform.fleet_tailscale_node
+
+- name: Fleet guest firewall (nftables)
+  hosts: fleet_guest_firewall_hosts
+  serial: 1
+  gather_facts: false
+  tags: [firewall]
+  roles:
+    - role: lv3.platform.fleet_guest_firewall
+
+- name: Postgres backup stack (own-pbs, then the 0database hypervisor, then pg-primary)
+  hosts: fleet_pg_backup_hosts
+  serial: 1
+  gather_facts: false
+  tags: [backup]
+  roles:
+    - role: lv3.platform.fleet_pg_backup
+
+- name: Docker image and build cache prune timer (build hosts)
+  hosts: fleet_docker_prune_hosts
+  serial: 1
+  gather_facts: false
+  tags: [docker-prune]
+  roles:
+    - role: lv3.platform.fleet_docker_prune

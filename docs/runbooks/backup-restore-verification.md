@@ -1,6 +1,21 @@
 # Backup Restore Verification
 
-ADR 0099 adds a repository-managed restore verification workflow that restores the highest-risk PBS-protected guests into the staging bridge, runs smoke tests, writes a receipt, and tears the restored VMs down unconditionally.
+## Production safety gate
+
+Do not assume the configured fixture bridge is isolated because this runbook
+calls it a staging bridge. The runner requires an explicit isolated fixture,
+no default gateway, no overlap with managed guest addresses, and a Proxmox
+bridge with no host IPv4 address or attached ports. Verify restore storage and
+available host capacity before booting any restored guest. If isolation or
+capacity cannot be proven, stop before starting the restored VM and record the
+blocker; do not improvise a subnet or reuse the source guest's network identity.
+
+The generic workflow must also use the storage identifier and restore target
+appropriate to the deployment. Its historical defaults may not match an
+already-running private environment. Confirm both values with read-only
+Proxmox queries before invoking `make restore-verification`.
+
+ADR 0099 adds a repository-managed restore verification workflow that restores the highest-risk PBS-protected guests into a configured, verified isolated bridge, runs smoke tests, writes a receipt, and tears down only VMs created by the current run.
 
 ADR 0190 extends the `docker-runtime` portion of that flow with a privacy-safe synthetic transaction replay so recovery validation records request success rate and latency distribution instead of only single-shot smoke checks.
 
@@ -17,45 +32,46 @@ ADR 0272 extends the same workflow with restore-readiness ladders and governed w
 
 For focused recovery drills or ADR-local replays, scope the run to one or more guests:
 
-- `make restore-verification RESTORE_ARGS='--targets docker-runtime --selection-strategy latest --ssh-timeout-seconds 900'`
+- `make restore-verification RESTORE_ARGS='--targets docker-runtime --storage-id lv3-backup-pbs --restore-storage local --selection-strategy latest --ssh-timeout-seconds 900'`
+- Override `--storage-id` and `--restore-storage` with values confirmed on the selected Proxmox host; do not assume the generic defaults match a private deployment.
 
 ## Targets
 
-The current repository implementation verifies three guests:
+The current repository defines restore targets for three guests:
 
 - `postgres` restored to VMID `900`
 - `docker-runtime` restored to VMID `901`
 - `backup` restored to VMID `902`
 
-Each restore uses the staging bridge and IP assignments already defined for the ADR 0088 fixture network:
-
-- `docker-runtime` -> `10.10.10.100/24`
-- `postgres` -> `10.10.10.110/24`
-- `backup` -> `10.10.10.120/24`
+The fixture network values are configuration only. The current fixtures are
+marked `isolated: false` until a dedicated isolated bridge and non-overlapping
+addresses are provisioned and verified; therefore they are not eligible for a
+live restore today.
 
 ## Workflow
 
-1. Query `sudo pvesm list lv3-backup-pbs` on the Proxmox host.
-2. Select one backup per target from the last 7 days.
-3. Restore the backup into VMIDs `900` to `902`.
-4. Rewire the restored guest to `vmbr20`, keep the original MAC, refresh cloud-init, and boot it.
-5. Wait for the guest access path (`ssh` first, then `qga` fallback) to become usable.
-6. Optionally stage an ADR 0187 seed snapshot under `/var/lib/lv3-seed-data/restore-verification/<vm-name>/`.
-7. Apply the declared restore-readiness profile from `config/restore-readiness-profiles.json`.
-8. Record the readiness ladder stages:
+1. Query `sudo pvesm list <storage-id>` on the Proxmox host, using the same `--storage-id` supplied to the workflow.
+2. Require an explicit isolated-network fixture with no gateway, no address overlap with managed guests, an unaddressed/empty Proxmox bridge, and an approved capacity result.
+3. Refuse the restore if the target VMID already exists anywhere in the Proxmox cluster; existing VMs are never removed to make room. A VMID becomes run-owned only after `qmrestore` succeeds.
+4. Select one backup per target from the last 7 days and restore it to the selected `--restore-storage`.
+5. Rewire the restored guest to the verified isolated bridge without a default gateway, keep the generated unique MAC, refresh cloud-init, and boot it.
+6. Use QEMU guest-agent access for isolated guests; do not rely on SSH from the Proxmox host into a network intentionally lacking a host-side address.
+7. Optionally stage an ADR 0187 seed snapshot under `/var/lib/lv3-seed-data/restore-verification/<vm-name>/` only when the fixture explicitly enables the SSH path.
+8. Apply the declared restore-readiness profile from `config/restore-readiness-profiles.json`.
+9. Record the readiness ladder stages:
    - restore completed
    - guest boot completed
    - guest access path ready
    - network and dependency path ready
    - service-specific warm-up completed
    - synthetic replay window passed
-9. Run repeated guest-local warm-up checks until the profile passes or its attempt budget is exhausted.
-10. Replay the ADR 0190 synthetic control-plane transactions only when the profile declares synthetic replay and the service-specific warm-up stage has already passed.
-11. Write one JSON receipt under `receipts/restore-verifications/`.
-12. Emit the mutation-audit event and optional NATS plus Mattermost notifications.
-13. Destroy the restored VMs even when an earlier step fails.
+10. Run repeated guest-local warm-up checks until the profile passes or its attempt budget is exhausted. Confirm host-published service bind addresses work on the fixture before treating app readiness as meaningful.
+11. Replay the ADR 0190 synthetic control-plane transactions only when the profile declares synthetic replay and the service-specific warm-up stage has already passed.
+12. Write one JSON receipt under `receipts/restore-verifications/`.
+13. Emit the mutation-audit event and optional NATS plus Mattermost notifications.
+14. Mark the restored guest with a unique per-run Proxmox tag, then verify that exact tag before cleanup. Destroy only a matching run-owned VMID; pre-existing, replaced, unmarked, or unverifiable VMs are left untouched and cleanup failure is written into the verification result.
 
-If the restored guest boots but never exposes an SSH banner through the fixture bridge in time, the workflow falls back to Proxmox guest-agent (`qga`) execution for the guest-local smoke commands and synthetic replay. That keeps the rehearsal governed and repeatable without ad hoc host-side shelling into the restored VM.
+Isolated fixtures use QEMU guest-agent (`qga`) for guest-local smoke commands and synthetic replay. Non-isolated legacy fixtures may use SSH with a QGA fallback, but the runner will refuse their live execution until they meet the isolation checks.
 
 ## Restore-Readiness Profiles
 

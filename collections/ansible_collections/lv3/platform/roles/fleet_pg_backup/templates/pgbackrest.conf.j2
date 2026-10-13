@@ -1,0 +1,27 @@
+# pgBackRest config for pg-primary (PG18, cluster 18/main) -- PREPARED, NOT ACTIVE.
+# No repo is configured on purpose: pgbackrest refuses to run until repo1-* is set, and
+# archive_command is NOT set in Postgres. See {{ fleet_pg_backup_pgbackrest_prepared_dir }}/RUNBOOK.txt.
+# Package default /etc/pgbackrest.conf (repo1-path=/var/lib/pgbackrest on the 82%-full root FS)
+# is superseded by this file; never use it.
+# Managed by lv3.platform.fleet_pg_backup. The repo encryption passphrase lives only in
+# {{ fleet_pg_backup_pgbackrest_conf_dir }}/{{ fleet_pg_backup_pgbackrest_cipher_file }} (never in git).
+[global]
+{% if fleet_pg_backup_pgbackrest_repo | length == 0 %}
+# --- repository: SET ONE (see RUNBOOK) -------------------------------------------------
+# repo1-type=sftp / repo1-path=... / repo1-sftp-host=... / repo1-sftp-host-user=... / repo1-sftp-private-key-file=...
+# ----------------------------------------------------------------------------------------
+{% else %}
+# --- repository ------------------------------------------------------------------------
+{% for key, value in fleet_pg_backup_pgbackrest_repo.items() %}
+repo1-{{ key }}={{ value }}
+{% endfor %}
+# ----------------------------------------------------------------------------------------
+{% endif %}
+{% for setting in fleet_pg_backup_pgbackrest_global_settings %}
+{{ setting }}
+{% endfor %}
+
+[{{ fleet_pg_backup_pgbackrest_stanza }}]
+pg1-path={{ fleet_pg_backup_pgbackrest_pg_path }}
+pg1-socket-path={{ fleet_pg_backup_pgbackrest_pg_socket_path }}
+pg1-user={{ fleet_pg_backup_pgbackrest_pg_user }}

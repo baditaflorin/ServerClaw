@@ -196,6 +196,20 @@ def test_main_uses_utc_generated_date_for_written_index(monkeypatch) -> None:
     assert captured["generated_on"] == dt.date(2026, 4, 3)
 
 
+def test_generated_date_preserves_committed_artifact_date_without_git_history(monkeypatch, tmp_path: Path) -> None:
+    module = load_module("generate_adr_index_snapshot_date", "scripts/generate_adr_index.py")
+    index_path = tmp_path / ".index.yaml"
+    index_path.write_text("generated: '2026-10-07'\n", encoding="utf-8")
+    monkeypatch.setattr(module, "INDEX_PATH", index_path)
+
+    def unavailable_git(*args, **kwargs):
+        raise module.subprocess.CalledProcessError(128, args[0], stderr="not a git repository")
+
+    monkeypatch.setattr(module.subprocess, "run", unavailable_git)
+
+    assert module.generated_date() == dt.date(2026, 10, 7)
+
+
 def test_bold_frontmatter_metadata_is_parsed_into_status_shards(tmp_path: Path) -> None:
     module = load_module("adr_discovery_bold_frontmatter", "scripts/adr_discovery.py")
     adr_dir = tmp_path / "docs" / "adr"

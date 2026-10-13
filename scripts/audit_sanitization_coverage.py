@@ -18,7 +18,7 @@ import ipaddress
 import json
 import re
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
@@ -67,6 +67,10 @@ PRIVATE_IPV4_NETWORKS = [
 # IPs that are never sensitive (bind addresses, broadcast, link-local, masks)
 IGNORE_IPS = frozenset(
     {
+        # Public recursive DNS resolvers are generic service endpoints, not
+        # deployment-owned infrastructure addresses to rewrite on publication.
+        "1.1.1.1",
+        "8.8.8.8",
         "0.0.0.0",
         "255.255.255.255",
         "255.255.255.0",

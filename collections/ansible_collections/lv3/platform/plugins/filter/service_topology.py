@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import ipaddress
+
 from ansible.errors import AnsibleFilterError
 
 
@@ -100,6 +102,94 @@ def service_topology_edge_sites(catalog):
     return sites
 
 
+def service_topology_private_edge_sites(catalog):
+    """Build TLS reverse-proxy sites restricted to explicit private source CIDRs."""
+    sites = []
+    for service_id, service_data in _ensure_catalog(catalog).items():
+        service = _service_with_id(service_id, service_data)
+        private_edge = service.get("private_edge")
+        if private_edge is None:
+            continue
+        private_edge = _service_with_id(service_id, private_edge)
+        if not private_edge.get("enabled", False):
+            continue
+
+        hostname = service.get("public_hostname")
+        if not isinstance(hostname, str) or not hostname.strip():
+            raise AnsibleFilterError(
+                f"service {service_id} enables a private edge route without public_hostname"
+            )
+        upstream = private_edge.get("upstream")
+        if not isinstance(upstream, str) or not upstream.strip():
+            raise AnsibleFilterError(
+                f"service {service_id} enables a private edge route without upstream"
+            )
+        if private_edge.get("tls", True) is not True:
+            raise AnsibleFilterError(
+                f"service {service_id} private edge route must use TLS"
+            )
+
+        allow_cidrs = private_edge.get("allow_cidrs")
+        if not isinstance(allow_cidrs, list) or not allow_cidrs:
+            raise AnsibleFilterError(
+                f"service {service_id} private edge route requires a non-empty allow_cidrs list"
+            )
+        normalized_cidrs = []
+        for cidr in allow_cidrs:
+            if not isinstance(cidr, str) or not cidr.strip():
+                raise AnsibleFilterError(
+                    f"service {service_id} private edge route allow_cidrs must contain CIDR strings"
+                )
+            try:
+                network = ipaddress.ip_network(cidr, strict=False)
+            except ValueError as exc:
+                raise AnsibleFilterError(
+                    f"service {service_id} private edge route has invalid CIDR {cidr!r}"
+                ) from exc
+            if (
+                not network.is_private
+                or network.is_loopback
+                or network.is_link_local
+                or network.is_multicast
+                or network.is_unspecified
+            ):
+                raise AnsibleFilterError(
+                    f"service {service_id} private edge route CIDR {cidr!r} must be a private unicast network"
+                )
+            normalized_cidrs.append(str(network))
+
+        aliases = private_edge.get("aliases", [])
+        if not isinstance(aliases, list) or any(
+            not isinstance(alias, str) or not alias.strip() for alias in aliases
+        ):
+            raise AnsibleFilterError(
+                f"service {service_id} private edge route aliases must be non-empty strings"
+            )
+
+        site = {
+            "hostname": hostname,
+            "kind": "proxy",
+            "upstream": upstream,
+            "private_only": True,
+            "allow_cidrs": normalized_cidrs,
+        }
+        for optional_field in (
+            "aliases",
+            "client_max_body_size",
+            "proxy_read_timeout_seconds",
+            "proxy_request_buffering",
+            "proxy_send_timeout_seconds",
+            "security_headers_enabled",
+            "websocket",
+        ):
+            if optional_field in private_edge:
+                site[optional_field] = private_edge[optional_field]
+        if aliases:
+            site["aliases"] = aliases
+        sites.append(site)
+    return sites
+
+
 def service_topology_edge_static_sites(catalog):
     static_sites = []
     for service_id, service_data in _ensure_catalog(catalog).items():
@@ -182,6 +272,7 @@ class FilterModule(object):
                 service_topology_edge_certificate_domains
             ),
             "service_topology_edge_sites": service_topology_edge_sites,
+            "service_topology_private_edge_sites": service_topology_private_edge_sites,
             "service_topology_edge_static_sites": service_topology_edge_static_sites,
             "service_topology_dns_records": service_topology_dns_records,
         }

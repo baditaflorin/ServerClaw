@@ -1,0 +1,47 @@
+---
+argument_specs:
+  main:
+    short_description: Prune unused Docker images and old build cache on a fleet build host with a systemd timer.
+    options:
+      fleet_docker_prune_image_max_age:
+        type: str
+        required: false
+        default: 168h
+        description:
+          - Unused images older than this Docker duration are removed (`docker image prune -af --filter until=...`).
+      fleet_docker_prune_builder_cache_max_age:
+        type: str
+        required: false
+        default: 168h
+        description:
+          - BuildKit build cache older than this Docker duration is removed.
+      fleet_docker_prune_on_calendar:
+        type: str
+        required: false
+        default: "*-*-* 04:30:00"
+        description:
+          - systemd OnCalendar expression for the run.
+      fleet_docker_prune_randomized_delay:
+        type: str
+        required: false
+        default: 30m
+        description:
+          - systemd RandomizedDelaySec for the timer.
+      fleet_docker_prune_script_path:
+        type: str
+        required: false
+        default: /usr/local/sbin/fleet-docker-prune
+        description:
+          - Where the prune script is installed.
+      fleet_docker_prune_unit_name:
+        type: str
+        required: false
+        default: fleet-docker-prune
+        description:
+          - Base name of the systemd service and timer.
+      fleet_docker_prune_textfile_dir:
+        type: str
+        required: false
+        default: ""
+        description:
+          - node_exporter textfile directory for the result metrics. Empty disables the metrics.

@@ -142,7 +142,7 @@
       "fqdn": "annotate.example.com",
       "service_id": "label_studio",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
       "target": "203.0.113.1",
@@ -153,7 +153,7 @@
         "auto_renew": true,
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/"
       },
-      "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Authentik boundary; repo-managed Label Studio tokens remain the current app-local automation path."
+      "notes": "Published through the shared NGINX edge and protected by the shared oauth2-proxy plus Authentik boundary; repo-managed Label Studio tokens remain the current app-local automation path. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "api.example.com",
@@ -195,7 +195,7 @@
       "fqdn": "bi.example.com",
       "service_id": "superset",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
       "target": "203.0.113.1",
@@ -206,7 +206,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Authentik OIDC client."
+      "notes": "Published through the shared NGINX edge while browser authentication remains service-native through the repo-managed Authentik OIDC client. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "billing.example.com",
@@ -313,7 +313,7 @@
       "fqdn": "cloud.example.com",
       "service_id": "nextcloud",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
       "target": "203.0.113.1",
@@ -324,7 +324,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects."
+      "notes": "Published through the shared NGINX edge while Nextcloud itself enforces browser and DAV authentication plus .well-known DAV discovery redirects. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "coolify.example.com",
@@ -347,7 +347,7 @@
       "fqdn": "data.example.com",
       "service_id": "directus",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
       "target": "203.0.113.1",
@@ -358,7 +358,7 @@
         "auto_renew": true,
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/"
       },
-      "notes": "The shared NGINX edge publishes data.example.com directly to Directus. Browser users authenticate upstream through Authentik and API consumers authenticate with Directus-issued bearer tokens."
+      "notes": "The shared NGINX edge publishes data.example.com directly to Directus. Browser users authenticate upstream through Authentik and API consumers authenticate with Directus-issued bearer tokens. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "database.example.com",
@@ -486,7 +486,7 @@
       "fqdn": "flags.example.com",
       "service_id": "flagsmith",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
       "target": "203.0.113.1",
@@ -497,7 +497,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Authentik."
+      "notes": "The shared edge leaves `/health` public for probes while the Flagsmith UI and browser management API remain behind oauth2-proxy and Authentik. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "git.example.com",
@@ -506,14 +506,15 @@
       "status": "active",
       "exposure": "private-only",
       "auth_requirement": "private_network",
-      "target": "100.64.0.1",
-      "target_port": 3009,
+      "target": "192.0.2.10",
+      "target_port": 443,
       "owner_adr": "0143",
       "tls": {
-        "provider": "none",
-        "auto_renew": false
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
+        "auto_renew": true
       },
-      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime."
+      "notes": "Private HTTPS route for Gitea; the NGINX source allowlist admits only the trusted tailnet subnet-router path. The controller-only TCP proxy remains separate."
     },
     {
       "fqdn": "grafana.example.com",
@@ -552,7 +553,7 @@
       "fqdn": "grist.example.com",
       "service_id": "grist",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
       "target": "203.0.113.1",
@@ -563,7 +564,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Authentik OIDC client."
+      "notes": "Published through the shared NGINX edge while Grist itself delegates operator browser sign-in to the repo-managed Authentik OIDC client. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "headscale.example.com",
@@ -620,7 +621,7 @@
       "fqdn": "langfuse.example.com",
       "service_id": "langfuse",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
       "target": "203.0.113.1",
@@ -630,7 +631,8 @@
         "provider": "letsencrypt",
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
-      }
+      },
+      "notes": "Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "livekit.example.com",
@@ -687,7 +689,7 @@
       "fqdn": "matrix.example.com",
       "service_id": "matrix_synapse",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
       "target": "203.0.113.1",
@@ -698,7 +700,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR."
+      "notes": "The public hostname terminates at the shared edge and forwards only the Matrix client listener; authentication is enforced by Synapse and federation stays disabled for this ADR. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "minio-console.example.com",
@@ -738,7 +740,7 @@
       "fqdn": "n8n.example.com",
       "service_id": "n8n",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "edge_oidc",
       "target": "203.0.113.1",
@@ -749,7 +751,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "The editor is protected by the shared oauth2-proxy and Authentik edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
+      "notes": "The editor is protected by the shared oauth2-proxy and Authentik edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "nginx.example.com",
@@ -822,7 +824,7 @@
       "fqdn": "paperless.example.com",
       "service_id": "paperless",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
       "target": "203.0.113.1",
@@ -833,7 +835,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge; docs.example.com remains reserved for the developer portal from ADR 0094."
+      "notes": "Published through the shared NGINX edge; docs.example.com remains reserved for the developer portal from ADR 0094. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "proxmox.example.com",
@@ -889,7 +891,7 @@
       "fqdn": "repowise.example.com",
       "service_id": "repowise",
       "environment": "production",
-      "status": "active",
+      "status": "retiring",
       "exposure": "edge-published",
       "auth_requirement": "upstream_auth",
       "target": "203.0.113.1",
@@ -900,7 +902,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Local semantic code search over the repository using Ollama embeddings and Qdrant vector storage. No third-party APIs required."
+      "notes": "Local semantic code search over the repository using Ollama embeddings and Qdrant vector storage. No third-party APIs required. Edge publication disabled 2026-10-12: the backend was never deployed on this fleet, so the vhost is unpublished until the service is deployed."
     },
     {
       "fqdn": "s3.example.com",

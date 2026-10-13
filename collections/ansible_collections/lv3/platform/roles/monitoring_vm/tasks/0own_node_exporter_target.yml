@@ -1,0 +1,167 @@
+---
+- name: Verify the 0own exporter is reachable over Tailscale
+  ansible.builtin.uri:
+    url: "http://{{ monitoring_prometheus_0own_node_exporter_target.address }}/metrics"
+    method: GET
+    status_code: 200
+    return_content: false
+    timeout: 5
+  changed_when: false
+
+- name: Confirm the configured Prometheus systemd unit is active before editing
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - "{{ monitoring_prometheus_service_name }}.service"
+  register: monitoring_0own_prometheus_service_state
+  changed_when: false
+  failed_when: >-
+    monitoring_0own_prometheus_service_state.rc != 0
+    or monitoring_0own_prometheus_service_state.stdout | trim != 'active'
+
+- name: Read the active Prometheus configuration without exposing its contents
+  ansible.builtin.slurp:
+    src: "{{ monitoring_prometheus_config_file }}"
+  register: monitoring_0own_prometheus_config_before
+  changed_when: false
+  no_log: true
+
+- name: Validate the current Prometheus configuration and safe insertion point
+  ansible.builtin.assert:
+    that:
+      - "'remote_write:' in (monitoring_0own_prometheus_config_before.content | b64decode)"
+      - "'job_name: node_exporter' in (monitoring_0own_prometheus_config_before.content | b64decode)"
+      - >-
+        ('# BEGIN ANSIBLE MANAGED 0OWN NODE EXPORTER' in (monitoring_0own_prometheus_config_before.content | b64decode))
+        or
+        (
+          monitoring_prometheus_0own_node_exporter_target.address not in (monitoring_0own_prometheus_config_before.content | b64decode)
+          and monitoring_prometheus_0own_node_exporter_target.job_name not in (monitoring_0own_prometheus_config_before.content | b64decode)
+        )
+    fail_msg: >-
+      The active Prometheus config no longer has the expected remote_write and
+      node_exporter structure, or the 0own job exists outside its managed block.
+      Refusing to rewrite it.
+  changed_when: false
+
+- name: Confirm the existing Prometheus configuration is valid before editing
+  ansible.builtin.command:
+    argv:
+      - promtool
+      - check
+      - config
+      - "{{ monitoring_prometheus_config_file }}"
+  changed_when: false
+
+- name: Add and verify the 0own node-exporter target with rollback on failure
+  block:
+    - name: Insert the 0own scrape job before the existing remote_write section
+      ansible.builtin.blockinfile:
+        path: "{{ monitoring_prometheus_config_file }}"
+        insertbefore: '^remote_write:$'
+        marker: "# {mark} ANSIBLE MANAGED 0OWN NODE EXPORTER"
+        block: "{{ lookup('ansible.builtin.template', '0own-node-exporter-scrape.yml.j2') }}"
+        owner: root
+        group: prometheus
+        mode: "0640"
+        backup: true
+      register: monitoring_0own_prometheus_config_update
+
+    - name: Validate the updated Prometheus configuration before reloading
+      ansible.builtin.command:
+        argv:
+          - promtool
+          - check
+          - config
+          - "{{ monitoring_prometheus_config_file }}"
+      changed_when: false
+      when: monitoring_0own_prometheus_config_update.changed
+
+    - name: Reload Prometheus configuration with SIGHUP only when the file changed
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - kill
+          - --kill-whom=main
+          - --signal=HUP
+          - "{{ monitoring_prometheus_service_name }}.service"
+      changed_when: true
+      when: monitoring_0own_prometheus_config_update.changed
+
+    - name: Verify Prometheus remains ready after its configuration reload
+      ansible.builtin.uri:
+        url: "{{ monitoring_prometheus_url }}/-/ready"
+        method: GET
+        status_code: 200
+      register: monitoring_0own_prometheus_ready
+      retries: 8
+      delay: 3
+      until: monitoring_0own_prometheus_ready.status == 200
+      changed_when: false
+
+    - name: Wait for Prometheus to report the 0own exporter as up
+      ansible.builtin.uri:
+        url: >-
+          {{ monitoring_prometheus_url }}/api/v1/query?query={{
+            ('up{job="' ~ monitoring_prometheus_0own_node_exporter_target.job_name
+             ~ '",monitored_host="' ~ monitoring_prometheus_0own_node_exporter_target.labels.monitored_host ~ '"}') | urlencode
+          }}
+        method: GET
+        status_code: 200
+        return_content: true
+      register: monitoring_0own_prometheus_load_query
+      retries: 8
+      delay: 5
+      until: >-
+        monitoring_0own_prometheus_load_query.json.data.result | default([]) | length == 1
+        and monitoring_0own_prometheus_load_query.json.data.result[0].value[1] | default('0') == '1'
+      changed_when: false
+
+    - name: Verify Prometheus retained a live 0own host load sample
+      ansible.builtin.uri:
+        url: >-
+          {{ monitoring_prometheus_url }}/api/v1/query?query={{
+            ('node_load1{job="' ~ monitoring_prometheus_0own_node_exporter_target.job_name
+             ~ '",monitored_host="' ~ monitoring_prometheus_0own_node_exporter_target.labels.monitored_host ~ '"}') | urlencode
+          }}
+        method: GET
+        status_code: 200
+        return_content: true
+      register: monitoring_0own_prometheus_load_sample
+      retries: 4
+      delay: 5
+      until: monitoring_0own_prometheus_load_sample.json.data.result | default([]) | length == 1
+      changed_when: false
+
+  rescue:
+    - name: Restore the previous Prometheus configuration after failed validation
+      ansible.builtin.copy:
+        src: "{{ monitoring_0own_prometheus_config_update.backup_file }}"
+        dest: "{{ monitoring_prometheus_config_file }}"
+        remote_src: true
+        owner: root
+        group: prometheus
+        mode: "0640"
+      when:
+        - monitoring_0own_prometheus_config_update is defined
+        - monitoring_0own_prometheus_config_update.changed | default(false)
+
+    - name: Reload Prometheus after restoring the previous configuration
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - kill
+          - --kill-whom=main
+          - --signal=HUP
+          - "{{ monitoring_prometheus_service_name }}.service"
+      changed_when: true
+      when:
+        - monitoring_0own_prometheus_config_update is defined
+        - monitoring_0own_prometheus_config_update.changed | default(false)
+
+    - name: Stop after restoring the previous configuration
+      ansible.builtin.fail:
+        msg: >-
+          0own scrape-target validation failed. The previous Prometheus config
+          was restored and reloaded; inspect the failed task before retrying.

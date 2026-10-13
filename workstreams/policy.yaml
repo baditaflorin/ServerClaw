@@ -10,6 +10,9 @@ delivery_model:
     - revive-
     - fix-
     - correct-
+    # Existing active workstreams use these historical, owner-managed names.
+    - fleet-
+    - codify-
   workstream_doc_root: docs/workstreams
   registry_owner: main
 release_policy:

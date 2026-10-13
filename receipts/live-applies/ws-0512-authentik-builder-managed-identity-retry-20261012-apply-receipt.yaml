@@ -1,0 +1,27 @@
+workstream_id: ws-0512-authentik-builder-managed-identity-retry-20261012
+state: partial
+schema_version: 1.1.0
+started_at: '2026-10-12T15:44:15Z'
+completed_at: '2026-10-12T15:54:04Z'
+applied_by: ws-0512-authentik-builder-live-apply-20261012
+repo_version: ''
+adr: 0295
+summary: Apply managed BuildKit identity and retire validated legacy daemon units
+  on the deployment's docker-build VM.
+targets:
+- host: docker-build
+  vmid: '130'
+  service: build-artifact-cache
+errors:
+- The live apply stopped at the legacy-container stop task (changed=3, failed=1, unreachable=0).
+  The preceding systemd stop removed --rm containers, but the next task used the earlier
+  running-state inspection. This is the diagnosed failure path; detailed task stderr
+  was not retained in the filtered console output.
+notes:
+- 'Recovery: started the newly rendered canonical managed BuildKit unit. Verified
+  canonical unit active/enabled and managed container running; non-canonical unit
+  inactive/disabled; both old container names absent.'
+- Verified the preserved cache path remains present and buildctl debug workers returns
+  an amd64 worker. No cache data was deleted.
+- Follow-up code adds a post-unit reinspection and narrows tolerated errors to container
+  disappearance; PR and successful governed replay remain pending.

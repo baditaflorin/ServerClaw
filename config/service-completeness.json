@@ -38,6 +38,18 @@
       "oidc_provider": "authentik",
       "authentik_client_generated": true
     },
+    "artifact_cache": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_api_gateway": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "requires_dashboard": false,
+      "requires_data_catalog": true,
+      "requires_alert_rules": false,
+      "notes": "Docker Distribution does not expose service-specific metrics or a dedicated dashboard. Its private registry v2 endpoint is verified from the monitoring VM and covered by the shared Prometheus blackbox availability SLO and generated burn alerts."
+    },
     "authentik": {
       "service_type": "compose",
       "requires_subdomain": true,
@@ -167,7 +179,12 @@
       "requires_oidc": false,
       "requires_secrets": false,
       "requires_compose_secrets": false,
-      "suppression_preset": "legacy-service"
+      "requires_api_gateway": false,
+      "requires_dashboard": false,
+      "requires_slo": false,
+      "requires_data_catalog": false,
+      "requires_alert_rules": false,
+      "notes": "Docker Runtime is an infrastructure guest, not a published application or application data owner. Its command-based Docker readiness probe and host-level observability are managed through the guest inventory; no per-service API-gateway route, dedicated dashboard, HTTP SLO, data-store record, or alert file applies."
     },
     "docs_portal": {
       "service_type": "nginx-plugin",
@@ -228,9 +245,9 @@
       "authentik_client_generated": true,
       "dashboard_file": "config/grafana/dashboards/glitchtip.json",
       "alert_rule_file": "config/alertmanager/rules/glitchtip.yml",
-      "suppressed_checks": {
-        "api_gateway": "2026-09-30"
-      }
+      "requires_api_gateway": false,
+      "suppressed_checks": {},
+      "notes": "GlitchTip's Sentry-compatible API and DSN use service-native credentials; an OIDC-JWT gateway route would not replace that authorization. Browser sign-in remains Authentik-backed."
     },
     "gotenberg": {
       "service_type": "compose",
@@ -325,7 +342,9 @@
       "requires_compose_secrets": true,
       "oidc_provider": "authentik",
       "authentik_client_generated": true,
-      "suppression_preset": "legacy-service"
+      "dashboard_file": "config/grafana/dashboards/langfuse.json",
+      "alert_rule_file": "config/alertmanager/rules/langfuse.yml",
+      "suppressed_checks": {}
     },
     "librechat": {
       "service_type": "compose",
@@ -420,11 +439,11 @@
       "service_type": "compose",
       "requires_subdomain": true,
       "requires_oidc": false,
+      "requires_api_gateway": false,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "suppressed_checks": {
-        "api_gateway": "2026-09-23"
-      }
+      "suppressed_checks": {},
+      "notes": "The S3 API uses native SigV4 credentials and is not an OIDC-JWT gateway upstream; the browser console remains separately protected by the shared edge OIDC gate."
     },
     "n8n": {
       "service_type": "compose",
@@ -475,9 +494,14 @@
       "service_type": "nginx-plugin",
       "requires_subdomain": true,
       "requires_oidc": false,
+      "requires_api_gateway": false,
       "requires_secrets": false,
       "requires_compose_secrets": false,
-      "suppression_preset": "legacy-service"
+      "requires_dashboard": false,
+      "requires_data_catalog": false,
+      "requires_alert_rules": false,
+      "suppression_preset": "legacy-service",
+      "notes": "The static NGINX edge is an ingress appliance, not an API client or data-owning application; edge health is covered by centralized host and SLO monitoring."
     },
     "nomad": {
       "service_type": "vm-service",
@@ -599,11 +623,10 @@
       "requires_oidc": false,
       "requires_secrets": true,
       "requires_compose_secrets": true,
-      "suppressed_checks": {
-        "alert_rules": "2026-09-30",
-        "api_gateway": "2026-09-30",
-        "grafana_dashboard": "2026-09-30"
-      }
+      "requires_api_gateway": false,
+      "dashboard_file": "config/grafana/dashboards/slo-overview.json",
+      "alert_rule_file": "config/prometheus/rules/slo_alerts.yml",
+      "suppressed_checks": {}
     },
     "portainer": {
       "service_type": "compose",
@@ -726,11 +749,17 @@
       }
     },
     "status_page": {
-      "service_type": "compose",
+      "service_type": "nginx-plugin",
       "requires_subdomain": true,
       "requires_oidc": false,
       "requires_secrets": false,
-      "requires_compose_secrets": true,
+      "requires_compose_secrets": false,
+      "requires_ansible_role": false,
+      "requires_api_gateway": false,
+      "requires_dashboard": false,
+      "requires_data_catalog": false,
+      "requires_alert_rules": false,
+      "notes": "This is a managed public endpoint provided by Uptime Kuma, not a standalone workload; runtime, SLO, and external availability are covered by the Uptime Kuma and edge-publication contracts.",
       "suppression_preset": "legacy-service"
     },
     "step_ca": {

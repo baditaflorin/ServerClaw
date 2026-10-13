@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
-  "recorded_at": "2026-10-01T11:52:40Z",
-  "recorded_on": "2026-10-01",
+  "recorded_at": "2026-10-12T16:26:53Z",
+  "recorded_on": "2026-10-12",
   "recorded_by": "codex",
   "repository": {
     "bucket": "restic-config-backup",
@@ -31,13 +31,13 @@
         "keep_monthly": 12
       },
       "latest_snapshot": {
-        "snapshot_id": "a0a5fbece323d9c57bbcb4f5a5e296fa86134e3f314c3841aa09ad5a6d90fac9",
-        "recorded_at": "2026-10-01T11:52:22Z",
+        "snapshot_id": "ab918a1b594a97a49035cf107bcc2a1f1aff4bec645a51ca81ce9c7c3bde69dd",
+        "recorded_at": "2026-10-12T16:26:07Z",
         "host": "docker-runtime",
         "paths": [
           "receipts"
         ],
-        "files": 17
+        "files": 71
       },
       "last_restore_verification": null,
       "reasons": [
@@ -59,8 +59,8 @@
         "keep_monthly": 6
       },
       "latest_snapshot": {
-        "snapshot_id": "9ae2dd3ef39bf456cce0663e729e48804e965f97563d2e8e0f0a943799314c6e",
-        "recorded_at": "2026-10-01T11:52:40Z",
+        "snapshot_id": "84b1bac2991b2f4801f81f5e0eb6c976edf355f576fc4769fb5e45cd56660146",
+        "recorded_at": "2026-10-12T16:26:53Z",
         "host": "docker-runtime",
         "paths": [
           "config"
@@ -86,8 +86,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "809b7843bdc219780d3d5700fc79d21db07ec6e19c94b3ef95b833eed5186775",
-        "recorded_at": "2026-10-01T11:52:40Z",
+        "snapshot_id": "324ca5f0af6646d44ae90545809a784969ac906d09a70f8f0d3860123c53affd",
+        "recorded_at": "2026-10-12T16:26:53Z",
         "host": "docker-runtime",
         "paths": [
           "versions/stack.yaml"
@@ -113,8 +113,8 @@
         "keep_daily": 90
       },
       "latest_snapshot": {
-        "snapshot_id": "31e04fc1d44ff69c644758d5db675d0936b41254bfe9d98a2e65e1d93563e5c2",
-        "recorded_at": "2026-10-01T11:52:24Z",
+        "snapshot_id": "b455fb9bc684f202c2c26e5371be073e823a14e8ce860176b5f9b643df6dfd8c",
+        "recorded_at": "2026-10-12T16:26:16Z",
         "host": "docker-runtime",
         "paths": [
           "config/controller-local-secrets.json"
@@ -140,8 +140,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "2d0debf47739144699d1f37c988c1357ce1b1fceeca39fca682e2ae5906da7c4",
-        "recorded_at": "2026-10-01T11:52:40Z",
+        "snapshot_id": "2eb81d3fab89d7e0c2d3ce768d93adede3ca93337ad80fbcc1b6f6fa898e60f8",
+        "recorded_at": "2026-10-12T16:26:53Z",
         "host": "docker-runtime",
         "paths": [
           "config/falco"

@@ -47,10 +47,32 @@ EXECUTION_LANES_PATH = repo_path("config", "execution-lanes.yaml")
 DEFAULT_PREFLIGHT_HEALTH_CHECK_TIMEOUT_SECONDS = 15
 
 
-def implementation_ref_exists(path_str: str, *, repo_root: Path = REPO_ROOT) -> bool:
+def implementation_ref_exists(
+    path_str: str,
+    *,
+    repo_root: Path = REPO_ROOT,
+    bootstrap_catalog: dict | None = None,
+) -> bool:
     candidate = repo_root / path_str
     if candidate.exists():
         return True
+
+    # Validation snapshots may omit generated, gitignored artifacts and may not
+    # include .git metadata. The bootstrap manifest is the source of truth for
+    # those paths, so do not rely solely on `git check-ignore` to recognize them.
+    if bootstrap_catalog is not None:
+        expected_path = Path(path_str)
+        manifests = bootstrap_catalog.get("manifests", {})
+        if isinstance(manifests, dict):
+            for manifest in manifests.values():
+                if not isinstance(manifest, dict):
+                    continue
+                artifacts = manifest.get("generated_artifacts", [])
+                if not isinstance(artifacts, list):
+                    continue
+                for artifact in artifacts:
+                    if isinstance(artifact, dict) and artifact.get("path") == expected_path.as_posix():
+                        return True
 
     result = subprocess.run(
         ["git", "check-ignore", "-q", path_str],
@@ -368,7 +390,7 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict, bootstrap_ca
         if not isinstance(implementation_refs, list) or not implementation_refs:
             raise ValueError(f"workflow '{workflow_id}' must define a non-empty implementation_refs list")
         for path_str in implementation_refs:
-            if not implementation_ref_exists(path_str):
+            if not implementation_ref_exists(path_str, bootstrap_catalog=bootstrap_catalog):
                 raise ValueError(f"workflow '{workflow_id}' references missing implementation path '{path_str}'")
 
         outputs = workflow.get("outputs")

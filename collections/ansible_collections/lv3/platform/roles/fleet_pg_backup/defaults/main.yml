@@ -1,0 +1,50 @@
+---
+# Which parts of the Postgres backup stack this host carries: pve_backup (the 0database hypervisor), pgbackrest
+# (pg-primary), pbs_server (own-pbs). Declared per host in inventory/fleet-observability.yml.
+fleet_pg_backup_components: []
+
+# State shared by the vzdump hook and the pgBackRest wrapper (root-owned, read back to render the metrics files).
+fleet_pg_backup_state_dir: /var/lib/pg-backup-metrics
+
+# --- pve_backup: vzdump hook, PBS storage, backup job -------------------------------------------------
+fleet_pg_backup_hook_path: /usr/local/sbin/vzdump-pg-metrics-hook
+fleet_pg_backup_hook_textfile_dir: /var/lib/prometheus/node-exporter/textfile
+fleet_pg_backup_hook_metrics_file: pg_backup_vzdump.prom
+fleet_pg_backup_hook_vzdump_log_dir: /var/log/vzdump
+fleet_pg_backup_hook_default_vmid: "100"
+# PBS storage entry. Everything except password_file is applied with `pvesh set`; the secret itself is never read,
+# written or logged by this role: it only checks that password_file exists.
+fleet_pg_backup_pve_storage: {}
+# vzdump jobs, each: id, vmid, storage, mode, schedule, bwlimit (KiB/s), compress, enabled, script, notes_template, comment.
+fleet_pg_backup_pve_jobs: []
+
+# --- pgbackrest: prepared configuration on pg-primary ---------------------------------------------------
+fleet_pg_backup_pgbackrest_user: postgres
+fleet_pg_backup_pgbackrest_group: postgres
+fleet_pg_backup_pgbackrest_conf_dir: /etc/pgbackrest
+fleet_pg_backup_pgbackrest_cipher_file: conf.d/10-repo-cipher.conf
+fleet_pg_backup_pgbackrest_stanza: main
+fleet_pg_backup_pgbackrest_pg_path: /var/lib/postgresql/18/main
+fleet_pg_backup_pgbackrest_pg_socket_path: /var/run/postgresql
+fleet_pg_backup_pgbackrest_pg_user: postgres
+fleet_pg_backup_pgbackrest_spool_path: /var/spool/pgbackrest
+fleet_pg_backup_pgbackrest_prepared_dir: /root/pgbackrest-prepared
+fleet_pg_backup_pgbackrest_wrapper_path: /usr/local/sbin/pgbackrest-daily
+fleet_pg_backup_pgbackrest_textfile_dir: /var/lib/prometheus/node-exporter/textfile
+# Empty means "no repository chosen yet": the config keeps its placeholder comment and the timer cannot be enabled.
+# Otherwise a mapping of repo1-<key> settings; keys that look like secrets (pass, secret, key) are refused.
+fleet_pg_backup_pgbackrest_repo: {}
+fleet_pg_backup_pgbackrest_global_settings: []
+# The timer and service always exist in the prepared directory. Installing and enabling them is a deliberate step:
+# it needs a repository, archive_mode on (a Postgres restart) and the node exporter textfile collector enabled.
+fleet_pg_backup_pgbackrest_timer_enabled: false
+fleet_pg_backup_pgbackrest_timer_oncalendar: "*-*-* 02:30:00 UTC"
+
+# --- pbs_server: own-pbs side ---------------------------------------------------------------------------
+fleet_pg_backup_pbs_datastore: ""
+fleet_pg_backup_pbs_datastore_path: ""
+fleet_pg_backup_pbs_namespace: ""
+fleet_pg_backup_pbs_user: {}
+fleet_pg_backup_pbs_token_name: ""
+fleet_pg_backup_pbs_acls: []
+fleet_pg_backup_pbs_prune_jobs: []

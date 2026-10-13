@@ -60,6 +60,8 @@ REMOTE_RUN_ROOT=""
 SNAPSHOT_BUILD_DIR=""
 LV3_VALIDATION_BASE_REF="${LV3_VALIDATION_BASE_REF:-}"
 LV3_VALIDATION_CHANGED_FILES_JSON="${LV3_VALIDATION_CHANGED_FILES_JSON:-}"
+REMOTE_STDIN_FD=""
+REMOTE_STDIN_FILE=""
 
 SSH_BASE_CMD=()
 
@@ -172,6 +174,34 @@ parse_args() {
     usage >&2
     exit 1
   }
+}
+
+prepare_remote_stdin() {
+  local stdin_file="${REMOTE_EXEC_STDIN_FILE:-}"
+  [[ -n "$stdin_file" ]] || return 0
+
+  "$PYTHON_BIN" - "$stdin_file" <<'PY'
+import stat
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+metadata = path.lstat()
+if not stat.S_ISREG(metadata.st_mode) or stat.S_IMODE(metadata.st_mode) != 0o600:
+    raise SystemExit("REMOTE_EXEC_STDIN_FILE must be a regular mode-0600 file")
+PY
+  REMOTE_STDIN_FILE="$stdin_file"
+  unset REMOTE_EXEC_STDIN_FILE
+  # Keep the payload away from every subprocess until the final SSH invocation.
+  exec 0</dev/null
+}
+
+open_remote_stdin_payload() {
+  [[ -n "$REMOTE_STDIN_FILE" ]] || return 0
+  exec 3<"$REMOTE_STDIN_FILE" || fail "could not open protected remote stdin file"
+  rm -f -- "$REMOTE_STDIN_FILE" || fail "could not remove protected remote stdin file after opening"
+  REMOTE_STDIN_FILE=""
+  REMOTE_STDIN_FD=3
 }
 
 load_command_configuration() {
@@ -387,6 +417,14 @@ timeout_prefix() {
 }
 
 cleanup_snapshot_build_dir() {
+  if [[ "$REMOTE_STDIN_FD" == "3" ]]; then
+    exec 3<&-
+    REMOTE_STDIN_FD=""
+  fi
+  if [[ -n "$REMOTE_STDIN_FILE" ]]; then
+    rm -f -- "$REMOTE_STDIN_FILE"
+    REMOTE_STDIN_FILE=""
+  fi
   [[ -n "$SNAPSHOT_BUILD_DIR" ]] || return 0
   rm -rf "$SNAPSHOT_BUILD_DIR"
   SNAPSHOT_BUILD_DIR=""
@@ -599,7 +637,7 @@ remote_runner_cache_args() {
 }
 
 remote_reachable() {
-  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "true" >/dev/null 2>&1
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "true" </dev/null >/dev/null 2>&1
 }
 
 mesh_proxy_configured() {
@@ -635,7 +673,7 @@ sync_remote_gate_status_back() {
   local_status="$REPO_ROOT/$STATUS_FILE"
   mkdir -p "$(dirname "$local_status")"
 
-  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "cat $(quote_shell "$remote_status")" > "$local_status" 2>/dev/null || true
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "cat $(quote_shell "$remote_status")" </dev/null > "$local_status" 2>/dev/null || true
 }
 
 ensure_remote_workspace() {
@@ -668,14 +706,14 @@ EOF
 }
 
 remote_remove_paths() {
-  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "rm -rf $* || sudo -n rm -rf $*" >/dev/null
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "rm -rf $* || sudo -n rm -rf $*" </dev/null >/dev/null
 }
 
 prepare_remote_run_namespace() {
   local remote_manifest_path="$REMOTE_RUN_ROOT/metadata/manifest.json"
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
     "rm -rf $(quote_shell "$REMOTE_RUN_ROOT") && mkdir -p $(quote_shell "$REMOTE_RUN_ROOT") $(quote_shell "$REMOTE_RUN_ROOT/repo") $(quote_shell "$REMOTE_RUN_ROOT/metadata") && tar -xzf $(quote_shell "$REMOTE_SNAPSHOT_ARCHIVE") -C $(quote_shell "$REMOTE_RUN_ROOT") && test -f $(quote_shell "$remote_manifest_path")" \
-    >/dev/null
+    </dev/null >/dev/null
 }
 
 sync_snapshot() {
@@ -737,12 +775,12 @@ run_local_command() {
 
 run_builtin_check_build_server() {
   echo "Checking SSH connectivity to $REMOTE_HOST"
-  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "printf 'build-server-ok\n'"
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "printf 'build-server-ok\n'" </dev/null
 
   echo "Checking remote workspace root $WORKSPACE_ROOT_BASE"
   echo "Checking remote session workspace $WORKSPACE_ROOT"
   ensure_remote_workspace
-  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "cd $(quote_shell "$WORKSPACE_ROOT") && pwd"
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "cd $(quote_shell "$WORKSPACE_ROOT") && pwd" </dev/null
 
   build_snapshot
   echo "Checking immutable snapshot dry-run upload from $LV3_SNAPSHOT_BRANCH@$LV3_SNAPSHOT_SOURCE_COMMIT"
@@ -840,7 +878,14 @@ run_remote_command() {
     fi
   fi
 
-  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "$remote_payload" || rc=$?
+  open_remote_stdin_payload
+  if [[ "$REMOTE_STDIN_FD" == "3" ]]; then
+    "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "$remote_payload" 0<&3 3<&- || rc=$?
+    exec 3<&-
+    REMOTE_STDIN_FD=""
+  else
+    "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "$remote_payload" </dev/null || rc=$?
+  fi
   sync_remote_gate_status_back
   if [[ "$rc" -eq 0 ]]; then
     return 0
@@ -855,12 +900,12 @@ run_remote_command() {
 
 main() {
   parse_args "$@"
+  trap cleanup_snapshot_build_dir EXIT
+  prepare_remote_stdin
   load_command_configuration
   load_session_workspace
   compute_validation_lane_context
   build_ssh_command
-  trap cleanup_snapshot_build_dir EXIT
-
   if remote_reachable; then
     run_remote_command
     return 0

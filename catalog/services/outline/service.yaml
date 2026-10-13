@@ -17,7 +17,7 @@ service:
   image_catalog_ids:
     - outline_runtime
     - minio_runtime
-    - langfuse_redis_runtime
+    - shared_valkey_runtime
   secret_catalog_ids:
     - outline_database_password
     - outline_secret_key

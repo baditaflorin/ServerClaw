@@ -160,7 +160,7 @@
       }}
   when: proxmox_tailscale_socket_unit_changed
 
-- name: Start Proxmox Tailscale proxy sockets when the listener is not already owned by an active proxy service
+- name: Start Proxmox Tailscale proxy sockets when the listener is inactive
   ansible.builtin.systemd:
     name: "lv3-tailscale-proxy-{{ item.name }}.socket"
     state: started
@@ -176,16 +176,16 @@
         | first
         | default([])
       }}
-    proxmox_tailscale_service_active_state: >-
+    proxmox_tailscale_socket_active_state: >-
       {{
         proxmox_tailscale_proxy_unit_state_lines
-        | select('match', '^service=')
-        | map('regex_replace', '^service=', '')
+        | select('match', '^socket=')
+        | map('regex_replace', '^socket=', '')
         | list
         | first
         | default('')
       }}
-  when: proxmox_tailscale_service_active_state != 'active'
+  when: proxmox_tailscale_socket_active_state != 'active'
 - name: Read active Proxmox Tailscale proxy service command lines
   ansible.builtin.shell: |
     set -euo pipefail
@@ -462,7 +462,7 @@
 - name: Assert Proxmox Tailscale proxy listeners remain active after converge
   ansible.builtin.assert:
     that:
-      - proxmox_tailscale_socket_active_state == 'active' or proxmox_tailscale_service_active_state == 'active'
+      - proxmox_tailscale_socket_active_state == 'active'
     fail_msg: >-
       Proxmox Tailscale proxy {{ item.name }} is unavailable after converge
       (socket={{ proxmox_tailscale_socket_active_state | default('unknown') }},

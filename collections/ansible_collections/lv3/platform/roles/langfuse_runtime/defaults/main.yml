@@ -36,7 +36,7 @@ langfuse_redis_gid: "999"
 langfuse_web_image: "{{ container_image_catalog.images.langfuse_runtime.ref }}"
 langfuse_worker_image: "{{ container_image_catalog.images.langfuse_worker_runtime.ref }}"
 langfuse_clickhouse_image: "{{ container_image_catalog.images.langfuse_clickhouse_runtime.ref }}"
-langfuse_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
+langfuse_redis_image: "{{ container_image_catalog.images.shared_valkey_runtime.ref }}"
 langfuse_database_name: langfuse
 langfuse_database_user: langfuse
 langfuse_database_host: "{{ hostvars[hostvars[platform_topology_host].postgres_ha.initial_primary].ansible_host }}"

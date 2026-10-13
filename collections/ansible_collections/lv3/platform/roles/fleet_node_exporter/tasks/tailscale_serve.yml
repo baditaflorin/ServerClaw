@@ -1,0 +1,47 @@
+---
+# Purpose: Keep `tailscale serve` TCP forwards in place on a host whose tailscaled runs in userspace networking.
+# Use case: Included from main.yml when fleet_node_exporter_tailscale_serve_tcp is not empty (CT108 only today).
+# Inputs: fleet_node_exporter_tailscale_serve_tcp, a list of {port, target}.
+# Outputs: One persisted serve TCP forward per item.
+# Idempotency: Idempotent. The forward is only written when `tailscale serve status --json` differs from the declaration.
+# Dependencies: tailscaled running (userspace mode is fine).
+
+- name: Read the current tailscale serve configuration
+  ansible.builtin.command:
+    argv:
+      - tailscale
+      - serve
+      - status
+      - --json
+  register: fleet_node_exporter_serve_status
+  changed_when: false
+  check_mode: false
+
+- name: Parse the current tailscale serve configuration
+  ansible.builtin.set_fact:
+    fleet_node_exporter_serve_current: "{{ (fleet_node_exporter_serve_status.stdout | default('{}', true) | trim | from_json).TCP | default({}) }}"
+
+- name: Report tailscale serve drift
+  ansible.builtin.debug:
+    msg: >-
+      DRIFT: tailscale serve tcp {{ item.port }} forwards to
+      {{ (fleet_node_exporter_serve_current[item.port | string] | default({})).TCPForward | default('nothing') }},
+      declared {{ item.target }}.
+  loop: "{{ fleet_node_exporter_tailscale_serve_tcp }}"
+  loop_control:
+    label: "tcp {{ item.port }}"
+  when: (fleet_node_exporter_serve_current[item.port | string] | default({})).TCPForward | default('') != item.target
+
+- name: Apply the declared tailscale serve TCP forwards
+  ansible.builtin.command:
+    argv:
+      - tailscale
+      - serve
+      - --bg
+      - "--tcp={{ item.port }}"
+      - "tcp://{{ item.target }}"
+  loop: "{{ fleet_node_exporter_tailscale_serve_tcp }}"
+  loop_control:
+    label: "tcp {{ item.port }}"
+  when: (fleet_node_exporter_serve_current[item.port | string] | default({})).TCPForward | default('') != item.target
+  changed_when: true

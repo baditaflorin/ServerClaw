@@ -4,6 +4,7 @@
 .git/
 .ansible/
 .ansible/validation/
+build/collection-install/
 .mypy_cache/
 .claude/
 .worktrees/

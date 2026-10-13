@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-09-28'
+generated: '2026-10-12'
 facet: status
 implementation_status: Implemented
 slug: implemented
-total_adrs: 378
+total_adrs: 379
 adrs:
   - adr: '0001'
     title: Bootstrap Dedicated Host With Ansible
@@ -7433,3 +7433,22 @@ adrs:
     path: docs/adr/0491-authentik-for-operator-and-agent-sso.md
     implemented_in_repo_version: 0.179.46
     implemented_on: '2026-08-31'
+  - adr: 0493
+    title: Bound Plausible ClickHouse diagnostic log storage
+    status: Accepted
+    implementation_status: Implemented
+    currently_describes: current_state
+    date: '2026-10-07'
+    concern: storage
+    keywords:
+      - bound
+      - plausible
+      - clickhouse
+      - diagnostic
+      - log
+      - storage
+    summary: Set a one-day TTL on Plausible ClickHouse's persistent diagnostic system log
+    filename: 0493-bounded-plausible-clickhouse-diagnostic-logs.md
+    path: docs/adr/0493-bounded-plausible-clickhouse-diagnostic-logs.md
+    implemented_in_platform_version: 0.178.226
+    implemented_on: '2026-10-07'

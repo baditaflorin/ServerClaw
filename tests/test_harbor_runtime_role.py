@@ -26,6 +26,17 @@ VERIFY_TASKS = (
     / "tasks"
     / "verify.yml"
 )
+PATCHED_RUNTIME_PROJECT_TASKS = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "harbor_runtime"
+    / "tasks"
+    / "patched_runtime_project.yml"
+)
 HOST_VARS = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
 
@@ -43,6 +54,44 @@ def test_role_tracks_robot_reconcile_state_before_refreshing_secret() -> None:
     assert "Record whether Harbor registry credential containers need recreation" in task_names
     assert "Record whether the Harbor admin password needs reconciliation" in task_names
     assert "Reset the Harbor admin password seed in the Harbor database when credentials drift" in task_names
+
+
+def test_patched_runtime_metadata_reconcile_is_idempotent_and_uses_project_update_api() -> None:
+    tasks = load_yaml(PATCHED_RUNTIME_PROJECT_TASKS)
+    task_by_name = {task["name"]: task for task in tasks}
+
+    query = task_by_name["Query patched-runtime project metadata before reconciliation"]
+    desired = task_by_name["Merge the desired patched-runtime policy into existing project metadata"]
+    update = task_by_name["Reconcile patched-runtime policy through Harbor's project update API"]
+    verify = task_by_name["Verify patched-runtime project metadata after reconciliation"]
+    assertion = task_by_name["Assert patched-runtime project metadata matches the security policy"]
+
+    assert query["ansible.builtin.uri"]["method"] == "GET"
+    assert query["ansible.builtin.uri"]["url"].strip().endswith("/metadatas/")
+    assert query["changed_when"] is False
+
+    desired_fact = desired["ansible.builtin.set_fact"]["harbor_patched_runtime_project_metadata_desired"]
+    assert "| combine({" in desired_fact
+    assert "'public':" in desired_fact
+    assert "'auto_scan': 'true'" in desired_fact
+    assert "'reuse_sys_cve_allowlist': 'false'" in desired_fact
+
+    update_uri = update["ansible.builtin.uri"]
+    assert update_uri["method"] == "PUT"
+    assert (
+        update_uri["url"].strip().endswith("/api/v2.0/projects/{{ harbor_patched_runtime_project_name | urlencode }}")
+    )
+    assert update_uri["body"]["metadata"] == "{{ harbor_patched_runtime_project_metadata_desired }}"
+    assert "!= harbor_patched_runtime_project_metadata_desired" in update["when"]
+    assert update["no_log"] is True
+
+    assert verify["ansible.builtin.uri"]["method"] == "GET"
+    assert verify["changed_when"] is False
+    assert assertion["ansible.builtin.assert"]["that"] == [
+        "harbor_patched_runtime_project_metadata_after.json.public == ('true' if harbor_patched_runtime_project_public else 'false')",
+        "harbor_patched_runtime_project_metadata_after.json.auto_scan == 'true'",
+        "harbor_patched_runtime_project_metadata_after.json.reuse_sys_cve_allowlist == 'false'",
+    ]
 
 
 def test_role_reads_the_authentik_secret_before_configuring_oidc() -> None:
@@ -244,5 +293,5 @@ def test_host_network_policy_allows_nginx_edge_access_to_harbor() -> None:
     runtime_control_rules = host_vars["network_policy"]["guests"]["runtime-control"]["allowed_inbound"]
     harbor_rule = next(rule for rule in runtime_control_rules if rule["source"] == "nginx" and 8095 in rule["ports"])
 
-    assert "edge access" in harbor_rule["description"].lower()
-    assert "harbor" in harbor_rule["description"].lower()
+    assert "shared edge" in harbor_rule["description"].lower()
+    assert 8095 in harbor_rule["ports"]

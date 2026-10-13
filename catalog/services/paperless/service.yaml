@@ -16,7 +16,7 @@ service:
   health_probe_id: paperless
   image_catalog_ids:
     - paperless_runtime
-    - langfuse_redis_runtime
+    - shared_valkey_runtime
   secret_catalog_ids:
     - paperless_database_password
     - paperless_secret_key

@@ -25,6 +25,51 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         self._disable_overlay.start()
         self.addCleanup(self._disable_overlay.stop)
 
+    def test_private_edge_route_stays_distinct_from_public_edge_publication(self) -> None:
+        host_vars = {
+            "platform_service_topology": {
+                "gitea": {
+                    "public_hostname": "git.example.com",
+                    "private_edge": {
+                        "enabled": True,
+                        "tls": True,
+                        "upstream": "http://10.10.10.92:3003",
+                        "allow_cidrs": ["10.10.10.1/32"],
+                    },
+                }
+            }
+        }
+        public_edge_defaults = {
+            "public_edge_authenticated_sites": {},
+            "public_edge_extra_sites": [],
+        }
+
+        route = audit.build_edge_route_index(host_vars, public_edge_defaults)["git.example.com"]
+
+        self.assertEqual(route["route_source"], "service_topology_private_edge")
+        self.assertEqual(route["route_kind"], "private-proxy")
+        self.assertEqual(route["metadata"]["allow_cidrs"], ["10.10.10.1/32"])
+        publication = audit._publication_entry(
+            {
+                "fqdn": "git.example.com",
+                "environment": "production",
+                "status": "active",
+                "owner_adr": "0143",
+                "exposure": "private-only",
+                "auth_requirement": "private_network",
+                "target": "192.0.2.10",
+                "target_port": 443,
+                "tls": {"provider": "letsencrypt", "auto_renew": True},
+            },
+            route,
+            {"dns": {"managed": True, "visibility": "tailnet"}},
+        )
+        self.assertEqual(publication["adapter"]["routing"]["mode"], "private-edge")
+        self.assertTrue(publication["adapter"]["dns"]["managed"])
+        self.assertEqual(publication["adapter"]["dns"]["visibility"], "tailnet")
+        self.assertFalse(publication["adapter"]["dns"]["zone_expected"])
+        self.assertFalse(publication["evidence_plan"]["dns_zone"])
+
     def test_build_registry_resolves_placeholder_domains_for_private_overlay(self) -> None:
         catalog = {
             "subdomains": [
@@ -130,10 +175,11 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         self.assertEqual(by_fqdn["example.com"]["adapter"]["routing"]["source"], "public_edge_apex")
         self.assertEqual(by_fqdn["example.com"]["adapter"]["dns"]["records"], [{"type": "A", "value": "203.0.113.1"}])
         self.assertEqual(by_fqdn["n8n.example.com"]["publication"]["access_model"], "platform-sso")
-        self.assertEqual(
-            by_fqdn["n8n.example.com"]["adapter"]["edge_auth"]["unauthenticated_prefix_paths"],
-            ["/webhook/", "/webhook-test/", "/webhook-waiting/"],
-        )
+        # n8n's backend was never deployed on this fleet (2026-10-12), so its edge
+        # publication is disabled and the catalog entry is retiring/unpublished.
+        self.assertEqual(by_fqdn["n8n.example.com"]["status"], "retiring")
+        self.assertEqual(by_fqdn["n8n.example.com"]["adapter"]["routing"]["mode"], "dns-only")
+        self.assertFalse(by_fqdn["n8n.example.com"]["live_tracking_expected"])
         self.assertEqual(by_fqdn["ops.example.com"]["publication"]["access_model"], "platform-sso")
         self.assertEqual(by_fqdn["ops.example.com"]["adapter"]["edge_auth"]["provider"], "oauth2_proxy")
         self.assertEqual(by_fqdn["docs.example.com"]["adapter"]["routing"]["source"], "public_edge_extra_sites")

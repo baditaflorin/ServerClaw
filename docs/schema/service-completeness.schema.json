@@ -45,10 +45,25 @@
           "requires_api_gateway": {
             "type": "boolean"
           },
+          "requires_ansible_role": {
+            "type": "boolean"
+          },
           "requires_secrets": {
             "type": "boolean"
           },
           "requires_compose_secrets": {
+            "type": "boolean"
+          },
+          "requires_dashboard": {
+            "type": "boolean"
+          },
+          "requires_slo": {
+            "type": "boolean"
+          },
+          "requires_data_catalog": {
+            "type": "boolean"
+          },
+          "requires_alert_rules": {
             "type": "boolean"
           },
           "oidc_provider": {

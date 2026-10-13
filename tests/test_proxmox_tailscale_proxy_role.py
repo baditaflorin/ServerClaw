@@ -5,6 +5,7 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ROLE_TASKS = REPO_ROOT / "roles" / "proxmox_tailscale_proxy" / "tasks" / "main.yml"
+SOCKET_TEMPLATE = REPO_ROOT / "roles" / "proxmox_tailscale_proxy" / "templates" / "lv3-tailscale-proxy.socket.j2"
 ARGUMENT_SPECS = REPO_ROOT / "roles" / "proxmox_tailscale_proxy" / "meta" / "argument_specs.yml"
 HOST_VARS = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
 
@@ -28,21 +29,25 @@ def test_role_argument_spec_declares_proxy_inputs() -> None:
     assert options["platform_host"]["type"] == "dict"
 
 
-def test_role_only_starts_socket_units_when_no_proxy_service_owns_the_listener() -> None:
+def test_role_restarts_socket_listeners_after_tailscaled_restarts() -> None:
     tasks = load_tasks()
     state_task = next(task for task in tasks if task.get("name") == "Read current Proxmox Tailscale proxy unit states")
     start_task = next(
         task
         for task in tasks
-        if task.get("name")
-        == "Start Proxmox Tailscale proxy sockets when the listener is not already owned by an active proxy service"
+        if task.get("name") == "Start Proxmox Tailscale proxy sockets when the listener is inactive"
     )
+    socket_template = SOCKET_TEMPLATE.read_text()
     assert state_task["register"] == "proxmox_tailscale_proxy_unit_states"
     assert state_task["become"] is False
     assert (
         "proxmox_tailscale_proxy_unit_states.results" in start_task["vars"]["proxmox_tailscale_proxy_unit_state_lines"]
     )
-    assert start_task["when"] == "proxmox_tailscale_service_active_state != 'active'"
+    assert "^socket=" in start_task["vars"]["proxmox_tailscale_socket_active_state"]
+    assert start_task["when"] == "proxmox_tailscale_socket_active_state != 'active'"
+    assert "BindToDevice=tailscale0" in socket_template
+    assert "Requires=tailscaled.service" in socket_template
+    assert "WantedBy=sockets.target tailscaled.service" in socket_template
 
 
 def test_role_asserts_proxy_listener_remains_available_after_converge() -> None:
@@ -52,10 +57,7 @@ def test_role_asserts_proxy_listener_remains_available_after_converge() -> None:
         for task in tasks
         if task.get("name") == "Assert Proxmox Tailscale proxy listeners remain active after converge"
     )
-    assert (
-        assert_task["ansible.builtin.assert"]["that"][0]
-        == "proxmox_tailscale_socket_active_state == 'active' or proxmox_tailscale_service_active_state == 'active'"
-    )
+    assert assert_task["ansible.builtin.assert"]["that"][0] == "proxmox_tailscale_socket_active_state == 'active'"
 
 
 def test_host_inventory_proxy_ports_reference_platform_port_assignments() -> None:

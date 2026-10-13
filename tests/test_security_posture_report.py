@@ -95,6 +95,52 @@ def test_default_lynis_hosts_reads_active_service_vms(monkeypatch) -> None:
     ]
 
 
+def test_select_lynis_hosts_allows_only_active_hosts_and_deduplicates(monkeypatch) -> None:
+    monkeypatch.setattr(report, "default_lynis_hosts", lambda _environment: ["docker-runtime", "monitoring", "nginx"])
+
+    assert report.select_lynis_hosts("production", "monitoring,nginx,monitoring") == ["monitoring", "nginx"]
+
+
+def test_select_lynis_hosts_rejects_hosts_outside_the_active_scan_set(monkeypatch) -> None:
+    monkeypatch.setattr(report, "default_lynis_hosts", lambda _environment: ["docker-runtime", "monitoring"])
+
+    try:
+        report.select_lynis_hosts("production", "monitoring,retired-host")
+    except ValueError as exc:
+        assert "outside the active production scan set" in str(exc)
+        assert "retired-host" in str(exc)
+    else:
+        raise AssertionError("inactive scan targets must fail closed")
+
+
+def test_run_ansible_security_scan_resolves_relative_output_directory_from_repo_root(
+    monkeypatch, tmp_path: Path
+) -> None:
+    captured: dict[str, object] = {}
+    monkeypatch.setattr(report, "REPO_ROOT", tmp_path)
+
+    def capture_command(command, *, cwd, env=None):
+        captured["command"] = command
+        captured["cwd"] = cwd
+        return type("Result", (), {"returncode": 0, "stderr": "", "stdout": ""})()
+
+    monkeypatch.setattr(report, "run_command", capture_command)
+    output_dir = Path(".local/security-posture/lynis/scoped")
+
+    report.run_ansible_security_scan(
+        inventory=Path("inventory/hosts.yml"),
+        playbook=Path("playbooks/tasks/security-scan.yml"),
+        output_dir=output_dir,
+        hosts=["monitoring"],
+    )
+
+    resolved = tmp_path / output_dir
+    command = captured["command"]
+    assert captured["cwd"] == tmp_path
+    assert command[command.index("-e") + 1] == f"security_scan_output_dir={resolved}"
+    assert resolved.is_dir()
+
+
 def test_build_security_events_emits_summary_and_critical_findings() -> None:
     events = report.build_security_events(
         {

@@ -49,6 +49,86 @@ def test_defaults_expose_private_prometheus_remote_write_endpoint() -> None:
     assert "{{ monitoring_prometheus_listen_address }}" in template
 
 
+def test_0own_scrape_target_uses_narrow_validated_apply_and_preserves_live_config() -> None:
+    monitoring_host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "monitoring.yml").read_text())
+    target = monitoring_host_vars["monitoring_prometheus_0own_node_exporter_target"]
+    playbook = yaml.safe_load((REPO_ROOT / "playbooks" / "services" / "prometheus-0own-node-exporter.yml").read_text())[
+        0
+    ]
+    tasks = load_tasks(ROLE_ROOT / "tasks" / "0own_node_exporter_target.yml")
+    scrape_template = (ROLE_ROOT / "templates" / "0own-node-exporter-scrape.yml.j2").read_text()
+    task_names = [task.get("name") for task in tasks]
+    service_guard = next(
+        task
+        for task in tasks
+        if task.get("name") == "Confirm the configured Prometheus systemd unit is active before editing"
+    )
+    update_block = next(
+        task
+        for task in tasks
+        if task.get("name") == "Add and verify the 0own node-exporter target with rollback on failure"
+    )
+    update_tasks = update_block["block"]
+    insertion = next(
+        task
+        for task in update_tasks
+        if task.get("name") == "Insert the 0own scrape job before the existing remote_write section"
+    )
+    apply_task = next(
+        task
+        for task in playbook["tasks"]
+        if task.get("name") == "Apply the 0own scrape-target tasks from the monitoring role"
+    )
+    reload_task = next(
+        task
+        for task in update_tasks
+        if task.get("name") == "Reload Prometheus configuration with SIGHUP only when the file changed"
+    )
+
+    assert target == {
+        "job_name": "pve_0own_host_node_exporter_via_tailscale",
+        "address": "203.0.113.3:9100",
+        "labels": {"monitored_host": "proxmox-node"},
+    }
+    assert monitoring_host_vars["monitoring_prometheus_service_name"] == "0mcp-prometheus"
+    assert service_guard["ansible.builtin.command"]["argv"] == [
+        "systemctl",
+        "is-active",
+        "{{ monitoring_prometheus_service_name }}.service",
+    ]
+    assert service_guard["failed_when"] is not None
+    assert (
+        task_names.index("Verify the 0own exporter is reachable over Tailscale")
+        < task_names.index("Confirm the configured Prometheus systemd unit is active before editing")
+        < task_names.index("Read the active Prometheus configuration without exposing its contents")
+    )
+    assert playbook["hosts"] == "monitoring"
+    assert apply_task["ansible.builtin.include_role"] == {
+        "name": "lv3.platform.monitoring_vm",
+        "tasks_from": "0own_node_exporter_target.yml",
+    }
+    assert "monitoring_prometheus_0own_node_exporter_target.labels | dictsort" in scrape_template
+    assert "labels.items() | dictsort" not in scrape_template
+    assert "Confirm the existing Prometheus configuration is valid before editing" in task_names
+    assert insertion["ansible.builtin.blockinfile"]["insertbefore"] == "^remote_write:$"
+    assert insertion["ansible.builtin.blockinfile"]["backup"] is True
+    assert task_names.index(
+        "Validate the current Prometheus configuration and safe insertion point"
+    ) < task_names.index("Confirm the existing Prometheus configuration is valid before editing")
+    assert reload_task["ansible.builtin.command"]["argv"][:5] == [
+        "systemctl",
+        "kill",
+        "--kill-whom=main",
+        "--signal=HUP",
+        "{{ monitoring_prometheus_service_name }}.service",
+    ]
+    rescue_names = [task.get("name") for task in update_block["rescue"]]
+    assert rescue_names[:2] == [
+        "Restore the previous Prometheus configuration after failed validation",
+        "Reload Prometheus after restoring the previous configuration",
+    ]
+
+
 def test_monitoring_stops_only_explicit_legacy_prometheus_units() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
     main_tasks = load_tasks(TASKS_PATH)

@@ -1,0 +1,11 @@
+[Unit]
+Description=Prune unused Docker images and old build cache
+Documentation=file://{{ fleet_docker_prune_script_path }}
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart={{ fleet_docker_prune_script_path }}
+Nice=10
+IOSchedulingClass=idle

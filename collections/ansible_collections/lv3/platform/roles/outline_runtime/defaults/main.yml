@@ -31,7 +31,7 @@ outline_public_hostname_overrides:
     address: "{{ outline_public_edge_private_ip }}"
 outline_redis_container_name: outline-redis
 outline_minio_container_name: outline-minio
-outline_redis_image: "{{ container_image_catalog.images.langfuse_redis_runtime.ref }}"
+outline_redis_image: "{{ container_image_catalog.images.shared_valkey_runtime.ref }}"
 outline_minio_image: "{{ container_image_catalog.images.minio_runtime.ref }}"
 outline_database_name: outline
 outline_database_user: outline
@@ -98,3 +98,9 @@ outline_api_token_scopes:
 outline_app_name: LV3 Knowledge Wiki
 outline_force_https: true
 outline_enable_updates: false
+
+# Container memory caps (hard limit / memory+swap). Sized at ~1.5x observed steady-state usage
+# on docker-runtime (2026-10-12); the host has swap (docker_runtime_swap_size_mb) so cold pages can
+# be paged out instead of OOM-killing a neighbour.
+outline_mem_limit: 900m
+outline_memswap_limit: 1800m

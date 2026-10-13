@@ -35,9 +35,14 @@ completeness:
   service_type: nginx-plugin
   requires_subdomain: true
   requires_oidc: false
+  requires_api_gateway: false
   requires_secrets: false
   requires_compose_secrets: false
+  requires_dashboard: false
+  requires_data_catalog: false
+  requires_alert_rules: false
   suppression_preset: legacy-service
+  notes: The static NGINX edge is an ingress appliance, not an API client or data-owning application; edge health is covered by centralized host and SLO monitoring.
 redundancy:
   tier: R1
   recovery_objective:

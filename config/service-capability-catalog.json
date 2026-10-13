@@ -92,6 +92,38 @@
       }
     },
     {
+      "id": "artifact_cache",
+      "name": "Artifact Cache",
+      "description": "Private pull-through container registry mirrors for platform build and validation workloads.",
+      "category": "infrastructure",
+      "lifecycle_status": "active",
+      "vm": "artifact-cache",
+      "vmid": 180,
+      "internal_url": "http://10.10.10.80:5001/v2/",
+      "exposure": "private-only",
+      "health_probe_id": "artifact_cache",
+      "adr": "0296",
+      "runbook": "docs/runbooks/artifact-cache-runtime.md",
+      "runtime_pool": "dedicated-build",
+      "deployment_surface": "playbooks/artifact-cache-vm.yml",
+      "restart_domain": "artifact-cache-core",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/dedicated-build",
+      "mobility_tier": "anchor",
+      "tags": [
+        "build",
+        "cache",
+        "registry"
+      ],
+      "notes": "Private cache endpoint; the registry v2 API is used for availability verification. It is not published through the public edge.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.80:5001/v2/",
+          "notes": "Internal-only registry health endpoint; consumer wiring is managed separately on approved builders."
+        }
+      }
+    },
+    {
       "id": "authentik",
       "name": "Authentik",
       "description": "Open-source IAM/SSO broker for platform operators, services, and agentic workloads.",
@@ -773,7 +805,7 @@
       "health_probe_id": "glitchtip",
       "image_catalog_ids": [
         "glitchtip_runtime",
-        "glitchtip_valkey_runtime"
+        "shared_valkey_runtime"
       ],
       "secret_catalog_ids": [
         "glitchtip_database_password",
@@ -1175,7 +1207,7 @@
         "langfuse_runtime",
         "langfuse_worker_runtime",
         "langfuse_clickhouse_runtime",
-        "langfuse_redis_runtime"
+        "shared_valkey_runtime"
       ],
       "secret_catalog_ids": [
         "langfuse_database_password",
@@ -1219,7 +1251,9 @@
       "exposure": "edge-published",
       "uptime_monitor_name": "LibreChat Public",
       "health_probe_id": "librechat",
-      "image_catalog_ids": [],
+      "image_catalog_ids": [
+        "librechat_runtime"
+      ],
       "secret_catalog_ids": [],
       "adr": "0380",
       "runbook": "docs/runbooks/configure-librechat.md",
@@ -2086,7 +2120,7 @@
       "image_catalog_ids": [
         "outline_runtime",
         "minio_runtime",
-        "langfuse_redis_runtime"
+        "shared_valkey_runtime"
       ],
       "secret_catalog_ids": [
         "outline_database_password",
@@ -2135,7 +2169,7 @@
       "health_probe_id": "paperless",
       "image_catalog_ids": [
         "paperless_runtime",
-        "langfuse_redis_runtime"
+        "shared_valkey_runtime"
       ],
       "secret_catalog_ids": [
         "paperless_database_password",

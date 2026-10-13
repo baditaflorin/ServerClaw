@@ -1,0 +1,52 @@
+---
+# Purpose: Refuse a layout where the exporter and a managed socket proxy would bind the same address and port.
+# Use case: Included from main.yml before anything on the host changes.
+# Inputs: fleet_node_exporter_listen_addresses and fleet_node_exporter_socket_proxies.
+# Outputs: fleet_node_exporter_port_plan fact; a failed assert on a collision; a warning for unmanaged proxies that still collide.
+# Idempotency: Read-only.
+# Dependencies: None.
+
+- name: Build the port plan from the exporter and the managed socket proxies
+  ansible.builtin.set_fact:
+    fleet_node_exporter_managed_proxies: >-
+      {{ fleet_node_exporter_socket_proxies | selectattr('state', 'equalto', 'present') | list }}
+    fleet_node_exporter_unmanaged_proxies: >-
+      {{ fleet_node_exporter_socket_proxies | selectattr('state', 'equalto', 'unmanaged') | list }}
+    fleet_node_exporter_disabled_proxies: >-
+      {{ fleet_node_exporter_socket_proxies | selectattr('state', 'equalto', 'disabled') | list }}
+
+- name: Resolve the bound address list
+  ansible.builtin.set_fact:
+    fleet_node_exporter_port_plan: >-
+      {{
+        fleet_node_exporter_listen_addresses
+        + (
+          fleet_node_exporter_managed_proxies | map(attribute='listen_address')
+          | zip(fleet_node_exporter_managed_proxies | map(attribute='listen_port'))
+          | map('join', ':') | list
+        )
+      }}
+
+- name: Assert every proxy has a known state
+  ansible.builtin.assert:
+    that:
+      - (fleet_node_exporter_socket_proxies | length) == (fleet_node_exporter_managed_proxies | length) + (fleet_node_exporter_unmanaged_proxies | length) + (fleet_node_exporter_disabled_proxies | length)
+    fail_msg: "Every fleet_node_exporter_socket_proxies item needs state: present, unmanaged or disabled."
+
+- name: Assert the managed listeners do not collide
+  ansible.builtin.assert:
+    that:
+      - fleet_node_exporter_port_plan | length == fleet_node_exporter_port_plan | unique | length
+    fail_msg: >-
+      The exporter and the managed socket proxies would bind the same address:port
+      ({{ fleet_node_exporter_port_plan | sort | join(', ') }}). Move one of them to a free port.
+
+- name: Warn about unmanaged proxies that collide with the exporter
+  ansible.builtin.debug:
+    msg: >-
+      NEEDS DECISION: unmanaged proxy {{ item.name }} listens on {{ item.listen_address }}:{{ item.listen_port }}, which this
+      host's exporter or another managed listener already owns. It is not touched. {{ item.unmanaged_reason | default('') }}
+  loop: "{{ fleet_node_exporter_unmanaged_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: (item.listen_address ~ ':' ~ item.listen_port) in fleet_node_exporter_port_plan

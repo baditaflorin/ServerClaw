@@ -8,6 +8,8 @@ This generated ledger preserves the full merged and live-applied workstream hist
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
+| `0493` | Bound Plausible ClickHouse diagnostic log storage | `live_applied` | [ws-0520-plausible-clickhouse-log-retention.md](../../workstreams/ws-0520-plausible-clickhouse-log-retention.md) |
+| `0492` | Scope Plausible analytics SSO to the operator email identity | `live_applied` | [ws-0519-plausible-email-sso.md](../../workstreams/ws-0519-plausible-email-sso.md) |
 | `0470` | Per-deployment fixture inventory + matrix CI | `merged` | [0470-deployment-fixture-matrix.md](../../adr/0470-deployment-fixture-matrix.md) |
 | `0448` | Per-deployment connection registry + run_with_deployment wrapper + topology role auto-fill | `merged` | [0448-deployment-connection-registry-and-wrapper.md](../../adr/0448-deployment-connection-registry-and-wrapper.md) |
 | `0409` | Accept clean ignored HTTPS alert outputs while rejecting present drift | `merged` | [ws-0500-https-alert-runtime-output-gate.md](../../workstreams/ws-0500-https-alert-runtime-output-gate.md) |
@@ -178,6 +180,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0023` | Docker runtime VM baseline | `live_applied` | [adr-0023-docker-runtime.md](../../workstreams/adr-0023-docker-runtime.md) |
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
+| `0011` | Add private Prometheus host metrics for 0own | `merged` | [ws-0521-0own-host-monitoring.md](../../workstreams/ws-0521-0own-host-monitoring.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
 | `` | Regenerate platform.yml with corrected 10.10.10.x addressing | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
 | `` | Reboot-verify the forward-chain fix on all 17 guests, root-cause the Docker-wipe bug, fix Postgres corruption | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |

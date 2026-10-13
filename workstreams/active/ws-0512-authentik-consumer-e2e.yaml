@@ -1,19 +1,21 @@
 id: ws-0512-authentik-consumer-e2e
+plane_issue_id: 6422c2e8-6b80-4b47-83e7-77274e497cb6
 adr: "0491"
 title: Audit and repair live Authentik consumer sign-in paths end to end
-status: blocked
+status: in_progress
 ready_to_merge: false
 live_applied: true
 owner: codex
-branch: codex/authentik-live-closeout-20260926
-worktree_path: .worktrees/authentik-live-closeout-20260926
+branch: codex/serverclaw-public-tailnet-check-20261013
+worktree_path: .worktrees/serverclaw-public-tailnet-check-20261013
 doc: docs/workstreams/ws-0512-authentik-consumer-e2e.md
 canonical_truth:
   changelog_entry: Verify and repair Authentik sign-in paths across active platform consumers.
   release_bump: patch
-  included_in_repo_version: null
+  included_in_repo_version: 0.179.50
   latest_receipts:
-    live_apply: receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
+    artifact_cache_plane: ws-0512-artifact-cache-monitoring-20261012
+    artifact_cache_slo: ws-0512-artifact-cache-prometheus-slo-20261012
 depends_on:
   - adr-0491-authentik-keycloak-sunset-2026-08-30
   - ws-0510-gitea-authentik-oidc-e2e
@@ -21,11 +23,22 @@ conflicts_with: []
 shared_surfaces:
   - .woodpecker.yml
   - config/authentik/oauth-clients.yaml
+  - config/authentik/scope-mappings.yaml
+  - config/ansible-execution-scopes.yaml
   - config/authentik/identities.yaml
   - config/authentik/test-identities.yaml
   - config/grafana/dashboards/grafana.json
   - config/alertmanager/rules/grafana.yml
+  - config/alertmanager/alertmanager.yml
+  - config/agent-tool-registry.json
   - build/platform-manifest.json
+  - docs/schema/live-apply-receipt.schema.json
+  - scripts/deployment_history.py
+  - tests/test_deployment_history.py
+  - build/librechat-tools/accounts.openapi.json
+  - build/librechat-tools/all.openapi.json
+  - scripts/generate_librechat_tool_specs.py
+  - tests/test_librechat_tool_specs.py
   - inventory/group_vars/platform.yml
   - scripts/topology-snapshot.json
   - docs/diagrams/agent-coordination-map.excalidraw
@@ -44,42 +57,228 @@ shared_surfaces:
   - collections/ansible_collections/lv3/platform/roles/librechat_runtime/**
   - collections/ansible_collections/lv3/platform/roles/repo_intake_runtime/**
   - collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/**
+  - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/**
+  - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+  - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/**
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/build_server/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/build_server/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/build_server/tasks/main.yml
+  - tests/test_build_server_role.py
+  - tests/test_proxmox_network_role.py
+  - docs/runbooks/configure-build-artifact-cache.md
+  - tests/test_artifact_cache_runtime_role.py
+  - config/subdomain-catalog.json
+  - config/subdomain-exposure-registry.json
+  - config/service-completeness.json
+  - catalog/services/docker_runtime/service.yaml
+  - config/service-capability-catalog.json
+  - catalog/services/artifact_cache/service.yaml
+  - config/contracts/service-partitions/catalog.json
+  - config/data-catalog.json
+  - config/dependency-graph.json
+  - config/grafana/dashboards/slo-overview.json
+  - config/health-probe-catalog.json
+  - config/service-redundancy-catalog.json
+  - config/slo-catalog.json
+  - config/slo-probe-overlay.json
+  - config/prometheus/file_sd/slo_targets.yml
+  - config/prometheus/rules/slo_alerts.yml
+  - config/prometheus/rules/slo_rules.yml
+  - tests/promtool/slo_rules_test.yml
+  - docs/runbooks/slo-tracking.md
+  - receipts/live-applies/ws-0512-artifact-cache-prometheus-slo-20261012.json
+  - tests/test_slo_tracking.py
+  - receipts/live-applies/ws-0512-artifact-cache-monitoring-20261012.json
+  - catalog/services/status_page/service.yaml
+  - docs/runbooks/artifact-cache-runtime.md
+  - docs/runbooks/configure-artifact-cache-vm.md
+  - docs/runbooks/sbom-cve-scanning.md
+  - docs/site-generated/architecture/dependency-graph.md
+  - docs/diagrams/service-dependency-graph.excalidraw
+  - scripts/environment_topology.py
+  - tests/test_environment_topology.py
+  - catalog/services/librechat/service.yaml
+  - config/workflow-catalog.json
+  - catalog/services/nginx_edge/service.yaml
+  - docs/schema/service-completeness.schema.json
+  - docs/schema/subdomain-exposure-registry.schema.json
+  - scripts/subdomain_catalog.py
+  - scripts/subdomain_exposure_audit.py
+  - scripts/service_completeness.py
+  - tests/test_nginx_edge_publication_role.py
+  - tests/test_linux_guest_firewall_role.py
+  - scripts/tailscale_policy_sync.py
+  - tests/test_tailscale_policy_sync.py
+  - tests/fixtures/linux_guest_firewall_snat_policy.yml
+  - publication/templates/hosts.yml
+  - publication/templates/proxmox-host.yml
+  - tests/test_linux_guest_firewall_role.py
+  - tests/test_service_topology_filters.py
+  - tests/test_subdomain_exposure_audit.py
+  - tests/test_subdomain_catalog.py
+  - tests/test_validate_service_completeness.py
+  - inventory/host_vars/proxmox-host.yml
   - scripts/**authentik*e2e*.py
+  - scripts/reconcile_authentik_scope_mappings.py
   - tests/**authentik*e2e*.py
   - tests/test_authentik_runtime_role.py
+  - tests/test_authentik_scope_mappings.py
+  - tests/test_authentik_oauth_reconcile.py
+  - tests/test_authentik_playbook.py
   - tests/test_outline_runtime_role.py
   - tests/test_authentik_identity_reconcile.py
   - tests/test_gitea_authentik_e2e.py
+  - scripts/authentik_recovery.py
+  - tests/test_authentik_recovery.py
+  - scripts/workflow_catalog.py
+  - tests/test_workflow_catalog_generated_refs.py
+  - tests/test_grafana_sso_role.py
   - scripts/session_logout_verify.py
   - tests/test_session_logout_verify.py
   - tests/test_glitchtip_runtime_role.py
+  - tests/test_proxmox_tailscale_proxy_role.py
   - docs/runbooks/configure-authentik.md
   - docs/runbooks/configure-gitea.md
   - docs/runbooks/configure-harbor.md
   - docs/runbooks/configure-outline.md
   - docs/runbooks/configure-glitchtip.md
+  - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+  - tests/test_docker_runtime_role.py
+  - scripts/service_completeness.py
+  - docs/schema/service-completeness.schema.json
+  - tests/test_validate_service_completeness.py
+  - receipts/live-applies/ws-0512-authentik-builder-managed-20261012-apply-receipt.yaml
+  - docs/runbooks/backup-restore-verification.md
+  - scripts/restore_verification.py
+  - tests/test_restore_verification.py
+  - tests/fixtures/docker-host-fixture.yml
+  - tests/fixtures/postgres-host-fixture.yml
+  - tests/fixtures/ops-base-fixture.yml
   - docs/workstreams/adr-0491-authentik-keycloak-sunset.md
   - docs/workstreams/ws-0512-authentik-consumer-e2e.md
   - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
+  - docs/adr/.index.yaml
+  - docs/adr/index/**
+  - scripts/generate_adr_index.py
+  - tests/test_generate_adr_index.py
   - workstreams.yaml
   - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
+  - receipts/live-applies/ws-0512-authentik-consumer-e2e-postmerge-20261011-apply-receipt.json
+  - receipts/live-applies/ws-0512-authentik-builder-route-partial-20261012-apply-receipt.yaml
+  - receipts/live-applies/ws-0512-authentik-builder-managed-20261012-apply-receipt.yaml
+  - receipts/live-applies/ws-0512-authentik-builder-managed-retry-20261012-apply-receipt.yaml
+  - receipts/live-applies/ws-0512-authentik-builder-managed-sshport-retry-20261012-apply-receipt.yaml
+  - receipts/live-applies/ws-0512-authentik-builder-managed-identity-retry-20261012-apply-receipt.yaml
+  - receipts/live-applies/ws-0512-authentik-builder-managed-replay-20261012.json
   - config/image-catalog.json
+  - receipts/image-scans/2026-10-11-librechat-runtime.json
+  - receipts/sbom/89b0008e610e.cdx.json
+  - receipts/cve/89b0008e610e-20261011T090357Z.grype.json
+  - receipts/restic-snapshots-latest.json
+  - receipts/ops-portal-snapshot.html
   - receipts/image-scans/2026-10-01-authentik-runtime.json
+  - receipts/image-scans/2026-10-11-authentik-runtime.json
   - receipts/cve/09782fe56675-20261001T100019Z.grype.json
+  - receipts/cve/09782fe56675-20261011T100042Z.grype.json
+  - receipts/cve/09782fe56675-20261012T210515Z.grype.json
   - receipts/sbom/09782fe56675.cdx.json
+  - receipts/security-reports/20261011T082609Z.json
+  - scripts/vulnerability_budget.py
+  - tests/test_vulnerability_budget.py
+  - scripts/audit_sanitization_coverage.py
+  - tests/test_audit_sanitization_coverage.py
+  - config/lynis-suppressions.json
+  - scripts/parse_lynis_report.py
+  - scripts/security_posture_report.py
+  - tests/test_parse_lynis_report.py
+  - tests/test_security_posture_report.py
+  - docs/runbooks/security-posture-reporting.md
+  - README.md
+  - versions/stack.yaml
+  - docs/release-notes/index/README.md
+  - docs/status/history/live-apply-evidence.md
+  - .gitignore
+  - Makefile
+  - build/patched-images/**
+  - config/controller-local-secrets.json
+  - config/sbom-scanner.json
+  - collections/ansible_collections/lv3/platform/roles/harbor_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/patched_runtime_project.yml
+  - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/reconcile_patched_runtime_robot.yml
+  - tests/test_harbor_runtime_role.py
+  - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/paperless_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/minio_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/minio_runtime/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/minio_runtime/tasks/migrate_data_owner.yml
+  - collections/ansible_collections/lv3/platform/roles/minio_runtime/templates/docker-compose.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/minio_runtime/meta/argument_specs.yml
+  - tests/test_minio_runtime_role.py
+  - docs/runbooks/minio-object-storage.md
+  - catalog/services/glitchtip/service.yaml
+  - catalog/services/outline/service.yaml
+  - catalog/services/langfuse/service.yaml
+  - catalog/services/paperless/service.yaml
+  - catalog/services/minio/service.yaml
+  - config/grafana/dashboards/langfuse.json
+  - config/alertmanager/rules/langfuse.yml
+  - scripts/build_patched_images.py
+  - scripts/remote_exec.sh
+  - scripts/live_apply_receipts.py
+  - scripts/service_completeness.py
+  - scripts/validate_repo.sh
+  - ansible.cfg
+  - .rsync-exclude
+  - tests/test_patched_runtime_images.py
+  - tests/test_remote_exec.py
+  - tests/test_live_apply_receipts.py
+  - tests/test_validate_service_completeness.py
+  - tests/test_validate_repo_cache.py
+  - tests/test_repository_snapshot.py
+  - workstreams/policy.yaml
+  - scripts/container_image_policy.py
+  - tests/test_container_image_policy.py
+  - tests/test_vulnerability_budget.py
+  - docs/runbooks/container-image-policy.md
+  - receipts/image-scans/2026-10-12-patched-shared-valkey-runtime-187679e3bd40.json
+  - receipts/sbom/187679e3bd40.cdx.json
+  - receipts/cve/187679e3bd40-20261012T073926Z.grype.json
+  - collections/ansible_collections/lv3/platform/roles/build_server/**
+  - tests/test_build_server_role.py
 ownership_manifest:
   owned_surfaces:
+    - id: sanitized_snapshot_tailnet_policy_ci
+      paths:
+        - scripts/tailscale_policy_sync.py
+        - tests/test_tailscale_policy_sync.py
+      mode: shared_contract
+      contract: sanitized-snapshot-tailnet-policy-check-v1
+    - id: sanitized_serverclaw_template_ci
+      paths:
+        - publication/templates/hosts.yml
+        - publication/templates/proxmox-host.yml
+        - tests/fixtures/linux_guest_firewall_snat_policy.yml
+      mode: exclusive
     - id: authentik_consumer_runtime_contract
       paths:
         - config/authentik/oauth-clients.yaml
+        - config/authentik/scope-mappings.yaml
         - config/authentik/identities.yaml
         - config/authentik/test-identities.yaml
         - config/authentik/provider-logout-flow.yaml
         - inventory/group_vars/all/platform_services.yml
         - collections/ansible_collections/lv3/platform/roles/authentik_runtime/**
+        - scripts/reconcile_authentik_scope_mappings.py
+        - config/ansible-execution-scopes.yaml
         - collections/ansible_collections/lv3/platform/roles/outline_runtime/**
         - collections/ansible_collections/lv3/platform/roles/grafana_sso/**
         - collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/**
+        - catalog/services/glitchtip/service.yaml
+        - catalog/services/outline/service.yaml
         - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/**
         - collections/ansible_collections/lv3/platform/roles/librechat_runtime/**
         - collections/ansible_collections/lv3/platform/roles/repo_intake_runtime/**
@@ -92,6 +291,57 @@ ownership_manifest:
         - scripts/**authentik*e2e*.py
         - tests/**authentik*e2e*.py
       mode: exclusive
+    - id: docker_runtime_managed_builder_recovery
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/docker_runtime/tasks/main.yml
+        - receipts/live-applies/ws-0512-authentik-builder-managed-20261012-apply-receipt.yaml
+        - receipts/live-applies/ws-0512-authentik-builder-managed-retry-20261012-apply-receipt.yaml
+        - receipts/live-applies/ws-0512-authentik-builder-managed-sshport-retry-20261012-apply-receipt.yaml
+        - receipts/live-applies/ws-0512-authentik-builder-managed-identity-retry-20261012-apply-receipt.yaml
+        - receipts/live-applies/ws-0512-authentik-builder-managed-replay-20261012.json
+      mode: shared_contract
+      contract: docker-runtime-recovery-v1
+    - id: docker_runtime_regression_test
+      paths:
+        - tests/test_docker_runtime_role.py
+      mode: shared_contract
+      contract: guest-firewall-policy-v1
+    - id: artifact_cache_network_policy
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+        - tests/test_artifact_cache_runtime_role.py
+        - tests/test_proxmox_network_role.py
+        - docs/runbooks/artifact-cache-runtime.md
+        - receipts/live-applies/ws-0512-artifact-cache-monitoring-20261012.json
+      mode: shared_contract
+      contract: artifact-cache-network-policy-v1
+    - id: live_apply_receipt_service_scope
+      paths:
+        - docs/schema/live-apply-receipt.schema.json
+        - scripts/deployment_history.py
+        - tests/test_deployment_history.py
+        - build/platform-manifest.json
+        - receipts/live-applies/ws-0512-authentik-builder-managed-replay-20261012.json
+      mode: shared_contract
+      contract: precise-live-apply-service-attribution-v1
+    - id: docker_runtime_service_completeness_source
+      paths:
+        - catalog/services/docker_runtime/service.yaml
+      mode: exclusive
+    - id: generated_service_catalogs
+      paths:
+        - config/service-completeness.json
+        - config/slo-catalog.json
+      mode: shared_contract
+      contract: generated-service-catalogs-v1
+    - id: service_completeness_applicability
+      paths:
+        - scripts/service_completeness.py
+        - docs/schema/service-completeness.schema.json
+        - tests/test_validate_service_completeness.py
+      mode: shared_contract
+      contract: service-completeness-validation-v1
     - id: glitchtip_runtime_regression
       paths:
         - tests/test_glitchtip_runtime_role.py
@@ -100,22 +350,111 @@ ownership_manifest:
     - id: authentik_runtime_regression
       paths:
         - tests/test_authentik_runtime_role.py
+        - tests/test_authentik_scope_mappings.py
+        - tests/test_authentik_oauth_reconcile.py
+        - tests/test_authentik_playbook.py
       mode: shared_contract
       contract: adr-0491-authentik-migration-v1
+    - id: authentik_operator_recovery
+      paths:
+        - scripts/authentik_recovery.py
+        - tests/test_authentik_recovery.py
+      mode: exclusive
+    - id: generated_workflow_implementation_refs
+      paths:
+        - scripts/workflow_catalog.py
+        - tests/test_workflow_catalog_generated_refs.py
+      mode: exclusive
+    - id: proxmox_tailscale_proxy_restart_recovery
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/**
+        - tests/test_proxmox_tailscale_proxy_role.py
+      mode: exclusive
+    - id: gitea_private_browser_edge_route
+      paths:
+        - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+        - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+        - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/**
+        - inventory/host_vars/proxmox-host.yml
+        - config/subdomain-catalog.json
+        - config/subdomain-exposure-registry.json
+        - docs/schema/subdomain-exposure-registry.schema.json
+        - scripts/subdomain_catalog.py
+        - scripts/subdomain_exposure_audit.py
+        - tests/test_nginx_edge_publication_role.py
+        - tests/test_linux_guest_firewall_role.py
+        - tests/test_service_topology_filters.py
+        - tests/test_subdomain_exposure_audit.py
+        - tests/test_subdomain_catalog.py
+      mode: shared_contract
+      contract: private-edge-routing-v1
+    - id: docker_firewall_reload_safety
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2
+        - tests/test_docker_runtime_role.py
+        - tests/test_linux_guest_firewall_role.py
+      mode: shared_contract
+      contract: guest-firewall-policy-v1
+    - id: ws_0513_completeness_handoff
+      paths:
+        - workstreams/active/ws-0513-builder-metrics-tailnet-firewall.yaml
+      mode: shared_contract
+      contract: workstream-ownership-transfer-v1
+    - id: scoped_subdomain_completeness_and_generated_workflow_refs
+      paths:
+        - config/service-completeness.json
+        - config/grafana/dashboards/langfuse.json
+        - config/alertmanager/rules/langfuse.yml
+        - config/workflow-catalog.json
+        - catalog/services/nginx_edge/service.yaml
+        - docs/schema/service-completeness.schema.json
+        - scripts/service_completeness.py
+        - tests/test_validate_service_completeness.py
+      mode: shared_contract
+      contract: service-completeness-scope-v1
     - id: outline_runtime_regression
       paths:
         - tests/test_outline_runtime_role.py
       mode: shared_contract
       contract: adr-0491-authentik-migration-v1
+    - id: authentik_mainline_live_apply_evidence
+      paths:
+        - README.md
+        - versions/stack.yaml
+        - docs/release-notes/index/README.md
+        - docs/status/history/live-apply-evidence.md
+        - receipts/live-applies/ws-0512-authentik-consumer-e2e-postmerge-20261011-apply-receipt.json
+        - receipts/live-applies/ws-0512-artifact-cache-prometheus-slo-20261012.json
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+    - id: alertmanager_template_yaml_compatibility
+      paths:
+        - config/alertmanager/alertmanager.yml
+      mode: shared_contract
+      contract: alertmanager-template-jinja-yaml-lint-v1
     - id: grafana_observability_baseline
       paths:
         - config/grafana/dashboards/grafana.json
         - config/alertmanager/rules/grafana.yml
       mode: shared_contract
       contract: grafana-observability-v1
+    - id: grafana_sso_regression
+      paths:
+        - tests/test_grafana_sso_role.py
+      mode: shared_contract
+      contract: adr-0491-authentik-migration-v1
     - id: platform_manifest_artifact
       paths:
         - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: authentik_librechat_tool_specs
+      paths:
+        - config/agent-tool-registry.json
+        - scripts/generate_librechat_tool_specs.py
+        - build/librechat-tools/accounts.openapi.json
+        - build/librechat-tools/all.openapi.json
+        - tests/test_librechat_tool_specs.py
       mode: shared_contract
       contract: generated-artifacts-v1
     - id: generated_platform_facts
@@ -160,6 +499,20 @@ ownership_manifest:
         - docs/runbooks/configure-glitchtip.md
       mode: shared_contract
       contract: adr-0491-authentik-migration-v1
+    - id: authentik_restore_rehearsal_safety
+      paths:
+        - docs/runbooks/backup-restore-verification.md
+      mode: shared_contract
+      contract: adr-0099-restore-verification-v1
+    - id: restore_verification_safety_guard
+      paths:
+        - scripts/restore_verification.py
+        - tests/test_restore_verification.py
+        - tests/fixtures/docker-host-fixture.yml
+        - tests/fixtures/postgres-host-fixture.yml
+        - tests/fixtures/ops-base-fixture.yml
+      mode: shared_contract
+      contract: adr-0099-restore-verification-v1
     - id: authentik_ci_workflow
       paths:
         - .woodpecker.yml
@@ -175,19 +528,179 @@ ownership_manifest:
         - workstreams.yaml
       mode: shared_contract
       contract: workstream-registry-v1
+    - id: generated_adr_index
+      paths:
+        - docs/adr/.index.yaml
+        - docs/adr/index/**
+        - scripts/generate_adr_index.py
+        - tests/test_generate_adr_index.py
+      mode: shared_contract
+      contract: generated-artifacts-v1
     - id: authentik_live_apply_evidence
       paths:
-        - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
+      - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
+      - receipts/live-applies/ws-0512-authentik-consumer-e2e-postmerge-20261011-apply-receipt.yaml
+      - receipts/live-applies/ws-0512-authentik-gitea-edge-20261011.yaml
+      - receipts/live-applies/ws-0512-authentik-builder-route-partial-20261012-apply-receipt.yaml
+      - receipts/restic-snapshots-latest.json
+      - receipts/ops-portal-snapshot.html
       mode: shared_contract
       contract: live-apply-evidence-v1
     - id: authentik_image_security_evidence
       paths:
         - config/image-catalog.json
+        - config/service-capability-catalog.json
+        - catalog/services/librechat/service.yaml
         - receipts/image-scans/2026-10-01-authentik-runtime.json
+        - receipts/image-scans/2026-10-11-authentik-runtime.json
+        - receipts/image-scans/2026-10-11-librechat-runtime.json
+        - receipts/image-scans/2026-10-12-patched-shared-valkey-runtime-187679e3bd40.json
+        - receipts/cve/89b0008e610e-20261011T090357Z.grype.json
+        - receipts/sbom/89b0008e610e.cdx.json
         - receipts/cve/09782fe56675-20261001T100019Z.grype.json
+        - receipts/cve/09782fe56675-20261011T100042Z.grype.json
         - receipts/sbom/09782fe56675.cdx.json
+        - receipts/sbom/187679e3bd40.cdx.json
+        - receipts/cve/187679e3bd40-20261012T073926Z.grype.json
+        - receipts/security-reports/20261011T082609Z.json
+        - scripts/vulnerability_budget.py
+        - tests/test_vulnerability_budget.py
+        - scripts/container_image_policy.py
+        - tests/test_container_image_policy.py
       mode: shared_contract
       contract: vulnerability-evidence-v1
+    - id: publication_sanitization_dns_resolver_classification
+      paths:
+        - scripts/audit_sanitization_coverage.py
+        - tests/test_audit_sanitization_coverage.py
+      mode: shared_contract
+      contract: publication-sanitization-audit-v1
+    - id: patched_runtime_image_supply_chain
+      paths:
+        - .gitignore
+        - Makefile
+        - build/patched-images/**
+        - config/controller-local-secrets.json
+        - config/sbom-scanner.json
+        - collections/ansible_collections/lv3/platform/roles/harbor_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/patched_runtime_project.yml
+        - collections/ansible_collections/lv3/platform/roles/harbor_runtime/tasks/reconcile_patched_runtime_robot.yml
+        - collections/ansible_collections/lv3/platform/roles/minio_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/minio_runtime/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/minio_runtime/tasks/migrate_data_owner.yml
+        - collections/ansible_collections/lv3/platform/roles/minio_runtime/templates/docker-compose.yml.j2
+        - collections/ansible_collections/lv3/platform/roles/minio_runtime/meta/argument_specs.yml
+        - catalog/services/minio/service.yaml
+        - scripts/build_patched_images.py
+        - scripts/remote_exec.sh
+        - tests/test_patched_runtime_images.py
+        - tests/test_remote_exec.py
+        - tests/test_harbor_runtime_role.py
+        - tests/test_minio_runtime_role.py
+        - docs/runbooks/container-image-policy.md
+        - docs/runbooks/minio-object-storage.md
+      mode: shared_contract
+      contract: patched-image-supply-chain-v1
+    - id: build_server_private_registry_route
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/build_server/**
+        - collections/ansible_collections/lv3/platform/roles/artifact_cache_runtime/defaults/main.yml
+        - tests/test_build_server_role.py
+        - tests/test_artifact_cache_runtime_role.py
+        - docs/runbooks/configure-build-artifact-cache.md
+      mode: shared_contract
+      contract: build-server-private-registry-route-v1
+    - id: active_workstream_branch_policy
+      paths:
+        - workstreams/policy.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: snapshot_receipt_evidence_validation
+      paths:
+        - scripts/live_apply_receipts.py
+        - tests/test_live_apply_receipts.py
+      mode: shared_contract
+      contract: immutable-snapshot-validation-v1
+    - id: snapshot_service_completeness_scope
+      paths:
+        - scripts/service_completeness.py
+        - tests/test_validate_service_completeness.py
+      mode: shared_contract
+      contract: immutable-snapshot-validation-v1
+    - id: ansible_collection_cache_precedence
+      paths:
+        - ansible.cfg
+        - scripts/validate_repo.sh
+        - tests/test_validate_repo_cache.py
+      mode: shared_contract
+      contract: ansible-validation-cache-v1
+    - id: snapshot_generated_dependency_exclusion
+      paths:
+        - .rsync-exclude
+        - tests/test_repository_snapshot.py
+      mode: shared_contract
+      contract: immutable-snapshot-validation-v1
+    - id: shared_valkey_consumer_contract
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/paperless_runtime/defaults/main.yml
+        - catalog/services/langfuse/service.yaml
+        - catalog/services/paperless/service.yaml
+      mode: shared_contract
+      contract: redis-compatible-runtime-image-v1
+    - id: nginx_host_security_suppression
+      paths:
+        - config/lynis-suppressions.json
+        - scripts/parse_lynis_report.py
+        - scripts/security_posture_report.py
+        - tests/test_parse_lynis_report.py
+        - tests/test_security_posture_report.py
+        - docs/runbooks/security-posture-reporting.md
+      mode: shared_contract
+      contract: host-scoped-lynis-suppressions-v1
+    - id: artifact_cache_catalog_and_runbook_contract
+      paths:
+        - catalog/services/artifact_cache/service.yaml
+        - config/contracts/service-partitions/catalog.json
+        - config/data-catalog.json
+        - config/dependency-graph.json
+        - config/grafana/dashboards/slo-overview.json
+        - config/health-probe-catalog.json
+        - config/service-redundancy-catalog.json
+        - config/slo-catalog.json
+        - config/slo-probe-overlay.json
+        - config/prometheus/file_sd/slo_targets.yml
+        - config/prometheus/rules/slo_alerts.yml
+        - config/prometheus/rules/slo_rules.yml
+        - tests/promtool/slo_rules_test.yml
+        - tests/test_slo_tracking.py
+        - docs/runbooks/slo-tracking.md
+        - docs/runbooks/artifact-cache-runtime.md
+        - docs/runbooks/configure-artifact-cache-vm.md
+        - docs/runbooks/sbom-cve-scanning.md
+      mode: shared_contract
+      contract: artifact-cache-catalog-and-probe-v1
+    - id: generated_dependency_diagram
+      paths:
+        - docs/site-generated/architecture/dependency-graph.md
+        - docs/diagrams/service-dependency-graph.excalidraw
+      mode: shared_contract
+      contract: generated-index-and-diagram-v1
+    - id: service_subdomain_retirement_contract
+      paths:
+        - scripts/environment_topology.py
+        - tests/test_environment_topology.py
+      mode: shared_contract
+      contract: service-subdomain-retirement-v1
+    - id: managed_status_page_completeness
+      paths:
+        - catalog/services/status_page/service.yaml
+        - docs/schema/service-completeness.schema.json
+        - scripts/service_completeness.py
+        - tests/test_validate_service_completeness.py
+      mode: shared_contract
+      contract: managed-status-page-endpoint-v1
 context: |
   The Authentik migration record reports that all consumers and protected
   browser paths passed, but the operator subsequently observed Outline
@@ -235,6 +748,91 @@ context: |
   exception. Production still runs 2026.8.0; apply remains pending PR review,
   a short-lived VM192 rollback snapshot, and post-apply readiness/consumer
   smoke checks. Do not silently extend the exception.
+
+  2026-10-11 Gitea browser-path correction: the public browser hostname reaches
+  the private NGINX VM through the trusted Proxmox subnet-router address, but
+  live NGINX had no matching vhost and served its unrelated default certificate.
+  The direct Mac-to-PVE host proxy ACL is a separate controller-path issue, not
+  the browser URL failure. A private TLS-only vhost is declared in source,
+  restricted to the ingress /32, and requires an existing shared certificate
+  that OpenSSL verifies covers the Git hostname. It does not enable public
+  Gitea DNS, widen the Tailscale ACL, or request a per-host public ACME
+  certificate. The managed edge route is now applied and a fresh strict-TLS
+  browser OIDC test passed with the non-admin gitea-e2e identity. The governed
+  converge completed with 133 tasks OK, 5 changed, 0 failed, and 53 skipped;
+  NGINX syntax/active checks, the Gitea route, and Authentik readiness all
+  passed. A governed Restic run protected five sources with zero uncovered.
+
+  2026-10-11 Grafana scope diagnosis: the live Authentik `grafana-groups`
+  mapping now exists and is attached to `grafana-oauth`; both read-only
+  reconciliation checks report no drift. A fresh strict-TLS Grafana browser
+  session still has no `orgRole`. Safe redirect inspection proved the active
+  Grafana runtime requests `openid profile email groups`, while the managed
+  Authentik mapping is exposed under `grafana-groups`. The role and regression
+  test now request that exact custom scope. After merge and governed converge,
+  fresh strict-TLS browser login succeeds as the non-admin test identity; the
+  Viewer role is assigned and 48 dashboards are discoverable. Browser logout
+  exposed a separate defect: Grafana sent its ID-token hint to the shared Ops
+  Portal provider's end-session endpoint, which Authentik rejected with HTTP
+  400. PR #288 now points Grafana at its own provider-scoped end-session URL,
+  and the fix is merged and applied from origin/main. A fresh browser logout
+  reached the expected Authentik confirmation, Grafana /api/user returned 401,
+  and a new Authentik sign-in restored a non-admin Viewer session. The
+  Grafana logout slice is complete; other workstream blockers remain.
+
+  2026-10-11 Grafana verifier correction: `/api/user` confirms the browser
+  identity and server-admin flag, while `/api/user/orgs` supplies workspace
+  roles. The corrected fresh strict-TLS Firefox verifier passed for
+  `gitea-e2e` with one Viewer membership and no Grafana server-admin access.
+
+  2026-10-13 security/build continuation: operator notes report that the
+  exact pinned stable Authentik image scan had 6 Critical / 99 High. Its
+  2026-10-12 summary and CVE receipt are absent from the checkout; the last
+  tracked same-digest receipt is dated 2026-10-11 and contains the same counts.
+  The current upstream 2026.11.0-rc1
+  source has moved to Python 3.14.8, AnyIO 4.14.2, and PyJWT 2.15.1, but that
+  pre-release source is not a deployable stable candidate and has no resulting
+  immutable image scan. Debian's tracker marks the exact bundled GnuTLS package
+  3.8.9-3+deb13u4 vulnerable to both GnuTLS Criticals and lists no fixed Trixie
+  version. Debian likewise still marks the bundled Trixie libxml2 version
+  vulnerable. No findings were suppressed. A read-only 2026-10-12 22:01 UTC
+  check found 2.9 GiB available and no swap on docker-build, with elevated
+  five-minute memory PSI and concurrent CI/build containers; the Proxmox parent
+  had 4.2 GiB available and 3.9/4.0 GiB swap used. No new heavy image build was
+  started. The sanitization strict audit and publisher dry-run leak check pass.
+  Only tracked scan/CVE receipts are declared in this workstream manifest; a
+  fresh scan must be archived before its results are treated as current.
+
+  2026-10-13 risk and repository-truth correction: the expired Authentik risk
+  exception was removed from config/image-catalog.json; the current digest is
+  explicitly marked blocked with no active exception. The catalog validator
+  accepts this state only for an image with Critical findings, and the
+  vulnerability-budget gate still denies Authentik at 6 Critical / 99 High.
+  Focused tests for image policy, vulnerability budget, Authentik runtime,
+  patched images, sanitization, and generated status/release-note checks pass
+  (62 tests). The full local suite attempt
+  made before this correction returned 3,963 passed, 190 failed, 17 errors, and
+  26 skipped; it is not a full-suite pass and must be reconciled with Woodpecker
+  before merge. Repository metadata also had platform_version 0.179.51 while
+  release_tracks.platform_versioning.current and the 0.179.51 release notes
+  both state 0.179.50/no live platform bump. versions/stack.yaml was corrected
+  to 0.179.50 and the generated README refreshed; repository data-model and
+  generated-README checks now pass.
+
+  Recovery email delivery was confirmed by metadata-only Gmail search on
+  2026-10-13, but the one-time link was not opened and no current operator
+  credential or completed reset is confirmed.
+blockers:
+  - The current Authentik digest scans at 6 Critical / 99 High with zero known fixes; the prior 3 Critical / 84 High exception expired on 2026-10-08. Do not apply an Authentik runtime-image change until a policy-compliant stable image or an explicit new risk decision covering the current findings exists.
+  - Outline and GlitchTip consumer changes remain blocked by unresolved critical image findings; no exception was authorized for either service.
+  - The latest recorded application-level Authentik restore rehearsal failed. A new drill is unsafe until the restore network is genuinely isolated and host capacity is admitted; the live fixture bridge currently overlaps production.
+  - The read-only source audit found no active Keycloak DNS declaration, but live DNS could not be verified: the legacy DNS Console API redirects without records and the available Hetzner Cloud API context has 34 zones but no example.org zone. Repeat with the canonical project-scoped Cloud API token; do not delete cold rollback archives in this workstream.
+  - Public ServerClaw snapshot pull request 69's refreshed pipelines fail because the sanitizer intentionally removes the private Tailscale policy while inherited CI still requires it. A narrow source-side skip is being added for sanitized snapshots only; a missing policy remains fatal in private source. The protected source gate and refreshed public checks must pass before publication can merge.
+  - The declared backup guest (VMID 160) is absent from the current Proxmox node and its inventory address is unreachable. PBS storage is independently online, but the backup-host security receipt remains stale; do not treat PBS availability as host-hardening evidence.
+  - >-
+    A current least-privileged operator credential and completed recovery reset
+    are not confirmed; delivery of the reset email is confirmed, but link
+    validity and successful reset are not.
 tasks:
   - id: t1
     title: Reconcile live provider/application state with declared clients and active deployments
@@ -244,7 +842,13 @@ tasks:
     status: in_progress
   - id: t3
     title: Fix observed consumer, proxy, or logout defects and apply through governed converges
-    status: blocked
+    status: in_progress
   - id: t4
     title: Run repository checks, capture live evidence, and merge/publish through PRs
+    status: in_progress
+  - id: t5
+    title: Preserve monitoring node-exporter rules in sanitized ServerClaw host templates
+    status: completed
+  - id: t6
+    title: Keep private Tailscale policy validation compatible with sanitized ServerClaw CI
     status: in_progress

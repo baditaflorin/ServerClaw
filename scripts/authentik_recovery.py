@@ -23,6 +23,7 @@ USERS_PATH = "/api/v3/core/users/"
 DEFAULT_RECOVERY_FLOW_SLUG = "platform-operator-recovery"
 DEFAULT_IDENTIFICATION_STAGE = "default-authentication-identification"
 DEFAULT_EMAIL_STAGE = "platform-operator-recovery-email"
+DEFAULT_OPERATOR_USERNAME = "akadmin"
 
 
 class RecoveryError(RuntimeError):
@@ -203,6 +204,7 @@ def send_recovery_email(
     api: HTTPAuthentikAPI,
     *,
     identity_file: Path,
+    operator_username: str = DEFAULT_OPERATOR_USERNAME,
     recovery_flow_slug: str = DEFAULT_RECOVERY_FLOW_SLUG,
     identification_stage_name: str = DEFAULT_IDENTIFICATION_STAGE,
     email_stage_name: str = DEFAULT_EMAIL_STAGE,
@@ -214,13 +216,22 @@ def send_recovery_email(
         email_stage_name=email_stage_name,
     )
     operator_email = _operator_email(identity_file).casefold()
+    normalized_username = operator_username.strip()
+    if not normalized_username:
+        raise RecoveryError("The configured platform operator username is empty")
     users = api.list_all(USERS_PATH)
     operator = _single(
-        [user for user in users if str(user.get("email", "")).casefold() == operator_email],
-        label="active platform operator",
+        [
+            user
+            for user in users
+            if user.get("username") == normalized_username and str(user.get("email", "")).casefold() == operator_email
+        ],
+        label="configured platform operator account",
     )
     if operator.get("is_active") is not True:
         raise RecoveryError("The platform operator account is inactive")
+    if operator.get("is_superuser") is not True:
+        raise RecoveryError("The configured platform operator account is not an administrator")
     user_pk = _object_pk(operator, "platform operator")
     email_stages = api.list_all(EMAIL_STAGES_PATH)
     email_stage = _single(
@@ -258,6 +269,7 @@ def _parser() -> argparse.ArgumentParser:
     send_parser = subparsers.add_parser("send-email", help="Request a recovery email for the configured operator.")
     common(send_parser)
     send_parser.add_argument("--identity-file", required=True, type=Path)
+    send_parser.add_argument("--operator-username", default=DEFAULT_OPERATOR_USERNAME)
     return parser
 
 
@@ -273,7 +285,12 @@ def main() -> int:
         if args.command == "check":
             result = check_recovery_contract(api, **kwargs)
         else:
-            result = send_recovery_email(api, identity_file=args.identity_file, **kwargs)
+            result = send_recovery_email(
+                api,
+                identity_file=args.identity_file,
+                operator_username=args.operator_username,
+                **kwargs,
+            )
     except (RecoveryError, OSError, ValueError, yaml.YAMLError) as exc:
         print(json.dumps({"result": "fail", "error": str(exc)}, sort_keys=True))
         return 1

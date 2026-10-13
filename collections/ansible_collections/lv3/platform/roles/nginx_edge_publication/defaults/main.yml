@@ -381,3 +381,17 @@ public_edge_sites: >-
     )
     | unique(attribute='hostname')
   }}
+public_edge_private_sites: >-
+  {{ public_edge_service_topology | service_topology_private_edge_sites }}
+public_edge_all_sites: >-
+  {{ (public_edge_sites + public_edge_private_sites) | unique(attribute='hostname') }}
+public_edge_private_certificate_hostnames: >-
+  {{
+    (public_edge_private_sites | map(attribute='hostname') | list)
+    + (
+      public_edge_private_sites
+      | selectattr('aliases', 'defined')
+      | map(attribute='aliases')
+      | flatten
+    )
+  }}

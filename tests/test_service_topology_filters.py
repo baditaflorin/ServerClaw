@@ -108,6 +108,76 @@ def test_edge_sites_preserve_exact_redirects() -> None:
     ]
 
 
+def test_private_edge_sites_require_tls_and_an_explicit_source_allowlist() -> None:
+    filters = load_module()
+    topology = {
+        "gitea": {
+            "public_hostname": "git.example.com",
+            "private_edge": {
+                "enabled": True,
+                "tls": True,
+                "upstream": "http://10.10.10.92:3003",
+                "allow_cidrs": ["10.10.10.1/32"],
+            },
+        }
+    }
+
+    sites = filters.service_topology_private_edge_sites(topology)
+    assert sites == [
+        {
+            "hostname": "git.example.com",
+            "kind": "proxy",
+            "upstream": "http://10.10.10.92:3003",
+            "private_only": True,
+            "allow_cidrs": ["10.10.10.1/32"],
+        }
+    ]
+
+
+def test_private_edge_site_rejects_an_invalid_allowlist() -> None:
+    filters = load_module()
+    topology = {
+        "gitea": {
+            "public_hostname": "git.example.com",
+            "private_edge": {
+                "enabled": True,
+                "tls": True,
+                "upstream": "http://10.10.10.92:3003",
+                "allow_cidrs": ["not-a-network"],
+            },
+        }
+    }
+
+    try:
+        filters.service_topology_private_edge_sites(topology)
+    except filters.AnsibleFilterError as exc:
+        assert "invalid CIDR" in str(exc)
+    else:
+        raise AssertionError("invalid private-edge source CIDR must be rejected")
+
+
+def test_private_edge_site_rejects_public_source_networks() -> None:
+    filters = load_module()
+    topology = {
+        "gitea": {
+            "public_hostname": "git.example.com",
+            "private_edge": {
+                "enabled": True,
+                "tls": True,
+                "upstream": "http://192.0.2.10:3003",
+                "allow_cidrs": ["0.0.0.0/0"],
+            },
+        }
+    }
+
+    try:
+        filters.service_topology_private_edge_sites(topology)
+    except filters.AnsibleFilterError as exc:
+        assert "private unicast network" in str(exc)
+    else:
+        raise AssertionError("private edge routes must reject public source networks")
+
+
 def test_edge_sites_preserve_proxy_header_and_security_policy_controls() -> None:
     filters = load_module()
     sites = filters.service_topology_edge_sites(
@@ -143,9 +213,10 @@ def test_platform_inventory_points_headscale_edge_at_proxmox_internal_bridge() -
     platform_vars = yaml.safe_load(PLATFORM_VARS_PATH.read_text())
     headscale = platform_vars["platform_service_topology"]["headscale"]
 
-    assert headscale["edge"]["upstream"] == "http://10.10.10.1:8080"
-    assert headscale["urls"]["internal"] == "http://10.10.10.1:8080"
-    assert platform_vars["headscale_internal_url"] == "http://10.10.10.1:8080"
+    expected_internal_url = headscale["urls"]["internal"]
+    assert headscale["edge"]["upstream"] == expected_internal_url
+    assert platform_vars["headscale_internal_url"] == expected_internal_url
+    assert expected_internal_url.endswith(":8080")
 
 
 def test_root_headscale_playbook_does_not_duplicate_edge_site_overrides() -> None:

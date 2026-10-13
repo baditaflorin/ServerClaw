@@ -1,0 +1,23 @@
+[Unit]
+Description=Generate Prometheus file_sd targets from the Scanopy inventory
+Documentation=file://{{ monitoring_scanopy_sd_readme_file }}
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+{% for key, value in monitoring_scanopy_sd_environment | dictsort %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+ExecStart=/usr/bin/python3 {{ monitoring_scanopy_sd_script_file }}
+TimeoutStartSec=240
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths={{ monitoring_prometheus_file_sd_dir }} {{ monitoring_scanopy_sd_state_dir }} {{ monitoring_scanopy_sd_textfile_dir }}
+ReadOnlyPaths={{ monitoring_scanopy_sd_config_dir }} {{ monitoring_scanopy_sd_install_dir }}
+CapabilityBoundingSet=CAP_CHOWN CAP_FOWNER CAP_DAC_OVERRIDE
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

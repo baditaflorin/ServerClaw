@@ -166,7 +166,7 @@ def test_explicit_topology_file_avoids_shared_profile(
     assert host_vars["proxmox_internal_ipv4"] == "10.77.0.1"
 
 
-def test_default_check_ignores_untracked_topology_inputs(
+def test_check_ignores_untracked_generated_topology_with_selected_overlay(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -177,6 +177,9 @@ def test_default_check_ignores_untracked_topology_inputs(
         "proxmox_guests:\n  - name: contaminated\n    ipv4: 10.99.0.2\n",
         encoding="utf-8",
     )
+    topology_file = tmp_path / "topology.yml"
+    topology_file.write_text("proxmox_internal_ipv4: 10.77.0.1\n", encoding="utf-8")
+    monkeypatch.setenv("PLATFORM_TOPOLOGY_OVERLAY", str(topology_file))
     calls: dict[str, object] = {}
 
     def fake_load_sources(
@@ -194,14 +197,15 @@ def test_default_check_ignores_untracked_topology_inputs(
 
     monkeypatch.setattr(generate_platform_vars, "load_sources", fake_load_sources)
     monkeypatch.setattr(generate_platform_vars, "missing_deployment_derived_platform_inputs", lambda: ())
+    monkeypatch.setattr(generate_platform_vars, "_apply_topology_override", lambda _path: None)
     monkeypatch.setattr(generate_platform_vars, "_load_generation_identity_overlay", lambda path: {})
     monkeypatch.setattr(generate_platform_vars, "build_platform_vars", lambda **kwargs: {})
     monkeypatch.setattr(generate_platform_vars, "render_platform_vars", lambda payload: "sentinel\n")
 
-    assert generate_platform_vars.check_platform_vars(output_path) == 0
+    assert generate_platform_vars.check_platform_vars(output_path, use_topology_override=True) == 0
     assert calls == {
         "skip_local_override": True,
-        "skip_topology_override": True,
+        "skip_topology_override": False,
         "skip_generated_topology": True,
     }
 
@@ -233,14 +237,18 @@ def test_default_check_remains_strict_when_deployment_inputs_are_present(
     input_path.write_text("dns_records: {}\n", encoding="utf-8")
     output_path = tmp_path / "platform.yml"
     output_path.write_text("actual: true\n", encoding="utf-8")
+    topology_file = tmp_path / "topology.yml"
+    topology_file.write_text("proxmox_internal_ipv4: 10.77.0.1\n", encoding="utf-8")
+    monkeypatch.setenv("PLATFORM_TOPOLOGY_OVERLAY", str(topology_file))
 
     monkeypatch.setattr(generate_platform_vars, "DEPLOYMENT_DERIVED_PLATFORM_INPUT_PATHS", (input_path,))
     monkeypatch.setattr(generate_platform_vars, "load_sources", lambda **_kwargs: ({}, {}))
+    monkeypatch.setattr(generate_platform_vars, "_apply_topology_override", lambda _path: None)
     monkeypatch.setattr(generate_platform_vars, "_load_generation_identity_overlay", lambda _path: {})
     monkeypatch.setattr(generate_platform_vars, "build_platform_vars", lambda **_kwargs: {"expected": True})
     monkeypatch.setattr(generate_platform_vars, "render_platform_vars", lambda _payload: "expected: true\n")
 
-    assert generate_platform_vars.check_platform_vars(output_path) == 2
+    assert generate_platform_vars.check_platform_vars(output_path, use_topology_override=True) == 2
     assert "must match" in capsys.readouterr().err
 
 
@@ -256,6 +264,9 @@ def test_default_check_reuses_tracked_identity_snapshot(
         "    management_ipv4: 198.51.100.42\n",
         encoding="utf-8",
     )
+    topology_file = tmp_path / "topology.yml"
+    topology_file.write_text("proxmox_internal_ipv4: 10.77.0.1\n", encoding="utf-8")
+    monkeypatch.setenv("PLATFORM_TOPOLOGY_OVERLAY", str(topology_file))
     captured: dict[str, Any] = {}
 
     def fake_build_platform_vars(*, stack, host_vars):
@@ -264,15 +275,33 @@ def test_default_check_reuses_tracked_identity_snapshot(
 
     monkeypatch.setattr(generate_platform_vars, "build_platform_vars", fake_build_platform_vars)
     monkeypatch.setattr(generate_platform_vars, "missing_deployment_derived_platform_inputs", lambda: ())
+    monkeypatch.setattr(generate_platform_vars, "_apply_topology_override", lambda _path: None)
     monkeypatch.setattr(
         generate_platform_vars,
         "render_platform_vars",
         lambda payload: output_path.read_text(encoding="utf-8"),
     )
 
-    assert generate_platform_vars.check_platform_vars(output_path) == 0
+    assert generate_platform_vars.check_platform_vars(output_path, use_topology_override=True) == 0
     assert captured["platform_domain"] == "tracked.example.net"
     assert captured["management_ipv4"] == "198.51.100.42"
+
+
+def test_default_check_skips_without_an_explicit_topology_selector(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.delenv("PLATFORM_TOPOLOGY_OVERLAY", raising=False)
+    monkeypatch.setattr(generate_platform_vars, "missing_deployment_derived_platform_inputs", lambda: ())
+    monkeypatch.setattr(
+        generate_platform_vars,
+        "load_sources",
+        lambda **_kwargs: pytest.fail("cannot compare deployment topology without its selected overlay"),
+    )
+
+    assert generate_platform_vars.check_platform_vars(tmp_path / "platform.yml") == 0
+    assert "PLATFORM_TOPOLOGY_OVERLAY not selected" in capsys.readouterr().out
 
 
 def test_generation_identity_snapshot_rejects_unapproved_local_scalars() -> None:

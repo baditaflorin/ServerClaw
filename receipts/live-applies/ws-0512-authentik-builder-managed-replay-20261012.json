@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "ws-0512-authentik-builder-managed-replay-20261012",
+  "environment": "production",
+  "applied_on": "2026-10-12",
+  "recorded_on": "2026-10-12",
+  "recorded_by": "codex",
+  "source_commit": "afb65543ef65b608c27de29aa077d40d547b5da2",
+  "repo_version_context": "0.179.50",
+  "platform_version_context": "0.179.50",
+  "workflow_id": "live-apply-service",
+  "adr": "0295",
+  "service_ids": ["artifact_cache", "docker_build"],
+  "summary": "Replayed the merged managed BuildKit and artifact-cache convergence on the docker-build VM, bootstrapped the remote builder, and verified the private cache endpoints from build and runtime consumers.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-build",
+      "vmid": "130",
+      "service": "build-artifact-cache"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Managed BuildKit service handoff",
+      "result": "pass",
+      "observed": "Ansible recap was ok=157 changed=1 unreachable=0 failed=0; 0mcp-buildkitd.service is active and enabled, the legacy unit is inactive and disabled, obsolete containers are absent, and the persistent cache path is present."
+    },
+    {
+      "check": "Remote Buildx worker and canary",
+      "result": "pass",
+      "observed": "The mcp-cache builder bootstrapped on BuildKit 0.33.1 with a linux/amd64 worker; a local-only OCI amd64 canary built successfully and the temporary artifact was removed."
+    },
+    {
+      "check": "Private artifact-cache endpoints",
+      "result": "pass",
+      "observed": "The /v2/ endpoints on ports 5001-5004 responded from both docker-build and docker-runtime. Monitoring access remained a separate pending firewall repair."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0512-authentik-consumer-e2e.md",
+    "docs/runbooks/artifact-cache-runtime.md",
+    "docs/runbooks/configure-build-artifact-cache.md"
+  ],
+  "notes": [
+    "Restic snapshot metadata advanced after the live apply; the retained evidence confirms the manifest update, not a separately captured wrapper exit code.",
+    "The pre-apply idle check found no active CI/build jobs, but the apply-lock context was released before the make process ran. No overlap was observed; this deviation remains visible, and future mutation subprocesses must hold the lock for their entire duration."
+  ]
+}

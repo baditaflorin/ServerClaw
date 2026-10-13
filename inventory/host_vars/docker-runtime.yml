@@ -1,0 +1,5 @@
+---
+# docker-runtime (VM 120, 10.10.10.20): ~85 containers in 16 GB RAM with no swap
+# (MemAvailable ~4-5%). An 8 GiB swap file gives the kernel somewhere to put cold
+# anonymous pages instead of squeezing the page cache / OOM-killing.
+docker_runtime_swap_size_mb: 8192

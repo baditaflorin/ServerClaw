@@ -24,6 +24,7 @@ from validation_toolkit import require_int, require_list, require_mapping, requi
 
 
 SLO_CATALOG_PATH = repo_path("config", "slo-catalog.json")
+SLO_PROBE_OVERLAY_PATH = repo_path("config", "slo-probe-overlay.json")
 PROMETHEUS_RULES_PATH = repo_path("config", "prometheus", "rules", "slo_rules.yml")
 PROMETHEUS_ALERTS_PATH = repo_path("config", "prometheus", "rules", "slo_alerts.yml")
 PROMETHEUS_TARGETS_PATH = repo_path("config", "prometheus", "file_sd", "slo_targets.yml")
@@ -136,6 +137,113 @@ def load_slo_catalog(
     return validate_slo_catalog(load_json(path), service_catalog=service_catalog, catalog_path=path)
 
 
+# Probe cadence of the slo-blackbox job (global scrape_interval in prometheus.yml.j2). The minimum-history guards in the
+# generated alerts are expressed as sample counts, so they must match this value.
+PROBE_INTERVAL_SECONDS = 15
+# A guard window passes once it holds at least this share of the samples a gap-free series would have.
+MIN_HISTORY_COVERAGE = 0.9
+PROBE_VIAS = {"edge", "direct"}
+_URL_PATTERN = re.compile(r"^(?P<scheme>https?)://(?P<host>[^/]+)(?P<path>/.*)?$")
+
+
+def split_probe_url(url: str) -> tuple[str, str, str]:
+    """Split scheme, host and path without urlparse so Jinja placeholders in the host survive."""
+    match = _URL_PATTERN.match(url)
+    if match is None:
+        raise ValueError(f"not an http(s) URL: {url}")
+    return match["scheme"], match["host"], match["path"] or "/"
+
+
+def validate_slo_probe_overlay(payload: dict[str, Any], catalog: dict[str, Any]) -> dict[str, Any]:
+    path = "config/slo-probe-overlay.json"
+    payload = require_mapping(payload, path)
+    require_str(payload.get("schema_version"), f"{path}.schema_version")
+    require_str(payload.get("review_note"), f"{path}.review_note")
+    require_str(payload.get("verified_on"), f"{path}.verified_on")
+    require_str(payload.get("edge_connect_host"), f"{path}.edge_connect_host")
+    tls_policy = require_mapping(payload.get("tls_policy"), f"{path}.tls_policy")
+    warn = require_int(tls_policy.get("warn_days"), f"{path}.tls_policy.warn_days", minimum=1)
+    critical = require_int(tls_policy.get("critical_days"), f"{path}.tls_policy.critical_days", minimum=1)
+    if critical >= warn:
+        raise ValueError(f"{path}.tls_policy.critical_days must be lower than warn_days")
+    history = require_mapping(payload.get("min_history"), f"{path}.min_history")
+    for key in ("fast_burn_minutes", "slow_burn_hours", "budget_hours"):
+        require_int(history.get(key), f"{path}.min_history.{key}", minimum=1)
+
+    catalog_ids = {slo["id"] for slo in catalog["slos"]}
+    listed: set[str] = set()
+    for index, raw in enumerate(require_list(payload.get("endpoints"), f"{path}.endpoints")):
+        entry = require_mapping(raw, f"{path}.endpoints[{index}]")
+        slo_id = require_str(entry.get("slo_id"), f"{path}.endpoints[{index}].slo_id")
+        if slo_id not in catalog_ids:
+            raise ValueError(f"{path}.endpoints[{index}].slo_id '{slo_id}' is not in config/slo-catalog.json")
+        if slo_id in listed:
+            raise ValueError(f"{path} lists '{slo_id}' more than once")
+        listed.add(slo_id)
+        via = require_str(entry.get("via"), f"{path}.endpoints[{index}].via")
+        if via not in PROBE_VIAS:
+            raise ValueError(f"{path}.endpoints[{index}].via must be one of {sorted(PROBE_VIAS)}")
+        scheme, _, _ = split_probe_url(require_str(entry.get("target_url"), f"{path}.endpoints[{index}].target_url"))
+        if via == "edge" and scheme != "https":
+            raise ValueError(f"{path}.endpoints[{index}] edge endpoints must be https")
+        if entry.get("tls") and via != "edge":
+            raise ValueError(f"{path}.endpoints[{index}].tls is only valid for edge endpoints")
+        if "objective_percent" in entry:
+            require_number(
+                entry["objective_percent"], f"{path}.endpoints[{index}].objective_percent", minimum=0.01, maximum=99.999
+            )
+    for index, raw in enumerate(require_list(payload.get("excluded"), f"{path}.excluded")):
+        entry = require_mapping(raw, f"{path}.excluded[{index}]")
+        slo_id = require_str(entry.get("slo_id"), f"{path}.excluded[{index}].slo_id")
+        require_str(entry.get("reason"), f"{path}.excluded[{index}].reason")
+        if slo_id not in catalog_ids:
+            raise ValueError(f"{path}.excluded[{index}].slo_id '{slo_id}' is not in config/slo-catalog.json")
+        if slo_id in listed:
+            raise ValueError(f"{path} lists '{slo_id}' as both an endpoint and excluded")
+        listed.add(slo_id)
+    unclassified = sorted(catalog_ids - listed)
+    if unclassified:
+        raise ValueError(
+            f"{path} must list every catalog SLO under endpoints or excluded; unclassified: {', '.join(unclassified)}"
+        )
+    return payload
+
+
+def load_slo_probe_overlay(catalog: dict[str, Any], path: Path = SLO_PROBE_OVERLAY_PATH) -> dict[str, Any]:
+    return validate_slo_probe_overlay(load_json(path), catalog)
+
+
+def effective_slo_catalog(catalog: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]:
+    """Return the catalog narrowed to verified endpoints, with the deployment's URLs and objectives applied.
+
+    Each returned SLO carries ``probe_via`` (edge or direct) and ``tls_assurance`` (bool) next to the catalog fields.
+    """
+    endpoints = {entry["slo_id"]: entry for entry in overlay["endpoints"]}
+    slos: list[dict[str, Any]] = []
+    for slo in catalog["slos"]:
+        entry = endpoints.get(slo["id"])
+        if entry is None:
+            continue
+        merged = dict(slo)
+        merged["target_url"] = entry["target_url"]
+        if "objective_percent" in entry:
+            merged["objective_percent"] = entry["objective_percent"]
+        merged["probe_via"] = entry["via"]
+        merged["tls_assurance"] = bool(entry.get("tls"))
+        slos.append(merged)
+    return {
+        **catalog,
+        "slos": slos,
+        "edge_connect_host": overlay["edge_connect_host"],
+        "tls_policy": dict(overlay["tls_policy"]),
+        "min_history": dict(overlay["min_history"]),
+    }
+
+
+def min_history_samples(seconds: int) -> int:
+    return int(seconds / PROBE_INTERVAL_SECONDS * MIN_HISTORY_COVERAGE)
+
+
 def default_prometheus_url(stack_path: Path = STACK_PATH) -> str | None:
     env_url = os.environ.get("LV3_PROMETHEUS_URL")
     if env_url:
@@ -169,12 +277,18 @@ def default_grafana_url(service_catalog_path: Path = SERVICE_CATALOG_PATH) -> st
 
 def slo_success_expr(slo: dict[str, Any], window: str) -> str:
     labels = f'job="slo-blackbox",slo_id="{slo["id"]}"'
+    # "and <instant selector>" keeps only series that were scraped within the last five minutes. A target that was
+    # removed or re-pointed leaves its old series behind for the whole window; without this they would keep producing
+    # ratios (and budget alerts) for an endpoint nobody probes any more.
     if slo["indicator"] == "availability":
-        return f"avg_over_time(probe_success{{{labels}}}[{window}])"
+        return f"avg_over_time(probe_success{{{labels}}}[{window}]) and probe_success{{{labels}}}"
     threshold_seconds = float(slo["latency_threshold_ms"]) / 1000.0
     # Latency compliance evaluates a comparison expression, so Prometheus
     # requires subquery syntax instead of a plain range selector.
-    return f"avg_over_time((probe_duration_seconds{{{labels}}} < bool {threshold_seconds:g})[{window}:])"
+    return (
+        f"avg_over_time((probe_duration_seconds{{{labels}}} < bool {threshold_seconds:g})[{window}:])"
+        f" and probe_duration_seconds{{{labels}}}"
+    )
 
 
 def slo_metric_queries(slo: dict[str, Any]) -> dict[str, str]:

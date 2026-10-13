@@ -1,0 +1,48 @@
+---
+# Package and service. The Debian/Ubuntu package ships the unit and an
+# /etc/default file whose ARGS line is the only thing this role manages there.
+fleet_node_exporter_manage_package: true
+fleet_node_exporter_package: prometheus-node-exporter
+fleet_node_exporter_service: prometheus-node-exporter
+fleet_node_exporter_defaults_file: /etc/default/prometheus-node-exporter
+
+# Every address the exporter itself binds, as "address:port". Required, no
+# default: an exporter without an explicit address would listen on all
+# interfaces, which this fleet never wants. Several entries need an exporter
+# that can bind more than one address (>= 1.7); 1.5.x cannot, use a
+# socket proxy for the second address instead.
+fleet_node_exporter_listen_addresses: []
+
+# Textfile collector. An empty path means "do not pass the flag and do not
+# manage a directory" (hosts whose exporter predates the textfile setup).
+fleet_node_exporter_textfile_dir: ""
+fleet_node_exporter_textfile_owner: prometheus
+fleet_node_exporter_textfile_group: prometheus
+fleet_node_exporter_textfile_mode: "0755"
+
+# Extra command line flags appended after the listen/textfile flags.
+fleet_node_exporter_extra_args: []
+
+# Cosmetic fidelity to the live /etc/default file, so the first converge is a
+# no-op on hosts whose ARGS line is single-quoted or starts with a space.
+fleet_node_exporter_args_quote: '"'
+fleet_node_exporter_args_prefix: ""
+
+# systemd socket proxies that publish an exporter that lives elsewhere (another
+# address on this host, or a guest behind it) on a tailnet address.
+# Each item: name, state (present|unmanaged|disabled), listen_address, listen_port,
+# upstream ("host:port"), socket_description, service_description,
+# free_bind (default false; set it for a tailnet address so the socket still binds when tailscale0 has no address yet,
+# for example while tailscaled restarts), unmanaged_reason, consumer and consumer_grants (documentation only).
+# "present" items are rendered, enabled and started. "unmanaged" items are never rendered, started or stopped; they are
+# only checked against the port plan so a known conflict stays visible. "disabled" items name an existing stale socket
+# unit (name = unit name without .socket, instances such as woodpecker-exec-proxy@9100 are fine) that the role keeps
+# stopped and disabled; it is never rendered and does not count in the port plan.
+fleet_node_exporter_socket_proxies: []
+fleet_node_exporter_proxyd_path: /usr/lib/systemd/systemd-socket-proxyd
+fleet_node_exporter_unit_dir: /etc/systemd/system
+
+# Userspace-mode tailscaled (no tailscale0, so no socket can bind a tailnet
+# address): expose a local TCP port with `tailscale serve`.
+# Each item: port, target ("host:port").
+fleet_node_exporter_tailscale_serve_tcp: []

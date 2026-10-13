@@ -25,8 +25,31 @@ Expected outcomes:
 - `artifact-cache` listens on `5001` through `5004`
 - Docker on `artifact-cache` trusts `10.10.10.80:5001-5004` as insecure
   internal registries for local warm-up pulls
+- the monitoring guest can probe only the primary registry port `5001`; build
+  and runtime consumers retain the required mirror ports `5001` through `5004`
+- the monitoring guest can also scrape the cache VM's node exporter on `9100`;
+  do not grant monitoring access to mirror ports `5002` through `5004`
 - `/opt/artifact-cache/seed-plan.json` exists on `artifact-cache`
 - the four `artifact-cache-*` containers are running on the dedicated guest
+
+## Monitor The Private Endpoint
+
+Prometheus blackbox is the continuous availability monitor for this private
+cache; Uptime Kuma remains disabled because the service is not public. Before
+adding or re-enabling the endpoint in `config/slo-probe-overlay.json`, prove it
+from the monitoring guest's actual Blackbox Exporter using the catalog's probe
+module and require `probe_success 1` with an HTTP 2xx status. The SLO target,
+recording rules, alert rules, and dashboard are generated from that overlay;
+do not edit the generated Prometheus files directly.
+
+The network allowlist is deliberately split: monitoring may reach the primary
+registry API on port 5001 and node-exporter on 9100, but not mirror ports
+5002–5004. After the firewall converge, verify from monitoring that `/v2/`
+and `/metrics` return HTTP 200, while TCP 5002–5004 remain blocked. Verify
+that both `docker-build` and `docker-runtime` still reach all four mirror
+ports. The PVE VM firewall must be compiled and active as well as the guest's
+nftables policy; a successful guest-local curl does not prove the monitoring
+route end to end.
 
 ## Repoint Build Consumers
 

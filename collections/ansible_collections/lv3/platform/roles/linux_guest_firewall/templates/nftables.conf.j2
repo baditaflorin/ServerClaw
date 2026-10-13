@@ -3,6 +3,14 @@
 # Replace only the table owned by this role. A global flush deletes Docker's
 # independently managed NAT/filter tables and forces a disruptive daemon restart.
 destroy table inet filter
+destroy table ip lv3_container_private_edge_snat
+destroy table ip lv3_container_snat
+{% if inventory_hostname == 'coolify' %}
+# Retire the unmanaged Coolify-only SNAT tables after their exact active flows
+# have moved into the role-owned table below. nft's destroy is idempotent.
+destroy table ip coolify_egress
+destroy table ip coolify_dns_egress
+{% endif %}
 
 {% set policy = linux_guest_firewall_policy %}
 {% set guest_ip_map = linux_guest_firewall_guest_ip_map %}
@@ -81,7 +89,7 @@ table inet filter {
 {% for cidr in docker_forward_cidrs %}
     ip saddr {{ cidr }} accept
 {% endfor %}
-{% for rule in guest_policy.allowed_inbound %}
+{% for rule in guest_policy.allowed_inbound if rule.forward | default(true) %}
 {{ render_forward_rule(rule) }}
 {% endfor %}
 {% else %}
@@ -96,3 +104,20 @@ table inet filter {
     policy accept;
   }
 }
+
+{% if guest_policy.allow_container_private_edge_https_snat | default(false) or guest_policy.container_snat_rules | default([]) | length > 0 %}
+# SNAT is allowed only for the explicit source/destination/protocol/port tuples
+# below. It provides a routable return path without general container egress.
+table ip lv3_container_snat {
+  chain postrouting {
+    type nat hook postrouting priority srcnat + 1; policy accept;
+{% for cidr in guest_policy.container_private_edge_https_snat_source_cidrs | default([]) %}
+    ip saddr {{ cidr }} ip daddr {{ hostvars[linux_guest_firewall_host_id].proxmox_public_edge_ipv4 }} tcp dport 443 snat to {{ guest_ip_map[inventory_hostname] }}
+{% endfor %}
+{% for rule in guest_policy.container_snat_rules | default([]) %}
+{% set destination_ip = guest_ip_map[rule.destination] if rule.destination in guest_ip_map else rule.destination %}
+    ip saddr {{ rule.source }} ip daddr {{ destination_ip }} {{ render_match(rule) }} snat to {{ guest_ip_map[inventory_hostname] }}
+{% endfor %}
+  }
+}
+{% endif %}

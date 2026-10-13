@@ -48,6 +48,24 @@ argument_specs:
         required: true
         description:
           - Local users that should be added to the docker group.
+      docker_runtime_swap_size_mb:
+        type: int
+        required: false
+        default: 0
+        description:
+          - Size in MiB of the swap file to provision; 0 disables swap management.
+      docker_runtime_swap_file:
+        type: str
+        required: false
+        default: /swapfile
+        description:
+          - Path of the managed swap file.
+      docker_runtime_swappiness:
+        type: int
+        required: false
+        default: 20
+        description:
+          - vm.swappiness applied when a swap file is managed.
       docker_runtime_public_edge_ipv4:
         type: str
         required: false

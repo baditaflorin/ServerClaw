@@ -1,0 +1,98 @@
+---
+# Purpose: Provision a persistent swap file on Docker guests that run many unbounded containers without a swap device.
+# Use case: Included from main.yml when docker_runtime_swap_size_mb > 0 (set per host in inventory/host_vars).
+#
+# Inputs (optional):
+#   - docker_runtime_swap_size_mb, docker_runtime_swap_file, docker_runtime_swappiness
+#
+# Outputs:
+#   - Swap file created (fallocate), formatted, enabled, persisted in /etc/fstab, and a vm.swappiness sysctl drop-in.
+#
+# Idempotency: Fully idempotent
+#              The file is only created/formatted when absent or not swap, and swapon only runs when not active.
+
+- name: Check whether the swap file exists
+  ansible.builtin.stat:
+    path: "{{ docker_runtime_swap_file }}"
+  register: docker_runtime_swap_file_stat
+
+- name: Allocate the swap file
+  ansible.builtin.command:
+    argv:
+      - fallocate
+      - -l
+      - "{{ docker_runtime_swap_size_mb }}M"
+      - "{{ docker_runtime_swap_file }}"
+  when: not docker_runtime_swap_file_stat.stat.exists
+  changed_when: true
+
+- name: Restrict swap file permissions
+  ansible.builtin.file:
+    path: "{{ docker_runtime_swap_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Inspect the swap file signature
+  ansible.builtin.command:
+    argv:
+      - blkid
+      - -p
+      - -s
+      - TYPE
+      - -o
+      - value
+      - "{{ docker_runtime_swap_file }}"
+  register: docker_runtime_swap_signature
+  changed_when: false
+  failed_when: false
+
+- name: Format the swap file
+  ansible.builtin.command:
+    argv:
+      - mkswap
+      - "{{ docker_runtime_swap_file }}"
+  when: docker_runtime_swap_signature.stdout | trim != 'swap'
+  changed_when: true
+
+- name: Persist the swap file in fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: '^{{ docker_runtime_swap_file | regex_escape }}\s'
+    line: "{{ docker_runtime_swap_file }} none swap sw,pri=-2 0 0"
+
+- name: List active swap devices
+  ansible.builtin.command:
+    argv:
+      - swapon
+      - --noheadings
+      - --show=NAME
+  register: docker_runtime_swap_active
+  changed_when: false
+
+- name: Enable the swap file
+  ansible.builtin.command:
+    argv:
+      - swapon
+      - "{{ docker_runtime_swap_file }}"
+  when: docker_runtime_swap_file not in docker_runtime_swap_active.stdout_lines | map('trim') | list
+  changed_when: true
+
+- name: Set a modest vm.swappiness
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/99-docker-runtime-swap.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      vm.swappiness = {{ docker_runtime_swappiness }}
+  register: docker_runtime_swappiness_conf
+
+- name: Apply vm.swappiness
+  ansible.builtin.command:
+    argv:
+      - sysctl
+      - -w
+      - "vm.swappiness={{ docker_runtime_swappiness }}"
+  when: docker_runtime_swappiness_conf is changed
+  changed_when: true

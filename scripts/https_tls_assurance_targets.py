@@ -14,6 +14,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
 from validation_toolkit import require_list, require_mapping, require_str
 
 from controller_automation_toolkit import load_json, repo_path
+from slo_tracking import effective_slo_catalog, load_slo_catalog, load_slo_probe_overlay, split_probe_url
 
 
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
@@ -407,6 +408,50 @@ def discover_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[d
     return targets
 
 
+def discover_overlay_https_tls_targets(environment: str = DEFAULT_ENVIRONMENT) -> list[dict[str, Any]]:
+    """TLS assurance targets for the edge endpoints verified in config/slo-probe-overlay.json.
+
+    The service-capability catalog carries placeholder hostnames and retired addresses, so deriving probe targets from
+    it produced probes that could never succeed. The overlay lists only endpoints that answer from the monitoring VM;
+    each edge-published one with ``tls`` set is probed through the edge's private address with the public name as SNI.
+    """
+    catalog = load_slo_catalog()
+    overlay = load_slo_probe_overlay(catalog)
+    live = effective_slo_catalog(catalog, overlay)
+    policy = {"unit": "days", "warn": int(live["tls_policy"]["warn_days"]), "critical": int(live["tls_policy"]["critical_days"])}
+    targets: list[dict[str, Any]] = []
+    seen_hosts: set[str] = set()
+    for slo in live["slos"]:
+        if not slo["tls_assurance"]:
+            continue
+        scheme, host, path = split_probe_url(slo["target_url"])
+        if host in seen_hosts:
+            continue
+        seen_hosts.add(host)
+        targets.append(
+            {
+                "id": f"{slugify(slo['service_id'])}-public",
+                "service_id": slo["service_id"],
+                "service_name": slo["service_id"].replace("_", " ").title(),
+                "environment": environment,
+                "scope": "public",
+                "source_kind": "slo-probe-overlay",
+                "exposure": "edge-published",
+                "auth_requirement": "none",
+                "probe_url": f"{scheme}://{live['edge_connect_host']}{path}",
+                "probe_hostname": host,
+                "probe_module": "http_2xx_follow_redirects",
+                "display_url": slo["target_url"],
+                "testssl_url": slo["target_url"],
+                "testssl_ip": "",
+                "certificate_id": "",
+                "expected_issuer": "letsencrypt",
+                "policy": dict(policy),
+            }
+        )
+    return targets
+
+
 def build_prometheus_targets(targets: list[dict[str, Any]]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for target in targets:
@@ -453,16 +498,21 @@ def build_prometheus_alert_rules(targets: list[dict[str, Any]]) -> dict[str, Any
         threshold_warn = int(target["policy"]["warn"])
         threshold_critical = int(target["policy"]["critical"])
         runbook_url = str(Path("docs/runbooks/https-tls-assurance.md"))
+        # No URL in the annotations: display URLs may hold Jinja placeholders that the role renders, and Prometheus would
+        # read them as Go template actions. The firing series carries the real URL in its instance label.
 
+        # Availability pages come from the SLO fast-burn alerts, so a failing probe only needs a warning here. The expiry
+        # alerts require the exporter to have seen a certificate (expiry > 0): a refused or timed-out connection exports
+        # no expiry, which would otherwise read as a certificate that expired in 1970.
         rules.append(
             {
                 "alert": alert_name("HTTPSProbeFailed", target["id"]),
                 "expr": f"probe_success{{{selector}}} == 0",
-                "for": "5m",
-                "labels": {**labels, "severity": "critical"},
+                "for": "10m",
+                "labels": {**labels, "severity": "warning"},
                 "annotations": {
                     "summary": f"{target['id']} HTTPS probe is failing.",
-                    "description": f"{target['display_url']} is no longer completing a healthy HTTPS probe through blackbox exporter.",
+                    "description": f"The {target['service_id']} public HTTPS endpoint is no longer completing a healthy probe through blackbox exporter.",
                     "runbook_url": runbook_url,
                 },
             }
@@ -471,14 +521,15 @@ def build_prometheus_alert_rules(targets: list[dict[str, Any]]) -> dict[str, Any
             {
                 "alert": alert_name("TLSCertificateExpiringWarning", target["id"]),
                 "expr": (
-                    f"((probe_ssl_earliest_cert_expiry{{{selector}}} - time()) / {unit_seconds}) < {threshold_warn}"
+                    f"(((probe_ssl_earliest_cert_expiry{{{selector}}} - time()) / {unit_seconds}) < {threshold_warn})"
+                    f" and (probe_ssl_earliest_cert_expiry{{{selector}}} > 0)"
                 ),
                 "for": "15m",
                 "labels": {**labels, "severity": "warning"},
                 "annotations": {
                     "summary": f"{target['id']} TLS certificate is approaching expiry.",
                     "description": (
-                        f"{target['display_url']} has less than {threshold_warn} {target['policy']['unit']} "
+                        f"The {target['service_id']} public HTTPS endpoint has less than {threshold_warn} {target['policy']['unit']} "
                         "remaining before certificate expiry."
                     ),
                     "runbook_url": runbook_url,
@@ -489,14 +540,15 @@ def build_prometheus_alert_rules(targets: list[dict[str, Any]]) -> dict[str, Any
             {
                 "alert": alert_name("TLSCertificateExpiringCritical", target["id"]),
                 "expr": (
-                    f"((probe_ssl_earliest_cert_expiry{{{selector}}} - time()) / {unit_seconds}) < {threshold_critical}"
+                    f"(((probe_ssl_earliest_cert_expiry{{{selector}}} - time()) / {unit_seconds}) < {threshold_critical})"
+                    f" and (probe_ssl_earliest_cert_expiry{{{selector}}} > 0)"
                 ),
                 "for": "15m",
                 "labels": {**labels, "severity": "critical"},
                 "annotations": {
                     "summary": f"{target['id']} TLS certificate is within the critical expiry window.",
                     "description": (
-                        f"{target['display_url']} has less than {threshold_critical} {target['policy']['unit']} "
+                        f"The {target['service_id']} public HTTPS endpoint has less than {threshold_critical} {target['policy']['unit']} "
                         "remaining before certificate expiry."
                     ),
                     "runbook_url": runbook_url,

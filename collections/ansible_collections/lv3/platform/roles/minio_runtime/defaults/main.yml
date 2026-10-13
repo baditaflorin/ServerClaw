@@ -11,6 +11,10 @@
 # Keep an explicit image fallback so direct role validation and focused tests
 # still see the pinned runtime ref before derive_service_defaults runs.
 minio_image: "{{ container_image_catalog.images.minio_runtime.ref }}"
+minio_runtime_uid: 10001
+minio_runtime_gid: 10001
+minio_runtime_user: "{{ minio_runtime_uid }}:{{ minio_runtime_gid }}"
+minio_data_owner_migration_marker_file: "{{ minio_site_dir }}/.data-owner-{{ minio_runtime_uid }}-{{ minio_runtime_gid }}-migrated"
 minio_policy_dir: "{{ minio_site_dir }}/policies"
 minio_api_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('minio', 'internal') }}"
 minio_console_port: "{{ hostvars[platform_topology_host].platform_service_topology | platform_service_port('minio', 'console') }}"

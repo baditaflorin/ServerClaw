@@ -1,0 +1,23 @@
+[Unit]
+Description=Tag new Docker bridge subnets in Scanopy as docker-bridge (keeps them hidden in the topology)
+Documentation=file://{{ monitoring_scanopy_retag_readme_file }}
+After=network-online.target tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+{% for key, value in monitoring_scanopy_retag_environment | dictsort %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+ExecStart=/usr/bin/python3 {{ monitoring_scanopy_retag_script_file }}
+TimeoutStartSec=120
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths={{ monitoring_scanopy_retag_textfile_dir }}
+ReadOnlyPaths={{ monitoring_scanopy_retag_config_dir }} {{ monitoring_scanopy_retag_install_dir }}
+CapabilityBoundingSet=CAP_CHOWN CAP_FOWNER CAP_DAC_OVERRIDE
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

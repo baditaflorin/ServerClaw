@@ -1,4 +1,7 @@
 ---
+- name: Reconcile repository-owned Authentik OAuth scope mappings
+  ansible.builtin.import_tasks: oauth_scope_mappings.yml
+
 - name: Verify the Authentik OAuth reconciler inputs exist on the controller
   ansible.builtin.stat:
     path: "{{ item }}"

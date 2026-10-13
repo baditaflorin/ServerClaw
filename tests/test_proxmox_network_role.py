@@ -44,6 +44,17 @@ def test_proxmox_network_renders_vm_firewall_from_active_role_path() -> None:
     assert template_module["dest"] == "/root/.lv3-vm-{{ guest.vmid }}.fw"
 
 
+def test_proxmox_network_rejects_management_interface_aliasing_wan_bridge() -> None:
+    tasks = yaml.safe_load(ROLE_TASKS.read_text(encoding="utf-8"))
+    guard = next(
+        task
+        for task in tasks
+        if task["name"] == "SAFETY GUARD — Reject a management interface that aliases the WAN bridge"
+    )
+
+    assert "management_interface != proxmox_wan_bridge" in guard["ansible.builtin.assert"]["that"]
+
+
 def test_proxmox_network_defaults_define_udp_forward_contract() -> None:
     defaults = yaml.safe_load(DEFAULTS_PATH.read_text(encoding="utf-8"))
 

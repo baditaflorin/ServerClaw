@@ -711,6 +711,11 @@ network_policy:
             - 80
             - 443
           description: Public edge ingress forwarded by the host
+        - source: monitoring
+          protocol: tcp
+          ports:
+            - 9100
+          description: Prometheus node-exporter scrape from the monitoring guest
     docker-runtime:
       allow_container_forwarding: true
       allowed_inbound:
@@ -1136,6 +1141,12 @@ network_policy:
           ports:
             - 4647
           description: Nomad server RPC to docker-build
+        - source: monitoring
+          protocol: tcp
+          ports:
+            - 9100
+          forward: false
+          description: Prometheus node-exporter scrape from the monitoring guest
     runtime-ai:
       allow_container_forwarding: true
       allowed_inbound:
@@ -1252,6 +1263,12 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: monitoring
+          protocol: tcp
+          ports:
+            - 9100
+          forward: false
+          description: Prometheus node-exporter scrape from the monitoring guest
         - source: public
           protocol: tcp
           ports:
@@ -1458,6 +1475,12 @@ network_policy:
           ports:
             - 8000
           description: Coolify apps VM calls back to the Coolify API during deployment
+        - source: monitoring
+          protocol: tcp
+          ports:
+            - 9100
+          forward: false
+          description: Prometheus node-exporter scrape from the monitoring guest
     coolify-apps:
       allow_container_forwarding: true
       allowed_inbound:
@@ -2411,6 +2434,12 @@ platform_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ gitea_controller_url }}"
+    private_edge:
+      enabled: true
+      tls: true
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'runtime-control') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.gitea_http_port }}"
+      allow_cidrs:
+        - "{{ proxmox_internal_ipv4 }}/32"
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime

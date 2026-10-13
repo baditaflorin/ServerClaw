@@ -111,3 +111,13 @@ dify_authentik_client_id: "{{ platform_service_registry.dify.sso.client_id }}"
 dify_authentik_client_secret_local_file: "{{ repo_shared_local_root }}/authentik/dify-client-secret.txt"
 dify_authentik_issuer: "{{ authentik_oidc_provider_base_url }}/dify/"
 dify_scripts_dir: "{{ playbook_dir | dirname }}/scripts"
+
+# Container memory caps (hard limit / memory+swap). Sized at ~1.5x observed steady-state usage
+# on docker-runtime (2026-10-12); the host has swap (docker_runtime_swap_size_mb) so cold pages can
+# be paged out instead of OOM-killing a neighbour.
+dify_api_mem_limit: 512m
+dify_api_memswap_limit: 1g
+dify_worker_mem_limit: 640m
+dify_worker_memswap_limit: 1280m
+dify_worker_beat_mem_limit: 512m
+dify_worker_beat_memswap_limit: 1g

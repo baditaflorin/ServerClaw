@@ -1,31 +1,87 @@
+# managed-by: role=alertmanager_runtime adr=0097
+# ntfy-only routing: critical -> ntfy critical topic, warning -> ntfy warning topic, info -> dropped, Watchdog ->
+# ntfy heartbeat topic (dead-man's switch). Credentials are never rendered here: ntfy basic auth reads
+# {{ alertmanager_runtime_ntfy_password_file }} (ntfy user {{ alertmanager_runtime_ntfy_username }}).
 global:
   resolve_timeout: 5m
 
 route:
-  group_by:
-    - alertname
-    - service
+  receiver: ntfy-warning
+  group_by: ['alertname', 'cluster', 'host']
   group_wait: 30s
   group_interval: 5m
-  repeat_interval: 4h
-  receiver: mattermost-warning
+  repeat_interval: 12h
   routes:
+    # Dead-man's switch: always-firing Watchdog rule -> low-priority heartbeat topic.
+    - matchers: ['alertname="Watchdog"']
+      receiver: ntfy-watchdog
+      group_by: ['alertname']
+      group_wait: 0s
+      group_interval: 6h
+      repeat_interval: 6h
     - matchers:
         - alertname="PostgresUnknownRoleConnection"
       receiver: pgaudit-unknown-role-relay
       continue: true
-    - matchers:
-        - severity="critical"
-      receiver: ntfy-critical
+# {% if alertmanager_runtime_triage_webhook_url | length > 0 %}
+    # fleet-triage (shadow mode): additional read-only triage receiver. continue: true => the routes below still run
+    # unchanged; a failing triage webhook only fails this receiver.
+    - matchers: ['severity=~"critical|warning"']
+      receiver: fleet-triage
+      group_by: ['alertname']
+      group_wait: 1m
+      group_interval: 10m
+      repeat_interval: 6h
       continue: true
-    - matchers:
-        - severity="critical"
-      receiver: mattermost-critical
-    - matchers:
-        - severity="info"
-      receiver: mattermost-info
+# {% endif %}
+
+    - matchers: ['severity="info"']
+      receiver: "null"
+    # Storm collapse: per-service alert families fan out into one alert per service.
+    # Group them by job+severity so a fleet-wide failure becomes ONE notification.
+    - matchers: ['alertname=~"HTTPSProbeFailed_.*|SLOFastBurn_.*|SLOBudgetCritical_.*|SLOSlowBurn_.*|TLSCertificateExpiring(Warning|Critical)_.*"']
+      group_by: ['cluster', 'job', 'severity']
+      group_wait: 2m
+      group_interval: 15m
+      repeat_interval: 12h
+      routes:
+        - matchers: ['severity="critical"']
+          receiver: ntfy-critical
+          repeat_interval: 6h
+        - matchers: ['severity="warning"']
+          receiver: ntfy-warning
+          group_wait: 5m
+          group_interval: 1h
+          repeat_interval: 24h
+    - matchers: ['severity="critical"']
+      receiver: ntfy-critical
+      repeat_interval: 4h
+    - matchers: ['severity="warning"']
+      receiver: ntfy-warning
+      group_wait: 5m
+      group_interval: 1h
+      repeat_interval: 12h
+
+inhibit_rules:
+  # A critical alert for a service suppresses its own warning-level alerts (e.g. SLO slow burn).
+  - source_matchers: ['severity="critical"', 'service_id=~".+"']
+    target_matchers: ['severity="warning"', 'service_id=~".+"']
+    equal: ['service_id']
+  - source_matchers: ['severity="critical"', 'certificate_id=~".+"']
+    target_matchers: ['severity="warning"', 'certificate_id=~".+"']
+    equal: ['certificate_id']
+  # Batch edge failure (>=5 services) collapses the per-service edge/probe alerts.
+  - source_matchers: ['alertname="FleetEdgeManyDown"']
+    target_matchers: ['alertname=~"FleetServiceEdgeDown|HTTPSProbeFailed_.*"']
+    equal: ['cluster']
+  # Proxmox exporter/host-metrics unreachable => "stale/missing metric" alerts are noise.
+  - source_matchers: ['alertname=~"PveExporterUnavailable|PveHostNodeExporterUnavailable"']
+    target_matchers: ['alertname=~"PveHostHealthMetricsStale|PveBackupFreshnessLow|ProxmoxHostCpuPackageTemperatureSensorMissing"']
+    equal: ['cluster']
 
 receivers:
+  - name: "null"
+
   - name: pgaudit-unknown-role-relay
     webhook_configs:
       - url: "{{ alertmanager_runtime_pgaudit_relay_webhook_url }}"
@@ -33,49 +89,40 @@ receivers:
 
   - name: ntfy-critical
     webhook_configs:
-      - url: "{{ alertmanager_runtime_ntfy_publish_url }}?title=LV3%20critical%20alert&priority=5&tags=warning%2Crotating_light"
+      - url: '{{ alertmanager_runtime_ntfy_base_url }}/{{ alertmanager_runtime_ntfy_topics.critical }}?{{ alertmanager_runtime_ntfy_query }}&p=5&tags=rotating_light%2Cwarning'
         send_resolved: true
         http_config:
           basic_auth:
             username: "{{ alertmanager_runtime_ntfy_username }}"
             password_file: "{{ alertmanager_runtime_ntfy_password_file }}"
 
-  - name: mattermost-critical
-    slack_configs:
-      - api_url: "{{ alertmanager_runtime_mattermost_critical_webhook_url }}"
-        send_resolved: true
-        channel: "#platform-alerts-critical"
-        title: "[{{ '{{' }} .Status | toUpper {{ '}}' }}] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
-        text: >-
-          {{ '{{' }} range .Alerts {{ '}}' }}
-          *Service:* {{ '{{' }} .Labels.service {{ '}}' }}
-          *Summary:* {{ '{{' }} .Annotations.summary {{ '}}' }}
-          *Runbook:* {{ '{{' }} .Annotations.runbook_url {{ '}}' }}
-          {{ '{{' }} if .Annotations.dashboard_url {{ '}}' }}*Dashboard:* {{ '{{' }} .Annotations.dashboard_url {{ '}}' }}{{ '{{' }} end {{ '}}' }}
-          {{ '{{' }} end {{ '}}' }}
-
-  - name: mattermost-warning
-    slack_configs:
-      - api_url: "{{ alertmanager_runtime_mattermost_warning_webhook_url }}"
-        send_resolved: true
-        channel: "#platform-alerts"
-        title: "[{{ '{{' }} .Status | toUpper {{ '}}' }}] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
-        text: >-
-          {{ '{{' }} range .Alerts {{ '}}' }}
-          *Service:* {{ '{{' }} .Labels.service {{ '}}' }}
-          *Summary:* {{ '{{' }} .Annotations.summary {{ '}}' }}
-          *Runbook:* {{ '{{' }} .Annotations.runbook_url {{ '}}' }}
-          {{ '{{' }} if .Annotations.dashboard_url {{ '}}' }}*Dashboard:* {{ '{{' }} .Annotations.dashboard_url {{ '}}' }}{{ '{{' }} end {{ '}}' }}
-          {{ '{{' }} end {{ '}}' }}
-
-  - name: mattermost-info
-    slack_configs:
-      - api_url: "{{ alertmanager_runtime_mattermost_info_webhook_url }}"
+  - name: ntfy-warning
+    webhook_configs:
+      - url: '{{ alertmanager_runtime_ntfy_base_url }}/{{ alertmanager_runtime_ntfy_topics.warning }}?{{ alertmanager_runtime_ntfy_query }}&p=3&tags=warning'
         send_resolved: false
-        channel: "#platform-ops"
-        title: "{{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
-        text: >-
-          {{ '{{' }} range .Alerts {{ '}}' }}
-          *Service:* {{ '{{' }} .Labels.service {{ '}}' }}
-          *Summary:* {{ '{{' }} .Annotations.summary {{ '}}' }}
-          {{ '{{' }} end {{ '}}' }}
+        http_config:
+          basic_auth:
+            username: "{{ alertmanager_runtime_ntfy_username }}"
+            password_file: "{{ alertmanager_runtime_ntfy_password_file }}"
+
+  - name: ntfy-watchdog
+    webhook_configs:
+      - url: '{{ alertmanager_runtime_ntfy_base_url }}/{{ alertmanager_runtime_ntfy_topics.watchdog }}?{{ alertmanager_runtime_ntfy_query }}&p=1&tags=heartbeat'
+        send_resolved: false
+        http_config:
+          basic_auth:
+            username: "{{ alertmanager_runtime_ntfy_username }}"
+            password_file: "{{ alertmanager_runtime_ntfy_password_file }}"
+# {% if alertmanager_runtime_triage_webhook_url | length > 0 %}
+
+  - name: fleet-triage
+    webhook_configs:
+      - url: '{{ alertmanager_runtime_triage_webhook_url }}'
+        send_resolved: false
+        max_alerts: 20
+        timeout: 10s
+        http_config:
+          authorization:
+            type: Bearer
+            credentials_file: "{{ alertmanager_runtime_triage_token_file }}"
+# {% endif %}

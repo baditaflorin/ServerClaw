@@ -57,6 +57,19 @@
     state: restarted
     daemon_reload: true
 
+# SIGHUP re-reads prometheus.yml, rule files and file_sd without dropping the TSDB head or open scrapes. The unit has no
+# ExecReload, so signal the main process directly. prometheus.yml is validated with promtool before it is written, and
+# Prometheus keeps the previous configuration if a reload is ever rejected.
+- name: Reload Prometheus configuration
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - kill
+      - --kill-whom=main
+      - --signal=HUP
+      - "{{ monitoring_prometheus_service_name }}.service"
+  changed_when: true
+
 - name: Restart Blackbox Exporter
   ansible.builtin.systemd:
     name: "{{ monitoring_blackbox_exporter_service_name }}"

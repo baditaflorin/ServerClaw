@@ -1,0 +1,125 @@
+id: ws-0522-monitoring-live-changes-codify
+adr: '0011'
+title: Codify the 2026-10-11 live monitoring changes so a converge does not erase them
+status: in_progress
+ready_to_merge: false
+live_applied: true
+owner: claude
+branch: codify-monitoring-live-changes
+worktree_path: .worktrees/codify-monitoring-live-changes
+doc: docs/workstreams/ws-0522-monitoring-live-changes-codify.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/handlers/main.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/scanopy_sd.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/tracing.yml
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus.yml.j2
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus-credentials-dropin.conf.j2
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/scanopy-sd.service.j2
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/scanopy-sd.timer.j2
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/scanopy-sd-extra-endpoints.json.j2
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/files/scanopy-sd/scanopy_sd.py
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/files/scanopy-sd/README
+  - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/README.md
+  - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/handlers/main.yml
+  - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/tasks/main.yml
+  - config/alertmanager/alertmanager.yml
+  - config/prometheus/rules/inventory.yml
+  - config/prometheus/rules/zz-alertmanager-watchdog.yml
+  - config/publication-sanitization.yaml
+  - config/controller-local-secrets.json
+  - inventory/host_vars/proxmox-host.yml
+  - inventory/host_vars/monitoring.yml
+  - playbooks/services/prometheus-0own-node-exporter.yml
+  - docs/runbooks/scanopy-service-discovery.md
+  - docs/runbooks/monitoring-stack.md
+  - docs/runbooks/tailscale-metrics-grants.md
+  - tests/test_monitoring_prometheus_codification.py
+  - .woodpecker.yml
+  - docs/workstreams/ws-0522-monitoring-live-changes-codify.md
+  - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: monitoring_prometheus_scrape_surface
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/handlers/main.yml
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/meta/argument_specs.yml
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/scanopy_sd.yml
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus.yml.j2
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus-credentials-dropin.conf.j2
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/scanopy-sd.service.j2
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/scanopy-sd.timer.j2
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/scanopy-sd-extra-endpoints.json.j2
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/files/scanopy-sd/scanopy_sd.py
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/files/scanopy-sd/README
+        - config/prometheus/rules/inventory.yml
+        - config/prometheus/rules/zz-alertmanager-watchdog.yml
+        - inventory/host_vars/monitoring.yml
+        - playbooks/services/prometheus-0own-node-exporter.yml
+        - tests/test_monitoring_prometheus_codification.py
+        - .woodpecker.yml
+      mode: exclusive
+    - id: monitoring_vm_role_shared_edits
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/tracing.yml
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
+    - id: alertmanager_ntfy_routing
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/README.md
+        - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/handlers/main.yml
+        - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/meta/argument_specs.yml
+        - collections/ansible_collections/lv3/platform/roles/alertmanager_runtime/tasks/main.yml
+        - config/alertmanager/alertmanager.yml
+      mode: exclusive
+    - id: monitoring_secret_catalog_entries
+      paths:
+        - config/controller-local-secrets.json
+      mode: shared_contract
+      contract: controller-local-secrets-catalog-v1
+    - id: nginx_guest_metrics_firewall_rule
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: proxmox-host-network-policy-v1
+    - id: exporter_address_publication_sanitization
+      paths:
+        - config/publication-sanitization.yaml
+      mode: shared_contract
+      contract: tier-c-sanitization-replacements-v1
+    - id: monitoring_operator_runbooks
+      paths:
+        - docs/runbooks/scanopy-service-discovery.md
+        - docs/runbooks/monitoring-stack.md
+        - docs/runbooks/tailscale-metrics-grants.md
+        - docs/workstreams/ws-0522-monitoring-live-changes-codify.md
+        - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
+      mode: exclusive
+    - id: active_workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: Codify the live monitoring changes (Scanopy discovery, ntfy-only Alertmanager routing, restored fleet exporters and OpenObserve remote_write) so a monitoring converge keeps them.
+  release_bump: patch
+tasks:
+  - id: t1
+    title: Make prometheus.yml.j2 data-driven and restore the fleet exporters, public-edge job, cadvisor, and remote_write
+    status: completed
+  - id: t2
+    title: Codify the Scanopy service-discovery job, rules, and Alertmanager ntfy-only routing
+    status: completed
+  - id: t3
+    title: Merge, then converge the monitoring host in check mode first and verify live targets
+    status: in_progress

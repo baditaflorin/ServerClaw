@@ -24,6 +24,18 @@ tokens:
     workflows:
       rotate: rotate-authentik-client-secret
       exposure_response: token-exposure-response
+  - id: authentik-plausible-edge-client-secret
+    token_class: authentik_client_secret
+    owner_service: plausible_edge
+    subject: plausible-edge
+    issued_at: "2026-10-05T00:00:00Z"
+    storage_ref: .local/authentik/plausible-edge-client-secret.txt
+    permissions:
+      - plausible_oidc_login
+      - plausible_oidc_callback
+    workflows:
+      rotate: rotate-authentik-client-secret
+      exposure_response: token-exposure-response
   - id: authentik-agent-hub-client-secret
     token_class: authentik_client_secret
     owner_service: authentik

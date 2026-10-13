@@ -114,12 +114,27 @@ roles:
   fleet_build_broker_runtime:
     policy: tracked
     reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  fleet_guest_firewall:
+    policy: tracked
+    reason: Hand-run on one fleet host with --limit; needs real hosts, no CI-safe fixture yet. Template output is covered by tests/test_fleet_observability_roles.py.
+  fleet_node_exporter:
+    policy: tracked
+    reason: Hand-run on one fleet host with --limit; needs real hosts, no CI-safe fixture yet. Template output is covered by tests/test_fleet_observability_roles.py.
+  fleet_pg_backup:
+    policy: tracked
+    reason: Hand-run on one fleet host with --limit; needs real hosts, no CI-safe fixture yet. The vzdump hook is executed by tests/test_fleet_observability_roles.py.
   fleet_runner_image_publisher_identity:
     policy: tracked
     reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   fleet_runner_private_0mcp_transport:
     policy: tracked
     reason: Recently added role; add a dedicated idempotency scenario before enforcement.
+  fleet_docker_prune:
+    policy: tracked
+    reason: Hand-run on one fleet host with --limit; needs a real Docker host, no CI-safe fixture yet.
+  fleet_tailscale_node:
+    policy: tracked
+    reason: Hand-run on one fleet host with --limit; needs real hosts, no CI-safe fixture yet.
   flagsmith_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

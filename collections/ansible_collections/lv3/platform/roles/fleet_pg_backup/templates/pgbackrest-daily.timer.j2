@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily pgBackRest backup
+
+[Timer]
+OnCalendar={{ fleet_pg_backup_pgbackrest_timer_oncalendar }}
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

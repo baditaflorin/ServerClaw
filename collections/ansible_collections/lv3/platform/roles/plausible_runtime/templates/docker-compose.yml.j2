@@ -54,6 +54,8 @@ services:
     image: {{ plausible_runtime_image }}
     container_name: {{ plausible_container_name }}
     restart: unless-stopped
+    mem_limit: {{ plausible_mem_limit }}
+    memswap_limit: {{ plausible_memswap_limit }}
     command:
       - sh
       - -c

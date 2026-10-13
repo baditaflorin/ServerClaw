@@ -1,0 +1,26 @@
+---
+# Purpose: Converge the Postgres backup stack pieces that live on the 0database hypervisor, on pg-primary and on own-pbs.
+# Use case: Run from playbooks/fleet-observability.yml with --limit on one of 0database_bastion, 0database_postgres or 0own_pbs.
+# Inputs: fleet_pg_backup_components and the fleet_pg_backup_* variables for that component (see defaults/main.yml).
+# Outputs: vzdump hook, PBS storage entry and backup job (pve_backup); pgBackRest config, wrapper and prepared units (pgbackrest); PBS user, ACLs and prune job (pbs_server).
+# Idempotency: Idempotent. Every mutation is preceded by a read and runs only when the live value differs.
+# Dependencies: pvesh on the hypervisor, the pgbackrest package source on pg-primary, proxmox-backup-manager on own-pbs. Secrets are never handled here.
+
+- name: Validate backup stack components
+  ansible.builtin.assert:
+    that:
+      - fleet_pg_backup_components | length > 0
+      - fleet_pg_backup_components | difference(['pve_backup', 'pgbackrest', 'pbs_server']) | length == 0
+    fail_msg: "fleet_pg_backup_components must be a non-empty subset of pve_backup, pgbackrest, pbs_server."
+
+- name: Converge the hypervisor side (vzdump hook, PBS storage, backup job)
+  ansible.builtin.include_tasks: pve_backup.yml
+  when: "'pve_backup' in fleet_pg_backup_components"
+
+- name: Converge the pg-primary side (prepared pgBackRest configuration)
+  ansible.builtin.include_tasks: pgbackrest.yml
+  when: "'pgbackrest' in fleet_pg_backup_components"
+
+- name: Converge the own-pbs side (user, ACLs, prune job)
+  ansible.builtin.include_tasks: pbs_server.yml
+  when: "'pbs_server' in fleet_pg_backup_components"

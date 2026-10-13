@@ -22,6 +22,17 @@ def test_artifact_cache_defaults_define_four_upstream_mirrors() -> None:
     assert mirrors["docker_io"]["mirror_registry"] == "{{ artifact_cache_bind_host }}:5001"
 
 
+def test_required_role_inputs_exist_before_argument_spec_validation() -> None:
+    defaults = yaml.safe_load((ROLE_ROOT / "defaults" / "main.yml").read_text())
+    argument_specs = yaml.safe_load((ROLE_ROOT / "meta" / "argument_specs.yml").read_text())
+    options = argument_specs["argument_specs"]["main"]["options"]
+    required_options = {name for name, option in options.items() if option.get("required", False)}
+
+    assert required_options <= set(defaults)
+    assert defaults["artifact_cache_site_dir"] == "{{ platform_service_registry.artifact_cache.site_dir }}"
+    assert defaults["artifact_cache_compose_file"] == "{{ artifact_cache_site_dir }}/docker-compose.yml"
+
+
 def test_private_ghcr_upstream_auth_is_opt_in_and_cache_only() -> None:
     defaults = yaml.safe_load((ROLE_ROOT / "defaults" / "main.yml").read_text())
     argument_specs = yaml.safe_load((ROLE_ROOT / "meta" / "argument_specs.yml").read_text())
@@ -148,13 +159,20 @@ def test_private_ghcr_docs_require_atomic_cache_only_vault_delivery() -> None:
 
 def test_artifact_cache_network_policy_allows_runtime_consumers() -> None:
     host_vars = yaml.safe_load(HOST_VARS_PATH.read_text())
-    artifact_cache_rules = host_vars["network_policy"]["guests"]["artifact-cache"]["allowed_inbound"]
+    artifact_cache_policy = host_vars["network_policy"]["guests"]["artifact-cache"]
+    artifact_cache_rules = artifact_cache_policy["allowed_inbound"]
     cache_sources = {
         rule["source"] for rule in artifact_cache_rules if {5001, 5002, 5003, 5004} & set(rule.get("ports", []))
     }
 
     assert {"docker-runtime", "172.16.0.0/12", "192.168.0.0/16"} <= cache_sources
     assert all(5005 not in rule.get("ports", []) for rule in artifact_cache_rules)
+
+    monitoring_ports = {
+        port for rule in artifact_cache_rules if rule["source"] == "monitoring" for port in rule.get("ports", [])
+    }
+    assert monitoring_ports == {5001, 9100}
+    assert artifact_cache_policy.get("allow_container_forwarding", False) is False
 
 
 def test_proxmox_vm_firewall_renders_cache_ports_for_concrete_guest_sources_only() -> None:

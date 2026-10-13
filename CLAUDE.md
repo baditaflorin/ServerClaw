@@ -10,7 +10,9 @@ It supplements `AGENTS.md` with Claude-specific checklists and context.
 This repo checkout is configured for **exactly one deployment**, defined by
 `.local/identity.yml`. There is no "active deployment" to select, no slug to
 remember, no `make whoami` ritual. The old multi-deployment substrate (ADRs
-0439-0481) was retired by ADR 0488 — see that ADR for the why.
+0437, 0439-0443, 0445, 0446, 0448, 0456-0460, 0462, 0470, 0480 and
+0481-explicit-deployment-context) was retired by ADR 0488 — see that ADR for
+the why.
 
 To configure a fresh clone:
 
@@ -19,8 +21,9 @@ To configure a fresh clone:
 2. Run `make bootstrap` — capacity is probed, VM sizes are resolved against
    the host envelope, then the 14-step provisioning chain runs.
 
-If `.local/identity.yml` is missing, every script that needs it will tell you
-exactly what fields to add.
+If `.local/identity.yml` is missing, see `docs/getting-started.md` Step 2 for
+the required fields (some scripts print the path they expected; others
+silently fall back to empty or tracked defaults).
 
 ---
 
@@ -35,7 +38,7 @@ Before writing any code, in order:
 5. Check Claude Code memory for any remembered context from prior sessions on this repo
 
 If the task touches a specific service, also read:
-- `docs/adr/.index.yaml` — search for the ADR covering that service
+- `docs/adr/.index.yaml` — root manifest; follow it to `docs/adr/index/by-concern/*.yaml` or `by-range/*.yaml` to find the ADR covering that service
 - The relevant workstream doc under `docs/workstreams/`
 
 ---
@@ -54,7 +57,8 @@ This is how other agents (and future-you) find what is in flight.
 5. Commit the workstream registration before starting the real work
 ```
 
-**Skip this only for** single-commit typo fixes or explicit user instruction.
+**No typo-fix exemption:** the `workstream-surfaces` gate rejects any pushed
+branch that is not registered, so register a minimal workstream even for tiny fixes.
 
 ---
 
@@ -65,10 +69,17 @@ This is how other agents (and future-you) find what is in flight.
 - Shared facts go in one place; never duplicate across roles/templates
 - Do not hardcode IPs, domains, or paths that belong in inventory or `.local/`
 - Do not touch `VERSION`, `changelog.md`, `versions/stack.yaml`, or `README.md`
-  on a branch — only on `main` during the integration step
-- Pre-push gate runs Docker validation on the build server (10.10.10.30);
-  if unreachable it falls back locally — Docker must be installed locally or
-  use `SKIP_REMOTE_GATE=1` with a `GATE_BYPASS_REASON_CODE`
+  on a feature/workstream branch — change `VERSION` and `changelog.md` only in
+  the `[release]` PR (section 4); `versions/stack.yaml` and `README.md` are
+  regenerated in that PR, and `versions/stack.yaml` is also updated by
+  live-apply verification records (AGENTS.md rule 12)
+- Pre-push gate (install with `make install-hooks`) runs validation natively on
+  the build server (host in `config/build-server.json`); if unreachable it falls
+  back to the native local toolchain (no Docker needed) or use
+  `SKIP_REMOTE_GATE=1` with `GATE_BYPASS_REASON_CODE`, `GATE_BYPASS_DETAIL`,
+  `GATE_BYPASS_SUBSTITUTE_EVIDENCE` and `GATE_BYPASS_REMEDIATION_REF` (a waiver
+  receipt is written to `receipts/gate-bypasses/`; the bypass skips all other
+  pre-push checks)
 
 ---
 
@@ -83,16 +94,18 @@ Run these steps **before** creating the PR:
 
 ```bash
 # Bump VERSION
-cat VERSION   # e.g. 0.178.7
-echo "0.178.8" > VERSION
+cat VERSION   # current version
+echo "<next-version>" > VERSION   # next semver, matching the workstream release_bump
 
-# Add changelog entry
-# Edit changelog.md — add a bullet under ## Unreleased
+# Add changelog entry: set canonical_truth.changelog_entry and release_bump
+# in the workstream shard (workstreams/active/<id>.yaml), then refresh
+# changelog.md, versions/stack.yaml and README.md from it
+make assemble-canonical-truth
 
 # Generate release notes
 uv run --with pyyaml \
   python scripts/generate_release_notes.py \
-  --version 0.178.8 \
+  --version <next-version> \
   --released-on $(date +%Y-%m-%d) \
   --write
 
@@ -107,23 +120,28 @@ uvx --python 3.12 \
 
 python scripts/generate_discovery_artifacts.py --write
 
+# Regenerate generated status docs
+make generate-status-docs
+
 # Regenerate ADR index (if ADRs changed)
 python scripts/generate_adr_index.py --write
 ```
 
 ### 4b. Commit and push the branch
 ```bash
-git add VERSION changelog.md RELEASE.md docs/release-notes/ \
-        build/platform-manifest.json build/onboarding/ \
+# Also stage anything else `git status` shows the generators changed
+git add VERSION changelog.md RELEASE.md README.md versions/stack.yaml \
+        docs/release-notes/ build/platform-manifest.json build/onboarding/ \
+        .repo-structure.yaml .config-locations.yaml \
         docs/adr/.index.yaml docs/adr/index/
-git commit -m "[release] Bump to 0.178.8 — <one-line summary>"
+git commit -m "[release] Bump to <next-version> — <one-line summary>"
 git push origin claude/my-branch -u
 ```
 
 ### 4c. Create a pull request
 ```bash
 gh pr create --base main \
-  --title "[release] Bump to 0.178.8 — <one-line summary>" \
+  --title "[release] Bump to X.Y.Z — <one-line summary>" \
   --body "$(cat <<'EOF'
 ## Summary
 - <bullet points describing what this release contains>
@@ -132,8 +150,10 @@ gh pr create --base main \
 - [x] VERSION bumped
 - [x] changelog.md updated
 - [x] Release notes generated
+- [x] Root summaries refreshed
 - [x] Platform manifest regenerated
 - [x] Discovery artifacts regenerated
+- [x] ADR index regenerated (if ADRs changed)
 
 ## Test plan
 - CI validation passes
@@ -141,9 +161,10 @@ EOF
 )"
 ```
 
-> **Note:** The `[release]` prefix in the PR title activates enforced
-> release-readiness checks in CI (ADR 0420). Non-release PRs run these
-> checks as advisory only.
+> **Note:** The `[release]` prefix in the PR title marks a release PR (ADR 0420).
+> No CI pipeline runs the release-readiness checks since 2026-09-28; run
+> `python3 scripts/check_release_readiness.py --enforce --base-ref origin/main`
+> locally before opening a release PR.
 
 ### 4d. Wait for CI and merge
 ```bash
@@ -163,6 +184,8 @@ bypass branch protection and push directly:
 SKIP_REMOTE_GATE=1 \
   GATE_BYPASS_REASON_CODE=emergency_hotfix \
   GATE_BYPASS_DETAIL="<describe the emergency>" \
+  GATE_BYPASS_SUBSTITUTE_EVIDENCE="<passed command or note>" \
+  GATE_BYPASS_REMEDIATION_REF="<workstream or issue>" \
   git push origin main
 ```
 
@@ -176,20 +199,20 @@ Run this **after** an Ansible playbook successfully deploys to production.
 
 ### 5a. Bump platform_version in versions/stack.yaml
 ```yaml
-# Increment the patch:
-platform_version: 0.130.99   # was 0.130.98
+# Increment the patch; release_tracks.platform_versioning.current must equal it:
+platform_version: <X.Y.Z+1>   # was <X.Y.Z>
 ```
 
 ### 5b. Update the service receipt in versions/stack.yaml
 ```yaml
 live_apply_evidence:
   latest_receipts:
-    api_gateway: 2026-04-05-portainer-tools-live-apply   # descriptive slug
+    api_gateway: <id of an existing file in receipts/live-applies/, without .json>   # create the receipt first
 ```
 
 ### 5c. Commit and merge via PR
 ```bash
-git add versions/stack.yaml
+git add versions/stack.yaml receipts/live-applies/<receipt-id>.json
 git commit -m "[live-apply] <service> deployed — <brief description>"
 git push origin claude/my-branch -u
 gh pr create --base main \
@@ -209,8 +232,7 @@ gh pr merge --squash --delete-branch
 | Find orphaned containers | `make detect-orphans` — containers running on wrong VM |
 | Remove orphaned containers | `make purge-orphans` |
 | Stop a container on a specific VM | `make teardown-service svc=<name> on_vm=<vm> env=production` |
-| Before running any playbook | Rename `.local/open-webui/provider.env` and `.local/serverclaw/provider.env` to `.bak`; restore after. These files trip the preflight `.env` scanner. |
-| Sync Dify tools | `python scripts/sync_tools_to_dify.py --base-url http://10.10.10.20:8094 ...` (internal URL — bypasses oauth2-proxy) |
+| Sync Dify tools | `python scripts/sync_tools_to_dify.py --base-url http://<docker-runtime internal IP>:8094 ...` (internal URL — bypasses oauth2-proxy) |
 | Bump platform manifest | `uvx --python 3.12 --with pyyaml --with jsonschema --with requests --with jinja2 python scripts/platform_manifest.py --write` |
 | Regenerate discovery artifacts | `python scripts/generate_discovery_artifacts.py --write` |
 | Regenerate workstreams.yaml | `python3 scripts/workstream_registry.py --write` |
@@ -219,7 +241,7 @@ gh pr merge --squash --delete-branch
 | Create a PR | `gh pr create --base main --title "[release] Bump to X.Y.Z — summary"` |
 | Merge a PR | `gh pr merge <number> --squash --delete-branch` |
 | Watch CI status | `gh pr checks <number> --watch` |
-| Skip remote gate (emergency) | `SKIP_REMOTE_GATE=1 GATE_BYPASS_REASON_CODE=<code> git push origin main` |
+| Skip all pre-push gates, secret detection included (emergency) | `SKIP_REMOTE_GATE=1 GATE_BYPASS_REASON_CODE=<code> GATE_BYPASS_DETAIL="<why>" GATE_BYPASS_SUBSTITUTE_EVIDENCE="<evidence>" GATE_BYPASS_REMEDIATION_REF="<ref>" git push origin main` (records a gate-bypass waiver receipt) |
 | Publish to ServerClaw (dry-run) | `make publish-serverclaw` |
 | Publish to ServerClaw (push) | `make publish-serverclaw-push` |
 | Audit sanitization coverage | `make audit-sanitization` |
@@ -228,13 +250,15 @@ gh pr merge --squash --delete-branch
 
 ## 7. Platform Topology Quick Reference
 
-| Host | IP | Purpose |
-|------|----|---------|
-| Proxmox host | 10.10.10.1 | Hypervisor |
-| runtime-control | 10.10.10.92 | API gateway, agent tools, Docker runtime |
-| postgres-vm | 10.10.10.60 | Shared PostgreSQL |
-| build server | 10.10.10.30 | Docker build + pre-push gate runner |
-| Dify internal | 10.10.10.20:8094 | Dify API (bypasses oauth2-proxy) |
+| Host | Purpose |
+|------|---------|
+| Proxmox host | Hypervisor |
+| runtime-control | API gateway, agent tools, Docker runtime |
+| postgres (primary), postgres-replica, postgres-apps, postgres-data | PostgreSQL |
+| build server (docker-build) | Docker build + pre-push gate runner |
+| Dify internal (docker-runtime, port 8094) | Dify API (bypasses oauth2-proxy) |
+
+Guest IPs: see `proxmox_guests` and `proxmox_internal_ipv4` in `inventory/host_vars/proxmox-host.yml`; do not hand-type them.
 
 SSH to guests uses `proxmox_host_jump` connection mode via the bootstrap key at `.local/ssh/bootstrap.id_ed25519`.
 
@@ -257,9 +281,10 @@ Branch-local changes to these will be overwritten or conflict on merge.
 
 ## 9. Deployment-Specific Values (ADR 0407) — CRITICAL
 
-The committed codebase is **generic by default**. This means the private repo
-and the public GitHub repo (`baditaflorin/ServerClaw`) stay nearly identical.
-Real deployment values live in `.local/` (gitignored).
+The committed codebase aims to be **generic by default** (ADR 0407, ADR 0409).
+`platform.yml`, inventory files and `receipts/` legitimately carry real values;
+the publish pipeline sanitizes or regenerates them for the public GitHub repo
+(`baditaflorin/ServerClaw`). Real deployment values live in `.local/` (gitignored).
 
 **⚠ Before writing ANY domain, URL, hostname, or operator reference, follow these rules:**
 
@@ -287,11 +312,11 @@ Real deployment values live in `.local/` (gitignored).
 ### Why this matters
 
 The publish pipeline syncs this repo to the public `ServerClaw` GitHub repo.
-If you write `example.com` in a doc or test, the pipeline must regex-replace it.
+If you write the real domain in a doc or test, the pipeline must regex-replace it.
 If you use `example.com`, the file passes through unchanged — keeping the
 private↔public diff small and reviewable.
 
-**The pipeline currently sanitizes ~588 files per publish (down from 6,482).**
+**Run `make publish-serverclaw` (dry-run) to see how many files the pipeline sanitizes.**
 Every file you write with generic values is one fewer file it needs to touch.
 
 ### ⚠️ platform.yml exception — generated file MUST have real values
@@ -320,20 +345,18 @@ always reflect actual deployment reality.
 
 ## 10. Common Pitfalls
 
-**Preflight `.env` scanner** — `roles/preflight` uses `ansible.builtin.find *.env` recursively. It excludes by basename, not path, so `.local/open-webui/provider.env` and `.local/serverclaw/provider.env` are always found. Temporarily rename them to `.bak` before any `make converge-*` run and restore after.
-
 **Dify URL** — The Dify subdomain is behind oauth2-proxy. Use the internal Dify IP and port for API calls from the controller.
 
 **Top-level imports in agent_tool_registry.py** — Any `import` that requires `requests` at module load time breaks `--export-mcp` validation (which runs in a container without `requests`). Always use lazy imports inside handler functions.
 
-**Platform manifest must match committed code** — The pre-push gate validates `build/platform-manifest.json` against the current schema. Regenerate it after any structural change (new role, new tool, new playbook).
+**Platform manifest must match committed code** — The pre-push gate validates `build/platform-manifest.json` against the current schema. Regenerate it whenever any input of `scripts/platform_manifest.py` changes: `VERSION`, `versions/stack.yaml`, `config/service-capability-catalog.json`, `config/capability-contract-catalog.json`, `config/workflow-catalog.json`, `config/workflow-defaults.yaml`, `config/manifest-static.yaml`, the runbooks the workflow catalog points at, `docs/release-notes/`, or ADR status metadata in `docs/adr/`. If unsure, run `scripts/platform_manifest.py --check`.
 
-**Pre-push gate snapshot** — The gate validates a point-in-time snapshot of committed code. Fixes committed after a push attempt starts apply to the *next* push, not the current one.
+**Pre-push gate snapshot** — The gate validates a point-in-time snapshot of the working tree (uncommitted and untracked files included), not of git objects. Fixes committed after a push attempt starts apply to the *next* push, not the current one.
 
 **`.local/` is sacred** — NEVER symlink, copy, or `git add` the `.local` directory. Worktrees intentionally lack `.local/`; read credentials from the main worktree path if needed. Never generate placeholder secrets that could overwrite real ones. Never use `git add -A` or `git add .` in a directory containing `.local`. A pre-commit hook blocks `.local` from the index but defense in depth matters. See ADR 0376 for the full incident analysis.
 
 **`platform.yml` fake IPs = broken deployment** — If `inventory/group_vars/platform.yml` contains `203.0.113.1` or `example.com`, every downstream artifact (DNS records, monitoring targets, Tailscale config) will be misconfigured. Always run `make generate-platform-vars` after changing `.local/identity.yml` or `inventory/host_vars/proxmox-host.yml`. The generator now loads `.local/identity.yml` as a high-priority overlay; without it, fake IPs propagate silently into production DNS.
 
-**Service VM migration must use `make migrate-service`** — Do NOT manually edit `platform_service_registry.host_group`, `proxy.upstream_host`, or `lv3_service_topology[svc].owning_vm` in isolation. All three must change together or topology drift occurs. The pre-push gate will catch it, but the right approach is to use `make migrate-service svc=X to=Y` which updates all registries atomically and runs converges in the correct order (postgres → stop-old → service → nginx). Manual multi-step migrations caused three drift incidents in 72 hours.
+**Service VM migration must use `make migrate-service`** — Do NOT manually edit `platform_service_registry.host_group`, `proxy.upstream_host`, or `platform_service_topology[svc].owning_vm` in isolation. All three must change together or topology drift occurs. The pre-push gate does not cross-check them; use `make migrate-service svc=X to=Y`, which updates all three in one run (not transactional: on failure revert by hand with `git checkout`), runs `scripts/validate_topology_consistency.py --check` and runs converges in the correct order (postgres → stop-old → service → nginx). It does not touch the service catalog `vm` or health-probe `owning_vm` entries; update those by hand. Manual multi-step migrations caused three drift incidents in 72 hours.
 
 **Service won't connect to PostgreSQL after moving it** — The pg_hba.conf is now derived from `platform_service_registry.host_group` automatically (ADR 0416 Phase 2). Run `make converge-postgres-vm env=production` to rebuild it. No manual `source_vm` edits — that field no longer exists.

@@ -14,6 +14,9 @@ oidc_jwks_url = "{{ public_edge_oidc_auth_jwks_url }}"
 oidc_enabled_signing_algs = [{% for algorithm in public_edge_oidc_auth_oidc_enabled_signing_algorithms %}"{{ algorithm }}"{% if not loop.last %}, {% endif %}{% endfor %}]
 allowed_groups = [{% for group in public_edge_oidc_auth_allowed_groups %}"{{ group }}"{% if not loop.last %}, {% endif %}{% endfor %}]
 email_domains = [{% for domain in public_edge_oidc_auth_email_domains %}"{{ domain }}"{% if not loop.last %}, {% endif %}{% endfor %}]
+{% if public_edge_oidc_auth_authenticated_emails_file | default('') | length > 0 %}
+authenticated_emails_file = "{{ public_edge_oidc_auth_authenticated_emails_file }}"
+{% endif %}
 insecure_oidc_allow_unverified_email = {{ public_edge_oidc_auth_allow_unverified_email | bool | lower }}
 cookie_name = "{{ public_edge_oidc_auth_cookie_name }}"
 cookie_secret = "{{ lookup('ansible.builtin.file', public_edge_oidc_auth_cookie_secret_local_file) | trim }}"

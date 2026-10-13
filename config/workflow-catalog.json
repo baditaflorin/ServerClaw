@@ -3389,7 +3389,6 @@
       "implementation_refs": [
         "Makefile",
         "config/prometheus/file_sd/https_tls_targets.yml",
-        "config/prometheus/rules/https_tls_alerts.yml",
         "config/windmill/scripts/https-tls-assurance.py",
         "config/workflow-catalog.json",
         "docs/runbooks/https-tls-assurance.md",
@@ -7851,6 +7850,8 @@
         "collections/ansible_collections/lv3/platform/roles/common/tasks/openbao_compose_env.yml",
         "collections/ansible_collections/lv3/platform/roles/openbao_runtime",
         "scripts/reconcile_authentik_oauth.py",
+        "config/authentik/scope-mappings.yaml",
+        "scripts/reconcile_authentik_scope_mappings.py",
         "catalog/services/authentik/service.yaml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json",
