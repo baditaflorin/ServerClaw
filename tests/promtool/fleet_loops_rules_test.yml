@@ -1,0 +1,141 @@
+# promtool unit tests for config/prometheus/rules/fleet-loops.yml (run by tests/test_fleet_loops_promtool.py when
+# promtool is installed). promtool starts its clock at the Unix epoch, so a heartbeat sample whose value equals its own
+# timestamp in seconds means "the loop ran just now": "0+60x99" at a 1m interval is a loop that reports every minute.
+rule_files:
+  - ../../config/prometheus/rules/fleet-loops.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a loop that reports on time raises nothing
+    interval: 1m
+    input_series:
+      - series: 'fleet_pool_guardian_last_run_timestamp_seconds{instance="b:9100"}'
+        values: "0+60x180"
+      - series: 'fleet_horizon_last_run_timestamp_seconds{instance="b:9100"}'
+        values: "0+60x180"
+    alert_rule_test:
+      - {eval_time: 120m, alertname: FleetPoolGuardianSilent, exp_alerts: []}
+      - {eval_time: 120m, alertname: FleetPoolGuardianNotReporting, exp_alerts: []}
+      - {eval_time: 120m, alertname: FleetHorizonSilent, exp_alerts: []}
+      - {eval_time: 120m, alertname: FleetHorizonNotReporting, exp_alerts: []}
+
+  - name: the nightly ten-minute stop of the builder raises nothing
+    interval: 1m
+    input_series:
+      # reports every minute, then no samples for 10 minutes (CT108 stopped by its backup), then reports again
+      - series: 'fleet_pool_guardian_last_run_timestamp_seconds{instance="b:9100"}'
+        values: "0+60x99 _x10 6600+60x70"
+      - series: 'fleet_horizon_last_run_timestamp_seconds{instance="b:9100"}'
+        values: "0+60x99 _x10 6600+60x70"
+    alert_rule_test:
+      - {eval_time: 105m, alertname: FleetPoolGuardianNotReporting, exp_alerts: []}
+      - {eval_time: 112m, alertname: FleetPoolGuardianNotReporting, exp_alerts: []}
+      - {eval_time: 112m, alertname: FleetPoolGuardianSilent, exp_alerts: []}
+      - {eval_time: 112m, alertname: FleetHorizonNotReporting, exp_alerts: []}
+      - {eval_time: 150m, alertname: FleetPoolGuardianNotReporting, exp_alerts: []}
+
+  - name: a guardian whose timer died but whose exporter still serves the old timestamp is silent after 45 minutes plus the wait
+    interval: 1m
+    input_series:
+      - series: 'fleet_pool_guardian_last_run_timestamp_seconds{instance="b:9100"}'
+        values: "600x180"
+    alert_rule_test:
+      - {eval_time: 40m, alertname: FleetPoolGuardianSilent, exp_alerts: []}
+      - {eval_time: 60m, alertname: FleetPoolGuardianSilent, exp_alerts: []}
+      - eval_time: 70m
+        alertname: FleetPoolGuardianSilent
+        exp_alerts:
+          - exp_labels: {severity: critical, service: fleet_loops, instance: "b:9100"}
+            exp_annotations:
+              summary: "The pool guardian on b:9100 has not run for 45 minutes"
+              description: "fleet-pool-guardian.timer fires every 10 minutes. Nothing has observed or repaired the service pools for 1h 0m 0s. On the builder check `systemctl status fleet-pool-guardian.timer fleet-pool-guardian.service` and `journalctl -u fleet-pool-guardian.service`."
+              runbook_url: docs/runbooks/fleet-observability.md
+
+  - name: a guardian that vanished from Prometheus (builder or exporter down, file unreadable) is caught by absent()
+    interval: 1m
+    input_series:
+      - series: 'fleet_pool_guardian_last_run_timestamp_seconds{instance="b:9100"}'
+        values: "0+60x59"
+    alert_rule_test:
+      # the series goes stale five minutes after its last sample (t=59m); absent() then holds for 30 minutes
+      - {eval_time: 80m, alertname: FleetPoolGuardianNotReporting, exp_alerts: []}
+      - eval_time: 100m
+        alertname: FleetPoolGuardianNotReporting
+        exp_alerts:
+          - exp_labels: {severity: critical, service: fleet_loops}
+            exp_annotations:
+              summary: "No pool guardian metrics are visible to Prometheus"
+              description: "fleet_pool_guardian_last_run_timestamp_seconds has been absent for 30 minutes: the builder (CT108) or its node exporter is down, or the textfile is missing or not readable by the exporter user (it must be mode 0644; fleet-runner before v0.7.340 wrote it 0600)."
+              runbook_url: docs/runbooks/fleet-observability.md
+
+  - name: a horizon watch that missed two runs warns
+    # promtool's lookback is 5 minutes, so the samples must be as dense as a real scrape: one a minute
+    interval: 1m
+    input_series:
+      - series: 'fleet_horizon_last_run_timestamp_seconds{instance="b:9100"}'
+        values: "7200x1100"
+    alert_rule_test:
+      - {eval_time: 12h, alertname: FleetHorizonSilent, exp_alerts: []}
+      - {eval_time: 15h, alertname: FleetHorizonSilent, exp_alerts: []}
+      - eval_time: 16h
+        alertname: FleetHorizonSilent
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_loops, instance: "b:9100"}
+            exp_annotations:
+              summary: "The horizon watch on b:9100 has not run for 13 hours"
+              description: "fleet-horizon.timer fires every 6 hours; two runs were missed (14h 0m 0s since the last one). Nothing is watching expiring certificates, tokens, domains, RAID or backups. On the builder check `systemctl status fleet-horizon.timer fleet-horizon.service` and `journalctl -u fleet-horizon.service`."
+              runbook_url: docs/runbooks/fleet-observability.md
+
+  - name: a horizon watch that vanished from Prometheus warns after an hour, not before
+    interval: 1m
+    input_series:
+      - series: 'fleet_horizon_last_run_timestamp_seconds{instance="b:9100"}'
+        values: "0+60x59"
+    alert_rule_test:
+      - {eval_time: 100m, alertname: FleetHorizonNotReporting, exp_alerts: []}
+      - eval_time: 140m
+        alertname: FleetHorizonNotReporting
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_loops}
+            exp_annotations:
+              summary: "No horizon watch metrics are visible to Prometheus"
+              description: "fleet_horizon_last_run_timestamp_seconds has been absent for an hour: the builder or its node exporter is down, or the textfile is missing or not readable by the exporter user (it must be mode 0644)."
+              runbook_url: docs/runbooks/fleet-observability.md
+
+  - name: findings and states raise only when they persist
+    interval: 1m
+    input_series:
+      - series: 'fleet_pool_guardian_findings{instance="b:9100", severity="critical"}'
+        values: "0x20 1x100"
+      - series: 'fleet_pool_guardian_circuits_open{instance="b:9100"}'
+        values: "0x20 2x100"
+      - series: 'fleet_pool_guardian_paused{instance="b:9100"}'
+        values: "1x2000"
+      - series: 'fleet_horizon_findings{instance="b:9100", severity="critical"}'
+        values: "1x200"
+      - series: 'fleet_horizon_findings{instance="b:9100", severity="warning"}'
+        values: "1x200"
+    alert_rule_test:
+      - {eval_time: 50m, alertname: FleetPoolGuardianCriticalFinding, exp_alerts: []}
+      - {eval_time: 90m, alertname: FleetPoolGuardianCriticalFinding, exp_alerts: [{exp_labels: {severity: critical, service: fleet_loops, instance: "b:9100"}, exp_annotations: {summary: "A service pool has had a critical finding for an hour", description: "1 critical pool finding(s) on b:9100 for 1 hour. The guardian repairs what is safe within minutes, so a finding this old is one it cannot or may not repair (credentials, capacity, an open circuit). Run `fleet-runner pool-guardian` (without --apply) on the builder for the findings.", runbook_url: docs/runbooks/fleet-observability.md}}]}
+      - {eval_time: 40m, alertname: FleetPoolGuardianCircuitOpen, exp_alerts: []}
+      - eval_time: 60m
+        alertname: FleetPoolGuardianCircuitOpen
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_loops, instance: "b:9100"}
+            exp_annotations:
+              summary: "The pool guardian stopped repairing 2 service(s)"
+              description: "The repair circuit is open for 2 service(s) on b:9100: three repairs failed within 24 hours, so the guardian leaves them alone until the hold passes. Read the failure output in /root/fleet-state/state/pool-guardian/events.jsonl."
+              runbook_url: docs/runbooks/fleet-observability.md
+      - {eval_time: 23h, alertname: FleetPoolGuardianPaused, exp_alerts: []}
+      - {eval_time: 25h, alertname: FleetPoolGuardianPaused, exp_alerts: [{exp_labels: {severity: warning, service: fleet_loops, instance: "b:9100"}, exp_annotations: {summary: "The pool guardian kill switch has been on for 24 hours", description: "Repairs are off on b:9100 (PAUSE file or FLEET_GUARDIAN_PAUSE) and have been for a day. The kill switch is meant for short interventions; remove it when the intervention is over.", runbook_url: docs/runbooks/fleet-observability.md}}]}
+      - {eval_time: 30m, alertname: FleetHorizonCriticalFinding, exp_alerts: []}
+      - eval_time: 90m
+        alertname: FleetHorizonCriticalFinding
+        exp_alerts:
+          - exp_labels: {severity: critical, service: fleet_loops, instance: "b:9100"}
+            exp_annotations:
+              summary: "The horizon watch has 1 critical finding(s)"
+              description: "Something that expires or degrades slowly has crossed its critical threshold (a degraded RAID array, a disk or backup problem, an expiry inside two weeks). Run `fleet-runner horizon` on the builder for the list; the horizon verb also pages its own ntfy topic, this is the independent second path."
+              runbook_url: docs/runbooks/fleet-observability.md
