@@ -42,6 +42,10 @@ EOF
 systemctl enable chronyd || systemctl enable chrony || true
 systemctl enable rsyslog fail2ban unattended-upgrades auditd
 
+# VMs have no IPMI device; the openipmi init script fails on every boot and shows up as a
+# permanently failed unit, which hides real failures. Mask it in the template.
+systemctl mask openipmi || true
+
 install -d -m 0755 /etc/ssh/sshd_config.d
 cat > /etc/ssh/sshd_config.d/90-lv3-hardening.conf <<'EOF'
 PasswordAuthentication no

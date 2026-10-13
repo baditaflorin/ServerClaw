@@ -520,6 +520,129 @@ def test_cross_signed_or_unsafe_client_ca_is_rejected(tmp_path: Path) -> None:
         handoff._verify_dedicated_client_ca(config, int(time.time()))
 
 
+def _server_leaf_via_intermediate(tmp_path: Path, materials: dict[str, tuple[Path, Path]]) -> tuple[Path, Path, Path]:
+    """A server leaf signed by an intermediate, as step-ca issues it. Returns (bundle, key, intermediate)."""
+    intermediate = _make_certificate_authority(tmp_path, "intermediate", materials["root"])
+    leaf, key = _make_leaf(
+        tmp_path,
+        "server-via-intermediate",
+        "subjectAltName=DNS:fleet-build-broker.internal,IP:198.51.100.80\nextendedKeyUsage=serverAuth\n",
+        intermediate,
+    )
+    bundle = tmp_path / "server-bundle.crt"
+    bundle.write_bytes(leaf.read_bytes() + intermediate[0].read_bytes())  # leaf first, as `step ca certificate` writes it
+    return bundle, key, intermediate[0]
+
+
+def test_server_leaf_signed_by_an_intermediate_verifies_with_the_issued_bundle(tmp_path: Path) -> None:
+    # Regression: renewal failed every hour with "issuer validation command failed"
+    # (openssl: unable to get local issuer certificate) because only the root was given.
+    materials = _make_fixture_pki(tmp_path / "materials")
+    config = _config(
+        tmp_path,
+        step=_write_fake_step(tmp_path, tmp_path / "materials"),
+        writer=_write_fake_writer(tmp_path),
+        materials=materials,
+    )
+    bundle, key, _ = _server_leaf_via_intermediate(tmp_path, materials)
+    step_ca = dict(config["step_ca"])  # type: ignore[arg-type]
+    step_ca["root_certificate_file"] = str(materials["root"][0])
+    not_after = handoff._verify_server_leaf(bundle, key, config["server"], step_ca, int(time.time()))  # type: ignore[arg-type]
+    assert not_after > int(time.time())
+
+
+def test_server_leaf_uses_the_intermediate_file_next_to_the_root_when_the_leaf_is_alone(tmp_path: Path) -> None:
+    materials = _make_fixture_pki(tmp_path / "materials")
+    config = _config(
+        tmp_path,
+        step=_write_fake_step(tmp_path, tmp_path / "materials"),
+        writer=_write_fake_writer(tmp_path),
+        materials=materials,
+    )
+    bundle, key, intermediate = _server_leaf_via_intermediate(tmp_path, materials)
+    leaf_only = tmp_path / "leaf-only.crt"
+    leaf_only.write_text(bundle.read_text().split("-----END CERTIFICATE-----")[0] + "-----END CERTIFICATE-----\n")
+    pki = tmp_path / "step-home"
+    pki.mkdir()
+    root = pki / "root_ca.crt"
+    shutil.copyfile(materials["root"][0], root)
+    step_ca = dict(config["step_ca"])  # type: ignore[arg-type]
+    step_ca["root_certificate_file"] = str(root)
+
+    with pytest.raises(handoff.HandoffError, match="issuer validation command failed"):
+        handoff._verify_server_leaf(leaf_only, key, config["server"], step_ca, int(time.time()))  # type: ignore[arg-type]
+
+    shutil.copyfile(intermediate, pki / "intermediate_ca.crt")
+    assert handoff._verify_server_leaf(leaf_only, key, config["server"], step_ca, int(time.time())) > int(time.time())  # type: ignore[arg-type]
+
+
+def test_server_leaf_from_an_unrelated_ca_is_still_rejected(tmp_path: Path) -> None:
+    # Untrusted intermediates must not widen trust: the chain still has to end at the step-ca root.
+    materials = _make_fixture_pki(tmp_path / "materials")
+    config = _config(
+        tmp_path,
+        step=_write_fake_step(tmp_path, tmp_path / "materials"),
+        writer=_write_fake_writer(tmp_path),
+        materials=materials,
+    )
+    rogue_root = _make_certificate_authority(tmp_path, "rogue-root")
+    rogue_issuer = _make_certificate_authority(tmp_path, "rogue-intermediate", rogue_root)
+    leaf, key = _make_leaf(
+        tmp_path,
+        "rogue-server",
+        "subjectAltName=DNS:fleet-build-broker.internal,IP:198.51.100.80\nextendedKeyUsage=serverAuth\n",
+        rogue_issuer,
+    )
+    bundle = tmp_path / "rogue-bundle.crt"
+    bundle.write_bytes(leaf.read_bytes() + rogue_issuer[0].read_bytes())
+    step_ca = dict(config["step_ca"])  # type: ignore[arg-type]
+    step_ca["root_certificate_file"] = str(materials["root"][0])
+    with pytest.raises(handoff.HandoffError, match="issuer validation command failed"):
+        handoff._verify_server_leaf(bundle, key, config["server"], step_ca, int(time.time()))  # type: ignore[arg-type]
+
+
+def test_client_leaf_is_issued_from_a_template_not_removed_step_flags(tmp_path: Path, monkeypatch) -> None:
+    # Regression: step 0.30 rejects --key-usage/--ext-key-usage ("flag provided but not defined"),
+    # which failed every renewal. The leaf must come from a template restricted to clientAuth.
+    materials = _make_fixture_pki(tmp_path / "materials")
+    config = _config(
+        tmp_path,
+        step=_write_fake_step(tmp_path, tmp_path / "materials"),
+        writer=_write_fake_writer(tmp_path),
+        materials=materials,
+    )
+    client = {"id": "builder-0docker", **handoff.EXPECTED_CLIENTS["builder-0docker"], "extended_key_usage": "clientAuth"}
+    captured: list[list[str]] = []
+    templates: list[str] = []
+
+    def fake_run(argv: list[str]):
+        captured.append(argv)
+        template_path = Path(argv[argv.index("--template") + 1])
+        templates.append(template_path.read_text(encoding="utf-8"))
+        return subprocess.CompletedProcess(argv, 0, b"", b"")
+
+    monkeypatch.setattr(handoff, "_run", fake_run)
+    out = tmp_path / "issue"
+    out.mkdir()
+    handoff._issue_client(config["step_ca"], client, config["client_ca"], out / "client.crt", out / "client.key")  # type: ignore[arg-type,index]
+
+    argv = captured[0]
+    assert "--key-usage" not in argv and "--ext-key-usage" not in argv and "--profile" not in argv
+    assert "--template" in argv and "--no-password" in argv and "--insecure" in argv
+    assert argv[argv.index("--san") + 1] == client["spiffe_id"]
+    template = templates[0]
+    assert '"extKeyUsage": ["clientAuth"]' in template
+    assert '"keyUsage": ["digitalSignature"]' in template
+    assert "serverAuth" not in template and '"isCA": false' in template
+    assert "toJson .Subject" in template and "toJson .SANs" in template
+
+
+def test_script_source_has_no_jinja_delimiters() -> None:
+    # The script is installed by an Ansible role; a stray delimiter would be expanded or break the render.
+    source = SCRIPT_PATH.read_text(encoding="utf-8")
+    assert "{" + "{" not in source and "{" + "%" not in source
+
+
 def test_client_leaf_chains_only_to_broker_trust_anchor(tmp_path: Path) -> None:
     materials = _make_fixture_pki(tmp_path / "materials")
     config = _config(

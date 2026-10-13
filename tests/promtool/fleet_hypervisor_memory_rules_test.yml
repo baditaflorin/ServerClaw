@@ -1,0 +1,97 @@
+# promtool unit tests for config/prometheus/rules/fleet-hypervisor-memory.yml and alertmanager-self.yml (run by
+# tests/test_fleet_hypervisor_memory_promtool.py when promtool is installed).
+rule_files:
+  - ../../config/prometheus/rules/fleet-hypervisor-memory.yml
+  - ../../config/prometheus/rules/alertmanager-self.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: 3 percent available for ten minutes is critical and warning, a short dip is not
+    interval: 1m
+    input_series:
+      - series: 'node_memory_MemTotal_bytes{role="hypervisor",host="pve-0mcp",instance="h:9100"}'
+        values: "1000x60"
+      - series: 'node_memory_MemAvailable_bytes{role="hypervisor",host="pve-0mcp",instance="h:9100"}'
+        values: "200x5 25x30 200x30"
+      - series: 'node_memory_MemTotal_bytes{role="hypervisor",host="pve-ok",instance="o:9100"}'
+        values: "1000x60"
+      - series: 'node_memory_MemAvailable_bytes{role="hypervisor",host="pve-ok",instance="o:9100"}'
+        values: "500x60"
+    alert_rule_test:
+      - {eval_time: 4m, alertname: FleetHypervisorMemAvailableLow, exp_alerts: []}
+      - eval_time: 25m
+        alertname: FleetHypervisorMemAvailableLow
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_hypervisor_memory, role: hypervisor, host: pve-0mcp, instance: "h:9100"}
+            exp_annotations:
+              summary: "Hypervisor pve-0mcp has under 5% memory available"
+              description: "pve-0mcp (h:9100) has 2.5% of RAM available for 10 minutes. Guests are being ballooned to their floor and host swap fills up next. Lower balloon targets of idle guests (qm set <id> --balloon <MB>) or shrink guests at the next maintenance window."
+              runbook_url: docs/runbooks/fleet-observability.md
+      - eval_time: 25m
+        alertname: FleetHypervisorMemAvailableCritical
+        exp_alerts:
+          - exp_labels: {severity: critical, service: fleet_hypervisor_memory, role: hypervisor, host: pve-0mcp, instance: "h:9100"}
+            exp_annotations:
+              summary: "Hypervisor pve-0mcp has under 3% memory available"
+              description: "pve-0mcp (h:9100) has 2.5% of RAM available. The kernel OOM killer can pick a guest's QEMU process next. Free memory now: lower balloon targets or shut down a non-critical guest."
+              runbook_url: docs/runbooks/fleet-observability.md
+      - {eval_time: 50m, alertname: FleetHypervisorMemAvailableLow, exp_alerts: []}
+
+  - name: swap over 90 percent used fires, a hypervisor without swap does not divide by zero
+    interval: 1m
+    input_series:
+      - series: 'node_memory_SwapTotal_bytes{role="hypervisor",host="pve-0mcp",instance="h:9100"}'
+        values: "1000x40"
+      - series: 'node_memory_SwapFree_bytes{role="hypervisor",host="pve-0mcp",instance="h:9100"}'
+        values: "50x40"
+      - series: 'node_memory_SwapTotal_bytes{role="hypervisor",host="pve-0own",instance="w:9100"}'
+        values: "0x40"
+      - series: 'node_memory_SwapFree_bytes{role="hypervisor",host="pve-0own",instance="w:9100"}'
+        values: "0x40"
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: FleetHypervisorSwapExhausted
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_hypervisor_memory, role: hypervisor, host: pve-0mcp, instance: "h:9100"}
+            exp_annotations:
+              summary: "Hypervisor pve-0mcp swap is over 90% used"
+              description: "pve-0mcp (h:9100) has only 5% of its swap free for 15 minutes. Guest pages are being swapped on the host, which slows every guest and leaves no headroom for a memory spike."
+              runbook_url: docs/runbooks/fleet-observability.md
+
+  - name: Alertmanager notification failures and persistence errors alert, a healthy one does not
+    interval: 1m
+    input_series:
+      - series: 'alertmanager_notifications_failed_total{instance="127.0.0.1:9093",integration="webhook",reason="clientError"}'
+        values: "0+1x60"
+      - series: 'alertmanager_nflog_maintenance_errors_total{instance="127.0.0.1:9093"}'
+        values: "0+1x10 10x50"
+      - series: 'up{job="alertmanager",instance="127.0.0.1:9093"}'
+        values: "1x10 0x40"
+    alert_rule_test:
+      - {eval_time: 10m, alertname: AlertmanagerNotificationsFailing, exp_alerts: []}
+      - eval_time: 30m
+        alertname: AlertmanagerNotificationsFailing
+        exp_alerts:
+          - exp_labels: {severity: warning, service: alertmanager, instance: "127.0.0.1:9093", integration: webhook}
+            exp_annotations:
+              summary: "Alertmanager 127.0.0.1:9093 fails to send webhook notifications"
+              description: "alertmanager_notifications_failed_total for integration webhook has kept increasing for 15 minutes. Look for 'Notify for alerts failed' in `journalctl -u prometheus-alertmanager` (a 413 means a group payload is too big for ntfy; a 401/403 means the ntfy user lost its ACL)."
+              runbook_url: docs/runbooks/fleet-observability.md
+      - eval_time: 12m
+        alertname: AlertmanagerStatePersistenceFailing
+        exp_alerts:
+          - exp_labels: {severity: warning, service: alertmanager, instance: "127.0.0.1:9093"}
+            exp_annotations:
+              summary: "Alertmanager 127.0.0.1:9093 cannot persist silences or its notification log"
+              description: "The nflog/silences snapshot cannot be written (usually directory ownership of the storage path). Silences and the notification log are lost on the next Alertmanager restart, which causes duplicate notifications."
+              runbook_url: docs/runbooks/fleet-observability.md
+      - {eval_time: 40m, alertname: AlertmanagerStatePersistenceFailing, exp_alerts: []}
+      - eval_time: 30m
+        alertname: AlertmanagerDown
+        exp_alerts:
+          - exp_labels: {severity: critical, service: alertmanager, instance: "127.0.0.1:9093", job: alertmanager}
+            exp_annotations:
+              summary: "Alertmanager 127.0.0.1:9093 metrics endpoint is down"
+              description: "Prometheus cannot scrape Alertmanager 127.0.0.1:9093 for 5 minutes. Alerts may not be delivered. Check `systemctl status prometheus-alertmanager` on the monitoring VM."
+              runbook_url: docs/runbooks/fleet-observability.md

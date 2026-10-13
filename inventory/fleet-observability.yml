@@ -52,6 +52,7 @@ all:
           fleet_node_exporter_args_quote: "'"
           fleet_node_exporter_args_prefix: " "
           fleet_node_exporter_proxyd_path: /lib/systemd/systemd-socket-proxyd
+          fleet_hypervisor_memory_reclaim_textfile_dir: /var/lib/prometheus/node-exporter/textfile
           # Port plan of the tailnet address 203.0.113.6: 9100 exporter, 9101 runtime-general proxy, 9102 exporter,
           # 9103 build-metrics proxy.
           fleet_node_exporter_socket_proxies:
@@ -236,6 +237,7 @@ all:
           ansible_host: 0own_bastion
           fleet_tailscale_node_advertise_routes:
             - 10.60.10.50/32
+            - 10.60.10.60/32
         0own_build_worker:
           ansible_host: 0own_build_worker
         0own_pbs:
@@ -261,6 +263,12 @@ all:
             - {path: /datastore/own-pbs/0database, role: DatastoreAudit, auth_id: "backup-0database@pbs"}
             - {path: /datastore/own-pbs/0database, role: DatastoreBackup, auth_id: "backup-0database@pbs!vzdump-0database"}
             - {path: /datastore/own-pbs/0database, role: DatastoreAudit, auth_id: "backup-0database@pbs!vzdump-0database"}
+            # 0own namespace: the 0own hypervisor's vzdump writer (user and token are operator-managed; token secret in the
+            # fleet vault as pbs-0own-vzdump-token-secret).
+            - {path: /datastore/own-pbs/0own, role: DatastoreBackup, auth_id: "backup-0own@pbs"}
+            - {path: /datastore/own-pbs/0own, role: DatastoreAudit, auth_id: "backup-0own@pbs"}
+            - {path: /datastore/own-pbs/0own, role: DatastoreBackup, auth_id: "backup-0own@pbs!vzdump-0own"}
+            - {path: /datastore/own-pbs/0own, role: DatastoreAudit, auth_id: "backup-0own@pbs!vzdump-0own"}
           fleet_pg_backup_pbs_prune_jobs:
             # Root namespace only. Without max_depth 0 this job recursed into every namespace (default full depth) and
             # applied keep-daily 7 to 0database, overriding the tighter prune-0database job. 0mcp-legacy is frozen and
@@ -290,6 +298,14 @@ all:
               keep_last: 3
               keep_weekly: 1
               comment: "0database pg-primary vzdump retention: 3 last + 1 weekly (capacity-bound, see report)"
+            - id: prune-0own
+              store: own-pbs
+              ns: 0own
+              schedule: "04:45"
+              max_depth: 0
+              keep_last: 3
+              keep_weekly: 1
+              comment: "0own guests (VMs 610 630 640 650 660 670): 3 last + 1 weekly, see docs/runbooks/pbs-0own-backups.md"
         0own_openobserve:
           # VM630
           ansible_host: 0own_openobserve
@@ -321,7 +337,15 @@ all:
             - 10.60.10.50:9100
           fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
         0own_staging_runtime:
+          # VM660: no tailscaled; reached through the hypervisor's 10.60.10.60/32 route (autoApprover + grant in
+          # config/tailscale/policy.hujson, added 2026-10-13).
           ansible_host: 0own_staging_runtime
+          fleet_node_exporter_listen_addresses:
+            - 10.60.10.60:9100
+          fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
+        # VM670 (pdm, 100.65.106.57) also runs prometheus-node-exporter on its tailnet address and its nftables file opens
+        # tcp 9100 on tailscale0 to 203.0.113.4 only, but our SSH key is not accepted there (it was set up through the
+        # QEMU guest agent: `qm guest exec 670`), so it is not an Ansible host yet.
 
     # ------------------------------------------------------------- role groups
     # Each play of playbooks/fleet-observability.yml targets one of these.
@@ -340,6 +364,7 @@ all:
         0own_openobserve:
         0own_github_mirror:
         0own_pyroscope_canary:
+        0own_staging_runtime:
     fleet_tailscale_node_hosts:
       hosts:
         0docker_bastion:
@@ -350,6 +375,10 @@ all:
     fleet_docker_prune_hosts:
       hosts:
         0mcp_docker_build:
+    # Ballooning hypervisors whose MemAvailable hides memory stranded in deferred-split huge pages (0mcp, 2026-10-13).
+    fleet_hypervisor_memory_reclaim_hosts:
+      hosts:
+        operator-bastion:
     fleet_pg_backup_hosts:
       hosts:
         0own_pbs:

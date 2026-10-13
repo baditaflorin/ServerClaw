@@ -1,6 +1,13 @@
+{# A path unit is implicitly Before=paths.target (before basic.target). This one is ordered After=pveproxy.service, and
+   pveproxy is After=ssh.service, which is After=basic.target: an ordering cycle. At boot systemd breaks it by deleting
+   start jobs; on the 0mcp hypervisor one of them was ssh.service. Without default dependencies the path unit is not
+   ordered Before=paths.target. #}
 [Unit]
 Description={{ proxmox_host_control_loops_description }} path trigger
 After={{ proxmox_host_control_loops_after_units | join(' ') }}
+DefaultDependencies=no
+Conflicts=shutdown.target
+Before=shutdown.target
 
 [Path]
 PathExists={{ proxmox_host_control_loops_reconcile_request_path }}

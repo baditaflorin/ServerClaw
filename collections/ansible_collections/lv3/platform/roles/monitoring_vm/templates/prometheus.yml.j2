@@ -23,6 +23,18 @@ scrape_configs:
         labels:
           service: prometheus
 
+  # Alertmanager's own metrics (notification failures, state persistence errors); the blackbox probes below only check liveness.
+  - job_name: alertmanager
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+{% for target in monitoring_prometheus_alertmanager_targets %}
+          - {{ target }}
+{% endfor %}
+        labels:
+          service: alertmanager
+          host: monitoring-lv3
+
   - job_name: tempo
     metrics_path: /metrics
     static_configs:

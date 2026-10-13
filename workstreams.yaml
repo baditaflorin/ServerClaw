@@ -233,8 +233,8 @@ workstreams:
   ready_to_merge: false
   live_applied: true
   owner: codex
-  branch: codex/authentik-closeout-20261013
-  worktree_path: .worktrees/ws-0512-public-snapshot-closeout-20261013
+  branch: codex/authentik-e2e-continue-after-harbor-fix-20261013
+  worktree_path: .worktrees/authentik-e2e-closeout-20261013
   doc: docs/workstreams/ws-0512-authentik-consumer-e2e.md
   canonical_truth:
     changelog_entry: Verify and repair Authentik sign-in paths across active platform
@@ -251,6 +251,8 @@ workstreams:
   conflicts_with: []
   shared_surfaces:
   - .woodpecker.yml
+  - tests/test_woodpecker_workflow_contract.py
+  - docs/runbooks/configure-woodpecker.md
   - config/authentik/oauth-clients.yaml
   - config/authentik/scope-mappings.yaml
   - config/ansible-execution-scopes.yaml
@@ -395,7 +397,14 @@ workstreams:
   - tests/fixtures/ops-base-fixture.yml
   - docs/workstreams/adr-0491-authentik-keycloak-sunset.md
   - docs/workstreams/ws-0512-authentik-consumer-e2e.md
+  - docs/workstreams/ws-0525-mainline-release-scratchpad-backfill.md
+  - changelog.md
+  - README.md
+  - docs/status/history/merged-workstreams.md
   - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
+  - workstreams/active/ws-0525-fleet-build-broker-pki-renewal.yaml
+  - workstreams/active/ws-0526-tailscale-proxy-and-openipmi-hardening.yaml
+  - workstreams/active/ws-0527-nginx-edge-logrotate.yaml
   - docs/adr/.index.yaml
   - docs/adr/index/**
   - scripts/generate_adr_index.py
@@ -422,14 +431,26 @@ workstreams:
   - receipts/image-scans/2026-10-01-authentik-runtime.json
   - receipts/image-scans/2026-10-11-authentik-runtime.json
   - receipts/image-scans/2026-10-13-authentik-runtime.json
+  - receipts/image-scans/2026-10-13-outline-runtime.json
+  - receipts/image-scans/2026-10-13-glitchtip-runtime.json
+  - receipts/image-scans/2026-10-13-minio-runtime.json
   - receipts/cve/09782fe56675-20261001T100019Z.grype.json
   - receipts/cve/09782fe56675-20261011T100042Z.grype.json
   - receipts/cve/09782fe56675-20261013T121937Z.grype.json
+  - receipts/cve/8ea6637e09f3-20261013T133652Z.grype.json
+  - receipts/cve/826337215a97-20261013T133656Z.grype.json
+  - receipts/cve/f6efb212cad3-20261013T133658Z.grype.json
   - receipts/sbom/09782fe56675.cdx.json
+  - receipts/sbom/8ea6637e09f3.cdx.json
+  - receipts/sbom/826337215a97.cdx.json
+  - receipts/sbom/f6efb212cad3.cdx.json
   - receipts/security-reports/20261011T082609Z.json
   - receipts/security-reports/20261013T083129Z.json
   - scripts/vulnerability_budget.py
   - tests/test_vulnerability_budget.py
+  - scripts/upgrade_container_image.py
+  - tests/test_upgrade_container_image.py
+  - tests/test_sbom_scanner.py
   - scripts/audit_sanitization_coverage.py
   - tests/test_audit_sanitization_coverage.py
   - config/lynis-suppressions.json
@@ -680,6 +701,7 @@ workstreams:
     - id: authentik_mainline_live_apply_evidence
       paths:
       - README.md
+      - docs/status/history/merged-workstreams.md
       - versions/stack.yaml
       - docs/release-notes/index/README.md
       - docs/status/history/live-apply-evidence.md
@@ -776,6 +798,8 @@ workstreams:
     - id: authentik_ci_workflow
       paths:
       - .woodpecker.yml
+      - tests/test_woodpecker_workflow_contract.py
+      - docs/runbooks/configure-woodpecker.md
       mode: shared_contract
       contract: woodpecker-workflow-v1
     - id: authentik_consumer_workstream
@@ -789,6 +813,20 @@ workstreams:
       - workstreams.yaml
       mode: shared_contract
       contract: workstream-registry-v1
+    - id: mainline_release_scratchpad_backfill
+      paths:
+      - changelog.md
+      - docs/workstreams/ws-0525-mainline-release-scratchpad-backfill.md
+      - workstreams/active/ws-0525-fleet-build-broker-pki-renewal.yaml
+      - workstreams/active/ws-0526-tailscale-proxy-and-openipmi-hardening.yaml
+      - workstreams/active/ws-0527-nginx-edge-logrotate.yaml
+      mode: shared_contract
+      contract: release-truth-v1
+    - id: generated_mainline_workstream_summary
+      paths:
+      - README.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
     - id: generated_adr_index
       paths:
       - docs/adr/.index.yaml
@@ -819,6 +857,9 @@ workstreams:
       - receipts/image-scans/2026-10-01-authentik-runtime.json
       - receipts/image-scans/2026-10-11-authentik-runtime.json
       - receipts/image-scans/2026-10-13-authentik-runtime.json
+      - receipts/image-scans/2026-10-13-outline-runtime.json
+      - receipts/image-scans/2026-10-13-glitchtip-runtime.json
+      - receipts/image-scans/2026-10-13-minio-runtime.json
       - receipts/image-scans/2026-10-11-librechat-runtime.json
       - receipts/image-scans/2026-10-12-patched-shared-valkey-runtime-187679e3bd40.json
       - receipts/cve/89b0008e610e-20261011T090357Z.grype.json
@@ -826,12 +867,21 @@ workstreams:
       - receipts/cve/09782fe56675-20261001T100019Z.grype.json
       - receipts/cve/09782fe56675-20261011T100042Z.grype.json
       - receipts/cve/09782fe56675-20261013T121937Z.grype.json
+      - receipts/cve/8ea6637e09f3-20261013T133652Z.grype.json
+      - receipts/cve/826337215a97-20261013T133656Z.grype.json
+      - receipts/cve/f6efb212cad3-20261013T133658Z.grype.json
       - receipts/sbom/09782fe56675.cdx.json
+      - receipts/sbom/8ea6637e09f3.cdx.json
+      - receipts/sbom/826337215a97.cdx.json
+      - receipts/sbom/f6efb212cad3.cdx.json
       - receipts/sbom/187679e3bd40.cdx.json
       - receipts/cve/187679e3bd40-20261012T073926Z.grype.json
       - receipts/security-reports/20261011T082609Z.json
       - scripts/vulnerability_budget.py
       - tests/test_vulnerability_budget.py
+      - scripts/upgrade_container_image.py
+      - tests/test_upgrade_container_image.py
+      - tests/test_sbom_scanner.py
       - scripts/container_image_policy.py
       - tests/test_container_image_policy.py
       mode: shared_contract
@@ -860,8 +910,11 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/minio_runtime/meta/argument_specs.yml
       - catalog/services/minio/service.yaml
       - scripts/build_patched_images.py
+      - scripts/upgrade_container_image.py
       - scripts/remote_exec.sh
       - tests/test_patched_runtime_images.py
+      - tests/test_upgrade_container_image.py
+      - tests/test_sbom_scanner.py
       - tests/test_remote_exec.py
       - tests/test_harbor_runtime_role.py
       - tests/test_minio_runtime_role.py
@@ -1331,6 +1384,10 @@ workstreams:
   - id: t6
     title: Keep private Tailscale policy validation compatible with sanitized ServerClaw
       CI
+    status: completed
+  - id: t7
+    title: Refresh pinned Outline, GlitchTip, and MinIO scan evidence without extending
+      exceptions
     status: completed
 - id: ws-0498-https-tls-test-baseline
   adr: 0491
@@ -8686,6 +8743,100 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 27265749-5306-4790-b09c-4a056a18e089
+- id: ws-0527-nginx-edge-logrotate
+  adr: '0174'
+  title: Install logrotate with public-edge NGINX packages
+  status: merged
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: main
+  worktree_path: .
+  doc: docs/workstreams/ws-0525-mainline-release-scratchpad-backfill.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+  - tests/test_nginx_edge_publication_role.py
+  - changelog.md
+  - workstreams.yaml
+  canonical_truth:
+    changelog_entry: 'Install `logrotate` with the public edge nginx packages: nginx-lv3
+      had no logrotate at all, so `access.log` grew to 5.2 GB without ever rotating
+      (first rotation done live on 2026-10-13).'
+    release_bump: patch
+    included_in_repo_version: null
+  context: Retrospective metadata backfill for merged commit a667dc3fe on main. The
+    source branch was not recorded in the commit history. The commit reports that
+    the first rotation ran live; this workstream record does not claim that the complete
+    platform workstream was applied.
+  tasks:
+  - id: t1
+    title: Backfill the merged edge-log rotation change into canonical release metadata
+    status: completed
+- id: ws-0526-tailscale-proxy-and-openipmi-hardening
+  adr: '0174'
+  title: Clear stale Tailscale proxy failures and mask unused OpenIPMI
+  status: merged
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: main
+  worktree_path: .
+  doc: docs/workstreams/ws-0525-mainline-release-scratchpad-backfill.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/**
+  - packer/scripts/base-hardening.sh
+  - tests/test_proxmox_tailscale_proxy_role.py
+  - changelog.md
+  - workstreams.yaml
+  canonical_truth:
+    changelog_entry: Clear stale `failed` state on socket-activated Tailscale proxy
+      services after the role runs, and mask `openipmi` in the VM base template.
+    release_bump: patch
+    included_in_repo_version: null
+  context: 'Retrospective metadata backfill for merged commit 59ae3dbe2 (PR #336),
+    source branch fleet/hardening-2026-10-13. The original source worktree was not
+    retained. No live deployment is claimed by this workstream record.'
+  tasks:
+  - id: t1
+    title: Backfill the merged proxy and VM-hardening fixes into canonical release
+      metadata
+    status: completed
+- id: ws-0525-fleet-build-broker-pki-renewal
+  adr: '0174'
+  title: Repair fleet build-broker PKI renewal validation
+  status: merged
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: main
+  worktree_path: .
+  doc: docs/workstreams/ws-0525-mainline-release-scratchpad-backfill.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_pki_handoff/**
+  - tests/test_fleet_build_broker_pki_handoff.py
+  - changelog.md
+  - workstreams.yaml
+  canonical_truth:
+    changelog_entry: 'Fix the Fleet build broker PKI renewal, which has failed every
+      hour since 2026-10-05: verify the step-ca server leaf with its intermediate
+      (the root alone cannot build the chain) and issue client leaves from a clientAuth-only
+      template instead of the `--key-usage` flags that step 0.30 removed. Add regression
+      tests that use a root, intermediate and leaf like step-ca does.'
+    release_bump: patch
+    included_in_repo_version: null
+  context: 'Retrospective metadata backfill for merged commit 59ae3dbe2 (PR #336),
+    source branch fleet/hardening-2026-10-13. The original source worktree was not
+    retained. No live deployment is claimed by this workstream record.'
+  tasks:
+  - id: t1
+    title: Backfill the merged PKI fix into canonical release metadata
+    status: completed
 - id: ws-0510-gitea-authentik-oidc-e2e
   adr: '0143'
   title: Enable least-privilege Gitea Authentik OIDC and browser E2E verification

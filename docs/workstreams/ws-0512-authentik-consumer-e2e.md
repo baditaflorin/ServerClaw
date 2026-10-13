@@ -3,8 +3,8 @@
 - ADR: 0491
 - Title: Audit and repair live Authentik consumer sign-in paths end to end
 - Status: in progress; production applies remain security-gated
-- Branch: `codex/authentik-closeout-20261013`
-- Worktree: `.worktrees/ws-0512-public-snapshot-closeout-20261013`
+- Branch: `codex/authentik-e2e-continue-after-harbor-fix-20261013`
+- Worktree: `.worktrees/authentik-e2e-closeout-20261013`
 - Owner: Codex
 - Depends on: `adr-0491-authentik-keycloak-sunset-2026-08-30`, `ws-0510-gitea-authentik-oidc-e2e`
 
@@ -225,10 +225,34 @@ publication run.
 
 The Harbor project/robot reconciliation and source recipes are code only at
 this checkpoint. Outline, GlitchTip, and MinIO candidates have not yet been
-built or scanned at their resulting digests, and no runtime image was deployed.
-Do not mark those image gates cleared until each pushed immutable digest has a
-passing scan; do not deploy until the merged catalog and exact receipt are in
-place.
+scanned at their resulting digests, and no runtime image was deployed. Do not
+mark those image gates cleared until each pushed immutable digest has a passing
+scan; do not deploy until the merged catalog and exact receipt are in place.
+
+### Patched-image push regression — 2026-10-13
+
+The first retry reached the final Outline image export on the configured
+remote BuildKit host, but Harbor rejected the push with HTTP 401 during the
+registry blob check. Inspection found that `build_remote.sh` logged in using a
+temporary Docker config, then invoked Buildx without selecting that config.
+The login and push therefore used different credential stores. The build
+script now exports the temporary `DOCKER_CONFIG` for the lifetime of the
+remote build, and a focused test guards that Buildx sees the same isolated
+Harbor login config. The patched-image test module passes (11 tests), shell
+syntax validation passes, and `git diff --check` is clean.
+
+A fresh read-only check of the configured build guest first showed 4.4 GiB
+available RAM, 2.7 GiB swap in use, a load average around 25, and elevated
+memory and I/O pressure. A later sample worsened to 3.4 GiB available, 3.3
+GiB swap in use, load average 48.5, and 10-second PSI of 9% memory-some / 4.5%
+memory-full and 19% I/O-some / 6.4% I/O-full. The Proxmox parent had 13 GiB
+available RAM and zero memory or I/O PSI; active Go format/build/test jobs were
+visible on the guest. No second image build was started. Recheck sustained
+builder headroom before retrying. Harbor granted the publisher a scoped push
+token and accepted the beginning of an empty upload, but the Buildx retry
+remains the definitive proof of the repaired auth handoff. No complete
+candidate digest was pushed, scanned, pinned in the catalog, or deployed; the
+GlitchTip signup setting has not been changed live.
 
 ### Risk-status and repository-truth correction — 2026-10-13
 
@@ -1034,3 +1058,123 @@ This closes the API Gateway/Typesense portion only. Outline and GlitchTip remain
 blocked behind unresolved runtime-image security and build-capacity gates;
 restore rehearsal, Neko IaC mapping, and full Keycloak retirement also remain
 open as recorded above.
+
+### Fresh consumer retest and builder capacity — 2026-10-13
+
+Repeated the six browser checks in new temporary Firefox profiles with strict
+TLS validation enabled. Gitea and Harbor completed Authentik login as the
+non-admin test identity. Grafana completed login with organization role
+`Viewer` and no server-admin privilege. LibreChat completed its Authentik
+callback and authenticated session. Outline still fails the Engine.IO
+WebSocket handshake; GlitchTip still rejects first-login provisioning with
+`signup_closed`. These results confirm the four passing consumers remain
+healthy, but do not close the two application-specific defects.
+
+The configured remote image builder is reachable through its strict-host-key
+bastion route. A read-only capacity check reports 5.0 GiB guest memory
+available, 2.3/4.0 GiB swap used, and 47 GiB free disk. Its Proxmox parent has
+4.5 GiB available and 4.0/4.0 GiB swap used. Because prior source builds were
+killed by the host OOM killer and the parent remains nearly out of memory, no
+new image build was started. A separate Buildx pool was not repurposed for this
+repository; it is not configured here as an approved image-build worker. No
+production runtime or configuration was changed during these
+retests.
+
+The first direct scan-refresh attempt also found that
+`config/sbom-scanner.json` still pointed at the staging cache address. The
+production builder's read-only probes returned HTTP 200 from all four current
+cache mirrors, confirming the production route declared by the topology. The
+scanner default now matches that route, and its unit fixtures use a generic
+cache hostname; a regression test covers the controller-local proxy override.
+Because this controller has no direct private-cache route, the refresh used a
+temporary strict-host-key SSH forward for the one required registry port. The
+local listener was closed after the scan. No public-registry fallback was used.
+
+Grype 0.111.0 and the latest available vulnerability database rescanned the
+exact pinned digests. Outline reports 23 Critical / 303 High, GlitchTip 23
+Critical / 235 High, and MinIO 38 Critical / 201 High; all three report zero
+blocking findings with a known fix. The raw SBOM/CVE evidence is recorded under
+`receipts/sbom/` and `receipts/cve/`. The three catalog summary receipts are:
+
+- `receipts/image-scans/2026-10-13-outline-runtime.json`
+- `receipts/image-scans/2026-10-13-glitchtip-runtime.json`
+- `receipts/image-scans/2026-10-13-minio-runtime.json`
+
+The catalog now points at those exact scan summaries, marks all three images
+`blocked`, and removes their expired exceptions. The scan-only refresh path now
+records blocked evidence without changing image pins or implicitly renewing an
+exception. No image apply or NATS/ntfy alert was run.
+
+The next safe closure step is to obtain adequate capacity on the configured
+builder (or explicitly configure and govern a repository-specific alternative),
+build and scan the exact Outline and GlitchTip candidates, and only then apply
+their already-managed runtime settings and repeat these browser checks. The
+current pinned images remain explicitly blocked. The Authentik image gate,
+restore rehearsal, Neko source mapping, and residual Keycloak retirement audit
+remain separate open gates.
+
+### Repository release-bookkeeping gate — 2026-10-13
+
+The first remote pre-push run passed all policy lanes except `generated-docs`:
+three valid post-0.179.51 changelog entries from already-merged mainline commits
+had no workstream metadata, so the canonical generator considered them stale.
+Rather than delete those notes, this branch adds merged-but-unreleased
+workstream records `ws-0525` through `ws-0527`, regenerates the changelog and
+merged-workstream status ledger, and keeps them tracked until the next version
+cut. The canonical-truth, generated-doc, workstream-surface, and agent-standard
+checks now pass locally. This bookkeeping repair does not change `VERSION`,
+`versions/stack.yaml`, or live services.
+
+### Post-merge Harbor fix and current build route — 2026-10-13
+
+PR #363 merged to private `main` at `6982c649f6c285f9ca072b5dc7f230b242a3b2f1`.
+Both Woodpecker checks passed; the repository pre-push gate also passed after
+its permitted local fallback retried Ansible lint/syntax when Ansible Galaxy
+returned HTTP 502. The merge fixed the isolated Harbor-auth handoff used by
+Buildx. The first corrected retry then exposed a second interaction: the fresh
+Docker config also hid the selected remote Buildx instance and fell back to the
+Docker-default builder. I interrupted that attempt after Buildx history showed
+an error at 1m51s; it produced no completed candidate digest, scan, catalog
+update, or live apply. A read-only probe confirmed that copying only the
+original `buildx/` metadata into the isolated auth config preserves the
+selected `example-cache` remote builder without copying its unrelated registry
+credentials. The continuation branch now does that, with regression coverage;
+one final build and scan is still needed to prove both auth and cache selection
+end to end.
+
+The current clean ServerClaw publication dry-run used that exact private-main
+source, passed the sanitization coverage and leak checks, and regenerated the
+public derived artifacts. Protected-branch publication PR #74 is open; its
+Woodpecker push and PR checks are pending because the shared `repo=*` agent is
+stopped. No direct push to public `main` was made.
+
+Read-only Proxmox evidence shows VMID 130 (`docker-build-lv3`) is running with
+about 8.1 GiB of its 12 GiB maximum allocated and high CPU use. Its current
+Proxmox config reports 20 cores and an 8 GiB balloon minimum, while the
+committed inventory declares 12 cores and the managed guest role sets balloon
+to zero. This drift was observed but not changed. The parent host has roughly
+12 GiB available and no memory or I/O PSI; the guest's SSH route through the
+strict bastion timed out during the SSH banner exchange. Earlier in the same
+session the guest reported all swap in use and severe I/O pressure. Do not
+retry image builds or alter guest hardware until guest access and sustained
+capacity recover; reconcile the observed hardware drift through the governed
+Proxmox path rather than an ad-hoc VM change.
+
+Next: complete the protected public PR after its checks pass; regain a stable
+read-only SSH/capacity sample from the configured builder; then retry and scan
+Outline, GlitchTip, and the MinIO dependency candidate at immutable Harbor
+digests. Only apply consumer runtime settings after each applicable image gate
+passes, then rerun the fresh browser E2E checks. Restore rehearsal, Neko IaC
+mapping, the Authentik image gate, and residual Keycloak retirement remain
+separate outstanding gates.
+
+### CI webhook filter repair — 2026-10-13
+
+After PR #364 and ServerClaw PR #74 were pushed, the Woodpecker server recorded
+`when filters filtered out all steps` for webhooks from both repositories.
+GitHub therefore kept their push and pull-request status contexts pending; the
+already-running build agent had no job to execute. The workflow-level event
+gate was moved onto the primary validation step as a documented step-level
+event list, and a regression test now guards that shape. No agent was left
+running on the runtime VM. The new push/PR events still need to prove that the
+server creates and completes pipelines before either PR is merged.

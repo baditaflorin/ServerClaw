@@ -40,6 +40,9 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0179` | Service redundancy tier matrix | `merged` | [adr-0179-service-redundancy-tier-matrix.md](../../workstreams/adr-0179-service-redundancy-tier-matrix.md) |
 | `0178` | Dependency wave manifests for parallel apply | `merged` | [adr-0178-dependency-wave-manifests.md](../../workstreams/adr-0178-dependency-wave-manifests.md) |
 | `0176` | Inventory sharding and host-scoped Ansible execution | `live_applied` | [adr-0176-inventory-sharding.md](../../workstreams/adr-0176-inventory-sharding.md) |
+| `0174` | Install logrotate with public-edge NGINX packages | `merged` | [ws-0525-mainline-release-scratchpad-backfill.md](../../workstreams/ws-0525-mainline-release-scratchpad-backfill.md) |
+| `0174` | Clear stale Tailscale proxy failures and mask unused OpenIPMI | `merged` | [ws-0525-mainline-release-scratchpad-backfill.md](../../workstreams/ws-0525-mainline-release-scratchpad-backfill.md) |
+| `0174` | Repair fleet build-broker PKI renewal validation | `merged` | [ws-0525-mainline-release-scratchpad-backfill.md](../../workstreams/ws-0525-mainline-release-scratchpad-backfill.md) |
 | `0173` | Workstream surface ownership manifest | `live_applied` | [adr-0173-workstream-surface-ownership-manifest.md](../../workstreams/adr-0173-workstream-surface-ownership-manifest.md) |
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](../../workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 | `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](../../workstreams/adr-0171-controlled-fault-injection.md) |

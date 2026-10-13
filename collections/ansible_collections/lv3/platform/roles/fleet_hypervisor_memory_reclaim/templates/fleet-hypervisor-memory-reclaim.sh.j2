@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Managed by lv3.platform.fleet_hypervisor_memory_reclaim.
+#
+# Why: guests are ballooned (pvestatd auto-ballooning) and QEMU backs guest RAM with transparent huge pages. When the balloon
+# driver hands back scattered 4 KiB pages, the host splits the huge page lazily: the unmapped part is queued for a deferred
+# split and stays allocated, counted neither as free nor as MemAvailable, until memory pressure runs the shrinkers. On pve-0mcp
+# this hid ~13 GB: MemAvailable read 3% while a single `echo 2 > /proc/sys/vm/drop_caches` (which runs every shrinker, including
+# the THP deferred-split one) moved MemFree from 2.2 GB to 15.3 GB with no swap activity and no guest impact.
+# This script runs that same shrinker pass whenever MemAvailable drops under the threshold. It touches no guest and no file data
+# (drop_caches=2 only drops reclaimable slab such as dentries and inodes).
+set -euo pipefail
+
+threshold={{ fleet_hypervisor_memory_reclaim_threshold_percent }}
+meminfo() { awk -v key="$1:" '$1 == key {print $2}' /proc/meminfo; }
+
+total_kb="$(meminfo MemTotal)"
+avail_before_kb="$(meminfo MemAvailable)"
+free_before_kb="$(meminfo MemFree)"
+percent=$(( avail_before_kb * 100 / total_kb ))
+reclaimed_kb=0
+ran=0
+if (( percent < threshold )); then
+  echo 2 > /proc/sys/vm/drop_caches
+  ran=1
+  sleep 3
+  free_after_kb="$(meminfo MemFree)"
+  reclaimed_kb=$(( free_after_kb > free_before_kb ? free_after_kb - free_before_kb : 0 ))
+fi
+echo "fleet-hypervisor-memory-reclaim: MemAvailable ${percent}% (threshold ${threshold}%), ran=${ran}, MemFree gained ${reclaimed_kb} kB"
+{% if fleet_hypervisor_memory_reclaim_textfile_dir | length > 0 %}
+
+tmp="$(mktemp "{{ fleet_hypervisor_memory_reclaim_textfile_dir }}/.fleet_hypervisor_memory_reclaim.XXXXXX")"
+cat > "$tmp" <<METRICS
+# HELP fleet_hypervisor_memory_reclaim_last_run_timestamp_seconds Unix time of the last check.
+# TYPE fleet_hypervisor_memory_reclaim_last_run_timestamp_seconds gauge
+fleet_hypervisor_memory_reclaim_last_run_timestamp_seconds $(date +%s)
+# HELP fleet_hypervisor_memory_reclaim_last_ran 1 when the last check was under the threshold and ran the shrinkers.
+# TYPE fleet_hypervisor_memory_reclaim_last_ran gauge
+fleet_hypervisor_memory_reclaim_last_ran ${ran}
+# HELP fleet_hypervisor_memory_reclaim_last_freed_bytes MemFree gained by the last run.
+# TYPE fleet_hypervisor_memory_reclaim_last_freed_bytes gauge
+fleet_hypervisor_memory_reclaim_last_freed_bytes $(( reclaimed_kb * 1024 ))
+METRICS
+chmod 0644 "$tmp"
+mv -f "$tmp" "{{ fleet_hypervisor_memory_reclaim_textfile_dir }}/fleet_hypervisor_memory_reclaim.prom"
+{% endif %}

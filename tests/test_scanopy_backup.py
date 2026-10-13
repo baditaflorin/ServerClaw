@@ -84,6 +84,18 @@ def test_a_good_dump_is_kept_with_private_permissions_and_reported(backup, monke
     assert m["scanopy_backup_last_success_timestamp_seconds"] > 1_700_000_000
 
 
+def test_the_metrics_file_is_readable_by_node_exporter_even_under_a_strict_umask(backup, monkeypatch) -> None:
+    # The unit runs with UMask=0077; a root-only .prom file is invisible to node_exporter and ScanopyBackupMetricsAbsent fires.
+    old = os.umask(0o077)
+    try:
+        serve(backup, monkeypatch, dump_text())
+        assert run(backup, monkeypatch) == 0
+    finally:
+        os.umask(old)
+
+    assert (Path(backup.CONF["textfile"]).stat().st_mode & 0o777) == 0o644
+
+
 def test_only_the_newest_files_are_kept(backup, monkeypatch) -> None:
     monkeypatch.setitem(backup.CONF, "keep", 3)
     serve(backup, monkeypatch, dump_text())

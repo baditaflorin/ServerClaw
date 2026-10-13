@@ -35,11 +35,20 @@ route:
       continue: true
 # {% endif %}
 
+    # Synthetic load test of the ntfy path (docs/runbooks/fleet-observability.md): a group of hundreds of
+    # AlertmanagerLoadTest alerts (severity "loadtest", never critical|warning) must be delivered as ONE short
+    # ntfy message to the warning topic (no 413).
+    - matchers: ['alertname="AlertmanagerLoadTest"']
+      receiver: ntfy-warning
+      group_by: ['alertname']
+      group_wait: 5s
+      group_interval: 1m
+      repeat_interval: 1h
     - matchers: ['severity="info"']
       receiver: "null"
     # Storm collapse: per-service alert families fan out into one alert per service.
     # Group them by job+severity so a fleet-wide failure becomes ONE notification.
-    - matchers: ['alertname=~"HTTPSProbeFailed_.*|SLOFastBurn_.*|SLOBudgetCritical_.*|SLOSlowBurn_.*|TLSCertificateExpiring(Warning|Critical)_.*"']
+    - matchers: ['alertname=~"FleetServiceEdgeDown|HTTPSProbeFailed_.*|SLOFastBurn_.*|SLOBudgetCritical_.*|SLOSlowBurn_.*|TLSCertificateExpiring(Warning|Critical)_.*"']
       group_by: ['cluster', 'job', 'severity']
       group_wait: 2m
       group_interval: 15m
@@ -74,6 +83,10 @@ inhibit_rules:
   - source_matchers: ['alertname="FleetEdgeManyDown"']
     target_matchers: ['alertname=~"FleetServiceEdgeDown|HTTPSProbeFailed_.*"']
     equal: ['cluster']
+  # Hypervisor memory: the critical (<3% available) alert suppresses the warning (<5%) for the same hypervisor.
+  - source_matchers: ['alertname="FleetHypervisorMemAvailableCritical"']
+    target_matchers: ['alertname="FleetHypervisorMemAvailableLow"']
+    equal: ['instance']
   # Proxmox exporter/host-metrics unreachable => "stale/missing metric" alerts are noise.
   - source_matchers: ['alertname=~"PveExporterUnavailable|PveHostNodeExporterUnavailable"']
     target_matchers: ['alertname=~"PveHostHealthMetricsStale|PveBackupFreshnessLow|ProxmoxHostCpuPackageTemperatureSensorMissing"']
@@ -91,6 +104,7 @@ receivers:
     webhook_configs:
       - url: '{{ alertmanager_runtime_ntfy_base_url }}/{{ alertmanager_runtime_ntfy_topics.critical }}?{{ alertmanager_runtime_ntfy_query }}&p=5&tags=rotating_light%2Cwarning'
         send_resolved: true
+        max_alerts: {{ alertmanager_runtime_ntfy_max_alerts }}
         http_config:
           basic_auth:
             username: "{{ alertmanager_runtime_ntfy_username }}"
@@ -100,6 +114,7 @@ receivers:
     webhook_configs:
       - url: '{{ alertmanager_runtime_ntfy_base_url }}/{{ alertmanager_runtime_ntfy_topics.warning }}?{{ alertmanager_runtime_ntfy_query }}&p=3&tags=warning'
         send_resolved: false
+        max_alerts: {{ alertmanager_runtime_ntfy_max_alerts }}
         http_config:
           basic_auth:
             username: "{{ alertmanager_runtime_ntfy_username }}"
@@ -109,6 +124,7 @@ receivers:
     webhook_configs:
       - url: '{{ alertmanager_runtime_ntfy_base_url }}/{{ alertmanager_runtime_ntfy_topics.watchdog }}?{{ alertmanager_runtime_ntfy_query }}&p=1&tags=heartbeat'
         send_resolved: false
+        max_alerts: {{ alertmanager_runtime_ntfy_max_alerts }}
         http_config:
           basic_auth:
             username: "{{ alertmanager_runtime_ntfy_username }}"

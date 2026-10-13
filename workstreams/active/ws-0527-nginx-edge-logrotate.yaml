@@ -1,0 +1,31 @@
+id: ws-0527-nginx-edge-logrotate
+adr: "0174"
+title: Install logrotate with public-edge NGINX packages
+status: merged
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: main
+worktree_path: .
+doc: docs/workstreams/ws-0525-mainline-release-scratchpad-backfill.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+  - tests/test_nginx_edge_publication_role.py
+  - changelog.md
+  - workstreams.yaml
+canonical_truth:
+  changelog_entry: >-
+    Install `logrotate` with the public edge nginx packages: nginx-lv3 had no logrotate at all, so `access.log` grew to 5.2 GB without ever rotating (first rotation done live on 2026-10-13).
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  Retrospective metadata backfill for merged commit a667dc3fe on main. The
+  source branch was not recorded in the commit history. The commit reports that
+  the first rotation ran live; this workstream record does not claim that the
+  complete platform workstream was applied.
+tasks:
+  - id: t1
+    title: Backfill the merged edge-log rotation change into canonical release metadata
+    status: completed

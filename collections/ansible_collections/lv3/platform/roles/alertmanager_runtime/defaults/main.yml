@@ -30,13 +30,23 @@ alertmanager_runtime_ntfy_topics:
   critical: platform-monitoring-critical
   warning: platform-monitoring-warning
   watchdog: platform-monitoring-watchdog
-# URL-encoded ntfy templates (tpl=yes). Decoded title:
-#   {{.status|upper}} ({{len .alerts}}): {{(index .alerts 0).labels.alertname}}{{if gt (len .alerts) 1}} +{{sub (len .alerts) 1}} more{{end}}
-# Decoded message: one "- alertname [host]: summary" line per alert, capped at 12, then "...and N more".
+# URL-encoded ntfy templates (tpl=yes). ntfy implements only a subset of the sprig functions ("int" is not defined and makes ntfy
+# answer HTTP 400), so the total is built with `add`. The receivers send at most alertmanager_runtime_ntfy_max_alerts alerts and
+# report the rest in the payload's truncatedAlerts field, which both templates read.
+# Decoded title (total = alerts in the payload + truncatedAlerts; alertname capped at 60 characters):
+#   {{$t := len .alerts}}{{with .truncatedAlerts}}{{$t = add $t .}}{{end}}{{.status|upper}} ({{$t}}): {{(index .alerts 0).labels.alertname | trunc 60}}{{if gt $t 1}} +{{sub $t 1}} more{{end}}
+# Decoded message: one "- alertname [host]: summary" line per alert in the payload (summary capped at 160 characters), then
+# "...and N more (full list in Alertmanager)" when Alertmanager truncated the group. Verified 2026-10-13 against ntfy v2.21.0
+# with a synthetic 300-alert AlertmanagerLoadTest group (one message, no 413).
 alertmanager_runtime_ntfy_title_query: >-
-  %7B%7B.status%7Cupper%7D%7D%20%28%7B%7Blen%20.alerts%7D%7D%29%3A%20%7B%7B%28index%20.alerts%200%29.labels.alertname%7D%7D%7B%7Bif%20gt%20%28len%20.alerts%29%201%7D%7D%20%2B%7B%7Bsub%20%28len%20.alerts%29%201%7D%7D%20more%7B%7Bend%7D%7D
+  %7B%7B%24t%20%3A%3D%20len%20.alerts%7D%7D%7B%7Bwith%20.truncatedAlerts%7D%7D%7B%7B%24t%20%3D%20add%20%24t%20.%7D%7D%7B%7Bend%7D%7D%7B%7B.status%7Cupper%7D%7D%20%28%7B%7B%24t%7D%7D%29%3A%20%7B%7B%28index%20.alerts%200%29.labels.alertname%20%7C%20trunc%2060%7D%7D%7B%7Bif%20gt%20%24t%201%7D%7D%20%2B%7B%7Bsub%20%24t%201%7D%7D%20more%7B%7Bend%7D%7D
 alertmanager_runtime_ntfy_message_query: >-
-  %7B%7Brange%20%24i%2C%20%24a%20%3A%3D%20.alerts%7D%7D%7B%7Bif%20lt%20%24i%2012%7D%7D-%20%7B%7B%24a.labels.alertname%7D%7D%7B%7Bwith%20%24a.labels.host%7D%7D%20%5B%7B%7B.%7D%7D%5D%7B%7Bend%7D%7D%7B%7Bwith%20%24a.annotations.summary%7D%7D%3A%20%7B%7B.%7D%7D%7B%7Bend%7D%7D%7B%7B%22%5Cn%22%7D%7D%7B%7Bend%7D%7D%7B%7Bend%7D%7D%7B%7Bif%20gt%20%28len%20.alerts%29%2012%7D%7D...and%20%7B%7Bsub%20%28len%20.alerts%29%2012%7D%7D%20more%20%28full%20list%20in%20Alertmanager%29%7B%7Bend%7D%7D
+  %7B%7Brange%20.alerts%7D%7D-%20%7B%7B.labels.alertname%20%7C%20trunc%2060%7D%7D%7B%7Bwith%20.labels.host%7D%7D%20%5B%7B%7B.%20%7C%20trunc%2040%7D%7D%5D%7B%7Bend%7D%7D%7B%7Bwith%20.annotations.summary%7D%7D%3A%20%7B%7B.%20%7C%20trunc%20160%7D%7D%7B%7Bend%7D%7D%7B%7B%22%5Cn%22%7D%7D%7B%7Bend%7D%7D%7B%7Bwith%20.truncatedAlerts%7D%7D...and%20%7B%7B.%7D%7D%20more%20%28full%20list%20in%20Alertmanager%29%7B%7Bend%7D%7D
+# Most alerts one ntfy notification may carry. The receiver posts Alertmanager's whole webhook JSON to ntfy, which rejects a request
+# that is too large (HTTP 413, an unrecoverable error: the notification is dropped). During the 2026-10-13 reboot incident one
+# critical group held 287 alerts and no critical notification got through for over an hour. One alert is 0.4-1.3 KB of JSON, so
+# 5 stays well below ntfy's default 8 KB request limit; the rest are counted in the payload's truncatedAlerts field.
+alertmanager_runtime_ntfy_max_alerts: 5
 alertmanager_runtime_ntfy_query: "tpl=yes&t={{ alertmanager_runtime_ntfy_title_query }}&m={{ alertmanager_runtime_ntfy_message_query }}"
 # fleet-triage (baditaflorin/go-fleet-triage): SHADOW-MODE, read-only alert triage on the Builder (CT108). An ADDITIONAL
 # receiver (continue: true) that never replaces the ntfy routes. Disabled unless a webhook URL is set (production sets

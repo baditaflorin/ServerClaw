@@ -1,0 +1,26 @@
+services:
+  caddy:
+    image: caddy@sha256:13b7fbadd017b042956fddbceedeeea12bb1e560534f9b3df281269dbcc61813
+    container_name: openobserve-caddy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "5"
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+    volumes:
+      - /opt/openobserve/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - observability
+volumes:
+  caddy_data:
+  caddy_config:
+networks:
+  observability:
+    external: true
+    name: openobserve_observability

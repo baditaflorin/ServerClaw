@@ -245,7 +245,16 @@ def _verify_leaf_lifetime(certificate: Path, now: int) -> int:
 
 def _verify_server_leaf(certificate: Path, private_key: Path, server: dict[str, Any], step_ca: dict[str, Any], now: int) -> int:
     _check_pair(certificate, private_key)
-    _run([OPENSSL, "verify", "-CAfile", step_ca["root_certificate_file"], str(certificate)])
+    # step-ca signs leaves with an intermediate, so the root alone cannot build the
+    # path ("unable to get local issuer certificate").  The intermediates arrive in
+    # the issued bundle (leaf first) and, if present, next to the root; they are
+    # passed as *untrusted*: they can only complete a chain that ends at the root,
+    # which stays the only trust anchor.
+    untrusted = ["-untrusted", str(certificate)]
+    intermediate = Path(step_ca["root_certificate_file"]).with_name("intermediate_ca.crt")
+    if intermediate.is_file():
+        untrusted += ["-untrusted", str(intermediate)]
+    _run([OPENSSL, "verify", "-CAfile", step_ca["root_certificate_file"], *untrusted, str(certificate)])
     san = _certificate_extension(certificate, "subjectAltName")
     _require(f"DNS:{BROKER_SERVER_DNS}" in san and f"IP Address:{server['ip_san']}" in san, "server certificate SAN contract failed")
     eku = _certificate_extension(certificate, "extendedKeyUsage")
@@ -434,15 +443,41 @@ def _issue_server(step_ca: dict[str, Any], server: dict[str, Any], certificate: 
     _run(argv)
 
 
+# Go-template delimiters, assembled at runtime so this file never contains a Jinja
+# delimiter that Ansible's template engine could try to expand.
+_GO_OPEN = "{" + "{"
+_GO_CLOSE = "}" + "}"
+
+
+def _client_leaf_template(extended_key_usage: str) -> str:
+    """step certificate template for a leaf with exactly digitalSignature and one EKU.
+
+    step 0.30 has no --key-usage/--ext-key-usage flags; the profile defaults would also
+    grant serverAuth, which the broker contract forbids ("clientAuth only").
+    """
+    return (
+        "{\n"
+        f'  "subject": {_GO_OPEN} toJson .Subject {_GO_CLOSE},\n'
+        f'  "sans": {_GO_OPEN} toJson .SANs {_GO_CLOSE},\n'
+        '  "keyUsage": ["digitalSignature"],\n'
+        f'  "extKeyUsage": [{json.dumps(extended_key_usage)}],\n'
+        '  "basicConstraints": {"isCA": false}\n'
+        "}\n"
+    )
+
+
 def _issue_client(
     step_ca: dict[str, Any], client: dict[str, Any], client_ca: dict[str, Any], certificate: Path, private_key: Path
 ) -> None:
+    template = certificate.parent / f"{client['id']}-leaf.tpl"
+    template.write_text(_client_leaf_template(client["extended_key_usage"]), encoding="utf-8")
+    os.chmod(template, 0o600)
     argv = [
         *step_ca["command"],
         "certificate",
         "create",
-        "--profile",
-        "leaf",
+        "--template",
+        str(template),
         "--kty",
         "EC",
         "--curve",
@@ -455,10 +490,10 @@ def _issue_client(
         client_ca["key_file"],
         "--san",
         client["spiffe_id"],
-        "--key-usage",
-        "digitalSignature",
-        "--ext-key-usage",
-        "clientAuth",
+        # The leaf key is written to a private temp file and handed straight to the
+        # writer; without these step would prompt for an encryption password.
+        "--no-password",
+        "--insecure",
         client["id"],
         str(certificate),
         str(private_key),

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -294,6 +295,39 @@ def test_a_fleet_that_cannot_be_listed_fails_the_run_and_withholds_the_success_t
     m = metrics(onboard)
     assert m['scanopy_onboard_fleet_list_ok{hypervisor="0mcp"}'] == 1 and m['scanopy_onboard_fleet_list_ok{hypervisor="0own"}'] == 0
     assert "scanopy_onboard_last_success_timestamp_seconds" not in m
+
+
+def test_a_single_ssh_timeout_while_listing_is_retried_once(onboard, monkeypatch) -> None:
+    write_config(onboard, fleets=[FLEET, FLEET2])
+    scanopy = FakeScanopy()
+    hv = FakeHypervisors(scanopy, {"0mcp": [], "0own": []})
+    real = hv.__call__
+    calls = {"0own": 0}
+
+    def flaky(fleet, remote_cmd, stdin=None, timeout=None):
+        if fleet["name"] == "0own" and remote_cmd == "list":
+            calls["0own"] += 1
+            if calls["0own"] == 1:
+                raise subprocess.TimeoutExpired("ssh", 40)
+        return real(fleet, remote_cmd, stdin, timeout)
+
+    monkeypatch.setattr(onboard, "call", scanopy)
+    monkeypatch.setattr(onboard, "ssh", flaky)
+    monkeypatch.setattr(sys, "argv", ["scanopy_onboard.py"])
+    with pytest.raises(SystemExit) as exit_info:
+        onboard.main()
+
+    assert exit_info.value.code == 0 and calls["0own"] == 2
+    assert metrics(onboard)['scanopy_onboard_fleet_list_ok{hypervisor="0own"}'] == 1
+
+
+def test_a_fleet_that_stays_down_after_the_retry_still_fails_the_run(onboard, monkeypatch) -> None:
+    write_config(onboard, fleets=[FLEET, FLEET2])
+    scanopy = FakeScanopy()
+    hv = FakeHypervisors(scanopy, {"0mcp": [], "0own": []})
+    hv.down.add("0own")
+
+    assert run(onboard, monkeypatch, scanopy, hv) == 1
 
 
 def test_failure_state_is_forgotten_when_the_guest_becomes_covered_or_disappears(onboard, monkeypatch) -> None:

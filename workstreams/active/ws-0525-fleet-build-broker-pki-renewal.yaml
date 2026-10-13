@@ -1,0 +1,30 @@
+id: ws-0525-fleet-build-broker-pki-renewal
+adr: "0174"
+title: Repair fleet build-broker PKI renewal validation
+status: merged
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: main
+worktree_path: .
+doc: docs/workstreams/ws-0525-mainline-release-scratchpad-backfill.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/fleet_build_broker_pki_handoff/**
+  - tests/test_fleet_build_broker_pki_handoff.py
+  - changelog.md
+  - workstreams.yaml
+canonical_truth:
+  changelog_entry: >-
+    Fix the Fleet build broker PKI renewal, which has failed every hour since 2026-10-05: verify the step-ca server leaf with its intermediate (the root alone cannot build the chain) and issue client leaves from a clientAuth-only template instead of the `--key-usage` flags that step 0.30 removed. Add regression tests that use a root, intermediate and leaf like step-ca does.
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  Retrospective metadata backfill for merged commit 59ae3dbe2 (PR #336), source
+  branch fleet/hardening-2026-10-13. The original source worktree was not retained.
+  No live deployment is claimed by this workstream record.
+tasks:
+  - id: t1
+    title: Backfill the merged PKI fix into canonical release metadata
+    status: completed

@@ -6,6 +6,15 @@ This runbook defines the repo-managed Woodpecker CI runtime for event-driven val
 
 Woodpecker is public on this platform at `ci.example.com`, but repository activation, secret management, and manual pipeline control remain repo-managed through the Gitea and Woodpecker APIs.
 
+## Trigger Filters
+
+Keep the main validation event filter on the `validate-woodpecker-contract`
+step, using a step-level `when` list for `manual`, `push`, and `pull_request`.
+Do not move this filter to the workflow root: the deployed server ignored push
+and pull-request webhooks with `when filters filtered out all steps`, leaving
+the GitHub checks pending even though an eligible validation step was defined.
+`tests/test_woodpecker_workflow_contract.py` guards this configuration shape.
+
 ## Canonical Surfaces
 
 - playbook: [playbooks/woodpecker.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/playbooks/woodpecker.yml)

@@ -1,0 +1,31 @@
+id: ws-0526-tailscale-proxy-and-openipmi-hardening
+adr: "0174"
+title: Clear stale Tailscale proxy failures and mask unused OpenIPMI
+status: merged
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: main
+worktree_path: .
+doc: docs/workstreams/ws-0525-mainline-release-scratchpad-backfill.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/**
+  - packer/scripts/base-hardening.sh
+  - tests/test_proxmox_tailscale_proxy_role.py
+  - changelog.md
+  - workstreams.yaml
+canonical_truth:
+  changelog_entry: >-
+    Clear stale `failed` state on socket-activated Tailscale proxy services after the role runs, and mask `openipmi` in the VM base template.
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  Retrospective metadata backfill for merged commit 59ae3dbe2 (PR #336), source
+  branch fleet/hardening-2026-10-13. The original source worktree was not retained.
+  No live deployment is claimed by this workstream record.
+tasks:
+  - id: t1
+    title: Backfill the merged proxy and VM-hardening fixes into canonical release metadata
+    status: completed

@@ -205,3 +205,13 @@ def test_role_removes_units_that_are_not_in_the_declared_proxy_catalog() -> None
     assert reset_task["changed_when"] is False
     assert remove_task["ansible.builtin.file"]["state"] == "absent"
     assert remove_task["notify"] == "Reload systemd"
+
+
+def test_role_clears_stale_failed_state_on_socket_activated_services() -> None:
+    tasks = load_tasks()
+    names = [task.get("name") for task in tasks]
+    reset = next(task for task in tasks if task.get("name", "").startswith("Clear stale failed state"))
+    assert reset["ansible.builtin.command"]["argv"][:2] == ["systemctl", "reset-failed"]
+    assert reset["failed_when"] is False and reset["changed_when"] is False
+    # It must run after the sockets are started, otherwise the failure it clears can come back.
+    assert names.index(reset["name"]) > names.index("Start Proxmox Tailscale proxy sockets when the listener is inactive")

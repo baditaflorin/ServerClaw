@@ -143,6 +143,7 @@ def test_production_render_static_jobs_are_exactly_the_reviewed_set() -> None:
         "otelcol-contrib",
         "loki-canary",
         "postgres-audit-alloy",
+        "alertmanager",
         "alertmanager-liveness",
         "alertmanager-readiness",
         "gitea-liveness",
@@ -240,7 +241,7 @@ def test_default_render_keeps_legacy_behaviour_for_other_deployments() -> None:
     assert "remote_write" not in config
     assert "node_exporter" not in jobs and "scanopy-blackbox" not in jobs and "public-edge-critical" not in jobs
     assert all("action" not in rule or rule["action"] != "drop" for rule in jobs["slo-blackbox"]["relabel_configs"])
-    fixed_jobs = 7  # prometheus, tempo, otelcol-contrib, loki-canary, postgres audit, slo-blackbox, https-tls-blackbox
+    fixed_jobs = 8  # prometheus, alertmanager, tempo, otelcol-contrib, loki-canary, postgres audit, slo-blackbox, https-tls-blackbox
     assert len(jobs) == fixed_jobs + expected_probe_jobs
 
 
@@ -374,6 +375,9 @@ def test_alertmanager_routes_to_ntfy_only_with_credentials_by_file() -> None:
     assert "/platform-monitoring-warning?" in receivers["ntfy-warning"]["webhook_configs"][0]["url"]
     assert "/platform-monitoring-watchdog?" in receivers["ntfy-watchdog"]["webhook_configs"][0]["url"]
     assert "&p=1&" in receivers["ntfy-watchdog"]["webhook_configs"][0]["url"]
+    # One group of 287 alerts made ntfy answer 413 on 2026-10-13 and the critical notification was dropped.
+    for name in ("ntfy-critical", "ntfy-warning", "ntfy-watchdog"):
+        assert receivers[name]["webhook_configs"][0]["max_alerts"] == 5, name
 
     by_receiver = {route["receiver"]: route for route in routes if "receiver" in route}
     assert by_receiver["ntfy-watchdog"]["repeat_interval"] == "6h"
@@ -383,7 +387,7 @@ def test_alertmanager_routes_to_ntfy_only_with_credentials_by_file() -> None:
     assert critical["receiver"] == "ntfy-critical" and critical["repeat_interval"] == "4h"
     assert warning["receiver"] == "ntfy-warning" and warning["group_wait"] == "5m"
     assert warning["group_interval"] == "1h" and warning["repeat_interval"] == "12h"
-    assert len(config["inhibit_rules"]) == 4
+    assert len(config["inhibit_rules"]) == 5
     assert any(route.get("receiver") == "pgaudit-unknown-role-relay" for route in routes)
 
 
@@ -785,3 +789,71 @@ def test_scanopy_relay_is_open_to_the_whole_guest_lan_in_the_canonical_host_fire
     assert [(rule["source"], rule.get("interface")) for rule in relay] == [("10.10.10.0/24", "vmbr20")]
     guests = {guest["ipv4"] for guest in policy["proxmox_guests"] if guest.get("ipv4")}
     assert guests and all(ip.startswith("10.10.10.") for ip in guests)  # every guest sits inside the allowed subnet
+
+
+
+def test_alertmanager_data_dir_belongs_to_the_user_alertmanager_runs_as() -> None:
+    """Alertmanager runs as prometheus; a root-owned data dir made nflog and silences maintenance fail every 15 minutes."""
+    tasks = yaml.safe_load((ALERTMANAGER_ROLE / "tasks" / "main.yml").read_text(encoding="utf-8"))
+    task = next(t for t in tasks if t.get("name") == "Ensure Alertmanager directories exist")
+    data = next(i for i in task["loop"] if "alertmanager_runtime_data_dir" in i["path"])
+    assert data["owner"] == "prometheus" and data["group"] == "prometheus"
+    assert "item.owner | default('root')" in task["ansible.builtin.file"]["owner"]
+
+
+def test_alertmanager_metrics_are_scraped_and_rules_cover_them() -> None:
+    jobs = jobs_by_name(render_prometheus(use_host_vars=True))
+    assert jobs["alertmanager"]["static_configs"][0]["targets"] == ["127.0.0.1:9093"]
+    assert jobs["alertmanager"]["metrics_path"] == "/metrics"
+
+    rules = yaml.safe_load((RULES_DIR / "alertmanager-self.yml").read_text())
+    by_alert = {rule["alert"]: rule for group in rules["groups"] for rule in group["rules"]}
+    assert set(by_alert) == {"AlertmanagerDown", "AlertmanagerNotificationsFailing", "AlertmanagerStatePersistenceFailing"}
+    assert by_alert["AlertmanagerDown"]["expr"] == 'up{job="alertmanager"} == 0'
+    assert "alertmanager_notifications_failed_total" in by_alert["AlertmanagerNotificationsFailing"]["expr"]
+    assert by_alert["AlertmanagerNotificationsFailing"]["for"] == "15m"
+    assert "alertmanager_nflog_maintenance_errors_total" in by_alert["AlertmanagerStatePersistenceFailing"]["expr"]
+
+
+def test_hypervisor_memory_rules_cover_every_hypervisor_and_are_shipped() -> None:
+    rules = yaml.safe_load((RULES_DIR / "fleet-hypervisor-memory.yml").read_text())
+    by_alert = {rule["alert"]: rule for group in rules["groups"] for rule in group["rules"]}
+    names = ("FleetHypervisorMemAvailableLow", "FleetHypervisorMemAvailableCritical", "FleetHypervisorSwapExhausted")
+    assert set(by_alert) == set(names)
+    low, critical, swap = (by_alert[name] for name in names)
+    assert "< 0.05" in low["expr"] and low["for"] == "10m" and low["labels"]["severity"] == "warning"
+    assert "< 0.03" in critical["expr"] and critical["labels"]["severity"] == "critical"
+    assert "< 0.10" in swap["expr"] and swap["for"] == "15m"
+    # Hypervisors without swap (SwapTotal 0) must not divide by zero into a false alert.
+    assert "node_memory_SwapTotal_bytes" in swap["expr"] and "> 0" in swap["expr"]
+    assert all('role="hypervisor"' in rule["expr"] for rule in by_alert.values())
+
+    main_tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "main.yml").read_text())
+    for name in ("Copy the hypervisor memory and swap alert rules", "Copy the Alertmanager self-monitoring rules"):
+        task = next(task for task in main_tasks if task.get("name") == name)
+        assert task["notify"] == "Reload Prometheus configuration"
+
+
+def test_ntfy_templates_report_truncated_alerts_and_only_use_functions_ntfy_has() -> None:
+    from urllib.parse import unquote
+
+    defaults = yaml.safe_load((ALERTMANAGER_ROLE / "defaults" / "main.yml").read_text())
+    title = unquote(" ".join(defaults["alertmanager_runtime_ntfy_title_query"].split()))
+    message = unquote(" ".join(defaults["alertmanager_runtime_ntfy_message_query"].split()))
+    # ntfy implements a subset of sprig: "int" is not defined and made every notification fail with HTTP 400.
+    assert "int " not in title and "int " not in message
+    assert ".truncatedAlerts" in title and ".truncatedAlerts" in message
+    assert "trunc 60" in title and "trunc 160" in message
+
+
+def test_alertmanager_has_a_load_test_route_and_collapses_edge_storms() -> None:
+    text, config = render_alertmanager()
+    routes = config["route"]["routes"]
+    load_test = next(route for route in routes if route["matchers"] == ['alertname="AlertmanagerLoadTest"'])
+    assert load_test["receiver"] == "ntfy-warning" and "continue" not in load_test
+    # fleet-triage must not receive the synthetic alerts: they carry severity "loadtest".
+    triage = next(route for route in routes if route.get("receiver") == "fleet-triage")
+    assert triage["matchers"] == ['severity=~"critical|warning"']
+    storm = next(route for route in routes if "FleetServiceEdgeDown" in route["matchers"][0])
+    assert storm["group_by"] == ["cluster", "job", "severity"]
+    assert any(rule["target_matchers"] == ['alertname="FleetHypervisorMemAvailableLow"'] for rule in config["inhibit_rules"])

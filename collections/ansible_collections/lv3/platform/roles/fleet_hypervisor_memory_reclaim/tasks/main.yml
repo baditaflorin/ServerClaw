@@ -1,0 +1,58 @@
+---
+# Purpose: Install a systemd timer that runs the kernel shrinkers (echo 2 > /proc/sys/vm/drop_caches) when a ballooning Proxmox hypervisor's MemAvailable falls under a threshold.
+# Use case: Run from playbooks/fleet-observability.yml with --limit on the 0mcp hypervisor, which read 3% MemAvailable with ~13 GB stranded in deferred-split THPs (2026-10-13).
+# Inputs: fleet_hypervisor_memory_reclaim_threshold_percent, fleet_hypervisor_memory_reclaim_interval, fleet_hypervisor_memory_reclaim_textfile_dir.
+# Outputs: the reclaim script, one systemd service and timer, and (optionally) three node_exporter textfile metrics.
+# Idempotency: Idempotent. Files are templated and the timer is only enabled/started, so a second run changes nothing.
+# Dependencies: fleet_node_exporter provides the textfile directory when the metrics are enabled.
+
+- name: Validate reclaim inputs
+  ansible.builtin.assert:
+    that:
+      - fleet_hypervisor_memory_reclaim_threshold_percent | int > 0
+      - fleet_hypervisor_memory_reclaim_threshold_percent | int < 50
+      - fleet_hypervisor_memory_reclaim_interval is match('^[0-9]+(s|min|h)$')
+      - fleet_hypervisor_memory_reclaim_script_path is match('^/')
+      - fleet_hypervisor_memory_reclaim_unit_name is match('^[a-z0-9-]+$')
+      - fleet_hypervisor_memory_reclaim_textfile_dir == '' or fleet_hypervisor_memory_reclaim_textfile_dir is match('^/')
+    fail_msg: >-
+      fleet_hypervisor_memory_reclaim needs a threshold between 1 and 49 percent, an interval like 5min, absolute script and
+      textfile paths, and a unit name of lowercase letters, digits and dashes.
+    quiet: true
+
+- name: Install the reclaim script
+  ansible.builtin.template:
+    src: fleet-hypervisor-memory-reclaim.sh.j2
+    dest: "{{ fleet_hypervisor_memory_reclaim_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the reclaim service unit
+  ansible.builtin.template:
+    src: fleet-hypervisor-memory-reclaim.service.j2
+    dest: "/etc/systemd/system/{{ fleet_hypervisor_memory_reclaim_unit_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd for fleet hypervisor memory reclaim
+
+- name: Install the reclaim timer unit
+  ansible.builtin.template:
+    src: fleet-hypervisor-memory-reclaim.timer.j2
+    dest: "/etc/systemd/system/{{ fleet_hypervisor_memory_reclaim_unit_name }}.timer"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd for fleet hypervisor memory reclaim
+
+- name: Apply pending systemd unit changes
+  ansible.builtin.meta: flush_handlers
+
+# In --check mode the unit files above are not written, so systemd cannot find the timer yet.
+- name: Enable and start the reclaim timer
+  ansible.builtin.systemd:
+    name: "{{ fleet_hypervisor_memory_reclaim_unit_name }}.timer"
+    enabled: true
+    state: started
+  when: not ansible_check_mode

@@ -65,5 +65,10 @@ def test_role_renders_service_timer_and_path_units() -> None:
     assert "OnCalendar={{ proxmox_host_control_loops_timer_on_calendar }}" in timer
     assert "Unit={{ proxmox_host_control_loops_service_name }}" in timer
     assert "PathExists={{ proxmox_host_control_loops_reconcile_request_path }}" in path_unit
+    # After=pveproxy.service + the implicit Before=paths.target is an ordering cycle with ssh.service (pveproxy is after ssh,
+    # ssh is after basic.target, which waits for paths.target); systemd broke it at boot by deleting start jobs.
+    unit_section = path_unit.split("[Path]", 1)[0]
+    assert "DefaultDependencies=no\n" in unit_section
+    assert "Conflicts=shutdown.target\n" in unit_section and "Before=shutdown.target\n" in unit_section
     assert "path_request" in script
     assert "_write_json(args.status_file, payload)" in script
