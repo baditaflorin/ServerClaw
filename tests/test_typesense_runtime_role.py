@@ -86,7 +86,7 @@ def test_compose_template_publishes_private_port_and_openbao_sidecar() -> None:
     assert "typesense-data:/data" in template
 
 
-def test_playbook_converges_proxy_runtime_and_catalog_sync() -> None:
+def test_playbook_converges_only_proxy_and_typesense_runtime() -> None:
     playbook = load_yaml(PLAYBOOK_PATH)
 
     assert len(playbook) == 2
@@ -103,7 +103,6 @@ def test_playbook_converges_proxy_runtime_and_catalog_sync() -> None:
         "lv3.platform.linux_guest_firewall",
         "lv3.platform.docker_runtime",
         "lv3.platform.typesense_runtime",
-        "lv3.platform.api_gateway_runtime",
     ]
 
 

@@ -256,9 +256,40 @@ monitoring_scanopy_discover_on_calendar: "*:02/15"
 monitoring_scanopy_discover_environment: {}
 # {Scanopy daemon name: "HH:MM" UTC}; set per host in inventory/host_vars.
 monitoring_scanopy_discover_schedule: {}
+# --- Automatic Scanopy onboarding of new Proxmox guests (see docs/runbooks/scanopy-service-discovery.md, "Automatic onboarding") ---
+# Lists the running guests of every hypervisor through a forced-command SSH key and installs the Scanopy daemon in guests that
+# have none. The hypervisor side (scanopy_onboard_hv.py + the key line in root's authorized_keys) is installed per hypervisor,
+# outside this role; the runbook has the procedure.
+monitoring_scanopy_onboard_enabled: false
+monitoring_scanopy_onboard_install_dir: /opt/scanopy-onboard
+monitoring_scanopy_onboard_script_file: "{{ monitoring_scanopy_onboard_install_dir }}/scanopy_onboard.py"
+monitoring_scanopy_onboard_hv_script_file: "{{ monitoring_scanopy_onboard_install_dir }}/scanopy_onboard_hv.py"
+monitoring_scanopy_onboard_readme_file: "{{ monitoring_scanopy_onboard_install_dir }}/README"
+monitoring_scanopy_onboard_fleets_file: "{{ monitoring_scanopy_onboard_install_dir }}/fleets.json"
+monitoring_scanopy_onboard_config_dir: /etc/scanopy-onboard
+monitoring_scanopy_onboard_ssh_key_file: "{{ monitoring_scanopy_onboard_config_dir }}/id_ed25519"
+monitoring_scanopy_onboard_state_dir: /var/lib/scanopy-onboard
+monitoring_scanopy_onboard_api_key_file: "{{ monitoring_scanopy_retag_api_key_file }}"
+monitoring_scanopy_onboard_textfile_dir: "{{ monitoring_scanopy_sd_textfile_dir }}"
+monitoring_scanopy_onboard_service_name: scanopy-onboard.service
+monitoring_scanopy_onboard_timer_name: scanopy-onboard.timer
+monitoring_scanopy_onboard_service_file: /etc/systemd/system/scanopy-onboard.service
+monitoring_scanopy_onboard_timer_file: /etc/systemd/system/scanopy-onboard.timer
+# Minutes 7/22/37/52: between the discovery trigger runs (2/17/32/47).
+monitoring_scanopy_onboard_on_calendar: "*:07/15"
+# Optional Environment= overrides (ONBOARD_MAX_INSTALLS_PER_RUN, ONBOARD_MIN_UNCOVERED_RUNS, ONBOARD_SLOT_FROM, SCANOPY_URL).
+monitoring_scanopy_onboard_environment: {}
+# Scanopy site and Docker credential new daemons are attached to; "exclude" entries are "<fleet>:<vm|ct>:<id>".
+monitoring_scanopy_onboard_site_id: ""
+monitoring_scanopy_onboard_docker_credential_id: ""
+monitoring_scanopy_onboard_exclude: []
+# [{name, ssh: "root@host", port, relay_url}] one per hypervisor; set per host in inventory/host_vars.
+monitoring_scanopy_onboard_fleets: []
 # Prometheus rule files shipped from config/prometheus/rules/ for the discovery pipeline and the Alertmanager heartbeat.
 monitoring_prometheus_inventory_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/inventory.yml"
 monitoring_prometheus_inventory_rules_file: "{{ monitoring_prometheus_rules_dir }}/inventory.yml"
+monitoring_prometheus_tier0_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/tier0.yml"
+monitoring_prometheus_tier0_rules_file: "{{ monitoring_prometheus_rules_dir }}/tier0.yml"
 monitoring_prometheus_fleet_disk_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/fleet-disk.yml"
 monitoring_prometheus_fleet_disk_rules_file: "{{ monitoring_prometheus_rules_dir }}/fleet-disk.yml"
 monitoring_prometheus_fleet_loops_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/fleet-loops.yml"

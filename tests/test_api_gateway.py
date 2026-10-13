@@ -10,6 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import httpx
+import pytest
 import yaml
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
@@ -45,12 +46,19 @@ def b64url_encode(data: bytes) -> str:
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode()
 
 
-def sign_token(private_key: rsa.RSAPrivateKey, *, roles: list[str], issuer: str) -> str:
+def sign_token(
+    private_key: rsa.RSAPrivateKey,
+    *,
+    roles: list[str],
+    issuer: str,
+    audience: str = "api-gateway-test",
+) -> str:
     header = {"alg": "RS256", "typ": "JWT", "kid": "test-key"}
     payload = {
         "sub": "user-123",
         "preferred_username": "ops",
         "iss": issuer,
+        "aud": audience,
         "exp": int(time.time()) + 3600,
         "realm_access": {"roles": roles},
     }
@@ -202,7 +210,13 @@ def prepare_world_state_db(path: Path) -> str:
     return f"sqlite:///{path}"
 
 
-def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
+def make_repo(
+    tmp_path: Path,
+    upstream_base: str,
+    *,
+    token_issuer: str | None = None,
+    token_audience: str = "api-gateway-test",
+) -> tuple[GatewayConfig, str]:
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     public_numbers = private_key.public_key().public_numbers()
 
@@ -684,7 +698,7 @@ steps:
         drift_receipts_dir=tmp_path / "receipts" / "drift-reports",
         jwks_url="http://jwks.test/jwks.json",
         issuer="https://id.example.test/application/o/agent-hub/",
-        expected_audience=None,
+        expected_audience="api-gateway-test",
         nats_url=None,
         nats_username=None,
         nats_password=None,
@@ -701,7 +715,12 @@ steps:
         world_state_dsn=world_state_dsn,
         authentik_retry_after_seconds=30,
     )
-    token = sign_token(private_key, roles=["platform-operator"], issuer=config.issuer or "")
+    token = sign_token(
+        private_key,
+        roles=["platform-operator"],
+        issuer=token_issuer or config.issuer or "",
+        audience=token_audience,
+    )
     return config, token
 
 
@@ -1561,6 +1580,53 @@ def test_gateway_requires_bearer_token(tmp_path: Path) -> None:
             await runtime.close()
 
     import asyncio
+
+    asyncio.run(run())
+
+
+@pytest.mark.parametrize(
+    ("token_issuer", "token_audience"),
+    [
+        ("https://unexpected.example/application/o/agent-hub/", "api-gateway-test"),
+        (None, "different-client"),
+    ],
+    ids=("wrong-issuer", "wrong-audience"),
+)
+def test_gateway_rejects_authentik_tokens_with_wrong_issuer_or_audience(
+    tmp_path: Path,
+    token_issuer: str | None,
+    token_audience: str,
+) -> None:
+    config, token = make_repo(
+        tmp_path,
+        "http://upstream.test",
+        token_issuer=token_issuer,
+        token_audience=token_audience,
+    )
+
+    def jwks(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=httpx.MockTransport(jwks)) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.get(
+                        "/v1/platform/services",
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                    assert response.status_code == 401
+                    assert response.json()["error"]["code"] == "AUTH_TOKEN_INVALID"
+            finally:
+                await runtime.close()
 
     asyncio.run(run())
 

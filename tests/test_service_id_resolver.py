@@ -31,3 +31,8 @@ def test_resolve_service_id_maps_nats_jetstream_playbook_to_canonical_service() 
 
 def test_resolve_service_id_maps_tesseract_ocr_playbook_to_canonical_service() -> None:
     assert service_id_resolver.resolve_service_id("tesseract-ocr") == "tesseract_ocr"
+
+
+def test_resolve_service_id_maps_api_gateway_playbook_to_canonical_service() -> None:
+    assert service_id_resolver.resolve_service_id("api-gateway") == "api_gateway"
+    assert service_id_resolver.exists_in_catalog("api-gateway") is True

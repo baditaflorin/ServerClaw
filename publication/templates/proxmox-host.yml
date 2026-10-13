@@ -1,3 +1,4 @@
+# serverclaw-publication-profile: generic
 host_public_hostname: Debian-trixie-latest-amd64-base
 proxmox_node_name: Debian-trixie-latest-amd64-base
 management_interface: enp7s0

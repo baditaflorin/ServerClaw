@@ -156,6 +156,24 @@ A dedicated **Platform API** Grafana dashboard tracks:
 
 ## Implementation Notes
 
+### Identity-provider migration status — 2026-10-13
+
+The Keycloak provider names, endpoint examples, client setup, and live
+verification statements below describe the original 2026-03 deployment and
+are historical, not the current authentication contract. ADR 0491 supersedes
+that identity-provider choice. The current gateway validates Authentik-issued
+tokens from provider `agent-hub`, requiring the configured issuer, audience,
+signature, and expiry. In a topology that declares an internal Authentik URL,
+the gateway fetches JWKS from that internal endpoint to avoid public-edge
+hairpin routing; issuer, discovery, and token endpoints remain the public OIDC
+URLs used by external clients. The fork-safe fallback uses the configured
+Authentik base URL when no internal topology URL is present.
+
+This note records the intended/current configuration contract; the 2026-10-13
+live result is recorded in the active Authentik consumer workstream only after
+the guarded API Gateway apply and authenticated smoke checks pass. It does not
+authorize Keycloak shutdown, which remains gated on all remaining consumers.
+
 - Live rollout completed on 2026-03-24 in platform version `0.114.2` with receipt [receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json).
 - The live runtime now validates JWTs against Keycloak over the shared Docker network, publishes the gateway on host port `8083`, and verifies an authenticated `/v1/platform/services` request during the Ansible converge.
 - Live verification on 2026-03-24 confirmed `https://api.example.com/healthz` returned `200 {"status":"ok"}` and `https://api.example.com/v1/platform/services` returned `200` with a valid realm-issued bearer token.

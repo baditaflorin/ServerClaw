@@ -233,6 +233,19 @@
   ansible.builtin.include_tasks: scanopy_discover.yml
   when: monitoring_scanopy_discover_enabled | bool
 
+- name: Install the automatic Scanopy onboarding job for new Proxmox guests
+  ansible.builtin.include_tasks: scanopy_onboard.yml
+  when: monitoring_scanopy_onboard_enabled | bool
+
+- name: Copy the Tier-0 replication alert rules
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_tier0_rules_source_file }}"
+    dest: "{{ monitoring_prometheus_tier0_rules_file }}"
+    owner: root
+    group: prometheus
+    mode: "0640"
+  notify: Reload Prometheus configuration
+
 - name: Copy the fleet disk alert rules
   ansible.builtin.copy:
     src: "{{ monitoring_prometheus_fleet_disk_rules_source_file }}"

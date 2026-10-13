@@ -3,8 +3,8 @@
 - ADR: 0491
 - Title: Audit and repair live Authentik consumer sign-in paths end to end
 - Status: in progress; production applies remain security-gated
-- Branch: `codex/serverclaw-template-ci-followup-20261013`
-- Worktree: `.worktrees/serverclaw-publish-main-20261013`
+- Branch: `codex/authentik-closeout-20261013`
+- Worktree: `.worktrees/ws-0512-public-snapshot-closeout-20261013`
 - Owner: Codex
 - Depends on: `adr-0491-authentik-keycloak-sunset-2026-08-30`, `ws-0510-gitea-authentik-oidc-e2e`
 
@@ -55,16 +55,18 @@ overall Authentik completion or complete Keycloak retirement yet.
 - **Authentik runtime:** a read-only live check confirms both server and worker
   run pinned `2026.8.3` digest `09782fe56675bc616a0324468f1698e2d9d83c978bc5e426686fb7563517a442`;
   public readiness returns HTTP 200. The current five-host security report is
-  host-only, so it does not refresh the image scan. Operator notes report a
-  2026-10-12 scan of the exact digest at 6 Critical/99 High, with zero fixable
-  Critical/High findings, but its summary and CVE receipt are absent from the
-  tracked checkout. The last archived same-digest receipt is dated 2026-10-11
-  and records the same totals; the catalog points to that verifiable artifact
-  until a fresh scan is saved. The old exception's 3/84 justification does not match this scan
-  and expired 2026-10-08. The runtime image gate rejects a new apply until the
-  findings and policy decision are reconciled. Do not renew the exception
-  implicitly. As of 2026-10-13, upstream still identifies 2026.8.3 as latest
-  stable; no newer stable tag was found.
+  host-only, so it does not refresh the image scan. A fresh scan of the exact
+  digest was archived on 2026-10-13 with Grype 0.111.0 and the latest available
+  vulnerability database. It reports 4 Critical, 96 High, 102 Medium, 29 Low,
+  86 Unknown, and zero blocking findings with a known fix; the catalog points
+  to this receipt and remains `blocked`. The tracked 2026-10-11 Grype 0.110.0
+  receipt reported 6 Critical/99 High and is retained as historical evidence;
+  the separate operator-reported Oct 12 receipt remains absent. The old
+  exception's 3/84 justification does not match the latest scan and expired
+  2026-10-08. The runtime image gate rejects a new apply until the findings
+  and policy decision are reconciled. Do not renew the exception implicitly.
+  As of 2026-10-13, upstream still identifies 2026.8.3 as latest stable; no
+  newer stable tag was found.
 - **Keycloak sunset:** no Keycloak container is running on `docker-runtime` or
   `runtime-control`; Gitea's live auth-source list contains only Authentik, and
   active service/client/integration/subdomain declarations contain no
@@ -161,17 +163,18 @@ documented in the MinIO runbook.
 
 ### Runtime-image continuation — 2026-10-13
 
-Operator notes report that the exact pinned Authentik digest was rescanned on
-2026-10-12 and had 6 Critical/99 High, with zero fixable Critical/High
-findings. That scan's summary and CVE artifact are missing from the tracked
-checkout. The last archived same-digest receipt is from 2026-10-11 and has the
-same 6 Critical/99 High summary; `config/image-catalog.json` points to that
-verifiable receipt. Re-run and archive a fresh scan before treating it as
-current scan evidence. The six Critical
-matches are Python 3.14.7 (`CVE-2026-19445`), AnyIO 4.14.1
+Operator notes reported that the exact pinned Authentik digest was rescanned on
+2026-10-12 at 6 Critical/99 High, with zero fixable Critical/High findings;
+that specific scan artifact is still absent. A fresh scan of the tracked SBOM
+was archived on 2026-10-13 using Grype 0.111.0 and the latest available
+database, built at 2026-10-13T06:35Z. The current receipt reports 4 Critical,
+96 High, 102 Medium, 29 Low, 86 Unknown, and zero blocking findings with a
+known fix. `config/image-catalog.json` points to this scan, while the image
+remains blocked because Critical findings are present and the prior exception
+expired. The scanner's current four Critical matches are Python 3.14.7
+(`CVE-2026-19445`), AnyIO 4.14.1
 (`GHSA-82r6-8w77-94w6`), PyJWT 2.13.0 (`GHSA-ffc3-869f-jxw9`), Debian
-libxml2 (`CVE-2026-6653`), and two GnuTLS alerts (`CVE-2026-95210`,
-`CVE-2026-88647`) against package version 3.8.9. Python 3.14.8 includes the
+libxml2 (`CVE-2026-6653`). Python 3.14.8 includes the
 Python security fix; AnyIO 4.14.2 and PyJWT 2.14.0 are the published fixed
 versions ([Python 3.14.8](https://www.python.org/downloads/release/python-3148/),
 [AnyIO advisory](https://github.com/advisories/ghsa-82r6-8w77-94w6),
@@ -179,11 +182,11 @@ versions ([Python 3.14.8](https://www.python.org/downloads/release/python-3148/)
 tracker still marks the Trixie libxml2 package vulnerable and notes no DSA;
 do not cross-grade from unstable just to clear the scanner
 ([Debian tracker](https://security-tracker.debian.org/tracker/CVE-2026-6653)).
-Although both GnuTLS CVE descriptions name 3.8.13, Debian's tracker currently
-marks the SBOM's exact Trixie package version 3.8.9-3+deb13u4 vulnerable for
-both findings, with no fixed Trixie version listed. Keep both Critical findings
-in the budget; do not suppress them based only on the description's version
-string ([Debian CVE-2026-95210 tracker](https://security-tracker.debian.org/tracker/CVE-2026-95210),
+The two GnuTLS findings present in the earlier scan remain in the raw receipt,
+but Grype 0.111.0 classifies them as negligible rather than Critical; they are
+not counted among the current four Critical findings. Debian's tracker still
+marks the exact Trixie package as vulnerable and lists no fixed Trixie version
+([Debian CVE-2026-95210 tracker](https://security-tracker.debian.org/tracker/CVE-2026-95210),
 [Debian CVE-2026-88647 tracker](https://security-tracker.debian.org/tracker/CVE-2026-88647)).
 The previous exception covered 3 Critical/84 High and expired 2026-10-08; it
 does not authorize the reported newer scan, and no exception was renewed.
@@ -232,8 +235,9 @@ place.
 The Authentik catalog entry no longer retains the expired October 8 exception:
 it is explicitly `blocked` with no active risk approval. The image-catalog
 validator now permits this honest state only when a Critical finding exists;
-the vulnerability-budget regression confirms that the entry remains denied at
-6 Critical / 99 High. Focused coverage for the touched image policy, budget,
+the vulnerability-budget regression confirmed that the entry remained denied
+at the then-current 6 Critical / 99 High. The later Grype 0.111.0 scan below
+reports 4 Critical / 96 High and remains denied. Focused coverage for the touched image policy, budget,
 Authentik role, patched-image, publication-audit, and generated
 status/release-note surfaces passes (62 tests).
 
@@ -835,20 +839,30 @@ password was fabricated or copied. This receipt records the SLO as live while
 keeping the remaining Alertmanager converge explicitly incomplete:
 `receipts/live-applies/ws-0512-artifact-cache-prometheus-slo-20261012.json`.
 
-### Keycloak DNS audit attempt — 2026-10-13
+### Keycloak SSO DNS retirement — 2026-10-13
 
 The source audit found no active Keycloak DNS declaration in the current
 inventory, DNS catalog, or service topology. Historical and compatibility
 references remain in migration/retirement code and cold rollback archives, so
-they are not treated as proof that every Keycloak artifact has been retired.
-The legacy DNS Console API read-only request now redirects to the Hetzner
-Console and returned no record data. The canonical Hetzner Cloud API context
-available to this operator lists 34 zones but does not include the platform's
-`example.org` zone. No DNS records were changed. Hetzner's migration guidance says
-the new Cloud API requires a newly created project-scoped token; the DNS audit
-must be repeated with the token for the project that owns `example.org`. Until
-then, absence of a source declaration is not a live-DNS retirement receipt.
-See [Hetzner's DNS API migration guidance](https://docs.hetzner.com/networking/dns/migration-to-hetzner-console/features-and-differences/).
+this one-record change is not a claim that every historical Keycloak artifact
+has been erased. The first read-only credential context lacked the `example.org`
+zone. A metadata-only Fleet Secrets inventory then identified the canonical
+`hcloud_token_fleet_core` record and its owning project. A short-lived,
+single-use service key read that record through the approved consumer API; the
+key was revoked immediately, and the token was never printed or stored locally.
+
+The Hetzner Cloud API inventory showed that `sso.example.org` had exactly one
+unprotected RRSet, `sso/A -> 203.0.113.1`; no `sso` AAAA or CNAME set existed.
+The separate `id.example.org` A record was retained. Before removal, strict TLS
+validation for `https://sso.example.org/` failed because the edge certificate did
+not cover the hostname, and an unauthenticated diagnostic GET returned HTTP
+403. The canonical Cloud API DELETE returned HTTP 201 and a subsequent GET of
+that exact RRSet returned 404. No other DNS names or record types were changed.
+See the live-apply receipt
+`receipts/live-applies/ws-0512-authentik-keycloak-sso-dns-retirement-20261013.yaml`.
+After the prior 60-second TTL elapsed, Cloudflare (`1.1.1.1`), Google
+(`8.8.8.8`), and Quad9 (`9.9.9.9`) each returned `NOERROR` with no A answer for
+`sso.example.org`, so the retirement is propagated at those resolvers.
 
 ### ServerClaw publication CI repair — 2026-10-13
 
@@ -871,7 +885,8 @@ receipt. Ownership is now declared. The catalog continues to mark Authentik
 blocked and points to the last tracked same-digest receipt from 2026-10-11;
 the reported 2026-10-12 scan remains unarchived. Re-run the protected gate,
 merge the private source PR, regenerate the sanitized snapshot, and get green
-checks on PR #69 before calling publication done.
+checks on PR #69 before calling publication done. The follow-up sections below
+record the completed source and public snapshot gates.
 
 The refreshed public runs then narrowed the remaining failure to one omitted
 generic firewall rule: the sanitized Proxmox host template lacked the existing
@@ -886,8 +901,8 @@ node-exporter rules omitted from the same Tier A template (nginx,
 docker-build, and runtime-control). The private inventory already contains
 those policies. This follow-up restores their generic equivalents in the
 canonical publication template and adds a regression assertion so future
-snapshots retain all three. The source repair and refreshed public PR checks
-are pending.
+snapshots retain all three. The template corrections were merged in private
+source PR #339 and included in the published snapshot.
 
 The refreshed public runs then exposed a separate inherited-CI mismatch: the
 publisher intentionally removes `config/tailscale/` and its private policy
@@ -896,4 +911,126 @@ Tailscale policy check. The check now skips only when the default policy and
 private publication manifest are both absent, which identifies the sanitized
 snapshot shape; a missing policy remains fatal in private source. Regression
 tests cover both cases. This source repair and the refreshed public PR checks
-must pass before PR #69 can merge.
+passed the private protected gate and both private Woodpecker checks. The fresh
+sanitized snapshot from source commit `f31c276c8d` passed the publication leak
+check and both public Woodpecker checks. ServerClaw PR #69 merged as
+`01e12293dc28f8da0cc30f9653774b2f28a439f2`. This closes the snapshot CI gap;
+it does not deploy Authentik or change the remaining live-service blockers.
+
+### Live continuation — 2026-10-13
+
+The active 0mcp deployment selector was verified from its ignored local
+identity/topology overlays. The Outline and GlitchTip deployment-selection
+preflights initially stopped because `inventory/group_vars/platform.yml` was
+stale for that selected deployment. Regenerating the canonical generated file
+made both preflights pass. The focused Outline, GlitchTip, admin-gate, and
+restore-verification tests pass (42 tests).
+
+Fresh strict-TLS consumer browser runs reproduce the remaining live defects:
+Outline completes Authentik login but fails its Engine.IO WebSocket handshake;
+the running Outline container omits the managed `websockets` service from its
+`SERVICES` value. GlitchTip returns `signup_closed` after Authentik login; local
+registration remains disabled and the running container lacks the managed
+social-app registration setting. Neither consumer was changed because its
+current image remains security-gated.
+
+A fresh scan of the exact deployed Authentik digest is recorded in
+`receipts/image-scans/2026-10-13-authentik-runtime.json` and
+`receipts/cve/09782fe56675-20261013T121937Z.grype.json`: 4 Critical, 96 High,
+102 Medium, 29 Low, 86 Unknown, with zero blocking findings that have a known
+fix. The image remains blocked; the old exception was not renewed. The
+configured builder and its Proxmox parent currently have limited available
+memory and near-full swap, so no patched-image build was started.
+
+Read-only Proxmox checks still find VMID 160 absent, while PBS storage is
+active; the declared guest route is unreachable. No restore VM or network
+bridge was created. At the time of this checkpoint the DNS retirement was
+still pending; the later one-record change is recorded below.
+The requested operator credential reset was applied directly through the
+authenticated Authentik user API (HTTP 204) after the recovery-link attempt
+stalled before its password-entry stage. The credential remains only in ignored
+deployment-local storage. A fresh Firefox profile trusted the internal CA,
+kept TLS validation enabled, and successfully reached `/if/admin/` as `akadmin`.
+The username/password were sent to the configured operator mailbox. Gmail
+metadata shows a SENT-labeled message with the same sender and recipient; it is
+not Inbox-labeled because this was self-addressed. This confirms administrator
+access; it does not confirm the self-service recovery-link flow.
+The change is recorded in
+`receipts/live-applies/ws-0512-authentik-operator-admin-access-20261013.yaml`.
+
+The example.org zone was subsequently verified through the canonical Hetzner
+Cloud API. Only the orphaned `sso/A -> 203.0.113.1` RRSet was removed;
+`id/A` was preserved. The deletion returned HTTP 201, its exact post-delete
+GET returned 404, and Cloudflare, Google, and Quad9 returned no A answer after
+the 60-second TTL. The one-use Fleet Secrets writer/service keys were revoked
+immediately after use; the canonical DNS token was never printed or stored
+locally. See
+`receipts/live-applies/ws-0512-authentik-keycloak-sso-dns-retirement-20261013.yaml`.
+
+### Runtime-comms security gate refresh and Neko edge audit — 2026-10-13
+
+The Neko live-apply gate initially rejected the host at four Lynis warnings.
+Read-only checks then confirmed a current Debian `trixie-security` source,
+active nftables input and forward chains with drop policies, and synchronized
+systemd time. The warning for legacy iptables and the legacy-format security
+repository detector are now host-scoped suppressions with fresh evidence; a
+scoped Lynis refresh at
+`receipts/security-reports/20261013T083129Z.json` leaves one warning: a pending
+reboot. `vulnerability_budget.py --service neko` now approves the host budget.
+The pending reboot remains visible and was not performed under the current
+Proxmox memory/swap pressure.
+
+The live strict-TLS `browser.example.org/oauth2/start?rd=%2F` route returns HTTP
+302 to `id.example.org` through the shared `ops-portal-oauth` client; NGINX syntax
+is valid. The exact live Neko site file contains four `Keycloak` mentions,
+all in comments and none in active directives. Its existing email-to-browser
+map has one route and runtime-comms has one running Neko container. The current
+managed playbook template is Authentik-backed, but the selected inventory has
+no top-level `neko_instances` input (the only canonical nested value is empty).
+A check-mode attempt to render the template therefore fails closed with
+`neko_instances` undefined. The `edge-publication` tag also selects no
+Neko-specific tasks in the current wrapper. No live Neko mapping was changed:
+re-rendering from the empty source would remove the one existing user route.
+The SSO redirect is verified as Authentik-backed, but those residual comments
+and the undeclared user-to-container mapping remain an IaC reconciliation gap.
+
+The governed apply's standard configuration-backup hook completed: all five
+governed sources were protected with zero uncovered or inactive sources in
+`receipts/restic-backups/20261013T083620Z.json`. This backup does not imply that
+the Neko site template was applied.
+
+### API Gateway and Typesense authenticated E2E — 2026-10-13
+
+Typesense had no existing container, image, persistent volume, or index on the
+declared `docker-runtime` VM. The pinned Typesense 29.0 image was restored and
+its health endpoint returned HTTP 200. A playbook ownership bug was found before
+the gateway was deployed: the Typesense playbook also invoked the API Gateway
+role on `docker-runtime`, despite the gateway being assigned to `runtime-control`.
+The playbook now converges Typesense only; a regression test prevents a second
+gateway from being created on the wrong VM.
+
+The separate governed API Gateway apply on `runtime-control` completed with
+zero failed or unreachable tasks. Its verification used the managed
+Authentik machine client: the discovery issuer matched, the client-credentials
+grant returned a bearer token, anonymous `/v1/health` was rejected with the
+canonical 401 error, and the authenticated platform-services and runtime-
+assurance endpoints returned 200. The protected structured-search endpoint
+returned Typesense-backed results. Independent read-only probes confirmed
+Typesense HTTP 200, 78 documents in `platform-services`, and public gateway
+`/healthz` HTTP 200. The post-apply Restic hook protected all five governed
+sources with no uncovered or inactive sources.
+
+The first gateway apply exposed a newline at the end of the controller-local
+Typesense API-key file; `urllib` rejected it as an invalid header before making
+the collection request. The catalog-sync client now strips surrounding file
+whitespace and has a regression test. The retry completed successfully. The
+temporary controller-to-Typesense SSH tunnel was closed and its listener
+verified absent. The local ignored Restic receipt records the apply snapshot;
+the tracked latest-snapshot receipt is updated by the managed hook.
+The committed live-apply evidence is recorded in
+`receipts/live-applies/ws-0512-authentik-api-gateway-typesense-20261013-apply-receipt.yaml`.
+
+This closes the API Gateway/Typesense portion only. Outline and GlitchTip remain
+blocked behind unresolved runtime-image security and build-capacity gates;
+restore rehearsal, Neko IaC mapping, and full Keycloak retirement also remain
+open as recorded above.

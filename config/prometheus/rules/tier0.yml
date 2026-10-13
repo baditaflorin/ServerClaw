@@ -1,0 +1,37 @@
+# Added 2026-10-13. Tier-0 replication (docs/tier0-multihost-design.md in fleet-state): CT108 snapshots the vault and keystore
+# databases every 5 minutes, encrypts them and verifies them on two other sites. Metrics come from the CT108 node_exporter textfile.
+groups:
+  - name: tier0_replication
+    rules:
+      - alert: Tier0SnapshotStale
+        expr: (time() - tier0_snapshot_last_success_timestamp_seconds) > 1200
+        for: 5m
+        labels:
+          severity: critical
+          service: tier0_replication
+        annotations:
+          summary: "No verified Tier-0 snapshot for over 20 minutes"
+          description: "The vault/keystore snapshot on CT108 has not verified on any replica for 20+ minutes (normal cadence 5 min). Run `journalctl -u tier0-snapshot` on CT108. If the 0docker site is down this alert is expected."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0ReplicaMissing
+        expr: tier0_snapshot_replicas_ok < tier0_snapshot_replicas_total
+        for: 15m
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "A Tier-0 replica did not verify the latest snapshot"
+          description: "{{ $value }} of the configured replica sites verified the latest vault/keystore snapshot; at least one site is unreachable or full. Check `journalctl -u tier0-snapshot` on CT108."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0SnapshotMetricsAbsent
+        expr: absent(tier0_snapshot_last_success_timestamp_seconds)
+        for: 30m
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "Tier-0 snapshot metrics are missing"
+          description: "tier0_snapshot_* metrics are not being scraped from CT108 (timer disabled, textfile removed, or CT108 not scraped)."
+          runbook_url: docs/runbooks/tier0-replication.md

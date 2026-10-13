@@ -46,11 +46,11 @@ def write_schedule(discover: ModuleType, schedule: dict) -> None:
     Path(discover.CONF["schedule_file"]).write_text(json.dumps(schedule))
 
 
-def scheduled(did: str, daemon: str, last_run: str | None, enabled: bool = True) -> dict:
+def scheduled(did: str, daemon: str, last_run: str | None, enabled: bool = True, cron: str = "0 0 1 * * *") -> dict:
     return {
         "id": did,
         "daemon_id": daemon,
-        "run_type": {"type": "Scheduled", "enabled": enabled, "cron_schedule": "0 0 1 * * *", "last_run": last_run},
+        "run_type": {"type": "Scheduled", "enabled": enabled, "cron_schedule": cron, "last_run": last_run},
     }
 
 
@@ -59,6 +59,7 @@ class FakeScanopy:
         self.daemons = daemons
         self.discoveries = discoveries
         self.conflict = conflict or set()
+        self.daemon_extra: dict[str, dict] = {}
         self.starts: list[str] = []
         self.calls: list[tuple[str, str]] = []
 
@@ -66,7 +67,8 @@ class FakeScanopy:
         assert key == "test-key"
         self.calls.append((method, path.split("?")[0]))
         if method == "GET" and path.startswith("/api/v1/daemons"):
-            return {"success": True, "data": [{"id": i, "name": n} for n, i in self.daemons.items()], "meta": {}}
+            rows = [{"id": i, "name": n, **self.daemon_extra.get(n, {})} for n, i in self.daemons.items()]
+            return {"success": True, "data": rows, "meta": {}}
         if method == "GET" and path.startswith("/api/v1/discovery"):
             return {"success": True, "data": self.discoveries, "meta": {}}
         if method == "POST" and path == "/api/v1/discovery/start-session":
@@ -215,3 +217,69 @@ def test_the_job_only_ever_starts_sessions() -> None:
 
     assert '"PUT"' not in source and '"DELETE"' not in source and "bulk-" not in source
     assert source.count('"POST"') == 1 and "/api/v1/discovery/start-session" in source
+
+
+def test_a_daemon_missing_from_the_inventory_is_scheduled_from_its_daily_cron(discover, monkeypatch) -> None:
+    # The onboarding job gives a new daemon a daily quarter-hour cron in Scanopy; no inventory edit is needed to scan it.
+    write_schedule(discover, {"vm-a": "04:00"})
+    fake = FakeScanopy(
+        {"vm-a": "da", "vm-new": "dn"},
+        [scheduled("d-a", "da", "2026-10-12T04:00:00Z"), scheduled("d-new", "dn", None, cron="0 0 2 * * *")],
+    )
+
+    assert run(discover, fake, monkeypatch) == 0
+
+    assert fake.starts == ["d-new"]
+    assert metrics(discover)["scanopy_discover_targets"] == 2
+
+
+def test_weekly_or_off_grid_or_disabled_schedules_are_not_adopted(discover, monkeypatch) -> None:
+    write_schedule(discover, {"vm-a": "04:00"})
+    fake = FakeScanopy(
+        {"vm-a": "da", "w": "dw", "g": "dg", "x": "dx"},
+        [
+            scheduled("d-a", "da", "2026-10-12T04:00:00Z"),
+            scheduled("d-w", "dw", None, cron="0 0 2 * * 0"),  # Scanopy's default weekly definition
+            scheduled("d-g", "dg", None, cron="0 7 2 * * *"),  # minute is not on the 15-minute grid
+            scheduled("d-x", "dx", None, enabled=False, cron="0 0 2 * * *"),
+        ],
+    )
+
+    assert run(discover, fake, monkeypatch) == 0
+
+    assert fake.starts == [] and metrics(discover)["scanopy_discover_targets"] == 1
+
+
+def test_the_inventory_slot_wins_over_the_cron_stored_in_scanopy(discover, monkeypatch) -> None:
+    write_schedule(discover, {"vm-a": "09:00"})
+    fake = FakeScanopy({"vm-a": "da"}, [scheduled("d-a", "da", "2026-10-12T09:00:00Z", cron="0 0 2 * * *")])
+
+    assert run(discover, fake, monkeypatch) == 0
+
+    assert fake.starts == []  # 02:00 would be due (ran yesterday 09:00); the inventory slot 09:00 is not
+
+
+def test_daemon_liveness_is_published_per_daemon(discover, monkeypatch) -> None:
+    write_schedule(discover, {"vm-a": "04:00"})
+    fake = FakeScanopy({"vm-a": "da", "vm-b": "db"}, [scheduled("d-a", "da", "2026-10-12T04:00:00Z")])
+    fake.daemon_extra = {
+        "vm-a": {"last_seen": "2026-10-13T02:09:30.123456Z", "is_unreachable": False},
+        "vm-b": {"last_seen": "2026-10-13T00:10:00Z", "is_unreachable": True},
+    }
+
+    run(discover, fake, monkeypatch)
+
+    m = metrics(discover)
+    assert m['scanopy_daemon_last_seen_age_seconds{daemon="vm-a"}'] == 30
+    assert m['scanopy_daemon_last_seen_age_seconds{daemon="vm-b"}'] == 2 * 3600
+    assert m["scanopy_daemons_total"] == 2 and m["scanopy_daemons_unreachable"] == 1
+
+
+def test_a_daemon_that_never_checked_in_reports_the_finite_never_age(discover, monkeypatch) -> None:
+    write_schedule(discover, {"vm-a": "04:00"})
+    fake = FakeScanopy({"vm-a": "da"}, [scheduled("d-a", "da", "2026-10-12T04:00:00Z")])
+    fake.daemon_extra = {"vm-a": {"last_seen": None}}
+
+    run(discover, fake, monkeypatch)
+
+    assert metrics(discover)['scanopy_daemon_last_seen_age_seconds{daemon="vm-a"}'] == discover.NEVER_RAN_AGE

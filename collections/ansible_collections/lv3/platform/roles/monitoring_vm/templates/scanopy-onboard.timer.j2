@@ -1,0 +1,10 @@
+[Unit]
+Description=Look for Proxmox guests without a Scanopy daemon every 15 minutes
+
+[Timer]
+OnCalendar={{ monitoring_scanopy_onboard_on_calendar }}
+AccuracySec=30s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

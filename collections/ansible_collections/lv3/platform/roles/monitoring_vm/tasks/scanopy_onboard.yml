@@ -1,0 +1,129 @@
+# Role Task File: monitoring_vm/tasks/scanopy_onboard.yml
+# Purpose: Install the job that puts a Scanopy daemon on every Proxmox guest that has none, plus its systemd timer.
+# Use case: Included by the monitoring_vm role when monitoring_scanopy_onboard_enabled is true. Every 15 minutes it lists the
+#           running guests of each hypervisor through a forced-command SSH key, compares them with the daemons Scanopy knows,
+#           and installs the daemon (daemon_poll against the fleet's relay) in guests that are still uncovered after two runs.
+#
+# Inputs (required):
+#   - monitoring_scanopy_onboard_* role defaults: install, config, state, key, textfile, and unit paths.
+#   - monitoring_scanopy_onboard_fleets: [{name, ssh, port, relay_url}] one entry per hypervisor (inventory/host_vars).
+#   - monitoring_scanopy_onboard_site_id: Scanopy site new daemons are provisioned in.
+#
+# Inputs (optional):
+#   - monitoring_scanopy_onboard_docker_credential_id, monitoring_scanopy_onboard_exclude, monitoring_scanopy_onboard_environment.
+#
+# Outputs:
+#   - /opt/scanopy-onboard job, hypervisor wrapper copy, fleets.json and README; a dedicated SSH key under /etc/scanopy-onboard
+#     (generated once, never replaced); scanopy-onboard.service and scanopy-onboard.timer.
+#   - scanopy_onboard_* metrics in the node_exporter textfile directory (alerts live in config/prometheus/rules/inventory.yml).
+#
+# Idempotency: Fully idempotent
+#              Files are compared by content and mode; the key is only generated when missing; the timer is only enabled.
+#
+# Dependencies:
+#   - scanopy_retag.yml: the job reuses the API key that role installs; it must be allowed to provision daemons and edit
+#     discovery definitions and hosts (an Admin key). This file never installs or replaces a key.
+#   - Each hypervisor must have /usr/local/sbin/scanopy-onboard-hv (the copy of scanopy_onboard_hv.py kept here) and the
+#     public key of {{ monitoring_scanopy_onboard_ssh_key_file }}.pub as a forced-command line in root's authorized_keys.
+#     That step lives outside this role (hypervisors are not monitoring_vm hosts); see the runbook.
+#   - docs/runbooks/scanopy-service-discovery.md: describes the flow, the guards, the hypervisor install and the rollback.
+#
+# Related Runbooks: docs/runbooks/scanopy-service-discovery.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-10-13
+---
+- name: Validate Scanopy onboard inputs
+  ansible.builtin.assert:
+    that:
+      - monitoring_scanopy_onboard_install_dir | length > 0
+      - monitoring_scanopy_onboard_api_key_file | length > 0
+      - monitoring_scanopy_onboard_textfile_dir | length > 0
+      - monitoring_scanopy_onboard_site_id | length > 0
+      - monitoring_scanopy_onboard_fleets | length > 0
+      - monitoring_scanopy_onboard_fleets | map(attribute='name') | unique | list | length == monitoring_scanopy_onboard_fleets | length
+      - monitoring_scanopy_onboard_fleets | selectattr('ssh', 'defined') | selectattr('relay_url', 'defined') | list | length == monitoring_scanopy_onboard_fleets | length
+    fail_msg: >-
+      monitoring_scanopy_onboard_enabled requires the install, key, and textfile paths, a site id, and a non-empty
+      monitoring_scanopy_onboard_fleets whose entries have a unique name, an ssh target and a relay_url.
+    quiet: true
+
+- name: Check that the Scanopy API key shared with the retag job is provisioned on the host
+  ansible.builtin.stat:
+    path: "{{ monitoring_scanopy_onboard_api_key_file }}"
+    get_checksum: false
+  register: monitoring_scanopy_onboard_api_key_stat
+
+- name: Refuse to run the onboard job without a non-empty Scanopy API key
+  ansible.builtin.assert:
+    that:
+      - monitoring_scanopy_onboard_api_key_stat.stat.exists
+      - monitoring_scanopy_onboard_api_key_stat.stat.size > 0
+    fail_msg: >-
+      No non-empty Scanopy API key at {{ monitoring_scanopy_onboard_api_key_file }}. It is installed by the
+      scanopy_retag tasks (monitoring_scanopy_retag_enabled); enable that first.
+    quiet: true
+
+- name: Ensure the Scanopy onboard directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - {path: "{{ monitoring_scanopy_onboard_install_dir }}", mode: "0755"}
+    - {path: "{{ monitoring_scanopy_onboard_state_dir }}", mode: "0755"}
+    - {path: "{{ monitoring_scanopy_onboard_config_dir }}", mode: "0700"}
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Generate the dedicated onboarding SSH key (only when missing)
+  ansible.builtin.command:
+    argv: [ssh-keygen, -q, -t, ed25519, -N, "", -C, scanopy-onboard, -f, "{{ monitoring_scanopy_onboard_ssh_key_file }}"]
+    creates: "{{ monitoring_scanopy_onboard_ssh_key_file }}"
+
+- name: Install the Scanopy onboard job and the hypervisor wrapper it drives
+  ansible.builtin.copy:
+    src: "scanopy-onboard/{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - {src: scanopy_onboard.py, dest: "{{ monitoring_scanopy_onboard_script_file }}", mode: "0755"}
+    - {src: scanopy_onboard_hv.py, dest: "{{ monitoring_scanopy_onboard_hv_script_file }}", mode: "0644"}
+    - {src: README, dest: "{{ monitoring_scanopy_onboard_readme_file }}", mode: "0644"}
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Render the Scanopy onboard fleet configuration
+  ansible.builtin.template:
+    src: scanopy-onboard-fleets.json.j2
+    dest: "{{ monitoring_scanopy_onboard_fleets_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Scanopy onboard systemd service
+  ansible.builtin.template:
+    src: scanopy-onboard.service.j2
+    dest: "{{ monitoring_scanopy_onboard_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Scanopy onboard systemd timer
+  ansible.builtin.template:
+    src: scanopy-onboard.timer.j2
+    dest: "{{ monitoring_scanopy_onboard_timer_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable the Scanopy onboard timer
+  ansible.builtin.systemd:
+    name: "{{ monitoring_scanopy_onboard_timer_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true

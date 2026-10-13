@@ -107,6 +107,7 @@ service ?=
 group ?=
 env ?= production
 EXTRA_ARGS ?=
+SERVICE_CANONICAL_ID = $(if $(strip $(service)),$(shell uv run --with pyyaml python $(REPO_ROOT)/scripts/service_id_resolver.py --resolve "$(service)"),)
 AUTOMATION_UV_PYTHON ?= uv run --with pyyaml python
 PLATFORM_TRACE_ID ?= $(shell python3 -c 'import uuid; print(uuid.uuid4().hex)')
 PLATFORM_INTENT_ID ?=
@@ -1959,18 +1960,18 @@ live-apply-service:
 	if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
 		printf '%s\n' "INFO live-apply-service: skipping vulnerability budget gate for syntax-check run"; \
 	elif [ "$(env)" = "production" ]; then \
-		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --service "$(service)"; \
+		$(AUTOMATION_UV_PYTHON) $(REPO_ROOT)/scripts/vulnerability_budget.py --service "$(SERVICE_CANONICAL_ID)"; \
 	fi; \
-		uv run --with pyyaml python $(REPO_ROOT)/scripts/standby_capacity.py --service "$(service)"; \
+		uv run --with pyyaml python $(REPO_ROOT)/scripts/standby_capacity.py --service "$(SERVICE_CANONICAL_ID)"; \
 		if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
 			printf '%s\n' "INFO live-apply-service: skipping service redundancy gate for syntax-check run"; \
 		else \
-			uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply --service "$(service)"; \
+			uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_redundancy.py --check-live-apply --service "$(SERVICE_CANONICAL_ID)"; \
 		fi; \
 		if printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])--syntax-check([[:space:]]|$$)'; then \
 			printf '%s\n' "INFO live-apply-service: skipping immutable guest replacement gate for syntax-check run"; \
 		else \
-			uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/immutable_guest_replacement.py --check-live-apply --service "$(service)" $(if $(filter true,$(ALLOW_IN_PLACE_MUTATION)),--allow-in-place-mutation,); \
+			uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/immutable_guest_replacement.py --check-live-apply --service "$(SERVICE_CANONICAL_ID)" $(if $(filter true,$(ALLOW_IN_PLACE_MUTATION)),--allow-in-place-mutation,); \
 		fi; \
 	else \
 		printf '%s\n' "INFO live-apply-service: skipping service-catalog gates for non-catalog playbook '$(service)'"; \

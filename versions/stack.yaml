@@ -191,6 +191,7 @@ live_apply_evidence:
     semaphore: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
     identity_provider: adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt
     grafana_sso: ws-0512-authentik-consumer-e2e-postmerge-20261011-apply-receipt
+    api_gateway_typesense: ws-0512-authentik-api-gateway-typesense-20261013
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated

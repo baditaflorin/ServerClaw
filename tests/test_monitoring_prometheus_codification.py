@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import jinja2
+import pytest
 import yaml
 
 
@@ -157,7 +158,11 @@ def test_production_render_static_jobs_are_exactly_the_reviewed_set() -> None:
 
 def test_production_render_keeps_only_reachable_catalog_probe_jobs() -> None:
     jobs = jobs_by_name(render_prometheus(use_host_vars=True))
-    probe_jobs = {name for name, job in jobs.items() if job.get("params", {}).get("module") and name.endswith(("-liveness", "-readiness"))}
+    probe_jobs = {
+        name
+        for name, job in jobs.items()
+        if job.get("params", {}).get("module") and name.endswith(("-liveness", "-readiness"))
+    }
 
     assert probe_jobs == {
         "alertmanager-liveness",
@@ -226,15 +231,15 @@ def test_default_render_keeps_legacy_behaviour_for_other_deployments() -> None:
     jobs = jobs_by_name(config)
     catalog = json.loads((REPO_ROOT / "config" / "health-probe-catalog.json").read_text())["services"]
     expected_probe_jobs = sum(
-        1 for service in catalog.values() for kind in ("liveness", "readiness") if service[kind]["kind"] in {"http", "tcp"}
+        1
+        for service in catalog.values()
+        for kind in ("liveness", "readiness")
+        if service[kind]["kind"] in {"http", "tcp"}
     )
 
     assert "remote_write" not in config
     assert "node_exporter" not in jobs and "scanopy-blackbox" not in jobs and "public-edge-critical" not in jobs
-    assert all(
-        "action" not in rule or rule["action"] != "drop"
-        for rule in jobs["slo-blackbox"]["relabel_configs"]
-    )
+    assert all("action" not in rule or rule["action"] != "drop" for rule in jobs["slo-blackbox"]["relabel_configs"])
     fixed_jobs = 7  # prometheus, tempo, otelcol-contrib, loki-canary, postgres audit, slo-blackbox, https-tls-blackbox
     assert len(jobs) == fixed_jobs + expected_probe_jobs
 
@@ -247,9 +252,12 @@ def test_prometheus_config_is_validated_and_reloaded_not_restarted() -> None:
 
     assert render["ansible.builtin.template"]["validate"] == "{{ monitoring_prometheus_config_validate_command }}"
     assert render["notify"] == "Reload Prometheus configuration"
-    assert yaml.safe_load((MONITORING_ROLE / "defaults" / "main.yml").read_text())[
-        "monitoring_prometheus_config_validate_command"
-    ] == "promtool check config %s"
+    assert (
+        yaml.safe_load((MONITORING_ROLE / "defaults" / "main.yml").read_text())[
+            "monitoring_prometheus_config_validate_command"
+        ]
+        == "promtool check config %s"
+    )
     assert "--signal=HUP" in reload_handler["ansible.builtin.command"]["argv"]
 
 
@@ -322,14 +330,22 @@ def test_discovery_and_watchdog_rules_are_shipped_from_the_repo() -> None:
         "ScanopyDiscoverStale",
         "ScanopyDiscoverMetricsAbsent",
         "ScanopyDiscoveryOverdue",
+        "ScanopyDaemonDown",
+        "ScanopyGuestWithoutDaemon",
+        "ScanopyOnboardStale",
+        "ScanopyOnboardMetricsAbsent",
     }
     assert [rule["alert"] for rule in watchdog_rules] == ["Watchdog"]
     assert watchdog_rules[0]["expr"] == "vector(1)"
 
     main_tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "main.yml").read_text())
     scanopy_tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "scanopy_sd.yml").read_text())
-    watchdog_copy = next(task for task in main_tasks if task.get("name") == "Copy the Alertmanager Watchdog heartbeat rule")
-    inventory_copy = next(task for task in scanopy_tasks if task.get("name") == "Copy the Scanopy inventory Prometheus rules")
+    watchdog_copy = next(
+        task for task in main_tasks if task.get("name") == "Copy the Alertmanager Watchdog heartbeat rule"
+    )
+    inventory_copy = next(
+        task for task in scanopy_tasks if task.get("name") == "Copy the Scanopy inventory Prometheus rules"
+    )
     assert watchdog_copy["notify"] == inventory_copy["notify"] == "Reload Prometheus configuration"
 
 
@@ -338,7 +354,14 @@ def test_alertmanager_routes_to_ntfy_only_with_credentials_by_file() -> None:
     receivers = {receiver["name"]: receiver for receiver in config["receivers"]}
     routes = config["route"]["routes"]
 
-    assert set(receivers) == {"null", "pgaudit-unknown-role-relay", "ntfy-critical", "ntfy-warning", "ntfy-watchdog", "fleet-triage"}
+    assert set(receivers) == {
+        "null",
+        "pgaudit-unknown-role-relay",
+        "ntfy-critical",
+        "ntfy-warning",
+        "ntfy-watchdog",
+        "fleet-triage",
+    }
     assert "slack_configs" not in text and "mattermost" not in text.lower()
     for name in ("ntfy-critical", "ntfy-warning", "ntfy-watchdog"):
         basic_auth = receivers[name]["webhook_configs"][0]["http_config"]["basic_auth"]
@@ -372,13 +395,22 @@ def test_fleet_triage_receiver_is_additive_shadow_and_credentialed_by_file() -> 
     # Additive: continue true, and it sits BEFORE the first route that can deliver to ntfy.
     assert triage_route["continue"] is True
     assert triage_route["matchers"] == ['severity=~"critical|warning"']
-    first_ntfy = next(i for i, route in enumerate(routes) if route.get("receiver", "").startswith("ntfy-") and route.get("receiver") != "ntfy-watchdog")
+    first_ntfy = next(
+        i
+        for i, route in enumerate(routes)
+        if route.get("receiver", "").startswith("ntfy-") and route.get("receiver") != "ntfy-watchdog"
+    )
     assert routes.index(triage_route) < first_ntfy
-    assert routes.index(triage_route) > next(i for i, route in enumerate(routes) if route.get("receiver") == "pgaudit-unknown-role-relay")
+    assert routes.index(triage_route) > next(
+        i for i, route in enumerate(routes) if route.get("receiver") == "pgaudit-unknown-role-relay"
+    )
     # Firing only, bounded, short timeout; token by file, never rendered.
     assert hook["send_resolved"] is False and hook["max_alerts"] == 20 and hook["timeout"] == "10s"
     assert hook["url"].endswith("/webhook/alertmanager?source=0mcp")
-    assert hook["http_config"]["authorization"] == {"type": "Bearer", "credentials_file": "/etc/alertmanager/triage-token"}
+    assert hook["http_config"]["authorization"] == {
+        "type": "Bearer",
+        "credentials_file": "/etc/alertmanager/triage-token",
+    }
     assert "credentials:" not in text and "bearer_token:" not in text
     # No triage receiver unless the URL is configured (staging and other converges stay unchanged).
     context = _context(ALERTMANAGER_ROLE / "defaults" / "main.yml", {})
@@ -438,19 +470,22 @@ def test_nginx_guest_firewall_keeps_the_monitoring_node_exporter_rule() -> None:
     assert monitoring[0]["protocol"] == "tcp" and monitoring[0]["ports"] == [9100]
 
 
-
 def test_scanopy_retag_is_off_by_default_and_on_for_the_monitoring_host() -> None:
     defaults = yaml.safe_load((MONITORING_ROLE / "defaults" / "main.yml").read_text())
     host_vars = yaml.safe_load(MONITORING_HOST_VARS.read_text())
     main_tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "main.yml").read_text())
-    include = next(task for task in main_tasks if task.get("name") == "Install the Scanopy Docker bridge subnet tagging job")
+    include = next(
+        task for task in main_tasks if task.get("name") == "Install the Scanopy Docker bridge subnet tagging job"
+    )
 
     assert defaults["monitoring_scanopy_retag_enabled"] is False
     assert host_vars["monitoring_scanopy_retag_enabled"] is True
     assert include["ansible.builtin.include_tasks"] == "scanopy_retag.yml"
     assert include["when"] == "monitoring_scanopy_retag_enabled | bool"
     # The retag key may assign tags, so it must not be the Viewer key that scanopy-sd uses.
-    assert defaults["monitoring_scanopy_retag_api_key_local_file"] != defaults["monitoring_scanopy_sd_api_key_local_file"]
+    assert (
+        defaults["monitoring_scanopy_retag_api_key_local_file"] != defaults["monitoring_scanopy_sd_api_key_local_file"]
+    )
     assert "{{ repo_shared_local_root }}" in defaults["monitoring_scanopy_retag_api_key_local_file"]
     specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())
     documented = specs["argument_specs"]["main"]["options"]
@@ -521,12 +556,17 @@ def test_scanopy_discover_is_off_by_default_and_schedules_every_target_once_per_
     schedule = host_vars["monitoring_scanopy_discover_schedule"]
     times = list(schedule.values())
 
-    assert defaults["monitoring_scanopy_discover_enabled"] is False and defaults["monitoring_scanopy_discover_schedule"] == {}
+    assert (
+        defaults["monitoring_scanopy_discover_enabled"] is False
+        and defaults["monitoring_scanopy_discover_schedule"] == {}
+    )
     assert host_vars["monitoring_scanopy_discover_enabled"] is True
     assert include["ansible.builtin.include_tasks"] == "scanopy_discover.yml"
     assert include["when"] == "monitoring_scanopy_discover_enabled | bool"
     # One start per 15-minute run and every slot is a distinct quarter hour, so no two hosts are ever started together.
-    assert len(times) == len(set(times)) == 20  # 16 Docker VMs + 4 Proxmox hypervisor daemons
+    assert (
+        len(times) == len(set(times)) == 41
+    )  # every Scanopy daemon: 16 Docker VMs, 4 hypervisor daemons, the rollout guests and the VMs without Docker
     assert all(re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", value) for value in times)
     assert all(int(value.split(":")[1]) % 15 == 0 for value in times)
     # The large Docker host keeps a 45-minute window to itself.
@@ -537,9 +577,13 @@ def test_scanopy_discover_is_off_by_default_and_schedules_every_target_once_per_
     assert defaults["monitoring_scanopy_discover_api_key_file"] == "{{ monitoring_scanopy_retag_api_key_file }}"
     tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "scanopy_discover.yml").read_text())
     assert not any("api_key_local" in json.dumps(task) for task in tasks)
-    refuse = next(task for task in tasks if task["name"] == "Refuse to run the discover job without a non-empty Scanopy API key")
+    refuse = next(
+        task for task in tasks if task["name"] == "Refuse to run the discover job without a non-empty Scanopy API key"
+    )
     assert "monitoring_scanopy_discover_api_key_stat.stat.size > 0" in refuse["ansible.builtin.assert"]["that"]
-    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"]["options"]
+    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"][
+        "options"
+    ]
     for name in (
         "monitoring_scanopy_discover_enabled",
         "monitoring_scanopy_discover_schedule",
@@ -570,7 +614,15 @@ def test_scanopy_discover_alerts_cover_failure_missing_metrics_and_overdue_hosts
     group = next(group for group in inventory["groups"] if group["name"] == "scanopy_discover")
     rules = {rule["alert"]: rule for rule in group["rules"]}
 
-    assert set(rules) == {"ScanopyDiscoverStale", "ScanopyDiscoverMetricsAbsent", "ScanopyDiscoveryOverdue"}
+    assert set(rules) == {
+        "ScanopyDiscoverStale",
+        "ScanopyDiscoverMetricsAbsent",
+        "ScanopyDiscoveryOverdue",
+        "ScanopyDaemonDown",
+    }
+    # A healthy daemon polls about every 30 s; 10 minutes of silence for 5 minutes is a dead daemon, not a slow poll.
+    assert rules["ScanopyDaemonDown"]["expr"] == "scanopy_daemon_last_seen_age_seconds > 600"
+    assert rules["ScanopyDaemonDown"]["for"] == "5m"
     assert rules["ScanopyDiscoverStale"]["expr"] == "(time() - scanopy_discover_last_success_timestamp_seconds) > 3600"
     assert rules["ScanopyDiscoverMetricsAbsent"]["expr"] == "absent(scanopy_discover_last_success_timestamp_seconds)"
     assert rules["ScanopyDiscoveryOverdue"]["expr"] == "scanopy_discover_oldest_last_run_age_seconds > 36 * 3600"
@@ -578,16 +630,123 @@ def test_scanopy_discover_alerts_cover_failure_missing_metrics_and_overdue_hosts
         assert rule["labels"] == {"severity": "warning", "service": "inventory"}
 
 
+def test_scanopy_onboard_is_off_by_default_and_wired_into_the_role_and_monitoring_host() -> None:
+    defaults = yaml.safe_load((MONITORING_ROLE / "defaults" / "main.yml").read_text())
+    host_vars = yaml.safe_load(MONITORING_HOST_VARS.read_text())
+    main_tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "main.yml").read_text())
+    include = next(
+        task
+        for task in main_tasks
+        if task.get("name") == "Install the automatic Scanopy onboarding job for new Proxmox guests"
+    )
+    fleets = {fleet["name"]: fleet for fleet in host_vars["monitoring_scanopy_onboard_fleets"]}
+
+    assert (
+        defaults["monitoring_scanopy_onboard_enabled"] is False and defaults["monitoring_scanopy_onboard_fleets"] == []
+    )
+    assert host_vars["monitoring_scanopy_onboard_enabled"] is True
+    assert include["ansible.builtin.include_tasks"] == "scanopy_onboard.yml"
+    assert include["when"] == "monitoring_scanopy_onboard_enabled | bool"
+    # One entry per hypervisor, each with the relay its guests poll (same relays as the retag/discover documentation).
+    assert set(fleets) == {"0docker", "0mcp", "0own", "pve01"}
+    assert {name: fleet["relay_url"] for name, fleet in fleets.items()} == {
+        "0docker": "http://10.10.10.1:60072",
+        "0mcp": "http://10.10.10.1:60072",
+        "0own": "http://10.60.10.1:60072",
+        "pve01": "http://10.50.0.1:60072",
+    }
+    # The API key is the one the retag tasks install; this role never installs or replaces one.
+    assert defaults["monitoring_scanopy_onboard_api_key_file"] == "{{ monitoring_scanopy_retag_api_key_file }}"
+    tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "scanopy_onboard.yml").read_text())
+    assert not any("api_key_local" in json.dumps(task) for task in tasks)
+    keygen = next(
+        task for task in tasks if task["name"] == "Generate the dedicated onboarding SSH key (only when missing)"
+    )
+    assert keygen["ansible.builtin.command"]["creates"] == "{{ monitoring_scanopy_onboard_ssh_key_file }}"
+    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"][
+        "options"
+    ]
+    for name in (
+        "monitoring_scanopy_onboard_enabled",
+        "monitoring_scanopy_onboard_fleets",
+        "monitoring_scanopy_onboard_site_id",
+        "monitoring_scanopy_onboard_docker_credential_id",
+        "monitoring_scanopy_onboard_exclude",
+        "monitoring_scanopy_onboard_on_calendar",
+        "monitoring_scanopy_onboard_environment",
+    ):
+        assert name in specs
+
+
+def test_scanopy_onboard_units_are_hardened_and_the_fleet_config_renders_to_json() -> None:
+    context = _context(MONITORING_ROLE / "defaults" / "main.yml", yaml.safe_load(MONITORING_HOST_VARS.read_text()))
+    env = _environment(MONITORING_ROLE / "templates")
+    service = env.get_template("scanopy-onboard.service.j2").render(**context)
+    timer = env.get_template("scanopy-onboard.timer.j2").render(**context)
+    rendered = json.loads(env.get_template("scanopy-onboard-fleets.json.j2").render(**context))
+
+    for hardening in ("NoNewPrivileges=yes", "ProtectSystem=strict", "PrivateTmp=yes", "ProtectHome=yes"):
+        assert hardening in service
+    assert "ReadWritePaths=/var/lib/prometheus/node-exporter /var/lib/scanopy-onboard /etc/scanopy-onboard\n" in service
+    assert "ExecStart=/usr/bin/python3 /opt/scanopy-onboard/scanopy_onboard.py" in service
+    assert "TimeoutStartSec=1500" in service  # two installs of up to ~10 minutes each
+    assert "OnCalendar=*:07/15" in timer  # between the discovery trigger runs (:02/:17/:32/:47)
+    host_vars = yaml.safe_load(MONITORING_HOST_VARS.read_text())
+    assert rendered["fleets"] == host_vars["monitoring_scanopy_onboard_fleets"]
+    assert rendered["site_id"] == host_vars["monitoring_scanopy_onboard_site_id"]
+    assert rendered["docker_credential_id"] == host_vars["monitoring_scanopy_onboard_docker_credential_id"]
+
+
+def test_scanopy_onboard_alerts_cover_uncovered_guests_stale_runs_and_missing_metrics() -> None:
+    inventory = yaml.safe_load((RULES_DIR / "inventory.yml").read_text())
+    group = next(group for group in inventory["groups"] if group["name"] == "scanopy_onboard")
+    rules = {rule["alert"]: rule for rule in group["rules"]}
+
+    assert set(rules) == {"ScanopyGuestWithoutDaemon", "ScanopyOnboardStale", "ScanopyOnboardMetricsAbsent"}
+    assert (
+        rules["ScanopyGuestWithoutDaemon"]["expr"]
+        == "(scanopy_onboard_guests_uncovered + scanopy_onboard_guests_unmanageable) > 0"
+    )
+    assert rules["ScanopyGuestWithoutDaemon"]["for"] == "3h"
+    assert rules["ScanopyOnboardStale"]["expr"] == "(time() - scanopy_onboard_last_success_timestamp_seconds) > 7200"
+    assert rules["ScanopyOnboardMetricsAbsent"]["expr"] == "absent(scanopy_onboard_last_success_timestamp_seconds)"
+    for rule in rules.values():
+        assert rule["labels"] == {"severity": "warning", "service": "inventory"}
+
+
 def test_guests_scraped_for_node_metrics_allow_the_monitoring_guest_on_9100() -> None:
     # Guest nftables is rendered from this policy: a scrape rule added only by hand (or only to the Proxmox firewall) is
     # removed by the next guest-firewall render, which silently turns the target down (NodeExporterMissing).
-    policy = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text())["network_policy"]["guests"]
+    policy = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text())["network_policy"][
+        "guests"
+    ]
 
     for guest in ("docker-build", "runtime-control"):
         rules = [
             rule
             for rule in policy[guest]["allowed_inbound"]
-            if rule.get("source") == "monitoring" and rule.get("protocol") == "tcp" and 9100 in (rule.get("ports") or [])
+            if rule.get("source") == "monitoring"
+            and rule.get("protocol") == "tcp"
+            and 9100 in (rule.get("ports") or [])
         ]
         assert rules, f"{guest} must allow monitoring -> tcp 9100 in the canonical network policy"
         assert all(rule.get("forward") is False for rule in rules)
+
+
+def test_scanopy_relay_is_open_to_the_whole_guest_lan_in_the_canonical_host_firewall_policy() -> None:
+    # The 0mcp hypervisor only lets a guest reach the Scanopy relay (10.10.10.1:60072) through its host firewall. The
+    # onboarding job installs daemons in guests nobody listed beforehand, so the rule covers the guest LAN instead of a
+    # per-guest allowlist; losing it would cut every 0mcp daemon off the server at once.
+    policy_path = REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml"
+    policy_text = policy_path.read_text()
+    if "# serverclaw-publication-profile: generic" in policy_text:
+        pytest.skip("the generic public template intentionally omits deployment-specific firewall exceptions")
+    policy = yaml.safe_load(policy_text)
+    relay = [
+        rule
+        for rule in policy["proxmox_host_additional_tcp_rules"]
+        if str(rule.get("port")) == "60072" and rule.get("destination") == "10.10.10.1"
+    ]
+    assert [(rule["source"], rule.get("interface")) for rule in relay] == [("10.10.10.0/24", "vmbr20")]
+    guests = {guest["ipv4"] for guest in policy["proxmox_guests"] if guest.get("ipv4")}
+    assert guests and all(ip.startswith("10.10.10.") for ip in guests)  # every guest sits inside the allowed subnet

@@ -12,6 +12,12 @@ if str(SCRIPTS_DIR) not in sys.path:
 import typesense_catalog_sync as sync  # noqa: E402
 
 
+def test_typesense_admin_client_strips_trailing_newline_from_api_key() -> None:
+    client = sync.TypesenseAdminClient(base_url="http://127.0.0.1:8108", api_key="local-test-key\n")
+
+    assert client.api_key == "local-test-key"
+
+
 class FakeTypesenseClient:
     def __init__(self, *, collection: dict | None = None, documents: list[dict] | None = None) -> None:
         self.collection = copy.deepcopy(collection)

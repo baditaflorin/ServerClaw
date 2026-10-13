@@ -112,7 +112,9 @@ def normalize_documents(documents: list[dict[str, Any]]) -> list[dict[str, Any]]
 class TypesenseAdminClient:
     def __init__(self, *, base_url: str, api_key: str) -> None:
         self.base_url = base_url.rstrip("/")
-        self.api_key = api_key
+        # Credential files commonly end with a newline. Never pass that through
+        # as an HTTP header value (urllib correctly rejects CR/LF in headers).
+        self.api_key = api_key.strip()
 
     def _request(
         self,
@@ -231,7 +233,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     catalog = require_mapping(load_json(args.catalog), str(args.catalog))
-    api_key = require_string(args.api_key_file.read_text(encoding="utf-8"), str(args.api_key_file))
+    api_key = require_string(args.api_key_file.read_text(encoding="utf-8").strip(), str(args.api_key_file))
     client = TypesenseAdminClient(base_url=args.typesense_url, api_key=api_key)
     result = sync_platform_service_collection(client, catalog, collection=args.collection)
     print(json.dumps(result, indent=2, sort_keys=True))

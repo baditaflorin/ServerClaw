@@ -6,8 +6,8 @@ status: in_progress
 ready_to_merge: false
 live_applied: true
 owner: codex
-branch: codex/serverclaw-public-tailnet-check-20261013
-worktree_path: .worktrees/serverclaw-public-tailnet-check-20261013
+branch: codex/authentik-closeout-20261013
+worktree_path: .worktrees/ws-0512-public-snapshot-closeout-20261013
 doc: docs/workstreams/ws-0512-authentik-consumer-e2e.md
 canonical_truth:
   changelog_entry: Verify and repair Authentik sign-in paths across active platform consumers.
@@ -16,6 +16,7 @@ canonical_truth:
   latest_receipts:
     artifact_cache_plane: ws-0512-artifact-cache-monitoring-20261012
     artifact_cache_slo: ws-0512-artifact-cache-prometheus-slo-20261012
+    api_gateway_typesense: ws-0512-authentik-api-gateway-typesense-20261013
 depends_on:
   - adr-0491-authentik-keycloak-sunset-2026-08-30
   - ws-0510-gitea-authentik-oidc-e2e
@@ -25,6 +26,13 @@ shared_surfaces:
   - config/authentik/oauth-clients.yaml
   - config/authentik/scope-mappings.yaml
   - config/ansible-execution-scopes.yaml
+  - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/**
+  - tests/test_api_gateway.py
+  - tests/test_api_gateway_runtime_role.py
+  - tests/test_service_id_resolver.py
+  - scripts/service_id_resolver.py
+  - docs/adr/0092-unified-platform-api-gateway.md
+  - docs/workstreams/adr-0092-platform-api-gateway.md
   - config/authentik/identities.yaml
   - config/authentik/test-identities.yaml
   - config/grafana/dashboards/grafana.json
@@ -167,6 +175,8 @@ shared_surfaces:
   - workstreams.yaml
   - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
   - receipts/live-applies/ws-0512-authentik-consumer-e2e-postmerge-20261011-apply-receipt.json
+  - receipts/live-applies/ws-0512-authentik-operator-admin-access-20261013.yaml
+  - receipts/live-applies/ws-0512-authentik-keycloak-sso-dns-retirement-20261013.yaml
   - receipts/live-applies/ws-0512-authentik-builder-route-partial-20261012-apply-receipt.yaml
   - receipts/live-applies/ws-0512-authentik-builder-managed-20261012-apply-receipt.yaml
   - receipts/live-applies/ws-0512-authentik-builder-managed-retry-20261012-apply-receipt.yaml
@@ -174,18 +184,22 @@ shared_surfaces:
   - receipts/live-applies/ws-0512-authentik-builder-managed-identity-retry-20261012-apply-receipt.yaml
   - receipts/live-applies/ws-0512-authentik-builder-managed-replay-20261012.json
   - config/image-catalog.json
+  - receipts/image-scans/2026-03-30-typesense-runtime.json
   - receipts/image-scans/2026-10-11-librechat-runtime.json
   - receipts/sbom/89b0008e610e.cdx.json
   - receipts/cve/89b0008e610e-20261011T090357Z.grype.json
   - receipts/restic-snapshots-latest.json
+  - receipts/restic-backups/20261013T083620Z.json
   - receipts/ops-portal-snapshot.html
   - receipts/image-scans/2026-10-01-authentik-runtime.json
   - receipts/image-scans/2026-10-11-authentik-runtime.json
+  - receipts/image-scans/2026-10-13-authentik-runtime.json
   - receipts/cve/09782fe56675-20261001T100019Z.grype.json
   - receipts/cve/09782fe56675-20261011T100042Z.grype.json
-  - receipts/cve/09782fe56675-20261012T210515Z.grype.json
+  - receipts/cve/09782fe56675-20261013T121937Z.grype.json
   - receipts/sbom/09782fe56675.cdx.json
   - receipts/security-reports/20261011T082609Z.json
+  - receipts/security-reports/20261013T083129Z.json
   - scripts/vulnerability_budget.py
   - tests/test_vulnerability_budget.py
   - scripts/audit_sanitization_coverage.py
@@ -286,6 +300,24 @@ ownership_manifest:
         - docs/workstreams/adr-0491-authentik-keycloak-sunset.md
       mode: shared_contract
       contract: adr-0491-authentik-migration-v1
+    - id: authentik_api_gateway_typesense_e2e
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/tasks/main.yml
+        - docs/adr/0092-unified-platform-api-gateway.md
+        - docs/runbooks/configure-typesense.md
+        - docs/workstreams/adr-0092-platform-api-gateway.md
+        - receipts/live-applies/ws-0512-authentik-api-gateway-typesense-20261013-apply-receipt.yaml
+        - receipts/live-applies/ws-0512-authentik-api-gateway-typesense-20261013.json
+        - playbooks/typesense.yml
+        - scripts/typesense_catalog_sync.py
+        - tests/test_api_gateway.py
+        - tests/test_api_gateway_runtime_role.py
+        - tests/test_service_id_resolver.py
+        - tests/test_typesense_catalog_sync.py
+        - tests/test_typesense_runtime_role.py
+      mode: shared_contract
+      contract: adr-0092-api-gateway-typesense-integration-v1
     - id: authentik_consumer_e2e_harness
       paths:
         - scripts/**authentik*e2e*.py
@@ -522,7 +554,8 @@ ownership_manifest:
       paths:
         - docs/workstreams/ws-0512-authentik-consumer-e2e.md
         - workstreams/active/ws-0512-authentik-consumer-e2e.yaml
-      mode: exclusive
+      mode: shared_contract
+      contract: authentik-workstream-evidence-v1
     - id: workstream_registry
       paths:
         - workstreams.yaml
@@ -540,8 +573,11 @@ ownership_manifest:
       paths:
       - receipts/live-applies/ws-0512-authentik-consumer-e2e-apply-receipt.yaml
       - receipts/live-applies/ws-0512-authentik-consumer-e2e-postmerge-20261011-apply-receipt.yaml
+      - receipts/live-applies/ws-0512-authentik-operator-admin-access-20261013.yaml
+      - receipts/live-applies/ws-0512-authentik-keycloak-sso-dns-retirement-20261013.yaml
       - receipts/live-applies/ws-0512-authentik-gitea-edge-20261011.yaml
       - receipts/live-applies/ws-0512-authentik-builder-route-partial-20261012-apply-receipt.yaml
+      - receipts/restic-backups/20261013T083620Z.json
       - receipts/restic-snapshots-latest.json
       - receipts/ops-portal-snapshot.html
       mode: shared_contract
@@ -551,14 +587,17 @@ ownership_manifest:
         - config/image-catalog.json
         - config/service-capability-catalog.json
         - catalog/services/librechat/service.yaml
+        - receipts/image-scans/2026-03-30-typesense-runtime.json
         - receipts/image-scans/2026-10-01-authentik-runtime.json
         - receipts/image-scans/2026-10-11-authentik-runtime.json
+        - receipts/image-scans/2026-10-13-authentik-runtime.json
         - receipts/image-scans/2026-10-11-librechat-runtime.json
         - receipts/image-scans/2026-10-12-patched-shared-valkey-runtime-187679e3bd40.json
         - receipts/cve/89b0008e610e-20261011T090357Z.grype.json
         - receipts/sbom/89b0008e610e.cdx.json
         - receipts/cve/09782fe56675-20261001T100019Z.grype.json
         - receipts/cve/09782fe56675-20261011T100042Z.grype.json
+        - receipts/cve/09782fe56675-20261013T121937Z.grype.json
         - receipts/sbom/09782fe56675.cdx.json
         - receipts/sbom/187679e3bd40.cdx.json
         - receipts/cve/187679e3bd40-20261012T073926Z.grype.json
@@ -652,6 +691,7 @@ ownership_manifest:
     - id: nginx_host_security_suppression
       paths:
         - config/lynis-suppressions.json
+        - receipts/security-reports/20261013T083129Z.json
         - scripts/parse_lynis_report.py
         - scripts/security_posture_report.py
         - tests/test_parse_lynis_report.py
@@ -800,14 +840,16 @@ context: |
   five-minute memory PSI and concurrent CI/build containers; the Proxmox parent
   had 4.2 GiB available and 3.9/4.0 GiB swap used. No new heavy image build was
   started. The sanitization strict audit and publisher dry-run leak check pass.
-  Only tracked scan/CVE receipts are declared in this workstream manifest; a
-  fresh scan must be archived before its results are treated as current.
+  At that checkpoint only the older tracked Authentik scan was available; the
+  fresh 2026-10-13 Grype 0.111.0 scan and current catalog pointer are recorded
+  below.
 
   2026-10-13 risk and repository-truth correction: the expired Authentik risk
   exception was removed from config/image-catalog.json; the current digest is
   explicitly marked blocked with no active exception. The catalog validator
   accepts this state only for an image with Critical findings, and the
-  vulnerability-budget gate still denies Authentik at 6 Critical / 99 High.
+  vulnerability-budget gate denied Authentik at the then-current 6 Critical /
+  99 High scan. A later 2026-10-13 scan with Grype 0.111.0 is recorded below.
   Focused tests for image policy, vulnerability budget, Authentik runtime,
   patched images, sanitization, and generated status/release-note checks pass
   (62 tests). The full local suite attempt
@@ -820,19 +862,65 @@ context: |
   generated-README checks now pass.
 
   Recovery email delivery was confirmed by metadata-only Gmail search on
-  2026-10-13, but the one-time link was not opened and no current operator
-  credential or completed reset is confirmed.
+  2026-10-13. The earlier one-time recovery-link attempt did not reach the
+  password-entry stage and remains unproven.
+
+  2026-10-13 live continuation: the active deployment selector is 0mcp. The
+  explicit identity/topology preflights for Outline and GlitchTip first found
+  stale generated platform vars; regenerating inventory/group_vars/platform.yml
+  from the selected overlays made both preflights pass. Focused Outline,
+  GlitchTip, admin-gate, and restore-verification unit tests pass (42 tests).
+  Fresh strict-TLS browser runs still fail at the real consumer boundary:
+  Outline authenticates but its Engine.IO WebSocket handshake fails; live
+  container inspection confirms SERVICES=web,worker,collaboration and omits
+  websockets. GlitchTip returns signup_closed after Authentik login; its live
+  container has local registration disabled and lacks the managed
+  ENABLE_SOCIAL_APPS_USER_REGISTRATION setting. No service was applied because
+  both runtime image gates remain blocked.
+
+  A fresh scan of the exact deployed Authentik digest used the tracked SBOM,
+  Grype 0.111.0, and the latest available vulnerability database (built
+  2026-10-13T06:35Z). Its receipts are
+  receipts/image-scans/2026-10-13-authentik-runtime.json and
+  receipts/cve/09782fe56675-20261013T121937Z.grype.json: 4 Critical, 96 High,
+  102 Medium, 29 Low, 86 Unknown, and zero blocking findings with a known fix.
+  The newer scanner classifies both previously reported GnuTLS findings as
+  negligible; they remain visible in the raw receipt. The image remains
+  blocked; the expired 3 Critical / 84 High exception was not renewed. The
+  configured docker-build guest had 4.9 GiB available with
+  2.3/4.0 GiB swap used; its Proxmox parent had 3.7 GiB available and 3.8/4.0
+  GiB swap used. No patched-image build or runtime mutation was started.
+
+  The Proxmox read-only check still finds VMID 160 absent while PBS storage is
+  active; the declared guest route has no network path. No restore VM or bridge
+  was created. The orphaned `sso.example.org` DNS A record was removed from the
+  canonical Hetzner Cloud zone; exact RRSet GET returned 404 afterward, and
+  1.1.1.1, 8.8.8.8, and 9.9.9.9 now return no answer. The separate `id` record
+  remains. See the DNS retirement receipt for the precise scope.
+  The configured active Authentik superuser password was reset through the
+  authenticated user API (HTTP 204) to a random value retained only in ignored
+  deployment-local storage. A fresh temporary Firefox profile trusted the
+  internal root CA and reached `/if/admin/` as `akadmin` over strict TLS. The
+  username/password were sent to the configured operator mailbox. A
+  metadata-only Gmail search found a SENT-labeled message with the operator
+  address as both sender and recipient; it is not Inbox-labeled. This confirms
+  operator access, not completion of the self-service recovery-link flow.
 blockers:
-  - The current Authentik digest scans at 6 Critical / 99 High with zero known fixes; the prior 3 Critical / 84 High exception expired on 2026-10-08. Do not apply an Authentik runtime-image change until a policy-compliant stable image or an explicit new risk decision covering the current findings exists.
-  - Outline and GlitchTip consumer changes remain blocked by unresolved critical image findings; no exception was authorized for either service.
+  - The exact deployed Authentik digest was freshly scanned on 2026-10-13 with Grype 0.111.0 and remains at 4 Critical / 96 High with zero known fixes; the previous 3 Critical / 84 High exception expired on 2026-10-08. Keep the runtime image unchanged until a policy-compliant stable image or an explicit new risk decision covering the current findings exists.
+  - Outline and GlitchTip configuration fixes are reproduced but remain unapplied behind unresolved critical image findings; no exception was authorized for either service. Patched-image builds are also deferred until builder and Proxmox-parent capacity are admitted.
   - The latest recorded application-level Authentik restore rehearsal failed. A new drill is unsafe until the restore network is genuinely isolated and host capacity is admitted; the live fixture bridge currently overlaps production.
-  - The read-only source audit found no active Keycloak DNS declaration, but live DNS could not be verified: the legacy DNS Console API redirects without records and the available Hetzner Cloud API context has 34 zones but no example.org zone. Repeat with the canonical project-scoped Cloud API token; do not delete cold rollback archives in this workstream.
-  - Public ServerClaw snapshot pull request 69's refreshed pipelines fail because the sanitizer intentionally removes the private Tailscale policy while inherited CI still requires it. A narrow source-side skip is being added for sanitized snapshots only; a missing policy remains fatal in private source. The protected source gate and refreshed public checks must pass before publication can merge.
   - The declared backup guest (VMID 160) is absent from the current Proxmox node and its inventory address is unreachable. PBS storage is independently online, but the backup-host security receipt remains stale; do not treat PBS availability as host-hardening evidence.
   - >-
-    A current least-privileged operator credential and completed recovery reset
-    are not confirmed; delivery of the reset email is confirmed, but link
-    validity and successful reset are not.
+    The self-service password-recovery link remains unverified in a fresh
+    browser. Direct API password reset and strict-TLS admin login are confirmed,
+    but they do not prove the recovery UX.
+  - >-
+    The Neko browser route redirects through Authentik, but the live NGINX map
+    has one user route and runtime-comms has one Neko container while the
+    selected inventory has no top-level neko_instances input. Re-rendering the
+    managed template from the empty nested registry value would remove that
+    user's route. Reconcile the authoritative private assignment source and use
+    a precisely scoped, validated edge apply before claiming Neko IaC parity.
 tasks:
   - id: t1
     title: Reconcile live provider/application state with declared clients and active deployments
@@ -851,4 +939,4 @@ tasks:
     status: completed
   - id: t6
     title: Keep private Tailscale policy validation compatible with sanitized ServerClaw CI
-    status: in_progress
+    status: completed

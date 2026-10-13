@@ -1,0 +1,24 @@
+scanopy-onboard: put a Scanopy daemon on every Proxmox guest that has none
+
+Every 15 minutes (minute 07/22/37/52) the job lists the running guests of each hypervisor (fleets.json) through a
+forced-command SSH key, compares them with the daemons Scanopy knows (daemon name, MAC address, or an IPv4 that belongs to one
+daemon host), and onboards a guest that is uncovered in two runs in a row: provisions a daemon + 1:1 API key, has the
+hypervisor install the daemon in the guest (CT: pct exec, VM: QEMU guest agent), waits for the check-in, gives the daemon's
+Scanopy discovery a free daily quarter-hour slot from 12:00 UTC (scanopy-discover starts it from then on) and attaches the
+Docker credential when the guest runs Docker.
+
+Files
+  /opt/scanopy-onboard/scanopy_onboard.py      the job (python3 stdlib)
+  /opt/scanopy-onboard/scanopy_onboard_hv.py   copy of the hypervisor wrapper (install as /usr/local/sbin/scanopy-onboard-hv)
+  /opt/scanopy-onboard/fleets.json             hypervisors, relay URLs, site and Docker credential, exclude list (from inventory)
+  /etc/scanopy-onboard/id_ed25519(.pub)        dedicated key; known_hosts is kept next to it
+  /var/lib/scanopy-onboard/state.json          per-guest sightings and failure backoff
+  /var/lib/prometheus/node-exporter/scanopy_onboard.prom   metrics scanopy_onboard_*
+  systemd: scanopy-onboard.service (oneshot) + scanopy-onboard.timer
+
+Guards: at most 2 installs per run; a failing guest backs off 30 min, doubling to 24 h; never touches a guest whose
+scanopy-daemon service is already active; guests listed under "exclude" are ignored.
+Manual run:  sudo systemctl start scanopy-onboard.service ; journalctl -u scanopy-onboard -n 30
+Dry run:     sudo python3 /opt/scanopy-onboard/scanopy_onboard.py --dry-run
+Rollback:    systemctl disable --now scanopy-onboard.timer
+Managed by the monitoring_vm role (tasks/scanopy_onboard.yml); see docs/runbooks/scanopy-service-discovery.md.

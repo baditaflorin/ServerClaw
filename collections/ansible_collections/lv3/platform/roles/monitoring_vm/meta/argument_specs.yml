@@ -216,6 +216,43 @@ argument_specs:
         required: false
         description:
           - Optional Environment= overrides for the discover unit (for example SCANOPY_URL, DISCOVER_CATCHUP_HOURS).
+      monitoring_scanopy_onboard_enabled:
+        type: bool
+        required: false
+        description:
+          - Install the job and timer that install the Scanopy daemon in new Proxmox guests through the hypervisors' forced-command key.
+      monitoring_scanopy_onboard_fleets:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - One entry per hypervisor with name, ssh (user@host), port and relay_url (the Scanopy relay the guests of that fleet poll).
+      monitoring_scanopy_onboard_site_id:
+        type: str
+        required: false
+        description:
+          - Scanopy site id new daemons are provisioned in.
+      monitoring_scanopy_onboard_docker_credential_id:
+        type: str
+        required: false
+        description:
+          - Scanopy credential id attached to hosts that run Docker (empty skips the attach).
+      monitoring_scanopy_onboard_exclude:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Guests the job must ignore, as "<fleet>:<vm|ct>:<id>".
+      monitoring_scanopy_onboard_on_calendar:
+        type: str
+        required: false
+        description:
+          - systemd OnCalendar expression of the timer (default *:07/15).
+      monitoring_scanopy_onboard_environment:
+        type: dict
+        required: false
+        description:
+          - Optional Environment= overrides for the onboard unit (ONBOARD_MAX_INSTALLS_PER_RUN, ONBOARD_MIN_UNCOVERED_RUNS, ONBOARD_SLOT_FROM).
       monitoring_influxdb_url:
         type: str
         required: true
