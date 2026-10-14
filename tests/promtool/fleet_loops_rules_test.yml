@@ -139,3 +139,72 @@ tests:
               summary: "The horizon watch has 1 critical finding(s)"
               description: "Something that expires or degrades slowly has crossed its critical threshold (a degraded RAID array, a disk or backup problem, an expiry inside two weeks). Run `fleet-runner horizon` on the builder for the list; the horizon verb also pages its own ntfy topic, this is the independent second path."
               runbook_url: docs/runbooks/fleet-observability.md
+
+  - name: runner config that stays different from git for an hour warns, a matching file and a short difference do not
+    interval: 1m
+    input_series:
+      - series: 'fleet_runner_config_drift{instance="b:9100", file="service-pools.json"}'
+        values: "1x200"
+      - series: 'fleet_runner_config_drift{instance="b:9100", file="nginx-upstreams.json"}'
+        values: "0x200"
+      - series: 'fleet_runner_config_drift{instance="b:9100", file="builder-pool.json"}'
+        values: "0x30 1x10 0x160"
+    alert_rule_test:
+      - {eval_time: 50m, alertname: FleetRunnerConfigDrift, exp_alerts: []}
+      - eval_time: 90m
+        alertname: FleetRunnerConfigDrift
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_loops, instance: "b:9100", file: service-pools.json}
+            exp_annotations:
+              summary: "service-pools.json on b:9100 differs from git"
+              description: "The runner config file service-pools.json on the builder has differed from master of the fleet-state repository for an hour. A standby builder is bootstrapped from git, so a promoted standby would run the old file. Run `journalctl -u runner-config-drift.service -n 60` on the builder for the diff, then open a PR that brings fleet-state in line with the live file (or restore the live file from git). A pool's weights adjusted by pool-balance are not drift while the pool has base_weights."
+              runbook_url: docs/runbooks/fleet-observability.md
+
+  - name: a drift check that cannot read the repository says so after three hours, not before
+    interval: 1m
+    input_series:
+      - series: 'fleet_runner_config_check_ok{instance="b:9100"}'
+        values: "0x300"
+    alert_rule_test:
+      - {eval_time: 150m, alertname: FleetRunnerConfigCheckFailing, exp_alerts: []}
+      - eval_time: 200m
+        alertname: FleetRunnerConfigCheckFailing
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_loops, instance: "b:9100"}
+            exp_annotations:
+              summary: "The runner-config drift check on b:9100 cannot read the fleet-state repository"
+              description: "fleet_runner_config_check_ok has been 0 for three hours: the builder cannot fetch master of the private fleet-state repository (credentials, GitHub or network), so whether the live runner config matches git is unknown. Check `journalctl -u runner-config-drift.service -n 20` and `git ls-remote https://github.com/baditaflorin/fleet-state` as root on the builder."
+              runbook_url: docs/runbooks/fleet-observability.md
+
+  - name: a drift check whose timer died is silent after three hours plus the wait, and one that vanished is caught by absent()
+    interval: 1m
+    input_series:
+      - series: 'fleet_runner_config_check_last_run_timestamp_seconds{instance="b:9100"}'
+        values: "600x330"
+    alert_rule_test:
+      - {eval_time: 60m, alertname: FleetRunnerConfigCheckSilent, exp_alerts: []}
+      - {eval_time: 190m, alertname: FleetRunnerConfigCheckSilent, exp_alerts: []}
+      - eval_time: 300m
+        alertname: FleetRunnerConfigCheckSilent
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_loops, instance: "b:9100"}
+            exp_annotations:
+              summary: "The runner-config drift check on b:9100 has not run for 3 hours"
+              description: "runner-config-drift.timer fires hourly; nothing has compared the live runner config with git for 4h 50m 0s. On the builder check `systemctl status runner-config-drift.timer runner-config-drift.service`."
+              runbook_url: docs/runbooks/fleet-observability.md
+
+  - name: a drift check that vanished from Prometheus warns after an hour, not before
+    interval: 1m
+    input_series:
+      - series: 'fleet_runner_config_check_last_run_timestamp_seconds{instance="b:9100"}'
+        values: "0+60x59"
+    alert_rule_test:
+      - {eval_time: 100m, alertname: FleetRunnerConfigNotReporting, exp_alerts: []}
+      - eval_time: 140m
+        alertname: FleetRunnerConfigNotReporting
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_loops}
+            exp_annotations:
+              summary: "No runner-config drift metrics are visible to Prometheus"
+              description: "fleet_runner_config_check_last_run_timestamp_seconds has been absent for an hour: the builder or its node exporter is down, or runner_config_drift.prom is missing or not readable by the exporter."
+              runbook_url: docs/runbooks/fleet-observability.md

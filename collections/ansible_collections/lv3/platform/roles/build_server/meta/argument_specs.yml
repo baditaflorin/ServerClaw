@@ -80,7 +80,7 @@ argument_specs:
       build_server_buildkit_cache_gb:
         type: int
         required: false
-        default: 50
+        default: 25
         description:
           - Soft cache retention target for BuildKit garbage collection.
       build_server_buildkit_registry_mirrors:

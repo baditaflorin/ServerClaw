@@ -22,7 +22,7 @@ def test_role_defaults_capture_cache_paths() -> None:
     assert defaults["build_server_pip_cache_volume"] == "pip-cache"
     assert defaults["build_server_buildkit_service_name"] == "{{ platform_identity.config_prefix }}-buildkitd"
     assert defaults["build_server_buildkit_container_name"] == "{{ platform_identity.config_prefix }}-buildkitd-managed"
-    assert defaults["build_server_buildkit_cache_gb"] == 50
+    assert defaults["build_server_buildkit_cache_gb"] == 25
     assert defaults["build_server_buildkit_legacy_container_names"] == []
     assert defaults["build_server_buildkit_legacy_containers_idle_confirmed"] is False
     assert defaults["build_server_registry_hosts"][0]["hostname"] == "registry.{{ platform_domain }}"

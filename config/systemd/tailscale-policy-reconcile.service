@@ -1,0 +1,17 @@
+[Unit]
+Description=Tailnet policy reconciler: bring the live policy to the merged policy when the change is additive and guarded
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+# 2 = "needs a human" (a merged change that cannot be applied unattended): the alert has already gone out, so the
+# unit is not "failed". 1 (an apply failed) and 3 (could not look) are real errors and show in `systemctl --failed`.
+SuccessExitStatus=2
+TimeoutStartSec=10min
+# One run at a time, here and for a hand-started run.
+ExecStart=/usr/bin/flock -n /run/lock/tailscale-policy-reconcile.lock /usr/local/bin/tailscale-policy-reconcile-run
+UMask=0077
+Nice=10

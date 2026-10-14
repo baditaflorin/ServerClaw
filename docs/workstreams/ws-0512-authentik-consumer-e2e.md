@@ -1369,3 +1369,75 @@ protected all five governed sources with none uncovered. See
 `receipts/live-applies/ws-0512-grafana-sso-apply-20261014-apply-receipt.yaml`.
 This closes Grafana's route repair only; Outline and GlitchTip image gates and
 the broader Authentik/Keycloak retirement checks remain open.
+
+### Recovery email and remaining consumer drift — 2026-10-14
+
+The governed recovery check now passes against `id.example.org`: the recovery
+flow, default-brand binding, login identification-stage binding, and global
+SMTP setting all match the managed contract. One guarded recovery-email request
+returned Authentik HTTP 204, and Gmail metadata confirmed the new reset message
+arrived unread in the Inbox at 2026-10-14 03:30 UTC. The older reset messages
+from October 13 are also in the Inbox, but their links exceed the documented
+20-minute lifetime. No reset URL or password is recorded here.
+
+Fresh strict-TLS browser tests still fail at the two known consumer gaps:
+GlitchTip returns `signup_closed` after Authentik login, and Outline does not
+complete its Engine.IO WebSocket handshake. Read-only inspection confirms
+runtime drift from managed source: GlitchTip still runs image 6.1.3 without
+`ENABLE_SOCIAL_APPS_USER_REGISTRATION`, and Outline still runs image 1.6.1
+with `SERVICES=web,worker,collaboration` (missing `websockets`). The managed
+GlitchTip setting permits social-provider JIT only; local registration and
+organization creation remain disabled. These settings were not applied because
+both live image pins remain security-blocked.
+
+The first GlitchTip candidate retry stopped before compilation or registry
+push because the manifest pointed at a GitHub mirror that does not contain the
+pinned backend tag. PR #385 corrected the source to the authoritative GitLab
+backend and merged after all three Woodpecker checks passed. Tag `v6.2.6` is
+pinned to commit `d3039088e913a591a8e6544a2d2fffc865a9711a`; a regression test
+protects that mapping.
+
+The corrected candidate built and pushed as
+`registry.example.org/patched-runtime/glitchtip:6.2.6-patched-20261012-488e13a6`
+with digest `sha256:3feb6212359e211a5aeb1f171e70779bdb70aa01ec161e557d713eb26ed180a2`.
+Its exact-digest scan found 1 Critical, 89 High, 77 Medium, 19 Low, and 68
+Unknown matches, with zero fixable High/Critical findings. The sole Critical
+is CVE-2026-6653 in Debian Trixie's `libxml2` 2.9.14-derived package. Debian's
+tracker still marks Trixie vulnerable; the candidate therefore failed the
+zero-Critical catalog gate. No catalog entry changed and no live service was
+restarted. The temporary Harbor auth config on the remote builder was removed
+by the build script's exit cleanup.
+
+The official Python slim base image scan found no `libxml2`, and the GlitchTip
+candidate package inventory and repository search found no `lxml` use. The
+package was explicitly added by the patched Dockerfile even though runtime
+only needs `libpq5`; the follow-up removes that unnecessary package and adds a
+regression test. The follow-up candidate is
+`registry.example.org/patched-runtime/glitchtip:6.2.6-patched-20261014-98749262`
+at digest
+`sha256:0794a3cbb4d044e733d4cbc116ba52ab10ddd063614656910b89ebd91f0da442`.
+Its exact-digest scan passed with 0 Critical, 82 High, 75 Medium, 18 Low, 67
+Unknown, and zero fixable High/Critical findings. The tracked scan receipt is
+`receipts/image-scans/2026-10-14-patched-glitchtip-runtime-0794a3cbb4d0.json`;
+the catalog is updated in this branch to `pass_no_critical` and pins that
+digest. This remains a candidate: no live service was changed, and a fresh
+GlitchTip sign-in E2E against the patched image plus the managed
+`ENABLE_SOCIAL_APPS_USER_REGISTRATION` setting is still required before calling
+the consumer fixed. Local registration and organization creation remain off.
+
+When preparing the post-merge apply from a clean checkout, canonical image
+policy validation found that the scan receipt's CycloneDX SBOM and raw Grype
+report were present only as ignored files in the build worktree, not in the
+merged repository. This follow-up commits those exact artifacts, declares their
+paths to WS-0512, and makes the canonical catalog/evidence validation part of
+the existing Woodpecker test suite so a local-only receipt cannot pass CI.
+Production remains unchanged until the complete evidence package passes the
+managed live-apply gates.
+
+The exact-digest Grype summary currently reports 82 High findings against the
+edge-published image budget of 75, with zero fixable High/Critical findings.
+The vulnerability-budget gate therefore rejects deployment even though the
+image has zero Critical findings. No GlitchTip image exception has been
+approved; do not deploy or relabel the image as budget-approved unless a
+refreshed exact-digest scan fits policy or the operator explicitly approves a
+time-bounded exception.

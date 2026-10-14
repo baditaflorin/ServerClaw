@@ -12,6 +12,7 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
+- Lower the BuildKit cache target on the build VM from 50 to 25 GiB (`build_server_buildkit_cache_gb`): at 50 GiB the cache reached ~60 GB, the root filesystem fell below the CI load controller's 10% stop line and every 0mcp Woodpecker pipeline stayed pending for hours (2026-10-13 and 2026-10-14). Applied live (buildctl prune to 25 GB, keepBytes 25 GiB, daemon restarted).
 - Add guarded, no-restart Prometheus scraping for the 0own Proxmox host.
 - Restore the remote validation gateway route to the declared build VM and cap pre-push validation concurrency.
 - Enable least-privilege Gitea Authentik login and verify a non-admin browser session.

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "glitchtip_runtime",
+  "image_ref": "registry.example.org/patched-runtime/glitchtip:6.2.6-patched-20261014-98749262@sha256:0794a3cbb4d044e733d4cbc116ba52ab10ddd063614656910b89ebd91f0da442",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.111.0@sha256:af9f30d1de4ecfbbcd2b674371e8df787879e16832af8ab81551b0bf1ec0ad5b",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.42.4@sha256:e9f29bec38cc856bfd3a7966d2f99711b5b244a531bf121da9de3b47789eecfa",
+  "scanned_on": "2026-10-14",
+  "sbom_receipt": "receipts/sbom/0794a3cbb4d0.cdx.json",
+  "cve_receipt": "receipts/cve/0794a3cbb4d0-20261014T041817Z.grype.json",
+  "summary": {
+    "critical": 0,
+    "high": 82,
+    "medium": 75,
+    "low": 18,
+    "unknown": 67,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 242
+  }
+}

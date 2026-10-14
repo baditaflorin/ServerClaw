@@ -1,0 +1,14 @@
+[Unit]
+Description=Tailnet policy reconciler: every 15 minutes
+
+[Timer]
+# OnBootSec + OnUnitInactiveSec, not OnActiveSec: OnActiveSec has no anchor after a boot and systemd re-bases it on
+# every daemon-reload. OnUnitInactiveSec needs the unit to have run once: the installer starts the service after
+# `enable --now`.
+OnBootSec=6min
+OnUnitInactiveSec=15min
+RandomizedDelaySec=60
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

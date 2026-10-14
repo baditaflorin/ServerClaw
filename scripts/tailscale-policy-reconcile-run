@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# tailscale-policy-reconcile-run: what tailscale-policy-reconcile.service runs on CT108.
+# See docs/runbooks/tailscale-metrics-grants.md ("Unattended reconciler").
+#
+# /root/.fleet-runner.env uses `export KEY=VAL` lines, which systemd's EnvironmentFile cannot parse, so the
+# environment is assembled here (GITHUB_TOKEN is what `gh` needs to read the CI status of a commit).
+#
+# Operator overrides live in /etc/fleet-runner/tailscale-reconcile.env:
+#   FLEET_TS_RECONCILE_REPO_URL   the policy repository (written by the installer; no credentials in it)
+#   FLEET_TS_RECONCILE_ARGS       empty = REPORT ONLY (the default). `--apply` lets it apply additive, guarded,
+#                                 CI-green changes. Removing `--apply` or touching <state-dir>/reconcile/PAUSE stops it.
+#   FLEET_TS_RECONCILE_NTFY_URL   alert topic (default: the edge probe's EDGE_PROBE_NTFY when it is an http(s) URL)
+set -uo pipefail
+LIB=${TS_RECONCILE_LIB:-/usr/local/lib/tailscale-policy-sync}
+# shellcheck disable=SC1091
+[ -f /root/.fleet-runner.env ] && { set -a; . /root/.fleet-runner.env; set +a; }
+# shellcheck disable=SC1091
+[ -f /etc/fleet-runner/tailscale-reconcile.env ] && { set -a; . /etc/fleet-runner/tailscale-reconcile.env; set +a; }
+
+if [ -z "${FLEET_TS_RECONCILE_NTFY_URL:-}" ] && [ -f /etc/default/fleet-edge-probe ]; then
+  u=$(. /etc/default/fleet-edge-probe >/dev/null 2>&1; printf '%s' "${EDGE_PROBE_NTFY:-}")
+  case "$u" in http://*|https://*) export FLEET_TS_RECONCILE_NTFY_URL="$u" ;; esac
+fi
+
+if [ -z "${FLEET_TS_RECONCILE_REPO_URL:-}" ]; then
+  echo "tailscale-policy-reconcile-run: FLEET_TS_RECONCILE_REPO_URL is not set (see /etc/fleet-runner/tailscale-reconcile.env)" >&2
+  exit 3
+fi
+
+# shellcheck disable=SC2086
+exec python3 "$LIB/tailscale_policy_reconcile.py" reconcile ${FLEET_TS_RECONCILE_ARGS:-}
