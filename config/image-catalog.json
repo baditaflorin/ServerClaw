@@ -422,8 +422,8 @@
       "ref": "docker.io/glitchtip/glitchtip:6.1.3@sha256:826337215a97602fcb32df400786b7db8575fd6921bdf686b05133735ed71b58",
       "platform": "linux/amd64",
       "pinned_on": "2026-03-30",
-      "scan_status": "pass_no_critical",
-      "scan_receipt": "receipts/image-scans/2026-03-30-glitchtip-runtime.json",
+      "scan_status": "blocked",
+      "scan_receipt": "receipts/image-scans/2026-10-13-glitchtip-runtime.json",
       "consumers": [
         "collections/ansible_collections/lv3/platform/roles/glitchtip_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",
@@ -1007,19 +1007,8 @@
       "ref": "docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:f6efb212cad3b62f78ca02339f16d8bc28d5bb2fbe792dfc21225c6037d2af8b",
       "platform": "linux/amd64",
       "pinned_on": "2026-03-30",
-      "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-04-13-minio-runtime.json",
-      "exception": {
-        "owner": "Platform operations",
-        "justification": "The pinned upstream MinIO image still reports critical Trivy findings in bundled Go binaries; keep it digest-pinned and review on the next image rotation window.",
-        "compensating_controls": [
-          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
-          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
-        ],
-        "approved_on": "2026-04-14",
-        "expires_on": "2026-04-21",
-        "remediation_plan": "Re-scan and refresh minio_runtime with make upgrade-container-image IMAGE_ID=minio_runtime WRITE=true APPLY=true before the refreshed exception expires."
-      },
+      "scan_status": "blocked",
+      "scan_receipt": "receipts/image-scans/2026-10-13-minio-runtime.json",
       "consumers": [
         "roles/minio_runtime/templates/docker-compose.yml.j2",
         "roles/outline_runtime/templates/docker-compose.yml.j2",
@@ -1270,19 +1259,8 @@
       "ref": "docker.io/outlinewiki/outline:1.6.1@sha256:8ea6637e09f38e31eaceb39479963db258a18f7525c6d522d108636c2c166db1",
       "platform": "linux/amd64",
       "pinned_on": "2026-03-27",
-      "scan_status": "exception_open",
-      "scan_receipt": "receipts/image-scans/2026-03-27-outline-runtime.json",
-      "exception": {
-        "owner": "Platform operations",
-        "justification": "The pinned upstream Outline image still reports critical Trivy findings in Debian 12 packages and bundled Node dependencies; keep it digest-pinned and re-evaluate on the next image review.",
-        "compensating_controls": [
-          "Digest pin keeps the deployed image fixed to the reviewed upstream artifact while the exception is open.",
-          "The service is published only through the shared managed edge instead of exposing the container directly on the public host."
-        ],
-        "approved_on": "2026-03-27",
-        "expires_on": "2026-04-10",
-        "remediation_plan": "Re-scan and refresh outline_runtime with make upgrade-container-image IMAGE_ID=outline_runtime WRITE=true APPLY=true before the exception expires."
-      },
+      "scan_status": "blocked",
+      "scan_receipt": "receipts/image-scans/2026-10-13-outline-runtime.json",
       "consumers": [
         "roles/outline_runtime/templates/docker-compose.yml.j2",
         "scripts/upgrade_container_image.py",

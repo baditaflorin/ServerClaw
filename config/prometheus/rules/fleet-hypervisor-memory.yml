@@ -1,0 +1,43 @@
+# Added 2026-10-13 after the 0mcp hypervisor (pve-0mcp) was found at 3.3% MemAvailable and 99.5% swap with nothing alerting:
+# FleetHypervisorMemoryPressure (node-placement.yml) reads fleet:hypervisor_node_mem_used_percent, which only the 0docker PVE
+# exporter feeds. These rules use the node_exporter series every hypervisor already exposes (role="hypervisor", scraped through
+# the tailnet / Scanopy file_sd), so every fleet's hypervisor is covered, including pve-0mcp.
+groups:
+  - name: fleet_hypervisor_memory
+    rules:
+      - alert: FleetHypervisorMemAvailableLow
+        expr: >-
+          (node_memory_MemAvailable_bytes{role="hypervisor"} / node_memory_MemTotal_bytes{role="hypervisor"}) < 0.05
+        for: 10m
+        labels:
+          severity: warning
+          service: fleet_hypervisor_memory
+        annotations:
+          summary: "Hypervisor {{ $labels.host }} has under 5% memory available"
+          description: "{{ $labels.host }} ({{ $labels.instance }}) has {{ $value | humanizePercentage }} of RAM available for 10 minutes. Guests are being ballooned to their floor and host swap fills up next. Lower balloon targets of idle guests (qm set <id> --balloon <MB>) or shrink guests at the next maintenance window."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: FleetHypervisorMemAvailableCritical
+        expr: >-
+          (node_memory_MemAvailable_bytes{role="hypervisor"} / node_memory_MemTotal_bytes{role="hypervisor"}) < 0.03
+        for: 5m
+        labels:
+          severity: critical
+          service: fleet_hypervisor_memory
+        annotations:
+          summary: "Hypervisor {{ $labels.host }} has under 3% memory available"
+          description: "{{ $labels.host }} ({{ $labels.instance }}) has {{ $value | humanizePercentage }} of RAM available. The kernel OOM killer can pick a guest's QEMU process next. Free memory now: lower balloon targets or shut down a non-critical guest."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: FleetHypervisorSwapExhausted
+        expr: >-
+          (node_memory_SwapFree_bytes{role="hypervisor"} / node_memory_SwapTotal_bytes{role="hypervisor"}) < 0.10
+          and node_memory_SwapTotal_bytes{role="hypervisor"} > 0
+        for: 15m
+        labels:
+          severity: warning
+          service: fleet_hypervisor_memory
+        annotations:
+          summary: "Hypervisor {{ $labels.host }} swap is over 90% used"
+          description: "{{ $labels.host }} ({{ $labels.instance }}) has only {{ $value | humanizePercentage }} of its swap free for 15 minutes. Guest pages are being swapped on the host, which slows every guest and leaves no headroom for a memory spike."
+          runbook_url: docs/runbooks/fleet-observability.md

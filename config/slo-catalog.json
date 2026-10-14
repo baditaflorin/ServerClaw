@@ -224,6 +224,16 @@
       "description": "The shared MinIO S3-compatible object-storage API remains reachable through the public LV3 edge."
     },
     {
+      "id": "neko-availability",
+      "service_id": "neko",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.21:8080/",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Neko signalling endpoint remains healthy on runtime-comms; the public edge separately enforces the Authentik OIDC browser session."
+    },
+    {
       "id": "netbox-availability",
       "service_id": "netbox",
       "indicator": "availability",

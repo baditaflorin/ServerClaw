@@ -70,3 +70,11 @@
   tags: [docker-prune]
   roles:
     - role: lv3.platform.fleet_docker_prune
+
+- name: Hypervisor memory reclaim timer (ballooning hypervisors)
+  hosts: fleet_hypervisor_memory_reclaim_hosts
+  serial: 1
+  gather_facts: false
+  tags: [memory-reclaim]
+  roles:
+    - role: lv3.platform.fleet_hypervisor_memory_reclaim

@@ -1,0 +1,81 @@
+# promtool unit tests for FleetRootFilesystemFillsWithin14Days (config/prometheus/rules/fleet-disk.yml).
+# Samples are one a minute so the 5 minute instant-vector lookback never drops the series; the 3 day regression
+# window therefore sees up to 4320 samples. "S-Dx5000" means a value that starts at S and falls by D per sample.
+rule_files:
+  - ../../config/prometheus/rules/fleet-disk.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a disk that fills within 14 days at its 3-day trend warns after six hours, not before
+    interval: 1m
+    input_series:
+      # 100 GB disk, 40 GB free, losing about 3 GB a day (2083333 bytes a minute): 40 - 42 < 0 within 14 days
+      - series: 'node_filesystem_avail_bytes{instance="db:9100",device="/dev/sda1",mountpoint="/",fstype="ext4"}'
+        values: "40000000000-2083333x5000"
+      - series: 'node_filesystem_size_bytes{instance="db:9100",device="/dev/sda1",mountpoint="/",fstype="ext4"}'
+        values: "100000000000x5000"
+    alert_rule_test:
+      - {eval_time: 5h, alertname: FleetRootFilesystemFillsWithin14Days, exp_alerts: []}
+      - eval_time: 8h
+        alertname: FleetRootFilesystemFillsWithin14Days
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_disk, instance: "db:9100", device: /dev/sda1, mountpoint: /, fstype: ext4}
+            exp_annotations:
+              summary: "Root filesystem on db:9100 fills up within 14 days at its 3-day trend"
+              description: "At the rate of the last 3 days (and the last 24 hours agree) db:9100 would have -2.794GiB of free space 14 days from now (negative means it runs out of space before then). The 24-hour alert only warns one day ahead; this leaves time to prune data or order storage."
+              runbook_url: docs/runbooks/docker-runtime-disk-pressure.md
+
+  - name: a disk that loses space too slowly to fill within 14 days stays quiet
+    interval: 1m
+    input_series:
+      # 40 GB free, losing 1 GB a day: still 26 GB free in 14 days
+      - series: 'node_filesystem_avail_bytes{instance="slow:9100",device="/dev/sda1",mountpoint="/",fstype="ext4"}'
+        values: "40000000000-694444x5000"
+      - series: 'node_filesystem_size_bytes{instance="slow:9100",device="/dev/sda1",mountpoint="/",fstype="ext4"}'
+        values: "100000000000x5000"
+    alert_rule_test:
+      - {eval_time: 24h, alertname: FleetRootFilesystemFillsWithin14Days, exp_alerts: []}
+      - {eval_time: 70h, alertname: FleetRootFilesystemFillsWithin14Days, exp_alerts: []}
+
+  - name: a disk that is more than 40% free stays quiet even when its trend says it will fill
+    interval: 1m
+    input_series:
+      # 60% free at the start, losing 5 GB a day (3472222 bytes a minute): the trend reaches 60 - 70 < 0 in 14 days, but
+      # the disk is still 48% free at the end of the test, so only the 40% guard keeps it quiet
+      - series: 'node_filesystem_avail_bytes{instance="half:9100",device="/dev/sda1",mountpoint="/",fstype="ext4"}'
+        values: "60000000000-3472222x5000"
+      - series: 'node_filesystem_size_bytes{instance="half:9100",device="/dev/sda1",mountpoint="/",fstype="ext4"}'
+        values: "100000000000x5000"
+    alert_rule_test:
+      - {eval_time: 24h, alertname: FleetRootFilesystemFillsWithin14Days, exp_alerts: []}
+      - {eval_time: 70h, alertname: FleetRootFilesystemFillsWithin14Days, exp_alerts: []}
+
+  - name: a stable disk and a one-off step older than three days raise nothing
+    interval: 1m
+    input_series:
+      # 40 GB free, dropped once by 30 GB at minute 100 and flat for the next 4 days
+      - series: 'node_filesystem_avail_bytes{instance="step:9100",device="/dev/sda1",mountpoint="/",fstype="ext4"}'
+        values: "40000000000x100 10000000000x6000"
+      - series: 'node_filesystem_size_bytes{instance="step:9100",device="/dev/sda1",mountpoint="/",fstype="ext4"}'
+        values: "100000000000x6100"
+      - series: 'node_filesystem_avail_bytes{instance="flat:9100",device="/dev/sda1",mountpoint="/",fstype="ext4"}'
+        values: "30000000000x6100"
+      - series: 'node_filesystem_size_bytes{instance="flat:9100",device="/dev/sda1",mountpoint="/",fstype="ext4"}'
+        values: "100000000000x6100"
+    alert_rule_test:
+      - {eval_time: 98h, alertname: FleetRootFilesystemFillsWithin14Days, exp_alerts: []}
+
+  - name: a one-off step older than a day stays quiet even while the 3-day trend is still steep
+    interval: 1m
+    input_series:
+      # 50 GB free, one drop of 40 GB at minute 1000 (about 17 h in), flat afterwards. The step stays inside the 24 h window
+      # until about 41 h, so a warning in between is a real change; from 48 h the last 24 h are flat at 10 GB while the 3-day
+      # window still holds the step (steep, negative): the 3-day rule alone would warn here (verified by mutation)
+      - series: 'node_filesystem_avail_bytes{instance="oldstep:9100",device="/dev/md2",mountpoint="/",fstype="ext4"}'
+        values: "50000000000x1000 10000000000x4000"
+      - series: 'node_filesystem_size_bytes{instance="oldstep:9100",device="/dev/md2",mountpoint="/",fstype="ext4"}'
+        values: "100000000000x5000"
+    alert_rule_test:
+      - {eval_time: 48h, alertname: FleetRootFilesystemFillsWithin14Days, exp_alerts: []}
+      - {eval_time: 60h, alertname: FleetRootFilesystemFillsWithin14Days, exp_alerts: []}

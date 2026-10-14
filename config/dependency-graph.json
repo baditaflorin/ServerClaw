@@ -1344,7 +1344,7 @@
       "from": "neko",
       "to": "authentik",
       "type": "soft",
-      "description": "Neko operator access is controlled through Authentik OIDC client configuration for Tailscale headscale management network."
+      "description": "NGINX Edge requires the Authentik OIDC session and maps each allowed email to that operator's assigned Neko instance."
     },
     {
       "from": "neko",

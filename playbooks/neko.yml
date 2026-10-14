@@ -39,12 +39,16 @@
   hosts: "{{ 'docker-runtime-staging' if (env | default('production')) == 'staging' else 'runtime-comms' }}"
   become: true
   gather_facts: true
+  any_errors_fatal: true
   tags:
     - tier-1
     - automation
     - service-neko
 
   pre_tasks:
+    - name: Guard destructive Neko reconciliation inputs
+      ansible.builtin.import_tasks: ../collections/ansible_collections/lv3/platform/playbooks/_includes/neko_input_guard.yml
+
     - name: Run shared preflight checks
       ansible.builtin.import_tasks: tasks/preflight.yml
       vars:
@@ -82,6 +86,7 @@
   hosts: "{{ 'nginx-staging' if (env | default('production')) == 'staging' else 'nginx' }}"
   become: true
   gather_facts: true
+  any_errors_fatal: true
   tags:
     - tier-2
     - networking
@@ -90,6 +95,10 @@
     - "{{ playbook_dir }}/../inventory/group_vars/platform.yml"
 
   pre_tasks:
+    - name: Guard destructive Neko reconciliation inputs
+      ansible.builtin.import_tasks: ../collections/ansible_collections/lv3/platform/playbooks/_includes/neko_input_guard.yml
+      tags: [neko-edge-publication]
+
     - name: Run shared preflight checks
       ansible.builtin.import_tasks: tasks/preflight.yml
       vars:
@@ -97,6 +106,7 @@
         playbook_execution_emit_audit: false
         required_hosts:
           - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+      tags: [neko-edge-publication]
 
   roles:
     - role: lv3.platform.nginx_edge_publication
@@ -109,14 +119,25 @@
         owner: root
         group: root
         mode: "0644"
+      register: neko_nginx_site
+      tags: [neko-edge-publication]
 
     - name: Enable browser.{{ platform_domain }} site
       ansible.builtin.file:
         src: /etc/nginx/sites-available/browser.{{ platform_domain }}.conf
         dest: /etc/nginx/sites-enabled/browser.{{ platform_domain }}.conf
         state: link
+      tags: [neko-edge-publication]
+
+    - name: Validate NGINX configuration before reloading
+      ansible.builtin.command:
+        argv: [nginx, -t]
+      changed_when: false
+      tags: [neko-edge-publication]
 
     - name: Reload nginx to apply browser.{{ platform_domain }} site
       ansible.builtin.service:
         name: nginx
         state: reloaded
+      when: neko_nginx_site.changed
+      tags: [neko-edge-publication]

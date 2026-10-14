@@ -714,7 +714,7 @@ sbom-refresh:
 
 upgrade-container-image:
 	@test -n "$(IMAGE_ID)" || (echo "set IMAGE_ID=<image-id>"; exit 1)
-	python3 $(REPO_ROOT)/scripts/upgrade_container_image.py --image-id "$(IMAGE_ID)" $(if $(IMAGE_TAG),--tag "$(IMAGE_TAG)",) $(if $(filter true,$(WRITE)),--write,) $(if $(filter true,$(APPLY)),--apply,) $(if $(filter true,$(SKIP_ARTIFACT_CACHE)),--skip-artifact-cache,) $(if $(EXCEPTION_JUSTIFICATION),--exception-justification "$(EXCEPTION_JUSTIFICATION)",) $(if $(EXCEPTION_REASON),--exception-reason "$(EXCEPTION_REASON)",) $(if $(EXCEPTION_OWNER),--exception-owner "$(EXCEPTION_OWNER)",) $(if $(EXCEPTION_EXPIRES_ON),--exception-expires-on "$(EXCEPTION_EXPIRES_ON)",) $(if $(EXCEPTION_REVIEW_BY),--exception-review-by "$(EXCEPTION_REVIEW_BY)",) $(if $(EXCEPTION_CONTROLS_JSON),--exception-controls-json '$(EXCEPTION_CONTROLS_JSON)',) $(if $(EXCEPTION_REMEDIATION_PLAN),--exception-remediation-plan "$(EXCEPTION_REMEDIATION_PLAN)",)
+	python3 $(REPO_ROOT)/scripts/upgrade_container_image.py --image-id "$(IMAGE_ID)" $(if $(IMAGE_TAG),--tag "$(IMAGE_TAG)",) $(if $(filter true,$(REFRESH_SCAN_ONLY)),--refresh-scan-only,) $(if $(filter true,$(RENEW_EXISTING_EXCEPTION)),--renew-existing-exception,) $(if $(filter true,$(WRITE)),--write,) $(if $(filter true,$(APPLY)),--apply,) $(if $(filter true,$(SKIP_ARTIFACT_CACHE)),--skip-artifact-cache,) $(if $(EXCEPTION_JUSTIFICATION),--exception-justification "$(EXCEPTION_JUSTIFICATION)",) $(if $(EXCEPTION_REASON),--exception-reason "$(EXCEPTION_REASON)",) $(if $(EXCEPTION_OWNER),--exception-owner "$(EXCEPTION_OWNER)",) $(if $(EXCEPTION_EXPIRES_ON),--exception-expires-on "$(EXCEPTION_EXPIRES_ON)",) $(if $(EXCEPTION_REVIEW_BY),--exception-review-by "$(EXCEPTION_REVIEW_BY)",) $(if $(EXCEPTION_CONTROLS_JSON),--exception-controls-json '$(EXCEPTION_CONTROLS_JSON)',) $(if $(EXCEPTION_REMEDIATION_PLAN),--exception-remediation-plan "$(EXCEPTION_REMEDIATION_PLAN)",)
 
 pin-image:
 	@test -n "$(IMAGE)" || (echo "set IMAGE=<registry/repository:tag>"; exit 1)
@@ -1564,10 +1564,8 @@ converge-livekit:
 converge-neko:
 	$(MAKE) preflight WORKFLOW=converge-neko
 	$(MAKE) generate-edge-static-sites
-	@echo "Syncing Neko assignments from Authentik (--dry-run to preview)..."
-	python3 $(REPO_ROOT)/scripts/neko_tool.py sync-from-authentik \
-	  --authentik-url "https://id.$(PLATFORM_DOMAIN)" \
-	  --group "$(PLATFORM_CONFIG_PREFIX)-admins"
+	@echo "Reconciling Neko assignments from Authentik into the selected private overlay..."
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/neko_tool.py --json sync-from-authentik
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/neko.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
@@ -2310,8 +2308,9 @@ docker-dev-reset: ## Destroy and recreate Docker dev environment
 publish-serverclaw: ## Dry-run: sanitize repo and check for leaks (no push)
 	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/publish_to_serverclaw.py
 
-publish-serverclaw-push: ## Sanitize and push to public ServerClaw repo
-	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/publish_to_serverclaw.py --push
+publish-serverclaw-push: ## Sanitize and push a branch for a protected-branch PR (requires BRANCH=...)
+	@test -n "$(BRANCH)" || { echo "Set BRANCH=codex/serverclaw-publish-<date>" >&2; exit 2; }
+	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/publish_to_serverclaw.py --push --branch "$(BRANCH)"
 
 audit-sanitization: ## Check publication sanitization coverage for drift
 	uv run --with pyyaml python3 $(REPO_ROOT)/scripts/audit_sanitization_coverage.py

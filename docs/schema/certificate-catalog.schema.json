@@ -44,7 +44,9 @@
             "type": "string",
             "enum": [
               "active",
-              "planned"
+              "planned",
+              "lan_only",
+              "tls_pending"
             ]
           },
           "summary": {

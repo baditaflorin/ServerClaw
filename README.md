@@ -32,7 +32,7 @@ monitored, and recoverable from a single repository.
 | Field | Value |
 | --- | --- |
 | Repository version | `0.179.51` |
-| Platform version | `0.179.50` |
+| Platform version | `0.179.51` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -58,6 +58,7 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
+| `grafana_sso` | `2026-10-14-ws-0512-grafana-sso-live-apply` |
 | `fork_services` | `2026-04-27-ws-0372-0fork-services-all-7-deployed` |
 | `restic_config_backup` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
 | `repo_intake` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
@@ -77,7 +78,6 @@ monitored, and recoverable from a single repository.
 | `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 | `ops_portal` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
 | `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
-| `mail_platform` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
 
 Showing 20 of 187 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
@@ -90,7 +90,7 @@ Showing 20 of 187 capability receipts. Full history: [live-apply evidence histor
 | Field | Value |
 | --- | --- |
 | Repository version | `0.179.51` |
-| Platform version | `0.179.50` |
+| Platform version | `0.179.51` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -357,7 +357,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 347 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 350 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |

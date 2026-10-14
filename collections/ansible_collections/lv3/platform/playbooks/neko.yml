@@ -15,7 +15,9 @@
 #       └─ WebRTC media (UDP range per instance)
 #
 # Instance lifecycle:
-#   - Add entry to neko_instances in inventory/group_vars/platform.yml
+#   - The operator instance derives from platform_operator_email
+#   - Add deployment-specific extra instances to the selected local overlay's
+#     sibling neko.yml (for example .local/deployments/<slug>/neko.yml)
 #   - Run this playbook → container created + existing Authentik account assigned
 #   - Remove entry → container destroyed + Authentik assignment removed
 #
@@ -29,9 +31,13 @@
   hosts: "runtime-comms"
   become: true
   gather_facts: true
+  any_errors_fatal: true
   tags: [tier-1, automation, service-neko]
 
   pre_tasks:
+    - name: Guard destructive Neko reconciliation inputs
+      ansible.builtin.import_tasks: _includes/neko_input_guard.yml
+
     - name: Run shared preflight checks
       import_tasks: tasks/preflight.yml
       tags: [preflight, neko]
@@ -80,7 +86,12 @@
 - name: "Authentik Assignment Lifecycle for Neko Instances"
   hosts: localhost
   gather_facts: false
+  any_errors_fatal: true
   tags: [tier-2, authentik, service-neko]
+
+  pre_tasks:
+    - name: Guard destructive Neko reconciliation inputs
+      ansible.builtin.import_tasks: _includes/neko_input_guard.yml
 
   vars:
     _neko_authentik_url: "{{ authentik_oidc_base_url | default('https://id.' + platform_domain) }}"
@@ -168,8 +179,13 @@
   hosts: "nginx"
   become: true
   gather_facts: false
-  tags: [tier-2, networking, service-neko]
+  any_errors_fatal: true
+  tags: [tier-2, networking, service-neko, neko-edge-publication]
   serial: 1
+
+  pre_tasks:
+    - name: Guard destructive Neko reconciliation inputs
+      ansible.builtin.import_tasks: _includes/neko_input_guard.yml
 
   tasks:
     - name: Render browser.{{ platform_domain }} NGINX site configuration
@@ -235,7 +251,12 @@
   hosts: "runtime-comms"
   become: true
   gather_facts: false
+  any_errors_fatal: true
   tags: [tier-3, verify, service-neko]
+
+  pre_tasks:
+    - name: Guard destructive Neko reconciliation inputs
+      ansible.builtin.import_tasks: _includes/neko_input_guard.yml
 
   tasks:
     - name: Check all configured Neko containers are running
@@ -285,5 +306,5 @@
           - "After login, NGINX routes X-Auth-Request-Email to their container."
           - "Users not assigned a container receive HTTP 403."
           - ""
-          - "To add a user: add entry to neko_instances in"
-          - "inventory/group_vars/platform.yml and re-run this playbook."
+          - "To add a user: update the selected deployment-local neko.yml"
+          - "overlay and re-run this playbook."

@@ -478,6 +478,21 @@
       "notes": "Repo-managed MinIO stores shared service objects, bucket metadata, and bucket-level lifecycle policy state for Loki, Langfuse exports, Gitea LFS, and RAG staging."
     },
     {
+      "id": "neko-operator-browser-profiles",
+      "service": "neko",
+      "name": "Per-operator Neko browser profiles and cache",
+      "class": "confidential",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/neko/instances/<instance>/cache",
+        "/opt/neko/instances/<instance>/config"
+      ],
+      "notes": "Per-operator browser state may include visited-site data and authenticated cookies. The instance mapping isolates each Authentik user, but no finite retention or backup contract is currently declared; treat the profile as sensitive and do not copy it into diagnostics or backups without an approved retention plan."
+    },
+    {
       "id": "netbox-change-log",
       "service": "netbox",
       "name": "NetBox object change log",

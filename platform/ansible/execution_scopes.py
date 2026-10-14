@@ -937,6 +937,60 @@ def _resolve_identity_override(repo_root: Path) -> list[str]:
     return []
 
 
+def _resolve_neko_override(repo_root: Path) -> list[str]:
+    """Load only the Neko overlay colocated with the selected identity.
+
+    Instance emails are deployment data, not committed inventory. Keeping the
+    overlay adjacent to the selected identity prevents a shared checkout from
+    accidentally mixing Neko assignments between deployments.
+    """
+    local_root = local_overlay_root(repo_root)
+    explicit_neko = os.environ.get("PLATFORM_NEKO_OVERLAY", "").strip()
+    if explicit_neko:
+        neko_path = Path(explicit_neko).expanduser()
+        if not neko_path.is_absolute():
+            neko_path = local_root / neko_path.as_posix().removeprefix(".local/")
+        neko_path = neko_path.resolve()
+        if not neko_path.is_relative_to(local_root.resolve()):
+            raise AnsibleExecutionScopeError("PLATFORM_NEKO_OVERLAY must resolve inside the private .local overlay")
+        if not neko_path.is_file():
+            raise AnsibleExecutionScopeError(f"explicit PLATFORM_NEKO_OVERLAY is not a file: {neko_path}")
+        return _validated_neko_overlay_args(neko_path)
+
+    overlay_env = os.environ.get("PLATFORM_IDENTITY_OVERLAY", "").strip()
+    if overlay_env:
+        identity_path = Path(overlay_env).expanduser()
+        if not identity_path.is_absolute():
+            identity_path = local_root / identity_path.as_posix().removeprefix(".local/")
+        identity_path = identity_path.resolve()
+        if not identity_path.is_file():
+            raise AnsibleExecutionScopeError(
+                f"explicit PLATFORM_IDENTITY_OVERLAY is not a file: {identity_path}"
+            )
+    else:
+        identity_path = local_root / "identity.yml"
+        if not identity_path.is_file():
+            return []
+
+    neko_path = identity_path.parent / "neko.yml"
+    if not neko_path.is_file():
+        return []
+    return _validated_neko_overlay_args(neko_path)
+
+
+def _validated_neko_overlay_args(neko_path: Path) -> list[str]:
+    payload = load_yaml(neko_path)
+    if not isinstance(payload, dict):
+        raise AnsibleExecutionScopeError(f"Neko overlay must contain a YAML mapping: {neko_path}")
+    allowed = {"neko_instances", "neko_allow_empty_instances"}
+    unexpected = sorted(set(payload) - allowed)
+    if unexpected:
+        raise AnsibleExecutionScopeError(
+            "Neko overlay may define only " + ", ".join(sorted(allowed)) + "; unexpected keys: " + ", ".join(unexpected)
+        )
+    return ["-e", f"@{neko_path}"]
+
+
 def run_planned_playbook(
     plan: PlannedPlaybookExecution,
     *,
@@ -961,6 +1015,7 @@ def run_planned_playbook(
         f"env={plan.env}",
         *(passthrough_args or []),
         *_resolve_identity_override(repo_root),
+        *_resolve_neko_override(repo_root),
     ]
     with _reserved_lane(plan, repo_root=repo_root, lane_registry=lane_registry) as lane_reservation:
         if lane_reservation is not None and lane_reservation.status != "acquired":

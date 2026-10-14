@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "restic-restore-verify-20261014T005902Z",
+  "recorded_at": "2026-10-14T00:59:02Z",
+  "recorded_on": "2026-10-14",
+  "recorded_by": "codex",
+  "restored_at": "2026-10-14T00:59:02Z",
+  "result": "pass",
+  "source_id": "receipts",
+  "snapshot_id": "19c9facc0f34af9092598437f954b4c16b5e727ff4981f746c620e0366656888",
+  "snapshot_recorded_at": "2026-10-14T00:57:55Z",
+  "restore_path": "/var/lib/lv3/restic-config-backup/restore-verification/20261014T005902Z/restore/srv/platform_server/receipts",
+  "restored_file_count": 84,
+  "expected_minimum_files": 1
+}

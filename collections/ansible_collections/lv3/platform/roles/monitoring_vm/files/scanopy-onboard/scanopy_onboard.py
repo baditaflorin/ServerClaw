@@ -45,7 +45,7 @@ CONF = {
     "min_runs": int(os.environ.get("ONBOARD_MIN_UNCOVERED_RUNS", "2")),
     "slot_from": os.environ.get("ONBOARD_SLOT_FROM", "12:00"),
     "wait_seconds": int(os.environ.get("ONBOARD_WAIT_SECONDS", "150")),
-    "ssh_timeout": int(os.environ.get("ONBOARD_SSH_TIMEOUT", "40")),
+    "ssh_timeout": int(os.environ.get("ONBOARD_SSH_TIMEOUT", "150")),  # 0own needs ~60 s to list during its nightly backups
     "install_timeout": int(os.environ.get("ONBOARD_INSTALL_TIMEOUT", "480")),
 }
 BACKOFF_FIRST = 1800
@@ -333,11 +333,16 @@ def main():
         all_listed = True
         for fleet in cfg["fleets"]:
             vals = m["fleets"].setdefault(fleet["name"], {"list_ok": 0, "running": 0})
-            try:
-                rc, out, err = ssh(fleet, "list")
-                listing = json.loads(out) if rc == 0 else None
-            except (subprocess.TimeoutExpired, ValueError, OSError) as e:
-                listing, err = None, str(e)
+            listing, err = None, ""
+            for attempt in (1, 2):  # one retry: a single SSH timeout must not fail the whole run
+                try:
+                    rc, out, err = ssh(fleet, "list")
+                    listing = json.loads(out) if rc == 0 else None
+                except (subprocess.TimeoutExpired, ValueError, OSError) as e:
+                    listing, err = None, str(e)
+                if listing is not None:
+                    break
+                log(f"warning: {fleet['name']}: listing attempt {attempt} failed: {(err or '').strip()[:120]}")
             if listing is None:
                 log(f"ERROR {fleet['name']}: could not list guests: {(err or '').strip()[:200]}")
                 all_listed = False

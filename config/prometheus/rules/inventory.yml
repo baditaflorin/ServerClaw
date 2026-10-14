@@ -218,3 +218,23 @@ groups:
         annotations:
           summary: "scanopy_backup_* metrics are missing"
           description: "The scanopy-backup textfile metrics are not being scraped (timer not running, no successful run yet, textfile removed, or monitoring-lv3 node_exporter not scraped). Check `systemctl status scanopy-backup.timer` on monitoring-lv3."
+
+      - alert: ScanopyBackupDrillStale
+        expr: (time() - scanopy_backup_drill_last_success_timestamp_seconds) > 10 * 86400
+        for: 1h
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "The Scanopy backup has not been proven restorable for more than 10 days"
+          description: "scanopy-backup-drill restores the newest dump into a throwaway Postgres container every Sunday 04:10 UTC and counts the core tables; the last successful drill is older than 10 days, so the dumps may no longer restore (version drift, a broken statement) or the drill itself cannot run. Check `journalctl -u scanopy-backup-drill` on monitoring-lv3, that Docker works there and the image postgres:17-alpine is available, and run it by hand with `sudo systemctl start scanopy-backup-drill.service`."
+
+      - alert: ScanopyBackupDrillMetricsAbsent
+        expr: absent(scanopy_backup_drill_last_success_timestamp_seconds)
+        for: 1h
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "scanopy_backup_drill_* metrics are missing"
+          description: "The scanopy-backup-drill textfile metrics are not being scraped (timer not running, no successful drill yet, textfile removed or unreadable by node_exporter, or monitoring-lv3 node_exporter not scraped). Check `systemctl status scanopy-backup-drill.timer` on monitoring-lv3."

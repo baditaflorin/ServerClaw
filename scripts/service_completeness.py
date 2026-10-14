@@ -404,6 +404,73 @@ def changed_services_in_catalog(path: str, base_ref: str) -> set[str] | None:
     except (json.JSONDecodeError, OSError):
         return None
 
+    if path == "config/dependency-graph.json":
+        if {key: value for key, value in before.items() if key not in {"nodes", "edges"}} != {
+            key: value for key, value in after.items() if key not in {"nodes", "edges"}
+        }:
+            return None
+
+        changed_services: set[str] = set()
+        before_nodes = before.get("nodes", [])
+        after_nodes = after.get("nodes", [])
+        if not isinstance(before_nodes, list) or not isinstance(after_nodes, list):
+            return None
+        if before_nodes or after_nodes:
+            valid_nodes = all(
+                isinstance(row, dict) and isinstance(row.get("id"), str) and isinstance(row.get("service"), str)
+                for row in (*before_nodes, *after_nodes)
+            )
+            if not valid_nodes:
+                return None
+            before_by_id = {row["id"]: row for row in before_nodes}
+            after_by_id = {row["id"]: row for row in after_nodes}
+            if len(before_by_id) != len(before_nodes) or len(after_by_id) != len(after_nodes):
+                return None
+            for node_id in set(before_by_id) | set(after_by_id):
+                before_node = before_by_id.get(node_id)
+                after_node = after_by_id.get(node_id)
+                if before_node != after_node:
+                    if before_node is not None:
+                        changed_services.add(before_node["service"])
+                    if after_node is not None:
+                        changed_services.add(after_node["service"])
+
+        before_edges = before.get("edges", [])
+        after_edges = after.get("edges", [])
+        if not isinstance(before_edges, list) or not isinstance(after_edges, list):
+            return None
+        if before_edges or after_edges:
+
+            def edge_key(row: dict[str, Any]) -> tuple[str, str, str]:
+                return (row["from"], row["to"], row["type"])
+
+            if not all(
+                isinstance(row, dict)
+                and all(isinstance(row.get(key), str) and row.get(key) for key in ("from", "to", "type"))
+                for row in (*before_edges, *after_edges)
+            ):
+                return None
+            before_by_key = {edge_key(row): row for row in before_edges}
+            after_by_key = {edge_key(row): row for row in after_edges}
+            if len(before_by_key) != len(before_edges) or len(after_by_key) != len(after_edges):
+                return None
+            if set(before_by_key) != set(after_by_key):
+                return None
+            for key in before_by_key:
+                before_edge = before_by_key[key]
+                after_edge = after_by_key[key]
+                if before_edge != after_edge:
+                    before_without_description = {
+                        name: value for name, value in before_edge.items() if name != "description"
+                    }
+                    after_without_description = {
+                        name: value for name, value in after_edge.items() if name != "description"
+                    }
+                    if before_without_description != after_without_description:
+                        return None
+                    changed_services.add(key[0])
+        return changed_services
+
     collection_key, record_key, service_key = SERVICE_SCOPED_COMPLETENESS_INPUTS[path]
     before_collection = before.get(collection_key)
     after_collection = after.get(collection_key)
@@ -784,10 +851,12 @@ def service_ids_for_changed_paths(
 ) -> list[str] | None:
     """Scope completeness checks to changed services; return None for global validation.
 
-    Catalog changes affect the whole service inventory. Service-role and
-    service-named documentation changes can use the same checklist for only the
-    affected services. Test-only edits do not change runtime completeness and
-    therefore must not make unrelated legacy service gaps block a test fix.
+    Structural catalog changes affect the whole service inventory. A
+    dependency-graph edge description edit can scope to its unchanged source
+    service; edge additions, removals, and rewiring remain global. Service-role
+    and service-named documentation changes can use the same checklist for only
+    the affected services. Test-only edits do not change runtime completeness
+    and therefore must not make unrelated legacy service gaps block a test fix.
     Changes outside service-owned surfaces return an empty list; validator
     behavior is covered by its own tests and does not force unrelated legacy
     services through an all-services audit.

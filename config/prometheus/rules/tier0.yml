@@ -35,3 +35,146 @@ groups:
           summary: "Tier-0 snapshot metrics are missing"
           description: "tier0_snapshot_* metrics are not being scraped from CT108 (timer disabled, textfile removed, or CT108 not scraped)."
           runbook_url: docs/runbooks/tier0-replication.md
+
+  - name: tier0_ci_replication
+    rules:
+      - alert: Tier0CISnapshotStale
+        expr: (time() - tier0_ci_snapshot_last_success_timestamp_seconds) > 10800
+        for: 10m
+        labels:
+          severity: critical
+          service: tier0_replication
+        annotations:
+          summary: "No verified CI standby snapshot for over 3 hours"
+          description: "The hourly Woodpecker (ci.0exec) slim-database + config snapshot on CT108 has not verified on any replica for 3+ hours. Run `journalctl -u tier0-ci-snapshot` on CT108. Expected while the 0docker site is down."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0CIReplicaMissing
+        expr: tier0_ci_snapshot_replicas_ok < tier0_ci_snapshot_replicas_total
+        for: 2h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "A CI standby replica did not verify the latest snapshot"
+          description: "{{ $value }} of the configured replica sites verified the latest CI snapshot; a site is unreachable or full."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+
+  - name: tier0_key_escrow
+    rules:
+      - alert: Tier0EscrowStale
+        expr: (time() - tier0_escrow_last_success_timestamp_seconds) > 129600
+        for: 10m
+        labels:
+          severity: critical
+          service: tier0_replication
+        annotations:
+          summary: "No verified vault key escrow for over 36 hours"
+          description: "The daily encrypted escrow of the vault master key and configuration (tier0-key-escrow on CT108) has not verified on any replica for 36+ hours. Without a current escrow a rotated key or token would be unrecoverable. Run `journalctl -u tier0-key-escrow` on CT108."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0EscrowReplicaMissing
+        expr: tier0_escrow_replicas_ok < tier0_escrow_replicas_total
+        for: 26h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "A replica site did not verify the latest key escrow"
+          description: "{{ $value }} of the configured replica sites verified the latest escrow; a site is unreachable or full."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0EscrowMetricsAbsent
+        expr: absent(tier0_escrow_last_success_timestamp_seconds)
+        for: 36h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "Tier-0 key escrow metrics are missing"
+          description: "tier0_escrow_* metrics are not being scraped from CT108 (timer disabled or textfile removed)."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+  - name: dns_as_code
+    rules:
+      - alert: DnsDriftDetected
+        expr: dns_drift_rrsets > 0
+        for: 2h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "Live DNS differs from fleet-state dns/*.json"
+          description: "{{ $value }} record set(s) differ. Either someone changed DNS by hand (export and commit it, or `dns-reconcile.py apply`) or a failover repoint was not recorded. See docs/runbooks/dns-failover.md in fleet-state; details: `journalctl -u dns-drift-check` on CT108."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: DnsDriftCheckStale
+        expr: (time() - dns_drift_last_run_timestamp_seconds) > 10800
+        for: 10m
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "DNS drift check has not run for 3 hours"
+          description: "dns-drift-check.timer on CT108 is not producing metrics (git clone, vault token or Hetzner API failing)."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+  - name: tier0_gateway_replication
+    rules:
+      - alert: Tier0GatewaySnapshotStale
+        expr: (time() - tier0_gateway_snapshot_last_success_timestamp_seconds) > 10800
+        for: 10m
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "No verified gateway standby snapshot for over 3 hours"
+          description: "The hourly encrypted snapshot of the VM104 nginx config and certificates (tier0-gateway-snapshot on CT108) has not verified on any replica for 3+ hours. See docs/runbooks/gateway-standby.md in fleet-state."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0GatewayReplicaMissing
+        expr: tier0_gateway_snapshot_replicas_ok < tier0_gateway_snapshot_replicas_total
+        for: 2h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "A replica site did not verify the latest gateway snapshot"
+          description: "{{ $value }} of the configured replica sites verified the latest gateway snapshot."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+  - name: gateway_certificates
+    rules:
+      - alert: GatewayCertExpiringSoon
+        expr: (fleet_gateway_cert_not_after_timestamp_seconds - time()) < 14 * 86400
+        for: 1h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "Gateway certificate {{ $labels.cert }} expires in under 14 days"
+          description: "A certificate the active VM104 nginx config loads has less than 14 days left, so its renewal is not working. acme.sh cron output goes to /dev/null: run the renewal by hand as the acme user on VM104 to see the error. Metrics come from the hourly gateway snapshot on CT108."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: GatewayCertExpiryCritical
+        expr: (fleet_gateway_cert_not_after_timestamp_seconds - time()) < 3 * 86400
+        for: 10m
+        labels:
+          severity: critical
+          service: tier0_replication
+        annotations:
+          summary: "Gateway certificate {{ $labels.cert }} expires in under 3 days (or already expired)"
+          description: "Visitors will see certificate errors. Renew now on VM104 (acme.sh or certbot) and reload nginx."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: GatewayCertFileMissing
+        expr: fleet_gateway_cert_missing > 0
+        for: 3h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "Gateway nginx references a certificate that is missing or unreadable: {{ $labels.cert }}"
+          description: "The active config names a certificate file that does not exist or is not valid PEM in the latest snapshot; nginx would refuse to start with it."
+          runbook_url: docs/runbooks/tier0-replication.md

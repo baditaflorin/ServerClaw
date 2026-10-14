@@ -10,8 +10,15 @@ placeholders before publishing.
 ## Prerequisites
 
 - Git remote `serverclaw` configured: `git remote add serverclaw git@github.com:baditaflorin/ServerClaw.git`
-- On `main` branch with clean working tree
+- Use a clean worktree based on the intended `origin/main` commit.
 - PyYAML available (installed automatically via `uv run --with pyyaml`)
+
+The publisher audits every local deployment identity for leak markers. A fresh
+worktree intentionally has no `.local`; set
+`LV3_PUBLICATION_DEPLOYMENTS_DIR` to the absolute path of the authoritative
+main-checkout `.local/deployments` directory. The audit fails if an explicitly
+configured path is relative or missing. Do not copy or symlink `.local` into a
+worktree.
 
 ## Commands
 
@@ -33,13 +40,18 @@ make publish-serverclaw
 Creates a temporary worktree, applies all sanitization tiers, runs leak
 detection, shows diff stats of what would be pushed. Does not push.
 
-### Publish (sanitize + push)
+### Publish (sanitize + push a review branch)
 
 ```bash
-make publish-serverclaw-push
+export LV3_PUBLICATION_DEPLOYMENTS_DIR="/absolute/path/to/main-checkout/.local/deployments"
+make publish-serverclaw
+make publish-serverclaw-push BRANCH=codex/serverclaw-publish-YYYYMMDD
 ```
 
-Same as dry-run, then force-pushes the sanitized snapshot to `serverclaw/main`.
+The second command pushes the sanitized snapshot to a dedicated publication
+branch. Create a pull request to `ServerClaw/main`, wait for its required
+Woodpecker checks, then merge the PR. Do not force-push the protected public
+main branch.
 
 ## Sanitization Tiers
 

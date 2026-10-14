@@ -1,0 +1,39 @@
+# Added 2026-10-13: Alertmanager's own /metrics are now scraped (job "alertmanager"). Before this only blackbox probes of
+# /-/healthy and /-/ready existed, so failing notifications and failing state persistence were invisible.
+groups:
+  - name: alertmanager_self
+    rules:
+      - alert: AlertmanagerDown
+        expr: up{job="alertmanager"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: alertmanager
+        annotations:
+          summary: "Alertmanager {{ $labels.instance }} metrics endpoint is down"
+          description: "Prometheus cannot scrape Alertmanager {{ $labels.instance }} for 5 minutes. Alerts may not be delivered. Check `systemctl status prometheus-alertmanager` on the monitoring VM."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: AlertmanagerNotificationsFailing
+        expr: sum by (instance, integration) (rate(alertmanager_notifications_failed_total[10m])) > 0
+        for: 15m
+        labels:
+          severity: warning
+          service: alertmanager
+        annotations:
+          summary: "Alertmanager {{ $labels.instance }} fails to send {{ $labels.integration }} notifications"
+          description: "alertmanager_notifications_failed_total for integration {{ $labels.integration }} has kept increasing for 15 minutes. Look for 'Notify for alerts failed' in `journalctl -u prometheus-alertmanager` (a 413 means a group payload is too big for ntfy; a 401/403 means the ntfy user lost its ACL)."
+          runbook_url: docs/runbooks/fleet-observability.md
+
+      - alert: AlertmanagerStatePersistenceFailing
+        expr: >-
+          increase(alertmanager_nflog_maintenance_errors_total[30m]) > 0
+          or increase(alertmanager_silences_maintenance_errors_total[30m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: alertmanager
+        annotations:
+          summary: "Alertmanager {{ $labels.instance }} cannot persist silences or its notification log"
+          description: "The nflog/silences snapshot cannot be written (usually directory ownership of the storage path). Silences and the notification log are lost on the next Alertmanager restart, which causes duplicate notifications."
+          runbook_url: docs/runbooks/fleet-observability.md

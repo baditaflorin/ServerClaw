@@ -17,6 +17,11 @@ Files
   /var/lib/prometheus/node-exporter/scanopy_backup.prom   metrics scanopy_backup_*
   systemd: scanopy-backup.service (oneshot) + scanopy-backup.timer
 
+Restore drill (weekly, Sundays 04:10 UTC, scanopy-backup-drill.timer): scanopy_backup_drill.py restores the newest dump into a
+throwaway postgres:17-alpine container (no network, 512 MB, removed afterwards) and counts the core tables; metrics
+scanopy_backup_drill_* (last success kept across failed runs), alerts ScanopyBackupDrillStale (10 days) and ...MetricsAbsent.
+Manual: sudo systemctl start scanopy-backup-drill.service ; journalctl -u scanopy-backup-drill -n 20
+
 Manual run:  sudo systemctl start scanopy-backup.service ; journalctl -u scanopy-backup -n 20
 Dry run:     sudo python3 /opt/scanopy-backup/scanopy_backup.py --dry-run
 Restore:     see docs/runbooks/scanopy-service-discovery.md, "Database backup".

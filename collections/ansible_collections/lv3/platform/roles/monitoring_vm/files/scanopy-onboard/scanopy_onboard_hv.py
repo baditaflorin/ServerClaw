@@ -18,6 +18,7 @@ The key can therefore do exactly two things, and nothing else is reachable throu
 
 Arguments are validated against strict patterns; the API key only travels on stdin and is never logged or put in argv.
 """
+import concurrent.futures
 import ipaddress
 import json
 import os
@@ -26,7 +27,7 @@ import shlex
 import subprocess
 import sys
 
-WRAPPER_VERSION = 1
+WRAPPER_VERSION = 2
 URL_RE = re.compile(r"^http://(10\.\d{1,3}\.\d{1,3}\.\d{1,3}):60072$")
 NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
 VERSION_RE = re.compile(r"^(latest|\d{1,3}\.\d{1,3}\.\d{1,3})$")
@@ -99,12 +100,20 @@ def usable(ip):
     return a.version == 4 and not (a.is_loopback or a.is_link_local)
 
 
+AGENT_TIMEOUT = 10  # a saturated hypervisor answers guest-agent calls slowly; never let one guest stall the listing
+LIST_WORKERS = 8
+
+
 def vm_ips(vmid):
-    rc, out, _ = run(["qm", "agent", str(vmid), "network-get-interfaces"], timeout=15)
-    if rc:
+    try:
+        rc, out, _ = run(["qm", "agent", str(vmid), "network-get-interfaces"], timeout=AGENT_TIMEOUT)
+        if rc:
+            return None
+        interfaces = json.loads(out)
+    except (subprocess.TimeoutExpired, ValueError, OSError):
         return None
     ips = []
-    for iface in json.loads(out):
+    for iface in interfaces:
         if SKIP_IFACE.match(iface.get("name", "")):
             continue
         ips += [a["ip-address"] for a in iface.get("ip-addresses", []) if a.get("ip-address-type") == "ipv4"]
@@ -112,7 +121,10 @@ def vm_ips(vmid):
 
 
 def ct_ips(vmid):
-    rc, out, _ = run(["pct", "exec", str(vmid), "--", "ip", "-4", "-o", "addr", "show"], timeout=15)
+    try:
+        rc, out, _ = run(["pct", "exec", str(vmid), "--", "ip", "-4", "-o", "addr", "show"], timeout=AGENT_TIMEOUT)
+    except (subprocess.TimeoutExpired, OSError):
+        return None
     if rc:
         return None
     ips = []
@@ -124,29 +136,26 @@ def ct_ips(vmid):
 
 
 def cmd_list():
-    guests = []
+    pending = []  # (kind, vmid, name, lines, address lookup)
     _, out, _ = run(["qm", "list"])
     for line in out.splitlines()[1:]:
         cols = line.split()
         if len(cols) >= 3 and cols[2] == "running" and cols[0].isdigit():
-            vmid, name = cols[0], cols[1]
-            lines = conf_lines("vm", vmid)
-            if any(re.match(r"^template:\s*1", ln) for ln in lines):
-                continue
-            ips = vm_ips(vmid)
-            guests.append({"kind": "vm", "id": int(vmid), "name": name, "macs": macs_of(lines),
-                           "ips": ips or [], "manageable": ips is not None})
+            lines = conf_lines("vm", cols[0])
+            if not any(re.match(r"^template:\s*1", ln) for ln in lines):
+                pending.append(("vm", cols[0], cols[1], lines, vm_ips))
     _, out, _ = run(["pct", "list"])
     for line in out.splitlines()[1:]:
         cols = line.split()
         if len(cols) >= 3 and cols[1] == "running" and cols[0].isdigit():
-            vmid, name = cols[0], cols[-1]
-            lines = conf_lines("ct", vmid)
-            if any(re.match(r"^template:\s*1", ln) for ln in lines):
-                continue
-            ips = ct_ips(vmid)
-            guests.append({"kind": "ct", "id": int(vmid), "name": name, "macs": macs_of(lines),
-                           "ips": ips or [], "manageable": ips is not None})
+            lines = conf_lines("ct", cols[0])
+            if not any(re.match(r"^template:\s*1", ln) for ln in lines):
+                pending.append(("ct", cols[0], cols[-1], lines, ct_ips))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=LIST_WORKERS) as pool:
+        addresses = list(pool.map(lambda item: item[4](item[1]), pending))
+    guests = [{"kind": kind, "id": int(vmid), "name": name, "macs": macs_of(lines), "ips": ips or [],
+               "manageable": ips is not None}
+              for (kind, vmid, name, lines, _), ips in zip(pending, addresses)]
     print(json.dumps({"wrapper_version": WRAPPER_VERSION, "hostname": os.uname().nodename, "guests": guests}))
     return 0
 

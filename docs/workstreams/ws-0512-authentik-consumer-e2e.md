@@ -3,8 +3,8 @@
 - ADR: 0491
 - Title: Audit and repair live Authentik consumer sign-in paths end to end
 - Status: in progress; production applies remain security-gated
-- Branch: `codex/authentik-closeout-20261013`
-- Worktree: `.worktrees/ws-0512-public-snapshot-closeout-20261013`
+- Branch: `codex/authentik-grafana-live-apply-mainline-20261014`
+- Worktree: `.worktrees/authentik-grafana-live-apply-mainline-20261014`
 - Owner: Codex
 - Depends on: `adr-0491-authentik-keycloak-sunset-2026-08-30`, `ws-0510-gitea-authentik-oidc-e2e`
 
@@ -138,6 +138,43 @@ overall Authentik completion or complete Keycloak retirement yet.
   Cold rollback archives and residual DNS/config references have not been
   exhaustively retired; those are distinct from removing a live runtime.
 
+### Grafana private-edge drift and check-mode regression — 2026-10-14
+
+PR #381 (`5ab54a34a9f14e001b971ba7b692e17982997ee2`) merged the explicit
+`grafana-sso` playbook tag and a backup-enabled managed `/etc/hosts` pin. Its
+push, PR, and metadata checks passed. A fresh live diagnosis then found that
+Grafana still resolved the Authentik issuer through the public DNS route and
+its OAuth user-profile request returned HTTP 401. The service role was already
+managed, but the broad service playbook would also converge unrelated
+monitoring and Alertmanager roles; the scoped tag confines the intended apply
+to Grafana SSO tasks (the two roles' always-tagged argument checks still run).
+
+The first governed Ansible check-mode run exposed a harness defect: Ansible
+skips the local HTTP probe in check mode, while the following assertion tried
+to read its absent `location` field. The assertion now skips only in check mode
+and still validates the live redirect during a real convergence. Focused
+Grafana role tests pass (6 tests), and the second service-scoped check-mode run
+completed with zero failures; the private-edge hostname pin is the only
+predicted config change, while the OAuth settings are already converged. The
+check-mode run's required Restic backup protected all 5 governed sources with
+none uncovered (`receipts/restic-backups/20261014T014547Z.json`). This records
+check and backup evidence only; the backup receipt was also published to the
+managed backup-status wiki collection.
+
+The scoped production apply then ran from merged `origin/main` commit
+`c8b8f317e2bd87c2f01fd2239dc524f4979707d0`. Ansible reported 11 OK, 2
+changed, 0 unreachable, and 0 failed; the changes were the managed private-edge
+hostname pin and Grafana restart. The guest now resolves the Authentik issuer
+through the private edge, Grafana is active, and its local `/api/health`
+returned HTTP 200. A fresh strict-TLS Firefox E2E completed Authentik login for
+the non-admin test identity and confirmed one Grafana organization with the
+`Viewer` role. The post-apply Restic backup protected all 5 governed sources
+with none uncovered. See
+`receipts/live-applies/2026-10-14-ws-0512-grafana-sso-live-apply.json` and
+`receipts/live-applies/ws-0512-grafana-sso-apply-20261014-apply-receipt.yaml`.
+This closes the Grafana route repair only; Outline and GlitchTip image gates
+and the remaining broader Authentik/Keycloak retirement checks are still open.
+
 ### Runtime-image security remediation — 2026-10-12
 
 This branch adds pinned source recipes and a strict remote-build path for
@@ -225,10 +262,34 @@ publication run.
 
 The Harbor project/robot reconciliation and source recipes are code only at
 this checkpoint. Outline, GlitchTip, and MinIO candidates have not yet been
-built or scanned at their resulting digests, and no runtime image was deployed.
-Do not mark those image gates cleared until each pushed immutable digest has a
-passing scan; do not deploy until the merged catalog and exact receipt are in
-place.
+scanned at their resulting digests, and no runtime image was deployed. Do not
+mark those image gates cleared until each pushed immutable digest has a passing
+scan; do not deploy until the merged catalog and exact receipt are in place.
+
+### Patched-image push regression — 2026-10-13
+
+The first retry reached the final Outline image export on the configured
+remote BuildKit host, but Harbor rejected the push with HTTP 401 during the
+registry blob check. Inspection found that `build_remote.sh` logged in using a
+temporary Docker config, then invoked Buildx without selecting that config.
+The login and push therefore used different credential stores. The build
+script now exports the temporary `DOCKER_CONFIG` for the lifetime of the
+remote build, and a focused test guards that Buildx sees the same isolated
+Harbor login config. The patched-image test module passes (11 tests), shell
+syntax validation passes, and `git diff --check` is clean.
+
+A fresh read-only check of the configured build guest first showed 4.4 GiB
+available RAM, 2.7 GiB swap in use, a load average around 25, and elevated
+memory and I/O pressure. A later sample worsened to 3.4 GiB available, 3.3
+GiB swap in use, load average 48.5, and 10-second PSI of 9% memory-some / 4.5%
+memory-full and 19% I/O-some / 6.4% I/O-full. The Proxmox parent had 13 GiB
+available RAM and zero memory or I/O PSI; active Go format/build/test jobs were
+visible on the guest. No second image build was started. Recheck sustained
+builder headroom before retrying. Harbor granted the publisher a scoped push
+token and accepted the beginning of an empty upload, but the Buildx retry
+remains the definitive proof of the repaired auth handoff. No complete
+candidate digest was pushed, scanned, pinned in the catalog, or deployed; the
+GlitchTip signup setting has not been changed live.
 
 ### Risk-status and repository-truth correction — 2026-10-13
 
@@ -980,19 +1041,39 @@ reboot. `vulnerability_budget.py --service neko` now approves the host budget.
 The pending reboot remains visible and was not performed under the current
 Proxmox memory/swap pressure.
 
-The live strict-TLS `browser.example.org/oauth2/start?rd=%2F` route returns HTTP
-302 to `id.example.org` through the shared `ops-portal-oauth` client; NGINX syntax
-is valid. The exact live Neko site file contains four `Keycloak` mentions,
+An earlier strict-TLS probe saw `browser.example.org/oauth2/start?rd=%2F` return
+HTTP 302 to `id.example.org`. A fresh 2026-10-13 20:45 UTC probe superseded that
+result: `/` returned HTTP 500 and `/oauth2/start` returned HTTP 502. A
+2026-10-14 host inspection corrects the configuration attribution: the active
+`0mcp-ops-portal-oauth2-proxy` unit reads `/etc/mcp/oauth2-proxy/ops-portal.cfg`,
+whose issuer is already Authentik. It is in `auto-restart` with exit status 1
+because discovery of `id.example.org` connects to the public host address and is
+refused. A separate unreferenced legacy config under `/etc/0mcp/` still names
+the retired Keycloak issuer; verify and retire that orphan only after backup.
+The canonical edge check mode predicts the missing local issuer pin and NGINX
+publication/reload changes. Do not claim edge SSO is healthy until the governed
+apply, proxy health, and callback verification pass.
+
+The exact live Neko site file contains four `Keycloak` mentions,
 all in comments and none in active directives. Its existing email-to-browser
 map has one route and runtime-comms has one running Neko container. The current
-managed playbook template is Authentik-backed, but the selected inventory has
-no top-level `neko_instances` input (the only canonical nested value is empty).
-A check-mode attempt to render the template therefore fails closed with
-`neko_instances` undefined. The `edge-publication` tag also selects no
-Neko-specific tasks in the current wrapper. No live Neko mapping was changed:
-re-rendering from the empty source would remove the one existing user route.
-The SSO redirect is verified as Authentik-backed, but those residual comments
-and the undeclared user-to-container mapping remain an IaC reconciliation gap.
+managed playbook template is Authentik-backed, but the selected inventory had
+no top-level `neko_instances` input and the service-registry default replaced
+the role's map with `{}`. Re-rendering from that state could remove the live
+browser route, container, and Neko-owned Authentik assignment. The closeout
+branch now declares the generic operator instance from
+`platform_operator_email`, removes the empty registry override, loads optional
+per-deployment `neko.yml` only beside the selected identity overlay, and rejects
+empty reconciliation unless an explicit local teardown flag is set. The Neko
+CLI now writes user mappings only beneath `.local/`, never into generated or
+tracked inventory. Regression tests cover both the destructive-state guard and
+deployment-overlay selection. The Makefile's canonical root wrapper now also
+guards both runtime and edge plays. Its `neko-edge-publication` tag selects the
+guard, edge preflight, Neko vhost render/link, `nginx -t`, and conditional NGINX
+reload; it does not select the Neko runtime/container play. Focused tests pass
+(51 tests), Ansible syntax check passes, and `--list-tasks` confirms this exact
+scope. This source change is not yet merged or live applied; the existing live
+Neko route and container have not been touched.
 
 The governed apply's standard configuration-backup hook completed: all five
 governed sources were protected with zero uncovered or inactive sources in
@@ -1034,3 +1115,257 @@ This closes the API Gateway/Typesense portion only. Outline and GlitchTip remain
 blocked behind unresolved runtime-image security and build-capacity gates;
 restore rehearsal, Neko IaC mapping, and full Keycloak retirement also remain
 open as recorded above.
+
+### Fresh consumer retest and builder capacity — 2026-10-13
+
+Repeated the six browser checks in new temporary Firefox profiles with strict
+TLS validation enabled. Gitea and Harbor completed Authentik login as the
+non-admin test identity. Grafana completed login with organization role
+`Viewer` and no server-admin privilege. LibreChat completed its Authentik
+callback and authenticated session. Outline still fails the Engine.IO
+WebSocket handshake; GlitchTip still rejects first-login provisioning with
+`signup_closed`. These results confirm the four passing consumers remain
+healthy, but do not close the two application-specific defects.
+
+The configured remote image builder is reachable through its strict-host-key
+bastion route. A read-only capacity check reports 5.0 GiB guest memory
+available, 2.3/4.0 GiB swap used, and 47 GiB free disk. Its Proxmox parent has
+4.5 GiB available and 4.0/4.0 GiB swap used. Because prior source builds were
+killed by the host OOM killer and the parent remains nearly out of memory, no
+new image build was started. A separate Buildx pool was not repurposed for this
+repository; it is not configured here as an approved image-build worker. No
+production runtime or configuration was changed during these
+retests.
+
+The first direct scan-refresh attempt also found that
+`config/sbom-scanner.json` still pointed at the staging cache address. The
+production builder's read-only probes returned HTTP 200 from all four current
+cache mirrors, confirming the production route declared by the topology. The
+scanner default now matches that route, and its unit fixtures use a generic
+cache hostname; a regression test covers the controller-local proxy override.
+Because this controller has no direct private-cache route, the refresh used a
+temporary strict-host-key SSH forward for the one required registry port. The
+local listener was closed after the scan. No public-registry fallback was used.
+
+Grype 0.111.0 and the latest available vulnerability database rescanned the
+exact pinned digests. Outline reports 23 Critical / 303 High, GlitchTip 23
+Critical / 235 High, and MinIO 38 Critical / 201 High; all three report zero
+blocking findings with a known fix. The raw SBOM/CVE evidence is recorded under
+`receipts/sbom/` and `receipts/cve/`. The three catalog summary receipts are:
+
+- `receipts/image-scans/2026-10-13-outline-runtime.json`
+- `receipts/image-scans/2026-10-13-glitchtip-runtime.json`
+- `receipts/image-scans/2026-10-13-minio-runtime.json`
+
+The catalog now points at those exact scan summaries, marks all three images
+`blocked`, and removes their expired exceptions. The scan-only refresh path now
+records blocked evidence without changing image pins or implicitly renewing an
+exception. No image apply or NATS/ntfy alert was run.
+
+The next safe closure step is to obtain adequate capacity on the configured
+builder (or explicitly configure and govern a repository-specific alternative),
+build and scan the exact Outline and GlitchTip candidates, and only then apply
+their already-managed runtime settings and repeat these browser checks. The
+current pinned images remain explicitly blocked. The Authentik image gate,
+restore rehearsal, Neko source mapping, and residual Keycloak retirement audit
+remain separate open gates.
+
+### Repository release-bookkeeping gate — 2026-10-13
+
+The first remote pre-push run passed all policy lanes except `generated-docs`:
+three valid post-0.179.51 changelog entries from already-merged mainline commits
+had no workstream metadata, so the canonical generator considered them stale.
+Rather than delete those notes, this branch adds merged-but-unreleased
+workstream records `ws-0525` through `ws-0527`, regenerates the changelog and
+merged-workstream status ledger, and keeps them tracked until the next version
+cut. The canonical-truth, generated-doc, workstream-surface, and agent-standard
+checks now pass locally. This bookkeeping repair does not change `VERSION`,
+`versions/stack.yaml`, or live services.
+
+### Post-merge Harbor fix and current build route — 2026-10-13
+
+PR #363 merged to private `main` at `6982c649f6c285f9ca072b5dc7f230b242a3b2f1`.
+Both Woodpecker checks passed; the repository pre-push gate also passed after
+its permitted local fallback retried Ansible lint/syntax when Ansible Galaxy
+returned HTTP 502. The merge fixed the isolated Harbor-auth handoff used by
+Buildx. The first corrected retry then exposed a second interaction: the fresh
+Docker config also hid the selected remote Buildx instance and fell back to the
+Docker-default builder. I interrupted that attempt after Buildx history showed
+an error at 1m51s; it produced no completed candidate digest, scan, catalog
+update, or live apply. A read-only probe confirmed that copying only the
+original `buildx/` metadata into the isolated auth config preserves the
+selected `example-cache` remote builder without copying its unrelated registry
+credentials. The continuation branch now does that, with regression coverage;
+one final build and scan is still needed to prove both auth and cache selection
+end to end.
+
+The current clean ServerClaw publication dry-run used that exact private-main
+source, passed the sanitization coverage and leak checks, and regenerated the
+public derived artifacts. Protected-branch publication PR #74 is open; its
+Woodpecker push and PR checks are pending because the shared `repo=*` agent is
+stopped. No direct push to public `main` was made.
+
+Read-only Proxmox evidence shows VMID 130 (`docker-build-lv3`) is running with
+about 8.1 GiB of its 12 GiB maximum allocated and high CPU use. Its current
+Proxmox config reports 20 cores and an 8 GiB balloon minimum, while the
+committed inventory declares 12 cores and the managed guest role sets balloon
+to zero. This drift was observed but not changed. The parent host has roughly
+12 GiB available and no memory or I/O PSI; the guest's SSH route through the
+strict bastion timed out during the SSH banner exchange. Earlier in the same
+session the guest reported all swap in use and severe I/O pressure. Do not
+retry image builds or alter guest hardware until guest access and sustained
+capacity recover; reconcile the observed hardware drift through the governed
+Proxmox path rather than an ad-hoc VM change.
+
+Next: complete the protected public PR after its checks pass; regain a stable
+read-only SSH/capacity sample from the configured builder; then retry and scan
+Outline, GlitchTip, and the MinIO dependency candidate at immutable Harbor
+digests. Only apply consumer runtime settings after each applicable image gate
+passes, then rerun the fresh browser E2E checks. Restore rehearsal, Neko IaC
+mapping, the Authentik image gate, and residual Keycloak retirement remain
+separate outstanding gates.
+
+### Neko edge and catalog correction — 2026-10-14
+
+The first branch push was stopped by generated-doc, schema, and service
+completeness checks. The stale canonical changelog output has been regenerated.
+The Neko service bundle now records the actual runtime-comms address, Authentik
+edge gate, persistent-profile data classification, and a private signalling
+SLO that remains excluded until the monitoring probe is applied and verified.
+The stale public TCP/8080 forward to a nonexistent guest was removed; UDP media
+forwarding now derives the address from the managed runtime-comms guest, and a
+private monitoring allowance was added for the readiness probe. These are
+source changes only; no Neko runtime or firewall change has been applied live.
+
+The repository completeness checker previously treated every dependency-graph
+edge edit as a whole-catalog change. It now scopes description-only edits to
+the unchanged edge's source service, while edge additions/removals/rewiring
+still force the full audit. Regression coverage preserves that conservative
+structural-change gate. The Neko-specific completeness result passes; the
+repo-wide legacy completeness backlog is not being waived or reported as
+cleared.
+
+Neko's v2-compatible image still has its built-in multi-user login bootstrap;
+it is not a second security boundary. Public TCP signalling must stay behind
+the Authentik-protected NGINX edge, with the runtime-comms firewall allowing
+only the edge and private monitoring probe. Post-merge verification must prove
+the oauth2-proxy stays healthy, an assigned Authentik user reaches only their
+instance, an unassigned user gets 403, and WebRTC succeeds. The latest edge
+investigation found the managed oauth2-proxy configuration already uses the
+Authentik issuer; its systemd unit is crash-looping because the edge resolves
+`id.example.org` to the public address and the connection is refused. A separate,
+unreferenced legacy file still contains the old Keycloak issuer. Apply the
+canonical local issuer pin, verify the managed unit and callback, then retire
+that orphaned file after confirming no unit references it.
+
+### Neko Authentik assignment-sync defaults — 2026-10-14
+
+The Make target previously passed an unset issuer and guessed the admin-group
+name, so the command could query `https://id.` and `<prefix>-admins` rather than
+the selected deployment's Authentik instance and `*-platform-admins` group.
+The sync now derives both values from the explicitly selected identity overlay,
+with `LV3_AUTHENTIK_URL` remaining an operator override. Its Make invocation
+uses JSON output so account attributes are not echoed into the terminal. Focused
+unit tests and a live read-only dry run passed with one configured instance and
+no assignment changes. No service, proxy, or firewall apply has been performed
+by this correction; the runtime apply remains a separate governed step after
+merge and fresh edge/consumer preflight.
+
+The first selected-production edge preflight also exposed incomplete Gitea
+private-edge metadata in the deployment topology overlay. Because the overlay
+replaces the service-topology map, that omission made the private-only hostname
+fail the catalog's TLS/allowlist validation. The missing declaration was
+restored from the tracked generic topology and `make generate-platform-vars`
+updated the private generated facts, including removal of the stale Neko
+TCP/8080 forward already retired by the source change. The edge-publication
+preflight now passes with the selected identity and topology. This is still
+source/config validation only; no edge or Neko runtime apply has occurred.
+
+### CI webhook filter repair — 2026-10-13
+
+After PR #364 and ServerClaw PR #74 were pushed, the Woodpecker server recorded
+`when filters filtered out all steps` for webhooks from both repositories.
+GitHub therefore kept their push and pull-request status contexts pending; the
+already-running build agent had no job to execute. The workflow-level event
+gate was moved onto the primary validation step as a documented step-level
+event list, and a regression test now guards that shape. No agent was left
+running on the runtime VM. The new push/PR events still need to prove that the
+server creates and completes pipelines before either PR is merged.
+
+### Production edge retry guard — 2026-10-14
+
+The first canonical edge-publication attempt stopped before any remote task:
+Ansible could not establish its configured SSH jump transport (`0 changed`,
+`1 unreachable`). Before retrying, the selected private topology overlay was
+found to re-enable 11 never-deployed routes that this runbook marks as retired.
+The overlay now keeps those routes disabled, matching the tracked topology and
+retiring catalog entries; Neko and Gitea remain enabled. Regenerated platform
+facts remove the retired routes from both service-topology views. This attempt
+made no production changes. A read-only SSH/Ansible ping then confirmed the
+bootstrap key is authorized for the edge guest's `ops` account and the canonical
+`proxmox_host_jump` connection mode works. The next apply must pass the selected
+Proxmox SSH address and port, then verify the Authentik-protected Neko route
+and the retired-route set before recording live-applied state.
+
+### Edge certificate gate scope — 2026-10-14
+
+The post-merge edge playbook check-mode run reached the public NGINX guest, but
+the final global certificate gate failed on ten hostnames already marked
+`retiring` in the canonical subdomain catalog, plus private-only Proxmox and
+Vaultwarden endpoints not reachable from this controller. No production task
+was applied. The certificate validator now treats the subdomain catalog as
+authoritative for retiring edge names, and the deployment certificate template
+classifies the two private-only endpoints as `lan_only`; the JSON schema now
+matches the catalog's existing status vocabulary. The new regression tests are
+included in the Woodpecker test step. Focused certificate tests pass (19
+tests), the data model validator passes, and `make validate-certificates`
+reports 36/36 active
+public certificates valid. The live edge and Neko route apply is still pending.
+
+### Edge publication retry and registry idempotency — 2026-10-14
+
+The canonical production check-mode replay now uses the generated shared
+`.local/inventory/hosts.yml` overlay; it reaches the correct NGINX guest with
+zero unreachable or failed tasks. Six changes are predicted: the local
+Authentik issuer pin and the NGINX publication/reload sequence. The active
+oauth2-proxy config uses the Authentik issuer, but journal evidence shows OIDC
+discovery fails because `id.example.org` resolves to the public host address from
+the edge and that connection is refused. The managed edge apply and fresh
+callback verification remain pending. The 36 active public certificates pass
+strict TLS validation (36 valid, zero expired, mismatched, expiring, or
+unreachable).
+
+Repeated canonical runs also exposed a registry-tool bug: after one run writes
+the selected deployment's resolved topology into the generated publication
+registry, the next `--write-registry --validate` compared that deployment
+output with only the generic tracked topology and aborted. The writer now
+validates the selected candidate in memory and writes it only after admission
+passes; the non-writing tracked-registry check remains unchanged. Regression
+tests run the combined operation twice and prove a failed validation preserves
+the existing registry.
+
+### Fresh edge and consumer checks — 2026-10-14
+
+The merged edge-publication reconcile was applied from the post-merge commit.
+The public NGINX route now returns the expected OAuth sign-in redirect, the
+edge resolves the Authentik issuer through its private address, OIDC discovery
+returns HTTP 200, and the managed oauth2-proxy is active. Fresh Firefox E2E
+completed the Authentik flow for the dedicated non-admin identity; Ops Portal
+and Repository Intake each returned the expected HTTP 403, with strict TLS and
+no server errors. Gitea and Harbor also completed fresh Authentik OIDC browser
+sessions as the non-admin test user.
+
+The fresh Grafana retest exposed configuration drift despite the merged SSO
+role: the Monitoring VM still resolved the Authentik issuer to the public edge
+address, so token exchange failed and `/api/user` returned HTTP 401. PR #382
+merged the `grafana-sso` scoped tag and its check-mode assertion; after merge,
+the managed private-edge pin was applied from commit
+`c8b8f317e2bd87c2f01fd2239dc524f4979707d0`. Ansible reported 11 OK, 2 changed,
+0 unreachable, and 0 failed. Grafana is active, `/api/health` returned HTTP
+200, and a fresh strict-TLS Firefox Authentik login completed for the
+non-admin test identity with the `Viewer` role. The post-apply Restic run
+protected all five governed sources with none uncovered. See
+`receipts/live-applies/2026-10-14-ws-0512-grafana-sso-live-apply.json` and
+`receipts/live-applies/ws-0512-grafana-sso-apply-20261014-apply-receipt.yaml`.
+This closes Grafana's route repair only; Outline and GlitchTip image gates and
+the broader Authentik/Keycloak retirement checks remain open.

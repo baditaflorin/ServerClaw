@@ -26,7 +26,6 @@ import socket
 import ssl
 import subprocess
 import sys
-from typing import Optional
 
 
 class CertStatus(Enum):
@@ -44,12 +43,12 @@ class CertValidationResult:
     target: str
     target_port: int
     status: CertStatus
-    common_name: Optional[str] = None
-    subject_alt_names: Optional[list] = field(default_factory=list)
-    not_after: Optional[str] = None
-    days_until_expiry: Optional[int] = None
-    error_message: Optional[str] = None
-    service_id: Optional[str] = None
+    common_name: str | None = None
+    subject_alt_names: list | None = field(default_factory=list)
+    not_after: str | None = None
+    days_until_expiry: int | None = None
+    error_message: str | None = None
+    service_id: str | None = None
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -130,19 +129,23 @@ def get_certificate(fqdn: str, target: str, port: int, timeout: int = 10):
     """Connect to target:port, verify against fqdn, return (cert_dict, error)."""
     ctx = ssl.create_default_context()
     try:
-        with socket.create_connection((target, port), timeout=timeout) as sock:
-            with ctx.wrap_socket(sock, server_hostname=fqdn) as ssock:
-                return ssock.getpeercert(), None
+        with (
+            socket.create_connection((target, port), timeout=timeout) as sock,
+            ctx.wrap_socket(sock, server_hostname=fqdn) as ssock,
+        ):
+            return ssock.getpeercert(), None
     except ssl.SSLCertVerificationError as e:
         # Cert exists but CA is untrusted (e.g. internal step-ca). Retrieve raw DER.
         ctx2 = ssl.create_default_context()
         ctx2.check_hostname = False
         ctx2.verify_mode = ssl.CERT_NONE
         try:
-            with socket.create_connection((target, port), timeout=timeout) as sock:
-                with ctx2.wrap_socket(sock, server_hostname=fqdn) as ssock:
-                    der = ssock.getpeercert(binary_form=True)
-                    return _parse_der_cert(der) if der else {}, str(e)
+            with (
+                socket.create_connection((target, port), timeout=timeout) as sock,
+                ctx2.wrap_socket(sock, server_hostname=fqdn) as ssock,
+            ):
+                der = ssock.getpeercert(binary_form=True)
+                return _parse_der_cert(der) if der else {}, str(e)
         except Exception as e2:
             return None, str(e2)
     except Exception as e:
@@ -150,7 +153,7 @@ def get_certificate(fqdn: str, target: str, port: int, timeout: int = 10):
 
 
 def domain_in_cert(fqdn: str, cn: str, sans: list) -> bool:
-    for pattern in [cn] + sans:
+    for pattern in [cn, *sans]:
         if pattern == fqdn:
             return True
         if pattern.startswith("*.") and fqdn.endswith(pattern[2:]) and fqdn.count(".") == pattern.count("."):
@@ -251,12 +254,32 @@ def load_subdomain_catalog(path: str) -> list:
                     "target_port": sub.get("target_port", 443),
                     "service_id": sub.get("service_id", ""),
                     "warn_days": 21,
-                    "status": "active",
+                    "status": sub.get("status", "active"),
+                    "exposure": sub.get("exposure", ""),
                 }
             )
         return entries
     except FileNotFoundError:
         return []
+
+
+def exclude_retiring_edge_certificates(entries: list[dict], subdomain_entries: list[dict]) -> list[dict]:
+    """Do not probe edge certificates for hostnames explicitly marked retiring.
+
+    The certificate catalog describes certificate material and can lag behind
+    the public-host lifecycle catalog. Keep the latter authoritative for
+    whether an edge-published hostname is still expected to serve traffic.
+    Private-only and informational-only endpoints are not treated as retiring
+    edge routes by this filter.
+    """
+    retiring_fqdns = {
+        str(entry.get("fqdn", "")).strip().lower()
+        for entry in subdomain_entries
+        if entry.get("status") == "retiring"
+        and entry.get("exposure") in ("edge-published", "edge-static")
+        and entry.get("fqdn")
+    }
+    return [entry for entry in entries if str(entry.get("fqdn", "")).strip().lower() not in retiring_fqdns]
 
 
 def format_text(results: list) -> str:
@@ -295,7 +318,7 @@ def format_text(results: list) -> str:
     return "\n".join(lines)
 
 
-def _read_platform_domain(path: Path) -> Optional[str]:
+def _read_platform_domain(path: Path) -> str | None:
     try:
         import yaml
     except ImportError:
@@ -310,7 +333,7 @@ def _read_platform_domain(path: Path) -> Optional[str]:
     return domain or None
 
 
-def _get_real_domain() -> Optional[str]:
+def _get_real_domain() -> str | None:
     """Read platform_domain from .local/identity.yml (ADR 0385 + ADR 0488).
 
     Returns None when the file is absent, malformed, or set to the
@@ -333,11 +356,11 @@ def _get_real_domain() -> Optional[str]:
     return None
 
 
-def _get_committed_domain() -> Optional[str]:
+def _get_committed_domain() -> str | None:
     return _read_platform_domain(REPO_ROOT / "inventory" / "group_vars" / "all" / "identity.yml")
 
 
-def _rewrite_hostname_for_real_domain(value: str, *, source_domain: Optional[str], real_domain: str) -> str:
+def _rewrite_hostname_for_real_domain(value: str, *, source_domain: str | None, real_domain: str) -> str:
     if not value or not source_domain or source_domain == real_domain:
         return value
     if value == source_domain:
@@ -353,10 +376,10 @@ def _rewrite_entries_for_real_domain(entries: list[dict], real_domain: str) -> l
     rewritten = []
     for entry in entries:
         updated = dict(entry)
-        for field in ("fqdn", "target"):
-            value = updated.get(field)
+        for field_name in ("fqdn", "target"):
+            value = updated.get(field_name)
             if isinstance(value, str):
-                updated[field] = _rewrite_hostname_for_real_domain(
+                updated[field_name] = _rewrite_hostname_for_real_domain(
                     value,
                     source_domain=source_domain,
                     real_domain=real_domain,
@@ -397,8 +420,11 @@ def main():
 
     entries = list(entries_master)
     real_domain = _get_real_domain()
+    subdomain_entries = load_subdomain_catalog(args.subdomain_config)
     if real_domain:
         entries = _rewrite_entries_for_real_domain(entries, real_domain)
+        subdomain_entries = _rewrite_entries_for_real_domain(subdomain_entries, real_domain)
+    entries = exclude_retiring_edge_certificates(entries, subdomain_entries)
 
     # ADR 0410 Phase 4a: skip example.com (generic committed placeholder).
     # ADR 0488: single deployment per checkout; identity lives in .local/identity.yml.

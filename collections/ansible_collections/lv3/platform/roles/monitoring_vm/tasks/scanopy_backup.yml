@@ -67,6 +67,7 @@
   loop:
     - {src: scanopy_backup.py, dest: "{{ monitoring_scanopy_backup_script_file }}", mode: "0755"}
     - {src: scanopy_backup_hv.sh, dest: "{{ monitoring_scanopy_backup_hv_script_file }}", mode: "0644"}
+    - {src: scanopy_backup_drill.py, dest: "{{ monitoring_scanopy_backup_drill_script_file }}", mode: "0755"}
     - {src: README, dest: "{{ monitoring_scanopy_backup_readme_file }}", mode: "0644"}
   loop_control:
     label: "{{ item.dest }}"
@@ -93,3 +94,29 @@
     enabled: true
     state: started
     daemon_reload: true
+
+- name: Render the Scanopy backup restore-drill systemd service
+  ansible.builtin.template:
+    src: scanopy-backup-drill.service.j2
+    dest: "{{ monitoring_scanopy_backup_drill_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: monitoring_scanopy_backup_drill_enabled | bool
+
+- name: Render the Scanopy backup restore-drill systemd timer
+  ansible.builtin.template:
+    src: scanopy-backup-drill.timer.j2
+    dest: "{{ monitoring_scanopy_backup_drill_timer_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: monitoring_scanopy_backup_drill_enabled | bool
+
+- name: Enable the Scanopy backup restore-drill timer
+  ansible.builtin.systemd:
+    name: "{{ monitoring_scanopy_backup_drill_timer_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+  when: monitoring_scanopy_backup_drill_enabled | bool

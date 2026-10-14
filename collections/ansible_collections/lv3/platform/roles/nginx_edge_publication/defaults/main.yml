@@ -323,6 +323,8 @@ public_edge_authenticated_sites:
         upstream: "{{ public_edge_api_gateway_upstream }}/v1/billing/health"
       - path: /api/v1/events
         upstream: "{{ public_edge_api_gateway_upstream }}/v1/billing/events"
+  browser.{{ platform_domain }}:
+    auth_proxy_upstream: http://127.0.0.1:4180
   docs.{{ platform_domain }}:
     auth_proxy_upstream: http://127.0.0.1:4180
   draw.{{ platform_domain }}:

@@ -17,6 +17,7 @@ from container_image_policy import (
     validate_image_catalog,
 )
 from controller_automation_toolkit import emit_cli_error, repo_path, shared_repo_root, write_json
+from outline_client import publish_receipt_to_outline
 from sbom_scanner import (
     CVE_RECEIPTS_DIR,
     SBOM_RECEIPTS_DIR,
@@ -81,6 +82,12 @@ def renew_exception_window(exception: dict, *, scanned_on: str) -> dict:
     return renewed
 
 
+def exception_expired_on(exception: dict, *, scanned_on: str) -> bool:
+    expiry_key = "expires_on" if exception.get("expires_on") is not None else "review_by"
+    expires_on = dt.date.fromisoformat(str(exception[expiry_key]))
+    return expires_on < dt.date.fromisoformat(scanned_on)
+
+
 def build_ref(registry_ref: str, tag: str, digest: str) -> str:
     return f"{registry_ref}:{tag}@{digest}"
 
@@ -126,6 +133,7 @@ def update_catalog(
     scanned_on: str,
     receipt_path: Path,
     exception: dict | None,
+    critical_findings: int = 0,
     preserve_pin: bool = False,
 ) -> dict:
     entry = catalog["images"][image_id]
@@ -136,7 +144,7 @@ def update_catalog(
         entry["pinned_on"] = scanned_on
     entry["scan_receipt"] = catalog_relative_path(receipt_path)
     if exception is None:
-        entry["scan_status"] = "pass_no_critical"
+        entry["scan_status"] = "blocked" if critical_findings else "pass_no_critical"
         entry.pop("exception", None)
     else:
         entry["scan_status"] = "exception_open"
@@ -235,6 +243,8 @@ def main() -> int:
         scanned_at = now_utc()
         scanned_on = scanned_at.date().isoformat()
         entry = catalog["images"][args.image_id]
+        if args.renew_existing_exception and not isinstance(entry.get("exception"), dict):
+            raise ValueError("--renew-existing-exception requires an existing catalog exception")
         if args.refresh_scan_only:
             tag = entry["tag"]
             digest = entry["digest"]
@@ -268,6 +278,8 @@ def main() -> int:
             update_grype_db=not args.skip_db_update,
             use_artifact_cache=not args.skip_artifact_cache,
         )
+        if args.write:
+            publish_receipt_to_outline(sbom_path)
         receipt = build_scan_receipt(
             image_id=args.image_id,
             image_ref=image_ref,
@@ -278,6 +290,8 @@ def main() -> int:
             cve_receipt=cve_receipt,
         )
         write_json(receipt_path, receipt)
+        if args.write:
+            publish_receipt_to_outline(receipt_path)
 
         blocking_findings = receipt["summary"]["blocking_findings_with_fix"]
         if blocking_findings != 0:
@@ -314,10 +328,17 @@ def main() -> int:
                     "expires_on": expires_on,
                     "remediation_plan": args.exception_remediation_plan,
                 }
-            elif args.refresh_scan_only and isinstance(entry.get("exception"), dict):
-                exception = dict(entry["exception"])
-                if args.renew_existing_exception:
-                    exception = renew_exception_window(exception, scanned_on=scanned_on)
+            elif args.refresh_scan_only:
+                existing_exception = entry.get("exception")
+                if isinstance(existing_exception, dict):
+                    if args.renew_existing_exception:
+                        exception = renew_exception_window(existing_exception, scanned_on=scanned_on)
+                    elif not exception_expired_on(existing_exception, scanned_on=scanned_on):
+                        exception = dict(existing_exception)
+                    else:
+                        exception = None
+                else:
+                    exception = None
             else:
                 raise ValueError(
                     f"{image_ref} has {receipt['summary']['critical']} critical vulnerabilities; "
@@ -334,6 +355,7 @@ def main() -> int:
             scanned_on=scanned_on,
             receipt_path=receipt_path,
             exception=exception,
+            critical_findings=receipt["summary"]["critical"],
             preserve_pin=args.refresh_scan_only,
         )
 
@@ -351,6 +373,7 @@ def main() -> int:
                     "write": args.write,
                     "apply": args.apply,
                     "refresh_scan_only": args.refresh_scan_only,
+                    "scan_status": updated_catalog["images"][args.image_id]["scan_status"],
                     "scan_receipt": relpath(receipt_path),
                     "sbom_receipt": relpath(sbom_path),
                     "cve_receipt": relpath(cve_path),

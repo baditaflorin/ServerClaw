@@ -80,15 +80,18 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
-    owner: root
+    owner: "{{ item.owner | default('root') }}"
     group: "{{ item.group }}"
     mode: "{{ item.mode }}"
   loop:
     - path: "{{ alertmanager_runtime_config_file | dirname }}"
       group: root
       mode: "0755"
+    # Alertmanager runs as prometheus and snapshots its notification log and silences here every 15 minutes; a root-owned
+    # directory made both fail with "permission denied" (silences and the notification log were never persisted).
     - path: "{{ alertmanager_runtime_data_dir }}"
-      group: root
+      owner: prometheus
+      group: prometheus
       mode: "0755"
     - path: "{{ alertmanager_runtime_rules_dir }}"
       group: prometheus

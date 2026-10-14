@@ -2,9 +2,9 @@
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
   "repo_version": "0.179.51",
-  "platform_version": "0.179.50",
-  "generated_at": "2026-10-13T11:15:45Z",
-  "next_refresh_at": "2026-10-13T12:15:45Z",
+  "platform_version": "0.179.51",
+  "generated_at": "2026-10-14T02:19:10Z",
+  "next_refresh_at": "2026-10-14T03:19:10Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",
@@ -281,7 +281,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.example.com",
-        "last_live_apply": "2026-10-11T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "grist": {
@@ -485,10 +485,11 @@
         "score": 0.95,
         "safe_to_act": true,
         "source": "repo_evidence",
-        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://browser.example.com",
-        "last_live_apply": "2026-07-02T00:00:00Z"
+        "last_live_apply": "2026-07-02T00:00:00Z",
+        "slo_status": "unknown"
       },
       "netbox": {
         "service_name": "NetBox",
@@ -523,7 +524,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://nginx.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "nomad": {

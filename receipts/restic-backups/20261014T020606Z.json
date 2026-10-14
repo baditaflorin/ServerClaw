@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "restic-config-backup-20261014T020606Z",
+  "recorded_at": "2026-10-14T02:06:06Z",
+  "recorded_on": "2026-10-14",
+  "recorded_by": "codex",
+  "triggered_by": "live-apply-service",
+  "source_commit": "unknown",
+  "repository": {
+    "bucket": "restic-config-backup",
+    "endpoint": "http://10.200.2.2:9000",
+    "repository_url": "s3:http://10.200.2.2:9000/restic-config-backup"
+  },
+  "summary": {
+    "governed_sources": 5,
+    "protected": 5,
+    "uncovered": 0,
+    "inactive": 0,
+    "uncovered_sources": [],
+    "inactive_sources": []
+  },
+  "source_results": [
+    {
+      "source_id": "config",
+      "result": "backed_up",
+      "host": "docker-runtime",
+      "files": 7,
+      "paths": [
+        "/srv/platform_server/config"
+      ],
+      "retention": {
+        "keep_daily": 30,
+        "keep_monthly": 6
+      },
+      "restic_stdout": "{\"message_type\":\"summary\",\"files_new\":0,\"files_changed\":4,\"files_unmodified\":3,\"dirs_new\":0,\"dirs_changed\":4,\"dirs_unmodified\":2,\"data_blobs\":0,\"tree_blobs\":5,\"data_added\":3564,\"data_added_packed\":1957,\"total_files_processed\":7,\"total_bytes_processed\":164597,\"total_duration\":0.797562583,\"backup_start\":\"2026-10-14T02:06:06.024966625Z\",\"backup_end\":\"2026-10-14T02:06:06.822529197Z\",\"snapshot_id\":\"c658cc241475778d7991b57112d57af8d4a7e504e2f7887bd3fd40b79ebced32\"}",
+      "snapshot_id": "c658cc241475778d7991b57112d57af8d4a7e504e2f7887bd3fd40b79ebced32"
+    },
+    {
+      "source_id": "versions_stack",
+      "result": "backed_up",
+      "host": "docker-runtime",
+      "files": 1,
+      "paths": [
+        "/srv/platform_server/versions/stack.yaml"
+      ],
+      "retention": {
+        "keep_daily": 30
+      },
+      "restic_stdout": "{\"message_type\":\"status\",\"percent_done\":1,\"total_files\":1,\"files_done\":1,\"total_bytes\":53484,\"bytes_done\":53484}\n{\"message_type\":\"summary\",\"files_new\":0,\"files_changed\":1,\"files_unmodified\":0,\"dirs_new\":0,\"dirs_changed\":3,\"dirs_unmodified\":0,\"data_blobs\":0,\"tree_blobs\":4,\"data_added\":1425,\"data_added_packed\":1181,\"total_files_processed\":1,\"total_bytes_processed\":53484,\"total_duration\":0.772775176,\"backup_start\":\"2026-10-14T02:06:07.718825458Z\",\"backup_end\":\"2026-10-14T02:06:08.491600644Z\",\"snapshot_id\":\"ae78f4e8ebf8fcdce716f65d1269761d190da4e5d5228168a659a1cafce2e059\"}",
+      "snapshot_id": "ae78f4e8ebf8fcdce716f65d1269761d190da4e5d5228168a659a1cafce2e059"
+    },
+    {
+      "source_id": "falco_overrides",
+      "result": "backed_up",
+      "host": "docker-runtime",
+      "files": 2,
+      "paths": [
+        "/srv/platform_server/config/falco"
+      ],
+      "retention": {
+        "keep_daily": 30
+      },
+      "restic_stdout": "{\"message_type\":\"summary\",\"files_new\":0,\"files_changed\":0,\"files_unmodified\":2,\"dirs_new\":0,\"dirs_changed\":0,\"dirs_unmodified\":5,\"data_blobs\":0,\"tree_blobs\":0,\"data_added\":0,\"data_added_packed\":0,\"total_files_processed\":2,\"total_bytes_processed\":1386,\"total_duration\":0.742063353,\"backup_start\":\"2026-10-14T02:06:09.402914172Z\",\"backup_end\":\"2026-10-14T02:06:10.144977514Z\",\"snapshot_id\":\"d8933bd5ea1149bf3d509ca834f728d93f3c68aa37e48f411888cc014d7076f2\"}",
+      "snapshot_id": "d8933bd5ea1149bf3d509ca834f728d93f3c68aa37e48f411888cc014d7076f2"
+    }
+  ],
+  "latest_snapshot_receipt": "receipts/restic-snapshots-latest.json",
+  "notifications": []
+}

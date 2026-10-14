@@ -28,6 +28,15 @@ esac
 umask 077
 docker_config="$(mktemp -d "${TMPDIR:-/tmp}/patched-image-auth.XXXXXX")"
 work_dir="$(mktemp -d "${TMPDIR:-/tmp}/patched-image-build.XXXXXX")"
+# Use an isolated, short-lived auth store for the Harbor login and Buildx push.
+# Preserve only the selected builder metadata: otherwise this fresh config
+# silently falls back to the Docker-default builder and loses the warm remote
+# BuildKit cache (the Docker-default config itself may contain unrelated auth).
+source_docker_config="${DOCKER_CONFIG:-$HOME/.docker}"
+if [[ -d "$source_docker_config/buildx" ]]; then
+  cp -a "$source_docker_config/buildx" "$docker_config/"
+fi
+export DOCKER_CONFIG="$docker_config"
 cleanup() {
   docker --config "$docker_config" logout "$registry" >/dev/null 2>&1 || true
   rm -rf -- "$docker_config" "$work_dir"

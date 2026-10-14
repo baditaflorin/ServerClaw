@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly Scanopy backup restore drill
+
+[Timer]
+OnCalendar={{ monitoring_scanopy_backup_drill_on_calendar }}
+RandomizedDelaySec=300
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,131 @@
+# Added 2026-10-13 after the 0database/0own re-audit: no rule referenced pg_backup_* and PveBackupFreshnessLow only
+# covers the 0docker host-side exporter. Two sources:
+#   1. pg_backup_* from the vzdump hook on the 0database hypervisor (roles fleet_pg_backup, prom file pg_backup_vzdump.prom).
+#   2. pbs_backup_group_* from scripts/pbs_backup_metrics.py on own-pbs (timer pbs-backup-metrics, every 5 minutes): newest
+#      snapshot per PBS backup group, i.e. one freshness series for every guest of every fleet that backs up to own-pbs
+#      (including the 0own guests once the 0own namespace jobs exist).
+# Existing alerts left alone: PveBackupFreshnessLow / PveBackupFailureRecent (0docker), PBSDatastore* (capacity).
+groups:
+  - name: fleet_pg_backup
+    rules:
+      - alert: PgBackupStale
+        expr: time() - pg_backup_last_success_timestamp_seconds{method="vzdump"} > 93600
+        for: 15m
+        labels:
+          severity: warning
+          service: pg_backup
+        annotations:
+          summary: "No successful vzdump of VM {{ $labels.vmid }} ({{ $labels.host }}) for over 26 hours"
+          description: "The daily pg-primary vzdump to PBS (job pg-primary-daily-pbs, 02:30 CEST) last succeeded {{ $value | humanizeDuration }} ago. Check the PVE task log on the hypervisor and PBS capacity/permissions."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      - alert: PgBackupStaleCritical
+        expr: time() - pg_backup_last_success_timestamp_seconds{method="vzdump"} > 180000
+        for: 15m
+        labels:
+          severity: critical
+          service: pg_backup
+        annotations:
+          summary: "No successful vzdump of VM {{ $labels.vmid }} ({{ $labels.host }}) for over 50 hours"
+          description: "Two daily runs of the pg-primary backup have been missed ({{ $value | humanizeDuration }} since the last success). The production Postgres has no point-in-time recovery, so this backup is the only recovery path."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      - alert: PgBackupLastRunFailed
+        expr: pg_backup_last_status{method="vzdump"} != 1
+        for: 10m
+        labels:
+          severity: critical
+          service: pg_backup
+        annotations:
+          summary: "The last vzdump of VM {{ $labels.vmid }} ({{ $labels.host }}) failed"
+          description: "The vzdump hook reported backup-abort. Read /var/log/vzdump/qemu-{{ $labels.vmid }}.log and the PVE task log on the hypervisor."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      # Both ratio alerts compare the last run with the 7-day history. size_bytes is what vzdump logged as "transferred"
+      # (dirty-bitmap runs transfer only changed blocks), so it moves with write volume: severity is info. They are
+      # gated on 2026-10-21 because the series still holds a hand-set sample (644245094400 bytes, 6345 s) until the fixed
+      # hook has run on 2026-10-14 02:30 CEST and that sample has left the 7-day window.
+      - alert: PgBackupSizeShrank
+        expr: |
+          (pg_backup_size_bytes{method="vzdump"} < 0.7 * avg_over_time(pg_backup_size_bytes{method="vzdump"}[7d]))
+          and on () (vector(time()) > 1792540800)
+        for: 5m
+        labels:
+          severity: info
+          service: pg_backup
+        annotations:
+          summary: "Last backup of VM {{ $labels.vmid }} transferred over 30% less than the 7-day average"
+          description: "Transferred {{ $value | humanize1024 }}B against a 7-day average well above that. A shrinking backup can mean a truncated source (wrong disk, empty volume) rather than less churn; compare with the PBS snapshot sizes."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      - alert: PgBackupDurationHigh
+        expr: |
+          (pg_backup_duration_seconds{method="vzdump"} > 3 * quantile_over_time(0.5, pg_backup_duration_seconds{method="vzdump"}[7d]))
+          and on () (vector(time()) > 1792540800)
+        for: 5m
+        labels:
+          severity: info
+          service: pg_backup
+        annotations:
+          summary: "Last backup of VM {{ $labels.vmid }} took over 3x the 7-day median duration"
+          description: "The run took {{ $value | humanizeDuration }}. Check PBS datastore I/O (verify/GC running?), network to own-pbs and the size of the transfer."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+  - name: fleet_pbs_backup_freshness
+    rules:
+      # Retired groups that stay in the root namespace until retention removes them: the 0docker guests were backed up
+      # there before they moved to the 0docker namespace on 2026-10-10 (ids 101/104/107/108/109 do not exist on 0mcp).
+      # 0mcp-legacy is a read-only archive.
+      - alert: PbsBackupGroupStale
+        expr: |
+          (
+            time() - pbs_backup_group_last_snapshot_timestamp_seconds{namespace!="0mcp-legacy"} > 93600
+          )
+          unless on (namespace, backup_type, backup_id)
+          pbs_backup_group_snapshot_count{namespace="", backup_id=~"101|104|107|108|109"}
+        for: 30m
+        labels:
+          severity: warning
+          service: pbs_backup
+        annotations:
+          summary: "PBS group {{ $labels.backup_type }}/{{ $labels.backup_id }} (namespace '{{ $labels.namespace }}') has no snapshot for over 26 hours"
+          description: "Newest snapshot is {{ $value | humanizeDuration }} old. Every daily job on the four fleets should land a snapshot inside 26 hours (VM 153 is 12:00 daily). Check the vzdump task on the owning hypervisor and the PBS task list."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      - alert: PbsBackupGroupStaleCritical
+        expr: |
+          (
+            time() - pbs_backup_group_last_snapshot_timestamp_seconds{namespace!="0mcp-legacy"} > 180000
+          )
+          unless on (namespace, backup_type, backup_id)
+          pbs_backup_group_snapshot_count{namespace="", backup_id=~"101|104|107|108|109"}
+        for: 30m
+        labels:
+          severity: critical
+          service: pbs_backup
+        annotations:
+          summary: "PBS group {{ $labels.backup_type }}/{{ $labels.backup_id }} (namespace '{{ $labels.namespace }}') has no snapshot for over 50 hours"
+          description: "Two daily runs were missed ({{ $value | humanizeDuration }}). If the guest was retired on purpose, prune the group in PBS and add it to the exclusion in this rule."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      - alert: PbsBackupMetricsStale
+        expr: time() - pbs_backup_collect_timestamp_seconds > 1800
+        for: 10m
+        labels:
+          severity: warning
+          service: pbs_backup
+        annotations:
+          summary: "PBS backup freshness collector on {{ $labels.instance }} stopped updating"
+          description: "pbs-backup-metrics.timer on own-pbs has not refreshed /var/lib/prometheus/node-exporter/textfile/pbs_backup.prom for {{ $value | humanizeDuration }}; the PbsBackupGroupStale alerts are blind until it runs again."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      - alert: PbsBackupMetricsMissing
+        expr: absent(pbs_backup_collect_timestamp_seconds{datastore="own-pbs"})
+        for: 30m
+        labels:
+          severity: warning
+          service: pbs_backup
+        annotations:
+          summary: "No PBS backup freshness series from own-pbs"
+          description: "Prometheus has no pbs_backup_collect_timestamp_seconds: the own-pbs node exporter is down or the textfile collector is not enabled there."
+          runbook_url: docs/runbooks/pbs-0own-backups.md

@@ -614,6 +614,83 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         self.assertEqual(build_calls[-1], ({"platform_domain": "tracked.example"}, False))
         self.assertEqual(report_calls[-1], ({"platform_domain": "tracked.example"}, False))
 
+    def test_write_and_validate_uses_selected_deployment_registry_before_writing(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="subdomain-exposure-write-validate-"))
+        try:
+            registry_path = temp_dir / "subdomain-exposure-registry.json"
+            generated_registry = {
+                "schema_version": "3.0.0",
+                "zone_name": "localhost",
+                "primary_deployment": "example.com",
+                "deployments": {},
+                "publications": [],
+                "summary": {"catalog_total": 0},
+            }
+            build_calls: list[tuple[dict[str, str] | None, bool]] = []
+            report_calls: list[tuple[dict[str, str] | None, bool]] = []
+
+            def build_with_overlay(*_args, identity_vars=None, include_local_topology_overlay=True, **_kwargs):
+                build_calls.append((identity_vars, include_local_topology_overlay))
+                return generated_registry
+
+            def report_with_overlay(*_args, identity_vars=None, include_local_topology_overlay=True, **_kwargs):
+                report_calls.append((identity_vars, include_local_topology_overlay))
+                return {"findings": []}
+
+            original = audit.REGISTRY_PATH
+            audit.REGISTRY_PATH = registry_path
+            try:
+                with (
+                    patch.object(audit, "build_registry", side_effect=build_with_overlay),
+                    patch.object(audit, "build_report", side_effect=report_with_overlay),
+                    patch.object(audit, "load_tracked_generation_identity_vars") as tracked_identity,
+                ):
+                    self.assertEqual(audit.main(["--write-registry", "--validate"]), 0)
+                    self.assertEqual(audit.main(["--write-registry", "--validate"]), 0)
+                    tracked_identity.assert_not_called()
+            finally:
+                audit.REGISTRY_PATH = original
+
+            self.assertEqual(json.loads(registry_path.read_text(encoding="utf-8")), generated_registry)
+            self.assertEqual(build_calls, [(None, True), (None, True)])
+            self.assertEqual(report_calls, [(None, True), (None, True)])
+        finally:
+            shutil.rmtree(temp_dir)
+
+    def test_write_and_validate_does_not_replace_registry_when_validation_fails(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="subdomain-exposure-write-fail-"))
+        try:
+            registry_path = temp_dir / "subdomain-exposure-registry.json"
+            original_content = '{"schema_version":"old"}\n'
+            registry_path.write_text(original_content, encoding="utf-8")
+            generated_registry = {
+                "schema_version": "3.0.0",
+                "zone_name": "localhost",
+                "primary_deployment": "example.com",
+                "deployments": {},
+                "publications": [],
+                "summary": {"catalog_total": 0},
+            }
+
+            original = audit.REGISTRY_PATH
+            audit.REGISTRY_PATH = registry_path
+            try:
+                with (
+                    patch.object(audit, "build_registry", return_value=generated_registry),
+                    patch.object(
+                        audit,
+                        "build_report",
+                        return_value={"findings": [{"severity": "CRITICAL", "finding": "fixture"}]},
+                    ),
+                ):
+                    self.assertEqual(audit.main(["--write-registry", "--validate"]), 2)
+            finally:
+                audit.REGISTRY_PATH = original
+
+            self.assertEqual(registry_path.read_text(encoding="utf-8"), original_content)
+        finally:
+            shutil.rmtree(temp_dir)
+
     def test_wildcard_edge_alias_matches_catalog_hostname(self) -> None:
         route = {
             "hostname": "apps.example.com",

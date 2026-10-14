@@ -273,6 +273,56 @@ def test_changed_dependency_graph_node_scopes_to_owning_service(
     assert selected == ["test_echo"]
 
 
+def test_changed_dependency_graph_edge_description_scopes_to_source_service(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+
+    graph_path = tmp_path / "config" / "dependency-graph.json"
+    graph = json.loads(graph_path.read_text(encoding="utf-8"))
+    graph["edges"].append(
+        {
+            "from": "test_echo",
+            "to": "docker_runtime",
+            "type": "soft",
+            "description": "Baseline edge for a scoped description change.",
+        }
+    )
+    graph_path.write_text(json.dumps(graph, indent=2) + "\n", encoding="utf-8")
+
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    subprocess.run(["git", "-C", str(tmp_path), "add", "."], check=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(tmp_path),
+            "-c",
+            "user.name=Completeness Test",
+            "-c",
+            "user.email=completeness-test@example.invalid",
+            "commit",
+            "-qm",
+            "baseline",
+        ],
+        check=True,
+    )
+
+    graph = json.loads(graph_path.read_text(encoding="utf-8"))
+    edge = next(row for row in graph["edges"] if row["from"] == "test_echo")
+    edge["description"] += " Description-only change."
+    graph_path.write_text(json.dumps(graph, indent=2) + "\n", encoding="utf-8")
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        ["config/dependency-graph.json"], context, base_ref="HEAD"
+    )
+
+    assert selected == ["test_echo"]
+
+
 def test_changed_dependency_graph_edges_keep_global_completeness_scope(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

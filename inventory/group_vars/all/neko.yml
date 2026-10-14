@@ -1,0 +1,12 @@
+# Neko operator browser assignment (ADR 0380 / ADR 0491).
+# The operator identity resolves from the selected deployment's local identity
+# overlay. Additional identities belong in the sibling deployment-local neko.yml.
+neko_instances:
+  operator:
+    email: "{{ platform_operator_email }}"
+    port: 8080
+    udp_range: "50000-50999"
+
+# An empty instance map removes containers and Neko-owned Authentik attributes.
+# Require an explicit deployment-local override to allow that destructive state.
+neko_allow_empty_instances: false

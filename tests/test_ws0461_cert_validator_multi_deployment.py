@@ -1,15 +1,14 @@
-"""Tests for ADR 0458 — cert validator multi-deployment auto-detect.
+"""Certificate-validator CLI contract after ADR 0488's single-deployment model.
 
-Covers:
-  1. `_list_deployment_slugs()` returns the slugs under .local/deployments/.
-  2. `--all-deployments` flag is parsed and visible in --help.
-  3. Auto-trigger: no flag passed + multiple deployments → multi-mode runs.
-  4. Single-deployment installs continue to use the legacy single path.
+ADR 0488 replaced automatic multi-deployment enumeration with an explicitly
+selected identity overlay. These tests guard the current CLI and catalog
+filtering contract rather than the retired deployment auto-detection path.
 """
 
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -36,28 +35,7 @@ def synthetic_local(tmp_path):
     return tmp_path
 
 
-def test_list_deployment_slugs_empty(synthetic_local):
-    mod = _load_module(synthetic_local)
-    assert mod._list_deployment_slugs() == []
-
-
-def test_list_deployment_slugs_returns_sorted(synthetic_local):
-    mod = _load_module(synthetic_local)
-    (synthetic_local / "deployments" / "zeta").mkdir(parents=True)
-    (synthetic_local / "deployments" / "alpha").mkdir(parents=True)
-    (synthetic_local / "deployments" / "beta").mkdir(parents=True)
-    assert mod._list_deployment_slugs() == ["alpha", "beta", "zeta"]
-
-
-def test_list_deployment_slugs_skips_dotfiles(synthetic_local):
-    mod = _load_module(synthetic_local)
-    (synthetic_local / "deployments" / ".cache").mkdir(parents=True)
-    (synthetic_local / "deployments" / "real").mkdir(parents=True)
-    assert mod._list_deployment_slugs() == ["real"]
-
-
-def test_help_lists_all_deployments_flag():
-    """The --all-deployments flag must appear in --help so operators discover it."""
+def test_help_exposes_single_deployment_validation_options():
     result = subprocess.run(
         ["python3", str(VALIDATOR_SCRIPT), "--help"],
         capture_output=True,
@@ -65,22 +43,11 @@ def test_help_lists_all_deployments_flag():
         check=False,
     )
     flat = " ".join(result.stdout.split())
-    assert "--all-deployments" in flat
-    assert "ADR 0458" in flat
-
-
-def test_help_lists_deployment_flag_still():
-    """ADR 0456's --deployment must continue to appear (regression check)."""
-    result = subprocess.run(
-        ["python3", str(VALIDATOR_SCRIPT), "--help"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    # argparse wraps long help strings; collapse whitespace before searching.
-    flat = " ".join(result.stdout.split())
-    assert "--deployment" in flat
-    assert "ADR 0456" in flat
+    assert result.returncode == 0
+    assert "--check-all" in flat
+    assert "--fqdn" in flat
+    assert "--all-deployments" not in flat
+    assert "--deployment" not in flat
 
 
 def test_module_imports_cleanly():
@@ -91,7 +58,50 @@ def test_module_imports_cleanly():
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(module)
-    # Sanity-check the new helper exists.
-    assert hasattr(module, "_list_deployment_slugs")
-    assert hasattr(module, "_resolve_deployment_slug")
     assert hasattr(module, "_get_real_domain")
+    assert hasattr(module, "load_catalog")
+    assert hasattr(module, "exclude_retiring_edge_certificates")
+
+
+def test_certificate_catalog_loader_returns_only_active_entries(tmp_path):
+    mod = _load_module(tmp_path)
+    catalog = tmp_path / "certificates.json"
+    catalog.write_text(
+        json.dumps(
+            {
+                "certificates": [
+                    {
+                        "service_id": "neko",
+                        "status": "active",
+                        "endpoint": {
+                            "host": "browser.example.com",
+                            "port": 443,
+                            "server_name": "browser.example.com",
+                        },
+                    },
+                    {
+                        "service_id": "retired",
+                        "status": "planned",
+                        "endpoint": {
+                            "host": "old.example.com",
+                            "port": 443,
+                            "server_name": "old.example.com",
+                        },
+                    },
+                    {
+                        "service_id": "private-only",
+                        "status": "lan_only",
+                        "endpoint": {
+                            "host": "private.example.com",
+                            "port": 443,
+                            "server_name": "private.example.com",
+                        },
+                    },
+                ]
+            }
+        )
+    )
+
+    entries = mod.load_catalog(str(catalog))
+
+    assert [entry["service_id"] for entry in entries] == ["neko"]

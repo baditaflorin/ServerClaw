@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: bitnami/postgresql@sha256:e989bcc1772cd82ef46bd03d3e6bf7ea35011b39a7826d828886cb9c45aec819
+    container_name: openobserve-postgres
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "5"
+    environment:
+      POSTGRESQL_DATABASE: openobserve
+      POSTGRESQL_USERNAME: postgres
+      POSTGRESQL_PASSWORD: ${OO_PG_PASSWORD:?OO_PG_PASSWORD must be provided}
+      POSTGRESQL_PORT_NUMBER: "5432"
+      ALLOW_EMPTY_PASSWORD: "no"
+    volumes:
+      - postgres_data:/bitnami/postgresql
+    networks:
+      - observability
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d openobserve"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  openobserve:
+    image: openobserve/openobserve@sha256:a7b7c8e91d250ac7da8ed2891cf233d7156a1da08fc07f4e4e520d0c98996fbf
+    container_name: openobserve
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "5"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ZO_ROOT_USER_EMAIL: admin@example.net
+      ZO_ROOT_USER_PASSWORD: ${OO_ROOT_PASSWORD:?OO_ROOT_PASSWORD must be provided}
+      ZO_DATA_DIR: /data
+      ZO_META_STORE: postgres
+      ZO_META_POSTGRES_DSN: ${ZO_META_POSTGRES_DSN:?ZO_META_POSTGRES_DSN must be provided}
+      ZO_TELEMETRY: "false"
+      ZO_COMPACT_DATA_RETENTION_DAYS: "30"
+    ports:
+      - "127.0.0.1:5080:5080"
+      - "127.0.0.1:5514:5514"
+    volumes:
+      - openobserve_data:/data
+    networks:
+      - observability
+
+networks:
+  observability:
+
+volumes:
+  postgres_data:
+  openobserve_data:

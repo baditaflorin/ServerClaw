@@ -136,6 +136,10 @@
   ],
   "excluded": [
     {
+      "slo_id": "neko-availability",
+      "reason": "The private readiness endpoint is not yet reachable from monitoring; the runtime-comms ACL must be applied and the probe verified before it is promoted to endpoints."
+    },
+    {
       "slo_id": "changedetection-availability",
       "reason": "Not reachable from the monitoring VM (connection refused or timeout); the Scanopy TCP probes do not list it either"
     },

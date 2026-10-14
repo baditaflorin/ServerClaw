@@ -91,6 +91,8 @@ def test_tailnet_routes_are_single_host_routes_and_keep_the_pre_existing_ones() 
     docker = hostvars["0docker_bastion"]["fleet_tailscale_node_advertise_routes"]
     own = hostvars["0own_bastion"]["fleet_tailscale_node_advertise_routes"]
     assert "10.10.10.109/32" in docker and "10.60.10.50/32" in own
+    # VM660 has no tailscaled; the hypervisor routes its /32 (policy autoApprover + Prometheus grant added 2026-10-13).
+    assert "10.60.10.60/32" in own
     # `tailscale set --advertise-routes` replaces the list, so the older routes must still be declared.
     assert {"10.10.10.30/32", "10.10.10.106/32", "10.10.10.107/32"} <= set(docker)
     assert all(route.endswith("/32") for route in docker + own)
@@ -584,7 +586,8 @@ def test_pbs_side_only_verifies_namespace_and_token_and_never_generates_secrets(
     assert argv_lines  # reads and additive writes only
     _, hostvars, _ = fleet.inventory_model()
     acls = hostvars["0own_pbs"]["fleet_pg_backup_pbs_acls"]
-    assert {a["path"] for a in acls} == {"/datastore/own-pbs/0database"}
+    # 0database (Postgres) and 0own (0own guests, added 2026-10-13); each namespace gets its own writer user and token.
+    assert {a["path"] for a in acls} == {"/datastore/own-pbs/0database", "/datastore/own-pbs/0own"}
     assert {a["role"] for a in acls} == {"DatastoreBackup", "DatastoreAudit"}
 
 
@@ -627,6 +630,7 @@ def test_playbook_refuses_to_run_without_a_limit_and_is_not_wired_anywhere_by_de
         "lv3.platform.fleet_guest_firewall",
         "lv3.platform.fleet_pg_backup",
         "lv3.platform.fleet_docker_prune",
+        "lv3.platform.fleet_hypervisor_memory_reclaim",
     ]
 
     for wired in ("playbooks/site.yml", "Makefile", ".woodpecker.yml", "ansible.cfg"):

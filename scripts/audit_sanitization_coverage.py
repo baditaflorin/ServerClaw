@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import ipaddress
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -35,11 +36,29 @@ OPERATORS_PATH = REPO_ROOT / "config" / "operators.yaml"
 HOST_VARS_DIR = REPO_ROOT / "inventory" / "host_vars"
 
 # ADR 0440: per-deployment identity files. Each deployment owns its own
-# identity.yml under .local/deployments/<slug>/. The publish pipeline must
-# treat every deployment's sensitive values as leak markers — otherwise a
-# domain configured for deployment B could leak into the public mirror that
-# was sanitised against only deployment A.
-DEPLOYMENTS_DIR = REPO_ROOT / ".local" / "deployments"
+# identity.yml under .local/deployments/<slug>/. A fresh git worktree has no
+# .local by design, so operators may point this audit at the authoritative
+# main-checkout directory without copying or symlinking credentials into the
+# worktree.
+DEPLOYMENTS_DIR_ENV = "LV3_PUBLICATION_DEPLOYMENTS_DIR"
+
+
+def resolve_deployments_dir(repo_root: Path = REPO_ROOT) -> Path:
+    configured = os.environ.get(DEPLOYMENTS_DIR_ENV)
+    if configured is None:
+        return repo_root / ".local" / "deployments"
+    if not configured.strip():
+        raise ValueError(f"{DEPLOYMENTS_DIR_ENV} must be an absolute path when set")
+    path = Path(configured).expanduser()
+    if not path.is_absolute():
+        raise ValueError(f"{DEPLOYMENTS_DIR_ENV} must be an absolute path when set")
+    resolved = path.resolve(strict=True)
+    if not resolved.is_dir():
+        raise ValueError(f"{DEPLOYMENTS_DIR_ENV} must point to a directory")
+    return resolved
+
+
+DEPLOYMENTS_DIR = resolve_deployments_dir()
 
 # IP patterns
 IPV4_RE = re.compile(r"\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b")

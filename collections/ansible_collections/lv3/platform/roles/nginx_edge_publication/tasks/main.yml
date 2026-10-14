@@ -55,7 +55,7 @@
   ansible.builtin.apt:
     name: >-
       {{
-        ['nginx', 'certbot', 'rsync']
+        ['nginx', 'certbot', 'rsync', 'logrotate']
         + (
           ['python3-venv']
           if public_edge_acme_challenge_method == 'dns-hetzner'

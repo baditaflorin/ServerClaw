@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "restic-config-backup-20261014T005755Z",
+  "recorded_at": "2026-10-14T00:57:55Z",
+  "recorded_on": "2026-10-14",
+  "recorded_by": "codex",
+  "triggered_by": "manual-backup",
+  "source_commit": "unknown",
+  "repository": {
+    "bucket": "restic-config-backup",
+    "endpoint": "http://10.200.2.2:9000",
+    "repository_url": "s3:http://10.200.2.2:9000/restic-config-backup"
+  },
+  "summary": {
+    "governed_sources": 5,
+    "protected": 5,
+    "uncovered": 0,
+    "inactive": 0,
+    "uncovered_sources": [],
+    "inactive_sources": []
+  },
+  "source_results": [
+    {
+      "source_id": "receipts",
+      "result": "backed_up",
+      "host": "docker-runtime",
+      "files": 84,
+      "paths": [
+        "/srv/platform_server/receipts"
+      ],
+      "retention": {
+        "keep_daily": 90,
+        "keep_monthly": 12
+      },
+      "restic_stdout": "{\"message_type\":\"status\",\"percent_done\":1,\"total_files\":84,\"files_done\":84,\"total_bytes\":254340,\"bytes_done\":254340}\n{\"message_type\":\"summary\",\"files_new\":1,\"files_changed\":1,\"files_unmodified\":82,\"dirs_new\":0,\"dirs_changed\":4,\"dirs_unmodified\":1,\"data_blobs\":2,\"tree_blobs\":5,\"data_added\":39243,\"data_added_packed\":9074,\"total_files_processed\":84,\"total_bytes_processed\":254340,\"total_duration\":0.831132224,\"backup_start\":\"2026-10-14T00:57:55.303461784Z\",\"backup_end\":\"2026-10-14T00:57:56.134594008Z\",\"snapshot_id\":\"19c9facc0f34af9092598437f954b4c16b5e727ff4981f746c620e0366656888\"}",
+      "snapshot_id": "19c9facc0f34af9092598437f954b4c16b5e727ff4981f746c620e0366656888"
+    },
+    {
+      "source_id": "controller_secret_manifest",
+      "result": "backed_up",
+      "host": "docker-runtime",
+      "files": 1,
+      "paths": [
+        "/srv/platform_server/config/controller-local-secrets.json"
+      ],
+      "retention": {
+        "keep_daily": 90
+      },
+      "restic_stdout": "{\"message_type\":\"status\",\"percent_done\":1,\"total_files\":1,\"files_done\":1,\"total_bytes\":132864,\"bytes_done\":132864}\n{\"message_type\":\"summary\",\"files_new\":0,\"files_changed\":0,\"files_unmodified\":1,\"dirs_new\":0,\"dirs_changed\":0,\"dirs_unmodified\":3,\"data_blobs\":0,\"tree_blobs\":0,\"data_added\":0,\"data_added_packed\":0,\"total_files_processed\":1,\"total_bytes_processed\":132864,\"total_duration\":0.737376933,\"backup_start\":\"2026-10-14T00:57:56.898452458Z\",\"backup_end\":\"2026-10-14T00:57:57.635829392Z\",\"snapshot_id\":\"2d7942d8841a903d0fbcd33fff753c2687762efa8fad689627c97e7a23013b75\"}",
+      "snapshot_id": "2d7942d8841a903d0fbcd33fff753c2687762efa8fad689627c97e7a23013b75"
+    }
+  ],
+  "latest_snapshot_receipt": "receipts/restic-snapshots-latest.json",
+  "notifications": []
+}

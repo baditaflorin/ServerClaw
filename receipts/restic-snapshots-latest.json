@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
-  "recorded_at": "2026-10-13T10:22:51Z",
-  "recorded_on": "2026-10-13",
+  "recorded_at": "2026-10-14T02:06:06Z",
+  "recorded_on": "2026-10-14",
   "recorded_by": "codex",
   "repository": {
     "bucket": "restic-config-backup",
@@ -31,15 +31,19 @@
         "keep_monthly": 12
       },
       "latest_snapshot": {
-        "snapshot_id": "940f2f28945a35396005cc27c09fa937ffbca62cc5e694103edd3f502b29da1a",
-        "recorded_at": "2026-10-13T10:22:38Z",
+        "snapshot_id": "b093ba1f9e9c7bd6c4f80bddad048edaa606135b45680d8f2011853312583623",
+        "recorded_at": "2026-10-14T02:05:52Z",
         "host": "docker-runtime",
         "paths": [
           "receipts"
         ],
-        "files": 80
+        "files": 89
       },
-      "last_restore_verification": null,
+      "last_restore_verification": {
+        "recorded_at": "2026-10-14T00:59:02Z",
+        "path": "receipts/restic-restore-verifications/20261014T005902Z.json",
+        "result": "pass"
+      },
       "reasons": [
         "Latest snapshot is 0 minutes old and within the 390 minute freshness window."
       ]
@@ -59,8 +63,8 @@
         "keep_monthly": 6
       },
       "latest_snapshot": {
-        "snapshot_id": "6e4e1e4f59a0af358deb90fb4be344057b3ecc39820d3e37c76516439c15a6ad",
-        "recorded_at": "2026-10-13T10:22:51Z",
+        "snapshot_id": "c658cc241475778d7991b57112d57af8d4a7e504e2f7887bd3fd40b79ebced32",
+        "recorded_at": "2026-10-14T02:06:06Z",
         "host": "docker-runtime",
         "paths": [
           "config"
@@ -86,8 +90,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "f0d1078310dc8bf8055c82c3c2bc33cc03aa0452abea3f1d711b1ef700b3471b",
-        "recorded_at": "2026-10-13T10:22:51Z",
+        "snapshot_id": "ae78f4e8ebf8fcdce716f65d1269761d190da4e5d5228168a659a1cafce2e059",
+        "recorded_at": "2026-10-14T02:06:06Z",
         "host": "docker-runtime",
         "paths": [
           "versions/stack.yaml"
@@ -113,8 +117,8 @@
         "keep_daily": 90
       },
       "latest_snapshot": {
-        "snapshot_id": "b8b0cffbbef4a1b73169ac5707e87a4c59a748907b1e9427576f5fe40468459a",
-        "recorded_at": "2026-10-13T10:22:40Z",
+        "snapshot_id": "738d4df5cb7f1818b46c66b56428e243cdfa971ddace26a2da00fae4b04ea2c1",
+        "recorded_at": "2026-10-14T02:05:54Z",
         "host": "docker-runtime",
         "paths": [
           "config/controller-local-secrets.json"
@@ -140,8 +144,8 @@
         "keep_daily": 30
       },
       "latest_snapshot": {
-        "snapshot_id": "71d362e4007558b882f6288e51e4da1f5b2696f2f8787863678b88116bca2ed0",
-        "recorded_at": "2026-10-13T10:22:51Z",
+        "snapshot_id": "d8933bd5ea1149bf3d509ca834f728d93f3c68aa37e48f411888cc014d7076f2",
+        "recorded_at": "2026-10-14T02:06:06Z",
         "host": "docker-runtime",
         "paths": [
           "config/falco"
