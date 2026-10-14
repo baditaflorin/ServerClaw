@@ -31,7 +31,10 @@ build_server_buildkit_config_file: /etc/buildkit/buildkitd.toml
 build_server_buildkit_socket_dir: /run/buildkit
 build_server_buildkit_socket_file: /run/buildkit/buildkitd.sock
 build_server_buildkit_cache_dir: /opt/builds/.buildkit-cache
-build_server_buildkit_cache_gb: 50
+# 25, not 50: the build VM's disk is shared with Woodpecker workspaces and Docker volumes. At 50 GiB the cache grew to
+# ~60 GB, the root filesystem fell below the CI load controller's 10% line and it drained the 0mcp agent (2026-10-13
+# and 2026-10-14: every pipeline pending for hours). The load controller resumes at 15% free.
+build_server_buildkit_cache_gb: 25
 build_server_buildkit_registry_mirrors: {}
 build_server_registry_hosts:
   - hostname: "registry.{{ platform_domain }}"

@@ -25,14 +25,15 @@ steps:
 
   # Tailscale policy as code (config/tailscale/). Offline checks ONLY: no credential is available to CI and none is
   # needed. Syntax, no allow-all grant, every tag defined in tagOwners, and the lockout guard (the policy tests must
-  # keep proving the operator Mac and the bastions can SSH). Plan/apply against the live tailnet is a manual step run
-  # from CT108 (docs/runbooks/tailscale-metrics-grants.md); CI never applies a policy.
+  # keep proving the operator Mac and the bastions can SSH), plus the reconciler's tests. Plan/apply against the live
+  # tailnet runs on CT108 only (docs/runbooks/tailscale-metrics-grants.md); CI never applies a policy.
   validate-tailscale-policy:
     image: python:3.12-slim
     commands:
       - python3 -m pip install --no-cache-dir pytest==8.3.4 pyyaml==6.0.2
       - python3 scripts/tailscale_policy_sync.py check
-      - python3 -m pytest tests/test_tailscale_policy_sync.py -q
+      - python3 scripts/tailscale_policy_reconcile.py --help > /dev/null
+      - python3 -m pytest tests/test_tailscale_policy_sync.py tests/test_tailscale_policy_reconcile.py -q
     when:
       - event: manual
       - event: [push, pull_request]
@@ -40,7 +41,10 @@ steps:
           include:
             - config/tailscale/**
             - scripts/tailscale_policy_sync.py
+            - scripts/tailscale_policy_reconcile.py
+            - scripts/tailscale-policy-reconcile-*
             - tests/test_tailscale_policy_sync.py
+            - tests/test_tailscale_policy_reconcile.py
             - tests/fixtures/tailscale/**
             - .woodpecker.yml
 

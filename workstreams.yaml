@@ -233,8 +233,8 @@ workstreams:
   ready_to_merge: false
   live_applied: true
   owner: codex
-  branch: codex/authentik-serverclaw-publish-20261014
-  worktree_path: .worktrees/authentik-serverclaw-publish-20261014
+  branch: codex/ws-0512-glitchtip-scan-evidence-20261014
+  worktree_path: .worktrees/ws-0512-glitchtip-scan-evidence-20261014
   doc: docs/workstreams/ws-0512-authentik-consumer-e2e.md
   canonical_truth:
     changelog_entry: Verify Authentik consumer sign-in and preserve source-faithful,
@@ -690,6 +690,13 @@ workstreams:
       - tests/test_glitchtip_runtime_role.py
       mode: shared_contract
       contract: adr-0491-authentik-migration-v1
+    - id: glitchtip_candidate_image_scan_receipt
+      paths:
+      - receipts/image-scans/2026-10-14-patched-glitchtip-runtime-0794a3cbb4d0.json
+      - receipts/sbom/0794a3cbb4d0.cdx.json
+      - receipts/cve/0794a3cbb4d0-20261014T041817Z.grype.json
+      mode: shared_contract
+      contract: container-image-scan-receipt-v1
     - id: authentik_runtime_regression
       paths:
       - tests/test_authentik_runtime_role.py

@@ -7,9 +7,11 @@ addresses, so it is private-repo only: `config/tailscale` is in `delete_paths` o
 `config/publication-sanitization.yaml` and never reaches the public mirror. The sync tool and its tests use synthetic
 fixtures only.
 
-Nothing applies the policy automatically. Editing the file in git does not change the tailnet until an operator runs
-`plan` then `apply` from CT108 (below). Between those two moments the file and the tailnet may differ, which is exactly
-what the drift check reports.
+By default nothing applies the policy automatically. Editing the file in git does not change the tailnet until an
+operator runs `plan` then `apply` from CT108 (below). Between those two moments the file and the tailnet may differ,
+which is exactly what the drift check reports. An optional, report-only-by-default reconciler on CT108 can apply the
+narrow class of merged changes that are provably safe (see "Unattended reconciler" below); CI never holds the
+credential and never applies.
 
 ## Files
 
@@ -67,6 +69,55 @@ then `apply` again; or revert the git commit and re-apply, which is preferred be
 The rollback copy was the live, test-passing policy at apply time, so it passes `plan` unless the tailnet's devices or
 tags changed since; `plan` shows the failing test if so.
 
+## Unattended reconciler (additive-only, report-only by default)
+
+`scripts/tailscale_policy_reconcile.py` runs on CT108 from `tailscale-policy-reconcile.timer` (every 15 minutes), next to
+the vault credential. It is a pull reconciler: CI is not involved and never holds a credential. A merged, reviewed
+change in git is the approval. Each run reads `config/tailscale/policy.hujson` at `origin/main`, compares it with the
+live policy and decides:
+
+| Decision | Meaning | Action |
+|---|---|---|
+| `in_sync` | identical | nothing |
+| `text_only` | same rules, comments or ordering differ | applied (only with `--apply`) |
+| `additive` | only new `grants` and new `tests`, every new grant inside the guard and proven by a new test | applied (only with `--apply`) |
+| `blocked` | anything else: a removal, a changed section (`groups`, `tagOwners`, `ssh`, `autoApprovers`, `nodeAttrs`), a failed offline check, a grant outside the guard | one alert, left for a human `plan` / `apply` |
+
+**Guard for an auto-applied grant.** Only the keys `src`, `dst`, `ip`. At most 8 entries per side, each a single IPv4
+host or an existing tag (no users, groups, autogroups, wildcards or CIDR ranges). `ip` is explicit `tcp:N`, `udp:N` or
+`tcp:A-B` (at most 1000 ports) and never touches a management port (SSH, telnet, SMB, RDP, VNC, WinRM, hypervisor
+APIs). Every `(src, dst, port)` must be accepted by a `tests` entry added in the same change, so Tailscale re-proves it
+at apply time and a later edit that breaks it is rejected. At most 5 new grants per change.
+
+**Before it applies** it requires the green CI status of that exact commit (`ci/woodpecker/push/woodpecker`),
+re-validates with Tailscale (which runs every policy test), saves a rollback copy, applies with `If-Match: <etag>` and
+re-reads the policy to confirm an empty diff. Bounds: one apply per run, at most 3 per 24 hours, and a commit whose apply
+failed twice is not retried until `main` moves.
+
+**It cannot be talked into weakening itself.** The rules live in the INSTALLED copies of the reconciler, the sync tool
+and `lockout-guard.json` under `/usr/local/lib/tailscale-policy-sync`. If any of them differs from git at the commit it
+is judging, the run is `blocked` ("installed ... differs from git: review it, then reinstall"), so a PR that changes the
+rules cannot also apply itself with the new rules. The installer only installs files identical to `origin/main`.
+
+```sh
+scripts/tailscale-policy-reconcile-install.sh            # install files and units
+scripts/tailscale-policy-reconcile-install.sh --enable   # also enable the timer: REPORT ONLY, it never applies
+scripts/tailscale-policy-reconcile-install.sh --status   # timer, last run, state, mode
+```
+
+Turning applying on is a deliberate edit, not an install side effect: set `export FLEET_TS_RECONCILE_ARGS=--apply` in
+`/etc/fleet-runner/tailscale-reconcile.env` on CT108. Turn it off by removing that line, or pause it without a restart
+with `touch /var/lib/tailscale-policy-sync/reconcile/PAUSE` (it keeps deciding and alerting, but never applies).
+
+State and audit are in `/var/lib/tailscale-policy-sync/reconcile/` (`state.json`, append-only `events.jsonl`); rollback
+copies are in `/var/lib/tailscale-policy-sync/rollback/` as for a manual `apply`. Metrics go to the node exporter textfile
+`tailscale_policy_reconcile.prom`. One ntfy notice is sent per state change (waiting, blocked, applied, failed, back in
+sync), never one per run and never with policy content or a secret. Exit codes: 0 ok or waiting, 1 an apply failed,
+2 blocked (alert sent), 3 could not look.
+
+What it does not do: it never removes or changes a rule, never edits SSH rules, groups, tag owners, auto-approved
+routes or node attributes, and never applies a grant for a management port. Those stay a human `plan` / `apply`.
+
 ## Drift detection
 
 `python3 scripts/tailscale_policy_sync.py drift` (or `scripts/tailscale-policy-ct108.sh drift`) compares the live policy
@@ -81,10 +132,9 @@ tailscale_policy_drift{kind="text"} 0       # only comments or formatting differ
 tailscale_policy_last_check_timestamp_seconds 1791788608
 ```
 
-No scheduler is installed by this change. Running `drift` on a timer on CT108 (for example `systemd` timer every 15
-minutes with `--textfile-dir`) and alerting on `tailscale_policy_drift == 1` or a stale
-`tailscale_policy_last_check_timestamp_seconds` (older than one hour) is a follow-up that needs an operator decision
-(it adds a unit on CT108). Until then run `drift` by hand, or rely on `plan` before every change.
+`drift` has no scheduler of its own. The reconciler below is the scheduled check: it compares live with git every 15
+minutes and exports `tailscale_policy_reconcile_in_sync`, `..._blocked` and a dead-man timestamp, which an alert can
+watch (`in_sync == 0` for more than an hour, or a stale `..._last_run_timestamp_seconds`).
 
 ## Lockout guard
 

@@ -12,6 +12,10 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import container_image_policy as policy
 
 
+def test_repository_image_catalog_has_complete_scan_evidence() -> None:
+    policy.validate_image_catalog(policy.load_image_catalog())
+
+
 def test_split_image_reference_supports_generic_registry_hosts() -> None:
     assert policy.split_image_reference("artifacts.plane.so/makeplane/plane-backend") == (
         "artifacts.plane.so",

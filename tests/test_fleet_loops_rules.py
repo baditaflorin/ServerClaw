@@ -44,6 +44,10 @@ def test_every_alert_is_complete_and_points_at_a_real_runbook() -> None:
         "FleetHorizonSilent",
         "FleetHorizonNotReporting",
         "FleetHorizonCriticalFinding",
+        "FleetRunnerConfigDrift",
+        "FleetRunnerConfigCheckFailing",
+        "FleetRunnerConfigCheckSilent",
+        "FleetRunnerConfigNotReporting",
     }
     for name, rule in alerts.items():
         assert rule["labels"]["severity"] in {"warning", "critical"}, name
@@ -101,3 +105,23 @@ def test_the_runbook_documents_the_rules_and_their_rollback() -> None:
     assert "/etc/prometheus/rules/fleet-loops.yml" in text
     for name in _alerts():
         assert name in text, name
+
+
+RUNNER_CONFIG_CADENCE_HOURS = 1  # runner-config-drift.timer OnCalendar hourly
+
+
+def test_runner_config_alerts_pair_staleness_with_absence_and_wait_out_the_cadence() -> None:
+    alerts = _alerts()
+    metric = "fleet_runner_config_check_last_run_timestamp_seconds"
+    assert f"time() - {metric}" in alerts["FleetRunnerConfigCheckSilent"]["expr"]
+    assert alerts["FleetRunnerConfigNotReporting"]["expr"] == f"absent({metric})"
+    assert _minutes(alerts["FleetRunnerConfigNotReporting"]["for"]) > NIGHTLY_STOP_MINUTES
+    silent = re.search(r">\s*(\d+)\s*\*\s*3600\b", alerts["FleetRunnerConfigCheckSilent"]["expr"])
+    assert silent and int(silent.group(1)) >= 3 * RUNNER_CONFIG_CADENCE_HOURS  # several missed runs, not one
+    # drift is only worth a look when it persists across several hourly checks, and a check that could not look says so
+    assert alerts["FleetRunnerConfigDrift"]["expr"] == "fleet_runner_config_drift == 1"
+    assert _minutes(alerts["FleetRunnerConfigDrift"]["for"]) >= 60
+    assert alerts["FleetRunnerConfigCheckFailing"]["expr"] == "fleet_runner_config_check_ok == 0"
+    assert _minutes(alerts["FleetRunnerConfigCheckFailing"]["for"]) >= 3 * 60
+    for name in ("FleetRunnerConfigDrift", "FleetRunnerConfigCheckFailing", "FleetRunnerConfigCheckSilent", "FleetRunnerConfigNotReporting"):
+        assert alerts[name]["labels"]["severity"] == "warning", name  # a config file differing from git is not a page

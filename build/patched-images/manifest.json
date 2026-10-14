@@ -17,11 +17,11 @@
     "glitchtip": {
       "kind": "build",
       "catalog_ids": ["glitchtip_runtime"],
-      "source_repository": "https://github.com/glitchtip/glitchtip.git",
+      "source_repository": "https://gitlab.com/glitchtip/glitchtip-backend.git",
       "source_ref": "v6.2.6",
       "source_commit": "d3039088e913a591a8e6544a2d2fffc865a9711a",
       "patch": "build/patched-images/glitchtip/source.patch",
-      "tag_prefix": "6.2.6-patched-20261012",
+      "tag_prefix": "6.2.6-patched-20261014",
       "repositories": ["glitchtip"]
     },
     "minio": {

@@ -27,6 +27,23 @@ def test_patched_image_manifest_is_complete_and_valkey_has_one_shared_pin() -> N
     )
 
 
+def test_glitchtip_candidate_uses_the_pinned_upstream_backend_tag() -> None:
+    glitchtip = patched_images.load_manifest()["images"]["glitchtip"]
+
+    assert glitchtip["source_repository"] == "https://gitlab.com/glitchtip/glitchtip-backend.git"
+    assert glitchtip["source_ref"] == "v6.2.6"
+    assert glitchtip["source_commit"] == "d3039088e913a591a8e6544a2d2fffc865a9711a"
+    assert glitchtip["tag_prefix"] == "6.2.6-patched-20261014"
+
+
+def test_glitchtip_candidate_does_not_install_unneeded_libxml2() -> None:
+    patch = (REPO_ROOT / "build" / "patched-images" / "glitchtip" / "source.patch").read_text(encoding="utf-8")
+    added_lines = [line[1:] for line in patch.splitlines() if line.startswith("+")]
+
+    assert any("apt-get install -y --no-install-recommends libpq5" in line for line in added_lines)
+    assert not any("libxml2" in line for line in added_lines)
+
+
 def test_minio_micro_runtime_invokes_binary_without_shell_entrypoint() -> None:
     dockerfile = (REPO_ROOT / "build" / "patched-images" / "minio" / "Dockerfile").read_text(encoding="utf-8")
     compose = (
