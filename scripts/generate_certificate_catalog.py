@@ -75,6 +75,7 @@ def main():
     # Write output
     with open(output_path, "w") as f:
         json.dump(catalog, f, indent=2)
+        f.write("\n")
 
     print(f"✓ Generated {output_path} for domain: {platform_domain}")
     return 0

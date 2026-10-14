@@ -16,6 +16,7 @@ service:
   health_probe_id: neko
   adr: 0380
   adr_file: docs/adr/0380-neko-for-operator-remote-browser-access.md
+  runbook: docs/runbooks/configure-neko.md
   runtime_pool: runtime-general
   deployment_surface: playbooks/services/neko.yml
   restart_domain: runtime-comms-webrtc
@@ -33,12 +34,19 @@ service:
       subdomain: browser.example.com
 completeness:
   service_type: compose
-  requires_subdomain: false
+  requires_subdomain: true
   requires_oidc: true
-  requires_secrets: true
-  requires_compose_secrets: true
-  suppression_preset: legacy-service
+  requires_api_gateway: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  requires_dashboard: false
+  requires_slo: true
+  requires_data_catalog: true
+  requires_alert_rules: false
+  oidc_provider: authentik
+  authentik_client_generated: true
   suppressed_checks: {}
+  notes: Neko's browser UI is gated by the shared Authentik oauth2-proxy client at NGINX Edge. Its Neko v2-compatible image retains the built-in multi-user login for session bootstrap; that default is not a security boundary, so only the authenticated edge and private runtime-comms firewall may reach an assigned instance. WebRTC signaling and UDP media do not belong on the API Gateway. Persistent browser profiles are catalogued explicitly. Dashboard and alert rules remain not applicable until the private readiness probe is verified from monitoring; the SLO overlay keeps that unverified endpoint excluded.
 redundancy:
   tier: R1
   recovery_objective:
@@ -67,8 +75,8 @@ dependency:
     - from: neko
       to: authentik
       type: soft
-      description: Neko operator access is controlled through Authentik OIDC client
-        configuration for Tailscale headscale management network.
+      description: NGINX Edge requires the Authentik OIDC session and maps each
+        allowed email to that operator's assigned Neko instance.
     - from: neko
       to: nginx_edge
       type: hard
@@ -115,3 +123,25 @@ health:
         - 200-299
     reason: Neko is operator-facing and published through the edge at browser.example.com;
       public health monitoring is essential for remote access availability.
+data:
+  - id: neko-operator-browser-profiles
+    service: neko
+    name: Per-operator Neko browser profiles and cache
+    class: confidential
+    retention_days: null
+    backup_included: false
+    access_role: platform-operator
+    pii_risk: high
+    locations:
+      - /opt/neko/instances/<instance>/cache
+      - /opt/neko/instances/<instance>/config
+    notes: Per-operator browser state may include visited-site data and authenticated cookies. The instance mapping isolates each Authentik user, but no finite retention or backup contract is currently declared; treat the profile as sensitive and do not copy it into diagnostics or backups without an approved retention plan.
+slos:
+  - id: neko-availability
+    service_id: neko
+    indicator: availability
+    objective_percent: 99.0
+    window_days: 30
+    target_url: http://10.10.10.21:8080/
+    probe_module: http_2xx_follow_redirects
+    description: The private Neko signalling endpoint remains healthy on runtime-comms; the public edge separately enforces the Authentik OIDC browser session.

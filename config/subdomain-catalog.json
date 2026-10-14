@@ -231,7 +231,7 @@
       "environment": "production",
       "status": "active",
       "exposure": "edge-published",
-      "auth_requirement": "none",
+      "auth_requirement": "edge_oidc",
       "target": "203.0.113.1",
       "target_port": 443,
       "owner_adr": "0380",
@@ -240,7 +240,7 @@
         "cert_path": "/etc/letsencrypt/live/{{ platform_config_prefix }}-edge/",
         "auto_renew": true
       },
-      "notes": "Published through the shared NGINX edge for operator-only access via Tailscale headscale management network. WebRTC media streams direct from Proxmox host (UDP 50000-60000) bypass TLS proxy for latency optimization."
+      "notes": "The shared NGINX edge requires the Authentik OIDC session before routing browser signalling to the assigned per-user Neko instance. WebRTC media uses the declared direct UDP range; only the TCP signalling/UI route is edge-published."
     },
     {
       "fqdn": "build.example.com",

@@ -305,6 +305,17 @@ monitoring_scanopy_backup_timer_file: /etc/systemd/system/scanopy-backup.timer
 monitoring_scanopy_backup_on_calendar: "*-*-* 03:20:00 UTC"
 # Optional Environment= overrides (BACKUP_SSH, BACKUP_SSH_PORT, BACKUP_KEEP, BACKUP_MIN_BYTES).
 monitoring_scanopy_backup_environment: {}
+# Weekly restore drill: the newest dump is restored into a throwaway Postgres container (no network) and its core tables are
+# counted. Needs Docker on this VM.
+monitoring_scanopy_backup_drill_enabled: false
+monitoring_scanopy_backup_drill_script_file: "{{ monitoring_scanopy_backup_install_dir }}/scanopy_backup_drill.py"
+monitoring_scanopy_backup_drill_service_name: scanopy-backup-drill.service
+monitoring_scanopy_backup_drill_timer_name: scanopy-backup-drill.timer
+monitoring_scanopy_backup_drill_service_file: /etc/systemd/system/scanopy-backup-drill.service
+monitoring_scanopy_backup_drill_timer_file: /etc/systemd/system/scanopy-backup-drill.timer
+monitoring_scanopy_backup_drill_on_calendar: "Sun *-*-* 04:10:00 UTC"
+# Image of the throwaway Postgres; keep the major version equal to the Scanopy database (17).
+monitoring_scanopy_backup_drill_image: postgres:17-alpine
 # Prometheus rule files shipped from config/prometheus/rules/ for the discovery pipeline and the Alertmanager heartbeat.
 monitoring_prometheus_inventory_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/inventory.yml"
 monitoring_prometheus_inventory_rules_file: "{{ monitoring_prometheus_rules_dir }}/inventory.yml"
@@ -314,6 +325,10 @@ monitoring_prometheus_fleet_disk_rules_source_file: "{{ monitoring_repo_root }}/
 monitoring_prometheus_fleet_disk_rules_file: "{{ monitoring_prometheus_rules_dir }}/fleet-disk.yml"
 monitoring_prometheus_fleet_loops_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/fleet-loops.yml"
 monitoring_prometheus_fleet_loops_rules_file: "{{ monitoring_prometheus_rules_dir }}/fleet-loops.yml"
+monitoring_prometheus_hypervisor_memory_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/fleet-hypervisor-memory.yml"
+monitoring_prometheus_hypervisor_memory_rules_file: "{{ monitoring_prometheus_rules_dir }}/fleet-hypervisor-memory.yml"
+monitoring_prometheus_alertmanager_self_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/alertmanager-self.yml"
+monitoring_prometheus_alertmanager_self_rules_file: "{{ monitoring_prometheus_rules_dir }}/alertmanager-self.yml"
 monitoring_prometheus_watchdog_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/zz-alertmanager-watchdog.yml"
 monitoring_prometheus_watchdog_rules_file: "{{ monitoring_prometheus_rules_dir }}/zz-alertmanager-watchdog.yml"
 monitoring_prometheus_url: http://127.0.0.1:9090

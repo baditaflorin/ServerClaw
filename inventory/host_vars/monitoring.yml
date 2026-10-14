@@ -24,6 +24,8 @@ monitoring_scanopy_onboard_docker_credential_id: dbe3353a-5d4b-4b1e-a723-1a87e90
 monitoring_scanopy_onboard_exclude: []
 # Nightly pull of the Scanopy database (hypervisor-local on 0docker, not covered by PBS) to this VM, 14 dumps kept.
 monitoring_scanopy_backup_enabled: true
+# Weekly proof that the newest dump restores (throwaway Postgres container on this VM).
+monitoring_scanopy_backup_drill_enabled: true
 monitoring_scanopy_onboard_fleets:
   - {name: 0docker, ssh: root@example.net, port: 22, relay_url: "http://10.10.10.1:60072"}
   - {name: 0mcp, ssh: root@10.10.10.1, port: 22, relay_url: "http://10.10.10.1:60072"}

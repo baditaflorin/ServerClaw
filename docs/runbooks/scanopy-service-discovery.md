@@ -81,6 +81,12 @@ Nothing secret is committed.
   The discovery trigger below reuses this same key (it needs the permission to
   start discovery sessions) and never installs or replaces a key itself; enable the
   retag tasks first.
+  **Current key (2026-10-14):** the file on the monitoring VM holds a **Member** key, `monitoring-automation (member)` (site
+  Infrastructure, no expiry), kept in the vault as `scanopy_member_api`. It is used by retag, discover and onboard; verified calls: all
+  list endpoints, `PUT` discovery and host, `POST` start-session, daemon provision and delete. The Admin key `scanopy api` (vault
+  `admin_api`) is no longer used by any job and is kept for manual work only. To rotate the Member key: create a new one in the UI
+  (API Keys, Create, permission Member, site Infrastructure), store it in the vault (`fleet-vault.py put scanopy_member_api ...`) and write
+  it to `/etc/scanopy-retag/api-key` (root `0600`), then start the three services once and check they succeed.
 - ntfy password: the ntfy user `alertmanager-notify` is a runtime user created
   with the ntfy CLI. Put its password in the controller-local file named by
   `alertmanager_runtime_ntfy_password_local_file`
@@ -316,6 +322,11 @@ Metrics (textfile `scanopy_onboard.prom`): `scanopy_onboard_last_success_timesta
 `ScanopyOnboardMetricsAbsent`. A VM whose QEMU guest agent does not answer cannot be reached from its hypervisor: it is counted as
 unmanageable, never touched, and needs the manual install.
 
+A hypervisor under heavy disk load answers slowly: on 0own, during its nightly backups (03:15, 04:00, 04:30 jobs) even `qm list` takes about 40 s
+and guest-agent calls time out. The wrapper (version 2) therefore queries guests in parallel with a 10 s limit each and reports a guest whose agent
+does not answer as not manageable (it is still matched by MAC and name), and the job allows 150 s per hypervisor listing (`ONBOARD_SSH_TIMEOUT`) and
+retries once. A hypervisor that still cannot be listed fails the run and, after 2 h, raises `ScanopyOnboardStale`.
+
 **Hypervisor side (one-time per hypervisor, outside the role).** The monitoring VM reaches the hypervisors over their public SSH
 (`root@example.net`, `root@10.10.10.1`, `root@203.0.113.14`, `root@proxmox.0database.com`); the tailnet does not allow tcp/22 from
 it. On every hypervisor:
@@ -360,10 +371,16 @@ The Scanopy Postgres is part of the compose project on the 0docker hypervisor, w
   (`scanopy_backup.prom`): `scanopy_backup_last_success_timestamp_seconds` (kept across failed runs, so its age keeps growing),
   `scanopy_backup_last_attempt_success`, `scanopy_backup_last_size_bytes`, `scanopy_backup_files`. Alerts: `ScanopyBackupStale`
   (no verified dump for 36 h) and `ScanopyBackupMetricsAbsent`.
+- **Weekly restore drill** (`scanopy-backup-drill.timer`, Sundays 04:10 UTC, needs Docker on the monitoring VM): restores the newest dump
+  into a throwaway `postgres:17-alpine` container (no network, 512 MB, removed afterwards), fails on any `psql` error and requires rows
+  in `daemons`, `hosts`, `discovery`, `api_keys` and `credentials`. Metrics `scanopy_backup_drill_*` (last success kept across failed runs,
+  row counts per table); alerts `ScanopyBackupDrillStale` (no good drill for 10 days) and `ScanopyBackupDrillMetricsAbsent`. Keep the image's
+  major version equal to the Scanopy database's (`monitoring_scanopy_backup_drill_image`). Run by hand with
+  `sudo systemctl start scanopy-backup-drill.service`.
 - Manual: `sudo systemctl start scanopy-backup.service`, `sudo python3 /opt/scanopy-backup/scanopy_backup.py --dry-run`.
   Roll back with `sudo systemctl disable --now scanopy-backup.timer` or `monitoring_scanopy_backup_enabled: false`.
 
-**Restore** (verified on 2026-10-13 into a scratch database: 41 daemons, 81 hosts, 154 discoveries, 41 API keys and 5 credentials,
+**Restore** (rehearsed by hand on 2026-10-13 into a scratch database, and every week by the drill: 41 daemons, 81 hosts, 154 discoveries, 41 API keys and 5 credentials,
 equal to live). The dump is plain SQL made with `--clean --if-exists`. Copy it to the new Scanopy host, stop the server container
 (`docker compose stop server` in `/Users/live`), then load it into the (empty or existing) database and start the server again:
 

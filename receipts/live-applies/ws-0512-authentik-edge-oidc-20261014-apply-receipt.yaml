@@ -1,0 +1,41 @@
+workstream_id: ws-0512-authentik-edge-oidc-20261014
+state: completed
+schema_version: 1.1.0
+started_at: '2026-10-14T00:55:54Z'
+completed_at: '2026-10-14T01:12:03Z'
+applied_by: codex/authentik-edge-live-apply-20261014
+repo_version: 0.179.51
+adr: 0491
+summary: Repair edge-local Authentik discovery for protected public-edge routes; backup,
+  apply, and verify the NGINX edge.
+targets:
+- service: nginx_edge
+  host_group: nginx
+  vmid: 110
+errors: []
+notes:
+- >-
+  Applied the canonical configure-edge-publication target from source commit
+  75c8ba33fe5dc59b780b08a65d7d63f9793b1fce. The NGINX converge completed with
+  136 OK, 6 changed, 0 unreachable, and 0 failed. The active proxy config was
+  already Authentik-backed; its issuer discovery recovered when edge-local DNS
+  resolution was corrected. The managed proxy is active and the OIDC discovery
+  document returns HTTP 200 through the private edge path.
+- >-
+  Pre-apply Restic coverage protected all 5 governed sources with 0 uncovered.
+  The receipt-source snapshot is
+  19c9facc0f34af9092598437f954b4c16b5e727ff4981f746c620e0366656888. Restore
+  verification passed with 84 files restored; see
+  receipts/restic-backups/20261014T005755Z.json and
+  receipts/restic-restore-verifications/20261014T005902Z.json.
+- >-
+  Post-apply certificate validation reported 36 valid certificates and zero
+  expiring, expired, mismatched, or unreachable endpoints. Fresh strict-TLS
+  Firefox E2E completed Authentik login for the non-admin test identity; Ops
+  Portal and Repository Intake each enforced the expected HTTP 403, with no
+  server errors. Gitea and Harbor fresh OIDC browser checks also passed.
+- >-
+  This receipt is limited to the edge issuer-resolution repair. A subsequent
+  fresh Grafana browser check independently exposed a stale private-edge
+  resolver pin on the Monitoring VM; that issue remains open in the parent
+  consumer E2E workstream and is not represented as passing here.

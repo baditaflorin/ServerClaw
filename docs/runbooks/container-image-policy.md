@@ -53,6 +53,20 @@ Check whether upstream tags have moved:
 make check-image-freshness
 ```
 
+Refresh the scan for the exact currently pinned digest without resolving a new
+tag or changing the runtime:
+
+```bash
+make upgrade-container-image IMAGE_ID=<image-id> REFRESH_SCAN_ONLY=true WRITE=true
+```
+
+This writes the fresh SBOM, CVE receipt, and catalog summary receipt, then
+updates only the scan pointer. An expired exception is removed; if Critical
+findings remain without an active exception, the catalog records `blocked` and
+the vulnerability-budget gate continues to reject applies. Exception renewal
+is a separate, explicit action using `RENEW_EXISTING_EXCEPTION=true` and must
+not be used as a routine scan-refresh shortcut.
+
 Inspect the catalog directly:
 
 ```bash

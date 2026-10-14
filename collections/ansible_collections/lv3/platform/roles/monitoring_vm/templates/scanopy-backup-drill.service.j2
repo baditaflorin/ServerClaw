@@ -1,0 +1,21 @@
+[Unit]
+Description=Restore the newest Scanopy dump into a throwaway Postgres and check it
+Documentation=file://{{ monitoring_scanopy_backup_readme_file }}
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+User=root
+Environment=BACKUP_DIR={{ monitoring_scanopy_backup_dir }}
+Environment=DRILL_IMAGE={{ monitoring_scanopy_backup_drill_image }}
+ExecStart=/usr/bin/python3 {{ monitoring_scanopy_backup_drill_script_file }}
+TimeoutStartSec=900
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths={{ monitoring_scanopy_backup_textfile_dir }}
+ReadOnlyPaths={{ monitoring_scanopy_backup_install_dir }} {{ monitoring_scanopy_backup_dir }}
+UMask=0077

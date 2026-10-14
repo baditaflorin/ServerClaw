@@ -1,0 +1,10 @@
+[Unit]
+Description=Check hypervisor MemAvailable and reclaim deferred-split huge pages under pressure
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec={{ fleet_hypervisor_memory_reclaim_interval }}
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

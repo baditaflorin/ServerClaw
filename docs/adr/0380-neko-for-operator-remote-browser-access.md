@@ -53,7 +53,7 @@ with identity-based routing.
 
 - Public entrypoint: `https://browser.example.com`
 - TLS terminates at the shared NGINX edge
-- Access is gated by the platform's oauth2-proxy and Keycloak identity flow
+- Access is gated by the platform's oauth2-proxy and Authentik identity flow
 - NGINX routes the authenticated operator to the correct backend by matching the
   authenticated email to a generated backend map
 - Unmapped identities receive HTTP 403 rather than a shared browser session
@@ -78,8 +78,22 @@ with identity-based routing.
   - DNS publication for `browser.example.com`
   - NGINX edge publication for the browser route
 - `neko_instances` defines the per-operator browser backends
-- Managed Keycloak users are provisioned and deprovisioned from the same declared
-  instance set
+- Existing Authentik users are assigned and unassigned from the same declared
+  instance set; removing an assignment never deletes the platform identity
+
+The generic operator assignment derives its email from
+`platform_operator_email`. Additional per-deployment Neko instances are stored
+in the selected private identity overlay's sibling `neko.yml`; user addresses
+must not be added to tracked generic inventory. Empty instance sets are rejected
+by default because they would remove every Neko container and Neko-owned
+Authentik assignment. A full teardown requires the explicit local setting
+`neko_allow_empty_instances: true`.
+
+The edge-only reconciliation tag `neko-edge-publication` validates and reloads
+the generated NGINX route without selecting the runtime-container or Authentik
+assignment plays. Use it for route repair when the container and identity
+assignment are already verified; run the full playbook when those surfaces also
+need reconciliation.
 
 ### Clean-worktree guarantee
 
@@ -122,11 +136,11 @@ this ADR is trying to avoid:
   Guards against forwarding-rule loss during concurrent convergence.
 - `tests/test_neko_timeout_hierarchy.py`
   Confirms the explicit long-lived proxy timeout remains in place.
-- `tests/test_neko_ingress_contract.py`
-  Verifies the public edge contract stays aligned with the Neko topology.
-- `tests/test_neko_verification_contract.py`
-  Ensures the controller-side verification path and clean-worktree bootstrap
-  remain wired correctly.
+- `tests/test_neko_configuration_safety.py`
+  Verifies deployment-local user data, the non-empty default, and the playbook
+  guard against destructive empty reconciliation.
+- `tests/test_ansible_execution_scopes.py`
+  Verifies that only the selected deployment's sibling `neko.yml` is loaded.
 - `tests/test_docker_runtime_role.py`
   Prevents the scoped-run argument-resolution regressions that broke exact-main
   Neko convergence.
@@ -136,7 +150,7 @@ this ADR is trying to avoid:
 The 2026-04-12 live apply was verified from an exact-main replay using:
 
 - clean-cache `make converge-neko env=production`
-- `python3 scripts/neko_tool.py validate`
+- `uvx --from pyyaml python scripts/neko_tool.py validate`
 - `python3 scripts/verify_neko_webrtc_session.py --public-url https://browser.example.com --timeout 30`
 
 That verification proved all of the following together:

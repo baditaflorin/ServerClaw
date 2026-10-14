@@ -1,0 +1,27 @@
+workstream_id: ws-0512-grafana-sso-apply-20261014
+state: completed
+schema_version: 1.1.0
+started_at: '2026-10-14T02:00:20Z'
+completed_at: '2026-10-14T02:06:54Z'
+applied_by: codex/authentik-grafana-live-apply-mainline-20261014
+repo_version: 0.179.51
+adr: 0491
+summary: Apply the reviewed Grafana SSO private-edge host pin using the narrowly tagged
+  role; verify service health and a fresh Viewer browser session.
+targets:
+- service: grafana
+  host_group: monitoring
+  vmid: 140
+errors: []
+notes:
+- 'Applied from merged origin/main commit c8b8f317e2bd87c2f01fd2239dc524f4979707d0
+  using make live-apply-service service=grafana env=production with --tags grafana-sso
+  and the documented in-place exception. Ansible recap: 11 OK, 2 changed, 0 unreachable,
+  0 failed; the changed work was the Authentik private-edge hosts pin and Grafana
+  restart.'
+- 'Post-apply checks: Grafana service active; localhost /api/health returned HTTP
+  200; the identity hostname resolved through the private edge. Fresh strict-TLS Firefox
+  E2E completed Authentik login for non-admin gitea-e2e and confirmed Grafana organization
+  role Viewer.'
+- Post-apply Restic backup receipt receipts/restic-backups/20261014T020606Z.json protected
+  all 5 governed sources with none uncovered.

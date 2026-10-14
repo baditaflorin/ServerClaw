@@ -1,0 +1,9 @@
+---
+# The reclaim only runs when MemAvailable is below this percentage of MemTotal.
+fleet_hypervisor_memory_reclaim_threshold_percent: 10
+# systemd timer cadence (OnUnitActiveSec).
+fleet_hypervisor_memory_reclaim_interval: 5min
+fleet_hypervisor_memory_reclaim_script_path: /usr/local/sbin/fleet-hypervisor-memory-reclaim
+fleet_hypervisor_memory_reclaim_unit_name: fleet-hypervisor-memory-reclaim
+# node_exporter textfile directory for the result metrics; empty disables them.
+fleet_hypervisor_memory_reclaim_textfile_dir: ""

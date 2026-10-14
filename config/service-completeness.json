@@ -463,12 +463,19 @@
     },
     "neko": {
       "service_type": "compose",
-      "requires_subdomain": false,
+      "requires_subdomain": true,
       "requires_oidc": true,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service",
-      "suppressed_checks": {}
+      "requires_api_gateway": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "requires_dashboard": false,
+      "requires_slo": true,
+      "requires_data_catalog": true,
+      "requires_alert_rules": false,
+      "oidc_provider": "authentik",
+      "authentik_client_generated": true,
+      "suppressed_checks": {},
+      "notes": "Neko's browser UI is gated by the shared Authentik oauth2-proxy client at NGINX Edge. Its Neko v2-compatible image retains the built-in multi-user login for session bootstrap; that default is not a security boundary, so only the authenticated edge and private runtime-comms firewall may reach an assigned instance. WebRTC signaling and UDP media do not belong on the API Gateway. Persistent browser profiles are catalogued explicitly. Dashboard and alert rules remain not applicable until the private readiness probe is verified from monitoring; the SLO overlay keeps that unverified endpoint excluded."
     },
     "netbox": {
       "service_type": "compose",

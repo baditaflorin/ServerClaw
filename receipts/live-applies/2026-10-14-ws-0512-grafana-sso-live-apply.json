@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-10-14-ws-0512-grafana-sso-live-apply",
+  "applied_on": "2026-10-14",
+  "recorded_on": "2026-10-14",
+  "recorded_by": "codex",
+  "source_commit": "c8b8f317e2bd87c2f01fd2239dc524f4979707d0",
+  "repo_version_context": "0.179.51",
+  "workflow_id": "live-apply-service",
+  "adr": "0491",
+  "environment": "production",
+  "service_ids": ["grafana"],
+  "summary": "Repaired Grafana server-side Authentik OIDC resolution through the private edge and verified a fresh Viewer browser session.",
+  "targets": [
+    {"kind": "vm", "name": "monitoring", "vmid": "140"}
+  ],
+  "verification": [
+    {
+      "check": "Scoped Grafana SSO convergence",
+      "result": "pass",
+      "observed": "The grafana-sso role converged with 11 OK, 2 changed, 0 unreachable, and 0 failed; OAuth settings were already converged."
+    },
+    {
+      "check": "Private-edge issuer resolution",
+      "result": "pass",
+      "observed": "The monitoring guest resolved the Authentik issuer hostname through the private edge after the managed hosts pin was applied."
+    },
+    {
+      "check": "Grafana service health",
+      "result": "pass",
+      "observed": "The grafana-server service was active and its local /api/health endpoint returned HTTP 200."
+    },
+    {
+      "check": "Fresh Authentik browser E2E",
+      "result": "pass",
+      "observed": "A temporary Firefox profile completed strict-TLS Authentik login as the non-admin test identity; Grafana reported one organization and the Viewer role."
+    },
+    {
+      "check": "Post-apply Restic backup",
+      "result": "pass",
+      "observed": "All 5 governed sources were protected with 0 uncovered; see receipts/restic-backups/20261014T020606Z.json."
+    }
+  ],
+  "evidence_refs": [
+    "receipts/live-applies/ws-0512-grafana-sso-apply-20261014-apply-receipt.yaml",
+    "receipts/restic-backups/20261014T020606Z.json",
+    "docs/workstreams/ws-0512-authentik-consumer-e2e.md"
+  ],
+  "notes": [
+    "The documented in-place exception was limited to the tagged Grafana SSO role because the repair was only a managed /etc/hosts pin and service restart; no guest replacement or data change was performed."
+  ]
+}

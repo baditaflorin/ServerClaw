@@ -1,4 +1,27 @@
 ---
+# Purpose: Reconcile configured Neko browser instances while refusing accidental empty teardown.
+# Use case: Run when converging the Neko runtime or recovering its container state.
+#
+# Inputs (required):
+#   - neko_instances (mapping): Named per-user session configuration; must be non-empty unless explicitly opted out.
+#
+# Outputs:
+#   - Configured Neko containers, health checks, and cleanup of removed instances.
+#
+# Idempotency: Fully idempotent
+#              Container and directory state is reconciled from the declared instances.
+#
+# Dependencies:
+#   - ADR 0380: Defines the per-user Neko runtime and session network requirements.
+#   - Requires: Docker runtime, selected deployment identity, and Neko instance mapping.
+#   - Role: lv3.platform.common — derives conventional service defaults.
+#
+# Related ADRs: 0165, 0380, 0491
+# Related Runbooks: docs/adr/0380-neko-for-operator-remote-browser-access.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-10-13
+
 # Neko Runtime Convergence — Multi-Instance
 # Manages N isolated browser containers driven by neko_instances dict.
 # Graceful: each instance deploys independently; one failing never blocks others.
@@ -11,11 +34,15 @@
     common_derive_service_name: neko
   when: neko_site_dir is not defined
 
-- name: Assert neko_instances is defined
+- name: Assert Neko has an explicit, non-empty instance set
   ansible.builtin.assert:
     that:
       - neko_instances is mapping
-    fail_msg: "neko_instances must be a dict (can be empty: {})"
+      - (neko_instances | length > 0) or (neko_allow_empty_instances | default(false) | bool)
+    fail_msg: >-
+      neko_instances must be a non-empty mapping. Set neko_allow_empty_instances=true
+      in the selected deployment-local overlay only when intentionally tearing
+      down every Neko instance and its Authentik assignment.
 
 - name: Ensure base Neko data directory exists
   ansible.builtin.file:

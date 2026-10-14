@@ -1,0 +1,13 @@
+---
+- name: Assert Neko instance reconciliation is explicitly configured
+  ansible.builtin.assert:
+    that:
+      - neko_instances is defined
+      - neko_instances is mapping
+      - (neko_instances | length > 0) or (neko_allow_empty_instances | default(false) | bool)
+    fail_msg: >-
+      Neko requires a non-empty instance mapping. A full teardown is destructive;
+      set neko_allow_empty_instances=true in the selected deployment-local
+      overlay only when intentionally removing every Neko instance.
+    quiet: true
+  tags: [always]

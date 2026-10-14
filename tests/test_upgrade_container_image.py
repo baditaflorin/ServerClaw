@@ -5,6 +5,8 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
@@ -84,6 +86,28 @@ def test_update_catalog_refresh_scan_only_preserves_pin_fields(monkeypatch, tmp_
     assert entry["pinned_on"] == original["pinned_on"]
     assert entry["scan_receipt"] == "receipts/image-scans/2026-04-14-dozzle-runtime.json"
     assert entry["scan_status"] == "pass_no_critical"
+
+
+def test_update_catalog_marks_critical_scan_blocked_without_exception(monkeypatch, tmp_path: Path) -> None:
+    catalog = make_catalog()
+    monkeypatch.setattr(tool, "IMAGE_CATALOG_PATH", tmp_path / "config" / "image-catalog.json")
+    receipt_path = tmp_path / "receipts" / "image-scans" / "2026-04-14-dozzle-runtime.json"
+
+    updated = tool.update_catalog(
+        catalog,
+        image_id="dozzle_runtime",
+        tag="v8.13.7",
+        digest=catalog["images"]["dozzle_runtime"]["digest"],
+        scanned_on="2026-04-14",
+        receipt_path=receipt_path,
+        exception=None,
+        critical_findings=1,
+        preserve_pin=True,
+    )
+
+    entry = updated["images"]["dozzle_runtime"]
+    assert entry["scan_status"] == "blocked"
+    assert "exception" not in entry
 
 
 def test_update_catalog_uses_shared_repo_root_for_shared_receipts(monkeypatch, tmp_path: Path) -> None:
@@ -190,6 +214,7 @@ def test_main_refresh_scan_only_reuses_current_pin(monkeypatch, tmp_path: Path, 
         written.append((path, payload))
 
     monkeypatch.setattr(tool, "write_json", fake_write_json)
+    monkeypatch.setattr(tool, "publish_receipt_to_outline", lambda path: None)
 
     def fail_resolve(*args, **kwargs):
         raise AssertionError("resolve_remote_digest should not be called during --refresh-scan-only")
@@ -256,8 +281,11 @@ def test_main_rejects_tag_with_refresh_scan_only(monkeypatch) -> None:
     }
 
 
-def test_main_refresh_scan_only_preserves_existing_legacy_exception(monkeypatch, tmp_path: Path, capsys) -> None:
-    catalog = make_exception_catalog(legacy_exception=True)
+@pytest.mark.parametrize("expired_exception", [False, True])
+def test_main_refresh_scan_only_blocks_unapproved_critical_findings(
+    monkeypatch, tmp_path: Path, capsys, expired_exception: bool
+) -> None:
+    catalog = make_exception_catalog(legacy_exception=True) if expired_exception else make_catalog()
     image_catalog_path = tmp_path / "config" / "image-catalog.json"
     image_catalog_path.parent.mkdir(parents=True, exist_ok=True)
     image_catalog_path.write_text(json.dumps(catalog), encoding="utf-8")
@@ -305,6 +333,7 @@ def test_main_refresh_scan_only_preserves_existing_legacy_exception(monkeypatch,
     monkeypatch.setattr(
         tool, "write_json", lambda path, payload: path.write_text(json.dumps(payload), encoding="utf-8")
     )
+    monkeypatch.setattr(tool, "publish_receipt_to_outline", lambda path: None)
     monkeypatch.setattr(tool, "resolve_remote_digest", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError()))
     monkeypatch.setattr(
         sys,
@@ -321,9 +350,12 @@ def test_main_refresh_scan_only_preserves_existing_legacy_exception(monkeypatch,
     assert tool.main() == 0
 
     updated_catalog = json.loads(image_catalog_path.read_text(encoding="utf-8"))
-    exception = updated_catalog["images"]["dozzle_runtime"]["exception"]
-    assert exception == catalog["images"]["dozzle_runtime"]["exception"]
-    assert json.loads(capsys.readouterr().out)["exception"] == exception
+    entry = updated_catalog["images"]["dozzle_runtime"]
+    assert entry["scan_status"] == "blocked"
+    assert "exception" not in entry
+    result = json.loads(capsys.readouterr().out)
+    assert result["exception"] is None
+    assert result["scan_status"] == "blocked"
 
 
 def test_main_refresh_scan_only_can_renew_existing_exception_window(monkeypatch, tmp_path: Path, capsys) -> None:
@@ -375,6 +407,7 @@ def test_main_refresh_scan_only_can_renew_existing_exception_window(monkeypatch,
     monkeypatch.setattr(
         tool, "write_json", lambda path, payload: path.write_text(json.dumps(payload), encoding="utf-8")
     )
+    monkeypatch.setattr(tool, "publish_receipt_to_outline", lambda path: None)
     monkeypatch.setattr(tool, "resolve_remote_digest", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError()))
     monkeypatch.setattr(
         sys,

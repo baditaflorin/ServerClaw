@@ -75,6 +75,18 @@ def test_glitchtip_remote_build_uses_its_pinned_source_dockerfile() -> None:
     assert '--file "$work_dir/source/Dockerfile"' in build_script
 
 
+def test_remote_buildx_push_preserves_builder_selection_in_isolated_auth_config() -> None:
+    build_script = (REPO_ROOT / "build" / "patched-images" / "build_remote.sh").read_text(encoding="utf-8")
+
+    assert 'source_docker_config="${DOCKER_CONFIG:-$HOME/.docker}"' in build_script
+    assert 'cp -a "$source_docker_config/buildx" "$docker_config/"' in build_script
+    assert 'export DOCKER_CONFIG="$docker_config"' in build_script
+    assert build_script.index('cp -a "$source_docker_config/buildx" "$docker_config/"') < build_script.index(
+        'export DOCKER_CONFIG="$docker_config"'
+    )
+    assert build_script.index('export DOCKER_CONFIG="$docker_config"') < build_script.index("\n    docker buildx build")
+
+
 def test_remote_build_invocation_supplies_the_declared_argument_contract() -> None:
     manifest = patched_images.load_manifest()
     command = patched_images.remote_build_command(

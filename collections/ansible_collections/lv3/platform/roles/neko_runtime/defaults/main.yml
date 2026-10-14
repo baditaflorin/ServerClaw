@@ -1,4 +1,24 @@
 ---
+# Purpose: Declare safe defaults for per-user Neko browser sessions.
+# Use case: Loaded whenever the neko_runtime role validates or deploys instances.
+#
+# Outputs:
+#   - Generic image, resource, and health defaults with full teardown disabled unless explicitly opted into locally.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0380: Defines Neko browser session routing and runtime behavior.
+#   - ADR 0491: Defines Authentik as the platform identity provider.
+#   - Requires: Deployment-specific identity and instance inputs from the selected private overlay.
+#
+# Related ADRs: 0165, 0380, 0491
+# Related Runbooks: docs/adr/0380-neko-for-operator-remote-browser-access.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-10-13
+
 # Neko Remote Desktop Role Defaults
 
 # --- Multi-instance configuration (primary interface) ---
@@ -6,6 +26,8 @@
 # Key = instance name (used for container name, data dir, logs).
 # Removing an entry from this dict causes the container to be destroyed
 # and its Authentik Neko assignment to be removed on the next converge.
+# The entire map may not be empty unless a deployment explicitly opts in to
+# a full teardown with neko_allow_empty_instances=true.
 #
 # Example:
 #   neko_instances:
@@ -18,6 +40,7 @@
 #       port: 8081
 #       udp_range: "53000-55999"
 neko_instances: {}
+neko_allow_empty_instances: false
 
 # --- Image configuration (shared across all instances) ---
 neko_runtime_image_name: "m1k1o/neko"

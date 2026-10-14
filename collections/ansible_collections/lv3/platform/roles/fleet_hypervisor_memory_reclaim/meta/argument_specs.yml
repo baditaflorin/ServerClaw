@@ -1,0 +1,35 @@
+---
+argument_specs:
+  main:
+    short_description: Reclaim memory stranded in deferred-split transparent huge pages on a ballooning Proxmox hypervisor.
+    options:
+      fleet_hypervisor_memory_reclaim_threshold_percent:
+        type: int
+        required: false
+        default: 10
+        description:
+          - The reclaim runs only while MemAvailable is below this percentage of MemTotal.
+      fleet_hypervisor_memory_reclaim_interval:
+        type: str
+        required: false
+        default: 5min
+        description:
+          - systemd OnUnitActiveSec for the timer.
+      fleet_hypervisor_memory_reclaim_script_path:
+        type: str
+        required: false
+        default: /usr/local/sbin/fleet-hypervisor-memory-reclaim
+        description:
+          - Where the reclaim script is installed.
+      fleet_hypervisor_memory_reclaim_unit_name:
+        type: str
+        required: false
+        default: fleet-hypervisor-memory-reclaim
+        description:
+          - Base name of the systemd service and timer.
+      fleet_hypervisor_memory_reclaim_textfile_dir:
+        type: str
+        required: false
+        default: ""
+        description:
+          - node_exporter textfile directory for the result metrics. Empty disables the metrics.

@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-10-14-ws-0512-authentik-edge-oidc-live-apply",
+  "applied_on": "2026-10-14",
+  "recorded_on": "2026-10-14",
+  "recorded_by": "codex",
+  "source_commit": "75c8ba33fe5dc59b780b08a65d7d63f9793b1fce",
+  "repo_version_context": "0.179.51",
+  "workflow_id": "configure-edge-publication",
+  "adr": "0491",
+  "environment": "production",
+  "service_ids": ["nginx_edge"],
+  "summary": "Restored private-edge Authentik discovery for public-edge OIDC consumers and verified the protected sign-in routes.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "nginx-edge",
+      "vmid": "110"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Canonical edge converge",
+      "result": "pass",
+      "observed": "configure-edge-publication completed with 136 OK, 6 changed, 0 unreachable, and 0 failed."
+    },
+    {
+      "check": "Edge-local Authentik discovery",
+      "result": "pass",
+      "observed": "The edge resolves the Authentik issuer through its private address; the protected app's OIDC discovery document returned HTTP 200 with strict TLS."
+    },
+    {
+      "check": "Fresh Ops Portal and Repository Intake browser E2E",
+      "result": "pass",
+      "observed": "A temporary Firefox profile completed Authentik login as the managed non-admin identity. Both shared-edge admin gates returned their expected HTTP 403; strict TLS was enabled and no server errors occurred."
+    },
+    {
+      "check": "Fresh Gitea and Harbor browser E2E",
+      "result": "pass",
+      "observed": "Both native OIDC consumers completed strict-TLS Authentik browser login as the non-admin test identity; each harness confirmed the account is not an administrator."
+    },
+    {
+      "check": "Public certificate validation",
+      "result": "pass",
+      "observed": "36 active certificates validated; zero expired, expiring, mismatched, or unreachable endpoints."
+    },
+    {
+      "check": "Pre-apply receipt backup and restore verification",
+      "result": "pass",
+      "observed": "Restic protected all 5 governed sources with 0 uncovered. The receipt-source snapshot passed restore verification with 84 files restored."
+    }
+  ],
+  "evidence_refs": [
+    "receipts/live-applies/ws-0512-authentik-edge-oidc-20261014-apply-receipt.yaml",
+    "receipts/restic-backups/20261014T005755Z.json",
+    "receipts/restic-restore-verifications/20261014T005902Z.json",
+    "docs/workstreams/ws-0512-authentik-consumer-e2e.md"
+  ],
+  "notes": [
+    "This receipt covers the edge issuer-resolution repair only. The fresh Grafana browser retest exposed separate stale DNS resolution on the Monitoring VM; Grafana remains open until its managed SSO role is safely reconciled and its browser check passes."
+  ]
+}

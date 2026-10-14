@@ -10,6 +10,7 @@ from __future__ import annotations
 import importlib.util
 import io
 import json
+import subprocess
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -178,3 +179,31 @@ def test_a_vm_whose_guest_agent_fails_is_listed_as_not_manageable(hv, monkeypatc
 
     (g,) = json.loads(capsys.readouterr().out)["guests"]
     assert g["manageable"] is False and g["ips"] == []
+
+
+def test_a_guest_agent_that_times_out_makes_the_guest_not_manageable_instead_of_failing_the_listing(hv, monkeypatch, capsys) -> None:
+    # A saturated hypervisor answers `qm agent` slowly; one TimeoutExpired used to crash the whole `list` (seen on 0own, load 25).
+    monkeypatch.setattr(hv, "conf_lines", lambda kind, vmid: ["name: x", "net0: virtio=BC:24:11:AA:BB:01,bridge=vmbr60"])
+
+    def run(cmd, stdin=None, timeout=60):
+        if cmd[:2] == ["qm", "list"]:
+            return 0, "VMID NAME STATUS\n610 build running\n620 pbs running\n", ""
+        if cmd[:2] == ["pct", "list"]:
+            return 0, "VMID Status Lock Name\n", ""
+        if cmd[:3] == ["qm", "agent", "610"]:
+            raise subprocess.TimeoutExpired(cmd, timeout)
+        return 0, json.dumps([{"name": "ens18", "ip-addresses": [{"ip-address": "10.60.10.20", "ip-address-type": "ipv4"}]}]), ""
+
+    monkeypatch.setattr(hv, "run", run)
+
+    assert invoke(hv, monkeypatch, "list") == 0
+
+    guests = {g["id"]: g for g in json.loads(capsys.readouterr().out)["guests"]}
+    assert guests[610]["manageable"] is False and guests[610]["ips"] == [] and guests[610]["macs"] == ["bc:24:11:aa:bb:01"]
+    assert guests[620]["manageable"] is True and guests[620]["ips"] == ["10.60.10.20"]
+
+
+def test_the_agent_timeout_is_short_and_guests_are_queried_in_parallel(hv) -> None:
+    # 7 VMs x 10 s sequentially would exceed the controller's SSH timeout; the pool keeps the listing near one timeout.
+    assert hv.AGENT_TIMEOUT <= 10 and hv.LIST_WORKERS >= 4
+    assert hv.WRAPPER_VERSION >= 2

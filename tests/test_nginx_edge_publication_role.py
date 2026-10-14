@@ -96,6 +96,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
                 "analytics.{{ platform_domain }}",
                 "annotate.{{ platform_domain }}",
                 "billing.{{ platform_domain }}",
+                "browser.{{ platform_domain }}",
                 "changelog.{{ platform_domain }}",
                 "coolify.{{ platform_domain }}",
                 "docs.{{ platform_domain }}",
@@ -237,6 +238,13 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         )
         self.assertEqual(private_cert_check["ansible.builtin.command"]["argv"][-2:], ["-checkhost", "{{ item }}"])
         self.assertEqual(private_cert_check["loop"], "{{ public_edge_private_certificate_hostnames }}")
+
+    def test_edge_packages_include_logrotate(self) -> None:
+        # nginx-lv3 had no logrotate installed, so access.log grew to 5 GB without ever rotating.
+        task = next(t for t in self.tasks if t.get("name") == "Ensure public edge packages are present")
+        packages = task["ansible.builtin.apt"]["name"]
+        self.assertIn("'logrotate'", packages)
+        self.assertIn("'nginx'", packages)
 
     def test_tasks_resolve_edge_catalogs_before_validation(self) -> None:
         task_names = [task["name"] for task in self.tasks]

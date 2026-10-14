@@ -24,6 +24,7 @@
     line: "{{ grafana_sso_internal_edge_ipv4 }} {{ grafana_sso_oidc_hostname }}"
     state: present
     create: false
+    backup: true
   notify: Restart Grafana
 
 - name: Ensure Grafana knows its public root URL
@@ -110,3 +111,4 @@
         grafana_sso_oidc_authorization_url in grafana_sso_redirect.location
       - ('client_id=' ~ grafana_sso_client_id) in grafana_sso_redirect.location
     fail_msg: "Grafana is not redirecting the generic OAuth login path to the expected Authentik client."
+  when: not ansible_check_mode

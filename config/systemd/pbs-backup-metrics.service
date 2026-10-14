@@ -1,0 +1,12 @@
+[Unit]
+Description=Publish PBS backup group freshness metrics for node_exporter
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/pbs-backup-metrics --datastore own-pbs --store-path /mnt/pbs-datastore/store
+Nice=10
+IOSchedulingClass=idle
+ProtectSystem=strict
+ReadWritePaths=/var/lib/prometheus/node-exporter/textfile
+PrivateTmp=true

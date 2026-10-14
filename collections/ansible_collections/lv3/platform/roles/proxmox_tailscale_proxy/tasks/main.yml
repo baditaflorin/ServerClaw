@@ -622,3 +622,19 @@
         | first
         | default('')
       }}
+
+# These .service units are socket-activated: systemd-socket-proxyd refuses to run
+# without a passed socket, so any direct start leaves the unit "failed" even though
+# the .socket keeps listening and proxying. Clear that stale state so real failures
+# stay visible in `systemctl --failed` and alerting.
+- name: Clear stale failed state on socket-activated Proxmox Tailscale proxy services
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - reset-failed
+      - "lv3-tailscale-proxy-{{ item.name }}.service"
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  changed_when: false
+  failed_when: false

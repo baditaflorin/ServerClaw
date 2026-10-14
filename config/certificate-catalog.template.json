@@ -87,8 +87,8 @@
     {
       "id": "proxmox-ui",
       "service_id": "proxmox_ui",
-      "status": "active",
-      "summary": "Proxmox manager HTTPS certificate on the host listener.",
+      "status": "lan_only",
+      "summary": "Private/Tailscale-only Proxmox manager HTTPS certificate on the host listener; excluded from public-edge validation.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
         "host": "100.64.0.1",
@@ -131,8 +131,8 @@
     {
       "id": "vaultwarden-private",
       "service_id": "vaultwarden",
-      "status": "active",
-      "summary": "Vaultwarden HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
+      "status": "lan_only",
+      "summary": "Private-only Vaultwarden HTTPS endpoint exposed through the Proxmox host Tailscale proxy; excluded from public-edge validation.",
       "expected_issuer": "step-ca",
       "endpoint": {
         "host": "100.64.0.1",

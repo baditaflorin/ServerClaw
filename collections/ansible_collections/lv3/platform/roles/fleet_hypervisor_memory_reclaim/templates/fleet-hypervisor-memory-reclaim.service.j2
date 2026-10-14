@@ -1,0 +1,8 @@
+[Unit]
+Description=Reclaim memory stranded in deferred-split huge pages when the hypervisor is short on MemAvailable
+Documentation=file://{{ fleet_hypervisor_memory_reclaim_script_path }}
+
+[Service]
+Type=oneshot
+ExecStart={{ fleet_hypervisor_memory_reclaim_script_path }}
+Nice=10

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "outline_runtime",
+  "image_ref": "docker.io/outlinewiki/outline:1.6.1@sha256:8ea6637e09f38e31eaceb39479963db258a18f7525c6d522d108636c2c166db1",
+  "scanner": "grype",
+  "scanner_image": "docker.io/anchore/grype:v0.111.0@sha256:af9f30d1de4ecfbbcd2b674371e8df787879e16832af8ab81551b0bf1ec0ad5b",
+  "sbom_generator_image": "docker.io/anchore/syft:v1.42.4@sha256:e9f29bec38cc856bfd3a7966d2f99711b5b244a531bf121da9de3b47789eecfa",
+  "scanned_on": "2026-10-13",
+  "sbom_receipt": "receipts/sbom/8ea6637e09f3.cdx.json",
+  "cve_receipt": "receipts/cve/8ea6637e09f3-20261013T133652Z.grype.json",
+  "summary": {
+    "critical": 23,
+    "high": 303,
+    "medium": 255,
+    "low": 47,
+    "unknown": 84,
+    "blocking_findings_with_fix": 0,
+    "total_matches": 712
+  }
+}

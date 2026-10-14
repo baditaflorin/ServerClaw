@@ -1163,7 +1163,16 @@ def main(argv: list[str] | None = None) -> int:
     try:
         validation_registry = None
         validation_identity_vars = None
-        if args.check_registry or args.validate:
+        include_local_topology_overlay = False
+        if args.write_registry and args.validate:
+            # A deployment apply intentionally materializes the registry from
+            # its selected private topology overlay. Validate that candidate
+            # registry in memory before writing it; comparing it to the
+            # committed generic registry makes every second apply fail after
+            # the first one has resolved the deployment's upstream addresses.
+            validation_registry = build_registry()
+            include_local_topology_overlay = True
+        elif args.check_registry or args.validate:
             validation_identity_vars = load_tracked_generation_identity_vars() or None
             validation_registry = build_registry(
                 identity_vars=validation_identity_vars,
@@ -1173,9 +1182,6 @@ def main(argv: list[str] | None = None) -> int:
 
         registry = validation_registry if validation_registry is not None else build_registry()
 
-        if args.write_registry:
-            write_json(REGISTRY_PATH, build_registry(), indent=2, sort_keys=False)
-
         report = build_report(
             registry,
             include_live_dns=args.include_live_dns,
@@ -1184,7 +1190,7 @@ def main(argv: list[str] | None = None) -> int:
             include_tls=args.include_tls,
             include_hetzner_zone=args.include_hetzner_zone,
             identity_vars=validation_identity_vars,
-            include_local_topology_overlay=validation_registry is None,
+            include_local_topology_overlay=include_local_topology_overlay or validation_registry is None,
         )
 
         if args.validate and report["findings"]:
@@ -1197,6 +1203,11 @@ def main(argv: list[str] | None = None) -> int:
             receipt_path = RECEIPTS_DIR / f"{compact_timestamp(utc_now())}.json"
             write_json(receipt_path, report, indent=2, sort_keys=True)
             publish_receipt_to_outline(receipt_path)
+
+        if args.write_registry:
+            # Keep writes after --validate so a failed admission check never
+            # replaces the last known-good registry.
+            write_json(REGISTRY_PATH, registry, indent=2, sort_keys=False)
 
         if args.print_registry:
             print(json.dumps(registry, indent=2))

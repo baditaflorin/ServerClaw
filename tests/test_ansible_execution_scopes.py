@@ -298,6 +298,65 @@ def test_resolve_identity_override_rejects_missing_explicit_selector(
         scopes._resolve_identity_override(worktree_root)
 
 
+def test_resolve_neko_override_uses_only_selected_deployment_sibling(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = tmp_path
+    worktree_root = repo_root / ".worktrees" / "ws-neko-overlay"
+    worktree_root.mkdir(parents=True)
+    selected = repo_root / ".local" / "deployments" / "selected" / "identity.yml"
+    other = repo_root / ".local" / "deployments" / "other" / "neko.yml"
+    selected.parent.mkdir(parents=True)
+    other.parent.mkdir(parents=True)
+    write(selected, "platform_domain: selected.example\n")
+    write(other, "neko_instances: {}\n")
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(selected))
+
+    assert scopes._resolve_neko_override(worktree_root) == []
+
+    selected_neko = selected.parent / "neko.yml"
+    write(selected_neko, "neko_instances: {}\n")
+    assert scopes._resolve_neko_override(worktree_root) == ["-e", f"@{selected_neko}"]
+
+
+def test_resolve_neko_override_uses_shared_legacy_overlay_pair(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("PLATFORM_IDENTITY_OVERLAY", raising=False)
+    repo_root = tmp_path
+    worktree_root = repo_root / ".worktrees" / "ws-neko-overlay"
+    worktree_root.mkdir(parents=True)
+    identity = repo_root / ".local" / "identity.yml"
+    neko = repo_root / ".local" / "neko.yml"
+    write(identity, "platform_domain: shared.example\n")
+    write(neko, "neko_instances: {}\n")
+
+    assert scopes._resolve_neko_override(worktree_root) == ["-e", f"@{neko}"]
+
+
+def test_resolve_neko_override_rejects_external_explicit_path(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo_root = tmp_path
+    worktree_root = repo_root / ".worktrees" / "ws-neko-overlay"
+    worktree_root.mkdir(parents=True)
+    outside = tmp_path / "neko.yml"
+    write(outside, "neko_instances: {}\n")
+    monkeypatch.setenv("PLATFORM_NEKO_OVERLAY", str(outside))
+
+    with pytest.raises(scopes.AnsibleExecutionScopeError, match="inside the private .local overlay"):
+        scopes._resolve_neko_override(worktree_root)
+
+
+def test_resolve_neko_override_rejects_non_neko_identity_keys(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    repo_root = tmp_path
+    worktree_root = repo_root / ".worktrees" / "ws-neko-overlay"
+    worktree_root.mkdir(parents=True)
+    neko = repo_root / ".local" / "deployments" / "selected" / "neko.yml"
+    neko.parent.mkdir(parents=True)
+    write(neko, "neko_instances: {}\nplatform_domain: wrong.example\n")
+    monkeypatch.setenv("PLATFORM_NEKO_OVERLAY", str(neko))
+
+    with pytest.raises(scopes.AnsibleExecutionScopeError, match="unexpected keys: platform_domain"):
+        scopes._resolve_neko_override(worktree_root)
+
+
 def test_explicit_identity_is_last_and_passthrough_cannot_override_reserved_keys(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

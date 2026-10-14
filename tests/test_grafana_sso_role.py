@@ -19,6 +19,17 @@ COLLECTION_ROLE_DEFAULTS = (
 )
 ROLE_META = REPO_ROOT / "roles" / "grafana_sso" / "meta" / "argument_specs.yml"
 ROLE_TASKS = REPO_ROOT / "roles" / "grafana_sso" / "tasks" / "main.yml"
+COLLECTION_ROLE_TASKS = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "grafana_sso"
+    / "tasks"
+    / "main.yml"
+)
 ROOT_PLAYBOOK = REPO_ROOT / "playbooks" / "services" / "grafana.yml"
 COLLECTION_PLAYBOOK = (
     REPO_ROOT / "collections" / "ansible_collections" / "lv3" / "platform" / "playbooks" / "services" / "grafana.yml"
@@ -45,9 +56,9 @@ def test_grafana_sso_loads_the_authentik_secret_from_the_controller_local_artifa
 def test_both_grafana_service_entrypoints_apply_the_authentik_sso_role() -> None:
     for playbook_path in (ROOT_PLAYBOOK, COLLECTION_PLAYBOOK):
         playbook = load_yaml(playbook_path)
-        roles = [role["role"] for role in playbook[0]["roles"]]
+        sso_role = next(role for role in playbook[0]["roles"] if role["role"] == "lv3.platform.grafana_sso")
 
-        assert roles[-1] == "lv3.platform.grafana_sso"
+        assert sso_role["tags"] == ["grafana-sso"]
 
 
 def test_grafana_requests_the_custom_scope_that_supplies_its_groups_claim() -> None:
@@ -81,20 +92,32 @@ def test_grafana_signout_uses_its_own_authentik_provider_endpoint() -> None:
 
 def test_grafana_pins_server_side_authentik_requests_to_the_private_edge() -> None:
     defaults = load_yaml(ROLE_DEFAULTS)
-    tasks = load_yaml(ROLE_TASKS)
-    pin_task = next(
-        task for task in tasks if task.get("name") == "Pin Authentik server-side OIDC requests to the private edge"
-    )
 
     assert defaults["grafana_sso_oidc_hostname"] == "{{ authentik_oidc_base_url | urlsplit('hostname') }}"
     assert (
         defaults["grafana_sso_internal_edge_ipv4"] == "{{ hostvars[platform_topology_host].proxmox_public_edge_ipv4 }}"
     )
-    assert pin_task["ansible.builtin.lineinfile"]["path"] == "/etc/hosts"
-    assert pin_task["ansible.builtin.lineinfile"]["create"] is False
-    assert pin_task["notify"] == "Restart Grafana"
-    hostname_matcher = pin_task["ansible.builtin.lineinfile"]["regexp"].replace(
-        "{{ grafana_sso_oidc_hostname | regex_escape }}", re.escape("id.example.com")
+    for tasks_path in (ROLE_TASKS, COLLECTION_ROLE_TASKS):
+        tasks = load_yaml(tasks_path)
+        pin_task = next(
+            task for task in tasks if task.get("name") == "Pin Authentik server-side OIDC requests to the private edge"
+        )
+
+        assert pin_task["ansible.builtin.lineinfile"]["path"] == "/etc/hosts"
+        assert pin_task["ansible.builtin.lineinfile"]["create"] is False
+        assert pin_task["ansible.builtin.lineinfile"]["backup"] is True
+        assert pin_task["notify"] == "Restart Grafana"
+        hostname_matcher = pin_task["ansible.builtin.lineinfile"]["regexp"].replace(
+            "{{ grafana_sso_oidc_hostname | regex_escape }}", re.escape("id.example.com")
+        )
+        assert re.search(hostname_matcher, "10.10.10.10 id.example.com\n")
+        assert not re.search(hostname_matcher, "10.10.10.10 unrelated.example.com\n")
+
+
+def test_grafana_redirect_assertion_is_skipped_in_ansible_check_mode() -> None:
+    tasks = load_yaml(ROLE_TASKS)
+    redirect_assertion = next(
+        task for task in tasks if task.get("name") == "Assert the Grafana OAuth redirect is wired to Authentik"
     )
-    assert re.search(hostname_matcher, "10.10.10.10 id.example.com\n")
-    assert not re.search(hostname_matcher, "10.10.10.10 unrelated.example.com\n")
+
+    assert redirect_assertion["when"] == "not ansible_check_mode"

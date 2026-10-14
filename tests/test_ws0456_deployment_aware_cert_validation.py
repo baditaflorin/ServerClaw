@@ -1,4 +1,4 @@
-"""Tests for ADR 0456 — deployment-aware certificate validation."""
+"""Tests for ADR 0456 — certificate validation with an explicit identity overlay."""
 
 from __future__ import annotations
 
@@ -32,69 +32,44 @@ def synthetic_local(tmp_path):
     return tmp_path
 
 
-def _write_identity(local_root: Path, slug: str | None, domain: str) -> None:
-    if slug:
-        path = local_root / "deployments" / slug / "identity.yml"
-    else:
-        path = local_root / "identity.yml"
+def _write_identity(path: Path, domain: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(f"platform_domain: {domain}\n")
 
 
-def test_resolve_explicit_wins(synthetic_local, monkeypatch):
+def test_get_real_domain_prefers_explicit_overlay(synthetic_local, monkeypatch):
     mod = _load_validator_module(synthetic_local)
-    monkeypatch.setenv("DEPLOYMENT", "from_env")
-    assert mod._resolve_deployment_slug("from_explicit") == "from_explicit"
+    monkeypatch.delenv("PLATFORM_IDENTITY_OVERLAY", raising=False)
+    legacy_identity = synthetic_local / "identity.yml"
+    selected_identity = synthetic_local / "deployments" / "alpha" / "identity.yml"
+    _write_identity(legacy_identity, "legacy.example")
+    _write_identity(selected_identity, "alpha.example")
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(selected_identity))
+
+    assert mod._get_real_domain() == "alpha.example"
 
 
-def test_resolve_falls_back_to_env(synthetic_local, monkeypatch):
+def test_get_real_domain_falls_back_to_legacy_overlay(synthetic_local, monkeypatch):
     mod = _load_validator_module(synthetic_local)
-    monkeypatch.setenv("DEPLOYMENT", "from_env")
-    assert mod._resolve_deployment_slug(None) == "from_env"
-
-
-def test_resolve_falls_back_to_active_file(synthetic_local, monkeypatch):
-    mod = _load_validator_module(synthetic_local)
-    monkeypatch.delenv("DEPLOYMENT", raising=False)
-    (synthetic_local / "active-deployment").write_text("from_file\n")
-    assert mod._resolve_deployment_slug(None) == "from_file"
-
-
-def test_resolve_returns_none_when_unset(synthetic_local, monkeypatch):
-    mod = _load_validator_module(synthetic_local)
-    monkeypatch.delenv("DEPLOYMENT", raising=False)
-    assert mod._resolve_deployment_slug(None) is None
-
-
-def test_get_real_domain_reads_per_deployment_identity(synthetic_local):
-    mod = _load_validator_module(synthetic_local)
-    _write_identity(synthetic_local, "alpha", "alpha.example")
-    assert mod._get_real_domain(deployment_slug="alpha") == "alpha.example"
-
-
-def test_get_real_domain_returns_none_when_per_deployment_missing(synthetic_local):
-    mod = _load_validator_module(synthetic_local)
-    assert mod._get_real_domain(deployment_slug="missing") is None
-
-
-def test_get_real_domain_skips_example_com_in_per_deployment(synthetic_local):
-    mod = _load_validator_module(synthetic_local)
-    _write_identity(synthetic_local, "alpha", "example.com")
-    assert mod._get_real_domain(deployment_slug="alpha") is None
-
-
-def test_get_real_domain_falls_back_to_legacy_overlay(synthetic_local):
-    mod = _load_validator_module(synthetic_local)
-    _write_identity(synthetic_local, None, "legacy.example")
+    monkeypatch.delenv("PLATFORM_IDENTITY_OVERLAY", raising=False)
+    _write_identity(synthetic_local / "identity.yml", "legacy.example")
     assert mod._get_real_domain() == "legacy.example"
 
 
-def test_get_real_domain_per_deployment_overrides_legacy(synthetic_local):
+def test_get_real_domain_skips_generic_placeholder(synthetic_local, monkeypatch):
     mod = _load_validator_module(synthetic_local)
-    _write_identity(synthetic_local, None, "legacy.example")
-    _write_identity(synthetic_local, "beta", "beta.example")
-    assert mod._get_real_domain(deployment_slug="beta") == "beta.example"
-    assert mod._get_real_domain() == "legacy.example"
+    identity = synthetic_local / "deployments" / "alpha" / "identity.yml"
+    _write_identity(identity, "example.com")
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(identity))
+
+    assert mod._get_real_domain() is None
+
+
+def test_get_real_domain_returns_none_for_missing_selected_overlay(synthetic_local, monkeypatch):
+    mod = _load_validator_module(synthetic_local)
+    monkeypatch.setenv("PLATFORM_IDENTITY_OVERLAY", str(synthetic_local / "missing.yml"))
+
+    assert mod._get_real_domain() is None
 
 
 def test_cross_deployment_drift_reason_allows_skip_cert_validation():

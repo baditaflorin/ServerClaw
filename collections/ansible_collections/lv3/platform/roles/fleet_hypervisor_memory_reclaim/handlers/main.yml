@@ -1,0 +1,4 @@
+---
+- name: Reload systemd for fleet hypervisor memory reclaim
+  ansible.builtin.systemd:
+    daemon_reload: true

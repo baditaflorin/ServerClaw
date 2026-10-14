@@ -105,6 +105,9 @@ line changes, which is not expected on any host today.
 | `/etc/pgbackrest` layout, `pgbackrest.conf`, `pgbackrest-daily`, prepared (not installed) service and timer | `fleet_pg_backup` (`pgbackrest`) | `fleet_pg_backup_pgbackrest_*` |
 | own-pbs realm user, ACLs on the `0database` namespace, prune job `prune-0database` | `fleet_pg_backup` (`pbs_server`) | `fleet_pg_backup_pbs_*` |
 | `fleet-docker-prune` script, service and daily timer (04:30 UTC, unused images and BuildKit cache older than 7 days; textfile metrics `fleet_docker_prune_*`) on the 0mcp docker-build guest | `fleet_docker_prune` | `fleet_docker_prune_*`; host `0mcp_docker_build` in group `fleet_docker_prune_hosts` |
+| `fleet-hypervisor-memory-reclaim` script, service and 5-minute timer (runs `echo 2 > /proc/sys/vm/drop_caches` while MemAvailable is under 10%; textfile metrics `fleet_hypervisor_memory_reclaim_*`) on the 0mcp hypervisor | `fleet_hypervisor_memory_reclaim` | `fleet_hypervisor_memory_reclaim_*`; host `operator-bastion` in group `fleet_hypervisor_memory_reclaim_hosts` |
+| Hypervisor memory alerts (`FleetHypervisorMemAvailableLow` <5% 10m, `FleetHypervisorMemAvailableCritical` <3% 5m, `FleetHypervisorSwapExhausted` >90% swap 15m; every `role="hypervisor"` node_exporter) | `monitoring_vm` | `config/prometheus/rules/fleet-hypervisor-memory.yml` |
+| Alertmanager self-monitoring: scrape job `alertmanager` (127.0.0.1:9093/metrics), `AlertmanagerDown`, `AlertmanagerNotificationsFailing`, `AlertmanagerStatePersistenceFailing` | `monitoring_vm` | `prometheus.yml.j2`, `config/prometheus/rules/alertmanager-self.yml` |
 | Root-filesystem alerts (`FleetRootFilesystemLow` <15% free 30m, `FleetRootFilesystemCritical` <7% 10m, `FleetRootFilesystemFillingFast` predicted full within 24h) and `FleetDockerPruneStale` | `monitoring_vm` | `config/prometheus/rules/fleet-disk.yml` (copied to `/etc/prometheus/rules/fleet-disk.yml` on the monitoring VM) |
 | Dead-man and finding alerts for the pool guardian and horizon loops on the 0docker builder (`FleetPoolGuardianSilent`, `FleetPoolGuardianNotReporting`, `FleetPoolGuardianCriticalFinding`, `FleetPoolGuardianCircuitOpen`, `FleetPoolGuardianPaused`, `FleetHorizonSilent`, `FleetHorizonNotReporting`, `FleetHorizonCriticalFinding`) | `monitoring_vm` | `config/prometheus/rules/fleet-loops.yml` (copied to `/etc/prometheus/rules/fleet-loops.yml` on the monitoring VM) |
 | the nginx guest's tcp 9100 rule | already in PR #299: `network_policy.guests.nginx` rendered by `linux_guest_firewall` | `inventory/host_vars/proxmox-host.yml` |
@@ -142,6 +145,8 @@ with a `dumpdir`); for a Proxmox Backup Server target the task log is `/var/log/
 argument (vzdump does not export `VMID`), ignores a stale log after a failed run, and keeps a wall-clock duration from
 `backup-start` to `backup-end` as a fallback. `tests/test_fleet_observability_roles.py` runs the rendered hook with bash
 against a stub vzdump layout, with and without `LOGFILE`.
+
+- `FleetRootFilesystemFillsWithin14Days` (warning, added 2026-10-13): fires when the 3-day trend leaves a root filesystem that is less than 40% free out of space within 14 days (6 h wait). The 24-hour rule leaves a day to react; this one leaves time to prune data or order storage (the 0database Postgres primary had about a week left when it was found by accident). The last 24 hours must trend the same way, so a one-off step (a restore, a cache warm-up) older than a day stays quiet; a step less than a day old can still warn. Tests: `tests/promtool/fleet_disk_forecast_test.yml`.
 
 ## Secrets stay out of git
 
@@ -229,6 +234,8 @@ scripts/tailscale-policy-ct108.sh plan        # semantic changes must be empty
 | Docker prune timer | `systemctl disable --now fleet-docker-prune.timer`, remove the two unit files and `/usr/local/sbin/fleet-docker-prune`, `systemctl daemon-reload`; pruned images are re-pulled on demand |
 | Disk alert rules | delete `/etc/prometheus/rules/fleet-disk.yml` on the monitoring VM and reload Prometheus |
 | Fleet loops rules | delete `/etc/prometheus/rules/fleet-loops.yml` on the monitoring VM and reload Prometheus |
+| Hypervisor memory reclaim timer | `systemctl disable --now fleet-hypervisor-memory-reclaim.timer`, remove the two unit files and `/usr/local/sbin/fleet-hypervisor-memory-reclaim`, `systemctl daemon-reload` |
+| Hypervisor memory / Alertmanager self rules | delete `/etc/prometheus/rules/fleet-hypervisor-memory.yml` / `alertmanager-self.yml`, reload Prometheus; the `alertmanager` scrape job: restore `/etc/prometheus/prometheus.yml.pre-am-scrape-<ts>` |
 | PBS ACL / prune job | `proxmox-backup-manager acl update <path> NoAccess --auth-id <id>` / `prune-job update` with the old value; user and token deletion is deliberately not automated |
 
 ## Validation
@@ -292,3 +299,41 @@ hypervisor was reset on 2026-10-13, and the nginx guest was no longer scraped (`
 ordered after `tailscaled.service`, `Restart=always`, `RestartSec=15`, no start limit); switch it off per host with
 `fleet_node_exporter_restart_forever: false`. Rollback: delete the drop-in and `systemctl daemon-reload`.
 
+The same check found a second cycle on the 0mcp hypervisor that is not about tailnet sockets: the host control-loop reconcile
+path unit (`proxmox_host_control_loops`) is `After=pveproxy.service` and, as a path unit, implicitly `Before=paths.target`;
+`pveproxy` is after `ssh.service`, which is after `basic.target`. systemd's way out of that cycle at boot is to delete start
+jobs, and `ssh.service` was one of the candidates. The path template now carries `DefaultDependencies=no`; the tailnet proxy
+sockets of the 0mcp hypervisor and this path unit have the same fix as drop-ins since 2026-10-13, and
+`systemd-analyze verify default.target` is clean there.
+
+
+
+## Hypervisor memory, Alertmanager delivery and the monitoring dead-man (added 2026-10-13)
+
+Found in the 2026-10-13 re-audit of the 0mcp fleet; every item was applied live first, then codified.
+
+- **Hypervisor memory.** pve-0mcp read 3% MemAvailable, 99.5% swap, with ~141 GB of guest RAM configured on 128 GB, and nothing
+  alerted (`FleetHypervisorMemoryPressure` reads a metric only the 0docker PVE exporter feeds). Rules:
+  `config/prometheus/rules/fleet-hypervisor-memory.yml`. Root cause of the apparent exhaustion: memory stranded in
+  deferred-split transparent huge pages after ballooning (see the `fleet_hypervisor_memory_reclaim` README); `drop_caches=2`
+  returned ~13 GB. pvestatd had already ballooned every guest to its floor (`qm monitor <id>`, `info balloon`: actual == the
+  `balloon` minimum), so lowering a floor is the only remaining lever: done for runtime-apps (4096 to 1536 MB) and runtime-ai
+  (2048 to 1280 MB), each above max(1.3 x its 7-day peak used, 1 GB). Rollback values are in `/root/balloon-changes-*.txt` on
+  the hypervisor. Guests to shrink at the next reboot: runtime-comms (4096 MB, peak used 1.1 GB), nginx (4096 MB, 1 GB),
+  0mcp-staging-runtime (8192 MB, balloon disabled), artifact-cache (4096 MB, balloon disabled, peak 0.8 GB).
+- **Alertmanager state.** The storage path was root-owned while the unit runs as `prometheus`, so nflog and silences were never
+  written. Fixed in the role (PR #356); `AlertmanagerStatePersistenceFailing` now alerts on it.
+- **ntfy 413 / 400.** ntfy rejects webhook JSON over its request limit (HTTP 413 `JSON body too large`, observed with 287
+  alerts) and implements only a subset of sprig (`int` is not defined: HTTP 400). The receivers send at most
+  `alertmanager_runtime_ntfy_max_alerts` (5) alerts; the templates add `.truncatedAlerts` back for the title count and the
+  "...and N more" line. Storm routing: `FleetServiceEdgeDown` now joins the family grouped by cluster, job and severity.
+- **Load test.** Route `alertname="AlertmanagerLoadTest"` (severity `loadtest`, so fleet-triage skips it) goes to
+  `platform-monitoring-warning`. Post 300 alerts with distinct `instance` labels and a 4 minute `endsAt` to
+  `http://127.0.0.1:9093/api/v2/alerts` on the monitoring VM; expect one message titled `FIRING (300): AlertmanagerLoadTest +299 more`.
+- **Kuma.** Uptime Kuma (runtime-general, `/opt/uptime-kuma`) had no notification channel. A default-enabled `ntfy` channel posts to
+  `platform-monitoring-warning` as the publish-only ntfy user `kuma-notify` (password in the fleet vault as
+  `kuma-notify-ntfy-password`). It lives in `kuma.db` (not in git). Rollback: stop the container, restore
+  `/opt/uptime-kuma/kuma.db.pre-ntfy-notification-<ts>`, start it.
+- **Dead-man's switch for the 0mcp monitoring.** CT108 probes the 0mcp Prometheus and Alertmanager every minute over the tailnet and
+  the 0docker Prometheus alerts on the result: `baditaflorin/go-fleet-metrics-hub`, `prometheus/rules/mcp-monitoring-deadman.yml`
+  and `ops/mcp-monitoring-probe/`.

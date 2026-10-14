@@ -1,0 +1,150 @@
+# promtool unit tests for config/prometheus/rules/fleet-backup-freshness.yml (run by tests/test_fleet_backup_freshness.py when
+# promtool is installed). promtool starts its clock at the Unix epoch, so a timestamp series whose value equals its own
+# time in seconds means "just happened": "0+60x1700" at a 1m interval is a backup that completes every minute.
+# The size/duration alerts are gated on a fixed date (2026-10-21) that promtool's clock never reaches, so those cases
+# only prove the gate holds the alerts back.
+rule_files:
+  - ../../config/prometheus/rules/fleet-backup-freshness.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a current pg_backup raises nothing
+    interval: 1m
+    input_series:
+      - series: 'pg_backup_last_success_timestamp_seconds{method="vzdump",vmid="100",host="pve-pve01"}'
+        values: "0+60x1800"
+      - series: 'pg_backup_last_status{method="vzdump",vmid="100",host="pve-pve01"}'
+        values: "1x1800"
+    alert_rule_test:
+      - {eval_time: 1700m, alertname: PgBackupStale, exp_alerts: []}
+      - {eval_time: 1700m, alertname: PgBackupStaleCritical, exp_alerts: []}
+      - {eval_time: 1700m, alertname: PgBackupLastRunFailed, exp_alerts: []}
+
+  - name: a pg_backup older than 26 hours warns and one older than 50 hours is critical
+    interval: 1m
+    input_series:
+      # last success at 6000 s, then no new success
+      - series: 'pg_backup_last_success_timestamp_seconds{method="vzdump",vmid="100",host="pve-pve01"}'
+        values: "0+60x100 6000x3300"
+    alert_rule_test:
+      - {eval_time: 1500m, alertname: PgBackupStale, exp_alerts: []}   # 84000 s old: under 26 h
+      - eval_time: 1700m                                               # 96000 s old: over 26 h for 15 m
+        alertname: PgBackupStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pg_backup, method: vzdump, vmid: "100", host: pve-pve01}
+            exp_annotations:
+              summary: "No successful vzdump of VM 100 (pve-pve01) for over 26 hours"
+              description: "The daily pg-primary vzdump to PBS (job pg-primary-daily-pbs, 02:30 CEST) last succeeded 1d 2h 40m 0s ago. Check the PVE task log on the hypervisor and PBS capacity/permissions."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+      - {eval_time: 1700m, alertname: PgBackupStaleCritical, exp_alerts: []}
+      - eval_time: 3300m                                               # 192000 s old: over 50 h
+        alertname: PgBackupStaleCritical
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pg_backup, method: vzdump, vmid: "100", host: pve-pve01}
+            exp_annotations:
+              summary: "No successful vzdump of VM 100 (pve-pve01) for over 50 hours"
+              description: "Two daily runs of the pg-primary backup have been missed (2d 5h 20m 0s since the last success). The production Postgres has no point-in-time recovery, so this backup is the only recovery path."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+
+  - name: a failed last run pages after ten minutes
+    interval: 1m
+    input_series:
+      - series: 'pg_backup_last_status{method="vzdump",vmid="100",host="pve-pve01"}'
+        values: "1x30 0x60"
+    alert_rule_test:
+      - {eval_time: 35m, alertname: PgBackupLastRunFailed, exp_alerts: []}
+      - eval_time: 50m
+        alertname: PgBackupLastRunFailed
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pg_backup, method: vzdump, vmid: "100", host: pve-pve01}
+            exp_annotations:
+              summary: "The last vzdump of VM 100 (pve-pve01) failed"
+              description: "The vzdump hook reported backup-abort. Read /var/log/vzdump/qemu-100.log and the PVE task log on the hypervisor."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+
+  - name: the size and duration alerts stay quiet until the hand-set sample has aged out of the 7-day window
+    interval: 1m
+    input_series:
+      - series: 'pg_backup_size_bytes{method="vzdump",vmid="100"}'
+        values: "644245094400x1000 128945655644x1000"
+      - series: 'pg_backup_duration_seconds{method="vzdump",vmid="100"}'
+        values: "1281x1000 6345x1000"
+    alert_rule_test:
+      - {eval_time: 1900m, alertname: PgBackupSizeShrank, exp_alerts: []}
+      - {eval_time: 1900m, alertname: PgBackupDurationHigh, exp_alerts: []}
+
+  - name: a PBS group with a fresh snapshot raises nothing, a stale one warns, then goes critical
+    interval: 1m
+    input_series:
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0own",backup_type="vm",backup_id="640"}'
+        values: "0+60x1800"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0own",backup_type="vm",backup_id="670"}'
+        values: "0+60x100 6000x3300"
+    alert_rule_test:
+      - eval_time: 1700m
+        alertname: PbsBackupGroupStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pbs_backup, datastore: own-pbs, namespace: "0own", backup_type: vm, backup_id: "670"}
+            exp_annotations:
+              summary: "PBS group vm/670 (namespace '0own') has no snapshot for over 26 hours"
+              description: "Newest snapshot is 1d 2h 40m 0s old. Every daily job on the four fleets should land a snapshot inside 26 hours (VM 153 is 12:00 daily). Check the vzdump task on the owning hypervisor and the PBS task list."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+      - {eval_time: 1700m, alertname: PbsBackupGroupStaleCritical, exp_alerts: []}
+      - eval_time: 3300m
+        alertname: PbsBackupGroupStaleCritical
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pbs_backup, datastore: own-pbs, namespace: "0own", backup_type: vm, backup_id: "670"}
+            exp_annotations:
+              summary: "PBS group vm/670 (namespace '0own') has no snapshot for over 50 hours"
+              description: "Two daily runs were missed (2d 5h 20m 0s). If the guest was retired on purpose, prune the group in PBS and add it to the exclusion in this rule."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+
+  - name: the frozen 0mcp-legacy archive and the retired root-namespace 0docker groups never alert
+    interval: 1m
+    input_series:
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0mcp-legacy",backup_type="vm",backup_id="100"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="",backup_type="vm",backup_id="101"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="",backup_type="vm",backup_id="101"}'
+        values: "3x3300"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="",backup_type="ct",backup_id="109"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="",backup_type="ct",backup_id="109"}'
+        values: "3x3300"
+    alert_rule_test:
+      - {eval_time: 3300m, alertname: PbsBackupGroupStale, exp_alerts: []}
+      - {eval_time: 3300m, alertname: PbsBackupGroupStaleCritical, exp_alerts: []}
+
+  - name: the collector alerts fire when the textfile stops refreshing and when it is absent
+    interval: 1m
+    input_series:
+      - series: 'pbs_backup_collect_timestamp_seconds{datastore="own-pbs",instance="own-pbs:9100"}'
+        values: "0+60x60 3600x60"
+    alert_rule_test:
+      - {eval_time: 50m, alertname: PbsBackupMetricsStale, exp_alerts: []}
+      - eval_time: 110m
+        alertname: PbsBackupMetricsStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pbs_backup, datastore: own-pbs, instance: "own-pbs:9100"}
+            exp_annotations:
+              summary: "PBS backup freshness collector on own-pbs:9100 stopped updating"
+              description: "pbs-backup-metrics.timer on own-pbs has not refreshed /var/lib/prometheus/node-exporter/textfile/pbs_backup.prom for 50m 0s; the PbsBackupGroupStale alerts are blind until it runs again."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+      - {eval_time: 20m, alertname: PbsBackupMetricsMissing, exp_alerts: []}
+
+  - name: the missing-series alert fires when no collector series exists at all
+    interval: 1m
+    input_series:
+      - series: 'up{job="node_exporter",instance="own-pbs:9100"}'
+        values: "1x100"
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: PbsBackupMetricsMissing
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pbs_backup, datastore: own-pbs}
+            exp_annotations:
+              summary: "No PBS backup freshness series from own-pbs"
+              description: "Prometheus has no pbs_backup_collect_timestamp_seconds: the own-pbs node exporter is down or the textfile collector is not enabled there."
+              runbook_url: docs/runbooks/pbs-0own-backups.md

@@ -120,6 +120,7 @@ def write_metrics(ok, size, count, dry_run, prev=None):
     try:
         with open(tmp, "w") as f:
             f.write("\n".join(lines) + "\n")
+        os.chmod(tmp, 0o644)  # the unit runs with UMask=0077; node_exporter (not root) has to read the metrics
         os.replace(tmp, CONF["textfile"])
     except OSError as e:
         log(f"warning: could not write metrics: {e}")
