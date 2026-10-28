@@ -117,6 +117,43 @@ tests:
       - {eval_time: 3300m, alertname: PbsBackupGroupStale, exp_alerts: []}
       - {eval_time: 3300m, alertname: PbsBackupGroupStaleCritical, exp_alerts: []}
 
+  - name: the weekly CT 108 image is exempt from the 26/50 h rules and judged at 8.5 and 16 days; its daily file group is not exempt
+    interval: 1m
+    input_series:
+      # one snapshot at t=1 s, never again
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0docker",backup_type="ct",backup_id="108"}'
+        values: "1x24100"
+      # the daily host group stopped at t=1 s too: it alerts like any daily group
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0docker",backup_type="host",backup_id="ct108-live"}'
+        values: "1x24100"
+    alert_rule_test:
+      - eval_time: 3300m
+        alertname: PbsBackupGroupStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pbs_backup, datastore: own-pbs, namespace: "0docker", backup_type: host, backup_id: ct108-live}
+            exp_annotations:
+              summary: "PBS group host/ct108-live (namespace '0docker') has no snapshot for over 26 hours"
+              description: "Newest snapshot is 2d 6h 59m 59s old. Every daily job on the four fleets should land a snapshot inside 26 hours (VM 153 is 12:00 daily). Check the vzdump task on the owning hypervisor and the PBS task list."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+      - {eval_time: 3300m, alertname: PbsBackupGroupStaleWeekly, exp_alerts: []}
+      - eval_time: 12300m
+        alertname: PbsBackupGroupStaleWeekly
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pbs_backup, datastore: own-pbs, namespace: "0docker", backup_type: ct, backup_id: "108"}
+            exp_annotations:
+              summary: "PBS group ct/108 (the builder's weekly full image) has no snapshot for over 8.5 days"
+              description: "Newest snapshot is 8d 12h 59m 59s old. ct108-nightly runs on Sundays at 03:30 CEST. Check the vzdump task on the 0docker hypervisor and that the daily host/ct108-live group is still fresh (fleet-state hypervisor-0docker/README.md)."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+      - {eval_time: 12300m, alertname: PbsBackupGroupStaleWeeklyCritical, exp_alerts: []}
+      - eval_time: 23100m
+        alertname: PbsBackupGroupStaleWeeklyCritical
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pbs_backup, datastore: own-pbs, namespace: "0docker", backup_type: ct, backup_id: "108"}
+            exp_annotations:
+              summary: "PBS group ct/108 (the builder's weekly full image) has no snapshot for over 16 days"
+              description: "Two weekly runs were missed (16d 0h 59m 59s). The only restore point left is the daily host/ct108-live file backup."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+
   - name: the collector alerts fire when the textfile stops refreshing and when it is absent
     interval: 1m
     input_series:

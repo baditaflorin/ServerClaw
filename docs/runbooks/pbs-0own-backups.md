@@ -142,3 +142,10 @@ This isolation is stricter than the bridge-based checks in `backup-restore-verif
 * OpenObserve compose: `compose.yaml.bak-pre-logrotate-*` and `edge-compose.yaml.bak-pre-logrotate-*` in `/opt/openobserve`.
 * Tailscale policy: rollback copy `/var/lib/tailscale-policy-sync/rollback/policy.20261013T144031Z.*.hujson` on CT108 (`plan --file ... && apply --file ...`); advertise-routes: `tailscale set --advertise-routes=10.60.10.50/32` on the 0own hypervisor (prefs copy `/root/tailscale-prefs.pre-adv-660.json`).
 * PBS 4.2.8: a pre-upgrade copy of `/etc/proxmox-backup` is `/root/etc-proxmox-backup-pre-4.2.8-*.tgz` on own-pbs.
+
+## CT 108 (the builder): weekly image, daily file backup (2026-10-28)
+
+`ct108-nightly` (vzdump, stop mode: the builder is down for the upload) runs **Sundays 03:30 CEST** since 2026-10-28. The daily restore point is the
+file-level `ct108-live-backup` (group `host/ct108-live`, namespace `0docker`, 05:30 CEST, no downtime). Accordingly `PbsBackupGroupStale*` exempt
+group `ct/108`, and `PbsBackupGroupStaleWeekly` (8.5 days) / `PbsBackupGroupStaleWeeklyCritical` (16 days) judge it; `host/ct108-live` is a normal daily group.
+Details and restore recipe: fleet-state `hypervisor-0docker/README.md`.
