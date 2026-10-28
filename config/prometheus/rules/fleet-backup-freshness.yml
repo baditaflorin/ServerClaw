@@ -83,6 +83,8 @@ groups:
           )
           unless on (namespace, backup_type, backup_id)
           pbs_backup_group_snapshot_count{namespace="", backup_id=~"101|104|107|108|109"}
+          unless on (namespace, backup_type, backup_id)
+          pbs_backup_group_last_snapshot_timestamp_seconds{namespace="0docker", backup_type="ct", backup_id="108"}
         for: 30m
         labels:
           severity: warning
@@ -99,6 +101,8 @@ groups:
           )
           unless on (namespace, backup_type, backup_id)
           pbs_backup_group_snapshot_count{namespace="", backup_id=~"101|104|107|108|109"}
+          unless on (namespace, backup_type, backup_id)
+          pbs_backup_group_last_snapshot_timestamp_seconds{namespace="0docker", backup_type="ct", backup_id="108"}
         for: 30m
         labels:
           severity: critical
@@ -106,6 +110,31 @@ groups:
         annotations:
           summary: "PBS group {{ $labels.backup_type }}/{{ $labels.backup_id }} (namespace '{{ $labels.namespace }}') has no snapshot for over 50 hours"
           description: "Two daily runs were missed ({{ $value | humanizeDuration }}). If the guest was retired on purpose, prune the group in PBS and add it to the exclusion in this rule."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      # CT 108 (the builder) has a WEEKLY full-image vzdump (Sunday 03:30 CEST) since 2026-10-28; its daily restore point is the group
+      # host/ct108-live (a normal daily group, covered by the two rules above). ct/108 is therefore exempt from the 26/50 h rules and
+      # judged here: 8.5 days (a missed Sunday is noticed on Monday of the week after) and 16 days (two missed runs).
+      - alert: PbsBackupGroupStaleWeekly
+        expr: time() - pbs_backup_group_last_snapshot_timestamp_seconds{namespace="0docker", backup_type="ct", backup_id="108"} > 734400
+        for: 30m
+        labels:
+          severity: warning
+          service: pbs_backup
+        annotations:
+          summary: "PBS group ct/108 (the builder's weekly full image) has no snapshot for over 8.5 days"
+          description: "Newest snapshot is {{ $value | humanizeDuration }} old. ct108-nightly runs on Sundays at 03:30 CEST. Check the vzdump task on the 0docker hypervisor and that the daily host/ct108-live group is still fresh (fleet-state hypervisor-0docker/README.md)."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      - alert: PbsBackupGroupStaleWeeklyCritical
+        expr: time() - pbs_backup_group_last_snapshot_timestamp_seconds{namespace="0docker", backup_type="ct", backup_id="108"} > 1382400
+        for: 30m
+        labels:
+          severity: critical
+          service: pbs_backup
+        annotations:
+          summary: "PBS group ct/108 (the builder's weekly full image) has no snapshot for over 16 days"
+          description: "Two weekly runs were missed ({{ $value | humanizeDuration }}). The only restore point left is the daily host/ct108-live file backup."
           runbook_url: docs/runbooks/pbs-0own-backups.md
 
       - alert: PbsBackupMetricsStale
