@@ -1,0 +1,9 @@
+[Unit]
+Description=Tier-0 hourly check that the standby edge still accepts production's gateway config (isolated nginx -t, nothing changed on the edge)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/tier0-edge-compat
+TimeoutStartSec=600
+Nice=10

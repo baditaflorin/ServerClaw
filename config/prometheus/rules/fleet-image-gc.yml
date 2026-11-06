@@ -1,0 +1,45 @@
+# Scheduler exit status includes registry-unavailable refusals: recoverability
+# failures must remain visible even though the primitive safely keeps the images.
+# The systemd collector retains failed units. A successful oneshot becomes
+# inactive, so testing active=0 would incorrectly alert after every good run.
+groups:
+  - name: fleet_image_gc
+    interval: 1m
+    rules:
+      - alert: FleetImageGcFailed
+        expr: max by (host, instance, name) (node_systemd_unit_state{name=~"fleet-image-gc-.+[.]service", state="failed"}) == 1
+        for: 3m
+        labels:
+          severity: warning
+          service: fleet_image_gc
+        annotations:
+          summary: "Image cleanup {{ $labels.name }} failed on {{ $labels.host }}"
+          description: "The bounded image cleanup scheduler failed. Check systemctl status {{ $labels.name }} and journalctl -u {{ $labels.name }} on {{ $labels.host }}. Registry-unavailable refusals keep images and fail the batch; restore approved registry access rather than bypassing recoverability checks. A later successful scheduled run clears the failed unit state."
+          runbook_url: docs/runbooks/fleet-image-gc-monitoring.md
+      - alert: FleetRunnerArtifactGcFailed
+        expr: max by (host, instance, name) (node_systemd_unit_state{name="builder-disk-gc.service", state="failed"}) == 1
+        for: 3m
+        labels:
+          severity: warning
+          service: fleet_runner_artifact_gc
+        annotations:
+          summary: "Runner artifact cleanup failed on {{ $labels.host }}"
+          description: "builder-disk-gc.service failed on {{ $labels.host }}. Check its journal and the artifact retention report; keep current, recent, active, referenced or unrecognized bundles protected. Do not bypass the retention guards."
+          runbook_url: docs/runbooks/fleet-image-gc-monitoring.md
+      - alert: FleetImageGcTimerStale
+        expr: |
+          (
+            time() - max by (host, instance, name) (fleet_image_gc_timer_expected_since_seconds{name=~"fleet-image-gc-.+[.]timer"}) > 3 * 3600
+          )
+          and on (host, instance)
+          (time() - max by (host, instance) (node_boot_time_seconds) > 3 * 3600)
+          unless on (host, instance, name)
+          (time() - max by (host, instance, name) (node_systemd_timer_last_trigger_seconds{name=~"fleet-image-gc-.+[.]timer"}) < 3 * 3600)
+        for: 10m
+        labels:
+          severity: warning
+          service: fleet_image_gc
+        annotations:
+          summary: "Image cleanup timer {{ $labels.name }} stopped triggering on {{ $labels.host }}"
+          description: "This intentionally enabled timer has no trigger in three hours, including a missing, disabled or unloaded timer. First rollout and host boot each have a three-hour grace period. Inspect systemctl status {{ $labels.name }} and its service on {{ $labels.host }}; preserve the approved cleanup bounds. Disarm the expectation marker only when intentionally retiring the timer."
+          runbook_url: docs/runbooks/fleet-image-gc-monitoring.md

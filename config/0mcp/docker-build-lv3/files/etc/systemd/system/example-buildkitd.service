@@ -1,0 +1,17 @@
+[Unit]
+Description=LV3 BuildKit daemon
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker rm -f example-buildkitd-managed
+ExecStart=/usr/bin/docker run --rm --name example-buildkitd-managed --privileged --network host --add-host registry.example.com:10.10.10.10 -v /etc/buildkit/buildkitd.toml:/etc/buildkit/buildkitd.toml:ro -v /opt/builds/.buildkit-cache:/var/lib/buildkit -v /run/buildkit:/run/buildkit moby/buildkit:buildx-stable-1 --addr unix:///run/buildkit/buildkitd.sock --config /etc/buildkit/buildkitd.toml
+ExecStop=/usr/bin/docker stop example-buildkitd-managed
+
+[Install]
+WantedBy=multi-user.target

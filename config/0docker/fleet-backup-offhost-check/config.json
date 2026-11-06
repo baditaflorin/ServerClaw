@@ -1,0 +1,11 @@
+{
+  "repo": "git@github.com:baditaflorin/fleet-backups.git",
+  "branch": "main",
+  "deploy_key": "/opt/services/fleet-backup-sync/github_deploy_key",
+  "known_hosts": "/opt/services/fleet-backup-sync/github_known_hosts",
+  "sources": ["secrets-db", "keystore-db", "broker-db-snapshot"],
+  "textfile": "/var/lib/prometheus/node-exporter/fleet_backup_offhost.prom",
+  "deep_textfile": "/var/lib/prometheus/node-exporter/fleet_backup_offhost_deep.prom",
+  "tmpdir": "/var/tmp",
+  "fetch_timeout_s": 900
+}

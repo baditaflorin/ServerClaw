@@ -8,6 +8,7 @@ Available task entrypoints:
 - `directory_tree` creates one or more directories with shared owner/group/mode defaults
 - `openbao_systemd_credentials` installs an OpenBao Agent plus systemd-credential bundle for host-native services
 - `systemd_unit` enables and starts a systemd unit with optional active-state verification
+- `journal_retention` caps persistent and volatile journals and expires old entries on a systemd host or guest; restarts only journald when its drop-in changes
 - `wait_port` waits for a TCP listener with shared timeout defaults
 
 Use the task entrypoints with `include_role`, for example:

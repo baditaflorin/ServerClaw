@@ -1,0 +1,33 @@
+#!/bin/bash
+# DNS stage of the 0docker failover, run on the Tier-0 runner. The Hetzner DNS token comes from the LOCAL vault standby (stdin of the reconciler only, never stored).
+#   tier0-dns status                       live vs git desired state (read-only)
+#   tier0-dns plan  [--to IP]              what a failover repoint would change (dry run; default IP = the 0mcp edge 203.0.113.1)
+#   tier0-dns failover --to IP [--only FQDN,..] --apply   repoint every A record on 203.0.113.2 to IP; writes the exact inverse to /var/lib/tier0-dns/revert-<ts>.json
+#   tier0-dns failback [--file F] [--apply]   EXACT inverse from the newest revert file (or F): values, TTL, comments; skips and reports anything changed since (exit 3)
+#   tier0-dns failback-git [--apply] [--force]  fallback when no revert file exists: restore the git desired state, but refuse unless every change is "standby IP -> primary IP"
+# Swapping --from/--to is NOT the inverse: 153 names legitimately point at the 0mcp address.
+set -uo pipefail
+R=/opt/tier0-runner/fleet-state; REC="python3 $R/scripts/tier0/dns-reconcile.py"; PRIMARY=203.0.113.2; EDGE=203.0.113.1; D=/var/lib/tier0-dns
+CMD=${1:-}; shift || true; TO=$EDGE; APPLY=0; FILE=""; FORCE=0; ONLY=""
+while [ $# -gt 0 ]; do case $1 in --to) TO=$2; shift;; --apply) APPLY=1;; --file) FILE=$2; shift;; --force) FORCE=1;; --only) ONLY=$2; shift;; *) echo "unknown option $1" >&2; exit 2;; esac; shift; done
+install -d -m 700 $D
+tok() { /opt/tier0-runner/bin/tier0-secret hcloud_token_fleet_core; }
+case $CMD in
+  status)   tok | $REC drift --dir "$R/dns";;
+  plan)     tok | $REC repoint --from $PRIMARY --to "$TO" ${ONLY:+--only "$ONLY"};;
+  failover) if [ $APPLY = 1 ]; then F=$D/revert-$(date -u +%Y%m%dT%H%M%SZ).json
+              tok | $REC repoint --from $PRIMARY --to "$TO" ${ONLY:+--only "$ONLY"} --apply --revert-file "$F"; rc=$?; echo "revert file: $F"; exit $rc
+            else echo "dry run only; add --apply" >&2; tok | $REC repoint --from $PRIMARY --to "$TO" ${ONLY:+--only "$ONLY"}; fi;;
+  failback) [ -n "$FILE" ] || FILE=$(ls -1t $D/revert-*.json 2>/dev/null | head -1)
+            [ -f "$FILE" ] || { echo "no revert file in $D: use failback-git (guarded) or pass --file" >&2; exit 4; }
+            echo "reverting from $FILE"
+            if [ $APPLY = 1 ]; then tok | $REC revert --file "$FILE" --apply; else tok | $REC revert --file "$FILE"; fi;;
+  failback-git)
+            P=$(tok | $REC apply --dir "$R/dns" 2>&1); echo "$P" | tail -15
+            # every planned change must be an A record going from the standby IP back to the primary IP; anything else is unrelated drift
+            bad=$(echo "$P" | grep -E "^\s*\[dry-run\]" | grep -vE "A \[[^]]*'$EDGE'[^]]*\] -> \[[^]]*'$PRIMARY'[^]]*\]" | grep -vE "ttl " || true)
+            if [ -n "$bad" ] && [ $FORCE != 1 ]; then echo "REFUSING: the git plan contains changes that are not 'standby IP -> primary IP':" >&2; echo "$bad" | head -8 >&2; exit 3; fi
+            [ $APPLY = 1 ] || exit 0
+            tok | $REC apply --dir "$R/dns" --apply;;
+  *) sed -n 2,10p "$0"; exit 2;;
+esac

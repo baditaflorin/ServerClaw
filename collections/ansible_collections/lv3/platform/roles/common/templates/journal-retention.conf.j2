@@ -1,0 +1,8 @@
+# managed-by: role=common adr=0226 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator', true) }}
+[Journal]
+SystemMaxUse={{ common_journal_retention_system_max_use }}
+SystemKeepFree={{ common_journal_retention_system_keep_free }}
+RuntimeMaxUse={{ common_journal_retention_runtime_max_use }}
+RuntimeKeepFree={{ common_journal_retention_runtime_keep_free }}
+MaxRetentionSec={{ common_journal_retention_max_retention }}
+MaxFileSec={{ common_journal_retention_max_file_age }}

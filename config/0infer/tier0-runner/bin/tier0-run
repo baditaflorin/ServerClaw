@@ -1,0 +1,17 @@
+#!/bin/bash
+# Run one of the Tier-0 failover scripts on this host as the unprivileged runner, with the host's sealed key, logging every run.
+#   tier0-run tier0-failover.sh --rehearse        tier0-run tier0-gateway-promote.sh --rehearse ...
+# The scripts live in /opt/tier0-runner (copied from fleet-state; VERSION = commit). Logs: /var/log/tier0-runner/.
+set -euo pipefail
+[ $# -ge 1 ] || { sed -n 2,5p "$0"; exit 2; }
+S=$1; shift
+[ -f "/opt/tier0-runner/fleet-state/scripts/tier0/$S" ] || { echo "no such script: $S" >&2; exit 2; }
+install -d -m 750 -o root -g t0runner /var/log/tier0-runner
+L=/var/log/tier0-runner/$(date -u +%Y%m%dT%H%M%SZ)-${S%.sh}.log
+{ echo "# $(date -u +%FT%TZ) $S $* (scripts commit $(cat /opt/tier0-runner/VERSION))"; } > "$L"; chgrp t0runner "$L"; chmod 640 "$L"
+set +e
+sudo -u t0runner env TIER0_KEY=/etc/tier0-standby/standby.key HOME=/var/lib/t0runner PATH=/usr/local/bin:/usr/bin:/bin \
+  /opt/tier0-runner/fleet-state/scripts/tier0/"$S" "$@" 2>&1 | tee -a "$L"
+rc=${PIPESTATUS[0]}
+echo "# exit $rc" | tee -a "$L"
+exit $rc

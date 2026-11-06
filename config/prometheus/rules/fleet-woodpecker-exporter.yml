@@ -1,0 +1,28 @@
+# Alerts on the Woodpecker control-plane exporter, added 2026-10-30. The exporter (private repo baditaflorin/fleet-woodpecker-metrics, timer on CT108,
+# textfile woodpecker.prom) had no alert of its own: a plane it cannot read, or an exporter that stopped, went unnoticed. `max by` merges duplicate series.
+groups:
+  - name: fleet_woodpecker_exporter
+    rules:
+      - alert: WoodpeckerControlPlaneUnreachable
+        expr: >-
+          max by (control_plane) (woodpecker_control_plane_up) == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: fleet_woodpecker_exporter
+        annotations:
+          summary: "The Woodpecker exporter cannot read {{ $labels.control_plane }}"
+          description: "woodpecker_control_plane_up is 0 for {{ $labels.control_plane }}: the exporter's API call failed (server down, token file, or the private proxy). Pipelines on that plane may be stuck; check the server and its token on CT108."
+          runbook_url: docs/runbooks/fleet-observability.md#woodpecker-exporter-alerts
+
+      - alert: WoodpeckerExporterMissing
+        expr: >-
+          absent(woodpecker_control_plane_up)
+        for: 15m
+        labels:
+          severity: warning
+          service: fleet_woodpecker_exporter
+        annotations:
+          summary: "No Woodpecker control-plane metrics are exported"
+          description: "woodpecker_control_plane_up has no series: fleet-woodpecker-metrics.timer on CT108 is not running or its run fails. Capacity, queue and pipeline dashboards are blind. systemctl status fleet-woodpecker-metrics.service on CT108."
+          runbook_url: docs/runbooks/fleet-observability.md#woodpecker-exporter-alerts

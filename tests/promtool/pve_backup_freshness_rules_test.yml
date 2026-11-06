@@ -1,0 +1,231 @@
+# promtool unit tests for PveBackupFreshnessLow in config/prometheus/rules/pve-host-incident.yml (run by tests/test_pve_backup_freshness_rules.py when promtool is
+# installed; written 2026-10-29). The alert holds each guest to 30 hours since its last successful vzdump, except a guest whose job is weekly (CT 108 since 2026-10-28):
+# that one is held to the limit the host collector publishes for it, 8.5 days. The collector's series, as it exports them for the 0docker hypervisor:
+#   proxmox_backup_expected_guest 1, proxmox_backup_last_success_timestamp_seconds (0 = no success in the collector's window: 48 h, or 10 days for a weekly guest),
+#   proxmox_backup_max_age_seconds 129600 (36 h, a daily guest) or 734400 (204 h = 8.5 days, a weekly guest).
+# promtool's clock starts at 0, so a last-success value of 86400 means "the run finished on day 1" and eval_time is that plus the age being tested. Rules are evaluated every
+# 5 minutes here (the same grid as the samples) and the alert waits 10 minutes (for: 10m) after the limit is crossed: the first evaluation over the limit is "limit + 5m"
+# (pending), the alert fires at "limit + 15m". An age exactly at the limit is not over it.
+rule_files:
+  - ../../config/prometheus/rules/pve-host-incident.yml
+
+evaluation_interval: 5m
+
+tests:
+  - name: a weekly guest is quiet 3 days after its run, a week after it, and up to exactly 8.5 days (the old fixed 30 hours fired for all of these)
+    interval: 5m
+    input_series:
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "1x3000"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "86400x3000"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "734400x3000"
+    alert_rule_test:
+      - {eval_time: 1d30m, alertname: PveBackupFreshnessLow, exp_alerts: []}   # the run has just finished
+      - {eval_time: 2d7h, alertname: PveBackupFreshnessLow, exp_alerts: []}    # 31 hours after the run: the daily limit does not apply to it
+      - {eval_time: 4d, alertname: PveBackupFreshnessLow, exp_alerts: []}      # 3 days after the run
+      - {eval_time: 8d, alertname: PveBackupFreshnessLow, exp_alerts: []}      # 7 days: the next run is due
+      - {eval_time: 9d, alertname: PveBackupFreshnessLow, exp_alerts: []}      # 8 days: the next run is a day late
+      - {eval_time: 9d12h, alertname: PveBackupFreshnessLow, exp_alerts: []}   # exactly 8.5 days: not over the limit
+      - {eval_time: 9d12h10m, alertname: PveBackupFreshnessLow, exp_alerts: []} # over the limit for 5 minutes: pending, not yet firing
+
+  - name: a weekly guest 9 days after its run alerts, and so does one just past 8.5 days
+    interval: 5m
+    input_series:
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "1x3000"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "86400x3000"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "734400x3000"
+    alert_rule_test:
+      - eval_time: 9d12h15m                                                    # 8.5 days + 15 minutes
+        alertname: PveBackupFreshnessLow
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale, guest_id: "108"}
+            exp_annotations:
+              summary: "Guest 108 has no fresh successful backup"
+              description: &description "No successful scheduled vzdump was observed for this guest inside its limit: 30 hours for a daily job, 8.5 days (the collector's proxmox_backup_max_age_seconds) for a weekly one. Check the latest PVE task log, PBS permissions/ownership, and datastore capacity."
+      - eval_time: 10d                                                         # 9 days after the run
+        alertname: PveBackupFreshnessLow
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale, guest_id: "108"}
+            exp_annotations: {summary: "Guest 108 has no fresh successful backup", description: *description}
+
+  - name: a daily guest is held to 30 hours as before, not to the 36 hours the collector publishes for it
+    interval: 5m
+    input_series:
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="107"}'
+        values: "1x800"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="107"}'
+        values: "86400x800"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="107"}'
+        values: "129600x800"
+    alert_rule_test:
+      - {eval_time: 1d29h, alertname: PveBackupFreshnessLow, exp_alerts: []}   # 29 hours after the run
+      - {eval_time: 2d6h, alertname: PveBackupFreshnessLow, exp_alerts: []}    # exactly 30 hours: not over the limit
+      - {eval_time: 2d6h10m, alertname: PveBackupFreshnessLow, exp_alerts: []} # over the limit for 5 minutes: pending
+      - eval_time: 2d7h                                                        # 31 hours after the run: fires, although the collector's own limit is 36 hours
+        alertname: PveBackupFreshnessLow
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale, guest_id: "107"}
+            exp_annotations: {summary: "Guest 107 has no fresh successful backup", description: *description}
+      - eval_time: 2d16h                                                       # 40 hours after the run
+        alertname: PveBackupFreshnessLow
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale, guest_id: "107"}
+            exp_annotations: {summary: "Guest 107 has no fresh successful backup", description: *description}
+
+  - name: the live data of 2026-10-29 (CT 108 at 40 hours, the daily guests at 14 to 15 hours) raises nothing; the old rule fired for guest 108 here
+    interval: 5m
+    input_series:
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "1x1500"
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="107"}'
+        values: "1x1500"
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "1x1500"
+      # ages at eval_time 5d (432000 s): guest 101 49,822 s, guest 107 55,492 s, guest 108 144,944 s
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "382178x1500"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="107"}'
+        values: "376508x1500"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "287056x1500"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "129600x1500"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="107"}'
+        values: "129600x1500"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "734400x1500"
+    alert_rule_test:
+      - {eval_time: 5d, alertname: PveBackupFreshnessLow, exp_alerts: []}
+
+  - name: a daily guest that missed its run alerts while the weekly guest, 3 days after its run, stays quiet
+    interval: 5m
+    input_series:
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "1x1200"
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="107"}'
+        values: "1x1200"
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "1x1200"
+      # at eval_time 4d (345600 s): guest 101 last ran 13 hours ago, guest 107 31 hours ago, guest 108 3 days ago
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "298800x1200"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="107"}'
+        values: "234000x1200"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "86400x1200"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "129600x1200"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="107"}'
+        values: "129600x1200"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "734400x1200"
+    alert_rule_test:
+      - eval_time: 4d
+        alertname: PveBackupFreshnessLow
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale, guest_id: "107"}
+            exp_annotations: {summary: "Guest 107 has no fresh successful backup", description: *description}
+
+  - name: a guest that was never backed up alerts, weekly or daily (the collector writes 0 when it saw no success in its window)
+    interval: 5m
+    input_series:
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "1x40"
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "1x40"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "0x40"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "0x40"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "129600x40"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "734400x40"
+    alert_rule_test:
+      - {eval_time: 5m, alertname: PveBackupFreshnessLow, exp_alerts: []}      # pending for the first ten minutes
+      - eval_time: 30m
+        alertname: PveBackupFreshnessLow
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale, guest_id: "101"}
+            exp_annotations: {summary: "Guest 101 has no fresh successful backup", description: *description}
+          - exp_labels: {severity: critical, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale, guest_id: "108"}
+            exp_annotations: {summary: "Guest 108 has no fresh successful backup", description: *description}
+
+  - name: a guest with no published limit is judged at 30 hours, so a missing or older collector never loosens the rule
+    interval: 5m
+    input_series:
+      # guest 108 ran on day 1 and the max-age series is absent (for example the collector was rolled back to the version before 2026-10-28)
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "1x1000"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="108"}'
+        values: "86400x1000"
+    alert_rule_test:
+      - {eval_time: 1d29h, alertname: PveBackupFreshnessLow, exp_alerts: []}
+      - eval_time: 2d7h                                                        # 31 hours
+        alertname: PveBackupFreshnessLow
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale, guest_id: "108"}
+            exp_annotations: {summary: "Guest 108 has no fresh successful backup", description: *description}
+
+  - name: another scrape job's guests and a guest that is not expected are ignored, a stale expected guest of this job still alerts
+    interval: 5m
+    input_series:
+      # guest 101 of this host: daily, last ran 3 days ago
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "1x1200"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "86400x1200"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "129600x1200"
+      # guest 101 of another hypervisor's exporter (guest ids repeat across hosts): weekly and fresh. It must neither alert nor lend its 8.5 day limit to this host's guest 101.
+      - series: 'proxmox_backup_expected_guest{job="pve_other_host_node_exporter",guest_id="101"}'
+        values: "1x1200"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_other_host_node_exporter",guest_id="101"}'
+        values: "259200x1200"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_other_host_node_exporter",guest_id="101"}'
+        values: "734400x1200"
+      # a guest of another hypervisor's exporter that is 3 days stale
+      - series: 'proxmox_backup_expected_guest{job="pve_other_host_node_exporter",guest_id="701"}'
+        values: "1x1200"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_other_host_node_exporter",guest_id="701"}'
+        values: "86400x1200"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_other_host_node_exporter",guest_id="701"}'
+        values: "129600x1200"
+      # a guest of this host that the collector says is not covered by a job (it never writes 0 today, the rule still honours it), 3 days stale
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="202"}'
+        values: "0x1200"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="202"}'
+        values: "86400x1200"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="202"}'
+        values: "129600x1200"
+    alert_rule_test:
+      - eval_time: 4d
+        alertname: PveBackupFreshnessLow
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale, guest_id: "101"}
+            exp_annotations: {summary: "Guest 101 has no fresh successful backup", description: *description}
+
+  - name: a stale guest of another scrape job with the same guest id does not make this host's fresh guest alert
+    interval: 5m
+    input_series:
+      # guest 101 of this host: daily, last ran 13 hours before eval_time 4d (345600 s)
+      - series: 'proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "1x1200"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "298800x1200"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale",guest_id="101"}'
+        values: "129600x1200"
+      # guest 101 of another hypervisor's exporter: daily and 3 days stale
+      - series: 'proxmox_backup_expected_guest{job="pve_other_host_node_exporter",guest_id="101"}'
+        values: "1x1200"
+      - series: 'proxmox_backup_last_success_timestamp_seconds{job="pve_other_host_node_exporter",guest_id="101"}'
+        values: "86400x1200"
+      - series: 'proxmox_backup_max_age_seconds{job="pve_other_host_node_exporter",guest_id="101"}'
+        values: "129600x1200"
+    alert_rule_test:
+      - {eval_time: 4d, alertname: PveBackupFreshnessLow, exp_alerts: []}

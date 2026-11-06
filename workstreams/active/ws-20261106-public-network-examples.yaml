@@ -1,0 +1,60 @@
+id: ws-20261106-public-network-examples
+adr: '0407'
+title: Preserve network semantics in sanitized address examples
+status: ready
+ready_to_merge: true
+live_applied: false
+owner: codex
+branch: codex/public-network-examples
+worktree_path: .worktrees/public-network-examples
+doc: docs/workstreams/ws-20261106-public-network-examples.md
+depends_on:
+- ws-20261106-image-gc-release-integration
+conflicts_with: []
+shared_surfaces:
+- config/publication-sanitization.yaml
+- .woodpecker.yml
+- VERSION
+- changelog.md
+- versions/stack.yaml
+- README.md
+- scripts/publish_to_serverclaw.py
+- tests/test_netpolicy.py
+- tests/test_netpolicy_run.py
+ownership_manifest:
+  owned_surfaces:
+  - id: public_network_examples
+    paths:
+    - config/publication-sanitization.yaml
+    - tests/test_publication_network_policy.py
+    - .woodpecker.yml
+    - docs/workstreams/ws-20261106-public-network-examples.md
+    - workstreams/active/ws-20261106-public-network-examples.yaml
+    - VERSION
+    - changelog.md
+    - versions/stack.yaml
+    - README.md
+    - scripts/publish_to_serverclaw.py
+    - tests/test_netpolicy.py
+    - tests/test_netpolicy_run.py
+    mode: exclusive
+canonical_truth:
+  changelog_entry: Keep sanitized Tailnet identities in shared-address space and prune
+    only eliminated exported baseline IDs while refusing new policy findings and preserving
+    private enforcement.
+  release_bump: patch
+  included_in_repo_version: 0.179.57
+notes: Publication-only example mapping correction. No live network policy, accepted
+  finding baseline, or checker behavior changes. Exported baseline refresh can only
+  remove accepted IDs and aborts on every new non-info finding. All pair plans validate
+  before writes; shared export path guards protect private files.
+tasks:
+- id: mapping
+  title: Preserve Tailnet address class in example replacements
+  status: completed
+- id: regression
+  title: Check actual sanitized policies and portable synthetic boundaries
+  status: completed
+- id: publication
+  title: Prepare strict export validation and required publication pipeline inputs
+  status: completed

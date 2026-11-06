@@ -7,7 +7,7 @@ key, credential assignment, tag and schedule. This job pulls a fresh dump every 
 forced-command SSH key that can do nothing but stream the dump.
 
 Each run: ssh <hypervisor> dump > <dir>/scanopy-<UTC>.sql.gz.part, verify (gzip integrity, size, the "dump complete" trailer
-pg_dump writes, the expected tables), move it into place (0600), then keep the newest KEEP files (default 14). A failed run
+pg_dump writes, the expected tables), move it into place (0600), then apply the tiered retention below. A failed run
 leaves the older dumps untouched and publishes scanopy_backup_* metrics; alerts live in config/prometheus/rules/inventory.yml.
 stdlib only. --dry-run does the dump and the checks but keeps nothing and publishes nothing.
 """
@@ -16,6 +16,7 @@ import datetime as dt
 import glob
 import gzip
 import os
+import re
 import subprocess
 import sys
 import time
@@ -27,7 +28,8 @@ CONF = {
     "known_hosts": os.environ.get("BACKUP_KNOWN_HOSTS", "/etc/scanopy-backup/known_hosts"),
     "dir": os.environ.get("BACKUP_DIR", "/var/backups/scanopy"),
     "textfile": os.environ.get("BACKUP_TEXTFILE", "/var/lib/prometheus/node-exporter/scanopy_backup.prom"),
-    "keep": int(os.environ.get("BACKUP_KEEP", "14")),
+    "keep_hours": int(os.environ.get("BACKUP_KEEP_HOURS", "48")),
+    "keep_days": int(os.environ.get("BACKUP_KEEP_DAYS", "14")),
     "min_bytes": int(os.environ.get("BACKUP_MIN_BYTES", "10000")),
     "timeout": int(os.environ.get("BACKUP_TIMEOUT", "600")),
 }
@@ -76,13 +78,39 @@ def verify(path):
     return size
 
 
-def rotate(directory, keep):
-    files = sorted(glob.glob(os.path.join(directory, "scanopy-*.sql.gz")))
+STAMP = re.compile(r"^scanopy-(\d{8}T\d{6}Z)\.sql\.gz$")
+
+
+def utcnow():
+    return dt.datetime.now(dt.timezone.utc)
+
+
+def rotate(directory, hours, days, now=None):
+    """Tiered retention: every dump from the last `hours` hours, plus the newest dump of each of the last `days` UTC days.
+
+    The newest dump is never removed, and a file whose name is not a dump timestamp is never touched.
+    Returns (kept, removed).
+    """
+    now = now or utcnow()
+    dumps = []
+    for path in sorted(glob.glob(os.path.join(directory, "scanopy-*.sql.gz"))):
+        m = STAMP.match(os.path.basename(path))
+        if m:
+            dumps.append((path, dt.datetime.strptime(m.group(1), "%Y%m%dT%H%M%SZ").replace(tzinfo=dt.timezone.utc)))
+    keep = {path for path, ts in dumps if now - ts <= dt.timedelta(hours=hours)}
+    newest_of_day = {}
+    for path, ts in dumps:  # sorted ascending, so the last one per day wins
+        if (now.date() - ts.date()).days < days:
+            newest_of_day[ts.date()] = path
+    keep |= set(newest_of_day.values())
+    if dumps:
+        keep.add(dumps[-1][0])
     removed = 0
-    for old in files[:-keep] if keep > 0 else []:
-        os.unlink(old)
-        removed += 1
-    return len(files) - removed, removed
+    for path, _ in dumps:
+        if path not in keep:
+            os.unlink(path)
+            removed += 1
+    return len(keep), removed
 
 
 def previous_success():
@@ -150,7 +178,7 @@ def main():
         else:
             os.chmod(part, 0o600)  # the dump holds credential material, whatever created the file
             os.replace(part, final)
-            count, removed = rotate(CONF["dir"], CONF["keep"])
+            count, removed = rotate(CONF["dir"], CONF["keep_hours"], CONF["keep_days"])
             log(f"saved {final} ({size} bytes); {count} kept, {removed} rotated out")
         ok = True
     except (RuntimeError, OSError, subprocess.TimeoutExpired) as e:

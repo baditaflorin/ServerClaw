@@ -15,6 +15,8 @@ destroy table ip coolify_dns_egress
 {% set policy = linux_guest_firewall_policy %}
 {% set guest_ip_map = linux_guest_firewall_guest_ip_map %}
 {% set guest_role_map = linux_guest_firewall_guest_role_map %}
+{# Guests that opt out of the `all_guests` fan-out (`network_policy_all_guests: false`): named-source rules still render, an `all_guests` rule does not name them as a source. #}
+{% set all_guests_excluded = linux_guest_firewall_all_guests_excluded | default([]) %}
 {% set guest_policy = policy.guests[inventory_hostname] %}
 {% set docker_forward_cidrs = docker_runtime_container_forward_source_cidrs | default(linux_guest_firewall_container_forward_source_cidrs) %}
 {% macro render_match(rule) -%}
@@ -36,7 +38,7 @@ icmp type echo-request
 {% elif rule.source == 'host' %}
     ip saddr {{ policy.host_source }} {{ render_match(rule) }} accept
 {% elif rule.source == 'all_guests' %}
-{% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != inventory_hostname %}
+{% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != inventory_hostname and guest_name not in all_guests_excluded %}
     ip saddr {{ guest_ip }}/32 {{ render_match(rule) }} accept
 {% endfor %}
 {% elif rule.source in guest_ip_map %}
@@ -57,7 +59,7 @@ icmp type echo-request
 {% elif rule.source == 'host' %}
     ip saddr {{ policy.host_source }} accept
 {% elif rule.source == 'all_guests' %}
-{% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != inventory_hostname %}
+{% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != inventory_hostname and guest_name not in all_guests_excluded %}
     ip saddr {{ guest_ip }}/32 accept
 {% endfor %}
 {% elif rule.source in guest_ip_map %}

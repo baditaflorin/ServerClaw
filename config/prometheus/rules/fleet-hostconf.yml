@@ -1,0 +1,91 @@
+# Alerts for the scheduled host-local configuration check (scripts/hostconf-scheduled.sh, docs/runbooks/host-local-config.md, config/hostconf/).
+# Once a day the operator's machine runs `scripts/hostconf.py drift --all` (read-only) and ships the result to this monitoring VM as the textfile
+# /var/lib/prometheus/node-exporter/fleet_hostconf.prom. The textfile keeps its last values between runs, so every `for:` below counts runs, not scrapes:
+# 2h is "still there at the next look", 26h is "there on two daily runs in a row". A check that stopped is a finding too (HostconfCheckStale), so the
+# guard cannot die silently: this is how VM 705 (a SPIRE server restored on 2026-10-20 with a 15,590 thread limit) was found, by looking, not by an alert.
+groups:
+  - name: fleet_hostconf
+    rules:
+      # kernel.threads-max under the fleet floor (131072): a VM with hot-plugged memory boots with the limit of its first ~1 GB (about 7000) and a reboot
+      # of a big Docker host then fails fork() for two seconds, leaving containers running with no network endpoint (2026-10-19, 22 containers).
+      - alert: HostconfBelowBaseline
+        expr: fleet_hostconf_below_baseline == 1
+        for: 2h
+        labels:
+          severity: warning
+          service: hostconf
+        annotations:
+          summary: "{{ $labels.machine }} is below the fleet baseline (kernel.threads-max under 131072)"
+          description: "The daily check found the thread limit of {{ $labels.machine }} under the floor, or its floor file listed but not applied. Add the machine's `sysctl-hotplug-threads-max` to config/hostconf/hostconf.yaml and apply it (python3 scripts/hostconf.py apply --host {{ $labels.machine }} --file sysctl-hotplug-threads-max --yes)."
+          runbook_url: docs/runbooks/host-local-config.md
+
+      # Any other difference between a host and config/hostconf. A machine that is below the floor is reported once, by the alert above.
+      - alert: HostconfDrift
+        expr: |
+          (fleet_hostconf_drift_files > 0)
+          unless on (machine)
+          (fleet_hostconf_below_baseline == 1)
+        for: 2h
+        labels:
+          severity: warning
+          service: hostconf
+        annotations:
+          summary: "{{ $labels.machine }} differs from config/hostconf ({{ $value }} file(s) or setting(s))"
+          description: "A managed drop-in, sysctl or Postgres file changed on the host (or is missing), or a setting is not in effect. python3 scripts/hostconf.py drift --host {{ $labels.machine }} --diff shows what; either put the change into the repo (adopt) or apply the repo's version."
+          runbook_url: docs/runbooks/host-local-config.md
+
+      - alert: HostconfMachineUnreachable
+        expr: fleet_hostconf_unreachable == 1
+        for: 26h
+        labels:
+          severity: warning
+          service: hostconf
+        annotations:
+          summary: "The daily hostconf check could not look at {{ $labels.machine }} on two runs in a row"
+          description: "ssh (or the hypervisor's guest agent) to {{ $labels.machine }} failed, or the machine answered as another host. A machine nobody can look at is a machine nobody checks: python3 scripts/hostconf.py drift --host {{ $labels.machine }}."
+          runbook_url: docs/runbooks/host-local-config.md
+
+      # The hypervisor listing: a guest the manifest does not know (a clone, a restore, a new VM), a managed machine that is gone, an exemption that no longer applies.
+      - alert: HostconfInventoryFinding
+        expr: fleet_hostconf_inventory_findings > 0
+        for: 2h
+        labels:
+          severity: warning
+          service: hostconf
+        annotations:
+          summary: "{{ $labels.hypervisor }}: {{ $value }} guest(s) the hostconf manifest does not match"
+          description: "python3 scripts/hostconf.py drift --inventory lists them: UNMANAGED = add the guest to config/hostconf/hostconf.yaml (with its `vm:`, and the thread-limit file if it is below the floor), GONE or STALE EXEMPTION = remove it from the manifest."
+          runbook_url: docs/runbooks/host-local-config.md
+
+      - alert: HostconfInventoryUnreachable
+        expr: fleet_hostconf_inventory_unreachable == 1
+        for: 26h
+        labels:
+          severity: warning
+          service: hostconf
+        annotations:
+          summary: "The daily hostconf check could not list the guests of {{ $labels.hypervisor }} on two runs in a row"
+          description: "A new guest of {{ $labels.hypervisor }} would go unnoticed. python3 scripts/hostconf.py drift --inventory shows the error (pvesh timing out on a busy host is the usual one)."
+          runbook_url: docs/runbooks/host-local-config.md
+
+      - alert: HostconfCheckStale
+        expr: time() - fleet_hostconf_last_run_timestamp_seconds > 129600
+        for: 30m
+        labels:
+          severity: warning
+          service: hostconf
+        annotations:
+          summary: "The daily hostconf check has not completed for over 36 hours"
+          description: "The last run finished {{ $value | humanizeDuration }} ago. The operator machine is off or asleep, its ssh keys are not available to the job, or the job fails: ~/Library/Logs/hostconf-drift.log on the operator machine, `scripts/hostconf-scheduled.sh status`. Until it runs again nothing watches the hosts' local configuration."
+          runbook_url: docs/runbooks/host-local-config.md
+
+      - alert: HostconfCheckMissing
+        expr: absent(fleet_hostconf_last_run_timestamp_seconds)
+        for: 2h
+        labels:
+          severity: warning
+          service: hostconf
+        annotations:
+          summary: "No hostconf check result on the monitoring VM"
+          description: "fleet_hostconf.prom is not in /var/lib/prometheus/node-exporter/ (never shipped, or removed): the scheduled check has not delivered a run."
+          runbook_url: docs/runbooks/host-local-config.md

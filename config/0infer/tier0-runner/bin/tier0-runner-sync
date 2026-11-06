@@ -1,0 +1,27 @@
+#!/bin/bash
+# Keep /opt/tier0-runner/fleet-state equal to fleet-state master (read-only deploy key, sparse checkout). Runs as root from a timer.
+# A new commit is accepted only if every shell script passes `bash -n` and every python script compiles; otherwise the previous commit stays (rollback) and the failure is exported.
+set -uo pipefail
+R=/opt/tier0-runner/fleet-state; PROM=/var/lib/prometheus/node-exporter/tier0_runner_sync.prom
+export GIT_SSH_COMMAND="ssh -i /etc/tier0-runner/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/etc/tier0-runner/known_hosts -o BatchMode=yes -o ConnectTimeout=20"
+cd "$R" || exit 1
+prev=$(git rev-parse HEAD); ok=1; why=""
+if ! timeout 120 git fetch -q --depth 50 origin master 2>/tmp/t0sync.err; then ok=0; why="fetch failed: $(tail -1 /tmp/t0sync.err | cut -c1-100)"; fi
+if [ $ok = 1 ]; then
+  new=$(git rev-parse origin/master)
+  if [ "$new" != "$prev" ]; then
+    git checkout -q --detach origin/master 2>>/tmp/t0sync.err || { ok=0; why="checkout failed"; }
+    if [ $ok = 1 ]; then
+      for f in scripts/tier0/*.sh; do bash -n "$f" 2>/dev/null || { ok=0; why="bash -n failed: $f"; break; }; done
+      if [ $ok = 1 ]; then for f in scripts/tier0/*.py; do python3 -m py_compile "$f" 2>/dev/null || { ok=0; why="py_compile failed: $f"; break; }; done; fi
+      if [ $ok = 0 ]; then git checkout -q --detach "$prev"; echo "rolled back to ${prev:0:7}: $why" >&2; fi
+    fi
+  fi
+fi
+find "$R" -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null
+cur=$(git rev-parse --short HEAD); echo "$cur" > /opt/tier0-runner/VERSION
+{ echo "tier0_runner_sync_last_run_timestamp_seconds $(date +%s)"; echo "tier0_runner_sync_ok $ok"
+  [ $ok = 1 ] && echo "tier0_runner_sync_last_success_timestamp_seconds $(date +%s)"
+  echo "tier0_runner_scripts_commit_time_seconds $(git log -1 --format=%ct)"; } > "$PROM.tmp" && mv "$PROM.tmp" "$PROM"; chmod 644 "$PROM"
+[ $ok = 1 ] && echo "ok at $cur" || echo "NOT updated ($why), staying at $cur"
+exit 0

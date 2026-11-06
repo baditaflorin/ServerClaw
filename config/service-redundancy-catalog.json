@@ -26,6 +26,24 @@
     }
   },
   "services": {
+    "agent_history": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 480,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_snapshot"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "agent-history",
+        "failover_trigger": "Restore the newest PBS snapshot of vm/155 into a new guest, unlock the data volume with the passphrase from OpenBao, and start the compose project; or rebuild the store from the laptops (the collector's backfill is idempotent).",
+        "failback_method": "Re-ingest from the laptops with the collector's backfill (about 15 to 30 minutes of store time for 30 days) and compare the per-day counts the collector audit reports."
+      },
+      "notes": "The nightly PBS job holds ciphertext for the data disk. The store is rebuildable from the operator laptops' own transcripts, which is what makes a nightly RPO and a single-member RAID1 acceptable for the pilot only (ADR 0494)."
+    },
     "alertmanager": {
       "tier": "R1",
       "recovery_objective": {

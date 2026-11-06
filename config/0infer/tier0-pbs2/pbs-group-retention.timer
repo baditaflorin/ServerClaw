@@ -1,0 +1,10 @@
+[Unit]
+Description=PBS #2 per-group retention, daily after the store-wide prune job (07:00) and before garbage collection (07:30)
+
+[Timer]
+OnCalendar=*-*-* 07:05:00 UTC
+RandomizedDelaySec=60
+Persistent=true
+
+[Install]
+WantedBy=timers.target

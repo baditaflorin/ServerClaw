@@ -1,0 +1,127 @@
+# promtool unit tests for config/prometheus/rules/fleet-hostconf.yml (run by tests/test_hostconf_rules.py when promtool is installed; on the
+# monitoring VM: promtool test rules tests/promtool/fleet_hostconf_rules_test.yml from the repo root). The textfile written by the daily check keeps
+# its last values between runs, so a series that never changes stands for "the check saw this at every run": `for: 2h` is "still there at the next
+# look" and `for: 26h` is "there on two daily runs in a row". promtool's clock starts at the Unix epoch: "0+60x1000 60000x2400" is a timestamp that
+# follows the clock for 1000 minutes and then stops (the check died).
+rule_files:
+  - ../../config/prometheus/rules/fleet-hostconf.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a machine under the thread floor raises the baseline alert once, and its drift count does not raise a second one
+    interval: 1m
+    input_series:
+      - series: 'fleet_hostconf_below_baseline{machine="vm-a"}'
+        values: "1x400"
+      - series: 'fleet_hostconf_drift_files{machine="vm-a"}'
+        values: "1x400"
+      - series: 'fleet_hostconf_below_baseline{machine="vm-b"}'
+        values: "0x400"
+      - series: 'fleet_hostconf_drift_files{machine="vm-b"}'
+        values: "0x400"
+    alert_rule_test:
+      - {eval_time: 90m, alertname: HostconfBelowBaseline, exp_alerts: []}
+      - eval_time: 130m
+        alertname: HostconfBelowBaseline
+        exp_alerts:
+          - exp_labels: {severity: warning, service: hostconf, machine: vm-a}
+            exp_annotations:
+              summary: "vm-a is below the fleet baseline (kernel.threads-max under 131072)"
+              description: "The daily check found the thread limit of vm-a under the floor, or its floor file listed but not applied. Add the machine's `sysctl-hotplug-threads-max` to config/hostconf/hostconf.yaml and apply it (python3 scripts/hostconf.py apply --host vm-a --file sysctl-hotplug-threads-max --yes)."
+              runbook_url: docs/runbooks/host-local-config.md
+      - {eval_time: 130m, alertname: HostconfDrift, exp_alerts: []}
+
+  - name: a machine with drift that is not about the floor raises the drift alert with the count
+    interval: 1m
+    input_series:
+      - series: 'fleet_hostconf_below_baseline{machine="db-1"}'
+        values: "0x400"
+      - series: 'fleet_hostconf_drift_files{machine="db-1"}'
+        values: "2x400"
+      - series: 'fleet_hostconf_drift_files{machine="db-2"}'
+        values: "0x400"
+    alert_rule_test:
+      - {eval_time: 90m, alertname: HostconfDrift, exp_alerts: []}
+      - eval_time: 130m
+        alertname: HostconfDrift
+        exp_alerts:
+          - exp_labels: {severity: warning, service: hostconf, machine: db-1}
+            exp_annotations:
+              summary: "db-1 differs from config/hostconf (2 file(s) or setting(s))"
+              description: "A managed drop-in, sysctl or Postgres file changed on the host (or is missing), or a setting is not in effect. python3 scripts/hostconf.py drift --host db-1 --diff shows what; either put the change into the repo (adopt) or apply the repo's version."
+              runbook_url: docs/runbooks/host-local-config.md
+      - {eval_time: 130m, alertname: HostconfBelowBaseline, exp_alerts: []}
+
+  - name: a machine the check could not look at alerts only when it fails on two daily runs in a row
+    interval: 1m
+    input_series:
+      # failed for 24 hours (one run), then answered
+      - series: 'fleet_hostconf_unreachable{machine="blip"}'
+        values: "1x1440 0x700"
+      # failed on every run
+      - series: 'fleet_hostconf_unreachable{machine="gone"}'
+        values: "1x2100"
+    alert_rule_test:
+      - {eval_time: 1500m, alertname: HostconfMachineUnreachable, exp_alerts: []}
+      - {eval_time: 2000m, alertname: HostconfMachineUnreachable, exp_alerts: [{exp_labels: {severity: warning, service: hostconf, machine: gone}, exp_annotations: {summary: "The daily hostconf check could not look at gone on two runs in a row", description: "ssh (or the hypervisor's guest agent) to gone failed, or the machine answered as another host. A machine nobody can look at is a machine nobody checks: python3 scripts/hostconf.py drift --host gone.", runbook_url: docs/runbooks/host-local-config.md}}]}
+
+  - name: a hypervisor whose guests the manifest does not match raises the inventory alert, and one that cannot be listed twice in a row the other
+    interval: 1m
+    input_series:
+      - series: 'fleet_hostconf_inventory_findings{hypervisor="pve-a"}'
+        values: "1x400"
+      - series: 'fleet_hostconf_inventory_findings{hypervisor="pve-b"}'
+        values: "0x400"
+      - series: 'fleet_hostconf_inventory_unreachable{hypervisor="pve-c"}'
+        values: "1x2100"
+      - series: 'fleet_hostconf_inventory_unreachable{hypervisor="pve-d"}'
+        values: "1x1440 0x700"
+    alert_rule_test:
+      - {eval_time: 90m, alertname: HostconfInventoryFinding, exp_alerts: []}
+      - eval_time: 130m
+        alertname: HostconfInventoryFinding
+        exp_alerts:
+          - exp_labels: {severity: warning, service: hostconf, hypervisor: pve-a}
+            exp_annotations:
+              summary: "pve-a: 1 guest(s) the hostconf manifest does not match"
+              description: "python3 scripts/hostconf.py drift --inventory lists them: UNMANAGED = add the guest to config/hostconf/hostconf.yaml (with its `vm:`, and the thread-limit file if it is below the floor), GONE or STALE EXEMPTION = remove it from the manifest."
+              runbook_url: docs/runbooks/host-local-config.md
+      - {eval_time: 1500m, alertname: HostconfInventoryUnreachable, exp_alerts: []}
+      - {eval_time: 2000m, alertname: HostconfInventoryUnreachable, exp_alerts: [{exp_labels: {severity: warning, service: hostconf, hypervisor: pve-c}, exp_annotations: {summary: "The daily hostconf check could not list the guests of pve-c on two runs in a row", description: "A new guest of pve-c would go unnoticed. python3 scripts/hostconf.py drift --inventory shows the error (pvesh timing out on a busy host is the usual one).", runbook_url: docs/runbooks/host-local-config.md}}]}
+
+  - name: a check that stopped running alerts after 36 hours and one that never delivered alerts as missing
+    interval: 1m
+    input_series:
+      # follows the clock for 1000 minutes (60000 s), then stops
+      - series: 'fleet_hostconf_last_run_timestamp_seconds{instance="monitoring"}'
+        values: "0+60x1000 60000x2400"
+    alert_rule_test:
+      - {eval_time: 900m, alertname: HostconfCheckStale, exp_alerts: []}
+      - {eval_time: 3100m, alertname: HostconfCheckStale, exp_alerts: []}
+      - eval_time: 3300m
+        alertname: HostconfCheckStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: hostconf, instance: monitoring}
+            exp_annotations:
+              summary: "The daily hostconf check has not completed for over 36 hours"
+              description: "The last run finished 1d 14h 20m 0s ago. The operator machine is off or asleep, its ssh keys are not available to the job, or the job fails: ~/Library/Logs/hostconf-drift.log on the operator machine, `scripts/hostconf-scheduled.sh status`. Until it runs again nothing watches the hosts' local configuration."
+              runbook_url: docs/runbooks/host-local-config.md
+      - {eval_time: 3300m, alertname: HostconfCheckMissing, exp_alerts: []}
+
+  - name: no check result at all alerts as missing after two hours
+    interval: 1m
+    input_series:
+      - series: 'up{job="node_exporter"}'
+        values: "1x400"
+    alert_rule_test:
+      - {eval_time: 90m, alertname: HostconfCheckMissing, exp_alerts: []}
+      - eval_time: 130m
+        alertname: HostconfCheckMissing
+        exp_alerts:
+          - exp_labels: {severity: warning, service: hostconf}
+            exp_annotations:
+              summary: "No hostconf check result on the monitoring VM"
+              description: "fleet_hostconf.prom is not in /var/lib/prometheus/node-exporter/ (never shipped, or removed): the scheduled check has not delivered a run."
+              runbook_url: docs/runbooks/host-local-config.md
+      - {eval_time: 130m, alertname: HostconfCheckStale, exp_alerts: []}

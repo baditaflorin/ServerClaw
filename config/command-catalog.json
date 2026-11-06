@@ -337,6 +337,45 @@
         "timeout_seconds": 1800
       }
     },
+    "provision-agent-history-vm": {
+      "description": "Provision the dedicated agent-history VM (vmid 155) and converge the agent-history store runtime on it. Never part of provision-guests.",
+      "workflow_id": "provision-agent-history-vm",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox host and guest jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=provision-agent-history-vm passes",
+        "make validate passes before the apply",
+        "The owner has approved provisioning (capacity option B, ADR 0494) and has recorded a written exception to the 15 % memory placement guard, which option B cannot satisfy; VM 180 (CI-critical) is never trimmed",
+        "Inventory already declares VM 155, 10.10.10.55, and the guest firewall policy for agent-history"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the exact qm commands the guests role ran for vmid 155 only, the balloon floor and discard settings, and the guest verification (no listener but loopback, no swap, data on the encrypted volume)."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if proxmox_guests_active does not contain exactly vmid 155: the guests role would rewrite other guests.",
+          "Stop if the hypervisor's memory placement guard is firing and the owner has not recorded an exception."
+        ],
+        "rollback_guidance": [
+          "Nothing is stored before the owner unlocks the data volume: stop the VM and destroy it (qm destroy 155 --purge 1), remove the declaration.",
+          "After data exists, follow the whole-pilot rollback in docs/runbooks/configure-agent-history.md, including pruning the PBS group vm/155."
+        ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 1800
+      }
+    },
     "configure-backup-vm": {
       "description": "Converge the dedicated backup VM and its managed Proxmox Backup Server integration.",
       "workflow_id": "configure-backup-vm",

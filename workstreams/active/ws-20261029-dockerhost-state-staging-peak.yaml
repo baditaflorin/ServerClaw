@@ -1,0 +1,69 @@
+id: ws-20261029-dockerhost-state-staging-peak
+adr: "0386"
+title: Lower the peak staging size of the VM 100 state backup so it stops pushing the hypervisor root filesystem down about four points a day
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/dockerhost-state-staging-peak
+worktree_path: .claude/worktrees/dockerhost-state-staging-peak
+doc: docs/workstreams/ws-20261029-dockerhost-state-staging-peak.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/0docker/dockerhost-state-backup/README.md
+  - config/0docker/dockerhost-state-backup/config.json
+  - config/0docker/dockerhost-state-backup/dockerhost_state_backup.py
+  - tests/test_dockerhost_state_backup.py
+  - tests/test_dockerhost_state_backup_staging.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261029-dockerhost-state-staging-peak.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261029-dockerhost-state-staging-peak.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261029_dockerhost_state_staging_peak_tracking
+      paths:
+        - docs/workstreams/ws-20261029-dockerhost-state-staging-peak.md
+      mode: exclusive
+    - id: dockerhost_state_backup_staging
+      paths:
+        - config/0docker/dockerhost-state-backup/README.md
+        - config/0docker/dockerhost-state-backup/config.json
+        - config/0docker/dockerhost-state-backup/dockerhost_state_backup.py
+        - tests/test_dockerhost_state_backup.py
+        - tests/test_dockerhost_state_backup_staging.py
+      mode: exclusive
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261029-dockerhost-state-staging-peak.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: The VM 100 state backup stages its large SQLite copies one at a time and compresses each, so its staging peak on the guest disk falls and the hypervisor root filesystem dips less.
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  The daily dockerhost-state-backup on VM 100 stages about 18 GiB (three SQLite online copies of 17.5 GiB) on the guest root
+  before one client call, which lets the hypervisor's root filesystem (/dev/md3, the only storage of the host) fall by about four
+  points for twenty minutes. On 2026-10-28 it reached 13.72 % free at 17:55Z and held CI admission (under 14 %) from 17:47 to
+  17:55Z. This change lowers the peak staged bytes without changing what is backed up; deploying it is a separate decision.
+tasks:
+  - id: t1
+    title: Measure the old script and the candidates on a quiet fleet host with the guest disk modelled as a sparse file
+    status: in_progress
+  - id: t2
+    title: Stage the large copies one at a time, compress each, verify before deleting the raw copy, trim what was freed
+    status: in_progress
+  - id: t3
+    title: Restore-drill one large compressed copy from a real snapshot on a scratch Proxmox Backup Server
+    status: pending
+  - id: t4
+    title: Review and merge (the user decides); installing on VM 100 is a separate step
+    status: pending

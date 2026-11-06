@@ -1,0 +1,10 @@
+[Unit]
+Description=Free disk on the 0mcp build worker (stale workspaces, docker cache, journal, tmp)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/flock -n /run/lock/docker-build-gc.lock /usr/local/bin/docker-build-gc.sh
+Nice=15
+IOSchedulingClass=idle
+TimeoutStartSec=2h

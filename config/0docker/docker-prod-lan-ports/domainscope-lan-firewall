@@ -1,0 +1,134 @@
+#!/bin/bash
+# domainscope-lan-firewall: only the sources in /etc/domainscope-lan-allow.conf may reach the DomainScope ports that Docker
+# publishes on VM101 docker-prod. Everything else that arrives on the LAN interface for those ports is dropped; every other port
+# and every other flow of the VM is left exactly as it was.
+#
+#   IPv4: a chain DOMAINSCOPE-LAN (one `-s <source> -j RETURN` per allowed source, then DROP), jumped to from DOCKER-USER once per
+#         port for new connections that arrived on eth0 (`--ctorigdstport`: the port before Docker rewrote it). This is the forward
+#         path Docker's published ports take; Docker's own NAT and chains are never touched.
+#   IPv6: docker-proxy also listens on [::] for these ports, and the link-local address of eth0 reaches it through INPUT (no Docker
+#         NAT for IPv6 here). A chain DOMAINSCOPE-LAN6 drops these ports from eth0; no IPv6 source is a legitimate caller.
+#
+# Each chain is replaced in one `*-restore --noflush` transaction (never an empty chain in place), and a jump is only added after its
+# chain is filled. Jumps to a chain for a port that is no longer in the conf are removed.
+#
+#   domainscope-lan-firewall            apply (idempotent; what the systemd unit runs)
+#   domainscope-lan-firewall --print    print the rules as `iptables -S` would show them, change nothing (validates the conf)
+#   domainscope-lan-firewall --remove   remove every jump and both chains (the rollback)
+set -euo pipefail
+
+CONF=${DOMAINSCOPE_LAN_CONF:-/etc/domainscope-lan-allow.conf}
+IFACE=${DOMAINSCOPE_LAN_IF:-eth0}
+CHAIN=DOMAINSCOPE-LAN
+CHAIN6=DOMAINSCOPE-LAN6
+IPT=${IPTABLES:-iptables}
+IPT_RESTORE=${IPTABLES_RESTORE:-iptables-restore}
+IP6T=${IP6TABLES:-ip6tables}
+IP6T_RESTORE=${IP6TABLES_RESTORE:-ip6tables-restore}
+
+mode=apply
+case "${1:-}" in
+  "") ;;
+  --print) mode=print ;;
+  --remove) mode=remove ;;
+  *) echo "usage: $0 [--print|--remove]" >&2; exit 64 ;;
+esac
+
+# every jump to $2 in chain $1 of the tool $3 (iptables or ip6tables), as the argument list of `-D`
+jumps_to() {
+  "$3" -S "$1" 2>/dev/null | sed -n "s/^-A $1 \(.* -j $2\)\$/\1/p"
+}
+
+remove_all() {
+  local spec
+  while read -r spec; do if [ -n "$spec" ]; then "$IPT" -D DOCKER-USER $spec; fi; done < <(jumps_to DOCKER-USER "$CHAIN" "$IPT")
+  while read -r spec; do if [ -n "$spec" ]; then "$IP6T" -D INPUT $spec; fi; done < <(jumps_to INPUT "$CHAIN6" "$IP6T")
+  "$IPT" -F "$CHAIN" 2>/dev/null || true; "$IPT" -X "$CHAIN" 2>/dev/null || true
+  "$IP6T" -F "$CHAIN6" 2>/dev/null || true; "$IP6T" -X "$CHAIN6" 2>/dev/null || true
+}
+
+if [ "$mode" = remove ]; then
+  remove_all
+  echo "domainscope-lan-firewall: removed (the DomainScope ports are open to the LAN again)"
+  exit 0
+fi
+
+ports=()
+allow=()
+valid_v4() {  # a.b.c.d or a.b.c.d/len, octets <= 255, len 8..32, not 0.0.0.0
+  local addr=${1%/*} len=32 a b c d o
+  [[ $1 == */* ]] && len=${1#*/}
+  [[ $addr =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ && $len =~ ^[0-9]{1,2}$ ]] || return 1
+  [ "$len" -ge 8 ] && [ "$len" -le 32 ] || return 1
+  IFS=. read -r a b c d <<<"$addr"
+  for o in $a $b $c $d; do [ "$o" -le 255 ] || return 1; done
+  [ "$addr" != "0.0.0.0" ]
+}
+n=0
+while IFS= read -r line || [ -n "$line" ]; do
+  n=$((n + 1))
+  line=${line%%#*}
+  read -r key value extra <<<"$line" || true
+  [ -n "${key:-}" ] || continue
+  if [ -n "${extra:-}" ]; then echo "refusing line $n of $CONF: one value per line" >&2; exit 2; fi
+  case "$key" in
+    port)
+      if ! [[ ${value:-} =~ ^[0-9]{1,5}$ ]] || [ "$value" -lt 1 ] || [ "$value" -gt 65535 ]; then
+        echo "refusing line $n of $CONF: '$value' is not a TCP port" >&2; exit 2
+      fi
+      ports+=("$value") ;;
+    allow)
+      if ! valid_v4 "${value:-}"; then
+        echo "refusing line $n of $CONF: '$value' is not one IPv4 address or CIDR (/8 to /32, no wildcard)" >&2; exit 2
+      fi
+      allow+=("$value") ;;
+    *) echo "refusing line $n of $CONF: unknown key '$key' (port or allow)" >&2; exit 2 ;;
+  esac
+done < "$CONF"
+[ ${#ports[@]} -gt 0 ] || { echo "refusing $CONF: no port" >&2; exit 2; }
+[ ${#allow[@]} -gt 0 ] || echo "warning: no allowed source in $CONF, the ports are closed to the whole LAN" >&2
+
+restore4() {
+  echo "*filter"
+  echo ":$CHAIN - [0:0]"
+  for s in "${allow[@]+"${allow[@]}"}"; do echo "-A $CHAIN -s $s -j RETURN"; done
+  echo "-A $CHAIN -j DROP"
+  echo "COMMIT"
+}
+restore6() {
+  echo "*filter"
+  echo ":$CHAIN6 - [0:0]"
+  echo "-A $CHAIN6 -j DROP"
+  echo "COMMIT"
+}
+jump4() { echo "-i $IFACE -p tcp -m conntrack --ctorigdstport $1 --ctdir ORIGINAL -j $CHAIN"; }
+jump6() { echo "-i $IFACE -p tcp -m tcp --dport $1 -j $CHAIN6"; }
+
+if [ "$mode" = print ]; then
+  restore4 | grep '^-A '
+  for p in "${ports[@]}"; do echo "-A DOCKER-USER $(jump4 "$p")"; done
+  restore6 | grep '^-A '
+  for p in "${ports[@]}"; do echo "-A INPUT $(jump6 "$p")"; done
+  exit 0
+fi
+
+restore4 | "$IPT_RESTORE" --noflush
+restore6 | "$IP6T_RESTORE" --noflush
+for p in "${ports[@]}"; do
+  # shellcheck disable=SC2046
+  "$IPT" -C DOCKER-USER $(jump4 "$p") 2>/dev/null || "$IPT" -I DOCKER-USER 1 $(jump4 "$p")
+  # shellcheck disable=SC2046
+  "$IP6T" -C INPUT $(jump6 "$p") 2>/dev/null || "$IP6T" -I INPUT 1 $(jump6 "$p")
+done
+# a port taken out of the conf: its jump goes (compared by port, never by the exact text iptables prints)
+while read -r spec; do
+  [ -n "$spec" ] || continue
+  p=$(sed -n 's/.*--ctorigdstport \([0-9]*\) .*/\1/p' <<<"$spec")
+  if [[ " ${ports[*]} " != *" $p "* ]]; then "$IPT" -D DOCKER-USER $spec; fi
+done < <(jumps_to DOCKER-USER "$CHAIN" "$IPT")
+while read -r spec; do
+  [ -n "$spec" ] || continue
+  p=$(sed -n 's/.*--dport \([0-9]*\) .*/\1/p' <<<"$spec")
+  if [[ " ${ports[*]} " != *" $p "* ]]; then "$IP6T" -D INPUT $spec; fi
+done < <(jumps_to INPUT "$CHAIN6" "$IP6T")
+echo "domainscope-lan-firewall: tcp ${ports[*]} on $IFACE open to: ${allow[*]:-nobody} (IPv4); closed to IPv6"

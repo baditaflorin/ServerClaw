@@ -1,0 +1,95 @@
+id: ws-20261101-pve-0mcp-memory-budget
+adr: "0494"
+title: "pve-0mcp memory budget: measured seven-day numbers, floors, host swap and KSM verdicts, an apply plan, and one budget alert (proposal, git only, nothing applied)"
+status: in_progress
+ready_to_merge: false
+live_applied: true
+owner: claude
+branch: claude/live-apply-budget-alert
+worktree_path: .claude/worktrees/live-apply-budget-alert
+doc: docs/workstreams/ws-20261101-pve-0mcp-memory-budget.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - docs/runbooks/pve-0mcp-memory-budget.md
+  - config/prometheus/rules/proxmox-host-memory-budget.yml
+  - tests/promtool/proxmox_host_memory_budget_rules_test.yml
+  - tests/test_proxmox_host_memory_budget.py
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+  - tests/test_adopted_prometheus_rules.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - versions/stack.yaml
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - receipts/live-applies/2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply.json
+  - workstreams/active/ws-20261101-pve-0mcp-memory-budget.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261101-pve-0mcp-memory-budget.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261101_pve_0mcp_memory_budget_tracking
+      paths:
+        - docs/workstreams/ws-20261101-pve-0mcp-memory-budget.md
+      mode: exclusive
+    - id: pve_0mcp_memory_budget_runbook
+      paths:
+        - docs/runbooks/pve-0mcp-memory-budget.md
+        - tests/test_proxmox_host_memory_budget.py
+      mode: exclusive
+    - id: proxmox_host_memory_budget_rules
+      paths:
+        - config/prometheus/rules/proxmox-host-memory-budget.yml
+        - tests/promtool/proxmox_host_memory_budget_rules_test.yml
+      mode: exclusive
+    - id: monitoring_vm_role_shared_edits
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+        - tests/test_adopted_prometheus_rules.py
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ws_20261101_pve_0mcp_memory_budget_mainline_live_apply_evidence
+      paths:
+        - README.md
+        - versions/stack.yaml
+        - docs/status/history/live-apply-evidence.md
+        - receipts/live-applies/2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply.json
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261101-pve-0mcp-memory-budget.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "pve-0mcp memory budget (proposal): seven-day measured guest memory, the budget table (floors plus fixed VMs against host RAM, target 75 percent, alarm above 80), floor, swap and KSM verdicts, a staged apply plan with undo, and the alert ProxmoxHostGuaranteedMemoryOverBudget with promtool tests. Docs, one rule file and tests only; nothing is applied to any host."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    pve_host_memory_budget_alert: 2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply
+context: >-
+  On 2026-11-01 the 0mcp hypervisor (pve-0mcp, 128716 MiB) fell to 3.9 percent available memory with its 4 GiB of swap full; a restart of VM 130 at a fixed 14336 MiB ended it.
+  This workstream turns the read-only analysis into a reviewed proposal: where memory and balloon settings are defined and how a change reaches the host, what every guest uses over
+  seven days (Prometheus) and what it holds on the host (qm), floors, fixed VMs, host swap, KSM, the budget rule, an apply plan, and one alert on the budget. Applying any of it
+  (qm set, a restart, a swap file, a KSM switch, shipping the rule file) is a separate step that needs the owner's yes.
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Add the alert ProxmoxHostGuaranteedMemoryOverBudget with promtool tests, a pytest pin, and adopt the file in the monitoring role
+    status: completed
+  - id: t3
+    title: Write the budget runbook (measured table, floors, swap, KSM, apply plan with undo) and pin its arithmetic with a test
+    status: completed
+  - id: t4
+    title: Pass the pre-push gate on the build server, open the pull request and merge it (PR 653, 1cee7e96)
+    status: completed
+  - id: t5
+    title: Ship the alert file to the monitoring VM (targeted Ansible play with the monitoring role's copy parameters), record the receipt and bump platform_version
+    status: completed

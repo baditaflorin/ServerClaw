@@ -1,0 +1,76 @@
+# Added 2026-10-22. The sidecar fleet-backup-sync copies the newest age-encrypted secrets-db / keystore-db / broker-db-snapshot archive to a private GitHub repository
+# (payload/<source>.age, or numbered parts for archives above 45 MiB, plus payload/state.tsv). It is the only copy outside the providers of both hypervisors, and nothing
+# watched it: the keystore-db archive was about to pass the sidecar's size cap and GitHub's 100 MB file limit (go-fleet-backup PR "numbered parts"), the copy would have gone
+# stale without an alert, and the daily report that would have noticed ran on the operator's Mac, which slept for three days.
+# Label note: the per-archive label is `archive`, NOT `source`: the monitoring Prometheus puts its own `source` label (scanopy_node) on every scraped target and would rename ours to exported_source.
+# Source of the metrics: config/0docker/fleet-backup-offhost-check on VM 100 (timer every 30 minutes, daily deep check), node_exporter textfile, scraped as job node_exporter.
+# Ages use time() - <absolute timestamp> on purpose: when the checker itself dies the last values stay in the file and the age keeps growing; the dead-man alerts below catch
+# the checker.
+groups:
+  - name: fleet_backup_offhost
+    rules:
+      - alert: FleetBackupOffhostCopyStale
+        expr: time() - fleet_backup_offhost_copy_timestamp_seconds > 129600
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_backup_offhost
+        annotations:
+          summary: "The off-host copy of {{ $labels.archive }} is older than 36 hours"
+          description: "The sidecar last copied {{ $labels.archive }} to GitHub {{ $value | humanizeDuration }} ago (it copies once a day). Look at `docker logs fleet-backup-sync` on VM 100: 'not copied' (size cap), 'tmp too small', 'cannot inspect remote branch' or a push error name the cause."
+          runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+
+      - alert: FleetBackupOffhostCopyVeryStale
+        expr: time() - fleet_backup_offhost_copy_timestamp_seconds > 259200
+        for: 30m
+        labels:
+          severity: critical
+          service: fleet_backup_offhost
+        annotations:
+          summary: "The off-host copy of {{ $labels.archive }} is older than 72 hours"
+          description: "Three daily copies were missed ({{ $value | humanizeDuration }}). If VM 100 and its NFS target were lost now, the newest copy outside the providers would be that old."
+          runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+
+      - alert: FleetBackupOffhostCopyBroken
+        expr: fleet_backup_offhost_copy_present == 0
+        for: 1h
+        labels:
+          severity: warning
+          service: fleet_backup_offhost
+        annotations:
+          summary: "The off-host copy of {{ $labels.archive }} is incomplete in the repository"
+          description: "state.tsv does not list {{ $labels.archive }}, or one of its files (a part of a split archive, or the single file) is missing, or a stale file of the other form is still there. The check prints which one: `journalctl -u fleet-backup-offhost-check -n 20` on VM 100."
+          runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+
+      - alert: FleetBackupOffhostCheckStale
+        expr: (time() - fleet_backup_offhost_check_last_success_timestamp_seconds > 10800) or absent(fleet_backup_offhost_check_last_success_timestamp_seconds{job="node_exporter"})
+        for: 10m
+        labels:
+          severity: warning
+          service: fleet_backup_offhost
+        annotations:
+          summary: "Nothing has checked the off-host backup copy for three hours"
+          description: "The check on VM 100 (fleet-backup-offhost-check.timer, every 30 minutes) has not read the GitHub repository successfully for 3 hours, or its metrics are gone. GitHub unreachable, the sidecar's key files changed, or the timer is off: `systemctl status fleet-backup-offhost-check.timer` and `journalctl -u fleet-backup-offhost-check -n 30`."
+          runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+
+      - alert: FleetBackupOffhostDeepCheckFailed
+        expr: fleet_backup_offhost_deep_source_ok == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: fleet_backup_offhost
+        annotations:
+          summary: "The off-host copy of {{ $labels.archive }} does not match what the sidecar published"
+          description: "The daily deep check rebuilt {{ $labels.archive }} from GitHub and its SHA-256, age header or size is wrong (or a file is missing). Treat the off-host copy as unusable until the next good deep check; the archive on the NFS target is the other copy. Details: `journalctl -u fleet-backup-offhost-deep -n 30` on VM 100."
+          runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+
+      - alert: FleetBackupOffhostDeepCheckStale
+        expr: (time() - fleet_backup_offhost_deep_last_success_timestamp_seconds > 180000) or absent(fleet_backup_offhost_deep_last_success_timestamp_seconds{job="node_exporter"})
+        for: 1h
+        labels:
+          severity: warning
+          service: fleet_backup_offhost
+        annotations:
+          summary: "No successful deep check of the off-host backup copy for 50 hours"
+          description: "The daily deep check (fleet-backup-offhost-deep.timer, 12:20Z) has not found every source intact since 50 hours ago, or has never run. Until it does, nobody knows the copy on GitHub can be rebuilt byte for byte."
+          runbook_url: docs/runbooks/fleet-backup-offhost-copy.md

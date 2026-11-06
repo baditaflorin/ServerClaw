@@ -3,6 +3,15 @@
   "schema_version": "1.0.0",
   "nodes": [
     {
+      "id": "agent_history",
+      "service": "agent_history",
+      "name": "Agent History Store",
+      "vm": "agent-history",
+      "tier": 1,
+      "category": "data",
+      "adr": "0494"
+    },
+    {
       "id": "alertmanager",
       "service": "alertmanager",
       "name": "Alertmanager",

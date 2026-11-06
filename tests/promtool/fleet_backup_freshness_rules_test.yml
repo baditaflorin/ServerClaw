@@ -1,79 +1,13 @@
 # promtool unit tests for config/prometheus/rules/fleet-backup-freshness.yml (run by tests/test_fleet_backup_freshness.py when
 # promtool is installed). promtool starts its clock at the Unix epoch, so a timestamp series whose value equals its own
 # time in seconds means "just happened": "0+60x1700" at a 1m interval is a backup that completes every minute.
-# The size/duration alerts are gated on a fixed date (2026-10-21) that promtool's clock never reaches, so those cases
-# only prove the gate holds the alerts back.
+# The pg_backup_* cases are gone with their rules (2026-10-21, VM 100 retired); the cases below cover the PBS group alerts.
 rule_files:
   - ../../config/prometheus/rules/fleet-backup-freshness.yml
 
 evaluation_interval: 1m
 
 tests:
-  - name: a current pg_backup raises nothing
-    interval: 1m
-    input_series:
-      - series: 'pg_backup_last_success_timestamp_seconds{method="vzdump",vmid="100",host="pve-pve01"}'
-        values: "0+60x1800"
-      - series: 'pg_backup_last_status{method="vzdump",vmid="100",host="pve-pve01"}'
-        values: "1x1800"
-    alert_rule_test:
-      - {eval_time: 1700m, alertname: PgBackupStale, exp_alerts: []}
-      - {eval_time: 1700m, alertname: PgBackupStaleCritical, exp_alerts: []}
-      - {eval_time: 1700m, alertname: PgBackupLastRunFailed, exp_alerts: []}
-
-  - name: a pg_backup older than 26 hours warns and one older than 50 hours is critical
-    interval: 1m
-    input_series:
-      # last success at 6000 s, then no new success
-      - series: 'pg_backup_last_success_timestamp_seconds{method="vzdump",vmid="100",host="pve-pve01"}'
-        values: "0+60x100 6000x3300"
-    alert_rule_test:
-      - {eval_time: 1500m, alertname: PgBackupStale, exp_alerts: []}   # 84000 s old: under 26 h
-      - eval_time: 1700m                                               # 96000 s old: over 26 h for 15 m
-        alertname: PgBackupStale
-        exp_alerts:
-          - exp_labels: {severity: warning, service: pg_backup, method: vzdump, vmid: "100", host: pve-pve01}
-            exp_annotations:
-              summary: "No successful vzdump of VM 100 (pve-pve01) for over 26 hours"
-              description: "The daily pg-primary vzdump to PBS (job pg-primary-daily-pbs, 02:30 CEST) last succeeded 1d 2h 40m 0s ago. Check the PVE task log on the hypervisor and PBS capacity/permissions."
-              runbook_url: docs/runbooks/pbs-0own-backups.md
-      - {eval_time: 1700m, alertname: PgBackupStaleCritical, exp_alerts: []}
-      - eval_time: 3300m                                               # 192000 s old: over 50 h
-        alertname: PgBackupStaleCritical
-        exp_alerts:
-          - exp_labels: {severity: critical, service: pg_backup, method: vzdump, vmid: "100", host: pve-pve01}
-            exp_annotations:
-              summary: "No successful vzdump of VM 100 (pve-pve01) for over 50 hours"
-              description: "Two daily runs of the pg-primary backup have been missed (2d 5h 20m 0s since the last success). The production Postgres has no point-in-time recovery, so this backup is the only recovery path."
-              runbook_url: docs/runbooks/pbs-0own-backups.md
-
-  - name: a failed last run pages after ten minutes
-    interval: 1m
-    input_series:
-      - series: 'pg_backup_last_status{method="vzdump",vmid="100",host="pve-pve01"}'
-        values: "1x30 0x60"
-    alert_rule_test:
-      - {eval_time: 35m, alertname: PgBackupLastRunFailed, exp_alerts: []}
-      - eval_time: 50m
-        alertname: PgBackupLastRunFailed
-        exp_alerts:
-          - exp_labels: {severity: critical, service: pg_backup, method: vzdump, vmid: "100", host: pve-pve01}
-            exp_annotations:
-              summary: "The last vzdump of VM 100 (pve-pve01) failed"
-              description: "The vzdump hook reported backup-abort. Read /var/log/vzdump/qemu-100.log and the PVE task log on the hypervisor."
-              runbook_url: docs/runbooks/pbs-0own-backups.md
-
-  - name: the size and duration alerts stay quiet until the hand-set sample has aged out of the 7-day window
-    interval: 1m
-    input_series:
-      - series: 'pg_backup_size_bytes{method="vzdump",vmid="100"}'
-        values: "644245094400x1000 128945655644x1000"
-      - series: 'pg_backup_duration_seconds{method="vzdump",vmid="100"}'
-        values: "1281x1000 6345x1000"
-    alert_rule_test:
-      - {eval_time: 1900m, alertname: PgBackupSizeShrank, exp_alerts: []}
-      - {eval_time: 1900m, alertname: PgBackupDurationHigh, exp_alerts: []}
-
   - name: a PBS group with a fresh snapshot raises nothing, a stale one warns, then goes critical
     interval: 1m
     input_series:
@@ -100,7 +34,64 @@ tests:
               description: "Two daily runs were missed (2d 5h 20m 0s). If the guest was retired on purpose, prune the group in PBS and add it to the exclusion in this rule."
               runbook_url: docs/runbooks/pbs-0own-backups.md
 
-  - name: the frozen 0mcp-legacy archive and the retired root-namespace 0docker groups never alert
+  # 0own/vm/610 is backed up weekly (Sunday 08:00Z) since 2026-10-19: the daily pair must stay silent for it, the weekly pair warns after 8 days
+  # and goes critical after 15. Ages below: 5760 m = 4 d, 11580 m = 8 d 1 h, 21660 m = 15 d 1 h (11520 m = 8 d, 21600 m = 15 d).
+  - name: a weekly PBS group is skipped by the daily pair, warns after 8 days and goes critical after 15
+    interval: 1m
+    input_series:
+      # one snapshot at t=0 and nothing after it
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0own",backup_type="vm",backup_id="610"}'
+        values: "0x22000"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="0own",backup_type="vm",backup_id="610"}'
+        values: "3x22000"
+    alert_rule_test:
+      # 4 days old: far past the daily 26/50 hours and still fine for a weekly job
+      - {eval_time: 5760m, alertname: PbsBackupGroupStale, exp_alerts: []}
+      - {eval_time: 5760m, alertname: PbsBackupGroupStaleCritical, exp_alerts: []}
+      - {eval_time: 5760m, alertname: PbsBackupGroupWeeklyStale, exp_alerts: []}
+      - {eval_time: 5760m, alertname: PbsBackupGroupWeeklyStaleCritical, exp_alerts: []}
+      # 8 d 1 h: the weekly warning, nothing else
+      - eval_time: 11580m
+        alertname: PbsBackupGroupWeeklyStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pbs_backup, datastore: own-pbs, namespace: "0own", backup_type: vm, backup_id: "610"}
+            exp_annotations:
+              summary: "PBS group vm/610 (namespace '0own') has no snapshot for over 8 days"
+              description: "Newest snapshot is 8d 1h 0m 0s old. This group is backed up weekly (own-build-worker-nightly-pbs, Sunday 11:00 on the 0own hypervisor), so the last Sunday run did not land. Check the vzdump task on the owning hypervisor and the PBS task list."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+      - {eval_time: 11580m, alertname: PbsBackupGroupWeeklyStaleCritical, exp_alerts: []}
+      - {eval_time: 11580m, alertname: PbsBackupGroupStale, exp_alerts: []}
+      - {eval_time: 11580m, alertname: PbsBackupGroupStaleCritical, exp_alerts: []}
+      # 15 d 1 h: the weekly critical (the daily pair is still silent)
+      - eval_time: 21660m
+        alertname: PbsBackupGroupWeeklyStaleCritical
+        exp_alerts:
+          - exp_labels: {severity: critical, service: pbs_backup, datastore: own-pbs, namespace: "0own", backup_type: vm, backup_id: "610"}
+            exp_annotations:
+              summary: "PBS group vm/610 (namespace '0own') has no snapshot for over 15 days"
+              description: "Two weekly runs were missed (15d 1h 0m 0s). If the job was changed on purpose, change this pair and the exclusion in PbsBackupGroupStale to match."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+      - {eval_time: 21660m, alertname: PbsBackupGroupStale, exp_alerts: []}
+      - {eval_time: 21660m, alertname: PbsBackupGroupStaleCritical, exp_alerts: []}
+
+  - name: a weekly PBS group whose Sunday run lands every 7 days never alerts, at any point of the cycle
+    interval: 1m
+    input_series:
+      # snapshots at t=0, 7 d (604800 s) and 14 d (1209600 s); the age peaks at 7 d just before the next one lands
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0own",backup_type="vm",backup_id="610"}'
+        values: "0x10079 604800x10079 1209600x2000"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="0own",backup_type="vm",backup_id="610"}'
+        values: "3x22000"
+    alert_rule_test:
+      - {eval_time: 10079m, alertname: PbsBackupGroupStale, exp_alerts: []}
+      - {eval_time: 10079m, alertname: PbsBackupGroupWeeklyStale, exp_alerts: []}
+      - {eval_time: 20159m, alertname: PbsBackupGroupStale, exp_alerts: []}
+      - {eval_time: 20159m, alertname: PbsBackupGroupStaleCritical, exp_alerts: []}
+      - {eval_time: 20159m, alertname: PbsBackupGroupWeeklyStale, exp_alerts: []}
+      - {eval_time: 20159m, alertname: PbsBackupGroupWeeklyStaleCritical, exp_alerts: []}
+      - {eval_time: 21500m, alertname: PbsBackupGroupWeeklyStale, exp_alerts: []}
+
+  - name: the frozen 0mcp-legacy archive, the retired root-namespace 0docker groups, the whole retired 0database namespace and the frozen 0docker VM group never alert
     interval: 1m
     input_series:
       - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0mcp-legacy",backup_type="vm",backup_id="100"}'
@@ -113,19 +104,107 @@ tests:
         values: "6000x3300"
       - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="",backup_type="ct",backup_id="109"}'
         values: "3x3300"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0database",backup_type="vm",backup_id="100"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="0database",backup_type="vm",backup_id="100"}'
+        values: "2x3300"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0database",backup_type="vm",backup_id="102"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="0database",backup_type="vm",backup_id="102"}'
+        values: "4x3300"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0database",backup_type="host",backup_id="pve01"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="0database",backup_type="host",backup_id="pve01"}'
+        values: "4x3300"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0docker",backup_type="vm",backup_id="100"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="0docker",backup_type="vm",backup_id="100"}'
+        values: "9x3300"
+      # root vm/130 (the CI build VM, no nightly backup since 2026-10-22): its last two snapshots stay and never alert
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="",backup_type="vm",backup_id="130"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="",backup_type="vm",backup_id="130"}'
+        values: "2x3300"
     alert_rule_test:
       - {eval_time: 3300m, alertname: PbsBackupGroupStale, exp_alerts: []}
       - {eval_time: 3300m, alertname: PbsBackupGroupStaleCritical, exp_alerts: []}
 
+  # The vm/130 exclusion is by group: another stale root-namespace VM (vm/120, the runtime VM) still alerts.
+  - name: only root vm/130 is skipped, a stale sibling in the root namespace still alerts
+    interval: 1m
+    input_series:
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="",backup_type="vm",backup_id="130"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="",backup_type="vm",backup_id="130"}'
+        values: "2x3300"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="",backup_type="vm",backup_id="120"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="",backup_type="vm",backup_id="120"}'
+        values: "12x3300"
+    alert_rule_test:
+      - eval_time: 1700m
+        alertname: PbsBackupGroupStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pbs_backup, datastore: own-pbs, backup_type: vm, backup_id: "120"}
+            exp_annotations:
+              summary: "PBS group vm/120 (namespace '') has no snapshot for over 26 hours"
+              description: "Newest snapshot is 1d 2h 40m 0s old. Every daily job on the four fleets should land a snapshot inside 26 hours (VM 153 is 12:00 daily). Check the vzdump task on the owning hypervisor and the PBS task list."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+
+  # The vm/100 exclusion is by group: the file-level backup of the same host (0docker/host/dockerhost-state) and the other 0docker groups stay watched, and only the VM group is skipped.
+  - name: only the frozen 0docker VM group is skipped, the host-state group of the same namespace still alerts
+    interval: 1m
+    input_series:
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0docker",backup_type="vm",backup_id="100"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="0docker",backup_type="vm",backup_id="100"}'
+        values: "9x3300"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0docker",backup_type="host",backup_id="dockerhost-state"}'
+        values: "6000x3300"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="0docker",backup_type="host",backup_id="dockerhost-state"}'
+        values: "3x3300"
+    alert_rule_test:
+      - {eval_time: 1500m, alertname: PbsBackupGroupStale, exp_alerts: []}   # 84000 s old: under 26 h
+      - eval_time: 1700m
+        alertname: PbsBackupGroupStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pbs_backup, datastore: own-pbs, namespace: "0docker", backup_type: host, backup_id: dockerhost-state}
+            exp_annotations:
+              summary: "PBS group host/dockerhost-state (namespace '0docker') has no snapshot for over 26 hours"
+              description: "Newest snapshot is 1d 2h 40m 0s old. Every daily job on the four fleets should land a snapshot inside 26 hours (VM 153 is 12:00 daily). Check the vzdump task on the owning hypervisor and the PBS task list."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+
+  - name: the Docker host state backup alerts when its last run did not end well and clears when the next one does
+    interval: 1m
+    input_series:
+      - series: 'dockerhost_state_backup_last_status{instance="100.64.0.7:9100",host="ubuntuvm1"}'
+        values: "1x100 0x100 1x100"
+    alert_rule_test:
+      - {eval_time: 90m, alertname: DockerhostStateBackupFailed, exp_alerts: []}
+      - {eval_time: 120m, alertname: DockerhostStateBackupFailed, exp_alerts: []}   # status 0 since 100 m, but not yet for 30 m
+      - eval_time: 140m
+        alertname: DockerhostStateBackupFailed
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pbs_backup, instance: "100.64.0.7:9100", host: ubuntuvm1}
+            exp_annotations:
+              summary: "The nightly state backup of the Docker host (VM 100) failed, was skipped or finished with warnings"
+              description: "dockerhost-state-backup on 100.64.0.7:9100 ended with status 0 (failed, skipped as busy, or warnings such as a database that could not be dumped). Read `journalctl -u dockerhost-state-backup -n 80` on VM 100; the previous snapshot of host/dockerhost-state is still in PBS, and PbsBackupGroupStale follows after 26 h without a good one."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+      - {eval_time: 250m, alertname: DockerhostStateBackupFailed, exp_alerts: []}
+
   - name: the weekly CT 108 image is exempt from the 26/50 h rules and judged at 8.5 and 16 days; its daily file group is not exempt
     interval: 1m
     input_series:
-      # one snapshot at t=1 s, never again
+      # one snapshot at t=1 s, never again; the snapshot_count series are what the exemptions key on
       - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0docker",backup_type="ct",backup_id="108"}'
         values: "1x24100"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="0docker",backup_type="ct",backup_id="108"}'
+        values: "5x24100"
       # the daily host group stopped at t=1 s too: it alerts like any daily group
       - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{datastore="own-pbs",namespace="0docker",backup_type="host",backup_id="ct108-live"}'
         values: "1x24100"
+      - series: 'pbs_backup_group_snapshot_count{datastore="own-pbs",namespace="0docker",backup_type="host",backup_id="ct108-live"}'
+        values: "5x24100"
     alert_rule_test:
       - eval_time: 3300m
         alertname: PbsBackupGroupStale
@@ -185,3 +264,57 @@ tests:
               summary: "No PBS backup freshness series from own-pbs"
               description: "Prometheus has no pbs_backup_collect_timestamp_seconds: the own-pbs node exporter is down or the textfile collector is not enabled there."
               runbook_url: docs/runbooks/pbs-0own-backups.md
+
+  - name: a datastore disk that stays over 90 percent busy for hours warns, a normal busy night and the daily GC do not
+    interval: 1m
+    input_series:
+      # sdb: 57 s of I/O time per minute (95 %) for 8 h, then 20 %
+      - series: 'node_disk_io_time_seconds_total{device="sdb",host="own-pbs",instance="100.64.0.11:9100"}'
+        values: "0+57x480 27360+12x720"
+      # the OS disk is 99 % busy all the time: it is not the datastore and must not alert
+      - series: 'node_disk_io_time_seconds_total{device="sda",host="own-pbs",instance="100.64.0.11:9100"}'
+        values: "0+59.4x1200"
+    alert_rule_test:
+      - {eval_time: 20m, alertname: PbsDatastoreDiskSaturated, exp_alerts: []}      # rate exists, but the 30 minute delay has not passed
+      - eval_time: 300m
+        alertname: PbsDatastoreDiskSaturated
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pbs_backup, host: own-pbs, instance: "100.64.0.11:9100", device: sdb}
+            exp_annotations:
+              summary: "own-pbs datastore disk sdb is 95% busy (4 h average)"
+              description: "Every nightly backup of every fleet writes to this one spinning disk and slows down behind whatever keeps it busy; VM snapshot backups throttle their guests to its speed. Look for a running verify, GC or sync (proxmox-backup-manager task list; read the task log file with tail, the command is slow on a saturated host) and stop the maintenance task, not the backups. Normal nights peak at 45-80 % and the daily GC (about 1.85 h at 99 %) stays under the 4 h average."
+              runbook_url: docs/runbooks/pbs-0own-backups.md
+      - {eval_time: 700m, alertname: PbsDatastoreDiskSaturated, exp_alerts: []}      # 20 % for 3.5 hours after the load ended: cleared
+
+  - name: a busy night at 75 percent for hours and the daily GC do not alert
+    interval: 1m
+    input_series:
+      # 75 % for 6 h, then a one hour burst at 100 %, then 20 %
+      - series: 'node_disk_io_time_seconds_total{device="sdb",host="own-pbs",instance="100.64.0.11:9100"}'
+        values: "0+45x360 16200+60x60 19800+12x400"
+    alert_rule_test:
+      - {eval_time: 300m, alertname: PbsDatastoreDiskSaturated, exp_alerts: []}
+      - {eval_time: 420m, alertname: PbsDatastoreDiskSaturated, exp_alerts: []}
+
+  - name: the daily GC (99 percent busy for 111 minutes) does not alert
+    interval: 1m
+    input_series:
+      # 10 % for 10 h, 99 % for 111 min, then 10 % again
+      - series: 'node_disk_io_time_seconds_total{device="sdb",host="own-pbs",instance="100.64.0.11:9100"}'
+        values: "0+6x600 3600+59.4x111 10194+6x300"
+    alert_rule_test:
+      - {eval_time: 650m, alertname: PbsDatastoreDiskSaturated, exp_alerts: []}
+      - {eval_time: 700m, alertname: PbsDatastoreDiskSaturated, exp_alerts: []}
+      - {eval_time: 800m, alertname: PbsDatastoreDiskSaturated, exp_alerts: []}
+
+  - name: three hours at 95 percent (a GC overlapping late backups) is tolerated, only a longer stall alerts
+    interval: 1m
+    input_series:
+      # 10 % for 2 h, 95 % for 3 h, then 10 %
+      - series: 'node_disk_io_time_seconds_total{device="sdb",host="own-pbs",instance="100.64.0.11:9100"}'
+        values: "0+6x120 720+57x180 10980+6x600"
+    alert_rule_test:
+      - {eval_time: 280m, alertname: PbsDatastoreDiskSaturated, exp_alerts: []}
+      - {eval_time: 330m, alertname: PbsDatastoreDiskSaturated, exp_alerts: []}
+      - {eval_time: 500m, alertname: PbsDatastoreDiskSaturated, exp_alerts: []}
+

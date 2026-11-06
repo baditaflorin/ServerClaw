@@ -1,0 +1,81 @@
+id: ws-0533-pve-host-daily-low-alert
+adr: "0386"
+title: Warn when the hypervisor root filesystem's 24-hour free-space low comes within two points of the CI admission hold
+status: in_progress
+ready_to_merge: false
+live_applied: true
+owner: claude
+branch: claude/live-apply-pve-daily-low
+worktree_path: .claude/worktrees/live-apply-pve-daily-low
+doc: docs/workstreams/ws-0533-pve-host-daily-low-alert.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/prometheus/rules/pve-host-incident.yml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0533-pve-host-daily-low-alert.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0533-pve-host-daily-low-alert.md
+  - versions/stack.yaml
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - receipts/live-applies/2026-10-26-pve-host-daily-low-alert-monitoring-live-apply.json
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0533_tracking
+      paths:
+        - docs/workstreams/ws-0533-pve-host-daily-low-alert.md
+      mode: exclusive
+    - id: pve_host_incident_rules
+      paths:
+        - config/prometheus/rules/pve-host-incident.yml
+      mode: shared_contract
+      contract: pve-host-incident-rules-v1
+    - id: pve_host_free_space_rule_tests
+      paths:
+        - tests/promtool/pve_host_free_space_rules_test.yml
+        - tests/test_pve_host_free_space_rules.py
+      mode: exclusive
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-0533-pve-host-daily-low-alert.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0533_mainline_live_apply_evidence
+      paths:
+        - README.md
+        - versions/stack.yaml
+        - docs/status/history/live-apply-evidence.md
+        - receipts/live-applies/2026-10-26-pve-host-daily-low-alert-monitoring-live-apply.json
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+canonical_truth:
+  changelog_entry: Warn when the hypervisor root filesystem's 24-hour free-space low is under 16%, two points above the CI admission hold, so a bad day stays visible for a day.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    pve_host_free_space_alert: 2026-10-26-pve-host-daily-low-alert-monitoring-live-apply
+context: >-
+  The hypervisor's root filesystem holds every guest disk of that host. CI admission is
+  held under 14% free and the existing warning is at 15%, but the free fraction swings by
+  several points within minutes (a daily state backup stages about 18 GiB, and an
+  application database log grew by tens of GiB overnight), so by the time the 15% warning
+  has waited its five minutes the hold is already on. The new warning looks at the lowest
+  value of the last 24 hours instead of the current one, so a dip that came close to the
+  hold stays visible for a day after the filesystem has recovered.
+tasks:
+  - id: t1
+    title: Add PveHostFilesystemDailyLowNarrow with a promtool unit test and a pytest wrapper
+    status: completed
+  - id: t2
+    title: Validate and merge through the private-source pull request
+    status: completed
+  - id: t3
+    title: Ship the rule file to the monitoring VM (targeted Ansible play with the monitoring role's copy parameters) and reload Prometheus
+    status: completed

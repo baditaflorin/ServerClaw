@@ -1,0 +1,64 @@
+id: ws-20261106-public-policy-test-portability
+adr: '0407'
+title: Keep portable policy-tool tests runnable in the sanitized public snapshot
+status: merged
+ready_to_merge: true
+live_applied: false
+owner: codex
+branch: main
+worktree_path: .worktrees/public-policy-test-portability
+doc: docs/workstreams/ws-20261106-public-policy-test-portability.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- tests/policy_test_sources.py
+- tests/fixtures/tailscale/standby-job-policy.hujson
+- tests/test_public_policy_test_portability.py
+- tests/test_tier0_domainscope_path.py
+- tests/test_dockerhost_pbs_relay.py
+- tests/test_standby_edge_grants.py
+- tests/test_standby_edge_grants_job.py
+- tests/test_tier0_edge_grants_wrapper.py
+- tests/test_tier0_edge_grants_install.py
+- .woodpecker.yml
+- scripts/domainscope-drive-refresh-install.sh
+- tests/test_domainscope_drive_refresh.py
+ownership_manifest:
+  owned_surfaces:
+  - id: public_policy_test_portability
+    paths:
+    - tests/policy_test_sources.py
+    - tests/fixtures/tailscale/standby-job-policy.hujson
+    - tests/test_public_policy_test_portability.py
+    - tests/test_tier0_domainscope_path.py
+    - tests/test_dockerhost_pbs_relay.py
+    - tests/test_standby_edge_grants.py
+    - tests/test_standby_edge_grants_job.py
+    - tests/test_tier0_edge_grants_wrapper.py
+    - tests/test_tier0_edge_grants_install.py
+    - .woodpecker.yml
+    - scripts/domainscope-drive-refresh-install.sh
+    - tests/test_domainscope_drive_refresh.py
+    mode: exclusive
+  - id: public_policy_test_portability_tracking
+    paths:
+    - docs/workstreams/ws-20261106-public-policy-test-portability.md
+    - workstreams/active/ws-20261106-public-policy-test-portability.yaml
+    mode: exclusive
+canonical_truth:
+  changelog_entry: Keep portable policy-tool tests runnable without the intentionally
+    excluded deployment policy while retaining private policy assertions and generic
+    fake-world coverage.
+  release_bump: patch
+  included_in_repo_version: 0.179.55
+  latest_receipts: {}
+notes: The scripted sanitized publication of the retention release passed leak and
+  coverage checks but public Woodpecker collection failed because three modules read
+  the excluded policy at import time. Deployment assertions now skip only when that
+  input is absent; parser and fake-world tests use a minimal generic fixture. Existing
+  private policy and guard inputs remain byte-identical and first choice.
+tasks:
+- id: portability
+  title: Repair the private/public test-input contract; final publication follows
+    the release integration
+  status: completed

@@ -1,0 +1,94 @@
+id: ws-0528-0infer-ci-worker
+adr: '0014'
+title: Onboard the 0infer CI worker and private access
+status: merged
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/0infer-runtime-docker-baseline
+worktree_path: .worktrees/0infer-woodpecker-metrics
+doc: docs/workstreams/ws-0528-0infer-ci-worker.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - config/tailscale/policy.hujson
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/workstreams/ws-0528-0infer-ci-worker.md
+  - receipts/gate-bypasses/*.json
+  - receipts/live-applies/ws-0528-0infer-ci-worker-apply-receipt.json
+  - receipts/live-applies/ws-0528-0infer-runtime-docker-apply-receipt.json
+  - changelog.md
+  - versions/stack.yaml
+  - workstreams/archive/2026/ws-0528-0infer-ci-worker.yaml
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: infer_worker_access_policy
+      paths:
+        - config/tailscale/policy.hujson
+        - docs/workstreams/ws-0528-0infer-ci-worker.md
+        - workstreams/archive/2026/ws-0528-0infer-ci-worker.yaml
+      mode: exclusive
+    - id: active_workstream_registry
+      paths:
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: workstream_status_diagram
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: gate_bypass_receipts
+      paths:
+        - receipts/gate-bypasses/*.json
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: infer_database_live_apply_receipt
+      paths:
+        - receipts/live-applies/ws-0528-0infer-ci-worker-apply-receipt.json
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    - id: platform_release_truth
+      paths:
+        - versions/stack.yaml
+      mode: shared_contract
+      contract: release-truth-v1
+    - id: runtime_docker_apply_receipt
+      paths:
+        - receipts/live-applies/ws-0528-0infer-runtime-docker-apply-receipt.json
+      mode: shared_contract
+      contract: live-apply-evidence-v1
+    - id: platform_change_notes
+      paths:
+        - changelog.md
+      mode: shared_contract
+      contract: release-bump-v1
+    - id: generated_release_status_docs
+      paths:
+        - README.md
+        - docs/status/history/live-apply-evidence.md
+        - docs/status/history/merged-workstreams.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+tasks:
+  - id: t1
+    title: Add narrowly scoped Tailscale access for CI, runtime, database, and metrics
+    status: completed
+  - id: t2
+    title: Register the CI worker, store its per-agent token, and verify scheduling
+    status: completed
+  - id: t3
+    title: Grant VM702 and runtime access to the existing 0database primary, apply the policy, and verify VM702 TCP connectivity
+    status: completed
+  - id: t4
+    title: Verify runtime VM703 TCP reachability with its authorized guest access path
+    status: completed
+  - id: t5
+    title: Reconcile the newly observed 0infer fleet-msg grants into policy source
+    status: completed
+  - id: t6
+    title: Install and verify the Docker runtime baseline on VM703
+    status: completed

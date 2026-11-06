@@ -1,0 +1,33 @@
+// Synthetic standby-job policy. Every address is from a documentation range.
+// The test helper binds the edge/runtime roles to the module under test.
+{
+	"groups": {"group:admins": ["operator@example.com"]},
+	"tagOwners": {"tag:admin": ["group:admins"]},
+	"grants": [
+		{
+			"src": ["203.0.113.10/32"],
+			"dst": ["203.0.113.20/32", "203.0.113.21/32"],
+			"ip": ["tcp:22"],
+		},
+		{
+			"src": ["192.0.2.10/32"],
+			"dst": ["192.0.2.11/32"],
+			"ip": ["tcp:8331", "tcp:18004", "tcp:18006", "tcp:18024", "tcp:18257"],
+		},
+		// ==== standby-edge-auto-grants END
+	],
+	"ssh": [],
+	"tests": [
+		{
+			"src": "203.0.113.10",
+			"accept": ["203.0.113.20:22", "203.0.113.21:22"],
+			"proto": "tcp",
+		},
+		{
+			"src": "192.0.2.10",
+			"accept": ["192.0.2.11:8331", "192.0.2.11:18004", "192.0.2.11:18006", "192.0.2.11:18024", "192.0.2.11:18257"],
+			"proto": "tcp",
+		},
+		// ==== standby-edge-auto-grants-tests END
+	],
+}

@@ -1,0 +1,16 @@
+[Unit]
+Description=File-level backup of the Docker host state to own-pbs (group host/dockerhost-state)
+After=network-online.target docker.service tailscaled.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/dockerhost-state-backup run
+# The host is CPU-starved by day and its disk is shared with ~460 containers: run at the lowest priority everywhere.
+Nice=19
+IOSchedulingClass=idle
+CPUWeight=10
+IOWeight=10
+MemoryHigh=3G
+MemoryMax=4G
+TimeoutStartSec=7h

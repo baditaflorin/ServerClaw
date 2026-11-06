@@ -1,0 +1,13 @@
+[Unit]
+Description=Limit the DomainScope ports Docker publishes on this VM to the LAN sources in /etc/domainscope-lan-allow.conf
+Requires=docker.service
+After=docker.service network-online.target
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/domainscope-lan-firewall
+
+[Install]
+WantedBy=multi-user.target docker.service

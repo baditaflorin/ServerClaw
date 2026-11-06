@@ -1,0 +1,10 @@
+[Unit]
+Description=Private Woodpecker %i proxy
+After=network-online.target tailscaled.service
+Wants=network-online.target
+Requires=tailscaled.service woodpecker-exec-proxy@%i.socket
+
+[Service]
+ExecStart=/lib/systemd/systemd-socket-proxyd 10.10.10.108:%i
+DynamicUser=yes
+PrivateTmp=yes

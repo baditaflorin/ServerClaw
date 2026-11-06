@@ -1,0 +1,11 @@
+[Unit]
+Description=Tier-0 full-cycle simulation, abort variant (weekly, Sunday)
+
+[Timer]
+Unit=tier0-sim@abort.service
+OnCalendar=Sun *-*-* 05:50:00 UTC
+RandomizedDelaySec=300
+Persistent=true
+
+[Install]
+WantedBy=timers.target

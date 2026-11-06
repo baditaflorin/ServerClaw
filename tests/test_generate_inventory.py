@@ -238,8 +238,40 @@ def test_proxmox_hosts_group_has_correct_ansible_host() -> None:
 def test_platform_group_has_required_children() -> None:
     inv = build_inventory(MINIMAL_HOST_VARS)
     children = inv["all"]["children"]["platform"]["children"]
-    for grp in ("proxmox_hosts", "lv3_guests", "postgres_guests", "backup_guests"):
+    for grp in ("proxmox_hosts", "lv3_guests", "postgres_guests", "backup_guests", "planned_guests"):
         assert grp in children
+
+
+# ---------------------------------------------------------------------------
+# planned guests (ADR 0494): declared, not yet approved or provisioned
+# ---------------------------------------------------------------------------
+
+
+def _with_planned_guest() -> dict:
+    host_vars = {**MINIMAL_HOST_VARS, "proxmox_guests": [*MINIMAL_HOST_VARS["proxmox_guests"]]}
+    host_vars["proxmox_guests"].append(
+        {"vmid": 155, "name": "later", "role": "later", "ipv4": "10.10.10.55", "tags": ["lv3"], "lifecycle": "planned"}
+    )
+    return host_vars
+
+
+def test_a_planned_guest_is_in_lv3_guests_and_in_planned_guests() -> None:
+    children = build_inventory(_with_planned_guest())["all"]["children"]
+    assert "later" in children["lv3_guests"]["hosts"], "kept so its group variables apply to its own playbook"
+    assert list(children["planned_guests"]["hosts"]) == ["later"]
+
+
+def test_planned_guests_group_is_present_and_empty_when_no_guest_is_planned() -> None:
+    children = build_inventory(MINIMAL_HOST_VARS)["all"]["children"]
+    assert children["planned_guests"]["hosts"] == {}, "present, so the exclusion patterns never name an unknown group"
+
+
+def test_scoped_group_patterns_exclude_planned_guests() -> None:
+    patterns = build_inventory(MINIMAL_HOST_VARS)["all"]["vars"]["playbook_execution_host_patterns"]
+    for group in ("lv3_guests", "postgres_guests", "backup_guests"):
+        for env in ("production", "staging"):
+            assert patterns[group][env] == f"{group}:&{env}:!planned_guests", (group, env)
+    assert patterns["proxmox_hosts"]["production"] == "proxmox_hosts:&production"
 
 
 # ---------------------------------------------------------------------------
@@ -361,13 +393,16 @@ def test_real_host_vars_vmid_formula() -> None:
     not REAL_HOST_VARS_PATH.exists(),
     reason="Real proxmox-host.yml not available",
 )
-def test_real_host_vars_generates_17_production_guests() -> None:
+def test_real_host_vars_generates_18_production_guests() -> None:
+    """17 provisioned guests plus agent-history (vmid 155, ADR 0494: declared planned, activated on 2026-10-29, not provisioned yet)."""
     with REAL_HOST_VARS_PATH.open() as fh:
         host_vars = yaml.safe_load(fh)
     inv = build_inventory(host_vars)
     lv3 = inv["all"]["children"]["lv3_guests"]["hosts"]
     production = [k for k, v in lv3.items() if isinstance(v, dict) and v.get("deployment_environment") == "production"]
-    assert len(production) == 17, f"Expected 17 production guests, got {len(production)}: {production}"
+    assert len(production) == 18, f"Expected 18 production guests, got {len(production)}: {production}"
+    planned = inv["all"]["children"]["planned_guests"]["hosts"]
+    assert planned == {}, "no guest is planned: agent-history was activated (the group is still emitted, empty)"
 
 
 @pytest.mark.skipif(

@@ -47,6 +47,17 @@ alertmanager_runtime_ntfy_message_query: >-
 # critical group held 287 alerts and no critical notification got through for over an hour. One alert is 0.4-1.3 KB of JSON, so
 # 5 stays well below ntfy's default 8 KB request limit; the rest are counted in the payload's truncatedAlerts field.
 alertmanager_runtime_ntfy_max_alerts: 5
+# Alertmanager HA mesh (gossip). Empty = single node (the default, unchanged behaviour). With peers set, ARGS gain
+# --cluster.advertise-address and one --cluster.peer per entry. Addresses must be reachable BY THE OTHER MEMBER (tailnet addresses, not private ones).
+alertmanager_runtime_cluster_advertise_address: ""
+alertmanager_runtime_cluster_peers: []
+# Second ntfy server that every ntfy receiver also posts to (fan-out), so losing one ntfy host cannot silence the phone. Empty base URL = off.
+# The topic names are anonymously readable on that server, so they are NOT committed: they come from a controller-local YAML file
+# ({critical: ..., warning: ..., watchdog: ...}); the bearer token file must already exist on the guest (written out of band, root:prometheus 0640).
+alertmanager_runtime_secondary_ntfy_base_url: ""
+alertmanager_runtime_secondary_ntfy_token_file: /etc/alertmanager/ntfy-tier0-token
+alertmanager_runtime_secondary_ntfy_topics_local_file: "{{ repo_shared_local_root }}/ntfy/tier0-topics.yml"
+alertmanager_runtime_secondary_ntfy_topics: "{{ (lookup('ansible.builtin.file', alertmanager_runtime_secondary_ntfy_topics_local_file, errors='ignore') | default('{}', true) | from_yaml) }}"
 alertmanager_runtime_ntfy_query: "tpl=yes&t={{ alertmanager_runtime_ntfy_title_query }}&m={{ alertmanager_runtime_ntfy_message_query }}"
 # fleet-triage (baditaflorin/go-fleet-triage): SHADOW-MODE, read-only alert triage on the Builder (CT108). An ADDITIONAL
 # receiver (continue: true) that never replaces the ntfy routes. Disabled unless a webhook URL is set (production sets

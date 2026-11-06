@@ -1,0 +1,72 @@
+id: ws-20261102-exec-proxy-tailscale0
+adr: "0287"
+title: "0docker hypervisor: tailscale0 Wants the Woodpecker exec-proxy socket, so a tailnet flap no longer leaves every CI agent refused until somebody starts it"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/hostconf-exec-proxy-tailscale0
+worktree_path: .claude/worktrees/hostconf-exec-proxy-tailscale0
+doc: docs/workstreams/ws-20261102-exec-proxy-tailscale0.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - config/hostconf/files/woodpecker-exec-proxy-follows-tailscale0.0docker.conf
+  - scripts/hostconf.py
+  - tests/test_hostconf.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261102-exec-proxy-tailscale0.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261102-exec-proxy-tailscale0.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261102_exec_proxy_tailscale0_tracking
+      paths:
+        - docs/workstreams/ws-20261102-exec-proxy-tailscale0.md
+      mode: exclusive
+    - id: hostconf_exec_proxy_follows_tailscale0_file
+      paths:
+        - config/hostconf/files/woodpecker-exec-proxy-follows-tailscale0.0docker.conf
+      mode: exclusive
+    - id: hostconf_manifest
+      paths:
+        - config/hostconf/hostconf.yaml
+        - config/hostconf/README.md
+        - scripts/hostconf.py
+        - tests/test_hostconf.py
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261102-exec-proxy-tailscale0.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "hostconf manages a drop-in on the 0docker hypervisor's tailscale0 device unit (Wants=woodpecker-exec-proxy@9000.socket), and may write drop-ins of device units; a tailnet flap no longer leaves the Woodpecker exec proxy stopped"
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  On 2026-11-02 from 11:33Z to 12:44Z every Woodpecker agent of ci.0exec.com was refused on 100.64.0.5:9000 (the 0docker hypervisor's tailnet address) and the whole CI plane stood
+  still (91 pipelines pending, 1 of 31 agents online). woodpecker-exec-proxy@9000.socket listens on that address with BindToDevice=tailscale0; when tailscale0 went away systemd stopped the
+  socket, the automatic start at 12:34:59 CET failed because the device was not active yet, and nothing started it again. The web API stayed up, so the plane looked alive. It was
+  started by hand at 12:44Z. A dummy-interface test on the hypervisor (systemd 252) showed that a unit Wanted by a device unit is started when the device comes back; the drop-in
+  does that for the socket.
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Allow drop-ins of device units in scripts/hostconf.py, add the drop-in file, the manifest entry and the bastion file list, a test row and the README lines (66 catalog files)
+    status: completed
+  - id: t3
+    title: Run the hostconf tests, pass the pre-push gate, open the pull request and land it; apply with hostconf.py apply --host bastion --file woodpecker-exec-proxy-follows-tailscale0 --yes (reload only)
+    status: in_progress

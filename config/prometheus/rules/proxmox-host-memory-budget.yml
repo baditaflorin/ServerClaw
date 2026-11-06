@@ -1,0 +1,32 @@
+# Added 2026-11-01 after pve-0mcp fell to 3.9% MemAvailable with its swap full (docs/runbooks/pve-0mcp-memory-budget.md).
+# The guaranteed footprint of a hypervisor is what its guests keep once pvestatd has ballooned every one of them down to its floor: the balloon floor of each running VM that has a
+# balloon, and the whole memory of each running VM with `balloon: 0`. pvestatd shrinks guests while the host is over its ballooning target (85% used on pve-0mcp, set by hand, default 80)
+# and never grows one above its floor then. With the guaranteed footprint above 80% of RAM there is too little room under that target (the host itself needs about 2.4%) for guests to
+# hold anything above their floors, so every ballooned guest is pinned at its floor: on 2026-11-01 the sum was 103168 MiB, 80.15% of the host, and the host sat at 89.3% used.
+# The series are the fleet_proxmox_* snapshot (job proxmox-capacity) that ProxmoxVMBallooningUnavailable already reads. The rule is scoped to pve_host="0mcp": the same sum is 84.7% for
+# 0docker and 86.8% for 0infer, hosts whose owners have not set a budget, and a fleet-wide rule would page for both on its first evaluation.
+groups:
+  - name: proxmox_host_memory_budget
+    rules:
+      - alert: ProxmoxHostGuaranteedMemoryOverBudget
+        expr: >-
+          sum by (pve_host) (
+            max by (pve_host, guest_id) (
+                (fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm"}
+                  and on (pve_host, guest_id) (fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm"} == 1))
+              or
+                (fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm"}
+                  and on (pve_host, guest_id) (fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm"} == 0))
+            )
+            and on (pve_host, guest_id) (fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",status="running"} == 1)
+          )
+          / on (pve_host) max by (pve_host) (fleet_proxmox_host_memory_total_bytes{pve_host="0mcp"})
+          > 0.80
+        for: 1h
+        labels:
+          severity: warning
+          service: proxmox_host_memory_budget
+        annotations:
+          summary: "Hypervisor {{ $labels.pve_host }}: balloon floors plus fixed VMs are {{ $value | humanizePercentage }} of RAM (budget 80%)"
+          description: "The running VMs of {{ $labels.pve_host }} are guaranteed {{ $value | humanizePercentage }} of the host's RAM (balloon floors plus VMs with balloon 0), over the 80% budget. pvestatd keeps every ballooned guest at its floor while the host is over its ballooning target (85% used on this node), and a guaranteed footprint above 80% leaves too little room under that target for guests to hold anything above their floors, so the floors are the real sizes and the maximums do not matter. Do not add a VM or raise a floor or a fixed size before cutting the same amount elsewhere; the table and the apply order are in the runbook."
+          runbook_url: docs/runbooks/pve-0mcp-memory-budget.md

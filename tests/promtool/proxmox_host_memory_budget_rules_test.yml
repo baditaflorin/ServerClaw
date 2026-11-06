@@ -1,0 +1,319 @@
+# promtool unit tests for config/prometheus/rules/proxmox-host-memory-budget.yml (run by tests/test_proxmox_host_memory_budget.py when promtool is installed).
+# Sizes are in MiB (the rule only divides two byte counts, so the unit cancels). The first case is the real snapshot of pve-0mcp taken on 2026-11-01 from the 0mcp Prometheus:
+# 19 running VMs and the stopped template 9000; the three VMs with balloon 0 (130, 180, 200) have no balloon_minimum_bytes series, as in the live data.
+rule_files:
+  - ../../config/prometheus/rules/proxmox-host-memory-budget.yml
+
+evaluation_interval: 5m
+
+tests:
+  - name: the live snapshot of 2026-11-01 is 80.15 percent of RAM guaranteed, pending for an hour and then firing
+    interval: 5m
+    input_series:
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="100",guest_name="hermes-agent",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="100",guest_name="hermes-agent",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="100",guest_name="hermes-agent",job="proxmox-capacity"}'
+        values: "4096x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="100",guest_name="hermes-agent",job="proxmox-capacity"}'
+        values: "6144x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="110",guest_name="nginx-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="110",guest_name="nginx-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="110",guest_name="nginx-lv3",job="proxmox-capacity"}'
+        values: "2048x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="110",guest_name="nginx-lv3",job="proxmox-capacity"}'
+        values: "4096x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="120",guest_name="docker-runtime-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="120",guest_name="docker-runtime-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="120",guest_name="docker-runtime-lv3",job="proxmox-capacity"}'
+        values: "16384x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="120",guest_name="docker-runtime-lv3",job="proxmox-capacity"}'
+        values: "18432x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="121",guest_name="runtime-comms-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="121",guest_name="runtime-comms-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="121",guest_name="runtime-comms-lv3",job="proxmox-capacity"}'
+        values: "2048x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="121",guest_name="runtime-comms-lv3",job="proxmox-capacity"}'
+        values: "4096x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="122",guest_name="runtime-apps-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="122",guest_name="runtime-apps-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="122",guest_name="runtime-apps-lv3",job="proxmox-capacity"}'
+        values: "1536x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="122",guest_name="runtime-apps-lv3",job="proxmox-capacity"}'
+        values: "8192x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="130",guest_name="docker-build-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="130",guest_name="docker-build-lv3",job="proxmox-capacity"}'
+        values: "0x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="130",guest_name="docker-build-lv3",job="proxmox-capacity"}'
+        values: "14336x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="140",guest_name="monitoring-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="140",guest_name="monitoring-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="140",guest_name="monitoring-lv3",job="proxmox-capacity"}'
+        values: "3072x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="140",guest_name="monitoring-lv3",job="proxmox-capacity"}'
+        values: "4096x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="150",guest_name="postgres-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="150",guest_name="postgres-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="150",guest_name="postgres-lv3",job="proxmox-capacity"}'
+        values: "6144x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="150",guest_name="postgres-lv3",job="proxmox-capacity"}'
+        values: "8192x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="151",guest_name="postgres-replica-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="151",guest_name="postgres-replica-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="151",guest_name="postgres-replica-lv3",job="proxmox-capacity"}'
+        values: "1024x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="151",guest_name="postgres-replica-lv3",job="proxmox-capacity"}'
+        values: "2048x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="152",guest_name="postgres-apps-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="152",guest_name="postgres-apps-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="152",guest_name="postgres-apps-lv3",job="proxmox-capacity"}'
+        values: "1024x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="152",guest_name="postgres-apps-lv3",job="proxmox-capacity"}'
+        values: "2048x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="154",guest_name="postgres-data-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="154",guest_name="postgres-data-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="154",guest_name="postgres-data-lv3",job="proxmox-capacity"}'
+        values: "6144x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="154",guest_name="postgres-data-lv3",job="proxmox-capacity"}'
+        values: "8192x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="155",guest_name="agent-history",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="155",guest_name="agent-history",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="155",guest_name="agent-history",job="proxmox-capacity"}'
+        values: "6144x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="155",guest_name="agent-history",job="proxmox-capacity"}'
+        values: "8192x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="170",guest_name="coolify-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="170",guest_name="coolify-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="170",guest_name="coolify-lv3",job="proxmox-capacity"}'
+        values: "4096x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="170",guest_name="coolify-lv3",job="proxmox-capacity"}'
+        values: "6144x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="171",guest_name="coolify-apps-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="171",guest_name="coolify-apps-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="171",guest_name="coolify-apps-lv3",job="proxmox-capacity"}'
+        values: "3072x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="171",guest_name="coolify-apps-lv3",job="proxmox-capacity"}'
+        values: "8192x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="180",guest_name="artifact-cache-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="180",guest_name="artifact-cache-lv3",job="proxmox-capacity"}'
+        values: "0x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="180",guest_name="artifact-cache-lv3",job="proxmox-capacity"}'
+        values: "4096x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="190",guest_name="runtime-ai-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="190",guest_name="runtime-ai-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="190",guest_name="runtime-ai-lv3",job="proxmox-capacity"}'
+        values: "1280x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="190",guest_name="runtime-ai-lv3",job="proxmox-capacity"}'
+        values: "3072x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="191",guest_name="runtime-general-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="191",guest_name="runtime-general-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="191",guest_name="runtime-general-lv3",job="proxmox-capacity"}'
+        values: "16384x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="191",guest_name="runtime-general-lv3",job="proxmox-capacity"}'
+        values: "16384x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="192",guest_name="runtime-control-lv3",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="192",guest_name="runtime-control-lv3",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="192",guest_name="runtime-control-lv3",job="proxmox-capacity"}'
+        values: "6144x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="192",guest_name="runtime-control-lv3",job="proxmox-capacity"}'
+        values: "12288x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="200",guest_name="0mcp-staging-runtime",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="200",guest_name="0mcp-staging-runtime",job="proxmox-capacity"}'
+        values: "0x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="200",guest_name="0mcp-staging-runtime",job="proxmox-capacity"}'
+        values: "4096x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="9000",guest_name="debian13-cloud-template",job="proxmox-capacity",status="stopped"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="9000",guest_name="debian13-cloud-template",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="9000",guest_name="debian13-cloud-template",job="proxmox-capacity"}'
+        values: "512x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="9000",guest_name="debian13-cloud-template",job="proxmox-capacity"}'
+        values: "1024x36"
+      - series: 'fleet_proxmox_host_memory_total_bytes{pve_host="0mcp",host="pve-0mcp",job="proxmox-capacity"}'
+        values: "128717x36"
+    alert_rule_test:
+      - {eval_time: 50m, alertname: ProxmoxHostGuaranteedMemoryOverBudget, exp_alerts: []}
+      - eval_time: 70m
+        alertname: ProxmoxHostGuaranteedMemoryOverBudget
+        exp_alerts:
+          - exp_labels: {severity: warning, service: proxmox_host_memory_budget, pve_host: "0mcp"}
+            exp_annotations:
+              summary: "Hypervisor 0mcp: balloon floors plus fixed VMs are 80.15% of RAM (budget 80%)"
+              description: "The running VMs of 0mcp are guaranteed 80.15% of the host's RAM (balloon floors plus VMs with balloon 0), over the 80% budget. pvestatd keeps every ballooned guest at its floor while the host is over its ballooning target (85% used on this node), and a guaranteed footprint above 80% leaves too little room under that target for guests to hold anything above their floors, so the floors are the real sizes and the maximums do not matter. Do not add a VM or raise a floor or a fixed size before cutting the same amount elsewhere; the table and the apply order are in the runbook."
+              runbook_url: docs/runbooks/pve-0mcp-memory-budget.md
+
+  - name: exactly 80 percent is quiet, 81 percent fires after an hour and back to 80 percent resolves; a balloon VM counts at its floor, not at its maximum
+    interval: 5m
+    input_series:
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity",status="running"}'
+        values: "1x42"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "1x42"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "500x42"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "800x42"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity",status="running"}'
+        values: "1x42"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity"}'
+        values: "0x42"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity"}'
+        values: "300x14 310x14 300x14"
+      - series: 'fleet_proxmox_host_memory_total_bytes{pve_host="0mcp",host="pve-0mcp",job="proxmox-capacity"}'
+        values: "1000x42"
+    alert_rule_test:
+      - {eval_time: 65m, alertname: ProxmoxHostGuaranteedMemoryOverBudget, exp_alerts: []}
+      - {eval_time: 120m, alertname: ProxmoxHostGuaranteedMemoryOverBudget, exp_alerts: []}
+      - eval_time: 135m
+        alertname: ProxmoxHostGuaranteedMemoryOverBudget
+        exp_alerts:
+          - exp_labels: {severity: warning, service: proxmox_host_memory_budget, pve_host: "0mcp"}
+            exp_annotations:
+              summary: "Hypervisor 0mcp: balloon floors plus fixed VMs are 81% of RAM (budget 80%)"
+              description: "The running VMs of 0mcp are guaranteed 81% of the host's RAM (balloon floors plus VMs with balloon 0), over the 80% budget. pvestatd keeps every ballooned guest at its floor while the host is over its ballooning target (85% used on this node), and a guaranteed footprint above 80% leaves too little room under that target for guests to hold anything above their floors, so the floors are the real sizes and the maximums do not matter. Do not add a VM or raise a floor or a fixed size before cutting the same amount elsewhere; the table and the apply order are in the runbook."
+              runbook_url: docs/runbooks/pve-0mcp-memory-budget.md
+      - {eval_time: 150m, alertname: ProxmoxHostGuaranteedMemoryOverBudget, exp_alerts: []}
+
+  - name: a stopped VM, a container (even one that reuses a VM's id), a duplicate scrape of the same guest and another hypervisor do not count (700 of 1000 is quiet)
+    interval: 5m
+    input_series:
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "400x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "900x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity",instance="dup:9100"}'
+        values: "400x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity"}'
+        values: "0x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity"}'
+        values: "300x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="3",guest_name="stopped-c",job="proxmox-capacity",status="stopped"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="3",guest_name="stopped-c",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="3",guest_name="stopped-c",job="proxmox-capacity"}'
+        values: "500x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="3",guest_name="stopped-c",job="proxmox-capacity"}'
+        values: "600x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="ct",guest_id="1",guest_name="container-d",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="ct",guest_id="1",guest_name="container-d",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="ct",guest_id="1",guest_name="container-d",job="proxmox-capacity"}'
+        values: "600x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0docker",guest_type="vm",guest_id="1",guest_name="other-host",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0docker",guest_type="vm",guest_id="1",guest_name="other-host",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0docker",guest_type="vm",guest_id="1",guest_name="other-host",job="proxmox-capacity"}'
+        values: "900x36"
+      - series: 'fleet_proxmox_host_memory_total_bytes{pve_host="0mcp",host="pve-0mcp",job="proxmox-capacity"}'
+        values: "1000x36"
+      - series: 'fleet_proxmox_host_memory_total_bytes{pve_host="0docker",host="pve-0docker",job="proxmox-capacity"}'
+        values: "1000x36"
+    alert_rule_test:
+      - {eval_time: 170m, alertname: ProxmoxHostGuaranteedMemoryOverBudget, exp_alerts: []}
+
+  - name: a VM with balloon 0 and no minimum series counts at its whole memory and tips 801 of 1000 over the line
+    interval: 5m
+    input_series:
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity",status="running"}'
+        values: "1x24"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "1x24"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "500x24"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "900x24"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity",status="running"}'
+        values: "1x24"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity"}'
+        values: "0x24"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity"}'
+        values: "301x24"
+      - series: 'fleet_proxmox_host_memory_total_bytes{pve_host="0mcp",host="pve-0mcp",job="proxmox-capacity"}'
+        values: "1000x24"
+    alert_rule_test:
+      - eval_time: 70m
+        alertname: ProxmoxHostGuaranteedMemoryOverBudget
+        exp_alerts:
+          - exp_labels: {severity: warning, service: proxmox_host_memory_budget, pve_host: "0mcp"}
+            exp_annotations:
+              summary: "Hypervisor 0mcp: balloon floors plus fixed VMs are 80.1% of RAM (budget 80%)"
+              description: "The running VMs of 0mcp are guaranteed 80.1% of the host's RAM (balloon floors plus VMs with balloon 0), over the 80% budget. pvestatd keeps every ballooned guest at its floor while the host is over its ballooning target (85% used on this node), and a guaranteed footprint above 80% leaves too little room under that target for guests to hold anything above their floors, so the floors are the real sizes and the maximums do not matter. Do not add a VM or raise a floor or a fixed size before cutting the same amount elsewhere; the table and the apply order are in the runbook."
+              runbook_url: docs/runbooks/pve-0mcp-memory-budget.md
+
+  - name: an excursion over the line that lasts under an hour does not fire (the alert waits an hour)
+    interval: 5m
+    input_series:
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "500x36"
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity",status="running"}'
+        values: "1x36"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity"}'
+        values: "0x36"
+      - series: 'fleet_proxmox_guest_memory_limit_bytes{pve_host="0mcp",guest_type="vm",guest_id="2",guest_name="fixed-b",job="proxmox-capacity"}'
+        values: "300x6 400x11 300x19"
+      - series: 'fleet_proxmox_host_memory_total_bytes{pve_host="0mcp",host="pve-0mcp",job="proxmox-capacity"}'
+        values: "1000x36"
+    alert_rule_test:
+      - {eval_time: 55m, alertname: ProxmoxHostGuaranteedMemoryOverBudget, exp_alerts: []}
+      - {eval_time: 85m, alertname: ProxmoxHostGuaranteedMemoryOverBudget, exp_alerts: []}
+      - {eval_time: 100m, alertname: ProxmoxHostGuaranteedMemoryOverBudget, exp_alerts: []}
+
+  - name: without the host total series there is nothing to divide by and no alert
+    interval: 5m
+    input_series:
+      - series: 'fleet_proxmox_guest_info{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity",status="running"}'
+        values: "1x24"
+      - series: 'fleet_proxmox_guest_balloon_enabled{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "1x24"
+      - series: 'fleet_proxmox_guest_balloon_minimum_bytes{pve_host="0mcp",guest_type="vm",guest_id="1",guest_name="balloon-a",job="proxmox-capacity"}'
+        values: "900x24"
+    alert_rule_test:
+      - {eval_time: 100m, alertname: ProxmoxHostGuaranteedMemoryOverBudget, exp_alerts: []}

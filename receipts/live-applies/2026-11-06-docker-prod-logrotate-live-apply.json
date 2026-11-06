@@ -1,0 +1,52 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-11-06-docker-prod-logrotate-live-apply",
+  "applied_on": "2026-11-06",
+  "recorded_on": "2026-11-06",
+  "recorded_by": "codex",
+  "source_commit": "1a763555767dbb43783a33e556c55cc467d528a0",
+  "repo_version_context": "0.179.52",
+  "workflow_id": "adr-0226-docker-prod-logrotate-live-apply",
+  "summary": "Replaced a legacy catch-all fleet-defaults logrotate stanza that matched distro-owned files twice and failed every daily run, with an explicit policy for the four active fleet-tool log paths.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-prod",
+      "vmid": "101"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Previous failure reproduced",
+      "result": "pass",
+      "observed": "logrotate.service had Result=exit-code, ExecMainStatus=1 and duplicate entries for alternatives.log and apt/history.log. fleet-defaults used /var/log/*.log and /var/log/**/*.log."
+    },
+    {
+      "check": "Combined policy validates",
+      "result": "pass",
+      "observed": "After replacing the file at 2026-11-06T16:37:31Z, logrotate --debug /etc/logrotate.conf exited zero. Debug output considers all four active tool files and distro-owned apt, alternatives, dpkg, cloud-init and unattended-upgrades logs under their package policies."
+    },
+    {
+      "check": "Daily service recovered",
+      "result": "pass",
+      "observed": "systemctl start logrotate.service succeeded; Result=success, ExecMainStatus=0, logrotate.timer active. Backup and validation output: /var/backups/fleet-logrotate/20261106T163731Z/."
+    },
+    {
+      "check": "Codified apply is repeatable",
+      "result": "pass",
+      "observed": "The targeted Ansible apply.yml matched the installed file and completed ok=3 changed=0 failed=0; full-system debug validation passed again. Check mode also reported changed=0 failed=0."
+    }
+  ],
+  "evidence_refs": [
+    "config/0docker/docker-prod-logrotate/fleet-defaults.conf",
+    "config/0docker/docker-prod-logrotate/apply.yml",
+    "config/0docker/docker-prod-logrotate/README.md"
+  ],
+  "notes": [
+    "Static policy matches the installed file byte-for-byte. It retains seven daily rotations and a 100 MiB size trigger, with copytruncate so open writers keep logging.",
+    "Package policies remain the authority for OS logs. New tool paths need explicit coverage.",
+    "Rollback restores /var/backups/fleet-logrotate/20261106T163731Z/fleet-defaults and validates the full config; the old file reproduces the original duplicate-policy failure."
+  ],
+  "service_ids": []
+}

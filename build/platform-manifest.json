@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.51",
-  "platform_version": "0.179.51",
-  "generated_at": "2026-10-14T02:19:10Z",
-  "next_refresh_at": "2026-10-14T03:19:10Z",
+  "repo_version": "0.179.57",
+  "platform_version": "0.179.59",
+  "generated_at": "2026-11-06T20:53:45Z",
+  "next_refresh_at": "2026-11-06T21:53:45Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",
@@ -37,7 +37,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://api.example.com",
-        "last_live_apply": "2026-10-13T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "artifact_cache": {
@@ -49,7 +49,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.80:5001/v2/",
-        "last_live_apply": "2026-10-12T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "authentik": {
@@ -84,7 +84,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:8096",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "changedetection": {
@@ -96,7 +96,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:5000",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "changelog_portal": {
@@ -141,7 +141,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:11235",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "dify": {
@@ -153,7 +153,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://agents.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "directus": {
@@ -165,7 +165,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://data.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "docker_build": {
@@ -177,7 +177,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://build.example.com",
-        "last_live_apply": "2026-10-12T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "docker_runtime": {
         "service_name": "Docker Runtime VM",
@@ -188,7 +188,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "docs_portal": {
         "service_name": "Developer Portal",
@@ -210,7 +210,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://logs.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "excalidraw": {
@@ -222,7 +222,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://draw.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "flagsmith": {
@@ -234,7 +234,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://flags.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "gitea": {
         "service_name": "Gitea",
@@ -245,7 +245,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3009",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "glitchtip": {
@@ -257,7 +257,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://errors.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "gotenberg": {
@@ -293,7 +293,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grist.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "harbor": {
@@ -305,7 +305,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://registry.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "headscale": {
@@ -317,7 +317,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://headscale.example.com",
-        "last_live_apply": "2026-08-31T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "homepage": {
         "service_name": "Homepage",
@@ -340,7 +340,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://annotate.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "lago": {
@@ -352,7 +352,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://billing.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "langfuse": {
         "service_name": "Langfuse",
@@ -363,7 +363,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://langfuse.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "librechat": {
@@ -375,7 +375,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://chat.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "litellm": {
         "service_name": "LiteLLM",
@@ -386,7 +386,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:4000",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "livekit": {
         "service_name": "LiveKit",
@@ -431,7 +431,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://matrix.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "mattermost": {
@@ -443,7 +443,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8066",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "minio": {
         "service_name": "MinIO",
@@ -454,7 +454,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://minio.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "n8n": {
@@ -466,7 +466,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://n8n.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "nats_jetstream": {
         "service_name": "NATS JetStream",
@@ -500,7 +500,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8004",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "nextcloud": {
@@ -512,7 +512,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://cloud.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "nginx_edge": {
@@ -547,7 +547,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://ntfy.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "ntopng": {
         "service_name": "ntopng",
@@ -558,7 +558,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3001",
-        "last_live_apply": "2026-08-31T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "ollama": {
         "service_name": "Ollama",
@@ -569,7 +569,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:11434",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "openbao": {
         "service_name": "OpenBao",
@@ -604,7 +604,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://ops.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "outline": {
         "service_name": "Outline",
@@ -615,7 +615,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://wiki.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "paperless": {
@@ -627,7 +627,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://paperless.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "piper": {
@@ -639,7 +639,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:8100",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "plane": {
@@ -651,7 +651,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://tasks.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "platform_context_api": {
@@ -663,7 +663,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8010",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "plausible": {
@@ -675,7 +675,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://analytics.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "portainer": {
@@ -687,7 +687,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9444",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "postgres": {
         "service_name": "PostgreSQL",
@@ -698,7 +698,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "postgres://database.example.com:5432",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "proxmox_ui": {
         "service_name": "Proxmox UI",
@@ -709,7 +709,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.example.com",
-        "last_live_apply": "2026-08-31T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "redpanda": {
         "service_name": "Redpanda",
@@ -720,7 +720,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "kafka://10.10.10.20:9092",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "repo_intake": {
         "service_name": "Repo Intake",
@@ -731,7 +731,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://repo-intake.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "repowise": {
         "service_name": "Repowise Semantic Code Search",
@@ -742,7 +742,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://repowise.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "searxng": {
         "service_name": "SearXNG",
@@ -753,7 +753,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://search.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "semaphore": {
         "service_name": "Semaphore",
@@ -788,7 +788,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://files.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "status_page": {
         "service_name": "Public Status Page",
@@ -811,7 +811,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
-        "last_live_apply": "2026-10-07T00:00:00Z"
+        "last_live_apply": "2026-10-14T00:00:00Z"
       },
       "superset": {
         "service_name": "Apache Superset",
@@ -822,7 +822,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://bi.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "temporal": {
@@ -869,7 +869,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8016",
-        "last_live_apply": "2026-10-13T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "uptime_kuma": {
@@ -893,7 +893,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://vault.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       },
       "windmill": {
@@ -917,7 +917,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://ci.example.com",
-        "last_live_apply": "2026-10-07T00:00:00Z",
+        "last_live_apply": "2026-10-14T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -4133,6 +4133,32 @@
         "runbook": "docs/runbooks/validation-gate.md"
       },
       {
+        "id": "provision-agent-history-vm",
+        "description": "Provision the dedicated agent-history VM (vmid 155) with a per-guest play that limits the guests role to that vmid, and converge the agent-history store runtime on it.",
+        "tags": [
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "provision-agent-history-vm",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 260,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-agent-history.md"
+      },
+      {
         "id": "provision-api-access",
         "description": "Create and verify the durable Proxmox API automation identity and token.",
         "tags": [
@@ -5100,6 +5126,16 @@
         ]
       },
       {
+        "id": "configure-agent-history",
+        "title": "Configure the agent-history VM",
+        "agent_trust_required": "T3",
+        "steps": 33,
+        "path": "docs/runbooks/configure-agent-history.md",
+        "workflow_ids": [
+          "provision-agent-history-vm"
+        ]
+      },
+      {
         "id": "configure-api-gateway",
         "title": "Configure API Gateway",
         "agent_trust_required": "T3",
@@ -5316,7 +5352,7 @@
         "id": "configure-guest-network-policy",
         "title": "Configure Guest Network Policy",
         "agent_trust_required": "T3",
-        "steps": 14,
+        "steps": 20,
         "path": "docs/runbooks/configure-guest-network-policy.md",
         "workflow_ids": [
           "converge-guest-network-policy"
@@ -6401,10 +6437,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.50",
-    "deployed_at": "2026-10-12",
-    "summary": "Add the `scanopy-retag` job to the monitoring VM: every 15 minutes it tags Docker bridge subnets in Scanopy with `docker-bridge` (additive only, fail-closed guards) so the topology, which hides that tag, stays readable; adds the `ScanopyRetagStale` and `ScanopyRetagMetricsAbsent` alerts. Add the `scanopy-discover` timer to the monitoring VM: Scanopy's own scheduler does not fire reliably, so the daily Docker VM discoveries (16 hosts, distinct UTC quarter-hour slots) are started through the Scanopy API, skipping hosts that already ran; adds the `ScanopyDiscoverStale`, `ScanopyDiscoverMetricsAbsent` and `ScanopyDiscoveryOverdue` alerts.",
-    "release_notes_url": "docs/release-notes/0.179.51.md"
+    "last_version": "0.179.56",
+    "deployed_at": "2026-11-06",
+    "summary": "Keep sanitized Tailnet identities in generic shared-address space so exported network-policy checks retain their source classification. Prune only accepted findings eliminated by the public projection; reject new non-info findings, malformed policy/baseline pairs and unsafe file aliases before writing exported baselines.",
+    "release_notes_url": "docs/release-notes/0.179.57.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -6475,6 +6511,13 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0395-agent-interface-abstraction-layer.md"
+    },
+    {
+      "adr": "0494",
+      "title": "The agent-history store runs on its own guest with its own Postgres",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0494-agent-history.md"
     }
   ]
 }

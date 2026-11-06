@@ -89,6 +89,15 @@
           | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='role'))
         )
       }}
+    # Guests with `network_policy_all_guests: false` are left out of every `all_guests` source expansion (named-source rules are unaffected).
+    linux_guest_firewall_all_guests_excluded: >-
+      {{
+        hostvars[linux_guest_firewall_host_id].proxmox_guests
+        | selectattr('network_policy_all_guests', 'defined')
+        | rejectattr('network_policy_all_guests')
+        | map(attribute='name')
+        | list
+      }}
 
 - name: Render guest nftables policy
   ansible.builtin.template:

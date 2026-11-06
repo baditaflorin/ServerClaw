@@ -12,6 +12,9 @@ table inet filter {
     type filter hook forward priority 0;
     policy drop;
     ct state related,established accept
+    # Never forward private space to the public uplink: a missing route would otherwise
+    # masquerade it onto the WAN and Hetzner reports it as a netscan (abuse 2610:Q6J2SHOZK9CK).
+    oifname "{{ proxmox_wan_bridge }}" ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10 } counter drop
     ip saddr {{ proxmox_internal_network }} accept
     iifname "tailscale0" ip daddr {{ proxmox_internal_network }} accept
 {% if proxmox_staging_bridge_enabled | default(false) %}

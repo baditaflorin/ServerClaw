@@ -1,0 +1,93 @@
+id: ws-0529-0infer-observability
+adr: "0011"
+title: Add 0infer to Scanopy inventory and fleet observability
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/ws-0529-monitoring-ssh-scope
+worktree_path: .worktrees/ws-0529-monitoring-ssh-scope
+doc: docs/workstreams/ws-0529-0infer-observability.md
+depends_on:
+  - ws-0528-0infer-ci-worker
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/files/scanopy-onboard/scanopy_onboard_hv.py
+  - config/tailscale/policy.hujson
+  - docs/runbooks/scanopy-service-discovery.md
+  - inventory/fleet-observability.yml
+  - inventory/host_vars/monitoring.yml
+  - tests/promtool/fleet_backup_freshness_rules_test.yml
+  - tests/test_monitoring_prometheus_codification.py
+  - tests/test_scanopy_onboard_hv.py
+  - workstreams/active/ws-0529-0infer-observability.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0529-0infer-observability.md
+  - changelog.md
+ownership_manifest:
+  owned_surfaces:
+    - id: scanopy_onboarding_for_0infer
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/files/scanopy-onboard/scanopy_onboard_hv.py
+        - tests/test_scanopy_onboard_hv.py
+        - docs/workstreams/ws-0529-0infer-observability.md
+      mode: exclusive
+    - id: monitoring_vm_targets
+      paths:
+        - inventory/host_vars/monitoring.yml
+        - tests/test_monitoring_prometheus_codification.py
+      mode: shared_contract
+      contract: monitoring-vm-targets-v1
+    - id: scanopy_onboarding_runbook
+      paths:
+        - docs/runbooks/scanopy-service-discovery.md
+      mode: shared_contract
+      contract: scanopy-discovery-runbook-v1
+    - id: 0infer_exporter_inventory
+      paths:
+        - inventory/fleet-observability.yml
+      mode: shared_contract
+      contract: fleet-observability-inventory-v1
+    - id: existing_backup_metric_host_label
+      paths:
+        - tests/promtool/fleet_backup_freshness_rules_test.yml
+      mode: shared_contract
+      contract: prometheus-backup-alert-label-v1
+    - id: 0infer_tailscale_permissions
+      paths:
+        - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-0529-0infer-observability.yaml
+        - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
+        - workstreams/active/ws-0523-fleet-observability-roles.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: release_integration
+      paths:
+        - changelog.md
+        - README.md
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+canonical_truth:
+  changelog_entry: Add 0infer to private Scanopy discovery and host/PostgreSQL node-exporter monitoring.
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  Extend the existing observability and Scanopy automation to cover the 0infer
+  Proxmox host and PostgreSQL guest using private Tailscale connectivity.
+tasks:
+  - id: t1
+    title: Add private Scanopy onboarding access for 0infer guests
+    status: in_progress
+  - id: t2
+    title: Add Tailscale grants and node exporter inventory for the host and PostgreSQL guest
+    status: in_progress

@@ -1,0 +1,58 @@
+# promtool unit tests for the fleet-edge-probe alerts in config/prometheus/rules/fleet-edge-probe.yml (run by tests/test_fleet_edge_probe_vantage_alert.py when
+# promtool is installed; written 2026-10-19). promtool starts its clock at the Unix epoch, so a timestamp series whose value equals its own time in seconds means
+# "just ran": "0+60x300" at a 1m interval is a probe that finishes a run every minute. Two vantages report: the CT108 builder and the monitoring VM on 0mcp.
+rule_files:
+  - ../../config/prometheus/rules/fleet-edge-probe.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: both vantages run every minute, nothing fires
+    interval: 1m
+    input_series:
+      - series: 'fleet_edge_probe_last_run{vantage="builder-lxc108-0docker"}'
+        values: "0+60x300"
+      - series: 'fleet_edge_probe_last_run{vantage="monitoring-lv3-0mcp"}'
+        values: "0+60x300"
+    alert_rule_test:
+      - {eval_time: 200m, alertname: FleetEdgeProbeStale, exp_alerts: []}
+      - {eval_time: 200m, alertname: FleetEdgeProbeVantageStale, exp_alerts: []}
+
+  - name: one dead vantage is named even though the other keeps the whole-probe alert quiet
+    interval: 1m
+    input_series:
+      # the builder's last run was at 0 s and its textfile keeps that value (a unit that exits 2 on every run); the monitoring VM keeps reporting
+      - series: 'fleet_edge_probe_last_run{vantage="builder-lxc108-0docker"}'
+        values: "0x300"
+      - series: 'fleet_edge_probe_last_run{vantage="monitoring-lv3-0mcp"}'
+        values: "0+60x300"
+    alert_rule_test:
+      - {eval_time: 30m, alertname: FleetEdgeProbeVantageStale, exp_alerts: []}      # silent for 1800 s: under the hour
+      - {eval_time: 65m, alertname: FleetEdgeProbeVantageStale, exp_alerts: []}      # over the hour (3900 s) but inside the 10 m delay
+      - eval_time: 90m
+        alertname: FleetEdgeProbeVantageStale
+        exp_alerts:
+          - exp_labels: {severity: warning, vantage: builder-lxc108-0docker}
+            exp_annotations: {summary: "fleet-edge-probe vantage builder-lxc108-0docker stopped reporting (>1h)", description: "No fleet_edge_probe_last_run update for over an hour from this vantage while another one may still be fresh. On the CT108 builder run systemctl status fleet-edge-probe: exit 2 with 'no eligible services matched filters' means EDGE_PROBE_RUNTIME in /etc/default/fleet-edge-probe matches no runtime in the registry."}
+      - {eval_time: 90m, alertname: FleetEdgeProbeStale, exp_alerts: []}              # the old alert stays quiet: max() is fresh, which is the gap this rule closes
+
+  - name: when every vantage is dead the whole-probe alert fires as before and both vantages are named
+    interval: 1m
+    input_series:
+      - series: 'fleet_edge_probe_last_run{vantage="builder-lxc108-0docker"}'
+        values: "0x300"
+      - series: 'fleet_edge_probe_last_run{vantage="monitoring-lv3-0mcp"}'
+        values: "0x300"
+    alert_rule_test:
+      - eval_time: 90m
+        alertname: FleetEdgeProbeStale
+        exp_alerts:
+          - exp_labels: {severity: warning}
+            exp_annotations: {summary: "fleet-edge-probe stopped reporting (>1h)", description: "No fleet_edge_probe_last_run update for over an hour from any vantage. The external edge monitor is blind."}
+      - eval_time: 90m
+        alertname: FleetEdgeProbeVantageStale
+        exp_alerts:
+          - exp_labels: {severity: warning, vantage: builder-lxc108-0docker}
+            exp_annotations: {summary: "fleet-edge-probe vantage builder-lxc108-0docker stopped reporting (>1h)", description: "No fleet_edge_probe_last_run update for over an hour from this vantage while another one may still be fresh. On the CT108 builder run systemctl status fleet-edge-probe: exit 2 with 'no eligible services matched filters' means EDGE_PROBE_RUNTIME in /etc/default/fleet-edge-probe matches no runtime in the registry."}
+          - exp_labels: {severity: warning, vantage: monitoring-lv3-0mcp}
+            exp_annotations: {summary: "fleet-edge-probe vantage monitoring-lv3-0mcp stopped reporting (>1h)", description: "No fleet_edge_probe_last_run update for over an hour from this vantage while another one may still be fresh. On the CT108 builder run systemctl status fleet-edge-probe: exit 2 with 'no eligible services matched filters' means EDGE_PROBE_RUNTIME in /etc/default/fleet-edge-probe matches no runtime in the registry."}

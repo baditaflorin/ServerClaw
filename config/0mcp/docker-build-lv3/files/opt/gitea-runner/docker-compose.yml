@@ -1,0 +1,28 @@
+---
+services:
+  runner:
+    image: docker.io/gitea/act_runner:0.4.0
+    container_name: 0mcp-gitea-runner
+    restart: unless-stopped
+    environment:
+      CONFIG_FILE: /config.yaml
+      GITEA_INSTANCE_URL: http://10.10.10.92:3003
+      # GITEA_RUNNER_REGISTRATION_TOKEN: none on purpose. The runner is registered (/opt/gitea-runner/data/.runner); the token is only read when that file is missing.
+      # To register again, run: gitea actions generate-runner-token (on the Gitea host) and pass the token once, never keep it in this file.
+      GITEA_RUNNER_NAME: docker-build
+      GITEA_RUNNER_LABELS: self-hosted:host,linux:host,amd64:host,docker:docker
+      GITEA_RUNNER_HOST_DATA_DIR: /opt/gitea-runner/data
+    volumes:
+      - /opt/gitea-runner/config.yaml:/config.yaml
+      - /opt/gitea-runner/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/gitea-runner/credentials/renovate:/var/run/lv3/renovate:ro
+    networks:
+      - default
+
+networks:
+  default:
+    name: gitea_runner_default
+    ipam:
+      config:
+        - subnet: 172.16.241.0/24

@@ -1,0 +1,136 @@
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+# The compose project is started by agent-history.service, which only runs while {{ agent_history_data_mount }} is a mount point.
+# If docker starts a container first (restart: unless-stopped after a reboot), the database bind mount below refuses to
+# create a missing source (create_host_path: false) and the empty mount point is immutable, so nothing can land on the
+# unencrypted OS disk. Nothing is published except the store on the loopback address.
+name: agent-history
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "{{ agent_history_docker_log_max_size }}"
+    max-file: "{{ agent_history_docker_log_max_file }}"
+
+services:
+  openbao-agent:
+    image: {{ agent_history_openbao_agent_image }}
+    container_name: agent-history-openbao-agent
+    # Same uid as the store: the files it renders are readable by the store and by nobody else.
+    user: "{{ agent_history_run_uid }}:{{ agent_history_run_gid }}"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp
+    volumes:
+      - {{ agent_history_agent_dir }}:/openbao-agent:ro
+      - {{ agent_history_run_dir }}:/run/agent-history
+    healthcheck:
+      test: ["CMD-SHELL", "test -s /run/agent-history/store.env && test -s /run/agent-history/db.env && test -s /run/agent-history/embed-token"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    logging: *logging
+
+  db:
+    image: {{ agent_history_db_image }}
+    container_name: agent-history-db
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    # POSTGRES_PASSWORD only; rendered by the OpenBao Agent, read by the docker CLI as root.
+    # required: false because compose parses every env_file at load, before the OpenBao Agent (started first by agent-history.service) has rendered it.
+    env_file:
+      - path: {{ agent_history_run_dir }}/db.env
+        required: false
+    environment:
+      POSTGRES_USER: agent_history
+      POSTGRES_DB: agent_history
+    command:
+      - postgres
+      - -c
+      - default_toast_compression=lz4
+      - -c
+      - shared_buffers={{ agent_history_postgres_shared_buffers }}
+      - -c
+      - effective_cache_size={{ agent_history_postgres_effective_cache_size }}
+      - -c
+      - work_mem=16MB
+      - -c
+      - maintenance_work_mem=256MB
+      - -c
+      - max_wal_size=4GB
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - jit=off
+      - -c
+      - max_connections=30
+      # Postgres can write row text into its log (a failing COPY names the row): keep statements, details and context out.
+      - -c
+      - log_error_verbosity=terse
+      - -c
+      - log_statement=none
+      - -c
+      - log_min_error_statement=panic
+    volumes:
+      - type: bind
+        source: {{ agent_history_pgdata_dir }}
+        target: /var/lib/postgresql/data
+        bind:
+          create_host_path: false
+    shm_size: 512mb
+    mem_limit: {{ agent_history_db_memory_limit }}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agent_history -d agent_history"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: *logging
+
+  store:
+    image: {{ agent_history_store_image }}
+    container_name: agent-history-store
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      openbao-agent:
+        condition: service_healthy
+    # AGENT_HISTORY_DATABASE_URL only; the tokens are files in the mounted directory so that SIGHUP rotates them.
+    env_file:
+      - path: {{ agent_history_run_dir }}/store.env
+        required: false
+    command:
+      - serve
+      - -listen=:{{ agent_history_store_port }}
+      - -partitionsAhead=3
+      - -readTokenFile=/run/agent-history/read-tokens
+      - -writeTokensFile=/run/agent-history/write-tokens
+      - -metricsTokenFile=/run/agent-history/metrics-token
+      # The embedding worker's own token: /v1/embed/* and nothing else.
+      - -embedTokenFile=/run/agent-history/embed-token
+{% if agent_history_embed_url | length > 0 %}
+      # Embeds the search QUESTION at query time; the worker fills the vectors. A slow or unreachable endpoint degrades the search to text.
+      - -embedUrl={{ agent_history_embed_url }}
+      - -embedModel={{ agent_history_embed_model }}
+      - -embedApi={{ agent_history_embed_api }}
+      - -embedDimensions={{ agent_history_embed_dimensions }}
+      - -embedTimeout={{ agent_history_embed_timeout }}
+      - -embedCacheSize={{ agent_history_embed_cache_size }}
+{% endif %}
+    ports:
+      - "{{ agent_history_store_bind }}:{{ agent_history_store_port }}:{{ agent_history_store_port }}"
+    volumes:
+      # The directory, not single files: the OpenBao Agent replaces files atomically and a file mount would go stale.
+      - {{ agent_history_run_dir }}:/run/agent-history:ro
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: {{ agent_history_store_memory_limit }}
+    logging: *logging

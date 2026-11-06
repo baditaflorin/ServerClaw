@@ -1,0 +1,372 @@
+# Purpose: Converge the agent-history store (Postgres with pgvector and agent-store) on its dedicated guest: encrypted data volume, OpenBao-delivered token files, compose project, tailnet publication and metrics bridge.
+# Use case: Run from playbooks/agent-history-vm.yml after the guest exists; safe to re-run, and safe while the data volume is still locked.
+# Inputs: the agent_history_* variables in defaults/main.yml; the owner-delivered AppRole files; an agent-store image loaded into the local Docker (agent_history_store_image).
+# Outputs: Units, helper scripts, OpenBao Agent configuration and the compose file; the compose project only when the volume is unlocked and every prerequisite is present.
+# Idempotency: Idempotent. It never formats a disk, never creates or reads a secret value, and starts the stack only when its prerequisites hold.
+# Dependencies: ADR 0494, ADR 0077, ADR 0231; role lv3.platform.docker_runtime converged before it.
+---
+- name: Validate agent-history runtime inputs
+  ansible.builtin.assert:
+    that:
+      - agent_history_store_bind == '127.0.0.1'
+      - agent_history_run_dir is match('^/run/')
+      - agent_history_data_mount is match('^/srv/')
+      - agent_history_pgdata_dir is match('^' ~ agent_history_data_mount ~ '/')
+      - agent_history_openbao_keys.keys() | sort | list == ['db_password', 'embed_tokens', 'metrics_token', 'read_tokens', 'write_tokens']
+      - agent_history_tailscale_https_port | int > 0
+      - agent_history_embed_api in ['ollama', 'openai']
+      - agent_history_embed_dimensions | int > 0
+      - >-
+        agent_history_embed_url | length == 0
+        or (agent_history_embed_model | length > 0 and agent_history_embed_url is match('^https?://[^/@\\s]+(/.*)?$'))
+      - >-
+        agent_history_embed_url | length == 0
+        or agent_history_embed_url is match('^https://')
+        or agent_history_embed_url is match('^http://(127\\.|10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|100\\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\\.)')
+      - agent_history_metrics_interval_seconds | int >= 15
+      - >-
+        not (agent_history_canary_scan_enabled | bool)
+        or (agent_history_canary_scan_host is match('^canary-'))
+    fail_msg: >-
+      agent_history_runtime requires the store on the loopback address only, a tmpfs run directory, a data mount under
+      /srv, the five OpenBao key names, a canary- host when the canary scan is enabled, and, when an embeddings endpoint is set,
+      a model name and an https address or an http address on a loopback, private or tailnet (100.64.0.0/10) range.
+
+- name: Ensure the agent-history packages are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - cryptsetup
+      - curl
+      - prometheus-node-exporter
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the agent-history directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ agent_history_site_dir }}"
+      mode: "0755"
+    - path: "{{ agent_history_agent_dir }}"
+      mode: "0755"
+    - path: "{{ agent_history_state_dir }}"
+      mode: "0700"
+    - path: "{{ agent_history_textfile_dir }}"
+      mode: "0755"
+
+- name: Install the tmpfs directory rule for the rendered secret files
+  ansible.builtin.template:
+    src: agent-history-tmpfiles.conf.j2
+    dest: /etc/tmpfiles.d/agent-history.conf
+    owner: root
+    group: root
+    mode: "0644"
+  register: agent_history_tmpfiles
+
+- name: Create the tmpfs directory for the rendered secret files
+  ansible.builtin.command:
+    argv:
+      - systemd-tmpfiles
+      - --create
+      - /etc/tmpfiles.d/agent-history.conf
+  changed_when: agent_history_tmpfiles.changed
+
+# --- the encrypted data volume ------------------------------------------------------------------------------------------
+- name: Check whether the encrypted data volume is mounted
+  ansible.builtin.command:
+    argv:
+      - mountpoint
+      - -q
+      - "{{ agent_history_data_mount }}"
+  register: agent_history_mountpoint
+  failed_when: false
+  changed_when: false
+
+- name: Record whether the encrypted data volume is mounted
+  ansible.builtin.set_fact:
+    agent_history_data_mounted: "{{ agent_history_mountpoint.rc == 0 }}"
+
+- name: Ensure the data mount point exists while nothing is mounted on it
+  ansible.builtin.file:
+    path: "{{ agent_history_data_mount }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: not agent_history_data_mounted | bool
+
+- name: Make the empty mount point immutable so nothing can be written to the unencrypted disk under it
+  ansible.builtin.file:
+    path: "{{ agent_history_data_mount }}"
+    state: directory
+    attributes: "+i"
+  when: not agent_history_data_mounted | bool
+
+- name: Ensure the Postgres data directory exists on the unlocked volume
+  ansible.builtin.file:
+    path: "{{ agent_history_pgdata_dir }}"
+    state: directory
+    owner: "999"
+    group: "999"
+    mode: "0700"
+  when: agent_history_data_mounted | bool
+
+- name: Install the unlock helper and the metrics bridge
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ agent_history_helper_dir }}/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0750"
+  loop:
+    - src: agent-history-unlock.sh.j2
+      dest: agent-history-unlock
+    - src: agent-history-metrics.sh.j2
+      dest: agent-history-metrics
+
+# --- OpenBao Agent configuration (no secret in any of it) ------------------------------------------------------------------
+- name: Render the OpenBao Agent configuration and its secret templates
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ agent_history_agent_dir }}/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - src: openbao-agent.hcl.j2
+      dest: agent.hcl
+    - src: db.env.ctmpl.j2
+      dest: db.env.ctmpl
+    - src: store.env.ctmpl.j2
+      dest: store.env.ctmpl
+    - src: read-tokens.ctmpl.j2
+      dest: read-tokens.ctmpl
+    - src: write-tokens.ctmpl.j2
+      dest: write-tokens.ctmpl
+    - src: metrics-token.ctmpl.j2
+      dest: metrics-token.ctmpl
+    - src: embed-token.ctmpl.j2
+      dest: embed-token.ctmpl
+    - src: metrics-header.ctmpl.j2
+      dest: metrics-header.ctmpl
+  register: agent_history_agent_config
+
+- name: Check for the AppRole files the owner delivers (existence only, never read)
+  ansible.builtin.stat:
+    path: "{{ item }}"
+    get_checksum: false
+  loop:
+    - "{{ agent_history_role_id_file }}"
+    - "{{ agent_history_secret_id_file }}"
+  register: agent_history_approle_stat
+
+- name: Restrict the AppRole files to the OpenBao Agent's uid when they exist
+  ansible.builtin.file:
+    path: "{{ item.item }}"
+    owner: "{{ agent_history_run_uid }}"
+    group: "{{ agent_history_run_gid }}"
+    mode: "0400"
+  loop: "{{ agent_history_approle_stat.results }}"
+  loop_control:
+    label: "{{ item.item | basename }}"
+  when: item.stat.exists
+
+- name: Record whether the AppRole files are delivered
+  ansible.builtin.set_fact:
+    agent_history_approle_ready: "{{ agent_history_approle_stat.results | selectattr('stat.exists') | list | length == 2 }}"
+
+# --- compose project --------------------------------------------------------------------------------------------------------
+- name: Check that the agent-store image is loaded into the local Docker
+  ansible.builtin.command:
+    argv:
+      - docker
+      - image
+      - inspect
+      - --format
+      - "{% raw %}{{.Id}}{% endraw %}"
+      - "{{ agent_history_store_image }}"
+  register: agent_history_store_image_inspect
+  failed_when: false
+  changed_when: false
+  when: agent_history_store_image | length > 0
+
+- name: Record whether the compose project can be rendered and started
+  ansible.builtin.set_fact:
+    agent_history_render_compose: "{{ agent_history_store_image | length > 0 }}"
+    agent_history_store_image_loaded: "{{ agent_history_store_image | length > 0 and agent_history_store_image_inspect.rc == 0 }}"
+
+- name: Render the compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ agent_history_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: agent_history_compose_template
+  when: agent_history_render_compose | bool
+
+- name: Install the compose project unit and the metrics bridge units
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - agent-history.service
+    - agent-history-metrics.service
+    - agent-history-metrics.timer
+  notify: Reload systemd units for agent-history
+
+- name: Apply pending systemd changes before enabling units
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable the compose project unit (it only starts while the data volume is mounted)
+  ansible.builtin.systemd:
+    name: agent-history.service
+    enabled: true
+    daemon_reload: true
+
+- name: Enable and start the metrics bridge timer
+  ansible.builtin.systemd:
+    name: agent-history-metrics.timer
+    enabled: true
+    state: started
+
+- name: Report why the compose project is not started
+  ansible.builtin.debug:
+    msg: >-
+      Not starting the agent-history compose project:
+      data volume mounted={{ agent_history_data_mounted }},
+      AppRole files delivered={{ agent_history_approle_ready }},
+      agent-store image loaded={{ agent_history_store_image_loaded }}.
+      The runbook (docs/runbooks/configure-agent-history.md) lists the owner steps that provide each one.
+  when: >-
+    not (agent_history_data_mounted | bool
+    and agent_history_approle_ready | bool
+    and agent_history_store_image_loaded | bool)
+
+- name: Start or refresh the compose project when every prerequisite holds
+  ansible.builtin.systemd:
+    name: agent-history.service
+    state: "{{ 'restarted' if (agent_history_compose_template.changed | default(false) or agent_history_agent_config.changed) else 'started' }}"
+  when:
+    - agent_history_data_mounted | bool
+    - agent_history_approle_ready | bool
+    - agent_history_store_image_loaded | bool
+
+- name: Record whether the compose project was started by this run
+  ansible.builtin.set_fact:
+    agent_history_stack_started: >-
+      {{ agent_history_data_mounted | bool and agent_history_approle_ready | bool and agent_history_store_image_loaded | bool }}
+
+# --- publication on the tailnet -------------------------------------------------------------------------------------------------
+- name: Read the tailnet state of this guest
+  ansible.builtin.command:
+    argv:
+      - tailscale
+      - status
+      - --json
+  register: agent_history_tailscale_status
+  failed_when: false
+  changed_when: false
+  when: agent_history_tailscale_serve_enabled | bool
+
+- name: Record whether this guest is on the tailnet
+  ansible.builtin.set_fact:
+    agent_history_tailnet_up: >-
+      {{
+        agent_history_tailscale_serve_enabled | bool
+        and agent_history_tailscale_status.rc == 0
+        and (agent_history_tailscale_status.stdout | from_json).BackendState == 'Running'
+      }}
+
+- name: Read the tailscale serve configuration
+  ansible.builtin.command:
+    argv:
+      - tailscale
+      - serve
+      - status
+  register: agent_history_serve_status
+  failed_when: false
+  changed_when: false
+  when: agent_history_tailnet_up | bool
+
+- name: Publish the loopback store listener on the tailnet (TLS is terminated by tailscaled)
+  ansible.builtin.command:
+    argv:
+      - tailscale
+      - serve
+      - --bg
+      - "--https={{ agent_history_tailscale_https_port }}"
+      - "http://127.0.0.1:{{ agent_history_store_port }}"
+  changed_when: true
+  when:
+    - agent_history_tailnet_up | bool
+    - agent_history_serve_status.stdout is not search('http://127.0.0.1:' ~ agent_history_store_port)
+
+- name: Report that the guest has not joined the tailnet yet
+  ansible.builtin.debug:
+    msg: >-
+      The guest is not on the tailnet, so tailscale serve was not configured. The owner mints a one-time key and joins the
+      guest (runbook step); then re-run this playbook. This role never sees the key.
+  when:
+    - agent_history_tailscale_serve_enabled | bool
+    - not agent_history_tailnet_up | bool
+
+# --- nightly canary scan (optional) -----------------------------------------------------------------------------------------------
+- name: Check for the canary scan SQL file the owner delivers (existence only, never read)
+  ansible.builtin.stat:
+    path: "{{ agent_history_canary_scan_sql_file }}"
+    get_checksum: false
+  register: agent_history_canary_sql_stat
+  when: agent_history_canary_scan_enabled | bool
+
+- name: Require the canary scan SQL file when the scan is enabled
+  ansible.builtin.assert:
+    that:
+      - agent_history_canary_sql_stat.stat.exists
+    fail_msg: >-
+      agent_history_canary_scan_enabled is true but {{ agent_history_canary_scan_sql_file }} is missing. Generate it with
+      agent-eval's scripts/dbscan for the canary host and deliver it as root:root 0600, or leave the scan disabled.
+  when: agent_history_canary_scan_enabled | bool
+
+- name: Install the canary scan script and units
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - src: agent-history-canary-scan.sh.j2
+      dest: "{{ agent_history_helper_dir }}/agent-history-canary-scan"
+      mode: "0750"
+    - src: agent-history-canary-scan.service.j2
+      dest: /etc/systemd/system/agent-history-canary-scan.service
+      mode: "0644"
+    - src: agent-history-canary-scan.timer.j2
+      dest: /etc/systemd/system/agent-history-canary-scan.timer
+      mode: "0644"
+  when: agent_history_canary_scan_enabled | bool
+  notify: Reload systemd units for agent-history
+
+- name: Apply pending systemd changes before enabling the canary scan
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start the canary scan timer
+  ansible.builtin.systemd:
+    name: agent-history-canary-scan.timer
+    enabled: true
+    state: started
+  when: agent_history_canary_scan_enabled | bool
+
+- name: Verify the agent-history runtime
+  ansible.builtin.include_tasks: verify.yml
+  when: agent_history_stack_started | bool

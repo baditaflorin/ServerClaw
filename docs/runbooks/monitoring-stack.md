@@ -124,7 +124,7 @@ The 0own host exporter is published by Scanopy service discovery under the
 `pve_0own_host_node_exporter_via_tailscale` job (see
 `docs/runbooks/scanopy-service-discovery.md`). The general monitoring role
 template now also renders the fleet scrape jobs, the public-edge probe job, and
-the OpenObserve `remote_write` block from `inventory/host_vars/monitoring.yml`,
+the OpenObserve `remote_write` block from `inventory/host_vars/monitoring.yml` (empty since 2026-10-14: the push to OpenObserve was disabled; see the comment there to restore it),
 so a full `grafana.yml` convergence no longer erases them. Every rendered
 `prometheus.yml` is validated with `promtool` and applied with SIGHUP.
 
@@ -140,7 +140,7 @@ twice.
 The 0own Proxmox host runs Debian's `prometheus-node-exporter` package. Its
 systemd drop-in at
 `/etc/systemd/system/prometheus-node-exporter.service.d/10-tailscale-only.conf`
-binds the exporter to `203.0.113.3:9100`. The host firewall accepts
+binds the exporter to `100.64.0.3:9100`. The host firewall accepts
 Tailscale interface traffic, and the tailnet policy restricts this metrics port
 to the monitoring VM. If the host's Tailscale address changes, update both the
 drop-in and the production target/grant before restarting the exporter.

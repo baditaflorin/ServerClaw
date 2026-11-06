@@ -1,0 +1,49 @@
+groups:
+  - name: public_edge_critical
+    rules:
+      - alert: PublicEndpointDown
+        expr: probe_success{job="public-edge-critical",probe_kind!="dns"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.service }} failed its {{ $labels.probe_vantage }} HTTPS probe"
+          description: "The configured HTTPS check has failed for at least two minutes. Check public routing, TLS/SNI, and the backend; the 0mcp CI check uses its internal gateway vantage."
+      - alert: PublicEndpointDnsResolutionFailed
+        expr: probe_success{job="public-edge-critical",probe_kind="dns"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: public_dns
+        annotations:
+          summary: "Public DNS returned no A record for {{ $labels.service }}"
+          description: "The monitoring VM queried Google DNS-over-HTTPS and did not receive a valid A answer. Check the authoritative DNS record and public resolver propagation."
+
+      - alert: PublicEdgeProbeTargetBroken
+        expr: up{job="public-edge-critical"} == 0
+        for: 30m
+        labels:
+          severity: warning                  # no static `service` label here: the series' own (which probe) must reach the notification
+        annotations:
+          summary: "The blackbox probe for {{ $labels.service }} ({{ $labels.probe_vantage }}) cannot be scraped: PublicEndpointDown and PublicEndpointDnsResolutionFailed are blind for it"
+          description: "Prometheus gets an error from the blackbox exporter for {{ $labels.instance }} (module {{ $labels.probe_module }}), so no probe_success is produced and the probe alerts stay silent. Usual cause: the file_sd target (public-critical-targets.yml on the monitoring VM, hand-managed) names a module that /etc/prometheus/blackbox.yml does not define (`curl 'http://127.0.0.1:9115/probe?module=<module>&target=<url>'` answers `Unknown module`): the source of the modules is config/blackbox/blackbox.yml in the repo, a live-only edit is overwritten by the next deploy (2026-10-11: two probes, ci.example.org through the internal gateway and badita.example.com DNS-over-HTTPS, were blind for a week). Otherwise the exporter itself is down (`systemctl status prometheus-blackbox-exporter`)."
+      - alert: PublicEndpointExternalDown
+        expr: pve_external_https_probe_success{service="ci.example.org",probe_vantage="0docker-public-egress"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: public_endpoint
+        annotations:
+          summary: "{{ $labels.service }} failed its independent public HTTPS probe"
+          description: "The 0docker Proxmox host could not complete a verified HTTPS request to this public endpoint. Check DNS, public routing, TLS, and the 0mcp edge."
+
+      - alert: PublicEndpointExternalProbeStale
+        expr: time() - pve_external_https_probe_timestamp_seconds{service="ci.example.org",probe_vantage="0docker-public-egress"} > 180
+        for: 1m
+        labels:
+          severity: warning
+          service: public_endpoint
+        annotations:
+          summary: "Independent public HTTPS probe for {{ $labels.service }} is stale"
+          description: "The 0docker external probe has not completed in three minutes. Check pve-external-public-probes.timer and its node-exporter textfile output."
+

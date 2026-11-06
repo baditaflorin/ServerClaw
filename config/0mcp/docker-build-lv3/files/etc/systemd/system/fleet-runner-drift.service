@@ -1,0 +1,17 @@
+[Unit]
+Description=Fleet deploy-drift scan: running images vs origin/main on every production cluster
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+# Exit 1 = "findings" (already reported by --notify). Exit 2 (could not scan:
+# ssh/gh/registry failure) and exit 3 (a service has been behind origin/main
+# longer than the SLO, --slo-hours) deliberately mark the unit FAILED, so
+# `systemctl --failed` shows drift that heal has not closed in time.
+SuccessExitStatus=1
+ExecStart=/usr/bin/flock -n /run/lock/fleet-runner-drift.lock /usr/local/bin/fleet-runner-drift-run scan
+UMask=0027
+TimeoutStartSec=15min

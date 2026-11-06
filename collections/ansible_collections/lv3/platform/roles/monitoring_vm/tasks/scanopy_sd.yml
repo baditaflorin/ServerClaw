@@ -132,6 +132,14 @@
     group: root
     mode: "0644"
 
+- name: Render the Scanopy ignored-hosts list
+  ansible.builtin.template:
+    src: scanopy-sd-ignored-hosts.json.j2
+    dest: "{{ monitoring_scanopy_sd_ignored_hosts_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Render the Scanopy service-discovery systemd service
   ansible.builtin.template:
     src: scanopy-sd.service.j2

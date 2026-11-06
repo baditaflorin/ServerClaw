@@ -1,0 +1,19 @@
+groups:
+  - name: restore-drill
+    rules:
+      - alert: RestoreDrillFailed
+        expr: restore_drill_last_success == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Weekly restore drill FAILED on {{ $labels.host }} (guest {{ $labels.guest }})"
+          description: "The scheduled PBS restore drill could not restore, boot or read guest {{ $labels.guest }}. Backups may not be restorable. See `journalctl -u restore-drill` on the host."
+      - alert: RestoreDrillStale
+        expr: time() - max by (host) (restore_drill_last_run_timestamp_seconds) > 9 * 86400
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No restore drill has run on {{ $labels.host }} for over 9 days"
+          description: "The weekly restore drill timer is not running or not reporting. A backup that is never restored is only a hope."

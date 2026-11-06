@@ -52,11 +52,11 @@ def _tasks(role: str, name: str) -> list[dict[str, Any]]:
 def test_inventory_seeds_every_fleet_and_scopes_roles_to_declared_hosts() -> None:
     groups, hostvars, all_vars = fleet.inventory_model()
 
-    for fleet_group in ("fleet_0mcp", "fleet_0docker", "fleet_0database", "fleet_0own"):
+    for fleet_group in ("fleet_0mcp", "fleet_0docker", "fleet_0own"):
         assert groups[fleet_group], fleet_group
     # Names are the ssh-fleet-sync aliases, one group per fleet.
     assert {"0docker_bastion", "0docker_docker", "0docker_nginx", "0docker_builder"} <= groups["fleet_0docker"]
-    assert {"0database_bastion", "0database_postgres"} <= groups["fleet_0database"]
+    assert "fleet_0database" not in groups  # pve01 (0database.com) retired 2026-10-21: its hosts left the inventory
     assert {"0own_bastion", "0own_pbs", "0own_github_mirror", "0own_pyroscope_canary"} <= groups["fleet_0own"]
     assert groups["fleet_0mcp"] == {"operator-bastion", "0mcp_docker_build"}
     assert all_vars["fleet_observability_max_hosts"] == 1
@@ -81,7 +81,7 @@ def test_hosts_that_log_in_unprivileged_use_become_and_root_hosts_do_not() -> No
 
     assert hostvars["0docker_nginx"]["ansible_become"] is True
     assert hostvars["0own_github_mirror"]["ansible_become"] is True
-    for host in ("0docker_bastion", "0database_bastion", "0own_pbs", "operator-bastion"):
+    for host in ("0docker_bastion", "0own_pbs", "operator-bastion"):
         assert "ansible_become" not in hostvars[host], host
 
 
@@ -209,11 +209,11 @@ def test_hypervisor_port_plan_has_no_collision_and_models_the_build_metrics_prox
     assert not [p for p in host["fleet_node_exporter_socket_proxies"] if p["state"] == "unmanaged"]
     proxy = next(p for p in host["fleet_node_exporter_socket_proxies"] if p["name"] == "woodpecker-0exec-build-metrics-proxy")
     assert proxy["state"] == "present"
-    assert (proxy["listen_address"], proxy["listen_port"], proxy["upstream"]) == ("203.0.113.6", 9103, "10.10.10.30:9100")
+    assert (proxy["listen_address"], proxy["listen_port"], proxy["upstream"]) == ("100.64.0.6", 9103, "10.10.10.30:9100")
     assert proxy["free_bind"] is True
     assert "100.114.37.21" in proxy["consumer"]
     # The tailnet port the exporter owns (:9100) is no longer claimed by the proxy.
-    assert "203.0.113.6:9100" in host["fleet_node_exporter_listen_addresses"]
+    assert "100.64.0.6:9100" in host["fleet_node_exporter_listen_addresses"]
 
 
 def test_build_metrics_proxy_socket_renders_freebind_on_the_tailnet_address_and_matches_the_live_text() -> None:
@@ -233,7 +233,7 @@ def test_build_metrics_proxy_socket_renders_freebind_on_the_tailnet_address_and_
         "Before=shutdown.target\n"
         "\n"
         "[Socket]\n"
-        "ListenStream=203.0.113.6:9103\n"
+        "ListenStream=100.64.0.6:9103\n"
         "NoDelay=true\n"
         "FreeBind=true\n"
         "Service=woodpecker-0exec-build-metrics-proxy.service\n"
@@ -275,7 +275,7 @@ def test_stale_woodpecker_exec_proxy_on_the_0docker_hypervisor_is_modelled_as_di
 
     plan = _port_plan(docker)
     assert len(plan) == len(set(plan))
-    assert "203.0.113.5:9100" in plan  # still owned once, by the managed proxy
+    assert "100.64.0.5:9100" in plan  # still owned once, by the managed proxy
 
     artifacts = fleet.exporter_artifacts("0docker_bastion", fleet._context("fleet_node_exporter", docker, all_vars))
     unit = next(a for a in artifacts if a.path == "systemd unit woodpecker-exec-proxy@9100.socket")
@@ -294,23 +294,23 @@ def test_stale_woodpecker_exec_proxy_on_the_0docker_hypervisor_is_modelled_as_di
 def test_build_metrics_proxy_firewall_rule_and_tailnet_grant_match_the_proxy() -> None:
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text(encoding="utf-8"))
     rule = next(r for r in host_vars["proxmox_host_additional_tcp_rules"] if r["port"] == 9103)
-    assert (rule["source"], rule["destination"]) == ("100.114.37.21/32", "203.0.113.6")
+    assert (rule["source"], rule["destination"]) == ("100.114.37.21/32", "100.64.0.6")
 
     policy = (REPO_ROOT / "config" / "tailscale" / "policy.hujson").read_text(encoding="utf-8")
     grant = re.search(r'"src": \["tag:builder-metrics-controller"\],\s*"dst": \["100\.120\.234\.7/32"\],\s*"ip":\s*\["tcp:9103"\]', policy)
     assert grant, "tailnet grant for the build-metrics proxy on :9103 is missing"
-    assert '"accept": ["203.0.113.6:9103"]' in policy, "policy test for the :9103 grant is missing"
+    assert '"accept": ["100.64.0.6:9103"]' in policy, "policy test for the :9103 grant is missing"
 
 
 def test_retired_build_metrics_port_9100_grant_and_cluster_rule_stay_removed() -> None:
     policy = (REPO_ROOT / "config" / "tailscale" / "policy.hujson").read_text(encoding="utf-8")
     stale = re.search(r'"src": \["tag:builder-metrics-controller"\],\s*"dst": \["100\.120\.234\.7/32"\],\s*"ip":\s*\["tcp:9100"\]', policy)
-    assert not stale, "the retired tag:builder-metrics-controller -> 203.0.113.6 tcp:9100 grant is back"
+    assert not stale, "the retired tag:builder-metrics-controller -> 100.64.0.6 tcp:9100 grant is back"
 
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox-host.yml").read_text(encoding="utf-8"))
     cluster_rules = {(r["source"], r["port"]) for r in host_vars["proxmox_cluster_additional_tcp_rules"]}
     assert ("100.114.37.21/32", 9100) not in cluster_rules, "the retired CT108 -> :9100 cluster firewall rule is back"
-    assert ("203.0.113.7/32", 9102) in cluster_rules
+    assert ("100.64.0.7/32", 9102) in cluster_rules
 
 
 def test_hypervisor_proxy_that_cannot_share_an_address_uses_a_distinct_address_from_the_exporter() -> None:
@@ -341,14 +341,13 @@ def test_userspace_tailscaled_host_uses_tailscale_serve_not_a_socket() -> None:
 def test_textfile_directories_keep_the_live_ownership() -> None:
     artifacts = {
         (host, a.path): (a.owner, a.group, a.mode)
-        for host in ("operator-bastion", "0docker_bastion", "0database_bastion", "0docker_nginx", "0own_pbs", "0docker_builder")
+        for host in ("operator-bastion", "0docker_bastion", "0docker_nginx", "0own_pbs", "0docker_builder")
         for a in fleet.render_host(host)
         if a.kind == "dir"
     }
 
     assert artifacts[("operator-bastion", "/var/lib/prometheus/node-exporter/textfile")] == ("root", "root", "755")
     assert artifacts[("0docker_bastion", "/var/lib/prometheus/node-exporter/textfile")] == ("root", "root", "755")
-    assert artifacts[("0database_bastion", "/var/lib/prometheus/node-exporter/textfile")] == ("root", "root", "755")
     assert artifacts[("0docker_nginx", "/var/lib/prometheus/node-exporter/textfile")] == ("prometheus", "prometheus", "755")
     assert artifacts[("0own_pbs", "/var/lib/prometheus/node-exporter/textfile")] == ("prometheus", "prometheus", "755")
     assert artifacts[("0docker_builder", "/var/lib/prometheus-node-exporter/textfile")] == ("prometheus", "prometheus", "755")
@@ -557,21 +556,12 @@ def test_pgbackrest_role_never_changes_postgres_or_reads_the_passphrase() -> Non
 
 
 def test_pve_backup_references_the_storage_secret_without_reading_it() -> None:
+    # pve01 (0database_bastion), the only host with a PVE-side job here, left the inventory on 2026-10-21; no host may carry a
+    # storage secret value, and the role must still never read one.
     _, hostvars, _ = fleet.inventory_model()
-    storage = hostvars["0database_bastion"]["fleet_pg_backup_pve_storage"]
-    job = hostvars["0database_bastion"]["fleet_pg_backup_pve_jobs"][0]
-
-    assert storage["password_file"] == "/etc/pve/priv/storage/own-pbs-0database.pw"
-    assert "password" not in {key for key in storage if key != "password_file"}
-    assert (job["id"], job["vmid"], job["schedule"], job["bwlimit"], job["mode"], job["enabled"]) == (
-        "pg-primary-daily-pbs",
-        "100",
-        "02:30",
-        100000,
-        "snapshot",
-        True,
-    )
-    assert job["notes_template"] == "{{guestname}} {{vmid}} daily crash-consistent"
+    for host, values in hostvars.items():
+        storage = values.get("fleet_pg_backup_pve_storage") or {}
+        assert "password" not in {key for key in storage if key != "password_file"}, host
     text = (ROLES / "fleet_pg_backup" / "tasks" / "pve_backup.yml").read_text(encoding="utf-8")
     assert "slurp" not in text and "--password" not in text and "pvesm" not in text.replace("`pvesm add pbs`", "")
 

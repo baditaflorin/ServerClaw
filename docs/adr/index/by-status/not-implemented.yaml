@@ -6,11 +6,11 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-10-14'
+generated: '2026-11-06'
 facet: status
 implementation_status: Not Implemented
 slug: not-implemented
-total_adrs: 33
+total_adrs: 34
 adrs:
   - adr: '0024'
     title: Docker Guest Security Baseline
@@ -633,3 +633,22 @@ adrs:
     summary: Add the three artefacts below to the repo.
     filename: 0423-operator-local-lsp-ai-runbook-against-litellm.md
     path: docs/adr/0423-operator-local-lsp-ai-runbook-against-litellm.md
+  - adr: 0494
+    title: The agent-history store runs on its own guest with its own Postgres
+    status: Proposed
+    implementation_status: Not Implemented
+    currently_describes: goal_state
+    date: '2026-10-28'
+    concern: vm-topology
+    keywords:
+      - agent-history
+      - store
+      - runs
+      - its
+      - own
+      - guest
+      - postgres
+    summary: '1. One new guest agent-history (vmid 155, 10.10.10.55): 4 vCPU, 8 GiB memory with a 6 GiB balloon floor, a 24
+      GiB OS'
+    filename: 0494-agent-history.md
+    path: docs/adr/0494-agent-history.md

@@ -1,0 +1,89 @@
+---
+# Purpose: Defaults for the agent_history_runtime role (ADR 0494). No secret value is ever a default, a template or an extra var.
+# Questions still open are marked TODO(ADR 0494 question N); the numbers are the pull request's list.
+
+# --- layout -------------------------------------------------------------------------------------------------------
+agent_history_site_dir: /opt/agent-history
+agent_history_compose_file: "{{ agent_history_site_dir }}/docker-compose.yml"
+# OpenBao Agent configuration, its secret templates (no secret in them) and the AppRole files (delivered by the owner).
+agent_history_agent_dir: "{{ agent_history_site_dir }}/openbao"
+agent_history_role_id_file: "{{ agent_history_agent_dir }}/role_id"
+agent_history_secret_id_file: "{{ agent_history_agent_dir }}/secret_id"
+# tmpfs directory the OpenBao Agent renders into; the store reads its token files from it.
+agent_history_run_dir: "{{ compose_runtime_secret_root }}/agent-history"
+# The agent-store image runs as distroless "nonroot"; the OpenBao Agent container runs as the same uid so that the
+# files it renders are readable by the store and by nobody else (the store warns about group- or world-readable files).
+agent_history_run_uid: 65532
+agent_history_run_gid: 65532
+agent_history_helper_dir: /usr/local/sbin
+agent_history_state_dir: /var/lib/agent-history
+
+# --- encrypted data volume (LUKS2, created by the owner: see the runbook; the role never formats a disk) ------------
+agent_history_data_device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
+agent_history_luks_name: agent-history-data
+agent_history_data_mount: /srv/agent-history
+agent_history_pgdata_dir: "{{ agent_history_data_mount }}/postgres"
+
+# --- containers ---------------------------------------------------------------------------------------------------
+agent_history_db_image: docker.io/pgvector/pgvector:0.8.1-pg17
+# agent-store is built on the build host and loaded with `docker save | docker load`; it has no registry reference.
+# The compose project is only started when this is set (the first converge prepares everything else).
+agent_history_store_image: ""
+agent_history_openbao_agent_image: "{{ openbao_agent_image }}"
+agent_history_db_memory_limit: 5g
+agent_history_store_memory_limit: 1g
+agent_history_postgres_shared_buffers: 2GB
+agent_history_postgres_effective_cache_size: 4500MB
+agent_history_docker_log_max_size: 10m
+agent_history_docker_log_max_file: "3"
+
+# --- the store ----------------------------------------------------------------------------------------------------
+agent_history_store_port: 8080
+agent_history_store_bind: 127.0.0.1
+# Semantic search (ADR 0494 question 14, answered 2026-10-29): the store embeds each search QUESTION at query time by calling an
+# embeddings endpoint, and a worker on a Mac with an Apple GPU fills the vectors (it uses the separate embed token below). The
+# endpoint is set for this guest in inventory/host_vars/agent-history.yml, so that no converge silently drops it. Empty = off: `semantic`
+# returns nothing and `hybrid` answers from text and exact (X-AH-Degraded: semantic-unavailable).
+agent_history_embed_url: ""
+# The model the store searches vectors for: it must equal the worker's --storeModel (default: its --embedModel).
+agent_history_embed_model: ""
+# Request shape of the endpoint: `ollama` (POST {url}/api/embed) or `openai` (POST {url}/v1/embeddings).
+agent_history_embed_api: ollama
+# Vector size the endpoint must return; it must equal the store's vector column or the store refuses to start.
+agent_history_embed_dimensions: 1024
+# One call to the endpoint gets at most this long (a hybrid search runs the other legs meanwhile); a slow or asleep Mac degrades the search.
+agent_history_embed_timeout: 2s
+agent_history_embed_cache_size: 256
+
+# --- OpenBao (the platform secret authority; ADR 0077, ADR 0231) ----------------------------------------------------
+# The administrator creates the KV entry and the AppRole; this role only reads. TODO(ADR 0494 question 7): confirm the
+# owner, the mount and the path layout before the guest is provisioned.
+agent_history_openbao_service_topology: "{{ platform_service_topology | service_topology_get('openbao') }}"
+agent_history_openbao_address: "http://{{ agent_history_openbao_service_topology.private_ip }}:{{ hostvars[platform_topology_host].platform_port_assignments.openbao_http_port }}"
+agent_history_openbao_kv_path: kv/data/services/agent-history/runtime
+# Keys the KV entry must hold (names only; the values are created by the administrator and never pass through Ansible).
+agent_history_openbao_keys:
+  db_password: db_password
+  read_tokens: read_tokens
+  write_tokens: write_tokens
+  metrics_token: metrics_token
+  embed_tokens: embed_tokens
+
+# --- tailnet (the guest joins as tag:agent-history with a one-time key the owner mints; this role never sees it; HTTPS certificates are enabled on the tailnet) ---
+agent_history_tailscale_serve_enabled: true
+agent_history_tailscale_https_port: 443
+
+# --- metrics bridge: reads the store's /metrics with the metrics-only token and writes a node_exporter textfile -------
+# Debian's prometheus-node-exporter reads this directory by default (no ARGS), as on the other 0mcp guests.
+agent_history_textfile_dir: /var/lib/prometheus/node-exporter
+agent_history_metrics_interval_seconds: 60
+agent_history_metrics_service: agent-history-metrics
+
+# --- nightly canary scan (agent-eval's scripts/dbscan prints the SQL; the redaction canary cannot see `raw` through the
+# store's API, so the guest counts secrets per database column itself). Off until the SQL file is delivered: it holds the
+# canary's fake secrets, which are not real, but it is still delivered by the owner and never committed. -----------------
+agent_history_canary_scan_enabled: false
+agent_history_canary_scan_sql_file: "{{ agent_history_state_dir }}/canary-scan.sql"
+# The `host` the SQL file was generated for (it must start with "canary-"); only used as the metrics label.
+agent_history_canary_scan_host: ""
+agent_history_canary_scan_on_calendar: "*-*-* 03:30:00 UTC"

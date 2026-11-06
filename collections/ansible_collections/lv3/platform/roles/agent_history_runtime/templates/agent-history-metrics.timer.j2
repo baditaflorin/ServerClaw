@@ -1,0 +1,11 @@
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+[Unit]
+Description=Run the agent-history metrics bridge every {{ agent_history_metrics_interval_seconds }} seconds
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec={{ agent_history_metrics_interval_seconds }}
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

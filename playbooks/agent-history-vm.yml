@@ -1,0 +1,227 @@
+# Playbook: agent-history-vm.yml
+# Purpose: Provision the dedicated agent-history VM (vmid 155) on Proxmox and converge the agent-history store runtime on that guest.
+# Use case: Run once the owner has approved provisioning (capacity decision, ADR 0494); re-run to converge the guest. Never run it as part of `make provision-guests`.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (path, required via make targets): SSH private key used for the Proxmox host and guest jump path.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Deployment environment selector. This playbook converges only the production guest.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): SSH routing mode for the guest baseline converge.
+#   - agent_history_store_image (string, optional): agent-store image loaded into the guest's Docker; empty prepares the guest without starting the stack.
+#   - platform_trace_id (string, optional): Mutation-audit trace identifier propagated by the make wrapper.
+#
+# Outputs:
+#   - VM `agent-history` (vmid 155) on Proxmox with Docker, guest firewall policy, named `ops` access, the encrypted-volume unlock helper, the OpenBao Agent configuration, the compose project (when its prerequisites hold), tailscale serve (when the guest is on the tailnet) and the metrics bridge.
+#
+# Idempotency: Partially idempotent
+#              The guest roles are idempotent. The Proxmox side applies the declared hardware with `qm set`, then sets the balloon floor and the data disk's discard option. Settings that need a restart wait until
+#              the guest's cloud-init first boot has finished (the guest play waits for it), and are then applied with one graceful `qm shutdown` and `qm start`, only when `qm config` (pending changes applied)
+#              differs from `qm config --current 1`. The VM is never stopped before its first boot has finished.
+#
+# Safety:
+#   - The first play limits `proxmox_guests_active` to vmid 155 and asserts it. The `proxmox_guests` role otherwise runs `qm set ... --balloon 0` on every declared guest, and the declarations differ from the live guests.
+#   - The data disk is formatted (LUKS2) by the owner, never by this playbook.
+#   - The VM is not stopped while cloud-init's first boot is running. The guests role starts the VM, and a stop seconds later (the first version of this play did that to apply the balloon and discard settings)
+#     cuts the first boot off: zero-byte netplan, ssh host keys and apt lists plus a saved instance-id, so the next boot never configures the network (found on the first provisioning, 2026-10-29). The balloon floor is
+#     applied live; the restart for the rest waits for `cloud-init status --wait` and is a graceful shutdown (forced only after 600 s).
+#   - Capacity is the owner's decision (ADR 0494, decision 8); nothing here checks it for them. The guest was declared `lifecycle: planned` and activated on 2026-10-29 (the owner deleted
+#     that line: the recorded approval, with the written exception to the 15 % placement guard in ADR 0494); this play still refuses a guest that is declared planned. Since the activation the
+#     unrestricted `make provision-guests` and the scoped runs on lv3_guests no longer skip this guest, which does not exist until this play has run: provision only with this play.
+#
+# Dependencies:
+#   - ADR 0084: Managed guests clone from the declared template catalog.
+#   - ADR 0494: The agent-history store runs on its own guest with its own Postgres.
+#   - Role: lv3.platform.proxmox_guests: provisions the guest from the managed template catalog.
+#   - Role: lv3.platform.linux_guest_firewall: renders network_policy.guests.agent-history.
+#   - Role: lv3.platform.docker_runtime: converges Docker CE on the guest.
+#   - Role: lv3.platform.agent_history_runtime: the store, its encrypted volume handling, secret delivery and metrics bridge.
+#
+# Related ADRs: 0049, 0077, 0084, 0231, 0494
+# Related Runbooks: docs/runbooks/configure-agent-history.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-10-29
+---
+- name: Ensure the agent-history VM is provisioned on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-agent-history-vm
+  vars:
+    agent_history_vm_vmid: 155
+    agent_history_vm_balloon_floor_mb: 6144
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('vmid', 'equalto', agent_history_vm_vmid)
+        | list
+      }}
+
+  pre_tasks:
+    - name: Refuse to run unless exactly the agent-history guest is selected
+      ansible.builtin.assert:
+        that:
+          - proxmox_guests_active | length == 1
+          - proxmox_guests_active[0].vmid == agent_history_vm_vmid
+          - proxmox_guests_active[0].name == 'agent-history'
+        fail_msg: >-
+          proxmox_guests_active must contain exactly the agent-history guest (vmid {{ agent_history_vm_vmid }}).
+          The proxmox_guests role rewrites the hardware of every guest it is given.
+      tags:
+        - guests
+        - agent-history-vm
+
+    - name: Refuse to run while the guest is planned (the owner's activation switch)
+      ansible.builtin.assert:
+        that:
+          - proxmox_guests_active[0].lifecycle | default('active') != 'planned'
+        fail_msg: >-
+          Guest agent-history (vmid {{ agent_history_vm_vmid }}) is declared with `lifecycle: planned`, so it is not approved
+          for provisioning. The owner activates it with one reviewed change: delete the `lifecycle: planned` line of its
+          entry in inventory/host_vars/proxmox-host.yml and run `make generate-inventory` (that drops it from the
+          planned_guests group). That change is the recorded approval of the capacity decision (ADR 0494, decision 8):
+          the written exception to the 15 % placement guard, or the re-measured headroom, belongs in its description.
+      tags:
+        - guests
+        - agent-history-vm
+
+  roles:
+    - role: lv3.platform.proxmox_guests
+      tags:
+        - guests
+        - agent-history-vm
+
+  post_tasks:
+    - name: Read the agent-history VM configuration
+      ansible.builtin.command: "qm config {{ agent_history_vm_vmid }}"
+      register: agent_history_vm_config
+      changed_when: false
+      tags:
+        - guests
+        - agent-history-vm
+
+    - name: Work out which hardware settings still differ from the declaration
+      ansible.builtin.set_fact:
+        agent_history_vm_scsi1_volume: "{{ agent_history_vm_config.stdout | regex_search('(?m)^scsi1: ([^,]+)', '\\1') | first | default('') }}"
+        agent_history_vm_balloon_ok: "{{ agent_history_vm_config.stdout is search('(?m)^balloon: ' ~ agent_history_vm_balloon_floor_mb ~ '$') }}"
+        agent_history_vm_discard_ok: "{{ agent_history_vm_config.stdout is search('(?m)^scsi1: .*discard=on') }}"
+      tags:
+        - guests
+        - agent-history-vm
+
+    - name: Set the balloon floor (the guests role forces balloon 0)
+      ansible.builtin.command: "qm set {{ agent_history_vm_vmid }} --balloon {{ agent_history_vm_balloon_floor_mb }}"
+      changed_when: true
+      when: not agent_history_vm_balloon_ok | bool
+      tags:
+        - guests
+        - agent-history-vm
+
+    - name: Let the data disk pass discards to the thin qcow2 file
+      ansible.builtin.command: "qm set {{ agent_history_vm_vmid }} --scsi1 {{ agent_history_vm_scsi1_volume }},discard=on"
+      changed_when: true
+      when:
+        - agent_history_vm_scsi1_volume | length > 0
+        - not agent_history_vm_discard_ok | bool
+      tags:
+        - guests
+        - agent-history-vm
+
+- name: Converge the dedicated agent-history guest
+  hosts: agent-history
+  become: true
+  gather_facts: false
+  tags:
+    - tier-2
+    - automation
+    - service-agent-history-vm
+  vars:
+    proxmox_guest_ssh_connection_mode: proxmox_host_jump
+    agent_history_vm_vmid: 155
+    agent_history_vm_proxmox_host: "{{ groups['proxmox_hosts'] | first }}"
+
+  pre_tasks:
+    - name: Wait for the agent-history VM SSH service to be reachable
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts after SSH is ready
+      ansible.builtin.setup:
+
+    - name: Wait for cloud-init first boot work to finish when present
+      ansible.builtin.shell: |
+        if command -v cloud-init >/dev/null 2>&1; then
+          cloud-init status --wait
+        fi
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: Wait for Debian package manager activity to settle after cloud-init
+      ansible.builtin.shell: |
+        for _ in $(seq 1 120); do
+          if ! pgrep -x apt-get >/dev/null \
+            && ! pgrep -x dpkg >/dev/null; then
+            exit 0
+          fi
+          sleep 5
+        done
+        exit 1
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    # The first boot is finished here, so a restart can no longer cut it off.
+    - name: Read the VM configuration with its pending changes applied
+      ansible.builtin.command: "qm config {{ agent_history_vm_vmid }}"
+      register: agent_history_vm_config_pending
+      changed_when: false
+      delegate_to: "{{ agent_history_vm_proxmox_host }}"
+
+    - name: Read the VM configuration as it is running
+      ansible.builtin.command: "qm config {{ agent_history_vm_vmid }} --current 1"
+      register: agent_history_vm_config_running
+      changed_when: false
+      delegate_to: "{{ agent_history_vm_proxmox_host }}"
+
+    - name: Restart the VM once, gracefully, when hardware settings are pending
+      when: agent_history_vm_config_pending.stdout != agent_history_vm_config_running.stdout
+      block:
+        - name: Shut the agent-history VM down gracefully so the pending hardware settings take effect
+          ansible.builtin.command: "qm shutdown {{ agent_history_vm_vmid }} --timeout 600 --forceStop 1"
+          changed_when: true
+          delegate_to: "{{ agent_history_vm_proxmox_host }}"
+
+        - name: Start the agent-history VM
+          ansible.builtin.command: "qm start {{ agent_history_vm_vmid }}"
+          changed_when: true
+          delegate_to: "{{ agent_history_vm_proxmox_host }}"
+
+        - name: Drop the SSH connection of the previous boot
+          ansible.builtin.meta: reset_connection
+
+        - name: Wait for the agent-history VM SSH service after the restart
+          ansible.builtin.wait_for_connection:
+            delay: 20
+            timeout: 600
+
+        - name: Wait for cloud-init after the restart
+          ansible.builtin.shell: |
+            if command -v cloud-init >/dev/null 2>&1; then
+              cloud-init status --wait
+            fi
+          args:
+            executable: /bin/bash
+          changed_when: false
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.linux_access
+      vars:
+        linux_access_admin_user: "{{ proxmox_guest_ci_user }}"
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.agent_history_runtime

@@ -1,4 +1,8 @@
+import os
+import shlex
+import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -217,3 +221,51 @@ def test_python_package_runner_handles_pyyaml_module_mapping() -> None:
 
     assert "pyyaml)" in script
     assert 'echo "yaml"' in script
+
+
+def run_workstream_surfaces_stage(tmp_path: Path, base_ref: str | None) -> list[str]:
+    """Run the real validate_repo.sh stage with the package runner stubbed to record its arguments."""
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    shutil.copy(VALIDATE_REPO_SCRIPT, scripts / "validate_repo.sh")
+    log = tmp_path / "runner.log"
+    runner = scripts / "run_python_with_packages.sh"
+    runner.write_text("#!/usr/bin/env bash\nprintf '%s\\n' \"$*\" >> " + shlex.quote(str(log)) + "\n")
+    runner.chmod(0o755)
+    env = {key: value for key, value in os.environ.items() if key != "LV3_VALIDATION_BASE_REF"}
+    env["LV3_VALIDATE_PYTHON_BIN"] = sys.executable
+    if base_ref is not None:
+        env["LV3_VALIDATION_BASE_REF"] = base_ref
+
+    completed = subprocess.run(
+        [str(scripts / "validate_repo.sh"), "workstream-surfaces"],
+        cwd=tmp_path,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    return log.read_text().splitlines()
+
+
+def test_validate_repo_workstream_surfaces_defaults_to_origin_main(tmp_path: Path) -> None:
+    calls = run_workstream_surfaces_stage(tmp_path, None)
+
+    assert len(calls) == 2
+    assert calls[0].endswith("--validate-registry")
+    assert calls[1].endswith("--validate-branch --base-ref origin/main")
+
+
+def test_validate_repo_workstream_surfaces_uses_the_validation_base_ref_of_a_stacked_branch(tmp_path: Path) -> None:
+    calls = run_workstream_surfaces_stage(tmp_path, "origin/claude/parent-branch")
+
+    assert len(calls) == 2
+    assert calls[1].endswith("--validate-branch --base-ref origin/claude/parent-branch")
+
+
+def test_validate_repo_keeps_the_renovate_digest_guard_on_origin_main() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert 'renovate_stack_digest_guard.py" --base-ref origin/main' in script

@@ -1,0 +1,67 @@
+id: ws-20261101-standby-guest-diag
+adr: "0188"
+title: "standby-ctl: a guest step that times out leaves the guest's own diagnostics in the run record (the 2026-10-31 rehearsal hang, docker never started)"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/standby-guest-diag
+worktree_path: .claude/worktrees/standby-guest-diag
+doc: docs/workstreams/ws-20261101-standby-guest-diag.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/0infer/tier0-runner/host/standby_ctl.py
+  - config/0infer/tier0-runner/README.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261101-standby-guest-diag.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261101-standby-guest-diag.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261101_standby_guest_diag_tracking
+      paths:
+        - docs/workstreams/ws-20261101-standby-guest-diag.md
+      mode: exclusive
+    - id: standby_ctl_guest_diag_tests
+      paths:
+        - tests/test_standby_ctl_guest_diag.py
+      mode: exclusive
+    - id: standby_ctl_controller
+      paths:
+        - config/0infer/tier0-runner/host/standby_ctl.py
+        - config/0infer/tier0-runner/README.md
+      mode: shared_contract
+      contract: tier0-standby-ctl-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261101-standby-guest-diag.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "standby-ctl (DomainScope standby VM 8101): when a guest step runs out of time it runs one bounded, docker-free diagnostic script in the guest and keeps the result in the run record (guest_diag). Code, tests and README only; nothing is applied to the hypervisor."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  The daily DomainScope standby rehearsal failed on 2026-10-31 (exit 5, 603.6 s): silent and teardown both ended in "guest exit 124: guest command did not finish in time",
+  and the guest-shutdown timed out too. The guest's boot had stalled before multi-user.target (cloud-init never started its final stage, which is ordered after
+  multi-user.target; docker.service is Type=notify with TimeoutStartSec=0), the guest was idle (load 0, no IO or memory pressure) and the hypervisor was quiet. The next
+  rehearsal (2026-11-01) passed. What docker or containerd waited for could not be shown: the record had no guest output, and the guest's journald (SystemKeepFree=5G on a
+  disk with 5.6 GB free) had already deleted the journal of that boot. This workstream makes the next occurrence explain itself.
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: standby_ctl.py runs one bounded, docker-free guest diagnostic on the first guest timeout and puts it in the run record; README documents it; tests pin it (and mutation-checked)
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate, open the pull request (not merged; installing it on the hypervisor needs the owner's yes)
+    status: in_progress

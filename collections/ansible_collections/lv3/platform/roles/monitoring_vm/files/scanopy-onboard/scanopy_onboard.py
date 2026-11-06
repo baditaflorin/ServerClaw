@@ -108,12 +108,26 @@ def daemon_name(fleet, g):
     return f"{g['kind']}-{fleet['name']}-{g['id']}-{clean}"[:80]
 
 
-def coverage_index(daemons, hosts):
-    """(daemon names, MACs of daemon hosts, IPv4s that belong to exactly one daemon host)."""
+DAEMON_SERVICE = "Scanopy Daemon"
+DAEMON_SERVICE_MAX_AGE = 7 * 86400
+
+
+def coverage_index(daemons, hosts, now=None):
+    """(daemon names, MACs of daemon hosts, IPv4s that prove a daemon runs there).
+
+    The IPv4 set has two sources, both required to be unambiguous (the address belongs to exactly one host):
+      * the host a daemon registered as (often Scanopy's "Docker" engine host, which only holds container addresses);
+      * a host that Scanopy has seen running a "Scanopy Daemon" service within the last 7 days. This does not depend on
+        the daemon's name or on which host record it is bound to, so a renamed daemon (the pve01 -> 0database fleet
+        rename) or a daemon bound to a Docker pseudo-host still covers its guest.
+    """
     host_by_id = {h["id"]: h for h in hosts}
     # A record that never checked in (provisioned, install failed) is not coverage: it has no host and nothing polls for it.
     names = {d["name"] for d in daemons if d.get("host_id")}
-    macs, ip_owner = set(), {}
+    macs, ip_owner, all_owner = set(), {}, {}
+    for h in hosts:
+        for ip in h.get("ip_addresses") or []:
+            all_owner.setdefault(ip.get("ip_address"), set()).add(h["id"])
     for d in daemons:
         h = host_by_id.get(d.get("host_id"))
         if not h:
@@ -122,7 +136,25 @@ def coverage_index(daemons, hosts):
             if ip.get("mac_address"):
                 macs.add(ip["mac_address"].lower())
             ip_owner.setdefault(ip.get("ip_address"), set()).add(h["id"])
-    return names, macs, {ip for ip, owners in ip_owner.items() if ip and len(owners) == 1}
+    covered = {ip for ip, owners in ip_owner.items() if ip and len(owners) == 1}
+    now = now if now is not None else time.time()
+    for h in hosts:
+        if not any(sv.get("name") == DAEMON_SERVICE and fresh(sv.get("last_seen_at"), now) for sv in h.get("services") or []):
+            continue
+        covered.update(ip["ip_address"] for ip in h.get("ip_addresses") or []
+                       if ip.get("ip_address") and all_owner.get(ip["ip_address"]) == {h["id"]})
+    return names, macs, covered
+
+
+def fresh(timestamp, now):
+    """True when a Scanopy timestamp (2026-10-12T14:27:00.36Z) is at most DAEMON_SERVICE_MAX_AGE old."""
+    if not timestamp:
+        return False
+    try:
+        seen = dt.datetime.strptime(timestamp.replace("Z", "").split(".")[0], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=dt.timezone.utc)
+    except ValueError:
+        return False
+    return now - seen.timestamp() <= DAEMON_SERVICE_MAX_AGE
 
 
 def is_covered(fleet, g, names, macs, unique_ips):

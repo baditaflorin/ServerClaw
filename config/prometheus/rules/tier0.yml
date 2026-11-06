@@ -144,6 +144,41 @@ groups:
           description: "{{ $value }} of the configured replica sites verified the latest gateway snapshot."
           runbook_url: docs/runbooks/tier0-replication.md
 
+  - name: tier0_domainscope_replication
+    rules:
+      - alert: Tier0DomainscopeSnapshotStale
+        expr: (time() - tier0_domainscope_snapshot_last_success_timestamp_seconds) > 10800
+        for: 10m
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "No verified DomainScope config bundle for over 3 hours"
+          description: "The hourly encrypted bundle of VM101's DomainScope .env, compose file and token files (tier0-domainscope-snapshot on CT108, restricted key tier0-domainscope on VM101) has not verified on any replica for 3+ hours. The standby VM would start on older configuration and image tags."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0DomainscopeReplicaMissing
+        expr: tier0_domainscope_snapshot_replicas_ok < tier0_domainscope_snapshot_replicas_total
+        for: 2h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "A replica site did not verify the latest DomainScope config bundle"
+          description: "{{ $value }} of the configured replica sites verified the latest bundle."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0DomainscopeSnapshotMissing
+        expr: absent(tier0_domainscope_snapshot_last_success_timestamp_seconds)
+        for: 3h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "No tier0_domainscope_snapshot metrics from CT108"
+          description: "tier0-domainscope-snapshot.timer on CT108 is disabled, never succeeded, or its textfile is not scraped."
+          runbook_url: docs/runbooks/tier0-replication.md
+
   - name: gateway_certificates
     rules:
       - alert: GatewayCertExpiringSoon
@@ -178,3 +213,238 @@ groups:
           summary: "Gateway nginx references a certificate that is missing or unreadable: {{ $labels.cert }}"
           description: "The active config names a certificate file that does not exist or is not valid PEM in the latest snapshot; nginx would refuse to start with it."
           runbook_url: docs/runbooks/tier0-replication.md
+
+  - name: served_certificates
+    rules:
+      - alert: ServedCertExpiringSoon
+        expr: (fleet_tls_served_not_after_timestamp_seconds - time()) < 14 * 86400
+        for: 1h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "{{ $labels.host }} serves a certificate that expires in under 14 days"
+          description: "Measured from the outside (the certificate the host actually serves), whichever server terminates TLS. Find the terminator for the name (0docker gateway VM104, 0mcp edge VM110, Caddy/Coolify, GitHub Pages) and fix its renewal; see docs/runbooks/gateway-standby.md in fleet-state."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: ServedCertExpiryCritical
+        expr: (fleet_tls_served_not_after_timestamp_seconds - time()) < 3 * 86400
+        for: 10m
+        labels:
+          severity: critical
+          service: tier0_replication
+        annotations:
+          summary: "{{ $labels.host }} serves a certificate that expires in under 3 days (or has expired)"
+          description: "Visitors will get certificate errors. Renew now."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: ServedCertDoesNotCoverHost
+        expr: fleet_tls_served_covers_host == 0
+        for: 3h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "{{ $labels.host }} serves a certificate whose names do not include it"
+          description: "Wrong or default certificate served for this name (vhost missing or mis-ordered on the terminating server)."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: ServedCertProbeFailing
+        expr: fleet_tls_served_probe_ok == 0
+        for: 3h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "{{ $labels.host }} (a registry hostname) does not answer TLS"
+          description: "No TLS handshake from CT108 for 3 hours: the service is down at the edge, DNS is wrong, or the name was retired without removing it from the registry."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: ServedCertProbeStale
+        expr: (time() - fleet_tls_served_last_run_timestamp_seconds) > 10800
+        for: 10m
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "The served-certificate probe has not run for 3 hours"
+          description: "tls-served-check.timer on CT108 is not producing metrics."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+  - name: tier0_failover_rehearsal
+    rules:
+      - alert: Tier0FailoverRehearsalStale
+        expr: (time() - tier0_failover_rehearsal_last_success_timestamp_seconds) > 35 * 86400
+        for: 1h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "No passed vault failover rehearsal for over 35 days"
+          description: "Run `tier0-vault-promote.sh --rehearse --dns-via-ct108` from the machine holding the Tier-0 private key (fleet-state scripts/tier0). A failover that is not exercised rots: images, firewall, certificates and the vhost all drift."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0FailoverRehearsalNeverRecorded
+        expr: absent(tier0_failover_rehearsal_last_success_timestamp_seconds)
+        for: 48h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "No failover rehearsal has ever been recorded"
+          description: "The standby has no /var/lib/tier0-rehearsal.json: run the rehearsal once (see Tier0FailoverRehearsalStale)."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0FullFailoverRehearsalStale
+        expr: (time() - tier0_failover_full_rehearsal_last_success_timestamp_seconds) > 35 * 86400
+        for: 1h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "No passed FULL failover rehearsal (vault + slice + gateway) for over 35 days"
+          description: "Run `scripts/tier0/tier0-failover.sh --rehearse` from the machine holding the Tier-0 private key (fleet-state). It takes about two minutes and changes nothing user-visible. The gateway, slice and edge parts drift (certificates, images, tailnet access, nginx) unless exercised."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+      - alert: Tier0StandbyImagesMissing
+        expr: tier0_standby_images_hosts_ok < tier0_escrow_replicas_total
+        for: 26h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "The vault/keystore images are not loaded on every standby host"
+          description: "A failover would need a registry login while the vault is down. Check `journalctl -u tier0-key-escrow` on CT108."
+          runbook_url: docs/runbooks/tier0-replication.md
+
+  # Added 2026-10-18. The brownout slice list (fleet-state brownout/slice-current.json) is rebuilt daily on CT108 from the live gateway and workload host
+  # (scripts/tier0/tier0-slice-refresh.sh, docs/brownout-slice.md). Metrics come from the CT108 node_exporter textfile.
+  - name: tier0_slice_refresh
+    rules:
+      - alert: Tier0SliceRefreshFailed
+        expr: max(tier0_slice_refresh_ok) == 0
+        for: 30m
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "The daily brownout slice refresh failed on its last run"
+          description: "On CT108 `journalctl -u tier0-slice-refresh` says why: exit 3 = it could not read the gateway or the workload host, or refused to write a list from partial data (the old list stays); exit 5 = the PR could not be published (a branch slice-refresh-* or an open PR may be left). The standby keeps the last good list, so coverage only decays slowly (new services are missing from it until the next success)."
+          runbook_url: docs/brownout-slice.md
+
+      - alert: Tier0SliceRefreshStale
+        expr: time() - max(tier0_slice_refresh_last_success_timestamp_seconds) > 129600
+        for: 1h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "No successful brownout slice refresh for {{ $value | humanizeDuration }}"
+          description: "tier0-slice-refresh.timer on CT108 runs daily at 03:45 UTC, shortly before tier0-slice-sync.sh (04:10). Services created since the last success are missing from the standby's list."
+          runbook_url: docs/brownout-slice.md
+
+      - alert: Tier0SliceRefreshMissing
+        expr: absent(tier0_slice_refresh_last_success_timestamp_seconds)
+        for: 36h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "The brownout slice refresh has never reported success (metric absent for 36 h)"
+          description: "tier0-slice-refresh.sh is not installed or never ran on CT108 (/usr/local/bin/tier0-slice-refresh.sh, units tier0-slice-refresh.service/.timer, textfile tier0_slice_refresh.prom). The list in git is then whatever was last written by hand."
+          runbook_url: docs/brownout-slice.md
+
+      # The daily bundle + image sync to the slice VM (tier0-slice-sync.sh, 04:10 UTC) had NO alert: a stale SSH host key for the slice VM (10-17 22:21Z, cloud-init regenerated its keys)
+      # stopped it without a trace for 30 hours. Its textfile is only written when the run gets that far, so staleness is the signal that always works.
+      - alert: Tier0SliceSyncStale
+        expr: time() - max(tier0_slice_last_success_timestamp_seconds) > 129600
+        for: 1h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "The slice standby sync (config+secrets bundle and images) has not succeeded for {{ $value | humanizeDuration }}"
+          description: "tier0-slice-sync.service on CT108 runs daily at 04:10 UTC. `journalctl -u tier0-slice-sync` shows where it stops: the first suspect is the slice VM's SSH host key (`ssh 0mcp_slice_standby true` from CT108 must work; cloud-init can regenerate host keys: compare with `qm guest exec 200 -- ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` on the 0mcp host before re-pinning), then the replicas, then a registry pull."
+          runbook_url: docs/brownout-slice.md
+
+      - alert: Tier0SliceImagesMissing
+        expr: max(tier0_slice_images_missing_on_standby) > 0
+        for: 2h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "{{ $value }} images of the standby slice are not on the slice VM"
+          description: "The last tier0-slice-sync run ended with images still missing on 0mcp_slice_standby: a failover would start fewer services (or need a registry login while the vault is down). `journalctl -u tier0-slice-sync` on CT108 names them (`still missing on ...`); the next daily run streams them again."
+          runbook_url: docs/brownout-slice.md
+
+  # Added 2026-10-18. The tier0-edge-grants job on CT108 (hourly at :20; docs/runbooks/standby-edge-grants.md) turns a tailnet backend port of the standby pools that stays closed from the edge into a
+  # policy PR that the reconciler applies. It runs with nobody in the loop, so its own failures must be loud: metrics come from the CT108 node_exporter textfile tier0_edge_grants.prom.
+  - name: tier0_edge_grants
+    rules:
+      - alert: Tier0EdgeGrantsFailed
+        expr: max(tier0_edge_grants_ok) == 0
+        for: 3h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "The standby edge grants job failed on its last runs (3 hours)"
+          description: "On CT108 `journalctl -u tier0-edge-grants.service` and `/usr/local/bin/tier0-edge-grants.sh --dry-run` say why: exit 3 = it could not run (Prometheus, the clone, gh or git cannot push, the installed copies differ from main (see Tier0EdgeGrantsInstalledDrift), a stale or failing edge-compat check), 4 = it refused (see Tier0EdgeGrantsNeedHuman), 5 = the PR flow failed (CI red, merge refused, a stale open PR was closed). After a failed attempt the job backs off (6 h, then 18 h, then a day) and ok stays 0 until an attempt succeeds: this alert is that state, not a flood of PRs. Until it works a missing tailnet grant is only noticed by Tier0EdgeBackendPortsClosed."
+          runbook_url: docs/runbooks/standby-edge-grants.md
+
+      - alert: Tier0EdgeGrantsStale
+        expr: time() - max(tier0_edge_grants_last_run_timestamp_seconds) > 10800
+        for: 1h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "The standby edge grants job has not run for {{ $value | humanizeDuration }}"
+          description: "tier0-edge-grants.timer on CT108 fires hourly at :20. Check `systemctl status tier0-edge-grants.timer tier0-edge-grants.service` there."
+          runbook_url: docs/runbooks/standby-edge-grants.md
+
+      - alert: Tier0EdgeGrantsMissing
+        expr: absent(tier0_edge_grants_last_run_timestamp_seconds)
+        for: 6h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "The standby edge grants job has never reported (metric absent for 6 h)"
+          description: "/usr/local/bin/tier0-edge-grants.sh and its units are not installed on CT108, or the textfile tier0_edge_grants.prom is not written."
+          runbook_url: docs/runbooks/standby-edge-grants.md
+
+      - alert: Tier0EdgeGrantsNeedHuman
+        expr: (max(tier0_edge_grants_capped) == 1) or (max(tier0_edge_grants_rejected_pairs) > 0) or (max(tier0_edge_grants_unverified_pairs) > 0) or (max(tier0_edge_grants_already_granted_pairs) > 0)
+        for: 2h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "The standby edge grants job found closed backend ports it will not grant by itself"
+          description: "capped = more than 40 new ports in one run (an incident: the edge's tailnet down shows everything closed); rejected = a destination that is not a pool runtime or a port outside the pool ranges or on the never list; unverified = the sockets of a runtime could not be listed over ssh from CT108; already_granted = closed although an explicit grant exists (the node, its tag or its route is the problem, not the policy). `/usr/local/bin/tier0-edge-grants.sh --dry-run` prints each pair and the reason."
+          runbook_url: docs/runbooks/standby-edge-grants.md
+
+      - alert: Tier0EdgeGrantsPrStuck
+        expr: max(tier0_edge_grants_pr_open) == 1
+        for: 3h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "An automatic standby edge grants PR has been open for 3 hours"
+          description: "The job waits for CI and merges, and when it runs it closes an automatic PR that has been open for more than 2 hours (a run that died). This alert therefore means the job is NOT running (PAUSE, or failing: see Tier0EdgeGrantsFailed) while a `tier0-edge-grants-*` PR in platform_server is still open. Look at its checks, then merge or close it."
+          runbook_url: docs/runbooks/standby-edge-grants.md
+
+      - alert: Tier0EdgeGrantsInstalledDrift
+        expr: max(tier0_edge_grants_installed_matches_git) == 0
+        for: 3h
+        labels:
+          severity: warning
+          service: tier0_replication
+        annotations:
+          summary: "The installed standby edge grants job differs from main: it runs nothing until it is reinstalled"
+          description: "The job runs only INSTALLED copies (/usr/local/lib/tier0-edge-grants, and the reconciler's tools in /usr/local/lib/tailscale-policy-sync) and refuses to run when one differs from main, so a merge never executes by itself with the policy credential. A reviewed change to scripts/standby_edge_grants_job.py, standby_edge_grants.py, tailscale_policy_sync.py, tailscale_policy_reconcile.py or config/tailscale/lockout-guard.json is waiting for its install: `scripts/tier0-edge-grants-install.sh --check` from an up-to-date main shows which file differs, `scripts/tier0-edge-grants-install.sh` installs the job's own files and `scripts/tailscale-policy-reconcile-install.sh` the reconciler's tools. Until then a missing tailnet grant is only noticed by Tier0EdgeBackendPortsClosed."
+          runbook_url: docs/runbooks/standby-edge-grants.md
+

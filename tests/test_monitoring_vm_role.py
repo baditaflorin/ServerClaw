@@ -87,7 +87,7 @@ def test_0own_scrape_target_uses_narrow_validated_apply_and_preserves_live_confi
 
     assert target == {
         "job_name": "pve_0own_host_node_exporter_via_tailscale",
-        "address": "203.0.113.3:9100",
+        "address": "100.64.0.3:9100",
         "labels": {"monitored_host": "proxmox-node"},
     }
     assert monitoring_host_vars["monitoring_prometheus_service_name"] == "0mcp-prometheus"

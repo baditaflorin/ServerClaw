@@ -1,0 +1,67 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-11-06-domainscope-live-drive-figures-live-apply",
+  "applied_on": "2026-11-06",
+  "recorded_on": "2026-11-06",
+  "recorded_by": "codex",
+  "source_commit": "3be779b38813e0f1826841deb83303b26f347e76",
+  "repo_version_context": "0.179.54",
+  "workflow_id": "adr-0226-domainscope-drive-refresh-live-apply",
+  "adr": "0226",
+  "service_ids": [],
+  "summary": "Installed the merged bounded live-figures exporter, Drive wrapper and unit on the Builder, paired with the reviewed private SSH-target defaults, and verified the complete path with an explicit read-only dry run. No document or refresh metric was written.",
+  "targets": [
+    {
+      "kind": "container",
+      "name": "builder",
+      "vmid": "108"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Reviewed main sources",
+      "result": "pass",
+      "observed": "PFS main 3be779b38813e0f1826841deb83303b26f347e76 (PR680) and private fleet-state main eae32c14d76df120c1ddeb8cbd2e803addbf0577 (PR707). Application tool built from fresh main 91dc9c9b7944da0e7dac4c4d1b00b5ba186fd904."
+    },
+    {
+      "check": "Official installer and backups",
+      "result": "pass",
+      "observed": "Installed at 2026-11-06T17:38:33Z from a fresh detached main using the official installer. Backups: /usr/local/bin/domainscope-drive-refresh-run.bak-20261106T173833Z and /etc/systemd/system/domainscope-drive-refresh.service.bak-20261106T173833Z. The previously absent defaults file was created at 17:38:06Z with mode 0600."
+    },
+    {
+      "check": "Installed bytes match main",
+      "result": "pass",
+      "observed": "Wrapper SHA256 ae3696f6dc52754c51690e94ccd0b2cccc6591a718d17d1795eb554a443b02c1; figures helper 2147a8317f6d20f10b104b587cdc0cfa3f3b24cd7711923ab5f9810f1d99649b; service unit 20c6399d4aa1ea67d8fc73c3ced78256617576365de4679f9a16055b02ef3930. The release worktree independently hashes to the same values. Private defaults SHA256 7064f88c813dc069a1556fd6a191b1f455af78e65a26ba4ff3331f6de34ad85e."
+    },
+    {
+      "check": "Full dry-run succeeds",
+      "result": "pass",
+      "observed": "Transient codex-domainscope-drive-dryrun-20261106T1741.service ran 17:41:00\u201317:41:24Z and exited 0 with User=root and HOME=/root, matching the normal service. Validated the current 110207-byte aggregate generated 08:17Z (as_of 2026-11-03); nine documents and twelve phrase replacements planned, no writes. Live cache is root-owned mode 0600."
+    },
+    {
+      "check": "Refresh metrics unchanged",
+      "result": "pass",
+      "observed": "Before and after the dry run, metrics SHA256 a2fcc25cb20fd8ffef793a056497d87ee4006d90bdaa6b8dcc052d7485e29d0f. The existing timer remains enabled, next slot 2026-11-07 07:39:16 UTC."
+    },
+    {
+      "check": "Transient execution identity correction",
+      "result": "pass",
+      "observed": "The first transient dry run validated figures but git fetch failed because HOME was absent. The successful verification explicitly supplied User=root and HOME=/root. This integration adds those same arguments to the installer and pins them in its test; installed runtime wrapper/helper/unit already match merged main."
+    }
+  ],
+  "evidence_refs": [
+    "scripts/domainscope-drive-figures.py",
+    "scripts/domainscope-drive-refresh-run",
+    "scripts/domainscope-drive-refresh-install.sh",
+    "config/systemd/domainscope-drive-refresh.service",
+    "tests/test_domainscope_drive_figures.py",
+    "tests/test_domainscope_drive_refresh.py",
+    "docs/runbooks/domainscope-drive-refresh.md"
+  ],
+  "notes": [
+    "This is infrastructure-only verification with explicit empty service scope. It does not refresh catalog application deployment dates.",
+    "Private target configuration remains in fleet-state; no credential or raw aggregate is included in this receipt.",
+    "platform_version advances to 0.179.58 after the exact-main runtime apply and successful dry-run verification."
+  ]
+}

@@ -1,0 +1,21 @@
+[Unit]
+Description=LV3 Nomad Agent
+Documentation=https://developer.hashicorp.com/nomad/docs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/local/bin/nomad agent -config=/etc/mcp/nomad/nomad.hcl
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+KillSignal=SIGINT
+LimitNOFILE=65536
+LimitNPROC=infinity
+Restart=on-failure
+RestartSec=5s
+TasksMax=infinity
+
+[Install]
+WantedBy=multi-user.target

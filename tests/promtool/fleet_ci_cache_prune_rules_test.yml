@@ -1,0 +1,75 @@
+# promtool unit tests for config/prometheus/rules/fleet-ci-cache-prune.yml (run by tests/test_fleet_ci_cache_prune_rules.py when promtool is installed).
+rule_files:
+  - ../../config/prometheus/rules/fleet-ci-cache-prune.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a go-build cache still over its cap fires after 5 minutes, caches under their cap do not, a duplicate series fires once
+    interval: 1m
+    input_series:
+      - series: 'ci_cache_prune_over_cap{host="0own-build-worker",instance="b:9101",cache="go-build"}'
+        values: "0x10 1x40"
+      - series: 'ci_cache_prune_over_cap{host="0own-build-worker",instance="b:9101",cache="go-mod"}'
+        values: "0x50"
+      - series: 'ci_cache_prune_over_cap{host="0own-build-worker",instance="b:9101",cache="npm"}'
+        values: "0x50"
+      # the same cache under a second label set (an exporter restart): fires once
+      - series: 'ci_cache_prune_over_cap{host="0own-build-worker",instance="b:9101",cache="go-build",fleet="0own"}'
+        values: "0x10 1x40"
+    alert_rule_test:
+      - {eval_time: 8m, alertname: CiCacheOverCap, exp_alerts: []}
+      - {eval_time: 13m, alertname: CiCacheOverCap, exp_alerts: []}
+      - eval_time: 20m
+        alertname: CiCacheOverCap
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_ci_cache_prune, host: 0own-build-worker, cache: go-build}
+            exp_annotations:
+              summary: "go-build cache on 0own-build-worker is still over its cap after the nightly prune"
+              description: "prune.sh deleted everything it may (files used in the last day, Go modules younger than 14 days) and the cache is still above its cap (ci_cache_prune_size_bytes against ci_cache_prune_cap_bytes), so the cache disk is not bounded and the prune unit exited 3. Read the run with `journalctl -u woodpecker-ci-cache-prune.service --since -2d` on the host. Either one working day needs more than the cap (raise the flag in the unit's drop-in caps.conf; see docs/runbooks/woodpecker-ci-go-cache-pilot.md in services-registry) or something other than the pipelines writes into the cache."
+              runbook_url: docs/runbooks/fleet-observability.md#ci-cache-prune-alerts
+
+  - name: a prune that has not finished for over 36 hours goes stale, one that runs daily does not
+    interval: 1m
+    input_series:
+      # last run frozen at epoch 0; time() passes 36 h (129600 s) at 2160 minutes and the rule waits 30 more
+      - series: 'ci_cache_prune_last_run_timestamp_seconds{host="0own-build-worker",instance="b:9101"}'
+        values: "0x2299"
+      # a host whose prune keeps finishing: the timestamp follows the clock
+      - series: 'ci_cache_prune_last_run_timestamp_seconds{host="docker-build-lv3",instance="a:9100"}'
+        values: "0+60x2299"
+    alert_rule_test:
+      - {eval_time: 2150m, alertname: CiCachePruneStale, exp_alerts: []}
+      - {eval_time: 2175m, alertname: CiCachePruneStale, exp_alerts: []}
+      - eval_time: 2200m
+        alertname: CiCachePruneStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_ci_cache_prune, host: 0own-build-worker}
+            exp_annotations:
+              summary: "the CI cache prune on 0own-build-worker has not finished a run for 36 hours"
+              description: "The timer runs daily at about 03:15 UTC and the run writes this metric when it ends, so 1d 12h 40m 0s without one means a run was missed or died before it wrote its file. Nothing bounds the cache disk until it runs again. On the host: `systemctl status woodpecker-ci-cache-prune.timer woodpecker-ci-cache-prune.service`."
+              runbook_url: docs/runbooks/fleet-observability.md#ci-cache-prune-alerts
+
+  - name: no series at all fires the missing rule after 3 days, a reporting host keeps it quiet
+    interval: 1h
+    input_series:
+      - series: 'up{job="node_exporter",instance="a:9100"}'
+        values: "1x100"
+    alert_rule_test:
+      - {eval_time: 60h, alertname: CiCachePruneMissing, exp_alerts: []}
+      - eval_time: 80h
+        alertname: CiCachePruneMissing
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_ci_cache_prune}
+            exp_annotations:
+              summary: "No host reports the CI cache prune metrics"
+              description: "No series ci_cache_prune_last_run_timestamp_seconds at all for 3 days (the stale rule cannot fire on a series that does not exist). Either `--prom` is not set in the prune unit on the pilot host, the textfile is not written, or its exporter is not scraped. Check `ls -l /var/lib/prometheus/node-exporter/ci-cache-prune.prom` on 0own-build-worker and `curl -s http://100.88.44.116:9101/metrics | grep ci_cache_prune`."
+              runbook_url: docs/runbooks/fleet-observability.md#ci-cache-prune-alerts
+
+  - name: a host that reports keeps the missing rule quiet
+    interval: 1h
+    input_series:
+      - series: 'ci_cache_prune_last_run_timestamp_seconds{host="0own-build-worker",instance="b:9101"}'
+        values: "0+3600x100"
+    alert_rule_test:
+      - {eval_time: 80h, alertname: CiCachePruneMissing, exp_alerts: []}

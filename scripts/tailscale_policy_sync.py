@@ -4,8 +4,10 @@
 Subcommands
 -----------
 check    Offline only, no credentials, no network. HuJSON syntax, forbidden patterns (allow-all, tags missing from
-         tagOwners) and the lockout guard (policy tests must keep proving the operator Mac and the bastions can SSH).
+         tagOwners), the lockout guard (policy tests must keep proving the operator Mac and the bastions can SSH) and
+         that the text is already in the form Tailscale stores (hujson.Format), so live can equal git byte for byte.
          This is what CI runs.
+fmt      Offline. Rewrite the file in that stored form (whitespace only); `--check` only reports.
 export   GET the live policy (HuJSON, comments preserved) to stdout; the ETag goes to stderr.
 plan     GET live, diff against the file (semantic + text), run `check`, POST /acl/validate (which also runs the
          policy `tests`). Records the live ETag and hashes in a plan file for `apply`. Exit non-zero on any failure.
@@ -61,7 +63,7 @@ VAULT_CMD = [
     "/etc/credstore.encrypted/fleet-graph-writer-renew/current/apikey-service-admin-token.cred",
     "-p",
     "LoadCredentialEncrypted=fleet-secrets-admin-token:"
-    "/etc/credstore.encrypted/fleet-runner-woodpecker-rotation/current/fleet-secrets-admin-token.cred",
+    "/etc/credstore.encrypted/fleet-tailscale-policy-sync/current/fleet-secrets-admin-token.cred",
     "-E",
     "HOME=/root",
     "/root/bin/fleet-vault.py",
@@ -139,6 +141,547 @@ def normalise_text(text: str) -> str:
 
 def sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Tailscale's stored form (a port of hujson.Format)
+# ---------------------------------------------------------------------------------------------------------------
+#
+# Tailscale keeps a posted policy re-formatted by github.com/tailscale/hujson `Format`: tab indentation, a composite
+# that was written on one line stays on one line only while it fits in 80 columns (otherwise one member per line),
+# the values of consecutive one-line members are aligned, and an expanded composite ends with a trailing comma.
+# A file in any other form never equals live: on 2026-10-20 #526's one-line nine-port lists made the reconciler see a
+# text-only difference on every run and re-apply it (#527 stored the live form). This is a line-by-line port of
+# hujson's parse.go, format.go and pack.go (BSD-3-Clause, Copyright (c) 2021 Tailscale Inc & AUTHORS), worked on
+# UTF-8 bytes like the original because its 80-column rule counts bytes. tests/test_tailscale_policy_sync.py checks
+# it against hujson's own Format test table and against the live policy as Tailscale stored it.
+
+_HJ_WS = b" \t\r\n"
+# unicode.IsSpace, which hujson trims with; str.isspace() also counts \x1c-\x1f.
+_GO_SPACE = "\t\n\v\f\r \x85\xa0                　"
+_PUNCH_CARD_WIDTH = 80
+
+
+class _HjValue:
+    """A value with the whitespace/comments before and after it. None is Go's nil: on the last member or element of
+    a composite a non-None `after` (even b"") is what marks a trailing comma."""
+
+    __slots__ = ("before", "value", "after")
+
+    def __init__(self) -> None:
+        self.before: bytes | None = None
+        self.value: Any = None  # bytes (a literal) | _HjObject | _HjArray
+        self.after: bytes | None = None
+
+
+class _HjObject:
+    __slots__ = ("members", "after", "expand")
+
+    def __init__(self) -> None:
+        self.members: list[tuple[_HjValue, _HjValue]] = []
+        self.after: bytes | None = None
+        self.expand = False
+
+    def __len__(self) -> int:
+        return len(self.members)
+
+    def values(self):
+        for name, value in self.members:
+            yield name
+            yield value
+
+    def last(self) -> _HjValue | None:
+        return self.members[-1][1] if self.members else None
+
+    def first_before(self) -> bytes | None:
+        return self.members[0][0].before if self.members else self.after
+
+
+class _HjArray:
+    __slots__ = ("elements", "after", "expand")
+
+    def __init__(self) -> None:
+        self.elements: list[_HjValue] = []
+        self.after: bytes | None = None
+        self.expand = False
+
+    def __len__(self) -> int:
+        return len(self.elements)
+
+    def values(self):
+        yield from self.elements
+
+    def last(self) -> _HjValue | None:
+        return self.elements[-1] if self.elements else None
+
+    def first_before(self) -> bytes | None:
+        return self.elements[0].before if self.elements else self.after
+
+
+def _hj_ws(b: bytes, i: int = 0) -> int:
+    n = i
+    while n < len(b) and b[n] in _HJ_WS:
+        n += 1
+    return n - i
+
+
+def _hj_comment(b: bytes, i: int = 0) -> int:
+    """Length of the comment starting at b[i] (a line comment includes its newline); 0 = none, -1 = unterminated."""
+    if b.startswith(b"//", i):
+        end = b"\n"
+    elif b.startswith(b"/*", i):
+        end = b"*/"
+    else:
+        return 0
+    j = b.find(end, i + 2)
+    return -1 if j < 0 else j + len(end) - i
+
+
+def _hj_has_comment(b: bytes | None) -> bool:
+    return bool(b) and _hj_ws(b) < len(b)
+
+
+def _hj_nl(b: bytes | None) -> bool:
+    return bool(b) and b"\n" in b
+
+
+def _go_rstrip(b: bytes) -> bytes:
+    return b.decode("utf-8", "surrogateescape").rstrip(_GO_SPACE).encode("utf-8", "surrogateescape")
+
+
+def _hj_extra(b: bytes, n: int) -> int:
+    while n < len(b):
+        if b[n] in _HJ_WS:
+            n += _hj_ws(b, n)
+        elif b[n] == 0x2F:  # '/'
+            nc = _hj_comment(b, n)
+            if nc == 0:
+                return n
+            if nc < 0:
+                raise SyncError("unterminated comment in policy")
+            if b.startswith(b"//", n) and (" ".encode() in b[n : n + nc] or " ".encode() in b[n : n + nc]):
+                raise SyncError("line separator inside a line comment in policy")
+            n += nc
+        else:
+            return n
+    return n
+
+
+def _hj_literal(lit: bytes) -> bytes:
+    def no_constant(name: str) -> Any:
+        raise ValueError(name)
+
+    try:
+        json.loads(lit.decode("utf-8"), parse_constant=no_constant)
+    except (ValueError, UnicodeDecodeError) as exc:
+        raise SyncError(f"invalid literal in policy: {lit[:40]!r}") from exc
+    return lit
+
+
+def _hj_next(b: bytes, n: int) -> tuple[_HjValue, int, int | None]:
+    """parseNext. The third item is the closing '}' or ']' met where a value should start (Go's errInvalid*End)."""
+    v = _HjValue()
+    n0, n = n, _hj_extra(b, n)
+    if n > n0:
+        v.before = b[n0:n]
+    if n < len(b) and b[n] in b"}]":
+        return v, n, b[n]
+    v.value, n = _hj_trimmed(b, n)
+    end, n = n, _hj_extra(b, n)
+    if n > end:
+        v.after = b[end:n]
+    return v, n, None
+
+
+def _hj_trimmed(b: bytes, n: int) -> tuple[Any, int]:
+    if n >= len(b):
+        raise SyncError("policy ends where a value should start")
+    c = b[n : n + 1]
+    if c in (b"{", b"["):
+        comp: Any = _HjObject() if c == b"{" else _HjArray()
+        closer = ord("}") if c == b"{" else ord("]")
+        n += 1
+        while True:
+            item, n, hit = _hj_next(b, n)
+            if hit is not None:
+                if hit != closer:
+                    raise SyncError("mismatched closing bracket in policy")
+                _hj_set_trailing_comma(comp, len(comp) > 0)
+                comp.after = item.before
+                return comp, n + 1
+            if isinstance(comp, _HjObject):
+                if not (isinstance(item.value, bytes) and item.value[:1] == b'"'):
+                    raise SyncError("an object name in the policy is not a string")
+                if n >= len(b) or b[n] != ord(":"):
+                    raise SyncError("missing ':' after an object name in policy")
+                value, n, hit = _hj_next(b, n + 1)
+                if hit is not None:
+                    raise SyncError("missing value after ':' in policy")
+                comp.members.append((item, value))
+            else:
+                comp.elements.append(item)
+            if n < len(b) and b[n] == ord(","):
+                n += 1
+            elif n < len(b) and b[n] == closer:
+                last = comp.last()
+                comp.after, last.after = last.after, None
+                return comp, n + 1
+            else:
+                raise SyncError("expected ',' or a closing bracket in policy")
+    if c == b'"':
+        j, esc = n + 1, False
+        while j < len(b):
+            if esc:
+                esc = False
+            elif b[j] == 0x5C:
+                esc = True
+            elif b[j] == 0x22:
+                return _hj_literal(b[n : j + 1]), j + 1
+            j += 1
+        raise SyncError("unterminated string in policy")
+    j = n
+    while j < len(b) and (b[j] in b"-+." or (b[j] < 0x80 and chr(b[j]).isalnum())):
+        j += 1
+    if j == n:
+        raise SyncError(f"invalid character {chr(b[n])!r} in policy")
+    return _hj_literal(b[n:j]), j
+
+
+def _hj_parse(b: bytes) -> _HjValue:
+    v, n, hit = _hj_next(b, 0)
+    if hit is not None or n < len(b):
+        raise SyncError("unexpected text after the policy's top-level value")
+    return v
+
+
+def _hj_set_trailing_comma(comp: Any, want: bool) -> None:
+    last = comp.last()
+    if last is None:
+        return
+    if want and last.after is None:
+        last.after = b""
+    elif not want and last.after is not None:
+        comp.after = last.after + (comp.after or b"")
+        last.after = None
+
+
+def _hj_is_standard(v: _HjValue) -> bool:
+    if _hj_has_comment(v.before) or _hj_has_comment(v.after):
+        return False
+    comp = v.value
+    if isinstance(comp, bytes):
+        return True
+    last = comp.last()
+    if (last is not None and last.after is not None) or _hj_has_comment(comp.after):
+        return False
+    return all(_hj_is_standard(sub) for sub in comp.values())
+
+
+def _go_string(s: str) -> bytes:
+    """hujson.String: JSON-quote with only the escapes Go's encoder needs; '/' and non-ASCII stay literal."""
+    escapes = {"\b": "\\b", "\t": "\\t", "\n": "\\n", "\f": "\\f", "\r": "\\r", "\\": "\\\\", '"': '\\"'}
+    out = ['"']
+    for ch in s:
+        if 0xD800 <= ord(ch) <= 0xDFFF:  # a lone surrogate: Go's decoder gives U+FFFD
+            ch = "�"
+        if ord(ch) < 0x20 or ch in '\\"':
+            out.append(escapes.get(ch) or f"\\u{ord(ch):04x}")
+        else:
+            out.append(ch)
+    out.append('"')
+    return "".join(out).encode("utf-8")
+
+
+def _hj_normalize(v: _HjValue) -> None:
+    comp = v.value
+    if isinstance(comp, bytes):
+        if comp[:1] == b'"' and b"\\" in comp:
+            v.value = _go_string(json.loads(comp.decode("utf-8")))
+        return
+    if not len(comp):
+        if not _hj_has_comment(comp.after):
+            comp.after = None
+        return
+    for sub in comp.values():
+        if not _hj_has_comment(sub.after):
+            sub.after = None
+    for sub in comp.values():
+        _hj_normalize(sub)
+
+
+def _hj_line_stats(b: bytes | None) -> tuple[int, int, bool]:
+    """(first line length, last line length, multi-line) of an extra, comments approximated as hujson does."""
+    b = b or b""
+
+    def length(s: bytes) -> int:
+        n = 0
+        while True:
+            s = s[_hj_ws(s) :]
+            if s.startswith(b"//"):
+                return n + 1 + len(s)
+            if s.startswith(b"/*"):
+                nc = _hj_comment(s)
+                if nc <= 0:
+                    return n + 1 + len(s)
+                n, s = n + 1 + nc, s[nc:]
+                continue
+            return n + 1 if n > 0 else n
+
+    if b"\n" not in b:
+        n = length(b)
+        return n, n, False
+    return length(b[: b.index(b"\n")]), length(b[b.rindex(b"\n") + 1 :]), True
+
+
+def _hj_expand(v: _HjValue) -> tuple[int, int, bool]:
+    """expandComposites: mark every composite that must print one member per line; returns its line statistics."""
+    comp = v.value
+    if isinstance(comp, bytes):
+        return len(comp), len(comp), False
+    expand = False
+    line, lines = 1, []  # starts after the opening bracket
+
+    def update(stats: tuple[int, int, bool]) -> None:
+        nonlocal line
+        line += stats[0]
+        if stats[2]:
+            lines.append(line)
+            line = stats[1]
+
+    if isinstance(comp, _HjObject):
+        for name, value in comp.members:
+            expand = expand or _hj_nl(name.before)
+            update(_hj_line_stats(name.before))
+            update(_hj_expand(name))
+            update(_hj_line_stats(name.after))
+            line += len(": ")
+            update(_hj_line_stats(value.before))
+            update(_hj_expand(value))
+            update(_hj_line_stats(value.after))
+            line += len(", ")
+        # upstream also tests `length > 1 && stats.multiline` here, on a stats that is still zero: a no-op, not ported
+    else:
+        for value in comp.elements:
+            expand = expand or _hj_nl(value.before)
+            update(_hj_line_stats(value.before))
+            update(_hj_expand(value))
+            update(_hj_line_stats(value.after))
+            line += len(", ")
+    line += 1
+    last = comp.last()
+    expand = expand or (last is not None and _hj_nl(last.after)) or _hj_nl(comp.after)
+    lines.append(line)
+    stats = (lines[0], lines[-1], len(lines) > 1)
+    expand = expand or any(n > _PUNCH_CARD_WIDTH for n in lines)
+    if expand:
+        stats = (1 + _hj_line_stats(comp.first_before())[0], 1, True)
+        comp.expand = True
+    return stats
+
+
+def _hj_format_extra(
+    b: bytes | None,
+    depth: int,
+    *,
+    leading_newline: bool = False,
+    trailing_newline: bool = False,
+    no_leading_empty: bool = False,
+    no_trailing_empty: bool = False,
+    unindent_last: bool = False,
+    space_if_empty: bool = False,
+) -> bytes | None:
+    """Extra.format: re-indent the comments in one stretch of whitespace; keeps None when nothing is emitted."""
+    if b is not None and b"\r" in b:
+        b = b.replace(b"\r\n", b"\n").replace(b"\n\r", b"\n").replace(b"\r", b" ")
+    rest = b or b""
+    out = bytearray()
+    if leading_newline and b"\n" not in rest:
+        out += b"\n"
+    while rest:
+        n = _hj_ws(rest)
+        if n:
+            out += b"\n" * min(rest[:n].count(b"\n"), 2)  # never more than one blank line
+            rest = rest[n:]
+            continue
+        n = _hj_comment(rest)
+        if n <= 0:
+            return b
+        out += b"\t" * depth if out.endswith(b"\n") else b" "
+        comment = rest[:n]
+        if comment.startswith(b"//") or b"\n" not in comment:
+            if comment.startswith(b"//"):
+                n -= 1  # the newline is the next stretch of whitespace
+            out += _go_rstrip(comment)
+            rest = rest[n:]
+            continue
+        lines = [_go_rstrip(line) for line in comment.split(b"\n")]
+        first = next((line for line in lines[1:] if line), b"")
+        has_empty = any(not line for line in lines)
+        common = first
+        for i in range(1, len(lines)):
+            line = lines[i]
+            if not line:
+                continue
+            if line.endswith(b"*/") and _hj_ws(line) + 2 == len(line):
+                lines[i] = common[: _hj_ws(common)] + b"*/"
+                break
+            k = 0
+            while k < len(line) and k < len(common):
+                if line[k] != common[k]:
+                    common = common[:k]
+                    break
+                k += 1
+        prefix = _hj_ws(common)
+        star_aligned = not has_empty and len(common) > prefix and common[prefix] == ord("*")
+        out += lines[0] + b"\n"
+        for line in lines[1:]:
+            if line:
+                out += b"\t" * depth + (b" " if star_aligned else b"") + line[prefix:]
+            out += b"\n"
+        out = bytearray(bytes(out).rstrip(b"\n"))
+        rest = rest[n:]
+    if trailing_newline and not out.endswith(b"\n"):
+        out += b"\n"
+    while no_leading_empty and out.startswith(b"\n\n"):
+        out = out[1:]
+    while no_trailing_empty and out.endswith(b"\n\n"):
+        out = out[:-1]
+    if out.endswith(b"\n"):
+        out += b"\t" * (depth - 1 if unindent_last else depth)
+    elif out:
+        out += b" "
+    if space_if_empty and not out:
+        out += b" "
+    return None if b is None and not out else bytes(out)
+
+
+def _hj_whitespace(v: _HjValue, depth: int, standard: bool) -> None:
+    """formatWhitespace: indentation, one member per line for expanded composites, trailing commas."""
+    comp = v.value
+    if isinstance(comp, bytes):
+        return
+    expand = comp.expand
+    if isinstance(comp, _HjObject):
+        for i, (name, value) in enumerate(comp.members):
+            name.before = _hj_format_extra(name.before, depth + 1, leading_newline=expand, no_leading_empty=i == 0, space_if_empty=i != 0)
+            name.after = _hj_format_extra(name.after, depth + 2, no_leading_empty=True, no_trailing_empty=True)
+            value.before = _hj_format_extra(value.before, depth + 2, no_leading_empty=True, no_trailing_empty=True, space_if_empty=True)
+            offset = (1 if expand else 0) + (1 if _hj_nl(name.after) or _hj_nl(value.before) else 0)
+            _hj_whitespace(value, depth + offset, standard)
+            value.after = _hj_format_extra(value.after, depth + 2, no_leading_empty=True, no_trailing_empty=True)
+    else:
+        for i, value in enumerate(comp.elements):
+            value.before = _hj_format_extra(value.before, depth + 1, leading_newline=expand, no_leading_empty=i == 0, space_if_empty=i != 0)
+            _hj_whitespace(value, depth + (1 if expand else 0), standard)
+            value.after = _hj_format_extra(value.after, depth + 2, no_leading_empty=True, no_trailing_empty=True)
+    comp.after = _hj_format_extra(
+        comp.after, depth + 1, trailing_newline=expand, no_leading_empty=not len(comp), no_trailing_empty=True, unindent_last=True
+    )
+    last = comp.last()
+    surrounded = last is not None and bool(last.after) and bool(comp.after)
+    if not expand and not surrounded:
+        _hj_set_trailing_comma(comp, False)
+    elif expand and not standard:
+        _hj_set_trailing_comma(comp, True)
+
+
+def _hj_has_newline(v: _HjValue, top: bool) -> bool:
+    if top and (_hj_nl(v.before) or _hj_nl(v.after)):
+        return True
+    return not isinstance(v.value, bytes) and any(_hj_has_newline(sub, True) for sub in v.value.values())
+
+
+def _hj_align(v: _HjValue) -> None:
+    """alignObjectValues: pad after the colon so consecutive one-line members start their values in one column."""
+    comp = v.value
+    if isinstance(comp, bytes):
+        return
+    if isinstance(comp, _HjObject):
+        rows: list[tuple[_HjValue, int]] = []
+
+        def flush() -> None:
+            width = max((length for _, length in rows), default=0)
+            for value, length in rows:
+                value.before = (value.before or b"") + b" " * (width - length)
+            rows.clear()
+
+        for name, value in comp.members:
+            if (
+                not _hj_nl(name.before)
+                or _hj_has_newline(name, False)
+                or _hj_nl(name.after)
+                or _hj_nl(value.before)
+                or _hj_has_newline(value, False)
+                or _hj_nl(value.after)
+            ):
+                flush()
+                continue
+            if (name.before or b"").count(b"\n") > 1:  # a blank line or a comment line starts a new block (upstream's indentSuffix is always empty)
+                flush()
+            rows.append((value, len(name.value) + len(name.after or b"") + len(":") + len(value.before or b"")))
+        flush()
+    for sub in comp.values():
+        _hj_align(sub)
+
+
+def _hj_pack(v: _HjValue, out: list[bytes]) -> None:
+    out.append(v.before or b"")
+    comp = v.value
+    if isinstance(comp, bytes):
+        out.append(comp)
+    else:
+        out.append(b"{" if isinstance(comp, _HjObject) else b"[")
+        if isinstance(comp, _HjObject):
+            for name, value in comp.members:
+                _hj_pack(name, out)
+                out.append(b":")
+                _hj_pack(value, out)
+                out.append(b",")
+        else:
+            for value in comp.elements:
+                _hj_pack(value, out)
+                out.append(b",")
+        last = comp.last()
+        if last is not None and last.after is None:
+            out.pop()  # no trailing comma
+        out.append(comp.after or b"")
+        out.append(b"}" if isinstance(comp, _HjObject) else b"]")
+    out.append(v.after or b"")
+
+
+def stored_form(text: str) -> str:
+    """The text Tailscale keeps when this policy is posted: hujson.Format(text). Raises SyncError on invalid HuJSON."""
+    v = _hj_parse(text.encode("utf-8"))
+    v.before = _hj_format_extra(v.before, 0)
+    if v.before is not None:
+        v.before = v.before[_hj_ws(v.before) :]
+    standard = _hj_is_standard(v)
+    _hj_normalize(v)
+    _hj_expand(v)
+    _hj_whitespace(v, 0, standard)
+    _hj_align(v)
+    v.after = _go_rstrip(_hj_format_extra(v.after, 0) or b"") + b"\n"
+    out: list[bytes] = []
+    _hj_pack(v, out)
+    return b"".join(out).decode("utf-8")
+
+
+def stored_form_errors(text: str, max_lines: int = 40) -> list[str]:
+    """Empty when `text` is already what Tailscale stores; otherwise why not, with the start of the diff."""
+    try:
+        want = stored_form(text)
+    except SyncError as exc:
+        return [str(exc)]
+    if want == text:
+        return []
+    diff = list(difflib.unified_diff(text.splitlines(), want.splitlines(), "policy.hujson (as written)", "policy.hujson (as Tailscale stores it)", lineterm=""))
+    changed = sum(1 for line in diff if line.startswith("-") and not line.startswith("---"))
+    shown = "\n".join(diff[:max_lines]) + ("\n..." if len(diff) > max_lines else "")
+    return [
+        f"policy text is not in the form Tailscale stores (hujson.Format): {changed} line(s) would change. Live would never equal "
+        "git and the reconciler would see a text-only difference after every apply. Fix: python3 scripts/tailscale_policy_sync.py fmt\n"
+        + shown
+    ]
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -397,6 +940,21 @@ def _state_paths(state_dir: Path) -> tuple[Path, Path]:
     return state_dir / "plan.json", state_dir / "plan.live.hujson"
 
 
+# Every apply made by this tool, so the reconciler (same state directory on CT108) can tell it from a change made
+# in the admin console or with another credential. It alerts on both: either one skips the reviewed-merge path.
+APPLIES_LOG = "applies.jsonl"
+
+
+def record_apply(state_dir: Path, *, etag_before: str, etag_after: str, file_sha256: str, rollback: Path) -> None:
+    path = state_dir / APPLIES_LOG
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    entry = {"ts": int(time.time()), "tool": "tailscale_policy_sync", "etag_before": etag_before, "etag_after": etag_after,
+             "file_sha256": file_sha256, "rollback": str(rollback)}
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(entry, sort_keys=True) + "\n")
+    os.chmod(path, 0o600)
+
+
 def _write_private(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".")
@@ -455,11 +1013,28 @@ def cmd_check(args: argparse.Namespace) -> int:
     if args.file == DEFAULT_POLICY and not args.file.exists() and not PUBLICATION_MANIFEST.exists():
         print("check: skipped (private Tailscale policy is omitted from this sanitized snapshot)")
         return 0
-    errors = check_policy(_read_policy(args.file), load_guard(args.guard))
+    text = _read_policy(args.file)
+    errors = check_policy(text, load_guard(args.guard))
+    if not errors:  # a syntax error is already reported once
+        errors = stored_form_errors(text)
     for err in errors:
         print(f"FAIL {err}", file=sys.stderr)
     print("check: " + ("FAILED" if errors else f"ok ({args.file})"))
     return 1 if errors else 0
+
+
+def cmd_fmt(args: argparse.Namespace) -> int:
+    text = _read_policy(args.file)
+    want = stored_form(text)
+    if want == text:
+        print(f"fmt: {args.file} is already in Tailscale's stored form")
+        return 0
+    if args.check:
+        print("\n".join(stored_form_errors(text)), file=sys.stderr)
+        return 1
+    args.file.write_text(want)
+    print(f"fmt: rewrote {args.file} in Tailscale's stored form (whitespace only; the rules are unchanged)")
+    return 0
 
 
 def cmd_export(args: argparse.Namespace) -> int:
@@ -542,6 +1117,12 @@ def cmd_apply(args: argparse.Namespace) -> int:
     errors = check_policy(desired, load_guard(args.guard))
     if errors:
         raise SyncError("offline check failed: " + "; ".join(errors))
+    print(
+        "note: this applies outside the reconciler. A merged additive change needs no hand apply (the reconciler applies it, "
+        "after its daily cap if that is spent), and the reconciler alerts on every live change it did not make "
+        "(FleetTailnetPolicyChangedOutsideReconciler). Rules that git lacks block it until git has them.",
+        file=sys.stderr,
+    )
     if not args.yes:
         if input(f"Apply {args.file} to the live tailnet policy? Type 'apply' to continue: ").strip() != "apply":
             raise SyncError("aborted by operator")
@@ -564,7 +1145,11 @@ def cmd_apply(args: argparse.Namespace) -> int:
         raise SyncError(f"apply refused: HTTP {status}: {body}  (live policy unchanged)")
     plan_file.unlink(missing_ok=True)
     print("applied. verifying round trip ...")
-    after, new_etag = api.get_policy()
+    new_etag = "?"
+    try:
+        after, new_etag = api.get_policy()
+    finally:  # recorded even when the re-read fails: the apply happened
+        record_apply(args.state_dir, etag_before=etag, etag_after=new_etag, file_sha256=sha256(desired), rollback=rollback)
     left = semantic_diff(parse_hujson(after), parse_hujson(desired))
     print(f"new etag: {new_etag}; post-apply semantic diff: {'EMPTY' if not left else left}")
     print(f"rollback: scripts/tailscale_policy_sync.py plan --file {rollback} && ... apply --file {rollback}")
@@ -602,9 +1187,13 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--file", type=Path, default=DEFAULT_POLICY, help="policy file (default: %(default)s)")
         p.add_argument("--guard", type=Path, default=DEFAULT_GUARD, help="lockout guard (default: %(default)s)")
 
-    p = sub.add_parser("check", help="offline checks (no credentials)")
+    p = sub.add_parser("check", help="offline checks (no credentials), including that the file is in Tailscale's stored form")
     common(p)
     p.set_defaults(func=cmd_check)
+    p = sub.add_parser("fmt", help="rewrite the file in the form Tailscale stores it (hujson.Format); offline")
+    common(p)
+    p.add_argument("--check", action="store_true", help="only report: exit 1 if the file is not in the stored form")
+    p.set_defaults(func=cmd_fmt)
     p = sub.add_parser("export", help="print the live policy (HuJSON) to stdout")
     p.set_defaults(func=cmd_export)
     p = sub.add_parser("plan", help="diff + validate + policy tests against the live tailnet (read-only)")

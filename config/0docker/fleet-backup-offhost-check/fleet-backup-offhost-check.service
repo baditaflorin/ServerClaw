@@ -1,0 +1,19 @@
+[Unit]
+Description=Check the off-host copy of the small encrypted backup archives (state.tsv, parts, freshness) and publish textfile metrics
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/fleet-backup-offhost-check check
+# The host is CPU-starved by day: the check is a partial clone plus one small blob, run it at the lowest priority anyway.
+Nice=19
+IOSchedulingClass=idle
+CPUWeight=10
+IOWeight=10
+MemoryMax=512M
+TimeoutStartSec=20min
+NoNewPrivileges=yes
+ProtectSystem=strict
+PrivateTmp=yes
+ReadWritePaths=/var/lib/prometheus/node-exporter /var/tmp

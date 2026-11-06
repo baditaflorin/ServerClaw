@@ -1,0 +1,15 @@
+[Unit]
+Description=DomainScope Drive data room refresh: daily at 07:30 UTC
+
+[Timer]
+# Daily, not only Monday: the run is a no-op when the documents are current, and data-room.json reaches main some hours after the Monday
+# cron job (06:40 UTC) writes it, so a daily run picks it up the day it lands. 07:30 UTC is clear of the builder's nightly backup stop
+# (ct108-nightly, 01:30Z, about an hour). Fixed slot, not OnBootSec; Persistent=false means no catch-up run at the boot that follows the
+# backup, the next slot runs it.
+OnCalendar=*-*-* 07:30:00 UTC
+RandomizedDelaySec=10min
+AccuracySec=1min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

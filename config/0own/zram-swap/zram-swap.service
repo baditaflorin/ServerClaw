@@ -1,0 +1,22 @@
+[Unit]
+Description=8 GiB zstd zram swap (host memory safety net, added 2026-10-19; remove with: systemctl disable --now zram-swap)
+# Boot ordering (2026-10-22, found by the horizon check boot_ordering_cycle, which counted 2 cycles; `systemd-analyze verify default.target` names them):
+#  1. With the default dependencies (After=basic.target, After=sysinit.target) the unit closes sysinit.target -> swap.target -> zram-swap.service -> basic.target -> sockets.target ->
+#     iscsid.socket -> sysinit.target, because the unit is Before=swap.target and swap.target is ordered before sysinit.target.
+#  2. With After=local-fs.target it closes local-fs.target -> zram-swap.service -> swap.target -> tmp.mount -> local-fs.target, because tmp.mount is After=swap.target and Before=local-fs.target.
+# At boot systemd breaks a cycle by DELETING a start job (it said swap.target for the first, tmp.mount for the second; it may pick any job of the loop). A swap unit that runs this
+# early needs neither: modprobe, sysfs and swapon work as soon as the root file system (ZFS, /usr and /lib/modules on it) is up. An empty After= in a drop-in does NOT remove a
+# line of this file (checked on systemd 257), which is why the unit itself is kept in git (config/0own/zram-swap) and no hostconf drop-in can fix it.
+# Without default dependencies the unit also loses the implicit shutdown ordering, so it is put back.
+DefaultDependencies=no
+Before=swap.target shutdown.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c "modprobe zram && echo zstd > /sys/block/zram0/comp_algorithm && echo 8G > /sys/block/zram0/disksize && mkswap -L zram0 /dev/zram0 && swapon -p 100 /dev/zram0"
+ExecStop=/bin/sh -c "swapoff /dev/zram0; echo 1 > /sys/block/zram0/reset"
+
+[Install]
+WantedBy=multi-user.target

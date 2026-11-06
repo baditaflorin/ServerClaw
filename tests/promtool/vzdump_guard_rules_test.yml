@@ -1,0 +1,94 @@
+# promtool unit tests for the vzdump-guard alerts in config/prometheus/rules/pve-host-incident.yml (run by tests/test_vzdump_guard_rules.py when promtool is
+# installed; written 2026-10-19 with the guard). promtool starts its clock at the Unix epoch, so a timestamp series whose value equals its own time in seconds means
+# "just happened": "0+60x300" at a 1m interval is a guard that finishes a run every minute. The guard writes vzdump_guard_last_run_timestamp_seconds every run, _enabled
+# (0 = kill switch or dry run), and _last_trip_timestamp_seconds (0 = never stopped a backup).
+rule_files:
+  - ../../config/prometheus/rules/pve-host-incident.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a guard that runs every minute, is enabled and never tripped raises nothing
+    interval: 1m
+    input_series:
+      - series: 'vzdump_guard_last_run_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"}'
+        values: "0+60x300"
+      - series: 'vzdump_guard_enabled{job="pve_0docker_host_node_exporter_via_tailscale"}'
+        values: "1x300"
+      - series: 'vzdump_guard_last_trip_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"}'
+        values: "0x300"
+    alert_rule_test:
+      - {eval_time: 200m, alertname: VzdumpGuardTripped, exp_alerts: []}
+      - {eval_time: 200m, alertname: VzdumpGuardSilent, exp_alerts: []}
+      - {eval_time: 200m, alertname: VzdumpGuardDisabled, exp_alerts: []}
+
+  - name: a trip raises the warning for 24 hours and then clears
+    interval: 1m
+    input_series:
+      # the guard stopped a backup at 6000 s (100 m); the counter file keeps that time
+      - series: 'vzdump_guard_last_trip_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"}'
+        values: "0x100 6000x2000"
+    alert_rule_test:
+      - {eval_time: 99m, alertname: VzdumpGuardTripped, exp_alerts: []}
+      - eval_time: 105m
+        alertname: VzdumpGuardTripped
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale}
+            exp_annotations: {summary: "vzdump-guard stopped the backup of the Docker host (VM 100) to protect it", description: "Within the last 24 hours the guard on the 0docker hypervisor stopped a snapshot backup because the guest's load or I/O wait collapsed while it ran (journalctl -u vzdump-guard on the hypervisor has the numbers). VM 100 has no new backup from that run, so PveBackupFailureRecent and PbsBackupGroupStale follow. Usual causes: PBS slower than the guest's write rate, the worn nvme1n1 mirror, CT108 builds. See hypervisor-0docker/README.md in fleet-state."}
+      - eval_time: 1500m                                   # 84,000 s after the trip: still inside 24 h
+        alertname: VzdumpGuardTripped
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale}
+            exp_annotations: {summary: "vzdump-guard stopped the backup of the Docker host (VM 100) to protect it", description: "Within the last 24 hours the guard on the 0docker hypervisor stopped a snapshot backup because the guest's load or I/O wait collapsed while it ran (journalctl -u vzdump-guard on the hypervisor has the numbers). VM 100 has no new backup from that run, so PveBackupFailureRecent and PbsBackupGroupStale follow. Usual causes: PBS slower than the guest's write rate, the worn nvme1n1 mirror, CT108 builds. See hypervisor-0docker/README.md in fleet-state."}
+      - {eval_time: 1600m, alertname: VzdumpGuardTripped, exp_alerts: []}   # 90,000 s after: cleared
+
+  - name: a guard that stops running is silent after five minutes plus the delay
+    interval: 1m
+    input_series:
+      # last run at 6000 s, then nothing new (the series keeps its last value, as a stale textfile does)
+      - series: 'vzdump_guard_last_run_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"}'
+        values: "0+60x100 6000x2000"
+    alert_rule_test:
+      - {eval_time: 104m, alertname: VzdumpGuardSilent, exp_alerts: []}
+      - eval_time: 115m
+        alertname: VzdumpGuardSilent
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale}
+            exp_annotations: {summary: "vzdump-guard on the 0docker hypervisor has stopped running", description: "The guard that protects the Docker host (VM 100) from its own snapshot backup has not written its metrics for more than five minutes (it runs every minute). Until it is back, a backup of VM 100 can spiral the host unattended (twice on 2026-10-19). Check systemctl status vzdump-guard.timer and journalctl -u vzdump-guard on the hypervisor; the next VM 100 backup starts at 04:30Z."}
+
+  - name: a guard whose metrics vanished altogether is silent too (the dead-man switch must not need the series to exist)
+    interval: 1m
+    input_series:
+      - series: 'up{job="pve_0docker_host_node_exporter_via_tailscale"}'
+        values: "1x200"
+    alert_rule_test:
+      - {eval_time: 3m, alertname: VzdumpGuardSilent, exp_alerts: []}
+      - eval_time: 20m
+        alertname: VzdumpGuardSilent
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale}
+            exp_annotations: {summary: "vzdump-guard on the 0docker hypervisor has stopped running", description: "The guard that protects the Docker host (VM 100) from its own snapshot backup has not written its metrics for more than five minutes (it runs every minute). Until it is back, a backup of VM 100 can spiral the host unattended (twice on 2026-10-19). Check systemctl status vzdump-guard.timer and journalctl -u vzdump-guard on the hypervisor; the next VM 100 backup starts at 04:30Z."}
+
+  - name: the kill switch left on warns after an hour and clears when it is removed
+    interval: 1m
+    input_series:
+      - series: 'vzdump_guard_enabled{job="pve_0docker_host_node_exporter_via_tailscale"}'
+        values: "0x120 1x300"
+      - series: 'vzdump_guard_last_run_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"}'
+        values: "0+60x420"
+    alert_rule_test:
+      - {eval_time: 30m, alertname: VzdumpGuardDisabled, exp_alerts: []}
+      - eval_time: 90m
+        alertname: VzdumpGuardDisabled
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pve_backup, job: pve_0docker_host_node_exporter_via_tailscale}
+            exp_annotations: {summary: "vzdump-guard is disabled (it only logs, it stops nothing)", description: "/etc/vzdump-guard/disabled exists on the 0docker hypervisor, so the guard only logs WOULD STOP. The kill switch is for a deliberate window; remove the file (rm /etc/vzdump-guard/disabled) when it is over."}
+      - {eval_time: 150m, alertname: VzdumpGuardDisabled, exp_alerts: []}
+
+  - name: a dry run of one minute (the drill, enabled 0 for a moment) does not raise the disabled alert
+    interval: 1m
+    input_series:
+      - series: 'vzdump_guard_enabled{job="pve_0docker_host_node_exporter_via_tailscale"}'
+        values: "1x10 0x1 1x200"
+    alert_rule_test:
+      - {eval_time: 100m, alertname: VzdumpGuardDisabled, exp_alerts: []}

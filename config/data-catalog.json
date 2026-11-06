@@ -3,6 +3,20 @@
   "schema_version": "1.0.0",
   "data_stores": [
     {
+      "id": "agent-history-events",
+      "service": "agent_history",
+      "name": "Agent history events, sessions and embeddings",
+      "class": "secret",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "high",
+      "locations": [
+        "/srv/agent-history/postgres"
+      ],
+      "notes": "Every prompt, reply, tool call, tool result and bus message of the coding agents on the operator laptops, kept after two redaction passes, so it can still hold secrets that no rule recognises. The data disk is LUKS2 and the nightly PBS snapshot holds ciphertext. Rebuildable from the laptops. No retention is built yet (the pilot keeps 30 days of history; a retention decision precedes any widening)."
+    },
+    {
       "id": "api-gateway-runtime-state",
       "service": "api_gateway",
       "name": "API Gateway operational state and run receipts",

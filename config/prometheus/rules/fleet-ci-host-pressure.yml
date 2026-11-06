@@ -1,0 +1,46 @@
+# Added 2026-10-26 with the graded Woodpecker admission (services-registry PR 1000/1001): the load controller closes agent slots when a builder is busy, but nothing
+# told anyone when a builder stays saturated anyway (a stuck controller, a guest outside the controller's view, a host that is slow even with every slot closed).
+# These read the kernel's pressure-stall numbers (node_exporter, the share of the last 5 minutes some task waited for CPU / was stalled on IO) of the four CI
+# hosts that Prometheus scrapes: 0docker-builder (CT108), docker-build-lv3 (VM 130 on 0mcp), 0own-build-worker (VM 610) and infer-builder-ci (VM 702 on 0infer,
+# scraped over the tailnet since 2026-10-27). A fifth CI host must be added to the three host regexes and to the count in FleetCiHostPressureMissing (and its test).
+# Thresholds from a 7 day back-test (2026-10-19..26, 5 minute steps, the delay in the rule applied): CPU waiting over 0.4 for 30 minutes = 2 episodes, IO stalled
+# over 0.5 for 30 minutes = 4 episodes, all on the 0own HDD guest; 0.6 and a 60 minute delay never fired. `max by (host)` merges the duplicate series an exporter
+# restart leaves (two label sets for one host in the same hour).
+groups:
+  - name: fleet_ci_host_pressure
+    rules:
+      - alert: FleetCiHostCpuPressureHigh
+        expr: >-
+          max by (host) (rate(node_pressure_cpu_waiting_seconds_total{host=~"0docker-builder|docker-build-lv3|0own-build-worker|infer-builder-ci|0pipe-build"}[5m])) > 0.4
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_ci_host_pressure
+        annotations:
+          summary: "CI host {{ $labels.host }} has had CPU pressure over 40% for 30 minutes"
+          description: "Tasks on {{ $labels.host }} waited for a CPU {{ $value | humanizePercentage }} of the last 5 minutes. The load controller should already be closing agent slots there: check `journalctl -u woodpecker-load-controller@ci.0exec` on CT108 for node_graded / agent_graded_closed and the agent states on ci.0exec.com."
+          runbook_url: docs/runbooks/fleet-observability.md#ci-host-pressure-alerts
+
+      - alert: FleetCiHostIoPressureHigh
+        expr: >-
+          max by (host) (rate(node_pressure_io_stalled_seconds_total{host=~"0docker-builder|docker-build-lv3|0own-build-worker|infer-builder-ci|0pipe-build"}[5m])) > 0.5
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_ci_host_pressure
+        annotations:
+          summary: "CI host {{ $labels.host }} has had IO pressure over 50% for 30 minutes"
+          description: "All tasks on {{ $labels.host }} were stalled on IO {{ $value | humanizePercentage }} of the last 5 minutes. On 0own-build-worker the HDD mirror is shared with the other guests, so look at the hypervisor first; the graded controller keeps that host's slots closed while its IO pressure is above 45%."
+          runbook_url: docs/runbooks/fleet-observability.md#ci-host-pressure-alerts
+
+      - alert: FleetCiHostPressureMissing
+        expr: >-
+          count(max by (host) (node_pressure_cpu_waiting_seconds_total{host=~"0docker-builder|docker-build-lv3|0own-build-worker|infer-builder-ci|0pipe-build"})) < 5
+        for: 15m
+        labels:
+          severity: warning
+          service: fleet_ci_host_pressure
+        annotations:
+          summary: "Fewer than 5 CI hosts report pressure numbers"
+          description: "Only {{ $value }} of the 5 CI hosts (0docker-builder, docker-build-lv3, 0own-build-worker, infer-builder-ci, 0pipe-build) expose node_pressure_* to Prometheus, so FleetCiHostCpuPressureHigh and FleetCiHostIoPressureHigh are blind for the others. Check the node_exporter scrape targets and that the guest kernel has PSI enabled."
+          runbook_url: docs/runbooks/fleet-observability.md#ci-host-pressure-alerts

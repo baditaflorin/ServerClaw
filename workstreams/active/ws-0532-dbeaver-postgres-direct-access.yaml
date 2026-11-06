@@ -1,0 +1,59 @@
+id: ws-0532-dbeaver-postgres-direct-access
+adr: "0014"
+title: Allow read-only DBeaver access to production PostgreSQL
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: codex
+branch: codex/dbeaver-direct-5432
+worktree_path: .worktrees/dbeaver-postgres-direct-access
+doc: docs/workstreams/ws-0532-dbeaver-postgres-direct-access.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/tailscale/policy.hujson
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0532-dbeaver-postgres-direct-access.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0532-dbeaver-postgres-direct-access.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0532_tracking
+      paths:
+        - docs/workstreams/ws-0532-dbeaver-postgres-direct-access.md
+      mode: exclusive
+    - id: dbeaver_postgres_tailnet_grant
+      paths:
+        - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-0532-dbeaver-postgres-direct-access.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+canonical_truth:
+  changelog_entry: Permit one operator device to reach production PostgreSQL over TLS using the existing database-scoped read-only login.
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  DBeaver Community needs a direct private-tailnet route to the production PostgreSQL
+  primary. The network grant is limited to the operator device, database VM and
+  TCP port 5432. PostgreSQL requires TLS and matches the login to the production
+  database; it rejects other database and role combinations from that device.
+tasks:
+  - id: t1
+    title: Add the exact-source PostgreSQL grant and matching Tailscale policy test
+    status: completed
+  - id: t2
+    title: Validate and merge the policy through the private-source pull request
+    status: in_progress
+  - id: t3
+    title: Apply the Tailscale policy and verify direct DBeaver access
+    status: pending

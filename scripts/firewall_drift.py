@@ -9,7 +9,13 @@ import re
 from typing import Any
 
 from controller_automation_toolkit import load_json, repo_path
-from drift_lib import build_guest_ssh_command, build_host_ssh_command, drift_event_topic, load_controller_context, run_command
+from drift_lib import (
+    build_guest_ssh_command,
+    build_host_ssh_command,
+    drift_event_topic,
+    load_controller_context,
+    run_command,
+)
 
 
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
@@ -66,6 +72,10 @@ def _resolve_policy(host_vars: dict[str, Any]) -> dict[str, Any]:
     policy["guest_management_sources"] = [
         str(source).replace(token, internal_ip) for source in policy.get("guest_management_sources", [])
     ]
+    # Guests with `network_policy_all_guests: false` are not a source of any `all_guests` rule (see the templates).
+    policy["all_guests_excluded"] = sorted(
+        guest["name"] for guest in host_vars["proxmox_guests"] if guest.get("network_policy_all_guests", True) is False
+    )
     return policy
 
 
@@ -81,7 +91,8 @@ def resolve_rule_sources(
     if source == "host":
         return [policy["host_source"]]
     if source == "all_guests":
-        return [f"{ip}/32" for name, ip in sorted(guest_ip_map.items()) if name != guest_name]
+        excluded = set(policy.get("all_guests_excluded", []))
+        return [f"{ip}/32" for name, ip in sorted(guest_ip_map.items()) if name != guest_name and name not in excluded]
     if source in guest_ip_map:
         return [f"{guest_ip_map[source]}/32"]
     return [str(source)]
@@ -301,7 +312,9 @@ def collect_drift(context: dict[str, Any] | None = None, *, guests: list[str] | 
         if guest_name not in policy["guests"]:
             continue
 
-        nft_result = run_command(build_guest_ssh_command(context, guest_name, "sudo -n nft list ruleset 2>/dev/null || nft list ruleset"))
+        nft_result = run_command(
+            build_guest_ssh_command(context, guest_name, "sudo -n nft list ruleset 2>/dev/null || nft list ruleset")
+        )
         if nft_result.returncode != 0:
             records.append(
                 {
@@ -462,7 +475,9 @@ def _source_covers(declared_source: str, depender_vm: str, guest_ip_map: dict[st
         return False
 
 
-def explain(*, target_guest: str, port: int, source_guest: str, host_vars: dict[str, Any] | None = None) -> dict[str, Any]:
+def explain(
+    *, target_guest: str, port: int, source_guest: str, host_vars: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Answer: can `source_guest` reach `target_guest` on `port`, and why (or why not)?"""
     host_vars = host_vars or load_controller_context()["host_vars"]
     policy = _resolve_policy(host_vars)
@@ -485,7 +500,9 @@ def explain(*, target_guest: str, port: int, source_guest: str, host_vars: dict[
                     "resolved_source": source,
                     "description": rule.get("description"),
                     "provenance": rule.get("provenance"),
-                    "owner": (rule.get("provenance") or {}).get("owner", "unset — see inventory/host_vars/proxmox-host.yml git blame"),
+                    "owner": (rule.get("provenance") or {}).get(
+                        "owner", "unset — see inventory/host_vars/proxmox-host.yml git blame"
+                    ),
                 }
     return {
         "reachable": False,
@@ -519,7 +536,11 @@ def main(argv: list[str] | None = None) -> int:
     elif mode == "deps":
         print(json.dumps(collect_dependency_gaps(), indent=2))
     elif mode == "explain":
-        print(json.dumps(explain(target_guest=args.target_guest, port=args.port, source_guest=args.source_guest), indent=2))
+        print(
+            json.dumps(
+                explain(target_guest=args.target_guest, port=args.port, source_guest=args.source_guest), indent=2
+            )
+        )
     return 0
 
 

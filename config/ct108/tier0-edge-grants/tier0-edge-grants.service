@@ -1,0 +1,13 @@
+[Unit]
+Description=Tier-0 standby edge: grant the tailnet backend ports that stay closed (policy PR + merge, applied by the reconciler)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Environment=HOME=/root
+Nice=15
+IOSchedulingClass=idle
+TimeoutStartSec=2400
+ExecStart=/usr/local/bin/tier0-edge-grants.sh

@@ -1,0 +1,95 @@
+# Purpose: Verify the agent-history runtime without reading a secret: health, listeners, token file ownership, encrypted volume, no swap.
+---
+- name: Wait for the store to listen on the loopback address
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ agent_history_store_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Verify the store health endpoint (it answers ok or 503 and needs no token)
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ agent_history_store_port }}/healthz"
+    method: GET
+    status_code: 200
+  register: agent_history_verify_health
+  retries: 18
+  delay: 5
+  until: agent_history_verify_health.status == 200
+  changed_when: false
+
+- name: List the listening TCP sockets
+  ansible.builtin.command:
+    argv:
+      - ss
+      - --no-header
+      - --listening
+      - --numeric
+      - --tcp
+  register: agent_history_verify_listeners
+  changed_when: false
+
+- name: Assert the store is published on loopback only and Postgres is not published
+  ansible.builtin.assert:
+    that:
+      - agent_history_verify_listeners.stdout_lines | select('search', ':' ~ agent_history_store_port ~ '\s') | reject('search', '127\.0\.0\.1:' ~ agent_history_store_port) | list | length == 0
+      - agent_history_verify_listeners.stdout_lines | select('search', ':5432\s') | list | length == 0
+    fail_msg: "The store must listen on 127.0.0.1 only and Postgres must not be published."
+
+- name: Check the rendered token files (ownership and mode only, never the content)
+  ansible.builtin.stat:
+    path: "{{ agent_history_run_dir }}/{{ item }}"
+    get_checksum: false
+  loop:
+    - read-tokens
+    - write-tokens
+    - metrics-token
+    - embed-token
+    - metrics.header
+    - store.env
+    - db.env
+  register: agent_history_verify_secret_files
+
+- name: Assert the rendered secret files exist and are readable by their owner only
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.mode == '0400'
+      - item.stat.uid == agent_history_run_uid | int
+    fail_msg: "{{ item.item }} is missing or not owned by the OpenBao Agent's uid with mode 0400."
+  loop: "{{ agent_history_verify_secret_files.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Find the device behind the Postgres data directory
+  ansible.builtin.command:
+    argv:
+      - findmnt
+      - --noheadings
+      - --output
+      - SOURCE
+      - --target
+      - "{{ agent_history_pgdata_dir }}"
+  register: agent_history_verify_pgdata_source
+  changed_when: false
+
+- name: Assert the Postgres data directory is on the encrypted volume
+  ansible.builtin.assert:
+    that:
+      - agent_history_verify_pgdata_source.stdout | trim == '/dev/mapper/' ~ agent_history_luks_name
+    fail_msg: "{{ agent_history_pgdata_dir }} is not on /dev/mapper/{{ agent_history_luks_name }}."
+
+- name: List active swap
+  ansible.builtin.command:
+    argv:
+      - swapon
+      - --noheadings
+      - --show
+  register: agent_history_verify_swap
+  changed_when: false
+
+- name: Assert the guest has no swap (secrets must not reach unencrypted swap)
+  ansible.builtin.assert:
+    that:
+      - agent_history_verify_swap.stdout | trim | length == 0
+    fail_msg: "The agent-history guest must run without swap."

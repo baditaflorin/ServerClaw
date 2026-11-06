@@ -1,0 +1,19 @@
+[Unit]
+Description=Deep check of the off-host backup copy: rebuild each archive from GitHub and compare sha256, age header and size with state.tsv
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/fleet-backup-offhost-check deep
+# Downloads the whole payload (about 160 MB today) into /var/tmp and removes it again: idle priority, bounded memory, generous time.
+Nice=19
+IOSchedulingClass=idle
+CPUWeight=10
+IOWeight=10
+MemoryMax=1G
+TimeoutStartSec=45min
+NoNewPrivileges=yes
+ProtectSystem=strict
+PrivateTmp=yes
+ReadWritePaths=/var/lib/prometheus/node-exporter /var/tmp

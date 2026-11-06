@@ -1,0 +1,99 @@
+# Role Task File: monitoring_vm/tasks/scanopy_standby.yml
+# Purpose: Keep a warm standby of the Scanopy server on the monitoring VM (a different fleet than the 0docker primary).
+# Use case: Included by the monitoring_vm role when monitoring_scanopy_standby_enabled is true. A persistent Postgres container is
+#           refreshed from the newest hourly dump (scanopy-backup); the standby SERVER is defined in the compose file but only started
+#           by the weekly boot test or by a real failover.
+#
+# Inputs (required):
+#   - monitoring_scanopy_standby_* role defaults; monitoring_scanopy_backup_enabled (the dumps this restores) and Docker on the host.
+#
+# Outputs:
+#   - /opt/scanopy-standby (compose file, generated .env with the standby database password, job, README, empty data dir),
+#     scanopy-standby-sync.{service,timer} (hourly) and scanopy-standby-boot-test.{service,timer} (weekly), scanopy_standby_* metrics.
+#
+# Idempotency: Fully idempotent
+#              Files are compared by content and mode; the .env is generated once and never replaced; timers are only enabled.
+#
+# Dependencies:
+#   - scanopy_backup.yml (hourly dumps in monitoring_scanopy_backup_dir); Docker Engine and the compose plugin on the host.
+#   - docs/runbooks/scanopy-service-discovery.md ("Warm standby"): describes the failover and the rollback.
+#
+# Related Runbooks: docs/runbooks/scanopy-service-discovery.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-10-17
+---
+- name: Validate Scanopy standby inputs
+  ansible.builtin.assert:
+    that:
+      - monitoring_scanopy_standby_install_dir | length > 0
+      - monitoring_scanopy_standby_server_image | length > 0
+      - monitoring_scanopy_standby_postgres_image | length > 0
+      - monitoring_scanopy_backup_enabled | bool
+    fail_msg: monitoring_scanopy_standby_enabled needs its install and image settings and monitoring_scanopy_backup_enabled (the dumps it restores).
+    quiet: true
+
+- name: Ensure the Scanopy standby directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - {path: "{{ monitoring_scanopy_standby_install_dir }}", mode: "0755"}
+    - {path: "{{ monitoring_scanopy_standby_install_dir }}/data", mode: "0755"}
+    - {path: "{{ monitoring_scanopy_standby_state_dir }}", mode: "0700"}
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Generate the standby database password (only when missing)
+  ansible.builtin.shell:
+    cmd: "umask 077; printf 'STANDBY_PG_PASSWORD=%s\\n' \"$(openssl rand -hex 16)\" > {{ monitoring_scanopy_standby_env_file }}"
+    creates: "{{ monitoring_scanopy_standby_env_file }}"
+
+- name: Install the Scanopy standby job, compose file and README
+  ansible.builtin.copy:
+    src: "scanopy-standby/{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - {src: scanopy_standby.py, dest: "{{ monitoring_scanopy_standby_script_file }}", mode: "0755"}
+    - {src: README, dest: "{{ monitoring_scanopy_standby_readme_file }}", mode: "0644"}
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Render the Scanopy standby compose file
+  ansible.builtin.template:
+    src: scanopy-standby-compose.yml.j2
+    dest: "{{ monitoring_scanopy_standby_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Scanopy standby systemd units
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - {src: scanopy-standby-sync.service.j2, dest: "{{ monitoring_scanopy_standby_sync_service_file }}"}
+    - {src: scanopy-standby-sync.timer.j2, dest: "{{ monitoring_scanopy_standby_sync_timer_file }}"}
+    - {src: scanopy-standby-boot-test.service.j2, dest: "{{ monitoring_scanopy_standby_boot_test_service_file }}"}
+    - {src: scanopy-standby-boot-test.timer.j2, dest: "{{ monitoring_scanopy_standby_boot_test_timer_file }}"}
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Enable the Scanopy standby timers
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+  loop:
+    - "{{ monitoring_scanopy_standby_sync_timer_name }}"
+    - "{{ monitoring_scanopy_standby_boot_test_timer_name }}"

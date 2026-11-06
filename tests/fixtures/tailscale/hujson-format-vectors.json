@@ -1,0 +1,162 @@
+{
+ "source": "github.com/tailscale/hujson format_test.go, testdataFormat (module v0.0.0-20260727124030-b80ff77dac4f); want is compared after removing one leading newline and adding one trailing newline, as TestFormat does",
+ "license": "BSD-3-Clause. Copyright (c) 2021 Tailscale Inc & AUTHORS. All rights reserved.",
+ "cases": [
+  {
+   "in": "null",
+   "want": "null"
+  },
+  {
+   "in": " \r\n\t//comment\n\n\n/**/null \r\t//comment\n\n\n/**/\r\n\t",
+   "want": "//comment\n\n/**/ null //comment\n\n/**/"
+  },
+  {
+   "in": "//comment\r\n//comment\n\r/**\r/*/null",
+   "want": "//comment\n//comment\n/** /*/ null"
+  },
+  {
+   "in": "\"\\u000F\\u000a\\/\\ud83d\\ude02\"",
+   "want": "\"\\u000f\\n/😂\""
+  },
+  {
+   "in": "{\n\r\t \n\r\t }",
+   "want": "{}"
+  },
+  {
+   "in": "{/**/}",
+   "want": "{ /**/ }"
+  },
+  {
+   "in": "{//\r\t\n}",
+   "want": "{ //\n}"
+  },
+  {
+   "in": "[\n\r\t \n\r\t ]",
+   "want": "[]"
+  },
+  {
+   "in": "[/**/]",
+   "want": "[ /**/ ]"
+  },
+  {
+   "in": "[//\r\t\n]",
+   "want": "[ //\n]"
+  },
+  {
+   "in": "{\"name\" \t \t:\"value\" \t \t,\"name\":\"value\"}",
+   "want": "{\"name\": \"value\", \"name\": \"value\"}"
+  },
+  {
+   "in": "{\"name\"/**/:\"value\"/**/,\"name\":\"value\"}",
+   "want": "{\"name\" /**/ : \"value\" /**/ , \"name\": \"value\"}"
+  },
+  {
+   "in": "[null \t \t,null]",
+   "want": "[null, null]"
+  },
+  {
+   "in": "[null/**/,null]",
+   "want": "[null /**/ , null]"
+  },
+  {
+   "in": "[0//\n,]",
+   "want": "\n[\n\t0 //\n\t\t,\n]"
+  },
+  {
+   "in": "[/*\n*/\n]",
+   "want": "[ /*\n\t */\n]"
+  },
+  {
+   "in": "[/*\n\n*/\n]",
+   "want": "[ /*\n\n\t*/\n]"
+  },
+  {
+   "in": "[ /*\n\t\n\t*/\n]",
+   "want": "[ /*\n\n\t*/\n]"
+  },
+  {
+   "in": "[\n\t\t\t/*\n\n\t\tline1\n  line2\n\n\t\t\t*/\n\n\t\t]",
+   "want": "\n[\n\t/*\n\n\t\t\tline1\n\t  line2\n\n\t*/\n]"
+  },
+  {
+   "in": "[\n\t\t/*\n\n  \tline1\n  line2\n\n\t\t*/\n\n\t]",
+   "want": "\n[\n\t/*\n\n\t\tline1\n\tline2\n\n\t*/\n]"
+  },
+  {
+   "in": "[\n/*\n* line1\n* line2\n*/\n\t\t]",
+   "want": "\n[\n\t/*\n\t * line1\n\t * line2\n\t */\n]"
+  },
+  {
+   "in": "[\n/*\n\t* line1\n* line2\n*/\n\t]",
+   "want": "\n[\n\t/*\n\t\t* line1\n\t* line2\n\t*/\n]"
+  },
+  {
+   "in": "//😊 \r\t☹\n/*😊 \r\t☹\n*/null//😊 \r\t\n/*\r\t\n*/",
+   "want": "\n//😊  \t☹\n/*😊  \t☹\n */ null //😊\n/*\n */"
+  },
+  {
+   "in": "\n\t\t\n\t\t   // LineComment   \n\t\t/* \n  BlockComment     \n\t\t\t */\n\n\t{\n\t\t\n\t\t// LineComment   \n\t /* \nBlockComment     \n\t\t  */\n\n\"name\"\n\n\t\t\n// LineComment   \n/* \nBlockComment     \n\t */\n\n:\n\t\t\n    // LineComment   \n/* \n BlockComment     \n\t */\n\n\t\t\t   \"value\"\n\n\t\t\n         \t\t\t   // LineComment   \n\t\t   \t   /* \n\t\t\t                         BlockComment     \n\t\t\t\t\t*/\n\n\t\t\t   ,\n\n\t\t\n\t    \t\t   // LineComment      \n   \t\t\t   /* \n\t\t\t   BlockComment     \n\t\t\t\t\t*/\n\t\t\t   \n\n\t}\n\n\t\t\t\n// LineComment   \n/* \nBlockComment     \n\t */\n\n\n\n\t ",
+   "want": "\n// LineComment\n/*\nBlockComment\n*/\n\n{\n\t// LineComment\n\t/*\n\tBlockComment\n\t*/\n\n\t\"name\"\n\t\t// LineComment\n\t\t/*\n\t\tBlockComment\n\t\t*/\n\t\t:\n\t\t// LineComment\n\t\t/*\n\t\tBlockComment\n\t\t*/\n\t\t\"value\"\n\t\t// LineComment\n\t\t/*\n\t\tBlockComment\n\t\t*/\n\t\t,\n\n\t// LineComment\n\t/*\n\tBlockComment\n\t*/\n}\n\n// LineComment\n/*\nBlockComment\n*/"
+  },
+  {
+   "in": "\n\t\t//line1\n\t\t{//line2\n\t\t\"name\"//line3\n\t\t://line4\n\t\t\"value\"//line5\n\t\t}//line6\n\t\t",
+   "want": "\n//line1\n{ //line2\n\t\"name\" //line3\n\t\t: //line4\n\t\t\"value\", //line5\n} //line6"
+  },
+  {
+   "in": "/**//**/{/**//**/\"name\"/**//**/:/**//**/null/**//**/,}/**//**/",
+   "want": "/**/ /**/ { /**/ /**/ \"name\" /**/ /**/ : /**/ /**/ null /**/ /**/ } /**/ /**/"
+  },
+  {
+   "in": "/**//**/{/**//**/\"name\"/**//**/:/**//**/null/**//**/,/**//**/}/**//**/",
+   "want": "/**/ /**/ { /**/ /**/ \"name\" /**/ /**/ : /**/ /**/ null /**/ /**/ , /**/ /**/ } /**/ /**/"
+  },
+  {
+   "in": "/**//**/[/**//**/null/**//**/,]/**//**/",
+   "want": "/**/ /**/ [ /**/ /**/ null /**/ /**/ ] /**/ /**/"
+  },
+  {
+   "in": "/**//**/[/**//**/null/**//**/,/**//**/]/**//**/",
+   "want": "/**/ /**/ [ /**/ /**/ null /**/ /**/ , /**/ /**/ ] /**/ /**/"
+  },
+  {
+   "in": "{\n\t\t\t\t\"name\": \"value\",\n\t\t\t\t\"name______\": \"value\",\n\t\t\t\t\"name_\": \"value\",\n\t\t\t\t\"name___\": \"value\"\n\t\t\t}",
+   "want": "\n{\n\t\"name\":       \"value\",\n\t\"name______\": \"value\",\n\t\"name_\":      \"value\",\n\t\"name___\":    \"value\"\n}"
+  },
+  {
+   "in": "{\n\t\t\"name\": \"value\",\n\t\t\"name______\": \"value\",\n\t\t// comment\n\t\t\"name_\": \"value\",\n\t\t\"name___\": \"value\"\n\t\t}",
+   "want": "\n{\n\t\"name\":       \"value\",\n\t\"name______\": \"value\",\n\t// comment\n\t\"name_\":   \"value\",\n\t\"name___\": \"value\",\n}"
+  },
+  {
+   "in": "{\n\t\"name\": \"value\",\n\t\"name______\": \"value\",\n\n\n\t\"name_\": \"value\",\n\t\"name___\": \"value\"\n\t}",
+   "want": "\n{\n\t\"name\":       \"value\",\n\t\"name______\": \"value\",\n\n\t\"name_\":   \"value\",\n\t\"name___\": \"value\"\n}"
+  },
+  {
+   "in": "{\n\t\t\t/**/ \"name\": \"value\",\n\t\t\t/**/ \"name______\": \"value\",/**/\n\t\t\t\"name_\"/**/: \"value\"/**/,\n\t\t\t\"name___\":/**/ \"value\"\n\t\t}",
+   "want": "\n{\n\t/**/ \"name\":         \"value\",\n\t/**/ \"name______\":   \"value\", /**/\n\t\"name_\" /**/ :  \"value\" /**/ ,\n\t\"name___\": /**/ \"value\",\n}"
+  },
+  {
+   "in": "{\"foo\": \"bar\", \n\t// Comment1\n\t\"fizz\":\"buzz\"\n\t// Comment2\n,}",
+   "want": "\n{\n\t\"foo\": \"bar\",\n\t// Comment1\n\t\"fizz\": \"buzz\"\n\t\t// Comment2\n\t\t,\n}"
+  },
+  {
+   "in": "\n\n\t//ACls\n\n// ACLs\n{\n\n\n\t\n\t\t\t\t\t// foo\n\t\t\t\t\t// foo\n\n\n\t\t\t\t\t\"k\"\n\n\n\t\t\t\t\t// bar\n\t\t\t\t\t// bar\n\n\n\t\t\t\t\t:\n\n\n\n\t\t\t\t\t// baz\n\t\t\t\t\t// baz\n\n\n\n\n\n\n\t\n\t\t\t\t\t\t\t\t[\t\t\t\t\t\t\t\t\t\"v\",\t\t\t\t\t\t\t\t\t]\n\n\t\t\t\t\t\t\t\t// gaz\n\t\t\t\t\t\t\t\t// gaz\n\n\t\t     // ,\n\n\t\t\t  // maz\n\n\n\n\n}\n\t",
+   "want": "\n//ACls\n\n// ACLs\n{\n\t// foo\n\t// foo\n\n\t\"k\"\n\t\t// bar\n\t\t// bar\n\t\t:\n\t\t// baz\n\t\t// baz\n\t\t[\"v\"],\n\n\t// gaz\n\t// gaz\n\n\t// ,\n\n\t// maz\n}"
+  },
+  {
+   "in": "\t\t\t   {\n\t\t\"a\" :     {\t\n\t\t\t\"b\" : [\n  \n\t\t\t  ],\n\t\t},\n  \n  \n  \n  }   ",
+   "want": "\n{\n\t\"a\": {\n\t\t\"b\": [],\n\t},\n}"
+  },
+  {
+   "in": "{\"a\":{\"b\":[],\"c\":[\n\n\n\n\n\n\t],},}",
+   "want": "{\"a\": {\"b\": [], \"c\": []}}"
+  },
+  {
+   "in": "\n\t[\n\t\t[\n\t\t\t\"a\",\n\t\t]\n\t\t,\n\t\t[\n\t\t\t\"a\",\n\t\t]\n\t\t,\n\t\t[\n\t\t\t\"a\",\n\t\t]\n\n\t]\n\t\n\t",
+   "want": "\n[\n\t[\n\t\t\"a\",\n\t],\n\t[\n\t\t\"a\",\n\t],\n\t[\n\t\t\"a\",\n\t],\n]"
+  },
+  {
+   "in": "\n\t{//fizzbuzz\n\t\"key\"\n\t\t\n\t\t:\"value\"\n\t\t\n\t\t,//wizzwuzzz \n\t\t\n\t// standalone comment\n\t\n\t\t// key comment\n\t\t\"key\":\"value\"}\n\t\n\t",
+   "want": "\n{ //fizzbuzz\n\t\"key\": \"value\", //wizzwuzzz\n\n\t// standalone comment\n\n\t// key comment\n\t\"key\": \"value\",\n}"
+  }
+ ]
+}

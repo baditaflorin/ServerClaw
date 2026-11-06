@@ -23,8 +23,8 @@ OpenObserve VM and watch its health before assigning more storage work.
 
 ## Preflight and rollback
 
-The network-policy change allows only monitoring-lv3 (`203.0.113.4`) to
-connect to 0own (`203.0.113.3:9100`) over Tailscale. The exporter is bound
+The network-policy change allows only monitoring-lv3 (`100.64.0.4`) to
+connect to 0own (`100.64.0.3:9100`) over Tailscale. The exporter is bound
 only to the destination's Tailscale address. The scrape update touches only
 monitoring-lv3's active Prometheus config, validates the prior and updated
 config with `promtool`, and sends SIGHUP only when the file changes. It retains

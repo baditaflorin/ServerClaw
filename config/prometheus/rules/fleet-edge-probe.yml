@@ -1,0 +1,44 @@
+# fleet-edge-probe — strict external edge assertions, fed via node_exporter textfile.
+# Metric source: /usr/local/bin/fleet-edge-probe --prom ...  (services-registry/bin/fleet-edge-probe.py)
+groups:
+  - name: fleet_edge_probe
+    interval: 1m
+    rules:
+      - alert: FleetEdgeProbeStale
+        expr: (time() - max(fleet_edge_probe_last_run)) > 3600
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "fleet-edge-probe stopped reporting (>1h)"
+          description: "No fleet_edge_probe_last_run update for over an hour from any vantage. The external edge monitor is blind."
+
+      # One vantage that stops reporting is not hidden by another that still does: the alert above takes max() over all vantages, so it
+      # only fires when the whole probe is blind. The CT108 vantage was dead for 26 h on 2026-10-18/19 (its runtime filter matched nothing
+      # after the Coolify migration, exit 2 on every run) while the monitoring VM's vantage kept the max fresh and nothing fired.
+      - alert: FleetEdgeProbeVantageStale
+        expr: (time() - max by (vantage) (fleet_edge_probe_last_run)) > 3600
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "fleet-edge-probe vantage {{ $labels.vantage }} stopped reporting (>1h)"
+          description: "No fleet_edge_probe_last_run update for over an hour from this vantage while another one may still be fresh. On the CT108 builder run systemctl status fleet-edge-probe: exit 2 with 'no eligible services matched filters' means EDGE_PROBE_RUNTIME in /etc/default/fleet-edge-probe matches no runtime in the registry."
+
+      - alert: FleetServiceEdgeDown
+        expr: max by (slug, host, runtime) (fleet_edge_probe_service_hard_fail) == 1
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.slug }} public edge is failing strict probe"
+          description: "{{ $labels.host }} ({{ $labels.runtime }}) fails one or more strict edge assertions (TLS/cert/redirect/health). Break down with: fleet_edge_probe_fail_code{slug=\"{{ $labels.slug }}\"}"
+
+      - alert: FleetEdgeManyDown
+        expr: max(fleet_edge_probe_hard_fail_total) >= 5
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $value }} fleet services failing the edge probe — likely a gateway/cert/DNS batch failure"
+          description: "A single-cause outage (missing vhost, expired wildcard cert, DNS repoint) usually shows up as many services failing at once."

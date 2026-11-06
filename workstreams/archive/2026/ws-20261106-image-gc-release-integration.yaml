@@ -1,0 +1,58 @@
+id: ws-20261106-image-gc-release-integration
+adr: '0407'
+title: Finalize image cleanup observability and sanitized publication
+status: merged
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: main
+worktree_path: .worktrees/image-gc-monitor-release
+doc: docs/workstreams/ws-20261106-image-gc-release-integration.md
+depends_on:
+- ws-20261106-image-gc-failure-alert
+- ws-20261106-artifact-gc-failure-alert
+conflicts_with: []
+shared_surfaces:
+- VERSION
+- changelog.md
+- versions/stack.yaml
+- workstreams.yaml
+- scripts/publish_to_serverclaw.py
+- tests/test_publication_capture_manifest.py
+- .woodpecker.yml
+ownership_manifest:
+  owned_surfaces:
+  - id: image_gc_release_integration
+    paths:
+    - VERSION
+    - changelog.md
+    - versions/stack.yaml
+    - workstreams.yaml
+    - scripts/publish_to_serverclaw.py
+    - tests/test_publication_capture_manifest.py
+    - .woodpecker.yml
+    - docs/workstreams/ws-20261106-image-gc-release-integration.md
+    - workstreams/active/ws-20261106-image-gc-release-integration.yaml
+    mode: exclusive
+canonical_truth:
+  changelog_entry: Alert on failed or stopped bounded image cleanup and refresh exported
+    capture checksums after sanitization without changing private operational hashes.
+  release_bump: patch
+  latest_receipts:
+    image_gc_monitoring: 2026-11-06-image-gc-monitoring-live-apply
+  included_in_repo_version: 0.179.56
+notes: Integration owns shared release files after the image cleanup alert source
+  lands. The public snapshot keeps its strict captured-file manifest tests; the publisher
+  refreshes only hashes of disposable exported bytes after all sanitization and generation
+  steps. No private policy is exported.
+tasks:
+- id: capture_manifest
+  title: Repair public capture checksums with strict file-set and root guards
+  status: completed
+- id: release
+  title: Record exact-main monitoring evidence and advance release metadata
+  status: completed
+- id: publication
+  title: Prepare final scripted publication inputs and primary CI gates
+  status: completed
+merged_in_repo_version: 0.179.56

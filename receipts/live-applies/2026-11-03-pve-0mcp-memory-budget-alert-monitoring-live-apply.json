@@ -1,0 +1,92 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply",
+  "applied_on": "2026-11-03",
+  "recorded_on": "2026-11-03",
+  "recorded_by": "claude",
+  "source_commit": "1cee7e96899c2507ce0b630950f912c522e0e8eb",
+  "repo_version_context": "0.179.52",
+  "workflow_id": "converge-monitoring",
+  "service_ids": [
+    "monitoring"
+  ],
+  "summary": "Shipped the ProxmoxHostGuaranteedMemoryOverBudget alert (PR 653, ws-20261101-pve-0mcp-memory-budget) to the monitoring VM's Prometheus by installing config/prometheus/rules/proxmox-host-memory-budget.yml from main 1cee7e96 at 2026-11-03T17:42Z. A targeted Ansible play that uses the monitoring_vm role's own copy parameters (root:prometheus, 0640, promtool-validated) and its SIGHUP reload, not a converge. The rule is new on the VM; it is scoped to pve_host 0mcp and computes 0.8214 (the guaranteed footprint after the 2026-11-02 stage 1 changes is 105,728 MiB of 128,717 MiB), above its 0.80 threshold, so it is pending and fires as a warning after its one hour.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "monitoring-lv3",
+      "vmid": "140",
+      "address": "10.10.10.40",
+      "pull_request": "https://github.com/baditaflorin/platform_server/pull/653"
+    },
+    {
+      "kind": "other",
+      "name": "prometheus-rules-proxmox-host-memory-budget.yml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Source and live state were the ones reviewed",
+      "result": "pass",
+      "observed": "The play aborts unless the source file is sha256 6e51657bd35925c7f23e47a025e03467c37def2dbafff1d00f38657ebbd5aba7 (the blob of config/prometheus/rules/proxmox-host-memory-budget.yml on main 1cee7e96, PR 653) and the VM has no such file or already the same one. The VM had none (ls: No such file or directory) in a snapshot of the whole rules directory taken immediately before: 75 entries with mode, owner, size and sha256."
+    },
+    {
+      "check": "Check mode before the apply",
+      "result": "pass",
+      "observed": "ansible-playbook --check --diff apply-proxmox-host-memory-budget.yml: ok=7 changed=1 failed=0 skipped=3; the only change is the new file, shown as a pure addition (the rule group, one alert, 'for: 1h')."
+    },
+    {
+      "check": "Rule validation with the running version",
+      "result": "pass",
+      "observed": "The copy task validates with promtool check rules before the file is placed, with the VM's own promtool (2.53.3+ds1, the version of the running Prometheus); promtool check config /etc/prometheus/prometheus.yml on the VM: SUCCESS. Locally promtool 3.5.0: check rules SUCCESS, 1 rule, and the repository's unit-test file passes (6 cases)."
+    },
+    {
+      "check": "Installed file",
+      "result": "pass",
+      "observed": "/etc/prometheus/rules/proxmox-host-memory-budget.yml is 640 root:prometheus, 3064 bytes, sha256 6e51657b...5aba7, equal to main 1cee7e96. No Ansible temp file was left in the rules directory."
+    },
+    {
+      "check": "Prometheus reload",
+      "result": "pass",
+      "observed": "SIGHUP via systemctl kill --kill-whom=main (the role's handler) at 17:42:13Z; the journal shows 'Completed loading of configuration file' at the same second; prometheus_config_last_reload_successful=1; the service was not restarted."
+    },
+    {
+      "check": "Alert loaded and evaluating",
+      "result": "pass",
+      "observed": "Group proxmox_host_memory_budget (1 rule): ProxmoxHostGuaranteedMemoryOverBudget health ok, state pending, severity warning, for 3600 s, lastError none. The expression without the threshold reads 0.8214 on the 0mcp Prometheus, the same figure as the hand sum of qm config (guaranteed 105,728 MiB: balloon floors plus the whole memory of VMs with balloon 0, 19 running VMs, over 128,717 MiB)."
+    },
+    {
+      "check": "Nothing else changed in the rules directory",
+      "result": "pass",
+      "observed": "The listing of all entries of /etc/prometheus/rules (mode, owner, size, sha256) before and after differs by exactly one line, the added proxmox-host-memory-budget.yml; no other file written in the last 30 minutes. The firing alerts are the same before and after except the new alert in state pending."
+    },
+    {
+      "check": "A file that was waiting got loaded by the same reload",
+      "result": "partial",
+      "observed": "Prometheus went from 68 groups / 561 rules to 70 groups / 564 rules, one group more than this change adds: /etc/prometheus/rules/fleet-log-shipping.yml (group fleet_log_shipping, HypervisorLogShippingSilent and LogFreshnessProbeBlind, from PR 649 of 2026-11-01) had been placed on the VM earlier but was not loaded until this reload. Found with prometheus_rule_group_rules unless prometheus_rule_group_rules offset 10m. Both rules are health ok and state inactive; neither fires. Not part of this change, recorded so the extra group is explained."
+    },
+    {
+      "check": "Repository live-apply path",
+      "result": "partial",
+      "observed": "Not run and not re-tested today. The same targeted one-file approach as 2026-10-26-pve-host-daily-low-alert-monitoring-live-apply (which records why make live-apply-service and make converge-monitoring were not used: gates that block, and a converge that replays all rule files with no way to narrow it). A later converge finds this file identical."
+    }
+  ],
+  "evidence_refs": [
+    "config/prometheus/rules/proxmox-host-memory-budget.yml",
+    "tests/promtool/proxmox_host_memory_budget_rules_test.yml",
+    "tests/test_proxmox_host_memory_budget.py",
+    "docs/runbooks/pve-0mcp-memory-budget.md",
+    "workstreams/active/ws-20261101-pve-0mcp-memory-budget.yaml",
+    "docs/workstreams/ws-20261101-pve-0mcp-memory-budget.md",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The rule was merged in PR 653 (squash commit 1cee7e96899c2507ce0b630950f912c522e0e8eb); this receipt records shipping it. The playbook, the before and after snapshots of the VM and the Ansible output are kept by the operator in sessions/2026-11-03-pve-0mcp-budget-alert-apply/ (not part of this repository).",
+    "The alert is expected to fire as a warning about one hour after the apply (about 18:42Z): the guaranteed footprint is 82.14 percent against the 80 percent alarm, by design of the budget rule in the runbook. Getting under 80 percent needs further floor cuts (the runbook's stage 2 and candidates), which are separate decisions.",
+    "Rollback: ssh 0mcp_monitoring 'sudo rm /etc/prometheus/rules/proxmox-host-memory-budget.yml && sudo systemctl kill --kill-whom=main --signal=HUP 0mcp-prometheus.service'. The file did not exist before, so there is no backup copy.",
+    "platform_version moves from 0.179.54 to 0.179.55 with this record (a patch bump for a safe incremental platform adjustment, as for the earlier monitoring rule receipts)."
+  ]
+}

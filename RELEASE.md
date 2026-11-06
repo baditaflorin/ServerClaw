@@ -1,24 +1,14 @@
-# Release 0.179.51
+# Release 0.179.57
 
-- Date: 2026-10-12
+- Date: 2026-11-06
 
 ## Summary
-- Add the `scanopy-retag` job to the monitoring VM: every 15 minutes it tags Docker bridge subnets in Scanopy with `docker-bridge` (additive only, fail-closed guards) so the topology, which hides that tag, stays readable; adds the `ScanopyRetagStale` and `ScanopyRetagMetricsAbsent` alerts.
-- Add the `scanopy-discover` timer to the monitoring VM: Scanopy's own scheduler does not fire reliably, so the daily Docker VM discoveries (16 hosts, distinct UTC quarter-hour slots) are started through the Scanopy API, skipping hosts that already ran; adds the `ScanopyDiscoverStale`, `ScanopyDiscoverMetricsAbsent` and `ScanopyDiscoveryOverdue` alerts.
-- Document the Scanopy-side runtime settings that are not in git and the finding about Scanopy's scheduler in the Scanopy service-discovery runbook.
-- Add guarded, no-restart Prometheus scraping for the 0own Proxmox host.
-- Restore the remote validation gateway route to the declared build VM and cap pre-push validation concurrency.
-- Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
-- Remove the unused GitHub Actions workflow and point validation metadata at Woodpecker while retaining the self-hosted Gitea validator.
-- Allow the Builder metrics peer to scrape docker-build node-exporter over the private tailnet without disrupting Docker-managed firewall rules.
-- Restore governed Plane API access through a loopback-only SSH forward and document the procedure.
-- Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
-- Keep the sanitized ServerClaw host template consistent with active authenticated edge routes.
-- Allow an explicitly configured operator email to access Plausible through a dedicated Authentik OAuth client and proxy.
-- Cap Plausible ClickHouse diagnostic system logs at one day without changing analytics event retention.
+- Keep sanitized Tailnet identities in generic shared-address space so exported network-policy checks retain their source classification.
+- Prune only accepted findings eliminated by the public projection; reject new non-info findings, malformed policy/baseline pairs and unsafe file aliases before writing exported baselines.
+- Run actual sanitized-policy regressions and portable foreign-source negative controls in Woodpecker while preserving private policy and baseline bytes.
 
 ## Platform Impact
-- no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
+- Publication automation only. Platform version remains 0.179.59; this release applies no runtime policy or application deployment.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -1,7 +1,7 @@
 # Role Task File: monitoring_vm/tasks/scanopy_backup.yml
-# Purpose: Install the job that pulls a nightly dump of the Scanopy database from the 0docker hypervisor, plus its systemd timer.
+# Purpose: Install the job that pulls an hourly dump of the Scanopy database from the 0docker hypervisor, plus its systemd timer.
 # Use case: Included by the monitoring_vm role when monitoring_scanopy_backup_enabled is true. The Scanopy Postgres is on the
-#           0docker hypervisor itself and is not covered by PBS; this keeps 14 verified dumps on the monitoring VM (another fleet).
+#           0docker hypervisor itself and is not covered by PBS; this keeps tiered verified dumps (48 h hourly, 14 daily) on the monitoring VM (another fleet).
 #
 # Inputs (required):
 #   - monitoring_scanopy_backup_* role defaults: install, config, backup, textfile, and unit paths.

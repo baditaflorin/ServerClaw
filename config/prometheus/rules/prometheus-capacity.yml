@@ -1,0 +1,60 @@
+groups:
+  - name: fleet_prometheus_capacity
+    rules:
+      # Prometheus's own resident memory as % of the host's total RAM.
+      # Cardinality (head series) is the actual driver of Prometheus RAM
+      # use, not query load on this fleet -- so RSS-vs-host-mem is a more
+      # honest early-warning signal than watching head_series in isolation,
+      # since it self-adjusts if this VM's RAM ever changes and doesn't
+      # require re-deriving a bytes-per-series constant later.
+      #
+      # `on()` with no labels is correct here even though both sides are
+      # vectors, not scalars: each side currently resolves to exactly one
+      # series, and `on()` vector-vector matching (ignore all labels, match
+      # as 1:1) is valid regardless of element count -- this is different
+      # from the "on()/ignoring() invalid on a scalar op" trap documented
+      # in node-placement.yml's fleet:placement_score comment.
+      - record: fleet:prometheus_rss_percent_of_host_mem
+        expr: |
+          process_resident_memory_bytes{job="prometheus"}
+          / on() node_memory_MemTotal_bytes{job="node",host="monitoring"}
+          * 100
+
+  - name: fleet_prometheus_capacity_alerts
+    rules:
+      # Empirical baseline measured 2026-08-26 on this exact host: 226
+      # scrape targets, 27,349 head series, 315.6MB RSS (~11.3 KiB/series,
+      # includes Go runtime overhead -- not a theoretical number). At that
+      # ratio, naively scaling node_exporter targets alone from today's 3
+      # hosts to the fleet's ~200-host target would push head series past
+      # ~497k and RSS past ~5.7GB on a 7.8GB host -- i.e. an OOM, not a
+      # graceful degradation, and disk (TSDB at ~1 byte/sample compressed)
+      # would separately need ~42-68GB against 48GB currently free. See
+      # fleet-state/OPS.md "Retention/cardinality planning" for the full
+      # capacity math and the node_exporter collector-trimming mitigation
+      # (systemd + per-veth-interface collectors alone were ~45% of the
+      # heaviest host's series, driven by container churn, not host signal
+      # anything here actually needs).
+      #
+      # Two tiers so there's runway to act between "notice" and "act now" --
+      # thresholds are a starting guess (like every other threshold in this
+      # rule set), not tuned against a real growth curve yet.
+      - alert: FleetPrometheusMemoryApproachingCapacity
+        expr: fleet:prometheus_rss_percent_of_host_mem > 50
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_placement
+        annotations:
+          summary: "Prometheus RSS above 50% of monitoring host RAM"
+          description: "Prometheus resident memory has been above 50% of this host's total RAM for 30m. Cardinality (head series) is the driver, not query load -- check prometheus_tsdb_head_series and which job/instance grew (see fleet-state/OPS.md capacity math) before adding more scrape targets."
+
+      - alert: FleetPrometheusMemoryCapacityCritical
+        expr: fleet:prometheus_rss_percent_of_host_mem > 75
+        for: 15m
+        labels:
+          severity: critical
+          service: fleet_placement
+        annotations:
+          summary: "Prometheus RSS above 75% of monitoring host RAM -- OOM risk"
+          description: "Prometheus resident memory has been above 75% of this host's total RAM for 15m. Left unaddressed this ends in an OOM kill of the monitoring process itself. Immediate options: trim node_exporter collectors on the heaviest targets (systemd + per-interface families are the known biggest non-essential contributors), raise the node/pve scrape_interval, or vertically scale this host as a stopgap."

@@ -1,0 +1,22 @@
+[Unit]
+Description=DomainScope search probe: production search answers its golden queries with real rows (read-only, writes a metrics textfile)
+Documentation=https://github.com/baditaflorin/platform_server/blob/main/docs/runbooks/domainscope-search-probe.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# root fetches the probe (CT108's git credential helper) and installs its metrics; the probe itself runs as nobody (see the wrapper).
+User=root
+Group=root
+# Emergency overrides (DSPROBE_* of the wrapper); nothing is expected in it.
+EnvironmentFile=-/etc/default/domainscope-search-probe
+# 2 = a search check failed: the alert is the signal, the unit did its job. 3 (could not run, no valid metrics) is a real error and shows
+# in `systemctl --failed`.
+SuccessExitStatus=2
+# A run takes about 4.5 minutes; the wrapper stops the probe at 12.
+TimeoutStartSec=15min
+# One run at a time, here and for a hand-started run.
+ExecStart=/usr/bin/flock -n /run/lock/domainscope-search-probe.lock /usr/local/bin/domainscope-search-probe-run
+PrivateTmp=yes
+Nice=10

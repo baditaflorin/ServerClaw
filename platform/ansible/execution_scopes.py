@@ -38,6 +38,9 @@ from platform.repo import REPO_ROOT, load_yaml, local_overlay_root
 CATALOG_PATH = REPO_ROOT / "config" / "ansible-execution-scopes.yaml"
 INVENTORY_PATH = REPO_ROOT / "inventory" / "hosts.yml"
 ALLOWED_MUTATION_SCOPES = {"host", "lane", "platform"}
+# A guest declared with `lifecycle: planned` (ADR 0494) is in this inventory group as well as lv3_guests. A scoped run
+# never targets a planned guest: it does not exist yet, so a play that reached it would fail on an unreachable host.
+PLANNED_GUESTS_GROUP = "planned_guests"
 ALLOWED_EXECUTION_CLASSES = {"mutation", "diagnostic"}
 LIST_HOSTS_HEADER_PATTERN = re.compile(r"^\s+hosts \(\d+\):$")
 IMPORT_PLAYBOOK_PATTERN = re.compile(r"^\s*-\s*import_playbook:\s*(?P<path>.+?)\s*$")
@@ -344,6 +347,23 @@ def _collect_inventory_hosts(payload: Any) -> tuple[str, ...]:
     return _unique_preserving_order(hosts)
 
 
+def _collect_group_hosts(payload: Any, group_name: str) -> tuple[str, ...]:
+    """Hosts of the inventory group `group_name`, wherever it appears in an `ansible-inventory --yaml` payload."""
+    hosts: list[str] = []
+
+    def visit(node: Any) -> None:
+        if not isinstance(node, dict):
+            return
+        for key, value in node.items():
+            if key == group_name and isinstance(value, dict):
+                hosts.extend(_collect_inventory_hosts(value))
+            elif isinstance(value, dict):
+                visit(value)
+
+    visit(payload)
+    return _unique_preserving_order(hosts)
+
+
 def _expand_inventory_limit(
     limit_expression: str,
     *,
@@ -375,9 +395,13 @@ def _expand_inventory_limit(
     except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
         raise AnsibleExecutionScopeError("PyYAML is required to expand inventory host limits") from exc
     payload = yaml.safe_load(result.stdout) or {}
-    hosts = _collect_inventory_hosts(payload)
+    planned = set(_collect_group_hosts(payload, PLANNED_GUESTS_GROUP))
+    hosts = tuple(host for host in _collect_inventory_hosts(payload) if host not in planned)
     if not hosts:
-        raise AnsibleExecutionScopeError(f"inventory limit '{limit_expression}' resolved no hosts for env '{env}'")
+        excluded = f" (planned guests excluded: {', '.join(sorted(planned))})" if planned else ""
+        raise AnsibleExecutionScopeError(
+            f"inventory limit '{limit_expression}' resolved no hosts for env '{env}'{excluded}"
+        )
     return hosts
 
 

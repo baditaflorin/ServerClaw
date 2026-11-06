@@ -1,0 +1,46 @@
+# Canonical network policy for one hypervisor: the ONE place the allowed flows of its VMs are decided.
+# Layers: pve = Proxmox VM firewall, input / forward = guest nftables, docker_user = guest iptables DOCKER-USER.
+# Edit this file in a PR; scripts/netpolicy.py drift tells how the live hosts differ. Every group needs a purpose.
+# `from` is one IPv4 address or CIDR per entry (no wildcard unless `public: true`), `wide_ok: <reason>` allows a CIDR wider than /24.
+version: 1
+host: 0docker
+collect: {ssh: root@10.10.10.1}
+ipsets: {}
+inner_sources: [172.16.0.0/12, 192.168.0.0/16, 10.200.0.0/16, 100.64.0.0/10]
+lan_networks: [10.10.10.0/24]
+guard:
+- src: 10.10.10.1
+  proto: tcp
+  port: '22'
+  layers: [pve, input]
+vms:
+  '100':
+    name: ubuntu-24-04
+    ip: 10.10.10.20
+    pve: {}
+    guest: {nft: absent}
+    groups: []
+  '101':
+    name: docker-prod
+    ip: 10.10.10.30
+    pve: {}
+    guest: {nft: absent}
+    groups:
+    - from: [10.10.10.1, 10.10.10.10, 10.10.10.20, 10.10.10.30, 172.20.0.0/14]
+      proto: tcp
+      ports: ['23480', '23481', '23482', '23483', '23580', '23581']
+      layers: [docker_user]
+      purpose: 'DomainScope prod web/api/api-next/frontend-next (23480-23483) and staging web/api (23580-23581) only from the edge VM104, VM100 (categorize
+        + Prometheus /metrics), the hypervisor (/health), the VM itself and its Docker bridges; every other LAN host is dropped so nobody skips
+        the edge admin gate, /metrics ACL and rate limits (go-url-categorizer-api#2510 finding 13, callers measured in #2638)'
+      owner: domainscope
+      decided: '2026-10-21'
+      unit: config/0docker/docker-prod-lan-ports
+    notes: 'No Proxmox VM firewall and no guest nftables (2026-10-21): only the six DomainScope ports are limited, in DOCKER-USER, by config/0docker/docker-prod-lan-ports;
+      every other port of the VM is open to the LAN as before. Turning the VM default to deny is a separate decision.'
+  '104':
+    name: debian-nginx-proxy-manager
+    ip: 10.10.10.10
+    pve: {}
+    guest: {nft: absent}
+    groups: []

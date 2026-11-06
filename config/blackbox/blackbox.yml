@@ -48,3 +48,37 @@ modules:
     timeout: 10s
     tcp:
       preferred_ip_protocol: ip4
+  # The two modules below were added BY HAND to the live /etc/prometheus/blackbox.yml on 2026-10-10 and wiped by the next deploy of this file (2026-10-11 03:41Z); the file_sd targets
+  # that use them (public-critical-targets.yml) kept pointing at them, so since then those two probes answered "Unknown module" (HTTP 400) and produced NO probe_success: silently blind.
+  # The alert PublicEdgeProbeTargetBroken now says so; keep every module a file_sd target names in this file.
+  # ci.example.org through the 0mcp internal gateway (the standby public edge VM110, 10.10.10.10): the only probe of that nginx serving HTTPS. The target is https://10.10.10.10/.
+  http_2xx_ci0mcp_internal:
+    prober: http
+    timeout: 10s
+    http:
+      preferred_ip_protocol: ip4
+      valid_status_codes: []
+      method: GET
+      follow_redirects: true
+      headers:
+        Host: ci.example.org
+      tls_config:
+        server_name: ci.example.org
+  # badita.example.com through Google's DNS-over-HTTPS JSON API (target https://8.8.8.8/resolve?name=badita.example.com&type=A): public DNS still answers for the name the failover repoints.
+  # The original definition was lost with the hand edit; this one requires a successful answer (Status 0) that carries an A record, not a particular address (the record legitimately
+  # changes at a failover).
+  http_2xx_dns_doh:
+    prober: http
+    timeout: 10s
+    http:
+      preferred_ip_protocol: ip4
+      valid_status_codes: [200]
+      method: GET
+      headers:
+        Host: dns.google
+        Accept: application/dns-json
+      tls_config:
+        server_name: dns.google
+      fail_if_body_not_matches_regexp:
+        - '"Status":\s*0'
+        - '"Answer":\s*\[\s*\{[^]]*"type":\s*1,'

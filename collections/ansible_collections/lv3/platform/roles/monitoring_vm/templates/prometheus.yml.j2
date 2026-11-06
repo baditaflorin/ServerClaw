@@ -14,6 +14,9 @@ alerting:
 {% for target in monitoring_prometheus_alertmanager_targets %}
             - {{ target }}
 {% endfor %}
+{% for target in monitoring_prometheus_extra_alertmanager_targets %}
+            - {{ target }}
+{% endfor %}
 
 scrape_configs:
   - job_name: prometheus
@@ -206,10 +209,21 @@ scrape_configs:
       - regex: scanopy_job
         action: labeldrop
     metric_relabel_configs:
-      # cardinality guard: systemd and container-veth families
-      - source_labels: [__name__]
-        regex: node_systemd_.*
+      # Keep cleanup inputs and the per-cluster active bit used by existing
+      # PostgreSQL alerts; drop all other systemd series for bounded cardinality.
+      - source_labels: [__name__, name, state]
+        regex: 'node_systemd_unit_state;postgresql@.+[.]service;active|node_systemd_unit_state;builder-disk-gc[.]service;failed'
+        target_label: __tmp_fleet_alert_systemd
+        replacement: '1'
+      - source_labels: [__name__, name]
+        regex: 'node_systemd_unit_state;fleet-image-gc-.+[.]service|node_systemd_timer_last_trigger_seconds;fleet-image-gc-.+[.]timer'
+        target_label: __tmp_fleet_alert_systemd
+        replacement: '1'
+      - source_labels: [__name__, __tmp_fleet_alert_systemd]
+        regex: 'node_systemd_.*;'
         action: drop
+      - regex: __tmp_fleet_alert_systemd
+        action: labeldrop
       - source_labels: [__name__, device]
         regex: 'node_network_.*;(veth.*|br-.*|docker0)'
         action: drop

@@ -1,0 +1,14 @@
+[Unit]
+Description=Tier-0 controller (SHADOW): is the primary site down? Records the decision, executes nothing
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/tier0-runner/controller/tier0_controller.py
+TimeoutStartSec=90
+ProtectSystem=strict
+ReadWritePaths=/var/lib/tier0-controller /var/lib/prometheus/node-exporter
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+Nice=10

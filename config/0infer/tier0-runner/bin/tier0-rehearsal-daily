@@ -1,0 +1,43 @@
+#!/bin/bash
+# Daily failover rehearsal from the runner (no operator key, no Mac): tier0-failover.sh --rehearse, then export the result as metrics.
+# Skips and retries for up to 20 minutes if another rehearsal is running on the targets (the throwaway names are shared). After ANY failure it runs the idempotent teardowns again.
+set -uo pipefail
+# one chain operation at a time: a real failover (tier0-executor) and the simulations take the same lock; the executor waits for us up to 3 minutes
+exec 8>/run/tier0-chain.lock
+flock -n 8 || { echo "chain busy (failover or simulation running): skipping this run"; exit 0; }
+PROM=/var/lib/prometheus/node-exporter/tier0_runner_rehearsal.prom
+RUN="ssh -o BatchMode=yes -o ConnectTimeout=15"
+busy() {
+  runuser -u t0runner -- env HOME=/var/lib/t0runner $RUN 0mcp_docker_build 'sudo docker ps -a --format "{{.Names}}" | grep -q rehearsal' 2>/dev/null && return 0
+  runuser -u t0runner -- env HOME=/var/lib/t0runner $RUN 0mcp_nginx 'sudo test -d /etc/nginx/t0g -o -d /etc/nginx/t0-rehearsal' 2>/dev/null && return 0
+  return 1
+}
+for i in $(seq 1 10); do busy || break; echo "another rehearsal is in progress on the targets, waiting ($i/10)"; sleep 120; done
+if busy; then echo "still busy after 20 minutes: not running" >&2; exit 0; fi
+prev_ok=$(grep '^tier0_runner_rehearsal_last_success_timestamp_seconds' $PROM 2>/dev/null | awk '{print $2}')
+t0=$(date +%s)
+/usr/local/bin/tier0-run tier0-failover.sh --rehearse; rc=$?
+if [ $rc -ne 0 ]; then
+  /usr/local/bin/tier0-run tier0-vault-promote.sh --teardown-rehearsal >/dev/null 2>&1 || true
+  /usr/local/bin/tier0-run tier0-gateway-promote.sh --teardown-rehearsal >/dev/null 2>&1 || true
+fi
+end=$(date +%s)
+install -d -m 755 /var/lib/tier0-runner; echo "{\"ts\": $end, \"rc\": $rc}" >> /var/lib/tier0-runner/rehearsal-history.jsonl     # the promotion gate counts consecutive green days from this
+{ echo "# TYPE tier0_runner_rehearsal_last_run_timestamp_seconds gauge"
+  echo "tier0_runner_rehearsal_last_run_timestamp_seconds $end"
+  echo "tier0_runner_rehearsal_last_exit_code $rc"
+  echo "tier0_runner_rehearsal_last_duration_seconds $((end-t0))"
+  if [ $rc -eq 0 ]; then echo "tier0_runner_rehearsal_last_success_timestamp_seconds $end"; elif [ -n "${prev_ok:-}" ]; then echo "tier0_runner_rehearsal_last_success_timestamp_seconds $prev_ok"; fi
+  echo "tier0_runner_rehearsal_info{commit=\"$(cat /opt/tier0-runner/VERSION)\"} 1"; } > "$PROM.tmp" && mv "$PROM.tmp" "$PROM"; chmod 644 "$PROM"
+# the slice stage's own summary as metrics (valid / invalid / missing-image directories): a directory that cannot start on the standby must not be visible only in a log
+LOG=$(ls -1t /var/log/tier0-runner/*-tier0-failover.log 2>/dev/null | head -1); SP=/var/lib/prometheus/node-exporter/tier0_runner_slice.prom
+if [ -n "$LOG" ] && /usr/local/sbin/tier0-rehearsal-metrics "$LOG" > "$SP.tmp" 2>/dev/null; then mv "$SP.tmp" "$SP"; chmod 644 "$SP"; else rm -f "$SP.tmp"; fi
+# DNS stage, read-only: the token must come out of the LOCAL vault standby and the plan must see roughly the 430 records on the primary (plausibility 300..600)
+DP=/var/lib/prometheus/node-exporter/tier0_runner_dns_plan.prom; dstart=$(date +%s)
+PLAN=$(/usr/local/sbin/tier0-dns plan 2>&1); drc=$?; n=$(echo "$PLAN" | grep -c "dry-run")
+DRIFT=$(/usr/local/sbin/tier0-dns status 2>&1 | sed -n 's/^drift: \([0-9]*\) rrset.*/\1/p' | head -1)
+ok=0; [ $drc -eq 0 ] && [ "$n" -ge 300 ] && [ "$n" -le 600 ] && ok=1
+{ echo "tier0_runner_dns_plan_last_run_timestamp_seconds $(date +%s)"; echo "tier0_runner_dns_plan_ok $ok"; echo "tier0_runner_dns_plan_rrsets $n"
+  [ -n "$DRIFT" ] && echo "tier0_runner_dns_drift_rrsets $DRIFT"; echo "tier0_runner_dns_plan_duration_seconds $(( $(date +%s) - dstart ))"; true; } > "$DP.tmp" && mv "$DP.tmp" "$DP"; chmod 644 "$DP"
+echo "dns plan: ok=$ok rrsets=$n drift=${DRIFT:-?}"
+exit $rc

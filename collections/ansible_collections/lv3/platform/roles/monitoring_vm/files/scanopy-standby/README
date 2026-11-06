@@ -1,0 +1,19 @@
+scanopy-standby: warm standby of the Scanopy server on the monitoring VM (0mcp fleet; the primary is on the 0docker hypervisor)
+
+Why: the primary is one Scanopy server + Postgres on one hypervisor. Its only state is the database (the server's data directory is
+empty), and scanopy-backup already pulls a verified dump every hour. This turns the newest dump into a ready replacement.
+
+What runs
+  scanopy-standby-sync.timer       hourly at :35 UTC: restore the newest dump into the persistent container scanopy-standby-postgres
+                                   (only when a newer dump exists; skipped while the standby server runs)
+  scanopy-standby-boot-test.timer  Sundays 04:40 UTC: start the standby server on 127.0.0.1:60099 against that data, check /api/health and
+                                   the daemon list through the API with the job key, stop it again
+  /opt/scanopy-standby/docker-compose.yml  postgres (always) and server (compose profile `failover`, stopped)
+  metrics scanopy_standby_* in the node_exporter textfile directory
+
+Failover (the primary on 0docker is gone or down for long): see docs/runbooks/scanopy-service-discovery.md, "Warm standby".
+  1. docker compose -f /opt/scanopy-standby/docker-compose.yml --profile failover up -d server   (with STANDBY_BIND=<tailnet ip> STANDBY_PORT=60072)
+  2. point the relays/daemons at this VM's address (tools described in the runbook)
+Manual: sudo systemctl start scanopy-standby-sync.service ; sudo systemctl start scanopy-standby-boot-test.service ; journalctl -u scanopy-standby-sync
+Rollback: systemctl disable --now scanopy-standby-sync.timer scanopy-standby-boot-test.timer ; docker compose -f /opt/scanopy-standby/docker-compose.yml down -v
+Managed by the monitoring_vm role (tasks/scanopy_standby.yml).

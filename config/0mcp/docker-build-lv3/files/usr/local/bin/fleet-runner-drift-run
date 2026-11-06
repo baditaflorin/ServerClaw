@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# fleet-runner-drift-run — wrapper the systemd units call.
+#   fleet-runner-drift-run scan   detect + notify
+#   fleet-runner-drift-run heal   detect + redeploy a small serial batch (gated)
+#
+# Why a wrapper: /root/.fleet-runner.env uses `export KEY=VAL` lines, which
+# systemd's EnvironmentFile cannot parse, and the registry must come from a
+# fresh clone of our own — never the shared /root/workspace/services-registry,
+# which may be dirty/stale and is not ours to reset.
+set -uo pipefail
+
+STATE=${FLEET_DRIFT_STATE_DIR:-/var/lib/fleet-runner/drift}
+WS="$STATE/ws"
+REG="$WS/services-registry"
+BIN=${FLEET_RUNNER_BIN:-/usr/local/bin/fleet-runner}
+
+# shellcheck disable=SC1091
+[ -f /root/.fleet-runner.env ] && . /root/.fleet-runner.env
+# shellcheck disable=SC1091
+[ -f /etc/fleet-runner/drift.env ] && . /etc/fleet-runner/drift.env
+
+mkdir -p "$WS"
+if [ -d "$REG/.git" ]; then
+  git -C "$REG" fetch -q --depth 1 origin main && git -C "$REG" reset -q --hard FETCH_HEAD \
+    || echo "WARN: could not refresh $REG; using the copy already there" >&2
+else
+  gh repo clone baditaflorin/services-registry "$REG" -- --depth 1 -q \
+    || { echo "ERROR: cannot clone services-registry; refusing to report on an unknown registry" >&2; exit 2; }
+fi
+
+# Control-plane services heal never deploys (keep in sync with
+# defaultDriftProtect in cmd_drift.go) plus operator exclusions: set
+# FLEET_DRIFT_EXTRA_PROTECT in /etc/fleet-runner/drift.env to a regexp of
+# registry ids / repo dirs to leave alone, e.g. '(^|[-_])(video[-_]content)([-_]|$)'.
+PROTECT='(^|[-_])(fleet|apikey|keystore|secrets|vault|broker|woodpecker|openobserve|grafana|prometheus|alertmanager|gateway|backup)([-_]|$)'
+# FLEET_DRIFT_EXTRA_PROTECT = hard exclusions (never deployed, even with
+# FLEET_DRIFT_INCLUDE_PROTECTED=1). Control plane (PROTECT) is deployed by heal
+# only when FLEET_DRIFT_INCLUDE_PROTECTED=1: last, one per run, behind a
+# vault/keystore health check before and after.
+NEVER="${FLEET_DRIFT_EXTRA_PROTECT:-}"
+INCLUDE_PROTECTED=()
+[ "${FLEET_DRIFT_INCLUDE_PROTECTED:-0}" = "1" ] && INCLUDE_PROTECTED=(--include-protected)
+
+
+# --- resilience: never exec a drift binary that lacks a flag this wrapper passes.
+# During a runner install the binary can be briefly older than the wrapper; an
+# unknown flag exits 2 ("flag provided but not defined"), the unit fails and the
+# timer can be left stopped. Check, wait for the swap to finish, then proceed or
+# exit 0 (a skipped tick, logged) instead of failing.
+need_flags="overflow-builder deploy-workspace max-protected reuse-scan parallel slo-hours ignore-containers never protect"
+ready=0
+for attempt in 1 2 3; do
+  help=$("$BIN" drift --help 2>&1 || true)
+  missing=""
+  for f in $need_flags; do printf '%s' "$help" | grep -q -- "-$f" || missing="$missing $f"; done
+  if [ -z "$missing" ]; then ready=1; break; fi
+  echo "WARN: $BIN lacks flag(s):$missing (runner install in progress?); retry $attempt/3 in 60s" >&2
+  sleep 60
+done
+if [ "$ready" != 1 ]; then
+  echo "WARN: skipping this tick: $BIN still lacks:$missing" >&2
+  exit 0
+fi
+
+mode=${1:-scan}
+shift || true
+case "$mode" in
+  scan)
+    exec "$BIN" drift --workdir "$WS" --ignore-containers "${FLEET_DRIFT_IGNORE_CONTAINERS:-}" --notify --slo-exit --slo-hours "${FLEET_DRIFT_SLO_HOURS:-12}" --state-dir "$STATE" "$@" ;;
+  heal)
+    exec "$BIN" drift --workdir "$WS" --ignore-containers "${FLEET_DRIFT_IGNORE_CONTAINERS:-}" --heal --apply --max-heal "${FLEET_DRIFT_MAX_HEAL:-4}" --parallel "${FLEET_DRIFT_PARALLEL:-1}" --max-protected "${FLEET_DRIFT_MAX_PROTECTED:-1}" --overflow-builder "${FLEET_DRIFT_OVERFLOW_BUILDER:-}" --primary-builds "${FLEET_DRIFT_PRIMARY_BUILDS:-3}" --overflow-builds "${FLEET_DRIFT_OVERFLOW_BUILDS:-1}" --reuse-scan "${FLEET_DRIFT_REUSE_SCAN:-8m}" \
+      --heal-pause "${FLEET_DRIFT_PAUSE:-60s}" \
+      --builder-cores "${FLEET_DRIFT_BUILDER_CORES:-20}" \
+      --max-load-per-core "${FLEET_DRIFT_MAX_LOAD:-1.5}" --protect "$PROTECT" --never "$NEVER" "${INCLUDE_PROTECTED[@]}" --deploy-workspace "$WS" --slo-hours "${FLEET_DRIFT_SLO_HOURS:-12}" --notify --state-dir "$STATE" "$@" ;;
+  *) echo "usage: $0 scan|heal [extra drift flags]" >&2; exit 2 ;;
+esac

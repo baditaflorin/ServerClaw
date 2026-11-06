@@ -5829,6 +5829,49 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "provision-agent-history-vm": {
+      "description": "Provision the dedicated agent-history VM (vmid 155) with a per-guest play that limits the guests role to that vmid, and converge the agent-history store runtime on it.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "provision-agent-history-vm",
+        "command": "make provision-agent-history-vm"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-agent-history-vm"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-agent-history.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/agent-history-vm.yml",
+        "collections/ansible_collections/lv3/platform/roles/agent_history_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml"
+      ],
+      "outputs": [
+        "agent-history provisioned as VM 155 on 10.10.10.55 with Docker, guest firewall policy, named ops access, the encrypted-volume unlock helper, the OpenBao Agent configuration, and (once the owner has unlocked the volume and delivered the AppRole files) the store and its Postgres reachable only on the tailnet."
+      ],
+      "verification_commands": [
+        "make syntax-check-agent-history-vm"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 260,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "disaster-recovery-runbook": {
       "description": "Render the ADR 0100 ordered recovery plan, current DR evidence summary, and table-top review state.",
       "lifecycle_status": "active",

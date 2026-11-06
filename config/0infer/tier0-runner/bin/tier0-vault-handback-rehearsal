@@ -1,0 +1,41 @@
+#!/bin/bash
+# Daily rehearsal of the vault HANDBACK data path (tier0-vault-handback.sh --rehearse in fleet-state): a scripted outage built from real rows of the newest vault snapshot, merged with vault-merge.py,
+# then the REAL vault image must verify every row of the merged database. Touches only its own throwaway container/data/port on the 0mcp standby host; never a promoted vault. Exported as metrics.
+# Waits (up to 15 min) for the chain lock instead of skipping: the other rehearsals and simulations run at the same hour and this one is only daily.
+set -uo pipefail
+exec 8>"${TIER0_CHAIN_LOCK:-/run/tier0-chain.lock}"
+flock -w "${TIER0_HB_LOCK_WAIT:-900}" 8 || { echo "chain busy for the whole wait (rehearsal, simulation or failover running): skipping this run"; exit 0; }
+PROM=${TIER0_HB_PROM:-/var/lib/prometheus/node-exporter/tier0_runner_vault_handback.prom}
+RUN=${TIER0_RUN:-/usr/local/bin/tier0-run}
+t0=$(date +%s)
+prev_ok=$(grep '^tier0_runner_vault_handback_rehearsal_last_success_timestamp_seconds' "$PROM" 2>/dev/null | awk '{print $2}')
+OUT=$("$RUN" tier0-vault-handback.sh --rehearse 2>&1); rc=$?
+printf '%s\n' "$OUT" | tail -16
+RES=$(printf '%s\n' "$OUT" | grep '^RESULT_JSON ' | tail -1 | sed 's/^RESULT_JSON //')
+end=$(date +%s)
+python3 - "$RES" "$rc" "$t0" "$end" "${prev_ok:-}" "$PROM" <<'PY'
+import json, os, sys
+res_s, rc, t0, end, prev_ok, prom = sys.argv[1:7]
+rc, t0, end = int(rc), int(t0), int(end)
+try:
+    res = json.loads(res_s)
+except ValueError:
+    res = {}
+status = res.get("status", "no-result")
+ok = 1 if status == "ok" else 0
+could_not_run = 1 if status in ("could-not-run", "no-result") else 0
+lines = ["# TYPE tier0_runner_vault_handback_rehearsal_last_run_timestamp_seconds gauge", f"tier0_runner_vault_handback_rehearsal_last_run_timestamp_seconds {end}",
+         f"tier0_runner_vault_handback_rehearsal_ok {ok}", f"tier0_runner_vault_handback_rehearsal_could_not_run {could_not_run}",
+         f"tier0_runner_vault_handback_rehearsal_last_exit_code {rc}", f"tier0_runner_vault_handback_rehearsal_last_duration_seconds {end - t0}"]
+if ok:
+    lines.append(f"tier0_runner_vault_handback_rehearsal_last_success_timestamp_seconds {end}")
+elif prev_ok:
+    lines.append(f"tier0_runner_vault_handback_rehearsal_last_success_timestamp_seconds {prev_ok}")
+for k, name in (("startup_rows", "rows_verified"), ("startup_verify_failed", "rows_failed_verification"), ("merged_rows", "merged_rows")):
+    if res.get(k) is not None:
+        lines.append(f"tier0_runner_vault_handback_rehearsal_{name} {int(res[k])}")
+tmp = prom + ".tmp"
+open(tmp, "w").write("\n".join(lines) + "\n"); os.chmod(tmp, 0o644); os.replace(tmp, prom)
+PY
+echo "vault handback rehearsal: rc=$rc"
+exit $rc

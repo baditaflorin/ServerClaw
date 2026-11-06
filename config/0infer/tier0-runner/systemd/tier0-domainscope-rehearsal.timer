@@ -1,0 +1,10 @@
+[Unit]
+Description=Tier-0 daily DomainScope standby rehearsal
+
+[Timer]
+OnCalendar=*-*-* 05:48:00 UTC
+RandomizedDelaySec=120
+Persistent=true
+
+[Install]
+WantedBy=timers.target

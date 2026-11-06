@@ -1,0 +1,93 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply",
+  "applied_on": "2026-11-04",
+  "recorded_on": "2026-11-04",
+  "recorded_by": "claude",
+  "source_commit": "03cc038fe5d4bb323122ef6021cdcc68f2b2de72",
+  "repo_version_context": "0.179.52",
+  "workflow_id": "converge-monitoring",
+  "service_ids": [
+    "monitoring"
+  ],
+  "summary": "Shipped the four alerts on the build VM's Go cache trim metric (PR 672, ws-20261104-fleet-job-caches-trim-alerts) to the monitoring VM's Prometheus by installing config/prometheus/rules/fleet-job-caches-trim.yml from main 03cc038fe at 2026-11-04T21:30Z. A targeted Ansible play that uses the monitoring_vm role's own copy parameters (root:prometheus, 0640, promtool-validated) and its SIGHUP reload, not a converge. The file is new on the VM; FleetJobCachesTrimFailed, FleetJobCachesTrimStale, FleetJobCachesTrimMissing and FleetJobCachesOverCap are loaded, healthy and inactive, and their expressions returned nothing both before and after the apply.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "monitoring-lv3",
+      "vmid": "140",
+      "address": "10.10.10.40",
+      "pull_request": "https://github.com/baditaflorin/platform_server/pull/672"
+    },
+    {
+      "kind": "other",
+      "name": "prometheus-rules-fleet-job-caches-trim.yml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Source and live state were the ones reviewed",
+      "result": "pass",
+      "observed": "The play aborts unless the source file is sha256 9ae9af4298180dcab8929086c8bcb824f394b1e5bf03d29e271b693937186f40 (the blob of config/prometheus/rules/fleet-job-caches-trim.yml on main 03cc038fe, PR 672) and the VM has no such file or already the same one. The VM had none (ls: No such file or directory) in a snapshot of the whole rules directory taken immediately before: 127 entries with mode, owner, size and sha256. All 39 .yml files on disk were already loaded by the running Prometheus, so the reload could not pick up anything else, and the operator's audit log shows no other session on the VM in the 4 hours before."
+    },
+    {
+      "check": "Check mode before the apply",
+      "result": "pass",
+      "observed": "ansible-playbook --check --diff apply-fleet-job-caches-trim.yml: ok=7 changed=1 failed=0 skipped=4; the only change is the new file, shown as a pure addition (one group, four alerts)."
+    },
+    {
+      "check": "Rule validation with the running version",
+      "result": "pass",
+      "observed": "promtool check rules with the VM's own promtool (2.53.3+ds1, the version of the running Prometheus) on the file before the play: SUCCESS, 4 rules found; the copy task validates with the same command before the file is placed; promtool check config /etc/prometheus/prometheus.yml on the VM: SUCCESS. The repository's promtool unit tests (12 test groups, promtool 3.5.0 on the authoring Mac) pass; the VM's promtool was not run on them."
+    },
+    {
+      "check": "Installed file",
+      "result": "pass",
+      "observed": "/etc/prometheus/rules/fleet-job-caches-trim.yml is 640 root:prometheus, 7483 bytes, sha256 9ae9af42...6f40, equal to main 03cc038fe, mtime 21:30:41Z."
+    },
+    {
+      "check": "Prometheus reload",
+      "result": "pass",
+      "observed": "SIGHUP via systemctl kill --kill-whom=main (the role's handler) at 21:30:48Z; the journal shows 'Completed loading of configuration file' in the same second; prometheus_config_last_reload_successful=1; the service was not restarted."
+    },
+    {
+      "check": "Alerts loaded and evaluating",
+      "result": "pass",
+      "observed": "Group fleet_job_caches_trim (interval 15 s, 4 rules), every rule health ok, state inactive, 0 alerts, lastError none: FleetJobCachesTrimFailed (for 3600 s, warning), FleetJobCachesTrimStale (1800 s, warning), FleetJobCachesTrimMissing (86400 s, warning), FleetJobCachesOverCap (86400 s, info). Prometheus went from 70 groups / 564 rules to 71 groups / 568 rules, exactly the group this change adds."
+    },
+    {
+      "check": "Nothing else changed in the rules directory or the alerts",
+      "result": "pass",
+      "observed": "The listing of all entries of /etc/prometheus/rules (mode, owner, size, sha256) before and after differs by exactly one line (127 to 128 entries), the added fleet-job-caches-trim.yml. The firing alerts on the 0mcp Prometheus are the same before and after (26 and 26, none gone, none new) and no FleetJobCaches* series exists in ALERTS."
+    },
+    {
+      "check": "The alert inputs before the apply",
+      "result": "pass",
+      "observed": "On the live Prometheus the four expressions returned nothing before the apply: last_result 0, the age of the metric file 3839 s (the GC timer runs every 4 hours), volumes_over_cap 0, the series present for host docker-build-lv3."
+    },
+    {
+      "check": "Repository live-apply path",
+      "result": "partial",
+      "observed": "Not run and not re-tested today. The same targeted one-file approach as 2026-10-26-pve-host-daily-low-alert-monitoring-live-apply and 2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply (which record why make live-apply-service and make converge-monitoring were not used: gates that block, and a converge that replays all rule files with no way to narrow it). A later converge finds this file identical, because PR 672 added it to monitoring_prometheus_adopted_rule_files."
+    }
+  ],
+  "evidence_refs": [
+    "config/prometheus/rules/fleet-job-caches-trim.yml",
+    "tests/promtool/fleet_job_caches_trim_rules_test.yml",
+    "tests/test_fleet_job_caches_trim_rules.py",
+    "config/0mcp/docker-build-lv3/README.md",
+    "docs/runbooks/fleet-observability.md",
+    "workstreams/active/ws-20261104-fleet-job-caches-trim-alerts.yaml",
+    "docs/workstreams/ws-20261104-fleet-job-caches-trim-alerts.md",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The rules were merged in PR 672 (squash commit 03cc038fe5d4bb323122ef6021cdcc68f2b2de72); this receipt records shipping them. The playbook, the before and after snapshots of the VM and the Ansible output are kept by the operator in sessions/2026-11-04-fleet-job-caches-trim-live-apply/ (not part of this repository).",
+    "The alerts are expected to stay quiet: the trim has run every 4 hours since 2026-11-03 12:25Z with last_result 0 and volumes_over_cap 0. Stale needs 9 hours without a run plus 30 minutes, Failed one bad run for an hour, Missing a day without the series, OverCap a day over the cap (severity info, which Alertmanager drops). No real alert has ever fired on this metric; the delays are reasoning checked against less than two days of healthy data.",
+    "Rollback: ssh 0mcp_monitoring 'sudo rm /etc/prometheus/rules/fleet-job-caches-trim.yml && sudo systemctl kill --kill-whom=main --signal=HUP 0mcp-prometheus.service'. The file did not exist before, so there is no backup copy.",
+    "platform_version moves from 0.179.55 to 0.179.56 with this record (a patch bump for a safe incremental platform adjustment, as for the earlier monitoring rule receipts)."
+  ]
+}

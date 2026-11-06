@@ -1,0 +1,55 @@
+# Woodpecker agent record alerts, added 2026-10-29. On 2026-10-28 eight agent records on ci.0exec lost their name (a PATCH that left it out
+# stores an empty name). The load controller finds agents by name, so for about a day it logged node_missing ~1,500 times per node and managed none
+# of the infer, 0own and 0mcp slots, and nothing alerted. The metrics come from services-registry bin/woodpecker_agent_names_check.py (timer on
+# CT108, textfile woodpecker-agent-names.prom). Today every value is 0 on both planes; `max by` merges duplicate series.
+groups:
+  - name: fleet_woodpecker_agent_records
+    rules:
+      - alert: WoodpeckerAgentRecordUnnamed
+        expr: >-
+          max by (plane) (woodpecker_agents_unnamed) > 0
+        for: 10m
+        labels:
+          severity: warning
+          service: fleet_woodpecker_agent_records
+        annotations:
+          summary: "{{ $value }} Woodpecker agent record(s) on {{ $labels.plane }} have an empty name"
+          description: "An agent record on {{ $labels.plane }} has no name (a PATCH to /api/agents/{id} without name stores an empty one). The load controller cannot find those agents and stops managing their slots. List them with GET /api/agents; restart the idle agent so it re-registers its WOODPECKER_HOSTNAME."
+          runbook_url: docs/runbooks/fleet-observability.md#woodpecker-agent-record-alerts
+
+      - alert: WoodpeckerControllerNodeMissingAgents
+        expr: >-
+          max by (plane, node) (woodpecker_load_controller_missing_agents) > 0
+        for: 10m
+        labels:
+          severity: warning
+          service: fleet_woodpecker_agent_records
+        annotations:
+          summary: "Load controller node {{ $labels.node }} on {{ $labels.plane }} lists {{ $value }} agent name(s) that no agent has"
+          description: "The controller config for node {{ $labels.node }} ({{ $labels.plane }}) names agents that are not registered: an emptied record name, or a stale config entry for an agent that is gone. The controller logs node_missing and does not manage that node. Fix the record (restart the idle agent) or remove the stale name from the config (backup first)."
+          runbook_url: docs/runbooks/fleet-observability.md#woodpecker-agent-record-alerts
+
+      - alert: WoodpeckerAgentRecordCheckBlind
+        expr: >-
+          min by (plane) (woodpecker_agent_names_check_up) == 0 or absent(woodpecker_agent_names_check_up)
+        for: 15m
+        labels:
+          severity: warning
+          service: fleet_woodpecker_agent_records
+        annotations:
+          summary: "The Woodpecker agent record check cannot read a plane or is not running"
+          description: "woodpecker_agent_names_check_up is 0 for the plane or absent: the agent record alerts above are blind. Check woodpecker-agent-names-check.timer on CT108 and the plane's API token."
+          runbook_url: docs/runbooks/fleet-observability.md#woodpecker-agent-record-alerts
+
+      - alert: WoodpeckerAgentNamesBeingWiped
+        expr: >-
+          sum by (plane) (increase(woodpecker_agent_names_repaired_total[15m])) > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: fleet_woodpecker_agent_records
+        annotations:
+          summary: "Something emptied {{ $value }} Woodpecker agent name(s) on {{ $labels.plane }} in the last 15 minutes; the check restored them"
+          description: "The CT108 check (woodpecker-agent-names-check --repair) put back agent names that a caller wiped with a PATCH that has no name (agents then vanish from the load controller). The wipe is already undone; the caller is not. On 2026-10-30 the nginx access log on VM104 (PATCH /api/agents, user agent curl) showed them: sessions pausing agents around docker or slot changes. Find the caller and make it send name and no_schedule."
+          runbook_url: docs/runbooks/fleet-observability.md#woodpecker-agent-record-alerts
+

@@ -116,6 +116,8 @@ def command_list_repos(args) -> int:
 
 
 def command_activate_repo(args) -> int:
+    # Gitea-era path: it looks the repository up in Gitea. The production planes (ci.0mcp, ci.0exec) use a GitHub forge; for those use
+    # scripts/woodpecker_activate_repo.sh (docs/runbooks/configure-woodpecker.md, "Activate a repository").
     client, auth = build_client(args.auth_file)
     full_name = (args.name or auth.get("repo_full_name") or "").strip()
     if not full_name:
@@ -268,7 +270,7 @@ def build_parser() -> argparse.ArgumentParser:
     list_repos.set_defaults(func=command_list_repos)
 
     activate = subparsers.add_parser(
-        "activate-repo", help="Activate one repository in Woodpecker using the configured Gitea admin token."
+        "activate-repo", help="Gitea-era: activate one repository using the configured Gitea admin token (GitHub-forge planes: scripts/woodpecker_activate_repo.sh)."
     )
     activate.add_argument("--name", help="Repository in owner/name form.")
     activate.set_defaults(func=command_activate_repo)

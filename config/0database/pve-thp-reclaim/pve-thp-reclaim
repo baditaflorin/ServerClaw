@@ -1,0 +1,138 @@
+#!/bin/bash
+# pve-thp-reclaim: give back the memory that ballooned VMs leave on the kernel's deferred-split list.
+#
+# Why. Guest RAM of a QEMU VM is transparent-huge-page backed (THP = madvise). Whenever the balloon shrinks a VM the kernel splits
+# 2 MB pages partly and queues the huge page on the deferred-split list; the unmapped tails stay allocated until a shrinker runs under
+# memory pressure. They are reclaimable, but MemAvailable does not count them, so the host shows 4-8% "available" for hours while 8-13 GB
+# can be taken back (2026-10-16 and again 2026-10-17 on pve01: a false ProxmoxHostMemoryExhausted, and a builder VM trimmed by mistake).
+# One `echo 2 > /proc/sys/vm/drop_caches` runs the shrinkers once (slab and deferred split) in seconds and touches no guest.
+#
+# What. The timer runs this every minute. It reads the gap = (nr_active_anon - nr_anon_pages) * 4 KiB from /proc/vmstat. At or above the
+# threshold (default 1024 MB) it drops the slab caches and reads the gap again. An action that frees less than MIN_GAIN (default 256 MB)
+# means the gap is something else, so it backs off for 15 minutes instead of acting every minute. Everything it saw and did is written
+# as a node_exporter textfile (pve_thp_*), atomically.
+#
+# Every path and the reclaim command can be overridden through the environment (tests do; a drop-in /etc/default/pve-thp-reclaim sets
+# the thresholds on a host):
+#   PVE_THP_RECLAIM_THRESHOLD_MB (1024)  PVE_THP_RECLAIM_MIN_GAIN_MB (256)  PVE_THP_RECLAIM_BACKOFF_SECONDS (900)
+#   PVE_THP_RECLAIM_VMSTAT  PVE_THP_RECLAIM_MEMINFO  PVE_THP_RECLAIM_DROP_CACHES  PVE_THP_RECLAIM_PROM  PVE_THP_RECLAIM_STATE_DIR
+#   PVE_THP_RECLAIM_LOCK  PVE_THP_RECLAIM_CMD (default: echo 2 into the drop_caches file)  PVE_THP_RECLAIM_NOW (epoch seconds, tests)
+# Exit 0 when it did its job or another run holds the lock; 1 when /proc/vmstat cannot be read (the unit shows failed and the textfile
+# stops moving, which is what the dead-man's alert watches).
+set -u
+
+THRESH_MB=${PVE_THP_RECLAIM_THRESHOLD_MB:-1024}
+MIN_GAIN_MB=${PVE_THP_RECLAIM_MIN_GAIN_MB:-256}
+BACKOFF_S=${PVE_THP_RECLAIM_BACKOFF_SECONDS:-900}
+VMSTAT=${PVE_THP_RECLAIM_VMSTAT:-/proc/vmstat}
+DROP=${PVE_THP_RECLAIM_DROP_CACHES:-/proc/sys/vm/drop_caches}
+PROM=${PVE_THP_RECLAIM_PROM:-/var/lib/prometheus/node-exporter/textfile/pve_thp_reclaim.prom}
+STATE_DIR=${PVE_THP_RECLAIM_STATE_DIR:-/var/lib/pve-thp-reclaim}
+LOCK=${PVE_THP_RECLAIM_LOCK:-/run/pve-thp-reclaim.lock}
+CMD=${PVE_THP_RECLAIM_CMD:-}
+
+now() { if [ -n "${PVE_THP_RECLAIM_NOW:-}" ]; then echo "$PVE_THP_RECLAIM_NOW"; else date +%s; fi; }
+
+# The gap in whole MB, or nothing (and a failure) when /proc/vmstat has no such counters.
+gap_mb() {
+  awk '/^nr_active_anon /{a=$2} /^nr_anon_pages /{b=$2} END{if (a == "" || b == "") exit 1; g = (a - b) * 4 / 1024; if (g < 0) g = 0; printf "%d\n", g}' "$VMSTAT"
+}
+
+# 120 s cap on the reclaim itself (coreutils timeout is on every Debian host; a dev machine without it just runs the command).
+TO=""
+command -v timeout >/dev/null 2>&1 && TO="timeout 120"
+
+reclaim() {
+  if [ -n "$CMD" ]; then
+    $TO bash -c "$CMD"
+  else
+    $TO bash -c 'echo 2 > "$1"' _ "$DROP"
+  fi
+}
+
+# key=value state: counters survive between runs (a lost state file only restarts the counters).
+get() { sed -n "s/^$1=//p" "$STATE_DIR/state" 2>/dev/null | tail -n 1; }
+
+mkdir -p "$STATE_DIR" || exit 1
+exec 9>"$LOCK" || exit 1
+flock -n 9 || exit 0
+
+before=$(gap_mb) || { echo "pve-thp-reclaim: cannot read nr_active_anon/nr_anon_pages from $VMSTAT" >&2; exit 1; }
+t=$(now)
+runs=$(( $(get runs) + 1 ))
+actions=$(( $(get actions) + 0 ))
+ineffective=$(( $(get ineffective) + 0 ))
+reclaimed_mb=$(( $(get reclaimed_mb) + 0 ))
+last_action=$(( $(get last_action) + 0 ))
+last_duration=$(get last_duration); last_duration=${last_duration:-0}
+backoff_until=$(( $(get backoff_until) + 0 ))
+after=$before
+
+if [ "$before" -ge "$THRESH_MB" ]; then
+  if [ "$t" -lt "$backoff_until" ]; then
+    echo "pve-thp-reclaim: gap ${before} MB at or above ${THRESH_MB} MB, backing off for $((backoff_until - t)) s after an action that freed little"
+  else
+    started=$SECONDS
+    reclaim || echo "pve-thp-reclaim: the reclaim command failed or timed out" >&2
+    last_duration=$((SECONDS - started))
+    after=$(gap_mb) || after=$before
+    gained=$((before - after))
+    actions=$((actions + 1))
+    last_action=$t
+    [ "$gained" -gt 0 ] && reclaimed_mb=$((reclaimed_mb + gained))
+    if [ "$gained" -lt "$MIN_GAIN_MB" ]; then
+      ineffective=$((ineffective + 1))
+      backoff_until=$((t + BACKOFF_S))
+      echo "pve-thp-reclaim: gap ${before} MB -> ${after} MB in ${last_duration} s: freed under ${MIN_GAIN_MB} MB, backing off ${BACKOFF_S} s"
+    else
+      echo "pve-thp-reclaim: gap ${before} MB -> ${after} MB in ${last_duration} s"
+    fi
+  fi
+fi
+
+backoff_active=0
+[ "$t" -lt "$backoff_until" ] && backoff_active=1
+
+state=$(mktemp "$STATE_DIR/.state.XXXXXX") || exit 1
+{
+  echo "runs=$runs"; echo "actions=$actions"; echo "ineffective=$ineffective"; echo "reclaimed_mb=$reclaimed_mb"
+  echo "last_action=$last_action"; echo "last_duration=$last_duration"; echo "backoff_until=$backoff_until"
+} > "$state" && mv -f "$state" "$STATE_DIR/state"
+
+prom=$(mktemp "$(dirname "$PROM")/.pve_thp_reclaim.XXXXXX") || exit 1
+{
+  echo "# HELP pve_thp_deferred_split_bytes Memory on the kernel deferred-split list (nr_active_anon - nr_anon_pages): reclaimable, but not in MemAvailable. After this run."
+  echo "# TYPE pve_thp_deferred_split_bytes gauge"
+  echo "pve_thp_deferred_split_bytes $((after * 1048576))"
+  echo "# HELP pve_thp_deferred_split_before_bytes The same gap as this run found it, before any reclaim."
+  echo "# TYPE pve_thp_deferred_split_before_bytes gauge"
+  echo "pve_thp_deferred_split_before_bytes $((before * 1048576))"
+  echo "# HELP pve_thp_reclaim_threshold_bytes Gap at or above which a reclaim runs."
+  echo "# TYPE pve_thp_reclaim_threshold_bytes gauge"
+  echo "pve_thp_reclaim_threshold_bytes $((THRESH_MB * 1048576))"
+  echo "# HELP pve_thp_reclaim_backoff_active 1 while an action that freed little is holding further actions back."
+  echo "# TYPE pve_thp_reclaim_backoff_active gauge"
+  echo "pve_thp_reclaim_backoff_active $backoff_active"
+  echo "# HELP pve_thp_reclaim_runs_total Checks made since the state file was created."
+  echo "# TYPE pve_thp_reclaim_runs_total counter"
+  echo "pve_thp_reclaim_runs_total $runs"
+  echo "# HELP pve_thp_reclaim_actions_total Reclaims run (drop_caches=2)."
+  echo "# TYPE pve_thp_reclaim_actions_total counter"
+  echo "pve_thp_reclaim_actions_total $actions"
+  echo "# HELP pve_thp_reclaim_ineffective_total Reclaims that freed less than the minimum gain."
+  echo "# TYPE pve_thp_reclaim_ineffective_total counter"
+  echo "pve_thp_reclaim_ineffective_total $ineffective"
+  echo "# HELP pve_thp_reclaim_reclaimed_bytes_total Gap given back by reclaims."
+  echo "# TYPE pve_thp_reclaim_reclaimed_bytes_total counter"
+  echo "pve_thp_reclaim_reclaimed_bytes_total $((reclaimed_mb * 1048576))"
+  echo "# HELP pve_thp_reclaim_last_action_duration_seconds How long the last reclaim took."
+  echo "# TYPE pve_thp_reclaim_last_action_duration_seconds gauge"
+  echo "pve_thp_reclaim_last_action_duration_seconds $last_duration"
+  echo "# HELP pve_thp_reclaim_last_action_timestamp_seconds When the last reclaim ran (0 = never)."
+  echo "# TYPE pve_thp_reclaim_last_action_timestamp_seconds gauge"
+  echo "pve_thp_reclaim_last_action_timestamp_seconds $last_action"
+  echo "# HELP pve_thp_reclaim_last_run_timestamp_seconds When this check ran (dead-man's alert)."
+  echo "# TYPE pve_thp_reclaim_last_run_timestamp_seconds gauge"
+  echo "pve_thp_reclaim_last_run_timestamp_seconds $t"
+} > "$prom" && chmod 0644 "$prom" && mv -f "$prom" "$PROM"
+exit 0

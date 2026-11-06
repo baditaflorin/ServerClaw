@@ -748,6 +748,42 @@ def test_remote_snapshot_scopes_generated_service_catalogs_to_changed_bundles(
     assert selected == ["test_echo"]
 
 
+def test_remote_snapshot_scopes_an_underscore_service_bundle_and_the_dependency_graph(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    # Real bundle directories carry the service id (label_studio, artifact_cache), not the hyphenated slug the tests above use.
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+    monkeypatch.setenv("LV3_SNAPSHOT_SOURCE_COMMIT", "a" * 40)
+    monkeypatch.setattr(service_completeness, "changed_services_in_catalog", lambda *_args: None)
+
+    selected = service_completeness.service_ids_for_changed_paths(
+        [
+            "config/dependency-graph.json",
+            "config/health-probe-catalog.json",
+            "catalog/services/test_echo/service.yaml",
+        ],
+        context,
+    )
+
+    assert selected == ["test_echo"]
+
+
+def test_remote_snapshot_keeps_the_dependency_graph_global_when_no_bundle_changed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_repo(tmp_path)
+    scaffold_demo_service(tmp_path)
+    service_completeness = load_service_completeness(monkeypatch, tmp_path)
+    context = service_completeness.load_context()
+    monkeypatch.setenv("LV3_SNAPSHOT_SOURCE_COMMIT", "a" * 40)
+    monkeypatch.setattr(service_completeness, "changed_services_in_catalog", lambda *_args: None)
+
+    assert service_completeness.service_ids_for_changed_paths(["config/dependency-graph.json"], context) is None
+
+
 def test_remote_snapshot_without_source_commit_fails_closed_for_generated_catalogs(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -41,7 +41,7 @@ def test_proxmox_network_renders_vm_firewall_from_active_role_path() -> None:
     template_module = render_task["ansible.builtin.template"]
 
     assert template_module["src"] == "vm.fw.j2"
-    assert template_module["dest"] == "/root/.lv3-vm-{{ guest.vmid }}.fw"
+    assert template_module["dest"] == "{{ proxmox_network_firewall_stage_dir }}/.lv3-vm-{{ guest.vmid }}.fw"
 
 
 def test_proxmox_network_rejects_management_interface_aliasing_wan_bridge() -> None:
@@ -79,6 +79,18 @@ def test_proxmox_network_template_renders_udp_filter_and_nat_rules() -> None:
     assert (
         "udp dport {{ forward.listen_port }} dnat ip to {{ forward.target_host }}:{{ forward.target_port }}" in template
     )
+
+
+def test_proxmox_network_template_never_forwards_private_space_to_the_wan() -> None:
+    template = TEMPLATE_PATH.read_text(encoding="utf-8")
+    drop = (
+        'oifname "{{ proxmox_wan_bridge }}" ip daddr '
+        "{ 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10 } counter drop"
+    )
+
+    assert drop in template
+    # the drop must come before the guest-network accept rules, or it never matches
+    assert template.index(drop) < template.index("ip saddr {{ proxmox_internal_network }} accept")
 
 
 def test_host_vars_define_livekit_public_tcp_and_udp_forwards() -> None:

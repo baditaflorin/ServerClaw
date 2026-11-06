@@ -1,0 +1,71 @@
+id: ws-20261103-build-gc-helper-image
+adr: "0494"
+title: "docker-build-lv3 (VM 130): step 3d no longer depends on one golang image being on the host (an ordered list, a bounded pull through the registry mirror, a WARNING and a textfile metric when it still cannot run); git only, nothing is applied"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/build-gc-helper-image
+worktree_path: .claude/worktrees/build-gc-helper-image
+doc: docs/workstreams/ws-20261103-build-gc-helper-image.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/0mcp/docker-build-lv3/README.md
+  - config/0mcp/docker-build-lv3/files.sha256
+  - config/0mcp/docker-build-lv3/files/usr/local/bin/fleet-job-caches-trim.sh
+  - tests/test_docker_build_gc_cache_trim.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261103-build-gc-helper-image.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261103-build-gc-helper-image.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261103_build_gc_helper_image_tracking
+      paths:
+        - docs/workstreams/ws-20261103-build-gc-helper-image.md
+      mode: exclusive
+    - id: docker_build_lv3_gc_helper_image_config
+      paths:
+        - config/0mcp/docker-build-lv3/README.md
+        - config/0mcp/docker-build-lv3/files.sha256
+        - config/0mcp/docker-build-lv3/files/usr/local/bin/fleet-job-caches-trim.sh
+      mode: shared_contract
+      contract: docker-build-vm-config-v1
+    - id: docker_build_gc_helper_image_tests
+      paths:
+        - tests/test_docker_build_gc_cache_trim.py
+      mode: shared_contract
+      contract: docker-build-vm-config-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261103-build-gc-helper-image.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "The build VM's docker-build-gc step 3d (the Go build cache cap inside the fleet-job-cache-* volumes) no longer needs one particular golang image on the host: it takes the first of golang:1.27 and golang:1.26 that exists, pulls golang:1.27 (bounded, through the registry mirror, only with room on the disk) when neither does, says WARNING and exits 3 when it still cannot run, and writes a textfile metric. Git only: nothing is installed on the VM by this change."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  Step 3d of docker-build-gc.sh (PR 657) runs go-fleet-job's program in throw-away containers of a golang image with docker's --pull never. Its default image
+  golang:1.26 was missing from the host at 2026-11-02 23:10Z, so the wrapper said SKIPPED and exited 0: once step 4 (the GC script calling it) is applied, the step would
+  silently never run. Read-only evidence of 2026-11-03: the image is back (a job pulled it), but an unused image goes whenever someone prunes: the host has two scheduled
+  pruners (docker-build-gc step 3 every 4 hours and fleet-docker-prune daily, both `docker image prune -a --until=168h`, which goes by the image's creation date, so all three
+  golang tags created 2026-10-28 03:15Z become prunable on 11-04 03:15Z) and a session pruned with until=24h at 22:46Z. This change makes the step independent of that.
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Wrapper - an ordered image list, a bounded pull through the registry mirror guarded by free space, WARNING lines and exit 3 when it cannot run, a textfile metric; tests, README (image paragraph, staged plan updated for the 2026-11-02 run with the old wrapper), files.sha256
+    status: completed
+  - id: t3
+    title: Run the tests and a mutation sweep on the build host, pass the pre-push gate through guarded_run.py, open the pull request (nothing is applied, nothing is merged)
+    status: in_progress

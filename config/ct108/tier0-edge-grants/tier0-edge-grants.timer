@@ -1,0 +1,10 @@
+[Unit]
+Description=Hourly Tier-0 standby edge grants (the edge-compat check runs at :50 on the runner; this looks at its numbers at :20)
+
+[Timer]
+OnCalendar=*-*-* *:20:00
+RandomizedDelaySec=120
+Persistent=false
+
+[Install]
+WantedBy=timers.target

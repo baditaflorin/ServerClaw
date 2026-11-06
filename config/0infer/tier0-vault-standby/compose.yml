@@ -1,0 +1,40 @@
+# Vault + keystore STANDBY on infer-tier0. Stopped by default (restart: "no"); started by promote.sh or by the drill.
+# Data comes from the courier (builder CT108 -> receive.sh) every few minutes. Secrets live only in ./.env (root, 0600).
+services:
+  keystore:
+    image: ghcr.io/baditaflorin/apikey-service:a6bad2e
+    restart: "no"
+    user: "${VSYNC_UID}:${VSYNC_GID}"
+    environment:
+      PORT: "8080"
+      DB_PATH: /data/keys.db
+      LOG_LEVEL: info
+      GRAPH_ENABLED: "false"
+      LEDGER_OVERFLOW_ENABLED: "false"
+      LEDGER_OVERFLOW_ENFORCE: "false"
+      ADMIN_TOKEN: ${KEYSTORE_ADMIN_TOKEN:?missing}
+    volumes:
+      - ./data/keystore:/data
+    ports:
+      - "127.0.0.1:18021:8080"
+  vault:
+    image: ghcr.io/baditaflorin/go-fleet-secrets:289c536
+    restart: "no"
+    user: "${VSYNC_UID}:${VSYNC_GID}"
+    environment:
+      PORT: "18140"
+      DB_PATH: /data/secrets.db
+      APIKEY_SERVICE_URL: http://keystore:8080
+      SECRETS_MASTER_KEY: ${SECRETS_MASTER_KEY:?missing}
+      SECRETS_ADMIN_TOKEN: ${SECRETS_ADMIN_TOKEN:?missing}
+      SECRETS_MASTER_KEYS: ${SECRETS_MASTER_KEYS:-}
+      SECRETS_ACTIVE_KEY_ID: ${SECRETS_ACTIVE_KEY_ID:-k0}
+      SECRETS_WRITE_V2: ${SECRETS_WRITE_V2:-}
+      SECRETS_REQUIRE_ROW_MAC: ${SECRETS_REQUIRE_ROW_MAC:-}
+    volumes:
+      - ./data/vault:/data
+    ports:
+      - "127.0.0.1:18140:18140"
+    depends_on: [keystore]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]

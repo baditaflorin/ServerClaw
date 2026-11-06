@@ -1,0 +1,14 @@
+[Unit]
+Description=DomainScope search probe: every 15 minutes
+
+[Timer]
+# Fixed slots, not OnBootSec: the builder is stopped about an hour each night by its backup (ct108-nightly, 01:30Z) and the boot that
+# follows starts many timers at once; Persistent=false means no catch-up run at that boot, the next slot runs it. The alert on a stale
+# probe (DomainScopeSearchProbeStale, 3 hours) outlasts that window.
+OnCalendar=*:04/15
+RandomizedDelaySec=60
+AccuracySec=30s
+Persistent=false
+
+[Install]
+WantedBy=timers.target

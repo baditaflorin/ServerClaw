@@ -1,0 +1,229 @@
+---
+# Purpose: Declare the validated input contract for the agent_history_runtime role.
+argument_specs:
+  main:
+    short_description: Converge the agent-history store (Postgres with pgvector and agent-store) on its dedicated guest, with an encrypted data volume and token files delivered by OpenBao.
+    options:
+      agent_history_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the compose project and the OpenBao Agent configuration.
+      agent_history_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path of the agent-history project.
+      agent_history_agent_dir:
+        type: path
+        required: true
+        description:
+          - Directory holding the OpenBao Agent configuration, its secret templates, and the AppRole role_id and secret_id files delivered by the owner.
+      agent_history_role_id_file:
+        type: path
+        required: true
+        description:
+          - AppRole role_id file for the OpenBao Agent; delivered by the owner, never created by this role.
+      agent_history_secret_id_file:
+        type: path
+        required: true
+        description:
+          - AppRole secret_id file for the OpenBao Agent; delivered by the owner, never created by this role.
+      agent_history_run_dir:
+        type: path
+        required: true
+        description:
+          - tmpfs directory the OpenBao Agent renders the token files and env files into.
+      agent_history_run_uid:
+        type: int
+        required: true
+        description:
+          - Numeric uid of the agent-store container (distroless nonroot); the OpenBao Agent container runs as it.
+      agent_history_run_gid:
+        type: int
+        required: true
+        description:
+          - Numeric gid of the agent-store container.
+      agent_history_helper_dir:
+        type: path
+        required: true
+        description:
+          - Directory for the unlock helper and the metrics bridge scripts.
+      agent_history_state_dir:
+        type: path
+        required: true
+        description:
+          - Directory for root-owned state that is not secret (the optional canary scan SQL file).
+      agent_history_data_device:
+        type: path
+        required: true
+        description:
+          - Block device of the data disk (stable by-id path). The owner creates the LUKS2 container on it; this role never formats it.
+      agent_history_luks_name:
+        type: str
+        required: true
+        description:
+          - dm-crypt mapping name of the data volume.
+      agent_history_data_mount:
+        type: path
+        required: true
+        description:
+          - Mount point of the unlocked data volume; protected with an immutable attribute while nothing is mounted.
+      agent_history_pgdata_dir:
+        type: path
+        required: true
+        description:
+          - Postgres data directory on the data volume (a bind mount that must already exist).
+      agent_history_db_image:
+        type: str
+        required: true
+        description:
+          - Postgres with pgvector image reference.
+      agent_history_store_image:
+        type: str
+        required: false
+        description:
+          - agent-store image reference, built on the build host and loaded into the guest. Empty prepares everything but does not start the project.
+      agent_history_openbao_agent_image:
+        type: str
+        required: true
+        description:
+          - OpenBao Agent image reference (the platform's pinned openbao_agent_image).
+      agent_history_db_memory_limit:
+        type: str
+        required: true
+        description:
+          - Compose memory limit of the database container.
+      agent_history_store_memory_limit:
+        type: str
+        required: true
+        description:
+          - Compose memory limit of the store container.
+      agent_history_postgres_shared_buffers:
+        type: str
+        required: true
+        description:
+          - Postgres shared_buffers.
+      agent_history_postgres_effective_cache_size:
+        type: str
+        required: true
+        description:
+          - Postgres effective_cache_size.
+      agent_history_docker_log_max_size:
+        type: str
+        required: true
+        description:
+          - Docker json-file log size cap per container (Postgres can log row text, so logs stay small and local).
+      agent_history_docker_log_max_file:
+        type: str
+        required: true
+        description:
+          - Docker json-file log file count cap per container.
+      agent_history_store_port:
+        type: int
+        required: true
+        description:
+          - TCP port of the store inside the guest.
+      agent_history_store_bind:
+        type: str
+        required: true
+        description:
+          - Address the store port is published on; must be the loopback address.
+      agent_history_embed_url:
+        type: str
+        required: false
+        description:
+          - Base address of the embeddings endpoint the store calls to embed a search question (a Mac over the tailnet). Empty disables semantic search; a real address is never committed. Plain http is only for a tailnet or private address.
+      agent_history_embed_model:
+        type: str
+        required: false
+        description:
+          - Embedding model name the store searches vectors for; must equal the embedding worker's --storeModel. Required when agent_history_embed_url is set.
+      agent_history_embed_api:
+        type: str
+        required: true
+        choices:
+          - ollama
+          - openai
+        description:
+          - Request shape of the embeddings endpoint (ollama /api/embed or openai /v1/embeddings).
+      agent_history_embed_dimensions:
+        type: int
+        required: true
+        description:
+          - Expected vector size; must equal the store's vector column (1024 for bge-m3).
+      agent_history_embed_timeout:
+        type: str
+        required: true
+        description:
+          - Budget of one call to the embeddings endpoint (a Go duration such as 2s).
+      agent_history_embed_cache_size:
+        type: int
+        required: true
+        description:
+          - Number of recently embedded search questions the store keeps (0 disables the cache).
+      agent_history_openbao_service_topology:
+        type: dict
+        required: true
+        description:
+          - Service topology entry of OpenBao.
+      agent_history_openbao_address:
+        type: str
+        required: true
+        description:
+          - OpenBao API address the OpenBao Agent uses.
+      agent_history_openbao_kv_path:
+        type: str
+        required: true
+        description:
+          - KV v2 data path holding the database password and the token lists. Created by the OpenBao administrator.
+      agent_history_openbao_keys:
+        type: dict
+        required: true
+        description:
+          - Names of the keys in the KV entry (db_password, read_tokens, write_tokens, metrics_token, embed_tokens). Names only, never values.
+      agent_history_tailscale_serve_enabled:
+        type: bool
+        required: true
+        description:
+          - Whether to publish the loopback store listener with tailscale serve once the guest has joined the tailnet.
+      agent_history_tailscale_https_port:
+        type: int
+        required: true
+        description:
+          - HTTPS port tailscale serve listens on (the tailnet grant names this port).
+      agent_history_textfile_dir:
+        type: path
+        required: true
+        description:
+          - node_exporter textfile collector directory the metrics bridge writes agent_history.prom into.
+      agent_history_metrics_interval_seconds:
+        type: int
+        required: true
+        description:
+          - Seconds between metrics bridge runs.
+      agent_history_metrics_service:
+        type: str
+        required: true
+        description:
+          - Base name of the metrics bridge systemd service and timer.
+      agent_history_canary_scan_enabled:
+        type: bool
+        required: true
+        description:
+          - Whether to run the nightly database scan for the redaction canary and write its textfile metrics.
+      agent_history_canary_scan_sql_file:
+        type: path
+        required: true
+        description:
+          - SQL file generated by agent-eval's dbscan, delivered by the owner.
+      agent_history_canary_scan_host:
+        type: str
+        required: false
+        description:
+          - The canary host the SQL file was generated for; used as the metrics label. Required when the scan is enabled.
+      agent_history_canary_scan_on_calendar:
+        type: str
+        required: true
+        description:
+          - systemd OnCalendar expression of the nightly scan.

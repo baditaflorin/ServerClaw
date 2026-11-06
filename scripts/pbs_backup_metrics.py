@@ -3,6 +3,9 @@
 
 Walks the datastore directory tree (no API token, no secrets): <store>/{vm,ct,host}/<id>/<RFC3339 snapshot>/ for the root
 namespace and <store>/ns/<name>/{vm,ct,host}/<id>/<snapshot>/ for namespaces (nested namespaces are walked too).
+Only FINISHED snapshots count: PBS writes the manifest index.json.blob last, so a directory without it is a backup in progress
+(or one that died): counting it made a running or hung backup look like a fresh one and hid PbsBackupGroupStale (2026-10-19: the
+stale alert for VM 100 sat inactive for 41 minutes while a backup that was later aborted was running).
 
 Metrics (labels datastore, namespace ("" is the root namespace), backup_type, backup_id):
   pbs_backup_group_last_snapshot_timestamp_seconds   newest snapshot time of the group
@@ -21,6 +24,7 @@ import time
 
 TS = re.compile(r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$")
 TYPES = ("vm", "ct", "host")
+MANIFEST = "index.json.blob"  # written by PBS when the backup has finished
 
 
 def snap_epoch(name):
@@ -41,7 +45,7 @@ def scan_groups(base):
             gdir = os.path.join(tdir, bid)
             if not os.path.isdir(gdir):
                 continue
-            epochs = [e for e in (snap_epoch(n) for n in os.listdir(gdir)) if e is not None]
+            epochs = [e for e in (snap_epoch(n) for n in os.listdir(gdir) if os.path.isfile(os.path.join(gdir, n, MANIFEST))) if e is not None]
             yield btype, bid, epochs
 
 

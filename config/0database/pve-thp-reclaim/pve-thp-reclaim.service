@@ -1,0 +1,16 @@
+[Unit]
+Description=Give back the memory ballooned VMs leave on the kernel's deferred-split list when it is large
+Documentation=file:///usr/local/sbin/pve-thp-reclaim
+ConditionPathExists=/usr/local/sbin/pve-thp-reclaim
+
+[Service]
+Type=oneshot
+User=root
+# Optional: PVE_THP_RECLAIM_THRESHOLD_MB, PVE_THP_RECLAIM_MIN_GAIN_MB, PVE_THP_RECLAIM_BACKOFF_SECONDS
+EnvironmentFile=-/etc/default/pve-thp-reclaim
+ExecStart=/usr/local/sbin/pve-thp-reclaim
+TimeoutStartSec=3min
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes

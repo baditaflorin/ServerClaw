@@ -1,0 +1,134 @@
+# promtool unit tests for config/prometheus/rules/fleet-apikey-wave.yml (run by tests/test_apikey_wave_rules.py when promtool is installed).
+# promtool starts its clock at the Unix epoch, so a heartbeat whose value equals its own timestamp in seconds means "the tool ran just now".
+rule_files:
+  - ../../config/prometheus/rules/fleet-apikey-wave.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a wave that runs, moves pools and has not halted raises nothing
+    interval: 5m
+    input_series:
+      - series: 'fleet_apikey_wave_last_run_timestamp_seconds{instance="b",host="0docker-builder"}'
+        values: "0+300x300"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="total"}'
+        values: "217x300"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="done"}'
+        values: "0+1x300"
+      - series: 'fleet_apikey_wave_halted{instance="b",host="0docker-builder"}'
+        values: "0x300"
+    alert_rule_test:
+      - {eval_time: 20h, alertname: ApikeyWaveHalted, exp_alerts: []}
+      - {eval_time: 20h, alertname: ApikeyWaveSilent, exp_alerts: []}
+      - {eval_time: 20h, alertname: ApikeyWaveStalled, exp_alerts: []}
+
+  - name: a halted wave alerts after ten minutes
+    interval: 1m
+    input_series:
+      - series: 'fleet_apikey_wave_halted{instance="b",host="0docker-builder"}'
+        values: "0x30 1x100"
+    alert_rule_test:
+      - {eval_time: 35m, alertname: ApikeyWaveHalted, exp_alerts: []}
+      - eval_time: 60m
+        alertname: ApikeyWaveHalted
+        exp_alerts:
+          - exp_labels: {instance: b, host: 0docker-builder, severity: warning, service: apikey-wave}
+            exp_annotations:
+              summary: "The keystore apikey wave halted itself and waits for a person"
+              description: "A pool failed after one of its replicas was rolled, or the check of its containers failed. The tool reverted the keys it had set but not rolled and does nothing until it is resumed. On the builder: `python3 /usr/local/bin/apikey-wave.py --status` names the pool and the reason, the pool's log is in /root/fleet-state/deploy-logs/apikey-wave/. Look, fix the pool, then `--resume`."
+              runbook_url: docs/runbooks/apikey-wave.md
+
+  - name: a tool that stopped running while pools remain is silent after three hours, not before
+    interval: 1m
+    input_series:
+      - series: 'fleet_apikey_wave_last_run_timestamp_seconds{instance="b",host="0docker-builder"}'
+        values: "0+60x60 3540x400"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="total"}'
+        values: "217x500"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="done"}'
+        values: "10x500"
+    alert_rule_test:
+      - {eval_time: 3h, alertname: ApikeyWaveSilent, exp_alerts: []}
+      - eval_time: 4h30m
+        alertname: ApikeyWaveSilent
+        exp_alerts:
+          - exp_labels: {instance: b, host: 0docker-builder, severity: warning, service: apikey-wave}
+            exp_annotations:
+              summary: "The keystore apikey wave has not run for 3 hours and pools remain"
+              description: "fleet_apikey_wave_last_run_timestamp_seconds is old while pools of the plan are not done: apikey-wave.timer on the builder is disabled or stopped, or the run dies before it writes its metrics (`systemctl status apikey-wave.service apikey-wave.timer`, `journalctl -u apikey-wave.service`)."
+              runbook_url: docs/runbooks/apikey-wave.md
+
+  - name: one pool done twenty hours in keeps the wave out of stalled for the rest of the day
+    interval: 1m
+    input_series:
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="total"}'
+        values: "217x2300"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="done"}'
+        values: "6x1200 7x1100"
+    alert_rule_test:
+      - {eval_time: 30h, alertname: ApikeyWaveStalled, exp_alerts: []}
+
+  - name: a young wave with nothing done yet is not stalled
+    interval: 1m
+    input_series:
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="total"}'
+        values: "217x600"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="done"}'
+        values: "0x600"
+    alert_rule_test:
+      - {eval_time: 9h, alertname: ApikeyWaveStalled, exp_alerts: []}
+
+  - name: a finished wave is never silent or stalled, whatever its heartbeat does
+    interval: 1m
+    input_series:
+      - series: 'fleet_apikey_wave_last_run_timestamp_seconds{instance="b",host="0docker-builder"}'
+        values: "0+60x60 3540x2000"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="total"}'
+        values: "217x2100"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="done"}'
+        values: "217x2100"
+    alert_rule_test:
+      - {eval_time: 30h, alertname: ApikeyWaveSilent, exp_alerts: []}
+      - {eval_time: 30h, alertname: ApikeyWaveStalled, exp_alerts: []}
+
+  # one sample a minute: with sparser input the instant selectors fall out of their 5 minute lookback between samples and the `for:` keeps restarting
+  - name: a wave that runs but moves no pool is stalled after a day and an hour
+    interval: 1m
+    input_series:
+      - series: 'fleet_apikey_wave_last_run_timestamp_seconds{instance="b",host="0docker-builder"}'
+        values: "0+60x1700"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="total"}'
+        values: "217x1700"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",state="done"}'
+        values: "6x1700"
+    alert_rule_test:
+      - {eval_time: 20h, alertname: ApikeyWaveStalled, exp_alerts: []}      # a flat series younger than a day is not stalled
+      - {eval_time: 24h, alertname: ApikeyWaveStalled, exp_alerts: []}      # the day is full, the hour of `for:` starts
+      - eval_time: 26h
+        alertname: ApikeyWaveStalled
+        exp_alerts:
+          - exp_labels: {instance: b, host: 0docker-builder, severity: warning, service: apikey-wave}
+            exp_annotations:
+              summary: "The keystore apikey wave moved no pool in 24 hours"
+              description: "The tool runs but every pool is refused or waits: the events say why (`tail /root/fleet-state/state/apikey-wave/events.jsonl`). Usual causes: the runner's preflight cannot get Fleet Graph's /brief while the dockerhost is saturated (environmental refusals, retried every 30 minutes), a keystore node that does not answer /health, a closed PAUSE file, or the backup window. Nothing is broken by waiting; the point is to know."
+              runbook_url: docs/runbooks/apikey-wave.md
+
+  # 2026-10-22: the builder is stopped by its nightly vzdump job; for 20 minutes after it the scrape target carried identity="stale" and `done` (value 6) was written under that
+  # label (several scrapes, all 6). That series has `delta(done[24h]) == 0`, so the alert fired from 22:03Z for a wave that was moving pools (88 done, 82 in the last 24 hours).
+  - name: a wave that moves pools stays out of stalled when a few samples of its series carry another identity label
+    interval: 1m
+    input_series:
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",identity="verified",state="total"}'
+        values: "5000x100 _x30 5000x1570"
+      # moves by one pool a minute; the 30 minutes of the stop are missing under this label
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",identity="verified",state="done"}'
+        values: "10+1x99 _x30 140+1x1569"
+      # the stale-identity series: three samples each, all the value the count had when the builder stopped (the wave does not run while it is down); one sample would give delta() no result
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",identity="stale",state="total"}'
+        values: "_x100 5000x2 _x1597"
+      - series: 'fleet_apikey_wave_pools{instance="b",host="0docker-builder",identity="stale",state="done"}'
+        values: "_x100 109x2 _x1597"
+    alert_rule_test:
+      # the stale sample stays in the 24 hour window until minute 1540; the old expression fires from minute 1500 (`offset 24h` is true from 1440, then the hour of `for:`)
+      - {eval_time: 25h30m, alertname: ApikeyWaveStalled, exp_alerts: []}
+      - {eval_time: 26h, alertname: ApikeyWaveStalled, exp_alerts: []}

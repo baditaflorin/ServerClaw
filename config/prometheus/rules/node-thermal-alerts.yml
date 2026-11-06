@@ -1,0 +1,55 @@
+groups:
+  - name: proxmox_host_cpu_thermal_alerts
+    rules:
+      - alert: ProxmoxHostCpuPackageTemperatureWarning
+        expr: |
+          (node_thermal_zone_temp{job=~"pve_.*_host.*|pve01_host_.*",type="x86_pkg_temp"} >= 85)
+          and
+          (node_thermal_zone_temp{job=~"pve_.*_host.*|pve01_host_.*",type="x86_pkg_temp"} < 95)
+        for: 5m
+        labels:
+          severity: warning
+          service: host_health
+        annotations:
+          summary: "CPU package temperature high on {{ $labels.instance }}"
+          description: "CPU package temperature is {{ $value }} C. Investigate cooling and host load."
+      - alert: ProxmoxHostCpuPackageTemperatureCritical
+        expr: node_thermal_zone_temp{job=~"pve_.*_host.*|pve01_host_.*",type="x86_pkg_temp"} >= 95
+        for: 1m
+        labels:
+          severity: critical
+          service: host_health
+        annotations:
+          summary: "CPU package temperature critical on {{ $labels.instance }}"
+          description: "CPU package temperature is {{ $value }} C. Immediate thermal protection is required."
+      - alert: ProxmoxHostCpuPackageTemperatureSensorMissing
+        expr: label_replace(absent(node_thermal_zone_temp{job="pve_0mcp_host_via_tailscale",type="x86_pkg_temp"}) and absent(node_hwmon_temp_celsius{job="pve_0mcp_host_via_tailscale",chip="pci0000:00_0000:00:18_3",sensor="temp1"}), "host", "0mcp-proxmox", "job", ".*")
+        for: 5m
+        labels:
+          severity: warning
+          service: host_health
+        annotations:
+          summary: "CPU package temperature is not reported for {{ $labels.host }}"
+          description: "Neither an Intel x86_pkg_temp series nor the AMD k10temp Tctl (hwmon pci0000:00_0000:00:18_3, temp1) is available from this Proxmox host; thermal health cannot be verified until a sensor source is exposed."
+      # AMD hosts (0mcp is a Ryzen 9 3900) expose the package temperature as k10temp Tctl (temp1), not x86_pkg_temp.
+      - alert: ProxmoxHostCpuTctlTemperatureWarning
+        expr: |
+          (node_hwmon_temp_celsius{job="pve_0mcp_host_via_tailscale",chip="pci0000:00_0000:00:18_3",sensor="temp1"} >= 85)
+          and
+          (node_hwmon_temp_celsius{job="pve_0mcp_host_via_tailscale",chip="pci0000:00_0000:00:18_3",sensor="temp1"} < 95)
+        for: 5m
+        labels:
+          severity: warning
+          service: host_health
+        annotations:
+          summary: "CPU temperature high on {{ $labels.instance }}"
+          description: "AMD k10temp Tctl is {{ $value }} C. Investigate cooling and host load."
+      - alert: ProxmoxHostCpuTctlTemperatureCritical
+        expr: node_hwmon_temp_celsius{job="pve_0mcp_host_via_tailscale",chip="pci0000:00_0000:00:18_3",sensor="temp1"} >= 95
+        for: 1m
+        labels:
+          severity: critical
+          service: host_health
+        annotations:
+          summary: "CPU temperature critical on {{ $labels.instance }}"
+          description: "AMD k10temp Tctl is {{ $value }} C. Immediate thermal protection is required."

@@ -25,6 +25,8 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](../../workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](../../workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](../../workstreams/ws-0315-gitea-followups.md) |
+| `0296` | Remove the CI Go build cache grant to the 0own build worker | `live_applied` | [ws-0531-retire-ci-go-build-cache-grant.md](../../workstreams/ws-0531-retire-ci-go-build-cache-grant.md) |
+| `0296` | Let CI agents reach the shared Go build cache on the 0own build worker | `live_applied` | [ws-0530-ci-go-build-cache-grant.md](../../workstreams/ws-0530-ci-go-build-cache-grant.md) |
 | `0296` | Allow Builder metrics scraping over the private tailnet | `live_applied` | [ws-0513-builder-metrics-tailnet-firewall.md](../../workstreams/ws-0513-builder-metrics-tailnet-firewall.md) |
 | `0296` | Deliver the cache-only GHCR proxy configuration through a one-shot reader bridge | `merged` | [ws-0504-cache-ghcr-secret-renderer.md](../../workstreams/ws-0504-cache-ghcr-secret-renderer.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](../../workstreams/ws-0295-live-apply.md) |
@@ -183,6 +185,7 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `0024` | Docker guest security baseline | `live_applied` | [adr-0024-docker-security.md](../../workstreams/adr-0024-docker-security.md) |
 | `0023` | Docker runtime VM baseline | `live_applied` | [adr-0023-docker-runtime.md](../../workstreams/adr-0023-docker-runtime.md) |
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](../../workstreams/adr-0020-backups.md) |
+| `0014` | Onboard the 0infer CI worker and private access | `merged` | [ws-0528-0infer-ci-worker.md](../../workstreams/ws-0528-0infer-ci-worker.md) |
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](../../workstreams/adr-0014-tailscale.md) |
 | `0011` | Add private Prometheus host metrics for 0own | `merged` | [ws-0521-0own-host-monitoring.md](../../workstreams/ws-0521-0own-host-monitoring.md) |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](../../workstreams/adr-0011-monitoring.md) |
@@ -198,6 +201,12 @@ This generated ledger preserves the full merged and live-applied workstream hist
 | `` | Fix example.org guest network addressing — swap internal/staging to match reality | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
 | `` | Audit — example.org fleet-wide guest network identity drift | `merged` | [2026-08-26-0mcp-nginx-edge-network-outage.md](../../postmortems/2026-08-26-0mcp-nginx-edge-network-outage.md) |
 | `` | ADR 0491: replace Keycloak with Authentik (Phase 0 -- decision + client audit) | `merged` | [0491-authentik-for-operator-and-agent-sso.md](../../adr/0491-authentik-for-operator-and-agent-sso.md) |
+| `0407` | Finalize image cleanup observability and sanitized publication | `merged` | [ws-20261106-image-gc-release-integration.md](../../workstreams/ws-20261106-image-gc-release-integration.md) |
+| `0226` | Surface bounded image cleanup failures through existing monitoring | `merged` | [fleet-image-gc-monitoring.md](../../runbooks/fleet-image-gc-monitoring.md) |
+| `0226` | Surface bounded runner artifact retention failures | `merged` | [fleet-image-gc-monitoring.md](../../runbooks/fleet-image-gc-monitoring.md) |
+| `0407` | Keep portable policy-tool tests runnable in the sanitized public snapshot | `merged` | [ws-20261106-public-policy-test-portability.md](../../workstreams/ws-20261106-public-policy-test-portability.md) |
+| `0226` | Read the current data-room aggregate before refreshing Drive figures | `merged` | [ws-20261106-domainscope-live-drive-figures.md](../../workstreams/ws-20261106-domainscope-live-drive-figures.md) |
+| `0226` | Bound system journals and repair fleet-tool log rotation for unattended operation | `merged` | [ws-20261106-proxmox-journal-retention.md](../../workstreams/ws-20261106-proxmox-journal-retention.md) |
 | `0491` | Upgrade the Authentik runtime to 2026.8.3 under a bounded operator-approved exception | `live_applied` | [ws-0517-authentik-runtime-upgrade.md](../../workstreams/ws-0517-authentik-runtime-upgrade.md) |
 | `0287` | Use Woodpecker as the public ServerClaw CI provider | `merged` | [ws-0513-woodpecker-only-public-ci.md](../../workstreams/ws-0513-woodpecker-only-public-ci.md) |
 | `0491` | Authentik Phase 2: reconcile GlitchTip and migrate Outline | `live_applied` | [adr-0491-authentik-phase2.md](../../workstreams/adr-0491-authentik-phase2.md) |

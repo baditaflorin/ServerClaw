@@ -1,0 +1,10 @@
+[Unit]
+Description=Every 2 minutes: replicate vault + keystore to the tier-0 standby
+
+[Timer]
+OnBootSec=120s
+OnUnitActiveSec=120s
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

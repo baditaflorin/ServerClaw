@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""Turn the slice stage of a tier0-failover rehearsal log into node_exporter textfile metrics (called by tier0-rehearsal-daily after the run).
+
+  tier0-rehearsal-metrics /var/log/tier0-runner/<ts>-tier0-failover.log      prints the metrics; exits 3 and prints nothing when the log has no slice summary
+
+The slice stage restores the encrypted bundle on the slice VM at the real paths and validates every directory (`docker compose config`, images local); a directory that cannot start
+at a failover used to be visible only to someone reading the log (2026-10-18: three directories named env files the bundle did not carry; the rehearsal still exited 0).
+Lines read (printed by tier0-slice-promote.sh --rehearse):
+   N directories validated (compose parses, images local, external networks created), B invalid/not restored, M with missing images
+   ports already in use on this VM before the slice starts: none | 18301 18302
+   memory available: X MiB (...)
+The gateway stage's all-names probe line is read too (printed by fleet-state standby-probe.sh through tier0-gateway-promote.sh --rehearse):
+   PROBE_ALL total=T probed=P answering=A reached=R failing=F slice_dependent=S seconds=N
+The keystore/vault verification of the vault and gateway stages (2026-10-18: the chain verifies keys against a LIVE keystore mesh node, fleet-state keystore-mesh-probe.sh):
+   KEYSTORE_MESH|KEYSTORE_VAULT|KEYSTORE_EDGE_VHOST|KEYSTORE_EDGE_GATEWAY|KEYSTORE_PROBE ... ok=0|1     one line per check from each vantage point
+   KEYSTORE_VERIFY mode=mesh [stage=gateway] result=ok|FAILED                                              the stage's verdict (the vault stage prints no stage=)
+Nothing is exported when no line is present (the run died before them): the previous metrics stay, the rehearsal's own staleness alerts speak for that."""
+import re
+import sys
+
+PROBE = re.compile(r"^PROBE_ALL total=(\d+) probed=(\d+) answering=(\d+) reached=(\d+) failing=(\d+) slice_dependent=(\d+) seconds=(\d+)", re.M)
+SUMMARY = re.compile(r"^\s*(\d+) directories validated \(compose parses, images local, external networks created\), (\d+) invalid/not restored, (\d+) with missing images", re.M)
+PORTS = re.compile(r"^\s*ports already in use on this VM before the slice starts: (.*)$", re.M)
+MEMORY = re.compile(r"^\s*memory available: (\d+) MiB", re.M)
+KLINE = re.compile(r"^\s*KEYSTORE_(?:MESH|VAULT|EDGE_VHOST|EDGE_GATEWAY|PROBE) .* ok=([01])\s*$", re.M)
+KVERIFY = re.compile(r"^\s*KEYSTORE_VERIFY mode=(\w+)(?: stage=(\w+))? result=(\w+)", re.M)
+
+
+def metrics(text):
+    out = []
+    m = SUMMARY.search(text)
+    if m:
+        valid, invalid, missing = (int(x) for x in m.groups())
+        out += ["# TYPE tier0_runner_slice_directories_validated gauge",
+                "tier0_runner_slice_directories_validated %d" % valid,
+                "tier0_runner_slice_directories_invalid %d" % invalid,
+                "tier0_runner_slice_images_missing_directories %d" % missing]
+        p = PORTS.search(text)
+        if p:
+            busy = [x for x in p.group(1).split() if x.isdigit()]
+            out.append("tier0_runner_slice_ports_busy %d" % len(busy))
+        mem = MEMORY.search(text)
+        if mem:
+            out.append("tier0_runner_slice_memory_available_mib %s" % mem.group(1))
+    pr = PROBE.search(text)
+    if pr:                                   # the gateway stage's all-names probe (fleet-state standby-probe.sh): how many names would really answer through the standby
+        total, probed, answering, reached, failing, slice_dep, secs = (int(x) for x in pr.groups())
+        out += ["# TYPE tier0_runner_standby_names_total gauge",
+                "tier0_runner_standby_names_total %d" % total, "tier0_runner_standby_names_probed %d" % probed,
+                "tier0_runner_standby_names_answering %d" % answering, "tier0_runner_standby_names_reached %d" % reached,
+                "tier0_runner_standby_names_failing %d" % failing, "tier0_runner_standby_names_slice_dependent %d" % slice_dep,
+                "tier0_runner_standby_probe_seconds %d" % secs]
+    lines = KLINE.findall(text)
+    if lines:                                # the chain's keystore checks: how many ran and how many failed (a rehearsal that fails them exits non-zero, this says WHICH kind of failure it was)
+        out += ["# TYPE tier0_runner_keystore_probe_lines gauge", "tier0_runner_keystore_probe_lines %d" % len(lines),
+                "tier0_runner_keystore_probe_failed_lines %d" % sum(1 for x in lines if x == "0")]
+    seen = {}
+    for mode, stage, result in KVERIFY.findall(text):
+        seen[stage or "vault"] = 1 if result == "ok" else 0
+    for stage in sorted(seen):
+        out.append('tier0_runner_keystore_verify_ok{stage="%s"} %d' % (stage, seen[stage]))
+    return "\n".join(out) + "\n" if out else None
+
+
+def main(argv):
+    if len(argv) != 1:
+        print(__doc__.split("\n\n")[0], file=sys.stderr)
+        return 2
+    try:
+        text = open(argv[0], errors="replace").read()
+    except OSError as e:
+        print("cannot read %s: %s" % (argv[0], e), file=sys.stderr)
+        return 3
+    out = metrics(text)
+    if out is None:
+        return 3
+    sys.stdout.write(out)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

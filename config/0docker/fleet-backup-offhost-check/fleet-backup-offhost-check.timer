@@ -1,0 +1,11 @@
+[Unit]
+Description=Check the off-host backup copy every 30 minutes (the sidecar publishes at most that often; :12 and :42 stay clear of its :00/:30 cycles)
+
+[Timer]
+OnCalendar=*:12,42
+RandomizedDelaySec=60
+AccuracySec=30s
+Persistent=false
+
+[Install]
+WantedBy=timers.target

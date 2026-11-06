@@ -87,3 +87,14 @@ make converge-ops-portal
 Record the cleanup and the successful replay in the live-apply receipt or the
 owning workstream document so later integrations know why the replay was
 initially blocked.
+
+## The front-end run directories (`/home/ops/fe_runs`) and the janitor
+On 2026-10-18 06:46Z the root disk of `docker-runtime` (VM 120, the host of the CI server, authelia and elasticsearch) reached 0% free: another agent session's front-end batteries start a new run dir
+(a copy of a frontend plus `npm ci`, ~600 MB, `/home/ops/fe_runs/<name>/`) every couple of minutes and never clean up (84 GB in 141 dirs, +15 GB an hour).
+- **What stops it now:** `fe-runs-janitor.timer` (every 30 minutes, `config/0mcp/docker-runtime/fe-runs-janitor/`, install with `install.sh` as root) removes ONLY the `node_modules` directories of idle run dirs
+  (no file outside node_modules modified for 120 minutes, 30 with under 25% free, 10 with under 12% free; never a run dir mounted by a running container; symlinks are never followed). Run dirs, outputs
+  and `/home/ops/fe-bp` are never touched. Metrics `fe_runs_janitor_*` (textfile), alerts `FeRunsJanitorStale` / `FeRunsJanitorMissing` in `fleet-disk.yml`. Dry run: `sudo FE_RUNS_DRY=1 /usr/local/sbin/fe-runs-janitor`, log `/var/log/fe-runs-janitor.log`.
+- **Emergency by hand** (what was done on 2026-10-18): `docker pause` the containers mounting `/home/ops/fe_runs` (reversible), then run the janitor with `FE_RUNS_IDLE_MIN=10` (parallel `rm`, default I/O class: the idle class never finishes
+  on that host), then `docker unpause`. A `du` of `/` takes minutes there: use targeted paths. The VM disk was also grown 256 -> 512 GB (`qm resize 120 scsi0 +256G` on the 0mcp host, then `growpart /dev/sda 1` and `resize2fs /dev/sda1` in the
+  guest; the root partition is the last one of the cloud image). Note `discard=on` is only a PENDING setting of that VM until its next restart.
+

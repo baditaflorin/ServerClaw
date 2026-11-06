@@ -1,0 +1,9 @@
+[Unit]
+Description=Tier-0 daily rehearsal of the vault handback data path (scripted outage from real rows, merged, then the real vault image must verify every row; throwaway names only)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/tier0-vault-handback-rehearsal
+TimeoutStartSec=1800
+Nice=10

@@ -1,0 +1,11 @@
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+[Unit]
+Description=agent-history redaction canary database scan
+Requires=docker.service
+After=docker.service agent-history.service
+
+[Service]
+Type=oneshot
+ExecStart={{ agent_history_helper_dir }}/agent-history-canary-scan
+# Exit 1 (a leak), 3 (canary absent) and 4 (scan failed) are findings the textfile reports; they are not unit failures.
+SuccessExitStatus=1 3 4

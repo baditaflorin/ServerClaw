@@ -1,81 +1,30 @@
 # Added 2026-10-13 after the 0database/0own re-audit: no rule referenced pg_backup_* and PveBackupFreshnessLow only
-# covers the 0docker host-side exporter. Two sources:
-#   1. pg_backup_* from the vzdump hook on the 0database hypervisor (roles fleet_pg_backup, prom file pg_backup_vzdump.prom).
-#   2. pbs_backup_group_* from scripts/pbs_backup_metrics.py on own-pbs (timer pbs-backup-metrics, every 5 minutes): newest
-#      snapshot per PBS backup group, i.e. one freshness series for every guest of every fleet that backs up to own-pbs
-#      (including the 0own guests once the 0own namespace jobs exist).
+# covers the 0docker host-side exporter. One source remains:
+#   pbs_backup_group_* from scripts/pbs_backup_metrics.py on own-pbs (timer pbs-backup-metrics, every 5 minutes): newest
+#   snapshot per PBS backup group, i.e. one freshness series for every guest of every fleet that backs up to own-pbs
+#   (including the 0own guests once the 0own namespace jobs exist).
+# 2026-10-21: the pg_backup_* group (PgBackupStale, PgBackupStaleCritical, PgBackupLastRunFailed, PgBackupSizeShrank,
+# PgBackupDurationHigh) is gone. Its only source was the vzdump hook of job pg-primary-daily-pbs (VM 100 on the 0database
+# hypervisor, the DomainScope hot standby). That VM was shut down on 2026-10-21 12:07Z for the pve01 retirement, the job is
+# disabled, and its last backup (00:30Z) would have raised PgBackupStale on 2026-10-22 at about 02:45Z. The rules are in git history
+# (commit before this change) if a Postgres VM gets a vzdump job with that hook again.
 # Existing alerts left alone: PveBackupFreshnessLow / PveBackupFailureRecent (0docker), PBSDatastore* (capacity).
 groups:
-  - name: fleet_pg_backup
-    rules:
-      - alert: PgBackupStale
-        expr: time() - pg_backup_last_success_timestamp_seconds{method="vzdump"} > 93600
-        for: 15m
-        labels:
-          severity: warning
-          service: pg_backup
-        annotations:
-          summary: "No successful vzdump of VM {{ $labels.vmid }} ({{ $labels.host }}) for over 26 hours"
-          description: "The daily pg-primary vzdump to PBS (job pg-primary-daily-pbs, 02:30 CEST) last succeeded {{ $value | humanizeDuration }} ago. Check the PVE task log on the hypervisor and PBS capacity/permissions."
-          runbook_url: docs/runbooks/pbs-0own-backups.md
-
-      - alert: PgBackupStaleCritical
-        expr: time() - pg_backup_last_success_timestamp_seconds{method="vzdump"} > 180000
-        for: 15m
-        labels:
-          severity: critical
-          service: pg_backup
-        annotations:
-          summary: "No successful vzdump of VM {{ $labels.vmid }} ({{ $labels.host }}) for over 50 hours"
-          description: "Two daily runs of the pg-primary backup have been missed ({{ $value | humanizeDuration }} since the last success). The production Postgres has no point-in-time recovery, so this backup is the only recovery path."
-          runbook_url: docs/runbooks/pbs-0own-backups.md
-
-      - alert: PgBackupLastRunFailed
-        expr: pg_backup_last_status{method="vzdump"} != 1
-        for: 10m
-        labels:
-          severity: critical
-          service: pg_backup
-        annotations:
-          summary: "The last vzdump of VM {{ $labels.vmid }} ({{ $labels.host }}) failed"
-          description: "The vzdump hook reported backup-abort. Read /var/log/vzdump/qemu-{{ $labels.vmid }}.log and the PVE task log on the hypervisor."
-          runbook_url: docs/runbooks/pbs-0own-backups.md
-
-      # Both ratio alerts compare the last run with the 7-day history. size_bytes is what vzdump logged as "transferred"
-      # (dirty-bitmap runs transfer only changed blocks), so it moves with write volume: severity is info. They are
-      # gated on 2026-10-21 because the series still holds a hand-set sample (644245094400 bytes, 6345 s) until the fixed
-      # hook has run on 2026-10-14 02:30 CEST and that sample has left the 7-day window.
-      - alert: PgBackupSizeShrank
-        expr: |
-          (pg_backup_size_bytes{method="vzdump"} < 0.7 * avg_over_time(pg_backup_size_bytes{method="vzdump"}[7d]))
-          and on () (vector(time()) > 1792540800)
-        for: 5m
-        labels:
-          severity: info
-          service: pg_backup
-        annotations:
-          summary: "Last backup of VM {{ $labels.vmid }} transferred over 30% less than the 7-day average"
-          description: "Transferred {{ $value | humanize1024 }}B against a 7-day average well above that. A shrinking backup can mean a truncated source (wrong disk, empty volume) rather than less churn; compare with the PBS snapshot sizes."
-          runbook_url: docs/runbooks/pbs-0own-backups.md
-
-      - alert: PgBackupDurationHigh
-        expr: |
-          (pg_backup_duration_seconds{method="vzdump"} > 3 * quantile_over_time(0.5, pg_backup_duration_seconds{method="vzdump"}[7d]))
-          and on () (vector(time()) > 1792540800)
-        for: 5m
-        labels:
-          severity: info
-          service: pg_backup
-        annotations:
-          summary: "Last backup of VM {{ $labels.vmid }} took over 3x the 7-day median duration"
-          description: "The run took {{ $value | humanizeDuration }}. Check PBS datastore I/O (verify/GC running?), network to own-pbs and the size of the transfer."
-          runbook_url: docs/runbooks/pbs-0own-backups.md
-
   - name: fleet_pbs_backup_freshness
     rules:
       # Retired groups that stay in the root namespace until retention removes them: the 0docker guests were backed up
       # there before they moved to the 0docker namespace on 2026-10-10 (ids 101/104/107/108/109 do not exist on 0mcp).
       # 0mcp-legacy is a read-only archive.
+      # 0own/vm/610 (the build worker) is backed up WEEKLY since 2026-10-19, so the daily pair skips it and the weekly pair below judges it.
+      # 0docker/vm/100 (the Docker host, VM level) is skipped: its job fleet-vm100-nightly has been paused on purpose since 2026-10-19 (three load spirals) and the group
+      # is frozen at 2026-10-18. The host is backed up file by file instead as 0docker/host/dockerhost-state (docs/runbooks/pbs-0own-backups.md), which these two alerts watch
+      # like every other group. When the VM-level job is enabled again, delete the vm/100 exclusion from both alerts.
+      # Root vm/130 (docker-build-lv3, the CI build VM on 0mcp) is skipped: it is excluded from the 0mcp nightly job since 2026-10-22 (it rewrote about 326 GiB of its 420 GiB disk every night, a rebuildable
+      # cache, and was the biggest steady load on own-pbs); its newest 2 snapshots stay. If its backup comes back, delete the vm/130 exclusion from both alerts.
+      # The namespace 0mcp-legacy (25 old groups from 2026-09-28..10-05) was deleted from own-pbs on 2026-10-22; the namespace!= matcher below is harmless leftover.
+      # The whole 0database namespace (host/pve01 and vm/100..103) is skipped: the 0database fleet (pve01) is being sunset, VM 100 (pg-primary) was
+      # shut down 2026-10-21 12:07Z and VMs 101/103 at 17:35Z. Its snapshots stay in PBS until someone prunes them; once they are pruned the exclusion
+      # can go with them. Nothing else in the repo watches the namespace, so a failing pve01 backup before the end of the sunset is not reported.
       - alert: PbsBackupGroupStale
         expr: |
           (
@@ -84,7 +33,15 @@ groups:
           unless on (namespace, backup_type, backup_id)
           pbs_backup_group_snapshot_count{namespace="", backup_id=~"101|104|107|108|109"}
           unless on (namespace, backup_type, backup_id)
-          pbs_backup_group_last_snapshot_timestamp_seconds{namespace="0docker", backup_type="ct", backup_id="108"}
+          pbs_backup_group_snapshot_count{namespace="0own", backup_type="vm", backup_id="610"}
+          unless on (namespace)
+          pbs_backup_group_snapshot_count{namespace="0database"}
+          unless on (namespace, backup_type, backup_id)
+          pbs_backup_group_snapshot_count{namespace="0docker", backup_type="vm", backup_id="100"}
+          unless on (namespace, backup_type, backup_id)
+          pbs_backup_group_snapshot_count{namespace="", backup_type="vm", backup_id="130"}
+          unless on (namespace, backup_type, backup_id)
+          pbs_backup_group_snapshot_count{namespace="0docker", backup_type="ct", backup_id="108"}
         for: 30m
         labels:
           severity: warning
@@ -102,7 +59,15 @@ groups:
           unless on (namespace, backup_type, backup_id)
           pbs_backup_group_snapshot_count{namespace="", backup_id=~"101|104|107|108|109"}
           unless on (namespace, backup_type, backup_id)
-          pbs_backup_group_last_snapshot_timestamp_seconds{namespace="0docker", backup_type="ct", backup_id="108"}
+          pbs_backup_group_snapshot_count{namespace="0own", backup_type="vm", backup_id="610"}
+          unless on (namespace)
+          pbs_backup_group_snapshot_count{namespace="0database"}
+          unless on (namespace, backup_type, backup_id)
+          pbs_backup_group_snapshot_count{namespace="0docker", backup_type="vm", backup_id="100"}
+          unless on (namespace, backup_type, backup_id)
+          pbs_backup_group_snapshot_count{namespace="", backup_type="vm", backup_id="130"}
+          unless on (namespace, backup_type, backup_id)
+          pbs_backup_group_snapshot_count{namespace="0docker", backup_type="ct", backup_id="108"}
         for: 30m
         labels:
           severity: critical
@@ -112,9 +77,50 @@ groups:
           description: "Two daily runs were missed ({{ $value | humanizeDuration }}). If the guest was retired on purpose, prune the group in PBS and add it to the exclusion in this rule."
           runbook_url: docs/runbooks/pbs-0own-backups.md
 
+      # The groups whose job runs weekly instead of nightly: 0own/vm/610, job own-build-worker-nightly-pbs (`sun 11:00` local = 08:00Z), weekly
+      # since 2026-10-19 because its nightly run wrote 0.4-1.2 TiB a day to the shared HDD mirror. The daily pair above skips the group (same
+      # selector), this pair judges it: one missed Sunday plus a day of slack = 8 days, two missed Sundays plus a day = 15 days. Back to a nightly
+      # job = delete the two `unless` lines above and this pair. Another weekly group = add its selector to all four.
+      - alert: PbsBackupGroupWeeklyStale
+        expr: |
+          time() - pbs_backup_group_last_snapshot_timestamp_seconds{namespace="0own", backup_type="vm", backup_id="610"} > 691200
+        for: 30m
+        labels:
+          severity: warning
+          service: pbs_backup
+        annotations:
+          summary: "PBS group {{ $labels.backup_type }}/{{ $labels.backup_id }} (namespace '{{ $labels.namespace }}') has no snapshot for over 8 days"
+          description: "Newest snapshot is {{ $value | humanizeDuration }} old. This group is backed up weekly (own-build-worker-nightly-pbs, Sunday 11:00 on the 0own hypervisor), so the last Sunday run did not land. Check the vzdump task on the owning hypervisor and the PBS task list."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      - alert: PbsBackupGroupWeeklyStaleCritical
+        expr: |
+          time() - pbs_backup_group_last_snapshot_timestamp_seconds{namespace="0own", backup_type="vm", backup_id="610"} > 1296000
+        for: 30m
+        labels:
+          severity: critical
+          service: pbs_backup
+        annotations:
+          summary: "PBS group {{ $labels.backup_type }}/{{ $labels.backup_id }} (namespace '{{ $labels.namespace }}') has no snapshot for over 15 days"
+          description: "Two weekly runs were missed ({{ $value | humanizeDuration }}). If the job was changed on purpose, change this pair and the exclusion in PbsBackupGroupStale to match."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      # dockerhost-state-backup (config/0docker/dockerhost-state-backup) writes dockerhost_state_backup.prom on VM 100 when a run ends: status 0 = it failed, was skipped because the host
+      # was busy, or finished with warnings (a database that could not be dumped or copied online). The group 0docker/host/dockerhost-state is also watched by the stale alerts above.
+      - alert: DockerhostStateBackupFailed
+        expr: dockerhost_state_backup_last_status == 0
+        for: 30m
+        labels:
+          severity: warning
+          service: pbs_backup
+        annotations:
+          summary: "The nightly state backup of the Docker host (VM 100) failed, was skipped or finished with warnings"
+          description: "dockerhost-state-backup on {{ $labels.instance }} ended with status 0 (failed, skipped as busy, or warnings such as a database that could not be dumped). Read `journalctl -u dockerhost-state-backup -n 80` on VM 100; the previous snapshot of host/dockerhost-state is still in PBS, and PbsBackupGroupStale follows after 26 h without a good one."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+
       # CT 108 (the builder) has a WEEKLY full-image vzdump (Sunday 03:30 CEST) since 2026-10-28; its daily restore point is the group
-      # host/ct108-live (a normal daily group, covered by the two rules above). ct/108 is therefore exempt from the 26/50 h rules and
-      # judged here: 8.5 days (a missed Sunday is noticed on Monday of the week after) and 16 days (two missed runs).
+      # host/ct108-live (file level, 05:30 CEST, a normal daily group covered by the two rules above). ct/108 is therefore exempt from
+      # the 26/50 h rules and judged here: 8.5 days (a missed Sunday is noticed on Monday of the week after) and 16 days (two missed runs).
       - alert: PbsBackupGroupStaleWeekly
         expr: time() - pbs_backup_group_last_snapshot_timestamp_seconds{namespace="0docker", backup_type="ct", backup_id="108"} > 734400
         for: 30m
@@ -158,3 +164,20 @@ groups:
           summary: "No PBS backup freshness series from own-pbs"
           description: "Prometheus has no pbs_backup_collect_timestamp_seconds: the own-pbs node exporter is down or the textfile collector is not enabled there."
           runbook_url: docs/runbooks/pbs-0own-backups.md
+
+      # 2026-10-19: own-pbs keeps its datastore on one spinning disk that every fleet's nightly backup writes to. A weekly verify job kept it 92-98 % busy for 22 hours, every backup took 4-6 times longer,
+      # VM snapshot backups throttled their guests (two spirals of the Docker host) and the first alert was PbsBackupGroupStale a day later. Normal nights peak at 45-80 % (2 h average, measured 10-11 to 10-18); a GC alone is 99 % for about 1.85 h, so the window is 4 h.
+      - alert: PbsDatastoreDiskSaturated
+        expr: |
+          avg_over_time(
+            rate(node_disk_io_time_seconds_total{host="own-pbs", device!~"sda|sr0|loop.*|dm-.*"}[10m])[4h:10m]
+          ) > 0.9
+        for: 30m
+        labels:
+          severity: warning
+          service: pbs_backup
+        annotations:
+          summary: "own-pbs datastore disk {{ $labels.device }} is {{ $value | humanizePercentage }} busy (4 h average)"
+          description: "Every nightly backup of every fleet writes to this one spinning disk and slows down behind whatever keeps it busy; VM snapshot backups throttle their guests to its speed. Look for a running verify, GC or sync (proxmox-backup-manager task list; read the task log file with tail, the command is slow on a saturated host) and stop the maintenance task, not the backups. Normal nights peak at 45-80 % and the daily GC (about 1.85 h at 99 %) stays under the 4 h average."
+          runbook_url: docs/runbooks/pbs-0own-backups.md
+

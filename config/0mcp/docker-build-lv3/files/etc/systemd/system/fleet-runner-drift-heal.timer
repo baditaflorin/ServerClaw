@@ -1,0 +1,12 @@
+[Unit]
+Description=Auto-heal small serial batches of stale services, continuously, behind a load gate
+
+[Timer]
+OnBootSec=10min
+# Measured from when the previous run FINISHES, so batches never stack.
+OnUnitInactiveSec=5min
+AccuracySec=30s
+Unit=fleet-runner-drift-heal.service
+
+[Install]
+WantedBy=timers.target

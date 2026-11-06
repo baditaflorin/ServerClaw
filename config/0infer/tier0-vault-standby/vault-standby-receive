@@ -1,0 +1,39 @@
+#!/bin/bash
+# Forced command for the courier key (authorized_keys: command="/usr/local/bin/vault-standby-receive",restrict ...).
+# Protocol: SSH_ORIGINAL_COMMAND must be exactly "put secrets" or "put keystore"; the SQLite snapshot (gzip) arrives on stdin.
+# It is verified (integrity_check) and swapped in atomically; the previous 6 copies are kept. It never starts or stops anything.
+# It REFUSES (exit 5, nothing written, upload drained) while the standby runs: then its databases are in use and may be the newest copy.
+set -euo pipefail
+LOG=/home/vsync/receive.log
+exec 2> >(tee -a "$LOG" >&2)
+echo "$(date -u +%FT%TZ) start cmd=[${SSH_ORIGINAL_COMMAND:-}]" >> "$LOG"
+case "${SSH_ORIGINAL_COMMAND:-}" in
+  "put secrets")  name=secrets.db; dir=/opt/tier0/vault-standby/data/vault ;;
+  "put keystore") name=keys.db;    dir=/opt/tier0/vault-standby/data/keystore ;;
+  *) echo "denied" >&2; exit 2 ;;
+esac
+# "Running" = something listens on the standby's published ports (docker-proxy binds them as soon as a container starts). vsync has no docker
+# access, so this is a connect probe. The upload is drained before refusing: exiting with it unread would SIGPIPE the courier's snapshot
+# step on the dockerhost, which then skips its cleanup and leaves the temp snapshot in /tmp.
+STANDBY_PORTS="18021 18140"
+standby_running() { local p; for p in $STANDBY_PORTS; do (exec 3<>"/dev/tcp/127.0.0.1/$p") 2>/dev/null && return 0; done; return 1; }
+refuse_if_standby_running() {
+  standby_running || return 0
+  cat > /dev/null
+  echo "refused: the standby is running (promoted?), not replacing its data" >&2
+  exit 5
+}
+refuse_if_standby_running
+umask 077; mkdir -p "$dir" "$dir/history"
+tmp=$(mktemp "$dir/.incoming.XXXXXX"); trap 'rm -f "$tmp"' EXIT
+gunzip > "$tmp"
+[ "$(sqlite3 "$tmp" 'pragma integrity_check' 2>&1)" = "ok" ] || { echo "integrity_check failed" >&2; exit 3; }
+rows=$(sqlite3 "$tmp" "select count(*) from sqlite_master where type='table'")
+[ "$rows" -gt 0 ] || { echo "empty database refused" >&2; exit 4; }
+refuse_if_standby_running   # it may have been started while the upload was running
+[ -f "$dir/$name" ] && cp -p "$dir/$name" "$dir/history/$name.$(date -u +%Y%m%dT%H%M%SZ)"
+{ ls -1t "$dir/history/$name".* 2>/dev/null || true; } | tail -n +7 | xargs -r rm -f
+rm -f "$dir/$name-wal" "$dir/$name-shm"        # a stale WAL next to a new main file would corrupt it
+mv "$tmp" "$dir/$name"; trap - EXIT
+date -u +%s > "$dir/.last_sync"
+echo "ok $name $(stat -c %s "$dir/$name") bytes, $rows tables"

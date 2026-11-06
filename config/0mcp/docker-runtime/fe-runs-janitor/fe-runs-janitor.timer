@@ -1,0 +1,10 @@
+[Unit]
+Description=Twice an hour: remove node_modules of idle front-end run dirs
+
+[Timer]
+OnCalendar=*:07,37:00
+RandomizedDelaySec=60
+Persistent=true
+
+[Install]
+WantedBy=timers.target

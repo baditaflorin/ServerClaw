@@ -1,0 +1,26 @@
+[Unit]
+Description=Restricted registrant-backfill (CT108) PostgreSQL relay to infer-pg-primary (VM701) over Tailscale
+# Prepared 2026-10-17 for the pg-primary -> infer-pg-primary cutover. INSTALLED DISABLED AND NOT STARTED.
+# Same shape as 0memory-postgres-relay.service (Outline), own port. Listens on the vmbr1 bridge address only, accepts only CT108 (10.10.10.108).
+# Enable: see pg-backup-mode-2026-10-17/ct108-relay/README.txt (needs the VM701 hba line for 100.64.0.5 / domainscope_app first).
+After=network-online.target tailscaled.service
+Wants=network-online.target
+Requires=tailscaled.service
+
+[Service]
+Type=simple
+User=nobody
+Group=nogroup
+ExecStart=/usr/bin/socat TCP4-LISTEN:15432,bind=10.10.10.1,reuseaddr,fork,range=10.10.10.108/32 TCP4:100.64.0.22:5432
+Restart=always
+RestartSec=3
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+RestrictAddressFamilies=AF_INET AF_UNIX
+MemoryMax=32M
+TasksMax=16
+
+[Install]
+WantedBy=multi-user.target

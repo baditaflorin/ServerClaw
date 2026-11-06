@@ -1,0 +1,7 @@
+/var/log/fe-runs-janitor.log {
+    weekly
+    rotate 8
+    compress
+    missingok
+    notifempty
+}

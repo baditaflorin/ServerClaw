@@ -4,7 +4,38 @@
 
 This runbook defines the repo-managed Woodpecker CI runtime for event-driven validation and governed pipeline execution on `docker-runtime`.
 
-Woodpecker is public on this platform at `ci.example.com`, but repository activation, secret management, and manual pipeline control remain repo-managed through the Gitea and Woodpecker APIs.
+Woodpecker is public on this platform at `ci.example.com`, but repository activation, secret management, and manual pipeline control remain repo-managed through the Woodpecker API. The forge is GitHub, not Gitea (see "Which forge" below).
+
+## Which forge
+
+Verified on 2026-10-30: both CI planes use a **GitHub** forge.
+
+- `ci.0mcp` (`https://ci.example.org`) and `ci.0exec` (`https://ci.0exec.com`): `GET /api/user` with the admin token returns an `avatar_url` on `avatars.githubusercontent.com` and `admin: true`; repositories carry a `forge_url` of the form `https://github.com/OWNER/REPO`.
+- The agent address `10.10.10.20:9000` is the gRPC port, not the HTTP API; use the `https://` URLs above.
+
+Not verified: that anything in this repo's `woodpecker_runtime` role, `scripts/woodpecker_bootstrap.py` or the Gitea-era sections of ADR 0287 still describes a running plane. They configure a Gitea OAuth application and were not changed. `scripts/woodpecker_tool.py activate-repo` is the same Gitea-era path (it reads a Gitea API URL and token from `.local/woodpecker/admin-auth.json` and looks the repository up in Gitea); it does not work against the GitHub planes. Use "Activate a repository" below.
+
+## Activate a repository
+
+From the operator's Mac (needs `ssh` to the bastion and an authenticated `gh`):
+
+```bash
+scripts/woodpecker_activate_repo.sh ci.0mcp baditaflorin/0pipe            # activate if missing; already activated is a no-op
+scripts/woodpecker_activate_repo.sh ci.0exec OWNER/REPO --run main         # also trigger a pipeline on main, wait, print each step
+```
+
+What it does: it asks the server first (`GET /api/user`; prints the forge and whether the token is admin, and refuses unless the forge is GitHub), looks the repository up (`GET /api/repos/lookup/OWNER/REPO`, 404 means not activated), activates a missing one with `POST /api/repos?forge_remote_id=<GitHub numeric id from gh api repos/OWNER/REPO --jq .id>`, and with `--run` triggers `POST /api/repos/<id>/pipelines` with `{"branch": ...}` and polls the pipeline. Exit 0 means activated (and, with `--run`, the pipeline succeeded).
+
+| Plane | URL | Fleet-vault entry (read on CT108) | Notes |
+|---|---|---|---|
+| `ci.0mcp` | `https://ci.example.org` | `woodpecker-ci-0mcp-api-token` | reachable from CT108 directly |
+| `ci.0exec` | `https://ci.0exec.com` | `woodpecker_ci_admin_pat_for_ci_0exec_com` | from CT108 only through the tailnet proxy `http://127.0.0.1:1056` |
+
+How the token is handled: every API call is made by `curl` inside CT108 (`ssh 0docker_bastion "pct exec 108 -- bash -s"`). The remote shell reads the entry with `bash /root/bin/fv.sh raw <entry>` into a variable and gives it to curl on stdin (`curl -K -`). It never reaches the Mac, a command line, a file or the output. Do not add `set -x`, do not put the token in a `-H` argument, and do not read the entry by hand to "just check".
+
+Webhook-token caution: activation makes Woodpecker create a GitHub webhook whose URL contains a hook token, and the activation response carries hook fields. The script prints neither. If you activate by hand, do not print the response or the webhook URL, and do not paste them into a ticket or a chat.
+
+Reference: `baditaflorin/0pipe` was activated on `ci.0mcp` this way on 2026-10-30 (Woodpecker repo id 6). Not verified: the `--run` polling uses `GET /api/repos/<id>/pipelines/<number>`; the scripted run of the whole flow is tested offline only (`tests/test_woodpecker_activate_repo.py`, shims for `ssh`, `gh` and `curl`).
 
 ## Trigger Filters
 
@@ -28,14 +59,14 @@ the GitHub checks pending even though an eligible validation step was defined.
 
 - public browser and API surface: `https://ci.example.com`
 - private controller path: `http://100.64.0.1:8017`
-- the Woodpecker login flow delegates to the repo-managed Gitea OAuth application
+- the Woodpecker login flow delegates to the forge, which is GitHub on both production planes (see "Which forge"); the Gitea OAuth application described in older versions of this runbook and in ADR 0287 is the original design, not the verified state
 - controller-local auth artifacts are mirrored under `.local/woodpecker/`
 - the seeded repository is `ops/proxmox-host_server`
 - the seeded repository secret `LV3_WOODPECKER_SECRET_SMOKE` is used only for governed CI smoke verification
 
 ## Generated Local Artifacts
 
-The workflow maintains controller-local artifacts under `.local/woodpecker/`:
+The `woodpecker_runtime` role and `scripts/woodpecker_bootstrap.py` (Gitea-era code, kept as it is) maintain controller-local artifacts under `.local/woodpecker/`; the two `gitea-client-*` files belong to that Gitea path and are not used by the GitHub-forge planes:
 
 - `database-password.txt`
 - `gitea-client-id.txt`
@@ -128,5 +159,5 @@ After a converge:
 
 - keep repository activation, secret management, and manual pipeline runs on the repo-managed API path
 - treat `.woodpecker.yml` as the source of truth for repository validation behavior
-- keep the Gitea OAuth client and Woodpecker API token in controller-local managed artifacts instead of ad hoc browser state
+- keep the Woodpecker API token in fleet-vault (production planes) or controller-local managed artifacts instead of ad hoc browser state
 - document any emergency UI-authored mutation immediately and bring it back to repo truth in the same turn

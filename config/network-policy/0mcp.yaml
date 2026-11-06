@@ -1,0 +1,1036 @@
+# Canonical network policy for one hypervisor: the ONE place the allowed flows of its VMs are decided.
+# Layers: pve = Proxmox VM firewall, input / forward = guest nftables, docker_user = guest iptables DOCKER-USER.
+# Edit this file in a PR; scripts/netpolicy.py drift tells how the live hosts differ. Every group needs a purpose.
+# `from` is one IPv4 address or CIDR per entry (no wildcard unless `public: true`), `wide_ok: <reason>` allows a CIDR wider than /24.
+version: 1
+host: 0mcp
+collect: {ssh: hv-0mcp}
+ipsets:
+  management: [100.64.0.0/10, 10.10.10.0/24]
+inner_sources: [172.16.0.0/12, 192.168.0.0/16, 10.200.0.0/16, 100.64.0.0/10]
+lan_networks: [10.10.10.0/24]
+guard:
+- src: 10.10.10.1
+  proto: tcp
+  port: '22'
+  layers: [pve, input]
+vms:
+  '100':
+    name: hermes-agent
+    ip: 10.10.10.100
+    pve: {}
+    guest: {nft: absent}
+    groups:
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [pve]
+      purpose: Prometheus node exporter scrape
+  '110':
+    name: nginx-lv3
+    ip: 10.10.10.10
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [any]
+      proto: tcp
+      ports: ['80', '443']
+      layers: [pve, input, forward]
+      purpose: public HTTP and HTTPS of the standby edge (nginx-lv3)
+      owner: tier0-edge
+      public: true
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+  '120':
+    name: docker-runtime-lv3
+    ip: 10.10.10.20
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [any, 10.10.10.1, 10.10.10.10, 10.10.10.21, 10.10.10.22, 10.10.10.30, 10.10.10.40, 10.10.10.50, 10.10.10.51, 10.10.10.52, 10.10.10.54,
+        10.10.10.60, 10.10.10.70, 10.10.10.71, 10.10.10.80, 10.10.10.90, 10.10.10.91, 10.10.10.92, 10.200.0.0/16, 100.64.0.0/10, 172.16.0.0/12,
+        192.168.0.0/16]
+      ports: '*'
+      layers: [forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [172.16.0.0/12, 192.168.0.0/16]
+      proto: tcp
+      ports: ['1025', '5000', '5678', '8017', '8018', '8025', '8055', '8084', '8096', '8100', '8103', '8104', '8108', '8881', '9092', '11235',
+        '11434']
+      layers: [input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['1025', '2586', '3001', '3005', '3006', '3090', '3095', '3096', '5678', '7070', '7880', '8008', '8016', '8017', '8018', '8025',
+        '8055', '8084', '8089', '8092', '8096', '8100', '8101', '8102', '8103', '8104', '8105', '8108', '8110', '8881', '9092', '11235', '11434']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['1025', '2586', '3005', '3095', '3096', '4222', '4647', '5000', '5678', '7007', '7070', '8017', '8018', '8025', '8055', '8084',
+        '8089', '8096', '8100', '8103', '8104', '8105', '8108', '8110', '8881', '9092', '9100', '11235', '11434', '18084']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.30]
+      proto: tcp
+      ports: ['1025', '3003', '5678', '7007', '8017', '8018', '8025', '8055', '8084', '8096', '8098', '8100', '8103', '8104', '8108', '8201',
+        '8881', '9000', '9092', '11235', '11434', '18084']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.21, 10.10.10.22, 10.10.10.51, 10.10.10.52, 10.10.10.54, 10.10.10.60, 10.10.10.70, 10.10.10.71, 10.10.10.80, 10.10.10.90,
+        10.10.10.91]
+      proto: tcp
+      ports: ['1025', '5678', '8017', '8018', '8025', '8055', '8084', '8096', '8100', '8103', '8104', '8108', '8881', '9092', '11235', '11434']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.50]
+      proto: tcp
+      ports: ['1025', '5678', '8017', '8018', '8025', '8055', '8084', '8096', '8100', '8103', '8104', '8108', '8881', '9092', '11235', '11434',
+        '18084']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '1025', '3005', '5000', '7070', '8008', '8010', '8017', '8018', '8025', '8082', '8088', '8096', '8100', '8102', '8103', '8104',
+        '8105', '8108', '8110', '8881', '9092', '9443', '9644']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.92]
+      proto: tcp
+      ports: ['22', '1025', '5678', '8017', '8018', '8025', '8055', '8084', '8096', '8100', '8103', '8104', '8108', '8881', '9010', '9092', '11235',
+        '11434']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22', '1025', '8025', '8096', '8100', '8103', '8104', '9092', '9644']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [any]
+      proto: tcp
+      ports: ['7881']
+      layers: [pve, input]
+      purpose: 'public realtime media ports (tcp 7881, udp 7882, udp 50000-58999: LiveKit by port numbers; owner to confirm)'
+      owner: unconfirmed
+      public: true
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [any]
+      proto: udp
+      ports: ['7882']
+      layers: [pve, input]
+      purpose: 'public realtime media ports (tcp 7881, udp 7882, udp 50000-58999: LiveKit by port numbers; owner to confirm)'
+      owner: unconfirmed
+      public: true
+  '121':
+    name: runtime-comms-lv3
+    ip: 10.10.10.21
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['7880', '7881', '8008', '8065', '8080', '8081', '8082', '8083', '8084', '8085', '8086', '8087', '8088']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20]
+      proto: tcp
+      ports: ['8103', '8104', '9092']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.22]
+      proto: tcp
+      ports: ['8103', '9092']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.91, 10.10.10.92]
+      proto: tcp
+      ports: ['9092']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9644']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['7880', '7881', '8008', '8065', '8080', '8081', '8082', '8083', '8084', '8085', '8086', '8087', '8088']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20, 172.16.0.0/12]
+      proto: tcp
+      ports: ['8103', '8104', '9092']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.22]
+      proto: tcp
+      ports: ['8103', '9092']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.91, 10.10.10.92]
+      proto: tcp
+      ports: ['9092']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9644']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [any]
+      proto: udp
+      ports: ['7882', 50000-58999]
+      layers: [pve, input, forward]
+      purpose: 'public realtime media ports (tcp 7881, udp 7882, udp 50000-58999: LiveKit by port numbers; owner to confirm)'
+      owner: unconfirmed
+      public: true
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [pve, input]
+      purpose: Prometheus node exporter scrape
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve]
+      purpose: imported from the live state, purpose not recorded yet
+  '122':
+    name: runtime-apps-lv3
+    ip: 10.10.10.22
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['8006', '8007', '8025', '8050', '8082', '8084', '8093', '8102', '8108']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40, 10.10.10.92]
+      proto: tcp
+      ports: ['9000']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20]
+      proto: tcp
+      ports: ['9000', '9001']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['8006', '8007', '8025', '8050', '8082', '8084', '8093', '8102', '8108']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40, 10.10.10.92]
+      proto: tcp
+      ports: ['9000']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20, 172.16.0.0/12, 192.168.0.0/16]
+      proto: tcp
+      ports: ['9000', '9001']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['8085']
+      layers: [pve, input]
+      purpose: creators.example.org NGINX to Creator Atlas
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [pve, input]
+      purpose: Prometheus node exporter scrape
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve]
+      purpose: imported from the live state, purpose not recorded yet
+  '130':
+    name: docker-build-lv3
+    ip: 10.10.10.30
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1, 10.10.10.20, 10.10.10.40, 10.200.0.0/16, 100.64.0.0/10, 172.16.0.0/12, 192.168.0.0/16]
+      ports: '*'
+      layers: [forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      ports: ['18021', '18023', '18140', '18142']
+      layers: [forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['18021', '18023', '18140', '18142']
+      layers: [pve, input]
+      purpose: tier0 vault/keystore standby reached by the 0mcp edge VM110 (keystore)
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '9100']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['4647', '9100']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20]
+      proto: tcp
+      ports: ['7007']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+  '140':
+    name: monitoring-lv3
+    ip: 10.10.10.40
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [100.64.0.3, 100.64.0.6]
+      proto: tcp
+      ports: ['60072']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.114.37.21]
+      proto: tcp
+      ports: ['9090', '9093']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.21]
+      proto: tcp
+      ports: ['9090', '9093', '9094', '60072']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.21]
+      proto: udp
+      ports: ['9094']
+      layers: [input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '3100', '4646', '8086', '19999']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.50, 10.10.10.51]
+      proto: tcp
+      ports: ['2379', '2380', '3100', '8086', '19999']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['3000', '3100', '8086', '19999']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20]
+      proto: tcp
+      ports: ['3100', '4318', '4647', '7007', '8086', '9090', '19999']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.90, 10.10.10.91, 10.10.10.92]
+      proto: tcp
+      ports: ['3100', '4647', '8086', '19999']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.30]
+      proto: tcp
+      ports: ['3100', '4647', '8086', '9090', '19999']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.21, 10.10.10.22, 10.10.10.52, 10.10.10.54, 10.10.10.60, 10.10.10.70, 10.10.10.71, 10.10.10.80]
+      proto: tcp
+      ports: ['3100', '8086', '19999']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+  '150':
+    name: postgres-lv3
+    ip: 10.10.10.50
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '5432']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['2379', '2380', '12345']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.51]
+      proto: tcp
+      ports: ['2379', '2380', '5432', '8008']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20, 10.10.10.92, 10.200.0.0/16, 172.16.0.0/12, 192.168.0.0/16]
+      proto: tcp
+      ports: ['5432']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.51]
+      proto: vrrp
+      ports: '*'
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [pve, input]
+      purpose: Prometheus node exporter scrape
+  '151':
+    name: postgres-replica-lv3
+    ip: 10.10.10.51
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['2379', '2380']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.50]
+      proto: tcp
+      ports: ['2379', '2380', '5432', '8008']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.50]
+      proto: vrrp
+      ports: '*'
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [pve, input]
+      purpose: Prometheus node exporter scrape
+  '152':
+    name: postgres-apps-lv3
+    ip: 10.10.10.52
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['12345']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '5432']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20, 10.10.10.21, 10.10.10.22, 10.200.0.0/16, 172.16.0.0/12, 192.168.0.0/16]
+      proto: tcp
+      ports: ['5432']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [pve, input]
+      purpose: Prometheus node exporter scrape
+  '154':
+    name: postgres-data-lv3
+    ip: 10.10.10.54
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['12345']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '5432']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20, 10.10.10.22, 10.200.0.0/16, 172.16.0.0/12, 192.168.0.0/16]
+      proto: tcp
+      ports: ['5432']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.91]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input]
+      purpose: Runtime VM191 PostgreSQL SSH tunnel
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [pve, input]
+      purpose: Prometheus node exporter scrape
+  '155':
+    # ADR 0494: the agent-history store. Reached only over the tailnet (tailscale serve, TLS, tcp 443);
+    # the store and Postgres listen on loopback / the compose network and are never published.
+    name: agent-history
+    ip: 10.10.10.55
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input, forward]
+      purpose: Operator and mesh connectivity testing (ping)
+      owner: agent-history
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input, forward]
+      purpose: Operator and Ansible SSH access (through the hypervisor or the tailnet)
+      owner: agent-history
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input, forward]
+      purpose: Tailscale mesh VPN protocol
+      owner: agent-history
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [pve, input, forward]
+      purpose: Prometheus node exporter scrape (carries the agent_history textfile metrics)
+      owner: agent-history
+    # The guest is a tailnet node tagged tag:agent-history (ADR 0494, decided 2026-10-29). The whole tailnet range is the source
+    # on purpose; the tailnet grant (config/tailscale/policy.hujson) names the four operator Macs and the hub's host (ubuntuvm1) by
+    # exact address, tcp:443 only.
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['443']
+      layers: [pve, input, forward]
+      purpose: agent-history store API over the tailnet (tailscale serve, TLS); narrowed by the tailnet grants
+      owner: agent-history
+    # Container egress of the compose project (the store, Postgres and the OpenBao Agent run in Docker): the docker_runtime role puts
+    # these three container ranges into the guest's forward chain (container forward compat), as on every Docker guest (compare VM 170).
+    # They are guest-only sources (never seen on the VM's network card), so the Proxmox layer has no counterpart.
+    - from: [10.200.0.0/16, 172.16.0.0/12, 192.168.0.0/16]
+      ports: '*'
+      layers: [forward]
+      purpose: container egress of the agent-history compose project (docker_runtime container forward compat)
+      owner: agent-history
+
+  '170':
+    name: coolify-lv3
+    ip: 10.10.10.70
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1, 10.10.10.10, 10.10.10.71, 10.200.0.0/16, 100.64.0.0/10, 172.16.0.0/12, 192.168.0.0/16]
+      ports: '*'
+      layers: [forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [172.16.0.0/12]
+      proto: tcp
+      ports: ['22']
+      layers: [input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '8000']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['80', '443', '8000', '8096']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.71]
+      proto: tcp
+      ports: ['8000']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [pve, input]
+      purpose: Prometheus node exporter scrape
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+  '171':
+    name: coolify-apps-lv3
+    ip: 10.10.10.71
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1, 10.10.10.10, 10.10.10.70, 10.10.10.1, 10.10.10.10, 10.10.10.70, 10.200.0.0/16, 100.64.0.0/10, 172.16.0.0/12, 192.168.0.0/16]
+      ports: '*'
+      layers: [forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 10.10.10.70, 172.16.0.0/12]
+      proto: tcp
+      ports: ['22']
+      layers: [input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['80', '443']
+      layers: [input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.30]
+      proto: tcp
+      ports: ['9100']
+      layers: [input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 10.10.10.70, 100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['80', '443']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9100']
+      layers: [pve, input]
+      purpose: Prometheus node exporter scrape
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve]
+      purpose: imported from the live state, purpose not recorded yet
+  '180':
+    name: artifact-cache-lv3
+    ip: 10.10.10.80
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.108]
+      proto: tcp
+      ports: ['18100']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '5001', '5002', '5003', '5004']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20, 172.16.0.0/12, 192.168.0.0/16]
+      proto: tcp
+      ports: ['5001', '5002', '5003', '5004']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.30]
+      proto: tcp
+      ports: ['5001', '5002', '5003', '5004', '18100']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['5001', '9100']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input, forward]
+      purpose: imported from the live state, purpose not recorded yet
+  '190':
+    name: runtime-ai-lv3
+    ip: 10.10.10.90
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.1, 10.10.10.10, 10.10.10.20, 10.10.10.21, 10.10.10.22, 10.10.10.30, 10.10.10.40, 10.10.10.50, 10.10.10.51, 10.10.10.52,
+        10.10.10.54, 10.10.10.60, 10.10.10.70, 10.10.10.71, 10.10.10.80, 10.10.10.91, 10.10.10.92, 10.200.0.0/16, 100.64.0.0/10, 172.16.0.0/12,
+        192.168.0.0/16]
+      ports: '*'
+      layers: [forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [172.16.0.0/12, 192.168.0.0/16]
+      proto: tcp
+      ports: ['3007', '3008', '3500', '9080', '9998']
+      layers: [input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '3007', '3008', '3500', '9080', '9998']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['3007', '3008', '3500', '9080', '9100', '9998']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10, 10.10.10.20, 10.10.10.21, 10.10.10.22, 10.10.10.30, 10.10.10.50, 10.10.10.51, 10.10.10.52, 10.10.10.54, 10.10.10.60,
+        10.10.10.70, 10.10.10.71, 10.10.10.80, 10.10.10.91, 10.10.10.92]
+      proto: tcp
+      ports: ['3007', '3008', '3500', '9080', '9998']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+  '191':
+    name: runtime-general-lv3
+    ip: 10.10.10.91
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [10.10.10.10, 10.10.10.30]
+      proto: tcp
+      ports: ['18021']
+      layers: [pve, docker_user]
+      purpose: 'keystore mesh node API for the 0docker failover chain: standby edge nginx-lv3 (10.10.10.10) and docker-build (10.10.10.30); PR
+        #481/#483'
+      owner: keystore
+      decided: '2026-10-18'
+      unit: config/keystore-mesh/lan-publish
+    - from: [10.10.10.1, 10.10.10.10, 10.10.10.20, 10.10.10.21, 10.10.10.22, 10.10.10.30, 10.10.10.40, 10.10.10.50, 10.10.10.51, 10.10.10.52,
+        10.10.10.54, 10.10.10.60, 10.10.10.70, 10.10.10.71, 10.10.10.80, 10.10.10.90, 10.10.10.92, 10.200.0.0/16, 100.64.0.0/10, 172.16.0.0/12,
+        192.168.0.0/16]
+      ports: '*'
+      layers: [forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [172.16.0.0/12, 192.168.0.0/16]
+      proto: tcp
+      ports: ['1025', '3001', '3090', '3500', '8025', '9080']
+      layers: [input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.8]
+      proto: tcp
+      ports: ['18315']
+      iif: tailscale0
+      layers: [input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.7]
+      proto: tcp
+      ports: ['9988', '9989']
+      iif: tailscale0
+      layers: [input]
+      purpose: 'SPIRE agents native Prometheus telemetry (0exec.com :9988, 0crawl.com :9989, bound to the tailnet address): the hub Prometheus on VM100 (ubuntuvm1) scrapes them'
+      owner: observability
+      decided: '2026-10-31'
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20, 10.10.10.21, 10.10.10.22, 10.10.10.30, 10.10.10.50, 10.10.10.51, 10.10.10.52, 10.10.10.54, 10.10.10.60, 10.10.10.70,
+        10.10.10.71, 10.10.10.80, 10.10.10.90, 10.10.10.92]
+      proto: tcp
+      ports: ['1025', '3001', '3090', '3500', '8025', '9080']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['1025', '3001', '3090', '3500', '8025', '9080', '9100']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.8]
+      proto: tcp
+      ports: ['18002']
+      layers: [pve, input]
+      purpose: 0docker NGINX gateway -> proxy.0exec.com replica on 0mcp runtime-general
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['22', '1025', '3001', '3090', '3500', '8025', '9080']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '1025', '3001', '3090', '3500', '8025', '9080', '9100']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['18315']
+      layers: [pve]
+      purpose: country-iso canary via 0mcp edge
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['9280']
+      layers: [pve]
+      purpose: Prometheus cAdvisor scrape
+  '192':
+    name: runtime-control-lv3
+    ip: 10.10.10.92
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: managed, input_policy: drop, forward_policy: drop}
+    groups:
+    - from: [any, 10.10.10.1, 10.10.10.10, 10.10.10.20, 10.10.10.21, 10.10.10.22, 10.10.10.30, 10.10.10.40, 10.10.10.50, 10.10.10.51, 10.10.10.52,
+        10.10.10.54, 10.10.10.55, 10.10.10.60, 10.10.10.70, 10.10.10.71, 10.10.10.80, 10.10.10.90, 10.10.10.91, 10.200.0.0/16, 100.64.0.0/10, 172.16.0.0/12,
+        192.168.0.0/16]
+      ports: '*'
+      layers: [forward]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [172.16.0.0/12, 192.168.0.0/16]
+      proto: tcp
+      ports: ['1587', '4222', '9080']
+      layers: [input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: icmp
+      ports: '*'
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.10]
+      proto: tcp
+      ports: ['1587', '3003', '4222', '8081', '8083', '8095', '8098', '9000', '9010', '9080']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.30]
+      proto: tcp
+      ports: ['1587', '3003', '4222', '8081', '8083', '8098', '8201', '9080']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.40]
+      proto: tcp
+      ports: ['1587', '4222', '4647', '8000', '8081', '8083', '8095', '8098', '8201', '9000', '9080', '9100', '9443']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.20, 10.10.10.21]
+      proto: tcp
+      ports: ['1587', '4222', '8081', '8083', '8098', '8201', '9080']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    # TODO(ADR 0494 question 7): the OpenBao AppRole and paths are the owner's step at provisioning time (the owner holds OpenBao admin); confirm the OpenBao owner and port then.
+    - from: [10.10.10.55]
+      proto: tcp
+      ports: ['8201']
+      layers: [pve, input]
+      purpose: OpenBao Agent secret delivery to the agent-history guest (store tokens and database password land on tmpfs)
+      owner: agent-history
+    - from: [10.10.10.22, 10.10.10.50, 10.10.10.51, 10.10.10.52, 10.10.10.54, 10.10.10.60, 10.10.10.70, 10.10.10.71, 10.10.10.80, 10.10.10.90,
+        10.10.10.91]
+      proto: tcp
+      ports: ['1587', '4222', '8081', '8083', '8098', '9080']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [100.64.0.0/10]
+      proto: tcp
+      ports: ['22']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22', '1587', '3003', '3004', '3500', '8000', '8081', '8083', '8095', '8098', '8200', '8222', '9000', '9080', '9443']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [any]
+      proto: tcp
+      ports: ['25', '587', '993']
+      layers: [pve, input]
+      purpose: public mail ports (SMTP 25, submission 587, IMAPS 993 by port numbers; owner to confirm)
+      owner: unconfirmed
+      public: true
+    - from: [10.10.10.1, 100.64.0.0/10]
+      proto: udp
+      ports: ['41641']
+      layers: [pve, input]
+      purpose: imported from the live state, purpose not recorded yet
+  '200':
+    name: 0mcp-staging-runtime
+    ip: 10.10.10.200
+    pve: {enable: '1', policy_in: DROP, policy_out: ACCEPT}
+    guest: {nft: absent}
+    groups:
+    - from: [10.10.10.1]
+      proto: icmp
+      ports: '*'
+      layers: [pve]
+      purpose: imported from the live state, purpose not recorded yet
+    - from: [10.10.10.1]
+      proto: tcp
+      ports: ['22']
+      layers: [pve]
+      purpose: SSH via Proxmox staging bastion

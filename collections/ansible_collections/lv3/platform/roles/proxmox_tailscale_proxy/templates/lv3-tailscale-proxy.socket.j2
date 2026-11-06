@@ -2,6 +2,10 @@
    (tailscaled starts after basic.target, which starts after sockets.target). systemd breaks it at boot by deleting
    start jobs: on 2026-10-13 the 0docker hypervisor came up without these proxies and without tailscaled. A socket
    without default dependencies is not ordered Before=sockets.target, so there is no cycle. #}
+{# FreeBind: after a tailscaled restart (a package update, a crash) systemd starts the socket as soon as tailscaled says "started", before tailscale0 has its
+   address; a plain bind then fails with "Cannot assign requested address" and the socket stays dead. IP_FREEBIND lets the bind succeed. BindToDevice makes systemd
+   add BindsTo= on the device unit, which is not active at that moment either, so the start job fails first: the hypervisor's tailscale0 device drop-in (hostconf
+   file tailscale0-wants-lv3-proxies) Wants= every socket and starts it when the device comes back. See docs/runbooks/tailscaled-restart-proxies.md. #}
 [Unit]
 Description=LV3 Tailscale TCP proxy socket for {{ item.name }}
 After=network-online.target tailscaled.service
@@ -15,6 +19,7 @@ Before=shutdown.target
 ListenStream={{ item.listen_address }}:{{ item.listen_port }}
 BindToDevice=tailscale0
 NoDelay=true
+FreeBind=true
 
 [Install]
 WantedBy=sockets.target tailscaled.service

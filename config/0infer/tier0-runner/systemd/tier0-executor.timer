@@ -1,0 +1,10 @@
+[Unit]
+Description=Tier-0 executor tick (every minute)
+
+[Timer]
+OnBootSec=100s
+OnUnitActiveSec=60s
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

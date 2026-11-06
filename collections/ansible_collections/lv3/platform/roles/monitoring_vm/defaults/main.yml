@@ -194,6 +194,7 @@ monitoring_scanopy_sd_install_dir: /opt/scanopy-sd
 monitoring_scanopy_sd_script_file: "{{ monitoring_scanopy_sd_install_dir }}/scanopy_sd.py"
 monitoring_scanopy_sd_readme_file: "{{ monitoring_scanopy_sd_install_dir }}/README"
 monitoring_scanopy_sd_extra_endpoints_file: "{{ monitoring_scanopy_sd_install_dir }}/extra-endpoints.json"
+monitoring_scanopy_sd_ignored_hosts_file: "{{ monitoring_scanopy_sd_install_dir }}/ignored-hosts.json"
 monitoring_scanopy_sd_state_dir: /var/lib/scanopy-sd
 monitoring_scanopy_sd_config_dir: /etc/scanopy-sd
 monitoring_scanopy_sd_api_key_file: "{{ monitoring_scanopy_sd_config_dir }}/api-key"
@@ -213,6 +214,9 @@ monitoring_scanopy_sd_interval: 5min
 monitoring_scanopy_sd_environment: {}
 # Known-real endpoints Scanopy has no port data for; rendered into extra-endpoints.json.
 monitoring_scanopy_sd_extra_endpoints: []
+# Inventory host names that are switched off on purpose (an abandoned replica, say): no node_exporter is expected there, so
+# NodeExporterMissing stays quiet. Rendered into ignored-hosts.json; a host that answers is still scraped normally.
+monitoring_scanopy_sd_ignored_hosts: []
 # RE2 regex matched against __address__ of scanopy-node targets. Matching targets are dropped so that exporters kept
 # as static jobs in monitoring_prometheus_extra_scrape_jobs are never scraped twice. Empty string disables the rule.
 monitoring_scanopy_sd_node_drop_address_regex: ""
@@ -302,8 +306,8 @@ monitoring_scanopy_backup_service_name: scanopy-backup.service
 monitoring_scanopy_backup_timer_name: scanopy-backup.timer
 monitoring_scanopy_backup_service_file: /etc/systemd/system/scanopy-backup.service
 monitoring_scanopy_backup_timer_file: /etc/systemd/system/scanopy-backup.timer
-monitoring_scanopy_backup_on_calendar: "*-*-* 03:20:00 UTC"
-# Optional Environment= overrides (BACKUP_SSH, BACKUP_SSH_PORT, BACKUP_KEEP, BACKUP_MIN_BYTES).
+monitoring_scanopy_backup_on_calendar: "*-*-* *:20:00 UTC"
+# Optional Environment= overrides (BACKUP_SSH, BACKUP_SSH_PORT, BACKUP_KEEP_HOURS, BACKUP_KEEP_DAYS, BACKUP_MIN_BYTES).
 monitoring_scanopy_backup_environment: {}
 # Weekly restore drill: the newest dump is restored into a throwaway Postgres container (no network) and its core tables are
 # counted. Needs Docker on this VM.
@@ -316,6 +320,28 @@ monitoring_scanopy_backup_drill_timer_file: /etc/systemd/system/scanopy-backup-d
 monitoring_scanopy_backup_drill_on_calendar: "Sun *-*-* 04:10:00 UTC"
 # Image of the throwaway Postgres; keep the major version equal to the Scanopy database (17).
 monitoring_scanopy_backup_drill_image: postgres:17-alpine
+# --- Warm standby of the Scanopy server (see docs/runbooks/scanopy-service-discovery.md, "Warm standby") ---
+# The newest dump from scanopy-backup is restored into a persistent Postgres container here every hour; the standby server
+# (compose profile `failover`) stays stopped until a failover and is boot-tested weekly. Needs Docker on this VM and the backup role.
+monitoring_scanopy_standby_enabled: false
+monitoring_scanopy_standby_install_dir: /opt/scanopy-standby
+monitoring_scanopy_standby_state_dir: /var/lib/scanopy-standby
+monitoring_scanopy_standby_script_file: "{{ monitoring_scanopy_standby_install_dir }}/scanopy_standby.py"
+monitoring_scanopy_standby_compose_file: "{{ monitoring_scanopy_standby_install_dir }}/docker-compose.yml"
+monitoring_scanopy_standby_env_file: "{{ monitoring_scanopy_standby_install_dir }}/.env"
+monitoring_scanopy_standby_readme_file: "{{ monitoring_scanopy_standby_install_dir }}/README"
+monitoring_scanopy_standby_textfile_dir: "{{ monitoring_scanopy_sd_textfile_dir }}"
+monitoring_scanopy_standby_sync_service_file: /etc/systemd/system/scanopy-standby-sync.service
+monitoring_scanopy_standby_sync_timer_file: /etc/systemd/system/scanopy-standby-sync.timer
+monitoring_scanopy_standby_sync_timer_name: scanopy-standby-sync.timer
+monitoring_scanopy_standby_sync_on_calendar: "*-*-* *:35:00 UTC"
+monitoring_scanopy_standby_boot_test_service_file: /etc/systemd/system/scanopy-standby-boot-test.service
+monitoring_scanopy_standby_boot_test_timer_file: /etc/systemd/system/scanopy-standby-boot-test.timer
+monitoring_scanopy_standby_boot_test_timer_name: scanopy-standby-boot-test.timer
+monitoring_scanopy_standby_boot_test_on_calendar: "Sun *-*-* 04:40:00 UTC"
+# Keep the server image on the primary's version (v0.17.22) and the Postgres major version on the primary's (17).
+monitoring_scanopy_standby_server_image: ghcr.io/scanopy/scanopy/server:v0.17.22
+monitoring_scanopy_standby_postgres_image: postgres:17-alpine
 # Prometheus rule files shipped from config/prometheus/rules/ for the discovery pipeline and the Alertmanager heartbeat.
 monitoring_prometheus_inventory_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/inventory.yml"
 monitoring_prometheus_inventory_rules_file: "{{ monitoring_prometheus_rules_dir }}/inventory.yml"
@@ -325,6 +351,42 @@ monitoring_prometheus_fleet_disk_rules_source_file: "{{ monitoring_repo_root }}/
 monitoring_prometheus_fleet_disk_rules_file: "{{ monitoring_prometheus_rules_dir }}/fleet-disk.yml"
 monitoring_prometheus_fleet_loops_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/fleet-loops.yml"
 monitoring_prometheus_fleet_loops_rules_file: "{{ monitoring_prometheus_rules_dir }}/fleet-loops.yml"
+# Rule files that were running on the monitoring VM with no copy in git (found 2026-10-14: a rebuilt VM would have lost them).
+# Each is shipped as is from config/prometheus/rules/<name>; tests/test_adopted_prometheus_rules.py pins this list.
+monitoring_prometheus_adopted_rule_files:
+  - fleet-edge-probe.yml
+  - node-placement.yml
+  - node-thermal-alerts.yml
+  - prometheus-capacity.yml
+  - pve-host-incident.yml
+  - pve-recovery-alerts.yml
+  - pve-storage-capacity.yml
+  # Added 2026-10-16 (reconciliation): live-only files adopted verbatim, and the resilience rules that were live before they had a way onto the VM.
+  - public-edge-critical.yml
+  - restore-drill.yml
+  - tier0-standby.yml
+  - pbs-usage.yml
+  # Added 2026-10-18: alerts for the network policy drift check (scripts/netpolicy.py, docs/runbooks/network-policy.md).
+  - netpolicy.yml
+  # Added 2026-10-19: the Postgres cluster unit (node_systemd_unit_state); the production database was down 21 minutes with the edge probe as the only alert.
+  - fleet-postgres-unit.yml
+  # Bounded image cleanup must surface registry refusals and failed attempts.
+  - fleet-image-gc.yml
+  # Added 2026-10-21: the DomainScope search probe on CT108 (production search answers its golden queries; docs/runbooks/domainscope-search-probe.md).
+  - domainscope-search.yml
+  # Added 2026-10-28: the DomainScope Drive data room refresh on CT108 (live figures in the Drive folder; docs/runbooks/domainscope-drive-refresh.md).
+  - domainscope-drive-refresh.yml
+  # Added 2026-10-22: the keystore apikey wave on the builder (fleet-state scripts/ct108/apikey-wave.py, docs/runbooks/apikey-wave.md): halted, silent, stalled.
+  - fleet-apikey-wave.yml
+  # Added 2026-10-28 (ADR 0494): the agent-history store on VM 155 (store down, ingest lag, spool depth, silent collector, redaction canary, backup gap, data disk). The guest does not exist yet: nothing fires until its metrics bridge writes agent_history.prom.
+  - agent-history.yml
+  # Added 2026-11-04 (docs/runbooks/fleet-observability.md#build-host-cache-trim-alerts): the Go build cache trim of the build VM's GC (step 3d): a run that failed or was skipped, no run for 9 hours, no metric for a day, a volume over its cap for a day. Applying it is a separate step; its expressions return nothing today.
+  - fleet-job-caches-trim.yml
+  # Added 2026-11-01 (docs/runbooks/pve-0mcp-memory-budget.md): the guaranteed memory of pve-0mcp's running VMs (balloon floors plus VMs with balloon 0) against the 80% budget. Applying it is a separate step; it fires at once while the sum is above 80%.
+  - proxmox-host-memory-budget.yml
+  # Added 2026-11-02: the shared CI cache prune on the Woodpecker pilot agent (services-registry PR #806, docs/runbooks/fleet-observability.md#ci-cache-prune-alerts):
+  # a cache still over its cap, a prune that stopped, no series at all. Inert until the host writes ci_cache_prune_*.
+  - fleet-ci-cache-prune.yml
 monitoring_prometheus_hypervisor_memory_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/fleet-hypervisor-memory.yml"
 monitoring_prometheus_hypervisor_memory_rules_file: "{{ monitoring_prometheus_rules_dir }}/fleet-hypervisor-memory.yml"
 monitoring_prometheus_alertmanager_self_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/alertmanager-self.yml"
@@ -341,6 +403,9 @@ monitoring_prometheus_rule_files:
   - /etc/prometheus/rules/*.yml
 monitoring_prometheus_alertmanager_targets:
   - 127.0.0.1:9093
+# Extra Alertmanagers Prometheus must send EVERY alert to (a gossip-mesh replica; the mesh de-duplicates). Alerting block only: they are not
+# added to the "alertmanager" scrape job; give them their own entry in monitoring_prometheus_extra_scrape_jobs (inventory).
+monitoring_prometheus_extra_alertmanager_targets: []
 monitoring_postgres_audit_metrics_job_name: postgres-audit-alloy
 monitoring_postgres_audit_metrics_port: 12345
 monitoring_postgres_audit_metrics_target: >-

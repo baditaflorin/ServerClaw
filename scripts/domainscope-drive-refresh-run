@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# domainscope-drive-refresh-run: what domainscope-drive-refresh.service runs on CT108 (docs/runbooks/domainscope-drive-refresh.md).
+#
+# Keeps the live figures of the Google Drive "DomainScope Data Room" folder current: builds the DomainScope repository's own tool
+# (src/cmd/drive-refresh of baditaflorin/go-url-categorizer-api at origin/main, fetched on every run) and runs it with the live figures
+# exported read-only from the cron host and the manifest docs/investor/drive-refresh.manifest.json of that commit. The tool finds the two
+# live figure sentences in the Google Docs the manifest lists and replaces exactly those phrases (see docs/investor/drive-refresh.md
+# there); it is a no-op when they are already current, so a daily run is cheap and picks up a new data-room.json the day it reaches main.
+#
+# The service account key is the fleet vault entry domainscope-drive-sa-key (Editor on that one Drive folder, nothing else). It is
+# read with `fv.sh raw` straight into the tool's standard input: never an argument, never an environment variable, never a file.
+# The tool is built and run as root because the vault read needs it; what it runs is merged, reviewed code (the same trust as every
+# deploy from this builder), and it gets an empty environment.
+#
+# A run that cannot get as far as the documents (fetch, build, vault, figures too old) is recorded as a failed run in the metrics
+# textfile (ok 0), never as green and never as silence; the time of the last good run is carried forward so the alert on its age
+# counts from it.
+#
+# Environment (the unit sets none; an override goes in /etc/default/domainscope-drive-refresh):
+#   DSDRIVE_APPLY          1 (default) writes the changes; 0 is a dry run that only prints them
+#   DSDRIVE_REPO_URL       default https://github.com/baditaflorin/go-url-categorizer-api (git uses CT108's credential helper)
+#   DSDRIVE_STATE          default /var/lib/domainscope-drive-refresh
+#   DSDRIVE_TEXTFILE_DIR   default /var/lib/prometheus-node-exporter/textfile
+#   DSDRIVE_FV             the vault helper, default /root/bin/fv.sh (run with bash)
+#   DSDRIVE_FIGURES_HOST   required SSH target of the existing DomainScope cron host
+#   DSDRIVE_FIGURES_FILE   explicit local aggregate instead of SSH (offline checks)
+#   DSDRIVE_FIGURES_HELPER default /usr/local/lib/domainscope-drive-refresh/figures.py
+#   DSDRIVE_GO             the go command, default go from PATH, else /usr/local/go/bin/go (GOTOOLCHAIN=auto fetches the toolchain go.mod asks for)
+#   DSDRIVE_TIMEOUT_SECONDS  default 900
+# Exit: 0 every listed document is current, 1 the tool ran and a document failed or held no figure phrase (the metrics say which),
+# 3 the tool could not run (fetch, build, vault, stale figures file; metrics say ok 0).
+set -uo pipefail
+umask 077
+
+STATE=${DSDRIVE_STATE:-/var/lib/domainscope-drive-refresh}
+TEXTFILE=${DSDRIVE_TEXTFILE_DIR:-/var/lib/prometheus-node-exporter/textfile}
+REPO_URL=${DSDRIVE_REPO_URL:-https://github.com/baditaflorin/go-url-categorizer-api}
+FV=${DSDRIVE_FV:-/root/bin/fv.sh}
+FIGURES_HELPER=${DSDRIVE_FIGURES_HELPER:-/usr/local/lib/domainscope-drive-refresh/figures.py}
+FIGURES_HOST=${DSDRIVE_FIGURES_HOST:-}
+# systemd gives a service no login PATH: Go lives in /usr/local/go/bin on the builder, which only a login shell has on its PATH.
+GO=${DSDRIVE_GO:-$(command -v go || echo /usr/local/go/bin/go)}
+APPLY=${DSDRIVE_APPLY:-1}
+TIMEOUT=${DSDRIVE_TIMEOUT_SECONDS:-900}
+ENTRY=domainscope-drive-sa-key
+PROM=domainscope_drive_refresh.prom
+PATHS=(src/go.mod src/go.sum src/cmd/drive-refresh docs/investor/drive-refresh.manifest.json)
+
+# A command-line dry run wins even when an EnvironmentFile sets APPLY=1.
+case "${1:-}" in
+  "") ;;
+  --dry-run) APPLY=0 ;;
+  *) echo "usage: $0 [--dry-run]" >&2; exit 3 ;;
+esac
+[[ $# -le 1 ]] || { echo "usage: $0 [--dry-run]" >&2; exit 3; }
+
+log() { echo "domainscope-drive-refresh: $*"; }
+err() { echo "domainscope-drive-refresh: $*" >&2; }
+for n in "$TIMEOUT"; do
+  [[ "$n" =~ ^[0-9]+$ ]] || { err "DSDRIVE_TIMEOUT_SECONDS must be a whole number (got '$n')"; exit 3; }
+done
+[[ "$APPLY" == 0 || "$APPLY" == 1 ]] || { err "DSDRIVE_APPLY must be 0 or 1 (got '$APPLY')"; exit 3; }
+
+# write_failed_run <reason>: the metrics of a run that never reached the documents: ok 0, the last success carried forward.
+write_failed_run() {
+  local now last tmp
+  # A dry run (DSDRIVE_APPLY=0) is a hand check: it leaves the metrics, and so the alerts, alone.
+  [[ "$APPLY" == 1 ]] || return 0
+  now=$(date +%s)
+  last=$(sed -n 's/^domainscope_drive_refresh_last_success_timestamp_seconds \([0-9][0-9]*\)$/\1/p' "$TEXTFILE/$PROM" 2>/dev/null | head -n1)
+  tmp="$TEXTFILE/.$PROM.tmp.$$"
+  {
+    echo "# The run did not reach the documents; written by domainscope-drive-refresh-run: $1"
+    echo "# TYPE domainscope_drive_refresh_last_run_timestamp_seconds gauge"
+    echo "domainscope_drive_refresh_last_run_timestamp_seconds $now"
+    if [[ -n "$last" ]]; then
+      echo "# TYPE domainscope_drive_refresh_last_success_timestamp_seconds gauge"
+      echo "domainscope_drive_refresh_last_success_timestamp_seconds $last"
+    fi
+    for kv in "ok 0" "docs_failed 0" "docs_changed 0" "replacements 0"; do
+      echo "# TYPE domainscope_drive_refresh_${kv%% *} gauge"
+      echo "domainscope_drive_refresh_${kv%% *} ${kv#* }"
+    done
+  } > "$tmp" && chmod 0644 "$tmp" && mv -f "$tmp" "$TEXTFILE/$PROM" || { rm -f "$tmp"; err "could not write $TEXTFILE/$PROM"; }
+}
+fail() { err "$1"; write_failed_run "$1"; exit 3; }
+
+mkdir -p "$STATE" "$STATE/bin" || fail "cannot create $STATE"
+repo="$STATE/repo"
+figures="$STATE/current-data-room.json"
+# Validate the current aggregate before touching credentials. A stale committed
+# report previously made the tool close stdin and the vault pipe report SIGPIPE.
+figure_args=(--host "$FIGURES_HOST" --out "$figures")
+[[ -z "${DSDRIVE_FIGURES_FILE:-}" ]] || figure_args+=(--input-file "$DSDRIVE_FIGURES_FILE")
+python3 "$FIGURES_HELPER" "${figure_args[@]}" || fail "current data-room figures could not be read or validated"
+
+# fetch: a blobless depth-1 clone with only the files the tool needs, moved to origin/main on every run. A failed fetch is a failed
+# run: nothing is built from a tree that might lag main.
+if [[ ! -d "$repo/.git" ]]; then
+  rm -rf "$repo"
+  git clone --quiet --filter=blob:none --no-checkout --depth 1 --branch main "$REPO_URL" "$repo" || fail "git clone of $REPO_URL failed"
+  git -C "$repo" sparse-checkout set --no-cone "${PATHS[@]/#//}" || fail "git sparse-checkout failed"
+fi
+git -C "$repo" fetch --quiet --depth 1 origin main || fail "git fetch origin main failed"
+git -C "$repo" checkout --quiet --detach FETCH_HEAD || fail "git checkout of origin/main failed"
+rev=$(git -C "$repo" rev-parse --short HEAD)
+for p in src/cmd/drive-refresh docs/investor/drive-refresh.manifest.json; do
+  [[ -e "$repo/$p" ]] || fail "origin/main $rev has no $p (the tool is not merged yet, or was moved)"
+done
+
+# build: the module cache lives in root's home, so a run after the first needs no download. No cgo, no VCS stamping.
+(cd "$repo/src" && env -i PATH="$PATH" HOME="${HOME:-/root}" GOFLAGS=-buildvcs=false CGO_ENABLED=0 \
+  "$GO" build -trimpath -o "$STATE/bin/drive-refresh.new" ./cmd/drive-refresh) || fail "go build of drive-refresh at $rev failed"
+mv -f "$STATE/bin/drive-refresh.new" "$STATE/bin/drive-refresh" || fail "could not install the built tool"
+
+args=(-key-stdin -data-room "$figures" -manifest "$repo/docs/investor/drive-refresh.manifest.json")
+[[ "$APPLY" == 1 ]] && args+=(-apply -metrics-out "$TEXTFILE/$PROM")
+
+log "origin/main $rev, $([[ "$APPLY" == 1 ]] && echo apply || echo dry run)"
+# The key goes from the vault into the tool's stdin and nowhere else. The tool prints which documents it changed, never the key.
+bash "$FV" raw "$ENTRY" | timeout "$TIMEOUT" env -i PATH="$PATH" "$STATE/bin/drive-refresh" "${args[@]}"
+rcs=("${PIPESTATUS[@]}")
+if [[ "${rcs[0]}" -ne 0 ]]; then
+  fail "could not read $ENTRY from the vault (fv.sh exit ${rcs[0]})"
+fi
+rc=${rcs[1]}
+if [[ "$rc" -eq 124 ]]; then
+  fail "drive-refresh did not finish in ${TIMEOUT}s"
+fi
+# 1 = a document failed (the tool wrote the metrics), 2 = usage (a wrapper bug: no metrics from the tool), anything else = it crashed.
+if [[ "$rc" -ne 0 && "$rc" -ne 1 ]]; then
+  fail "drive-refresh exited $rc"
+fi
+exit "$rc"

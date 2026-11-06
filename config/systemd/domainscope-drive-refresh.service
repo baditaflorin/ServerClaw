@@ -1,0 +1,25 @@
+[Unit]
+Description=DomainScope Drive data room refresh: brings the live figures in the Drive folder to docs/investor/data-room.json (one folder, a service account, a no-op when current)
+Documentation=https://github.com/baditaflorin/platform_server/blob/main/docs/runbooks/domainscope-drive-refresh.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# root: the wrapper reads the current figures via configured SSH, fetches the tool (CT108's git credential helper) and reads the service account key from the fleet vault into the
+# tool's standard input; the tool itself runs with an empty environment.
+User=root
+Group=root
+# Emergency overrides (DSDRIVE_* of the wrapper, e.g. DSDRIVE_APPLY=0 for a dry run); nothing is expected in it.
+EnvironmentFile=-/etc/default/domainscope-drive-refresh
+# Set DSDRIVE_FIGURES_HOST in the local override to the SSH target hosting the
+# existing cron container. No fallback to the periodically committed figures.
+# 1 = a document failed or held no figure phrase: the metrics say which and the journal lists it. The unit still ran. 3 (could not
+# fetch, build, read the vault or the figures are too old) is a real error and shows in `systemctl --failed`.
+SuccessExitStatus=1
+# A run takes under a minute once the Go module cache is warm; the wrapper stops the tool at 15 minutes.
+TimeoutStartSec=25min
+# One run at a time, here and for a hand-started run.
+ExecStart=/usr/bin/flock -n /run/lock/domainscope-drive-refresh.lock /usr/local/bin/domainscope-drive-refresh-run
+PrivateTmp=yes
+Nice=10

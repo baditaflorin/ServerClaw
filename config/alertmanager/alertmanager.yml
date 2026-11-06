@@ -109,6 +109,16 @@ receivers:
           basic_auth:
             username: "{{ alertmanager_runtime_ntfy_username }}"
             password_file: "{{ alertmanager_runtime_ntfy_password_file }}"
+# {% if alertmanager_runtime_secondary_ntfy_base_url | length > 0 and (alertmanager_runtime_secondary_ntfy_topics.critical | default('')) | length > 0 %}
+
+      - url: '{{ alertmanager_runtime_secondary_ntfy_base_url }}/{{ alertmanager_runtime_secondary_ntfy_topics.critical }}?{{ alertmanager_runtime_ntfy_query }}&p=5&tags=rotating_light%2Cwarning'
+        send_resolved: true
+        max_alerts: {{ alertmanager_runtime_ntfy_max_alerts }}
+        http_config:
+          authorization:
+            type: Bearer
+            credentials_file: "{{ alertmanager_runtime_secondary_ntfy_token_file }}"
+# {% endif %}
 
   - name: ntfy-warning
     webhook_configs:
@@ -119,6 +129,16 @@ receivers:
           basic_auth:
             username: "{{ alertmanager_runtime_ntfy_username }}"
             password_file: "{{ alertmanager_runtime_ntfy_password_file }}"
+# {% if alertmanager_runtime_secondary_ntfy_base_url | length > 0 and (alertmanager_runtime_secondary_ntfy_topics.warning | default('')) | length > 0 %}
+
+      - url: '{{ alertmanager_runtime_secondary_ntfy_base_url }}/{{ alertmanager_runtime_secondary_ntfy_topics.warning }}?{{ alertmanager_runtime_ntfy_query }}&p=3&tags=warning'
+        send_resolved: false
+        max_alerts: {{ alertmanager_runtime_ntfy_max_alerts }}
+        http_config:
+          authorization:
+            type: Bearer
+            credentials_file: "{{ alertmanager_runtime_secondary_ntfy_token_file }}"
+# {% endif %}
 
   - name: ntfy-watchdog
     webhook_configs:
@@ -129,6 +149,16 @@ receivers:
           basic_auth:
             username: "{{ alertmanager_runtime_ntfy_username }}"
             password_file: "{{ alertmanager_runtime_ntfy_password_file }}"
+# {% if alertmanager_runtime_secondary_ntfy_base_url | length > 0 and (alertmanager_runtime_secondary_ntfy_topics.watchdog | default('')) | length > 0 %}
+
+      - url: '{{ alertmanager_runtime_secondary_ntfy_base_url }}/{{ alertmanager_runtime_secondary_ntfy_topics.watchdog }}?{{ alertmanager_runtime_ntfy_query }}&p=1&tags=heartbeat'
+        send_resolved: false
+        max_alerts: {{ alertmanager_runtime_ntfy_max_alerts }}
+        http_config:
+          authorization:
+            type: Bearer
+            credentials_file: "{{ alertmanager_runtime_secondary_ntfy_token_file }}"
+# {% endif %}
 # {% if alertmanager_runtime_triage_webhook_url | length > 0 %}
 
   - name: fleet-triage

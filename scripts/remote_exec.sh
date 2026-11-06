@@ -325,7 +325,15 @@ compute_validation_lane_context() {
     return 0
   fi
 
-  base_ref="$("$PYTHON_BIN" - "$REPO_ROOT" <<'PY'
+  if [[ -n "$LV3_VALIDATION_BASE_REF" ]]; then
+    # A caller-supplied base (a branch stacked on an unmerged parent) is kept.
+    # An unresolvable one must stop here: the diff below would print [] and an
+    # empty change list passes every surface check without checking anything.
+    base_ref="$LV3_VALIDATION_BASE_REF"
+    git -C "$REPO_ROOT" rev-parse --verify --quiet "${base_ref}^{commit}" >/dev/null ||
+      fail "LV3_VALIDATION_BASE_REF=$base_ref does not resolve to a commit; fetch it, or after the parent merged rebase onto origin/main and unset it"
+  else
+    base_ref="$("$PYTHON_BIN" - "$REPO_ROOT" <<'PY'
 import subprocess
 import sys
 from pathlib import Path
@@ -339,6 +347,7 @@ remote_exists = subprocess.run(
 print(remote_candidate if remote_exists.returncode == 0 else "main")
 PY
 )"
+  fi
 
   LV3_VALIDATION_BASE_REF="$base_ref"
   LV3_VALIDATION_CHANGED_FILES_JSON="$("$PYTHON_BIN" - "$REPO_ROOT" "$base_ref" <<'PY'

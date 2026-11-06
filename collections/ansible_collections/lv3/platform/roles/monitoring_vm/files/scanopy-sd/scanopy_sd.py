@@ -45,6 +45,8 @@ CONF = {
     "extra_file": os.environ.get("SD_EXTRA_FILE", "/opt/scanopy-sd/extra-endpoints.json"),
     # optional {"inventory-name": ["nodename", ...]} map for exporters whose nodename cannot be derived
     "alias_file": os.environ.get("SD_NODE_ALIAS_FILE", "/opt/scanopy-sd/node-aliases.json"),
+    # optional ["inventory-name", ...]: hosts that are switched off on purpose; a node_exporter that does not answer there is not an alert
+    "ignored_file": os.environ.get("SD_IGNORED_HOSTS_FILE", "/opt/scanopy-sd/ignored-hosts.json"),
     "min_ratio": float(os.environ.get("SD_MIN_RATIO", "0.8")),
     "max_age_days": float(os.environ.get("SD_MAX_AGE_DAYS", "30")),
     "sticky_days": float(os.environ.get("SD_STICKY_DAYS", "7")),
@@ -184,6 +186,32 @@ def load_aliases(path):
         vals = [v] if isinstance(v, str) else v if isinstance(v, list) else []
         out[norm(k)] = {norm(x) for x in vals if isinstance(x, str) and norm(x)}
     return out
+
+
+def load_ignored_hosts(path):
+    """Inventory host names that are intentionally down. A missing or malformed file means none."""
+    try:
+        names = json.load(open(path))
+    except (OSError, ValueError):
+        return set()
+    return {n for n in names if isinstance(n, str)} if isinstance(names, list) else set()
+
+
+def down_host_state(name, last, sticky_cut, mismatch, reachable, ignored):
+    """Classify a host whose node_exporter did not answer now.
+
+    Returns (info fields, publish_stale): an ignored host is not expected and is not published, so the NodeExporterMissing
+    alert and the up==0 series both stay away; a host that answered recently keeps being published so up==0 is visible.
+    """
+    if name in ignored:
+        return {"expected_node_exporter": "0", "reason": "ignored", "via": ""}, False
+    if last and last["ts"] >= sticky_cut:
+        return {"expected_node_exporter": "1", "reason": "down_after_ok", "via": last["via"]}, True
+    if mismatch:
+        return {"expected_node_exporter": "1", "reason": "identity_mismatch", "via": ""}, False
+    if reachable:
+        return {"expected_node_exporter": "1", "reason": "exporter_not_listening", "via": ""}, False
+    return {"expected_node_exporter": "0", "reason": "unreachable", "via": ""}, False
 
 
 def assign_node_names(hosts, aliases=None):
@@ -547,6 +575,7 @@ def main():
         extras = json.load(open(CONF["extra_file"]))
     except Exception:
         extras = []
+    ignored = load_ignored_hosts(CONF["ignored_file"])
     node_res, bb_res, ex_res = probe_all(hosts, peers, state, extras)
     sticky_cut = t0 - CONF["sticky_days"] * 86400
     node_seen = state.setdefault("node_last_ok", {})
@@ -569,18 +598,13 @@ def main():
             info.update(expected_node_exporter="1", reason="ok", via=res["via"])
         else:
             last = node_seen.get(h["id"])
-            if last and last["ts"] >= sticky_cut:
+            fields, publish_stale = down_host_state(h["name"], last, sticky_cut, mismatch, reachable, ignored)
+            if publish_stale:
                 # was scrapeable recently: keep publishing so up==0 is visible and alerts
                 lab["via"] = last["via"]
                 lab["identity"] = "stale"
                 node_targets.append({"targets": [last["addr"]], "labels": lab})
-                info.update(expected_node_exporter="1", reason="down_after_ok", via=last["via"])
-            elif mismatch:
-                info.update(expected_node_exporter="1", reason="identity_mismatch", via="")
-            elif reachable:
-                info.update(expected_node_exporter="1", reason="exporter_not_listening", via="")
-            else:
-                info.update(expected_node_exporter="0", reason="unreachable", via="")
+            info.update(fields)
         if info["reason"] != "ok":
             uncovered[info["reason"]] = uncovered.get(info["reason"], 0) + 1
         host_info.append(info)

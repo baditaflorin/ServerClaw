@@ -65,7 +65,8 @@ ownership_manifest:
         - playbooks/services/prometheus-0own-node-exporter.yml
         - tests/test_monitoring_prometheus_codification.py
         - .woodpecker.yml
-      mode: exclusive
+      mode: shared_contract
+      contract: monitoring-vm-targets-v1
     - id: monitoring_vm_role_shared_edits
       paths:
         - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
@@ -103,11 +104,12 @@ ownership_manifest:
         - docs/runbooks/monitoring-stack.md
         - docs/runbooks/tailscale-metrics-grants.md
         - docs/workstreams/ws-0522-monitoring-live-changes-codify.md
-        - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
-      mode: exclusive
+      mode: shared_contract
+      contract: scanopy-discovery-runbook-v1
     - id: active_workstream_registry
       paths:
         - workstreams.yaml
+        - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
       mode: shared_contract
       contract: workstream-registry-v1
 canonical_truth:

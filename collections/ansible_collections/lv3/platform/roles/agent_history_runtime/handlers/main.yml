@@ -1,0 +1,5 @@
+---
+# Purpose: Handlers for the agent_history_runtime role.
+- name: Reload systemd units for agent-history
+  ansible.builtin.systemd:
+    daemon_reload: true

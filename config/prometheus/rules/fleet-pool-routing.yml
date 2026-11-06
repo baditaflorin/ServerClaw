@@ -1,0 +1,82 @@
+# Added 2026-10-22. On 2026-10-22 09:06Z a bulk `nginx-render --push --reload` from a host without the private service-pools.json (a missing file reads as "no pools") took 282
+# pooled services off their pools on the gateway: the replicas on the other servers idled, the Docker host took the whole load again, the standby edge could serve 276 vhosts
+# fewer, and the pool balancer, which leaves "a render is pending" to the render's owner, waited for five hours. Nothing alerted: every per-pool signal (guardian findings, balancer
+# outcomes, gateway health) stayed green because the pools themselves were fine, only nothing routed through them.
+# What shows it: the per-pool numbers the balancer already publishes. fleet_pool_balance_member_measured_share_pct{service,target} is the share of a pool's requests that went to a member over
+# the last hour (it exists only for pools with at least 20 requests in the window), fleet_pool_balance_member_configured_share_pct is what the pool's weights give that member. A pool that
+# carries traffic and whose non-Docker-host members get under 5 % of it although their weights give them more than 30 % is not routed through its pool (or its replicas are down). Counted
+# over the pools: 1-3 in normal times (a drained replica), 85-120 from 10:21Z to 11:21Z on 2026-10-22 while the scan still produced traffic for 131 pools, and 8 of the 10 pools left with data
+# at low traffic (11:51Z to 14:21Z); 1 after the restore. The first version of this alert compared the AVERAGE share with its 24 h maximum and was wrong at low traffic: the number of pools that
+# have a measured share fell from 131 to 10 when the scan ended, so the average and its baseline described different sets of pools (it fired at 18:51Z for a healthy fleet).
+# The freshness term keeps a frozen file (a balancer starved of its lock by the pool guardian keeps its last values) from alerting: FleetPoolBalanceSilent (fleet-loops.yml) owns that case.
+groups:
+  - name: fleet_pool_routing
+    rules:
+      - alert: FleetPoolReplicaShareCollapsed
+        expr: |
+          count(
+            (sum by (service) (fleet_pool_balance_member_measured_share_pct{target!="dockerhost"}) < 5)
+              and on (service)
+            (sum by (service) (fleet_pool_balance_member_configured_share_pct{target!="dockerhost"}) > 30)
+          ) > 5
+            and on ()
+          (time() - max(fleet_pool_balance_last_run_timestamp_seconds)) < 1800
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_pool_routing
+        annotations:
+          summary: "{{ $value }} pools that carry traffic send under 5 % of it to their replicas although their weights give the replicas more than 30 %"
+          description: "The balancer measures, per pool, the share of requests each member took over the last hour and compares it with the share its weights give it. {{ $value }} pools whose weights send more than 30 % to replicas see under 5 % arrive there. The usual cause: the gateway's vhosts no longer route through their pool upstreams (a push of nginx-render from a host without the pools file; the pool balancer then says 'a render is pending'), or the replica hosts dropped out. Restore: on the builder run `fleet-runner nginx-render --exact-filter <the pooled services> --service-pools /root/fleet-state/service-pools.json` (read-only: how many files change), then the same with --push --reload."
+          runbook_url: docs/runbooks/pool-routing-collapse.md
+
+      # Second signature of the same incident: while the gateway did not match what nginx-render renders, the balancer skipped every pool with a proposal ("a render is pending,
+      # left to whoever owns it") and applied nothing for hours. fleet_pool_balance_proposals_pending (pools with a routing proposal that was not applied in the last run) sat at
+      # 200-257 against a normal 3-5 from 10:31Z to 14:31Z on 2026-10-22, with fleet_pool_balance_applied at 0. The freshness term keeps a frozen file (a balancer starved of its lock by
+      # the guardian keeps its last values) from alerting: FleetPoolBalanceSilent (fleet-loops.yml) owns that case.
+      - alert: FleetPoolBalanceStuck
+        expr: |
+          max(fleet_pool_balance_proposals_pending) > 30
+            and max(fleet_pool_balance_applied) == 0
+            and max(fleet_pool_balance_apply_enabled) == 1
+            and (time() - max(fleet_pool_balance_last_run_timestamp_seconds)) < 1800
+        for: 2h
+        labels:
+          severity: warning
+          service: fleet_pool_routing
+        annotations:
+          summary: "The pool balancer has {{ $value }} routing proposals and has applied none for 2 hours"
+          description: "Apply is on and the balancer ran in the last 30 minutes, yet it applied nothing while more than 30 pools wait for a routing change. Usual causes: the gateway no longer matches what nginx-render renders for those pools ('a render is pending, left to whoever owns it' in /root/fleet-state/state/pool-guardian/events.jsonl, balance_skipped), a guard that refuses every pool (environment contract, cordon), or the load gate. Look at `grep balance_skipped /root/fleet-state/state/pool-guardian/events.jsonl | tail` on the builder, then run `fleet-runner nginx-render --service-pools /root/fleet-state/service-pools.json` (read-only) to see how many files differ."
+          runbook_url: docs/runbooks/pool-routing-collapse.md
+
+      # Third signature: the balancer's environment contract guard held most pools for hours and nothing alerted, because FleetPoolBalanceStuck needs applied == 0 and the quick
+      # batch runs between the full planning runs kept applying a few pools. 2026-10-24 15:00Z to 2026-10-25 18:43Z: the keystore wave set APIKEY_SERVICE_URLS on the remote copies
+      # only, so a copy that would gain traffic lacked a variable name its sibling had, and a full planning run held 66-95 % of the 282 pools in 23 of the 27 hours the
+      # event log covers (10-24 15:29Z on; the other four hours show no full run) while 6-37 pools an hour were still applied. The per-run value is heavy-tailed (1 in a batch run, 186-267 in a full planning run), so
+      # the rule takes the HOURLY MAXIMUM as a share of the planned pools and asks for at least 6 of the last 8 hours over 40 %. After the fix (go_fleet_runner v0.7.713) the same
+      # hours read 2-20 % at first. The normal level is not fixed: the guard holds the pools that ask for a shift toward the Docker host, so it is 2-9 pools when no host is
+      # pressured and 90-92 (32-33 %) while infer-runtime is (10-26 04-05Z, mem_available 20 %): about 77 pools whose infer copy has BACKOFF_COORDINATOR_URL, CALL_TRACER_URL,
+      # FINGERPRINT_CACHE_URL or FLEET_FETCH_CACHE_URL that the Docker host copy lacks refuse every shed toward it. The 40 % line (113 pools) sits about 20 pools above that standing level
+      # on purpose: more than that held for six hours means a pressured host cannot shed load at all. The subquery points are aligned to the hour, so the value changes only on the hour. A series
+      # that is younger than 6 hours cannot reach 6 points, and the metric is absent on a runner without it: both stay quiet. Needs go_fleet_runner >= v0.7.717.
+      - alert: FleetPoolBalanceEnvGuardHolding
+        expr: |
+          sum_over_time(
+            (
+              max by (instance) (max_over_time(fleet_pool_balance_skipped_env_contract[1h]))
+                /
+              max by (instance) (max_over_time(fleet_pool_balance_pools[1h]))
+                > bool 0.4
+            )[8h:1h]
+          ) >= 6
+            and on (instance)
+          (max by (instance) (fleet_pool_balance_apply_enabled) == 1)
+            and on ()
+          (time() - max(fleet_pool_balance_last_run_timestamp_seconds)) < 1800
+        labels:
+          severity: warning
+          service: fleet_pool_routing
+        annotations:
+          summary: "The pool balancer's environment contract guard held over 40 % of the pools in at least 6 of the last 8 hours"
+          description: "In a full planning run the guard left more than 40 % of the pools where they were because the copy that would gain traffic lacks environment variable names another copy of the pool has (or the copies could not be compared). Pools that cannot be balanced keep their old traffic split, so replica load stops being rebalanced although nothing is down. Usual cause: a fleet-wide environment change staged over days (a wave) that sets a variable on some copies of a pool before the others. Find the names in the balance_skipped events on the builder (runbook), then finish the wave, or, when the variable differs by design and a copy works without it, make the guard ignore it."
+          runbook_url: docs/runbooks/pool-routing-collapse.md

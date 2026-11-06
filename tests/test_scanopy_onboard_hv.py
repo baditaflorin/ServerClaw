@@ -98,15 +98,17 @@ def test_install_refuses_a_missing_or_malformed_key_and_a_guest_that_is_not_runn
 
 
 def test_install_in_a_container_pipes_the_script_with_the_key_on_stdin_only(hv, monkeypatch, capsys) -> None:
-    rec = Recorder({
-        "pct list": (0, "VMID Status Lock Name\n107 running pve-exporter\n", ""),
-        "pct exec 107": (0, "RESULT active=yes docker=no\n", ""),
-    })
+    rec = Recorder(
+        {
+            "pct list": (0, "VMID Status Lock Name\n107 running pve-exporter\n", ""),
+            "pct exec 107": (0, "RESULT active=yes docker=no\n", ""),
+        }
+    )
     monkeypatch.setattr(hv, "run", rec)
 
     assert invoke(hv, monkeypatch, " ".join(GOOD), KEY + "\n") == 0
 
-    (cmd, script), = [call for call in rec.calls if call[0][:2] == ["pct", "exec"]]
+    ((cmd, script),) = [call for call in rec.calls if call[0][:2] == ["pct", "exec"]]
     assert cmd == ["pct", "exec", "107", "--", "bash", "-s"]
     assert f"KEY={KEY}" in script and "http://10.10.10.1:60072" in script and "'0.17.22'" not in script
     assert ' install --server-url "$URL" --mode daemon_poll' in script
@@ -114,18 +116,57 @@ def test_install_in_a_container_pipes_the_script_with_the_key_on_stdin_only(hv, 
     assert "RESULT active=yes docker=no" in capsys.readouterr().out
 
 
-def test_install_in_a_vm_goes_through_the_guest_agent_with_stdin_and_returns_the_guest_exit_code(hv, monkeypatch, capsys) -> None:
+def test_install_in_a_vm_goes_through_the_guest_agent_with_stdin_and_returns_the_guest_exit_code(
+    hv, monkeypatch, capsys
+) -> None:
     reply = json.dumps({"exited": 1, "exitcode": 6, "out-data": "ERR install failed: x\n", "err-data": ""})
-    rec = Recorder({"qm list": (0, "VMID NAME STATUS MEM\n200 stage running 4096\n", ""), "qm guest exec 200": (0, reply, "")})
+    rec = Recorder(
+        {"qm list": (0, "VMID NAME STATUS MEM\n200 stage running 4096\n", ""), "qm guest exec 200": (0, reply, "")}
+    )
     monkeypatch.setattr(hv, "run", rec)
 
     rc = invoke(hv, monkeypatch, "install vm 200 http://10.10.10.1:60072 vm-0mcp-200-stage latest", KEY + "\n")
 
     assert rc == 6
-    (cmd, script), = [call for call in rec.calls if call[0][:3] == ["qm", "guest", "exec"]]
+    ((cmd, script),) = [call for call in rec.calls if call[0][:3] == ["qm", "guest", "exec"]]
     assert cmd[:6] == ["qm", "guest", "exec", "200", "--pass-stdin", "1"] and cmd[-3:] == ["--", "bash", "-s"]
     assert KEY in script and not any(KEY in part for part in cmd)
     assert "ERR install failed: x" in capsys.readouterr().out
+
+
+def test_install_accepts_the_private_scanopy_tailnet_endpoint(hv, monkeypatch, capsys) -> None:
+    reply = json.dumps({"exited": 1, "exitcode": 0, "out-data": "RESULT active=yes docker=no\n", "err-data": ""})
+    rec = Recorder(
+        {"qm list": (0, "VMID NAME STATUS MEM\n200 stage running 4096\n", ""), "qm guest exec 200": (0, reply, "")}
+    )
+    monkeypatch.setattr(hv, "run", rec)
+
+    rc = invoke(hv, monkeypatch, "install vm 200 http://100.64.0.5:60072 vm-0infer-200-stage 0.17.22", KEY + "\n")
+
+    assert rc == 0
+    ((cmd, script),) = [call for call in rec.calls if call[0][:3] == ["qm", "guest", "exec"]]
+    assert "http://100.64.0.5:60072" in script
+    assert not any(KEY in part for part in cmd)
+    assert "RESULT active=yes docker=no" in capsys.readouterr().out
+
+
+def test_install_accepts_the_private_0infer_guest_relay(hv, monkeypatch, capsys) -> None:
+    reply = json.dumps({"exited": 1, "exitcode": 0, "out-data": "RESULT active=yes docker=no\n", "err-data": ""})
+    rec = Recorder(
+        {
+            "qm list": (0, "VMID NAME STATUS MEM\n704 infer-tier0 running 8192\n", ""),
+            "qm guest exec 704": (0, reply, ""),
+        }
+    )
+    monkeypatch.setattr(hv, "run", rec)
+
+    rc = invoke(hv, monkeypatch, "install vm 704 http://10.70.10.1:60072 vm-0infer-704-infer-tier0 0.17.22", KEY + "\n")
+
+    assert rc == 0
+    ((cmd, script),) = [call for call in rec.calls if call[0][:3] == ["qm", "guest", "exec"]]
+    assert "http://10.70.10.1:60072" in script
+    assert not any(KEY in part for part in cmd)
+    assert "RESULT active=yes docker=no" in capsys.readouterr().out
 
 
 def test_the_guest_script_refuses_an_active_daemon_and_other_architectures(hv) -> None:
@@ -137,7 +178,9 @@ def test_the_guest_script_refuses_an_active_daemon_and_other_architectures(hv) -
     assert "set -x" not in script  # the key is in the script text; tracing would print it
 
 
-def test_list_reports_running_non_template_guests_with_macs_and_real_interface_addresses(hv, monkeypatch, capsys, tmp_path) -> None:
+def test_list_reports_running_non_template_guests_with_macs_and_real_interface_addresses(
+    hv, monkeypatch, capsys, tmp_path
+) -> None:
     confs = {
         ("vm", "200"): ["name: stage", "net0: virtio=BC:24:11:AA:BB:CC,bridge=vmbr20"],
         ("vm", "201"): ["template: 1", "net0: virtio=BC:24:11:AA:BB:DD,bridge=vmbr20"],
@@ -146,17 +189,28 @@ def test_list_reports_running_non_template_guests_with_macs_and_real_interface_a
     monkeypatch.setattr(hv, "conf_lines", lambda kind, vmid: confs.get((kind, vmid), []))
     agent = [
         {"name": "lo", "ip-addresses": [{"ip-address": "127.0.0.1", "ip-address-type": "ipv4"}]},
-        {"name": "ens18", "ip-addresses": [{"ip-address": "10.10.10.200", "ip-address-type": "ipv4"},
-                                           {"ip-address": "fe80::1", "ip-address-type": "ipv6"}]},
+        {
+            "name": "ens18",
+            "ip-addresses": [
+                {"ip-address": "10.10.10.200", "ip-address-type": "ipv4"},
+                {"ip-address": "fe80::1", "ip-address-type": "ipv6"},
+            ],
+        },
         {"name": "docker0", "ip-addresses": [{"ip-address": "172.17.0.1", "ip-address-type": "ipv4"}]},
         {"name": "br-1234", "ip-addresses": [{"ip-address": "172.20.0.1", "ip-address-type": "ipv4"}]},
     ]
-    rec = Recorder({
-        "qm list": (0, "VMID NAME STATUS MEM\n200 stage running 1\n201 tpl running 1\n202 off stopped 1\n", ""),
-        "qm agent 200": (0, json.dumps(agent), ""),
-        "pct list": (0, "VMID Status Lock Name\n107 running pve-exporter\n", ""),
-        "pct exec 107": (0, "2: eth0    inet 10.10.10.107/24 brd 10.10.10.255 scope global eth0\n3: docker0    inet 172.17.0.1/16 scope global docker0\n", ""),
-    })
+    rec = Recorder(
+        {
+            "qm list": (0, "VMID NAME STATUS MEM\n200 stage running 1\n201 tpl running 1\n202 off stopped 1\n", ""),
+            "qm agent 200": (0, json.dumps(agent), ""),
+            "pct list": (0, "VMID Status Lock Name\n107 running pve-exporter\n", ""),
+            "pct exec 107": (
+                0,
+                "2: eth0    inet 10.10.10.107/24 brd 10.10.10.255 scope global eth0\n3: docker0    inet 172.17.0.1/16 scope global docker0\n",
+                "",
+            ),
+        }
+    )
     monkeypatch.setattr(hv, "run", rec)
 
     assert invoke(hv, monkeypatch, "list") == 0
@@ -164,15 +218,34 @@ def test_list_reports_running_non_template_guests_with_macs_and_real_interface_a
     out = json.loads(capsys.readouterr().out)
     assert out["wrapper_version"] == hv.WRAPPER_VERSION
     assert out["guests"] == [
-        {"kind": "vm", "id": 200, "name": "stage", "macs": ["bc:24:11:aa:bb:cc"], "ips": ["10.10.10.200"], "manageable": True},
-        {"kind": "ct", "id": 107, "name": "pve-exporter", "macs": ["bc:24:11:00:00:07"], "ips": ["10.10.10.107"], "manageable": True},
+        {
+            "kind": "vm",
+            "id": 200,
+            "name": "stage",
+            "macs": ["bc:24:11:aa:bb:cc"],
+            "ips": ["10.10.10.200"],
+            "manageable": True,
+        },
+        {
+            "kind": "ct",
+            "id": 107,
+            "name": "pve-exporter",
+            "macs": ["bc:24:11:00:00:07"],
+            "ips": ["10.10.10.107"],
+            "manageable": True,
+        },
     ]
 
 
 def test_a_vm_whose_guest_agent_fails_is_listed_as_not_manageable(hv, monkeypatch, capsys) -> None:
     monkeypatch.setattr(hv, "conf_lines", lambda kind, vmid: ["name: x"])
-    rec = Recorder({"qm list": (0, "VMID NAME STATUS\n640 mirror running\n", ""), "qm agent 640": (255, "", "QEMU guest agent is not running"),
-                    "pct list": (0, "VMID Status Lock Name\n", "")})
+    rec = Recorder(
+        {
+            "qm list": (0, "VMID NAME STATUS\n640 mirror running\n", ""),
+            "qm agent 640": (255, "", "QEMU guest agent is not running"),
+            "pct list": (0, "VMID Status Lock Name\n", ""),
+        }
+    )
     monkeypatch.setattr(hv, "run", rec)
 
     invoke(hv, monkeypatch, "list")
@@ -181,9 +254,13 @@ def test_a_vm_whose_guest_agent_fails_is_listed_as_not_manageable(hv, monkeypatc
     assert g["manageable"] is False and g["ips"] == []
 
 
-def test_a_guest_agent_that_times_out_makes_the_guest_not_manageable_instead_of_failing_the_listing(hv, monkeypatch, capsys) -> None:
+def test_a_guest_agent_that_times_out_makes_the_guest_not_manageable_instead_of_failing_the_listing(
+    hv, monkeypatch, capsys
+) -> None:
     # A saturated hypervisor answers `qm agent` slowly; one TimeoutExpired used to crash the whole `list` (seen on 0own, load 25).
-    monkeypatch.setattr(hv, "conf_lines", lambda kind, vmid: ["name: x", "net0: virtio=BC:24:11:AA:BB:01,bridge=vmbr60"])
+    monkeypatch.setattr(
+        hv, "conf_lines", lambda kind, vmid: ["name: x", "net0: virtio=BC:24:11:AA:BB:01,bridge=vmbr60"]
+    )
 
     def run(cmd, stdin=None, timeout=60):
         if cmd[:2] == ["qm", "list"]:
@@ -192,14 +269,20 @@ def test_a_guest_agent_that_times_out_makes_the_guest_not_manageable_instead_of_
             return 0, "VMID Status Lock Name\n", ""
         if cmd[:3] == ["qm", "agent", "610"]:
             raise subprocess.TimeoutExpired(cmd, timeout)
-        return 0, json.dumps([{"name": "ens18", "ip-addresses": [{"ip-address": "10.60.10.20", "ip-address-type": "ipv4"}]}]), ""
+        return (
+            0,
+            json.dumps([{"name": "ens18", "ip-addresses": [{"ip-address": "10.60.10.20", "ip-address-type": "ipv4"}]}]),
+            "",
+        )
 
     monkeypatch.setattr(hv, "run", run)
 
     assert invoke(hv, monkeypatch, "list") == 0
 
     guests = {g["id"]: g for g in json.loads(capsys.readouterr().out)["guests"]}
-    assert guests[610]["manageable"] is False and guests[610]["ips"] == [] and guests[610]["macs"] == ["bc:24:11:aa:bb:01"]
+    assert (
+        guests[610]["manageable"] is False and guests[610]["ips"] == [] and guests[610]["macs"] == ["bc:24:11:aa:bb:01"]
+    )
     assert guests[620]["manageable"] is True and guests[620]["ips"] == ["10.60.10.20"]
 
 

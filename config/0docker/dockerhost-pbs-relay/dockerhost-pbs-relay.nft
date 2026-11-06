@@ -1,0 +1,23 @@
+# Docker host (VM100, 10.10.10.20) -> own-pbs (PBS#1, tailnet 100.64.0.11) relay through THIS hypervisor, 2026-10-22.
+# Why: VM100's own tailscaled has no direct path to own-pbs (it sits behind this host's NAT and shares the public address and the 41641 port with this host's tailscaled): it goes through
+# a DERP relay at about 2.8 MB/s (22 Mbit/s, RTT 0.4-0.8 s). This hypervisor has a DIRECT WireGuard path to own-pbs (203.0.113.2 <-> 203.0.113.14). VM100 -> 10.10.10.1:8007 (vmbr1) -> DNAT ->
+# 100.64.0.11:8007 over this host's tailnet link (masqueraded to 100.64.0.5, which already has the grant to own-pbs tcp:8007 in config/tailscale/policy.hujson).
+# Narrow on purpose: only source 10.10.10.20, only the vmbr1 side, only tcp 8007, never reachable from the Internet (no enp5s0 match, nothing is published). TLS ends at own-pbs, so the pinned
+# certificate fingerprint of the backup client is unchanged.
+# The MSS clamp: tailscale0 has MTU 1280 and VM100 speaks MTU 1500.
+# Loaded as its own table by dockerhost-pbs-relay.service (this host's /etc/nftables.conf is a stock file and nftables.service is disabled; fleet-lockdown loads its own table the same way).
+# Undo: ./install-host.sh --undo (or systemctl disable --now dockerhost-pbs-relay.service).
+table ip dockerhost_pbs_relay {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+        iifname "vmbr1" ip saddr 10.10.10.20 ip daddr 10.10.10.1 tcp dport 8007 counter dnat to 100.64.0.11:8007
+    }
+    chain postrouting {
+        type nat hook postrouting priority srcnat; policy accept;
+        oifname "tailscale0" ip saddr 10.10.10.20 ip daddr 100.64.0.11 tcp dport 8007 counter masquerade
+    }
+    chain mss {
+        type filter hook forward priority mangle; policy accept;
+        oifname "tailscale0" ip saddr 10.10.10.20 ip daddr 100.64.0.11 tcp dport 8007 tcp flags syn tcp option maxseg size set rt mtu
+    }
+}

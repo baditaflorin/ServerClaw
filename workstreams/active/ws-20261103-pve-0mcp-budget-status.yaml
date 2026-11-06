@@ -1,0 +1,66 @@
+id: ws-20261103-pve-0mcp-budget-status
+adr: "0494"
+title: "pve-0mcp memory budget runbook: a status section for what stage 1 changed on 2026-11-02 and the new totals (82.14 percent guaranteed, 97.1 percent maximums), tests pin it"
+status: in_progress
+ready_to_merge: false
+live_applied: true
+owner: claude
+branch: claude/pve-0mcp-budget-status
+worktree_path: .claude/worktrees/pve-0mcp-budget-status
+doc: docs/workstreams/ws-20261103-pve-0mcp-budget-status.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - docs/runbooks/pve-0mcp-memory-budget.md
+  - tests/test_proxmox_host_memory_budget.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261103-pve-0mcp-budget-status.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261103-pve-0mcp-budget-status.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261103_pve_0mcp_budget_status_tracking
+      paths:
+        - docs/workstreams/ws-20261103-pve-0mcp-budget-status.md
+      mode: exclusive
+    - id: pve_0mcp_memory_budget_doc_status
+      paths:
+        - docs/runbooks/pve-0mcp-memory-budget.md
+        - tests/test_proxmox_host_memory_budget.py
+      mode: shared_contract
+      contract: pve-0mcp-memory-budget-doc-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261103-pve-0mcp-budget-status.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "The pve-0mcp memory budget runbook has a status section (11): what was applied on 2026-11-02 (VM 120 floor to 18,432; VMs 171, 122 and 192 at fixed sizes; the swap file step left open because a stopgap exists), the new totals (105,728 MiB guaranteed, 82.14 percent; maximums 124,928 MiB, 97.1 percent), and the tests pin the arithmetic"
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  PR 653 merged the budget runbook and its alert as a proposal that says nothing is applied. On 2026-11-02 stage 1 was taken in part and three VMs were given fixed sizes when the host
+  fell under 5 percent available again, and on 2026-11-03 the alert was shipped. The runbook still said "nothing applied" and "80.15 today", its test pinned that sentence, and the alert
+  it links to computes 82.14. The 2026-11-01 tables stay as the dated measurement (their tests are unchanged); a new section 11 records the changes and the new totals, and the old
+  "nothing applied" test becomes two tests: which steps were applied, and that section 11's figures add up against the budget table. The live changes were made and verified before this
+  change (live_applied is true); nothing is applied by it.
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Write section 11 (what was applied, the numbers now, what happened to the host) and qualify the sentences that were true only on 2026-11-01
+    status: completed
+  - id: t3
+    title: Replace the nothing-applied test by two tests that pin the applied steps and the arithmetic of section 11 (mutation-tested)
+    status: completed
+  - id: t4
+    title: Pass the pre-push gate on the build server, open the pull request and land it
+    status: in_progress

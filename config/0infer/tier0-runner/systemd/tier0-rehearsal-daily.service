@@ -1,0 +1,9 @@
+[Unit]
+Description=Tier-0 daily failover rehearsal from the runner (nothing user-visible changes)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/tier0-rehearsal-daily
+TimeoutStartSec=2400
+Nice=10

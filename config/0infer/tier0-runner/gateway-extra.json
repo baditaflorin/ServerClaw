@@ -1,0 +1,8 @@
+{
+  "_comment": "Read by build-standby-gateway.py (--extra-config, default /etc/tier0-runner/gateway-extra.json via tier0-gateway-promote.sh). The DomainScope vhost is not a *.https.conf and points at VM101 (10.10.10.30), which is gone with the site: its web ports are served by the standby VM 8101 on 0infer, reached through the 0infer hypervisor's nft DNAT (config/0infer/tier0-runner/host/infer-domainscope-standby.nft) over the tailnet grant for exactly these two ports. tests/test_tier0_domainscope_path.py keeps the three in step.",
+  "extra_vhosts": ["domainscope_scrapetheworld_org.conf"],
+  "remap": {
+    "10.10.10.30:23480": "100.64.0.21:23480",
+    "10.10.10.30:23481": "100.64.0.21:23481"
+  }
+}

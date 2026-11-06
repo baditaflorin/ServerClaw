@@ -1,0 +1,13 @@
+# DomainScope standby (VM 8101 standby-docker-prod, 10.70.10.50), added 2026-10-17 by the resilience session. Narrow on purpose.
+#  - the standby public edge (edge-standby-0mcp, VM110 on 0mcp, tailnet 100.84.241.55) reaches the standby's two web ports THROUGH this host:
+#    tailnet 100.64.0.21:23480 (frontend) and :23481 (api) -> 10.70.10.50 (same port)
+#  - only from that one source address; the tailnet grant in config/tailscale/policy.hujson allows exactly these two ports from the edge, nothing else on this host
+#  - while the VM is off (its resting state) the rule is harmless: the edge's connection simply times out; the counter proves the edge reached this host
+#  - the forward chain of infer-proxmox.nft already accepts tailscale0 -> vmbr70 and the established replies, so no filter change is needed
+# Undo: delete this file and its include in /etc/nftables.conf, then `nft delete table ip infer_ds_standby_nat`.
+table ip infer_ds_standby_nat {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+        iifname "tailscale0" ip saddr 100.84.241.55 ip daddr 100.64.0.21 tcp dport { 23480, 23481 } counter dnat to 10.70.10.50
+    }
+}

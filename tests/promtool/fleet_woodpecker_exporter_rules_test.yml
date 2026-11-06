@@ -1,0 +1,47 @@
+# promtool unit tests for config/prometheus/rules/fleet-woodpecker-exporter.yml (run by tests/test_fleet_woodpecker_exporter_rules.py when promtool is installed).
+rule_files:
+  - ../../config/prometheus/rules/fleet-woodpecker-exporter.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: an unreadable plane fires after 10 minutes, a healthy one never
+    interval: 1m
+    input_series:
+      - series: 'woodpecker_control_plane_up{control_plane="ci_0exec"}'
+        values: "1x5 0x40"
+      - series: 'woodpecker_control_plane_up{control_plane="ci_0mcp"}'
+        values: "1x45"
+    alert_rule_test:
+      - {eval_time: 10m, alertname: WoodpeckerControlPlaneUnreachable, exp_alerts: []}
+      - eval_time: 20m
+        alertname: WoodpeckerControlPlaneUnreachable
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_woodpecker_exporter, control_plane: ci_0exec}
+            exp_annotations:
+              summary: "The Woodpecker exporter cannot read ci_0exec"
+              description: "woodpecker_control_plane_up is 0 for ci_0exec: the exporter's API call failed (server down, token file, or the private proxy). Pipelines on that plane may be stuck; check the server and its token on CT108."
+              runbook_url: docs/runbooks/fleet-observability.md#woodpecker-exporter-alerts
+
+  - name: no series at all fires, a present series does not
+    interval: 1m
+    input_series:
+      - series: 'something_else{x="y"}'
+        values: "1x40"
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: WoodpeckerExporterMissing
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_woodpecker_exporter}
+            exp_annotations:
+              summary: "No Woodpecker control-plane metrics are exported"
+              description: "woodpecker_control_plane_up has no series: fleet-woodpecker-metrics.timer on CT108 is not running or its run fails. Capacity, queue and pipeline dashboards are blind. systemctl status fleet-woodpecker-metrics.service on CT108."
+              runbook_url: docs/runbooks/fleet-observability.md#woodpecker-exporter-alerts
+
+  - name: a present series does not fire the missing alert
+    interval: 1m
+    input_series:
+      - series: 'woodpecker_control_plane_up{control_plane="ci_0exec"}'
+        values: "1x40"
+    alert_rule_test:
+      - {eval_time: 30m, alertname: WoodpeckerExporterMissing, exp_alerts: []}

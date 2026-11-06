@@ -113,6 +113,14 @@
         "backup_pbs"
       ]
     },
+    "dedicated-agent-history": {
+      "kind": "dedicated_plane",
+      "phase": "planned-dedicated",
+      "summary": "Dedicated plane for the agent-history store: its own guest, its own Postgres and an encrypted data volume, kept out of every runtime pool because it holds every secret an agent ever saw (ADR 0494).",
+      "services": [
+        "agent_history"
+      ]
+    },
     "dedicated-build": {
       "kind": "dedicated_plane",
       "phase": "already-dedicated",

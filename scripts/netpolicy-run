@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# netpolicy-run: what netpolicy-drift.service runs on CT108 (docs/runbooks/network-policy.md, "The drift job").
+#
+# Compares the LIVE firewall state of every hypervisor that has a policy file with config/network-policy/*.yaml at origin/main (a
+# squash-merged, reviewed change is the approval) and writes node-exporter textfile metrics netpolicy_<host>.prom. The tool is the
+# INSTALLED copy (scripts/netpolicy-install.sh puts only files identical to origin/main there). It READS hosts and never changes one.
+#
+# Operator overrides live in /etc/fleet-runner/netpolicy.env:
+#   NETPOLICY_REPO_URL   the repository (written by the installer, no credentials in it; git uses the credential helper of CT108)
+# Exit: 0 every policy in sync, 2 drift somewhere (an alert, not a failure of the unit), 3 could not look (fetch or hypervisor).
+set -uo pipefail
+LIB=${NETPOLICY_LIB:-/usr/local/lib/netpolicy}
+STATE=${NETPOLICY_STATE:-/var/lib/netpolicy}
+TEXTFILE=${NETPOLICY_TEXTFILE_DIR:-/var/lib/prometheus-node-exporter/textfile}
+# shellcheck disable=SC1091
+[ -f /etc/fleet-runner/netpolicy.env ] && { set -a; . /etc/fleet-runner/netpolicy.env; set +a; }
+if [ -z "${NETPOLICY_REPO_URL:-}" ]; then
+  echo "netpolicy-run: NETPOLICY_REPO_URL is not set (see /etc/fleet-runner/netpolicy.env)" >&2
+  exit 3
+fi
+export GIT_TERMINAL_PROMPT=0
+install -d -m 0700 "$STATE"
+if [ ! -d "$STATE/repo/.git" ]; then
+  git clone --quiet --filter=blob:none --no-checkout "$NETPOLICY_REPO_URL" "$STATE/repo" || { echo "netpolicy-run: clone failed" >&2; exit 3; }
+fi
+git -C "$STATE/repo" fetch --quiet --depth 1 origin main || { echo "netpolicy-run: fetch failed" >&2; exit 3; }
+sha=$(git -C "$STATE/repo" rev-parse origin/main) || exit 3
+rm -rf "$STATE/policy"; mkdir -p "$STATE/policy"
+git -C "$STATE/repo" archive "$sha" config/network-policy | tar -x -C "$STATE/policy" || { echo "netpolicy-run: no policy at $sha" >&2; exit 3; }
+echo "netpolicy-run: policy at ${sha:0:9}"
+rc=0
+shopt -s nullglob
+files=("$STATE"/policy/config/network-policy/*.yaml)
+[ ${#files[@]} -gt 0 ] || { echo "netpolicy-run: no policy file at ${sha:0:9}" >&2; exit 3; }
+for f in "${files[@]}"; do
+  python3 "$LIB/netpolicy.py" drift --policy "$f" --textfile-dir "$TEXTFILE"
+  r=$?
+  # 3 (could not look) outranks 2 (drift) outranks 0
+  if [ "$r" -eq 3 ] || { [ "$r" -eq 2 ] && [ "$rc" -ne 3 ]; }; then rc=$r; elif [ "$r" -ne 0 ] && [ "$rc" -eq 0 ]; then rc=3; fi
+done
+exit "$rc"

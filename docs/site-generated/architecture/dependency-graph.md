@@ -60,7 +60,7 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Artifact Cache, Authentik, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, LiveKit, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
+| `1` | Agent History Store, Alertmanager, Artifact Cache, Authentik, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Grist, Harbor, Headscale, LiveKit, Mail Platform, Mailpit, MinIO, NATS JetStream, NGINX Edge, Nomad, Ollama, OpenBao, Piper, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Redpanda, Repowise Semantic Code Search, SearXNG, Uptime Kuma, ntopng, step-ca |
 | `2` | Apache Superset, Apache Tika, Browser Runner, Changedetection.io, Changelog Portal, Coolify Apps Ingress, Crawl4AI, Developer Portal, Dify, Directus, Excalidraw, Flagsmith, Gitea, GlitchTip, Gotenberg, Homepage, Label Studio, Lago, Langfuse, LibreChat, LiteLLM Proxy, Matrix Synapse, Mattermost, Neko Remote Desktop, NetBox, Nextcloud, OpenFGA, Outline, Paperless-ngx, Plane, Platform API Gateway, Plausible Analytics, Public Status Page, Repo Intake, SFTPGo, Semaphore, ServerClaw, Temporal, Tesseract OCR, Typesense, Vaultwarden, Windmill, n8n, ntfy |
 | `3` | Ops Portal, Woodpecker CI |
 
@@ -68,6 +68,7 @@ Generated from `config/dependency-graph.json`.
 
 ```mermaid
 graph TD
+    agent_history["Agent History Store\nTier 1"]
     alertmanager["Alertmanager\nTier 1"]
     artifact_cache["Artifact Cache\nTier 1"]
     authentik["Authentik\nTier 1"]

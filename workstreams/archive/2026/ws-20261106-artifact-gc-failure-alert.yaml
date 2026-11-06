@@ -1,0 +1,34 @@
+id: ws-20261106-artifact-gc-failure-alert
+adr: '0226'
+title: Surface bounded runner artifact retention failures
+status: merged
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: main
+worktree_path: .worktrees/artifact-gc-alert
+doc: docs/runbooks/fleet-image-gc-monitoring.md
+depends_on:
+- ws-20261106-image-gc-failure-alert
+conflicts_with: []
+shared_surfaces:
+- .woodpecker.yml
+- config/prometheus/rules/fleet-image-gc.yml
+- collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus.yml.j2
+- tests/test_fleet_image_gc_rules.py
+- tests/test_monitoring_prometheus_codification.py
+- tests/test_adopted_prometheus_rules.py
+- tests/promtool/fleet_image_gc_rules_test.yml
+canonical_truth:
+  changelog_entry: Expose only the builder artifact cleanup failed-state metric and
+    alert after three minutes without widening generic systemd collection.
+  release_bump: patch
+  latest_receipts:
+    image_gc_monitoring: 2026-11-06-image-gc-monitoring-live-apply
+  included_in_repo_version: 0.179.56
+notes: The existing builder disk janitor now includes bounded runner artifact retention.
+  Its nonzero failure must remain visible. Verify the real failed=0 sample and healthy
+  rule after merge; never intentionally fail production GC. Shared version and final
+  publication metadata stay with the release integration. Plane registration was attempted;
+  the isolated checkout has no private Plane authentication overlay, so this Git shard
+  is the fallback.

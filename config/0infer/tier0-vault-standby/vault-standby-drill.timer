@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly vault standby promotion drill
+
+[Timer]
+OnCalendar=Sat *-*-* 04:20:00
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

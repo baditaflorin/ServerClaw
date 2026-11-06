@@ -13,6 +13,12 @@ Group membership is derived from tags in proxmox_guests:
   - postgres_guests: guests whose tags include 'postgres'
   - backup_guests:   guests whose tags include 'backup'
 
+A guest declared with `lifecycle: planned` (declared, not yet approved or provisioned: ADR 0494) joins
+planned_guests as well as lv3_guests (so its group variables still apply to its own per-guest playbook),
+and the scoped host patterns below exclude planned_guests, so no scoped converge touches a host that
+does not exist yet. The planned_guests group is always emitted, even when empty, so those patterns
+never name an unknown group.
+
 Usage:
   python3 scripts/generate_inventory.py --write    # regenerate inventory/hosts.yml
   python3 scripts/generate_inventory.py --check    # exit 1 if drift detected
@@ -73,16 +79,16 @@ _EXECUTION_HOST_PATTERNS: dict[str, dict[str, str]] = {
         "staging": "proxmox_hosts:&staging",
     },
     "lv3_guests": {
-        "production": "lv3_guests:&production",
-        "staging": "lv3_guests:&staging",
+        "production": "lv3_guests:&production:!planned_guests",
+        "staging": "lv3_guests:&staging:!planned_guests",
     },
     "postgres_guests": {
-        "production": "postgres_guests:&production",
-        "staging": "postgres_guests:&staging",
+        "production": "postgres_guests:&production:!planned_guests",
+        "staging": "postgres_guests:&staging:!planned_guests",
     },
     "backup_guests": {
-        "production": "backup_guests:&production",
-        "staging": "backup_guests:&staging",
+        "production": "backup_guests:&production:!planned_guests",
+        "staging": "backup_guests:&staging:!planned_guests",
     },
     # Hosts with dedicated staging VMs
     "coolify": {"production": "coolify", "staging": "coolify-staging"},
@@ -169,6 +175,7 @@ def build_inventory(host_vars: dict) -> dict:
         lv3_guests   – all production + staging guests (with ansible_host)
         postgres_guests – guests tagged 'postgres' (prod + staging)
         backup_guests   – guests tagged 'backup'   (prod + staging)
+        planned_guests  – guests with lifecycle: planned (production names only; always present)
     """
     guests: list[dict] = require_list(host_vars.get("proxmox_guests", []), "proxmox_guests")
     ts_ip: str = require_str(
@@ -227,6 +234,12 @@ def build_inventory(host_vars: dict) -> dict:
             if g.get("has_staging", False):
                 backup_names[f"{g['name']}-staging"] = None
 
+    # --- planned_guests: declared but not yet approved or provisioned (ADR 0494) ---
+    planned_names: dict[str, None] = {}
+    for g in guests:
+        if g.get("lifecycle") == "planned":
+            planned_names[g["name"]] = None
+
     return {
         "all": {
             "vars": {
@@ -243,6 +256,7 @@ def build_inventory(host_vars: dict) -> dict:
                         "lv3_guests": None,
                         "postgres_guests": None,
                         "backup_guests": None,
+                        "planned_guests": None,
                     }
                 },
                 "platform_services": {"children": {"proxmox_hosts": None}},
@@ -261,6 +275,7 @@ def build_inventory(host_vars: dict) -> dict:
                 "lv3_guests": {"hosts": lv3_hosts},
                 "postgres_guests": {"hosts": postgres_names},
                 "backup_guests": {"hosts": backup_names},
+                "planned_guests": {"hosts": planned_names},
             },
         }
     }

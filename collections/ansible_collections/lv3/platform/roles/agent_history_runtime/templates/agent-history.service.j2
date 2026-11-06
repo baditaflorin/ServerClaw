@@ -1,0 +1,23 @@
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+# Starts the compose project only while the encrypted data volume is mounted (ADR 0494). At boot the condition is false,
+# the unit is skipped, and agent-history-unlock starts it after the owner unlocks the volume.
+[Unit]
+Description=agent-history store and Postgres (compose project)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+ConditionPathIsMount={{ agent_history_data_mount }}
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory={{ agent_history_site_dir }}
+# The OpenBao Agent first (it renders the env files and the token files), then wait for them, then everything else.
+ExecStart=/usr/bin/docker compose --file {{ agent_history_compose_file }} up --detach openbao-agent
+ExecStart=/usr/bin/timeout 180 /bin/sh -c 'until [ -s {{ agent_history_run_dir }}/db.env ] && [ -s {{ agent_history_run_dir }}/store.env ]; do sleep 2; done'
+ExecStart=/usr/bin/docker compose --file {{ agent_history_compose_file }} up --detach --remove-orphans
+ExecStop=/usr/bin/docker compose --file {{ agent_history_compose_file }} stop
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

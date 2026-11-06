@@ -1,0 +1,66 @@
+#!/bin/bash
+# Standing janitor for /home/ops/fe_runs on docker-runtime (VM 120): removes ONLY the node_modules directories of idle run dirs.
+#
+# Why: front-end batteries (another agent session's runs) start a new run dir (a copy of a frontend plus `npm ci`, ~600 MB) every couple of minutes and never clean up. On 2026-10-18 06:46Z that
+# filled the root disk of the host that also runs the CI server (ci.example.org), authelia and elasticsearch. node_modules is regenerable (`[ -d node_modules ] || npm ci` is what the runs themselves
+# do), run dirs, outputs and everything else are never touched. The user approved this exact policy on 2026-10-18.
+#
+# A run dir is IDLE when no running container mounts it and no file outside node_modules was modified for IDLE minutes. IDLE shrinks as the disk fills (120 min with >= 25% free, 30 min with
+# >= 12%, 10 min below). Symlinks are never followed, nothing outside the base directory is touched. Exports fe_runs_janitor_* metrics to the node exporter textfile directory.
+#   FE_RUNS_DRY=1 only logs what it would remove.     Environment overrides (tests): FE_RUNS_BASE FE_RUNS_LOG FE_RUNS_PROM FE_RUNS_PAR FE_RUNS_FREE_PCT FE_RUNS_IDLE_MIN
+set -u
+BASE=${FE_RUNS_BASE:-/home/ops/fe_runs}
+LOG=${FE_RUNS_LOG:-/var/log/fe-runs-janitor.log}
+PROM=${FE_RUNS_PROM:-/var/lib/prometheus/node-exporter/fe_runs_janitor.prom}
+PAR=${FE_RUNS_PAR:-4}
+DRY=${FE_RUNS_DRY:-0}
+LOCK=${FE_RUNS_LOCK:-/run/fe-runs-janitor.lock}
+command -v flock >/dev/null 2>&1 && { exec 9>"$LOCK"; flock -n 9 || { echo "another run is in progress"; exit 0; }; }
+log() { printf '%s %s\n' "$(date -u +%FT%TZ)" "$*" >> "$LOG" 2>/dev/null || true; }
+free_pct=${FE_RUNS_FREE_PCT:-$(df -P "$BASE" 2>/dev/null | awk 'NR==2{gsub("%","",$5); print 100-$5}')}
+free_pct=${free_pct:-50}
+if [ -n "${FE_RUNS_IDLE_MIN:-}" ]; then IDLE=$FE_RUNS_IDLE_MIN
+elif [ "$free_pct" -ge 25 ]; then IDLE=120
+elif [ "$free_pct" -ge 12 ]; then IDLE=30
+else IDLE=10; fi
+t0=$(date +%s)
+write_metrics() { # write_metrics STATUS REMOVED RUNS REMAINING
+  local prev_ok
+  prev_ok=$(grep '^fe_runs_janitor_last_success_timestamp_seconds' "$PROM" 2>/dev/null | awk '{print $2}')
+  {
+    echo "# TYPE fe_runs_janitor_last_run_timestamp_seconds gauge"
+    echo "fe_runs_janitor_last_run_timestamp_seconds $(date +%s)"
+    echo "fe_runs_janitor_last_exit_code $([ "$1" = ok ] && echo 0 || echo 1)"
+    echo "fe_runs_janitor_removed_dirs $2"
+    echo "fe_runs_janitor_run_dirs $3"
+    echo "fe_runs_janitor_node_modules_dirs_remaining $4"
+    echo "fe_runs_janitor_idle_minutes $IDLE"
+    echo "fe_runs_janitor_duration_seconds $(( $(date +%s) - t0 ))"
+    if [ "$1" = ok ]; then echo "fe_runs_janitor_last_success_timestamp_seconds $(date +%s)"; elif [ -n "$prev_ok" ]; then echo "fe_runs_janitor_last_success_timestamp_seconds $prev_ok"; fi
+  } > "$PROM.tmp" 2>/dev/null && chmod 644 "$PROM.tmp" && mv "$PROM.tmp" "$PROM" 2>/dev/null || true
+}
+[ -d "$BASE" ] || { log "no $BASE: nothing to do"; write_metrics ok 0 0 0; exit 0; }
+# run dirs mounted by a running container (never touched)
+busy=$(docker ps -q 2>/dev/null | while read -r c; do docker inspect -f '{{range .Mounts}}{{.Source}}{{"\n"}}{{end}}' "$c" 2>/dev/null; done | grep "^$BASE/" | sed "s#^$BASE/\([^/]*\).*#\1#" | sort -u)
+LIST=$(mktemp "${TMPDIR:-/tmp}/fe-runs-janitor.XXXXXX") || exit 1
+trap 'rm -f "$LIST"' EXIT
+runs=0; skipped_busy=0; skipped_active=0
+for dir in "$BASE"/*/; do
+  d=$(basename "$dir")
+  [ -d "$BASE/$d" ] && [ ! -L "$BASE/$d" ] || continue
+  runs=$((runs + 1))
+  if printf '%s\n' "$busy" | grep -qx -- "$d"; then skipped_busy=$((skipped_busy + 1)); continue; fi
+  if [ -n "$(find "$BASE/$d" -maxdepth 4 -path '*/node_modules' -prune -o -mmin -"$IDLE" -print -quit 2>/dev/null)" ]; then skipped_active=$((skipped_active + 1)); continue; fi
+  find "$BASE/$d" -maxdepth 3 -name node_modules -type d -prune -print0 2>/dev/null >> "$LIST"
+done
+n=$(tr -cd '\0' < "$LIST" | wc -c | tr -d ' ')
+log "start dry=$DRY idle=${IDLE}m free=${free_pct}% run_dirs=$runs busy=$skipped_busy active=$skipped_active node_modules_selected=$n"
+rc=0
+if [ "$n" -gt 0 ]; then
+  tr '\0' '\n' < "$LIST" | sed 's/^/REMOVE /' >> "$LOG" 2>/dev/null || true
+  if [ "$DRY" != 1 ]; then xargs -0 -r -n 1 -P "$PAR" rm -rf -- < "$LIST" || rc=1; fi
+fi
+remaining=$(find "$BASE" -maxdepth 4 -name node_modules -type d -prune 2>/dev/null | wc -l | tr -d ' ')
+log "done removed=$([ "$DRY" = 1 ] && echo 0 || echo "$n") remaining=$remaining free=$(df -P "$BASE" 2>/dev/null | awk 'NR==2{print $4}')K rc=$rc"
+write_metrics "$([ $rc = 0 ] && echo ok || echo failed)" "$([ "$DRY" = 1 ] && echo 0 || echo "$n")" "$runs" "$remaining"
+exit $rc

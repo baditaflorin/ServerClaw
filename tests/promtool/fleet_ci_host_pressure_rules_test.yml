@@ -1,0 +1,79 @@
+# promtool unit tests for config/prometheus/rules/fleet-ci-host-pressure.yml (run by tests/test_fleet_ci_host_pressure_rules.py when promtool is installed).
+# The counters grow by (pressure share x 60 seconds) per one minute sample.
+rule_files:
+  - ../../config/prometheus/rules/fleet-ci-host-pressure.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: 50 percent CPU waiting for 40 minutes fires after 30, a 15 minute dip and a host outside the list do not
+    interval: 1m
+    input_series:
+      # busy: 50% from minute 10 to 50, otherwise 5%
+      - series: 'node_pressure_cpu_waiting_seconds_total{job="node_exporter",host="docker-build-lv3",instance="a:9100"}'
+        values: "0+3x10 0+30x40 0+3x40"
+      # a 15 minute dip only
+      - series: 'node_pressure_cpu_waiting_seconds_total{job="node_exporter",host="0docker-builder",instance="b:9100"}'
+        values: "0+3x10 0+30x15 0+3x65"
+      # not a CI host
+      - series: 'node_pressure_cpu_waiting_seconds_total{job="node_exporter",host="some-other-guest",instance="c:9100"}'
+        values: "0+54x90"
+      - series: 'node_pressure_cpu_waiting_seconds_total{job="node_exporter",host="0own-build-worker",instance="d:9101"}'
+        values: "0+3x90"
+    alert_rule_test:
+      - {eval_time: 25m, alertname: FleetCiHostCpuPressureHigh, exp_alerts: []}
+      - eval_time: 49m
+        alertname: FleetCiHostCpuPressureHigh
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_ci_host_pressure, host: docker-build-lv3}
+            exp_annotations:
+              summary: "CI host docker-build-lv3 has had CPU pressure over 40% for 30 minutes"
+              description: "Tasks on docker-build-lv3 waited for a CPU 50% of the last 5 minutes. The load controller should already be closing agent slots there: check `journalctl -u woodpecker-load-controller@ci.0exec` on CT108 for node_graded / agent_graded_closed and the agent states on ci.0exec.com."
+              runbook_url: docs/runbooks/fleet-observability.md#ci-host-pressure-alerts
+      - {eval_time: 85m, alertname: FleetCiHostCpuPressureHigh, exp_alerts: []}
+
+  - name: IO stalled over 50 percent for 30 minutes fires, two series of one host fire once
+    interval: 1m
+    input_series:
+      - series: 'node_pressure_io_stalled_seconds_total{job="node_exporter",host="0own-build-worker",instance="d:9101"}'
+        values: "0+3x10 0+42x60 0+3x20"
+      # the series an exporter restart leaves under another label set, same values
+      - series: 'node_pressure_io_stalled_seconds_total{job="node_exporter",host="0own-build-worker",instance="d:9101",fleet="0own"}'
+        values: "0+3x10 0+42x60 0+3x20"
+      - series: 'node_pressure_io_stalled_seconds_total{job="node_exporter",host="docker-build-lv3",instance="a:9100"}'
+        values: "0+6x90"
+    alert_rule_test:
+      - eval_time: 50m
+        alertname: FleetCiHostIoPressureHigh
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_ci_host_pressure, host: 0own-build-worker}
+            exp_annotations:
+              summary: "CI host 0own-build-worker has had IO pressure over 50% for 30 minutes"
+              description: "All tasks on 0own-build-worker were stalled on IO 70% of the last 5 minutes. On 0own-build-worker the HDD mirror is shared with the other guests, so look at the hypervisor first; the graded controller keeps that host's slots closed while its IO pressure is above 45%."
+              runbook_url: docs/runbooks/fleet-observability.md#ci-host-pressure-alerts
+      - {eval_time: 85m, alertname: FleetCiHostIoPressureHigh, exp_alerts: []}
+
+  - name: the missing-metrics alert fires when a CI host stops reporting and stays quiet while all five report
+    interval: 1m
+    input_series:
+      - series: 'node_pressure_cpu_waiting_seconds_total{job="node_exporter",host="0docker-builder",instance="b:9100"}'
+        values: "0+3x60"
+      - series: 'node_pressure_cpu_waiting_seconds_total{job="node_exporter",host="docker-build-lv3",instance="a:9100"}'
+        values: "0+3x60"
+      - series: 'node_pressure_cpu_waiting_seconds_total{job="infer_node_exporter_via_tailscale",host="infer-builder-ci",instance="e:9100"}'
+        values: "0+3x60"
+      - series: 'node_pressure_cpu_waiting_seconds_total{job="pipe_node_exporter_via_tailscale",host="0pipe-build",instance="f:9100"}'
+        values: "0+3x60"
+      # 0own-build-worker reports for 20 minutes, then its exporter is gone
+      - series: 'node_pressure_cpu_waiting_seconds_total{job="node_exporter",host="0own-build-worker",instance="d:9101"}'
+        values: "0+3x20"
+    alert_rule_test:
+      - {eval_time: 15m, alertname: FleetCiHostPressureMissing, exp_alerts: []}
+      - eval_time: 50m
+        alertname: FleetCiHostPressureMissing
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_ci_host_pressure}
+            exp_annotations:
+              summary: "Fewer than 5 CI hosts report pressure numbers"
+              description: "Only 4 of the 5 CI hosts (0docker-builder, docker-build-lv3, 0own-build-worker, infer-builder-ci, 0pipe-build) expose node_pressure_* to Prometheus, so FleetCiHostCpuPressureHigh and FleetCiHostIoPressureHigh are blind for the others. Check the node_exporter scrape targets and that the guest kernel has PSI enabled."
+              runbook_url: docs/runbooks/fleet-observability.md#ci-host-pressure-alerts

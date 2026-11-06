@@ -6,6 +6,9 @@ package_update: false
 package_upgrade: false
 ssh_pwauth: false
 disable_root: true
+# Keep the SSH host keys when cloud-init sees a new instance id (any change of the guest's cloud-init settings): the Tier-0 failover chain pins them,
+# and a regenerated key silently breaks its daily rehearsal and a real failover (VM 200 on 2026-10-17).
+ssh_deletekeys: false
 
 users:
   - default
@@ -28,7 +31,17 @@ packages:
   - {{ package }}
 {% endfor %}
 
+# A VM with hot-plugged memory boots with a kernel.threads-max of about 7000 (the kernel sizes it from the ~1 GB it sees at boot): a start storm of containers hit it on
+# 2026-10-19 (fork returned EAGAIN, containers came up without a network endpoint). Every guest gets the floor from its first boot; config/hostconf keeps the same file on
+# the guests that exist and checks the floor on every machine (baseline kernel.threads-max, file sysctl-hotplug-threads-max).
+write_files:
+  - path: /etc/sysctl.d/90-memory-hotplug-threads.conf
+    permissions: "0644"
+    content: |
+      kernel.threads-max = 131072
+
 runcmd:
+  - sysctl -p /etc/sysctl.d/90-memory-hotplug-threads.conf
   - systemctl enable --now qemu-guest-agent
 
 final_message: "{{ item.name }} cloud-init completed."

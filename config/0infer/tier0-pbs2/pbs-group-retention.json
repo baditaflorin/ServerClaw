@@ -1,0 +1,9 @@
+{
+  "_comment": "Installed to /etc/pbs-group-retention.json on infer-tier0 (VM704). Groups listed here are pruned to their newest keep_last snapshots at 07:05 UTC, after the store-wide job prune-tier0 (keep-last 3, keep-weekly 1, 07:00). keep_last may not be below 2. PBS #2 is the SECOND copy: PBS #1 on 0own keeps the longer history.",
+  "store": "tier0",
+  "max_newest_age_h": 72,
+  "groups": [
+    {"ns": "0docker", "type": "vm", "id": "100", "keep_last": 2, "frozen": true, "why": "docker host VM100 (~390 containers): 22-50 GB of unique data per snapshot, the biggest group on the datastore. FROZEN since 2026-10-19: its VM-level backup is paused (the host is backed up file by file as 0docker:host/dockerhost-state); remove frozen if the VM job runs again"},
+    {"ns": "0database", "type": "vm", "id": "100", "keep_last": 2, "frozen": true, "why": "pg-primary VM100: 34-45 GB of unique data per snapshot; a physical replica also runs on 0infer. FROZEN since 2026-10-21: the 0database fleet (pve01) is being sunset, VM100 is off"}
+  ]
+}

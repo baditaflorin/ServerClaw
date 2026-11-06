@@ -1,0 +1,31 @@
+# ~t0runner/.ssh/config on infer-tier0: the runner reaches the three 0mcp VMs only through a jump-only user on the bastion.
+# known_hosts must hold the bastion's host key as [203.0.113.1]:2222 and the three VM host keys (cross-check each against the host's own /etc/ssh/ssh_host_ed25519_key.pub).
+Host operator-bastion
+  HostName 203.0.113.1
+  Port 2222
+  User t0jump
+Host 0mcp_nginx
+  HostName 10.10.10.10
+  User ops
+  ProxyJump operator-bastion
+Host 0mcp_docker_build
+  HostName 10.10.10.30
+  User ops
+  ProxyJump operator-bastion
+Host 0mcp_staging_runtime
+  HostName 10.10.10.200
+  User debian
+  ProxyJump operator-bastion
+# the hypervisor's standby controller: root's authorized_keys line for THIS key is a forced command that can run only standby-ctl-ssh (host/install-host.sh);
+# the host key of 10.70.10.1 must be pinned in known_hosts by hand (README)
+Host infer_host_standby
+  HostName 10.70.10.1
+  User root
+  IdentityFile ~/.ssh/id_ed25519_standby
+Host *
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+  StrictHostKeyChecking yes
+  BatchMode yes
+  ConnectTimeout 20
+  ServerAliveInterval 15

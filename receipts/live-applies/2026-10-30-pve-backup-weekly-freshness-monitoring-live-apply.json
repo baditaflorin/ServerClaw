@@ -1,0 +1,103 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-10-30-pve-backup-weekly-freshness-monitoring-live-apply",
+  "applied_on": "2026-10-30",
+  "recorded_on": "2026-10-30",
+  "recorded_by": "claude",
+  "source_commit": "a39eade5eeef483f954ffb8cf019d706040586c0",
+  "repo_version_context": "0.179.52",
+  "workflow_id": "converge-monitoring",
+  "service_ids": [
+    "monitoring"
+  ],
+  "summary": "Shipped the per-guest limit of PveBackupFreshnessLow (PR 624, ws-20261029-pve-backup-weekly-freshness) to the monitoring VM's Prometheus by installing config/prometheus/rules/pve-host-incident.yml from main a39eade5e at 2026-10-30T00:48:07Z (02:48 local). The alert holds a guest whose published proxmox_backup_max_age_seconds is over 48 hours (CT 108, weekly job ct108-nightly, 8.5 days) to that limit and every other guest to 30 hours, so CT 108 no longer pages for about 5.75 days of every week. A targeted Ansible play that uses the monitoring_vm role's own copy parameters (root:prometheus, 0640), validated by promtool before it replaced the live file, followed by a SIGHUP reload without a restart; only that file and one backup copy changed in /etc/prometheus/rules. The firing alert for guest 108 (critical since about 09:30Z on 2026-10-29) cleared at the first evaluation after the reload.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "monitoring-lv3",
+      "vmid": "140",
+      "address": "10.10.10.40",
+      "pull_request": "https://github.com/baditaflorin/platform_server/pull/624"
+    },
+    {
+      "kind": "other",
+      "name": "prometheus-rules-pve-host-incident.yml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Source and live file were the ones reviewed",
+      "result": "pass",
+      "observed": "The play aborts unless the source file is sha256 15ba51a2c81da4cdd98151e8c23f3e0507d364b3346013e5fac9fb83d2ec5b78 (git blob bc498803c, pve-host-incident.yml at main a39eade5e, the squash commit of PR 624; main still had the same file when it ran) and the live file is sha256 666979ef7dd7cb828b99f6fc3b9dcf5e27dfcf547f9d5d3508987ddc89531812 (the PR 584 version applied on 2026-10-26, unchanged since: mtime 2026-10-26 23:02:08, 640 root:prometheus, 11061 bytes) or already the new one. Both held."
+    },
+    {
+      "check": "Check mode before the apply",
+      "result": "pass",
+      "observed": "ansible-playbook --check --diff of the one-file play, run on 2026-10-30 at about 00:47Z: ok=8 changed=2 skipped=3, failed=0; the diff was +16 -2 lines (the rule expression, its description and a comment block), which is exactly PR 624's change to that file. The 22-file replay of the role's rule copies made on 2026-10-26 was not repeated."
+    },
+    {
+      "check": "Rule validation with the running version",
+      "result": "pass",
+      "observed": "The copy task's validate step ran promtool check rules (2.53.3+ds1 on the VM, the version of the running Prometheus) on the new file before it replaced the live one and passed; promtool check config /etc/prometheus/prometheus.yml then passed for the whole configuration (play task ok). No separate stdin run was made this time."
+    },
+    {
+      "check": "Previous file kept",
+      "result": "pass",
+      "observed": "/etc/prometheus/rules/pve-host-incident.yml.pre-weekly-vzdump-20261030T004755Z, 640 root:prometheus, 11061 bytes, sha256 666979ef...1812 (mtime kept from 2026-10-26 23:02:08). Prometheus loads only *.yml, so the copy is inert."
+    },
+    {
+      "check": "Installed file",
+      "result": "pass",
+      "observed": "/etc/prometheus/rules/pve-host-incident.yml is 640 root:prometheus, 12458 bytes, sha256 15ba51a2...5b78, equal to main a39eade5e, installed at 00:48:07Z; no .ansible_tmp file was left in the rules directory."
+    },
+    {
+      "check": "Prometheus reload",
+      "result": "pass",
+      "observed": "SIGHUP via systemctl kill --kill-whom=main at 00:48:14Z; journal 'Completed loading of configuration file' at 00:48:15Z, totalDuration 177 ms; prometheus_config_last_reload_successful=1; the service was not restarted (main process 685 throughout). A second reload at 00:54:19Z (117 ms, also successful) followed a change of a different rule file, fleet-woodpecker-agent-records.yml, modified at 00:54 by someone else; it is not part of this apply."
+    },
+    {
+      "check": "Alert loaded with the new expression and cleared",
+      "result": "pass",
+      "observed": "The play's read-back from the running Prometheus (rules API): PveBackupFreshnessLow, group pve_host_incident (15 s interval), query carries proxmox_backup_max_age_seconds, lastError none. The alert instance for guest 108 that had been firing was gone at the first evaluation (last evaluation 00:48:29Z): health ok, state inactive, 0 alerts, no ALERTS series; the alerts firing on the 0mcp Prometheus went from 17 to 16, the only difference being PveBackupFreshnessLow for guest 108, and none appeared."
+    },
+    {
+      "check": "New limit against live data",
+      "result": "pass",
+      "observed": "At about 00:50Z the limits the rule computes per guest were 108000 s (30 h) for guests 101, 104, 107 and 109 and 734400 s (8.5 days) for guest 108; the ages of the last success were 70,994 s (101, 104), 76,664 s (107, 109) and 166,116 s (108): no guest over its limit. The old fixed 30 h rule read true for guest 108 only. The collector (fleet-state PR 619, installed 2026-10-28) already published proxmox_backup_max_age_seconds for all five guests."
+    },
+    {
+      "check": "Nothing else changed on the VM",
+      "result": "pass",
+      "observed": "A listing of all entries of /etc/prometheus/rules (mode, owner, size, sha256) before and after the apply: 122 to 123 entries, and the only differences are pve-host-incident.yml (new content, same 640 root:prometheus) and the added backup copy. The later change of fleet-woodpecker-agent-records.yml (00:54Z) was made by someone else after the 'after' listing."
+    },
+    {
+      "check": "Still in place about seven hours later",
+      "result": "pass",
+      "observed": "At 2026-10-30T07:44Z the live file was unchanged (sha256 15ba51a2...5b78, 640 root:prometheus, 12458 bytes, mtime 00:48:07), the backup copy unchanged, 123 entries, no stray temporary file; prometheus_config_last_reload_successful=1 (last reload 00:54:19Z); the running Prometheus had 70 rule groups and 585 rules (65 groups with alert rules, 411 alert rules); PveBackupFreshnessLow health ok, state inactive, 0 alerts (last evaluation 07:44:14Z), no ALERTS series."
+    },
+    {
+      "check": "Repository live-apply path",
+      "result": "partial",
+      "observed": "Not run this time. On 2026-10-26 (receipt 2026-10-26-pve-host-daily-low-alert-monitoring-live-apply) make live-apply-service service=grafana env=production stopped at the vulnerability budget gate (host scan for monitoring older than its 7-day limit) and at the immutable guest replacement gate (needs ALLOW_IN_PLACE_MUTATION=true) and would trigger a restic backup afterwards, and make converge-monitoring runs seven playbooks; the same targeted one-file play with the monitoring_vm role's own copy parameters was used again. Those gates were not re-tested today."
+    }
+  ],
+  "evidence_refs": [
+    "config/prometheus/rules/pve-host-incident.yml",
+    "tests/promtool/pve_backup_freshness_rules_test.yml",
+    "tests/test_pve_backup_freshness_rules.py",
+    "workstreams/active/ws-20261029-pve-backup-weekly-freshness.yaml",
+    "docs/workstreams/ws-20261029-pve-backup-weekly-freshness.md",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml",
+    "receipts/live-applies/2026-10-26-pve-host-daily-low-alert-monitoring-live-apply.json",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The rule was merged in PR 624 (squash commit a39eade5eeef483f954ffb8cf019d706040586c0); this receipt records shipping it. The collector side is baditaflorin/fleet-state PR 619 (hypervisor-0docker/libexec/pve-host-health-metrics.py, installed on the hypervisor on 2026-10-28), which publishes proxmox_backup_max_age_seconds and looks back 10 days for a weekly guest. The same targeted approach is recorded in 2026-10-26-pve-host-daily-low-alert-monitoring-live-apply and 2026-10-12-scanopy-retag-discover-monitoring-live-apply.",
+    "Rollback: copy /etc/prometheus/rules/pve-host-incident.yml.pre-weekly-vzdump-20261030T004755Z over pve-host-incident.yml and send SIGHUP to 0mcp-prometheus.service (systemctl kill --kill-whom=main --signal=HUP 0mcp-prometheus.service); the alert for guest 108 then fires again 30 hours after each Sunday 03:30 run until its next run.",
+    "Other agents change rule files on this VM at the same time: fleet-woodpecker-agent-records.yml was modified at 00:54Z on 2026-10-30 and Prometheus reloaded. Whether inventory.yml and fleet-loops.yml still differ from main (as recorded on 2026-10-26) was not re-checked.",
+    "platform_version moves from 0.179.53 to 0.179.54 with this record (ADR 0008: a patch bump for a safe incremental platform adjustment, applied from main); VERSION stays 0.179.52 until the next release bump.",
+    "The play, its dry-run and run output and the before and after listings are on the operator's machine, not in the repository: sessions/2026-10-30-pve-weekly-vzdump-live-apply/ of the fleet_agent_primitives working folder."
+  ]
+}

@@ -1,0 +1,9 @@
+[Unit]
+Description=Tier-0 daily DomainScope standby rehearsal (boots the standby VM with its link down, staging stack only, powers it off again)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/tier0-domainscope-rehearsal
+TimeoutStartSec=1500
+Nice=10

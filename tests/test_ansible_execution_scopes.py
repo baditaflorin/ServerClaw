@@ -530,6 +530,62 @@ all:
     assert calls[1][calls[1].index("-l") + 1] == "proxmox_hosts:&staging"
 
 
+def test_discover_target_hosts_never_returns_a_planned_guest(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """ADR 0494: a guest in the planned_guests group does not exist yet; a literal `hosts: lv3_guests` play must not reach it."""
+    repo_root = tmp_path
+    playbook_path = repo_root / "playbooks" / "all-guests.yml"
+    playbook_path.parent.mkdir(parents=True)
+    playbook_path.write_text("- hosts: lv3_guests\n  tasks: []\n", encoding="utf-8")
+    inventory_path = repo_root / "inventory" / "hosts.yml"
+    inventory_path.parent.mkdir(parents=True)
+    inventory_path.write_text("all:\n  children:\n    lv3_guests:\n      hosts:\n        alpha:\n", encoding="utf-8")
+
+    def fake_run(command: list[str], cwd: Path, text: bool, capture_output: bool, check: bool = False):
+        del cwd, text, capture_output, check
+        payload = {
+            "all": {
+                "children": {
+                    "lv3_guests": {"hosts": {"alpha": {}, "planned-one": {}}},
+                    "planned_guests": {"hosts": {"planned-one": {}}},
+                }
+            }
+        }
+        return subprocess.CompletedProcess(command, 0, stdout=yaml.safe_dump(payload), stderr="")
+
+    monkeypatch.setattr(scopes.subprocess, "run", fake_run)
+
+    hosts = scopes.discover_target_hosts(
+        "playbooks/all-guests.yml", env="production", repo_root=repo_root, inventory_path=inventory_path
+    )
+    assert hosts == ("alpha",)
+
+
+def test_a_limit_that_only_names_a_planned_guest_resolves_no_hosts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = tmp_path
+    playbook_path = repo_root / "playbooks" / "one-guest.yml"
+    playbook_path.parent.mkdir(parents=True)
+    playbook_path.write_text("- hosts: planned-one\n  tasks: []\n", encoding="utf-8")
+    inventory_path = repo_root / "inventory" / "hosts.yml"
+    inventory_path.parent.mkdir(parents=True)
+    inventory_path.write_text(
+        "all:\n  children:\n    planned_guests:\n      hosts:\n        planned-one:\n", encoding="utf-8"
+    )
+
+    def fake_run(command: list[str], cwd: Path, text: bool, capture_output: bool, check: bool = False):
+        del cwd, text, capture_output, check
+        payload = {"all": {"children": {"planned_guests": {"hosts": {"planned-one": {}}}}}}
+        return subprocess.CompletedProcess(command, 0, stdout=yaml.safe_dump(payload), stderr="")
+
+    monkeypatch.setattr(scopes.subprocess, "run", fake_run)
+
+    with pytest.raises(scopes.AnsibleExecutionScopeError, match="planned guests excluded: planned-one"):
+        scopes.discover_target_hosts(
+            "playbooks/one-guest.yml", env="production", repo_root=repo_root, inventory_path=inventory_path
+        )
+
+
 def test_plan_playbook_execution_uses_catalog_host_pattern_var(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     repo_root, catalog_path, inventory_path = make_repo(tmp_path)
     write(

@@ -1,0 +1,58 @@
+id: ws-20261106-proxmox-journal-retention
+adr: "0226"
+title: Bound system journals and repair fleet-tool log rotation for unattended operation
+status: merged
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: main
+worktree_path: .worktrees/journal-retention
+doc: docs/workstreams/ws-20261106-proxmox-journal-retention.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - docs/schema/live-apply-receipt.schema.json
+  - tests/test_deployment_history.py
+  - playbooks/journal-retention.yml
+  - config/0docker/docker-prod-logrotate
+  - collections/ansible_collections/lv3/platform/roles/common/tasks/journal_retention.yml
+  - collections/ansible_collections/lv3/platform/roles/common/templates/journal-retention.conf.j2
+  - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops
+  - docs/runbooks/configure-host-control-loops.md
+ownership_manifest:
+  owned_surfaces:
+    - id: proxmox_journal_retention
+      paths:
+        - docs/schema/live-apply-receipt.schema.json
+        - tests/test_deployment_history.py
+        - playbooks/journal-retention.yml
+        - config/0docker/docker-prod-logrotate
+        - collections/ansible_collections/lv3/platform/roles/proxmox_host_control_loops
+        - collections/ansible_collections/lv3/platform/roles/common/tasks/journal_retention.yml
+        - collections/ansible_collections/lv3/platform/roles/common/templates/journal-retention.conf.j2
+        - collections/ansible_collections/lv3/platform/roles/common/defaults/main.yml
+        - docs/runbooks/configure-host-control-loops.md
+      mode: exclusive
+    - id: proxmox_journal_retention_tracking
+      paths:
+        - docs/workstreams/ws-20261106-proxmox-journal-retention.md
+        - workstreams/active/ws-20261106-proxmox-journal-retention.yaml
+      mode: exclusive
+canonical_truth:
+  changelog_entry: Bound Proxmox host journals to 1 GiB persistent and 256 MiB volatile, with 30-day retention, independently of emergency low-disk cleanup.
+  release_bump: patch
+  included_in_repo_version: 0.179.53
+  latest_receipts:
+    bounded_journal_retention: 2026-11-06-retention-mainline-live-apply
+    docker_prod_logrotate: 2026-11-06-retention-mainline-live-apply
+notes: >-
+  The live host had no journald limits beyond system defaults and held 3.1 GiB.
+  The scoped manual apply at 2026-11-06T16:30:47Z set explicit limits and verified
+  systemd-journald active with a 1 GiB maximum and 987.7 MiB current use.
+  PR678 merged as bdf9145 after both CI pipelines passed. Targeted exact-main
+  replays and source hashes verified all three targets; platform version is 0.179.57.
+tasks:
+  - id: journal-retention
+    title: Codify, verify and integrate the host journal cap
+    status: completed

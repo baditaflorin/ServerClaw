@@ -1,0 +1,145 @@
+# promtool unit tests for config/prometheus/rules/fleet-backup-offhost.yml (run by tests/test_fleet_backup_offhost_rules.py when promtool is installed).
+# promtool starts its clock at the Unix epoch, so a timestamp series whose value equals its own time in seconds means "just happened": "0+60x1700" at a 1m
+# interval is a copy that is refreshed every minute; a series that stops growing is a copy that stopped being refreshed.
+rule_files:
+  - ../../config/prometheus/rules/fleet-backup-offhost.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a copy refreshed daily raises nothing, a copy that stops warns after 36 hours and goes critical after 72
+    interval: 1m
+    input_series:
+      # fresh: refreshed every minute for the whole run
+      - series: 'fleet_backup_offhost_copy_timestamp_seconds{job="node_exporter",archive="secrets-db"}'
+        values: "0+60x5000"
+      # stale: last refreshed at minute 100, then nothing
+      - series: 'fleet_backup_offhost_copy_timestamp_seconds{job="node_exporter",archive="keystore-db"}'
+        values: "0+60x100 6000x4900"
+    alert_rule_test:
+      # 2000 min = 33 h 20 min since the refresh: still inside 36 h
+      - {eval_time: 2000m, alertname: FleetBackupOffhostCopyStale, exp_alerts: []}
+      # the 36 h line is crossed at minute 2260; ten minutes later the 30 minute delay has not passed yet
+      - {eval_time: 2270m, alertname: FleetBackupOffhostCopyStale, exp_alerts: []}
+      # 2400 min: 2300 min = 38 h 20 min old (past 36 h = 2160 min, plus the 30 min delay)
+      - eval_time: 2400m
+        alertname: FleetBackupOffhostCopyStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_backup_offhost, job: node_exporter, archive: keystore-db}
+            exp_annotations:
+              summary: "The off-host copy of keystore-db is older than 36 hours"
+              description: "The sidecar last copied keystore-db to GitHub 1d 14h 20m 0s ago (it copies once a day). Look at `docker logs fleet-backup-sync` on VM 100: 'not copied' (size cap), 'tmp too small', 'cannot inspect remote branch' or a push error name the cause."
+              runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+      - {eval_time: 2400m, alertname: FleetBackupOffhostCopyVeryStale, exp_alerts: []}
+      # 4500 min: 4400 min = 73 h 20 min old
+      - eval_time: 4500m
+        alertname: FleetBackupOffhostCopyVeryStale
+        exp_alerts:
+          - exp_labels: {severity: critical, service: fleet_backup_offhost, job: node_exporter, archive: keystore-db}
+            exp_annotations:
+              summary: "The off-host copy of keystore-db is older than 72 hours"
+              description: "Three daily copies were missed (3d 1h 20m 0s). If VM 100 and its NFS target were lost now, the newest copy outside the providers would be that old."
+              runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+      - {eval_time: 4500m, alertname: FleetBackupOffhostCopyStale, exp_alerts: [{exp_labels: {severity: warning, service: fleet_backup_offhost, job: node_exporter, archive: keystore-db}, exp_annotations: {summary: "The off-host copy of keystore-db is older than 36 hours", description: "The sidecar last copied keystore-db to GitHub 3d 1h 20m 0s ago (it copies once a day). Look at `docker logs fleet-backup-sync` on VM 100: 'not copied' (size cap), 'tmp too small', 'cannot inspect remote branch' or a push error name the cause.", runbook_url: docs/runbooks/fleet-backup-offhost-copy.md}}]}
+
+  - name: an incomplete copy warns after an hour and a complete one stays quiet
+    interval: 1m
+    input_series:
+      - series: 'fleet_backup_offhost_copy_present{job="node_exporter",archive="keystore-db"}'
+        values: "1x30 0x200"
+      - series: 'fleet_backup_offhost_copy_present{job="node_exporter",archive="secrets-db"}'
+        values: "1x230"
+    alert_rule_test:
+      # 0 from minute 30; a short blip below an hour does not alert
+      - {eval_time: 80m, alertname: FleetBackupOffhostCopyBroken, exp_alerts: []}
+      - eval_time: 100m
+        alertname: FleetBackupOffhostCopyBroken
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_backup_offhost, job: node_exporter, archive: keystore-db}
+            exp_annotations:
+              summary: "The off-host copy of keystore-db is incomplete in the repository"
+              description: "state.tsv does not list keystore-db, or one of its files (a part of a split archive, or the single file) is missing, or a stale file of the other form is still there. The check prints which one: `journalctl -u fleet-backup-offhost-check -n 20` on VM 100."
+              runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+
+  - name: the check that stops, or whose metrics vanish, is noticed
+    interval: 1m
+    input_series:
+      # last success at minute 100, then the series keeps its last value (the textfile is still there) for the rest of the run
+      - series: 'fleet_backup_offhost_check_last_success_timestamp_seconds{job="node_exporter"}'
+        values: "0+60x100 6000x500"
+    alert_rule_test:
+      # 120 min after the last success: below 3 hours
+      - {eval_time: 220m, alertname: FleetBackupOffhostCheckStale, exp_alerts: []}
+      # 300 min after: past 3 hours (180 min) + 10 min delay
+      - eval_time: 400m
+        alertname: FleetBackupOffhostCheckStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_backup_offhost, job: node_exporter}
+            exp_annotations:
+              summary: "Nothing has checked the off-host backup copy for three hours"
+              description: "The check on VM 100 (fleet-backup-offhost-check.timer, every 30 minutes) has not read the GitHub repository successfully for 3 hours, or its metrics are gone. GitHub unreachable, the sidecar's key files changed, or the timer is off: `systemctl status fleet-backup-offhost-check.timer` and `journalctl -u fleet-backup-offhost-check -n 30`."
+              runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+
+  - name: with no metrics at all the dead-man alerts fire
+    interval: 1m
+    input_series:
+      - series: 'up{job="node_exporter"}'
+        values: "1x100"
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: FleetBackupOffhostCheckStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_backup_offhost, job: node_exporter}
+            exp_annotations:
+              summary: "Nothing has checked the off-host backup copy for three hours"
+              description: "The check on VM 100 (fleet-backup-offhost-check.timer, every 30 minutes) has not read the GitHub repository successfully for 3 hours, or its metrics are gone. GitHub unreachable, the sidecar's key files changed, or the timer is off: `systemctl status fleet-backup-offhost-check.timer` and `journalctl -u fleet-backup-offhost-check -n 30`."
+              runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+      - eval_time: 90m
+        alertname: FleetBackupOffhostDeepCheckStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_backup_offhost, job: node_exporter}
+            exp_annotations:
+              summary: "No successful deep check of the off-host backup copy for 50 hours"
+              description: "The daily deep check (fleet-backup-offhost-deep.timer, 12:20Z) has not found every source intact since 50 hours ago, or has never run. Until it does, nobody knows the copy on GitHub can be rebuilt byte for byte."
+              runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+
+  - name: a deep check whose last success is more than 50 hours old warns after an hour, a recent one does not
+    interval: 1m
+    input_series:
+      # last success at minute 100, then the series keeps its last value
+      - series: 'fleet_backup_offhost_deep_last_success_timestamp_seconds{job="node_exporter"}'
+        values: "0+60x100 6000x4000"
+      - series: 'fleet_backup_offhost_deep_last_success_timestamp_seconds{job="node_exporter",instance="fresh"}'
+        values: "0+60x4100"
+    alert_rule_test:
+      # the 50 h line (180000 s) is crossed at minute 3100; the one hour delay ends at 3161
+      - {eval_time: 3150m, alertname: FleetBackupOffhostDeepCheckStale, exp_alerts: []}
+      - eval_time: 3200m
+        alertname: FleetBackupOffhostDeepCheckStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_backup_offhost, job: node_exporter}
+            exp_annotations:
+              summary: "No successful deep check of the off-host backup copy for 50 hours"
+              description: "The daily deep check (fleet-backup-offhost-deep.timer, 12:20Z) has not found every source intact since 50 hours ago, or has never run. Until it does, nobody knows the copy on GitHub can be rebuilt byte for byte."
+              runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+
+  - name: a deep check that finds a damaged copy is critical after five minutes, an intact one is quiet
+    interval: 1m
+    input_series:
+      - series: 'fleet_backup_offhost_deep_source_ok{job="node_exporter",archive="keystore-db"}'
+        values: "1x10 0x60"
+      - series: 'fleet_backup_offhost_deep_source_ok{job="node_exporter",archive="secrets-db"}'
+        values: "1x70"
+      - series: 'fleet_backup_offhost_deep_last_success_timestamp_seconds{job="node_exporter"}'
+        values: "0+60x70"
+    alert_rule_test:
+      - {eval_time: 12m, alertname: FleetBackupOffhostDeepCheckFailed, exp_alerts: []}
+      - eval_time: 30m
+        alertname: FleetBackupOffhostDeepCheckFailed
+        exp_alerts:
+          - exp_labels: {severity: critical, service: fleet_backup_offhost, job: node_exporter, archive: keystore-db}
+            exp_annotations:
+              summary: "The off-host copy of keystore-db does not match what the sidecar published"
+              description: "The daily deep check rebuilt keystore-db from GitHub and its SHA-256, age header or size is wrong (or a file is missing). Treat the off-host copy as unusable until the next good deep check; the archive on the NFS target is the other copy. Details: `journalctl -u fleet-backup-offhost-deep -n 30` on VM 100."
+              runbook_url: docs/runbooks/fleet-backup-offhost-copy.md
+      - {eval_time: 30m, alertname: FleetBackupOffhostDeepCheckStale, exp_alerts: []}

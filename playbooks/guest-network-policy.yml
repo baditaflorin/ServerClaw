@@ -11,7 +11,11 @@
   hosts: lv3_guests
   serial: 1
   become: true
-  gather_facts: true
+  # Fact gathering ignores --tags. A scoped `--tags proxmox-vm-firewall` run (only the
+  # per-VM Proxmox firewall files, see the first play) must not connect to any guest, so
+  # this play gathers facts unless that is the only selected tag; every task below is
+  # skipped by the tag selection in that case.
+  gather_facts: "{{ ansible_run_tags | difference(['proxmox-vm-firewall']) | length > 0 }}"
 
   pre_tasks:
     - name: Ensure target guest is Debian

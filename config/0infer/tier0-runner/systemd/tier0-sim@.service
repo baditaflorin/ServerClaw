@@ -1,0 +1,9 @@
+[Unit]
+Description=Tier-0 full-cycle failover simulation (%i) on throwaway objects
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/tier0-runner/executor/tier0_sim.py %i
+TimeoutStartSec=1800
+Nice=10

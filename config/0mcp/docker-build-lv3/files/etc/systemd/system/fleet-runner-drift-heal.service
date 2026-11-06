@@ -1,0 +1,18 @@
+[Unit]
+Description=Fleet deploy-drift auto-heal: redeploy a small serial batch of stale services
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+SuccessExitStatus=1
+# Strictly serial, --max-heal (default 4) per run, --heal-pause between deploys,
+# and a load/memory/disk gate on the builder AND the target docker host before
+# every deploy. A per-service circuit breaker stops retrying a failing deploy on
+# the same origin sha for 24h; two consecutive failures abort the run. Shares
+# the scan's lock so the two never overlap.
+ExecStart=/usr/bin/flock -n /run/lock/fleet-runner-drift.lock /usr/local/bin/fleet-runner-drift-run heal
+UMask=0027
+TimeoutStartSec=90min

@@ -33,6 +33,17 @@
   hosts: proxmox_hosts
   become: true
   gather_facts: true
+  vars:
+    # ADR 0494: the default guest set is every declared guest EXCEPT those declared with `lifecycle: planned` (declared, not
+    # yet approved or provisioned). Without this the guests role falls back to ALL declared guests (an empty
+    # proxmox_guests_active counts as unset) and would clone a planned guest. Names are used for the exclusion because a
+    # guest without a lifecycle key must stay selected. The per-guest playbooks set their own list and are unaffected.
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | rejectattr('name', 'in', (proxmox_guests | selectattr('lifecycle', 'defined') | selectattr('lifecycle', 'equalto', 'planned') | map(attribute='name') | list))
+        | list
+      }}
 
   pre_tasks:
     - name: Ensure target host is Debian 13
