@@ -1,0 +1,62 @@
+#!/bin/bash
+# Hourly "does the standby edge still accept production's gateway config?" (tier0-edge-compat.sh in fleet-state), exported as metrics. Read-only for the edge: the stage runs the edge's real
+# `nginx -t` inside a private mount namespace with overlay mounts, nothing is written to the edge, nothing is reloaded. Skipped (exit 0) while a chain operation holds the chain lock
+# (the daily rehearsal, the simulation, a failover): they exercise the same builders and their results count.
+set -uo pipefail
+exec 8>"${TIER0_CHAIN_LOCK:-/run/tier0-chain.lock}"
+flock -n 8 || { echo "chain busy (rehearsal, simulation or failover running): skipping this run"; exit 0; }
+PROM=${TIER0_EDGE_COMPAT_PROM:-/var/lib/prometheus/node-exporter/tier0_runner_edge_compat.prom}
+RUN=${TIER0_RUN:-/usr/local/bin/tier0-run}
+t0=$(date +%s)
+prev_ok=$(grep '^tier0_runner_edge_compat_last_success_timestamp_seconds' "$PROM" 2>/dev/null | awk '{print $2}')
+OUT=$("$RUN" tier0-edge-compat.sh 2>&1); rc=$?
+printf '%s\n' "$OUT" | tail -12
+RES=$(printf '%s\n' "$OUT" | grep '^RESULT_JSON ' | tail -1 | sed 's/^RESULT_JSON //')
+end=$(date +%s)
+python3 - "$RES" "$rc" "$end" "${prev_ok:-}" "$PROM" <<'PY'
+import json, os, sys
+res_s, rc, end, prev_ok, prom = sys.argv[1:6]
+rc, end = int(rc), int(end)
+try:
+    res = json.loads(res_s)
+except ValueError:
+    res = {}
+status = res.get("status", "no-result")
+ok = 1 if status == "ok" else 0
+could_not_run = 1 if status in ("no-snapshot", "no-edge", "edge-unsupported", "no-result") else 0
+lines = ["# TYPE tier0_runner_edge_compat_last_run_timestamp_seconds gauge", f"tier0_runner_edge_compat_last_run_timestamp_seconds {end}",
+         f"tier0_runner_edge_compat_ok {ok}", f"tier0_runner_edge_compat_could_not_run {could_not_run}", f"tier0_runner_edge_compat_last_exit_code {rc}"]
+if ok:
+    lines.append(f"tier0_runner_edge_compat_last_success_timestamp_seconds {end}")
+elif prev_ok:
+    lines.append(f"tier0_runner_edge_compat_last_success_timestamp_seconds {prev_ok}")
+for k, name in (("vhosts_selected", "vhosts_selected"), ("vhosts_skipped", "vhosts_skipped"), ("snapshot_age_seconds", "snapshot_age_seconds"),
+                ("backends_total", "backends_total"), ("backends_closed", "backends_closed"),                 # tailnet ip:port pairs of the standby pools, TCP-tested from the edge
+                ("keystore_mesh_nodes", "keystore_mesh_nodes"), ("keystore_mesh_nodes_ok", "keystore_mesh_nodes_ok"),     # the keystore mesh nodes the chain verifies keys against, asked from the edge
+                ("keystore_mesh_key_checked", "keystore_mesh_key_checked")):                                          # 1 = the throwaway test key was used on every node (0: the key file is missing)
+    if res.get(k) is not None and res.get("status") not in ("no-snapshot",):
+        lines.append(f"tier0_runner_edge_compat_{name} {int(res[k])}")
+if res.get("nginx_version"):
+    lines.append('tier0_runner_edge_compat_info{nginx_version="%s"} 1' % res["nginx_version"])
+# Per closed backend pair: how many hourly runs in a row it has been closed. A missing tailnet grant stays closed, a tailnet hiccup of the edge does not, and the grant job on the builder
+# (platform_server scripts/standby_edge_grants_job.py) only acts on a pair at 2 or more. A run that could not look (not ok) or an older stage without the list changes nothing: what was known stays.
+import re
+prev_text = open(prom).read() if os.path.exists(prom) else ""
+prev = {(m.group(1), m.group(2)): int(m.group(3)) for m in re.finditer(r'^tier0_runner_edge_backend_closed_streak\{backend_ip="([^"]+)",backend_port="(\d+)"\} (\d+)', prev_text, re.M)}
+pairs = res.get("backends_closed_pairs")
+if ok and isinstance(pairs, list):
+    streak = {}
+    for pair in pairs:
+        ip, _, port = str(pair).rpartition(":")
+        if ip and port.isdigit():
+            streak[(ip, port)] = prev.get((ip, port), 0) + 1
+else:
+    streak = prev
+if streak:
+    lines.append("# TYPE tier0_runner_edge_backend_closed_streak gauge")
+    lines += ['tier0_runner_edge_backend_closed_streak{backend_ip="%s",backend_port="%s"} %d' % (ip, port, n) for (ip, port), n in sorted(streak.items())]
+tmp = prom + ".tmp"
+open(tmp, "w").write("\n".join(lines) + "\n"); os.chmod(tmp, 0o644); os.replace(tmp, prom)
+PY
+echo "edge compat: rc=$rc"
+exit $rc

@@ -1,0 +1,45 @@
+# Added 2026-10-28. Alerts for the DomainScope Drive data room refresh: the live figures in the Google Drive "DomainScope Data Room" folder
+# (catalogue count, smart-search share) brought to docs/investor/data-room.json by domainscope-drive-refresh.timer on the builder CT108,
+# daily at 07:30 UTC (scripts/domainscope-drive-refresh-run), metrics in the node exporter textfile domainscope_drive_refresh.prom.
+#
+# DomainScopeDriveRefreshFailing: the last run did not end with every listed document current (domainscope_drive_refresh_ok is 0): a
+# document failed or held no figure phrase (someone rewrote it), the figures file was older than 8 days (the Monday data room job did not
+# reach main), or the run could not fetch, build or read the vault. The textfile keeps its last values between runs, so one failed run
+# alerts about half an hour after it and resolves with the next good one; a dry run writes no metrics.
+# DomainScopeDriveRefreshStale: no good run for 49 hours (a daily job plus an hour of grace). last_over_time keeps the last value while the
+# builder is stopped by its nightly backup, so the window counts as the age it is; a series gone for 7 days (or never written) is covered
+# by absent_over_time. The wrapper carries the last success time through failed runs, so this counts from the last good run.
+groups:
+  - name: domainscope_drive_refresh
+    rules:
+      - alert: DomainScopeDriveRefreshFailing
+        expr: |
+          domainscope_drive_refresh_ok == 0
+        for: 30m
+        labels:
+          severity: warning
+          service: domainscope
+        annotations:
+          summary: "The DomainScope Drive data room refresh failed its last run"
+          description: >-
+            The last run of domainscope-drive-refresh on the builder (CT108) did not leave every listed Drive document current: a document
+            failed or held no figure phrase, data-room.json on main is older than 8 days, or the run could not fetch, build or read the vault.
+            The documents it names are in `journalctl -u domainscope-drive-refresh.service -n 80` on the builder.
+          runbook_url: docs/runbooks/domainscope-drive-refresh.md
+      - alert: DomainScopeDriveRefreshStale
+        expr: |
+          (time() - max(last_over_time(domainscope_drive_refresh_last_success_timestamp_seconds[7d])) > 49 * 3600)
+          or
+          absent_over_time(domainscope_drive_refresh_last_success_timestamp_seconds[7d])
+        for: 1h
+        labels:
+          severity: warning
+          service: domainscope
+        annotations:
+          summary: "No good DomainScope Drive data room refresh for 49 hours"
+          description: >-
+            The live figures in the Drive data room folder have not been checked for two days: domainscope-drive-refresh.timer on CT108
+            stopped, every run fails (see DomainScopeDriveRefreshFailing), or the builder or its node exporter is down. On the builder:
+            `systemctl status domainscope-drive-refresh.timer domainscope-drive-refresh.service`; from the repository
+            `scripts/domainscope-drive-refresh-install.sh --status`.
+          runbook_url: docs/runbooks/domainscope-drive-refresh.md

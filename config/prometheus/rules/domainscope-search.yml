@@ -1,0 +1,49 @@
+# Added 2026-10-21. Alerts for the DomainScope search probe: production search (https://domainscope.scrapetheworld.org) answering its
+# golden queries with real rows. The probe is the DomainScope repository's own scripts/search-probe.sh --all --markets 20, run on the
+# builder CT108 by domainscope-search-probe.timer every 15 minutes (scripts/domainscope-search-probe-run), metrics in the node exporter
+# textfile domainscope_search_probe.prom. On 2026-10-20 semantic search answered 500 for hours and country searches 0 rows while every
+# route-level check passed: nothing looked at what search answered.
+#
+# DomainScopeSearchBroken: no run in the last 20 minutes succeeded AND at least two runs ended in that window (the run timestamp changed),
+# i.e. two failed runs in a row; one bad run (a slow LLM answer, a blip) does not page. A probe that cannot run counts as a failed run (the
+# wrapper writes success 0), so the journal on CT108 tells "search is down" from "the probe broke".
+# DomainScopeSearchProbeStale: no run has finished for 3 hours. last_over_time keeps the last value while the builder is stopped by its
+# nightly backup (ct108-nightly, 01:30Z, about an hour, the series is absent meanwhile), so the window counts as the age it is, not as a
+# vanished series; a series gone for 6 hours (or never written) is covered by absent_over_time.
+groups:
+  - name: domainscope_search
+    rules:
+      - alert: DomainScopeSearchBroken
+        expr: |
+          max_over_time(domainscope_search_probe_success[20m]) == 0
+          and on (instance, target)
+          changes(domainscope_search_probe_last_run_timestamp_seconds[20m]) >= 1
+        for: 5m
+        labels:
+          severity: warning
+          service: domainscope
+        annotations:
+          summary: "DomainScope production search is failing its golden queries ({{ $labels.target }})"
+          description: >-
+            Two search probe runs in a row failed against {{ $labels.target }}: a golden query errored (HTTP 5xx, 429, timeout), returned
+            fewer rows than its minimum or answered catalog_matches_not_searchable, or the probe itself could not run. The [FAIL] lines are in
+            `journalctl -u domainscope-search-probe.service -n 80` on the builder (CT108); run the probe by hand with
+            `scripts/search-probe.sh --all --markets 20` from the DomainScope repository. Rows gated known-failing never fail it.
+          runbook_url: docs/runbooks/domainscope-search-probe.md
+      - alert: DomainScopeSearchProbeStale
+        expr: |
+          (time() - max(last_over_time(domainscope_search_probe_last_run_timestamp_seconds[6h])) > 3 * 3600)
+          or
+          absent_over_time(domainscope_search_probe_last_run_timestamp_seconds[6h])
+        for: 10m
+        labels:
+          severity: warning
+          service: domainscope
+        annotations:
+          summary: "The DomainScope search probe has not finished a run for 3 hours"
+          description: >-
+            Nothing has checked production DomainScope search for 3 hours (the nightly backup stop of the builder is about an hour):
+            domainscope-search-probe.timer on CT108 stopped, the run fails before it writes metrics (a failed fetch with no earlier probe), or the
+            builder or its node exporter is down. On the builder: `systemctl status domainscope-search-probe.timer domainscope-search-probe.service`,
+            `journalctl -u domainscope-search-probe.service -n 40`; from the repository `scripts/domainscope-search-probe-install.sh --status`.
+          runbook_url: docs/runbooks/domainscope-search-probe.md

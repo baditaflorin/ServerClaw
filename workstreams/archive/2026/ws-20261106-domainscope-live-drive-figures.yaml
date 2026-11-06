@@ -1,0 +1,45 @@
+id: ws-20261106-domainscope-live-drive-figures
+adr: "0226"
+title: Read the current data-room aggregate before refreshing Drive figures
+status: merged
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: main
+worktree_path: .worktrees/domainscope-live-drive-figures
+doc: docs/workstreams/ws-20261106-domainscope-live-drive-figures.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - scripts/domainscope-drive-refresh-run
+  - scripts/domainscope-drive-refresh-install.sh
+  - scripts/domainscope-drive-figures.py
+  - config/systemd/domainscope-drive-refresh.service
+  - docs/runbooks/domainscope-drive-refresh.md
+  - tests/test_domainscope_drive_refresh.py
+  - tests/test_domainscope_drive_figures.py
+ownership_manifest:
+  owned_surfaces:
+    - id: domainscope_live_drive_figures
+      paths:
+        - scripts/domainscope-drive-refresh-run
+        - scripts/domainscope-drive-refresh-install.sh
+        - scripts/domainscope-drive-figures.py
+        - config/systemd/domainscope-drive-refresh.service
+        - docs/runbooks/domainscope-drive-refresh.md
+        - tests/test_domainscope_drive_refresh.py
+        - tests/test_domainscope_drive_figures.py
+        - docs/workstreams/ws-20261106-domainscope-live-drive-figures.md
+        - workstreams/active/ws-20261106-domainscope-live-drive-figures.yaml
+      mode: exclusive
+canonical_truth:
+  changelog_entry: Read and validate the current data-room aggregate through bounded SSH before any credential access; explicitly force installer verification to dry-run.
+  release_bump: patch
+  included_in_repo_version: 0.179.55
+  latest_receipts:
+    domainscope_live_drive_figures: 2026-11-06-domainscope-live-drive-figures-live-apply
+notes: >-
+  The live aggregate was current while the periodically committed snapshot was
+  eleven days old. Its early rejection also closed the vault pipe and masked
+  the stale-data cause with a broken-pipe error. Verification is dry-run only;
+  no investor-facing document is written in this workstream.

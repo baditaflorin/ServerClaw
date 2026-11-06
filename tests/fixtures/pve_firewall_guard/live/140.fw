@@ -1,0 +1,9 @@
+[OPTIONS]
+enable: 1
+policy_in: DROP
+policy_out: ACCEPT
+
+[RULES]
+# hand-authored: Prometheus scrape
+IN ACCEPT -source 10.10.10.14/32 -p tcp -dport 9100
+IN ACCEPT -p tcp -dport 443

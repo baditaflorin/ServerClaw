@@ -1,0 +1,87 @@
+id: ws-0537-agent-history-activate
+adr: "0494"
+title: Activate the agent-history guest (delete lifecycle planned from VM 155), after ws-0534 (#598) merged
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/agent-history-activate
+worktree_path: .claude/worktrees/agent-history-activate
+doc: docs/workstreams/ws-0537-agent-history-activate.md
+depends_on:
+  - ws-0534-agent-history-vm
+conflicts_with: []
+shared_surfaces:
+  - inventory/host_vars/proxmox-host.yml
+  - inventory/hosts.yml
+  - docs/adr/0494-agent-history.md
+  - docs/runbooks/configure-agent-history.md
+  - playbooks/agent-history-vm.yml
+  - tests/test_planned_guests.py
+  - tests/test_generate_inventory.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0537-agent-history-activate.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0537-agent-history-activate.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0537_tracking
+      paths:
+        - docs/workstreams/ws-0537-agent-history-activate.md
+      mode: exclusive
+    - id: agent_history_activation_declaration
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: agent_history_activation_inventory
+      paths:
+        - inventory/hosts.yml
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_history_activation_records
+      paths:
+        - docs/adr/0494-agent-history.md
+        - docs/runbooks/configure-agent-history.md
+        - playbooks/agent-history-vm.yml
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: agent_history_activation_tests
+      paths:
+        - tests/test_planned_guests.py
+        - tests/test_generate_inventory.py
+      mode: shared_contract
+      contract: planned-guest-lifecycle-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-0537-agent-history-activate.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: Activate the agent-history guest (VM 155) by deleting its lifecycle planned line, with the capacity record and the written exception to the 15 % placement guard. Nothing is provisioned.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  ADR 0494 declared VM 155 with lifecycle planned so that the declaration was inert until the owner approved it. This
+  workstream is that approval as one reviewed change: the line is deleted, the inventory is regenerated (the planned_guests
+  group stays, empty), the tests that counted planned guests are updated, and the ADR and the runbook record the activation
+  and the capacity decision. It was prepared on top of ws-0534 and rebased onto main after #598 merged; it is merged
+  immediately before provisioning, because from the merge the unrestricted provisioning and the scoped runs no longer skip
+  the guest, which does not exist until make provision-agent-history-vm has run.
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Delete lifecycle planned from VM 155, regenerate the inventory, update the tests, the ADR and the runbook
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on the build server and open the pull request (stacked, not merged, no live-apply marker)
+    status: in_progress

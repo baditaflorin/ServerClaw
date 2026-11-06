@@ -1,0 +1,10 @@
+[Unit]
+Description=Tier-0 hourly standby edge compatibility check
+
+[Timer]
+OnCalendar=*:50:00
+RandomizedDelaySec=60
+Persistent=false
+
+[Install]
+WantedBy=timers.target

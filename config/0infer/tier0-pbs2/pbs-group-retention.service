@@ -1,0 +1,10 @@
+[Unit]
+Description=PBS #2 per-group retention (the two churny VM100 groups keep their newest 2 snapshots)
+After=proxmox-backup.service proxmox-backup-proxy.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/pbs-group-retention --apply
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=900

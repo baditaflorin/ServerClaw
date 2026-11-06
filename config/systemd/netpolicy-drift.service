@@ -1,0 +1,15 @@
+[Unit]
+Description=Network policy drift: compare the live firewall rules of the VMs with config/network-policy (read-only)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+# 2 = drift found: the alert is the signal, the unit did its job. 3 (could not look) is a real error and shows in `systemctl --failed`.
+SuccessExitStatus=2
+TimeoutStartSec=15min
+# One run at a time, here and for a hand-started run.
+ExecStart=/usr/bin/flock -n /run/lock/netpolicy-drift.lock /usr/local/bin/netpolicy-run
+Nice=10

@@ -1,13 +1,13 @@
-scanopy-backup: nightly pull of the Scanopy database to the monitoring VM
+scanopy-backup: hourly pull of the Scanopy database to the monitoring VM
 
 Why: the Scanopy server, Postgres and hypervisor-local daemon run on the 0docker hypervisor, which PBS does not back up (it backs
 up guests). Losing that host would lose every daemon key, credential assignment, tag and schedule. The monitoring VM lives in another
 fleet (0mcp), so a dump kept here survives the loss of 0docker.
 
-Each night (03:20 UTC) the job runs `ssh root@example.net dump` with /etc/scanopy-backup/id_ed25519. The key is a forced command
+Every hour (at :20 UTC) the job runs `ssh root@example.net dump` with /etc/scanopy-backup/id_ed25519. The key is a forced command
 (/usr/local/sbin/scanopy-backup-hv on the hypervisor) that can only stream `pg_dump | gzip`. The dump is written as .part, verified
 (gzip integrity, size, pg_dump completion trailer, the core tables), moved to /var/backups/scanopy/scanopy-<UTC>.sql.gz (0600) and
-the newest 14 are kept. A failed run leaves older dumps untouched.
+retention is tiered: every dump of the last 48 hours plus the newest dump of each of the last 14 UTC days (about 60 files, under 60 MB). A failed run leaves older dumps untouched.
 
 Files
   /opt/scanopy-backup/scanopy_backup.py        the job (python3 stdlib)

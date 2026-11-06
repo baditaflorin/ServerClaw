@@ -1,0 +1,34 @@
+#!/bin/bash
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+# Read the store's /metrics on loopback with the metrics-only token and write a node_exporter textfile (ADR 0494).
+# The token is in a header file rendered by the OpenBao Agent: it is never an argument, an environment variable or output.
+set -uo pipefail
+
+out="{{ agent_history_textfile_dir }}/agent_history.prom"
+header_file="{{ agent_history_run_dir }}/metrics.header"
+tmp="$(mktemp "{{ agent_history_textfile_dir }}/.agent_history.XXXXXX")"
+trap 'rm -f "$tmp"' EXIT
+
+ok=0
+body=""
+if [ -r "$header_file" ]; then
+  if body="$(curl --silent --fail --max-time 10 --noproxy '*' -H "@$header_file" "http://127.0.0.1:{{ agent_history_store_port }}/metrics")"; then
+    ok=1
+  fi
+fi
+
+{
+  if [ "$ok" = 1 ]; then
+    printf '%s\n' "$body"
+  fi
+  echo "# HELP agent_history_scrape_success 1 when the last read of the store's /metrics worked."
+  echo "# TYPE agent_history_scrape_success gauge"
+  echo "agent_history_scrape_success $ok"
+  echo "# HELP agent_history_scrape_timestamp_seconds Unix time of the last attempt to read the store's /metrics."
+  echo "# TYPE agent_history_scrape_timestamp_seconds gauge"
+  echo "agent_history_scrape_timestamp_seconds $(date +%s)"
+} >"$tmp"
+
+chmod 0644 "$tmp"
+mv -f "$tmp" "$out"
+trap - EXIT

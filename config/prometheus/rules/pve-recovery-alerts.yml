@@ -1,0 +1,51 @@
+groups:
+  - name: pve-recovery
+    rules:
+      - alert: PveExporterUnavailable
+        expr: up{job="pve"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Proxmox exporter is unreachable"
+          description: "Prometheus cannot scrape the Proxmox hypervisor exporter. Storage and VM-state visibility is lost."
+      - alert: PveLocalStorageCritical
+        expr: fleet:pve_storage_free_percent{id=~"storage/.*/local"} < 10
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Proxmox root storage is critically low"
+          description: "The local PVE storage has less than 10% free space; VMs can be paused with I/O errors."
+      - alert: PveLocalStorageEmergency
+        expr: fleet:pve_storage_free_percent{id=~"storage/.*/local"} < 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Proxmox root storage is nearly full"
+          description: "The local PVE storage has less than 5% free space. Immediate operator action is required."
+      - alert: PveBackupStorageLowHeadroom
+        expr: fleet:pve_storage_free_percent{id=~"storage/.*/backup-lv3"} < 20
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PBS datastore has low free space"
+          description: "The backup datastore has less than 20% free space; review retention, GC, and capacity."
+      - alert: PveBackupStorageCritical
+        expr: fleet:pve_storage_free_percent{id=~"storage/.*/backup-lv3"} < 10
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PBS datastore is critically low"
+          description: "The backup datastore has less than 10% free space and may prevent backups."
+      - alert: PveCoreVmUnavailable
+        expr: pve_up{id=~"qemu/(110|120|140|160|192)"} == 0
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "A core 0mcp VM is unavailable"
+          description: "Core VM {{ $labels.id }} is not reported running by Proxmox."

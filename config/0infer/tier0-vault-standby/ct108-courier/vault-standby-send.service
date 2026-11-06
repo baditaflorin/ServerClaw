@@ -1,0 +1,9 @@
+[Unit]
+Description=Replicate vault + keystore SQLite snapshots to the tier-0 standby (infer-tier0)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/flock -n /run/lock/vault-standby-send.lock /usr/local/sbin/vault-standby-send
+Nice=10
+TimeoutStartSec=300

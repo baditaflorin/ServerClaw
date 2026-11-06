@@ -241,6 +241,10 @@
   ansible.builtin.include_tasks: scanopy_backup.yml
   when: monitoring_scanopy_backup_enabled | bool
 
+- name: Keep a warm standby of the Scanopy server
+  ansible.builtin.include_tasks: scanopy_standby.yml
+  when: monitoring_scanopy_standby_enabled | bool
+
 - name: Copy the Tier-0 replication alert rules
   ansible.builtin.copy:
     src: "{{ monitoring_prometheus_tier0_rules_source_file }}"
@@ -266,6 +270,16 @@
     owner: root
     group: prometheus
     mode: "0640"
+  notify: Reload Prometheus configuration
+
+- name: Copy the rule files adopted from the live monitoring VM
+  ansible.builtin.copy:
+    src: "{{ monitoring_repo_root }}/config/prometheus/rules/{{ item }}"
+    dest: "{{ monitoring_prometheus_rules_dir }}/{{ item }}"
+    owner: root
+    group: prometheus
+    mode: "0640"
+  loop: "{{ monitoring_prometheus_adopted_rule_files }}"
   notify: Reload Prometheus configuration
 
 - name: Copy the hypervisor memory and swap alert rules

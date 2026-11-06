@@ -8,6 +8,22 @@
       - (proxmox_guests_active | default(proxmox_guests, true)) | length > 0
     fail_msg: "proxmox_guests requires template catalog, storage, bridge, and guest inventory inputs."
 
+- name: Refuse to provision a planned guest (declared with lifecycle planned, not yet activated by the owner)
+  ansible.builtin.assert:
+    that:
+      - >-
+        (proxmox_guests_active | default(proxmox_guests, true))
+        | selectattr('lifecycle', 'defined') | selectattr('lifecycle', 'equalto', 'planned')
+        | list | length == 0
+    fail_msg: >-
+      Refusing to provision planned guest(s):
+      {{ (proxmox_guests_active | default(proxmox_guests, true))
+         | selectattr('lifecycle', 'defined') | selectattr('lifecycle', 'equalto', 'planned')
+         | map(attribute='name') | join(', ') }}.
+      A planned guest is declared but not approved. The owner activates it with one reviewed change that deletes its
+      `lifecycle: planned` line in inventory/host_vars/proxmox-host.yml (ADR 0494). The default guest set already skips
+      planned guests; this stops a per-guest playbook or an empty selection from reaching one.
+
 - name: Ensure snippets directory exists
   ansible.builtin.file:
     path: /var/lib/vz/snippets

@@ -10,6 +10,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import os
 import re
 import shutil
@@ -17,6 +19,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import Callable
 
 import yaml
 
@@ -65,6 +68,9 @@ BINARY_EXTENSIONS = frozenset(
 
 # Directories to always skip
 SKIP_DIRS = frozenset({".git", "__pycache__", ".terraform", "node_modules"})
+
+# These manifests describe captured file bytes, which Tier C may intentionally change.
+CAPTURED_FILE_MANIFESTS = ("config/0mcp/docker-build-lv3/files.sha256",)
 
 
 def load_config() -> dict:
@@ -188,6 +194,117 @@ def delete_paths(worktree: Path, config: dict) -> int:
     return count
 
 
+def _export_path_checker(worktree: Path) -> Callable[[Path], Path]:
+    """Confine derived-artifact writes to a disposable, non-aliased export."""
+    if worktree.is_symlink() or not worktree.is_dir():
+        raise ValueError("Public export root must be a directory without a symlink")
+    export_root = worktree.resolve(strict=True)
+    if export_root.samefile(REPO_ROOT):
+        raise ValueError("Public export cannot be the source checkout")
+
+    def checked_export_path(path: Path) -> Path:
+        relative = path.relative_to(worktree)
+        current = worktree
+        for part in relative.parts:
+            if part == "..":
+                raise ValueError("Captured-file path escapes the public export")
+            current = current / part
+            if current.is_symlink():
+                raise ValueError(f"Captured-file path contains a symlink: {relative}")
+        try:
+            path.resolve().relative_to(export_root)
+        except ValueError as error:
+            raise ValueError(f"Captured-file path resolves outside the public export: {relative}") from error
+        return path
+
+    return checked_export_path
+
+
+def refresh_captured_file_manifests(worktree: Path) -> None:
+    """Refresh exported hashes while preserving the exact file-set contract."""
+    checked_export_path = _export_path_checker(worktree)
+    for relative in CAPTURED_FILE_MANIFESTS:
+        manifest = worktree / relative
+        checked_export_path(manifest)
+        if manifest.is_symlink():
+            raise ValueError(f"Captured-file manifest cannot be a symlink: {relative}")
+        if not manifest.exists():
+            continue
+        if not manifest.is_file():
+            raise ValueError(f"Captured-file manifest must be a regular file: {relative}")
+        if manifest.stat().st_nlink != 1:
+            raise ValueError(f"Captured-file manifest cannot share a hard link: {relative}")
+        files = manifest.parent / "files"
+        checked_export_path(files)
+        if files.is_symlink() or not files.is_dir():
+            raise ValueError(f"Captured files root must be a directory without a symlink: {relative}")
+        expected: set[str] = set()
+        for line in manifest.read_text(encoding="utf-8").splitlines():
+            digest, name = line.split(None, 1)
+            name = name.strip()
+            path = Path(name)
+            if not re.fullmatch(r"[0-9a-f]{64}", digest) or path.is_absolute() or ".." in path.parts or name in expected:
+                raise ValueError(f"Invalid captured-file manifest entry in {relative}: {name}")
+            expected.add(name)
+        actual: set[str] = set()
+        for path in files.rglob("*"):
+            checked_export_path(path)
+            if path.is_symlink():
+                raise ValueError(f"Captured-file manifest cannot follow symlinks: {path.relative_to(worktree)}")
+            if path.is_file():
+                actual.add(path.relative_to(files).as_posix())
+        if actual != expected:
+            raise ValueError(f"Captured-file manifest file set changed in {relative}")
+        checked_export_path(manifest)
+        manifest.write_text(
+            "".join(f"{hashlib.sha256((files / name).read_bytes()).hexdigest()}  {name}\n" for name in sorted(expected)),
+            encoding="utf-8",
+        )
+
+
+def refresh_network_policy_baselines(worktree: Path) -> None:
+    """Remove only accepted findings eliminated by the public projection.
+
+    New findings always abort publication. Every policy is checked before any
+    baseline is written; private operational baselines are never passed here.
+    """
+    import netpolicy
+
+    checked_export_path = _export_path_checker(worktree)
+    directory = checked_export_path(worktree / "config" / "network-policy")
+    if not directory.exists():
+        return
+    if not directory.is_dir():
+        raise ValueError("Public network-policy root must be a directory")
+    policies = sorted(directory.glob("*.yaml"))
+    expected_baselines = {path.with_suffix(".baseline.json") for path in policies}
+    if set(directory.glob("*.baseline.json")) != expected_baselines:
+        raise ValueError("Public network policies and baselines must be paired")
+    updates: list[tuple[Path, list[str]]] = []
+    for policy_path in policies:
+        checked_export_path(policy_path)
+        if not policy_path.is_file() or policy_path.stat().st_nlink != 1:
+            raise ValueError(f"Public network policy must be a regular unshared file: {policy_path.name}")
+        baseline = checked_export_path(policy_path.with_suffix(".baseline.json"))
+        if not baseline.is_file() or baseline.stat().st_nlink != 1:
+            raise ValueError(f"Public network baseline must be a regular unshared file: {baseline.name}")
+        accepted = json.loads(baseline.read_text(encoding="utf-8"))
+        if not isinstance(accepted, list) or not all(isinstance(item, str) for item in accepted) or len(set(accepted)) != len(accepted):
+            raise ValueError(f"Invalid public network baseline: {baseline.name}")
+        findings = {finding["id"] for finding in netpolicy.check(netpolicy.load_policy(policy_path))
+                    if finding["severity"] != "info"}
+        if findings - set(accepted):
+            raise ValueError(f"Public network policy introduces unaccepted findings: {policy_path.name}")
+        retained = [item for item in accepted if item in findings]
+        if retained != accepted:
+            updates.append((baseline, retained))
+    for baseline, retained in updates:
+        checked_export_path(baseline)
+        if not baseline.is_file() or baseline.stat().st_nlink != 1:
+            raise ValueError(f"Public network baseline changed file identity: {baseline.name}")
+        baseline.write_text(json.dumps(retained, indent=1) + "\n", encoding="utf-8")
+
+
 def regenerate_public_derived_artifacts(worktree: Path) -> None:
     """Regenerate committed derived files after Tier A source replacements.
 
@@ -196,11 +313,15 @@ def regenerate_public_derived_artifacts(worktree: Path) -> None:
     rebuilt before the snapshot is committed, otherwise ServerClaw CI detects
     stale generated files immediately after `make generate-platform-vars`.
     """
+    refresh_network_policy_baselines(worktree)
     run(["make", "generate-platform-vars"], cwd=worktree)
     # `generate-platform-vars` first refreshes cross-cutting artifacts, then
     # embeds them in platform.yml. A second pass establishes that generated
     # fixed point after Tier A inputs change together.
     run(["make", "generate-platform-vars"], cwd=worktree)
+    # A captured config can contain a private hostname or network. Its public
+    # replacement must have a checksum of the exported bytes, not the private input.
+    refresh_captured_file_manifests(worktree)
 
 
 def check_leaks(worktree: Path, config: dict) -> list[str]:

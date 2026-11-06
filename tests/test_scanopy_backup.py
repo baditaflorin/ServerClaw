@@ -1,6 +1,6 @@
 """Tests for the nightly Scanopy database backup pull.
 
-The job streams a pg_dump from the 0docker hypervisor through a forced-command key, verifies it, keeps 14 and reports metrics.
+The job streams a pg_dump from the 0docker hypervisor through a forced-command key, verifies it, keeps hourly dumps for 48 h plus one per day for 14 days, and reports metrics.
 A failed or truncated dump must never replace or rotate away a good one. SSH is replaced by a scripted `pull`; nothing here
 touches a real host.
 """
@@ -96,15 +96,56 @@ def test_the_metrics_file_is_readable_by_node_exporter_even_under_a_strict_umask
     assert (Path(backup.CONF["textfile"]).stat().st_mode & 0o777) == 0o644
 
 
-def test_only_the_newest_files_are_kept(backup, monkeypatch) -> None:
-    monkeypatch.setitem(backup.CONF, "keep", 3)
+def make_dump(directory: Path, stamp: str) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / f"scanopy-{stamp}.sql.gz").write_bytes(b"x")
+
+
+def test_tiered_retention_keeps_48_hours_of_hourly_dumps_and_the_newest_of_each_of_14_days(backup, tmp_path) -> None:
+    import datetime as dt
+
+    now = dt.datetime(2026, 10, 17, 12, 30, tzinfo=dt.timezone.utc)
+    d = tmp_path / "tier"
+    stamps = [f"202610{day:02d}T{hour:02d}2000Z" for day in range(1, 18) for hour in range(0, 24, 6)]
+    stamps = [s for s in stamps if s <= "20261017T123000Z"]  # nothing newer than "now"
+    for stamp in stamps:
+        make_dump(d, stamp)
+    kept, removed = backup.rotate(str(d), 48, 14, now)
+    names = sorted(p.name[len("scanopy-"):-len(".sql.gz")] for p in d.iterdir())
+
+    assert kept + removed == len(stamps) and kept == len(names)
+    recent = [n for n in names if n > "20261015T123000Z"]
+    assert recent == ["20261015T182000Z", "20261016T002000Z", "20261016T062000Z", "20261016T122000Z", "20261016T182000Z",
+                      "20261017T002000Z", "20261017T062000Z", "20261017T122000Z"]  # every dump of the last 48 h
+    older = [n for n in names if n <= "20261015T123000Z"]
+    assert older == [f"202610{day:02d}T182000Z" for day in range(4, 15)]  # one per day, the newest of that day, back 14 days
+
+
+def test_retention_never_removes_the_newest_dump_or_unrelated_files(backup, tmp_path) -> None:
+    import datetime as dt
+
+    d = tmp_path / "safe"
+    make_dump(d, "20250101T000000Z")  # absurdly old, but the only dump
+    (d / "notes.txt").write_text("keep me")
+    (d / "scanopy-weird.sql.gz").write_bytes(b"x")  # does not carry a timestamp
+    kept, removed = backup.rotate(str(d), 48, 14, dt.datetime(2026, 10, 17, tzinfo=dt.timezone.utc))
+
+    assert (kept, removed) == (1, 0)
+    assert sorted(p.name for p in d.iterdir()) == ["notes.txt", "scanopy-20250101T000000Z.sql.gz", "scanopy-weird.sql.gz"]
+
+
+def test_the_run_applies_the_retention_and_reports_the_kept_count(backup, monkeypatch) -> None:
+    import datetime as dt
+
+    monkeypatch.setattr(backup, "utcnow", lambda: dt.datetime(2026, 10, 13, 6, 0, tzinfo=dt.timezone.utc))
+    for stamp in ("20260901T000000Z", "20260901T120000Z", "20261012T200000Z"):
+        make_dump(Path(backup.CONF["dir"]), stamp)
     serve(backup, monkeypatch, dump_text())
 
-    for _ in range(5):
-        assert run(backup, monkeypatch) == 0
+    assert run(backup, monkeypatch) == 0
 
-    assert dumps(backup) == [f"scanopy-20261013T0{i}0000Z.sql.gz" for i in (2, 3, 4)]
-    assert metrics(backup)["scanopy_backup_files"] == 3
+    assert dumps(backup) == ["scanopy-20261012T200000Z.sql.gz", "scanopy-20261013T000000Z.sql.gz"]  # September is gone
+    assert metrics(backup)["scanopy_backup_files"] == 2
 
 
 @pytest.mark.parametrize(
@@ -116,7 +157,6 @@ def test_only_the_newest_files_are_kept(backup, monkeypatch) -> None:
     ],
 )
 def test_a_bad_dump_fails_the_run_and_never_replaces_or_rotates_good_ones(backup, monkeypatch, payload, message, capsys) -> None:
-    monkeypatch.setitem(backup.CONF, "keep", 1)
     serve(backup, monkeypatch, dump_text())
     assert run(backup, monkeypatch) == 0
     good = metrics(backup)["scanopy_backup_last_success_timestamp_seconds"]

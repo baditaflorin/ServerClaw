@@ -1,0 +1,53 @@
+# Warm standby of the Scanopy server (managed by the monitoring_vm role; see docs/runbooks/scanopy-service-discovery.md).
+# Only `postgres` runs normally, refreshed from the hourly dump by scanopy_standby.py. `server` belongs to the `failover` profile:
+# it is started by the boot test (127.0.0.1:60099) or by a real failover (STANDBY_BIND / STANDBY_PORT), never by default.
+name: scanopy-standby
+services:
+  postgres:
+    image: {{ monitoring_scanopy_standby_postgres_image }}
+    container_name: scanopy-standby-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "${STANDBY_PG_PASSWORD:?the role generates .env with the standby password}"
+      POSTGRES_DB: scanopy
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=40"]
+    volumes:
+      - scanopy_standby_pg:/var/lib/postgresql/data
+    networks: [standby]
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  server:
+    image: {{ monitoring_scanopy_standby_server_image }}
+    container_name: scanopy-standby-server
+    profiles: ["failover"]
+    restart: "no"
+    command: ["server"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SCANOPY_PUBLIC_URL: http://localhost:60072
+      SCANOPY_INTEGRATED_DAEMON_URL: http://127.0.0.1:60073
+      SCANOPY_LOG_LEVEL: info
+      SCANOPY_WEB_EXTERNAL_PATH: /app/static
+      SCANOPY_DATABASE_URL: "postgresql://postgres:${STANDBY_PG_PASSWORD}@postgres:5432/scanopy"
+    ports:
+      - "${STANDBY_BIND:-127.0.0.1}:${STANDBY_PORT:-60072}:60072"
+    volumes:
+      - ./data:/data
+    networks: [standby]
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:60072/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+networks:
+  standby: {}
+volumes:
+  scanopy_standby_pg: {}

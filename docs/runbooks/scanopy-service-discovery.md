@@ -33,9 +33,9 @@ rules in `config/prometheus/rules/inventory.yml` alert on staleness, shrinkage a
 |---|---|---|---|
 | `/etc/prometheus/prometheus.yml` | `roles/monitoring_vm/templates/prometheus.yml.j2` + `inventory/host_vars/monitoring.yml` | `monitoring_vm` (`tracing.yml`) | Validated with `promtool check config` before it replaces the live file; applied with SIGHUP (reload), not a restart. |
 | Static fleet exporters, cadvisor, public-edge job | `monitoring_prometheus_extra_scrape_jobs`, `monitoring_prometheus_public_edge_targets_file` | `monitoring_vm` | Only exporters Scanopy does not publish. |
-| OpenObserve `remote_write` | `monitoring_prometheus_remote_write_targets` | `monitoring_vm` | Password is never in git: `password_file` points at a systemd credential. |
+| OpenObserve `remote_write` (DISABLED 2026-10-14: ~2,200 unqueried metric streams duplicating this Prometheus) | `monitoring_prometheus_remote_write_targets` (now `[]`; the commented restore block is in `inventory/host_vars/monitoring.yml`) | `monitoring_vm` | Password is never in git: `password_file` points at a systemd credential. |
 | Prometheus credential drop-in | `monitoring_prometheus_remote_write_credentials` | `monitoring_vm` | `LoadCredentialEncrypted=` line only; the encrypted blob must already exist on the host and the role fails closed if it does not. |
-| `scanopy_sd.py`, README, `extra-endpoints.json` | `roles/monitoring_vm/files/scanopy-sd/`, `monitoring_scanopy_sd_extra_endpoints` | `monitoring_vm` (`scanopy_sd.yml`) | The script is byte-identical to the version running since 2026-10-11. |
+| `scanopy_sd.py`, README, `extra-endpoints.json` | `roles/monitoring_vm/files/scanopy-sd/`, `monitoring_scanopy_sd_extra_endpoints` | `monitoring_vm` (`scanopy_sd.yml`) | Hosts that are switched off on purpose are listed in `monitoring_scanopy_sd_ignored_hosts` (rendered to `ignored-hosts.json`): while such a host does not answer it is not expected to have a node_exporter, is not published, and `NodeExporterMissing` stays quiet (currently `domainscope-pg-replica`, VM 153, whose replication slot is lost). Remove the entry when the VM runs again. |
 | `scanopy-sd.service` / `.timer` | `roles/monitoring_vm/templates/scanopy-sd.*.j2` | `monitoring_vm` | Timer is enabled, never restarted by a converge. |
 | `/etc/scanopy-sd/api-key` | controller-local `monitoring_scanopy_sd_api_key_local_file` | `monitoring_vm` | root `0600`. See "Secrets". |
 | `scanopy_retag.py`, README | `roles/monitoring_vm/files/scanopy-retag/` | `monitoring_vm` (`scanopy_retag.yml`) | Tags Docker bridge subnets in Scanopy. See "Docker bridge subnet tagging". |
@@ -47,7 +47,7 @@ rules in `config/prometheus/rules/inventory.yml` alert on staleness, shrinkage a
 | `scanopy-onboard.service` / `.timer` | `roles/monitoring_vm/templates/scanopy-onboard.*.j2` | `monitoring_vm` | Timer runs every 15 minutes (minute 07/22/37/52); enabled, never restarted by a converge. Reuses `/etc/scanopy-retag/api-key`. |
 | `/etc/scanopy-onboard/id_ed25519` | generated once by the role (`ssh-keygen`, `creates:`) | `monitoring_vm` | Dedicated key; its public half is a forced-command line on each hypervisor. |
 | `scanopy_backup.py`, `scanopy_backup_hv.sh`, README | `roles/monitoring_vm/files/scanopy-backup/`, `monitoring_scanopy_backup_*` | `monitoring_vm` (`scanopy_backup.yml`) | Nightly pull of the Scanopy database. See "Database backup". |
-| `scanopy-backup.service` / `.timer` | `roles/monitoring_vm/templates/scanopy-backup.*.j2` | `monitoring_vm` | Daily 03:20 UTC; enabled, never restarted by a converge. |
+| `scanopy-backup.service` / `.timer` | `roles/monitoring_vm/templates/scanopy-backup.*.j2` | `monitoring_vm` | Hourly at :20 UTC; enabled, never restarted by a converge. |
 | `rules/inventory.yml`, `rules/zz-alertmanager-watchdog.yml` | `config/prometheus/rules/` | `monitoring_vm` | Reload only. `inventory.yml` also carries the `scanopy_retag`, `scanopy_discover` (incl. `ScanopyDaemonDown`) and `scanopy_onboard` alert groups. |
 | `/etc/alertmanager/alertmanager.yml` | `config/alertmanager/alertmanager.yml` | `alertmanager_runtime` | ntfy-only routing, validated with `amtool check-config`, applied with a reload. |
 | `/etc/alertmanager/ntfy-password` | controller-local `alertmanager_runtime_ntfy_password_local_file` | `alertmanager_runtime` | root:prometheus `0640` (Alertmanager runs as `prometheus`). |
@@ -143,6 +143,11 @@ authenticated query helper if the unauthenticated call is rejected.
   files are kept and `scanopy_sd_guard_tripped=1` (`TargetCountDrop`). Accept a
   real shrink with `touch /var/lib/scanopy-sd/accept-shrink` on the VM; the next
   run consumes it.
+  Deleting many Scanopy hosts on purpose (for example foreign hosts swept by a
+  daemon) always trips it, and `ScanopySDStale` follows after 30 minutes because the
+  guarded run is not a success: touch `accept-shrink` (as root, the directory is
+  not world-readable) in the same session as the deletion. This was missed on
+  2026-10-16 (125 to 94 hosts) and targets sat unrefreshed for 36 hours.
 - Only endpoints connectable from the monitoring VM are published, and each
   node_exporter identity is verified against `node_uname_info`. The reported
   nodename must equal an inventory name, or the first DNS label of one (the
@@ -223,8 +228,9 @@ creates, edits and deletes nothing in Scanopy.
   empty key or schedule, an unknown daemon name, or a daemon without a `Scheduled`
   definition. The other targets still run.
 
-The schedule covers the 16 Docker VM daemons (01:00 to 05:15 UTC) and the four Proxmox hypervisor daemons
-(`pve-0docker`, `pve-0mcp`, `pve-0own`, `pve-pve01`, 05:30 to 06:15 UTC) so the Proxmox VE inventory stays fresh.
+The schedule covers the Docker VM daemons (01:00 to 05:15 UTC), then each hypervisor's Proxmox daemon (`pve-0docker`, `pve-0mcp`,
+`pve-0own`, `pve-0database`, `pve-0infer`) and the two host daemons for the hypervisors that need them (05:30 onward UTC) so each Proxmox VE inventory stays fresh. PVE01 remains the
+technical hostname and SSH endpoint (`proxmox.0database.com`); its fleet and Scanopy identity is `0database`.
 
 To add or move a host, edit `monitoring_scanopy_discover_schedule` in
 `inventory/host_vars/monitoring.yml` (keep slots on distinct quarter hours) and
@@ -268,10 +274,13 @@ Every running Proxmox guest (VM and container) and every hypervisor runs a Scano
 - Unit `scanopy-daemon.service`, `ExecStart=/usr/local/bin/scanopy-daemon --config-dir /etc/scanopy/daemon/scanopy-daemon
   --log-file /var/log/scanopy/scanopy-daemon.log`, `Restart=always`, user root. `config.json` holds the daemon name, port, server URL,
   site id and the daemon's own API key (root-only in practice). `scanopy-daemon install` writes all of this.
-- **Server URL per fleet.** Guests do not call the server directly: each hypervisor publishes it on its gateway address, and the daemon's
+- **Server URL per fleet.** Guests use a private relay or tailnet address, and the daemon's
   `server_url` is that address on port 60072: `http://10.10.10.1:60072` (0docker, the server itself), `http://10.10.10.1:60072` (0mcp),
-  `http://10.60.10.1:60072` (0own), `http://10.50.0.1:60072` (pve01). On 0mcp, 0own and pve01 this is a `scanopy-relay.socket` +
-  `systemd-socket-proxyd` forwarding to the server's tailnet address.
+  `http://10.60.10.1:60072` (0own), `http://10.50.0.1:60072` (0database), and
+  `http://10.70.10.1:60072` (0infer, bound to vmbr70). On 0mcp, 0own, 0database and 0infer this is a `scanopy-relay.socket` +
+  `systemd-socket-proxyd` forwarding to the server's tailnet address. The 0infer host listens only on `10.70.10.1:60072` and forwards to
+  `100.64.0.5:60072`; this covers VM704, which has no Tailscale interface. Keep the Tailscale API grant on the hypervisor only.
+  The relay service runs as `nobody` with `NoNewPrivileges=true`, `PrivateTmp=true`, `ProtectSystem=strict`, and `ProtectHome=true`.
 - **Relay rule.** The 0mcp hypervisor's `host.fw` lets the guest LAN reach the relay with one rule (`IN ACCEPT -i vmbr20 -source
   10.10.10.0/24 -dest 10.10.10.1 -p tcp -dport 60072`), rendered from `proxmox_host_additional_tcp_rules`
   (`inventory/host_vars/proxmox-host.yml`). It used to be one rule per guest; that blocked every guest the onboarding job installs
@@ -286,13 +295,35 @@ Every running Proxmox guest (VM and container) and every hypervisor runs a Scano
 - **After a manual install:** a new daemon gets a weekly `Scheduled` discovery by default. Move it to a daily quarter-hour slot (the
   trigger adopts it, or add it to `monitoring_scanopy_discover_schedule`), and attach the `docker-socket-1` credential to the host
   of every guest that runs Docker. The onboarding job does both itself.
-- A host that needs a second daemon identity (a Proxmox credential is assigned to a daemon, so the pve01 hypervisor has `Scanopy daemon pve01`
-  on port 60073 and `pve-pve01` on port 60074) uses a second unit with its own config directory and log: `scanopy-daemon-2.service` with
+- A host that needs a second daemon identity (a Proxmox credential is assigned to a daemon, so the 0database hypervisor has `Scanopy daemon 0database`
+  on port 60073 and `pve-0database` on port 60074) uses a second unit with its own config directory and log: `scanopy-daemon-2.service` with
   `--config-dir /etc/scanopy/daemon/scanopy-daemon-2 --log-file /var/log/scanopy/scanopy-daemon-2.log`. That unit was missing until
-  2026-10-12, so discoveries addressed to `pve-pve01` stayed `Pending` and its Proxmox data stopped refreshing on 2026-10-08.
+  2026-10-12, so discoveries addressed to `pve-0database` stayed `Pending` and its Proxmox data stopped refreshing on 2026-10-08.
 - Proxmox discovery reads its API-token secret from `/root/.config/scanopy/proxmox-token.secret` on the daemon's own host, so only the
   hypervisor daemons can use the Proxmox credentials; VM daemons log harmless "credential malformed" warnings.
 - A daemon only runs a discovery for which a `Scheduled` definition exists in Scanopy; `scanopy-discover` starts those definitions.
+- **Setting up a new hypervisor's two daemons (done for 0infer on 2026-10-16; the steps are the same for any new Proxmox host).**
+  1. Proxmox side (mirrors the other hypervisors): role `ScanopyGuestAgent` (`VM.GuestAgent.Audit`), user `scanopy@pve`, API token `discovery`
+     with privilege separation, and the roles `PVEAuditor` + `ScanopyGuestAgent` on `/` for both the user and the token. The token secret is
+     written by the command that creates it to `/root/.config/scanopy/proxmox-token.secret` (root, `0600`) so it never appears in a terminal.
+  2. Scanopy side: provision the two daemon records (`POST /api/v1/daemons/provision`, names `Scanopy daemon <fleet>` and `pve-<fleet>`, the keys go
+     straight into root-only files on the host), install with `scanopy-daemon install --mode daemon_poll --server-url http://100.64.0.5:60072`
+     (the hypervisor talks to the server over the tailnet; its relay is for guests): the first on port 60073 with the default config dir, the second with
+     `--daemon-port 60074 --config-dir /etc/scanopy/daemon/scanopy-daemon-2 --log-file /var/log/scanopy/scanopy-daemon-2.log --instance 2`
+     (that creates `scanopy-daemon-2.service`). Delete the staging files with the keys afterwards.
+  **Restrict the scan scope before the first discovery runs.** A Hetzner host whose public interface is an on-link /26 (0infer: `eno1 203.0.113.20/26`)
+     shares that LAN with other customers; a daemon with the default scope ARP-sweeps and port-probes every neighbour. On 2026-10-16 the two 0infer
+     daemons did exactly that and recorded 33 foreign hosts (157.90.1.128/26) before it was noticed. For a new Proxmox host: install the daemons with
+     `--interfaces <internal bridge>` (config key `interfaces`, e.g. `["vmbr70"]`) so they never attach to the public interface, and set `subnet_ids`
+     of their `Scheduled` discovery to the internal subnet only. Check `interfaced_subnet_ids` of the daemon (no public CIDR) and that no
+     non-private subnet with foreign hosts appears under Subnets before leaving it alone. 0docker's public /27 only ever showed its own gateway; every
+     other hypervisor is routed /32, but check each new one.
+  3. Give each daemon's `Scheduled` discovery the cron of its slot in `monitoring_scanopy_discover_schedule`.
+  4. Create the credential `pve-<fleet>-proxmox` (type ProxmoxApiToken, port 8006, token id `scanopy@pve!discovery`, secret from the file path above).
+     Credentials are organisation-level: the Member key gets HTTP 403, use the Admin key (vault `admin_api`). Let the first discovery run (it creates the
+     hypervisor's host record with its bridge address, 10.70.10.1 for 0infer), then assign the credential to that host and address and start the
+     `pve-<fleet>` discovery again so the Proxmox VE data is read.
+
 
 ### Automatic onboarding of new guests
 
@@ -337,9 +368,11 @@ install -m 0755 scanopy_onboard_hv.py /usr/local/sbin/scanopy-onboard-hv        
 command="/usr/local/sbin/scanopy-onboard-hv",no-pty,no-port-forwarding,no-agent-forwarding,no-X11-forwarding,from="10.10.10.40,203.0.113.1" ssh-ed25519 AAAA... scanopy-onboard
 ```
 
-`from=` is the monitoring VM's LAN address (0mcp's own hypervisor sees it) and the 0mcp public address its traffic leaves from. The key
-can run `list` and `install <vm|ct> <id> <relay-url> <name> <version>` and nothing else; arguments are validated, the relay must be a
-`http://10.x.x.x:60072` address. After changing the wrapper, copy it to all four hypervisors again (`list` reports `wrapper_version`).
+`from=` is the monitoring VM's permitted source address for that hypervisor. The 0mcp hypervisor sees its LAN and public addresses;
+the 0infer hypervisor sees the monitoring VM's Tailscale address `100.64.0.4`. The key can run `list` and
+`install <vm|ct> <id> <relay-url> <name> <version>` and nothing else; arguments are validated, the relay must be a
+`http://10.x.x.x:60072` fleet relay or the exact private Scanopy address `http://100.64.0.5:60072`. After changing the wrapper, copy it
+to every onboarded hypervisor again (`list` reports `wrapper_version`).
 
 On the monitoring VM:
 
@@ -353,11 +386,44 @@ Verified end to end on 2026-10-13: the daemon was stopped and deleted in Scanopy
 (0mcp-staging-runtime); the next run re-installed both, they checked in, got slots 12:00 and 12:15 UTC, and VM 200 got the Docker
 credential. Roll back with `sudo systemctl disable --now scanopy-onboard.timer` or `monitoring_scanopy_onboard_enabled: false`.
 
+**A guest that moved between fleets keeps its old daemon (VM 705 `infer-spire`, found 2026-10-23).** A VM that is migrated to another hypervisor
+keeps `/etc/scanopy/daemon/*/config.json` with the old relay URL (here `http://10.50.0.1:60072` of the retired pve01) and the old daemon record, which is
+then deleted: the daemon logs `403 Daemon context required`, `Daemon NOT ready`, and never retries. The onboarding job provisions a new record, but the
+installer answers `skipped=already-active` and the job fails; later runs consider the guest covered because its host still shows a fresh "Scanopy Daemon"
+service (up to 7 days), so only `ScanopyDaemonDown` (a record with `last_seen` never set, age 3650 days) tells. Fix: stop the old daemon in the guest
+(`qm guest exec <vmid> -- systemctl stop scanopy-daemon` from the hypervisor), then call `onboard()` of `/opt/scanopy-onboard/scanopy_onboard.py` for that
+guest from a root python on the monitoring VM (it reuses the provisioned record by name, so no duplicate), or delete the guest's service stop file and let the
+job retry. Check afterwards: `scanopy_daemon_last_seen_age_seconds` low, a daily slot assigned. After moving a guest, stop its old daemon first.
+
+### Compressing proxy for the web UI
+
+The Scanopy server sends its API uncompressed: the topology page downloads about 16 MB, 11.7 MB of it one `GET /api/v1/topology/data` response (449 of the
+459 subnets are Docker bridges, plus 1,500 services and 3,000 interfaces). A small Caddy container on the 0docker hypervisor, `scanopy-gzip`, serves the
+same server compressed on the tailnet-only port **60080**: use `http://100.64.0.5:60080/?view=Workloads#topology` instead of port 60072 in the
+browser. Measured on 2026-10-16: that response drops to 1.3 MB (gzip) / 1.2 MB (zstd), the whole page to about 3.4 MB; load time 14 s -> 12 s, because the
+rest is the app's own start-up chain (about 5 MB of JavaScript, then several waves of list requests) and the browser's layout work. Daemons and relays
+keep using 60072; nothing about the server changed, and the session cookie works on both ports.
+
+```bash
+# /root/scanopy-gzip/Caddyfile on the 0docker hypervisor
+{ auto_https off
+  admin off }
+:8080 {
+	encode zstd gzip
+	reverse_proxy scanopy-server-1:60072 { flush_interval -1 }
+}
+docker run -d --name scanopy-gzip --restart unless-stopped --network scanopy_scanopy \
+  -p 100.64.0.5:60080:8080 -v /root/scanopy-gzip/Caddyfile:/etc/caddy/Caddyfile:ro --memory 128m caddy:2-alpine
+```
+
+Remove it with `docker rm -f scanopy-gzip` (nothing else depends on it). The topology views: L3 Logical is IP networks only; **Workloads** shows the
+containers per host. The hidden-subnet tag filter (Docker bridges) also hides the containers in L3 Logical.
+
 ### Database backup
 
 The Scanopy Postgres is part of the compose project on the 0docker hypervisor, which PBS does not back up (it backs up guests); until
-2026-10-13 the only copy was one dump from 2026-10-08 on the same host. `scanopy-backup` (systemd timer on the monitoring VM, daily
-03:20 UTC) pulls a fresh `pg_dump` to the monitoring VM, which lives in another fleet (0mcp) and is itself in the nightly PBS job to
+2026-10-13 the only copy was one dump from 2026-10-08 on the same host. `scanopy-backup` (systemd timer on the monitoring VM, hourly,
+at :20 UTC) pulls a fresh `pg_dump` to the monitoring VM, which lives in another fleet (0mcp) and is itself in the nightly PBS job to
 `own-pbs` (02:00), so there are two further copies one night later.
 
 - The pull is `ssh root@example.net dump` with `/etc/scanopy-backup/id_ed25519`. On the hypervisor that key is a forced command
@@ -367,7 +433,7 @@ The Scanopy Postgres is part of the compose project on the 0docker hypervisor, w
   Reinstall both after the hypervisor is rebuilt (see the next section for the host key).
 - The dump is verified before it is kept: gzip integrity, at least 10 kB, the `PostgreSQL database dump complete` trailer, and the
   core tables (`daemons`, `hosts`, `discovery`, `api_keys`, `credentials`). It lands in `/var/backups/scanopy/scanopy-<UTC>.sql.gz`
-  (root only, `0600`: it holds credential material), the newest 14 are kept, and a failed run changes nothing. Metrics
+  (root only, `0600`: it holds credential material), retention is tiered (every dump of the last 48 h plus the newest of each of the last 14 UTC days), and a failed run changes nothing. Metrics
   (`scanopy_backup.prom`): `scanopy_backup_last_success_timestamp_seconds` (kept across failed runs, so its age keeps growing),
   `scanopy_backup_last_attempt_success`, `scanopy_backup_last_size_bytes`, `scanopy_backup_files`. Alerts: `ScanopyBackupStale`
   (no verified dump for 36 h) and `ScanopyBackupMetricsAbsent`.
@@ -391,6 +457,49 @@ zcat scanopy-<UTC>.sql.gz | docker exec -i scanopy-postgres-1 sh -c 'psql -U "$P
 To rehearse without touching the live database, create a scratch database first (`create database scanopy_restore_test`), load into
 that with `-d scanopy_restore_test`, compare row counts, and drop it. A restored database keeps every daemon key, so the daemons
 reconnect on their own; only a lost database needs the re-enrolment in the next section.
+
+### Warm standby of the Scanopy server (monitoring VM)
+
+Scanopy is an observation tool: Prometheus service discovery keeps its last good files while the server is down, and daemons retry. Real-time
+replication is not worth its moving parts for a 72 MB database that the daemons can rediscover. What matters is how fast a replacement can serve the
+daemon keys, credentials, tags and schedules that are not rediscoverable. The server's only state is the database (its data directory is empty;
+its whole configuration is five settings), so a standby is the newest dump plus the same server image:
+
+- **Data:** `scanopy-backup` dumps hourly (tiered retention, see "Database backup"); `scanopy-standby-sync` (hourly at :35 UTC) restores the newest
+  dump into the persistent container `scanopy-standby-postgres` on the monitoring VM (0mcp fleet, a different hypervisor than the 0docker primary),
+  only when a newer dump exists, and checks that daemons, hosts, discoveries, API keys and credentials have rows. Worst case a failover loses the
+  last hour of discovery history.
+- **Server:** `scanopy-standby-server` (the same image tag as the primary, `v0.17.22`) is defined in `/opt/scanopy-standby/docker-compose.yml` under
+  the compose profile `failover` and never runs by default. `scanopy-standby-boot-test` (Sundays 04:40 UTC) starts it on `127.0.0.1:60099` against the
+  restored data, waits for `/api/health`, lists the daemons through the API with the key of the retag/discover/onboard jobs (it is stored in the
+  database, so a working answer proves the copy is a functioning Scanopy) and stops it again. First run on 2026-10-17: healthy after 16 s, 47 daemons.
+- **Alerts:** `ScanopyStandbyStale` (standby not refreshed for 6 h), `ScanopyStandbyBootTestStale` (no good boot test for 10 days),
+  `ScanopyStandbyMetricsAbsent`, `ScanopyStandbyFailoverActive` (the standby server is running: a failover is in progress or was forgotten).
+- **Memory:** the always-on part is one Postgres container (limited to 256 MB); the server needs about 250 MB and only runs for the 10-20 s boot test
+  or during a failover. The monitoring VM has 4 GB and is tight, so check `free -m` before a long failover.
+
+**Failover** (the primary is gone or down for long; the standby carries on from the newest dump):
+
+1. On the monitoring VM start the server on the tailnet address (the sync pauses itself while it runs, so the live data is not overwritten):
+   `sudo STANDBY_BIND=100.64.0.4 STANDBY_PORT=60072 docker compose -f /opt/scanopy-standby/docker-compose.yml --profile failover up -d server`.
+   The UI is then `http://100.64.0.4:60072`, the same login and keys as the primary.
+2. Point the daemons at it. Guest daemons go through the relay on their hypervisor (`scanopy-relay.service`, `systemd-socket-proxyd <target>:60072`):
+   on the 0mcp, 0own, 0database and 0infer hypervisors change the target in `/etc/systemd/system/scanopy-relay.service` from `100.64.0.5:60072` to
+   `100.64.0.4:60072` (`sed -i 's/100.64.0.5:60072/100.64.0.4:60072/' /etc/systemd/system/scanopy-relay.service && systemctl daemon-reload && systemctl restart scanopy-relay.service`).
+   The hypervisors' own daemons already use their local relay (done 2026-10-17), so no `config.json` edits are needed; every daemon in the fleet reconnects
+   by itself within a minute. Reachability is in place and was verified: the Tailscale grant (`config/tailscale/policy.hujson`) and the monitoring VM
+   firewall (`network_policy.guests.monitoring.allowed_inbound`, tcp/60072 from the four hypervisors) both allow it; before the standby server is started a
+   hypervisor gets "connection refused" from `100.64.0.4:60072`, which is the expected healthy answer.
+3. Check: `scanopy_daemon_last_seen_age_seconds` low for all daemons, the jobs on the monitoring VM succeed (they use the relay on 10.10.10.1),
+   `ScanopyStandbyFailoverActive` fires (expected, it tells the next person).
+
+**Failback** (the primary is healthy again): stop writes by pausing nothing is needed; dump the standby database
+(`docker exec scanopy-standby-postgres pg_dump -U postgres -d scanopy --no-owner --clean --if-exists | gzip > /root/failback.sql.gz`), restore it into the primary
+as in "Database backup", repoint the relays back to `100.64.0.5:60072`, then stop the standby server
+(`docker compose -f /opt/scanopy-standby/docker-compose.yml --profile failover rm -sf server`); the hourly sync resumes by itself.
+
+Roll the standby back with `systemctl disable --now scanopy-standby-sync.timer scanopy-standby-boot-test.timer` and
+`docker compose -f /opt/scanopy-standby/docker-compose.yml down -v`, or `monitoring_scanopy_standby_enabled: false` and a converge (installed files stay).
 
 ### Recovery after the Scanopy server or the 0docker hypervisor is rebuilt
 
@@ -424,6 +533,19 @@ When the hypervisor is back:
    on the 0mcp hypervisor first.
 6. Check `sudo python3 /opt/scanopy-onboard/scanopy_onboard.py --dry-run` and `sudo python3 /opt/scanopy-discover/scanopy_discover.py
    --dry-run` before the next timer run; both should report no errors.
+
+### Primary server compose file (0docker hypervisor, not in git)
+
+The compose project `scanopy` (server + postgres) lives in `/Users/live` on the 0docker hypervisor (`docker-compose.yml`, `.env` 0600 with
+`POSTGRES_PASSWORD`, `data/` bind-mounted into the server, named volume `scanopy_postgres_data`). The original file was found missing on 2026-10-17 while the
+containers kept running (they carry the labels `com.docker.compose.project.config_files=/Users/live/docker-compose.yml`), so it was rebuilt from
+`docker inspect`: same image `ghcr.io/scanopy/scanopy/server:v0.17.22` (+ `postgres:17-alpine`), port 60072, env (`SCANOPY_DATABASE_URL`, `SCANOPY_PUBLIC_URL=http://localhost:60072`,
+`SCANOPY_INTEGRATED_DAEMON_URL=http://host.docker.internal:60073`, `SCANOPY_WEB_EXTERNAL_PATH=/app/static`, log level info), `host.docker.internal:host-gateway`, network
+`scanopy_scanopy`, healthchecks and labels (`service: scanopy`, `org.scanopy.deploy_mode: downtime`). Postgres renders with the same config hash as the running container;
+the server does not (some cosmetic field is unrecoverable), so a `docker compose up -d` recreates the server once with the same image and data. The embedded daemon
+(`scanopy-daemon`: host network, privileged, docker.sock, volume `scanopy_daemon-config`) is not in the file but carries the project label: never use
+`--remove-orphans`. The warm-standby compose (`templates/scanopy-standby-compose.yml.j2`) is the same shape. For an upgrade change the image tag in the file first,
+take a dump (`scanopy-backup.service`), then `docker compose up -d` in `/Users/live`.
 
 ### Scanopy-side runtime settings (not in git)
 

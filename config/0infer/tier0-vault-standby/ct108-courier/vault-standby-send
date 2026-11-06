@@ -1,0 +1,28 @@
+#!/bin/bash
+# Runs on the BUILDER (CT108) every few minutes: consistent online snapshot of the vault + keystore SQLite DBs on the dockerhost,
+# streamed (gzip) to the tier-0 standby through the 0infer host's forwarded ssh port (2240 -> VM704:22, forced command, key-only).
+# WAL-safe via sqlite3 .backup. CT108 runs tailscaled in userspace mode, so the tailnet hop goes through its local CONNECT proxy.
+set -uo pipefail
+DOCKERHOST=${DOCKERHOST:-ubuntu_vm@10.10.10.20}
+SRC=(-o BatchMode=yes -o ConnectTimeout=15)
+DST=(-o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/root/.ssh/known_hosts_tier0
+     -o "ProxyCommand=nc -X connect -x 127.0.0.1:1056 %h %p" -p 2240 -i /root/.ssh/tier0_sync)
+TARGET=vsync@100.64.0.21
+rc=0
+push() {  # $1 label  $2 source db path on the dockerhost
+  ssh "${SRC[@]}" "$DOCKERHOST" "set -e; t=\$(mktemp -u /tmp/snap.XXXXXX); ok=0; for i in 1 2 3 4; do if sudo sqlite3 -cmd '.timeout 30000' '$2' \".backup \$t\" 2>/dev/null; then ok=1; break; fi; sudo rm -f \$t; sleep 4; done; [ \$ok = 1 ] || { echo 'snapshot failed after retries' >&2; exit 1; }; sudo chmod 600 \$t; sudo gzip -1 -c \$t; sudo rm -f \$t" \
+    | ssh "${DST[@]}" "$TARGET" "put $1" || { echo "push $1 FAILED" >&2; rc=1; }
+}
+push secrets  /var/lib/docker/volumes/go-fleet-secrets_secrets-data/_data/secrets.db
+push keystore /opt/services/go_apikey_service/data/keys.db
+M=/var/lib/prometheus-node-exporter/textfile    # the builder's node_exporter --collector.textfile.directory
+if [ -d "$M" ]; then
+  tmp="$M/.vault_standby_sync.$$"
+  { echo "# TYPE vault_standby_sync_last_run_timestamp_seconds gauge"
+    echo "vault_standby_sync_last_run_timestamp_seconds $(date +%s)"
+    echo "vault_standby_sync_last_success $((1-rc))"
+    if [ "$rc" = 0 ]; then echo "vault_standby_sync_last_success_timestamp_seconds $(date +%s)"; fi
+  } > "$tmp"
+  mv "$tmp" "$M/vault_standby_sync.prom"
+fi
+exit $rc

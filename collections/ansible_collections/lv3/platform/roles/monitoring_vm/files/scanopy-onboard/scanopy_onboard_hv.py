@@ -28,7 +28,9 @@ import subprocess
 import sys
 
 WRAPPER_VERSION = 2
-URL_RE = re.compile(r"^http://(10\.\d{1,3}\.\d{1,3}\.\d{1,3}):60072$")
+# Fleet relays normally use their Proxmox gateway address. 0infer guests use
+# the Scanopy server's private Tailscale address; its ACL grants port 60072 only.
+URL_RE = re.compile(r"^http://(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|100\.120\.249\.11):60072$")
 NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$")
 VERSION_RE = re.compile(r"^(latest|\d{1,3}\.\d{1,3}\.\d{1,3})$")
 KEY_RE = re.compile(r"^[A-Za-z0-9_.=+/-]{8,256}$")

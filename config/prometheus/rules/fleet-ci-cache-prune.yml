@@ -1,0 +1,46 @@
+# Added 2026-11-02. The shared Go/npm CI cache of the Woodpecker pilot agent (0own-build-worker, VM 610; services-registry PR #806) is trimmed every
+# night by scripts/ci-cache/prune.sh. A cache that ended above its cap only logged a line: go-build ended every prune above its 8 GB cap from 10-21
+# to 11-01 and nothing alerted, because the script exited 0.
+# The numbers come from `prune.sh --prom /var/lib/prometheus/node-exporter/ci-cache-prune.prom`: a node-exporter textfile written when a real (not
+# dry) run ends, with the size and cap of go-build, go-mod and npm, an over-cap flag per cache and the time of the run. Prometheus scrapes that
+# exporter (100.88.44.116:9101) through the Scanopy file_sd list with host="0own-build-worker". The same run exits 3 when a cache is still over its cap.
+# Until the new prune.sh runs on that host there are no ci_cache_prune_* series: the first two rules stay quiet and CiCachePruneMissing speaks after
+# 3 days. A second agent host that gets the host-local cache needs no change here: its series carry its own `host` label. `max by (...)` merges the
+# duplicate series an exporter restart leaves.
+groups:
+  - name: fleet_ci_cache_prune
+    rules:
+      - alert: CiCacheOverCap
+        expr: >-
+          max by (host, cache) (ci_cache_prune_over_cap) == 1
+        for: 5m
+        labels:
+          severity: warning
+          service: fleet_ci_cache_prune
+        annotations:
+          summary: "{{ $labels.cache }} cache on {{ $labels.host }} is still over its cap after the nightly prune"
+          description: "prune.sh deleted everything it may (files used in the last day, Go modules younger than 14 days) and the cache is still above its cap (ci_cache_prune_size_bytes against ci_cache_prune_cap_bytes), so the cache disk is not bounded and the prune unit exited 3. Read the run with `journalctl -u woodpecker-ci-cache-prune.service --since -2d` on the host. Either one working day needs more than the cap (raise the flag in the unit's drop-in caps.conf; see docs/runbooks/woodpecker-ci-go-cache-pilot.md in services-registry) or something other than the pipelines writes into the cache."
+          runbook_url: docs/runbooks/fleet-observability.md#ci-cache-prune-alerts
+
+      - alert: CiCachePruneStale
+        expr: >-
+          time() - max by (host) (ci_cache_prune_last_run_timestamp_seconds) > 36 * 3600
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_ci_cache_prune
+        annotations:
+          summary: "the CI cache prune on {{ $labels.host }} has not finished a run for 36 hours"
+          description: "The timer runs daily at about 03:15 UTC and the run writes this metric when it ends, so {{ $value | humanizeDuration }} without one means a run was missed or died before it wrote its file. Nothing bounds the cache disk until it runs again. On the host: `systemctl status woodpecker-ci-cache-prune.timer woodpecker-ci-cache-prune.service`."
+          runbook_url: docs/runbooks/fleet-observability.md#ci-cache-prune-alerts
+
+      - alert: CiCachePruneMissing
+        expr: absent(ci_cache_prune_last_run_timestamp_seconds)
+        for: 3d
+        labels:
+          severity: warning
+          service: fleet_ci_cache_prune
+        annotations:
+          summary: "No host reports the CI cache prune metrics"
+          description: "No series ci_cache_prune_last_run_timestamp_seconds at all for 3 days (the stale rule cannot fire on a series that does not exist). Either `--prom` is not set in the prune unit on the pilot host, the textfile is not written, or its exporter is not scraped. Check `ls -l /var/lib/prometheus/node-exporter/ci-cache-prune.prom` on 0own-build-worker and `curl -s http://100.88.44.116:9101/metrics | grep ci_cache_prune`."
+          runbook_url: docs/runbooks/fleet-observability.md#ci-cache-prune-alerts

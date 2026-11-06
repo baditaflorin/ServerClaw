@@ -1,0 +1,95 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-10-26-pve-host-daily-low-alert-monitoring-live-apply",
+  "applied_on": "2026-10-26",
+  "recorded_on": "2026-10-27",
+  "recorded_by": "claude",
+  "source_commit": "054003541fd54abe23eef3ca88034ba4eee25726",
+  "repo_version_context": "0.179.52",
+  "workflow_id": "converge-monitoring",
+  "service_ids": [
+    "monitoring"
+  ],
+  "summary": "Shipped the PveHostFilesystemDailyLowNarrow alert (PR 584, ws-0533) to the monitoring VM's Prometheus by installing config/prometheus/rules/pve-host-incident.yml from main 054003541 at 2026-10-26T23:02Z (2026-10-27 01:02 local). A targeted Ansible play that uses the monitoring_vm role's own copy parameters (root:prometheus, 0640) and its SIGHUP reload, not a converge: make live-apply-service service=grafana was blocked by two gates and make converge-monitoring runs seven playbooks and cannot be narrowed to one file.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "monitoring-lv3",
+      "vmid": "140",
+      "address": "10.10.10.40",
+      "pull_request": "https://github.com/baditaflorin/platform_server/pull/584"
+    },
+    {
+      "kind": "other",
+      "name": "prometheus-rules-pve-host-incident.yml"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Source and live file were the ones reviewed",
+      "result": "pass",
+      "observed": "The play aborts unless the source file is sha256 666979ef7dd7cb828b99f6fc3b9dcf5e27dfcf547f9d5d3508987ddc89531812 (the blob of pve-host-incident.yml on origin/main 054003541) and the live file is sha256 7d08ceae381a2f11f92104e3961579f2576e52e77a70bf7e055b895ccabcd0f5 (the file that had been diffed) or already equal to the source; both assertions held, and a real run needs APPLY_CONFIRMED=yes."
+    },
+    {
+      "check": "Check mode before the apply",
+      "result": "pass",
+      "observed": "ansible-playbook --check --diff of the monitoring_vm role's 22 rule-file copies (same source files, owner, group and mode, task-level check_mode: true): 3 content changes (pve-host-incident.yml +13 lines, which is exactly the new alert; inventory.yml ScanopyBackupStale 36 h to 4 h; fleet-loops.yml a new FleetTailnetPolicyChangedOutsideReconciler), 4 attribute-only changes, 15 identical. Only pve-host-incident.yml was applied."
+    },
+    {
+      "check": "Rule validation with the running version",
+      "result": "pass",
+      "observed": "promtool 2.53.3+ds1 on the VM (the version of the running Prometheus): check rules on the new file SUCCESS, 15 rules (once with the file piped on stdin before the apply, and again by the copy task's validate step before the file replaced the live one); promtool check config /etc/prometheus/prometheus.yml SUCCESS after the install."
+    },
+    {
+      "check": "Previous file kept",
+      "result": "pass",
+      "observed": "/etc/prometheus/rules/pve-host-incident.yml.pre-daily-low-20261026T230155Z, 640 root:prometheus, 9642 bytes, sha256 7d08ceae...d0f5. Prometheus loads only *.yml, so the copy is inert."
+    },
+    {
+      "check": "Installed file",
+      "result": "pass",
+      "observed": "/etc/prometheus/rules/pve-host-incident.yml is 640 root:prometheus (was 644), 11061 bytes, sha256 666979ef...1812, equal to origin/main; no .ansible_tmp file was left in the rules directory."
+    },
+    {
+      "check": "Prometheus reload",
+      "result": "pass",
+      "observed": "SIGHUP via systemctl kill --kill-whom=main at 23:02:13Z; journal 'Completed loading of configuration file' at 23:02:14Z; prometheus_config_last_reload_successful=1; the service was not restarted; 63 rule groups, rules 548 to 549."
+    },
+    {
+      "check": "Alert loaded and quiet",
+      "result": "pass",
+      "observed": "Group pve_host_incident (15 rules, 15 s interval): PveHostFilesystemDailyLowNarrow health ok, state inactive, severity warning, lastError none; no ALERTS series; the rule's expression without the threshold read 0.18865 (the 24-hour low of the hypervisor root free fraction) against the 0.16 threshold."
+    },
+    {
+      "check": "Nothing else changed on the VM",
+      "result": "pass",
+      "observed": "A listing of all 113 entries of /etc/prometheus/rules (mode, owner, size, sha256) before and after differs only in pve-host-incident.yml (mode 0644 to 0640, new content) and the added backup copy. The same five alert rows fire on the 0mcp Prometheus before and after (FleetHostOverloaded, FleetPoolReplicaShareCollapsed twice, ScanopyEndpointDown, Watchdog); none comes from this change."
+    },
+    {
+      "check": "Still in place about eight hours later",
+      "result": "pass",
+      "observed": "At 2026-10-27T06:59Z the live file was unchanged (sha256 666979ef...1812, 640 root:prometheus), prometheus_config_last_reload_successful=1, 63 groups and 549 rules, the alert health ok and state inactive (last evaluation 06:58:59Z), no ALERTS series, and the 24-hour low still 0.18865."
+    },
+    {
+      "check": "Repository live-apply path",
+      "result": "partial",
+      "observed": "Not run. make live-apply-service service=grafana env=production stops at the vulnerability budget gate (host scan for monitoring is 15.6 days old, limit 7 days) and at the immutable guest replacement gate (needs ALLOW_IN_PLACE_MUTATION=true as a documented exception), and would trigger a restic backup after the playbook even with --check; make converge-monitoring has no such gates but runs seven playbooks with no way to narrow it. A later converge finds pve-host-incident.yml identical."
+    }
+  ],
+  "evidence_refs": [
+    "config/prometheus/rules/pve-host-incident.yml",
+    "tests/promtool/pve_host_free_space_rules_test.yml",
+    "workstreams/active/ws-0533-pve-host-daily-low-alert.yaml",
+    "docs/workstreams/ws-0533-pve-host-daily-low-alert.md",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The rule was merged in PR 584 (squash commit 054003541fd54abe23eef3ca88034ba4eee25726); this receipt records shipping it. The same targeted approach, with the same checks, is recorded in 2026-10-12-scanopy-retag-discover-monitoring-live-apply.",
+    "Left on purpose: inventory.yml (ScanopyBackupStale 36 h to 4 h, from PR 438) and fleet-loops.yml (new FleetTailnetPolicyChangedOutsideReconciler, from PR 538) on the VM still differ from main, and four rule files (node-placement, node-thermal-alerts, pve-recovery-alerts, pve-storage-capacity) are 0644 where the role sets 0640 root:prometheus. A later converge ships them. Evaluated against the live Prometheus on 2026-10-26, none of the three alerts would have fired (last Scanopy dump 15 minutes old, tailnet out-of-band increase 0, 24-hour low 18.87%).",
+    "Rollback: copy /etc/prometheus/rules/pve-host-incident.yml.pre-daily-low-20261026T230155Z over pve-host-incident.yml and send SIGHUP to 0mcp-prometheus.service; the mode stays 0640 root:prometheus.",
+    "platform_version moves from 0.179.52 to 0.179.53 with this record (ADR 0008: a patch bump for a safe incremental platform adjustment, applied from main); VERSION stays 0.179.52 until the next release bump."
+  ]
+}

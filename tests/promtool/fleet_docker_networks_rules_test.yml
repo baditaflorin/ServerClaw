@@ -1,0 +1,99 @@
+# promtool unit tests for config/prometheus/rules/fleet-docker-networks.yml (run by tests/test_fleet_docker_networks_rules.py when promtool is installed).
+rule_files:
+  - ../../config/prometheus/rules/fleet-docker-networks.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a built-in-pool host at 27 of 31 fires NearlyFull, at 31 Exhausted; a big-pool host and a host at 26 do not
+    interval: 1m
+    input_series:
+      - series: 'docker_network_pool_capacity_subnets{host="infer-builder-ci",instance="a:9100"}'
+        values: "31x30"
+      - series: 'docker_network_pool_used_subnets{host="infer-builder-ci",instance="a:9100"}'
+        values: "22x5 27x14 31x10"
+      - series: 'docker_network_pool_capacity_subnets{host="0own-build-worker",instance="b:9101"}'
+        values: "31x30"
+      - series: 'docker_network_pool_used_subnets{host="0own-build-worker",instance="b:9101"}'
+        values: "26x30"
+      - series: 'docker_network_pool_capacity_subnets{host="ubuntu-24-04",instance="c:9100"}'
+        values: "4608x30"
+      - series: 'docker_network_pool_used_subnets{host="ubuntu-24-04",instance="c:9100"}'
+        values: "1304x30"
+      # the same host under a second label set (an exporter restart): fires once
+      - series: 'docker_network_pool_capacity_subnets{host="infer-builder-ci",instance="a:9100",fleet="0infer"}'
+        values: "31x30"
+      - series: 'docker_network_pool_used_subnets{host="infer-builder-ci",instance="a:9100",fleet="0infer"}'
+        values: "22x5 27x14 31x10"
+    alert_rule_test:
+      - {eval_time: 8m, alertname: DockerNetworkPoolNearlyFull, exp_alerts: []}
+      - eval_time: 12m
+        alertname: DockerNetworkPoolNearlyFull
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_docker_networks, host: infer-builder-ci}
+            exp_annotations:
+              summary: "infer-builder-ci has fewer than 5 Docker network subnets left"
+              description: "Only 4 subnets are left in the Docker address pools of infer-builder-ci; at 0 every new network (each Woodpecker workflow, each compose project) fails. Look for leaked `wp_*_default` networks younger than the 6 h age floor (`docker network ls`), remove the empty ones by hand, and move the host to larger `default-address-pools`."
+              runbook_url: docs/runbooks/fleet-observability.md#docker-network-pool-alerts
+      - {eval_time: 12m, alertname: DockerNetworkPoolExhausted, exp_alerts: []}
+      - eval_time: 22m
+        alertname: DockerNetworkPoolExhausted
+        exp_alerts:
+          - exp_labels: {severity: critical, service: fleet_docker_networks, host: infer-builder-ci}
+            exp_annotations:
+              summary: "infer-builder-ci has no Docker network subnet left"
+              description: "The Docker address pools of infer-builder-ci are full: every new network fails, so every Woodpecker workflow on its agents fails at once. Remove empty `wp_*_default` networks by hand now (never `docker network prune` on a runtime host), then move the host to larger `default-address-pools`."
+              runbook_url: docs/runbooks/fleet-observability.md#docker-network-pool-alerts
+
+  - name: a host whose last success is older than 3 hours goes stale, a fresh one does not
+    interval: 1m
+    input_series:
+      # last success frozen at t=0 (epoch 0); time() at 200m is 12000 s > 10800
+      - series: 'docker_network_gc_last_success_timestamp_seconds{host="docker-build-lv3",instance="a:9100"}'
+        values: "0x220"
+      # refreshed every minute
+      - series: 'docker_network_gc_last_success_timestamp_seconds{host="0docker-builder",instance="b:9100"}'
+        values: "0+60x220"
+    alert_rule_test:
+      - {eval_time: 185m, alertname: DockerNetworkGcStale, exp_alerts: []}
+      - eval_time: 200m
+        alertname: DockerNetworkGcStale
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_docker_networks, host: docker-build-lv3}
+            exp_annotations:
+              summary: "docker-network-gc has not completed on docker-build-lv3 for 3 hours"
+              description: "The timer runs every 30 minutes; the last run that could read Docker on docker-build-lv3 was 3h 20m 0s ago, so leaked networks pile up and the pool numbers are stale. `systemctl status docker-network-gc.timer docker-network-gc.service` and `journalctl -u docker-network-gc` on the host."
+              runbook_url: docs/runbooks/fleet-observability.md#docker-network-pool-alerts
+
+  - name: two reporting hosts are fewer than 21, and no series at all fires the absent rule
+    interval: 1m
+    input_series:
+      - series: 'docker_network_gc_last_success_timestamp_seconds{host="docker-build-lv3",instance="a:9100"}'
+        values: "0+60x40"
+      - series: 'docker_network_gc_last_success_timestamp_seconds{host="0docker-builder",instance="b:9100"}'
+        values: "0+60x40"
+    alert_rule_test:
+      - eval_time: 35m
+        alertname: DockerNetworkGcHostsMissing
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_docker_networks}
+            exp_annotations:
+              summary: "Fewer than 21 Docker hosts report docker-network-gc metrics"
+              description: "Only 2 of the 21 scraped Docker hosts expose docker_network_gc_*, so DockerNetworkPoolNearlyFull is blind for the others. Run `scripts/install-docker-network-gc.sh status --all` from a fleet-state checkout."
+              runbook_url: docs/runbooks/fleet-observability.md#docker-network-pool-alerts
+      - {eval_time: 35m, alertname: DockerNetworkGcHostsMissingNone, exp_alerts: []}
+
+  - name: nothing reported at all
+    interval: 1m
+    input_series:
+      - series: 'up{job="node_exporter",instance="a:9100"}'
+        values: "1x40"
+    alert_rule_test:
+      - eval_time: 35m
+        alertname: DockerNetworkGcHostsMissingNone
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_docker_networks}
+            exp_annotations:
+              summary: "No Docker host reports docker-network-gc metrics"
+              description: "No series docker_network_gc_last_success_timestamp_seconds at all (count() of nothing returns nothing, so DockerNetworkGcHostsMissing cannot fire). Run `scripts/install-docker-network-gc.sh status --all` from a fleet-state checkout."
+              runbook_url: docs/runbooks/fleet-observability.md#docker-network-pool-alerts

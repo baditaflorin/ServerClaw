@@ -128,3 +128,34 @@ def test_build_hosts_populates_node_names(sd, monkeypatch) -> None:
     }
     hosts, _, _ = sd.build_hosts(inv)
     assert len(hosts) == 1 and {"scrapetheworld.org", "scrapetheworld"} <= hosts[0]["node_names"]
+
+
+def test_missing_or_invalid_ignored_hosts_file_means_none(sd, tmp_path) -> None:
+    assert sd.load_ignored_hosts(str(tmp_path / "absent.json")) == set()
+    bad = tmp_path / "bad.json"
+    bad.write_text("[1, 2")
+    assert sd.load_ignored_hosts(str(bad)) == set()
+    bad.write_text('{"a": 1}')
+    assert sd.load_ignored_hosts(str(bad)) == set()
+    bad.write_text('["domainscope-pg-replica", 7, "other"]')
+    assert sd.load_ignored_hosts(str(bad)) == {"domainscope-pg-replica", "other"}
+
+
+def test_an_ignored_host_that_is_down_is_neither_expected_nor_published(sd) -> None:
+    recent = {"addr": "10.10.10.53:9100", "ts": 1000.0, "via": "lan"}
+    fields, publish = sd.down_host_state("domainscope-pg-replica", recent, 500.0, "", True, {"domainscope-pg-replica"})
+    assert fields == {"expected_node_exporter": "0", "reason": "ignored", "via": ""}
+    assert publish is False  # no stale up==0 series either
+
+
+def test_a_host_that_is_not_ignored_keeps_every_existing_down_state(sd) -> None:
+    recent = {"addr": "10.10.10.9:9100", "ts": 1000.0, "via": "lan"}
+    old = {"addr": "10.10.10.9:9100", "ts": 100.0, "via": "lan"}
+    assert sd.down_host_state("a", recent, 500.0, "", False, set()) == (
+        {"expected_node_exporter": "1", "reason": "down_after_ok", "via": "lan"}, True)
+    assert sd.down_host_state("a", old, 500.0, "wrongname", True, set())[0]["reason"] == "identity_mismatch"
+    assert sd.down_host_state("a", None, 500.0, "", True, set())[0]["reason"] == "exporter_not_listening"
+    assert sd.down_host_state("a", None, 500.0, "", False, set()) == (
+        {"expected_node_exporter": "0", "reason": "unreachable", "via": ""}, False)
+    # only a host that really is down is affected: ignoring a name never hides an answering exporter (that branch is not reached)
+    assert sd.down_host_state("b", recent, 500.0, "", True, {"a"})[0]["reason"] == "down_after_ok"

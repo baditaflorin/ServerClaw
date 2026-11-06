@@ -1,0 +1,6 @@
+#!/bin/sh
+# PID 1 of the rig container. systemd as PID 1 only follows udev (and so only creates .device units) when udevd is already running as it starts, so udevd
+# is started first, by hand; the packaged units of udevd are masked in the Dockerfile.
+mkdir -p /run/udev
+/lib/systemd/systemd-udevd --daemon
+exec /sbin/init

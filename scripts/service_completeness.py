@@ -48,6 +48,8 @@ SERVICE_SCOPED_COMPLETENESS_INPUTS = {
 }
 SNAPSHOT_GENERATED_SERVICE_CATALOGS = {
     "config/data-catalog.json",
+    # Built from the bundles' `dependency` blocks like the others: with no Git baseline in a remote snapshot, a change is attributed to the changed bundles.
+    "config/dependency-graph.json",
     "config/health-probe-catalog.json",
     "config/service-capability-catalog.json",
     "config/service-completeness.json",
@@ -879,7 +881,8 @@ def service_ids_for_changed_paths(
             bundle_services: set[str] = set()
             for bundle_path in bundle_paths:
                 parts = bundle_path.split("/")
-                service_id = service_slugs.get(parts[2].lower()) if len(parts) >= 4 else None
+                # Bundle directories use the service id (label_studio); the slugs are hyphenated (label-studio).
+                service_id = service_slugs.get(parts[2].lower().replace("_", "-")) if len(parts) >= 4 else None
                 if service_id is None:
                     return None
                 bundle_services.add(service_id)

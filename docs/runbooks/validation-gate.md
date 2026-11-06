@@ -55,6 +55,12 @@ Run the fast local hook set across the whole checkout:
 uvx --from pre-commit pre-commit run --all-files
 ```
 
+## Stacked Branches
+
+The gate diffs a branch against `origin/main`, so a branch stacked on an unmerged parent also carries the parent's files and fails `workstream-surfaces`. Name the parent's ref instead, for the push and for a manual run alike: `LV3_VALIDATION_BASE_REF=origin/claude/parent-branch git push` (or `... make pre-push-gate`). `scripts/remote_exec.sh` keeps that ref, computes the changed files against it, and stops if it does not resolve; `workstream-surfaces` and the Semgrep baseline use it too. Unset, nothing changes.
+
+After the parent merges, rebase the child and unset the variable: `git rebase --onto origin/main <parent head> <child>`. List the parent in the child's workstream shard `depends_on`. The renovate stack/digest guard stays on `origin/main` on purpose.
+
 ## Gate Definition
 
 The authoritative gate surfaces are:
@@ -105,6 +111,31 @@ The blocking ADR 0306 invariants are repo-managed rule ids `CKV_LV3_1` through `
 
 When the push starts from a Git worktree checkout, [scripts/remote_exec.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/remote_exec.sh) now builds one immutable content-addressed repository snapshot, uploads that archive into the active build-server session workspace, and unpacks it into a fresh `.lv3-runs/<run_id>/repo` namespace before running remote checks. The remote gate therefore validates one consistent repository image without depending on mirrored `.git/worktrees/...` metadata.
 [scripts/run_python_with_packages.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/scripts/run_python_with_packages.sh) now keeps Python-based gate checks runnable inside the registry-backed runner images even when those images do not ship `uv`; the helper uses `uv` when present and otherwise falls back to the runner's native Python plus pip-installed dependencies only when imports are missing.
+
+## Running the Gate on an Alternate Build Server
+
+A second build server can run the same gate without any change to this repository. `scripts/remote_exec.sh` reads its target from `config/build-server.json`, or from the file named in `REMOTE_EXEC_CONFIG`. The alternate file is the default one with:
+
+- a different ssh target (`host`, `ssh_key`, `ssh_options`)
+- different paths: `workspace_root`, `packer_plugin_cache`, `ansible_collection_cache`, `ansible_requirements_sha_file`, and every `/opt/builds/` path inside the native commands
+- no `apt_proxy_url` where the default proxy is not reachable from there
+- a `PATH` prefix on the native commands when the server keeps its gate toolchain in an isolated prefix instead of the system paths
+
+Generate that file from the checkout's own `config/build-server.json` every time instead of keeping a copy, so it follows changes to the commands. The native toolchain is the one `collections/ansible_collections/lv3/platform/playbooks/services/build-server-gate-tools.yml` describes, plus `gitleaks` and `rsync` (the snapshot upload needs it on the server). Keep the versions equal to the default builder's. As of 2026-10-29 that builder runs tofu 1.12.6, semgrep 1.155.0 and gitleaks 8.28.0, which it attests in `gate-tool-versions.json`; the play still pins tofu 1.9.1 and semgrep 1.88.0 and does not install gitleaks, so re-running it as it stands would move tofu back. Compare a candidate with the default builder before trusting its result.
+
+The private repository `baditaflorin/0pipe` holds one such server (its toolchain installer, the config generator, the run and push wrappers and the parity check): see its `docs/gate-builder.md`.
+
+Rules for any alternate server:
+
+- **Never run the gate on the machine you push from.** `.githooks/pre-push` calls `scripts/remote_exec.sh pre-push-gate --local-fallback`, and with that flag *any* remote failure reruns the whole gate locally, a gate that is simply red included, not only an unreachable server. Run the gate by hand as `scripts/remote_exec.sh pre-push-gate` (no flag: an unreachable server fails the run), push through a wrapper that stops the process group when the output says `falling back locally`, and never use `--no-verify`.
+- **A server that also runs CI is shared.** The native gate commands already pass `--jobs 2`. Look at the load before starting; a busy worker is a reason to wait or to use the default builder, not to run locally.
+- **Workspaces pile up between runs.** Each session gets `<workspace_root>/.lv3-session-workspaces/<session>/` holding a full copy of the branch (0.7 to 3 GB measured). `remote_exec.sh` prunes only at the start of the next run: sessions older than `REMOTE_EXEC_SESSION_RETENTION_DAYS` (2; at most 256 kept), runs older than `REMOTE_EXEC_RUN_RETENTION_DAYS` (2) or beyond `REMOTE_EXEC_RUN_KEEP_COUNT` (32), snapshots older than `REMOTE_EXEC_SNAPSHOT_RETENTION_DAYS` (2) or beyond `REMOTE_EXEC_SNAPSHOT_KEEP_COUNT` (16). An idle server keeps whatever the last runs left, so on a server with another job clean by hand when the disk gets tight, with a dry run first and never while a gate is running.
+
+### How the Gate Runs ansible-lint
+
+The gate does not call the `ansible-lint` binary found on the build server. `scripts/validate_repo.sh` (`configure_validation_commands`) checks for `uv`: when it is on `PATH`, ansible-lint, ansible-playbook, ansible-galaxy and yamllint run as `uv tool run` with their own pinned environment, `ansible-lint==24.12.2` with `ansible-core==2.17.10` (`LV3_ANSIBLE_LINT_VERSION`, `LV3_ANSIBLE_CORE_VERSION`) and `yamllint==1.37.1` (`LV3_YAMLLINT_VERSION`). Only when `uv` is missing does the script fall back to the binaries on `PATH`.
+
+That is why `ansible-lint` run natively on a builder whose system Python has ansible-core 2.21.0 fails with `ModuleNotFoundError: No module named 'ansible.parsing.yaml.constructor'` while the gate's `ansible-lint` check passes: ansible-core 2.21.0 has no `ansible/parsing/yaml/constructor.py` (the code moved to `ansible/_internal/_yaml/_constructor.py`), and ansible-lint 24.12.2 imports it. On both builders the `uv` cache holds `ansible_core-2.17.10` and `ansible_lint-24.12.2`. Consequences: `uv` on the server's `PATH` is part of the gate toolchain (without it the check fails for this reason, not because of the repository); with `uv` present the state of the native `ansible-lint` does not matter to the gate; and bumping ansible-lint or ansible-core for the gate means changing the two defaults in `scripts/validate_repo.sh` (or setting the `LV3_*` variables), not the system packages.
 
 ## Static Analysis Gate Checks (Session 2026-04-11)
 

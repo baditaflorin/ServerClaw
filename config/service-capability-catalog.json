@@ -3,6 +3,38 @@
   "schema_version": "1.0.0",
   "services": [
     {
+      "id": "agent_history",
+      "name": "Agent History Store",
+      "description": "Postgres 17 with pgvector and the agent-store API: every prompt, reply and tool call of the coding agents on the operator laptops, searchable, behind two redaction passes.",
+      "category": "data",
+      "lifecycle_status": "planned",
+      "vm": "agent-history",
+      "vmid": 155,
+      "internal_url": "http://127.0.0.1:8080",
+      "exposure": "private-only",
+      "health_probe_id": "agent_history",
+      "adr": "0494",
+      "runbook": "docs/runbooks/configure-agent-history.md",
+      "deployment_surface": "playbooks/agent-history-vm.yml",
+      "runtime_pool": "dedicated-agent-history",
+      "restart_domain": "dedicated-agent-history-core",
+      "api_contract_ref": "config/contracts/service-partitions/catalog.json#/partitions/dedicated-agent-history",
+      "mobility_tier": "anchor",
+      "tags": [
+        "data",
+        "private-only",
+        "tailnet"
+      ],
+      "notes": "Planned, not provisioned. Reachable only over the tailnet (tailscale serve terminates TLS on the guest and proxies to the loopback listener); there is no public name, no edge vhost, no API gateway route and no hypervisor port proxy. The store holds every secret an agent ever saw, so it is the most sensitive service on the platform.",
+      "environments": {
+        "production": {
+          "status": "planned",
+          "url": "http://127.0.0.1:8080",
+          "notes": "In-guest loopback address, used only by the guest's own health checks and the metrics bridge. The tailnet name is the owner's and is not committed."
+        }
+      }
+    },
+    {
       "id": "alertmanager",
       "name": "Alertmanager",
       "description": "Severity-based alert routing, grouping, and silencing service for the monitoring stack.",

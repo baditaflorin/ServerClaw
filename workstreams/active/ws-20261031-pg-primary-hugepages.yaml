@@ -1,0 +1,98 @@
+id: ws-20261031-pg-primary-hugepages
+adr: "0495"
+title: Huge pages for the production Postgres VM701 (S2 of ADR 0495) as hostconf files and a window runbook, applied only in a maintenance window, planned 2026-11-04, 11:00-12:00Z (any day 11:00-13:00Z once S1c has run 24 h)
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/pg-primary-pgss-max
+worktree_path: .claude/worktrees/pg-primary-pgss-max
+doc: docs/workstreams/ws-20261031-pg-primary-hugepages.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/hostconf/files/postgresql-pgss-max.infer-pg-primary.conf
+  - tests/test_pg_primary_pgss_max.py
+  - config/hostconf/files/sysctl-postgres-hugepages.infer-pg-primary.conf
+  - config/hostconf/files/postgresql-huge-pages.infer-pg-primary.conf
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - docs/runbooks/host-local-config.md
+  - docs/adr/0495-pg-primary-memory-guardrails.md
+  - tests/test_pg_primary_memory.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261031-pg-primary-hugepages.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261031-pg-primary-hugepages.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261031_pg_primary_hugepages_tracking
+      paths:
+        - docs/workstreams/ws-20261031-pg-primary-hugepages.md
+      mode: exclusive
+    - id: hostconf_pg_primary_hugepages_files
+      paths:
+        - config/hostconf/files/sysctl-postgres-hugepages.infer-pg-primary.conf
+        - config/hostconf/files/postgresql-huge-pages.infer-pg-primary.conf
+      mode: exclusive
+    - id: hostconf_pg_primary_pgss_max
+      paths:
+        - config/hostconf/files/postgresql-pgss-max.infer-pg-primary.conf
+        - tests/test_pg_primary_pgss_max.py
+      mode: exclusive
+    - id: hostconf_manifest
+      paths:
+        - config/hostconf/hostconf.yaml
+        - config/hostconf/README.md
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: host_local_config_runbook
+      paths:
+        - docs/runbooks/host-local-config.md
+      mode: shared_contract
+      contract: host-local-config-runbook-v1
+    - id: adr_0495_hugepages_amendment
+      paths:
+        - docs/adr/0495-pg-primary-memory-guardrails.md
+      mode: shared_contract
+      contract: adr-0495-pg-primary-memory-v1
+    - id: pg_primary_memory_tests_hugepages
+      paths:
+        - tests/test_pg_primary_memory.py
+      mode: shared_contract
+      contract: pg-primary-memory-tests-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261031-pg-primary-hugepages.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: Huge pages for the production Postgres VM701 (vm.nr_hugepages 12800 and huge_pages on) are recorded as hostconf files with the window runbook; nothing is applied by merging, the apply is a maintenance window, planned 2026-11-04, 11:00-12:00Z (any day 11:00-13:00Z once S1c has run 24 h).
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  S2 of ADR 0495. The shared-memory segment of VM701 (24.66 GiB, 12628 huge pages of 2 MiB) is backed by 4 kB pages, so every backend carries 43-48 MiB of page
+  tables (3.7 GiB at the 140 processes of the 2026-10-31 01:25Z OOM, about 15 GiB in the connection-storm worst case). Reserving 12800 huge pages and starting Postgres
+  with huge_pages = on removes that cost. It needs one restart (5 s measured on 2026-10-30, 60 s budget) and a sysctl file whose apply runs `sysctl -p` at once, so it is
+  applied only inside a maintenance window, with Postgres stopped for the reservation. Merging applies nothing: the daily drift check reports both files missing until then.
+  Rider (stacked on the S2 PR): pg_stat_statements.max 5000 -> 20000, a restart setting of a preloaded library, rides on the same restart so the next 24 h of pg_stat_statements attribution are
+  complete (the 5,000-entry table evicts and attributes only 3.8 GB of the 612 GB of temporary files). About 6 MB of shared memory, inside the 172-page margin. Same seed, apply, reset order as huge_pages.
+tasks:
+  - id: t1
+    title: Add the sysctl and conf.d hostconf files and their expect entries for infer-pg-primary
+    status: in_progress
+  - id: t2
+    title: Window runbook in host-local-config.md and the ADR 0495 amendment (planned 2026-11-04, 11:00-12:00Z (any day 11:00-13:00Z once S1c has run 24 h))
+    status: in_progress
+  - id: t3
+    title: Merge just before the window (the user decides); apply in the window only, planned 2026-11-04 11:00Z
+    status: pending
+  - id: t4
+    title: Rider pg_stat_statements.max 20000 on the same restart (postgresql-pgss-max.infer-pg-primary, restart-only, seeded with ALTER SYSTEM before the stop and applied after the start); stacked on the S2 PR
+    status: in_progress

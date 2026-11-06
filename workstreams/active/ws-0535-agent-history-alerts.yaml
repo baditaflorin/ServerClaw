@@ -1,0 +1,71 @@
+id: ws-0535-agent-history-alerts
+adr: "0494"
+title: Alert rules for the agent-history store (git only; promtool tests, pytest pin, adopted rules list)
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/agent-history-alerts
+worktree_path: .claude/worktrees/agent-history-alerts
+doc: docs/workstreams/ws-0535-agent-history-alerts.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/prometheus/rules/agent-history.yml
+  - tests/promtool/agent_history_rules_test.yml
+  - tests/test_agent_history_rules.py
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+  - tests/test_adopted_prometheus_rules.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0535-agent-history-alerts.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0535-agent-history-alerts.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0535_tracking
+      paths:
+        - docs/workstreams/ws-0535-agent-history-alerts.md
+      mode: exclusive
+    - id: agent_history_alert_rules
+      paths:
+        - config/prometheus/rules/agent-history.yml
+        - tests/promtool/agent_history_rules_test.yml
+        - tests/test_agent_history_rules.py
+      mode: exclusive
+    - id: monitoring_vm_role_shared_edits
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+        - tests/test_adopted_prometheus_rules.py
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-0535-agent-history-alerts.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: Add the agent-history alert rules (store down, ingest lag, spool depth, silent collector, redaction canary, backup gap, data disk) with promtool tests, and list the file among the rule files the monitoring role ships. Nothing is applied.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  ADR 0494 puts the agent-history store on its own guest. This workstream is the alert rules for it, in git only: the rule
+  file, its promtool unit tests, a pytest pin, and the line in the monitoring role's adopted list. Shipping the file to the
+  monitoring VM and reloading Prometheus is a separate, owner-approved step; merging does not do it. The guest itself is
+  declared by a separate pull request (ws-0534).
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Add agent-history.yml with promtool unit tests and a pytest pin, and adopt it in the monitoring role
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on the build server and open the pull request (not merged, no [live-apply])
+    status: in_progress

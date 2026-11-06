@@ -1,0 +1,97 @@
+# promtool unit tests for config/prometheus/rules/fleet-woodpecker-agent-records.yml (run by tests/test_fleet_woodpecker_agent_records_rules.py when promtool is installed).
+rule_files:
+  - ../../config/prometheus/rules/fleet-woodpecker-agent-records.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: an unnamed record fires after 10 minutes, clean planes never
+    interval: 1m
+    input_series:
+      - series: 'woodpecker_agents_unnamed{plane="ci.0exec"}'
+        values: "0x5 3x40"
+      - series: 'woodpecker_agents_unnamed{plane="ci.0mcp"}'
+        values: "0x45"
+    alert_rule_test:
+      - {eval_time: 10m, alertname: WoodpeckerAgentRecordUnnamed, exp_alerts: []}
+      - eval_time: 20m
+        alertname: WoodpeckerAgentRecordUnnamed
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_woodpecker_agent_records, plane: ci.0exec}
+            exp_annotations:
+              summary: "3 Woodpecker agent record(s) on ci.0exec have an empty name"
+              description: "An agent record on ci.0exec has no name (a PATCH to /api/agents/{id} without name stores an empty one). The load controller cannot find those agents and stops managing their slots. List them with GET /api/agents; restart the idle agent so it re-registers its WOODPECKER_HOSTNAME."
+              runbook_url: docs/runbooks/fleet-observability.md#woodpecker-agent-record-alerts
+
+  - name: a node whose configured agent names are not registered fires, per node
+    interval: 1m
+    input_series:
+      - series: 'woodpecker_load_controller_missing_agents{plane="ci.0exec",node="infer-builder-ci"}'
+        values: "4x40"
+      - series: 'woodpecker_load_controller_missing_agents{plane="ci.0exec",node="0pipe-build"}'
+        values: "0x40"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: WoodpeckerControllerNodeMissingAgents
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_woodpecker_agent_records, plane: ci.0exec, node: infer-builder-ci}
+            exp_annotations:
+              summary: "Load controller node infer-builder-ci on ci.0exec lists 4 agent name(s) that no agent has"
+              description: "The controller config for node infer-builder-ci (ci.0exec) names agents that are not registered: an emptied record name, or a stale config entry for an agent that is gone. The controller logs node_missing and does not manage that node. Fix the record (restart the idle agent) or remove the stale name from the config (backup first)."
+              runbook_url: docs/runbooks/fleet-observability.md#woodpecker-agent-record-alerts
+
+  - name: the check going blind or disappearing fires, a healthy check does not
+    interval: 1m
+    input_series:
+      - series: 'woodpecker_agent_names_check_up{plane="ci.0exec"}'
+        values: "1x5 0x40"
+      - series: 'woodpecker_agent_names_check_up{plane="ci.0mcp"}'
+        values: "1x45"
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: WoodpeckerAgentRecordCheckBlind
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_woodpecker_agent_records, plane: ci.0exec}
+            exp_annotations:
+              summary: "The Woodpecker agent record check cannot read a plane or is not running"
+              description: "woodpecker_agent_names_check_up is 0 for the plane or absent: the agent record alerts above are blind. Check woodpecker-agent-names-check.timer on CT108 and the plane's API token."
+              runbook_url: docs/runbooks/fleet-observability.md#woodpecker-agent-record-alerts
+
+  - name: no series at all (the timer is not running) also fires
+    interval: 1m
+    input_series:
+      - series: 'up{job="x"}'
+        values: "1x40"
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: WoodpeckerAgentRecordCheckBlind
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_woodpecker_agent_records}
+            exp_annotations:
+              summary: "The Woodpecker agent record check cannot read a plane or is not running"
+              description: "woodpecker_agent_names_check_up is 0 for the plane or absent: the agent record alerts above are blind. Check woodpecker-agent-names-check.timer on CT108 and the plane's API token."
+              runbook_url: docs/runbooks/fleet-observability.md#woodpecker-agent-record-alerts
+
+  - name: a restored name fires once, an unchanged counter never
+    interval: 1m
+    input_series:
+      - series: 'woodpecker_agent_names_repaired_total{plane="ci.0exec"}'
+        values: "0x5 1x30"
+      - series: 'woodpecker_agent_names_repaired_total{plane="ci.0mcp"}'
+        values: "3x35"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: WoodpeckerAgentNamesBeingWiped
+        exp_alerts: []
+      - eval_time: 8m
+        alertname: WoodpeckerAgentNamesBeingWiped
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_woodpecker_agent_records, plane: ci.0exec}
+            exp_annotations:
+              summary: "Something emptied 1 Woodpecker agent name(s) on ci.0exec in the last 15 minutes; the check restored them"
+              description: "The CT108 check (woodpecker-agent-names-check --repair) put back agent names that a caller wiped with a PATCH that has no name (agents then vanish from the load controller). The wipe is already undone; the caller is not. On 2026-10-30 the nginx access log on VM104 (PATCH /api/agents, user agent curl) showed them: sessions pausing agents around docker or slot changes. Find the caller and make it send name and no_schedule."
+              runbook_url: docs/runbooks/fleet-observability.md#woodpecker-agent-record-alerts
+      - eval_time: 30m
+        alertname: WoodpeckerAgentNamesBeingWiped
+        exp_alerts: []
+

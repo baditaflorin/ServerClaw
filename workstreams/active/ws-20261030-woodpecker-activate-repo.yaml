@@ -1,0 +1,68 @@
+id: ws-20261030-woodpecker-activate-repo
+adr: "0287"
+title: "Woodpecker: a script to activate a GitHub repository in a CI plane, and the runbook and ADR 0287 corrected (the forge is GitHub, not Gitea)"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/woodpecker-activate
+worktree_path: .claude/worktrees/woodpecker-activate
+doc: docs/workstreams/ws-20261030-woodpecker-activate-repo.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - scripts/woodpecker_activate_repo.sh
+  - scripts/woodpecker_tool.py
+  - tests/test_woodpecker_activate_repo.py
+  - docs/runbooks/configure-woodpecker.md
+  - docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+  - workstreams/active/ws-20261030-woodpecker-activate-repo.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261030-woodpecker-activate-repo.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261030_woodpecker_activate_repo_tracking
+      paths:
+        - docs/workstreams/ws-20261030-woodpecker-activate-repo.md
+      mode: exclusive
+    - id: woodpecker_activate_repo_script
+      paths:
+        - scripts/woodpecker_activate_repo.sh
+        - tests/test_woodpecker_activate_repo.py
+      mode: exclusive
+    - id: woodpecker_gitea_era_tool_note
+      paths:
+        - scripts/woodpecker_tool.py
+      mode: shared_contract
+      contract: woodpecker-controller-tool-v1
+    - id: woodpecker_runbook_and_adr
+      paths:
+        - docs/runbooks/configure-woodpecker.md
+        - docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+      mode: shared_contract
+      contract: woodpecker-ci-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261030-woodpecker-activate-repo.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "scripts/woodpecker_activate_repo.sh PLANE OWNER/REPO [--run BRANCH] activates a GitHub repository in the ci.0mcp or ci.0exec Woodpecker plane (idempotent, token read by fleet-vault inside CT108 and never printed) and can run and wait for a pipeline; the Woodpecker runbook and ADR 0287 now say the forge is GitHub and mark the Gitea-era activate-repo path as stale."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: "Verified 2026-10-30: both Woodpecker planes use a GitHub forge. The repo's runbook, ADR 0287 and woodpecker_tool.py activate-repo still described Gitea. Nothing is applied by this change and no host or API is contacted: the tests run the script against shims."
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Write the activation script and its offline test
+    status: completed
+  - id: t3
+    title: Runbook section, forge correction in the runbook and ADR 0287, stale marker on woodpecker_tool activate-repo
+    status: completed
+  - id: t4
+    title: Open the PR (not merged)
+    status: in_progress

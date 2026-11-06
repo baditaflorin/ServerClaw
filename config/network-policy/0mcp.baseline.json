@@ -1,0 +1,19 @@
+[
+ "100:no-guest-nft",
+ "100:pve-off",
+ "100:pve-policy",
+ "110:shadowed:forward:10.10.10.40 tcp/9100",
+ "110:shadowed:input:10.10.10.40 tcp/9100",
+ "120:open-chain:forward",
+ "121:dead-at-guest:10.10.10.1 icmp/*",
+ "121:dead-at-guest:10.10.10.1 udp/41641",
+ "121:dead-at-guest:100.64.0.0/10 icmp/*",
+ "121:dead-at-guest:100.64.0.0/10 udp/41641",
+ "122:dead-at-guest:10.10.10.1 icmp/*",
+ "122:dead-at-guest:10.10.10.1 udp/41641",
+ "122:dead-at-guest:100.64.0.0/10 icmp/*",
+ "122:dead-at-guest:100.64.0.0/10 udp/41641",
+ "171:shadowed:input:10.10.10.30 tcp/9100",
+ "192:open-chain:forward",
+ "200:no-guest-nft"
+]

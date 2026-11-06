@@ -1,15 +1,25 @@
 schema_version: 1.0.0
-repo_version: 0.179.51
-platform_version: 0.179.51
+repo_version: 0.179.57
+platform_version: 0.179.59
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
+    image_gc_monitoring: 2026-11-06-image-gc-monitoring-live-apply
+    domainscope_live_drive_figures: 2026-11-06-domainscope-live-drive-figures-live-apply
+    bounded_journal_retention: 2026-11-06-retention-mainline-live-apply
+    docker_prod_logrotate: 2026-11-06-retention-mainline-live-apply
     coolify_runtime: 2026-04-03-adr-0340-coolify-apps-vm-separation-live-apply
     fork_services: 2026-04-27-ws-0372-0fork-services-all-7-deployed
     platform: 2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply
     plausible: ws-0520-plausible-clickhouse-log-retention-apply-receipt
+    infer_ci_postgres_access: ws-0528-0infer-ci-worker-apply-receipt
+    infer_runtime_docker: ws-0528-0infer-runtime-docker-apply-receipt
     monitoring: 2026-03-28-adr-0250-log-queryability-canary-live-apply
+    pve_host_free_space_alert: 2026-10-26-pve-host-daily-low-alert-monitoring-live-apply
+    pve_host_memory_budget_alert: 2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply
+    pve_backup_weekly_freshness: 2026-10-30-pve-backup-weekly-freshness-monitoring-live-apply
+    fleet_job_caches_trim_alerts: 2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply
     nats_jetstream: 2026-03-30-adr-0276-nats-jetstream-event-bus-mainline-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
     capability_contracts: 2026-03-28-adr-0205-capability-contracts-before-product-selection-mainline-live-apply
@@ -1186,8 +1196,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.179.51
+    current: 0.179.57
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.179.51
+    current: 0.179.59
     meaning: intended platform release for the actual server configuration

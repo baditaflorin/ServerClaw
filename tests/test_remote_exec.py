@@ -7,6 +7,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPT_PATH = REPO_ROOT / "scripts" / "remote_exec.sh"
@@ -204,6 +206,8 @@ def run_remote_exec(
     extra_env: dict[str, str] | None = None,
     ssh_options: list[str] | None = None,
     local_command: str = 'printf local-fallback > "$REMOTE_EXEC_MARKER"',
+    script_path: Path = SCRIPT_PATH,
+    cwd: Path = REPO_ROOT,
 ) -> subprocess.CompletedProcess[str]:
     ssh_log = tmp_path / "ssh.log"
     rsync_log = tmp_path / "rsync.log"
@@ -246,8 +250,8 @@ def run_remote_exec(
         env.update(extra_env)
 
     completed = subprocess.run(
-        [str(SCRIPT_PATH), *args],
-        cwd=REPO_ROOT,
+        [str(script_path), *args],
+        cwd=cwd,
         env=env,
         text=True,
         capture_output=True,
@@ -379,6 +383,107 @@ def test_remote_exec_preserves_validation_lane_context_for_local_fallback(tmp_pa
     assert recorded_base_ref == "origin/main"
     assert "README.md" in json.loads(recorded_changed_files)
     assert "workstreams.yaml" in json.loads(recorded_changed_files)
+
+
+STACKED_LANE_CONTEXT_COMMAND = (
+    'printf "%s\\n%s" "${LV3_VALIDATION_BASE_REF:-}" "${LV3_VALIDATION_CHANGED_FILES_JSON:-}" > "$REMOTE_EXEC_MARKER"'
+)
+
+
+def make_stacked_repo(tmp_path: Path) -> tuple[Path, Path]:
+    """A throwaway repo: main <- claude/parent (parent.txt) <- claude/child (child.txt).
+
+    Returns the repo root and its copy of remote_exec.sh, which derives REPO_ROOT from its own location.
+    """
+    repo = tmp_path / "stack"
+    (repo / "scripts").mkdir(parents=True)
+    script = repo / "scripts" / "remote_exec.sh"
+    shutil.copy(SCRIPT_PATH, script)
+    (repo / "scripts" / "session_workspace.py").symlink_to(REPO_ROOT / "scripts" / "session_workspace.py")
+
+    def git(*args: str) -> None:
+        subprocess.run(
+            ["git", "-C", str(repo), "-c", "commit.gpgsign=false", *args],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    git("init", "-b", "main")
+    git("config", "user.name", "Test")
+    git("config", "user.email", "test@example.com")
+    (repo / "README.md").write_text("base\n")
+    git("add", ".")
+    git("commit", "-m", "base")
+    git("update-ref", "refs/remotes/origin/main", "HEAD")
+    git("checkout", "-b", "claude/parent")
+    (repo / "parent.txt").write_text("parent\n")
+    git("add", "parent.txt")
+    git("commit", "-m", "parent")
+    git("update-ref", "refs/remotes/origin/claude/parent", "HEAD")
+    git("checkout", "-b", "claude/child")
+    (repo / "child.txt").write_text("child\n")
+    git("add", "child.txt")
+    git("commit", "-m", "child")
+    return repo, script
+
+
+@pytest.fixture
+def clean_lane_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The gate itself exports these into the runs it starts, which would otherwise short-circuit the computation.
+    monkeypatch.delenv("LV3_VALIDATION_BASE_REF", raising=False)
+    monkeypatch.delenv("LV3_VALIDATION_CHANGED_FILES_JSON", raising=False)
+
+
+def run_stacked_lane_context(
+    tmp_path: Path, repo: Path, script: Path, *, base_ref: str | None
+) -> subprocess.CompletedProcess[str]:
+    return run_remote_exec(
+        tmp_path,
+        "pre-push-gate",
+        "--local-fallback",
+        extra_env={"REMOTE_EXEC_SSH_FAIL": "1", **({"LV3_VALIDATION_BASE_REF": base_ref} if base_ref else {})},
+        local_command=STACKED_LANE_CONTEXT_COMMAND,
+        script_path=script,
+        cwd=repo,
+    )
+
+
+@pytest.mark.usefixtures("clean_lane_env")
+def test_remote_exec_defaults_the_validation_base_to_origin_main_for_a_stacked_branch(tmp_path: Path) -> None:
+    repo, script = make_stacked_repo(tmp_path)
+
+    completed = run_stacked_lane_context(tmp_path, repo, script, base_ref=None)
+
+    assert completed.returncode == 0, completed.stderr
+    recorded_base_ref, recorded_changed_files = completed.marker.read_text().splitlines()  # type: ignore[attr-defined]
+    assert recorded_base_ref == "origin/main"
+    # The parent's file is part of the child's change list: the stacked-branch failure this setting exists for.
+    assert json.loads(recorded_changed_files) == ["child.txt", "parent.txt"]
+
+
+@pytest.mark.usefixtures("clean_lane_env")
+def test_remote_exec_keeps_a_caller_supplied_validation_base_for_a_stacked_branch(tmp_path: Path) -> None:
+    repo, script = make_stacked_repo(tmp_path)
+
+    completed = run_stacked_lane_context(tmp_path, repo, script, base_ref="origin/claude/parent")
+
+    assert completed.returncode == 0, completed.stderr
+    recorded_base_ref, recorded_changed_files = completed.marker.read_text().splitlines()  # type: ignore[attr-defined]
+    assert recorded_base_ref == "origin/claude/parent"
+    assert json.loads(recorded_changed_files) == ["child.txt"]
+
+
+@pytest.mark.usefixtures("clean_lane_env")
+def test_remote_exec_refuses_a_validation_base_that_does_not_resolve(tmp_path: Path) -> None:
+    repo, script = make_stacked_repo(tmp_path)
+
+    completed = run_stacked_lane_context(tmp_path, repo, script, base_ref="origin/claude/no-such-parent")
+
+    assert completed.returncode != 0
+    assert "LV3_VALIDATION_BASE_REF=origin/claude/no-such-parent does not resolve" in completed.stderr
+    # An empty change list would pass every surface check, so the local command must never have run.
+    assert not completed.marker.exists()  # type: ignore[attr-defined]
 
 
 def test_remote_exec_falls_back_locally_when_remote_command_fails(tmp_path: Path) -> None:

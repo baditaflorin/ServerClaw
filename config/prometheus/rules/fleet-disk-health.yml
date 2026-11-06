@@ -1,0 +1,98 @@
+# Disk health alerts for the Proxmox hosts, added 2026-10-29 with the 0pipe build server. The read-only collector
+# (fleet-state scripts/proxmox-storage-metrics.py, installed on 0docker, 0mcp, 0infer, 0own and 0pipe, textfile fleet_disk_*)
+# has exported SMART facts since October, but nothing alerted on them: on 2026-10-29 one 0docker mirror half (nvme1n1) had failed SMART
+# at 110 % rated wear, 0pipe's only SSD (a used auction disk) was at 80 % wear after 15.7k hours, and no alert had fired.
+# The collector's own header says it "exports the facts; the alert rules" decide. Thresholds are calibrated on the live series of that day:
+# every reallocated / pending / uncorrectable / media-error counter is 0 today, temperatures are 31-52 C, wear is 0-26 % except the three
+# disks above. `max by` merges the duplicate series an exporter restart leaves.
+groups:
+  - name: fleet_disk_health
+    rules:
+      - alert: FleetDiskSmartFailed
+        expr: >-
+          min by (pve_host, device, serial) (fleet_disk_smart_passed) == 0
+        for: 10m
+        labels:
+          severity: critical
+          service: fleet_disk_health
+        annotations:
+          summary: "Disk {{ $labels.device }} on {{ $labels.pve_host }} failed its SMART self-assessment"
+          description: "The drive {{ $labels.device }} (serial {{ $labels.serial }}) on {{ $labels.pve_host }} reports SMART overall health FAILED. On a mirror, replace it before the other half follows; on a single disk, move the workload and rebuild."
+          runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+      - alert: FleetDiskWearHigh
+        expr: >-
+          max by (pve_host, device, serial) (fleet_disk_wear_percent) >= 80 and max by (pve_host, device, serial) (fleet_disk_wear_percent) < 95
+        for: 1h
+        labels:
+          severity: warning
+          service: fleet_disk_health
+        annotations:
+          summary: "Disk {{ $labels.device }} on {{ $labels.pve_host }} has used {{ $value }}% of its rated endurance"
+          description: "{{ $labels.device }} (serial {{ $labels.serial }}) on {{ $labels.pve_host }} is at {{ $value }}% of rated wear. Plan the replacement now; a single-disk host (0pipe) has no mirror to absorb the failure."
+          runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+      - alert: FleetDiskWearCritical
+        expr: >-
+          max by (pve_host, device, serial) (fleet_disk_wear_percent) >= 95
+        for: 1h
+        labels:
+          severity: critical
+          service: fleet_disk_health
+        annotations:
+          summary: "Disk {{ $labels.device }} on {{ $labels.pve_host }} is at {{ $value }}% of its rated endurance"
+          description: "{{ $labels.device }} (serial {{ $labels.serial }}) on {{ $labels.pve_host }} is at or past its rated endurance ({{ $value }}%). Replace it; the drive can fail without further warning."
+          runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+      - alert: FleetDiskWearForecast
+        expr: >-
+          max by (pve_host, device, serial) (predict_linear(fleet_disk_wear_percent[3d], 30 * 86400)) >= 100
+          and on (pve_host, device, serial) max by (pve_host, device, serial) (fleet_disk_wear_percent) >= 60
+          and on (pve_host, device, serial) max by (pve_host, device, serial) (fleet_disk_wear_percent) < 100
+        for: 6h
+        labels:
+          severity: warning
+          service: fleet_disk_health
+        annotations:
+          summary: "Disk {{ $labels.device }} on {{ $labels.pve_host }} is forecast to reach 100% wear within 30 days"
+          description: "At the 3 day trend, {{ $labels.device }} (serial {{ $labels.serial }}) on {{ $labels.pve_host }} reaches its rated endurance in under 30 days (forecast {{ $value | humanize }}%). Look at what writes to it (CI builds on 0pipe) and order the replacement."
+          runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+      - alert: FleetDiskBadSectors
+        expr: >-
+          max by (pve_host, device, serial) (fleet_disk_reallocated_sectors) > 0
+          or max by (pve_host, device, serial) (fleet_disk_pending_sectors) > 0
+          or max by (pve_host, device, serial) (fleet_disk_offline_uncorrectable) > 0
+          or max by (pve_host, device, serial) (fleet_disk_media_errors) > 0
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_disk_health
+        annotations:
+          summary: "Disk {{ $labels.device }} on {{ $labels.pve_host }} reports bad sectors or media errors"
+          description: "{{ $labels.device }} (serial {{ $labels.serial }}) on {{ $labels.pve_host }} has a non-zero reallocated, pending, offline-uncorrectable or media-error counter ({{ $value }}). Every such counter was 0 across the fleet on 2026-10-29, so any growth is new."
+          runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+      - alert: FleetDiskHot
+        expr: >-
+          max by (pve_host, device, serial) (fleet_disk_temperature_celsius) > 65
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_disk_health
+        annotations:
+          summary: "Disk {{ $labels.device }} on {{ $labels.pve_host }} runs at {{ $value }} C"
+          description: "{{ $labels.device }} (serial {{ $labels.serial }}) on {{ $labels.pve_host }} has been above 65 C for 30 minutes (fleet disks run at 31-52 C). Check airflow and what is hammering it."
+          runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+      - alert: FleetDiskHealthMissing
+        expr: >-
+          count(max by (pve_host) (fleet_disk_smart_passed)) < 5
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_disk_health
+        annotations:
+          summary: "Fewer than 5 hosts report SMART health"
+          description: "Only {{ $value }} of the 5 Proxmox hosts (0docker, 0infer, 0mcp, 0own, 0pipe) export fleet_disk_smart_passed, so the disk health alerts are blind for the others. Check proxmox-storage-metrics.timer on the missing host."
+          runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts

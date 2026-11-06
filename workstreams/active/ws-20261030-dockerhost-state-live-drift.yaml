@@ -1,0 +1,65 @@
+id: ws-20261030-dockerhost-state-live-drift
+adr: "0386"
+title: Put the 12 inventory entries and 6 archives that the VM 100 state backup runs into git, so the next install from git does not drop them
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/dockerhost-state-live-drift
+worktree_path: .claude/worktrees/dockerhost-state-live-drift
+doc: docs/workstreams/ws-20261030-dockerhost-state-live-drift.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/0docker/dockerhost-state-backup/README.md
+  - config/0docker/dockerhost-state-backup/config.json
+  - config/0docker/dockerhost-state-backup/dockerhost_state_backup.py
+  - tests/test_dockerhost_state_backup_staging.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261030-dockerhost-state-live-drift.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261030-dockerhost-state-live-drift.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261030_dockerhost_state_live_drift_tracking
+      paths:
+        - docs/workstreams/ws-20261030-dockerhost-state-live-drift.md
+      mode: exclusive
+    - id: dockerhost_state_backup_live_parity
+      paths:
+        - config/0docker/dockerhost-state-backup/README.md
+        - config/0docker/dockerhost-state-backup/config.json
+        - config/0docker/dockerhost-state-backup/dockerhost_state_backup.py
+        - tests/test_dockerhost_state_backup_staging.py
+      mode: shared_contract
+      contract: dockerhost-state-backup-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261030-dockerhost-state-live-drift.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: The VM 100 state backup in git now has the 12 inventory entries and 6 archives that run on the host, so installing it from git no longer drops them.
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  On 2026-10-29 someone added 12 inventory entries to the installed dockerhost-state-backup script on VM 100 (20:48Z) and 6 archives to its config (21:01Z)
+  by hand; neither is in any PR. The merged staging change (#617) was installed on VM 100 on 2026-10-30 07:05Z as a hybrid: the merged script plus those
+  12 entries, with the config left alone, so installing the script or config from git would silently drop them from the backup. This change makes git match
+  what runs, byte for byte for the script and equal apart from whitespace and key order for the config. Nothing is installed or changed on any host.
+tasks:
+  - id: t1
+    title: Port the 12 inventory entries and the 6 archives (with the usr_local exclude) exactly as they run, and prove the script is byte-identical to the live file
+    status: completed
+  - id: t2
+    title: Review the 12 commands and the 6 archives for secrets (what lands in clear text in the snapshot, who can read it) and put the answer at the top of the pull request
+    status: completed
+  - id: t3
+    title: Pin the entries and archives in tests and document them in the README; validate through the pre-push gate and open the pull request (the user decides the merge)
+    status: in_progress

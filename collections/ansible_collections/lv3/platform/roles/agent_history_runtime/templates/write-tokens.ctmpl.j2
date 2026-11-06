@@ -1,0 +1,3 @@
+{# managed-by: role=agent_history_runtime adr=0494 (secret template: names only, no value) -#}
+[[ with secret "{{ agent_history_openbao_kv_path }}" ]][[ .Data.data.{{ agent_history_openbao_keys.write_tokens }} ]]
+[[ end ]]

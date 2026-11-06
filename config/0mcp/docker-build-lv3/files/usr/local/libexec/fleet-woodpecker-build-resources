@@ -1,0 +1,502 @@
+#!/usr/bin/env python3
+"""Sample live Woodpecker step containers into node-exporter textfile metrics."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import tempfile
+import time
+from collections import defaultdict
+from pathlib import Path
+from typing import Any
+
+WINDOW_SECONDS = 24 * 60 * 60
+ACTIVE_SECONDS = 75
+BYTE_RE = re.compile(r"^\s*([0-9]+(?:\.[0-9]+)?)\s*([KMGTPE]?i?B|B)\s*$", re.I)
+SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+CI_METADATA_KEYS = (
+    "CI_REPO",
+    "CI_PIPELINE_NUMBER",
+    "CI_SYSTEM_HOST",
+    "CI_STEP_NAME",
+    "CI_STEP_NUMBER",
+)
+WORKER_ALIASES = {
+    # Keep existing host-side systemd environment files working while the
+    # current PVE builder identity is normalized across all metric sources.
+    "postgres-builder": "pve01-amd64-builder",
+}
+
+
+def parse_percent(value: str) -> float:
+    return float(value.strip().removesuffix("%"))
+
+
+def parse_bytes(value: str) -> int:
+    match = BYTE_RE.match(value)
+    if not match:
+        raise ValueError(f"unsupported byte value: {value!r}")
+    number = float(match.group(1))
+    unit = match.group(2)
+    prefix = unit[0].upper() if unit.upper() != "B" else ""
+    power = "KMGTPE".find(prefix) + 1 if prefix else 0
+    base = 1024 if "I" in unit.upper() else 1000
+    return int(number * (base**power))
+
+
+def labels(values: dict[str, object]) -> str:
+    def escape(value: object) -> str:
+        return str(value).replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+
+    return ",".join(f'{key}="{escape(value)}"' for key, value in sorted(values.items()))
+
+
+def run_json(command: list[str]) -> Any:
+    completed = subprocess.run(command, check=True, capture_output=True, text=True, timeout=20)
+    return json.loads(completed.stdout)
+
+
+def control_plane(system_host: str) -> str:
+    if system_host.lower() == "ci.0exec.com":
+        return "ci_0exec"
+    if system_host.lower() == "ci.example.org":
+        return "ci_0mcp"
+    return "unknown"
+
+
+def canonical_worker(worker: str) -> str:
+    return WORKER_ALIASES.get(worker, worker)
+
+
+def safe_ci_metadata(environment: list[object]) -> dict[str, str]:
+    """Extract only the CI labels used for metrics; ignore all other env values."""
+    result: dict[str, str] = {}
+    for key in CI_METADATA_KEYS:
+        prefix = f"{key}="
+        for item in environment:
+            if isinstance(item, str) and item.startswith(prefix):
+                result[key] = item[len(prefix):]
+                break
+    return result
+
+
+def _cgroup_child(root: Path, relative: str) -> Path | None:
+    root_resolved = root.resolve()
+    candidate = (root / relative.lstrip("/")).resolve()
+    if candidate == root_resolved or root_resolved not in candidate.parents:
+        return None
+    return candidate
+
+
+def container_cpu_seconds(
+    pid: object,
+    proc_root: Path = Path("/proc"),
+    cgroup_root: Path = Path("/sys/fs/cgroup"),
+) -> float | None:
+    """Read cumulative CPU usage from the container's cgroup counter."""
+    try:
+        process_id = int(pid)
+        if process_id <= 0:
+            return None
+        entries = (proc_root / str(process_id) / "cgroup").read_text(encoding="utf-8").splitlines()
+    except (OSError, TypeError, ValueError):
+        return None
+
+    for entry in entries:
+        try:
+            hierarchy, controllers, relative = entry.split(":", 2)
+        except ValueError:
+            continue
+        if hierarchy == "0" and not controllers:
+            cgroup = _cgroup_child(cgroup_root, relative)
+            if cgroup is None:
+                return None
+            try:
+                for line in (cgroup / "cpu.stat").read_text(encoding="utf-8").splitlines():
+                    key, value = line.split(None, 1)
+                    if key == "usage_usec":
+                        return int(value) / 1_000_000
+            except (OSError, ValueError):
+                return None
+            return None
+        if "cpuacct" in controllers.split(","):
+            relative_path = relative.lstrip("/")
+            for mount in (cgroup_root / "cpu,cpuacct", cgroup_root / "cpuacct"):
+                cgroup = _cgroup_child(mount, relative_path)
+                if cgroup is None:
+                    continue
+                try:
+                    usage = (cgroup / "cpuacct.usage").read_text(encoding="utf-8")
+                    return int(usage) / 1_000_000_000
+                except (OSError, ValueError):
+                    continue
+    return None
+
+
+def current_samples() -> tuple[
+    dict[tuple[str, str, str], dict[str, float]],
+    dict[tuple[str, str, str, str, str], dict[str, float]],
+    dict[str, dict[str, object]],
+]:
+    ids = subprocess.run(
+        ["docker", "ps", "-q", "--filter", "name=wp_"],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=10,
+    ).stdout.split()
+    pipeline_samples: dict[tuple[str, str, str], dict[str, float]] = defaultdict(
+        lambda: {"cpu": 0.0, "memory": 0.0, "limit": 0.0, "containers": 0.0}
+    )
+    step_samples: dict[tuple[str, str, str, str, str], dict[str, float]] = defaultdict(
+        lambda: {"cpu": 0.0, "memory": 0.0, "limit": 0.0, "containers": 0.0}
+    )
+    if not ids:
+        return pipeline_samples, step_samples, {}
+
+    inspect = run_json(["docker", "inspect", *ids])
+    metadata: dict[str, dict[str, str]] = {}
+    cpu_samples: dict[str, dict[str, object]] = {}
+    for container in inspect:
+        config = container.get("Config") or {}
+        env = safe_ci_metadata(config.get("Env") or [])
+        repo = env.get("CI_REPO", "")
+        pipeline_number = env.get("CI_PIPELINE_NUMBER", "")
+        plane = control_plane(env.get("CI_SYSTEM_HOST", ""))
+        if not repo or not pipeline_number.isdigit() or plane == "unknown":
+            continue
+        cid = str(container.get("Id", ""))
+        if cid:
+            metadata[cid] = {
+                "repo": repo,
+                "pipeline_number": pipeline_number,
+                "control_plane": plane,
+                "step_name": env.get("CI_STEP_NAME", "unknown") or "unknown",
+                "step_number": env.get("CI_STEP_NUMBER", "0") or "0",
+            }
+            pipeline_key = (plane, repo, pipeline_number)
+            step_key = (*pipeline_key, metadata[cid]["step_name"], metadata[cid]["step_number"])
+            cpu_seconds = container_cpu_seconds((container.get("State") or {}).get("Pid"))
+            if cpu_seconds is not None:
+                cpu_samples[cid] = {
+                    "pipeline_key": pipeline_key,
+                    "step_key": step_key,
+                    "cpu_seconds": cpu_seconds,
+                }
+    if not metadata:
+        return pipeline_samples, step_samples, cpu_samples
+
+    stats = subprocess.run(
+        ["docker", "stats", "--no-stream", "--format", "{{json .}}", *metadata.keys()],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=20,
+    ).stdout.splitlines()
+    name_to_id = {
+        str(container.get("Name", "")).lstrip("/"): cid
+        for cid, container in ((str(x.get("Id", "")), x) for x in inspect)
+    }
+    now_samples: dict[tuple[str, str, str], dict[str, float]] = defaultdict(
+        lambda: {"cpu": 0.0, "memory": 0.0, "limit": 0.0, "containers": 0.0}
+    )
+    now_steps: dict[tuple[str, str, str, str, str], dict[str, float]] = defaultdict(
+        lambda: {"cpu": 0.0, "memory": 0.0, "limit": 0.0, "containers": 0.0}
+    )
+    for line in stats:
+        try:
+            stat = json.loads(line)
+            cid = name_to_id.get(str(stat.get("Name", "")).lstrip("/"))
+            meta = metadata.get(cid or "")
+            if not meta:
+                continue
+            used_text, limit_text = str(stat["MemUsage"]).split("/", 1)
+            cpu = parse_percent(str(stat["CPUPerc"]))
+            memory = float(parse_bytes(used_text))
+            limit = float(parse_bytes(limit_text))
+            pipeline_key = (meta["control_plane"], meta["repo"], meta["pipeline_number"])
+            step_key = (*pipeline_key, meta["step_name"], meta["step_number"])
+            for destination, key in ((now_samples, pipeline_key), (now_steps, step_key)):
+                destination[key]["cpu"] += cpu
+                destination[key]["memory"] += memory
+                destination[key]["limit"] += limit
+                destination[key]["containers"] += 1
+        except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+            continue
+    return now_samples, now_steps, cpu_samples
+
+
+def update_state(state_path: Path, now: int, samples: dict[tuple[str, str, str], dict[str, float]],
+                 step_samples: dict[tuple[str, str, str, str, str], dict[str, float]],
+                 cpu_samples: dict[str, dict[str, object]] | None = None) -> dict[str, Any]:
+    try:
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        state = {"pipelines": {}, "steps": {}}
+    pipelines = state.setdefault("pipelines", {})
+    steps = state.setdefault("steps", {})
+    container_cpu = state.setdefault("container_cpu", {})
+
+    def ensure_record(records: dict[str, Any], key: tuple[str, ...]) -> dict[str, Any]:
+        joined = "\0".join(key)
+        return records.setdefault(joined, {
+            "labels": list(key), "first_seen": now, "last_seen": now,
+            "cpu_peak": 0.0, "memory_peak": 0.0, "memory_percent_peak": 0.0,
+            "samples": 0, "containers_peak": 0,
+            # Keep average-only counters separate from the original peak
+            # sample count so existing state files start a truthful mean
+            # at rollout instead of treating old samples as zero usage.
+            "average_samples": 0,
+            "cpu_sample_sum": 0.0,
+            "memory_sample_sum": 0.0,
+            "memory_percent_sample_sum": 0.0,
+            "cpu_time_seconds": 0.0,
+            "cpu_time_containers": 0,
+        })
+
+    def update(records: dict[str, Any], observed: dict[tuple[str, ...], dict[str, float]]) -> None:
+        for key, value in observed.items():
+            record = ensure_record(records, key)
+            record["last_seen"] = now
+            record["cpu_peak"] = max(float(record["cpu_peak"]), value["cpu"])
+            record["memory_peak"] = max(float(record["memory_peak"]), value["memory"])
+            percent = 100.0 * value["memory"] / value["limit"] if value["limit"] else 0.0
+            record["memory_percent_peak"] = max(float(record["memory_percent_peak"]), percent)
+            record["samples"] = int(record["samples"]) + 1
+            record["containers_peak"] = max(int(record.get("containers_peak", 0)), int(value["containers"]))
+            record["average_samples"] = int(record.get("average_samples", 0)) + 1
+            record["cpu_sample_sum"] = float(record.get("cpu_sample_sum", 0.0)) + value["cpu"]
+            record["memory_sample_sum"] = float(record.get("memory_sample_sum", 0.0)) + value["memory"]
+            record["memory_percent_sample_sum"] = (
+                float(record.get("memory_percent_sample_sum", 0.0)) + percent
+            )
+        stale = [key for key, record in records.items() if now - int(record.get("last_seen", 0)) > WINDOW_SECONDS]
+        for key in stale:
+            del records[key]
+
+    update(pipelines, samples)
+    update(steps, step_samples)
+    for container_id, sample in (cpu_samples or {}).items():
+        pipeline_key = tuple(str(value) for value in sample["pipeline_key"])
+        step_key = tuple(str(value) for value in sample["step_key"])
+        current_cpu = max(0.0, float(sample["cpu_seconds"]))
+        previous = container_cpu.get(container_id)
+        previous_cpu = float(previous.get("cpu_seconds", 0.0)) if isinstance(previous, dict) else 0.0
+        delta = max(0.0, current_cpu - previous_cpu)
+        pipeline_record = ensure_record(pipelines, pipeline_key)
+        step_record = ensure_record(steps, step_key)
+        pipeline_record["last_seen"] = now
+        step_record["last_seen"] = now
+        pipeline_record["cpu_time_seconds"] = float(pipeline_record.get("cpu_time_seconds", 0.0)) + delta
+        step_record["cpu_time_seconds"] = float(step_record.get("cpu_time_seconds", 0.0)) + delta
+        if not isinstance(previous, dict):
+            pipeline_record["cpu_time_containers"] = int(pipeline_record.get("cpu_time_containers", 0)) + 1
+            step_record["cpu_time_containers"] = int(step_record.get("cpu_time_containers", 0)) + 1
+        container_cpu[container_id] = {
+            "pipeline_key": list(pipeline_key),
+            "step_key": list(step_key),
+            "cpu_seconds": current_cpu,
+            "last_seen": now,
+        }
+    stale_cpu_containers = [
+        container_id for container_id, record in container_cpu.items()
+        if now - int(record.get("last_seen", 0)) > WINDOW_SECONDS
+    ]
+    for container_id in stale_cpu_containers:
+        del container_cpu[container_id]
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(prefix=".build-resources-", dir=state_path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(state, stream, separators=(",", ":"))
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.chmod(temp_name, 0o600)
+        os.replace(temp_name, state_path)
+    finally:
+        if os.path.exists(temp_name):
+            os.unlink(temp_name)
+    return state
+
+
+def load_image_builds(path: Path, now: int) -> list[dict[str, Any]]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+    records = payload.get("builds", []) if isinstance(payload, dict) else []
+    if not isinstance(records, list):
+        return []
+    eligible = []
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        try:
+            age = now - int(record.get("created_at", 0))
+            layer_bytes = int(record.get("layer_bytes", -1))
+            config_bytes = int(record.get("config_bytes", -1))
+            manifest_bytes = int(record.get("manifest_bytes", -1))
+        except (TypeError, ValueError):
+            continue
+        digest = str(record.get("digest", ""))
+        if not (0 <= age <= WINDOW_SECONDS and SHA256_RE.fullmatch(digest) and
+                layer_bytes >= 0 and config_bytes >= 0 and manifest_bytes >= 0):
+            continue
+        required = ("control_plane", "repo", "image", "pipeline_number", "platform")
+        if any(not str(record.get(field, "")).strip() for field in required):
+            continue
+        eligible.append({**record, "age_seconds": age, "layer_bytes": layer_bytes,
+                         "config_bytes": config_bytes, "manifest_bytes": manifest_bytes})
+    return eligible
+
+
+def render(state: dict[str, Any], worker: str, now: int,
+           image_builds: list[dict[str, Any]] | None = None) -> str:
+    worker = canonical_worker(worker)
+    output = [
+        "# HELP woodpecker_build_cpu_peak_percent_24h Peak summed CPU percentage for active Woodpecker pipeline containers in the last 24h.",
+        "# TYPE woodpecker_build_cpu_peak_percent_24h gauge",
+        "# HELP woodpecker_build_cpu_seconds_24h Sampled cgroup CPU core-seconds consumed by observed pipeline containers in the last 24h.",
+        "# TYPE woodpecker_build_cpu_seconds_24h gauge",
+        "# HELP woodpecker_build_cpu_containers_observed_24h Unique pipeline containers with readable cgroup CPU counters in the last 24h.",
+        "# TYPE woodpecker_build_cpu_containers_observed_24h gauge",
+        "# HELP woodpecker_build_memory_peak_bytes_24h Peak summed memory in bytes for active Woodpecker pipeline containers in the last 24h.",
+        "# TYPE woodpecker_build_memory_peak_bytes_24h gauge",
+        "# HELP woodpecker_build_memory_peak_percent_24h Peak combined memory limit percentage for active Woodpecker pipeline containers in the last 24h.",
+        "# TYPE woodpecker_build_memory_peak_percent_24h gauge",
+        "# HELP woodpecker_build_resource_samples_24h Number of resource samples collected for a Woodpecker pipeline in the last 24h.",
+        "# TYPE woodpecker_build_resource_samples_24h gauge",
+        "# HELP woodpecker_build_resource_average_samples_24h Number of samples contributing to sampled-average resource metrics for a pipeline in the last 24h.",
+        "# TYPE woodpecker_build_resource_average_samples_24h gauge",
+        "# HELP woodpecker_build_cpu_sampled_avg_percent_24h Arithmetic mean of sampled summed CPU percentages across live Woodpecker step containers for a pipeline in the last 24h.",
+        "# TYPE woodpecker_build_cpu_sampled_avg_percent_24h gauge",
+        "# HELP woodpecker_build_memory_sampled_avg_bytes_24h Arithmetic mean of sampled summed memory bytes across live Woodpecker step containers for a pipeline in the last 24h.",
+        "# TYPE woodpecker_build_memory_sampled_avg_bytes_24h gauge",
+        "# HELP woodpecker_build_memory_sampled_avg_percent_24h Arithmetic mean of sampled memory-limit percentages across live Woodpecker step containers for a pipeline in the last 24h.",
+        "# TYPE woodpecker_build_memory_sampled_avg_percent_24h gauge",
+        "# HELP woodpecker_build_active_pipelines Number of Woodpecker pipelines with live step containers on a worker.",
+        "# TYPE woodpecker_build_active_pipelines gauge",
+        "# HELP woodpecker_build_step_cpu_seconds_24h Sampled cgroup CPU core-seconds consumed by an observed Woodpecker step container in the last 24h.",
+        "# TYPE woodpecker_build_step_cpu_seconds_24h gauge",
+        "# HELP woodpecker_build_step_memory_peak_bytes_24h Peak memory in bytes for a Woodpecker step container in the last 24h.",
+        "# TYPE woodpecker_build_step_memory_peak_bytes_24h gauge",
+        "# HELP woodpecker_build_step_cpu_sampled_avg_percent_24h Arithmetic mean of sampled CPU percentage for a Woodpecker step container in the last 24h.",
+        "# TYPE woodpecker_build_step_cpu_sampled_avg_percent_24h gauge",
+        "# HELP woodpecker_build_step_memory_sampled_avg_bytes_24h Arithmetic mean of sampled memory bytes for a Woodpecker step container in the last 24h.",
+        "# TYPE woodpecker_build_step_memory_sampled_avg_bytes_24h gauge",
+        "# HELP woodpecker_build_image_layer_bytes_24h Compressed OCI image layer bytes measured from a published platform manifest in the last 24h.",
+        "# TYPE woodpecker_build_image_layer_bytes_24h gauge",
+        "# HELP woodpecker_build_image_config_bytes_24h OCI image config bytes measured from a published platform manifest in the last 24h.",
+        "# TYPE woodpecker_build_image_config_bytes_24h gauge",
+        "# HELP woodpecker_build_image_manifest_bytes_24h OCI platform manifest bytes for a successfully published image in the last 24h.",
+        "# TYPE woodpecker_build_image_manifest_bytes_24h gauge",
+        "# HELP woodpecker_build_image_total_bytes_24h Compressed OCI image layers plus config bytes measured after a successful publish in the last 24h.",
+        "# TYPE woodpecker_build_image_total_bytes_24h gauge",
+        "# HELP woodpecker_build_image_age_seconds_24h Age of the OCI image-size measurement in seconds.",
+        "# TYPE woodpecker_build_image_age_seconds_24h gauge",
+    ]
+    active: dict[tuple[str, str], int] = defaultdict(int)
+    for plane in ("ci_0exec", "ci_0mcp"):
+        active[(plane, worker)] = 0
+    for record in state.get("pipelines", {}).values():
+        plane, repo, number = record["labels"]
+        base = {"control_plane": plane, "execution_host": worker, "repo": repo, "pipeline_number": number}
+        active_key = (plane, worker)
+        if now - int(record.get("last_seen", 0)) <= ACTIVE_SECONDS:
+            active[active_key] += 1
+        for metric, field in (
+            ("woodpecker_build_cpu_peak_percent_24h", "cpu_peak"),
+            ("woodpecker_build_memory_peak_bytes_24h", "memory_peak"),
+            ("woodpecker_build_memory_peak_percent_24h", "memory_percent_peak"),
+            ("woodpecker_build_resource_samples_24h", "samples"),
+        ):
+            output.append(f"{metric}{{{labels(base)}}} {record[field]}")
+        cpu_containers = int(record.get("cpu_time_containers", 0))
+        if cpu_containers > 0:
+            output.extend((
+                f'woodpecker_build_cpu_seconds_24h{{{labels(base)}}} '
+                f'{float(record.get("cpu_time_seconds", 0.0))}',
+                f'woodpecker_build_cpu_containers_observed_24h{{{labels(base)}}} {cpu_containers}',
+            ))
+        average_samples = int(record.get("average_samples", 0))
+        output.append(
+            f'woodpecker_build_resource_average_samples_24h{{{labels(base)}}} {average_samples}'
+        )
+        if average_samples > 0:
+            output.extend((
+                f'woodpecker_build_cpu_sampled_avg_percent_24h{{{labels(base)}}} '
+                f'{float(record.get("cpu_sample_sum", 0.0)) / average_samples}',
+                f'woodpecker_build_memory_sampled_avg_bytes_24h{{{labels(base)}}} '
+                f'{float(record.get("memory_sample_sum", 0.0)) / average_samples}',
+                f'woodpecker_build_memory_sampled_avg_percent_24h{{{labels(base)}}} '
+                f'{float(record.get("memory_percent_sample_sum", 0.0)) / average_samples}',
+            ))
+    for (plane, host), count in sorted(active.items()):
+        output.append(f'woodpecker_build_active_pipelines{{control_plane="{plane}",execution_host="{host}"}} {count}')
+    for record in state.get("steps", {}).values():
+        plane, repo, number, step_name, step_number = record["labels"]
+        base = {"control_plane": plane, "execution_host": worker, "repo": repo,
+                "pipeline_number": number, "step_name": step_name, "step_number": step_number}
+        output.append(f"woodpecker_build_step_memory_peak_bytes_24h{{{labels(base)}}} {record['memory_peak']}")
+        cpu_containers = int(record.get("cpu_time_containers", 0))
+        if cpu_containers > 0:
+            output.append(
+                f'woodpecker_build_step_cpu_seconds_24h{{{labels(base)}}} '
+                f'{float(record.get("cpu_time_seconds", 0.0))}'
+            )
+        average_samples = int(record.get("average_samples", 0))
+        if average_samples > 0:
+            output.extend((
+                f'woodpecker_build_step_cpu_sampled_avg_percent_24h{{{labels(base)}}} '
+                f'{float(record.get("cpu_sample_sum", 0.0)) / average_samples}',
+                f'woodpecker_build_step_memory_sampled_avg_bytes_24h{{{labels(base)}}} '
+                f'{float(record.get("memory_sample_sum", 0.0)) / average_samples}',
+            ))
+    for record in image_builds or []:
+        base = {
+            "control_plane": record["control_plane"],
+            "execution_host": worker,
+            "repo": record["repo"],
+            "pipeline_number": record["pipeline_number"],
+            "image": record["image"],
+            "digest": record["digest"],
+            "platform": record["platform"],
+        }
+        layers = int(record["layer_bytes"])
+        config = int(record["config_bytes"])
+        manifest = int(record["manifest_bytes"])
+        output.extend((
+            f'woodpecker_build_image_layer_bytes_24h{{{labels(base)}}} {layers}',
+            f'woodpecker_build_image_config_bytes_24h{{{labels(base)}}} {config}',
+            f'woodpecker_build_image_manifest_bytes_24h{{{labels(base)}}} {manifest}',
+            f'woodpecker_build_image_total_bytes_24h{{{labels(base)}}} {layers + config}',
+            f'woodpecker_build_image_age_seconds_24h{{{labels(base)}}} {record["age_seconds"]}',
+        ))
+    return "\n".join(output) + "\n"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--worker", required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--state", type=Path, default=Path("/var/lib/woodpecker-build-metrics/state.json"))
+    args = parser.parse_args()
+    now = int(time.time())
+    pipelines, steps, cpu_samples = current_samples()
+    state = update_state(args.state, now, pipelines, steps, cpu_samples)
+    image_builds = load_image_builds(args.state.parent / "image-builds.json", now)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    temp = args.output.with_suffix(args.output.suffix + ".tmp")
+    temp.write_text(render(state, args.worker, now, image_builds), encoding="utf-8")
+    os.chmod(temp, 0o644)
+    os.replace(temp, args.output)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

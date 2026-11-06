@@ -2,7 +2,7 @@
 monitoring_prometheus_service_name: 0mcp-prometheus
 monitoring_prometheus_0own_node_exporter_target:
   job_name: pve_0own_host_node_exporter_via_tailscale
-  address: 203.0.113.3:9100
+  address: 100.64.0.3:9100
   labels:
     monitored_host: proxmox-node
 
@@ -26,14 +26,20 @@ monitoring_scanopy_onboard_exclude: []
 monitoring_scanopy_backup_enabled: true
 # Weekly proof that the newest dump restores (throwaway Postgres container on this VM).
 monitoring_scanopy_backup_drill_enabled: true
+# Warm standby of the Scanopy server on this VM (0mcp fleet; the primary is on the 0docker hypervisor): hourly restore of the newest dump,
+# weekly boot test; the standby server stays stopped until a failover.
+monitoring_scanopy_standby_enabled: true
 monitoring_scanopy_onboard_fleets:
   - {name: 0docker, ssh: root@example.net, port: 22, relay_url: "http://10.10.10.1:60072"}
   - {name: 0mcp, ssh: root@10.10.10.1, port: 22, relay_url: "http://10.10.10.1:60072"}
   - {name: 0own, ssh: root@203.0.113.14, port: 22, relay_url: "http://10.60.10.1:60072"}
-  - {name: pve01, ssh: root@proxmox.0database.com, port: 22, relay_url: "http://10.50.0.1:60072"}
+  # The monitoring VM reaches the 0infer hypervisor over Tailscale using the forced-command onboarding key.
+  # Guest daemons use the private vmbr70 relay; VM704 has no Tailscale interface.
+  - {name: 0infer, ssh: root@100.64.0.21, port: 22, relay_url: "http://10.70.10.1:60072"}
 monitoring_scanopy_discover_schedule:
-  # Slots are UTC and distinct quarter hours (one start per 15-minute run). Order: Docker VMs 01:00-05:15, Proxmox hypervisor daemons
-  # 05:30-06:15, then the guests added in the full rollout (containers, staging runtimes, pdm, spire) and the VMs without Docker.
+  # Slots are UTC and distinct quarter hours (one start per 15-minute run). Order: Docker VMs 01:00-04:45, three Proxmox daemons
+  # 05:30-06:00, then the rollout guests (containers, staging runtimes, pdm and VMs without Docker); 0infer daemons are at 11:45 and 12:00.
+  # pve01 (0database) and its four VMs left on 2026-10-21; their slots stay free.
   vm-0mcp-171-coolify-apps-lv3: "01:00"
   vm-0docker-101-docker-prod: "01:15"
   vm-0mcp-120-docker-runtime-lv3: "01:30"
@@ -48,12 +54,9 @@ monitoring_scanopy_discover_schedule:
   vm-0mcp-190-runtime-ai-lv3: "04:15"
   vm-0own-610-0own-build-worker: "04:30"
   vm-0own-630-0own-openobserve: "04:45"
-  vm-pve01-101-pve01-amd64-builder: "05:00"
-  vm-pve01-runtime-1: "05:15"
   pve-0docker: "05:30"
   pve-0mcp: "05:45"
   pve-0own: "06:00"
-  pve-pve01: "06:15"
   ct-0docker-107-pve-exporter: "06:30"
   ct-0docker-108-0docker-builder: "06:45"
   ct-0docker-109-scrapetheworld: "07:00"
@@ -61,8 +64,6 @@ monitoring_scanopy_discover_schedule:
   vm-0own-650-pyroscope-canary: "07:30"
   vm-0own-660-0own-staging-runtime: "07:45"
   vm-0own-670-pdm: "08:00"
-  vm-pve01-103-spire-prod-0exec: "08:15"
-  Scanopy daemon pve01: "08:30"
   scanopy-daemon: "08:45"
   vm-0docker-104-debian-nginx-proxy-manager: "09:00"
   vm-0mcp-100-hermes-agent: "09:15"
@@ -74,7 +75,12 @@ monitoring_scanopy_discover_schedule:
   vm-0mcp-154-postgres-data-lv3: "10:45"
   vm-0own-github-mirror: "11:00"
   vm-0own-own-pbs: "11:15"
-  vm-pve01-100-pg-primary: "11:30"
+  pve-0infer: "11:45"
+  Scanopy daemon 0infer: "12:00"
+# Switched off on purpose: the domainscope Postgres replica (VM 153 on 0mcp). Its replication slot on pg-primary is lost, so it would need a full
+# re-copy of the 460 GB database; replica not wanted for now. Remove the entry when the VM is started again.
+monitoring_scanopy_sd_ignored_hosts:
+  - domainscope-pg-replica
 monitoring_scanopy_sd_extra_endpoints:
   - target: http://10.10.10.20:8102/healthz
     module: http_2xx
@@ -119,21 +125,61 @@ monitoring_prometheus_extra_scrape_jobs:
         labels:
           cluster: lv3
           host: runtime-general-lv3
-# OpenObserve remote_write. The password never lives in git: the unit loads the
-# encrypted credential /etc/credstore.encrypted/openobserve_password (created
-# out of band with systemd-creds) and Prometheus reads it from
+  # 0infer hypervisor and PostgreSQL VM node exporters (tailnet only; grants tag:prometheus-monitoring -> 100.64.0.21 :9100 and
+  # tag:infer-postgres :9100). Scanopy SD does not cover 10.70.10.0/24 yet, so these stay static. Live since 2026-10-15; the
+  # exporters themselves are in inventory/fleet-observability.yml (fleet_0infer). The job name keeps the node-placement rule regex.
+  - job_name: infer_node_exporter_via_tailscale
+    static_configs:
+      - targets: ["100.64.0.21:9100"]
+        labels: {host: infer-hypervisor, role: hypervisor, fleet: 0infer}
+      - targets: ["100.64.0.22:9100"]
+        labels: {host: infer-pg-primary, role: postgres, fleet: 0infer}
+      # CI builder VM702 (Woodpecker slot agents): scraped for the CI host pressure alerts; grant tag:prometheus-monitoring -> tag:infer-builder-ci :9100 (2026-10-27).
+      - targets: ["100.64.0.23:9100"]
+        labels: {host: infer-builder-ci, role: ci, fleet: 0infer}
+  # 0pipe build server (Hetzner HEL1, 2026-10-28): its Proxmox host and the build VM 100 (Woodpecker slot agents), tailnet only. The build VM is
+  # scraped for the CI host pressure alerts (FleetCiHostPressureMissing counts five CI hosts). Live on the monitoring VM before this entry existed
+  # (both targets up on 2026-10-29): without it in git, the next converge would drop the job and that alert would fire. The job name keeps the
+  # node-placement rule regex.
+  - job_name: pipe_node_exporter_via_tailscale
+    static_configs:
+      - targets: ["100.115.117.66:9100"]
+        labels: {host: pipe-hypervisor, role: hypervisor, fleet: 0pipe}
+      - targets: ["100.125.199.15:9100"]
+        labels: {host: 0pipe-build, role: ci, fleet: 0pipe}
+      # 0pipe-runtime (VM 101, restricted canary pool member, tag:pool-runtime; node_exporter bound to its tailnet address, seen 2026-11-04). The path is
+      # already granted (tag:prometheus-monitoring -> tag:pool-runtime tcp 9100, config/tailscale/policy.hujson). Whether Prometheus already scrapes it was not checked.
+      - targets: ["100.83.124.115:9100"]
+        labels: {host: 0pipe-runtime, role: runtime, fleet: 0pipe}
+  # Tier-0 alert replica (infer-tier0, VM704) through the 0infer host's forwards (docs/runbooks/tier0-infer-site.md). Kept as two separate jobs:
+  # AlertmanagerMeshDegraded counts members of job "alertmanager" and Tier0SiteAlertmanagerDown watches job "alertmanager_tier0".
+  - job_name: tier0_node_exporter
+    static_configs:
+      - targets: ["100.64.0.21:9101"]
+        labels: {host: infer-tier0, role: tier0, fleet: 0infer}
+  - job_name: alertmanager_tier0
+    static_configs:
+      - targets: ["100.64.0.21:9093"]
+        labels: {host: infer-tier0, role: tier0, fleet: 0infer}
+# OpenObserve remote_write: DISABLED 2026-10-14. Prometheus pushed every series (about 2,200 metric streams, e.g. node_systemd_unit_state
+# 788 M documents) to OpenObserve with no filter, duplicating what this Prometheus already keeps for 15 days; nothing queried them
+# (no dashboards, alerts or datasources; OpenObserve is used for logs and traces). Existing OpenObserve data is kept and ages out.
+# To restore it, put back the two lists below; the password never lives in git: the unit loads the encrypted credential
+# /etc/credstore.encrypted/openobserve_password (created out of band with systemd-creds) and Prometheus reads it from
 # /run/credentials/<unit>/openobserve_password.
-monitoring_prometheus_remote_write_credentials:
-  - name: openobserve_password
-    encrypted_file: /etc/credstore.encrypted/openobserve_password
-monitoring_prometheus_remote_write_targets:
-  - url: https://openobserve.0own.com/api/default/prometheus/api/v1/write
-    basic_auth:
-      username: openobserve-ingest@monitoring.internal
-      password_file: "/run/credentials/{{ monitoring_prometheus_service_name }}.service/openobserve_password"
-    queue_config:
-      capacity: 10000
-      max_shards: 4
+#   monitoring_prometheus_remote_write_credentials:
+#     - name: openobserve_password
+#       encrypted_file: /etc/credstore.encrypted/openobserve_password
+#   monitoring_prometheus_remote_write_targets:
+#     - url: https://openobserve.0own.com/api/default/prometheus/api/v1/write
+#       basic_auth:
+#         username: openobserve-ingest@monitoring.internal
+#         password_file: "/run/credentials/{{ monitoring_prometheus_service_name }}.service/openobserve_password"
+#       queue_config:
+#         capacity: 10000
+#         max_shards: 4
+monitoring_prometheus_remote_write_credentials: []
+monitoring_prometheus_remote_write_targets: []
 # Alertmanager authenticates to ntfy as the dedicated runtime user alertmanager-notify (created with the ntfy CLI, so it
 # is not in ntfy server.yml). Its password is only ever read from the controller-local file below and is installed as
 # /etc/alertmanager/ntfy-password (root:prometheus 0640).
@@ -145,6 +191,13 @@ alertmanager_runtime_triage_webhook_url: "http://100.114.37.21:18322/webhook/ale
 # monitoring_prometheus_listen_address); guest nftables accepts 9090/9093 only from 100.114.37.21/32
 # (inventory/host_vars/proxmox-host.yml network_policy.guests.monitoring) and the Tailscale grant is single-pair.
 alertmanager_runtime_listen_address: "0.0.0.0:9093"
+# Tier-0 alert replica on VM704 (0infer), reached through the 0infer host's tailnet address (nft forwards; see docs/runbooks/tier0-infer-site.md).
+alertmanager_runtime_cluster_advertise_address: "100.64.0.4:9094"
+alertmanager_runtime_cluster_peers:
+  - "100.64.0.21:9094"
+alertmanager_runtime_secondary_ntfy_base_url: "http://100.64.0.21:2586"
+monitoring_prometheus_extra_alertmanager_targets:
+  - "100.64.0.21:9093"
 alertmanager_runtime_ntfy_password_local_file: "{{ repo_shared_local_root }}/ntfy/alertmanager-notify-password.txt"
 # Alertmanager restarts the unit that actually runs on this guest (the generic
 # default derives from platform_identity.config_prefix and would not match).

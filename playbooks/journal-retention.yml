@@ -1,0 +1,19 @@
+---
+# Playbook: journal-retention.yml
+# Purpose: Bound local systemd journal storage independently of emergency cleanup.
+# Use case: Targeted retention apply on a Proxmox host or an explicitly selected systemd guest.
+# Inputs: journal_retention_hosts (inventory pattern, default proxmox_hosts); common_journal_retention_* overrides.
+# Outputs: A backed-up journald drop-in and an active journal daemon.
+# Idempotency: Restarts only journald and only when the managed file changes.
+# Dependencies: systemd-journald; lv3.platform.common journal_retention task entrypoint.
+# Related ADRs: 0226
+
+- name: Configure bounded system journal retention
+  hosts: "{{ journal_retention_hosts | default('proxmox_hosts') }}"
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Apply the shared journal retention policy
+      ansible.builtin.import_role:
+        name: lv3.platform.common
+        tasks_from: journal_retention

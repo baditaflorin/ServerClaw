@@ -1,0 +1,47 @@
+#!/bin/bash
+# Daily DomainScope standby rehearsal from the runner: boots VM 8101 on the hypervisor with the link DOWN, checks it is silent, applies the current config bundle, probes the database
+# read-only, resolves the production image tags, runs the STAGING stack on them, tears everything down and powers off (tier0-domainscope-promote.sh --rehearse -> standby-ctl rehearse).
+# Never touches production, never competes with a failover (the stage skips itself when the controller is not NORMAL). Exports the result as metrics and a history file.
+set -uo pipefail
+exec 9>/run/tier0-domainscope.lock
+flock -n 9 || { echo "another domainscope rehearsal is running: skipping this run"; exit 0; }
+PROM=/var/lib/prometheus/node-exporter/tier0_runner_domainscope.prom
+HIST=/var/lib/tier0-runner/domainscope-rehearsal-history.jsonl
+t0=$(date +%s)
+prev_ok=$(grep '^tier0_runner_domainscope_rehearsal_last_success_timestamp_seconds' "$PROM" 2>/dev/null | awk '{print $2}')
+OUT=$(/usr/local/bin/tier0-run tier0-domainscope-promote.sh --rehearse 2>&1); rc=$?
+printf '%s\n' "$OUT" | tail -45
+RES=$(printf '%s\n' "$OUT" | grep '^RESULT_JSON ' | tail -1 | sed 's/^RESULT_JSON //')
+end=$(date +%s)
+install -d -m 755 /var/lib/tier0-runner
+python3 - "$RES" "$rc" "$t0" "$end" "${prev_ok:-}" "$PROM" "$HIST" "$(cat /opt/tier0-runner/VERSION 2>/dev/null)" <<'PY'
+import json, os, sys
+res_s, rc, t0, end, prev_ok, prom, hist, commit = sys.argv[1:9]
+rc, t0, end = int(rc), int(t0), int(end)
+try:
+    res = json.loads(res_s)
+except ValueError:
+    res = {}
+status = res.get("status", "no-result")
+skipped = 1 if status == "skipped" else 0
+ok = rc == 0 and not skipped
+lines = ["# TYPE tier0_runner_domainscope_rehearsal_last_run_timestamp_seconds gauge",
+         f"tier0_runner_domainscope_rehearsal_last_run_timestamp_seconds {end}",
+         f"tier0_runner_domainscope_rehearsal_last_exit_code {rc}",
+         f"tier0_runner_domainscope_rehearsal_skipped {skipped}",
+         f"tier0_runner_domainscope_rehearsal_last_duration_seconds {end - t0}",
+         f"tier0_runner_domainscope_degraded_images {len(res.get('degraded', []))}"]
+if ok:
+    lines.append(f"tier0_runner_domainscope_rehearsal_last_success_timestamp_seconds {end}")
+elif prev_ok:
+    lines.append(f"tier0_runner_domainscope_rehearsal_last_success_timestamp_seconds {prev_ok}")
+if res.get("bundle_age_hours") is not None:
+    lines.append(f"tier0_runner_domainscope_bundle_age_seconds {int(res['bundle_age_hours'] * 3600)}")
+if res.get("bundle_api_tag"):
+    lines.append('tier0_runner_domainscope_bundle_info{api_image_tag="%s",frontend_image_tag="%s",commit="%s"} 1' % (res["bundle_api_tag"], res.get("bundle_frontend_tag", ""), commit))
+tmp = prom + ".tmp"
+open(tmp, "w").write("\n".join(lines) + "\n"); os.chmod(tmp, 0o644); os.replace(tmp, prom)
+open(hist, "a").write(json.dumps({"ts": end, "rc": rc, "status": status, "seconds": end - t0, "degraded": len(res.get("degraded", []))}) + "\n")
+PY
+echo "domainscope rehearsal: rc=$rc"
+exit $rc

@@ -82,6 +82,31 @@ groups:
           description: "The fleet-docker-prune timer on {{ $labels.instance }} has not completed a successful run for more than 3 days. Check `systemctl status fleet-docker-prune.service` and `journalctl -u fleet-docker-prune`."
           runbook_url: docs/runbooks/docker-runtime-disk-pressure.md
 
+  # Added 2026-10-18. The fe-runs-janitor timer on docker-runtime (VM 120) removes node_modules of idle front-end run dirs under /home/ops/fe_runs (see docs/runbooks/docker-runtime-disk-pressure.md):
+  # those runs filled the root disk of the CI server's host to 0% on 2026-10-18 06:46Z. A silent janitor would bring that back, so its own staleness is alerted.
+  - name: fe_runs_janitor
+    rules:
+      - alert: FeRunsJanitorStale
+        expr: (time() - fe_runs_janitor_last_success_timestamp_seconds) > 10800
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_disk
+        annotations:
+          summary: "The fe-runs janitor on {{ $labels.instance }} has not succeeded for 3 hours"
+          description: "fe-runs-janitor.timer (every 30 minutes) removes node_modules of idle run dirs under /home/ops/fe_runs; without it a front-end battery that starts a ~600 MB run dir every couple of minutes fills the root disk (VM 120 hosts the CI server). `systemctl status fe-runs-janitor.service`, `journalctl -u fe-runs-janitor`, /var/log/fe-runs-janitor.log."
+          runbook_url: docs/runbooks/docker-runtime-disk-pressure.md
+      - alert: FeRunsJanitorMissing
+        expr: absent(fe_runs_janitor_last_success_timestamp_seconds{host="docker-runtime-lv3"})
+        for: 3h
+        labels:
+          severity: warning
+          service: fleet_disk
+        annotations:
+          summary: "No fe-runs janitor metrics from docker-runtime-lv3"
+          description: "/var/lib/prometheus/node-exporter/fe_runs_janitor.prom is missing on docker-runtime (VM 120): the timer is not installed or has never succeeded (config/0mcp/docker-runtime/fe-runs-janitor/install.sh)."
+          runbook_url: docs/runbooks/docker-runtime-disk-pressure.md
+
   # Added 2026-10-13. The own-pbs datastore (/mnt/pbs-datastore, ext4 on its own virtual disk) holds every fleet's backups:
   # when it fills, all backups fail. The series comes from the own-pbs node_exporter, whose Debian default
   # --collector.filesystem.mount-points-exclude hides /mnt (inventory/fleet-observability.yml overrides it for 0own_pbs).

@@ -1,0 +1,389 @@
+# promtool unit tests for config/prometheus/rules/agent-history.yml (run by tests/test_agent_history_rules.py when promtool is installed; written 2026-10-28, ADR 0494).
+# The series are what the guest's metrics bridge and canary scan write into the node exporter textfile directory, with the node exporter's own job and instance labels.
+# exp_annotations are the fully rendered text: when an annotation changes, run `promtool test rules` and copy the "got" text from its failure output.
+# The data-disk, canary and backup tests use 1-minute samples because their `for:` (hours) must not be broken by the 5-minute staleness of a sparser series.
+rule_files:
+  - ../../config/prometheus/rules/agent-history.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: "the store answers its metrics: nothing; it stops answering: down after ten minutes"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_scrape_success{instance="agent-history-lv3:9100",job="node"}'
+        values: "1x20 0+0x30"
+    alert_rule_test:
+      - {eval_time: 15m, alertname: AgentHistoryStoreDown, exp_alerts: []}
+      - {eval_time: 25m, alertname: AgentHistoryStoreDown, exp_alerts: []}
+      - eval_time: 35m
+        alertname: AgentHistoryStoreDown
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history", "instance": "agent-history-lv3:9100", "job": "node"}
+            exp_annotations: {"description": "The bridge on the agent-history guest could not read the store's /metrics for 10 minutes. The collectors on the laptops spool and nothing is lost, but nothing is stored. After a reboot of the guest the data volume is locked until the owner runs agent-history-unlock; otherwise look at `docker ps` and `docker logs agent-history-store` on the guest (the logs hold metadata only).", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "The agent-history store does not answer its metrics endpoint"}
+
+  - name: "a fresh textfile is quiet, a textfile that stopped being written is stale after five minutes"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_scrape_timestamp_seconds{instance="agent-history-lv3:9100",job="node"}'
+        values: "100x60"
+    alert_rule_test:
+      - {eval_time: 5m, alertname: AgentHistoryMetricsStale, exp_alerts: []}
+      - eval_time: 20m
+        alertname: AgentHistoryMetricsStale
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history", "instance": "agent-history-lv3:9100", "job": "node"}
+            exp_annotations: {"description": "agent_history.prom on the agent-history guest is 18m 20s old, so every agent-history alert is blind. Check `systemctl status agent-history-metrics.timer` and the node exporter's textfile directory on the guest.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "The agent-history metrics bridge has not written for over 5 minutes"}
+
+  - name: "a bridge that keeps writing never goes stale"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_scrape_timestamp_seconds{instance="agent-history-lv3:9100",job="node"}'
+        values: "0+60x60"
+    alert_rule_test:
+      - {eval_time: 30m, alertname: AgentHistoryMetricsStale, exp_alerts: []}
+
+  - name: "ingest lag: events an hour old raise the warning, events that arrive at once do not"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="1"}'
+        values: "0+0x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="5"}'
+        values: "0+0x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="30"}'
+        values: "0+0x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="120"}'
+        values: "0+0x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="600"}'
+        values: "0+0x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="3600"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="21600"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="86400"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="604800"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="+Inf"}'
+        values: "0+10x120"
+    alert_rule_test:
+      - {eval_time: 20m, alertname: AgentHistoryIngestLagHigh, exp_alerts: []}
+      - eval_time: 1h15m
+        alertname: AgentHistoryIngestLagHigh
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history"}
+            exp_annotations: {"description": "The 95th percentile of received-minus-event-time is 57m 30s over 30 minutes. Expected while a laptop backfills history (a 30-day backfill is old events by design); otherwise a collector is behind or a laptop was asleep and has caught up. Compare agent_history_spool_depth per host.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "agent-history events reach the store more than 10 minutes after they happened"}
+
+  - name: "ingest lag stays quiet when events arrive within a second"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="1"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="5"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="30"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="120"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="600"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="3600"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="21600"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="86400"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="604800"}'
+        values: "0+10x120"
+      - series: 'agent_history_ingest_lag_seconds_bucket{job="node",le="+Inf"}'
+        values: "0+10x120"
+    alert_rule_test:
+      - {eval_time: 1h15m, alertname: AgentHistoryIngestLagHigh, exp_alerts: []}
+
+  - name: "a spool of more than twenty batches for half an hour, per host"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_spool_depth{host="mac14",job="node"}'
+        values: "5x10 30x80"
+      - series: 'agent_history_spool_depth{host="imac",job="node"}'
+        values: "5x90"
+    alert_rule_test:
+      - {eval_time: 20m, alertname: AgentHistorySpoolDepthHigh, exp_alerts: []}
+      - eval_time: 1h
+        alertname: AgentHistorySpoolDepthHigh
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history", "host": "mac14"}
+            exp_annotations: {"description": "The collector on mac14 reported 30 batches waiting (500 events each) at its last delivery, for 30 minutes. It stops reading new data at 256 MiB, so a long outage leaves the files untouched, not lost. Check the store, the tailnet path and the collector's `agent-tail status` on that laptop.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "The agent-tail spool on mac14 holds more than 20 undelivered batches"}
+
+  - name: "a collector silent for more than two days (and a chatty one is ignored)"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_collector_last_seen_seconds{host="mac14",job="node"}'
+        values: "170000+60x600"
+      - series: 'agent_history_collector_last_seen_seconds{host="imac",job="node"}'
+        values: "1000+60x600"
+    alert_rule_test:
+      - {eval_time: 30m, alertname: AgentHistoryCollectorSilent, exp_alerts: []}
+      - eval_time: 3h
+        alertname: AgentHistoryCollectorSilent
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history", "host": "mac14", "job": "node"}
+            exp_annotations: {"description": "The store last heard from the collector on mac14 2d 2h 13m 20s ago (a heartbeat counts). Laptops sleep, so the limit is two days, not minutes. Check that the launchd job is loaded, the write token is still valid (a 401 halts the collector until it is restarted) and the laptop reaches the tailnet.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "No agent-history collector batch from mac14 for 48 hours"}
+
+  - name: "a rise of the store's redaction counter warns at once; a flat counter does not"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_redactions_total{host="mac14",rule="github-token",job="node"}'
+        values: "0+0x10 3x50"
+      - series: 'agent_history_redactions_total{host="imac",rule="github-token",job="node"}'
+        values: "5x60"
+    alert_rule_test:
+      - {eval_time: 5m, alertname: AgentHistoryRedactionHit, exp_alerts: []}
+      - eval_time: 15m
+        alertname: AgentHistoryRedactionHit
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history", "host": "mac14", "rule": "github-token", "job": "node"}
+            exp_annotations: {"description": "A collector let something through that the store's second pass recognised (rule github-token, host mac14). If it is a real secret, rotate it; the redacted copy is what is stored, but the laptop's transcript still holds it. Update the collector's agent-redact version on that host.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "The store's own redaction pass replaced a secret from mac14 (rule github-token)"}
+
+  - name: "queries that take a couple of seconds raise the slow-query warning, quick ones do not"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.005"}'
+        values: "0+0x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.01"}'
+        values: "0+0x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.025"}'
+        values: "0+0x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.05"}'
+        values: "0+0x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.1"}'
+        values: "0+0x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.25"}'
+        values: "0+0x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.5"}'
+        values: "0+0x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="1"}'
+        values: "0+0x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="2.5"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="5"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="10"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="+Inf"}'
+        values: "0+10x120"
+    alert_rule_test:
+      - {eval_time: 10m, alertname: AgentHistoryQuerySlow, exp_alerts: []}
+      - eval_time: 40m
+        alertname: AgentHistoryQuerySlow
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history"}
+            exp_annotations: {"description": "p95 of agent_history_query_seconds is 2.425s over 10 minutes (the specification's target is 1 second). Likely a cold page cache after a restart, an ingest burst competing for the disk, or an index that no longer fits in memory; see `agent_history_query_seconds` per mode.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "agent-history read requests take more than a second at the 95th percentile"}
+
+  - name: "quick queries stay quiet"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.005"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.01"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.025"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.05"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.1"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.25"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="0.5"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="1"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="2.5"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="5"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="10"}'
+        values: "0+10x120"
+      - series: 'agent_history_query_seconds_bucket{job="node",mode="exact",le="+Inf"}'
+        values: "0+10x120"
+    alert_rule_test:
+      - {eval_time: 40m, alertname: AgentHistoryQuerySlow, exp_alerts: []}
+
+  - name: "parse errors from a new CLI version are informational; a flat counter is quiet"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_parse_errors_total{agent="claude",agent_version="9.9",job="node"}'
+        values: "0+0x10 2x50"
+      - series: 'agent_history_parse_errors_total{agent="codex",agent_version="1.0",job="node"}'
+        values: "3x60"
+    alert_rule_test:
+      - {eval_time: 5m, alertname: AgentHistoryParseErrors, exp_alerts: []}
+      - eval_time: 15m
+        alertname: AgentHistoryParseErrors
+        exp_alerts:
+          - exp_labels: {"severity": "info", "service": "agent_history", "agent": "claude", "agent_version": "9.9"}
+            exp_annotations: {"description": "Validation refused lines in the last hour. A new agent_version with errors is the sign that a coding agent CLI changed its transcript format; the collector's parser needs updating.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "agent-history refused lines from claude 9.9"}
+
+  - name: "rejected ingest lines are informational"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_rejected_lines_total{host="mac14",job="node"}'
+        values: "0+0x10 4x50"
+    alert_rule_test:
+      - {eval_time: 5m, alertname: AgentHistoryRejectedLines, exp_alerts: []}
+      - eval_time: 15m
+        alertname: AgentHistoryRejectedLines
+        exp_alerts:
+          - exp_labels: {"severity": "info", "service": "agent_history", "host": "mac14"}
+            exp_annotations: {"description": "The store refused lines from mac14 in the last hour (too large, a timestamp outside the accepted window, an exit code that does not fit). The collector files them in its quarantine with the store's reason.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "agent-history refused ingest lines from mac14"}
+
+  - name: "a laptop clock more than five minutes off, ahead or behind, for half an hour"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_clock_skew_seconds{host="mac14",job="node"}'
+        values: "-400x120"
+      - series: 'agent_history_clock_skew_seconds{host="imac",job="node"}'
+        values: "10x120"
+    alert_rule_test:
+      - {eval_time: 20m, alertname: AgentHistoryClockSkew, exp_alerts: []}
+      - eval_time: 45m
+        alertname: AgentHistoryClockSkew
+        exp_alerts:
+          - exp_labels: {"severity": "info", "service": "agent_history", "host": "mac14", "job": "node"}
+            exp_annotations: {"description": "Collector clock minus store clock was 6m 40s at the last batch from mac14. Event times from that laptop sort wrongly in timelines until its clock is corrected.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "The clock of mac14 differs from the agent-history store by more than 5 minutes"}
+
+  - name: "a leak found by the canary scan warns at once; a clean scan does not"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_canary_leaks{host="canary-mac14",source="dbscan"}'
+        values: "0+0x10 2x10"
+      - series: 'agent_history_canary_leaks{host="canary-imac",source="dbscan"}'
+        values: "0+0x20"
+    alert_rule_test:
+      - {eval_time: 5m, alertname: AgentHistoryCanaryLeak, exp_alerts: []}
+      - eval_time: 15m
+        alertname: AgentHistoryCanaryLeak
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history", "host": "canary-mac14", "source": "dbscan"}
+            exp_annotations: {"description": "The last canary scan found 2 place(s) where a fake secret survived redaction (host canary-mac14). Real secrets of the same shapes reach the store the same way: stop the collectors that run the old redaction version, fix the rule, purge the canary rows, and rotate anything that matched in real history. This is a warning by the owner's decision of 2026-10-29 (question 16: no paging, including for a leak), so nobody is paged: read the warning topic.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "A redaction canary secret was found in the agent-history store"}
+
+  - name: "a canary that never passed is stale after 36 hours plus an hour"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_canary_last_success_timestamp_seconds{host="canary-mac14",source="dbscan"}'
+        values: "0+0x2700"
+    alert_rule_test:
+      - {eval_time: 1d6h, alertname: AgentHistoryCanaryStale, exp_alerts: []}
+      - eval_time: 1d16h
+        alertname: AgentHistoryCanaryStale
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history", "host": "canary-mac14", "source": "dbscan"}
+            exp_annotations: {"description": "The last scan that found the canary in the store and no leak was 1d 16h 0m 0s ago (0 means it never passed). The canary stopped being delivered, the scan could not run, or it keeps finding nothing (exit code 3 in agent_history_canary_last_exit_code). Until it passes, a redaction regression would go unseen.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "The agent-history redaction canary has not passed for 36 hours"}
+
+  - name: "a canary that passes every night is never stale"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_canary_last_success_timestamp_seconds{host="canary-mac14",source="dbscan"}'
+        values: "0+60x2700"
+    alert_rule_test:
+      - {eval_time: 1d16h, alertname: AgentHistoryCanaryStale, exp_alerts: []}
+
+  - name: "a store that is scraped for a day with no canary series at all raises the missing-canary note"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_scrape_success{instance="agent-history-lv3:9100",job="node"}'
+        values: "1x2700"
+    alert_rule_test:
+      - {eval_time: 12h, alertname: AgentHistoryCanaryMissing, exp_alerts: []}
+      - eval_time: 1d6h
+        alertname: AgentHistoryCanaryMissing
+        exp_alerts:
+          - exp_labels: {"severity": "info", "service": "agent_history"}
+            exp_annotations: {"description": "No agent_history_canary_* series exists on the agent-history guest. The nightly scan (agent_history_canary_scan_enabled) needs the SQL file from agent-eval's scripts/dbscan; the second laptop should not be trusted before it runs.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "The agent-history store is up but no redaction canary scan has ever reported"}
+
+  - name: "no missing-canary note while the canary reports, or while the store is not scraped"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_scrape_success{instance="agent-history-lv3:9100",job="node"}'
+        values: "1x2700"
+      - series: 'agent_history_canary_last_success_timestamp_seconds{host="canary-mac14",source="dbscan"}'
+        values: "0+60x2700"
+    alert_rule_test:
+      - {eval_time: 1d6h, alertname: AgentHistoryCanaryMissing, exp_alerts: []}
+
+  - name: "no missing-canary note when nothing about the store is scraped (the guest does not exist yet)"
+    interval: 1m
+    input_series:
+      - series: 'up{job="node"}'
+        values: "1x2700"
+    alert_rule_test:
+      - {eval_time: 1d6h, alertname: AgentHistoryCanaryMissing, exp_alerts: []}
+
+  - name: "a data volume with 15 percent free warns after half an hour; the root filesystem is not this alert"
+    interval: 1m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{instance="agent-history-lv3:9100",job="node",device="/dev/mapper/agent-history-data",fstype="ext4",mountpoint="/srv/agent-history"}'
+        values: "15x120"
+      - series: 'node_filesystem_size_bytes{instance="agent-history-lv3:9100",job="node",device="/dev/mapper/agent-history-data",fstype="ext4",mountpoint="/srv/agent-history"}'
+        values: "100x120"
+      - series: 'node_filesystem_avail_bytes{instance="agent-history-lv3:9100",job="node",device="/dev/sda1",fstype="ext4",mountpoint="/"}'
+        values: "5x120"
+      - series: 'node_filesystem_size_bytes{instance="agent-history-lv3:9100",job="node",device="/dev/sda1",fstype="ext4",mountpoint="/"}'
+        values: "100x120"
+    alert_rule_test:
+      - {eval_time: 20m, alertname: AgentHistoryDataDiskLow, exp_alerts: []}
+      - eval_time: 45m
+        alertname: AgentHistoryDataDiskLow
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history", "instance": "agent-history-lv3:9100", "job": "node", "device": "/dev/mapper/agent-history-data", "fstype": "ext4", "mountpoint": "/srv/agent-history"}
+            exp_annotations: {"description": "15% of the encrypted data volume is free. Postgres and its WAL live there. Grow it online (qm resize 155 scsi1 +64G, cryptsetup resize, resize2fs) before it fills; the plan is to resize at 70% used.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "The agent-history data volume has less than 20% free"}
+
+  - name: "a data volume that is 50 percent free and flat stays quiet"
+    interval: 1m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{instance="agent-history-lv3:9100",job="node",device="/dev/mapper/agent-history-data",fstype="ext4",mountpoint="/srv/agent-history"}'
+        values: "50x500"
+      - series: 'node_filesystem_size_bytes{instance="agent-history-lv3:9100",job="node",device="/dev/mapper/agent-history-data",fstype="ext4",mountpoint="/srv/agent-history"}'
+        values: "100x500"
+    alert_rule_test:
+      - {eval_time: 6h40m, alertname: AgentHistoryDataDiskLow, exp_alerts: []}
+      - {eval_time: 6h40m, alertname: AgentHistoryDataDiskFillingFast, exp_alerts: []}
+
+  - name: "a data volume losing 30 GB an hour is on course to fill within 14 days"
+    interval: 1m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{instance="agent-history-lv3:9100",job="node",device="/dev/mapper/agent-history-data",fstype="ext4",mountpoint="/srv/agent-history"}'
+        values: "130000000000-500000000x240"
+    alert_rule_test:
+      - {eval_time: 20m, alertname: AgentHistoryDataDiskFillingFast, exp_alerts: []}
+      - eval_time: 1h30m
+        alertname: AgentHistoryDataDiskFillingFast
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history", "instance": "agent-history-lv3:9100", "job": "node", "device": "/dev/mapper/agent-history-data", "fstype": "ext4", "mountpoint": "/srv/agent-history"}
+            exp_annotations: {"description": "At the last 6 hours' rate the encrypted data volume runs out of space inside two weeks. A backfill from a laptop is a one-off burst and looks like this too: check `agent_history_events_ingested_total` before resizing.", "runbook_url": "docs/runbooks/configure-agent-history.md", "summary": "The agent-history data volume is on course to fill within 14 days"}
+
+  - name: "a guest scraped for 36 hours with no PBS group vm/155 raises the missing-backup warning; the other groups do not hide it"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_scrape_timestamp_seconds{instance="agent-history-lv3:9100",job="node"}'
+        values: "100x4000"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{namespace="",backup_type="vm",backup_id="130"}'
+        values: "0+60x4000"
+    alert_rule_test:
+      - {eval_time: 1d6h, alertname: AgentHistoryBackupMissing, exp_alerts: []}
+      - eval_time: 1d16h
+        alertname: AgentHistoryBackupMissing
+        exp_alerts:
+          - exp_labels: {"severity": "warning", "service": "agent_history", "backup_id": "155", "backup_type": "vm"}
+            exp_annotations: {"description": "The guest has reported metrics for 36 hours but PBS has no backup group vm/155. Check that the nightly job fleet-nightly-0mcp covers it (`all 1`), the guest agent answers (`qm agent 155 ping`), and, with the owner's approval, take the first snapshot by hand. Without one no stale-backup alert can ever fire.", "runbook_url": "docs/runbooks/pbs-0own-backups.md", "summary": "No PBS snapshot of the agent-history guest (vm/155) exists"}
+
+  - name: "no missing-backup warning once the group exists"
+    interval: 1m
+    input_series:
+      - series: 'agent_history_scrape_timestamp_seconds{instance="agent-history-lv3:9100",job="node"}'
+        values: "100x4000"
+      - series: 'pbs_backup_group_last_snapshot_timestamp_seconds{namespace="",backup_type="vm",backup_id="155"}'
+        values: "0+60x4000"
+    alert_rule_test:
+      - {eval_time: 1d16h, alertname: AgentHistoryBackupMissing, exp_alerts: []}

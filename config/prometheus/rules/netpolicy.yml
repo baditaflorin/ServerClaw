@@ -1,0 +1,76 @@
+# Added 2026-10-18. Alerts for the network policy drift check (scripts/netpolicy.py drift, run on the builder CT108 by
+# netpolicy-drift.timer every 30 minutes, metrics in the node exporter textfile netpolicy_<hypervisor>.prom). The policy file
+# config/network-policy/<hypervisor>.yaml is the one place the allowed flows of the VMs are decided; these alerts say when a host
+# stopped matching it (a hand edit, or a merged change that was not applied) or when the check itself stopped looking.
+#
+# Two failure shapes need two alerts, as for the other loops: when the series exists but its timestamp is old the check stopped
+# running (`NetpolicySilent`); when the series is gone (target down, file unreadable) a staleness expression returns nothing and would
+# resolve by itself, so `absent()` covers it (`NetpolicyNotReporting`). The builder is stopped for about 10 minutes each night by its
+# vzdump job; every `for:` below outlasts that, and the 3 hours exceed six runs of the 30 minute timer.
+groups:
+  - name: netpolicy
+    rules:
+      - alert: NetpolicyDrift
+        expr: netpolicy_vm_in_sync == 0
+        for: 1h
+        labels:
+          severity: warning
+          service: netpolicy
+        annotations:
+          summary: "Network policy drift on VM {{ $labels.vm }} of {{ $labels.hypervisor }}"
+          description: >-
+            The live firewall rules of VM {{ $labels.vm }} on {{ $labels.hypervisor }} have differed from config/network-policy/{{ $labels.hypervisor }}.yaml
+            for more than an hour: a hand edit on a host, or a merged change that was not applied. Run
+            `python3 scripts/netpolicy.py drift --policy config/network-policy/{{ $labels.hypervisor }}.yaml --live` for the list per layer
+            (pve, input, forward, docker_user). Fix the host or the file; do not leave the difference.
+          runbook_url: docs/runbooks/network-policy.md
+      - alert: NetpolicySilent
+        expr: (time() - netpolicy_last_run_timestamp_seconds) > 3 * 3600
+        for: 10m
+        labels:
+          severity: warning
+          service: netpolicy
+        annotations:
+          summary: "The network policy drift check of {{ $labels.hypervisor }} has not run for 3 hours"
+          description: >-
+            netpolicy_last_run_timestamp_seconds is old: netpolicy-drift.timer on CT108 stopped, or the run fails before it writes its metrics
+            (`systemctl status netpolicy-drift.service`, `scripts/netpolicy-install.sh --status`).
+          runbook_url: docs/runbooks/network-policy.md
+      - alert: NetpolicyNotReporting
+        expr: absent(netpolicy_last_run_timestamp_seconds)
+        for: 3h
+        labels:
+          severity: warning
+          service: netpolicy
+        annotations:
+          summary: "No network policy drift metrics at all"
+          description: >-
+            No netpolicy_last_run_timestamp_seconds series for 3 hours: the builder's node exporter textfile is not scraped, the
+            file netpolicy_<hypervisor>.prom is missing, or the job was never installed (`scripts/netpolicy-install.sh --enable`).
+          runbook_url: docs/runbooks/network-policy.md
+      - alert: NetpolicyCannotLook
+        expr: netpolicy_could_not_look == 1
+        for: 2h
+        labels:
+          severity: warning
+          service: netpolicy
+        annotations:
+          summary: "The network policy check cannot read {{ $labels.hypervisor }}"
+          description: >-
+            For 2 hours the drift check could not read the live state of {{ $labels.hypervisor }} (the ssh alias in `collect.ssh` of the policy
+            file, the Proxmox guest agent, or the fetch of the policy from git). An unreadable host is never reported as in sync, so
+            until this clears nothing is being compared.
+          runbook_url: docs/runbooks/network-policy.md
+      - alert: NetpolicyUnmodelledRules
+        expr: netpolicy_unparsed_lines > 0
+        for: 1h
+        labels:
+          severity: warning
+          service: netpolicy
+        annotations:
+          summary: "VM {{ $labels.vm }} of {{ $labels.hypervisor }} has firewall rules the policy tool does not model"
+          description: >-
+            {{ $value }} live rule line(s) on VM {{ $labels.vm }} are outside what scripts/netpolicy.py understands (a DROP rule, an OUT rule,
+            a new macro or nft shape). The policy is blind to them: extend the tool and the file, or remove the rule. See the
+            `not modelled` lines of `netpolicy.py drift`.
+          runbook_url: docs/runbooks/network-policy.md

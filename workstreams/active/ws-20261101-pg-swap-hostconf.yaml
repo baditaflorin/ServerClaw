@@ -1,0 +1,67 @@
+id: ws-20261101-pg-swap-hostconf
+adr: "0494"
+title: "infer-pg-primary (VM701): the swap sysctl of the 2026-10-31 swapfile is a managed hostconf file, so a rebuilt VM and a drift check keep vm.swappiness at 10"
+status: in_progress
+ready_to_merge: false
+live_applied: true
+owner: claude
+branch: claude/hostconf-pg-swap
+worktree_path: .claude/worktrees/hostconf-pg-swap
+doc: docs/workstreams/ws-20261101-pg-swap-hostconf.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - config/hostconf/files/sysctl-pg-swap.infer-pg-primary.conf
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261101-pg-swap-hostconf.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261101-pg-swap-hostconf.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261101_pg_swap_hostconf_tracking
+      paths:
+        - docs/workstreams/ws-20261101-pg-swap-hostconf.md
+      mode: exclusive
+    - id: hostconf_pg_swap_file
+      paths:
+        - config/hostconf/files/sysctl-pg-swap.infer-pg-primary.conf
+      mode: exclusive
+    - id: hostconf_manifest
+      paths:
+        - config/hostconf/hostconf.yaml
+        - config/hostconf/README.md
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261101-pg-swap-hostconf.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "hostconf manages /etc/sysctl.d/91-pg-swap.conf (vm.swappiness = 10) on infer-pg-primary, the sysctl that went with the 16 GiB swapfile of 2026-10-31; drift reports it, the entry documents the swapfile rebuild commands"
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  On 2026-10-31 13:27Z VM701 (the production DomainScope Postgres) got a 16 GiB swapfile on its root disk and /etc/sysctl.d/91-pg-swap.conf with vm.swappiness = 10, by hand,
+  after the 01:25Z global OOM. The file existed on the host and nowhere else, which is what hostconf exists to prevent. The manifest now lists it with the effective setting
+  (sysctl vm.swappiness = 10); the live file was read before the entry was written and `hostconf.py drift --host infer-pg-primary` reports it in sync (live_applied is true: nothing
+  needs applying).
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Add config/hostconf/files/sysctl-pg-swap.infer-pg-primary.conf, the manifest entry and the host's file list, and the README line (65 catalog files)
+    status: completed
+  - id: t3
+    title: Run the hostconf tests and the live read-only drift check, pass the pre-push gate on the build server, open the pull request and land it with fleet-ship
+    status: in_progress

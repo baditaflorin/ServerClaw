@@ -1,0 +1,254 @@
+# Added 2026-10-28 (ADR 0494). Alerts for the agent-history store (agent-store, Postgres 17 with pgvector) on its dedicated guest (VM 155).
+#
+# Where the series come from: the guest's metrics bridge (agent-history-metrics.timer, every 60 seconds) reads the store's /metrics on loopback with the
+# metrics-only token and writes it, plus agent_history_scrape_success and agent_history_scrape_timestamp_seconds, into the node exporter textfile directory.
+# The nightly canary database scan (agent-history-canary-scan.timer, off until the owner delivers its SQL file) writes agent_history_canary_*. The laptops are
+# not scraped: each ingest batch carries the collector's spool depth and clock, and the store re-exports them per host. The names are the store's own (agent-store
+# internal/metrics/metrics.go) and agent-eval's (internal/canary/metrics.go); the ingest-lag and query histograms are histograms, so they are read with
+# histogram_quantile, not compared as numbers.
+#
+# Severity follows the repository's three levels. Question 16 (alert routing) was answered by the owner on 2026-10-29: warning only, no paging, including for a canary
+# leak. So every alert below is `warning` or `info` and none is `critical`. info alerts are dropped by Alertmanager (they are visible in Prometheus only).
+# AgentHistoryCanaryLeak (a secret survived redaction: rotate it) and AgentHistoryRedactionHit (the store's own second pass caught something a collector let through)
+# are both `warning`.
+#
+# Not here, on purpose: backup AGE is judged by the generic PbsBackupGroupStale (26 hours) and PbsBackupGroupStaleCritical (50 hours) in
+# fleet-backup-freshness.yml, which cover vm/155 as soon as its first snapshot exists; AgentHistoryBackupMissing covers the gap they cannot (a group that never
+# got a first snapshot raises nothing). An audit-gap alert needs the read token, which the bridge does not hold. There is no blackbox probe: the monitoring guest
+# has no route to the loopback listener by design.
+groups:
+  - name: agent_history_store
+    rules:
+      - alert: AgentHistoryStoreDown
+        expr: |
+          agent_history_scrape_success == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "The agent-history store does not answer its metrics endpoint"
+          description: >-
+            The bridge on the agent-history guest could not read the store's /metrics for 10 minutes. The collectors on the laptops spool and nothing is lost, but
+            nothing is stored. After a reboot of the guest the data volume is locked until the owner runs agent-history-unlock; otherwise look at
+            `docker ps` and `docker logs agent-history-store` on the guest (the logs hold metadata only).
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryMetricsStale
+        expr: |
+          time() - agent_history_scrape_timestamp_seconds > 300
+        for: 5m
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "The agent-history metrics bridge has not written for over 5 minutes"
+          description: >-
+            agent_history.prom on the agent-history guest is {{ $value | humanizeDuration }} old, so every agent-history alert is blind. Check
+            `systemctl status agent-history-metrics.timer` and the node exporter's textfile directory on the guest.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryIngestLagHigh
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(agent_history_ingest_lag_seconds_bucket[30m]))) > 600
+        for: 30m
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "agent-history events reach the store more than 10 minutes after they happened"
+          description: >-
+            The 95th percentile of received-minus-event-time is {{ $value | humanizeDuration }} over 30 minutes. Expected while a laptop backfills
+            history (a 30-day backfill is old events by design); otherwise a collector is behind or a laptop was asleep and has caught up.
+            Compare agent_history_spool_depth per host.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistorySpoolDepthHigh
+        expr: |
+          max by (host) (agent_history_spool_depth) > 20
+        for: 30m
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "The agent-tail spool on {{ $labels.host }} holds more than 20 undelivered batches"
+          description: >-
+            The collector on {{ $labels.host }} reported {{ $value }} batches waiting (500 events each) at its last delivery, for 30 minutes. It stops reading new
+            data at 256 MiB, so a long outage leaves the files untouched, not lost. Check the store, the tailnet path and the collector's `agent-tail status` on that laptop.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryCollectorSilent
+        expr: |
+          agent_history_collector_last_seen_seconds > 172800
+        for: 1h
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "No agent-history collector batch from {{ $labels.host }} for 48 hours"
+          description: >-
+            The store last heard from the collector on {{ $labels.host }} {{ $value | humanizeDuration }} ago (a heartbeat counts). Laptops sleep, so the limit is two
+            days, not minutes. Check that the launchd job is loaded, the write token is still valid (a 401 halts the collector until it is restarted) and the laptop reaches the tailnet.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryRedactionHit
+        expr: |
+          increase(agent_history_redactions_total[1h]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "The store's own redaction pass replaced a secret from {{ $labels.host }} (rule {{ $labels.rule }})"
+          description: >-
+            A collector let something through that the store's second pass recognised (rule {{ $labels.rule }}, host {{ $labels.host }}). If it is a real secret,
+            rotate it; the redacted copy is what is stored, but the laptop's transcript still holds it. Update the collector's agent-redact version on that host.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryQuerySlow
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(agent_history_query_seconds_bucket[10m]))) > 1
+        for: 15m
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "agent-history read requests take more than a second at the 95th percentile"
+          description: >-
+            p95 of agent_history_query_seconds is {{ $value | humanizeDuration }} over 10 minutes (the specification's target is 1 second). Likely a cold page cache after a
+            restart, an ingest burst competing for the disk, or an index that no longer fits in memory; see `agent_history_query_seconds` per mode.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryParseErrors
+        expr: |
+          sum by (agent, agent_version) (increase(agent_history_parse_errors_total[1h])) > 0
+        for: 0m
+        labels:
+          severity: info
+          service: agent_history
+        annotations:
+          summary: "agent-history refused lines from {{ $labels.agent }} {{ $labels.agent_version }}"
+          description: >-
+            Validation refused lines in the last hour. A new agent_version with errors is the sign that a coding agent CLI changed its transcript format; the collector's parser needs updating.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryRejectedLines
+        expr: |
+          sum by (host) (increase(agent_history_rejected_lines_total[1h])) > 0
+        for: 0m
+        labels:
+          severity: info
+          service: agent_history
+        annotations:
+          summary: "agent-history refused ingest lines from {{ $labels.host }}"
+          description: >-
+            The store refused lines from {{ $labels.host }} in the last hour (too large, a timestamp outside the accepted window, an exit code that does not fit). The collector files them in its quarantine with the store's reason.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryClockSkew
+        expr: |
+          abs(agent_history_clock_skew_seconds) > 300
+        for: 30m
+        labels:
+          severity: info
+          service: agent_history
+        annotations:
+          summary: "The clock of {{ $labels.host }} differs from the agent-history store by more than 5 minutes"
+          description: >-
+            Collector clock minus store clock was {{ $value | humanizeDuration }} at the last batch from {{ $labels.host }}. Event times from that laptop sort wrongly in timelines until its clock is corrected.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+  - name: agent_history_redaction_canary
+    rules:
+      # The canary is a daily synthetic session of fake secrets (agent-eval). agent_history_canary_leaks counts the database places where one was found;
+      # an exit that could not look keeps the previous value, so not being able to look never clears an alarm.
+      - alert: AgentHistoryCanaryLeak
+        expr: |
+          agent_history_canary_leaks > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "A redaction canary secret was found in the agent-history store"
+          description: >-
+            The last canary scan found {{ $value }} place(s) where a fake secret survived redaction (host {{ $labels.host }}). Real secrets of the same shapes reach the store the same way: stop the
+            collectors that run the old redaction version, fix the rule, purge the canary rows, and rotate anything that matched in real history.
+            This is a warning by the owner's decision of 2026-10-29 (question 16: no paging, including for a leak), so nobody is paged: read the warning topic.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryCanaryStale
+        expr: |
+          time() - agent_history_canary_last_success_timestamp_seconds > 36 * 3600
+        for: 1h
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "The agent-history redaction canary has not passed for 36 hours"
+          description: >-
+            The last scan that found the canary in the store and no leak was {{ $value | humanizeDuration }} ago (0 means it never passed). The canary stopped being delivered, the scan
+            could not run, or it keeps finding nothing (exit code 3 in agent_history_canary_last_exit_code). Until it passes, a redaction regression would go unseen.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryCanaryMissing
+        expr: |
+          absent(agent_history_canary_last_success_timestamp_seconds) and on() (agent_history_scrape_success == 1)
+        for: 24h
+        labels:
+          severity: info
+          service: agent_history
+        annotations:
+          summary: "The agent-history store is up but no redaction canary scan has ever reported"
+          description: >-
+            No agent_history_canary_* series exists on the agent-history guest. The nightly scan (agent_history_canary_scan_enabled) needs the SQL file from agent-eval's scripts/dbscan; the second laptop
+            should not be trusted before it runs.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+  - name: agent_history_storage
+    rules:
+      - alert: AgentHistoryDataDiskLow
+        expr: |
+          node_filesystem_avail_bytes{mountpoint="/srv/agent-history",fstype!~"tmpfs|overlay|squashfs|ramfs"}
+            / node_filesystem_size_bytes{mountpoint="/srv/agent-history",fstype!~"tmpfs|overlay|squashfs|ramfs"} < 0.20
+        for: 30m
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "The agent-history data volume has less than 20% free"
+          description: >-
+            {{ $value | humanizePercentage }} of the encrypted data volume is free. Postgres and its WAL live there. Grow it online (qm resize 155 scsi1 +64G, cryptsetup resize, resize2fs)
+            before it fills; the plan is to resize at 70% used.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      - alert: AgentHistoryDataDiskFillingFast
+        expr: |
+          predict_linear(node_filesystem_avail_bytes{mountpoint="/srv/agent-history",fstype!~"tmpfs|overlay|squashfs|ramfs"}[6h], 14 * 86400) < 0
+        for: 30m
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "The agent-history data volume is on course to fill within 14 days"
+          description: >-
+            At the last 6 hours' rate the encrypted data volume runs out of space inside two weeks. A backfill from a laptop is a one-off burst and looks like this too: check
+            `agent_history_events_ingested_total` before resizing.
+          runbook_url: docs/runbooks/configure-agent-history.md
+
+      # A PBS group exists only after its first snapshot, so the generic stale alerts (fleet-backup-freshness.yml) can never fire for a guest that never got one.
+      # The store has been scraped for 36 hours straight and the group vm/155 still does not exist: the nightly job (02:00, all guests) did not cover it.
+      - alert: AgentHistoryBackupMissing
+        expr: |
+          absent(pbs_backup_group_last_snapshot_timestamp_seconds{namespace="", backup_type="vm", backup_id="155"})
+            and on() (agent_history_scrape_timestamp_seconds > 0)
+        for: 36h
+        labels:
+          severity: warning
+          service: agent_history
+        annotations:
+          summary: "No PBS snapshot of the agent-history guest (vm/155) exists"
+          description: >-
+            The guest has reported metrics for 36 hours but PBS has no backup group vm/155. Check that the nightly job fleet-nightly-0mcp covers it (`all 1`), the guest agent answers
+            (`qm agent 155 ping`), and, with the owner's approval, take the first snapshot by hand. Without one no stale-backup alert can ever fire.
+          runbook_url: docs/runbooks/pbs-0own-backups.md

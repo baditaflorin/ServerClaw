@@ -1,0 +1,897 @@
+# promtool unit tests for config/prometheus/rules/fleet-pool-routing.yml (run by tests/test_fleet_pool_routing_rules.py when promtool is installed).
+# The series are the balancer's per-pool numbers, one sample every 5 minutes (a sparser input than the 5 minute lookback would make the selectors vanish).
+rule_files:
+  - ../../config/prometheus/rules/fleet-pool-routing.yml
+
+evaluation_interval: 5m
+
+tests:
+  - name: eight pools that carry traffic and send under 5 percent of it to replicas their weights favour raise the alert after the delay, and clear when the traffic comes back
+    interval: 5m
+    input_series:
+      # fresh balancer file for the whole run (value = eval time in seconds)
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x400"
+      # the eight pools: healthy for 500 min (100 samples), then the replicas get nothing for 500 min, then healthy again
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="bad0",target="infer-runtime"}'
+        values: "62x100 0x100 62x200"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="bad0",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="bad1",target="infer-runtime"}'
+        values: "62x100 0x100 62x200"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="bad1",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="bad2",target="infer-runtime"}'
+        values: "62x100 0x100 62x200"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="bad2",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="bad3",target="infer-runtime"}'
+        values: "62x100 0x100 62x200"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="bad3",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="bad4",target="infer-runtime"}'
+        values: "62x100 0x100 62x200"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="bad4",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="bad5",target="infer-runtime"}'
+        values: "62x100 0x100 62x200"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="bad5",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="bad6",target="infer-runtime"}'
+        values: "62x100 0x100 62x200"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="bad6",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="bad7",target="infer-runtime"}'
+        values: "62x100 0x100 62x200"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="bad7",target="infer-runtime"}'
+        values: "60x400"
+      # four healthy pools all along: measured close to configured
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="ok0",target="infer-runtime"}'
+        values: "58x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="ok0",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="ok1",target="infer-runtime"}'
+        values: "58x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="ok1",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="ok2",target="infer-runtime"}'
+        values: "58x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="ok2",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="ok3",target="infer-runtime"}'
+        values: "58x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="ok3",target="infer-runtime"}'
+        values: "60x400"
+    alert_rule_test:
+      # healthy so far
+      - {eval_time: 400m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+      # the collapse starts at minute 505; 10 minutes later the 30 minute delay has not passed
+      - {eval_time: 515m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+      # 45 minutes into it: firing, with the number of pools in the text
+      - eval_time: 550m
+        alertname: FleetPoolReplicaShareCollapsed
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_pool_routing}
+            exp_annotations:
+              summary: "8 pools that carry traffic send under 5 % of it to their replicas although their weights give the replicas more than 30 %"
+              description: "The balancer measures, per pool, the share of requests each member took over the last hour and compares it with the share its weights give it. 8 pools whose weights send more than 30 % to replicas see under 5 % arrive there. The usual cause: the gateway's vhosts no longer route through their pool upstreams (a push of nginx-render from a host without the pools file; the pool balancer then says 'a render is pending'), or the replica hosts dropped out. Restore: on the builder run `fleet-runner nginx-render --exact-filter <the pooled services> --service-pools /root/fleet-state/service-pools.json` (read-only: how many files change), then the same with --push --reload."
+              runbook_url: docs/runbooks/pool-routing-collapse.md
+      # the traffic is back on the replicas from minute 1005: cleared
+      - {eval_time: 1030m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+
+  - name: five pools, a drained replica and healthy pools stay quiet
+    interval: 5m
+    input_series:
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x300"
+      # five pools with a zero measured share is the normal worst case (the alert needs more than five): quiet
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="few0",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="few0",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="few1",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="few1",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="few2",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="few2",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="few3",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="few3",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="few4",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="few4",target="infer-runtime"}'
+        values: "60x300"
+      # ten pools whose replica is drained (configured 10 %, under the 30 % line): quiet
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="drained0",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="drained0",target="infer-runtime"}'
+        values: "10x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="drained1",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="drained1",target="infer-runtime"}'
+        values: "10x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="drained2",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="drained2",target="infer-runtime"}'
+        values: "10x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="drained3",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="drained3",target="infer-runtime"}'
+        values: "10x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="drained4",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="drained4",target="infer-runtime"}'
+        values: "10x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="drained5",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="drained5",target="infer-runtime"}'
+        values: "10x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="drained6",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="drained6",target="infer-runtime"}'
+        values: "10x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="drained7",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="drained7",target="infer-runtime"}'
+        values: "10x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="drained8",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="drained8",target="infer-runtime"}'
+        values: "10x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="drained9",target="infer-runtime"}'
+        values: "0x300"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="drained9",target="infer-runtime"}'
+        values: "10x300"
+    alert_rule_test:
+      - {eval_time: 60m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+      - {eval_time: 200m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+
+  - name: a frozen balancer file does not raise the share alert (the silent alerts own that case)
+    interval: 5m
+    input_series:
+      # the last run was at minute 20 and nothing was written since: the file is older than 30 minutes from minute 50 on
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x4 1200x296"
+      # eight pools start to look collapsed at minute 20, exactly when the file freezes
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="frozen0",target="infer-runtime"}'
+        values: "62x4 0x296"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="frozen0",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="frozen1",target="infer-runtime"}'
+        values: "62x4 0x296"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="frozen1",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="frozen2",target="infer-runtime"}'
+        values: "62x4 0x296"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="frozen2",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="frozen3",target="infer-runtime"}'
+        values: "62x4 0x296"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="frozen3",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="frozen4",target="infer-runtime"}'
+        values: "62x4 0x296"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="frozen4",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="frozen5",target="infer-runtime"}'
+        values: "62x4 0x296"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="frozen5",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="frozen6",target="infer-runtime"}'
+        values: "62x4 0x296"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="frozen6",target="infer-runtime"}'
+        values: "60x300"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="frozen7",target="infer-runtime"}'
+        values: "62x4 0x296"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="frozen7",target="infer-runtime"}'
+        values: "60x300"
+    alert_rule_test:
+      # 25 minutes of the condition, the file is still fresh: pending, not firing
+      - {eval_time: 45m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+      # the file went stale before the delay was over; whatever it still says does not alert
+      - {eval_time: 100m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+      - {eval_time: 300m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+
+  - name: the pools that carry traffic come and go (the bulk scan ends and 120 of 133 pools stop reporting) and a healthy fleet stays quiet
+    interval: 5m
+    input_series:
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x400"
+      # 120 pools carry the scan's traffic for 10 hours (healthy: 60 % measured, 60 % configured), then they have no measured share any more (fewer than 20 requests in the window); their configured share stays
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan0",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan0",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan1",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan1",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan2",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan2",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan3",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan3",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan4",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan4",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan5",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan5",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan6",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan6",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan7",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan7",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan8",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan8",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan9",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan9",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan10",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan10",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan11",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan11",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan12",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan12",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan13",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan13",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan14",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan14",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan15",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan15",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan16",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan16",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan17",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan17",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan18",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan18",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan19",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan19",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan20",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan20",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan21",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan21",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan22",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan22",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan23",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan23",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan24",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan24",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan25",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan25",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan26",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan26",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan27",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan27",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan28",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan28",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan29",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan29",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan30",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan30",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan31",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan31",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan32",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan32",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan33",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan33",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan34",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan34",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan35",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan35",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan36",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan36",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan37",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan37",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan38",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan38",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan39",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan39",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan40",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan40",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan41",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan41",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan42",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan42",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan43",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan43",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan44",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan44",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan45",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan45",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan46",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan46",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan47",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan47",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan48",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan48",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan49",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan49",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan50",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan50",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan51",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan51",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan52",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan52",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan53",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan53",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan54",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan54",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan55",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan55",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan56",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan56",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan57",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan57",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan58",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan58",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan59",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan59",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan60",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan60",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan61",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan61",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan62",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan62",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan63",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan63",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan64",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan64",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan65",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan65",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan66",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan66",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan67",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan67",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan68",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan68",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan69",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan69",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan70",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan70",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan71",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan71",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan72",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan72",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan73",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan73",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan74",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan74",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan75",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan75",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan76",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan76",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan77",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan77",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan78",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan78",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan79",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan79",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan80",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan80",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan81",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan81",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan82",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan82",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan83",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan83",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan84",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan84",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan85",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan85",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan86",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan86",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan87",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan87",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan88",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan88",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan89",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan89",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan90",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan90",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan91",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan91",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan92",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan92",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan93",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan93",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan94",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan94",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan95",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan95",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan96",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan96",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan97",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan97",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan98",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan98",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan99",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan99",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan100",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan100",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan101",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan101",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan102",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan102",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan103",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan103",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan104",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan104",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan105",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan105",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan106",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan106",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan107",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan107",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan108",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan108",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan109",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan109",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan110",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan110",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan111",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan111",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan112",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan112",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan113",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan113",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan114",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan114",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan115",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan115",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan116",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan116",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan117",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan117",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan118",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan118",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="scan119",target="infer-runtime"}'
+        values: "60x120 _x280"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="scan119",target="infer-runtime"}'
+        values: "60x400"
+      # 10 pools keep reporting at a low but healthy share (20 % measured against 60 % configured): the average of the measured shares falls from 55 to 15, which is what raised the false alarm of the first version
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="steady0",target="infer-runtime"}'
+        values: "20x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="steady0",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="steady1",target="infer-runtime"}'
+        values: "20x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="steady1",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="steady2",target="infer-runtime"}'
+        values: "20x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="steady2",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="steady3",target="infer-runtime"}'
+        values: "20x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="steady3",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="steady4",target="infer-runtime"}'
+        values: "20x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="steady4",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="steady5",target="infer-runtime"}'
+        values: "20x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="steady5",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="steady6",target="infer-runtime"}'
+        values: "20x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="steady6",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="steady7",target="infer-runtime"}'
+        values: "20x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="steady7",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="steady8",target="infer-runtime"}'
+        values: "20x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="steady8",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="steady9",target="infer-runtime"}'
+        values: "20x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="steady9",target="infer-runtime"}'
+        values: "60x400"
+      # 3 pools in the normal baseline (a replica that gets nothing): the count stays far under the threshold of 5
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="quirk0",target="infer-runtime"}'
+        values: "0x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="quirk0",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="quirk1",target="infer-runtime"}'
+        values: "0x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="quirk1",target="infer-runtime"}'
+        values: "60x400"
+      - series: 'fleet_pool_balance_member_measured_share_pct{job="node_exporter",service="quirk2",target="infer-runtime"}'
+        values: "0x400"
+      - series: 'fleet_pool_balance_member_configured_share_pct{job="node_exporter",service="quirk2",target="infer-runtime"}'
+        values: "60x400"
+    alert_rule_test:
+      - {eval_time: 300m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+      # 100 minutes after the scan pools stopped reporting, and the next day
+      - {eval_time: 700m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+      - {eval_time: 1500m, alertname: FleetPoolReplicaShareCollapsed, exp_alerts: []}
+
+  - name: a balancer that has many proposals and applies none for two hours raises the stuck alert, in no other state
+    interval: 5m
+    input_series:
+      # run timestamps that keep up with the clock (value = eval time in seconds): the balancer runs and writes its file
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x300"
+      - series: 'fleet_pool_balance_apply_enabled{job="node_exporter"}'
+        values: "1x300"
+      # 3 h of 200 pending proposals with nothing applied (the 2026-10-22 shape), then the restore: 40 applied per run
+      - series: 'fleet_pool_balance_proposals_pending{job="node_exporter"}'
+        values: "5x24 200x36 74x240"
+      - series: 'fleet_pool_balance_applied{job="node_exporter"}'
+        values: "0x60 40x240"
+    alert_rule_test:
+      # 100 min after the stuck state began (at 120 min): nothing yet
+      - {eval_time: 200m, alertname: FleetPoolBalanceStuck, exp_alerts: []}
+      # 120 min of the condition have passed at 240 min: it fires
+      - eval_time: 250m
+        alertname: FleetPoolBalanceStuck
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_pool_routing}
+            exp_annotations:
+              summary: "The pool balancer has 200 routing proposals and has applied none for 2 hours"
+              description: "Apply is on and the balancer ran in the last 30 minutes, yet it applied nothing while more than 30 pools wait for a routing change. Usual causes: the gateway no longer matches what nginx-render renders for those pools ('a render is pending, left to whoever owns it' in /root/fleet-state/state/pool-guardian/events.jsonl, balance_skipped), a guard that refuses every pool (environment contract, cordon), or the load gate. Look at `grep balance_skipped /root/fleet-state/state/pool-guardian/events.jsonl | tail` on the builder, then run `fleet-runner nginx-render --service-pools /root/fleet-state/service-pools.json` (read-only) to see how many files differ."
+              runbook_url: docs/runbooks/pool-routing-collapse.md
+      # applying again (40 per run) while 74 proposals are still pending: quiet
+      - {eval_time: 400m, alertname: FleetPoolBalanceStuck, exp_alerts: []}
+      # the normal baseline of 5 pending never alerts
+      - {eval_time: 100m, alertname: FleetPoolBalanceStuck, exp_alerts: []}
+
+  - name: a frozen balancer file does not raise the stuck alert (the silent alerts own that case)
+    interval: 5m
+    input_series:
+      # the last run was at minute 100 and nothing was written since: the file keeps its last values
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x20 6000x280"
+      - series: 'fleet_pool_balance_apply_enabled{job="node_exporter"}'
+        values: "1x300"
+      - series: 'fleet_pool_balance_proposals_pending{job="node_exporter"}'
+        values: "200x300"
+      - series: 'fleet_pool_balance_applied{job="node_exporter"}'
+        values: "0x300"
+    alert_rule_test:
+      - {eval_time: 150m, alertname: FleetPoolBalanceStuck, exp_alerts: []}
+      - {eval_time: 300m, alertname: FleetPoolBalanceStuck, exp_alerts: []}
+
+  # FleetPoolBalanceEnvGuardHolding. fleet_pool_balance_skipped_env_contract is heavy-tailed per run: a quick batch run holds 1, a full planning run (one an hour here, the last sample
+  # of the hour) holds most pools. H = a full run held 200 of 282 (71 %, the 2026-10-24/25 freeze: 66-95 %), B = 90 (32 %, the standing level while infer-runtime is pressured, measured 2026-10-26 04-05Z), L = 7 (2 %).
+  - name: a guard that holds most pools in a full planning run, hour after hour, raises the alert at the sixth hour and clears three hours after the fix
+    interval: 5m
+    input_series:
+      - series: 'fleet_pool_balance_pools{job="node_exporter"}'
+        values: "282x131"
+      - series: 'fleet_pool_balance_apply_enabled{job="node_exporter"}'
+        values: "1x131"
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x131"
+      - series: 'fleet_pool_balance_skipped_env_contract{job="node_exporter"}'
+        values: "1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 7 1x10 7 1x10 7"
+    alert_rule_test:
+      # five hours over 40 %: not enough
+      - {eval_time: 330m, alertname: FleetPoolBalanceEnvGuardHolding, exp_alerts: []}
+      # the sixth hour: firing
+      - eval_time: 390m
+        alertname: FleetPoolBalanceEnvGuardHolding
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_pool_routing}
+            exp_annotations:
+              summary: "The pool balancer's environment contract guard held over 40 % of the pools in at least 6 of the last 8 hours"
+              description: "In a full planning run the guard left more than 40 % of the pools where they were because the copy that would gain traffic lacks environment variable names another copy of the pool has (or the copies could not be compared). Pools that cannot be balanced keep their old traffic split, so replica load stops being rebalanced although nothing is down. Usual cause: a fleet-wide environment change staged over days (a wave) that sets a variable on some copies of a pool before the others. Find the names in the balance_skipped events on the builder (runbook), then finish the wave, or, when the variable differs by design and a copy works without it, make the guard ignore it."
+              runbook_url: docs/runbooks/pool-routing-collapse.md
+      # the fix lands at hour 8; hours 2 to 7 are still over 40 % at 10 h 30 min (six of the last eight): still firing
+      - eval_time: 630m
+        alertname: FleetPoolBalanceEnvGuardHolding
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_pool_routing}
+            exp_annotations:
+              summary: "The pool balancer's environment contract guard held over 40 % of the pools in at least 6 of the last 8 hours"
+              description: "In a full planning run the guard left more than 40 % of the pools where they were because the copy that would gain traffic lacks environment variable names another copy of the pool has (or the copies could not be compared). Pools that cannot be balanced keep their old traffic split, so replica load stops being rebalanced although nothing is down. Usual cause: a fleet-wide environment change staged over days (a wave) that sets a variable on some copies of a pool before the others. Find the names in the balance_skipped events on the builder (runbook), then finish the wave, or, when the variable differs by design and a copy works without it, make the guard ignore it."
+              runbook_url: docs/runbooks/pool-routing-collapse.md
+      # at 11 h 30 min only five of the last eight hours are over 40 %: cleared
+      - {eval_time: 690m, alertname: FleetPoolBalanceEnvGuardHolding, exp_alerts: []}
+
+  - name: the standing number of held pools while a host is pressured (a third of them in a full run) stays quiet for ten hours
+    interval: 5m
+    input_series:
+      - series: 'fleet_pool_balance_pools{job="node_exporter"}'
+        values: "282x119"
+      - series: 'fleet_pool_balance_apply_enabled{job="node_exporter"}'
+        values: "1x119"
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x119"
+      - series: 'fleet_pool_balance_skipped_env_contract{job="node_exporter"}'
+        values: "1x10 90 1x10 90 1x10 90 1x10 90 1x10 90 1x10 90 1x10 90 1x10 90 1x10 90 1x10 90"
+    alert_rule_test:
+      - {eval_time: 390m, alertname: FleetPoolBalanceEnvGuardHolding, exp_alerts: []}
+      - {eval_time: 570m, alertname: FleetPoolBalanceEnvGuardHolding, exp_alerts: []}
+
+  - name: five hours over the line are not enough (it takes six of the last eight)
+    interval: 5m
+    input_series:
+      - series: 'fleet_pool_balance_pools{job="node_exporter"}'
+        values: "282x119"
+      - series: 'fleet_pool_balance_apply_enabled{job="node_exporter"}'
+        values: "1x119"
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x119"
+      - series: 'fleet_pool_balance_skipped_env_contract{job="node_exporter"}'
+        values: "1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 7 1x10 7 1x10 7 1x10 7 1x10 7"
+    alert_rule_test:
+      - {eval_time: 390m, alertname: FleetPoolBalanceEnvGuardHolding, exp_alerts: []}
+      - {eval_time: 570m, alertname: FleetPoolBalanceEnvGuardHolding, exp_alerts: []}
+
+  - name: a frozen balancer file does not raise it (the silent alerts own that case)
+    interval: 5m
+    input_series:
+      # the file stops being written after minute 300: from minute 330 on it is older than 30 minutes
+      - series: 'fleet_pool_balance_pools{job="node_exporter"}'
+        values: "282x119"
+      - series: 'fleet_pool_balance_apply_enabled{job="node_exporter"}'
+        values: "1x119"
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x60 18000x59"
+      - series: 'fleet_pool_balance_skipped_env_contract{job="node_exporter"}'
+        values: "1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200"
+    alert_rule_test:
+      - {eval_time: 570m, alertname: FleetPoolBalanceEnvGuardHolding, exp_alerts: []}
+
+  - name: a balancer that is not allowed to apply does not raise it
+    interval: 5m
+    input_series:
+      - series: 'fleet_pool_balance_pools{job="node_exporter"}'
+        values: "282x119"
+      - series: 'fleet_pool_balance_apply_enabled{job="node_exporter"}'
+        values: "0x119"
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x119"
+      - series: 'fleet_pool_balance_skipped_env_contract{job="node_exporter"}'
+        values: "1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200 1x10 200"
+    alert_rule_test:
+      - {eval_time: 570m, alertname: FleetPoolBalanceEnvGuardHolding, exp_alerts: []}
+
+  - name: a runner that does not publish the number stays quiet
+    interval: 5m
+    input_series:
+      - series: 'fleet_pool_balance_pools{job="node_exporter"}'
+        values: "282x119"
+      - series: 'fleet_pool_balance_apply_enabled{job="node_exporter"}'
+        values: "1x119"
+      - series: 'fleet_pool_balance_last_run_timestamp_seconds{job="node_exporter"}'
+        values: "0+300x119"
+    alert_rule_test:
+      - {eval_time: 570m, alertname: FleetPoolBalanceEnvGuardHolding, exp_alerts: []}

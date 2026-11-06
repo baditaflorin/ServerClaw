@@ -1,0 +1,68 @@
+groups:
+  - name: pve_storage_capacity
+    rules:
+      # Free space (percent) on each Proxmox VE storage pool, from the
+      # pve-exporter running on the hypervisor host itself (job="pve").
+      #
+      # Why a recording rule rather than inlining the expression in the
+      # alert: the same ratio is worth graphing for trend//runway purposes
+      # (this pool is the tightest resource on the fleet), and a named
+      # series makes the Grafana panel and the alert agree by construction
+      # instead of by copy-paste.
+      #
+      # pve_disk_usage_bytes / pve_disk_size_bytes carry identical label
+      # sets for a given storage id, so the default vector-matching (match
+      # on all labels) is correct here -- no on()/ignoring() needed, and
+      # notably NOT the on() form used in prometheus-capacity.yml, which is
+      # there only because those two sides have disjoint label sets.
+      #
+      # Cross-checked 2026-08-28 against `pvesm status` on the host:
+      # local = 69.43% used / 30.57% free -- this expression reproduced
+      # 30.572% exactly, so the metric source and the operator-visible
+      # number are the same number, not two independent estimates.
+      - record: fleet:pve_storage_free_percent
+        expr: |
+          (
+            1
+            - pve_disk_usage_bytes{job="pve_0docker_via_tailscale", id=~"storage/.*"}
+              / pve_disk_size_bytes{job="pve_0docker_via_tailscale", id=~"storage/.*"}
+          ) * 100
+
+  - name: pve_storage_capacity_alerts
+    rules:
+      # Headroom alert for the hypervisor's OWN pool (`local`, a dir
+      # storage on /dev/md3) -- the disk that backs every VM image on this
+      # host. When it fills, VMs stop being able to write and the failure
+      # is host-wide, not service-local, which is why this is worth an
+      # alert of its own rather than leaving it to per-VM node_exporter
+      # filesystem alerts.
+      #
+      # Deliberately scoped to `local` only. The other pve storage on this
+      # host is `backup-lv3`, a REMOTE PBS datastore -- its capacity is a
+      # backup-retention decision owned by the operator, not something this
+      # alert should page about, so it is excluded rather than silenced
+      # later.
+      #
+      # severity: warning routes to the mattermost-warning receiver (the
+      # Alertmanager default route). Intentionally not `critical`: disk
+      # growth here is slow-moving and this is an early-warning/trending
+      # signal, not a wake-someone-up event. Escalate to a second critical
+      # tier only once there is a real growth curve to tune against.
+      #
+      # for: 5m matches the "hourly check" intent -- with a 15s evaluation
+      # interval, requiring the condition to hold for a full hour filters
+      # out transient blips (a large restore, a temporary ISO upload)
+      # without meaningfully delaying a genuine fill-up.
+      #
+      # No spare local NVMe is present: the host currently has one NVMe
+      # member online in each RAID1 array. Do not assume an unregistered
+      # 1.8TB disk is available; verify lsblk and /proc/mdstat.
+      - alert: PveLocalStorageLowHeadroom
+        expr: fleet:pve_storage_free_percent{id=~"storage/.*/local"} < 15
+        for: 5m
+        labels:
+          severity: warning
+          service: pve_storage
+        annotations:
+          summary: "Proxmox `local` storage below 15% free on {{ $labels.host }}"
+          description: "PVE storage {{ $labels.id }} has been below 15% free for 1h (currently {{ $value | printf \"%.1f\" }}% free). This pool backs every VM image on the hypervisor; if it reaches 0 the failure is host-wide. Check `pvesm status` and per-VM disk growth. This is the Proxmox host filesystem; check df -h /, /proc/mdstat, and the CI admission controller."

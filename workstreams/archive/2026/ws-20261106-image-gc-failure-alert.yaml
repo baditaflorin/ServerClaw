@@ -1,0 +1,49 @@
+id: ws-20261106-image-gc-failure-alert
+title: Surface bounded image cleanup failures through existing monitoring
+status: merged
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: main
+worktree_path: tmp/pfs-image-gc-alert-20261106
+doc: docs/runbooks/fleet-image-gc-monitoring.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- .woodpecker.yml
+- config/prometheus/rules/fleet-image-gc.yml
+- config/prometheus/rules/fleet-postgres-unit.yml
+- collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+- collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus.yml.j2
+- docs/runbooks/fleet-image-gc-monitoring.md
+- tests/test_fleet_image_gc_rules.py
+- tests/test_monitoring_prometheus_codification.py
+- tests/test_fleet_postgres_unit_alert.py
+- tests/promtool/fleet_image_gc_rules_test.yml
+- tests/promtool/fleet_postgres_unit_rules_test.yml
+- workstreams/active/ws-20261106-image-gc-failure-alert.yaml
+summary: 'Loaded monitoring had no image-cleanup or generic failed-unit rule. Reuse
+  the working systemd collector and warning route for fleet-image-gc units. Registry-unavailable
+  nonzero refusals remain visible, while successful inactive oneshots and unrelated
+  failed units stay quiet. Expected-timer markers gate stale/missing-trigger checks
+  with three-hour boot/rollout grace. Real PostgreSQL exporter/Prometheus comparisons
+  also confirmed four existing cluster alerts were blind; preserve only their already-required
+  active bit.
+
+  '
+acceptance_criteria:
+- Promtool proves delayed failure, fresh success, inactive and unrelated-unit behavior.
+- Existing monitoring role deploys the rule.
+- Exact loaded rule is healthy and actual unit labels match its selector.
+- Missing/disabled timers alert only after intentional rollout and boot grace.
+notes:
+- Plane registration unavailable because this isolated checkout has no local Plane
+  authentication file.
+canonical_truth:
+  included_in_repo_version: 0.179.56
+  changelog_entry: Monitor failed and stopped bounded image cleanup and restore only
+    the PostgreSQL cluster-state input already required by existing alerts.
+  release_bump: patch
+  latest_receipts:
+    image_gc_monitoring: 2026-11-06-image-gc-monitoring-live-apply
+adr: '0226'

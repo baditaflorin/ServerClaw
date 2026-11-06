@@ -1,0 +1,111 @@
+schema_version: 1.0.0
+service:
+  id: agent_history
+  name: Agent History Store
+  description: 'Postgres 17 with pgvector and the agent-store API: every prompt, reply and tool call of the coding agents on the operator laptops, searchable, behind two redaction passes.'
+  category: data
+  lifecycle_status: planned
+  vm: agent-history
+  vmid: 155
+  internal_url: http://127.0.0.1:8080
+  exposure: private-only
+  health_probe_id: agent_history
+  adr: '0494'
+  runbook: docs/runbooks/configure-agent-history.md
+  deployment_surface: playbooks/agent-history-vm.yml
+  runtime_pool: dedicated-agent-history
+  restart_domain: dedicated-agent-history-core
+  api_contract_ref: config/contracts/service-partitions/catalog.json#/partitions/dedicated-agent-history
+  mobility_tier: anchor
+  tags:
+    - data
+    - private-only
+    - tailnet
+  notes: Planned, not provisioned. Reachable only over the tailnet (tailscale serve terminates TLS on the guest and proxies to the loopback listener); there is no public name, no edge vhost, no API gateway route and no hypervisor port proxy. The store holds every secret an agent ever saw, so it is the most sensitive service on the platform.
+  environments:
+    production:
+      status: planned
+      url: http://127.0.0.1:8080
+      notes: In-guest loopback address, used only by the guest's own health checks and the metrics bridge. The tailnet name is the owner's and is not committed.
+completeness:
+  service_type: compose
+  requires_subdomain: false
+  requires_oidc: false
+  requires_api_gateway: false
+  requires_secrets: false
+  requires_compose_secrets: false
+  requires_dashboard: false
+  requires_data_catalog: true
+  requires_alert_rules: false
+  requires_slo: false
+  notes: >-
+    Private, tailnet-only. No subdomain, OIDC client or API gateway route, by design (ADR 0049 operator-only, ADR 0494).
+    The store's secrets (database password, read, write and metrics tokens, LUKS passphrase) are created by the OpenBao
+    administrator and the owner and never pass through the controller, so there is no controller-local mirror to catalogue
+    (config/secret-catalog.json models controller-local files). No blackbox SLO: the monitoring guest has no route to the
+    loopback listener on purpose; availability and ingest health come from the metrics bridge and the alert rules in
+    config/prometheus/rules/agent-history.yml, which are a separate change. No dashboard yet.
+redundancy:
+  tier: R1
+  recovery_objective:
+    rto_minutes: 480
+    rpo_minutes: 1440
+  backup_sources:
+    - git_repository
+    - pbs_vm_snapshot
+  standby:
+    kind: cold
+    location: agent-history
+    failover_trigger: Restore the newest PBS snapshot of vm/155 into a new guest, unlock the data volume with the passphrase from OpenBao, and start the compose project; or rebuild the store from the laptops (the collector's backfill is idempotent).
+    failback_method: Re-ingest from the laptops with the collector's backfill (about 15 to 30 minutes of store time for 30 days) and compare the per-day counts the collector audit reports.
+  notes: The nightly PBS job holds ciphertext for the data disk. The store is rebuildable from the operator laptops' own transcripts, which is what makes a nightly RPO and a single-member RAID1 acceptable for the pilot only (ADR 0494).
+dependency:
+  node:
+    id: agent_history
+    service: agent_history
+    name: Agent History Store
+    vm: agent-history
+    tier: 1
+    category: data
+    adr: '0494'
+  outbound_edges: []
+health:
+  service_name: agent-history
+  owning_vm: agent-history
+  role: agent_history_runtime
+  verify_file: roles/agent_history_runtime/tasks/verify.yml
+  liveness:
+    kind: http
+    description: The store answers its health endpoint on the guest's loopback address (200 when Postgres answers, 503 when it does not; no token).
+    timeout_seconds: 60
+    retries: 12
+    delay_seconds: 5
+    url: http://127.0.0.1:8080/healthz
+    method: GET
+    expected_status:
+      - 200
+  readiness:
+    kind: http
+    description: The store and its Postgres are ready to accept ingest from the collectors.
+    timeout_seconds: 90
+    retries: 18
+    delay_seconds: 5
+    url: http://127.0.0.1:8080/healthz
+    method: GET
+    expected_status:
+      - 200
+  uptime_kuma:
+    enabled: false
+    reason: Private, tailnet-only service; there is no public name to monitor. Availability comes from the metrics bridge and Prometheus rules.
+data:
+  - id: agent-history-events
+    service: agent_history
+    name: Agent history events, sessions and embeddings
+    class: secret
+    retention_days: null
+    backup_included: true
+    access_role: break_glass
+    pii_risk: high
+    locations:
+      - /srv/agent-history/postgres
+    notes: Every prompt, reply, tool call, tool result and bus message of the coding agents on the operator laptops, kept after two redaction passes, so it can still hold secrets that no rule recognises. The data disk is LUKS2 and the nightly PBS snapshot holds ciphertext. Rebuildable from the laptops. No retention is built yet (the pilot keeps 30 days of history; a retention decision precedes any widening).

@@ -177,8 +177,10 @@ gh pr merge <number> --squash --delete-branch
 
 ### 4e. Emergency direct push (admin only)
 
-For genuine emergencies (production outage, security patch), admins can
-bypass branch protection and push directly:
+For genuine emergencies (production outage, security patch), the owner/admin
+(the only collaborator) can push directly. The private repo has no branch
+protection (not available on its plan), so the PR rule is a convention, not an
+enforced gate:
 
 ```bash
 SKIP_REMOTE_GATE=1 \
@@ -243,7 +245,7 @@ gh pr merge --squash --delete-branch
 | Watch CI status | `gh pr checks <number> --watch` |
 | Skip all pre-push gates, secret detection included (emergency) | `SKIP_REMOTE_GATE=1 GATE_BYPASS_REASON_CODE=<code> GATE_BYPASS_DETAIL="<why>" GATE_BYPASS_SUBSTITUTE_EVIDENCE="<evidence>" GATE_BYPASS_REMEDIATION_REF="<ref>" git push origin main` (records a gate-bypass waiver receipt) |
 | Publish to ServerClaw (dry-run) | `make publish-serverclaw` |
-| Publish to ServerClaw (push) | `make publish-serverclaw-push` |
+| Publish to ServerClaw (push a branch for a PR) | `make publish-serverclaw-push BRANCH=codex/serverclaw-publish-<date>` |
 | Audit sanitization coverage | `make audit-sanitization` |
 
 ---

@@ -1,0 +1,9 @@
+[Unit]
+Description=Tier-0 executor tick (mode from /etc/tier0-executor/mode, default shadow: records, executes nothing)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/tier0-runner/executor/tier0_executor.py tick
+TimeoutStartSec=3600
+Nice=10

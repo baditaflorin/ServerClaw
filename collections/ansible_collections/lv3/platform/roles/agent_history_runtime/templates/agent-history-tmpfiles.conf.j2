@@ -1,0 +1,3 @@
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+# tmpfs directory for the rendered secret files: owned by the uid that runs the OpenBao Agent and the store.
+d {{ agent_history_run_dir }} 0700 {{ agent_history_run_uid }} {{ agent_history_run_gid }} -

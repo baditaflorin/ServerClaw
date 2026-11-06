@@ -1,0 +1,7 @@
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+[Unit]
+Description=agent-history metrics bridge (store /metrics to a node_exporter textfile)
+
+[Service]
+Type=oneshot
+ExecStart={{ agent_history_helper_dir }}/agent-history-metrics

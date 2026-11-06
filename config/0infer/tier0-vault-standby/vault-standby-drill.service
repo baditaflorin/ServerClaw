@@ -1,0 +1,9 @@
+[Unit]
+Description=Weekly promotion drill of the vault/keystore standby (isolated, stops itself)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/tier0/vault-standby/drill.sh
+TimeoutStartSec=15min
+Nice=10

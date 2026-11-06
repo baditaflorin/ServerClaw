@@ -3172,7 +3172,7 @@
           "slug": "proxmox",
           "title": "Proxmox Administration",
           "description": "Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.",
-          "action_url": "https://203.0.113.6:8006/",
+          "action_url": "https://100.64.0.6:8006/",
           "action_label": "Open Private Proxmox UI",
           "meta": "Use Tailscale host access for routine Proxmox administration."
         },

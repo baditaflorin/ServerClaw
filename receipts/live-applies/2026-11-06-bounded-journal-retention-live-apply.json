@@ -1,0 +1,58 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-11-06-bounded-journal-retention-live-apply",
+  "applied_on": "2026-11-06",
+  "recorded_on": "2026-11-06",
+  "recorded_by": "codex",
+  "source_commit": "1a763555767dbb43783a33e556c55cc467d528a0",
+  "repo_version_context": "0.179.52",
+  "workflow_id": "adr-0226-journal-retention-live-apply",
+  "adr": "0226",
+  "summary": "Set explicit journal storage and age limits on the Proxmox host and the inference runtime guest, then codified the equivalent policy in the common-role journal_retention helper and a targeted playbook. The host control-loop baseline imports the shared helper.",
+  "targets": [
+    {
+      "kind": "bare-metal",
+      "name": "proxmox-host"
+    },
+    {
+      "kind": "vm",
+      "name": "infer-runtime",
+      "vmid": "703"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Proxmox host journal daemon and limit",
+      "result": "pass",
+      "observed": "At 2026-11-06T16:30:47Z systemd-journald restarted successfully and reported System Journal 987.7 MiB, max 1 GiB, versus 3.1 GiB before. Main configuration backup: /root/backups/journald-unattended-20261106T163047Z/."
+    },
+    {
+      "check": "Shared helper apply and repeatability",
+      "result": "pass",
+      "observed": "The common helper was applied to the Proxmox host at 16:36:54Z. A subsequent check-mode replay reported changed=0 failed=0. The targeted playbook with argument-spec validation also reported changed=0 failed=0. Journald remained active."
+    },
+    {
+      "check": "Inference guest retention and reclaimed capacity",
+      "result": "pass",
+      "observed": "At 2026-11-06T16:35:36Z VM703 received the same six settings via its Proxmox guest agent. Journald active, usage 4 GiB to 984.6 MiB; root used bytes 162779652096 to 159500169216, reclaiming 3279482880 bytes. Root use fell 81 to 79 percent. Backup: /var/backups/fleet-journald/20261106T163536Z/."
+    },
+    {
+      "check": "Explicit desired limits",
+      "result": "pass",
+      "observed": "SystemMaxUse=1G, SystemKeepFree=5G, RuntimeMaxUse=256M, RuntimeKeepFree=256M, MaxRetentionSec=30day, MaxFileSec=1day. The runtime guest was a manual equivalent apply before source codification; its provenance comment differs from the template."
+    }
+  ],
+  "evidence_refs": [
+    "playbooks/journal-retention.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/journal_retention.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/templates/journal-retention.conf.j2",
+    "docs/runbooks/configure-host-control-loops.md"
+  ],
+  "notes": [
+    "Initial diagnosis used fresh main 7da1c482f30b03782fee0e2a1e63d99dd76620f1. No Hermes writes. No application data or Docker volume pruning.",
+    "This records the live-first apply and equivalent codification. platform_version remains unchanged until an exact-main replay after merge.",
+    "Rollback restores the saved configuration or moves the new drop-in aside and restarts only journald. Log entries already expired are not restored by raising a limit."
+  ],
+  "service_ids": []
+}

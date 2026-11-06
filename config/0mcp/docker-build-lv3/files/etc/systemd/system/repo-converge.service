@@ -1,0 +1,14 @@
+[Unit]
+Description=Converge /root/workspace checkouts to origin (archive uncommitted work first)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# systemd gives root units no HOME; git needs /root for the credentials that reach private repos.
+Environment=HOME=/root
+# A FAIL (could not archive/reset a repo) exits non-zero so `systemctl --failed`
+# shows it. SKIPs (active work, unpushed commits, detached HEAD) are deliberate.
+ExecStart=/usr/bin/flock -n /run/lock/repo-converge.lock /usr/local/bin/repo-converge.sh --apply --jobs 4
+Nice=10
+TimeoutStartSec=30min

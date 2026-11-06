@@ -299,3 +299,42 @@ def test_validate_archiving_branch_still_rejects_unowned_edits(tmp_path: Path) -
 
     with pytest.raises(ValueError, match="outside declared owned surfaces"):
         ownership.validate_branch_ownership(repo_root=repo, base_ref="main")
+
+
+def init_stacked_repo(tmp_path: Path) -> Path:
+    """main <- codex/parent (edits a file the child does not own) <- the registered child branch."""
+    repo = init_repo(tmp_path)
+    git(repo, "checkout", "-b", "codex/parent", "main")
+    write(repo / "notes.txt", "parent-only change\n")
+    git(repo, "add", ".")
+    git(repo, "commit", "-m", "Parent")
+    git(repo, "checkout", "codex/adr-0173-ownership-manifest")
+    git(repo, "merge", "--ff-only", "codex/parent")
+    write(repo / "scripts" / "workstream_surface_ownership.py", "print('child')\n")
+    git(repo, "add", ".")
+    git(repo, "commit", "-m", "Child")
+    return repo
+
+
+def test_validate_branch_stacked_on_unmerged_parent_fails_against_main(tmp_path: Path) -> None:
+    repo = init_stacked_repo(tmp_path)
+
+    with pytest.raises(ValueError, match=r"notes\.txt: outside declared owned surfaces"):
+        ownership.validate_branch_ownership(repo_root=repo, base_ref="main")
+
+
+def test_validate_branch_stacked_on_unmerged_parent_passes_against_the_parent(tmp_path: Path) -> None:
+    repo = init_stacked_repo(tmp_path)
+
+    changed_files = ownership.validate_branch_ownership(repo_root=repo, base_ref="codex/parent")
+
+    assert changed_files == ["scripts/workstream_surface_ownership.py"]
+
+
+def test_cli_stacked_branch_needs_the_parent_as_base_ref(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    repo = init_stacked_repo(tmp_path)
+
+    assert ownership.main(["--validate-branch", "--base-ref", "main", "--repo-root", str(repo)]) == 1
+    assert "notes.txt: outside declared owned surfaces" in capsys.readouterr().err
+    assert ownership.main(["--validate-branch", "--base-ref", "codex/parent", "--repo-root", str(repo)]) == 0
+    assert "Workstream branch ownership OK" in capsys.readouterr().out

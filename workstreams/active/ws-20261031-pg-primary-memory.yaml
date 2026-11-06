@@ -1,0 +1,121 @@
+id: ws-20261031-pg-primary-memory
+adr: "0495"
+title: Put the VM701 memory guardrails after the 2026-10-31 global OOM in git (parallel-query limits, work_mem, the 10 GiB /dev/shm cap and the VM memory)
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/pg-primary-temp-files-log
+worktree_path: .claude/worktrees/pg-primary-temp-files-log
+doc: docs/workstreams/ws-20261031-pg-primary-memory.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/hostconf/files/postgresql-temp-files-log.infer-pg-primary.conf
+  - tests/test_pg_primary_temp_files_log.py
+  - config/0infer/pg-primary-memory/README.md
+  - config/0infer/pg-primary-memory/install-vm.sh
+  - config/hostconf/files/postgresql-parallel-guardrails.infer-pg-primary.conf
+  - config/hostconf/files/postgresql-work-mem-guardrails.infer-pg-primary.conf
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - docs/runbooks/host-local-config.md
+  - docs/adr/0495-pg-primary-memory-guardrails.md
+  - tests/test_pg_primary_memory.py
+  - docs/adr/.index.yaml
+  - docs/adr/index/by-concern/vm-topology.yaml
+  - docs/adr/index/by-range/0400-0499.yaml
+  - docs/adr/index/by-status/partial.yaml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261031-pg-primary-memory.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261031-pg-primary-memory.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261031_pg_primary_memory_tracking
+      paths:
+        - docs/workstreams/ws-20261031-pg-primary-memory.md
+      mode: exclusive
+    - id: pg_primary_memory_config
+      paths:
+        - config/0infer/pg-primary-memory/README.md
+        - config/0infer/pg-primary-memory/install-vm.sh
+        - tests/test_pg_primary_memory.py
+      mode: exclusive
+    - id: pg_primary_temp_files_log
+      paths:
+        - config/hostconf/files/postgresql-temp-files-log.infer-pg-primary.conf
+        - tests/test_pg_primary_temp_files_log.py
+      mode: exclusive
+    - id: adr_0495_pg_primary_memory_guardrails
+      paths:
+        - docs/adr/0495-pg-primary-memory-guardrails.md
+      mode: exclusive
+    - id: hostconf_pg_primary_guardrail_files
+      paths:
+        - config/hostconf/files/postgresql-parallel-guardrails.infer-pg-primary.conf
+        - config/hostconf/files/postgresql-work-mem-guardrails.infer-pg-primary.conf
+      mode: exclusive
+    - id: hostconf_manifest
+      paths:
+        - config/hostconf/hostconf.yaml
+        - config/hostconf/README.md
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: host_local_config_runbook
+      paths:
+        - docs/runbooks/host-local-config.md
+      mode: shared_contract
+      contract: host-local-config-runbook-v1
+    - id: adr_index
+      paths:
+        - docs/adr/.index.yaml
+        - docs/adr/index/by-concern/vm-topology.yaml
+        - docs/adr/index/by-range/0400-0499.yaml
+        - docs/adr/index/by-status/partial.yaml
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261031-pg-primary-memory.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: The memory guardrails of the production Postgres VM701 after the 2026-10-31 global OOM (parallel-query limits, work_mem, the 10 GiB /dev/shm cap, the VM memory) are recorded in git; nothing is applied by merging.
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  On 2026-10-31 at 01:25Z the kernel OOM killer ended nine postgres processes on VM701 (infer-pg-primary) and the cluster crash-recovered for about 25 s. The
+  memory that ran the VM out was shared memory beyond the main segment (parallel-query dynamic shared memory, +24.5 GiB over the 24.6 GiB segment).
+  Two live changes were made that morning by other sessions and are not in git: /dev/shm capped at 10 GiB (08:02Z) and the VM raised to 66560 MiB (about
+  08:17Z). This change records both and lands the reload-only guardrails (max_parallel_workers_per_gather 2, max_parallel_workers 12, temp_file_limit 150GB, work_mem 64MB)
+  as hostconf files. Applying any of it is a separate, supervised step; huge pages are a separate PR for a maintenance window.
+  Update 2026-11-02: S1 was applied live on 2026-11-01 (S1a 11:04Z, S1b 11:41Z) and its 24 h acceptance found one regression (SELECT COUNT(*) FROM mv_domains_denormalized
+  0.42 s -> 0.62 s with workers per call 3.94 -> 1.97), so max_parallel_workers_per_gather goes back to 4 (only that knob; 12, 150GB and work_mem 64MB stay), planned for 2026-11-03 11:03Z.
+  Update 2026-11-04: log_temp_files = 64MB (a plain hostconf apply, reload only) so the statements behind the 612 GB of temporary files, which pg_stat_statements does not attribute (5,000 entries,
+  2,000+ deallocations), show up in the server log.
+tasks:
+  - id: t1
+    title: Add the two hostconf conf.d files and their expect entries for infer-pg-primary (no huge-pages file)
+    status: completed
+  - id: t2
+    title: Record the /dev/shm cap and the VM memory under config/0infer/pg-primary-memory with an idempotent installer and a test
+    status: completed
+  - id: t3
+    title: ADR 0495 and the apply-order subsection in the host-local-config runbook
+    status: completed
+  - id: t4
+    title: Review and merge (PR 646, merged); the two files were applied on VM701 on 2026-11-01 (S1a 11:04Z, S1b 11:41Z)
+    status: completed
+  - id: t5
+    title: Revert max_parallel_workers_per_gather to 4 after the S1 acceptance (ADR 0495, amendment of 2026-11-02); apply Tue 2026-11-03 11:03Z with one hostconf apply of the parallel file
+    status: in_progress
+  - id: t6
+    title: Log temporary files of 64 MB or more with their statement (log_temp_files = 64MB, ADR 0495 amendment of 2026-11-04); apply after the merge with one plain hostconf apply
+    status: in_progress

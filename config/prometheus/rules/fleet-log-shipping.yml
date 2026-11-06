@@ -1,0 +1,30 @@
+# Hypervisor log shipping alerts, added 2026-11-01. Until 2026-10-30 the 0mcp, 0infer and 0pipe hypervisors shipped nothing to OpenObserve
+# for weeks and nothing noticed; their journals (kernel, OOM, SMART, PVE, sshd) are what we read after an incident. The metrics come from
+# config/0own/openobserve/log-freshness/openobserve-log-freshness.py (timer on VM 630, textfile openobserve-log-freshness.prom). A hypervisor
+# that produces no warning/kernel/sshd line for 2 h is not realistic (the quietest, 0pipe, writes ~90 events an hour).
+groups:
+  - name: fleet_log_shipping
+    rules:
+      - alert: HypervisorLogShippingSilent
+        expr: >-
+          time() - max by (host) (openobserve_log_last_event_timestamp_seconds{stream="host_logs",role="hypervisor"}) > 7200
+        for: 10m
+        labels:
+          severity: warning
+          service: fleet_log_shipping
+        annotations:
+          summary: "No log from hypervisor {{ $labels.host }} in OpenObserve host_logs for over 2 hours"
+          description: "The journal shipper (vector.service) on {{ $labels.host }} is stopped, stuck or cannot reach openobserve.0own.com, so its kernel, OOM, SMART, PVE and sshd logs are not being kept. Check `systemctl status vector` and `journalctl -u vector` on the host; the installer is 0pipe scripts/install-vector-host.sh (0docker and 0own ship by their own route)."
+          runbook_url: docs/runbooks/fleet-observability.md#hypervisor-log-shipping-alerts
+
+      - alert: LogFreshnessProbeBlind
+        expr: >-
+          min(openobserve_log_freshness_up) == 0 or absent(openobserve_log_freshness_up)
+        for: 15m
+        labels:
+          severity: warning
+          service: fleet_log_shipping
+        annotations:
+          summary: "The OpenObserve log freshness probe cannot read OpenObserve or is not running"
+          description: "Without the probe a silent hypervisor shipper goes unnoticed. On VM 630 check `systemctl status openobserve-log-freshness.timer`, `journalctl -u openobserve-log-freshness`, and that OpenObserve answers on 127.0.0.1:5080 with the root credential in /opt/openobserve/secrets."
+          runbook_url: docs/runbooks/fleet-observability.md#hypervisor-log-shipping-alerts

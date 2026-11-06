@@ -42,7 +42,8 @@ ownership_manifest:
         - docs/runbooks/fleet-observability.md
         - docs/workstreams/ws-0523-fleet-observability-roles.md
         - workstreams/active/ws-0523-fleet-observability-roles.yaml
-      mode: exclusive
+      mode: shared_contract
+      contract: fleet-observability-inventory-v1
     - id: exporter_listener_runbook
       paths:
         - docs/runbooks/tailscale-metrics-grants.md
@@ -61,6 +62,7 @@ ownership_manifest:
     - id: active_workstream_registry
       paths:
         - workstreams.yaml
+        - workstreams/active/ws-0523-fleet-observability-roles.yaml
       mode: shared_contract
       contract: workstream-registry-v1
 canonical_truth:

@@ -126,7 +126,7 @@ def test_alertmanager_package_env_template_pins_repo_managed_runtime_flags() -> 
 
     assert "--config.file={{ alertmanager_runtime_config_file }}" in env_template
     assert "--storage.path={{ alertmanager_runtime_data_dir }}" in env_template
-    assert "--web.listen-address=127.0.0.1:{{ alertmanager_runtime_port }}" in env_template
+    assert "--web.listen-address={{ alertmanager_runtime_listen_address }}" in env_template
 
 
 def test_pgaudit_relay_templates_pin_local_listener_and_nats_publication_subject() -> None:

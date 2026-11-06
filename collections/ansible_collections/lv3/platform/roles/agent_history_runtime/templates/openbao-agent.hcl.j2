@@ -1,0 +1,47 @@
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+# OpenBao Agent for the agent-history guest (ADR 0077, ADR 0231). It renders the database password and the token files
+# into the tmpfs directory below. This file and the templates it names hold no secret: the AppRole files are delivered
+# by the owner and the values live in OpenBao KV at {{ agent_history_openbao_kv_path }}.
+pid_file = "/tmp/openbao-agent.pid"
+
+vault {
+  address = "{{ agent_history_openbao_address }}"
+}
+
+auto_auth {
+  method "approle" {
+    mount_path = "auth/approle"
+
+    config = {
+      role_id_file_path                   = "/openbao-agent/{{ agent_history_role_id_file | basename }}"
+      secret_id_file_path                 = "/openbao-agent/{{ agent_history_secret_id_file | basename }}"
+      remove_secret_id_file_after_reading = false
+    }
+  }
+}
+
+template_config {
+  exit_on_retry_failure         = true
+  static_secret_render_interval = "5m"
+}
+{% for item in [
+  {'src': 'db.env.ctmpl', 'dest': 'db.env'},
+  {'src': 'store.env.ctmpl', 'dest': 'store.env'},
+  {'src': 'read-tokens.ctmpl', 'dest': 'read-tokens'},
+  {'src': 'write-tokens.ctmpl', 'dest': 'write-tokens'},
+  {'src': 'metrics-token.ctmpl', 'dest': 'metrics-token'},
+  {'src': 'embed-token.ctmpl', 'dest': 'embed-token'},
+  {'src': 'metrics-header.ctmpl', 'dest': 'metrics.header'},
+] %}
+
+template {
+  source               = "/openbao-agent/{{ item.src }}"
+  destination          = "/run/agent-history/{{ item.dest }}"
+  create_dest_dirs     = false
+  perms                = 256
+  backup               = false
+  error_on_missing_key = true
+  left_delimiter       = "[["
+  right_delimiter      = "]]"
+}
+{% endfor %}

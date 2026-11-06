@@ -1,0 +1,11 @@
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+[Unit]
+Description=Nightly agent-history redaction canary database scan
+
+[Timer]
+OnCalendar={{ agent_history_canary_scan_on_calendar }}
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

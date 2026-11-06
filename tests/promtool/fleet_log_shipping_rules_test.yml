@@ -1,0 +1,56 @@
+# promtool unit tests for config/prometheus/rules/fleet-log-shipping.yml (run by tests/test_fleet_log_shipping_rules.py when promtool is installed).
+rule_files:
+  - ../../config/prometheus/rules/fleet-log-shipping.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a hypervisor silent for over 2 hours fires, a recent one never
+    interval: 1m
+    input_series:
+      - series: 'openobserve_log_last_event_timestamp_seconds{stream="host_logs",host="0mcp",role="hypervisor"}'
+        values: "3600x300"
+      - series: 'openobserve_log_last_event_timestamp_seconds{stream="host_logs",host="0pipe",role="hypervisor"}'
+        values: "0+60x300"
+    alert_rule_test:
+      - {eval_time: 100m, alertname: HypervisorLogShippingSilent, exp_alerts: []}
+      - eval_time: 200m
+        alertname: HypervisorLogShippingSilent
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_log_shipping, host: 0mcp}
+            exp_annotations:
+              summary: "No log from hypervisor 0mcp in OpenObserve host_logs for over 2 hours"
+              description: "The journal shipper (vector.service) on 0mcp is stopped, stuck or cannot reach openobserve.0own.com, so its kernel, OOM, SMART, PVE and sshd logs are not being kept. Check `systemctl status vector` and `journalctl -u vector` on the host; the installer is 0pipe scripts/install-vector-host.sh (0docker and 0own ship by their own route)."
+              runbook_url: docs/runbooks/fleet-observability.md#hypervisor-log-shipping-alerts
+
+  - name: a host never seen in the window (timestamp 0) fires after the delay
+    interval: 1m
+    input_series:
+      - series: 'openobserve_log_last_event_timestamp_seconds{stream="host_logs",host="0infer",role="hypervisor"}'
+        values: "0x200"
+    alert_rule_test:
+      - {eval_time: 100m, alertname: HypervisorLogShippingSilent, exp_alerts: []}
+      - eval_time: 150m
+        alertname: HypervisorLogShippingSilent
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_log_shipping, host: 0infer}
+            exp_annotations:
+              summary: "No log from hypervisor 0infer in OpenObserve host_logs for over 2 hours"
+              description: "The journal shipper (vector.service) on 0infer is stopped, stuck or cannot reach openobserve.0own.com, so its kernel, OOM, SMART, PVE and sshd logs are not being kept. Check `systemctl status vector` and `journalctl -u vector` on the host; the installer is 0pipe scripts/install-vector-host.sh (0docker and 0own ship by their own route)."
+              runbook_url: docs/runbooks/fleet-observability.md#hypervisor-log-shipping-alerts
+
+  - name: the probe going blind or disappearing fires, a healthy probe does not
+    interval: 1m
+    input_series:
+      - series: 'openobserve_log_freshness_up'
+        values: "1x10 0x30"
+    alert_rule_test:
+      - {eval_time: 20m, alertname: LogFreshnessProbeBlind, exp_alerts: []}
+      - eval_time: 35m
+        alertname: LogFreshnessProbeBlind
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_log_shipping}
+            exp_annotations:
+              summary: "The OpenObserve log freshness probe cannot read OpenObserve or is not running"
+              description: "Without the probe a silent hypervisor shipper goes unnoticed. On VM 630 check `systemctl status openobserve-log-freshness.timer`, `journalctl -u openobserve-log-freshness`, and that OpenObserve answers on 127.0.0.1:5080 with the root credential in /opt/openobserve/secrets."
+              runbook_url: docs/runbooks/fleet-observability.md#hypervisor-log-shipping-alerts

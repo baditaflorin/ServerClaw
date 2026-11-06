@@ -1,0 +1,102 @@
+id: ws-20261030-pve-firewall-install-guard
+adr: "0067"
+title: "proxmox_network: the per-VM Proxmox firewall install compares with the live files, refuses to remove live rules, backs up before it writes; record the 0mcp backup fleecing"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/pve-fw-guard
+worktree_path: .claude/worktrees/pve-fw-guard
+doc: docs/workstreams/ws-20261030-pve-firewall-install-guard.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/README.md
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/files/pve_fw_guard.py
+  - tests/test_proxmox_network_role.py
+  - tests/test_proxmox_network_vm_firewall_tag.py
+  - docs/runbooks/configure-guest-network-policy.md
+  - docs/runbooks/configure-agent-history.md
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261030-pve-firewall-install-guard.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261030-pve-firewall-install-guard.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261030_pve_fw_guard_tracking
+      paths:
+        - docs/workstreams/ws-20261030-pve-firewall-install-guard.md
+      mode: exclusive
+    - id: proxmox_network_install_guard
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/defaults/main.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/meta/argument_specs.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/README.md
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/files/pve_fw_guard.py
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: proxmox_network_install_guard_tests
+      paths:
+        - tests/test_pve_firewall_install_guard.py
+        - tests/fixtures/pve_firewall_guard/*
+      mode: exclusive
+    - id: proxmox_network_install_guard_pinned_tests
+      paths:
+        - tests/test_proxmox_network_role.py
+        - tests/test_proxmox_network_vm_firewall_tag.py
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: proxmox_network_install_guard_runbook
+      paths:
+        - docs/runbooks/configure-guest-network-policy.md
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: proxmox_network_install_guard_agent_history_runbook
+      paths:
+        - docs/runbooks/configure-agent-history.md
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: ws_20261030_pve_fw_guard_pbs_runbook
+      paths:
+        - docs/runbooks/pbs-0own-backups.md
+      mode: exclusive
+    - id: proxmox_network_install_guard_platform_manifest
+      paths:
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261030-pve-firewall-install-guard.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "The proxmox_network per-VM Proxmox firewall install compares each render with the live /etc/pve/firewall file (also in --check mode), fails before writing anything when it would remove a rule line or a managed block unless -e proxmox_network_allow_rule_removal=true, copies every file it replaces to /root/fw-backup-<timestamp>/ with a restore.sh, and can be limited to named VMs with -e proxmox_network_firewall_vmids=155; the 0mcp nightly PBS job's fleecing is recorded in the PBS runbook."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: "On 2026-10-30 an apply of the proxmox-vm-firewall slice on 0mcp copied the inventory render over the live per-VM firewall files and removed about 25 production rules for about three minutes (hand-authored rules, an AUTO-MIGRATED set, and the fleet-pool-fw block on VM 191); the --check --diff before it had compared the render with the staging copy and showed only additions. Nothing is applied by this change and no host is contacted: the tests run the guard against fixtures and the role against a temporary directory with stand-ins for qm and pve-firewall."
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Write the guard (compare with the live files, refuse removals, back up, install, restore script), wire it into the role, select VMs, make check mode plan the real run's guests
+    status: completed
+  - id: t3
+    title: Tests with fixtures and a real ansible-playbook run against a temporary directory; runbook sections for the guard and the 0mcp fleecing
+    status: completed
+  - id: t4
+    title: Pass the pre-push gate on a build server (no local fallback), merge through the Woodpecker gate
+    status: in_progress

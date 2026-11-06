@@ -1,0 +1,84 @@
+# pve-0mcp (hostname debian-base-template, ssh alias operator-bastion), read-only capture of the stopgap swapfile, 2026-11-01 about 22:08Z to 22:11Z,
+# five minutes after it was added by hand (22:03Z). Only reads were run: no swapon, swapoff, mkswap, fallocate, fstab edit or file write on the host. The last block is the
+# installer's own read-only `check` verb streamed to the host once (22:27Z) to test it against the real tools; it makes no change.
+# README.md quotes these numbers and tests/test_hypervisor_swap.py pins the ones the installer depends on. No secret in here (UUIDs are filesystem identifiers).
+# Host clock: `uptime` printed local time 23:08 (UTC+1) at 22:08Z; `date -u` printed 2026-11-01T22:10:50Z at the memory read below.
+
+$ cat /proc/swaps
+Filename				Type		Size		Used		Priority
+/dev/md0                                partition	4189180		3882812		-1
+/swapfile-0mcp-stopgap                  file		33554428	0		-1
+
+$ swapon --show=NAME,TYPE,SIZE,USED,PRIO,UUID,LABEL --bytes
+NAME                   TYPE             SIZE       USED PRIO UUID                                 LABEL
+/dev/md0               partition  4289720320 3975999488   -1 00273bec-21a4-4ac6-b529-6479429fdc8a
+/swapfile-0mcp-stopgap file      34359734272          0   -1 c6e053ea-ed3a-4826-b2b7-b8f262f791a1 stopgap
+
+$ blkid -o export /swapfile-0mcp-stopgap
+DEVNAME=/swapfile-0mcp-stopgap
+LABEL=stopgap
+UUID=c6e053ea-ed3a-4826-b2b7-b8f262f791a1
+TYPE=swap
+
+$ stat -c '%a %U:%G %s %n' /swapfile-0mcp-stopgap
+600 root:root 34359738368 /swapfile-0mcp-stopgap
+
+$ filefrag /swapfile-0mcp-stopgap | tail -n 1
+/swapfile-0mcp-stopgap: 329 extents found
+
+$ findmnt -no SOURCE,FSTYPE,TARGET -T /swapfile-0mcp-stopgap
+/dev/md2 ext4 /
+
+$ df -B1 --output=source,size,used,avail,target /
+Filesystem         1B-blocks          Used        Avail Mounted on
+/dev/md2       1883669504000 1259229011968 624423714816 /
+
+$ cat /proc/mdstat   (md2 is the root filesystem; md0 is the 4 GiB swap partition; one member each)
+md2 : active raid1 nvme1n1p3[0]
+      1869997376 blocks super 1.2 [1/1] [U]
+md0 : active raid1 nvme1n1p1[0]
+      4189184 blocks super 1.2 [1/1] [U]
+md1 : active raid1 nvme1n1p2[0]
+      1046528 blocks super 1.2 [1/1] [U]
+
+$ cat /etc/fstab   (no line for the swapfile: a reboot drops it)
+proc /proc proc defaults 0 0
+# /dev/md/0
+UUID=00273bec-21a4-4ac6-b529-6479429fdc8a none swap sw 0 0
+# /dev/md/1
+UUID=81d41055-16b2-4f64-ac16-40b255f87b72 /boot ext3 defaults 0 0
+# /dev/md/2
+UUID=262d2a64-94df-48c6-9c8c-614582e88675 / ext4 defaults 0 0
+UUID=d8a21735-4165-40b9-876d-a345faa54994 /var/lib/vz-nvme1 ext4 defaults,noatime,nofail 0 2
+
+$ ls /etc/pve/nodes
+debian-base-template
+
+$ sysctl vm.swappiness vm.overcommit_memory
+vm.swappiness = 60
+vm.overcommit_memory = 0
+
+$ systemctl list-units --type=swap --no-legend
+  dev-disk-by\x2duuid-00273bec\x2d21a4\x2d4ac6\x2db529\x2d6479429fdc8a.swap loaded active active /dev/disk/by-uuid/00273bec-21a4-4ac6-b529-6479429fdc8a
+  swapfile\x2d0mcp\x2dstopgap.swap                                          loaded active active /swapfile-0mcp-stopgap
+
+$ grep -E '^(MemTotal|MemAvailable|SwapTotal|SwapFree):' /proc/meminfo   (22:10:50Z)
+MemTotal:       131805900 kB
+MemAvailable:     7992408 kB
+SwapTotal:       37743608 kB
+SwapFree:        33860808 kB
+
+$ swapon --version; mkswap --version; findmnt --version; awk --version | head -n 1; bash --version | head -n 1
+swapon from util-linux 2.41.5
+mkswap from util-linux 2.41.5 (features: extends-check, nocow, fallocate, blkid-check, uuid, selinux)
+findmnt from util-linux 2.41.5
+mawk 1.3.4 20250131
+GNU bash, version 5.2.37(1)-release (x86_64-pc-linux-gnu)
+
+$ ssh operator-bastion 'bash -s -- check' < install-host.sh   (22:27Z, read-only verb; exit 2 = usable, not persisted)
+install-host.sh: /swapfile-0mcp-stopgap on debian-base-template
+install-host.sh:   file       ok       32 GiB (34359738368 bytes), mode 600, root:root, swap signature, label stopgap, uuid c6e053ea-ed3a-4826-b2b7-b8f262f791a1
+install-host.sh:   active     ok       in /proc/swaps, 0 MiB used
+install-host.sh:   fstab      absent   a reboot drops the swapfile (install-host.sh --persist adds: /swapfile-0mcp-stopgap none swap sw,nofail 0 0)
+install-host.sh:   info       581 GiB free on /, MemAvailable 7 GiB
+exit=2

@@ -1,0 +1,142 @@
+# promtool unit tests for config/prometheus/rules/fleet-disk-health.yml (run by tests/test_fleet_disk_health_rules.py when promtool is installed).
+rule_files:
+  - ../../config/prometheus/rules/fleet-disk-health.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a failed SMART self-assessment fires after 10 minutes, a passing disk never
+    interval: 1m
+    input_series:
+      - series: 'fleet_disk_smart_passed{pve_host="a",device="sda",serial="S1"}'
+        values: "1x10 0x60"
+      - series: 'fleet_disk_smart_passed{pve_host="b",device="sda",serial="S2"}'
+        values: "1x70"
+    alert_rule_test:
+      - {eval_time: 15m, alertname: FleetDiskSmartFailed, exp_alerts: []}
+      - eval_time: 30m
+        alertname: FleetDiskSmartFailed
+        exp_alerts:
+          - exp_labels: {severity: critical, service: fleet_disk_health, pve_host: a, device: sda, serial: S1}
+            exp_annotations:
+              summary: "Disk sda on a failed its SMART self-assessment"
+              description: "The drive sda (serial S1) on a reports SMART overall health FAILED. On a mirror, replace it before the other half follows; on a single disk, move the workload and rebuild."
+              runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+  - name: wear warns from 80 percent, is critical from 95 percent and a young disk stays quiet
+    interval: 1m
+    input_series:
+      - series: 'fleet_disk_wear_percent{pve_host="a",device="sda",serial="S1"}'
+        values: "85x150"
+      - series: 'fleet_disk_wear_percent{pve_host="b",device="sda",serial="S2"}'
+        values: "96x150"
+      - series: 'fleet_disk_wear_percent{pve_host="c",device="sda",serial="S3"}'
+        values: "70x150"
+    alert_rule_test:
+      - {eval_time: 30m, alertname: FleetDiskWearHigh, exp_alerts: []}
+      - eval_time: 90m
+        alertname: FleetDiskWearHigh
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_disk_health, pve_host: a, device: sda, serial: S1}
+            exp_annotations:
+              summary: "Disk sda on a has used 85% of its rated endurance"
+              description: "sda (serial S1) on a is at 85% of rated wear. Plan the replacement now; a single-disk host (0pipe) has no mirror to absorb the failure."
+              runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+      - eval_time: 90m
+        alertname: FleetDiskWearCritical
+        exp_alerts:
+          - exp_labels: {severity: critical, service: fleet_disk_health, pve_host: b, device: sda, serial: S2}
+            exp_annotations:
+              summary: "Disk sda on b is at 96% of its rated endurance"
+              description: "sda (serial S2) on b is at or past its rated endurance (96%). Replace it; the drive can fail without further warning."
+              runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+  - name: a bad-sector counter that starts growing fires after 30 minutes, an all-zero disk does not
+    interval: 1m
+    input_series:
+      - series: 'fleet_disk_reallocated_sectors{pve_host="a",device="sda",serial="S1"}'
+        values: "0x20 3x80"
+      - series: 'fleet_disk_reallocated_sectors{pve_host="b",device="sda",serial="S2"}'
+        values: "0x100"
+    alert_rule_test:
+      - {eval_time: 40m, alertname: FleetDiskBadSectors, exp_alerts: []}
+      - eval_time: 70m
+        alertname: FleetDiskBadSectors
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_disk_health, pve_host: a, device: sda, serial: S1}
+            exp_annotations:
+              summary: "Disk sda on a reports bad sectors or media errors"
+              description: "sda (serial S1) on a has a non-zero reallocated, pending, offline-uncorrectable or media-error counter (3). Every such counter was 0 across the fleet on 2026-10-29, so any growth is new."
+              runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+  - name: the missing alert fires when a host stops reporting and stays quiet while all five report
+    interval: 1m
+    input_series:
+      - series: 'fleet_disk_smart_passed{pve_host="h1",device="sda",serial="A"}'
+        values: "1x120"
+      - series: 'fleet_disk_smart_passed{pve_host="h2",device="sda",serial="B"}'
+        values: "1x120"
+      - series: 'fleet_disk_smart_passed{pve_host="h3",device="sda",serial="C"}'
+        values: "1x120"
+      - series: 'fleet_disk_smart_passed{pve_host="h4",device="sda",serial="D"}'
+        values: "1x120"
+      # h5 reports for 20 minutes, then its collector is gone
+      - series: 'fleet_disk_smart_passed{pve_host="h5",device="sda",serial="E"}'
+        values: "1x20"
+    alert_rule_test:
+      - {eval_time: 15m, alertname: FleetDiskHealthMissing, exp_alerts: []}
+      - eval_time: 90m
+        alertname: FleetDiskHealthMissing
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_disk_health}
+            exp_annotations:
+              summary: "Fewer than 5 hosts report SMART health"
+              description: "Only 4 of the 5 Proxmox hosts (0docker, 0infer, 0mcp, 0own, 0pipe) export fleet_disk_smart_passed, so the disk health alerts are blind for the others. Check proxmox-storage-metrics.timer on the missing host."
+              runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+  - name: a disk that runs hot for 30 minutes warns, a cool one does not
+    interval: 1m
+    input_series:
+      - series: 'fleet_disk_temperature_celsius{pve_host="a",device="sda",serial="S1"}'
+        values: "70x100"
+      - series: 'fleet_disk_temperature_celsius{pve_host="b",device="sda",serial="S2"}'
+        values: "40x100"
+    alert_rule_test:
+      - {eval_time: 20m, alertname: FleetDiskHot, exp_alerts: []}
+      - eval_time: 60m
+        alertname: FleetDiskHot
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_disk_health, pve_host: a, device: sda, serial: S1}
+            exp_annotations:
+              summary: "Disk sda on a runs at 70 C"
+              description: "sda (serial S1) on a has been above 65 C for 30 minutes (fleet disks run at 31-52 C). Check airflow and what is hammering it."
+              runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts
+
+  - name: a flat, an already dead and a slowly wearing disk never trigger the wear forecast
+    interval: 1m
+    input_series:
+      - series: 'fleet_disk_wear_percent{pve_host="flat",device="sda",serial="S1"}'
+        values: "80x9000"
+      - series: 'fleet_disk_wear_percent{pve_host="dead",device="sda",serial="S2"}'
+        values: "110x9000"
+      # 10 percent, +0.24 percent a day: far from 100 in 30 days
+      - series: 'fleet_disk_wear_percent{pve_host="young",device="sda",serial="S3"}'
+        values: "10+0.000166667x9000"
+    alert_rule_test:
+      - {eval_time: 150h, alertname: FleetDiskWearForecast, exp_alerts: []}
+
+  - name: a disk at 70 percent that wears 1.2 percent a day is forecast to reach 100 percent within 30 days
+    interval: 1m
+    input_series:
+      # +0.05 percent an hour = 1.2 percent a day, so 77.5 percent after 150 hours and 113.5 percent forecast 30 days later
+      - series: 'fleet_disk_wear_percent{pve_host="a",device="sda",serial="S1"}'
+        values: "70+0.000833333x9000"
+    alert_rule_test:
+      - eval_time: 150h
+        alertname: FleetDiskWearForecast
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_disk_health, pve_host: a, device: sda, serial: S1}
+            exp_annotations:
+              summary: "Disk sda on a is forecast to reach 100% wear within 30 days"
+              description: "At the 3 day trend, sda (serial S1) on a reaches its rated endurance in under 30 days (forecast 113.5%). Look at what writes to it (CI builds on 0pipe) and order the replacement."
+              runbook_url: docs/runbooks/fleet-observability.md#disk-health-alerts

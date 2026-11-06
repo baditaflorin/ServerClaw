@@ -23,10 +23,1906 @@ release_policy:
   breaking_change_criteria: config/version-semantics.json
 archive_summary:
   root: workstreams/archive
-  total_workstreams: 341
+  total_workstreams: 348
   by_year:
-    '2026': 341
+    '2026': 348
 workstreams:
+- id: ws-20261031-pg-primary-memory
+  adr: 0495
+  title: Put the VM701 memory guardrails after the 2026-10-31 global OOM in git (parallel-query
+    limits, work_mem, the 10 GiB /dev/shm cap and the VM memory)
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/pg-primary-temp-files-log
+  worktree_path: .claude/worktrees/pg-primary-temp-files-log
+  doc: docs/workstreams/ws-20261031-pg-primary-memory.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/hostconf/files/postgresql-temp-files-log.infer-pg-primary.conf
+  - tests/test_pg_primary_temp_files_log.py
+  - config/0infer/pg-primary-memory/README.md
+  - config/0infer/pg-primary-memory/install-vm.sh
+  - config/hostconf/files/postgresql-parallel-guardrails.infer-pg-primary.conf
+  - config/hostconf/files/postgresql-work-mem-guardrails.infer-pg-primary.conf
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - docs/runbooks/host-local-config.md
+  - docs/adr/0495-pg-primary-memory-guardrails.md
+  - tests/test_pg_primary_memory.py
+  - docs/adr/.index.yaml
+  - docs/adr/index/by-concern/vm-topology.yaml
+  - docs/adr/index/by-range/0400-0499.yaml
+  - docs/adr/index/by-status/partial.yaml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261031-pg-primary-memory.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261031-pg-primary-memory.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261031_pg_primary_memory_tracking
+      paths:
+      - docs/workstreams/ws-20261031-pg-primary-memory.md
+      mode: exclusive
+    - id: pg_primary_memory_config
+      paths:
+      - config/0infer/pg-primary-memory/README.md
+      - config/0infer/pg-primary-memory/install-vm.sh
+      - tests/test_pg_primary_memory.py
+      mode: exclusive
+    - id: pg_primary_temp_files_log
+      paths:
+      - config/hostconf/files/postgresql-temp-files-log.infer-pg-primary.conf
+      - tests/test_pg_primary_temp_files_log.py
+      mode: exclusive
+    - id: adr_0495_pg_primary_memory_guardrails
+      paths:
+      - docs/adr/0495-pg-primary-memory-guardrails.md
+      mode: exclusive
+    - id: hostconf_pg_primary_guardrail_files
+      paths:
+      - config/hostconf/files/postgresql-parallel-guardrails.infer-pg-primary.conf
+      - config/hostconf/files/postgresql-work-mem-guardrails.infer-pg-primary.conf
+      mode: exclusive
+    - id: hostconf_manifest
+      paths:
+      - config/hostconf/hostconf.yaml
+      - config/hostconf/README.md
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: host_local_config_runbook
+      paths:
+      - docs/runbooks/host-local-config.md
+      mode: shared_contract
+      contract: host-local-config-runbook-v1
+    - id: adr_index
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/by-concern/vm-topology.yaml
+      - docs/adr/index/by-range/0400-0499.yaml
+      - docs/adr/index/by-status/partial.yaml
+      mode: shared_contract
+      contract: adr-index-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261031-pg-primary-memory.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: The memory guardrails of the production Postgres VM701 after
+      the 2026-10-31 global OOM (parallel-query limits, work_mem, the 10 GiB /dev/shm
+      cap, the VM memory) are recorded in git; nothing is applied by merging.
+    release_bump: patch
+    included_in_repo_version: null
+  context: 'On 2026-10-31 at 01:25Z the kernel OOM killer ended nine postgres processes
+    on VM701 (infer-pg-primary) and the cluster crash-recovered for about 25 s. The
+    memory that ran the VM out was shared memory beyond the main segment (parallel-query
+    dynamic shared memory, +24.5 GiB over the 24.6 GiB segment). Two live changes
+    were made that morning by other sessions and are not in git: /dev/shm capped at
+    10 GiB (08:02Z) and the VM raised to 66560 MiB (about 08:17Z). This change records
+    both and lands the reload-only guardrails (max_parallel_workers_per_gather 2,
+    max_parallel_workers 12, temp_file_limit 150GB, work_mem 64MB) as hostconf files.
+    Applying any of it is a separate, supervised step; huge pages are a separate PR
+    for a maintenance window. Update 2026-11-02: S1 was applied live on 2026-11-01
+    (S1a 11:04Z, S1b 11:41Z) and its 24 h acceptance found one regression (SELECT
+    COUNT(*) FROM mv_domains_denormalized 0.42 s -> 0.62 s with workers per call 3.94
+    -> 1.97), so max_parallel_workers_per_gather goes back to 4 (only that knob; 12,
+    150GB and work_mem 64MB stay), planned for 2026-11-03 11:03Z. Update 2026-11-04:
+    log_temp_files = 64MB (a plain hostconf apply, reload only) so the statements
+    behind the 612 GB of temporary files, which pg_stat_statements does not attribute
+    (5,000 entries, 2,000+ deallocations), show up in the server log.'
+  tasks:
+  - id: t1
+    title: Add the two hostconf conf.d files and their expect entries for infer-pg-primary
+      (no huge-pages file)
+    status: completed
+  - id: t2
+    title: Record the /dev/shm cap and the VM memory under config/0infer/pg-primary-memory
+      with an idempotent installer and a test
+    status: completed
+  - id: t3
+    title: ADR 0495 and the apply-order subsection in the host-local-config runbook
+    status: completed
+  - id: t4
+    title: Review and merge (PR 646, merged); the two files were applied on VM701
+      on 2026-11-01 (S1a 11:04Z, S1b 11:41Z)
+    status: completed
+  - id: t5
+    title: Revert max_parallel_workers_per_gather to 4 after the S1 acceptance (ADR
+      0495, amendment of 2026-11-02); apply Tue 2026-11-03 11:03Z with one hostconf
+      apply of the parallel file
+    status: in_progress
+  - id: t6
+    title: Log temporary files of 64 MB or more with their statement (log_temp_files
+      = 64MB, ADR 0495 amendment of 2026-11-04); apply after the merge with one plain
+      hostconf apply
+    status: in_progress
+- id: ws-20261031-pg-primary-hugepages
+  adr: 0495
+  title: Huge pages for the production Postgres VM701 (S2 of ADR 0495) as hostconf
+    files and a window runbook, applied only in a maintenance window, planned 2026-11-04,
+    11:00-12:00Z (any day 11:00-13:00Z once S1c has run 24 h)
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/pg-primary-pgss-max
+  worktree_path: .claude/worktrees/pg-primary-pgss-max
+  doc: docs/workstreams/ws-20261031-pg-primary-hugepages.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/hostconf/files/postgresql-pgss-max.infer-pg-primary.conf
+  - tests/test_pg_primary_pgss_max.py
+  - config/hostconf/files/sysctl-postgres-hugepages.infer-pg-primary.conf
+  - config/hostconf/files/postgresql-huge-pages.infer-pg-primary.conf
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - docs/runbooks/host-local-config.md
+  - docs/adr/0495-pg-primary-memory-guardrails.md
+  - tests/test_pg_primary_memory.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261031-pg-primary-hugepages.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261031-pg-primary-hugepages.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261031_pg_primary_hugepages_tracking
+      paths:
+      - docs/workstreams/ws-20261031-pg-primary-hugepages.md
+      mode: exclusive
+    - id: hostconf_pg_primary_hugepages_files
+      paths:
+      - config/hostconf/files/sysctl-postgres-hugepages.infer-pg-primary.conf
+      - config/hostconf/files/postgresql-huge-pages.infer-pg-primary.conf
+      mode: exclusive
+    - id: hostconf_pg_primary_pgss_max
+      paths:
+      - config/hostconf/files/postgresql-pgss-max.infer-pg-primary.conf
+      - tests/test_pg_primary_pgss_max.py
+      mode: exclusive
+    - id: hostconf_manifest
+      paths:
+      - config/hostconf/hostconf.yaml
+      - config/hostconf/README.md
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: host_local_config_runbook
+      paths:
+      - docs/runbooks/host-local-config.md
+      mode: shared_contract
+      contract: host-local-config-runbook-v1
+    - id: adr_0495_hugepages_amendment
+      paths:
+      - docs/adr/0495-pg-primary-memory-guardrails.md
+      mode: shared_contract
+      contract: adr-0495-pg-primary-memory-v1
+    - id: pg_primary_memory_tests_hugepages
+      paths:
+      - tests/test_pg_primary_memory.py
+      mode: shared_contract
+      contract: pg-primary-memory-tests-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261031-pg-primary-hugepages.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Huge pages for the production Postgres VM701 (vm.nr_hugepages
+      12800 and huge_pages on) are recorded as hostconf files with the window runbook;
+      nothing is applied by merging, the apply is a maintenance window, planned 2026-11-04,
+      11:00-12:00Z (any day 11:00-13:00Z once S1c has run 24 h).
+    release_bump: patch
+    included_in_repo_version: null
+  context: 'S2 of ADR 0495. The shared-memory segment of VM701 (24.66 GiB, 12628 huge
+    pages of 2 MiB) is backed by 4 kB pages, so every backend carries 43-48 MiB of
+    page tables (3.7 GiB at the 140 processes of the 2026-10-31 01:25Z OOM, about
+    15 GiB in the connection-storm worst case). Reserving 12800 huge pages and starting
+    Postgres with huge_pages = on removes that cost. It needs one restart (5 s measured
+    on 2026-10-30, 60 s budget) and a sysctl file whose apply runs `sysctl -p` at
+    once, so it is applied only inside a maintenance window, with Postgres stopped
+    for the reservation. Merging applies nothing: the daily drift check reports both
+    files missing until then. Rider (stacked on the S2 PR): pg_stat_statements.max
+    5000 -> 20000, a restart setting of a preloaded library, rides on the same restart
+    so the next 24 h of pg_stat_statements attribution are complete (the 5,000-entry
+    table evicts and attributes only 3.8 GB of the 612 GB of temporary files). About
+    6 MB of shared memory, inside the 172-page margin. Same seed, apply, reset order
+    as huge_pages.'
+  tasks:
+  - id: t1
+    title: Add the sysctl and conf.d hostconf files and their expect entries for infer-pg-primary
+    status: in_progress
+  - id: t2
+    title: Window runbook in host-local-config.md and the ADR 0495 amendment (planned
+      2026-11-04, 11:00-12:00Z (any day 11:00-13:00Z once S1c has run 24 h))
+    status: in_progress
+  - id: t3
+    title: Merge just before the window (the user decides); apply in the window only,
+      planned 2026-11-04 11:00Z
+    status: pending
+  - id: t4
+    title: Rider pg_stat_statements.max 20000 on the same restart (postgresql-pgss-max.infer-pg-primary,
+      restart-only, seeded with ALTER SYSTEM before the stop and applied after the
+      start); stacked on the S2 PR
+    status: in_progress
+- id: ws-20261104-fleet-job-caches-trim-alerts
+  adr: 0494
+  title: 'docker-build-lv3 (VM 130): four alerts on the textfile metric of the GC''s
+    step 3d (the Go build cache trim): a run that failed or was skipped, a trim that
+    stopped, no metric at all, a volume over its cap for a day; merged in PR 672 and
+    applied to the monitoring VM on 2026-11-04'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: true
+  owner: claude
+  branch: claude/live-apply-fleet-job-caches-trim-alerts
+  worktree_path: .claude/worktrees/live-apply-fleet-job-caches-trim-alerts
+  doc: docs/workstreams/ws-20261104-fleet-job-caches-trim-alerts.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/prometheus/rules/fleet-job-caches-trim.yml
+  - tests/promtool/fleet_job_caches_trim_rules_test.yml
+  - tests/test_fleet_job_caches_trim_rules.py
+  - config/0mcp/docker-build-lv3/README.md
+  - docs/runbooks/fleet-observability.md
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+  - tests/test_adopted_prometheus_rules.py
+  - .woodpecker.yml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - versions/stack.yaml
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - receipts/live-applies/2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply.json
+  - workstreams/active/ws-20261104-fleet-job-caches-trim-alerts.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261104-fleet-job-caches-trim-alerts.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261104_fleet_job_caches_trim_alerts_tracking
+      paths:
+      - docs/workstreams/ws-20261104-fleet-job-caches-trim-alerts.md
+      mode: exclusive
+    - id: fleet_job_caches_trim_rules
+      paths:
+      - config/prometheus/rules/fleet-job-caches-trim.yml
+      - tests/promtool/fleet_job_caches_trim_rules_test.yml
+      - tests/test_fleet_job_caches_trim_rules.py
+      mode: exclusive
+    - id: fleet_job_caches_trim_alerts_build_vm_readme
+      paths:
+      - config/0mcp/docker-build-lv3/README.md
+      mode: shared_contract
+      contract: docker-build-vm-config-v1
+    - id: fleet_job_caches_trim_alerts_observability_runbook
+      paths:
+      - docs/runbooks/fleet-observability.md
+      mode: shared_contract
+      contract: fleet-observability-inventory-v1
+    - id: monitoring_vm_role_shared_edits
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+      - tests/test_adopted_prometheus_rules.py
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
+    - id: fleet_job_caches_trim_alerts_woodpecker_pytest_step
+      paths:
+      - .woodpecker.yml
+      mode: shared_contract
+      contract: woodpecker-workflow-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ws_20261104_fleet_job_caches_trim_alerts_mainline_live_apply_evidence
+      paths:
+      - README.md
+      - versions/stack.yaml
+      - docs/status/history/live-apply-evidence.md
+      - receipts/live-applies/2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply.json
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261104-fleet-job-caches-trim-alerts.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'Alerts for the build VM''s Go build cache trim (step 3d of docker-build-gc,
+      textfile metric fleet_job_caches_trim.prom): FleetJobCachesTrimFailed (the last
+      full run failed or was skipped), FleetJobCachesTrimStale (no run for 9 hours),
+      FleetJobCachesTrimMissing (no metric for a day) and FleetJobCachesOverCap (info:
+      a volume over its size cap at every run for 24 hours), with promtool unit tests,
+      a runbook section and a README section. Applied to the monitoring VM on 2026-11-04
+      (a targeted one-file play, receipt 2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply).'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      fleet_job_caches_trim_alerts: 2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply
+  context: 'Step 3d of the build VM''s 4-hourly GC (platform_server PRs 657
+    and 664) trims the Go build cache inside the fleet-job-cache-* volumes to a 20
+    GiB cap and keeps the VM''s root off the disk-full line (the go-url-categorizer-api
+    cache grew from 17 to 80 GiB in two days before it existed). It has run on its
+    own since 2026-11-03 10:05Z and writes fleet_job_caches_trim.prom into node_exporter''s
+    textfile directory, but no rule on either Prometheus read that file: a failed
+    or skipped run, a timer that stopped, a file that is gone or a volume stuck over
+    its cap would have told nobody (on 2026-11-02 the step would have been skipped
+    silently, its helper image had been pruned). This change adds the four alerts,
+    their unit tests and the runbook text. Putting the rule file on the monitoring
+    VM was a separate step that needed the owner''s yes; it was taken on 2026-11-04.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Rule file with four alerts, promtool unit tests and a pytest wrapper that
+      pins the metric names to the ones the wrapper script writes, runbook section
+      and rollback row, README section for the trim, the monitoring_vm adopted list,
+      the Woodpecker pytest step
+    status: completed
+  - id: t3
+    title: Mutation sweep (88 of 88 killed), pre-push gate on the build server, open
+      the pull request and merge it (PR 672, 03cc038fe)
+    status: completed
+  - id: t4
+    title: Ship the rule file to the monitoring VM (targeted Ansible play with the
+      monitoring role's copy parameters), record the receipt and bump platform_version
+    status: completed
+- id: ws-20261103-pve-0mcp-budget-status
+  adr: 0494
+  title: 'pve-0mcp memory budget runbook: a status section for what stage 1 changed
+    on 2026-11-02 and the new totals (82.14 percent guaranteed, 97.1 percent maximums),
+    tests pin it'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: true
+  owner: claude
+  branch: claude/pve-0mcp-budget-status
+  worktree_path: .claude/worktrees/pve-0mcp-budget-status
+  doc: docs/workstreams/ws-20261103-pve-0mcp-budget-status.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - docs/runbooks/pve-0mcp-memory-budget.md
+  - tests/test_proxmox_host_memory_budget.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261103-pve-0mcp-budget-status.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261103-pve-0mcp-budget-status.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261103_pve_0mcp_budget_status_tracking
+      paths:
+      - docs/workstreams/ws-20261103-pve-0mcp-budget-status.md
+      mode: exclusive
+    - id: pve_0mcp_memory_budget_doc_status
+      paths:
+      - docs/runbooks/pve-0mcp-memory-budget.md
+      - tests/test_proxmox_host_memory_budget.py
+      mode: shared_contract
+      contract: pve-0mcp-memory-budget-doc-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261103-pve-0mcp-budget-status.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'The pve-0mcp memory budget runbook has a status section (11):
+      what was applied on 2026-11-02 (VM 120 floor to 18,432; VMs 171, 122 and 192
+      at fixed sizes; the swap file step left open because a stopgap exists), the
+      new totals (105,728 MiB guaranteed, 82.14 percent; maximums 124,928 MiB, 97.1
+      percent), and the tests pin the arithmetic'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'PR 653 merged the budget runbook and its alert as a proposal that says
+    nothing is applied. On 2026-11-02 stage 1 was taken in part and three VMs were
+    given fixed sizes when the host fell under 5 percent available again, and on 2026-11-03
+    the alert was shipped. The runbook still said "nothing applied" and "80.15 today",
+    its test pinned that sentence, and the alert it links to computes 82.14. The 2026-11-01
+    tables stay as the dated measurement (their tests are unchanged); a new section
+    11 records the changes and the new totals, and the old "nothing applied" test
+    becomes two tests: which steps were applied, and that section 11''s figures add
+    up against the budget table. The live changes were made and verified before this
+    change (live_applied is true); nothing is applied by it.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Write section 11 (what was applied, the numbers now, what happened to the
+      host) and qualify the sentences that were true only on 2026-11-01
+    status: completed
+  - id: t3
+    title: Replace the nothing-applied test by two tests that pin the applied steps
+      and the arithmetic of section 11 (mutation-tested)
+    status: completed
+  - id: t4
+    title: Pass the pre-push gate on the build server, open the pull request and land
+      it
+    status: in_progress
+- id: ws-20261103-build-gc-helper-image
+  adr: 0494
+  title: 'docker-build-lv3 (VM 130): step 3d no longer depends on one golang image
+    being on the host (an ordered list, a bounded pull through the registry mirror,
+    a WARNING and a textfile metric when it still cannot run); git only, nothing is
+    applied'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/build-gc-helper-image
+  worktree_path: .claude/worktrees/build-gc-helper-image
+  doc: docs/workstreams/ws-20261103-build-gc-helper-image.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/0mcp/docker-build-lv3/README.md
+  - config/0mcp/docker-build-lv3/files.sha256
+  - config/0mcp/docker-build-lv3/files/usr/local/bin/fleet-job-caches-trim.sh
+  - tests/test_docker_build_gc_cache_trim.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261103-build-gc-helper-image.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261103-build-gc-helper-image.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261103_build_gc_helper_image_tracking
+      paths:
+      - docs/workstreams/ws-20261103-build-gc-helper-image.md
+      mode: exclusive
+    - id: docker_build_lv3_gc_helper_image_config
+      paths:
+      - config/0mcp/docker-build-lv3/README.md
+      - config/0mcp/docker-build-lv3/files.sha256
+      - config/0mcp/docker-build-lv3/files/usr/local/bin/fleet-job-caches-trim.sh
+      mode: shared_contract
+      contract: docker-build-vm-config-v1
+    - id: docker_build_gc_helper_image_tests
+      paths:
+      - tests/test_docker_build_gc_cache_trim.py
+      mode: shared_contract
+      contract: docker-build-vm-config-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261103-build-gc-helper-image.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'The build VM''s docker-build-gc step 3d (the Go build cache
+      cap inside the fleet-job-cache-* volumes) no longer needs one particular golang
+      image on the host: it takes the first of golang:1.27 and golang:1.26 that exists,
+      pulls golang:1.27 (bounded, through the registry mirror, only with room on the
+      disk) when neither does, says WARNING and exits 3 when it still cannot run,
+      and writes a textfile metric. Git only: nothing is installed on the VM by this
+      change.'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'Step 3d of docker-build-gc.sh (PR 657) runs go-fleet-job''s program in
+    throw-away containers of a golang image with docker''s --pull never. Its default
+    image golang:1.26 was missing from the host at 2026-11-02 23:10Z, so the wrapper
+    said SKIPPED and exited 0: once step 4 (the GC script calling it) is applied,
+    the step would silently never run. Read-only evidence of 2026-11-03: the image
+    is back (a job pulled it), but an unused image goes whenever someone prunes: the
+    host has two scheduled pruners (docker-build-gc step 3 every 4 hours and fleet-docker-prune
+    daily, both `docker image prune -a --until=168h`, which goes by the image''s creation
+    date, so all three golang tags created 2026-10-28 03:15Z become prunable on 11-04
+    03:15Z) and a session pruned with until=24h at 22:46Z. This change makes the step
+    independent of that.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Wrapper - an ordered image list, a bounded pull through the registry mirror
+      guarded by free space, WARNING lines and exit 3 when it cannot run, a textfile
+      metric; tests, README (image paragraph, staged plan updated for the 2026-11-02
+      run with the old wrapper), files.sha256
+    status: completed
+  - id: t3
+    title: Run the tests and a mutation sweep on the build host, pass the pre-push
+      gate through guarded_run.py, open the pull request (nothing is applied, nothing
+      is merged)
+    status: in_progress
+- id: ws-20261102-build-gc-cache-trim
+  adr: 0494
+  title: 'docker-build-lv3 (VM 130): the host''s own 4-hourly GC also trims the Go
+    build caches inside the fleet-job-cache-* volumes by size and age, with go-fleet-job
+    v0.5.0''s tested program vendored and pinned (git only, nothing is applied)'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/build-gc-cache-trim
+  worktree_path: .claude/worktrees/build-gc-cache-trim
+  doc: docs/workstreams/ws-20261102-build-gc-cache-trim.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/0mcp/docker-build-lv3/README.md
+  - config/0mcp/docker-build-lv3/files.sha256
+  - config/0mcp/docker-build-lv3/files/usr/local/bin/docker-build-gc.sh
+  - config/0mcp/docker-build-lv3/files/usr/local/bin/fleet-job-caches.sh
+  - config/0mcp/docker-build-lv3/files/usr/local/bin/fleet-job-caches-trim.sh
+  - tests/test_docker_build_gc_cache_trim.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261102-build-gc-cache-trim.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261102-build-gc-cache-trim.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261102_build_gc_cache_trim_tracking
+      paths:
+      - docs/workstreams/ws-20261102-build-gc-cache-trim.md
+      mode: exclusive
+    - id: docker_build_lv3_gc_cache_trim_config
+      paths:
+      - config/0mcp/docker-build-lv3/README.md
+      - config/0mcp/docker-build-lv3/files.sha256
+      - config/0mcp/docker-build-lv3/files/usr/local/bin/docker-build-gc.sh
+      - config/0mcp/docker-build-lv3/files/usr/local/bin/fleet-job-caches.sh
+      - config/0mcp/docker-build-lv3/files/usr/local/bin/fleet-job-caches-trim.sh
+      mode: shared_contract
+      contract: docker-build-vm-config-v1
+    - id: docker_build_gc_cache_trim_tests
+      paths:
+      - tests/test_docker_build_gc_cache_trim.py
+      mode: exclusive
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261102-build-gc-cache-trim.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'The 0mcp build VM''s 4-hourly docker-build-gc gains step 3d:
+      the Go build cache inside each fleet-job-cache-* volume is kept under 20 GiB
+      (nothing used within 12 h goes while a job uses the volume), by go-fleet-job
+      v0.5.0''s own program vendored byte for byte and pinned by sha256. Git only:
+      nothing is installed on the VM by this change.'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'On 2026-10-31 and again on 2026-11-02 one Go build cache volume of the
+    0mcp build VM, fleet-job-cache-gucapi-gocache, grew from 17 GiB to 80 GiB in two
+    days (1.8 to 2.8 GiB an hour) and took the root filesystem from about 69 % to
+    94 % used, against the CI load controller''s line of 10 % free. The volume is
+    in use most weekday hours, so idle-cache-volumes-trim.sh (whole volumes, idle
+    for 3 days) never touches it and nothing bounds its size. go-fleet-job v0.5.0
+    (2026-11-02) has the program that does (`fleet-job cache prune`: a size cap inside
+    a Go build cache, also while a job uses the volume, never a file used within a
+    floor), but nothing schedules it. This change makes the host''s own GC call that
+    program, vendored unchanged, so no second implementation exists.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Vendor go-fleet-job v0.5.0 caches.sh byte for byte (pinned), add the wrapper
+      fleet-job-caches-trim.sh and step 3d of docker-build-gc.sh, files.sha256 and
+      README (design, name gap, staged apply plan with undo)
+    status: completed
+  - id: t3
+    title: Tests (fake docker, temp volumes, the real program) run by hand on the
+      build host, pass the pre-push gate through guarded_run.py, open the pull request
+      (nothing is applied, nothing is merged)
+    status: in_progress
+- id: ws-20261101-vm130-inventory-correct
+  adr: 0494
+  title: 'VM 130 (docker-build-lv3, the 0mcp CI builder): the inventory says what
+    the live VM is after the 2026-11-01 memory restart (20 cores, 14336 MB fixed,
+    600 GB)'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/vm130-inventory-correct
+  worktree_path: .claude/worktrees/vm130-inventory-correct
+  doc: docs/workstreams/ws-20261101-vm130-inventory-correct.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - inventory/host_vars/proxmox-host.yml
+  - config/0mcp/docker-build-lv3/README.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261101-vm130-inventory-correct.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261101-vm130-inventory-correct.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261101_vm130_inventory_correct_tracking
+      paths:
+      - docs/workstreams/ws-20261101-vm130-inventory-correct.md
+      mode: exclusive
+    - id: vm130_inventory_declaration
+      paths:
+      - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: docker_build_lv3_readme
+      paths:
+      - config/0mcp/docker-build-lv3/README.md
+      mode: shared_contract
+      contract: docker-build-vm-config-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261101-vm130-inventory-correct.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'VM 130 (docker-build-lv3) is declared as the live VM runs after
+      the 2026-11-01 memory restart: 20 cores, memory_mb 14336 (fixed, balloon 0),
+      disk_gb 600; a provision-guests run no longer shrinks the production CI builder.
+      Inventory and docs only; nothing is applied.'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'On 2026-11-01 the 0mcp hypervisor ran out of memory and VM 130 was restarted
+    at 14336 MiB with ballooning off (a drained restart, 08:48-08:51Z). The inventory
+    entry still said 12 cores, 10240 MB and 320 GB, and the proxmox_guests role runs
+    `qm set --cores --memory --balloon 0` on every declared guest, so a provision-guests
+    run would have shrunk the production CI builder. The entry now matches `qm config
+    130` read on 2026-11-01. The generated inventory/group_vars/platform.yml is not
+    regenerated here: a dry run differs in 1043 lines (other guests, including VM
+    155) and nothing reads sizes from it.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Declare VM 130 as live (20 cores, 14336 MB, 600 GB) in host_vars and correct
+      the docker-build-lv3 README (intro, new dated section, rebuild recipe)
+    status: completed
+  - id: t3
+    title: Run the inventory and config tests, pass the pre-push gate, open the pull
+      request and land it with fleet-ship (nothing is applied live)
+    status: in_progress
+- id: ws-20261101-pve-0mcp-memory-budget
+  adr: 0494
+  title: 'pve-0mcp memory budget: measured seven-day numbers, floors, host swap and
+    KSM verdicts, an apply plan, and one budget alert (proposal, git only, nothing
+    applied)'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: true
+  owner: claude
+  branch: claude/live-apply-budget-alert
+  worktree_path: .claude/worktrees/live-apply-budget-alert
+  doc: docs/workstreams/ws-20261101-pve-0mcp-memory-budget.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - docs/runbooks/pve-0mcp-memory-budget.md
+  - config/prometheus/rules/proxmox-host-memory-budget.yml
+  - tests/promtool/proxmox_host_memory_budget_rules_test.yml
+  - tests/test_proxmox_host_memory_budget.py
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+  - tests/test_adopted_prometheus_rules.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - versions/stack.yaml
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - receipts/live-applies/2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply.json
+  - workstreams/active/ws-20261101-pve-0mcp-memory-budget.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261101-pve-0mcp-memory-budget.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261101_pve_0mcp_memory_budget_tracking
+      paths:
+      - docs/workstreams/ws-20261101-pve-0mcp-memory-budget.md
+      mode: exclusive
+    - id: pve_0mcp_memory_budget_runbook
+      paths:
+      - docs/runbooks/pve-0mcp-memory-budget.md
+      - tests/test_proxmox_host_memory_budget.py
+      mode: exclusive
+    - id: proxmox_host_memory_budget_rules
+      paths:
+      - config/prometheus/rules/proxmox-host-memory-budget.yml
+      - tests/promtool/proxmox_host_memory_budget_rules_test.yml
+      mode: exclusive
+    - id: monitoring_vm_role_shared_edits
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+      - tests/test_adopted_prometheus_rules.py
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ws_20261101_pve_0mcp_memory_budget_mainline_live_apply_evidence
+      paths:
+      - README.md
+      - versions/stack.yaml
+      - docs/status/history/live-apply-evidence.md
+      - receipts/live-applies/2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply.json
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261101-pve-0mcp-memory-budget.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'pve-0mcp memory budget (proposal): seven-day measured guest
+      memory, the budget table (floors plus fixed VMs against host RAM, target 75
+      percent, alarm above 80), floor, swap and KSM verdicts, a staged apply plan
+      with undo, and the alert ProxmoxHostGuaranteedMemoryOverBudget with promtool
+      tests. Docs, one rule file and tests only; nothing is applied to any host.'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      pve_host_memory_budget_alert: 2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply
+  context: 'On 2026-11-01 the 0mcp hypervisor (pve-0mcp, 128716 MiB) fell to 3.9 percent
+    available memory with its 4 GiB of swap full; a restart of VM 130 at a fixed 14336
+    MiB ended it. This workstream turns the read-only analysis into a reviewed proposal:
+    where memory and balloon settings are defined and how a change reaches the host,
+    what every guest uses over seven days (Prometheus) and what it holds on the host
+    (qm), floors, fixed VMs, host swap, KSM, the budget rule, an apply plan, and one
+    alert on the budget. Applying any of it (qm set, a restart, a swap file, a KSM
+    switch, shipping the rule file) is a separate step that needs the owner''s yes.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Add the alert ProxmoxHostGuaranteedMemoryOverBudget with promtool tests,
+      a pytest pin, and adopt the file in the monitoring role
+    status: completed
+  - id: t3
+    title: Write the budget runbook (measured table, floors, swap, KSM, apply plan
+      with undo) and pin its arithmetic with a test
+    status: completed
+  - id: t4
+    title: Pass the pre-push gate on the build server, open the pull request and merge
+      it (PR 653, 1cee7e96)
+    status: completed
+  - id: t5
+    title: Ship the alert file to the monitoring VM (targeted Ansible play with the
+      monitoring role's copy parameters), record the receipt and bump platform_version
+    status: completed
+- id: ws-20261101-pg-swap-hostconf
+  adr: 0494
+  title: 'infer-pg-primary (VM701): the swap sysctl of the 2026-10-31 swapfile is
+    a managed hostconf file, so a rebuilt VM and a drift check keep vm.swappiness
+    at 10'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: true
+  owner: claude
+  branch: claude/hostconf-pg-swap
+  worktree_path: .claude/worktrees/hostconf-pg-swap
+  doc: docs/workstreams/ws-20261101-pg-swap-hostconf.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - config/hostconf/files/sysctl-pg-swap.infer-pg-primary.conf
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261101-pg-swap-hostconf.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261101-pg-swap-hostconf.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261101_pg_swap_hostconf_tracking
+      paths:
+      - docs/workstreams/ws-20261101-pg-swap-hostconf.md
+      mode: exclusive
+    - id: hostconf_pg_swap_file
+      paths:
+      - config/hostconf/files/sysctl-pg-swap.infer-pg-primary.conf
+      mode: exclusive
+    - id: hostconf_manifest
+      paths:
+      - config/hostconf/hostconf.yaml
+      - config/hostconf/README.md
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261101-pg-swap-hostconf.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: hostconf manages /etc/sysctl.d/91-pg-swap.conf (vm.swappiness
+      = 10) on infer-pg-primary, the sysctl that went with the 16 GiB swapfile of
+      2026-10-31; drift reports it, the entry documents the swapfile rebuild commands
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'On 2026-10-31 13:27Z VM701 (the production DomainScope Postgres) got a
+    16 GiB swapfile on its root disk and /etc/sysctl.d/91-pg-swap.conf with vm.swappiness
+    = 10, by hand, after the 01:25Z global OOM. The file existed on the host and nowhere
+    else, which is what hostconf exists to prevent. The manifest now lists it with
+    the effective setting (sysctl vm.swappiness = 10); the live file was read before
+    the entry was written and `hostconf.py drift --host infer-pg-primary` reports
+    it in sync (live_applied is true: nothing needs applying).'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Add config/hostconf/files/sysctl-pg-swap.infer-pg-primary.conf, the manifest
+      entry and the host's file list, and the README line (65 catalog files)
+    status: completed
+  - id: t3
+    title: Run the hostconf tests and the live read-only drift check, pass the pre-push
+      gate on the build server, open the pull request and land it with fleet-ship
+    status: in_progress
+- id: ws-20261101-hypervisor-swap-stopgap
+  adr: 0494
+  title: 'pve-0mcp: the 32 GiB stopgap swapfile added by hand on 2026-11-01 is in
+    git as a documented, idempotent host-local config (README, install-host.sh with
+    check/--persist/--remove, live-state snapshot, tests); nothing is applied by this
+    change'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: true
+  owner: claude
+  branch: claude/hypervisor-swap-stopgap
+  worktree_path: .claude/worktrees/hypervisor-swap-stopgap
+  doc: docs/workstreams/ws-20261101-hypervisor-swap-stopgap.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/0mcp/hypervisor-swap/README.md
+  - config/0mcp/hypervisor-swap/install-host.sh
+  - config/0mcp/hypervisor-swap/live-state-20261101.txt
+  - tests/test_hypervisor_swap.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261101-hypervisor-swap-stopgap.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261101-hypervisor-swap-stopgap.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261101_hypervisor_swap_stopgap_tracking
+      paths:
+      - docs/workstreams/ws-20261101-hypervisor-swap-stopgap.md
+      mode: exclusive
+    - id: hypervisor_swap_stopgap_config
+      paths:
+      - config/0mcp/hypervisor-swap/README.md
+      - config/0mcp/hypervisor-swap/install-host.sh
+      - config/0mcp/hypervisor-swap/live-state-20261101.txt
+      mode: exclusive
+    - id: hypervisor_swap_stopgap_tests
+      paths:
+      - tests/test_hypervisor_swap.py
+      mode: exclusive
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261101-hypervisor-swap-stopgap.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: config/0mcp/hypervisor-swap/ records the 32 GiB stopgap swapfile
+      of pve-0mcp (added by hand 2026-11-01 22:03Z) with its reasons, undo and removal
+      criteria, and install-host.sh repeats it idempotently (check, --apply, --persist,
+      --remove); the swapfile is not in /etc/fstab yet
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: On 2026-11-01 the 0mcp hypervisor (pve-0mcp) had 8 GiB of 125 GiB available,
+    its 4 GiB swap partition 3.8 GiB full and its VMs configured for 139 GiB; the
+    owner approved a stopgap and a 32 GiB swapfile /swapfile-0mcp-stopgap was created
+    live on / (md2, ext4) at 22:03Z, by hand. It is not in /etc/fstab, so a reboot
+    drops it, and it was in no repository. hostconf manages sysctl files, systemd
+    drop-ins and Postgres conf.d files only (no swap or fstab kind), so this uses
+    the install-script pattern of config/0mcp and config/0infer. Nothing is installed
+    or changed on the host by this change (the read-only check verb was run once against
+    the live host, 22:27Z, to test it); persisting the swapfile (install-host.sh --persist)
+    needs the owner's yes. The lasting fix (VM memory sizes that fit the host) is
+    the owner's decision and belongs to the capacity plan and the memory-budget proposal
+    (PR 653), not here.
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Add config/0mcp/hypervisor-swap/ (README, install-host.sh, live-state snapshot)
+      and tests/test_hypervisor_swap.py
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on the build server, open the pull request, check
+      Woodpecker (the owner merges; persisting the swapfile on the host is a separate
+      approved step)
+    status: in_progress
+- id: ws-20261029-agent-history-vip-collision
+  adr: 0494
+  title: Move the Postgres HA VIP off 10.10.10.55, the agent-history guest's address,
+    and pin that no guest sits on a VIP
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/agent-history-vip-collision
+  worktree_path: .claude/worktrees/ah-vip
+  doc: docs/workstreams/ws-20261029-agent-history-vip-collision.md
+  depends_on:
+  - ws-0534-agent-history-vm
+  - ws-0537-agent-history-activate
+  conflicts_with: []
+  shared_surfaces:
+  - inventory/host_vars/proxmox-host.yml
+  - tests/test_guest_addresses_distinct.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261029-agent-history-vip-collision.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261029-agent-history-vip-collision.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261029_vip_collision_tracking
+      paths:
+      - docs/workstreams/ws-20261029-agent-history-vip-collision.md
+      mode: exclusive
+    - id: vip_collision_inventory
+      paths:
+      - inventory/host_vars/proxmox-host.yml
+      - tests/test_guest_addresses_distinct.py
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261029-agent-history-vip-collision.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Move the Postgres HA keepalived VIP from 10.10.10.55 (the agent-history
+      guest's address) to 10.10.10.58 and pin that no guest address equals a VIP.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'Latent address collision found while fixing NetpolicyDrift for the agent-history
+    guest: the Postgres HA VIP declared in the inventory is the store''s address.
+    The VIP is not deployed, so there is no live change; the tests keep it from recurring.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Move postgres_ha.vip_ipv4 to 10.10.10.58 and add the distinct-address tests
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not
+      merged, no live-apply marker, nothing applied)
+    status: in_progress
+- id: ws-20261029-agent-history-netpolicy-drift
+  adr: 0494
+  title: Keep the agent-history store out of the all_guests fan-out and declare its
+    forward flows (NetpolicyDrift for VM 155 and VM 192)
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/agent-history-netpolicy-drift
+  worktree_path: .claude/worktrees/ah-netpol
+  doc: docs/workstreams/ws-20261029-agent-history-netpolicy-drift.md
+  depends_on:
+  - ws-0534-agent-history-vm
+  - ws-0537-agent-history-activate
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2
+  - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/templates/vm.fw.j2
+  - scripts/firewall_drift.py
+  - tests/test_network_policy_all_guests_flag.py
+  - inventory/host_vars/proxmox-host.yml
+  - config/network-policy/0mcp.yaml
+  - docs/runbooks/configure-guest-network-policy.md
+  - docs/runbooks/configure-agent-history.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261029-agent-history-netpolicy-drift.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261029-agent-history-netpolicy-drift.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261029_tracking
+      paths:
+      - docs/workstreams/ws-20261029-agent-history-netpolicy-drift.md
+      mode: exclusive
+    - id: all_guests_opt_out_guest_nft
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2
+      - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+      mode: shared_contract
+      contract: guest-firewall-policy-v1
+    - id: all_guests_opt_out_vm_firewall
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/templates/vm.fw.j2
+      - scripts/firewall_drift.py
+      - tests/test_network_policy_all_guests_flag.py
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: all_guests_opt_out_inventory
+      paths:
+      - inventory/host_vars/proxmox-host.yml
+      - config/network-policy/0mcp.yaml
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: all_guests_opt_out_runbooks
+      paths:
+      - docs/runbooks/configure-guest-network-policy.md
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: all_guests_opt_out_agent_history_runbook
+      paths:
+      - docs/runbooks/configure-agent-history.md
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261029-agent-history-netpolicy-drift.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'Keep the agent-history store out of every all_guests source
+      expansion (network_policy_all_guests: false) in both renderers and the drift
+      tool, declare its forward flows and VM 192''s forward source in the netpolicy
+      file, and document the 0mcp invocation of the scoped firewall slice.'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'The NetpolicyDrift alert for VM 155 and VM 192 comes from the all_guests
+    fan-out naming the new store guest and from VM 155''s undeclared forward chain.
+    Least privilege: the store is excluded from the fan-out by an explicit per-guest
+    flag; flows that name it stay. Nothing is applied by this change.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Add the all_guests opt-out to both renderers and the drift tool, declare
+      VM 155 forward and VM 192 forward source, document the 0mcp slice invocation
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not
+      merged, no live-apply marker, nothing applied)
+    status: in_progress
+- id: ws-20261029-agent-history-embed-query
+  adr: 0494
+  title: 'Agent-history semantic search: the store embeds the question through the
+    embeddings Mac, with its own embed token'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/agent-history-embed-query
+  worktree_path: .claude/worktrees/ah-embed-query
+  doc: docs/workstreams/ws-20261029-agent-history-embed-query.md
+  depends_on:
+  - ws-0534-agent-history-vm
+  - ws-0537-agent-history-activate
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/agent_history_runtime/**
+  - config/tailscale/policy.hujson
+  - inventory/host_vars/agent-history.yml
+  - docs/runbooks/configure-agent-history.md
+  - docs/adr/0494-agent-history.md
+  - tests/test_agent_history_runtime_embed.py
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261029-agent-history-embed-query.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261029-agent-history-embed-query.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261029_embed_query_tracking
+      paths:
+      - docs/workstreams/ws-20261029-agent-history-embed-query.md
+      - tests/test_agent_history_runtime_embed.py
+      mode: exclusive
+    - id: agent_history_runtime_role
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/agent_history_runtime/**
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: agent_history_embed_vars
+      paths:
+      - inventory/host_vars/agent-history.yml
+      mode: shared_contract
+      contract: agent-history-guest-vars-v1
+    - id: agent_history_tailnet_policy
+      paths:
+      - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: agent_history_records
+      paths:
+      - docs/runbooks/configure-agent-history.md
+      - docs/adr/0494-agent-history.md
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: agent_history_platform_manifest
+      paths:
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261029-agent-history-embed-query.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'agent-history semantic search: the store embeds the search question
+      through bge-m3 on the embeddings Mac (one tailnet grant, tcp:8443 from tag:agent-history
+      to mac14) and takes the embedding worker''s vectors with a separate embed token
+      rendered from OpenBao.'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: Makes `semantic` and `hybrid` search return hits on the live agent-history
+    store. The role gains the embed flags and an embed-token secret file; the tailnet
+    policy gains one grant and its tests. The Mac side (Ollama and agent-embed as
+    launchd agents, tailscale serve) lives on the operator's Mac and is described
+    in the runbook. The endpoint address is set in the guest's host_vars.
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: 'Role: embed token file, embed flags, input assertions, tests; policy:
+      one grant and its tests; runbook section'
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server, merge, apply the policy and the
+      role, and verify end to end
+    status: completed
+- id: ws-0545-agent-history-canary-scan
+  adr: 0494
+  title: 'Agent-history: turn on the nightly redaction canary scan (host canary-mac14)
+    and record how the canary runs'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/agent-history-canary-scan
+  worktree_path: .claude/worktrees/ah-canary
+  doc: docs/workstreams/ws-0545-agent-history-canary-scan.md
+  depends_on:
+  - ws-0534-agent-history-vm
+  - ws-0535-agent-history-alerts
+  conflicts_with: []
+  shared_surfaces:
+  - inventory/host_vars/agent-history.yml
+  - docs/runbooks/configure-agent-history.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0545-agent-history-canary-scan.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0545-agent-history-canary-scan.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0545_tracking
+      paths:
+      - docs/workstreams/ws-0545-agent-history-canary-scan.md
+      mode: exclusive
+    - id: agent_history_canary_vars
+      paths:
+      - inventory/host_vars/agent-history.yml
+      mode: exclusive
+    - id: agent_history_runbook
+      paths:
+      - docs/runbooks/configure-agent-history.md
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0545-agent-history-canary-scan.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Enable the agent-history nightly redaction canary scan for the
+      canary host canary-mac14 (host vars), and document how the canary is delivered,
+      scanned and proven.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: Git side of the daily redaction canary. The role already installs the scan
+    when agent_history_canary_scan_enabled is true; this sets it for the guest and
+    names the canary host. The SQL file the scan reads is generated by agent-eval's
+    scripts/dbscan and delivered by the owner (never committed). Applying the role
+    is a separate, recorded live step.
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Host vars for the guest (scan on, host canary-mac14) and the runbook section
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request, then
+      land it and apply the role to the guest (recorded in the PR)
+    status: in_progress
+- id: ws-0540-agent-history-runbook-records
+  adr: 0494
+  title: 'Agent-history runbook: the first provisioning run and its traps, and the
+    VM 130 memory and slot facts in git'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/agent-history-runbook-records
+  worktree_path: .claude/worktrees/ah-records
+  doc: docs/workstreams/ws-0540-agent-history-runbook-records.md
+  depends_on:
+  - ws-0534-agent-history-vm
+  - ws-0537-agent-history-activate
+  conflicts_with: []
+  shared_surfaces:
+  - docs/runbooks/configure-agent-history.md
+  - docs/adr/0494-agent-history.md
+  - inventory/host_vars/proxmox-host.yml
+  - config/0mcp/docker-build-lv3/README.md
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0540-agent-history-runbook-records.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0540-agent-history-runbook-records.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0540_tracking
+      paths:
+      - docs/workstreams/ws-0540-agent-history-runbook-records.md
+      mode: exclusive
+    - id: agent_history_records
+      paths:
+      - docs/runbooks/configure-agent-history.md
+      - docs/adr/0494-agent-history.md
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: agent_history_vm130_declaration
+      paths:
+      - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: docker_build_lv3_readme
+      paths:
+      - config/0mcp/docker-build-lv3/README.md
+      mode: shared_contract
+      contract: docker-build-vm-config-v1
+    - id: agent_history_platform_manifest
+      paths:
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0540-agent-history-runbook-records.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Record the first agent-history provisioning run (invocation and
+      traps), the VM 130 memory and builder-slot cut, and the hypervisor firewall
+      line added by hand; VM 130 declared memory_mb 10240.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'Docs plus one inventory number: the first provisioning of VM 155 and the
+    live trim of VM 130 happened on 2026-10-29 and are now written down. The VM 130
+    memory_mb change is the declared capacity the owner asked for; a later provision-guests
+    run would apply it.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Write the provisioning record and traps, the VM 130 facts and the firewall-line
+      explanation; declare VM 130 at 10 GiB
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not
+      merged, no live-apply marker, nothing applied)
+    status: in_progress
+- id: ws-0539-agent-history-provision-fix
+  adr: 0494
+  title: 'Agent-history provisioning play: no stop before the guest''s first boot
+    has finished, and no docker.io in its cloud-init packages'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/agent-history-provision-fix
+  worktree_path: .claude/worktrees/ah-provision
+  doc: docs/workstreams/ws-0539-agent-history-provision-fix.md
+  depends_on:
+  - ws-0534-agent-history-vm
+  - ws-0537-agent-history-activate
+  conflicts_with: []
+  shared_surfaces:
+  - playbooks/agent-history-vm.yml
+  - tests/test_agent_history_vm_playbook.py
+  - inventory/host_vars/proxmox-host.yml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0539-agent-history-provision-fix.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0539-agent-history-provision-fix.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0539_tracking
+      paths:
+      - docs/workstreams/ws-0539-agent-history-provision-fix.md
+      mode: exclusive
+    - id: agent_history_provision_play
+      paths:
+      - playbooks/agent-history-vm.yml
+      - tests/test_agent_history_vm_playbook.py
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: agent_history_guest_declaration
+      paths:
+      - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0539-agent-history-provision-fix.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Fix the agent-history provisioning play so it never stops the
+      VM before cloud-init's first boot has finished (graceful restart only when hardware
+      settings are pending), and drop docker.io from that guest's cloud-init packages.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'Found on the first real provisioning of VM 155: a forced qm stop seconds
+    after the first start cut cloud-init off and the guest never got its network.
+    The fix defers any restart until the first boot is done and makes it graceful.
+    docker.io is dropped from the guest''s cloud-init packages because the docker_runtime
+    role installs Docker CE and removes docker.io.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Replace the forced stop with a deferred graceful restart, drop docker.io
+      from the guest packages, add static tests
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not
+      merged, no live-apply marker, nothing applied)
+    status: in_progress
+- id: ws-0538-agent-history-policy-owner
+  adr: 0494
+  title: Remove the temporary tag:pool-runtime owner from tag:agent-history in the
+    tailnet policy
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/agent-history-policy-owner
+  worktree_path: .claude/worktrees/ah-policy
+  doc: docs/workstreams/ws-0538-agent-history-policy-owner.md
+  depends_on:
+  - ws-0534-agent-history-vm
+  - ws-0537-agent-history-activate
+  conflicts_with: []
+  shared_surfaces:
+  - config/tailscale/policy.hujson
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0538-agent-history-policy-owner.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0538-agent-history-policy-owner.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0538_tracking
+      paths:
+      - docs/workstreams/ws-0538-agent-history-policy-owner.md
+      mode: exclusive
+    - id: agent_history_tailnet_policy
+      paths:
+      - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0538-agent-history-policy-owner.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Remove the temporary tag:pool-runtime owner from tag:agent-history
+      in the tailnet policy (applied by a human with the policy tool after merge).
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: The temporary co-owner existed only to let the agent-history node re-advertise
+    tag:agent-history after joining with tag:pool-runtime (ADR 0494, trade-offs).
+    The node now carries the new tag, so the owner entry is removed. The tailnet policy
+    tool treats a tagOwners change as blocked, so the apply is manual.
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Remove tag:pool-runtime from the owners of tag:agent-history and say so
+      in the comment
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not
+      merged, no live-apply marker, nothing applied)
+    status: in_progress
+- id: ws-0537-agent-history-activate
+  adr: 0494
+  title: Activate the agent-history guest (delete lifecycle planned from VM 155),
+    after ws-0534 (#598) merged
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/agent-history-activate
+  worktree_path: .claude/worktrees/agent-history-activate
+  doc: docs/workstreams/ws-0537-agent-history-activate.md
+  depends_on:
+  - ws-0534-agent-history-vm
+  conflicts_with: []
+  shared_surfaces:
+  - inventory/host_vars/proxmox-host.yml
+  - inventory/hosts.yml
+  - docs/adr/0494-agent-history.md
+  - docs/runbooks/configure-agent-history.md
+  - playbooks/agent-history-vm.yml
+  - tests/test_planned_guests.py
+  - tests/test_generate_inventory.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0537-agent-history-activate.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0537-agent-history-activate.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0537_tracking
+      paths:
+      - docs/workstreams/ws-0537-agent-history-activate.md
+      mode: exclusive
+    - id: agent_history_activation_declaration
+      paths:
+      - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: agent_history_activation_inventory
+      paths:
+      - inventory/hosts.yml
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_history_activation_records
+      paths:
+      - docs/adr/0494-agent-history.md
+      - docs/runbooks/configure-agent-history.md
+      - playbooks/agent-history-vm.yml
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: agent_history_activation_tests
+      paths:
+      - tests/test_planned_guests.py
+      - tests/test_generate_inventory.py
+      mode: shared_contract
+      contract: planned-guest-lifecycle-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0537-agent-history-activate.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Activate the agent-history guest (VM 155) by deleting its lifecycle
+      planned line, with the capacity record and the written exception to the 15 %
+      placement guard. Nothing is provisioned.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'ADR 0494 declared VM 155 with lifecycle planned so that the declaration
+    was inert until the owner approved it. This workstream is that approval as one
+    reviewed change: the line is deleted, the inventory is regenerated (the planned_guests
+    group stays, empty), the tests that counted planned guests are updated, and the
+    ADR and the runbook record the activation and the capacity decision. It was prepared
+    on top of ws-0534 and rebased onto main after #598 merged; it is merged immediately
+    before provisioning, because from the merge the unrestricted provisioning and
+    the scoped runs no longer skip the guest, which does not exist until make provision-agent-history-vm
+    has run.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Delete lifecycle planned from VM 155, regenerate the inventory, update
+      the tests, the ADR and the runbook
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on the build server and open the pull request (stacked,
+      not merged, no live-apply marker)
+    status: in_progress
+- id: ws-0535-agent-history-alerts
+  adr: 0494
+  title: Alert rules for the agent-history store (git only; promtool tests, pytest
+    pin, adopted rules list)
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/agent-history-alerts
+  worktree_path: .claude/worktrees/agent-history-alerts
+  doc: docs/workstreams/ws-0535-agent-history-alerts.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/prometheus/rules/agent-history.yml
+  - tests/promtool/agent_history_rules_test.yml
+  - tests/test_agent_history_rules.py
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+  - tests/test_adopted_prometheus_rules.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0535-agent-history-alerts.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0535-agent-history-alerts.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0535_tracking
+      paths:
+      - docs/workstreams/ws-0535-agent-history-alerts.md
+      mode: exclusive
+    - id: agent_history_alert_rules
+      paths:
+      - config/prometheus/rules/agent-history.yml
+      - tests/promtool/agent_history_rules_test.yml
+      - tests/test_agent_history_rules.py
+      mode: exclusive
+    - id: monitoring_vm_role_shared_edits
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+      - tests/test_adopted_prometheus_rules.py
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0535-agent-history-alerts.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Add the agent-history alert rules (store down, ingest lag, spool
+      depth, silent collector, redaction canary, backup gap, data disk) with promtool
+      tests, and list the file among the rule files the monitoring role ships. Nothing
+      is applied.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'ADR 0494 puts the agent-history store on its own guest. This workstream
+    is the alert rules for it, in git only: the rule file, its promtool unit tests,
+    a pytest pin, and the line in the monitoring role''s adopted list. Shipping the
+    file to the monitoring VM and reloading Prometheus is a separate, owner-approved
+    step; merging does not do it. The guest itself is declared by a separate pull
+    request (ws-0534).'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Add agent-history.yml with promtool unit tests and a pytest pin, and adopt
+      it in the monitoring role
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on the build server and open the pull request (not
+      merged, no [live-apply])
+    status: in_progress
+- id: ws-0534-agent-history-vm
+  adr: 0494
+  title: Dedicated guest for the agent-history store, in git only (ADR, guest declaration,
+    network policy, per-guest playbook, runtime role, catalogs)
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/agent-history-vm
+  worktree_path: .claude/worktrees/agent-history-vm
+  doc: docs/workstreams/ws-0534-agent-history-vm.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - docs/adr/0494-agent-history.md
+  - inventory/host_vars/proxmox-host.yml
+  - config/network-policy/0mcp.yaml
+  - playbooks/agent-history-vm.yml
+  - collections/ansible_collections/lv3/platform/roles/agent_history_runtime
+  - catalog/services/agent_history/service.yaml
+  - docs/runbooks/configure-agent-history.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - docs/diagrams/service-dependency-graph.excalidraw
+  - docs/diagrams/trust-tier-model.excalidraw
+  - config/tailscale/policy.hujson
+  - playbooks/proxmox-install.yml
+  - scripts/generate_inventory.py
+  - platform/ansible/execution_scopes.py
+  - tests/test_planned_guests.py
+  - build/platform-manifest.json
+  - scripts/service_completeness.py
+  - tests/test_validate_service_completeness.py
+  - workstreams/active/ws-0534-agent-history-vm.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0534-agent-history-vm.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0534_tracking
+      paths:
+      - docs/workstreams/ws-0534-agent-history-vm.md
+      mode: exclusive
+    - id: agent_history_adr
+      paths:
+      - docs/adr/0494-agent-history.md
+      mode: exclusive
+    - id: agent_history_runtime_surface
+      paths:
+      - playbooks/agent-history-vm.yml
+      - collections/ansible_collections/lv3/platform/roles/agent_history_runtime/**
+      - catalog/services/agent_history/service.yaml
+      - docs/runbooks/configure-agent-history.md
+      mode: exclusive
+    - id: agent_history_adr_index
+      paths:
+      - docs/adr/.index.yaml
+      - docs/adr/index/**
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_history_generated_diagrams
+      paths:
+      - docs/diagrams/service-dependency-graph.excalidraw
+      - docs/diagrams/trust-tier-model.excalidraw
+      - docs/site-generated/architecture/dependency-graph.md
+      mode: shared_contract
+      contract: generated-index-and-diagram-v1
+    - id: agent_history_service_partition
+      paths:
+      - config/contracts/service-partitions/catalog.json
+      mode: shared_contract
+      contract: agent-history-guest-registration-v1
+    - id: agent_history_generated_status
+      paths:
+      - README.md
+      mode: shared_contract
+      contract: generated-status-docs-v1
+    - id: agent_history_platform_manifest
+      paths:
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: service_completeness_scope
+      paths:
+      - scripts/service_completeness.py
+      - tests/test_validate_service_completeness.py
+      mode: shared_contract
+      contract: service-completeness-validation-v1
+    - id: agent_history_planned_guest_guard
+      paths:
+      - playbooks/proxmox-install.yml
+      - collections/ansible_collections/lv3/platform/playbooks/proxmox-install.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_guests/tasks/main.yml
+      - scripts/generate_inventory.py
+      - platform/ansible/execution_scopes.py
+      - tests/test_planned_guests.py
+      - tests/test_generate_inventory.py
+      - tests/test_ansible_execution_scopes.py
+      mode: shared_contract
+      contract: planned-guest-lifecycle-v1
+    - id: agent_history_tailnet_policy
+      paths:
+      - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: agent_history_generated_inventory
+      paths:
+      - inventory/hosts.yml
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: generated_service_catalogs
+      paths:
+      - config/data-catalog.json
+      - config/dependency-graph.json
+      - config/health-probe-catalog.json
+      - config/service-capability-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      mode: shared_contract
+      contract: generated-service-catalogs-v1
+    - id: agent_history_guest_network_policy
+      paths:
+      - inventory/host_vars/proxmox-host.yml
+      - config/network-policy/0mcp.yaml
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: agent_history_service_registry
+      paths:
+      - inventory/group_vars/all/platform_services.yml
+      - config/capacity-model.json
+      - config/ansible-execution-scopes.yaml
+      - config/ansible-role-idempotency.yml
+      - Makefile
+      mode: shared_contract
+      contract: agent-history-guest-registration-v1
+    - id: agent_history_workflow_catalog
+      paths:
+      - config/workflow-catalog.json
+      mode: shared_contract
+      contract: workflow-catalog-entry-v1
+    - id: agent_history_command_catalog
+      paths:
+      - config/command-catalog.json
+      mode: shared_contract
+      contract: agent-history-guest-registration-v1
+    - id: agent_history_publication_sanitization
+      paths:
+      - config/publication-sanitization.yaml
+      mode: shared_contract
+      contract: tier-c-sanitization-replacements-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0534-agent-history-vm.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Add the agent-history guest (vmid 155) in git only. ADR 0494,
+      guest and network policy declarations, a per-guest provisioning playbook and
+      make target, the agent_history_runtime role, and the service catalog entries.
+      Nothing is provisioned.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'The agent-history store (Postgres 17 with pgvector and agent-store) keeps
+    every prompt, reply and tool call of the coding agents on the operator laptops.
+    It is the most sensitive service on the platform and needs its own guest, an encrypted
+    data volume, secrets delivered by OpenBao and tailnet-only exposure. This workstream
+    is the git side only: it declares the guest and everything around it. Provisioning,
+    OpenBao, the tailnet, capacity and the alert rules are separate, owner-approved
+    steps and a separate change.'
+  tasks:
+  - id: t1
+    title: Register the workstream and write ADR 0494
+    status: completed
+  - id: t2
+    title: Declare the guest, its guest and canonical network policy, topology, registry,
+      capacity and catalog entries
+    status: completed
+  - id: t3
+    title: Add the per-guest playbook, the make target and the agent_history_runtime
+      role
+    status: completed
+  - id: t4
+    title: Pass the pre-push gate on the build server and open the pull request (not
+      merged, no [live-apply])
+    status: in_progress
 - id: ws-0520-plausible-clickhouse-log-retention
   adr: 0493
   title: Bound Plausible ClickHouse diagnostic log storage
@@ -6997,6 +8893,66 @@ workstreams:
   - serverclaw/main HEAD no longer contains the leaked file
   related_adrs:
   - "ADR 0409 \u2014 Generalize committed code to eliminate publication sanitization"
+- id: ws-20261106-public-network-examples
+  adr: '0407'
+  title: Preserve network semantics in sanitized address examples
+  status: ready
+  ready_to_merge: true
+  live_applied: false
+  owner: codex
+  branch: codex/public-network-examples
+  worktree_path: .worktrees/public-network-examples
+  doc: docs/workstreams/ws-20261106-public-network-examples.md
+  depends_on:
+  - ws-20261106-image-gc-release-integration
+  conflicts_with: []
+  shared_surfaces:
+  - config/publication-sanitization.yaml
+  - .woodpecker.yml
+  - VERSION
+  - changelog.md
+  - versions/stack.yaml
+  - README.md
+  - scripts/publish_to_serverclaw.py
+  - tests/test_netpolicy.py
+  - tests/test_netpolicy_run.py
+  ownership_manifest:
+    owned_surfaces:
+    - id: public_network_examples
+      paths:
+      - config/publication-sanitization.yaml
+      - tests/test_publication_network_policy.py
+      - .woodpecker.yml
+      - docs/workstreams/ws-20261106-public-network-examples.md
+      - workstreams/active/ws-20261106-public-network-examples.yaml
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      - README.md
+      - scripts/publish_to_serverclaw.py
+      - tests/test_netpolicy.py
+      - tests/test_netpolicy_run.py
+      mode: exclusive
+  canonical_truth:
+    changelog_entry: Keep sanitized Tailnet identities in shared-address space and
+      prune only eliminated exported baseline IDs while refusing new policy findings
+      and preserving private enforcement.
+    release_bump: patch
+    included_in_repo_version: 0.179.57
+  notes: Publication-only example mapping correction. No live network policy, accepted
+    finding baseline, or checker behavior changes. Exported baseline refresh can only
+    remove accepted IDs and aborts on every new non-info finding. All pair plans validate
+    before writes; shared export path guards protect private files.
+  tasks:
+  - id: mapping
+    title: Preserve Tailnet address class in example replacements
+    status: completed
+  - id: regression
+    title: Check actual sanitized policies and portable synthetic boundaries
+    status: completed
+  - id: publication
+    title: Prepare strict export validation and required publication pipeline inputs
+    status: completed
 - id: ws-0511-serverclaw-public-route-template
   adr: '0407'
   title: Keep the ServerClaw host template aligned with the edge route catalog
@@ -7358,6 +9314,339 @@ workstreams:
     '
   blockers: []
   plane_issue_id: 3d700a28-78fd-4edb-b4ac-6bce7f6cf20f
+- id: ws-20261030-dockerhost-state-live-drift
+  adr: 0386
+  title: Put the 12 inventory entries and 6 archives that the VM 100 state backup
+    runs into git, so the next install from git does not drop them
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/dockerhost-state-live-drift
+  worktree_path: .claude/worktrees/dockerhost-state-live-drift
+  doc: docs/workstreams/ws-20261030-dockerhost-state-live-drift.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/0docker/dockerhost-state-backup/README.md
+  - config/0docker/dockerhost-state-backup/config.json
+  - config/0docker/dockerhost-state-backup/dockerhost_state_backup.py
+  - tests/test_dockerhost_state_backup_staging.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261030-dockerhost-state-live-drift.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261030-dockerhost-state-live-drift.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261030_dockerhost_state_live_drift_tracking
+      paths:
+      - docs/workstreams/ws-20261030-dockerhost-state-live-drift.md
+      mode: exclusive
+    - id: dockerhost_state_backup_live_parity
+      paths:
+      - config/0docker/dockerhost-state-backup/README.md
+      - config/0docker/dockerhost-state-backup/config.json
+      - config/0docker/dockerhost-state-backup/dockerhost_state_backup.py
+      - tests/test_dockerhost_state_backup_staging.py
+      mode: shared_contract
+      contract: dockerhost-state-backup-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261030-dockerhost-state-live-drift.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: The VM 100 state backup in git now has the 12 inventory entries
+      and 6 archives that run on the host, so installing it from git no longer drops
+      them.
+    release_bump: patch
+    included_in_repo_version: null
+  context: 'On 2026-10-29 someone added 12 inventory entries to the installed dockerhost-state-backup
+    script on VM 100 (20:48Z) and 6 archives to its config (21:01Z) by hand; neither
+    is in any PR. The merged staging change (#617) was installed on VM 100 on 2026-10-30
+    07:05Z as a hybrid: the merged script plus those 12 entries, with the config left
+    alone, so installing the script or config from git would silently drop them from
+    the backup. This change makes git match what runs, byte for byte for the script
+    and equal apart from whitespace and key order for the config. Nothing is installed
+    or changed on any host.'
+  tasks:
+  - id: t1
+    title: Port the 12 inventory entries and the 6 archives (with the usr_local exclude)
+      exactly as they run, and prove the script is byte-identical to the live file
+    status: completed
+  - id: t2
+    title: Review the 12 commands and the 6 archives for secrets (what lands in clear
+      text in the snapshot, who can read it) and put the answer at the top of the
+      pull request
+    status: completed
+  - id: t3
+    title: Pin the entries and archives in tests and document them in the README;
+      validate through the pre-push gate and open the pull request (the user decides
+      the merge)
+    status: in_progress
+- id: ws-20261029-pve-backup-weekly-freshness
+  adr: 0386
+  title: Hold a guest with a weekly vzdump job to its own freshness limit in PveBackupFreshnessLow,
+    so CT 108 stops alerting most of every week
+  status: in_progress
+  ready_to_merge: false
+  live_applied: true
+  owner: claude
+  branch: claude/live-apply-pve-weekly-freshness
+  worktree_path: .claude/worktrees/live-apply-pve-weekly-freshness
+  doc: docs/workstreams/ws-20261029-pve-backup-weekly-freshness.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/prometheus/rules/pve-host-incident.yml
+  - tests/promtool/pve_backup_freshness_rules_test.yml
+  - tests/test_pve_backup_freshness_rules.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261029-pve-backup-weekly-freshness.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261029-pve-backup-weekly-freshness.md
+  - versions/stack.yaml
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - receipts/live-applies/2026-10-30-pve-backup-weekly-freshness-monitoring-live-apply.json
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261029_pve_backup_weekly_freshness_tracking
+      paths:
+      - docs/workstreams/ws-20261029-pve-backup-weekly-freshness.md
+      mode: exclusive
+    - id: pve_host_incident_rules
+      paths:
+      - config/prometheus/rules/pve-host-incident.yml
+      mode: shared_contract
+      contract: pve-host-incident-rules-v1
+    - id: pve_backup_freshness_rule_tests
+      paths:
+      - tests/promtool/pve_backup_freshness_rules_test.yml
+      - tests/test_pve_backup_freshness_rules.py
+      mode: exclusive
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261029-pve-backup-weekly-freshness.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_20261029_pve_backup_weekly_freshness_mainline_live_apply_evidence
+      paths:
+      - README.md
+      - versions/stack.yaml
+      - docs/status/history/live-apply-evidence.md
+      - receipts/live-applies/2026-10-30-pve-backup-weekly-freshness-monitoring-live-apply.json
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+  canonical_truth:
+    changelog_entry: PveBackupFreshnessLow holds a guest whose only vzdump job is
+      weekly to the collector's 8.5 day limit and keeps the 30 hour limit for every
+      other guest, so CT 108 no longer raises a critical alert for most of every week.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      pve_backup_weekly_freshness: 2026-10-30-pve-backup-weekly-freshness-monitoring-live-apply
+  context: 'CT 108 (the builder) has had a weekly vzdump job since 2026-10-28 (ct108-nightly,
+    "sun 03:30"; its daily restore point is the file-level group host/ct108-live).
+    PveBackupFreshnessLow held every guest to a fixed 30 hours since the last successful
+    vzdump, so it fires 30 hours after each Sunday run and stays critical until the
+    next run: about 5.75 days of every 7, with nothing failing. The host collector
+    (baditaflorin/fleet-state hypervisor-0docker/libexec/pve-host-health-metrics.py,
+    PR 619, installed on the hypervisor on 2026-10-28) already reads each job''s schedule
+    and publishes proxmox_backup_max_age_seconds per guest (36 hours, or 8.5 days
+    for a weekly guest) and looks back 10 days for a weekly guest. This change makes
+    the alert in this repository use that limit for a weekly guest and nothing else;
+    a daily guest stays at 30 hours. Applying it to the monitoring VM is a separate
+    decision.'
+  tasks:
+  - id: t1
+    title: Judge a weekly guest by the collector's published limit in PveBackupFreshnessLow,
+      keep 30 hours for every other guest, with promtool unit tests and a pytest wrapper
+    status: completed
+  - id: t2
+    title: Validate through the pre-push gate and open the pull request (the user
+      decides the merge)
+    status: completed
+  - id: t3
+    title: Ship the rule file to the monitoring VM (targeted one-file play, SIGHUP)
+      and record the receipt (done on the user's yes, 2026-10-30)
+    status: completed
+- id: ws-20261029-dockerhost-state-staging-peak
+  adr: 0386
+  title: Lower the peak staging size of the VM 100 state backup so it stops pushing
+    the hypervisor root filesystem down about four points a day
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/dockerhost-state-staging-peak
+  worktree_path: .claude/worktrees/dockerhost-state-staging-peak
+  doc: docs/workstreams/ws-20261029-dockerhost-state-staging-peak.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/0docker/dockerhost-state-backup/README.md
+  - config/0docker/dockerhost-state-backup/config.json
+  - config/0docker/dockerhost-state-backup/dockerhost_state_backup.py
+  - tests/test_dockerhost_state_backup.py
+  - tests/test_dockerhost_state_backup_staging.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261029-dockerhost-state-staging-peak.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261029-dockerhost-state-staging-peak.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261029_dockerhost_state_staging_peak_tracking
+      paths:
+      - docs/workstreams/ws-20261029-dockerhost-state-staging-peak.md
+      mode: exclusive
+    - id: dockerhost_state_backup_staging
+      paths:
+      - config/0docker/dockerhost-state-backup/README.md
+      - config/0docker/dockerhost-state-backup/config.json
+      - config/0docker/dockerhost-state-backup/dockerhost_state_backup.py
+      - tests/test_dockerhost_state_backup.py
+      - tests/test_dockerhost_state_backup_staging.py
+      mode: exclusive
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261029-dockerhost-state-staging-peak.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: The VM 100 state backup stages its large SQLite copies one at
+      a time and compresses each, so its staging peak on the guest disk falls and
+      the hypervisor root filesystem dips less.
+    release_bump: patch
+    included_in_repo_version: null
+  context: The daily dockerhost-state-backup on VM 100 stages about 18 GiB (three
+    SQLite online copies of 17.5 GiB) on the guest root before one client call, which
+    lets the hypervisor's root filesystem (/dev/md3, the only storage of the host)
+    fall by about four points for twenty minutes. On 2026-10-28 it reached 13.72 %
+    free at 17:55Z and held CI admission (under 14 %) from 17:47 to 17:55Z. This change
+    lowers the peak staged bytes without changing what is backed up; deploying it
+    is a separate decision.
+  tasks:
+  - id: t1
+    title: Measure the old script and the candidates on a quiet fleet host with the
+      guest disk modelled as a sparse file
+    status: in_progress
+  - id: t2
+    title: Stage the large copies one at a time, compress each, verify before deleting
+      the raw copy, trim what was freed
+    status: in_progress
+  - id: t3
+    title: Restore-drill one large compressed copy from a real snapshot on a scratch
+      Proxmox Backup Server
+    status: pending
+  - id: t4
+    title: Review and merge (the user decides); installing on VM 100 is a separate
+      step
+    status: pending
+- id: ws-0533-pve-host-daily-low-alert
+  adr: 0386
+  title: Warn when the hypervisor root filesystem's 24-hour free-space low comes within
+    two points of the CI admission hold
+  status: in_progress
+  ready_to_merge: false
+  live_applied: true
+  owner: claude
+  branch: claude/live-apply-pve-daily-low
+  worktree_path: .claude/worktrees/live-apply-pve-daily-low
+  doc: docs/workstreams/ws-0533-pve-host-daily-low-alert.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/prometheus/rules/pve-host-incident.yml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0533-pve-host-daily-low-alert.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0533-pve-host-daily-low-alert.md
+  - versions/stack.yaml
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - receipts/live-applies/2026-10-26-pve-host-daily-low-alert-monitoring-live-apply.json
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0533_tracking
+      paths:
+      - docs/workstreams/ws-0533-pve-host-daily-low-alert.md
+      mode: exclusive
+    - id: pve_host_incident_rules
+      paths:
+      - config/prometheus/rules/pve-host-incident.yml
+      mode: shared_contract
+      contract: pve-host-incident-rules-v1
+    - id: pve_host_free_space_rule_tests
+      paths:
+      - tests/promtool/pve_host_free_space_rules_test.yml
+      - tests/test_pve_host_free_space_rules.py
+      mode: exclusive
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0533-pve-host-daily-low-alert.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_0533_mainline_live_apply_evidence
+      paths:
+      - README.md
+      - versions/stack.yaml
+      - docs/status/history/live-apply-evidence.md
+      - receipts/live-applies/2026-10-26-pve-host-daily-low-alert-monitoring-live-apply.json
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+  canonical_truth:
+    changelog_entry: Warn when the hypervisor root filesystem's 24-hour free-space
+      low is under 16%, two points above the CI admission hold, so a bad day stays
+      visible for a day.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts:
+      pve_host_free_space_alert: 2026-10-26-pve-host-daily-low-alert-monitoring-live-apply
+  context: The hypervisor's root filesystem holds every guest disk of that host. CI
+    admission is held under 14% free and the existing warning is at 15%, but the free
+    fraction swings by several points within minutes (a daily state backup stages
+    about 18 GiB, and an application database log grew by tens of GiB overnight),
+    so by the time the 15% warning has waited its five minutes the hold is already
+    on. The new warning looks at the lowest value of the last 24 hours instead of
+    the current one, so a dip that came close to the hold stays visible for a day
+    after the filesystem has recovered.
+  tasks:
+  - id: t1
+    title: Add PveHostFilesystemDailyLowNarrow with a promtool unit test and a pytest
+      wrapper
+    status: completed
+  - id: t2
+    title: Validate and merge through the private-source pull request
+    status: completed
+  - id: t3
+    title: Ship the rule file to the monitoring VM (targeted Ansible play with the
+      monitoring role's copy parameters) and reload Prometheus
+    status: completed
 - id: revive-provision-operator-identity-fix
   adr: 0385
   title: Revive provision_operator/operator_manager identity-derivation fix from stale
@@ -7799,6 +10088,176 @@ workstreams:
       contract: mainline-release-integration-v1
   ready_to_merge: false
   live_applied: false
+- id: ws-20261020-enrichment-pool-ports
+  title: Permit reviewed enrichment replica private ports
+  status: in_progress
+  ready_to_merge: true
+  live_applied: false
+  owner: codex
+  branch: codex/enrichment-pool-ports-20261020
+  worktree_path: .
+  doc: docs/workstreams/ws-20261020-enrichment-pool-ports.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/tailscale/policy.hujson
+  - docs/workstreams/ws-20261020-enrichment-pool-ports.md
+  canonical_truth:
+    changelog_entry: Permit exact private gateway and monitoring ports for reviewed
+      enrichment replicas.
+    release_bump: patch
+    included_in_repo_version: null
+  context: Expand reviewed service replicas across five existing runtime guests while
+    keeping the current batch running.
+  tasks:
+  - id: t1
+    title: Review exact grants and validate canonical policy plan
+    status: completed
+  - id: t2
+    title: Apply with ETag and verify gateway reachability
+    status: pending
+  notes:
+  - Independent scope review and canonical live policy validation passed.
+  - Plane projection unavailable because the existing API token is invalid; Git shard
+    remains authoritative.
+  adr: 0296
+  ownership_manifest:
+    owned_surfaces:
+    - id: enrichment_pool_private_ports
+      paths:
+      - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: enrichment_pool_network_tracking
+      paths:
+      - docs/workstreams/ws-20261020-enrichment-pool-ports.md
+      mode: exclusive
+    - id: enrichment_pool_network_registry
+      paths:
+      - workstreams/active/ws-20261020-enrichment-pool-ports.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: enrichment_pool_network_generated_docs
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - README.md
+      - docs/status/**
+      - versions/stack.yaml
+      - build/platform-manifest.json
+      - changelog.md
+      - VERSION
+      mode: shared_contract
+      contract: generated-artifacts-v1
+- id: ws-0531-retire-ci-go-build-cache-grant
+  adr: 0296
+  title: Remove the CI Go build cache grant to the 0own build worker
+  status: live_applied
+  ready_to_merge: true
+  live_applied: true
+  owner: claude
+  branch: claude/ws-0531-live-applied
+  worktree_path: .claude/worktrees/ws-0531-live-applied
+  doc: docs/workstreams/ws-0531-retire-ci-go-build-cache-grant.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/tailscale/policy.hujson
+  - workstreams/active/ws-0531-retire-ci-go-build-cache-grant.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0531-retire-ci-go-build-cache-grant.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0531_tracking
+      paths:
+      - docs/workstreams/ws-0531-retire-ci-go-build-cache-grant.md
+      mode: exclusive
+    - id: ci_go_build_cache_grant_removal
+      paths:
+      - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0531-retire-ci-go-build-cache-grant.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Remove the tailnet grant that let the pve01, 0infer and 0mcp
+      CI agents reach the retired Go build cache port on the 0own build worker.
+    release_bump: patch
+    included_in_repo_version: null
+  context: The shared Go build cache added under ws-0530 was measured slower than
+    no cache on every other site and no better than a host-mounted cache directory
+    on its own host, so its server is stopped. Nothing uses TCP 18335 on the build
+    worker any more; the grant and its three policy tests are removed so no unused
+    path stays open.
+  tasks:
+  - id: t1
+    title: Remove the cache-port grant and its three accept/deny policy tests
+    status: completed
+  - id: t2
+    title: Validate against the live tailnet (plan) and apply from CT108
+    status: completed
+  - id: t3
+    title: Verify the cache port is closed from the three agent hosts and live equals
+      git
+    status: completed
+- id: ws-0530-ci-go-build-cache-grant
+  adr: 0296
+  title: Let CI agents reach the shared Go build cache on the 0own build worker
+  status: live_applied
+  ready_to_merge: true
+  live_applied: true
+  owner: claude
+  branch: claude/ci-gocache-grant-applied
+  worktree_path: .claude/worktrees/ci-gocache-grant
+  doc: docs/workstreams/ws-0530-ci-go-build-cache-grant.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/tailscale/policy.hujson
+  - workstreams/active/ws-0530-ci-go-build-cache-grant.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0530-ci-go-build-cache-grant.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0530_tracking
+      paths:
+      - docs/workstreams/ws-0530-ci-go-build-cache-grant.md
+      mode: exclusive
+    - id: ci_go_build_cache_tailscale_permissions
+      paths:
+      - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0530-ci-go-build-cache-grant.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: Allow the pve01, 0infer and 0mcp CI agents to reach only the
+      shared Go build cache port on the 0own build worker.
+    release_bump: patch
+    included_in_repo_version: null
+  context: A shared Go build cache (GOCACHEPROG server) runs on the 0own build worker
+    so Go builds on any CI agent reuse compiled packages. Agents on other sites reach
+    0own only over the tailnet, so the policy needs one narrow grant to the cache
+    port. The metrics port of the same server stays closed to agents.
+  tasks:
+  - id: t1
+    title: Add the cache-port grant and accept/deny policy tests
+    status: completed
+  - id: t2
+    title: Validate against the live tailnet (plan) and apply from CT108
+    status: completed
+  - id: t3
+    title: Verify an agent on another site reaches the cache port and not the metrics
+      port
+    status: completed
 - id: ws-0513-builder-metrics-tailnet-firewall
   adr: 0296
   title: Allow Builder metrics scraping over the private tailnet
@@ -8294,6 +10753,166 @@ workstreams:
     status: in_progress
   - id: t3
     title: Document the cache-only credential boundary and verification gate
+    status: in_progress
+- id: ws-20261102-exec-proxy-tailscale0
+  adr: 0287
+  title: '0docker hypervisor: tailscale0 Wants the Woodpecker exec-proxy socket, so
+    a tailnet flap no longer leaves every CI agent refused until somebody starts it'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/hostconf-exec-proxy-tailscale0
+  worktree_path: .claude/worktrees/hostconf-exec-proxy-tailscale0
+  doc: docs/workstreams/ws-20261102-exec-proxy-tailscale0.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - config/hostconf/files/woodpecker-exec-proxy-follows-tailscale0.0docker.conf
+  - scripts/hostconf.py
+  - tests/test_hostconf.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261102-exec-proxy-tailscale0.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261102-exec-proxy-tailscale0.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261102_exec_proxy_tailscale0_tracking
+      paths:
+      - docs/workstreams/ws-20261102-exec-proxy-tailscale0.md
+      mode: exclusive
+    - id: hostconf_exec_proxy_follows_tailscale0_file
+      paths:
+      - config/hostconf/files/woodpecker-exec-proxy-follows-tailscale0.0docker.conf
+      mode: exclusive
+    - id: hostconf_manifest
+      paths:
+      - config/hostconf/hostconf.yaml
+      - config/hostconf/README.md
+      - scripts/hostconf.py
+      - tests/test_hostconf.py
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261102-exec-proxy-tailscale0.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: hostconf manages a drop-in on the 0docker hypervisor's tailscale0
+      device unit (Wants=woodpecker-exec-proxy@9000.socket), and may write drop-ins
+      of device units; a tailnet flap no longer leaves the Woodpecker exec proxy stopped
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: On 2026-11-02 from 11:33Z to 12:44Z every Woodpecker agent of ci.0exec.com
+    was refused on 100.64.0.5:9000 (the 0docker hypervisor's tailnet address)
+    and the whole CI plane stood still (91 pipelines pending, 1 of 31 agents online).
+    woodpecker-exec-proxy@9000.socket listens on that address with BindToDevice=tailscale0;
+    when tailscale0 went away systemd stopped the socket, the automatic start at 12:34:59
+    CET failed because the device was not active yet, and nothing started it again.
+    The web API stayed up, so the plane looked alive. It was started by hand at 12:44Z.
+    A dummy-interface test on the hypervisor (systemd 252) showed that a unit Wanted
+    by a device unit is started when the device comes back; the drop-in does that
+    for the socket.
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Allow drop-ins of device units in scripts/hostconf.py, add the drop-in
+      file, the manifest entry and the bastion file list, a test row and the README
+      lines (66 catalog files)
+    status: completed
+  - id: t3
+    title: Run the hostconf tests, pass the pre-push gate, open the pull request and
+      land it; apply with hostconf.py apply --host bastion --file woodpecker-exec-proxy-follows-tailscale0
+      --yes (reload only)
+    status: in_progress
+- id: ws-20261030-woodpecker-activate-repo
+  adr: 0287
+  title: 'Woodpecker: a script to activate a GitHub repository in a CI plane, and
+    the runbook and ADR 0287 corrected (the forge is GitHub, not Gitea)'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/woodpecker-activate
+  worktree_path: .claude/worktrees/woodpecker-activate
+  doc: docs/workstreams/ws-20261030-woodpecker-activate-repo.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - scripts/woodpecker_activate_repo.sh
+  - scripts/woodpecker_tool.py
+  - tests/test_woodpecker_activate_repo.py
+  - docs/runbooks/configure-woodpecker.md
+  - docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+  - workstreams/active/ws-20261030-woodpecker-activate-repo.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261030-woodpecker-activate-repo.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261030_woodpecker_activate_repo_tracking
+      paths:
+      - docs/workstreams/ws-20261030-woodpecker-activate-repo.md
+      mode: exclusive
+    - id: woodpecker_activate_repo_script
+      paths:
+      - scripts/woodpecker_activate_repo.sh
+      - tests/test_woodpecker_activate_repo.py
+      mode: exclusive
+    - id: woodpecker_gitea_era_tool_note
+      paths:
+      - scripts/woodpecker_tool.py
+      mode: shared_contract
+      contract: woodpecker-controller-tool-v1
+    - id: woodpecker_runbook_and_adr
+      paths:
+      - docs/runbooks/configure-woodpecker.md
+      - docs/adr/0287-woodpecker-ci-as-the-api-driven-continuous-integration-server.md
+      mode: shared_contract
+      contract: woodpecker-ci-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261030-woodpecker-activate-repo.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: scripts/woodpecker_activate_repo.sh PLANE OWNER/REPO [--run BRANCH]
+      activates a GitHub repository in the ci.0mcp or ci.0exec Woodpecker plane (idempotent,
+      token read by fleet-vault inside CT108 and never printed) and can run and wait
+      for a pipeline; the Woodpecker runbook and ADR 0287 now say the forge is GitHub
+      and mark the Gitea-era activate-repo path as stale.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'Verified 2026-10-30: both Woodpecker planes use a GitHub forge. The repo''s
+    runbook, ADR 0287 and woodpecker_tool.py activate-repo still described Gitea.
+    Nothing is applied by this change and no host or API is contacted: the tests run
+    the script against shims.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Write the activation script and its offline test
+    status: completed
+  - id: t3
+    title: Runbook section, forge correction in the runbook and ADR 0287, stale marker
+      on woodpecker_tool activate-repo
+    status: completed
+  - id: t4
+    title: Open the PR (not merged)
     status: in_progress
 - id: ws-0514-retire-github-actions
   adr: 0287
@@ -8865,6 +11484,84 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 27265749-5306-4790-b09c-4a056a18e089
+- id: ws-20261101-standby-guest-diag
+  adr: 0188
+  title: 'standby-ctl: a guest step that times out leaves the guest''s own diagnostics
+    in the run record (the 2026-10-31 rehearsal hang, docker never started)'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/standby-guest-diag
+  worktree_path: .claude/worktrees/standby-guest-diag
+  doc: docs/workstreams/ws-20261101-standby-guest-diag.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/0infer/tier0-runner/host/standby_ctl.py
+  - config/0infer/tier0-runner/README.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261101-standby-guest-diag.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261101-standby-guest-diag.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261101_standby_guest_diag_tracking
+      paths:
+      - docs/workstreams/ws-20261101-standby-guest-diag.md
+      mode: exclusive
+    - id: standby_ctl_guest_diag_tests
+      paths:
+      - tests/test_standby_ctl_guest_diag.py
+      mode: exclusive
+    - id: standby_ctl_controller
+      paths:
+      - config/0infer/tier0-runner/host/standby_ctl.py
+      - config/0infer/tier0-runner/README.md
+      mode: shared_contract
+      contract: tier0-standby-ctl-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261101-standby-guest-diag.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'standby-ctl (DomainScope standby VM 8101): when a guest step
+      runs out of time it runs one bounded, docker-free diagnostic script in the guest
+      and keeps the result in the run record (guest_diag). Code, tests and README
+      only; nothing is applied to the hypervisor.'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'The daily DomainScope standby rehearsal failed on 2026-10-31 (exit 5,
+    603.6 s): silent and teardown both ended in "guest exit 124: guest command did
+    not finish in time", and the guest-shutdown timed out too. The guest''s boot had
+    stalled before multi-user.target (cloud-init never started its final stage, which
+    is ordered after multi-user.target; docker.service is Type=notify with TimeoutStartSec=0),
+    the guest was idle (load 0, no IO or memory pressure) and the hypervisor was quiet.
+    The next rehearsal (2026-11-01) passed. What docker or containerd waited for could
+    not be shown: the record had no guest output, and the guest''s journald (SystemKeepFree=5G
+    on a disk with 5.6 GB free) had already deleted the journal of that boot. This
+    workstream makes the next occurrence explain itself.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: standby_ctl.py runs one bounded, docker-free guest diagnostic on the first
+      guest timeout and puts it in the run record; README documents it; tests pin
+      it (and mutation-checked)
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate, open the pull request (not merged; installing it
+      on the hypervisor needs the owner's yes)
+    status: in_progress
 - id: ws-0527-nginx-edge-logrotate
   adr: '0174'
   title: Install logrotate with public-edge NGINX packages
@@ -9239,6 +11936,158 @@ workstreams:
   ready_to_merge: false
   live_applied: false
   plane_issue_id: 3dc83890-945f-41eb-9ca7-b21f7ff54c40
+- id: ws-20261029-0pipe-gate-builder-runbook
+  adr: 0087
+  title: 'Validation gate runbook: running the gate on an alternate build server,
+    and how the gate really runs ansible-lint'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/0pipe-gate-builder-runbook
+  worktree_path: .claude/worktrees/0pipe-gate-builder
+  doc: docs/workstreams/ws-20261029-0pipe-gate-builder-runbook.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - docs/runbooks/validation-gate.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261029-0pipe-gate-builder-runbook.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261029-0pipe-gate-builder-runbook.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261029_0pipe_gate_builder_tracking
+      paths:
+      - docs/workstreams/ws-20261029-0pipe-gate-builder-runbook.md
+      mode: exclusive
+    - id: validation_gate_runbook
+      paths:
+      - docs/runbooks/validation-gate.md
+      mode: shared_contract
+      contract: validation-gate-runbook-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261029-0pipe-gate-builder-runbook.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'Validation gate runbook: how to run the gate on an alternate
+      build server (REMOTE_EXEC_CONFIG, never a local fallback, shared workers, workspace
+      retention) and how the gate really runs ansible-lint (uv tool run with ansible-core
+      2.17.10, not the native binary).'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: Docs only. A second build server was set up on 2026-10-29 as an alternate
+    gate builder; its toolchain installer, config generator and parity check live
+    in the private repository baditaflorin/0pipe (the owner moved everything about
+    that server there), so this repository only gets the generic gate facts, without
+    real hostnames or addresses (ADR 0409).
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Write the alternate-server section and the ansible-lint explanation in
+      the gate runbook
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not
+      merged, no live-apply marker, nothing applied)
+    status: in_progress
+- id: ws-0541-gate-stacked-base-ref
+  adr: 0087
+  title: Pre-push gate - a branch stacked on an unmerged branch names its parent as
+    the validation base
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/gate-stacked-base-ref
+  worktree_path: .claude/worktrees/gate-stacked-base
+  doc: docs/workstreams/ws-0541-gate-stacked-base-ref.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - scripts/remote_exec.sh
+  - scripts/validate_repo.sh
+  - tests/test_remote_exec.py
+  - tests/test_validate_repo_cache.py
+  - tests/test_workstream_surface_ownership.py
+  - docs/runbooks/validation-gate.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0541-gate-stacked-base-ref.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0541-gate-stacked-base-ref.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0541_gate_stacked_base_ref_tracking
+      paths:
+      - docs/workstreams/ws-0541-gate-stacked-base-ref.md
+      mode: exclusive
+    - id: gate_stacked_base_ref_scripts
+      paths:
+      - scripts/remote_exec.sh
+      - scripts/validate_repo.sh
+      mode: shared_contract
+      contract: pre-push-gate-v1
+    - id: gate_stacked_base_ref_tests
+      paths:
+      - tests/test_remote_exec.py
+      - tests/test_validate_repo_cache.py
+      - tests/test_workstream_surface_ownership.py
+      mode: shared_contract
+      contract: pre-push-gate-v1
+    - id: gate_stacked_base_ref_runbook
+      paths:
+      - docs/runbooks/validation-gate.md
+      mode: shared_contract
+      contract: pre-push-gate-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0541-gate-stacked-base-ref.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: A branch stacked on an unmerged branch can pass the pre-push
+      gate by setting LV3_VALIDATION_BASE_REF to its parent's ref; remote_exec.sh
+      keeps it, computes the changed files against it and refuses one that does not
+      resolve, and workstream-surfaces uses it. Unset, nothing changes.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'The gate diffed every branch against origin/main in two places (scripts/remote_exec.sh
+    built the changed-file list and exported the base, scripts/validate_repo.sh passed
+    origin/main to the workstream surface check), so a branch stacked on an unmerged
+    parent was judged on the parent''s files too and failed workstream-surfaces on
+    every builder; the pre-push hook then fell back to a local run on the laptop,
+    which the fleet forbids. The caller can now name the parent (LV3_VALIDATION_BASE_REF=origin/claude/parent).
+    Nothing else changes: with the variable unset the behaviour is as before.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Keep a caller-supplied base in remote_exec.sh, use it in validate_workstream_surfaces,
+      add the tests and the runbook section
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not
+      merged, no live-apply marker, nothing applied)
+    status: in_progress
 - id: ws-0517-validation-host-route
   adr: 0082
   title: Restore the remote validation-host route to the declared build VM
@@ -9353,6 +12202,223 @@ workstreams:
   - id: t5
     title: Publish the sanitized ServerClaw snapshot after merge
     status: completed
+- id: ws-20261030-pve-firewall-install-guard
+  adr: '0067'
+  title: 'proxmox_network: the per-VM Proxmox firewall install compares with the live
+    files, refuses to remove live rules, backs up before it writes; record the 0mcp
+    backup fleecing'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/pve-fw-guard
+  worktree_path: .claude/worktrees/pve-fw-guard
+  doc: docs/workstreams/ws-20261030-pve-firewall-install-guard.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/defaults/main.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/meta/argument_specs.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/README.md
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/files/pve_fw_guard.py
+  - tests/test_proxmox_network_role.py
+  - tests/test_proxmox_network_vm_firewall_tag.py
+  - docs/runbooks/configure-guest-network-policy.md
+  - docs/runbooks/configure-agent-history.md
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261030-pve-firewall-install-guard.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261030-pve-firewall-install-guard.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261030_pve_fw_guard_tracking
+      paths:
+      - docs/workstreams/ws-20261030-pve-firewall-install-guard.md
+      mode: exclusive
+    - id: proxmox_network_install_guard
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/meta/argument_specs.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/README.md
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/files/pve_fw_guard.py
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: proxmox_network_install_guard_tests
+      paths:
+      - tests/test_pve_firewall_install_guard.py
+      - tests/fixtures/pve_firewall_guard/*
+      mode: exclusive
+    - id: proxmox_network_install_guard_pinned_tests
+      paths:
+      - tests/test_proxmox_network_role.py
+      - tests/test_proxmox_network_vm_firewall_tag.py
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: proxmox_network_install_guard_runbook
+      paths:
+      - docs/runbooks/configure-guest-network-policy.md
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: proxmox_network_install_guard_agent_history_runbook
+      paths:
+      - docs/runbooks/configure-agent-history.md
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: ws_20261030_pve_fw_guard_pbs_runbook
+      paths:
+      - docs/runbooks/pbs-0own-backups.md
+      mode: exclusive
+    - id: proxmox_network_install_guard_platform_manifest
+      paths:
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261030-pve-firewall-install-guard.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: The proxmox_network per-VM Proxmox firewall install compares
+      each render with the live /etc/pve/firewall file (also in --check mode), fails
+      before writing anything when it would remove a rule line or a managed block
+      unless -e proxmox_network_allow_rule_removal=true, copies every file it replaces
+      to /root/fw-backup-<timestamp>/ with a restore.sh, and can be limited to named
+      VMs with -e proxmox_network_firewall_vmids=155; the 0mcp nightly PBS job's fleecing
+      is recorded in the PBS runbook.
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'On 2026-10-30 an apply of the proxmox-vm-firewall slice on 0mcp copied
+    the inventory render over the live per-VM firewall files and removed about 25
+    production rules for about three minutes (hand-authored rules, an AUTO-MIGRATED
+    set, and the fleet-pool-fw block on VM 191); the --check --diff before it had
+    compared the render with the staging copy and showed only additions. Nothing is
+    applied by this change and no host is contacted: the tests run the guard against
+    fixtures and the role against a temporary directory with stand-ins for qm and
+    pve-firewall.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Write the guard (compare with the live files, refuse removals, back up,
+      install, restore script), wire it into the role, select VMs, make check mode
+      plan the real run's guests
+    status: completed
+  - id: t3
+    title: Tests with fixtures and a real ansible-playbook run against a temporary
+      directory; runbook sections for the guard and the 0mcp fleecing
+    status: completed
+  - id: t4
+    title: Pass the pre-push gate on a build server (no local fallback), merge through
+      the Woodpecker gate
+    status: in_progress
+- id: ws-0541-proxmox-vm-firewall-tag
+  adr: '0067'
+  title: 'proxmox_network: a proxmox-vm-firewall tag that renders only the per-VM
+    Proxmox firewall files'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/proxmox-vm-firewall-scope
+  worktree_path: .claude/worktrees/vm-firewall-scope
+  doc: docs/workstreams/ws-0541-proxmox-vm-firewall-tag.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/README.md
+  - playbooks/guest-network-policy.yml
+  - collections/ansible_collections/lv3/platform/playbooks/guest-network-policy.yml
+  - tests/test_proxmox_network_vm_firewall_tag.py
+  - docs/runbooks/configure-guest-network-policy.md
+  - docs/runbooks/configure-agent-history.md
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0541-proxmox-vm-firewall-tag.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0541-proxmox-vm-firewall-tag.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0541_tracking
+      paths:
+      - docs/workstreams/ws-0541-proxmox-vm-firewall-tag.md
+      mode: exclusive
+    - id: proxmox_vm_firewall_scope
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/proxmox_network/README.md
+      - playbooks/guest-network-policy.yml
+      - collections/ansible_collections/lv3/platform/playbooks/guest-network-policy.yml
+      - tests/test_proxmox_network_vm_firewall_tag.py
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: proxmox_vm_firewall_runbook
+      paths:
+      - docs/runbooks/configure-guest-network-policy.md
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: proxmox_vm_firewall_agent_history_runbook
+      paths:
+      - docs/runbooks/configure-agent-history.md
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: proxmox_vm_firewall_platform_manifest
+      paths:
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0541-proxmox-vm-firewall-tag.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'Add a proxmox-vm-firewall tag to the proxmox_network role: guest-network-policy.yml
+      --tags proxmox-vm-firewall renders and installs only /etc/pve/firewall/<vmid>.fw,
+      compiles, and restarts pve-firewall when a file changed, without replaying interfaces,
+      nftables or forwarding and without stopping or starting a guest; the placeholder-address
+      safety guards carry the always tag.'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: Until now the per-VM Proxmox firewall files were only rendered by the first
+    play of guest-network-policy.yml, which a --limit on a guest skips and a full
+    run replays together with the whole hypervisor network, so on 2026-10-29 one OpenBao
+    rule for the agent-history guest was appended to /etc/pve/firewall/192.fw by hand.
+    This adds a scoped, tagged way to render only those files. Nothing is applied
+    by this change and no host is contacted; the first live use is a separate operator
+    step.
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Tag the per-VM firewall tasks and the guards, keep the guest play from
+      gathering facts in a scoped run, add the pinning test, the runbook section and
+      the role README
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not
+      merged, no live-apply marker, nothing applied)
+    status: in_progress
 - id: adr-0066-mutation-audit-log
   adr: '0066'
   title: Structured mutation audit log
@@ -9838,6 +12904,386 @@ workstreams:
     title: Dispatch a fresh recovery email and verify provider acceptance and public
       recovery flow
     status: completed
+- id: ws-20261103-tailscaled-restart-0docker
+  adr: '0014'
+  title: '0docker hypervisor: the tailnet proxy sockets survive a tailscaled restart
+    (FreeBind for woodpecker-exec-proxy@.socket, a tailscale0 device Wants= for zdocker-hypervisor-metrics-proxy.socket),
+    proved on the 0docker systemd; git only, nothing is applied'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/tailscaled-restart-0docker
+  worktree_path: .claude/worktrees/tailscaled-0docker
+  doc: docs/workstreams/ws-20261103-tailscaled-restart-0docker.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - config/hostconf/files/socket-free-bind.0docker.conf
+  - config/hostconf/files/tailscale0-wants-zdocker-metrics-proxy.0docker.conf
+  - scripts/tailscaled_restart_rig/README.md
+  - scripts/tailscaled_restart_rig/build_variants.py
+  - scripts/tailscaled_restart_rig/run.sh
+  - scripts/tailscaled_restart_rig/0docker-units/woodpecker-exec-proxy@.socket
+  - scripts/tailscaled_restart_rig/0docker-units/woodpecker-exec-proxy@.service
+  - tests/test_tailscaled_restart_proxies.py
+  - tests/test_tailscaled_restart_0docker.py
+  - docs/runbooks/tailscaled-restart-proxies.md
+  - docs/workstreams/ws-20261102-tailscaled-restart-proxies.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - build/platform-manifest.json
+  - workstreams/active/ws-20261103-tailscaled-restart-0docker.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261103-tailscaled-restart-0docker.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261103_tailscaled_restart_0docker_tracking
+      paths:
+      - docs/workstreams/ws-20261103-tailscaled-restart-0docker.md
+      mode: exclusive
+    - id: tailscaled_restart_0docker_hostconf_files
+      paths:
+      - config/hostconf/files/socket-free-bind.0docker.conf
+      - config/hostconf/files/tailscale0-wants-zdocker-metrics-proxy.0docker.conf
+      mode: exclusive
+    - id: tailscaled_restart_0docker_tests_and_fixtures
+      paths:
+      - tests/test_tailscaled_restart_0docker.py
+      - scripts/tailscaled_restart_rig/0docker-units/woodpecker-exec-proxy@.socket
+      - scripts/tailscaled_restart_rig/0docker-units/woodpecker-exec-proxy@.service
+      mode: exclusive
+    - id: tailscaled_restart_rig_and_runbook
+      paths:
+      - docs/runbooks/tailscaled-restart-proxies.md
+      - docs/workstreams/ws-20261102-tailscaled-restart-proxies.md
+      - scripts/tailscaled_restart_rig/README.md
+      - scripts/tailscaled_restart_rig/build_variants.py
+      - scripts/tailscaled_restart_rig/run.sh
+      - tests/test_tailscaled_restart_proxies.py
+      mode: shared_contract
+      contract: tailscaled-restart-rig-v1
+    - id: hostconf_manifest
+      paths:
+      - config/hostconf/hostconf.yaml
+      - config/hostconf/README.md
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261103-tailscaled-restart-0docker.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: 'The 0docker hypervisor''s tailnet proxy sockets survive a tailscaled
+      restart: woodpecker-exec-proxy@.socket gets FreeBind=true and zdocker-hypervisor-metrics-proxy.socket
+      is Wanted by the tailscale0 device (hostconf drop-ins); the throwaway-systemd
+      rig models the 0docker unit shapes on systemd 252'
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'On 2026-11-02 at 12:33 CET tailscaled on the 0docker hypervisor updated
+    itself (the control plane''s `tailscale update --yes`, the same update that hit
+    0mcp) and was restarted: the restart took 90 s because tailscaled''s stop timed
+    out, and when it started again at 12:34:59 woodpecker-exec-proxy@9000.socket (BindToDevice=tailscale0,
+    no FreeBind) failed with "Bound to unit sys-subsystem-net-devices-tailscale0.device,
+    but unit isn''t active" and the Woodpecker CI plane stood still for 71 minutes.
+    PR 659 added a tailscale0 device drop-in that Wants= the socket; PR 661 (0mcp)
+    showed in a rig that this is half a fix: the device appears about 0.3 s (0docker)
+    to 0.8 s (0mcp) before it has its address, so the Wants= start fails with "Cannot
+    assign requested address" unless the socket has FreeBind=true. zdocker-hypervisor-metrics-proxy.socket
+    has FreeBind but is only WantedBy=sockets.target, so after a separate stop and
+    start of tailscaled nothing starts it. This workstream adds the FreeBind drop-in
+    and the device Wants= for the 0docker hypervisor.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Read-only scan of the 0docker hypervisor, two hostconf files with two manifest
+      entries, a 0docker family of rig variants on systemd 252, the catalog-and-inventory
+      test, the runbook
+    status: in_progress
+  - id: t3
+    title: Pass the pre-push gate, open the pull request and land it; apply with hostconf.py
+      apply --host bastion --file socket-free-bind.woodpecker-exec-proxy --file tailscale0-wants-zdocker-metrics-proxy
+      --yes (daemon-reload only, no restart), after the user's yes
+    status: pending
+- id: ws-20261102-tailscaled-restart-proxies
+  adr: '0014'
+  title: '0mcp hypervisor: the tailnet proxy sockets survive a tailscaled restart
+    (FreeBind plus a tailscale0 device drop-in that Wants them), so a self-update
+    of tailscaled no longer leaves 20 proxies dead'
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: claude
+  branch: claude/tailscaled-restart-proxies
+  worktree_path: .claude/worktrees/tailscaled-restart-proxies
+  doc: docs/workstreams/ws-20261102-tailscaled-restart-proxies.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/templates/lv3-tailscale-proxy.socket.j2
+  - inventory/fleet-observability.yml
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - config/hostconf/files/socket-free-bind.0mcp.conf
+  - config/hostconf/files/tailscale0-wants-lv3-proxies.0mcp.conf
+  - scripts/tailscaled_restart_rig/README.md
+  - scripts/tailscaled_restart_rig/build_variants.py
+  - scripts/tailscaled_restart_rig/rig-init
+  - scripts/tailscaled_restart_rig/run.sh
+  - tests/test_tailscaled_restart_proxies.py
+  - docs/runbooks/tailscaled-restart-proxies.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261102-tailscaled-restart-proxies.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261102-tailscaled-restart-proxies.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_20261102_tailscaled_restart_proxies_tracking
+      paths:
+      - docs/workstreams/ws-20261102-tailscaled-restart-proxies.md
+      - docs/runbooks/tailscaled-restart-proxies.md
+      mode: exclusive
+    - id: tailscaled_restart_proxies_rig_and_tests
+      paths:
+      - scripts/tailscaled_restart_rig/README.md
+      - scripts/tailscaled_restart_rig/build_variants.py
+      - scripts/tailscaled_restart_rig/rig-init
+      - scripts/tailscaled_restart_rig/run.sh
+      - tests/test_tailscaled_restart_proxies.py
+      mode: exclusive
+    - id: tailscaled_restart_proxies_hostconf_files
+      paths:
+      - config/hostconf/files/socket-free-bind.0mcp.conf
+      - config/hostconf/files/tailscale0-wants-lv3-proxies.0mcp.conf
+      mode: exclusive
+    - id: hostconf_manifest
+      paths:
+      - config/hostconf/hostconf.yaml
+      - config/hostconf/README.md
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: lv3_tailscale_proxy_socket_template
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/proxmox_tailscale_proxy/templates/lv3-tailscale-proxy.socket.j2
+      mode: shared_contract
+      contract: proxmox-tailscale-proxy-role-v1
+    - id: fleet_observability_inventory
+      paths:
+      - inventory/fleet-observability.yml
+      mode: shared_contract
+      contract: fleet-observability-inventory-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-20261102-tailscaled-restart-proxies.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+  canonical_truth:
+    changelog_entry: The 0mcp hypervisor's tailnet proxy sockets bind with FreeBind=true
+      and tailscale0 Wants= them (hostconf drop-ins, role template, inventory), so
+      a tailscaled restart no longer leaves them dead; a throwaway-systemd rig proves
+      it
+    release_bump: patch
+    included_in_repo_version: null
+    latest_receipts: {}
+  context: 'On 2026-11-02 at 12:33:26 CET tailscaled on the 0mcp hypervisor updated
+    itself (the Tailscale control plane sent a c2n update, which ran `tailscale update
+    --yes`, which ran `apt-get install --yes --allow-downgrades tailscale=1.104.4`)
+    and restarted. systemd stopped every socket with Requires=tailscaled.service and
+    started them again 3 s later, before tailscale0 existed and before it had its
+    address: the 19 lv3-tailscale-proxy-* sockets (BindToDevice=tailscale0) failed
+    with "Bound to unit sys-subsystem-net-devices-tailscale0.device, but unit isn''t
+    active" and zmcp-runtime-general-metrics-proxy.socket with "Cannot assign requested
+    address". All 20 stayed dead for 8 hours (OpenBao, Postgres, Vaultwarden, Gitea,
+    Woodpecker, ...; the alert was FleetNodeExporterDown for runtime-general) until
+    they were started by hand. woodpecker-0exec-build-metrics-proxy.socket had FreeBind=true
+    and came back at once. The same self-update ran on the 0docker hypervisor at 12:33:24
+    CET and was the unexplained tailscale0 flap behind #659. The fix is FreeBind=true
+    plus a tailscale0 device drop-in that Wants= every proxy socket.'
+  tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: FreeBind in the lv3 socket template, free_bind for the runtime-general
+      proxy, the two hostconf drop-in files with 21 manifest entries, the throwaway-systemd
+      rig, tests and the runbook
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate, open the pull request and land it; apply with hostconf.py
+      apply --host pve-0mcp --file socket-free-bind.* --file tailscale0-wants-lv3-proxies
+      --yes (daemon-reload only, no restart), after the user's yes
+    status: in_progress
+- id: ws-0532-dbeaver-postgres-direct-access
+  adr: '0014'
+  title: Allow read-only DBeaver access to production PostgreSQL
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/dbeaver-direct-5432
+  worktree_path: .worktrees/dbeaver-postgres-direct-access
+  doc: docs/workstreams/ws-0532-dbeaver-postgres-direct-access.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - config/tailscale/policy.hujson
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0532-dbeaver-postgres-direct-access.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0532-dbeaver-postgres-direct-access.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: ws_0532_tracking
+      paths:
+      - docs/workstreams/ws-0532-dbeaver-postgres-direct-access.md
+      mode: exclusive
+    - id: dbeaver_postgres_tailnet_grant
+      paths:
+      - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0532-dbeaver-postgres-direct-access.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+  canonical_truth:
+    changelog_entry: Permit one operator device to reach production PostgreSQL over
+      TLS using the existing database-scoped read-only login.
+    release_bump: patch
+    included_in_repo_version: null
+  context: DBeaver Community needs a direct private-tailnet route to the production
+    PostgreSQL primary. The network grant is limited to the operator device, database
+    VM and TCP port 5432. PostgreSQL requires TLS and matches the login to the production
+    database; it rejects other database and role combinations from that device.
+  tasks:
+  - id: t1
+    title: Add the exact-source PostgreSQL grant and matching Tailscale policy test
+    status: completed
+  - id: t2
+    title: Validate and merge the policy through the private-source pull request
+    status: in_progress
+  - id: t3
+    title: Apply the Tailscale policy and verify direct DBeaver access
+    status: pending
+- id: ws-0529-0infer-observability
+  adr: '0011'
+  title: Add 0infer to Scanopy inventory and fleet observability
+  status: in_progress
+  ready_to_merge: false
+  live_applied: false
+  owner: codex
+  branch: codex/ws-0529-monitoring-ssh-scope
+  worktree_path: .worktrees/ws-0529-monitoring-ssh-scope
+  doc: docs/workstreams/ws-0529-0infer-observability.md
+  depends_on:
+  - ws-0528-0infer-ci-worker
+  conflicts_with: []
+  shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/files/scanopy-onboard/scanopy_onboard_hv.py
+  - config/tailscale/policy.hujson
+  - docs/runbooks/scanopy-service-discovery.md
+  - inventory/fleet-observability.yml
+  - inventory/host_vars/monitoring.yml
+  - tests/promtool/fleet_backup_freshness_rules_test.yml
+  - tests/test_monitoring_prometheus_codification.py
+  - tests/test_scanopy_onboard_hv.py
+  - workstreams/active/ws-0529-0infer-observability.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0529-0infer-observability.md
+  - changelog.md
+  ownership_manifest:
+    owned_surfaces:
+    - id: scanopy_onboarding_for_0infer
+      paths:
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/files/scanopy-onboard/scanopy_onboard_hv.py
+      - tests/test_scanopy_onboard_hv.py
+      - docs/workstreams/ws-0529-0infer-observability.md
+      mode: exclusive
+    - id: monitoring_vm_targets
+      paths:
+      - inventory/host_vars/monitoring.yml
+      - tests/test_monitoring_prometheus_codification.py
+      mode: shared_contract
+      contract: monitoring-vm-targets-v1
+    - id: scanopy_onboarding_runbook
+      paths:
+      - docs/runbooks/scanopy-service-discovery.md
+      mode: shared_contract
+      contract: scanopy-discovery-runbook-v1
+    - id: 0infer_exporter_inventory
+      paths:
+      - inventory/fleet-observability.yml
+      mode: shared_contract
+      contract: fleet-observability-inventory-v1
+    - id: existing_backup_metric_host_label
+      paths:
+      - tests/promtool/fleet_backup_freshness_rules_test.yml
+      mode: shared_contract
+      contract: prometheus-backup-alert-label-v1
+    - id: 0infer_tailscale_permissions
+      paths:
+      - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: workstream_registry
+      paths:
+      - workstreams/active/ws-0529-0infer-observability.yaml
+      - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
+      - workstreams/active/ws-0523-fleet-observability-roles.yaml
+      - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: release_integration
+      paths:
+      - changelog.md
+      - README.md
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+    - id: agent_coordination_map
+      paths:
+      - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+  canonical_truth:
+    changelog_entry: Add 0infer to private Scanopy discovery and host/PostgreSQL node-exporter
+      monitoring.
+    release_bump: patch
+    included_in_repo_version: null
+  context: Extend the existing observability and Scanopy automation to cover the 0infer
+    Proxmox host and PostgreSQL guest using private Tailscale connectivity.
+  tasks:
+  - id: t1
+    title: Add private Scanopy onboarding access for 0infer guests
+    status: in_progress
+  - id: t2
+    title: Add Tailscale grants and node exporter inventory for the host and PostgreSQL
+      guest
+    status: in_progress
 - id: ws-0523-fleet-observability-roles
   adr: '0011'
   title: Codify the 2026-10-12 exporter, firewall, Tailscale node and Postgres backup
@@ -9883,7 +13329,8 @@ workstreams:
       - docs/runbooks/fleet-observability.md
       - docs/workstreams/ws-0523-fleet-observability-roles.md
       - workstreams/active/ws-0523-fleet-observability-roles.yaml
-      mode: exclusive
+      mode: shared_contract
+      contract: fleet-observability-inventory-v1
     - id: exporter_listener_runbook
       paths:
       - docs/runbooks/tailscale-metrics-grants.md
@@ -9902,6 +13349,7 @@ workstreams:
     - id: active_workstream_registry
       paths:
       - workstreams.yaml
+      - workstreams/active/ws-0523-fleet-observability-roles.yaml
       mode: shared_contract
       contract: workstream-registry-v1
   canonical_truth:
@@ -9990,7 +13438,8 @@ workstreams:
       - playbooks/services/prometheus-0own-node-exporter.yml
       - tests/test_monitoring_prometheus_codification.py
       - .woodpecker.yml
-      mode: exclusive
+      mode: shared_contract
+      contract: monitoring-vm-targets-v1
     - id: monitoring_vm_role_shared_edits
       paths:
       - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
@@ -10028,11 +13477,12 @@ workstreams:
       - docs/runbooks/monitoring-stack.md
       - docs/runbooks/tailscale-metrics-grants.md
       - docs/workstreams/ws-0522-monitoring-live-changes-codify.md
-      - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
-      mode: exclusive
+      mode: shared_contract
+      contract: scanopy-discovery-runbook-v1
     - id: active_workstream_registry
       paths:
       - workstreams.yaml
+      - workstreams/active/ws-0522-monitoring-live-changes-codify.yaml
       mode: shared_contract
       contract: workstream-registry-v1
   canonical_truth:

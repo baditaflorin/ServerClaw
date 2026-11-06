@@ -1,0 +1,66 @@
+id: ws-20261101-vm130-inventory-correct
+adr: "0494"
+title: "VM 130 (docker-build-lv3, the 0mcp CI builder): the inventory says what the live VM is after the 2026-11-01 memory restart (20 cores, 14336 MB fixed, 600 GB)"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/vm130-inventory-correct
+worktree_path: .claude/worktrees/vm130-inventory-correct
+doc: docs/workstreams/ws-20261101-vm130-inventory-correct.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - inventory/host_vars/proxmox-host.yml
+  - config/0mcp/docker-build-lv3/README.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261101-vm130-inventory-correct.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261101-vm130-inventory-correct.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261101_vm130_inventory_correct_tracking
+      paths:
+        - docs/workstreams/ws-20261101-vm130-inventory-correct.md
+      mode: exclusive
+    - id: vm130_inventory_declaration
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: docker_build_lv3_readme
+      paths:
+        - config/0mcp/docker-build-lv3/README.md
+      mode: shared_contract
+      contract: docker-build-vm-config-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261101-vm130-inventory-correct.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "VM 130 (docker-build-lv3) is declared as the live VM runs after the 2026-11-01 memory restart: 20 cores, memory_mb 14336 (fixed, balloon 0), disk_gb 600; a provision-guests run no longer shrinks the production CI builder. Inventory and docs only; nothing is applied."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  On 2026-11-01 the 0mcp hypervisor ran out of memory and VM 130 was restarted at 14336 MiB with ballooning off (a drained restart, 08:48-08:51Z).
+  The inventory entry still said 12 cores, 10240 MB and 320 GB, and the proxmox_guests role runs `qm set --cores --memory --balloon 0` on every declared guest,
+  so a provision-guests run would have shrunk the production CI builder. The entry now matches `qm config 130` read on 2026-11-01. The generated
+  inventory/group_vars/platform.yml is not regenerated here: a dry run differs in 1043 lines (other guests, including VM 155) and nothing reads sizes from it.
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Declare VM 130 as live (20 cores, 14336 MB, 600 GB) in host_vars and correct the docker-build-lv3 README (intro, new dated section, rebuild recipe)
+    status: completed
+  - id: t3
+    title: Run the inventory and config tests, pass the pre-push gate, open the pull request and land it with fleet-ship (nothing is applied live)
+    status: in_progress

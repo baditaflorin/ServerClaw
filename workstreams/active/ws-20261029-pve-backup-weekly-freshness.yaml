@@ -1,0 +1,83 @@
+id: ws-20261029-pve-backup-weekly-freshness
+adr: "0386"
+title: Hold a guest with a weekly vzdump job to its own freshness limit in PveBackupFreshnessLow, so CT 108 stops alerting most of every week
+status: in_progress
+ready_to_merge: false
+live_applied: true
+owner: claude
+branch: claude/live-apply-pve-weekly-freshness
+worktree_path: .claude/worktrees/live-apply-pve-weekly-freshness
+doc: docs/workstreams/ws-20261029-pve-backup-weekly-freshness.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/prometheus/rules/pve-host-incident.yml
+  - tests/promtool/pve_backup_freshness_rules_test.yml
+  - tests/test_pve_backup_freshness_rules.py
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261029-pve-backup-weekly-freshness.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261029-pve-backup-weekly-freshness.md
+  - versions/stack.yaml
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - receipts/live-applies/2026-10-30-pve-backup-weekly-freshness-monitoring-live-apply.json
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261029_pve_backup_weekly_freshness_tracking
+      paths:
+        - docs/workstreams/ws-20261029-pve-backup-weekly-freshness.md
+      mode: exclusive
+    - id: pve_host_incident_rules
+      paths:
+        - config/prometheus/rules/pve-host-incident.yml
+      mode: shared_contract
+      contract: pve-host-incident-rules-v1
+    - id: pve_backup_freshness_rule_tests
+      paths:
+        - tests/promtool/pve_backup_freshness_rules_test.yml
+        - tests/test_pve_backup_freshness_rules.py
+      mode: exclusive
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261029-pve-backup-weekly-freshness.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+    - id: ws_20261029_pve_backup_weekly_freshness_mainline_live_apply_evidence
+      paths:
+        - README.md
+        - versions/stack.yaml
+        - docs/status/history/live-apply-evidence.md
+        - receipts/live-applies/2026-10-30-pve-backup-weekly-freshness-monitoring-live-apply.json
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+canonical_truth:
+  changelog_entry: PveBackupFreshnessLow holds a guest whose only vzdump job is weekly to the collector's 8.5 day limit and keeps the 30 hour limit for every other guest, so CT 108 no longer raises a critical alert for most of every week.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    pve_backup_weekly_freshness: 2026-10-30-pve-backup-weekly-freshness-monitoring-live-apply
+context: >-
+  CT 108 (the builder) has had a weekly vzdump job since 2026-10-28 (ct108-nightly, "sun 03:30"; its daily restore point is the file-level
+  group host/ct108-live). PveBackupFreshnessLow held every guest to a fixed 30 hours since the last successful vzdump, so it fires 30 hours
+  after each Sunday run and stays critical until the next run: about 5.75 days of every 7, with nothing failing. The host collector
+  (baditaflorin/fleet-state hypervisor-0docker/libexec/pve-host-health-metrics.py, PR 619, installed on the hypervisor on 2026-10-28) already
+  reads each job's schedule and publishes proxmox_backup_max_age_seconds per guest (36 hours, or 8.5 days for a weekly guest) and looks back
+  10 days for a weekly guest. This change makes the alert in this repository use that limit for a weekly guest and nothing else; a daily guest
+  stays at 30 hours. Applying it to the monitoring VM is a separate decision.
+tasks:
+  - id: t1
+    title: Judge a weekly guest by the collector's published limit in PveBackupFreshnessLow, keep 30 hours for every other guest, with promtool unit tests and a pytest wrapper
+    status: completed
+  - id: t2
+    title: Validate through the pre-push gate and open the pull request (the user decides the merge)
+    status: completed
+  - id: t3
+    title: Ship the rule file to the monitoring VM (targeted one-file play, SIGHUP) and record the receipt (done on the user's yes, 2026-10-30)
+    status: completed

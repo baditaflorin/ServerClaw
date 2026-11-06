@@ -1,0 +1,111 @@
+# promtool unit tests for config/prometheus/rules/netpolicy.yml (run by tests/test_netpolicy_rules.py when promtool is installed).
+# promtool starts its clock at the Unix epoch, so a heartbeat whose value equals its own timestamp in seconds means "the check ran
+# just now": "0+1800x99" at a 30m interval is a check that reports every 30 minutes.
+rule_files:
+  - ../../config/prometheus/rules/netpolicy.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a check that reports on time and finds nothing raises nothing
+    interval: 30m
+    input_series:
+      - series: 'netpolicy_last_run_timestamp_seconds{hypervisor="0mcp"}'
+        values: "0+1800x30"
+      - series: 'netpolicy_vm_in_sync{hypervisor="0mcp",vm="191"}'
+        values: "1x30"
+      - series: 'netpolicy_could_not_look{hypervisor="0mcp"}'
+        values: "0x30"
+      - series: 'netpolicy_unparsed_lines{hypervisor="0mcp",vm="191"}'
+        values: "0x30"
+    alert_rule_test:
+      - {eval_time: 10h, alertname: NetpolicyDrift, exp_alerts: []}
+      - {eval_time: 10h, alertname: NetpolicySilent, exp_alerts: []}
+      - {eval_time: 10h, alertname: NetpolicyNotReporting, exp_alerts: []}
+      - {eval_time: 10h, alertname: NetpolicyCannotLook, exp_alerts: []}
+      - {eval_time: 10h, alertname: NetpolicyUnmodelledRules, exp_alerts: []}
+
+  - name: a VM that stops matching its policy alerts after an hour, not before
+    interval: 1m
+    input_series:
+      - series: 'netpolicy_vm_in_sync{hypervisor="0mcp",vm="191"}'
+        values: "1x30 0x200"
+      - series: 'netpolicy_vm_in_sync{hypervisor="0mcp",vm="110"}'
+        values: "1x230"
+    alert_rule_test:
+      - {eval_time: 85m, alertname: NetpolicyDrift, exp_alerts: []}
+      - eval_time: 100m
+        alertname: NetpolicyDrift
+        exp_alerts:
+          - exp_labels: {hypervisor: "0mcp", vm: "191", severity: warning, service: netpolicy}
+            exp_annotations:
+              summary: "Network policy drift on VM 191 of 0mcp"
+              description: "The live firewall rules of VM 191 on 0mcp have differed from config/network-policy/0mcp.yaml for more than an hour: a hand edit on a host, or a merged change that was not applied. Run `python3 scripts/netpolicy.py drift --policy config/network-policy/0mcp.yaml --live` for the list per layer (pve, input, forward, docker_user). Fix the host or the file; do not leave the difference."
+              runbook_url: docs/runbooks/network-policy.md
+
+  - name: a drift that is fixed within the hour never alerts
+    interval: 1m
+    input_series:
+      - series: 'netpolicy_vm_in_sync{hypervisor="0mcp",vm="191"}'
+        values: "1x10 0x40 1x200"
+    alert_rule_test:
+      - {eval_time: 150m, alertname: NetpolicyDrift, exp_alerts: []}
+
+  - name: a check that stopped running is silent after 3 hours
+    interval: 1m
+    input_series:
+      - series: 'netpolicy_last_run_timestamp_seconds{hypervisor="0mcp"}'
+        values: "0+60x60 3540x400"
+    alert_rule_test:
+      - {eval_time: 3h, alertname: NetpolicySilent, exp_alerts: []}
+      - eval_time: 5h
+        alertname: NetpolicySilent
+        exp_alerts:
+          - exp_labels: {hypervisor: "0mcp", severity: warning, service: netpolicy}
+            exp_annotations:
+              summary: "The network policy drift check of 0mcp has not run for 3 hours"
+              description: "netpolicy_last_run_timestamp_seconds is old: netpolicy-drift.timer on CT108 stopped, or the run fails before it writes its metrics (`systemctl status netpolicy-drift.service`, `scripts/netpolicy-install.sh --status`)."
+              runbook_url: docs/runbooks/network-policy.md
+
+  - name: a series that is gone is caught by absent(), not by the staleness alert
+    interval: 1m
+    input_series:
+      - series: 'up{job="node",instance="ct108:9100"}'
+        values: "1x400"
+    alert_rule_test:
+      - {eval_time: 120m, alertname: NetpolicyNotReporting, exp_alerts: []}
+      - eval_time: 200m
+        alertname: NetpolicyNotReporting
+        exp_alerts:
+          - exp_labels: {severity: warning, service: netpolicy}
+            exp_annotations:
+              summary: "No network policy drift metrics at all"
+              description: "No netpolicy_last_run_timestamp_seconds series for 3 hours: the builder's node exporter textfile is not scraped, the file netpolicy_<hypervisor>.prom is missing, or the job was never installed (`scripts/netpolicy-install.sh --enable`)."
+              runbook_url: docs/runbooks/network-policy.md
+      - {eval_time: 200m, alertname: NetpolicySilent, exp_alerts: []}
+
+  - name: an unreadable hypervisor and unmodelled rules each alert after their wait
+    interval: 1m
+    input_series:
+      - series: 'netpolicy_could_not_look{hypervisor="0mcp"}'
+        values: "0x10 1x300"
+      - series: 'netpolicy_unparsed_lines{hypervisor="0mcp",vm="120"}'
+        values: "0x10 3x300"
+    alert_rule_test:
+      - {eval_time: 100m, alertname: NetpolicyCannotLook, exp_alerts: []}
+      - eval_time: 150m
+        alertname: NetpolicyCannotLook
+        exp_alerts:
+          - exp_labels: {hypervisor: "0mcp", severity: warning, service: netpolicy}
+            exp_annotations:
+              summary: "The network policy check cannot read 0mcp"
+              description: "For 2 hours the drift check could not read the live state of 0mcp (the ssh alias in `collect.ssh` of the policy file, the Proxmox guest agent, or the fetch of the policy from git). An unreadable host is never reported as in sync, so until this clears nothing is being compared."
+              runbook_url: docs/runbooks/network-policy.md
+      - eval_time: 90m
+        alertname: NetpolicyUnmodelledRules
+        exp_alerts:
+          - exp_labels: {hypervisor: "0mcp", vm: "120", severity: warning, service: netpolicy}
+            exp_annotations:
+              summary: "VM 120 of 0mcp has firewall rules the policy tool does not model"
+              description: "3 live rule line(s) on VM 120 are outside what scripts/netpolicy.py understands (a DROP rule, an OUT rule, a new macro or nft shape). The policy is blind to them: extend the tool and the file, or remove the rule. See the `not modelled` lines of `netpolicy.py drift`."
+              runbook_url: docs/runbooks/network-policy.md

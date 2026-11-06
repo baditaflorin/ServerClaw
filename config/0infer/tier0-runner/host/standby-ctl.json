@@ -1,0 +1,59 @@
+{
+  "_comment": "Installed to /etc/standby-ctl/config.json on the 0infer hypervisor. Everything not listed falls back to the defaults in standby_ctl.py; listing it here keeps the deployed values reviewable. primary_probes are the 0docker host's public ssh and edge ports; control_probes must answer, or 'primary unreachable' is treated as unknown. prod_dbname / rehearsal_dbname are the two databases an activation / a rehearsal must end up connected to: the controller checks compose's rendered config and the running containers against them and refuses a bundle whose .env names another one. dsn_host_map rewrites the HOST of POSTGRES_DSN in the bundle's production and staging .env (since the 2026-10-18 cutover the DSNs name VM701 by its tailnet address, which the standby cannot route to; it answers on its vmbr70 address); credentials and options are kept byte for byte. pg_cert is the pinned public server certificate of VM701 (host/pg-tls/, installed to /etc/standby-ctl/pg-tls/) that is put into the guest's data volume before the database probe, because the DSN verifies the server against /data/pg-tls/infer-pg-primary.crt.",
+  "vmid": 8101,
+  "expect_name": "standby-docker-prod",
+  "bridge": "vmbr70",
+  "guest_ip": "10.70.10.50",
+  "gateway_ip": "10.70.10.1",
+  "primary_probes": [
+    [
+      "203.0.113.2",
+      22
+    ],
+    [
+      "203.0.113.2",
+      443
+    ]
+  ],
+  "control_probes": [
+    [
+      "203.0.113.1",
+      443
+    ],
+    [
+      "1.1.1.1",
+      443
+    ]
+  ],
+  "ports": {
+    "frontend": 23480,
+    "api": 23481
+  },
+  "env_overrides": {
+    "unset": [
+      "FLEET_INTERNAL_HOST",
+      "FLEET_COLOCATE_SERVICES"
+    ],
+    "set": {},
+    "append_csv": {
+      "TRUSTED_PROXIES": [
+        "10.70.10.1"
+      ]
+    },
+    "dsn_host_map": {
+      "100.64.0.22": "10.70.10.10"
+    }
+  },
+  "pg_cert": {
+    "src": "/etc/standby-ctl/pg-tls/infer-pg-primary.crt",
+    "sha256": "dc4a57dfb0b201d5a86f3ce5b077478c239bd66147c405423dd1021e100c3827",
+    "volume": "domainscope-data",
+    "dest": "pg-tls/infer-pg-primary.crt"
+  },
+  "min_available_mb_rehearse": 9000,
+  "min_available_mb_activate": 4500,
+  "cron_min_active_minutes": 30,
+  "prod_dbname": "prod_2026_domainscope_scrapetheworld_org",
+  "rehearsal_dbname": "stage_2026_domainscope_scrapetheworld_org",
+  "rehearse_hold_s": 20
+}

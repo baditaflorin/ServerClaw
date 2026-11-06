@@ -1,0 +1,20 @@
+[Unit]
+Description=Boot the Scanopy standby server against the restored data, check it, stop it
+Documentation=file://{{ monitoring_scanopy_standby_readme_file }}
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+User=root
+Environment=BACKUP_DIR={{ monitoring_scanopy_backup_dir }}
+ExecStart=/usr/bin/python3 {{ monitoring_scanopy_standby_script_file }} boot-test
+TimeoutStartSec=900
+Nice=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths={{ monitoring_scanopy_standby_state_dir }} {{ monitoring_scanopy_standby_textfile_dir }}
+ReadOnlyPaths={{ monitoring_scanopy_standby_install_dir }} {{ monitoring_scanopy_backup_dir }} {{ monitoring_scanopy_retag_api_key_file | dirname }}
+UMask=0077

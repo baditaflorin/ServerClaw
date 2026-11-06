@@ -1,0 +1,61 @@
+id: ws-20261020-enrichment-pool-ports
+title: Permit reviewed enrichment replica private ports
+status: in_progress
+ready_to_merge: true
+live_applied: false
+owner: codex
+branch: codex/enrichment-pool-ports-20261020
+worktree_path: .
+doc: docs/workstreams/ws-20261020-enrichment-pool-ports.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+- config/tailscale/policy.hujson
+- docs/workstreams/ws-20261020-enrichment-pool-ports.md
+canonical_truth:
+  changelog_entry: Permit exact private gateway and monitoring ports for reviewed
+    enrichment replicas.
+  release_bump: patch
+  included_in_repo_version: null
+context: Expand reviewed service replicas across five existing runtime guests while
+  keeping the current batch running.
+tasks:
+- id: t1
+  title: Review exact grants and validate canonical policy plan
+  status: completed
+- id: t2
+  title: Apply with ETag and verify gateway reachability
+  status: pending
+notes:
+- Independent scope review and canonical live policy validation passed.
+- Plane projection unavailable because the existing API token is invalid; Git shard
+  remains authoritative.
+adr: 0296
+ownership_manifest:
+  owned_surfaces:
+  - id: enrichment_pool_private_ports
+    paths:
+    - config/tailscale/policy.hujson
+    mode: shared_contract
+    contract: guest-network-policy-v1
+  - id: enrichment_pool_network_tracking
+    paths:
+    - docs/workstreams/ws-20261020-enrichment-pool-ports.md
+    mode: exclusive
+  - id: enrichment_pool_network_registry
+    paths:
+    - workstreams/active/ws-20261020-enrichment-pool-ports.yaml
+    - workstreams.yaml
+    mode: shared_contract
+    contract: workstream-registry-v1
+  - id: enrichment_pool_network_generated_docs
+    paths:
+    - docs/diagrams/agent-coordination-map.excalidraw
+    - README.md
+    - docs/status/**
+    - versions/stack.yaml
+    - build/platform-manifest.json
+    - changelog.md
+    - VERSION
+    mode: shared_contract
+    contract: generated-artifacts-v1

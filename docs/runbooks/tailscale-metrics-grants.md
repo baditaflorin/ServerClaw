@@ -51,7 +51,20 @@ What the commands do:
   copy, then POSTs with `If-Match: <etag>` so Tailscale itself rejects a concurrent edit, and finally re-reads the live
   policy to confirm an empty diff. A plan is single-use.
 - `check` is offline: HuJSON syntax; no allow-all (`"*"` to `"*"` or `"*:*"`); every `tag:` referenced anywhere exists in
-  `tagOwners`; the lockout guard; the policy has `tests`.
+  `tagOwners`; the lockout guard; the policy has `tests`; and the text is already in the form Tailscale stores it (below).
+- `fmt` is offline: it rewrites the file in that stored form (whitespace only). `fmt --check` only reports.
+
+### Tailscale's stored form
+
+Tailscale keeps a posted policy re-formatted by `hujson.Format`: tab indentation; a list or object written on one line
+stays on one line only while it fits in 80 columns (counted in bytes, from its opening bracket), otherwise one entry per
+line with a trailing comma; consecutive one-line members of an object have their values aligned (`"src": ` / `"ip":  `).
+The ETag of the live policy is the sha256 of that stored text (all 38 rollback copies on CT108 match their ETag,
+2026-10-21). A file in any other form can never equal live byte for byte. `stored_form()` in the sync tool is a port of
+that formatter, checked against hujson's own test table and against every live copy on CT108; CI fails a policy that is
+not in that form (2026-10-20: #526's one-line nine-port lists made the reconciler re-apply on every run until #527
+stored them as Tailscale does). Fix a red check with `python3 scripts/tailscale_policy_sync.py fmt` and commit the
+result: it changes whitespace only.
 
 ### Credentials
 
@@ -78,8 +91,8 @@ live policy and decides:
 
 | Decision | Meaning | Action |
 |---|---|---|
-| `in_sync` | identical | nothing |
-| `text_only` | same rules, comments or ordering differ | applied (only with `--apply`) |
+| `in_sync` | identical, or live is exactly what Tailscale stores when git's text is posted | nothing |
+| `text_only` | same rules, comments or ordering differ | applied (only with `--apply`), not counted against the daily cap, at most once per policy text |
 | `additive` | only new `grants` and new `tests`, every new grant inside the guard and proven by a new test | applied (only with `--apply`) |
 | `blocked` | anything else: a removal, a changed section (`groups`, `tagOwners`, `ssh`, `autoApprovers`, `nodeAttrs`), a failed offline check, a grant outside the guard | one alert, left for a human `plan` / `apply` |
 
@@ -87,12 +100,22 @@ live policy and decides:
 host or an existing tag (no users, groups, autogroups, wildcards or CIDR ranges). `ip` is explicit `tcp:N`, `udp:N` or
 `tcp:A-B` (at most 1000 ports) and never touches a management port (SSH, telnet, SMB, RDP, VNC, WinRM, hypervisor
 APIs). Every `(src, dst, port)` must be accepted by a `tests` entry added in the same change, so Tailscale re-proves it
-at apply time and a later edit that breaks it is rejected. At most 5 new grants per change.
+at apply time and a later edit that breaks it is rejected. At most 5 new grants per change. An existing test may change in one way only: destinations
+move from its `deny` to its `accept` list, each opened (dst, port, protocol) by a grant added in the same change, and
+nothing else about the test changes (#539: the canary agent's `:8082` was asserted closed until its grant). The test held
+`deny` on live, the only rule change is the guarded new grants, and Tailscale runs every test before the apply, so the
+`accept` passes only if a new grant opens it for that source, including a test that names the tagged node by address.
+Any other change to a test is a removal and stays `blocked`.
 
 **Before it applies** it requires the green CI status of that exact commit (`ci/woodpecker/push/woodpecker`),
 re-validates with Tailscale (which runs every policy test), saves a rollback copy, applies with `If-Match: <etag>` and
-re-reads the policy to confirm an empty diff. Bounds: one apply per run, at most 3 per 24 hours, and a commit whose apply
-failed twice is not retried until `main` moves.
+re-reads the policy to confirm an empty diff. Bounds: one apply per run, at most 3 rule-changing (`additive`) applies per
+24 hours, and a commit whose apply failed twice is not retried until `main` moves. A `text_only` apply changes no rule
+(the semantic diff is empty before and is checked again after), so it is not counted and does not wait for the cap;
+counting one spent the cap on 2026-10-20 and left #528 and #533 waiting until they were applied by hand. If such an apply
+leaves live in a form neither git nor `stored_form()` predicts (Tailscale changed its formatter), the next `text_only`
+run for the same text is `blocked` instead of applying again: adopt live's text (`scripts/tailscale-policy-ct108.sh
+export`) and fix the formatter port. When the cap does hold a change, the notice says when the next slot frees.
 
 **It cannot be talked into weakening itself.** The rules live in the INSTALLED copies of the reconciler, the sync tool
 and `lockout-guard.json` under `/usr/local/lib/tailscale-policy-sync`. If any of them differs from git at the commit it
@@ -105,6 +128,14 @@ scripts/tailscale-policy-reconcile-install.sh --enable   # also enable the timer
 scripts/tailscale-policy-reconcile-install.sh --status   # timer, last run, state, mode
 ```
 
+**Status on CT108: APPLY IS ON since 2026-10-18 17:00 UTC** (the owner's decision: "if this gives it more autonomy then yes"; before that it was report-only and logged `would_apply` for days).
+What that means in practice: a squash-merged change that is `text_only` or `additive` and inside the guard above is applied within 15 minutes after its commit's CI is green, with no person; everything
+else (any removal, a grant touching a management port such as the hypervisor ssh/8006 mesh, an edit of groups/tagOwners/ssh/nodeAttrs) stays `blocked` and needs a human `plan`/`apply`.
+Kill switch: `touch /var/lib/tailscale-policy-sync/reconcile/PAUSE` on CT108 (it keeps deciding and alerting, never applies); off for good: restore the empty `FLEET_TS_RECONCILE_ARGS=`
+(the file `tailscale-reconcile.env.bak-pre-apply-20261018T1700Z` next to it is the report-only original). A git file that is not in the form Tailscale stores can no longer
+merge (CI runs `check`), and if one does, live in its stored form counts as `in_sync` (metric `tailscale_policy_reconcile_git_stored_form 0`) instead of being re-applied every run.
+The tier0-edge-grants job writes its policy through `stored_form()`.
+
 Turning applying on is a deliberate edit, not an install side effect: set `export FLEET_TS_RECONCILE_ARGS=--apply` in
 `/etc/fleet-runner/tailscale-reconcile.env` on CT108. Turn it off by removing that line, or pause it without a restart
 with `touch /var/lib/tailscale-policy-sync/reconcile/PAUSE` (it keeps deciding and alerting, but never applies).
@@ -112,11 +143,89 @@ with `touch /var/lib/tailscale-policy-sync/reconcile/PAUSE` (it keeps deciding a
 State and audit are in `/var/lib/tailscale-policy-sync/reconcile/` (`state.json`, append-only `events.jsonl`); rollback
 copies are in `/var/lib/tailscale-policy-sync/rollback/` as for a manual `apply`. Metrics go to the node exporter textfile
 `tailscale_policy_reconcile.prom`. One ntfy notice is sent per state change (waiting, blocked, applied, failed, back in
-sync), never one per run and never with policy content or a secret. Exit codes: 0 ok or waiting, 1 an apply failed,
+sync), never one per run and never with policy content or a secret. Notices, the failure circuit and the
+daily cap follow the policy text, not the commit: an unrelated commit on `main` neither repeats a notice nor
+resets a circuit, and a comment-only difference never pages. Exit codes: 0 ok or waiting, 1 an apply failed,
 2 blocked (alert sent), 3 could not look.
+
+Reading the journal (`journalctl -u tailscale-policy-reconcile.service`):
+
+- A run held back by the daily cap says so on every run: `daily cap: 3 rule-changing applies in 24h; waits until about <UTC time>`, and
+  writes a `deferred_cap` event (`waits_until` as the same text, `applied_in_window` as the count). The time is when enough of the
+  applies in the window have aged out to bring the count under the cap. The one notice per state change carries the same time and the
+  commit.
+- `waits until about an unknown time` means the cap history (`applied` in `state.json`) holds something that cannot be read as a time
+  (or a time too large to format), or is not a list. The reconciler fails closed: every unreadable entry counts as a spent slot. With
+  three or more of them, or a field that is not a list, no rule-changing apply can happen (a text-only apply changes no rule and still
+  goes through) until a human fixes the file: after reading the journal for how it got there, set `applied` to `[]`
+  in `/var/lib/tailscale-policy-sync/reconcile/state.json` (or delete the field). With one or two unreadable entries the cap is lowered by
+  that many until about 20 further applies push them out of the 20 entries kept. (An empty string or `{}` used to read as "no applies";
+  they now hold the cap.)
+- `reconcile: state.json field <name> had the wrong type (<type>) and was reset` means a field of `state.json` (not `applied`) had a shape
+  the reconciler never writes, so it was dropped as if missing: counters restart from zero, a lost failure count resets the failure circuit (a policy
+  that was failing is tried again, so a few more failed-apply notices can follow), a lost ETag takes a fresh baseline (a live change made at
+  that moment goes unnoticed), a lost `unconverged` marker lets a text-only policy that was held for a human be applied once more, and a lost
+  `notified` repeats one notice. A counter is wrong-typed also when it is negative or too large to be exported as a metric sample. The line
+  names the type of the whole field (`dict` for a bad counter inside `failures` or `out_of_band`), and the value is never printed. The file
+  itself is rewritten at the next timer run (`status` shows the line without saving anything).
+- `reconcile: notice failed (<error class>[ HTTP <code>]): <title>` means the notifier raised: the channel refused the notice, could
+  not be reached, or the configured value is not a URL. It never shows the URL (the topic is the secret) or the error text. Its absence is
+  not proof of delivery: an ntfy-style server accepts a mistyped but well-formed topic and delivers to nobody, so check the topic once by
+  sending a test. A failed notice is recorded as sent (it is not retried), so the line appears once per state change, not on every run.
+- `reconcile: audit event not written (<error class>): <event>` means the audit line (`events.jsonl`) could not be appended after an
+  apply or a deferral. The apply is still counted and saved; fix the log's permissions or the disk.
+- An installed copy that differs from git blocks the run. Three files are compared with git at the head commit: this reconciler,
+  `scripts/tailscale_policy_sync.py` and `config/tailscale/lockout-guard.json`. The comparison is byte for byte apart from line endings
+  and trailing newlines, so even a comment-only edit counts. A failed read of one of the three from git blocks the same way: it is usually a
+  transient network failure, and if the same error repeats the path no longer exists at that commit or the credential is broken (the
+  journal line carries git's error; the installer cannot fix that). A file that is missing from CT108 does not reach this check: without
+  the guard file the run stops before it can look (exit 3, `lockout guard file missing`, no notice, no metrics, so the dead-man alert is
+  what tells you), and without the sync tool the run ends in a traceback (exit 1); the installer is the remedy for both. The installer
+  installs those three plus the run wrapper and the two systemd units; the wrapper and the units are not compared.
+
+After merging ANY change to `scripts/tailscale_policy_reconcile.py`, `scripts/tailscale_policy_sync.py` or
+`config/tailscale/lockout-guard.json`, run `scripts/tailscale-policy-reconcile-install.sh` right after the merge, not later in the day. It
+runs from a checkout at `origin/main` (it installs onto CT108 over the bastion; it cannot be run on CT108). From the next run (within 15
+minutes) until a run has happened after the install, every run reports `blocked` (exit 2, `in_sync` 0 and `blocked` 1 in the metrics,
+nothing applied, one "needs a human" notice that names the installer), even when the live policy equals git, and any additive grant merged
+in the meantime waits. The plain install only copies files and reloads systemd, so the block ends at the first timer run after it (or at
+once with `--enable`, which also starts a run). That run sends "back in sync" when live already equals git, or applies what was waiting
+(an "applied" notice instead).
+
+What is best-effort: the cap line, the `deferred_cap` event, the notice-failed line, the audit line written after an apply, and the last
+"applied" line. They can never raise into the run, so a dead stdout/stderr or an unwritable `events.jsonl` cannot cost an apply its state
+save, and a hand-edited `applied` field or a wrong-typed state field cannot crash the run. The verifying re-read after an apply is covered
+too: whatever it raises, the apply is counted and saved and the run exits 1; the next run takes a fresh ETag baseline when the GET itself
+failed, and starts from the ETag the GET returned when only its body did not parse. Known limits, not
+changed by this: (1) a `state.json` that is not valid JSON, or not an object, is read as empty, so the cap count starts again from zero;
+one that cannot be read at all (a directory, permissions) or is nested absurdly deep crashes every run until it is fixed; (2) a POST whose
+answer is lost (a timeout or a reset while it is in flight) crashes the run before anything is saved: the apply may have landed, the next
+run reads the new ETag as a change from outside, and the apply is not counted; (3) the other prints and audit lines of a run are not
+guarded: a dead stdout from the start stops a run before anything is applied, a dead stderr stops a failed-apply report, and an unwritable
+`events.jsonl` stops every path that logs before it saves its state except the apply itself: blocked, CI failed, report-only, could not
+look (no `look_ok=0` metric), out-of-band detection (it recurs on every run) and a failed apply (the failure is not saved, so the failure
+circuit never opens and a refused apply is retried on every run); (4) if stdout dies while the process exits the exit status can be 120
+although the run finished; (5) the pending-apply gauge is the same for a cap hold as for a CI wait, so the journal and the `deferred_cap`
+events are what tell them apart. These need a hand edit, a full disk, a broken pipe or a network failure at the wrong second.
 
 What it does not do: it never removes or changes a rule, never edits SSH rules, groups, tag owners, auto-approved
 routes or node attributes, and never applies a grant for a management port. Those stay a human `plan` / `apply`.
+
+### Changes made outside the reconciler
+
+Each run compares the live ETag with the one it last saw or produced itself. Any other ETag is a change it did not make:
+it logs `out_of_band_change` (both ETags) in `events.jsonl`, sends one notice, and counts it in
+`tailscale_policy_reconcile_out_of_band_changes_total{via=...}`. `via="sync_tool"` means `tailscale_policy_sync.py apply`
+recorded the apply in `/var/lib/tailscale-policy-sync/applies.jsonl` (with its rollback copy); `via="unknown"` is the
+admin console, another credential or an older copy of the sync tool, which recorded nothing. `FleetTailnetPolicyChangedOutsideReconciler`
+(warning, `config/prometheus/rules/fleet-loops.yml`) fires on the next scrape and clears three hours later.
+
+Both hand applies it was built for went through the sync tool on CT108 while the reconciler waited on its cap:
+2026-10-20 15:32 UTC (six grants git did not have yet, which blocked the reconciler until #526 merged) and 2026-10-21
+06:37 UTC (the merged #533; the next run was `in_sync` and nothing said a person had applied it). A merged additive
+change never needs that. When the alert fires: read the two ETags in `events.jsonl`, run
+`scripts/tailscale-policy-ct108.sh drift`, and adopt any live-only rule into git with a PR; a planned manual apply of a
+`blocked` change needs nothing more. The sync tool's `apply` prints the same reminder before it asks for confirmation.
 
 ## Drift detection
 
@@ -148,7 +257,7 @@ inside the guard file, so weakening the guard shows up as a test failure, not on
 
 | Source | Destination | Ports | Purpose |
 |---|---|---|---|
-| `tag:pve01-metrics`, pg-primary | own-pbs | tcp 8007 | Postgres backup path: vzdump and pgBackRest reach only the PBS API. |
+| `tag:pve01-metrics`, pg-primary | own-pbs | tcp 8007 | **RETIRED (pve01 left the tailnet; #546 removed this grant and its tests, and `tests/test_standby_edge_grants.py` fails if the tag, the hypervisor or VM100 addresses come back).** It was the Postgres backup path: vzdump and pgBackRest reached only the PBS API. |
 | `tag:prometheus-monitoring` | 0docker VM100 (dockerhost), VM104 (nginx-proxy-manager), CT107 (pve-exporter, via hypervisor route), CT109 (scrapetheworld, via hypervisor route) | tcp 9100 | node_exporter scrape. |
 | `tag:prometheus-monitoring` | 0own VM620 (own-pbs), VM630 (openobserve), VM640 (github-mirror), VM650 (pyroscope-canary, via hypervisor route) | tcp 9100 | node_exporter scrape. |
 | `tag:prometheus-monitoring` | 0own build worker | tcp 9101 | Build worker and Woodpecker resource metrics exporter. |
@@ -161,8 +270,8 @@ advertise a wider range without console approval):
 
 New policy `tests` entries assert that the monitoring VM can reach every metrics
 port above and cannot reach SSH (`:22`) or the PBS API on those hosts, and that
-`tag:pve01-metrics` and pg-primary can reach `own-pbs:8007` but neither `:22`
-nor `:443` there nor the 0own and 0mcp hypervisors. Re-run the policy tests
+`tag:pve01-metrics` and pg-primary could reach `own-pbs:8007` but neither `:22`
+nor `:443` there nor the 0own and 0mcp hypervisors (retired with the grant above; those tests are gone). Re-run the policy tests
 after any edit; the API rejects a policy whose tests fail.
 
 ## Exporter listeners and firewalls
@@ -176,15 +285,15 @@ comparison and rollback).
 |---|---|---|
 | 0mcp hypervisor | `prometheus-node-exporter` listens on the tailnet address at `:9100` and `:9102`. | `fleet_node_exporter` |
 | 0docker hypervisor | systemd socket proxy `zdocker-hypervisor-metrics-proxy.{socket,service}` forwards its tailnet `:9100` to `10.10.10.1:9100` (the exporter cannot bind two addresses). | `fleet_node_exporter` |
-| 0mcp hypervisor (build-metrics proxy) | systemd socket proxy `woodpecker-0exec-build-metrics-proxy.{socket,service}` (`FreeBind=true`) forwards its tailnet `:9103` to `10.10.10.30:9100` (docker-build VM exporter). Consumer: CT108 `100.114.37.21`, via the grant `tag:builder-metrics-controller -> 203.0.113.6/32 tcp:9103`. | `fleet_node_exporter` |
+| 0mcp hypervisor (build-metrics proxy) | systemd socket proxy `woodpecker-0exec-build-metrics-proxy.{socket,service}` (`FreeBind=true`) forwards its tailnet `:9103` to `10.10.10.30:9100` (docker-build VM exporter). Consumer: CT108 `100.114.37.21`, via the grant `tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9103`. | `fleet_node_exporter` |
 | 0docker hypervisor (stale `woodpecker-exec-proxy@9100.socket`) | kept stopped and disabled. | `fleet_node_exporter` (`state: disabled`) |
 | 0docker VM100 | node_exporter on its tailnet address `:9100`. | `fleet_node_exporter` |
 | 0docker CT108 | `tailscale serve --tcp=9100` to `10.10.10.108:9100` (userspace tailscaled). | `fleet_node_exporter` |
 | 0own github-mirror (VM640) | `nftables`: only the monitoring VM's tailnet address may reach tcp 9100, on `tailscale0`. | `fleet_guest_firewall` |
 | 0own VMs 620/630/640/650, 0docker VM104, CT107, CT109 | New `prometheus-node-exporter` installs with the textfile directory, bound to the tailnet or internal address. | `fleet_node_exporter` |
 | 0docker and 0own hypervisors | Advertised `/32` routes `10.10.10.109/32` and `10.60.10.50/32`. | `fleet_tailscale_node` |
-| 0mcp monitoring-lv3 (VM140) | CT108 `100.114.37.21` may read Prometheus `:9090` and Alertmanager `:9093` (GET only, consumers go-fleet-triage and the `fleet` MCP server, via tailscaled's userspace SOCKS5 on CT108). Three coupled pieces: the grant `100.114.37.21/32 -> 203.0.113.4/32 tcp:9090,9093`, an nftables allow rule for exactly that source (`network_policy.guests.monitoring`), and Alertmanager listening on `0.0.0.0:9093` (`alertmanager_runtime_listen_address`; Prometheus already listens on `0.0.0.0:9090`). Rollback: remove the nft rule, set the listen address back to `127.0.0.1:9093` and restart Alertmanager, drop `tcp:9093` from the grant. | `linux_guest_firewall`, `alertmanager_runtime`, policy sync |
-| 0database hypervisor (pve01), pg-primary, own-pbs | PBS storage `own-pbs-0database`, job `pg-primary-daily-pbs` (02:30) with `/usr/local/sbin/vzdump-pg-metrics-hook`, pgBackRest prepared on pg-primary, PBS user/ACL/prune job. | `fleet_pg_backup` |
+| 0mcp monitoring-lv3 (VM140) | CT108 `100.114.37.21` may read Prometheus `:9090` and Alertmanager `:9093` (GET only, consumers go-fleet-triage and the `fleet` MCP server, via tailscaled's userspace SOCKS5 on CT108). Three coupled pieces: the grant `100.114.37.21/32 -> 100.64.0.4/32 tcp:9090,9093`, an nftables allow rule for exactly that source (`network_policy.guests.monitoring`), and Alertmanager listening on `0.0.0.0:9093` (`alertmanager_runtime_listen_address`; Prometheus already listens on `0.0.0.0:9090`). Rollback: remove the nft rule, set the listen address back to `127.0.0.1:9093` and restart Alertmanager, drop `tcp:9093` from the grant. | `linux_guest_firewall`, `alertmanager_runtime`, policy sync |
+| 0database hypervisor (pve01), pg-primary, own-pbs | **RETIRED: pve01 was cancelled (its VMs stopped 2026-10-21), so what ran on its hypervisor and on pg-primary VM100 is gone.** Historical record of the 2026-10-12 setup: PBS storage `own-pbs-0database`, job `pg-primary-daily-pbs` (02:30) with `/usr/local/sbin/vzdump-pg-metrics-hook`, pgBackRest prepared on pg-primary, PBS user/ACL/prune job. | `fleet_pg_backup` |
 
 The `nginx` guest on the 0mcp fleet keeps its monitoring-only tcp 9100 firewall rule in
 `inventory/host_vars/proxmox-host.yml` (`network_policy.guests.nginx`), rendered by `linux_guest_firewall`.
@@ -196,16 +305,16 @@ The `nginx` guest on the 0mcp fleet keeps its monitoring-only tcp 9100 firewall 
   the tailnet `:9100`, which node_exporter now owns. It moved to `:9103`, gets
   `FreeBind=true` (it died on 2026-10-11 when tailscaled restarted), and is
   modelled as managed. The grant for `tag:builder-metrics-controller` ->
-  `203.0.113.6/32` `tcp:9103`, its policy test and the PVE `host.fw` line are in
+  `100.64.0.6/32` `tcp:9103`, its policy test and the PVE `host.fw` line are in
   git and live. **Removed 2026-10-12 (user approved):** the older grant
-  `tag:builder-metrics-controller -> 203.0.113.6/32 tcp:9100` and the cluster
+  `tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9100` and the cluster
   firewall rule for `100.114.37.21/32` tcp 9100. They reached the hypervisor
   exporter, not the builder VM; no consumer used them (CT108 reads via SSH
   tunnels and the `:9103` proxy; its only flow to `:9100` was an idle, zero-payload
   TCP connection).
 - The 0mcp hypervisor's `:9102` listener is not covered by any monitoring grant
   (the monitoring VM cannot reach it today).
-- Hypervisor node exporters (`203.0.113.5:9100`, `203.0.113.6:9100`) are
+- Hypervisor node exporters (`100.64.0.5:9100`, `100.64.0.6:9100`) are
   now reachable from the monitoring VM and published by Scanopy under their
   legacy `pve_*_host_*` job names, so `PveHostNodeExporterUnavailable` no longer
   fires for them.

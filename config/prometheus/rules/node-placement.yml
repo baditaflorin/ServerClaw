@@ -1,0 +1,132 @@
+groups:
+  - name: fleet_node_placement
+    rules:
+      # Per-host derived signals, normalized so they're comparable across
+      # different core counts / disk sizes. Consumers (a future placement
+      # tool, a human eyeballing Grafana) should read these, not re-derive
+      # from raw node_exporter series -- see fleet-state/OPS.md "0mcp fleet
+      # -- build hosts & host-load monitoring".
+      - record: fleet:node_cpu_busy_percent
+        expr: label_replace(100 - (avg by (instance) (rate(node_cpu_seconds_total{job=~"node_exporter|.*_node_exporter_via_tailscale|pve_.*_host_via_tailscale",mode="idle"}[5m])) * 100), "host", "$1", "instance", "(.+)")
+
+      - record: fleet:node_load1_normalized
+        expr: label_replace(avg by (instance) (node_load1{job=~"node_exporter|.*_node_exporter_via_tailscale|pve_.*_host_via_tailscale"}) / on(instance) count by (instance) (node_cpu_seconds_total{job=~"node_exporter|.*_node_exporter_via_tailscale|pve_.*_host_via_tailscale",mode="idle"}), "host", "$1", "instance", "(.+)")
+
+      - record: fleet:node_mem_used_percent
+        expr: label_replace(avg by (instance) ((1 - node_memory_MemAvailable_bytes{job=~"node_exporter|.*_node_exporter_via_tailscale|pve_.*_host_via_tailscale"} / node_memory_MemTotal_bytes{job=~"node_exporter|.*_node_exporter_via_tailscale|pve_.*_host_via_tailscale"}) * 100), "host", "$1", "instance", "(.+)")
+
+      - record: fleet:node_disk_used_percent
+        expr: label_replace(avg by (instance) ((1 - node_filesystem_avail_bytes{job=~"node_exporter|.*_node_exporter_via_tailscale|pve_.*_host_via_tailscale",mountpoint="/",fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{job=~"node_exporter|.*_node_exporter_via_tailscale|pve_.*_host_via_tailscale",mountpoint="/",fstype!~"tmpfs|overlay"}) * 100), "host", "$1", "instance", "(.+)")
+
+      # Single 0-100 "how loaded is this host" composite. Lower = more free
+      # capacity. Weights are a starting point (CPU-weighted, since the
+      # known candidate workloads -- builds, CI, scanners -- are CPU-bound),
+      # not tuned against real placement outcomes yet. Revisit once there's
+      # dispatch history to compare against.
+      #
+      # Every recorded series above carries only the `host` label (each is
+      # already aggregated `by (host)`), so the `+` operations below match
+      # correctly with Prometheus's default one-to-one vector matching --
+      # no `on(host)` needed for vector-vector ops when label sets already
+      # agree (and `on()`/`ignoring()` isn't valid at all on a scalar * vector
+      # op like `0.5 * fleet:node_cpu_busy_percent` -- that's a parse error).
+      # Hit both mistakes live on first deploy: v1 had inconsistent label
+      # sets across the inputs (health:"ok", zero output, silently); the
+      # `on(host)` fix for that then broke parsing on the scalar multiplies.
+      - record: fleet:placement_score
+        expr: |
+          clamp_max(
+            (0.5 * fleet:node_cpu_busy_percent)
+            + (0.3 * fleet:node_mem_used_percent)
+            + (0.2 * clamp_max(fleet:node_load1_normalized * 100, 100))
+          , 100)
+
+  - name: fleet_node_placement_alerts
+    rules:
+      # Sane default: page-worthy only when a host is BOTH clearly loaded
+      # AND has been that way for a while (not a momentary spike from one
+      # job landing). Tune the threshold/duration per pool once real
+      # traffic patterns exist -- these are starting defaults, not tuned.
+      - alert: FleetHostOverloaded
+        expr: fleet:placement_score > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: fleet_placement
+        annotations:
+          summary: "Host {{ $labels.host }} is running hot (placement score > 80 for 10m)"
+          description: "fleet:placement_score for {{ $labels.host }} has been above 80 for 10 minutes -- new work should avoid this host until it recovers."
+
+      - alert: FleetHostDiskCritical
+        expr: |
+          fleet:node_disk_used_percent{host!="100.64.0.5:9100"} >= 95
+          or label_replace(
+            100 * pve_disk_usage_bytes{job="pve_0docker_via_tailscale",id=~"node/.+"}
+              / pve_disk_size_bytes{job="pve_0docker_via_tailscale",id=~"node/.+"},
+            "host", "$1", "monitored_host", "(.+)"
+          ) >= 95
+        for: 15m
+        labels:
+          severity: critical
+          service: fleet_placement
+        annotations:
+          summary: "Host {{ $labels.host }} root filesystem at or above 95% used"
+          description: "Root filesystem usage on {{ $labels.host }} is at or above 95%; inspect the largest paths and growth before it reaches full."
+
+  # Hypervisor-layer signals (pve_exporter, job="pve") -- see OPS.md
+  # "0mcp fleet -- hypervisor-layer capacity" for why this is a distinct
+  # layer from the `node` job above, not a duplicate of it: a VM's own
+  # node_exporter can read "idle" while the physical host it runs on is
+  # actually contended by a sibling VM/LXC, and only this layer sees that.
+  # Currently a single-node cluster (one Proxmox host on 0mcp/lv3), so
+  # every guest's placement decision shares the same hypervisor reading --
+  # these recording rules and the mismatch alert below are written to
+  # extend cleanly once/if this fleet ever has more than one hypervisor
+  # node (the `id` label already carries the per-node identity).
+  - name: fleet_hypervisor_placement
+    rules:
+      - record: fleet:hypervisor_node_cpu_busy_percent
+        expr: pve_cpu_usage_ratio{job="pve_0docker_via_tailscale",id=~"node/.+"} * 100
+
+      - record: fleet:hypervisor_node_mem_used_percent
+        expr: (pve_memory_usage_bytes{job="pve_0docker_via_tailscale",id=~"node/.+"} / pve_memory_size_bytes{job="pve_0docker_via_tailscale",id=~"node/.+"}) * 100
+
+  - name: fleet_hypervisor_placement_alerts
+    rules:
+      # Direct, independently-actionable finding (not a comparison against
+      # any guest): confirmed live 2026-08-26 at ~94.6% on this fleet's one
+      # hypervisor node, invisible from inside any single VM. High hypervisor
+      # memory means new VMs/LXCs (or growing an existing one) may not have
+      # room, regardless of how idle individual guests look.
+      - alert: FleetHypervisorMemoryPressure
+        expr: fleet:hypervisor_node_mem_used_percent > 90
+        for: 15m
+        labels:
+          severity: warning
+          service: fleet_placement
+        annotations:
+          summary: "Hypervisor node {{ $labels.instance }} memory above 90% used"
+          description: "Physical host memory is tight fleet-wide, across every guest combined -- not visible from any single VM's own metrics. New VM/LXC allocation or growing an existing one may fail even though individual guests look fine."
+
+      # The exact scenario item #2 of the placement-challenges list names:
+      # a candidate host's OWN node_exporter reads idle, but the physical
+      # host it runs on is actually busy (a noisy neighbor). Routing new
+      # work there based on guest-only metrics would starve it. Not
+      # currently firing on this fleet (docker-build-lv3 reads idle at
+      # BOTH layers as of 2026-08-26) -- this exists to catch it when a
+      # future neighbor changes that.
+      # 2026-10-14: the first version matched with a bare `and on()`, so ANY hot hypervisor made EVERY host under 30% busy
+      # alert (26 at once when the 0docker hypervisor peaked). The hypervisor series here is the 0docker Proxmox host, so only
+      # its own guests (fleet="0docker", matched through their instance) can be victims of its neighbours.
+      - alert: FleetHypervisorContentionMismatch
+        expr: |
+          (fleet:node_cpu_busy_percent < 30)
+          and on(host) label_replace(up{fleet="0docker",role="guest"}, "host", "$1", "instance", "(.*)")
+          and on() (fleet:hypervisor_node_cpu_busy_percent > 70)
+        for: 10m
+        labels:
+          severity: warning
+          service: fleet_placement
+        annotations:
+          summary: "Host {{ $labels.host }} looks idle from inside, but its hypervisor is busy"
+          description: "{{ $labels.host }}'s own node_exporter reports low CPU busy%, but the physical Proxmox host it runs on is above 70% CPU -- likely a noisy neighbor VM/LXC. Don't trust this host's own placement score alone; check fleet:hypervisor_node_cpu_busy_percent before routing new work here."

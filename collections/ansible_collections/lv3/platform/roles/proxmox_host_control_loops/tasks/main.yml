@@ -13,6 +13,13 @@
 #   - Role: lv3.platform.common — reused to assert timer and path units are active after deployment.
 # Related ADRs: 0204, 0220, 0224, 0226
 
+- name: Configure bounded host journal retention
+  ansible.builtin.import_role:
+    name: lv3.platform.common
+    tasks_from: journal_retention
+  tags:
+    - journal-retention
+
 - name: Validate Proxmox host control-loop inputs
   ansible.builtin.assert:
     that:

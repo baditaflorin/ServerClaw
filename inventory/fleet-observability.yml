@@ -25,8 +25,8 @@ all:
       children:
         fleet_0mcp: {}
         fleet_0docker: {}
-        fleet_0database: {}
         fleet_0own: {}
+        fleet_0infer: {}
 
     # ------------------------------------------------------------------ 0mcp
     # The hypervisor, plus the docker-build guest for fleet_docker_prune only: the other 0mcp guests are modelled by
@@ -44,8 +44,8 @@ all:
           ansible_host: operator-bastion
           # node_exporter binds the tailnet address on 9100 and 9102 (exporter >= 1.9 binds several addresses).
           fleet_node_exporter_listen_addresses:
-            - 203.0.113.6:9100
-            - 203.0.113.6:9102
+            - 100.64.0.6:9100
+            - 100.64.0.6:9102
           fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
           fleet_node_exporter_textfile_owner: root
           fleet_node_exporter_textfile_group: root
@@ -53,14 +53,17 @@ all:
           fleet_node_exporter_args_prefix: " "
           fleet_node_exporter_proxyd_path: /lib/systemd/systemd-socket-proxyd
           fleet_hypervisor_memory_reclaim_textfile_dir: /var/lib/prometheus/node-exporter/textfile
-          # Port plan of the tailnet address 203.0.113.6: 9100 exporter, 9101 runtime-general proxy, 9102 exporter,
+          # Port plan of the tailnet address 100.64.0.6: 9100 exporter, 9101 runtime-general proxy, 9102 exporter,
           # 9103 build-metrics proxy.
           fleet_node_exporter_socket_proxies:
+            # free_bind added 2026-11-02: tailscaled updated itself at 12:33 CET, the bind failed with "Cannot assign requested address" and this proxy
+            # stayed dead for 8 hours (FleetNodeExporterDown for runtime-general). See docs/runbooks/tailscaled-restart-proxies.md.
             - name: zmcp-runtime-general-metrics-proxy
               state: present
-              listen_address: 203.0.113.6
+              listen_address: 100.64.0.6
               listen_port: 9101
               upstream: 10.10.10.91:9100
+              free_bind: true
               socket_description: Tailscale-only node-exporter proxy for runtime-general VM191
               service_description: Forward runtime-general node-exporter over Tailscale only
             # Moved from tailnet :9100 (now the hypervisor exporter) to :9103 on 2026-10-12. FreeBind lets the socket start
@@ -68,7 +71,7 @@ all:
             # tailscaled restarted on 2026-10-11 00:53 and the proxy stayed dead.
             - name: woodpecker-0exec-build-metrics-proxy
               state: present
-              listen_address: 203.0.113.6
+              listen_address: 100.64.0.6
               listen_port: 9103
               upstream: 10.10.10.30:9100
               free_bind: true
@@ -77,8 +80,8 @@ all:
               # Documentation only (not rendered): who reads this proxy, and the rules that let them.
               consumer: CT108 0docker-builder (tailnet 100.114.37.21, tag:builder-metrics-controller) reads docker-build metrics
               consumer_grants:
-                - tailnet policy grant tag:builder-metrics-controller -> 203.0.113.6/32 tcp:9103 (config/tailscale/policy.hujson)
-                - PVE host.fw line IN ACCEPT -source 100.114.37.21/32 -dest 203.0.113.6 -p tcp -dport 9103 (proxmox_host_additional_tcp_rules)
+                - tailnet policy grant tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9103 (config/tailscale/policy.hujson)
+                - PVE host.fw line IN ACCEPT -source 100.114.37.21/32 -dest 100.64.0.6 -p tcp -dport 9103 (proxmox_host_additional_tcp_rules)
 
     # ----------------------------------------------------------------- 0docker
     fleet_0docker:
@@ -97,7 +100,7 @@ all:
           fleet_node_exporter_socket_proxies:
             - name: zdocker-hypervisor-metrics-proxy
               state: present
-              listen_address: 203.0.113.5
+              listen_address: 100.64.0.5
               listen_port: 9100
               upstream: 10.10.10.1:9100
               free_bind: true
@@ -108,7 +111,7 @@ all:
             # the role keeps it that way and never renders it. The 9000 instance (Woodpecker agent path) is not touched.
             - name: woodpecker-exec-proxy@9100
               state: disabled
-              listen_address: 203.0.113.5
+              listen_address: 100.64.0.5
               listen_port: 9100
           # Single /32 routes only (the tailnet policy auto-approves nothing wider). .109 (CT109) was added 2026-10-12;
           # the others were already advertised and must stay in the list because `tailscale set` replaces it.
@@ -124,7 +127,7 @@ all:
           ansible_host: 0docker_docker
           fleet_node_exporter_listen_addresses:
             - 10.10.10.20:9100
-            - 203.0.113.7:9100
+            - 100.64.0.7:9100
           fleet_node_exporter_extra_args:
             - '--collector.netdev.device-exclude=^(veth.*|br-.*|docker.*)$'
             - --no-collector.arp
@@ -137,7 +140,7 @@ all:
           ansible_host: 0docker_nginx
           ansible_become: true
           fleet_node_exporter_listen_addresses:
-            - 203.0.113.8:9100
+            - 100.64.0.8:9100
           fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
         0docker_pve_exporter:
           # CT107: no tailscaled; reached through the hypervisor's /32 route.
@@ -162,74 +165,6 @@ all:
             - 10.10.10.109:9100
           fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
 
-    # --------------------------------------------------------------- 0database
-    fleet_0database:
-      hosts:
-        0database_bastion:
-          # pve01. Carries the vzdump hook, the PBS storage entry and the pg-primary backup job.
-          ansible_host: 0database_bastion
-          fleet_node_exporter_listen_addresses:
-            - 203.0.113.9:9100
-          fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
-          fleet_node_exporter_textfile_owner: root
-          fleet_node_exporter_textfile_group: root
-          fleet_node_exporter_args_quote: "'"
-          fleet_pg_backup_components: [pve_backup]
-          fleet_pg_backup_pve_storage:
-            id: own-pbs-0database
-            type: pbs
-            server: 203.0.113.11
-            datastore: own-pbs
-            namespace: 0database
-            username: backup-0database@pbs!vzdump-0database
-            content: backup
-            # Public TLS certificate fingerprint of own-pbs, not a secret.
-            fingerprint: "C2:22:2B:4A:B3:66:0E:8E:A9:8D:2C:D3:99:6E:BD:CB:23:C5:6F:8F:DD:52:D9:DD:54:67:3C:BD:92:09:61:34"
-            # Reference only. The token secret is written by `pvesm add pbs` and never appears in git or in the role output.
-            password_file: /etc/pve/priv/storage/own-pbs-0database.pw
-          fleet_pg_backup_pve_jobs:
-            - id: pg-primary-daily-pbs
-              vmid: "100"
-              storage: own-pbs-0database
-              mode: snapshot
-              schedule: "02:30"
-              bwlimit: 100000
-              compress: zstd
-              enabled: true
-              script: /usr/local/sbin/vzdump-pg-metrics-hook
-              notes_template: !unsafe "{{guestname}} {{vmid}} daily crash-consistent"
-              comment: Daily crash-consistent snapshot of pg-primary (VM100) to PBS namespace 0database.
-        0database_postgres:
-          # pg-primary. Only the prepared pgBackRest configuration is codified; the exporter has no textfile collector
-          # yet (matches live), which the pgBackRest timer needs before it may be enabled.
-          ansible_host: 0database_postgres
-          fleet_node_exporter_listen_addresses:
-            - 203.0.113.10:9100
-          fleet_pg_backup_components: [pgbackrest]
-          fleet_pg_backup_pgbackrest_global_settings:
-            - repo1-retention-full-type=count
-            - repo1-retention-full=2
-            - repo1-retention-diff=6
-            - repo1-bundle=y
-            - repo1-block=y
-            - compress-type=zst
-            - compress-level=3
-            - process-max=4
-            - start-fast=y
-            - delta=y
-            - log-level-console=info
-            - log-level-file=detail
-            - "# async WAL push with a hard cap: if the repo is unreachable, pgBackRest drops queued WAL"
-            - "# (acknowledges it) once the queue exceeds the cap, instead of letting pg_wal fill the 82%-full disk."
-            - "# Cost: a PITR gap until the next full backup. Alert on pg_stat_archiver.failed_count / last_archived_time."
-            - archive-async=y
-            - spool-path=/var/spool/pgbackrest
-            - archive-push-queue-max=25GiB
-        0database_builder:
-          ansible_host: 0database_builder
-        0database_runtime_1:
-          ansible_host: 0database_runtime_1
-
     # -------------------------------------------------------------------- 0own
     fleet_0own:
       hosts:
@@ -244,7 +179,7 @@ all:
           # VM620. The PBS side of the Postgres backup path.
           ansible_host: 0own_pbs
           fleet_node_exporter_listen_addresses:
-            - 203.0.113.11:9100
+            - 100.64.0.11:9100
           fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
           # Debian's default --collector.filesystem.mount-points-exclude also hides /mnt, which is where the datastore
           # (/mnt/pbs-datastore) lives. Same regex without mnt|media; the PBSDatastore* alerts depend on this series.
@@ -310,21 +245,21 @@ all:
           # VM630
           ansible_host: 0own_openobserve
           fleet_node_exporter_listen_addresses:
-            - 203.0.113.12:9100
+            - 100.64.0.12:9100
           fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
         0own_github_mirror:
           # VM640. Its nftables file only lets the monitoring VM's tailnet address reach tcp 9100 on tailscale0.
           ansible_host: 0own_github_mirror
           ansible_become: true
           fleet_node_exporter_listen_addresses:
-            - 203.0.113.13:9100
+            - 100.64.0.13:9100
           fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
           fleet_guest_firewall_flush_mode: ruleset
           fleet_guest_firewall_allowed_inbound:
             - {source: 10.60.10.1, protocol: tcp, ports: [22, 3000]}
             - {interface: tailscale0, protocol: tcp, ports: [22, 443]}
             - interface: tailscale0
-              source: 203.0.113.4
+              source: 100.64.0.4
               protocol: tcp
               ports: [9100]
               description: Prometheus (monitoring-lv3) node_exporter scrape only
@@ -344,8 +279,22 @@ all:
             - 10.60.10.60:9100
           fleet_node_exporter_textfile_dir: /var/lib/prometheus/node-exporter/textfile
         # VM670 (pdm, 100.65.106.57) also runs prometheus-node-exporter on its tailnet address and its nftables file opens
-        # tcp 9100 on tailscale0 to 203.0.113.4 only, but our SSH key is not accepted there (it was set up through the
+        # tcp 9100 on tailscale0 to 100.64.0.4 only, but our SSH key is not accepted there (it was set up through the
         # QEMU guest agent: `qm guest exec 670`), so it is not an Ansible host yet.
+
+    # ----------------------------------------------------------------- 0infer
+    # New Proxmox hypervisor and PostgreSQL VM. Exporters bind to Tailscale only.
+    fleet_0infer:
+      hosts:
+        0infer_bastion:
+          ansible_host: 0infer_bastion
+          fleet_node_exporter_listen_addresses:
+            - 100.64.0.21:9100
+        0infer_pg_primary:
+          ansible_host: 0infer_pg_primary
+          ansible_become: true
+          fleet_node_exporter_listen_addresses:
+            - 100.64.0.22:9100
 
     # ------------------------------------------------------------- role groups
     # Each play of playbooks/fleet-observability.yml targets one of these.
@@ -358,13 +307,13 @@ all:
         0docker_pve_exporter:
         0docker_builder:
         0docker_scrapetheworld:
-        0database_bastion:
-        0database_postgres:
         0own_pbs:
         0own_openobserve:
         0own_github_mirror:
         0own_pyroscope_canary:
         0own_staging_runtime:
+        0infer_bastion:
+        0infer_pg_primary:
     fleet_tailscale_node_hosts:
       hosts:
         0docker_bastion:
@@ -382,5 +331,3 @@ all:
     fleet_pg_backup_hosts:
       hosts:
         0own_pbs:
-        0database_bastion:
-        0database_postgres:

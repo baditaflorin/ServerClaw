@@ -23,7 +23,7 @@ Both ChatGPT and Claude may be used in this repo. Work as if another assistant w
 12. Bump `platform_version` in `versions/stack.yaml` only when merged work is actually applied live from `main`.
 13. Update `changelog.md` whenever `VERSION` changes, and use the `Unreleased` section for merged notes that have not yet been cut into a numbered release.
 14. When a live change is actually applied, finish the turn by committing it, pushing it to GitHub, and updating the relevant release/workstream state unless explicitly blocked.
-15. **All changes to main go through pull requests** (ADR 0419). Push your branch, create a PR via `gh pr create`, wait for CI, then merge via `gh pr merge --squash --delete-branch`. Direct push to main is reserved for emergencies with admin bypass only.
+15. **All changes to main go through pull requests** (ADR 0419). Push your branch, create a PR via `gh pr create`, wait for CI, then merge via `gh pr merge --squash --delete-branch`. Direct push to main is reserved for emergencies. This is a convention: the private repo has no GitHub branch protection (not available on its plan), so nothing technically blocks it.
 15. Keep everything DRY: centralize shared facts, avoid repeated shell snippets, and refactor duplication early.
 16. Keep everything structurally solid: separate concerns, prefer small reversible changes, and do not mix bootstrap, security, storage, and Proxmox object management in one opaque step.
 17. Every ADR must record both decision status and implementation state, including the first repo version, first platform version, and date where implementation became true.
@@ -139,7 +139,8 @@ Visit https://grafana.<your-real-domain> to view dashboards.
 ```
 
 **In inventory/config** — Real values are acceptable here (the publish pipeline
-sanitizes these ~76 files). But prefer template variables when possible.
+sanitizes these files; `make publish-serverclaw` prints the sanitized-file count).
+But prefer template variables when possible.
 
 ### Finding real deployment values
 
@@ -472,7 +473,9 @@ gh pr merge <number> --squash --delete-branch
 
 ### Emergency direct push
 
-Admins can bypass branch protection for genuine emergencies:
+Direct push to main is possible for genuine emergencies; the private repo has no
+GitHub branch protection to bypass (not available on its plan), so the PR flow is
+a convention:
 ```bash
 SKIP_REMOTE_GATE=1 GATE_BYPASS_REASON_CODE=emergency_hotfix \
   GATE_BYPASS_DETAIL="<describe>" GATE_BYPASS_SUBSTITUTE_EVIDENCE="<passed check or note>" \
@@ -587,7 +590,9 @@ Audit missing headers: `python3 scripts/check_provenance_headers.py`
 ## Nomad Scheduler (ADR 0232, ADR 0361)
 
 The platform runs a private Nomad cluster for durable batch and long-running
-internal jobs. Agents and operators can view, dispatch, and manage jobs.
+internal jobs. Operators can view, dispatch, and manage jobs (management token);
+agents get the view tools `list-nomad-jobs` and `get-nomad-job-status` and the
+approval-gated `dispatch-nomad-job` only.
 
 | Resource | Location |
 |---|---|

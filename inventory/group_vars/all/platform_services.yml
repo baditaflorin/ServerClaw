@@ -1856,3 +1856,14 @@ platform_service_registry:
       public_fqdn: id.{{ platform_domain }}
       auth_proxy: false             # Authentik is the identity provider
   # END SERVICE: authentik
+
+  # BEGIN SERVICE: agent_history
+  agent_history:
+    service_type: docker_compose
+    image_catalog_key: ""            # agent-store is built on the build host and loaded with docker save; pgvector is pulled through the artifact cache. Neither is in the image catalog yet (no digest pin or scan before provisioning): ADR 0494.
+    internal_port: 8080
+    host_group: agent-history
+    site_dir: /opt/agent-history
+    container_name: agent-history
+    needs_openbao: false             # token files come from a role-local OpenBao Agent unit (ADR 0231), not the registered-service compose env helper
+  # END SERVICE: agent_history

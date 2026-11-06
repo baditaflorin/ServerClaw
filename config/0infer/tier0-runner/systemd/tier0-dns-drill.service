@@ -1,0 +1,9 @@
+[Unit]
+Description=Tier-0 DNS stage drill on one throwaway test name (create, selective failover, failback, delete)
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/tier0-dns-drill
+TimeoutStartSec=900
+Nice=10

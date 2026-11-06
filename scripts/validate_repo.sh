@@ -632,13 +632,17 @@ validate_architecture_fitness() {
   resolve_python_bin
   "$PYTHON_BIN" "$REPO_ROOT/scripts/replaceability_scorecards.py" --validate >/dev/null
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/validate_renovate_contract.py" >/dev/null
+  # Stays on origin/main on purpose: it checks the cumulative stack/catalog
+  # pair that will land on main, which a stacked branch's parent never breaks.
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/renovate_stack_digest_guard.py" --base-ref origin/main >/dev/null
 }
 
 validate_workstream_surfaces() {
   echo "Workstream surface ownership validation"
   run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-registry >/dev/null
-  run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-branch --base-ref origin/main >/dev/null
+  # A branch stacked on an unmerged parent sets LV3_VALIDATION_BASE_REF to the
+  # parent's ref so only its own commits are checked against its own surfaces.
+  run_uv_python pyyaml -- "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-branch --base-ref "${LV3_VALIDATION_BASE_REF:-origin/main}" >/dev/null
 }
 
 validate_generated_docs() {

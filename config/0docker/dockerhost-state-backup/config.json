@@ -1,0 +1,58 @@
+{
+  "repository": "backup-dockerhost@pbs!state@10.10.10.1:8007:own-pbs",
+  "fingerprint": "C2:22:2B:4A:B3:66:0E:8E:A9:8D:2C:D3:99:6E:BD:CB:23:C5:6F:8F:DD:52:D9:DD:54:67:3C:BD:92:09:61:34",
+  "namespace": "0docker",
+  "backup_type": "host",
+  "backup_id": "dockerhost-state",
+  "secret_file": "/etc/dockerhost-state-backup/token.secret",
+  "staging_dir": "/var/backups/dockerhost-state",
+  "textfile": "/var/lib/prometheus/node-exporter/dockerhost_state_backup.prom",
+  "archives": {
+    "etc": "/etc",
+    "opt": "/opt",
+    "home": "/home",
+    "srv": "/srv",
+    "root": "/root",
+    "volumes": "/var/lib/docker/volumes",
+    "usr_local": "/usr/local",
+    "tailscale": "/var/lib/tailscale",
+    "dockernet": "/var/lib/docker/network",
+    "systemd_state": "/var/lib/systemd",
+    "url_categorizer_state": "/var/lib/url-categorizer",
+    "fleet_container_audit": "/var/lib/fleet-container-audit"
+  },
+  "exclude": {
+    "etc": ["/dockerhost-state-backup/token.secret"],
+    "root": ["/embcache", "/.cache", "/go", "/build_scratch"],
+    "volumes": [
+      "/fleet-backup_backup-destination",
+      "/buildx_buildkit_remote0_state",
+      "/buildx_buildkit_remote-amd640_state",
+      "/0init-komodo-repo-cache",
+      "/metadata.db",
+      "/backingFsBlockDev"
+    ],
+    "usr_local": ["/bin/cosign"]
+  },
+  "raw_sqlite": [
+    "/srv/hermes-offsite/backups/*",
+    "/srv/hermes-offsite/recovery-work-*",
+    "/opt/services/go_apikey_service/data/backups/*",
+    "/opt/services/go_apikey_service/promote-*",
+    "/var/lib/docker/volumes/task-credential-broker-backups/_data/*"
+  ],
+  "limits": {
+    "start_load5": 60,
+    "abort_load1": 400,
+    "start_wait_s": 1800,
+    "deadline_s": 21600,
+    "dump_timeout_s": 900,
+    "sqlite_timeout_s": 10800,
+    "check_timeout_s": 3600,
+    "check_max_bytes": 536870912,
+    "compress_min_bytes": 67108864,
+    "compress_timeout_s": 3600,
+    "trim_wait_s": 300
+  },
+  "trim_staging": true
+}

@@ -6,10 +6,10 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-10-14'
+generated: '2026-11-06'
 facet: concern
 concern: vm-topology
-total_adrs: 48
+total_adrs: 50
 adrs:
   - adr: '0005'
     title: Single-Node First Topology
@@ -927,3 +927,44 @@ adrs:
     summary: '| File | Source | Purpose |'
     filename: 0482-capacity-aware-dynamic-sizing.md
     path: docs/adr/0482-capacity-aware-dynamic-sizing.md
+  - adr: 0494
+    title: The agent-history store runs on its own guest with its own Postgres
+    status: Proposed
+    implementation_status: Not Implemented
+    currently_describes: goal_state
+    date: '2026-10-28'
+    concern: vm-topology
+    keywords:
+      - agent-history
+      - store
+      - runs
+      - its
+      - own
+      - guest
+      - postgres
+    summary: '1. One new guest agent-history (vmid 155, 10.10.10.55): 4 vCPU, 8 GiB memory with a 6 GiB balloon floor, a 24
+      GiB OS'
+    filename: 0494-agent-history.md
+    path: docs/adr/0494-agent-history.md
+  - adr: 0495
+    title: The production Postgres VM701 bounds the shared memory its parallel queries can take
+    status: Accepted
+    implementation_status: Partial
+    currently_describes: mixed_state
+    date: '2026-10-31'
+    concern: vm-topology
+    keywords:
+      - postgres
+      - oom
+      - shared-memory
+      - parallel-query
+      - hostconf
+      - infer-pg-primary
+      - production
+      - vm701
+      - bounds
+      - shared
+    summary: 1. Keep the 10 GiB /dev/shm cap and the 66,560 MiB of VM memory (no ballooning), and record both in config/0infer/pg-primary-memory/
+      (README with the measured n
+    filename: 0495-pg-primary-memory-guardrails.md
+    path: docs/adr/0495-pg-primary-memory-guardrails.md

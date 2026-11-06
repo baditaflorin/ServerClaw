@@ -8,6 +8,9 @@
 # Inputs (optional):
 #   - proxmox_staging_bridge_enabled (bool, optional, default=true): Whether the optional staging bridge should be rendered on the host.
 #   - proxmox_public_ingress_tcp_forwards / proxmox_public_ingress_udp_forwards (list, optional): Extra public ingress mappings published through the Proxmox host firewall.
+#   - proxmox_network_allow_rule_removal (bool, optional, default=false): Let the per-VM firewall install remove rules or managed blocks that the live file has and the render does not. Pass it on the command line for one run (`-e proxmox_network_allow_rule_removal=true`), never in an inventory file.
+#   - proxmox_network_firewall_vmids (list of int, optional, default=[]): Manage the firewall files of only these guests (`-e proxmox_network_firewall_vmids=155` or `=155,191`, or a JSON list); empty means every guest that exists on the host. Naming a guest that does not exist fails.
+#   - proxmox_network_firewall_live_dir / proxmox_network_firewall_stage_dir / proxmox_network_firewall_backup_root (path, optional): Where the live per-VM firewall files, the rendered staging copies and the timestamped pre-install backups live; the defaults are the Proxmox host's own paths.
 #
 # Outputs:
 #   - Stable defaults for IPv4 forwarding, public ingress forwarding, and the Proxmox firewall conntrack helper paths.
@@ -24,10 +27,15 @@
 # Related Runbooks: docs/runbooks/configure-livekit.md
 #
 # Author: LV3 Platform
-# Last Updated: 2026-04-01
+# Last Updated: 2026-10-30
 proxmox_network_enable_ipv4_forwarding: true
 proxmox_public_ingress_tcp_forwards: []
 proxmox_public_ingress_udp_forwards: []
 proxmox_network_conntrack_helper_path: /usr/local/sbin/{{ platform_identity.config_prefix }}-proxmox-firewall-conntrack
 proxmox_network_conntrack_service_file: /etc/systemd/system/{{ platform_identity.config_prefix }}-proxmox-firewall-conntrack.service
 proxmox_staging_bridge_enabled: true
+proxmox_network_allow_rule_removal: false
+proxmox_network_firewall_live_dir: /etc/pve/firewall
+proxmox_network_firewall_stage_dir: /root
+proxmox_network_firewall_backup_root: /root
+proxmox_network_firewall_vmids: []

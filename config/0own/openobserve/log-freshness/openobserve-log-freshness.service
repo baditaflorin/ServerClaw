@@ -1,0 +1,6 @@
+[Unit]
+Description=OpenObserve host_logs freshness per hypervisor (node-exporter textfile)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/openobserve-log-freshness.py

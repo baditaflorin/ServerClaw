@@ -1,0 +1,63 @@
+---
+# Purpose: Install the fleet-tool rotation policy without overlapping distro log policies.
+# Use case: Targeted repair or rebuild of the production Docker VM's legacy fleet-defaults file.
+# Inputs: The operator's SSH alias for docker-prod; fleet-defaults.conf beside this playbook.
+# Outputs: A backed-up, globally validated fleet-defaults policy and successful log rotation.
+# Idempotency: Rewrites and runs rotation only when the policy changes.
+# Dependencies: Existing logrotate package and logrotate.timer on the Debian guest.
+
+- name: Configure production Docker fleet-tool log retention
+  hosts: "{{ logrotate_target | default('0docker_docker_prod') }}"
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Apply and validate the fleet-tool policy
+      block:
+        - name: Install the bounded fleet-tool log policy
+          ansible.builtin.copy:
+            src: fleet-defaults.conf
+            dest: /etc/logrotate.d/fleet-defaults
+            owner: root
+            group: root
+            mode: "0644"
+            backup: true
+            validate: /usr/sbin/logrotate --debug %s
+          register: fleet_tool_logrotate_config
+
+        - name: Validate all logrotate policies together
+          ansible.builtin.command: /usr/sbin/logrotate --debug /etc/logrotate.conf
+          changed_when: false
+          when: not ansible_check_mode
+      rescue:
+        - name: Restore the previous fleet-tool policy
+          ansible.builtin.copy:
+            src: "{{ fleet_tool_logrotate_config.backup_file }}"
+            dest: /etc/logrotate.d/fleet-defaults
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0644"
+          when: fleet_tool_logrotate_config.backup_file is defined
+
+        - name: Remove a newly introduced policy after failed validation
+          ansible.builtin.file:
+            path: /etc/logrotate.d/fleet-defaults
+            state: absent
+          when:
+            - fleet_tool_logrotate_config.changed | default(false)
+            - fleet_tool_logrotate_config.backup_file is not defined
+
+        - name: Report that combined validation failed
+          ansible.builtin.fail:
+            msg: The combined logrotate configuration failed validation; the fleet-tool policy was rolled back.
+
+    - name: Run logrotate after changing the policy
+      ansible.builtin.systemd_service:
+        name: logrotate.service
+        state: started
+      when: fleet_tool_logrotate_config.changed
+
+    - name: Verify the daily rotation timer remains active
+      ansible.builtin.command: systemctl is-active logrotate.timer
+      changed_when: false
+      when: not ansible_check_mode

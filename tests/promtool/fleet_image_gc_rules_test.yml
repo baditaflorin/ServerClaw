@@ -1,0 +1,267 @@
+rule_files:
+- ../../config/prometheus/rules/fleet-image-gc.yml
+evaluation_interval: 1m
+tests:
+- name: runner artifact cleanup failure waits three minutes and clears after recovery
+  interval: 1m
+  input_series:
+  - series: node_systemd_unit_state{host="builder",instance="builder:9100",name="builder-disk-gc.service",state="failed"}
+    values: 1x4 0x5
+  alert_rule_test:
+  - eval_time: 2m
+    alertname: FleetRunnerArtifactGcFailed
+    exp_alerts: []
+  - eval_time: 3m
+    alertname: FleetRunnerArtifactGcFailed
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: fleet_runner_artifact_gc
+        host: builder
+        instance: builder:9100
+        name: builder-disk-gc.service
+      exp_annotations:
+        summary: Runner artifact cleanup failed on builder
+        description: builder-disk-gc.service failed on builder. Check its journal and the artifact retention report; keep current, recent, active, referenced or unrecognized bundles protected. Do not bypass the retention guards.
+        runbook_url: docs/runbooks/fleet-image-gc-monitoring.md
+  - eval_time: 6m
+    alertname: FleetRunnerArtifactGcFailed
+    exp_alerts: []
+- name: healthy artifact cleanup and unrelated failed units are silent
+  interval: 1m
+  input_series:
+  - series: node_systemd_unit_state{host="builder",instance="builder:9100",name="builder-disk-gc.service",state="failed"}
+    values: 0x8
+  - series: node_systemd_unit_state{host="builder",instance="builder:9100",name="unrelated.service",state="failed"}
+    values: 1x8
+  alert_rule_test:
+  - eval_time: 6m
+    alertname: FleetRunnerArtifactGcFailed
+    exp_alerts: []
+- name: registry or command failure alerts after three minutes and a subsequent success
+    clears it
+  interval: 1m
+  input_series:
+  - series: node_systemd_unit_state{host="builder",instance="builder:9100",name="fleet-image-gc-infer.service",state="failed"}
+    values: 0x1 1x5 0x5
+  alert_rule_test:
+  - eval_time: 4m
+    alertname: FleetImageGcFailed
+    exp_alerts: []
+  - eval_time: 6m
+    alertname: FleetImageGcFailed
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: fleet_image_gc
+        host: builder
+        instance: builder:9100
+        name: fleet-image-gc-infer.service
+      exp_annotations:
+        summary: Image cleanup fleet-image-gc-infer.service failed on builder
+        description: The bounded image cleanup scheduler failed. Check systemctl status
+          fleet-image-gc-infer.service and journalctl -u fleet-image-gc-infer.service
+          on builder. Registry-unavailable refusals keep images and fail the batch;
+          restore approved registry access rather than bypassing recoverability checks.
+          A later successful scheduled run clears the failed unit state.
+        runbook_url: docs/runbooks/fleet-image-gc-monitoring.md
+  - eval_time: 9m
+    alertname: FleetImageGcFailed
+    exp_alerts: []
+- name: normal inactive oneshots and unrelated failed units do not alert
+  interval: 1m
+  input_series:
+  - series: node_systemd_unit_state{host="builder",instance="builder:9100",name="fleet-image-gc-infer.service",state="inactive"}
+    values: 1x12
+  - series: node_systemd_unit_state{host="builder",instance="builder:9100",name="fleet-image-gc-infer.service",state="failed"}
+    values: '0x12'
+  - series: node_systemd_unit_state{host="builder",instance="builder:9100",name="unrelated.service",state="failed"}
+    values: 1x12
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: FleetImageGcFailed
+    exp_alerts: []
+- name: both configured naming patterns match and duplicate scrape labels do not duplicate
+    alerts
+  interval: 1m
+  input_series:
+  - series: node_systemd_unit_state{host="builder",instance="builder:9100",name="fleet-image-gc-infer.service",state="failed"}
+    values: 1x12
+  - series: node_systemd_unit_state{host="builder",instance="builder:9100",name="fleet-image-gc-infer.service",state="failed",fleet="extra"}
+    values: 1x12
+  - series: node_systemd_unit_state{host="builder",instance="builder:9100",name="fleet-image-gc-mcp-vm120.service",state="failed"}
+    values: 1x12
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: FleetImageGcFailed
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: fleet_image_gc
+        host: builder
+        instance: builder:9100
+        name: fleet-image-gc-infer.service
+      exp_annotations:
+        summary: Image cleanup fleet-image-gc-infer.service failed on builder
+        description: The bounded image cleanup scheduler failed. Check systemctl status
+          fleet-image-gc-infer.service and journalctl -u fleet-image-gc-infer.service
+          on builder. Registry-unavailable refusals keep images and fail the batch;
+          restore approved registry access rather than bypassing recoverability checks.
+          A later successful scheduled run clears the failed unit state.
+        runbook_url: docs/runbooks/fleet-image-gc-monitoring.md
+    - exp_labels:
+        severity: warning
+        service: fleet_image_gc
+        host: builder
+        instance: builder:9100
+        name: fleet-image-gc-mcp-vm120.service
+      exp_annotations:
+        summary: Image cleanup fleet-image-gc-mcp-vm120.service failed on builder
+        description: The bounded image cleanup scheduler failed. Check systemctl status
+          fleet-image-gc-mcp-vm120.service and journalctl -u fleet-image-gc-mcp-vm120.service
+          on builder. Registry-unavailable refusals keep images and fail the batch;
+          restore approved registry access rather than bypassing recoverability checks.
+          A later successful scheduled run clears the failed unit state.
+        runbook_url: docs/runbooks/fleet-image-gc-monitoring.md
+- name: expected but missing or disabled timer alerts after grace
+  interval: 1m
+  input_series:
+  - &id001
+    series: fleet_image_gc_timer_expected_since_seconds{host="builder",instance="builder:9100",name="fleet-image-gc-infer.timer"}
+    values: 1x240
+  - &id002
+    series: node_boot_time_seconds{host="builder",instance="builder:9100"}
+    values: 1x240
+  alert_rule_test:
+  - eval_time: 185m
+    alertname: FleetImageGcTimerStale
+    exp_alerts: []
+  - eval_time: 200m
+    alertname: FleetImageGcTimerStale
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: fleet_image_gc
+        host: builder
+        instance: builder:9100
+        name: fleet-image-gc-infer.timer
+      exp_annotations:
+        summary: Image cleanup timer fleet-image-gc-infer.timer stopped triggering
+          on builder
+        description: This intentionally enabled timer has no trigger in three hours,
+          including a missing, disabled or unloaded timer. First rollout and host
+          boot each have a three-hour grace period. Inspect systemctl status fleet-image-gc-infer.timer
+          and its service on builder; preserve the approved cleanup bounds. Disarm
+          the expectation marker only when intentionally retiring the timer.
+        runbook_url: docs/runbooks/fleet-image-gc-monitoring.md
+- name: stopped timer with old trigger alerts
+  interval: 1m
+  input_series:
+  - *id001
+  - *id002
+  - series: node_systemd_timer_last_trigger_seconds{host="builder",instance="builder:9100",name="fleet-image-gc-infer.timer"}
+    values: 1x240
+  alert_rule_test:
+  - eval_time: 200m
+    alertname: FleetImageGcTimerStale
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: fleet_image_gc
+        host: builder
+        instance: builder:9100
+        name: fleet-image-gc-infer.timer
+      exp_annotations:
+        summary: Image cleanup timer fleet-image-gc-infer.timer stopped triggering
+          on builder
+        description: This intentionally enabled timer has no trigger in three hours,
+          including a missing, disabled or unloaded timer. First rollout and host
+          boot each have a three-hour grace period. Inspect systemctl status fleet-image-gc-infer.timer
+          and its service on builder; preserve the approved cleanup bounds. Disarm
+          the expectation marker only when intentionally retiring the timer.
+        runbook_url: docs/runbooks/fleet-image-gc-monitoring.md
+- name: fresh trigger clears stale timer
+  interval: 1m
+  input_series:
+  - *id001
+  - *id002
+  - series: node_systemd_timer_last_trigger_seconds{host="builder",instance="builder:9100",name="fleet-image-gc-infer.timer"}
+    values: 1x200 12060+60x39
+  alert_rule_test:
+  - eval_time: 200m
+    alertname: FleetImageGcTimerStale
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: fleet_image_gc
+        host: builder
+        instance: builder:9100
+        name: fleet-image-gc-infer.timer
+      exp_annotations:
+        summary: Image cleanup timer fleet-image-gc-infer.timer stopped triggering
+          on builder
+        description: This intentionally enabled timer has no trigger in three hours,
+          including a missing, disabled or unloaded timer. First rollout and host
+          boot each have a three-hour grace period. Inspect systemctl status fleet-image-gc-infer.timer
+          and its service on builder; preserve the approved cleanup bounds. Disarm
+          the expectation marker only when intentionally retiring the timer.
+        runbook_url: docs/runbooks/fleet-image-gc-monitoring.md
+  - eval_time: 205m
+    alertname: FleetImageGcTimerStale
+    exp_alerts: []
+- name: newly enabled timer gets first rollout grace
+  interval: 1m
+  input_series:
+  - series: fleet_image_gc_timer_expected_since_seconds{host="builder",instance="builder:9100",name="fleet-image-gc-infer.timer"}
+    values: 10000x240
+  - *id002
+  alert_rule_test:
+  - eval_time: 200m
+    alertname: FleetImageGcTimerStale
+    exp_alerts: []
+- name: reboot gets grace even with old expectation
+  interval: 1m
+  input_series:
+  - *id001
+  - series: node_boot_time_seconds{host="builder",instance="builder:9100"}
+    values: 10000x240
+  alert_rule_test:
+  - eval_time: 200m
+    alertname: FleetImageGcTimerStale
+    exp_alerts: []
+- name: unarmed staged timer is silent
+  interval: 1m
+  input_series:
+  - *id002
+  - series: node_systemd_timer_last_trigger_seconds{host="builder",instance="builder:9100",name="fleet-image-gc-infer.timer"}
+    values: 1x240
+  alert_rule_test:
+  - eval_time: 200m
+    alertname: FleetImageGcTimerStale
+    exp_alerts: []
+- name: different timer trigger cannot hide missing expected timer
+  interval: 1m
+  input_series:
+  - *id001
+  - *id002
+  - series: node_systemd_timer_last_trigger_seconds{host="builder",instance="builder:9100",name="fleet-image-gc-other.timer"}
+    values: 1+60x240
+  alert_rule_test:
+  - eval_time: 200m
+    alertname: FleetImageGcTimerStale
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: fleet_image_gc
+        host: builder
+        instance: builder:9100
+        name: fleet-image-gc-infer.timer
+      exp_annotations:
+        summary: Image cleanup timer fleet-image-gc-infer.timer stopped triggering
+          on builder
+        description: This intentionally enabled timer has no trigger in three hours,
+          including a missing, disabled or unloaded timer. First rollout and host
+          boot each have a three-hour grace period. Inspect systemctl status fleet-image-gc-infer.timer
+          and its service on builder; preserve the approved cleanup bounds. Disarm
+          the expectation marker only when intentionally retiring the timer.
+        runbook_url: docs/runbooks/fleet-image-gc-monitoring.md

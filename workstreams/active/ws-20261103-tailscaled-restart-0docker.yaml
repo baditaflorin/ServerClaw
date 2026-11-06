@@ -1,0 +1,97 @@
+id: ws-20261103-tailscaled-restart-0docker
+adr: "0014"
+title: "0docker hypervisor: the tailnet proxy sockets survive a tailscaled restart (FreeBind for woodpecker-exec-proxy@.socket, a tailscale0 device Wants= for zdocker-hypervisor-metrics-proxy.socket), proved on the 0docker systemd; git only, nothing is applied"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/tailscaled-restart-0docker
+worktree_path: .claude/worktrees/tailscaled-0docker
+doc: docs/workstreams/ws-20261103-tailscaled-restart-0docker.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/hostconf/hostconf.yaml
+  - config/hostconf/README.md
+  - config/hostconf/files/socket-free-bind.0docker.conf
+  - config/hostconf/files/tailscale0-wants-zdocker-metrics-proxy.0docker.conf
+  - scripts/tailscaled_restart_rig/README.md
+  - scripts/tailscaled_restart_rig/build_variants.py
+  - scripts/tailscaled_restart_rig/run.sh
+  - scripts/tailscaled_restart_rig/0docker-units/woodpecker-exec-proxy@.socket
+  - scripts/tailscaled_restart_rig/0docker-units/woodpecker-exec-proxy@.service
+  - tests/test_tailscaled_restart_proxies.py
+  - tests/test_tailscaled_restart_0docker.py
+  - docs/runbooks/tailscaled-restart-proxies.md
+  - docs/workstreams/ws-20261102-tailscaled-restart-proxies.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - build/platform-manifest.json
+  - workstreams/active/ws-20261103-tailscaled-restart-0docker.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261103-tailscaled-restart-0docker.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261103_tailscaled_restart_0docker_tracking
+      paths:
+        - docs/workstreams/ws-20261103-tailscaled-restart-0docker.md
+      mode: exclusive
+    - id: tailscaled_restart_0docker_hostconf_files
+      paths:
+        - config/hostconf/files/socket-free-bind.0docker.conf
+        - config/hostconf/files/tailscale0-wants-zdocker-metrics-proxy.0docker.conf
+      mode: exclusive
+    - id: tailscaled_restart_0docker_tests_and_fixtures
+      paths:
+        - tests/test_tailscaled_restart_0docker.py
+        - scripts/tailscaled_restart_rig/0docker-units/woodpecker-exec-proxy@.socket
+        - scripts/tailscaled_restart_rig/0docker-units/woodpecker-exec-proxy@.service
+      mode: exclusive
+    - id: tailscaled_restart_rig_and_runbook
+      paths:
+        - docs/runbooks/tailscaled-restart-proxies.md
+        - docs/workstreams/ws-20261102-tailscaled-restart-proxies.md
+        - scripts/tailscaled_restart_rig/README.md
+        - scripts/tailscaled_restart_rig/build_variants.py
+        - scripts/tailscaled_restart_rig/run.sh
+        - tests/test_tailscaled_restart_proxies.py
+      mode: shared_contract
+      contract: tailscaled-restart-rig-v1
+    - id: hostconf_manifest
+      paths:
+        - config/hostconf/hostconf.yaml
+        - config/hostconf/README.md
+      mode: shared_contract
+      contract: hostconf-manifest-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261103-tailscaled-restart-0docker.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "The 0docker hypervisor's tailnet proxy sockets survive a tailscaled restart: woodpecker-exec-proxy@.socket gets FreeBind=true and zdocker-hypervisor-metrics-proxy.socket is Wanted by the tailscale0 device (hostconf drop-ins); the throwaway-systemd rig models the 0docker unit shapes on systemd 252"
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  On 2026-11-02 at 12:33 CET tailscaled on the 0docker hypervisor updated itself (the control plane's `tailscale update --yes`, the same update that hit 0mcp) and was restarted: the restart took 90 s because
+  tailscaled's stop timed out, and when it started again at 12:34:59 woodpecker-exec-proxy@9000.socket (BindToDevice=tailscale0, no FreeBind) failed with "Bound to unit sys-subsystem-net-devices-tailscale0.device,
+  but unit isn't active" and the Woodpecker CI plane stood still for 71 minutes. PR 659 added a tailscale0 device drop-in that Wants= the socket; PR 661 (0mcp) showed in a rig that this is half a fix: the device
+  appears about 0.3 s (0docker) to 0.8 s (0mcp) before it has its address, so the Wants= start fails with "Cannot assign requested address" unless the socket has FreeBind=true. zdocker-hypervisor-metrics-proxy.socket has
+  FreeBind but is only WantedBy=sockets.target, so after a separate stop and start of tailscaled nothing starts it. This workstream adds the FreeBind drop-in and the device Wants= for the 0docker hypervisor.
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Read-only scan of the 0docker hypervisor, two hostconf files with two manifest entries, a 0docker family of rig variants on systemd 252, the catalog-and-inventory test, the runbook
+    status: in_progress
+  - id: t3
+    title: Pass the pre-push gate, open the pull request and land it; apply with hostconf.py apply --host bastion --file socket-free-bind.woodpecker-exec-proxy --file tailscale0-wants-zdocker-metrics-proxy --yes (daemon-reload only, no restart), after the user's yes
+    status: pending

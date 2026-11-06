@@ -1,0 +1,90 @@
+id: ws-20261029-agent-history-netpolicy-drift
+adr: "0494"
+title: "Keep the agent-history store out of the all_guests fan-out and declare its forward flows (NetpolicyDrift for VM 155 and VM 192)"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/agent-history-netpolicy-drift
+worktree_path: .claude/worktrees/ah-netpol
+doc: docs/workstreams/ws-20261029-agent-history-netpolicy-drift.md
+depends_on:
+  - ws-0534-agent-history-vm
+  - ws-0537-agent-history-activate
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2
+  - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/templates/vm.fw.j2
+  - scripts/firewall_drift.py
+  - tests/test_network_policy_all_guests_flag.py
+  - inventory/host_vars/proxmox-host.yml
+  - config/network-policy/0mcp.yaml
+  - docs/runbooks/configure-guest-network-policy.md
+  - docs/runbooks/configure-agent-history.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261029-agent-history-netpolicy-drift.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261029-agent-history-netpolicy-drift.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261029_tracking
+      paths:
+        - docs/workstreams/ws-20261029-agent-history-netpolicy-drift.md
+      mode: exclusive
+    - id: all_guests_opt_out_guest_nft
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/templates/nftables.conf.j2
+        - collections/ansible_collections/lv3/platform/roles/linux_guest_firewall/tasks/main.yml
+      mode: shared_contract
+      contract: guest-firewall-policy-v1
+    - id: all_guests_opt_out_vm_firewall
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/templates/vm.fw.j2
+        - scripts/firewall_drift.py
+        - tests/test_network_policy_all_guests_flag.py
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: all_guests_opt_out_inventory
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+        - config/network-policy/0mcp.yaml
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: all_guests_opt_out_runbooks
+      paths:
+        - docs/runbooks/configure-guest-network-policy.md
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: all_guests_opt_out_agent_history_runbook
+      paths:
+        - docs/runbooks/configure-agent-history.md
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261029-agent-history-netpolicy-drift.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "Keep the agent-history store out of every all_guests source expansion (network_policy_all_guests: false) in both renderers and the drift tool, declare its forward flows and VM 192's forward source in the netpolicy file, and document the 0mcp invocation of the scoped firewall slice."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: "The NetpolicyDrift alert for VM 155 and VM 192 comes from the all_guests fan-out naming the new store guest and from VM 155's undeclared forward chain. Least privilege: the store is excluded from the fan-out by an explicit per-guest flag; flows that name it stay. Nothing is applied by this change."
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: "Add the all_guests opt-out to both renderers and the drift tool, declare VM 155 forward and VM 192 forward source, document the 0mcp slice invocation"
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not merged, no live-apply marker, nothing applied)
+    status: in_progress

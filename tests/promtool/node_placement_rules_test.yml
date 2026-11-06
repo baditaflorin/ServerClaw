@@ -1,0 +1,47 @@
+# promtool unit tests for config/prometheus/rules/node-placement.yml (run by tests/test_adopted_prometheus_rules.py when promtool
+# is installed). The contention alert once matched with a bare `and on()`, so ANY hot hypervisor made EVERY host under 30% busy
+# alert (26 at once on 2026-10-14). The recorded series are fed in directly.
+rule_files:
+  - ../../config/prometheus/rules/node-placement.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a busy hypervisor flags only its own idle guests, never an idle host of another hypervisor
+    interval: 1m
+    input_series:
+      - series: 'fleet:hypervisor_node_cpu_busy_percent{instance="pve:9221", id="node/hv"}'
+        values: "85x60"
+      - series: 'fleet:node_cpu_busy_percent{host="10.10.10.30:9100"}'
+        values: "20x60"
+      - series: 'fleet:node_cpu_busy_percent{host="10.10.10.91:9100"}'
+        values: "20x60"
+      - series: 'fleet:node_cpu_busy_percent{host="10.10.10.40:9100"}'
+        values: "60x60"
+      - series: 'up{job="node_exporter", instance="10.10.10.30:9100", fleet="0docker", role="guest"}'
+        values: "1x60"
+      - series: 'up{job="node_exporter", instance="10.10.10.91:9100", fleet="0mcp", role="runtime"}'
+        values: "1x60"
+      - series: 'up{job="node_exporter", instance="10.10.10.40:9100", fleet="0docker", role="guest"}'
+        values: "1x60"
+    alert_rule_test:
+      - {eval_time: 5m, alertname: FleetHypervisorContentionMismatch, exp_alerts: []}
+      - eval_time: 30m
+        alertname: FleetHypervisorContentionMismatch
+        exp_alerts:
+          - exp_labels: {severity: warning, service: fleet_placement, host: "10.10.10.30:9100"}
+            exp_annotations:
+              summary: "Host 10.10.10.30:9100 looks idle from inside, but its hypervisor is busy"
+              description: "10.10.10.30:9100's own node_exporter reports low CPU busy%, but the physical Proxmox host it runs on is above 70% CPU -- likely a noisy neighbor VM/LXC. Don't trust this host's own placement score alone; check fleet:hypervisor_node_cpu_busy_percent before routing new work here."
+
+  - name: an idle guest of the monitored hypervisor does not alert while the hypervisor is not busy
+    interval: 1m
+    input_series:
+      - series: 'fleet:hypervisor_node_cpu_busy_percent{instance="pve:9221", id="node/hv"}'
+        values: "40x60"
+      - series: 'fleet:node_cpu_busy_percent{host="10.10.10.30:9100"}'
+        values: "20x60"
+      - series: 'up{job="node_exporter", instance="10.10.10.30:9100", fleet="0docker", role="guest"}'
+        values: "1x60"
+    alert_rule_test:
+      - {eval_time: 30m, alertname: FleetHypervisorContentionMismatch, exp_alerts: []}

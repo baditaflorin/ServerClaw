@@ -1,0 +1,453 @@
+groups:
+  - name: tier0-standby
+    rules:
+      - alert: VaultStandbySyncStale
+        expr: time() - vault_standby_sync_last_success_timestamp_seconds > 900
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Vault/keystore standby copy on infer-tier0 is {{ $value | humanizeDuration }} old"
+          description: "The builder (CT108) courier `vault-standby-send.timer` has not completed a replication to the tier-0 standby for over 15 minutes. A promotion now would lose that much vault data. Check `journalctl -u vault-standby-send` on CT108."
+      - alert: VaultStandbySyncVeryStale
+        expr: time() - vault_standby_sync_last_success_timestamp_seconds > 3600
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Vault/keystore standby has not synced for over an hour"
+          description: "No successful replication of secrets.db/keys.db to infer-tier0 for over 1 hour; the standby is not a usable safety net until this is fixed."
+      - alert: VaultStandbySyncMissing
+        expr: absent(vault_standby_sync_last_success_timestamp_seconds)
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Vault standby sync metric is missing"
+          description: "Prometheus has no vault_standby_sync_* series from the builder (CT108 textfile collector). The courier may not be running."
+      - alert: AlertmanagerMeshDegraded
+        expr: alertmanager_cluster_members{job="alertmanager"} < 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alertmanager mesh has fewer than 2 members"
+          description: "The primary Alertmanager no longer sees its replica on infer-tier0 (gossip via the 0infer host, tcp+udp 9094). Alerts still flow, but a lost 0mcp would now silence them."
+      - alert: Tier0SiteDown
+        expr: up{job="tier0_node_exporter"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "infer-tier0 (alert replica, vault standby) is unreachable"
+          description: "Prometheus cannot scrape node_exporter on infer-tier0 through the 0infer host forward (100.64.0.21:9101). The second alert stack and the vault standby are not protecting anything until this is fixed."
+      - alert: Tier0SiteAlertmanagerDown
+        expr: up{job="alertmanager_tier0"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alertmanager #2 on infer-tier0 is down"
+          description: "The replica Alertmanager (100.64.0.21:9093) does not answer /metrics."
+      - alert: VaultStandbyDrillFailed
+        expr: vault_standby_drill_last_success == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The weekly vault standby promotion drill FAILED"
+          description: "The standby on infer-tier0 could not be started and used (health, one-use key from the standby keystore, secret listing, or the record-count sanity check). A real promotion would not have worked. See `journalctl -u vault-standby-drill` on infer-tier0."
+      - alert: VaultStandbyDrillStale
+        expr: time() - max(vault_standby_drill_last_success_timestamp_seconds) > 9 * 86400
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No successful vault standby promotion drill for over 9 days"
+          description: "The weekly drill timer (vault-standby-drill.timer on infer-tier0) has not produced a successful run for more than 9 days, or it keeps being skipped because the standby is running."
+      - alert: VaultStandbyRunning
+        expr: vault_standby_drill_skipped == 1
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "The vault standby on infer-tier0 is RUNNING (promoted?)"
+          description: "The drill found the standby containers already running and refused to touch them. If nobody promoted it on purpose, two writers may exist: investigate immediately (never run primary and standby as writers at once)."
+      - alert: XhostRestoreDrillFailed
+        expr: xhost_restore_drill_last_success == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Weekly cross-host restore drill FAILED for {{ $labels.source }}"
+          description: "Restoring {{ $labels.source }} from the SECOND PBS (infer-tier0) onto the 0infer host failed (restore, no-NIC check, boot, guest-agent file check or cleanup). The second backup copy may not be restorable. See `journalctl -u xhost-restore-drill` on the 0infer host."
+      - alert: XhostRestoreDrillStale
+        expr: time() - max(xhost_restore_drill_last_success_timestamp_seconds) > 9 * 86400
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No successful cross-host restore drill from the second PBS for over 9 days"
+          description: "xhost-restore-drill.timer on the 0infer host has not produced a successful run for more than 9 days."
+  - name: tier0-runner
+    rules:
+      - alert: Tier0FailoverDecisionPrimaryDown
+        expr: max(tier0_controller_would_failover) == 1
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "0docker has been unreachable from 2 independent vantage points for 5+ minutes: failover is due (controller is in SHADOW mode, nothing was executed)"
+          description: "On infer-tier0 run `sudo tier0-run tier0-failover.sh --promote`, then the DNS stage (fleet-state docs/runbooks/failover-0docker-loss.md). Controller state and history: /var/lib/tier0-controller. Stop automatic evaluation: touch /var/lib/tier0-controller/PAUSE."
+      - alert: Tier0ControllerStale
+        expr: time() - max(tier0_controller_last_run_timestamp_seconds) > 600
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The Tier-0 controller on infer-tier0 has not evaluated for {{ $value | humanizeDuration }}"
+          description: "tier0-controller.timer on infer-tier0 (every minute) stopped producing metrics: nobody is deciding whether 0docker is down."
+      - alert: Tier0HostUpAppsDown
+        expr: max(tier0_controller_host_up_apps_down) == 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "0docker answers on TCP but every canary app fails: the controller's host-level rule sees UP and would NOT fail over"
+          description: "Measurement from the controller (never part of its decision): https://<canary>/health fails for ALL of T0C_APP_TARGETS while TCP 22/443 of the primary answer. Check the gateway VM104 and the service VM100. Whether this state should count as the primary being DOWN is an open operator decision; this data is what it should be judged on."
+      - alert: Tier0ControllerBlind
+        expr: max(tier0_controller_tick_status) == -1
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The Tier-0 controller cannot decide: a vantage point is unusable"
+          description: "One of the controller's two vantage points (infer-tier0 itself, or the 0mcp ssh hop through the jump user) returned UNKNOWN for 15 minutes. UNKNOWN never counts as DOWN, so a real outage would NOT trigger a failover decision."
+      - alert: Tier0RunnerRehearsalFailed
+        expr: max(tier0_runner_rehearsal_last_exit_code) != 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "The daily failover rehearsal from the Tier-0 runner FAILED: the 0docker failover chain is broken right now"
+          description: "See /var/log/tier0-runner/ on infer-tier0 (newest *-tier0-failover.log). Usual cause: production's gateway or vault changed shape since the last green run (a new upstream, a new http-level variable). Fix the builder in fleet-state scripts/tier0; the runner syncs master every 15 minutes."
+      - alert: Tier0RunnerRehearsalStale
+        expr: time() - max(tier0_runner_rehearsal_last_success_timestamp_seconds) > 129600
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "No successful failover rehearsal from the Tier-0 runner for {{ $value | humanizeDuration }}"
+          description: "The failover chain has not been proven for over 36 hours (tier0-rehearsal-daily.timer on infer-tier0 runs daily)."
+      - alert: Tier0RunnerRehearsalMissing
+        expr: absent(tier0_runner_rehearsal_last_run_timestamp_seconds)
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No Tier-0 runner rehearsal metrics at all"
+          description: "tier0_runner_rehearsal.prom is missing from the infer-tier0 node exporter textfile directory."
+      - alert: Tier0RunnerSyncFailing
+        expr: min(tier0_runner_sync_ok) == 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The Tier-0 runner could not update its scripts from fleet-state master"
+          description: "tier0-runner-sync.service on infer-tier0 failed or rolled back a commit whose scripts do not parse; the runner keeps running the previous commit."
+      - alert: Tier0RunnerSyncStale
+        expr: time() - max(tier0_runner_sync_last_success_timestamp_seconds) > 7200
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The Tier-0 runner scripts have not been synced for {{ $value | humanizeDuration }}"
+          description: "The runner may be rehearsing outdated code."
+      - alert: Tier0RunnerDnsPlanFailed
+        expr: min(tier0_runner_dns_plan_ok) == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "The DNS stage of the 0docker failover cannot plan: the failover would stop at DNS"
+          description: "`tier0-dns plan` on infer-tier0 failed or saw an implausible number of records (expected about 430, accepted 300-600). Usual causes: the local vault standby is stale or stopped syncing (token not readable), the Hetzner DNS API is unreachable, the token was rotated. Run `sudo tier0-dns plan` there to see the error."
+      - alert: Tier0RunnerDnsPlanStale
+        expr: time() - max(tier0_runner_dns_plan_last_run_timestamp_seconds) > 129600
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The DNS failover plan has not been checked for {{ $value | humanizeDuration }}"
+          description: "tier0-rehearsal-daily.timer on infer-tier0 runs the DNS plan check daily."
+      - alert: Tier0RunnerDnsDrillFailed
+        expr: max(tier0_runner_dns_drill_last_exit_code) != 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "The monthly DNS stage drill (one throwaway test name) FAILED"
+          description: "t0-drill.example.net may still exist: check `dig @ns1.your-server.de t0-drill.example.net` and delete it with the reconciler `unset`. Details: `journalctl -u tier0-dns-drill` on infer-tier0."
+      - alert: Tier0RunnerDnsDrillStale
+        expr: time() - max(tier0_runner_dns_drill_last_success_timestamp_seconds) > 3456000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No successful DNS stage drill for {{ $value | humanizeDuration }}"
+          description: "tier0-dns-drill.timer on infer-tier0 runs monthly (1st, 05:41 UTC)."
+      - alert: Tier0ExecutorFailedOver
+        expr: max(tier0_executor_phase{phase=~"FAILED_OVER|FAILED_OVER_DEGRADED"}) == 1
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "0docker FAILED OVER: the Tier-0 executor finished, the standby edge is serving; failback is MANUAL"
+          description: "Vault+keystore, slice, standby gateway and DNS were switched by the executor on infer-tier0 (state: /var/lib/tier0-executor/current.json, log/events.jsonl). Failback is deliberate and scripted: from a machine with ssh to the runner, the standby host and the returned primary, `scripts/tier0/tier0-failback.sh --check` (read-only: is the primary back and stable for 30 minutes, the vault handback plan, the exact DNS inverse), then `--execute --yes-failback` (vault handback pass 1, `tier0-dns failback`, drain, pass 2, standby teardown, `tier0-executor ack`, re-arm; resumable). Runbook: fleet-state docs/runbooks/failover-0docker-loss.md."
+      - alert: Tier0ExecutorFailed
+        expr: max(tier0_executor_phase{phase="FAILED"}) == 1
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: "The Tier-0 executor FAILED during a failover: a person/agent is needed now"
+          description: "See the `note` of /var/lib/tier0-executor/current.json on infer-tier0. A required stage failed (DNS untouched, users unaffected) or DNS may be PARTIALLY applied (the note names the revert file; `sudo tier0-dns plan` shows what is left)."
+      - alert: Tier0ExecutorAborted
+        expr: max(tier0_executor_phase{phase=~"ABORTED_PRIMARY_BACK|ABORTED_UNCERTAIN|ABORTED_GATE"}) == 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The Tier-0 executor aborted a failover (primary answered again, could not be confirmed down, or the promotion gate is closed)"
+          description: "Nothing user-visible changed. Parts that were already started are left running (never torn down automatically): see the note in /var/lib/tier0-executor/current.json, then `sudo tier0-executor ack`."
+      - alert: Tier0ExecutorStuck
+        expr: max(tier0_executor_phase{phase=~"RUNNING|PAUSED"}) == 1
+        for: 20m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The Tier-0 executor has been RUNNING or PAUSED for 20 minutes"
+          description: "A PAUSE file stops it between steps (/var/lib/tier0-controller/PAUSE or /var/lib/tier0-executor/PAUSE); a busy chain lock delays it. `sudo tier0-executor status`."
+      - alert: Tier0ExecutorAwaitingDnsApproval
+        expr: max(tier0_executor_awaiting_dns_approval) == 1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "0docker is DOWN and the standby is up: the DNS repoint waits for YOUR approval"
+          description: "The executor started the standby stages and the primary is confirmed down on every tick. Verify (`sudo tier0-executor status` on infer-tier0), then `sudo tier0-executor approve` (or have an agent do it). Until then users still hit the dead primary. If the primary comes back the run aborts by itself."
+      - alert: Tier0ExecutorStale
+        expr: time() - max(tier0_executor_last_run_timestamp_seconds) > 600
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The Tier-0 executor has not ticked for {{ $value | humanizeDuration }}"
+          description: "tier0-executor.timer on infer-tier0 (every minute) stopped: a controller decision would not be acted on."
+      - alert: Tier0ExecutorLiveMode
+        expr: max(tier0_executor_mode{mode="live"}) == 1
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "AUTOMATIC failover is ENABLED (Tier-0 executor mode live)"
+          description: "/etc/tier0-executor/mode says live on infer-tier0: the next 0docker outage decided by the controller is switched to the standby without a person. Stop it with `touch /var/lib/tier0-controller/PAUSE`."
+      - alert: Tier0SimFailed
+        expr: max(tier0_sim_last_exit_code) != 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "The full-cycle failover simulation FAILED: automatic failover cannot be trusted"
+          description: "`journalctl -u 'tier0-sim@*'` on infer-tier0 shows which check failed. The simulation uses throwaway objects only (t0-sim.example.net, rehearsal stages); if it died halfway check `dig @ns1.your-server.de t0-sim.example.net` and the rehearsal leftovers (`sudo tier0-run tier0-vault-promote.sh --teardown-rehearsal`)."
+      - alert: Tier0SimStale
+        expr: time() - max(tier0_sim_last_success_timestamp_seconds{variant="clean"}) > 129600
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "No successful full-cycle failover simulation for {{ $value | humanizeDuration }}"
+          description: "tier0-sim-clean.timer on infer-tier0 runs daily (05:35 UTC)."
+      - alert: Tier0SimMissing
+        expr: absent(tier0_sim_last_run_timestamp_seconds{variant="clean"})
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No Tier-0 simulation metrics at all"
+          description: "tier0_sim_clean.prom is missing from the infer-tier0 node exporter textfile directory."
+      - alert: Tier0DomainscopeRehearsalFailed
+        expr: max(tier0_runner_domainscope_rehearsal_last_exit_code) != 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The DomainScope standby (VM 8101 on 0infer) failed its daily rehearsal: a failover would not bring DomainScope up"
+          description: "On infer-tier0: `sudo tier0-run tier0-domainscope-promote.sh --rehearse` shows the failing step; the hypervisor keeps a record per run in /var/log/standby-ctl/ and `standby-ctl status` there shows the VM. The rehearsal only ever uses the STAGING stack; the standby ends in its resting state (stopped, link down) even when a step fails, so this is not an emergency until a failover is due."
+      - alert: Tier0DomainscopeRehearsalStale
+        expr: time() - max(tier0_runner_domainscope_rehearsal_last_success_timestamp_seconds) > 259200
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No successful DomainScope standby rehearsal for {{ $value | humanizeDuration }}"
+          description: "tier0-domainscope-rehearsal.timer on infer-tier0 runs daily (05:48 UTC). A rehearsal that is SKIPPED (the hypervisor is short of memory, or the controller was not NORMAL) is not a success: if it keeps skipping, free memory on the 0infer hypervisor or lower min_available_mb_rehearse in /etc/standby-ctl/config.json."
+      - alert: Tier0DomainscopeRehearsalMissing
+        expr: absent(tier0_runner_domainscope_rehearsal_last_run_timestamp_seconds)
+        for: 36h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No DomainScope standby rehearsal metrics at all"
+          description: "tier0_runner_domainscope.prom is missing from the infer-tier0 node exporter textfile directory: tier0-domainscope-rehearsal.timer is not installed or has never run."
+      - alert: Tier0DomainscopeBundleStale
+        expr: max(tier0_runner_domainscope_bundle_age_seconds) > 21600
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The DomainScope config bundle the standby would use is {{ $value | humanizeDuration }} old"
+          description: "CT108's hourly tier0-domainscope-snapshot is not delivering (see Tier0DomainscopeSnapshotStale). A failover now would start DomainScope on the configuration of its last applied bundle (at most one rehearsal old)."
+      - alert: Tier0DomainscopeImagesLagging
+        expr: max(tier0_runner_domainscope_degraded_images) > 0
+        for: 36h
+        labels:
+          severity: warning
+        annotations:
+          summary: "The DomainScope standby does not have the production image tags on disk: a failover would run an OLDER image"
+          description: "The rehearsal could not pull the production image tags onto the standby (GHCR unreachable from 0infer, or a package is no longer public) and fell back to the newest tags on its disk; an activation would do the same. The rehearsal result (`degraded`) names the variables. `docker pull` of the tag by hand on the standby (boot it with standby-ctl rehearse) shows the registry error."
+      - alert: PbsGroupRetentionFailed
+        expr: max(pbs_group_retention_last_run_timestamp_seconds) > max(pbs_group_retention_last_success_timestamp_seconds) + 60
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "The PBS #2 per-group retention failed its last run: the two big VM100 groups are not being pruned to 2 snapshots"
+          description: "On infer-tier0: `sudo pbs-group-retention` (dry run) prints which group failed which guard (a lock held by a running sync, a stale feed: newest snapshot older than 72 h, an unexpected dry run). The store-wide prune job still keeps 3 + 1 weekly, so nothing is lost: PBS #2 just holds more than intended. Details: config/0infer/tier0-pbs2/README.md."
+      - alert: PbsGroupRetentionStale
+        expr: time() - max(pbs_group_retention_last_run_timestamp_seconds) > 172800
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "The PBS #2 per-group retention has not run for {{ $value | humanizeDuration }}"
+          description: "pbs-group-retention.timer on infer-tier0 runs daily at 07:05 UTC; `systemctl status pbs-group-retention.timer pbs-group-retention.service` shows why not."
+      - alert: Tier0EdgeCompatRejected
+        expr: max(tier0_runner_edge_compat_ok) == 0 and max(tier0_runner_edge_compat_could_not_run) == 0
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "The standby edge REJECTS the config the standby builders make of production's current gateway snapshot: the 0docker failover is broken right now"
+          description: "The hourly check (tier0-edge-compat on infer-tier0, nothing is changed on the edge) ran the edge's real `nginx -t` in an isolated mount namespace and it failed, or a builder failed. `sudo tier0-run tier0-edge-compat.sh` prints the first nginx error lines (an unknown variable, a duplicate zone, a missing module). Usual cause: production's gateway or vault vhost changed shape (2026-10-17: a map, a limit zone, perl_set $verify_key_hash). Fix the builder in fleet-state scripts/tier0 (build-standby-gateway.py / build-standby-vhost.py); the runner syncs master every 15 minutes."
+      - alert: Tier0EdgeCompatCannotRun
+        expr: max(tier0_runner_edge_compat_could_not_run) == 1
+        for: 3h
+        labels:
+          severity: warning
+        annotations:
+          summary: "The hourly standby edge compatibility check cannot run (no usable gateway snapshot, the edge is unreachable, or it lacks unshare/overlayfs)"
+          description: "`sudo tier0-run tier0-edge-compat.sh` on infer-tier0 prints which: status no-snapshot (the CT108 gateway snapshot job or the replicas), no-edge (ssh to the 0mcp edge VM110 from the runner), edge-unsupported (util-linux unshare or overlayfs missing on the edge)."
+      - alert: Tier0EdgeCompatStale
+        expr: time() - max(tier0_runner_edge_compat_last_run_timestamp_seconds) > 10800
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The hourly standby edge compatibility check has not run for {{ $value | humanizeDuration }}"
+          description: "tier0-edge-compat.timer on infer-tier0 runs at :50 every hour and skips only while the chain lock is held (rehearsal, simulation, failover)."
+      - alert: Tier0EdgeCompatServedDrop
+        expr: max(tier0_runner_edge_compat_vhosts_selected) < 0.8 * max(max_over_time(tier0_runner_edge_compat_vhosts_selected[1d]))
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "The standby could serve 20% fewer vhosts than earlier today ({{ $value }} now)"
+          description: "A builder regression or a production change shrank what build-standby-gateway.py can serve from the standby (SELECTED.json lists what is skipped and why). Compare with `sudo tier0-run tier0-gateway-promote.sh --rehearse` output and the not-served reasons."
+      - alert: Tier0EdgeBackendPortsClosed
+        expr: max(tier0_runner_edge_compat_backends_closed) > 0
+        for: 5h
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value }} tailnet backend ports of the standby gateway's pools cannot be reached from the edge VM: those names would answer 504 in an outage"
+          description: "The hourly edge-compat check (`sudo cat /var/log/tier0-runner/<latest>-tier0-edge-compat.log` on infer-tier0) TCP-tests every tailnet ip:port the standby pools keep from the edge and lists the failures as `CLOSED <ip> <port>`. A closed port that is listening on its host is a missing tailnet grant (the pools program adds ports daily; the tier0-edge-grants job on CT108 turns one that stays closed for two runs into a policy PR the reconciler applies, about two hours after it first shows: this alert waits five, so it fires only when that automation is not doing it, see Tier0EdgeGrants*; by hand: `scripts/standby_edge_grants.py --reach <those lines> --verify` in platform_server prints the grants and tests, docs/runbooks/standby-edge-grants.md); one nothing listens on is a stale pool server. Before this alert existed a day of new pools left 103 of 293 ports closed and 92 names failing 504, found only by the rehearsal's all-names probe."
+      - alert: Tier0StandbyNamesNotAnswering
+        expr: max(tier0_runner_standby_names_failing) > 5
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value }} public names do not answer through the standby gateway in the daily rehearsal (5xx or no answer on /health)"
+          description: "The gateway stage of the daily rehearsal probes every name the standby serves that does not depend on the slice (tier0-run tier0-gateway-promote.sh --rehearse on infer-tier0 prints `failing: <name> -> <code>` and `PROBE_ALL ...`). By design 0-3 fail (the keystore/vault names while their stage is not up, domainscope while its standby VM is off); more usually means pool backends the edge cannot reach (Tier0EdgeBackendPortsClosed, tailnet grants) or replicas that are down."
+      - alert: Tier0KeystoreMeshNodeNotAnswering
+        expr: max(tier0_runner_edge_compat_keystore_mesh_nodes) - max(tier0_runner_edge_compat_keystore_mesh_nodes_ok) > 0
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value }} keystore mesh node(s) the failover chain verifies keys against do not answer from the standby edge as a keystore must"
+          description: "The hourly edge-compat check (`sudo cat /var/log/tier0-runner/<latest>-tier0-edge-compat.log` on infer-tier0, lines `KEYSTORE_MESH`) asks every keystore mesh node the chain uses from the edge VM: the 0mcp node 10.10.10.91:18021 on the standby LAN and the 0infer node 100.64.0.24:18021 over the tailnet (backup): /version, the throwaway test key (200, another scope 401) and a made-up key (401). A node that fails makes the daily rehearsal fail and, at a real failover, makes the vault stage fall back to the restored snapshot keystore (up to an hour old: a key revoked since is accepted again). Causes: the node down, its API publish or the two firewall layers on the 0mcp node (platform_server config/keystore-mesh/lan-publish, /etc/pve/firewall/191.fw on operator-bastion), a tailnet grant for the 0infer node, the test key (Fleet Secrets keystore_failover_test_key) revoked or expired."
+      - alert: Tier0KeystoreMeshAllNodesDown
+        expr: max(tier0_runner_edge_compat_keystore_mesh_nodes_ok) == 0 and max(tier0_runner_edge_compat_keystore_mesh_nodes) > 0
+        for: 1h
+        labels:
+          severity: critical
+        annotations:
+          summary: "No keystore mesh node answers from the standby edge: a failover now would verify keys against the restored snapshot only"
+          description: "Every keystore mesh node of the failover chain fails the hourly check from the edge (see Tier0KeystoreMeshNodeNotAnswering for the check and the causes). The vault stage would fall back to the restored hourly keystore snapshot and the standby gateway's key verification would have no live node."
+      - alert: Tier0KeystoreMeshKeyUnchecked
+        expr: min(tier0_runner_edge_compat_keystore_mesh_key_checked) == 0
+        for: 6h
+        labels:
+          severity: warning
+        annotations:
+          summary: "The hourly keystore mesh check could not use the throwaway test key: only the version and the made-up-key checks ran"
+          description: "keystore-mesh-probe.sh reads the verify-only test key from /etc/tier0-standby/keystore-failover-test.key on infer-tier0 (0640 root:t0runner; Fleet Secrets name keystore_failover_test_key, scope failover-rehearsal.0exec.com, expires ~2027-10-18). Without it the nodes' data (are recent keys present?) and the scope check are not verified. Re-provision it from Fleet Secrets through the builder's vault path; never print it."
+      - alert: Tier0KeystoreVerifyFailing
+        expr: max(tier0_runner_keystore_probe_failed_lines) > 0
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value }} keystore/vault check(s) failed in the daily failover rehearsal"
+          description: "The vault and gateway stages of the daily rehearsal print one `KEYSTORE_MESH|KEYSTORE_VAULT|KEYSTORE_EDGE_*` line per check (`sudo grep -E 'KEYSTORE_|FAILED' /var/log/tier0-runner/<latest>-tier0-failover.log` on infer-tier0; ok=0 is the failing one). The vault check reads the probe secret tier0_failover_probe straight from the promoted vault with the test key: it fails if the vault does not decrypt, its keystore (the mesh node) does not accept the key, or the secret/consumer was removed from Fleet Secrets."
+      - alert: Tier0SliceDirectoriesInvalid
+        expr: max(tier0_runner_slice_directories_invalid) + max(tier0_runner_slice_images_missing_directories) > 0
+        for: 2h
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value }} directories of the standby slice cannot start on the slice VM (compose does not validate, or images are missing)"
+          description: "The daily rehearsal restores the slice bundle on the slice VM and validates every directory: `sudo grep -E 'INVALID|image missing|NOT RESTORED' /var/log/tier0-runner/<latest>-tier0-failover.log` on infer-tier0 names them. Usual causes: a compose file naming an env_file or mount outside its directory and /opt/fleet-secrets (the sync carries exactly two host env files: add a new one to tier0-slice-sync.sh deliberately, or exclude the service in fleet-state brownout/slice-overrides.json), or images not streamed (Tier0SliceImagesMissing)."
+      - alert: Tier0StandbyDarkNames
+        expr: max(tier0_runner_edge_compat_vhosts_skipped) > 80
+        for: 6h
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value }} public names would be dark in a 0docker outage: the standby gateway cannot serve them"
+          description: "The hourly edge-compat log on infer-tier0 (`sudo cat /var/log/tier0-runner/<latest>-tier0-edge-compat.log`) lists every one as `not served: <name>: <reason>`. After the daily slice refresh the ones that remain are services whose state would start EMPTY on the standby (decide per service: replicate its data, or accept) or whose port is on another host; a number that grows means new such services. `tier0-slice-refresh.sh --dry-run` on CT108 shows what the refresh would change (it was 121 before the refresh existed, 56 after the first one)."
+      - alert: Tier0VaultHandbackRehearsalFailed
+        expr: max(tier0_runner_vault_handback_rehearsal_ok) == 0 and max(tier0_runner_vault_handback_rehearsal_could_not_run) == 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The vault handback rehearsal FAILED: handing the vault back from the promoted node after a failover would not be safe as scripted"
+          description: "On infer-tier0: `sudo tier0-run tier0-vault-handback.sh --rehearse` prints which decision was wrong or says the REAL vault image refused the merged database (rows that fail its own verification: a new vault version, key layout or row MAC rule; compare `startup key check` in the output). Nothing real is touched by the rehearsal (throwaway container tier0-hb-rehearsal on the 0mcp standby host, port 18150). Not an emergency until a failover has happened, but fix it before one does: the failback depends on it."
+      - alert: Tier0VaultHandbackRehearsalStale
+        expr: time() - max(tier0_runner_vault_handback_rehearsal_last_success_timestamp_seconds) > 129600
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No successful vault handback rehearsal for {{ $value | humanizeDuration }}"
+          description: "tier0-vault-handback-rehearsal.timer on infer-tier0 runs daily (05:58 UTC). `sudo tier0-run tier0-vault-handback.sh --rehearse` shows why it cannot succeed: exit 3 = could not run (no usable vault snapshot or escrow replica, the standby host unreachable, the vault image missing there, port 18150 busy), exit 5 = it failed."
+      - alert: Tier0VaultHandbackRehearsalMissing
+        expr: absent(tier0_runner_vault_handback_rehearsal_last_run_timestamp_seconds)
+        for: 36h
+        labels:
+          severity: warning
+        annotations:
+          summary: "No vault handback rehearsal metrics at all"
+          description: "tier0_runner_vault_handback.prom is missing from the infer-tier0 node exporter textfile directory: tier0-vault-handback-rehearsal.timer is not installed or has never run."

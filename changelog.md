@@ -12,7 +12,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Unreleased
 
-- Lower the BuildKit cache target on the build VM from 50 to 25 GiB (`build_server_buildkit_cache_gb`): at 50 GiB the cache reached ~60 GB, the root filesystem fell below the CI load controller's 10% stop line and every 0mcp Woodpecker pipeline stayed pending for hours (2026-10-13 and 2026-10-14). Applied live (buildctl prune to 25 GB, keepBytes 25 GiB, daemon restarted).
 - Add guarded, no-restart Prometheus scraping for the 0own Proxmox host.
 - Restore the remote validation gateway route to the declared build VM and cap pre-push validation concurrency.
 - Enable least-privilege Gitea Authentik login and verify a non-admin browser session.
@@ -21,6 +20,8 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - Install `logrotate` with the public edge nginx packages: nginx-lv3 had no logrotate at all, so `access.log` grew to 5.2 GB without ever rotating (first rotation done live on 2026-10-13).
 - Remove the unused GitHub Actions workflow and point validation metadata at Woodpecker while retaining the self-hosted Gitea validator.
 - Allow the Builder metrics peer to scrape docker-build node-exporter over the private tailnet without disrupting Docker-managed firewall rules.
+- Allow the pve01, 0infer and 0mcp CI agents to reach only the shared Go build cache port on the 0own build worker.
+- Remove the tailnet grant that let the pve01, 0infer and 0mcp CI agents reach the retired Go build cache port on the 0own build worker.
 - Restore governed Plane API access through a loopback-only SSH forward and document the procedure.
 - Resolve selected DNS catalog placeholders during guarded deployment preflight without changing the generic catalog or live DNS.
 - Keep the sanitized ServerClaw host template consistent with active authenticated edge routes.
@@ -30,10 +31,15 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 
 ## Latest Release
 
-- [0.179.51 release notes](docs/release-notes/0.179.51.md)
+- [0.179.57 release notes](docs/release-notes/0.179.57.md)
 
 ## Previous Releases
 
+- [0.179.56 release notes](docs/release-notes/0.179.56.md)
+- [0.179.55 release notes](docs/release-notes/0.179.55.md)
+- [0.179.54 release notes](docs/release-notes/0.179.54.md)
+- [0.179.53 release notes](docs/release-notes/0.179.53.md)
+- [0.179.51 release notes](docs/release-notes/0.179.51.md)
 - [0.179.50 release notes](docs/release-notes/0.179.50.md)
 - [0.179.49 release notes](docs/release-notes/0.179.49.md)
 - [0.179.48 release notes](docs/release-notes/0.179.48.md)
@@ -41,11 +47,6 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 - [0.179.46 release notes](docs/release-notes/0.179.46.md)
 - [0.179.45 release notes](docs/release-notes/0.179.45.md)
 - [0.179.44 release notes](docs/release-notes/0.179.44.md)
-- [0.179.43 release notes](docs/release-notes/0.179.43.md)
-- [0.179.42 release notes](docs/release-notes/0.179.42.md)
-- [0.179.41 release notes](docs/release-notes/0.179.41.md)
-- [0.179.40 release notes](docs/release-notes/0.179.40.md)
-- [0.179.39 release notes](docs/release-notes/0.179.39.md)
 - [0.179.31 release notes](docs/release-notes/0.179.31.md)
 - [0.179.30 release notes](docs/release-notes/0.179.30.md)
 - [0.179.29 release notes](docs/release-notes/0.179.29.md)
@@ -54,4 +55,4 @@ Versioned release notes live under [docs/release-notes/README.md](docs/release-n
 ## Release Archives
 
 - [Release note archives](docs/release-notes/index/README.md)
-- [2026 (562 releases)](docs/release-notes/index/2026.md)
+- [2026 (567 releases)](docs/release-notes/index/2026.md)

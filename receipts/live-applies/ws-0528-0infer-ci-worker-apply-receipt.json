@@ -1,0 +1,66 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "ws-0528-0infer-ci-worker-apply-receipt",
+  "applied_on": "2026-10-14",
+  "recorded_on": "2026-10-14",
+  "recorded_by": "codex",
+  "source_commit": "4df519653d7d5af7c9f9cbd31bd111aaaa815e25",
+  "repo_version_context": "0.179.51",
+  "workflow_id": "live-apply-service",
+  "adr": "0014",
+  "summary": "Allow the 0infer Woodpecker builder and runtime VM to reach the existing 0database production PostgreSQL primary on TCP 5432.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "0database-pg-primary",
+      "vmid": "100",
+      "address": "Tailscale 100.64.0.10 (LAN 10.50.0.10)",
+      "pull_request": "https://github.com/baditaflorin/platform_server/pull/397"
+    },
+    {
+      "kind": "vm",
+      "name": "infer-builder-ci",
+      "vmid": "702",
+      "address": "Tailscale 100.64.0.23"
+    },
+    {
+      "kind": "vm",
+      "name": "infer-runtime",
+      "vmid": "703",
+      "address": "Tailscale 100.64.0.24"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Tailscale policy apply",
+      "result": "pass",
+      "observed": "Policy API accepted the change, returned a new ETag, and the apply tool confirmed an empty semantic diff."
+    },
+    {
+      "check": "VM702 PostgreSQL TCP reachability",
+      "result": "pass",
+      "observed": "From infer-builder-ci, nc -vz -w 5 100.64.0.10 5432 succeeded."
+    },
+    {
+      "check": "VM703 PostgreSQL TCP reachability",
+      "result": "pass",
+      "observed": "Ran nc -vz -w 5 100.64.0.10 5432 inside VM703 through the active Proxmox QEMU guest agent; TCP connection succeeded. No guest SSH key or database credentials were changed."
+    },
+    {
+      "check": "PostgreSQL authentication",
+      "result": "partial",
+      "observed": "No database login or query was attempted; the network probe does not validate CI credentials or SQL grants."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0528-0infer-ci-worker.md",
+    "workstreams/archive/2026/ws-0528-0infer-ci-worker.yaml",
+    "config/tailscale/policy.hujson",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "Scope was one production PostgreSQL VM out of four on 0database and two 0infer source VMs; no restart, SQL mutation, or data change occurred.",
+    "Rollback copy: /var/lib/tailscale-policy-sync/rollback/policy.20261014T084826Z.1cf3be20c041.hujson."
+  ]
+}

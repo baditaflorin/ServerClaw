@@ -1,0 +1,27 @@
+#!/bin/bash
+# Wet drill of the whole DNS stage on ONE throwaway test name: create -> selective failover -> verify at the authoritative server -> exact failback -> verify -> delete.
+# Touches no other record. Exports metrics. Run monthly (and after any change to the DNS tooling). Root only (token from the local vault standby).
+set -uo pipefail
+R=/opt/tier0-runner/fleet-state; REC="python3 $R/scripts/tier0/dns-reconcile.py"; ZONE=example.net; NAME=t0-drill; FQDN=$NAME.$ZONE; PRIMARY=203.0.113.2; EDGE=203.0.113.1
+PROM=/var/lib/prometheus/node-exporter/tier0_runner_dns_drill.prom; D=/var/lib/tier0-dns
+NS=$(dig +short NS $ZONE | head -1); tok() { /opt/tier0-runner/bin/tier0-secret hcloud_token_fleet_core; }
+ans() { dig +short +time=3 +tries=2 @"$NS" $FQDN A | head -1; }
+wait_for() { for i in $(seq 1 30); do [ "$(ans)" = "$1" ] && return 0; sleep 2; done; return 1; }
+t0=$(date +%s); rc=0; step() { printf '%-58s' "$1"; }; ok() { echo "ok  ($(( $(date +%s) - t0 )) s)"; }; bad() { echo "FAILED: $1"; rc=1; }
+cleanup() { tok | $REC unset --zone $ZONE --name $NAME --type A --apply >/dev/null 2>&1 || true
+            { echo "tier0_runner_dns_drill_last_run_timestamp_seconds $(date +%s)"; echo "tier0_runner_dns_drill_last_exit_code $rc"; echo "tier0_runner_dns_drill_last_duration_seconds $(( $(date +%s) - t0 ))"
+              [ $rc = 0 ] && echo "tier0_runner_dns_drill_last_success_timestamp_seconds $(date +%s)"; true; } > $PROM.tmp && mv $PROM.tmp $PROM; chmod 644 $PROM; }
+trap cleanup EXIT
+echo "authoritative server: $NS   test name: $FQDN"
+step "1 create the test record -> $PRIMARY (ttl 60)"; tok | $REC set --zone $ZONE --name $NAME --type A --value $PRIMARY --ttl 60 --apply >/dev/null 2>&1 && wait_for $PRIMARY && ok || { bad "create/propagate"; exit 1; }
+N0=$(/usr/local/sbin/tier0-dns plan 2>/dev/null | grep -c "dry-run")
+step "2 selective failover of ONLY $FQDN"; OUT=$(/usr/local/sbin/tier0-dns failover --to $EDGE --only $FQDN --apply 2>&1); echo "$OUT" | grep -q "revert file:" && wait_for $EDGE && ok || { bad "failover: $(echo "$OUT" | tail -2 | tr '\n' ' ' | cut -c1-120)"; exit 1; }
+RF=$(echo "$OUT" | sed -n 's/^revert file: //p' | tail -1)
+N1=$(/usr/local/sbin/tier0-dns plan 2>/dev/null | grep -c "dry-run")
+step "3 only that record moved (records still on the primary: $N0 -> $N1)"; [ "$N1" = "$((N0-1))" ] && ok || bad "expected $((N0-1)), got $N1"
+step "4 exact failback from the revert file"; /usr/local/sbin/tier0-dns failback --file "$RF" --apply >/dev/null 2>&1 && wait_for $PRIMARY && ok || bad "failback/propagate"
+step "5 the failback is idempotent (second run restores 0)"; /usr/local/sbin/tier0-dns failback --file "$RF" 2>&1 | grep -q "0 to restore, 1 already restored" && ok || bad "not idempotent"
+install -d -m 700 $D/drill; mv "$RF" $D/drill/ 2>/dev/null
+step "6 delete the test record"; tok | $REC unset --zone $ZONE --name $NAME --type A --apply >/dev/null 2>&1; gone=0; for i in $(seq 1 30); do [ -z "$(ans)" ] && { gone=1; break; }; sleep 2; done; [ $gone = 1 ] && ok || bad "still resolves: $(ans)"
+echo "DNS stage drill: $([ $rc = 0 ] && echo PASS || echo FAIL) in $(( $(date +%s) - t0 )) s"
+exit $rc

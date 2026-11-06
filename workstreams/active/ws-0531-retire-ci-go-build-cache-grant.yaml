@@ -1,0 +1,53 @@
+id: ws-0531-retire-ci-go-build-cache-grant
+adr: "0296"
+title: Remove the CI Go build cache grant to the 0own build worker
+status: live_applied
+ready_to_merge: true
+live_applied: true
+owner: claude
+branch: claude/ws-0531-live-applied
+worktree_path: .claude/worktrees/ws-0531-live-applied
+doc: docs/workstreams/ws-0531-retire-ci-go-build-cache-grant.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/tailscale/policy.hujson
+  - workstreams/active/ws-0531-retire-ci-go-build-cache-grant.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0531-retire-ci-go-build-cache-grant.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0531_tracking
+      paths:
+        - docs/workstreams/ws-0531-retire-ci-go-build-cache-grant.md
+      mode: exclusive
+    - id: ci_go_build_cache_grant_removal
+      paths:
+        - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-0531-retire-ci-go-build-cache-grant.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: Remove the tailnet grant that let the pve01, 0infer and 0mcp CI agents reach the retired Go build cache port on the 0own build worker.
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  The shared Go build cache added under ws-0530 was measured slower than no cache on
+  every other site and no better than a host-mounted cache directory on its own host, so
+  its server is stopped. Nothing uses TCP 18335 on the build worker any more; the grant
+  and its three policy tests are removed so no unused path stays open.
+tasks:
+  - id: t1
+    title: Remove the cache-port grant and its three accept/deny policy tests
+    status: completed
+  - id: t2
+    title: Validate against the live tailnet (plan) and apply from CT108
+    status: completed
+  - id: t3
+    title: Verify the cache port is closed from the three agent hosts and live equals git
+    status: completed

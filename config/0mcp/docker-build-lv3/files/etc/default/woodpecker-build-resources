@@ -1,0 +1,2 @@
+WOODPECKER_METRICS_WORKER=0mcp-builder
+WOODPECKER_METRICS_OUTPUT=/var/lib/prometheus/node-exporter/woodpecker-build-resources.prom

@@ -1,0 +1,106 @@
+id: ws-20261104-fleet-job-caches-trim-alerts
+adr: "0494"
+title: "docker-build-lv3 (VM 130): four alerts on the textfile metric of the GC's step 3d (the Go build cache trim): a run that failed or was skipped, a trim that stopped, no metric at all, a volume over its cap for a day; merged in PR 672 and applied to the monitoring VM on 2026-11-04"
+status: in_progress
+ready_to_merge: false
+live_applied: true
+owner: claude
+branch: claude/live-apply-fleet-job-caches-trim-alerts
+worktree_path: .claude/worktrees/live-apply-fleet-job-caches-trim-alerts
+doc: docs/workstreams/ws-20261104-fleet-job-caches-trim-alerts.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/prometheus/rules/fleet-job-caches-trim.yml
+  - tests/promtool/fleet_job_caches_trim_rules_test.yml
+  - tests/test_fleet_job_caches_trim_rules.py
+  - config/0mcp/docker-build-lv3/README.md
+  - docs/runbooks/fleet-observability.md
+  - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+  - tests/test_adopted_prometheus_rules.py
+  - .woodpecker.yml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - versions/stack.yaml
+  - README.md
+  - docs/status/history/live-apply-evidence.md
+  - receipts/live-applies/2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply.json
+  - workstreams/active/ws-20261104-fleet-job-caches-trim-alerts.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261104-fleet-job-caches-trim-alerts.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261104_fleet_job_caches_trim_alerts_tracking
+      paths:
+        - docs/workstreams/ws-20261104-fleet-job-caches-trim-alerts.md
+      mode: exclusive
+    - id: fleet_job_caches_trim_rules
+      paths:
+        - config/prometheus/rules/fleet-job-caches-trim.yml
+        - tests/promtool/fleet_job_caches_trim_rules_test.yml
+        - tests/test_fleet_job_caches_trim_rules.py
+      mode: exclusive
+    - id: fleet_job_caches_trim_alerts_build_vm_readme
+      paths:
+        - config/0mcp/docker-build-lv3/README.md
+      mode: shared_contract
+      contract: docker-build-vm-config-v1
+    - id: fleet_job_caches_trim_alerts_observability_runbook
+      paths:
+        - docs/runbooks/fleet-observability.md
+      mode: shared_contract
+      contract: fleet-observability-inventory-v1
+    - id: monitoring_vm_role_shared_edits
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/monitoring_vm/defaults/main.yml
+        - tests/test_adopted_prometheus_rules.py
+      mode: shared_contract
+      contract: monitoring-vm-role-edits-v1
+    - id: fleet_job_caches_trim_alerts_woodpecker_pytest_step
+      paths:
+        - .woodpecker.yml
+      mode: shared_contract
+      contract: woodpecker-workflow-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: ws_20261104_fleet_job_caches_trim_alerts_mainline_live_apply_evidence
+      paths:
+        - README.md
+        - versions/stack.yaml
+        - docs/status/history/live-apply-evidence.md
+        - receipts/live-applies/2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply.json
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261104-fleet-job-caches-trim-alerts.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "Alerts for the build VM's Go build cache trim (step 3d of docker-build-gc, textfile metric fleet_job_caches_trim.prom): FleetJobCachesTrimFailed (the last full run failed or was skipped), FleetJobCachesTrimStale (no run for 9 hours), FleetJobCachesTrimMissing (no metric for a day) and FleetJobCachesOverCap (info: a volume over its size cap at every run for 24 hours), with promtool unit tests, a runbook section and a README section. Applied to the monitoring VM on 2026-11-04 (a targeted one-file play, receipt 2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply)."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts:
+    fleet_job_caches_trim_alerts: 2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply
+context: >-
+  Step 3d of the build VM's 4-hourly GC (platform_server PRs 657 and 664) trims the Go build cache inside the fleet-job-cache-* volumes to a 20 GiB cap and keeps the
+  VM's root off the disk-full line (the go-url-categorizer-api cache grew from 17 to 80 GiB in two days before it existed). It has run on its own since 2026-11-03 10:05Z and
+  writes fleet_job_caches_trim.prom into node_exporter's textfile directory, but no rule on either Prometheus read that file: a failed or skipped run, a timer that stopped, a
+  file that is gone or a volume stuck over its cap would have told nobody (on 2026-11-02 the step would have been skipped silently, its helper image had been pruned). This change
+  adds the four alerts, their unit tests and the runbook text. Putting the rule file on the monitoring VM was a separate step that needed the owner's yes; it was taken on 2026-11-04.
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Rule file with four alerts, promtool unit tests and a pytest wrapper that pins the metric names to the ones the wrapper script writes, runbook section and rollback row, README section for the trim, the monitoring_vm adopted list, the Woodpecker pytest step
+    status: completed
+  - id: t3
+    title: Mutation sweep (88 of 88 killed), pre-push gate on the build server, open the pull request and merge it (PR 672, 03cc038fe)
+    status: completed
+  - id: t4
+    title: Ship the rule file to the monitoring VM (targeted Ansible play with the monitoring role's copy parameters), record the receipt and bump platform_version
+    status: completed

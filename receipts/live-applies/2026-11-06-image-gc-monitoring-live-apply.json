@@ -1,0 +1,114 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-11-06-image-gc-monitoring-live-apply",
+  "applied_on": "2026-11-06",
+  "recorded_on": "2026-11-06",
+  "recorded_by": "codex",
+  "source_commit": "a0e84e298c18dc841e448a2fce319e7b8f152c57",
+  "repo_version_context": "0.179.55",
+  "workflow_id": "adr-0226-image-gc-monitoring-live-apply",
+  "adr": "0226",
+  "service_ids": [],
+  "summary": "Verified merged image/artifact cleanup failure monitoring and missed-timer monitoring, restored existing PostgreSQL alert inputs, enabled two independently bounded image cleanup timers after real recoverable canaries, and observed both natural first scheduled batches succeed.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "monitoring"
+    },
+    {
+      "kind": "container",
+      "name": "builder",
+      "vmid": "108"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Exact source and CI",
+      "result": "pass",
+      "observed": "PFS PR682 exact head48e8717f0686921e07cbff18d7e48d6468372c00 passed primary push2378 and PR2379. Squash merge8e996667c15202c021a4cbac126e14d6653bab60 fetched freshly and verified live; private scheduler source41d730e344c0662936b669342e6c4eb7ac7da48e (PR712). Exact-main push pipeline2384 also passed (source8e996667c15202c021a4cbac126e14d6653bab60)."
+    },
+    {
+      "check": "Exact-main monitoring replay",
+      "result": "pass",
+      "observed": "Initial merged8e9966 replay: GC rule SHA256d145e996a6ea34cc5f90cfacedc4a7ff9a8df5b1468cee56a0dad96a4662e6f4 and PostgreSQL rule SHA256ddcb3f82a620f28f8315ed7c291fd117a473c7b8cb854e65a79153ab98b2ba4c matched live files. The live metric relabel configuration equaled rendered main; full promtool validation passed and replay changed zero files. The later artifact-monitoring extension below supersedes the GC rule/config hashes."
+    },
+    {
+      "check": "Backups and reload",
+      "result": "pass",
+      "observed": "Rule backup/absent marker at /var/backups/fleet-image-gc-monitoring/20261106T182155Z; scrape-guard backup at /var/backups/fleet-image-gc-monitoring/20261106T182952Z; final GC+PG guard and PostgreSQL advice backup at /var/backups/fleet-image-gc-monitoring/20261106T183154Z. Full config SHA256bb782316504885ddcdf9bb1c2148db7e44047849e2a85b882fce0d2618830b7b. Reloaded with main-process SIGHUP only."
+    },
+    {
+      "check": "Actual ingestion and incident routing",
+      "result": "pass",
+      "observed": "Synthetic failed service and expected-but-absent timer matched the actual loaded alert expressions with host/instance/name labels. Both loaded rules healthok. Temporary marker removed and unit reset before alert delays. amtool tested the actual Alertmanager config: both alert families route to fleet-triage and ntfy-warning; no synthetic notification sent."
+    },
+    {
+      "check": "Existing PostgreSQL coverage restored",
+      "result": "pass",
+      "observed": "Four real monitored PostgreSQL17 clusters and the proxy guest PostgreSQL15 were previously dropped by the generic Scanopy systemd guard. Their active-state bits are now ingested; the PostgreSQL18 static target remains covered. Six active cluster series equal1; the existing PostgreSQL not-active/I/O-stall alerts are inactive. Other systemd families remain dropped."
+    },
+    {
+      "check": "Real bounded image canaries",
+      "result": "pass",
+      "observed": "Infer removed2 reviewed recoverable image records;282 running-container IDs/states/image references/restarts and20 protected tags unchanged, used images available and no auth residue. Candidate logical sizes93,366,922bytes; observed root used delta minus54,648,832bytes. MCP removed1 reviewed record;89 containers(80running/9stopped),9 protected tags and every used image unchanged/inspectable, no unhealthy containers/auth residue. Logical30,044,137bytes; root used increased12,288bytes, so no measurable physical reclaim claimed there."
+    },
+    {
+      "check": "Intentional timer enablement",
+      "result": "pass",
+      "observed": "Both timers armed and enabled at18:53:10\u201311UTC. Separate config/state/lock; four repos/hour, ten image IDs/repo, fourteen-day floor,512MiB/128tasks and bounded process-group timeout. Infer first trigger18:53:10; MCP first trigger is delayed fifteen minutes plus up to ten minutes jitter. Initial expected-marker timestamp is preserved on repeated arm."
+    },
+    {
+      "check": "First infer scheduled batch",
+      "result": "pass",
+      "observed": "Real timer18:53:10UTC launched the bounded worker18:53:17\u201318:54:20UTC. Four repositories completed exit0 with no eligible removals, no registry-unavailable refusals and zero batch failures. Cursor advanced to admin-finder. Service Result=success/ExecMainStatus=0, next slot20:03:48UTC. Post-batch282 running/20protectedreferences and all used-image availability remain healthy; no ephemeral auth residue."
+    },
+    {
+      "check": "Intent and trigger ingestion",
+      "result": "pass",
+      "observed": "Both expected-marker timestamps and exact timer-trigger series are ingested under the same host/instance/name labels. Infer trigger1793991190.518336 and MCP trigger1793992678.432307 are nonzero; both GC alerts are healthy/inactive after successful first batches."
+    },
+    {
+      "check": "First MCP scheduled batch",
+      "result": "pass",
+      "observed": "The configured jittered timer naturally launched the worker19:17:59\u201319:18:03UTC. One available repository completed exit0 with zero eligible removals, registry-unavailable refusals and failures. Independent cursor advanced to mcp-site-service; infer cursor remains admin-finder. All89 container IDs/states/image references/restarts(80running/9stopped),9protectedtags and110image records unchanged; every used image inspectable, zero unhealthy/auth residue. ServiceResult=success/ExecMainStatus=0. Both timers remain enabled, next snapshots19:57:59UTC infer and20:24:29UTC MCP (jitter may resample)."
+    },
+    {
+      "check": "Exact-main artifact failure alert extension",
+      "result": "pass",
+      "observed": "PR683 exact head051b73ee470f7fc3a3bede751d2b637671c8c72b passed primary push2385 and PR2386 and merged asa0e84e298c18dc841e448a2fce319e7b8f152c57. Fresh fetch selected that exact source. The three-rule file SHA2569e084d18530cd1be482aa095ac10fbd271fe2414b0f8a55fb87bf8483e4ccd98 and scoped metric relabel guard were installed19:34:54UTC. Full config SHA2569262c105a6c02ea70f4ce544ef34ffd3afeae588c0cc24d9fbfdbce3a46221cc; full promtool validation passes. Backup /var/backups/fleet-image-gc-monitoring/20261106T193454Z. Main-process SIGHUP only; no systemd daemon-reload."
+    },
+    {
+      "check": "Actual artifact unit state and incident routing",
+      "result": "pass",
+      "observed": "The existing unit genuinely failed19:20:22\u201319:20:28UTC after acquiring its lock: the helper refused unreadable process evidence and preserved protected artifacts. No intentional failure or reset was induced. A subsequent real unit run19:30:03\u201319:30:07UTC reports Resultsuccess/ExecMainStatus0/inactive. Its exact builder-disk-gc.service failed-state series is ingested as0 on the actual scheduler host. FleetRunnerArtifactGcFailed, FleetImageGcFailed and FleetImageGcTimerStale all report healthok/inactive. amtool against the loaded Alertmanager configuration routes the artifact alert to fleet-triage+ntfy-warning; no synthetic notification sent."
+    },
+    {
+      "check": "Final artifact cleanup source and preservation proof",
+      "result": "pass",
+      "observed": "Private fleet-state source 52b0ea8a07bae27ae00a9475314c3644d276da36 was deployed as helper SHA256 fd42c9a05e274dbe24aef4584fad06c6a47ea483232dc085fca577013556557b. The genuine builder-disk-gc.service ran 19:40:47\u201319:40:50 UTC with Result=success and ExecMainStatus=0. All 67 reviewed sets / 132 files / 654854749 logical bytes were absent after the initial fail-closed partial run and normal retry; stable process-evidence errors still refuse cleanup. Preservation assertions captured at 19:51:45 UTC before the queued v0.7.763 install found 117 of 118 original protected records byte-identical. The sole comparison difference was a legitimate scheduled drift-executable rotation: original SHA256 9d8408ec1495c220baec1dcb7bf4d1f5c90a3e8eddec5c803af3c283a2f5bf88 (39933738 bytes, source 5e1260d5c963f8b93189cbf0ee076e2444d7fb54, v0.7.761, Go 1.26, vcs.modified=false) remains intact at /usr/local/bin/fleet-runner-drift.bak-selfupdate-20261106T192236Z. Scheduled v761\u2192v762 at 19:22:36 and v762\u2192v763 at 19:38:14\u201319:38:25 explain the path change; artifact cleanup did not alter the original. The fsynced mode-0600 record /var/lib/fleet-runner/runner-artifact-final-preservation-20261106T195145Z.json preserves per-record hashes and the original before-map SHA256 152fd96abf244eb64af138be6d2912fd549039faf5b59428f1da8215ea24492e."
+    },
+    {
+      "check": "Scheduler environment parsing repair and authentication proof",
+      "result": "pass",
+      "observed": "The scheduler units introduced in this rollout incorrectly passed the runner shell bootstrap file to systemd EnvironmentFile parsing. Private fleet-state PR716 merged as 163ff058c475fc8294484864f6105fd77e64b3d6 removes that wiring from both units and retains the runner's own bootstrap loader. Freshly fetched merged-main replay changed zero files; infer unit SHA256 8d784f9a9e6ce21e42da161235dfcd901f7bc2f9191b29dac42fc8c8b846d609 and MCP unit SHA256 e6d1c1fb0be698768f2323f569ec4844c2d9bad02e00f4eeb046e9bae42224e6 match live bytes. Backup /var/backups/fleet-image-gc-env/20261106T200820Z. Both loaded EnvironmentFiles are empty; services report inactive/success/exit0, timers remain enabled/active and expectation timestamps remain 1793991189/1793991190. Authenticated private-registry dry-run codex-image-gc-bootstrap-proof-20261106.service completed at 20:09:49 UTC in the minimal normal root context without EnvironmentFile: exit0, would_remove1, removal_attempts0 and registry_unavailable0. At 20:12:30 UTC, all two new manager entries since 20:08:20 across the units and proof contain zero rejected environment assignments. Historical 24 matching messages were masked and logged through the secret ledger (six unique records); no raw values enter this receipt. No scheduled service restart, cleanup apply, credential rotation or journal deletion was performed for the repair."
+    }
+  ],
+  "evidence_refs": [
+    "config/prometheus/rules/fleet-image-gc.yml",
+    "config/prometheus/rules/fleet-postgres-unit.yml",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus.yml.j2",
+    "tests/promtool/fleet_image_gc_rules_test.yml",
+    "tests/promtool/fleet_postgres_unit_rules_test.yml",
+    "docs/runbooks/fleet-image-gc-monitoring.md"
+  ],
+  "notes": [
+    "Infrastructure-only apply with explicit empty service scope; application deployment dates must not change.",
+    "The broader adopted-rule catalog expectation/CI gate is corrected by the final release integration;97 tests pass with25 host-tool skips. Actual GC and PostgreSQL promtool test suites pass on the monitoring VM.",
+    "Builder logs use the effective500M journald cap. Original infer journal reclaim3,279,482,880bytes is separate from image-canary bytes. The123GB infer and17GB MCP reclaimable figures were prior estimates, not actual reclaimed data. Third-party/local MCP images remain outside this GHCR-only policy.",
+    "A one-off snapshot helper initially reused prior canary snapshot filenames during the first-batch check; corrected separate first-batch paths retain current full snapshots. Original canary apply/dry-run/size manifests and recorded successful check outcomes/hashes remain, but the earlier full before/after container JSON snapshots were overwritten. This affected generated audit evidence only, not production state.",
+    "The delayed timer next-time sample changed within its15\u201325minute activation window; the first short observer expired before the later sample. A full-window observer confirmed the natural successful run. No manual whole-batch start or timer timing change occurred.",
+    "The earlier 19:30 unit run was recorded before final helper provenance was established. The later final artifact verification above records the independently verified helper source, genuine run and timestamped preservation exception; no cleanup failure was hidden by a reset.",
+    "Final release validation passes 108 focused tests with 25 host-tool skips on the Mac. All 19 publisher capture regressions pass in an isolated checkout without private config. Ancestor/root symlinks, resolved containment, hard links, direct source writes and case-insensitive source aliases are rejected without changing outside bytes; the case-alias test skips on case-sensitive filesystems."
+  ]
+}

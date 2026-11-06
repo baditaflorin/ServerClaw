@@ -1,0 +1,71 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-11-06-retention-mainline-live-apply",
+  "applied_on": "2026-11-06",
+  "recorded_on": "2026-11-06",
+  "recorded_by": "codex",
+  "source_commit": "bdf914506728be8c6a81013b472864552161f126",
+  "repo_version_context": "0.179.53",
+  "workflow_id": "adr-0226-retention-mainline-live-apply",
+  "adr": "0226",
+  "service_ids": [],
+  "summary": "Replayed the merged journal-retention helper and production Docker logrotate policy from main bdf9145 after PR678 passed both Woodpecker pipelines. Recorded platform version 0.179.57 only after this exact-main verification.",
+  "targets": [
+    {
+      "kind": "bare-metal",
+      "name": "proxmox-host"
+    },
+    {
+      "kind": "vm",
+      "name": "infer-runtime",
+      "vmid": "703"
+    },
+    {
+      "kind": "vm",
+      "name": "docker-prod",
+      "vmid": "101"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Exact main and CI",
+      "result": "pass",
+      "observed": "Fresh fetch selected bdf914506728be8c6a81013b472864552161f126, the squash merge of PR678. Exact feature head eda1cdff7631dfadd766d50b658754ba4cd25b3c passed push pipeline2346 and PR pipeline2347. Final fleet regression group: 1393 passed, 16 skipped."
+    },
+    {
+      "check": "Proxmox journal replay",
+      "result": "pass",
+      "observed": "At 2026-11-06T16:50:21Z the merged playbooks/journal-retention.yml ran against the Proxmox host: ok=4, changed=0, failed=0. Journald active, restart skipped because the desired file was already installed."
+    },
+    {
+      "check": "Production Docker rotation replay",
+      "result": "pass",
+      "observed": "At 2026-11-06T16:50:26Z the merged config/0docker/docker-prod-logrotate/apply.yml ran against VM101: ok=3, changed=0, failed=0. Combined full-system logrotate debug passed and the daily timer remained active."
+    },
+    {
+      "check": "Inference runtime exact-main file",
+      "result": "pass",
+      "observed": "At 2026-11-06T16:51:19Z the common template rendered from main was compared through the Proxmox QEMU guest agent. Only the provenance comment differed from the earlier equivalent manual apply; the old file was backed up at /var/backups/fleet-journald/20261106T165119Z/ and the exact file installed. Journald restarted successfully, active, journal usage 992.6 MiB."
+    },
+    {
+      "check": "Journal file hash matches source and both machines",
+      "result": "pass",
+      "observed": "SHA-256 a9dcd85e2f47607dee6ab008eee1228ea5e8120610884f5c84c863c3e803ec77 is the main template rendered with its defaults and operator provenance, the Proxmox host file, and the VM703 file."
+    }
+  ],
+  "evidence_refs": [
+    "playbooks/journal-retention.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/tasks/journal_retention.yml",
+    "collections/ansible_collections/lv3/platform/roles/common/templates/journal-retention.conf.j2",
+    "config/0docker/docker-prod-logrotate/apply.yml",
+    "config/0docker/docker-prod-logrotate/fleet-defaults.conf",
+    "receipts/live-applies/2026-11-06-bounded-journal-retention-live-apply.json",
+    "receipts/live-applies/2026-11-06-docker-prod-logrotate-live-apply.json"
+  ],
+  "notes": [
+    "Initial live-first backups and reclaimed capacity are recorded in the two earlier receipts. No application image, data volume or database was changed.",
+    "This is an infrastructure-only apply with explicit empty service scope; it must not refresh application deployment dates.",
+    "Sanitized publication dry-run from main passed the leak check after installing the missing local uv tool in the task venv."
+  ]
+}

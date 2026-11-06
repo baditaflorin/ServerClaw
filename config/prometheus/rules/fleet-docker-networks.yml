@@ -1,0 +1,70 @@
+# Added 2026-10-29. Every bridge network takes one subnet from the Docker daemon's address pools; when they run out, every new network on
+# that host fails ("could not find an available, non-overlapping IPv4 address pool among the defaults"). On 2026-10-28 that stopped every
+# Woodpecker workflow on agent 110 (infer-builder-ci): agents that lose their Docker socket or are killed leave their per-workflow network
+# `wp_<ulid>_<n>_default` behind, and with Docker's built-in pools (31 subnets) about 30 leaked networks are enough.
+# The numbers come from fleet-state scripts/docker-network-gc.py (systemd timer every 30 minutes on every Docker host listed in
+# fleet-state scripts/docker-network-gc.hosts), which also removes leaked Woodpecker networks that are empty and older than 6 hours, and
+# writes docker_network_gc.prom into the node-exporter textfile directory. It runs on 23 hosts, 21 of them scraped (infer-runtime and
+# 0mcp-staging-runtime have no node_exporter target; coolify-apps-lv3 is left out: its exporter is a container without a textfile mount).
+# A newly scraped Docker host must be added to the count in DockerNetworkGcHostsMissing and its unit test. `max by (host)` merges the duplicate series an exporter restart leaves.
+groups:
+  - name: fleet_docker_networks
+    rules:
+      - alert: DockerNetworkPoolNearlyFull
+        expr: >-
+          max by (host) (docker_network_pool_capacity_subnets - docker_network_pool_used_subnets) < 5
+        for: 5m
+        labels:
+          severity: warning
+          service: fleet_docker_networks
+        annotations:
+          summary: "{{ $labels.host }} has fewer than 5 Docker network subnets left"
+          description: "Only {{ $value }} subnets are left in the Docker address pools of {{ $labels.host }}; at 0 every new network (each Woodpecker workflow, each compose project) fails. Look for leaked `wp_*_default` networks younger than the 6 h age floor (`docker network ls`), remove the empty ones by hand, and move the host to larger `default-address-pools`."
+          runbook_url: docs/runbooks/fleet-observability.md#docker-network-pool-alerts
+
+      - alert: DockerNetworkPoolExhausted
+        expr: >-
+          max by (host) (docker_network_pool_used_subnets - docker_network_pool_capacity_subnets) >= 0
+        for: 1m
+        labels:
+          severity: critical
+          service: fleet_docker_networks
+        annotations:
+          summary: "{{ $labels.host }} has no Docker network subnet left"
+          description: "The Docker address pools of {{ $labels.host }} are full: every new network fails, so every Woodpecker workflow on its agents fails at once. Remove empty `wp_*_default` networks by hand now (never `docker network prune` on a runtime host), then move the host to larger `default-address-pools`."
+          runbook_url: docs/runbooks/fleet-observability.md#docker-network-pool-alerts
+
+      - alert: DockerNetworkGcStale
+        expr: >-
+          time() - max by (host) (docker_network_gc_last_success_timestamp_seconds) > 3 * 3600
+        for: 10m
+        labels:
+          severity: warning
+          service: fleet_docker_networks
+        annotations:
+          summary: "docker-network-gc has not completed on {{ $labels.host }} for 3 hours"
+          description: "The timer runs every 30 minutes; the last run that could read Docker on {{ $labels.host }} was {{ $value | humanizeDuration }} ago, so leaked networks pile up and the pool numbers are stale. `systemctl status docker-network-gc.timer docker-network-gc.service` and `journalctl -u docker-network-gc` on the host."
+          runbook_url: docs/runbooks/fleet-observability.md#docker-network-pool-alerts
+
+      - alert: DockerNetworkGcHostsMissing
+        expr: >-
+          count(max by (host) (docker_network_gc_last_success_timestamp_seconds)) < 21
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_docker_networks
+        annotations:
+          summary: "Fewer than 21 Docker hosts report docker-network-gc metrics"
+          description: "Only {{ $value }} of the 21 scraped Docker hosts expose docker_network_gc_*, so DockerNetworkPoolNearlyFull is blind for the others. Run `scripts/install-docker-network-gc.sh status --all` from a fleet-state checkout."
+          runbook_url: docs/runbooks/fleet-observability.md#docker-network-pool-alerts
+
+      - alert: DockerNetworkGcHostsMissingNone
+        expr: absent(docker_network_gc_last_success_timestamp_seconds)
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_docker_networks
+        annotations:
+          summary: "No Docker host reports docker-network-gc metrics"
+          description: "No series docker_network_gc_last_success_timestamp_seconds at all (count() of nothing returns nothing, so DockerNetworkGcHostsMissing cannot fire). Run `scripts/install-docker-network-gc.sh status --all` from a fleet-state checkout."
+          runbook_url: docs/runbooks/fleet-observability.md#docker-network-pool-alerts

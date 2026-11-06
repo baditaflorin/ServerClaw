@@ -1,0 +1,13 @@
+[Unit]
+Description=Network policy drift check: every 30 minutes
+
+[Timer]
+# OnBootSec + OnUnitInactiveSec, not OnActiveSec (no anchor after a boot, re-based on every daemon-reload). OnUnitInactiveSec needs the
+# unit to have run once: the installer starts the service after `enable --now`.
+OnBootSec=8min
+OnUnitInactiveSec=30min
+RandomizedDelaySec=60
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

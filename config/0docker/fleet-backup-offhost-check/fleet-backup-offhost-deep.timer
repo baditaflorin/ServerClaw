@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily deep check of the off-host backup copy (12:20Z: after the 06:00Z end of the backup window, clear of the 17:38Z host backup and the 22:00Z GC)
+
+[Timer]
+OnCalendar=*-*-* 12:20:00 UTC
+RandomizedDelaySec=10min
+AccuracySec=1min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

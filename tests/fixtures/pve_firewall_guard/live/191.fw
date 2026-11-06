@@ -1,0 +1,19 @@
+[OPTIONS]
+enable: 1
+policy_in: DROP
+policy_out: ACCEPT
+
+[RULES]
+# hand-authored: Prometheus scrape of node_exporter
+IN ACCEPT -source 10.10.10.14/32 -p tcp -dport 9100 # prometheus
+# hand-authored: ssh tunnel to the shared Postgres
+IN ACCEPT -source 10.10.10.54/32 -p tcp -dport 22
+# AUTO-MIGRATED from the guest nftables policy
+IN ACCEPT -source 10.10.10.20/32 -p tcp -dport 18021
+IN ACCEPT -source 10.10.10.21/32 -p tcp -dport 18021
+|IN ACCEPT -source 10.10.10.22/32 -p tcp -dport 18021
+# BEGIN fleet-pool-fw
+IN ACCEPT -source 10.10.10.30/32 -p tcp -dport 8443
+IN ACCEPT -source 10.10.10.31/32 -p tcp -dport 8443
+# END fleet-pool-fw
+IN ACCEPT -p tcp -dport 443

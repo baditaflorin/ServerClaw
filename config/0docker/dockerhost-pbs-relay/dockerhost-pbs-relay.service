@@ -1,0 +1,14 @@
+[Unit]
+Description=Relay Docker host (VM100) -> own-pbs :8007 through this hypervisor's direct tailnet path (nft table dockerhost_pbs_relay)
+After=network-online.target tailscaled.service fleet-lockdown.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-/usr/sbin/nft delete table ip dockerhost_pbs_relay
+ExecStart=/usr/sbin/nft -f /etc/nftables/dockerhost-pbs-relay.nft
+ExecStop=-/usr/sbin/nft delete table ip dockerhost_pbs_relay
+
+[Install]
+WantedBy=multi-user.target

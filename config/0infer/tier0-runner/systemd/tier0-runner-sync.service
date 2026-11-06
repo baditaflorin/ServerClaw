@@ -1,0 +1,9 @@
+[Unit]
+Description=Tier-0 runner: sync fleet-state master (read-only deploy key), roll back a commit whose scripts do not parse
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/tier0-runner-sync
+TimeoutStartSec=300
+Nice=10

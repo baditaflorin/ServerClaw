@@ -1,0 +1,1346 @@
+# Host-local OS configuration under version control: the files that must exist on a host, and the setting each one has to produce.
+# Edit this file and config/hostconf/files/ in a PR; scripts/hostconf.py drift tells how the live hosts differ, scripts/hostconf.py apply
+# writes the files (reload only, never a restart). README.md in this directory says how to add a file or a host.
+#
+# files: the catalog. dest is where the file goes on the host (only systemd drop-ins, /etc/sysctl.d/NN-*.conf and Postgres conf.d/NN-*.conf are
+#        possible), src is the content under files/, purpose says why it exists, expect is the effective setting that proves it works
+#        (systemctl show, sysctl -n, Postgres SHOW). mode/owner/group default to 0644 root:root.
+# hosts: id -> ssh alias, the name `hostname` prints there (apply refuses another machine), and the catalog ids the host carries (none is fine when only the baseline
+#        applies to it). `sudo: false` for a host where the ssh user is root and there is no sudo.
+# baseline: floors EVERY host in this file must meet, checked by `drift` whether or not the host carries a file. A host already above a floor carries nothing (a file
+#        with a fixed value would lower it); a host below it gets the `fix` catalog file listed. Every machine of the fleet belongs in `hosts`: add a new VM here when it is created.
+version: 1
+
+baseline:
+  - {sysctl_min: kernel.threads-max, value: "131072", fix: sysctl-hotplug-threads-max}
+
+# inventory: the hypervisors whose VMs and containers `drift --all` lists. A guest that is neither a host above (`vm:` names it) nor exempt here is reported as UNMANAGED, so a machine
+# created by hand (a clone of a template, a restore) is noticed instead of keeping a default nobody looked at.
+inventory:
+  hypervisors: [pve-0mcp, pve-0infer, bastion, pve-0own, pve-0pipe]
+  exempt:
+    - {hypervisor: pve-0mcp, id: 9109, why: "outline-restore-canary, a stopped LXC container for the Outline restore drill; a container shares the hypervisor's kernel limits, which the baseline checks"}
+    - {hypervisor: pve-0infer, id: 8101, why: "standby-docker-prod, a stopped standby copy of docker-prod restored from PBS#2 (never started by hand); its limit comes from docker-prod's disk and is checked the next time it runs"}
+
+files:
+  nginx-restart-policy.webgateway:
+    dest: /etc/systemd/system/nginx.service.d/override.conf
+    src: nginx-restart-policy.webgateway.conf
+    purpose: >-
+      nginx on the 0docker gateway VM (VM104) restarts when it dies and is not stopped as a whole when the kernel OOM-kills one worker.
+      Added after the 2026-10-12 14:45Z outage (69 workers, Restart=no and the default OOMPolicy=stop kept the public edge down).
+    expect:
+      - {systemd: nginx.service, property: Restart, value: on-failure}
+      - {systemd: nginx.service, property: OOMPolicy, value: continue}
+  nginx-restart-policy.nginx-lv3:
+    dest: /etc/systemd/system/nginx.service.d/override.conf
+    src: nginx-restart-policy.nginx-lv3.conf
+    purpose: >-
+      The same restart policy for nginx on the 0mcp gateway VM (nginx-lv3), which had Restart=no and OOMPolicy=stop like the 0docker gateway did
+      before its 2026-10-12 outage. Found by the restart-policy scan of 2026-10-19.
+    expect:
+      - {systemd: nginx.service, property: Restart, value: on-failure}
+      - {systemd: nginx.service, property: OOMPolicy, value: continue}
+  nginx-restart-policy.bastion:
+    dest: /etc/systemd/system/nginx.service.d/override.conf
+    src: nginx-restart-policy.bastion.conf
+    purpose: >-
+      The same restart policy for nginx on the 0docker hypervisor, which carries 443 and the SSH jump ports 11022-11025 into every 0docker VM:
+      if it died, every unattended ssh path into them would be gone. Found by the restart-policy scan of 2026-10-19.
+    expect:
+      - {systemd: nginx.service, property: Restart, value: on-failure}
+      - {systemd: nginx.service, property: OOMPolicy, value: continue}
+
+  user-0-slice-memory.0docker-builder:
+    dest: /etc/systemd/system/user-0.slice.d/50-memory.conf
+    src: user-0-slice-memory.0docker-builder.conf
+    purpose: >-
+      Everything started through ssh as root on the Builder (CT108) shares 6 GiB and no swap, so a runaway `go test` (a mutation run reached 9.6 GB
+      on 2026-10-21 and took the 0docker hypervisor into swap, load 257) dies inside the container. The fleet's services (system.slice) and the CI
+      step containers (docker, limited per step by the agents) are not in this slice.
+    expect:
+      - {systemd: user-0.slice, property: MemoryHigh, value: "5368709120"}
+      - {systemd: user-0.slice, property: MemoryMax, value: "6442450944"}
+      - {systemd: user-0.slice, property: MemorySwapMax, value: "0"}
+
+  postgresql-oom-policy.infer-pg-primary:
+    dest: /etc/systemd/system/postgresql@18-main.service.d/20-oom-policy.conf
+    src: postgresql-oom-policy.infer-pg-primary.conf
+    purpose: >-
+      The production DomainScope Postgres (VM701) keeps running when the kernel OOM-kills one of its processes: the postmaster crash-recovers in
+      about a minute instead of systemd stopping the whole unit (OOMPolicy=stop with Restart=no kept it down 21 minutes on 2026-10-19 11:31Z).
+    expect:
+      - {systemd: postgresql@18-main.service, property: OOMPolicy, value: continue}
+  postgresql-oom-policy.postgres-lv3:
+    dest: /etc/systemd/system/postgresql@17-main.service.d/20-oom-policy.conf
+    src: postgresql-oom-policy.postgres-lv3.conf
+    purpose: >-
+      The same OOMPolicy=continue for PostgreSQL 17 on the 0mcp database VM (postgres-lv3), found by the restart-policy scan of 2026-10-19.
+    expect:
+      - {systemd: postgresql@17-main.service, property: OOMPolicy, value: continue}
+
+  postgresql-after-tailscale.infer-pg-primary:
+    dest: /etc/systemd/system/postgresql@18-main.service.d/10-after-tailscale.conf
+    src: postgresql-after-tailscale.infer-pg-primary.conf
+    purpose: >-
+      The production DomainScope Postgres listens on its tailnet address (100.64.0.22): start it after tailscaled has assigned it, because
+      Postgres only warns about an address it cannot bind and would silently not serve the tailnet. Added by the 2026-10-17 cutover.
+    expect:
+      - {systemd: postgresql@18-main.service, property: After, contains: tailscaled.service}
+
+  postgresql-log-connections.infer-pg-primary:
+    dest: /etc/postgresql/18/main/conf.d/97-log-connections.conf
+    src: postgresql-log-connections.infer-pg-primary.conf
+    mode: "0640"
+    group: postgres
+    purpose: >-
+      The production DomainScope Postgres logs every connection and its authorization, so the source of a burst of new connections (about 125 in
+      15 s killed it on 2026-10-19 11:31Z) can be traced afterwards. Was an ALTER SYSTEM in postgresql.auto.conf, which no file or review showed.
+    expect:
+      - {pg_setting: log_connections, cluster: "18/main", value: "receipt,authorization"}
+
+  postgresql-temp-files-log.infer-pg-primary:
+    dest: /etc/postgresql/18/main/conf.d/98-temp-files-log.conf
+    src: postgresql-temp-files-log.infer-pg-primary.conf
+    mode: "0640"
+    group: postgres
+    purpose: >-
+      The production DomainScope Postgres (VM701) logs every temporary file of 64 MB or more with its size and the statement (ADR 0495, amendment of 2026-11-04). pg_stat_database counts 612 GB of
+      temporary files (3,540 files, 177 MB on average) since 2026-10-31, but pg_stat_statements attributes only 3.8 GB: its table holds 5,000 entries and evicts (2,000+ deallocations), so the
+      statements behind the spills are unknown. log_temp_files is -1 (off) today and not in postgresql.auto.conf, so nothing shadows this file and a plain `hostconf.py apply` works (reload only, no
+      restart). Expected volume: about ten to a few tens of log lines an hour, hundreds in a busy evening. Rollback: remove the file.
+    expect:
+      - {pg_setting: log_temp_files, cluster: "18/main", value: "64MB"}
+  postgresql-parallel-guardrails.infer-pg-primary:
+    dest: /etc/postgresql/18/main/conf.d/98-parallel-guardrails.conf
+    src: postgresql-parallel-guardrails.infer-pg-primary.conf
+    mode: "0640"
+    group: postgres
+    purpose: >-
+      Bounds the shared memory that parallel queries of the production DomainScope Postgres (VM701) can take: at most 12 workers in total (was 24), 4 per gather (S1 set 2 on 2026-11-01 and the
+      24 h acceptance reverted that knob: SELECT COUNT(*) FROM mv_domains_denormalized went from 0.42 s to 0.62 s, workers per call 3.94 -> 1.97), and 150 GB of temporary files per process (was
+      unlimited). With 12 workers at most 3 gathers of 4 run at once: 128 MiB x 2 x 5 = 1.25 GiB per parallel hash node for the role domainscope_app, 3.75 GiB of /dev/shm in all, under the 10 GiB
+      cap (ADR 0495, amendment of 2026-11-02). Added after the 2026-10-31 01:25Z global OOM, when parallel-query dynamic shared memory (/dev/shm) grew 24.5 GiB beyond the main segment in one
+      scrape interval and the kernel killed nine postgres processes. Before the S1 apply of 2026-11-01 the two worker limits were ALTER SYSTEM values in postgresql.auto.conf (temp_file_limit was at its
+      default), and postgresql.auto.conf overrides conf.d: the apply runbook (docs/runbooks/host-local-config.md) must run ALTER SYSTEM RESET on each name after the file is written, as for
+      97-log-connections, or this file is shadowed and `drift` reports the setting not in effect.
+    expect:
+      - {pg_setting: max_parallel_workers_per_gather, cluster: "18/main", value: "4"}
+      - {pg_setting: max_parallel_workers, cluster: "18/main", value: "12"}
+      - {pg_setting: temp_file_limit, cluster: "18/main", value: "150GB"}
+  postgresql-work-mem-guardrails.infer-pg-primary:
+    dest: /etc/postgresql/18/main/conf.d/98-work-mem-guardrails.conf
+    src: postgresql-work-mem-guardrails.infer-pg-primary.conf
+    mode: "0640"
+    group: postgres
+    purpose: >-
+      The global work_mem of the production DomainScope Postgres (VM701) goes from 256 MB to 64 MB, so one parallel hash node (work_mem x hash_mem_multiplier x workers + 1) stops
+      reaching 2.5 GiB (5.0 GiB for the role that carries 512 MB) in each of 6 simultaneous gathers. Added after the 2026-10-31 01:25Z global OOM (parallel-query shared memory, ADR 0495).
+      A file of its own because it is applied 30 minutes after 98-parallel-guardrails.conf, so a regression is attributable to one knob. work_mem is an ALTER SYSTEM value in
+      postgresql.auto.conf today, which overrides conf.d: the apply runbook (docs/runbooks/host-local-config.md) must run ALTER SYSTEM RESET work_mem after the file is written, as for
+      97-log-connections, or this file is shadowed and `drift` reports the setting not in effect.
+    expect:
+      - {pg_setting: work_mem, cluster: "18/main", value: "64MB"}
+  postgresql-huge-pages.infer-pg-primary:
+    dest: /etc/postgresql/18/main/conf.d/99-huge-pages.conf
+    src: postgresql-huge-pages.infer-pg-primary.conf
+    mode: "0640"
+    group: postgres
+    purpose: >-
+      The production DomainScope Postgres (VM701) starts with huge_pages = on, so it refuses to start when the pages reserved by sysctl-postgres-hugepages.infer-pg-primary are not there
+      instead of silently running on 4 kB pages (ADR 0495, S2, applied in a maintenance window, planned 2026-11-04, 11:00-12:00Z (any day 11:00-13:00Z once S1c has run 24 h)). huge_pages needs a RESTART: a reload leaves the running value at try
+      (pending_restart), hostconf never restarts, and `apply` reads the setting back right after the reload, finds try, puts the file back and exits 5. So the file is applied after the
+      restart, once SHOW already says on, with the value seeded by ALTER SYSTEM before the stop and reset afterwards (docs/runbooks/host-local-config.md, "Huge pages for infer-pg-primary").
+      Until then `drift` reports it missing and the setting not in effect.
+    expect:
+      - {pg_setting: huge_pages, cluster: "18/main", value: "on"}
+  postgresql-pgss-max.infer-pg-primary:
+    dest: /etc/postgresql/18/main/conf.d/99-pgss-max.conf
+    src: postgresql-pgss-max.infer-pg-primary.conf
+    mode: "0640"
+    group: postgres
+    purpose: >-
+      pg_stat_statements.max goes from 5000 to 20000 on the production DomainScope Postgres (VM701), riding on the restart of the huge-pages window (ADR 0495): the 5,000-entry table evicts (2,000+
+      deallocations since 2026-10-31), so pg_stat_statements attributes only 3.8 GB of the 612 GB of temporary files that pg_stat_database counts. It costs about 6 MB of shared memory, inside the
+      172-page margin of the huge-pages reservation. pg_stat_statements.max needs a RESTART: a reload leaves the running value at 5000 (pending_restart), hostconf never restarts, and `apply` reads
+      the setting back right after the reload, finds 5000, puts the file back and exits 5. So the value is seeded with ALTER SYSTEM before the stop, this file is applied after the start (SHOW says
+      20000) and the seed is reset, exactly as for huge_pages (docs/runbooks/host-local-config.md, "Huge pages for infer-pg-primary"). Until then `drift` reports it missing and the setting not in effect.
+    expect:
+      - {pg_setting: pg_stat_statements.max, cluster: "18/main", value: "20000"}
+
+
+  sysctl-pg-swap.infer-pg-primary:
+    dest: /etc/sysctl.d/91-pg-swap.conf
+    src: sysctl-pg-swap.infer-pg-primary.conf
+    purpose: >-
+      vm.swappiness=10 on the production DomainScope Postgres VM (VM701), which got a 16 GiB swapfile on its ROOT disk (/dev/sda1, not the database disk /dev/sdb)
+      on 2026-10-31 13:27Z after the 01:25Z global OOM: shared memory that the kernel cannot reclaim can now be swapped instead of killing postgres backends, and a low
+      swappiness keeps ordinary page cache and anonymous memory from being swapped for nothing. The swapfile itself is not a managed file (the tool writes drop-ins only); a
+      rebuilt VM needs, as root: `fallocate -l 16G /swapfile && chmod 600 /swapfile && mkswap -L pgswap /swapfile && swapon /swapfile` and the line
+      `/swapfile none swap sw,pri=10 0 0` in /etc/fstab, only when the root disk has at least 36 GiB free. Watch it with the hub alerts PgPrimarySwapUsed (over 1 GiB for 5
+      minutes), PgPrimarySwapIn and PgPrimarySwapAlmostFull (go-fleet-metrics-hub 0.1.17).
+    expect:
+      - {sysctl: vm.swappiness, value: "10"}
+
+  sysctl-hotplug-threads-max:
+    dest: /etc/sysctl.d/90-memory-hotplug-threads.conf
+    src: sysctl-hotplug-threads-max.conf
+    purpose: >-
+      The floor of 131072 threads for VMs that boot below it. VMs whose memory is hot-plugged get kernel.threads-max from the memory the kernel sees at boot (about 1 GB: about 7000
+      threads), not from their real size: a container start storm after the 2026-10-19 17:28Z reboot of infer-runtime hit that limit (fork and pthread_create returned EAGAIN and 22 containers
+      ran without a network endpoint). The small 0own VMs (31k-95k, sized from 2-8 GB of RAM) get the same floor. A host that boots above it (hypervisors, big VMs) carries no file, because a fixed
+      value would lower it; the baseline checks those.
+    expect:
+      - {sysctl: kernel.threads-max, value: "131072"}
+  sysctl-postgres-hugepages.infer-pg-primary:
+    dest: /etc/sysctl.d/91-postgres-hugepages.conf
+    src: sysctl-postgres-hugepages.infer-pg-primary.conf
+    purpose: >-
+      Reserves 12800 huge pages (25.0 GiB; the segment needs 12628, 172 pages = 344 MiB of margin) for the shared memory of the production DomainScope Postgres (VM701), which takes the
+      page tables of its 140 processes from 3.7 GiB to about 0.02 GiB (ADR 0495, S2, applied in a maintenance window, planned 2026-11-04, 11:00-12:00Z (any day 11:00-13:00Z once S1c has run 24 h)). `apply` of a sysctl file runs `sysctl -p` at once: apply it ONLY
+      with Postgres stopped (reserving while it runs counts the 24.6 GiB segment twice and evicts the page cache). A short reservation is reported by `apply` as the setting not in effect: it puts
+      the file and the old page count back and exits 5. Ballooning must stay off while the pages are reserved (balloon = memory on VM701). Until applied, `drift` reports it missing.
+    expect:
+      - {sysctl: vm.nr_hugepages, value: "12800"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-coolify:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-coolify.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-coolify.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-coolify.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-gitea:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-gitea.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-gitea.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-gitea.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-matrix-synapse:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-matrix-synapse.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-matrix-synapse.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-matrix-synapse.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-mattermost:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-mattermost.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-mattermost.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-mattermost.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-netbox:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-netbox.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-netbox.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-netbox.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-nomad:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-nomad.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-nomad.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-nomad.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-ntopng:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-ntopng.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-ntopng.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-ntopng.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-openbao:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-openbao.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-openbao.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-openbao.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-openfga:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-openfga.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-openfga.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-openfga.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-plane:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-plane.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-plane.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-plane.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-platform-context-api:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-platform-context-api.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-platform-context-api.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-platform-context-api.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-portainer:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-portainer.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-portainer.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-portainer.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-postgres:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-postgres.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-postgres.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-postgres.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-semaphore:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-semaphore.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-semaphore.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-semaphore.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-step-ca:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-step-ca.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-step-ca.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-step-ca.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-typesense:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-typesense.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-typesense.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-typesense.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-vaultwarden:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-vaultwarden.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-vaultwarden.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-vaultwarden.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-windmill:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-windmill.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-windmill.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-windmill.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.lv3-tailscale-proxy-woodpecker:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-woodpecker.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-woodpecker.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: lv3-tailscale-proxy-woodpecker.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.woodpecker-0exec-build-metrics-proxy:
+    dest: /etc/systemd/system/woodpecker-0exec-build-metrics-proxy.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket woodpecker-0exec-build-metrics-proxy.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: woodpecker-0exec-build-metrics-proxy.socket, property: DefaultDependencies, value: "no"}
+
+  socket-no-default-deps.zmcp-runtime-general-metrics-proxy:
+    dest: /etc/systemd/system/zmcp-runtime-general-metrics-proxy.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket zmcp-runtime-general-metrics-proxy.socket is no longer ordered Before=sockets.target: it is also
+      After=tailscaled.service, and tailscaled starts after sockets.target, an ordering cycle that made systemd delete start jobs (the proxy sockets and
+      tailscaled itself) at the 2026-10-13 reboots.
+    expect:
+      - {systemd: zmcp-runtime-general-metrics-proxy.socket, property: DefaultDependencies, value: "no"}
+
+  socket-free-bind.lv3-tailscale-proxy-coolify:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-coolify.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-coolify.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-coolify.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-gitea:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-gitea.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-gitea.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-gitea.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-matrix-synapse:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-matrix-synapse.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-matrix-synapse.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-matrix-synapse.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-mattermost:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-mattermost.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-mattermost.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-mattermost.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-netbox:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-netbox.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-netbox.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-netbox.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-nomad:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-nomad.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-nomad.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-nomad.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-ntopng:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-ntopng.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-ntopng.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-ntopng.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-openbao:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-openbao.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-openbao.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-openbao.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-openfga:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-openfga.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-openfga.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-openfga.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-plane:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-plane.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-plane.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-plane.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-platform-context-api:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-platform-context-api.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-platform-context-api.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-platform-context-api.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-portainer:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-portainer.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-portainer.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-portainer.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-postgres:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-postgres.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-postgres.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-postgres.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-semaphore:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-semaphore.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-semaphore.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-semaphore.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-step-ca:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-step-ca.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-step-ca.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-step-ca.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-typesense:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-typesense.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-typesense.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-typesense.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-vaultwarden:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-vaultwarden.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-vaultwarden.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-vaultwarden.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-windmill:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-windmill.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-windmill.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-windmill.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.lv3-tailscale-proxy-woodpecker:
+    dest: /etc/systemd/system/lv3-tailscale-proxy-woodpecker.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket lv3-tailscale-proxy-woodpecker.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: lv3-tailscale-proxy-woodpecker.socket, property: FreeBind, value: "yes"}
+
+  socket-free-bind.zmcp-runtime-general-metrics-proxy:
+    dest: /etc/systemd/system/zmcp-runtime-general-metrics-proxy.socket.d/20-free-bind.conf
+    src: socket-free-bind.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet proxy socket zmcp-runtime-general-metrics-proxy.socket binds even when tailscale0 has no address yet (FreeBind=true). Without it a tailscaled restart
+      (the 2026-11-02 12:33 self-update) left the bind failing with "Cannot assign requested address" and the socket dead until someone started it by hand.
+    expect:
+      - {systemd: zmcp-runtime-general-metrics-proxy.socket, property: FreeBind, value: "yes"}
+
+  tailscale0-wants-lv3-proxies:
+    dest: /etc/systemd/system/sys-subsystem-net-devices-tailscale0.device.d/10-wants-lv3-tailscale-proxies.conf
+    src: tailscale0-wants-lv3-proxies.0mcp.conf
+    purpose: >-
+      The 0mcp hypervisor's tailnet device tailscale0 Wants= all 19 lv3-tailscale-proxy-*.socket and the two node-exporter proxy sockets, so each is started again when the device comes back. They listen with
+      BindToDevice=tailscale0, so systemd stops them with the device and the automatic start fails ("Bound to unit sys-subsystem-net-devices-tailscale0.device, but
+      unit isn't active") because tailscaled reports started before it has created the device: on 2026-11-02 12:33 (tailscaled updated itself) that left OpenBao, Postgres,
+      Vaultwarden, Gitea, Woodpecker and 14 more proxies dead for 8 hours. Needs socket-free-bind (the device appears before it has its address).
+    expect:
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-coolify.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-gitea.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-matrix-synapse.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-mattermost.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-netbox.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-nomad.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-ntopng.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-openbao.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-openfga.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-plane.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-platform-context-api.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-portainer.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-postgres.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-semaphore.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-step-ca.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-typesense.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-vaultwarden.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-windmill.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: lv3-tailscale-proxy-woodpecker.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: woodpecker-0exec-build-metrics-proxy.socket}
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: zmcp-runtime-general-metrics-proxy.socket}
+
+  socket-no-default-deps.woodpecker-exec-proxy:
+    dest: /etc/systemd/system/woodpecker-exec-proxy@.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0docker.conf
+    purpose: >-
+      The 0docker hypervisor's tailnet proxy socket woodpecker-exec-proxy@.socket is no longer ordered Before=sockets.target (After=tailscaled.service made
+      an ordering cycle): at the 2026-10-13 12:39 reboot systemd deleted the sockets and tailscaled itself and the host came up without the tailnet proxies.
+    expect:
+      - {systemd: woodpecker-exec-proxy@9100.socket, property: DefaultDependencies, value: "no"}
+
+  woodpecker-exec-proxy-follows-tailscale0:
+    dest: /etc/systemd/system/sys-subsystem-net-devices-tailscale0.device.d/10-wants-woodpecker-exec-proxy.conf
+    src: woodpecker-exec-proxy-follows-tailscale0.0docker.conf
+    purpose: >-
+      The 0docker hypervisor's tailnet device tailscale0 Wants=woodpecker-exec-proxy@9000.socket, so that the socket is started again when the device comes back.
+      The socket is bound to the device, systemd stops it when the device goes away, and nothing started it again: on 2026-11-02 a tailscale0 flap left
+      every Woodpecker agent refused on 100.64.0.5:9000 and the CI plane (ci.0exec.com) down for 71 minutes while its web API stayed up.
+    expect:
+      # contains, not value: the second device drop-in (tailscale0-wants-zdocker-metrics-proxy) adds a name to the same Wants= list
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: woodpecker-exec-proxy@9000.socket}
+
+  socket-free-bind.woodpecker-exec-proxy:
+    dest: /etc/systemd/system/woodpecker-exec-proxy@.socket.d/20-free-bind.conf
+    src: socket-free-bind.0docker.conf
+    purpose: >-
+      The 0docker hypervisor's tailnet proxy socket woodpecker-exec-proxy@.socket (every instance; 9000 is the Woodpecker agent path) binds even when tailscale0 has no address yet
+      (FreeBind=true). The device drop-in woodpecker-exec-proxy-follows-tailscale0 starts the socket when tailscale0 comes back, and tailscale0 appears about 0.3 s before it has its
+      address: without FreeBind that start fails with "Cannot assign requested address" and the socket stays dead after a tailscaled restart (the 2026-11-02 12:34:59 self-update left the
+      CI plane down for 71 minutes). Needs woodpecker-exec-proxy-follows-tailscale0.
+    expect:
+      - {systemd: woodpecker-exec-proxy@9000.socket, property: FreeBind, value: "yes"}
+
+  socket-no-default-deps.zdocker-hypervisor-metrics-proxy:
+    dest: /etc/systemd/system/zdocker-hypervisor-metrics-proxy.socket.d/10-no-default-deps.conf
+    src: socket-no-default-deps.0docker.conf
+    purpose: >-
+      The 0docker hypervisor's tailnet proxy socket zdocker-hypervisor-metrics-proxy.socket is no longer ordered Before=sockets.target
+      (After=tailscaled.service made an ordering cycle): at the 2026-10-13 12:39 reboot systemd deleted the sockets and tailscaled itself and the host came
+      up without the tailnet proxies.
+    expect:
+      - {systemd: zdocker-hypervisor-metrics-proxy.socket, property: DefaultDependencies, value: "no"}
+
+  tailscale0-wants-zdocker-metrics-proxy:
+    dest: /etc/systemd/system/sys-subsystem-net-devices-tailscale0.device.d/10-wants-zdocker-hypervisor-metrics-proxy.conf
+    src: tailscale0-wants-zdocker-metrics-proxy.0docker.conf
+    purpose: >-
+      The 0docker hypervisor's tailnet device tailscale0 Wants=zdocker-hypervisor-metrics-proxy.socket (the tailnet :9100 node-exporter proxy), so it is started again when the device comes
+      back. The socket has FreeBind=true and survives a restart of tailscaled, but it is only WantedBy=sockets.target: after a separate stop and start of tailscaled nothing started it.
+      A second drop-in next to woodpecker-exec-proxy-follows-tailscale0 (systemd adds up Wants=).
+    expect:
+      - {systemd: sys-subsystem-net-devices-tailscale0.device, property: Wants, contains: zdocker-hypervisor-metrics-proxy.socket}
+
+  node-exporter-after-tailscale:
+    dest: /etc/systemd/system/prometheus-node-exporter.service.d/10-after-tailscale.conf
+    src: node-exporter-after-tailscale.conf
+    purpose: >-
+      node-exporter binds the Tailscale address: start it after tailscaled and without a start limit, because at boot it lost the race with tailscaled and
+      hit the start limit (5 tries in 10 s) and nothing scraped the host. Rolled out 2026-10-15 to the hypervisors and the 0infer VMs; also recorded in
+      fleet-edge-hardening hypervisor-0infer/.
+    expect:
+      - {systemd: prometheus-node-exporter.service, property: After, contains: tailscaled.service}
+
+  node-exporter-wait-for-tailscale:
+    dest: /etc/systemd/system/prometheus-node-exporter.service.d/10-wait-for-tailscale.conf
+    src: node-exporter-wait-for-tailscale.conf
+    purpose: >-
+      Pools session 2026-10-16: the exporter binds to the Tailscale IP, which does not exist yet when it starts at boot; it crash-looped and hit the start
+      limit (seen on 0own VM 660 after a reboot). Wait for tailscaled and network-online, no start limit, restart every 5 s.
+    expect:
+      - {systemd: prometheus-node-exporter.service, property: Restart, value: always}
+
+  node-exporter-retry-until-tailnet:
+    dest: /etc/systemd/system/prometheus-node-exporter.service.d/10-retry-until-tailnet.conf
+    src: node-exporter-retry-until-tailnet.conf
+    purpose: >-
+      Added 2026-10-13 on the 0docker gateway: the exporter listens on the tailnet address, which does not exist until tailscaled is up; the stock unit gave
+      up for good at the 2026-10-13 reboot and nothing scraped the host. Retry every 15 s without a start limit.
+    expect:
+      - {systemd: prometheus-node-exporter.service, property: Restart, value: always}
+
+  node-exporter-restart-always:
+    dest: /etc/systemd/system/prometheus-node-exporter.service.d/restart-always.conf
+    src: node-exporter-restart-always.conf
+    purpose: >-
+      node-exporter on the monitoring VM restarts whatever the exit reason, every 5 s (added 2026-10-14).
+    expect:
+      - {systemd: prometheus-node-exporter.service, property: Restart, value: always}
+
+  sysctl-fleet-neigh-gc:
+    dest: /etc/sysctl.d/90-fleet-neigh-gc.conf
+    src: sysctl-fleet-neigh-gc.conf
+    purpose: >-
+      Raise the kernel neighbour table GC thresholds on dockerhost: about 460 containers share one global table (940-1022 live entries against the defaults
+      128/512/1024), which overflowed ('neighbor table overflow', 50-175 per hour on 2026-10-17/18) and dropped packets. Applied 2026-10-18; the file header
+      has the measurements and the rollback.
+    expect:
+      - {sysctl: net.ipv4.neigh.default.gc_thresh3, value: "8192"}
+
+  sysctl-docker-fleet:
+    dest: /etc/sysctl.d/99-docker-fleet.conf
+    src: sysctl-docker-fleet.conf
+    purpose: >-
+      dockerhost kernel limits for about 460 containers: kernel.threads-max 2000000 (the same thread-limit fix as sysctl-hotplug-threads-max, written here
+      on 2026-05-22 without a comment), pid_max, vm.max_map_count and the inotify limits.
+    expect:
+      - {sysctl: kernel.threads-max, value: "2000000"}
+
+  docker-limits:
+    dest: /etc/systemd/system/docker.service.d/limits.conf
+    src: docker-limits.conf
+    purpose: >-
+      dockerd runs with LimitNOFILE=65535 on dockerhost (about 460 containers).
+    expect:
+      - {systemd: docker.service, property: LimitNOFILE, value: "65535"}
+
+  fstrim-hourly:
+    dest: /etc/systemd/system/fstrim.timer.d/0docker-hourly.conf
+    src: fstrim-hourly.conf
+    purpose: >-
+      fstrim on dockerhost runs HOURLY (up to 5 minutes of random delay, one minute of accuracy) instead of weekly. The qcow2 of VM 100 on the 0docker hypervisor only
+      shrinks when the guest trims, and the hypervisor's root file system fell under its 14 % admission hold on 2026-10-22; another session replaced the daily drop-in
+      (kept on the host as 0docker-daily.conf.pre-hourly-20261022T070928Z) at 07:09Z and this entry adopts the live file byte for byte. The check reads the random delay,
+      because systemd prints the calendar normalised.
+    expect:
+      - {systemd: fstrim.timer, property: RandomizedDelayUSec, value: 5min}
+
+  fleet-container-audit-oo-auth:
+    dest: /etc/systemd/system/fleet-container-audit.service.d/oo-auth.conf
+    src: fleet-container-audit-oo-auth.conf
+    purpose: >-
+      The fleet container audit on dockerhost runs with its OpenObserve ingest settings from an EnvironmentFile; the ingestion-only token stays on the host
+      (the tool reads it from CA_OO_AUTH).
+    expect:
+      - {systemd: fleet-container-audit.service, property: ExecStart, contains: "path=/usr/local/bin/fleet-container-audit"}
+
+  ct108-fstrim-skip-during-vzdump:
+    dest: /etc/systemd/system/0docker-ct108-fstrim.service.d/10-skip-during-vzdump.conf
+    src: ct108-fstrim-skip-during-vzdump.conf
+    purpose: >-
+      The 5-minute `pct fstrim 108` on the 0docker hypervisor is skipped (as a success) while a vzdump holds /var/run/vzdump.lock: the nightly CT108 backup
+      runs in stop mode and a trim could land inside it. A precaution (2026-10-14); also recorded in fleet-edge-hardening hypervisor-0docker/ct108-fstrim.
+    expect:
+      - {systemd: 0docker-ct108-fstrim.service, property: ExecStart, contains: /var/run/vzdump.lock}
+
+  nftables-infer-preload:
+    dest: /etc/systemd/system/nftables.service.d/10-infer.conf
+    src: nftables-infer-preload.conf
+    purpose: >-
+      The 0infer hypervisor loads its infer nftables preload before nftables starts.
+    expect:
+      - {systemd: nftables.service, property: ExecStartPre, contains: "path=/usr/local/sbin/infer-nftables-preload"}
+
+  nftables-destroy-table:
+    dest: /etc/systemd/system/nftables.service.d/override.conf
+    src: nftables-destroy-table.conf
+    purpose: >-
+      On runtime-general-lv3 stopping nftables destroys table inet filter instead of flushing the whole ruleset (so Docker's tables stay).
+    expect:
+      - {systemd: nftables.service, property: ExecStop, contains: destroy}
+
+  proxmox-incident-control-sync-metric:
+    dest: /etc/systemd/system/proxmox-incident-control-sync.service.d/metric.conf
+    src: proxmox-incident-control-sync-metric.conf
+    purpose: >-
+      proxmox-incident-control-sync records proxmox_incident_sync_last_success_timestamp_seconds after every successful run (a textfile metric the alerts
+      read).
+    expect:
+      - {systemd: proxmox-incident-control-sync.service, property: ExecStartPost, contains: "path=/usr/local/libexec/proxmox-incident-control-metric.sh"}
+
+  proxmox-incident-control-restore-verify-metric:
+    dest: /etc/systemd/system/proxmox-incident-control-restore-verify.service.d/metric.conf
+    src: proxmox-incident-control-restore-verify-metric.conf
+    purpose: >-
+      proxmox-incident-control-restore-verify records proxmox_incident_restore_verify_last_success_timestamp_seconds after every successful run (a textfile
+      metric the alerts read).
+    expect:
+      - {systemd: proxmox-incident-control-restore-verify.service, property: ExecStartPost, contains: "path=/usr/local/libexec/proxmox-incident-control-metric.sh"}
+
+  woodpecker-exec-proxy-9100-target:
+    dest: /etc/systemd/system/woodpecker-exec-proxy@9100.service.d/override.conf
+    src: woodpecker-exec-proxy-9100-target.conf
+    purpose: >-
+      The woodpecker exec proxy instance 9100 on the 0docker hypervisor forwards to the hypervisor's node exporter at 10.10.10.1:9100.
+    expect:
+      - {systemd: woodpecker-exec-proxy@9100.service, property: ExecStart, contains: 10.10.10.1:9100}
+
+  nfs-server-after-tailscale:
+    dest: /etc/systemd/system/nfs-server.service.d/ct108-worktrees.conf
+    src: nfs-server-after-tailscale.conf
+    purpose: >-
+      The NFS server of the 0own build worker (it exports the CT108 worktrees) starts after tailscaled and the worktrees mount, waits for its tailnet
+      address and retries a failed start: at the 2026-10-19 23:36Z reboot nfsd failed to bind the address it had not been given yet and stayed failed.
+    expect:
+      - {systemd: nfs-server.service, property: Requires, contains: tailscaled.service}
+      - {systemd: nfs-server.service, property: Restart, value: on-failure}
+
+  rpcbind-socket-v4-only:
+    dest: /etc/systemd/system/rpcbind.socket.d/ct108-nfs-v4-only.conf
+    src: rpcbind-socket-loopback-only.conf
+    purpose: >-
+      rpcbind on the 0own build worker listens on loopback and its unix socket only (the CT108 worktrees are exported over NFSv4 alone).
+    expect:
+      - {systemd: rpcbind.socket, property: Listen, contains: 127.0.0.1:111}
+
+  caddy-after-tailscale:
+    dest: /etc/systemd/system/caddy.service.d/10-after-tailscale.conf
+    src: caddy-after-tailscale.conf
+    purpose: >-
+      Caddy on the Hermes agent VM starts after tailscaled and network-online (it serves on the tailnet).
+    expect:
+      - {systemd: caddy.service, property: After, contains: tailscaled.service}
+
+  hermes-gateway-release-path:
+    dest: /etc/systemd/system/hermes-gateway.service.d/60-reliability-release.conf
+    src: hermes-gateway-release-path.conf
+    purpose: >-
+      hermes-gateway runs from the reliability release (PYTHONPATH points at releases/reliability-5c2eebfcc).
+    expect:
+      - {systemd: hermes-gateway.service, property: Environment, contains: "PYTHONPATH=/home/hermes/.hermes/releases/reliability-5c2eebfcc"}
+
+  logrotate-timer-hourly:
+    dest: /etc/systemd/system/logrotate.timer.d/override.conf
+    src: logrotate-timer-hourly.conf
+    purpose: >-
+      logrotate runs hourly on the 0docker gateway (the access logs reach 250 MB within a day on a storm day), with 5 minutes of accuracy and random delay
+      (the check reads the accuracy, because systemd prints the calendar normalised).
+    expect:
+      - {systemd: logrotate.timer, property: AccuracyUSec, value: 5min}
+
+  sysctl-fleet-swap:
+    dest: /etc/sysctl.d/99-fleet-swap.conf
+    src: sysctl-fleet-swap.conf
+    purpose: >-
+      vm.swappiness=20 on the 0mcp guests that have swap (2026-10-13).
+    expect:
+      - {sysctl: vm.swappiness, value: "20"}
+
+  sysctl-docker-runtime-swap:
+    dest: /etc/sysctl.d/99-docker-runtime-swap.conf
+    src: sysctl-docker-runtime-swap.conf
+    purpose: >-
+      vm.swappiness=20 on the 0mcp Docker host (2026-10-12).
+    expect:
+      - {sysctl: vm.swappiness, value: "20"}
+
+  sysctl-0mcp-ip-forwarding:
+    dest: /etc/sysctl.d/99-0mcp-ip-forwarding.conf
+    src: sysctl-ip-forward.conf
+    purpose: >-
+      IPv4 forwarding on the 0mcp hypervisor (guest routing).
+    expect:
+      - {sysctl: net.ipv4.ip_forward, value: "1"}
+
+  sysctl-0mpc-ip-forwarding:
+    dest: /etc/sysctl.d/99-0mpc-ip-forwarding.conf
+    src: sysctl-ip-forward.conf
+    purpose: >-
+      IPv4 forwarding on the 0mcp hypervisor (guest routing): the same line also lives in 99-0mcp-ip-forwarding.conf under the older, misspelled name
+    expect:
+      - {sysctl: net.ipv4.ip_forward, value: "1"}
+
+  sysctl-infer-proxmox-forwarding:
+    dest: /etc/sysctl.d/99-infer-proxmox-forwarding.conf
+    src: sysctl-ip-forward.conf
+    purpose: >-
+      IPv4 forwarding on the 0infer hypervisor (guest routing).
+    expect:
+      - {sysctl: net.ipv4.ip_forward, value: "1"}
+
+  sysctl-tailscale-forwarding:
+    dest: /etc/sysctl.d/99-tailscale.conf
+    src: sysctl-tailscale-forwarding.conf
+    purpose: >-
+      IPv4 and IPv6 forwarding on the 0docker hypervisor (it is a Tailscale subnet router).
+    expect:
+      - {sysctl: net.ipv4.ip_forward, value: "1"}
+
+  sysctl-disable-ipv6:
+    dest: /etc/sysctl.d/99-disable-ipv6.conf
+    src: sysctl-disable-ipv6.conf
+    purpose: >-
+      IPv6 is disabled on the 0docker gateway VM.
+    expect:
+      - {sysctl: net.ipv6.conf.all.disable_ipv6, value: "1"}
+
+  sysctl-disable-mptcp:
+    dest: /etc/sysctl.d/99-disable-mptcp.conf
+    src: sysctl-disable-mptcp.conf
+    purpose: >-
+      CVE-2026-98432 stop-gap (2026-10-30): the demonstrated exploit needs an MPTCP listener, and every Go program since 1.24 opens its listeners as MPTCP when
+      the kernel allows it. net.mptcp.enabled=0 makes new sockets plain TCP in the host network namespace. It does not fix the kernel bug, it does not reach
+      containers that have their own network namespace, and an open listener stays MPTCP until its service restarts. Remove once the fixed kernel runs everywhere.
+    expect:
+      - {sysctl: net.mptcp.enabled, value: "0"}
+
+  sysctl-tailscale-rpfilter:
+    dest: /etc/sysctl.d/99-tailscale-rpfilter.conf
+    src: sysctl-tailscale-rpfilter.conf
+    purpose: >-
+      Reverse-path filtering is off on the Hermes agent VM: with a strict rp_filter the return packets of tailnet peers reaching services bound on
+      tailscale0 are dropped when the default route is another interface (inbound timeouts).
+    expect:
+      - {sysctl: net.ipv4.conf.all.rp_filter, value: "0"}
+
+  aivoicebus-observer:
+    dest: /etc/systemd/system/aivoicebus.service.d/observer.conf
+    src: aivoicebus-observer.conf
+    purpose: >-
+      The aivoicebus service on the hypervisors loads its observer token as a systemd credential from /etc/aivoicebus/observer-token; the token itself stays
+      on the host (the file names the path only; systemctl prints credentials as [unprintable], so the check only proves that one is configured).
+    expect:
+      - {systemd: aivoicebus.service, property: LoadCredential, contains: "LoadCredential=[unprintable]"}
+
+hosts:
+  webgateway:
+    ssh: webgateway
+    hostname: debian-nginx-proxy-manager
+    vm: {hypervisor: bastion, id: 104}
+    note: nginx gateway, VM104 on 0docker (public edge)
+    files:
+      - nginx-restart-policy.webgateway
+      - sysctl-hotplug-threads-max
+      - node-exporter-retry-until-tailnet
+      - logrotate-timer-hourly
+      - sysctl-disable-ipv6
+      - sysctl-disable-mptcp
+  bastion:
+    ssh: bastion
+    hostname: Debian-bookworm-latest-amd64-base
+    note: "the 0docker hypervisor (a physical host, no hot-plug, so no thread-limit file)"
+    files:
+      - nginx-restart-policy.bastion
+      - socket-no-default-deps.woodpecker-exec-proxy
+      - woodpecker-exec-proxy-follows-tailscale0
+      - socket-free-bind.woodpecker-exec-proxy
+      - socket-no-default-deps.zdocker-hypervisor-metrics-proxy
+      - tailscale0-wants-zdocker-metrics-proxy
+      - ct108-fstrim-skip-during-vzdump
+      - proxmox-incident-control-sync-metric
+      - proxmox-incident-control-restore-verify-metric
+      - woodpecker-exec-proxy-9100-target
+      - sysctl-tailscale-forwarding
+      - aivoicebus-observer
+      - sysctl-disable-mptcp
+  nginx-lv3:
+    ssh: 0mcp_nginx
+    hostname: nginx-lv3
+    vm: {hypervisor: pve-0mcp, id: 110}
+    note: nginx gateway of the 0mcp fleet
+    files:
+      - nginx-restart-policy.nginx-lv3
+      - sysctl-hotplug-threads-max
+      - sysctl-fleet-swap
+      - sysctl-disable-mptcp
+  postgres-lv3:
+    ssh: 0mcp_postgres
+    hostname: postgres-lv3
+    vm: {hypervisor: pve-0mcp, id: 150}
+    note: PostgreSQL 17 of the 0mcp fleet
+    files: [postgresql-oom-policy.postgres-lv3, sysctl-hotplug-threads-max, sysctl-disable-mptcp]
+  infer-pg-primary:
+    ssh: 0infer_pg_primary
+    hostname: infer-pg-primary.example.org
+    vm: {hypervisor: pve-0infer, id: 701}
+    note: production DomainScope Postgres 18, VM701 on 0infer
+    files:
+      - postgresql-oom-policy.infer-pg-primary
+      - postgresql-after-tailscale.infer-pg-primary
+      - postgresql-log-connections.infer-pg-primary
+      - postgresql-parallel-guardrails.infer-pg-primary
+      - postgresql-temp-files-log.infer-pg-primary
+      - postgresql-work-mem-guardrails.infer-pg-primary
+      - postgresql-huge-pages.infer-pg-primary
+      - postgresql-pgss-max.infer-pg-primary
+      - sysctl-pg-swap.infer-pg-primary
+      - sysctl-hotplug-threads-max
+      - sysctl-postgres-hugepages.infer-pg-primary
+      - node-exporter-after-tailscale
+      - node-exporter-wait-for-tailscale
+      - sysctl-disable-mptcp
+  infer-runtime:
+    ssh: 0infer_runtime
+    hostname: infer-runtime.example.org
+    vm: {hypervisor: pve-0infer, id: 703}
+    note: pool replicas, VM703 on 0infer (about 273 containers)
+    files:
+      - sysctl-hotplug-threads-max
+      - node-exporter-after-tailscale
+      - node-exporter-wait-for-tailscale
+      - sysctl-disable-mptcp
+  infer-builder-ci:
+    ssh: 0infer_builder_ci
+    hostname: infer-builder-ci.example.org
+    vm: {hypervisor: pve-0infer, id: 702}
+    note: CI builder, VM702 on 0infer
+    files:
+      - sysctl-hotplug-threads-max
+      - node-exporter-after-tailscale
+      - sysctl-disable-mptcp
+  infer-tier0:
+    ssh: 0infer_tier0
+    hostname: infer-tier0
+    vm: {hypervisor: pve-0infer, id: 704}
+    note: tier-0 standby runner, VM704 on 0infer
+    files: [sysctl-hotplug-threads-max, sysctl-disable-mptcp]
+  docker-runtime:
+    ssh: 0mcp_docker
+    hostname: docker-runtime
+    vm: {hypervisor: pve-0mcp, id: 120}
+    note: "0mcp Docker host (16 GB; the VM closest to its old limit, 3.7k of 7k threads in use)"
+    files:
+      - sysctl-hotplug-threads-max
+      - sysctl-docker-runtime-swap
+      - sysctl-disable-mptcp
+  runtime-general-lv3:
+    ssh: 0mcp_runtime_general
+    hostname: runtime-general-lv3
+    vm: {hypervisor: pve-0mcp, id: 191}
+    note: 0mcp general runtime (16 GB)
+    files:
+      - sysctl-hotplug-threads-max
+      - node-exporter-wait-for-tailscale
+      - nftables-destroy-table
+      - sysctl-fleet-swap
+      - sysctl-disable-mptcp
+  docker-build:
+    ssh: 0mcp_docker_build
+    hostname: docker-build
+    vm: {hypervisor: pve-0mcp, id: 130}
+    note: 0mcp Docker build VM (20 vCPU)
+    files:
+      - sysctl-hotplug-threads-max
+      - sysctl-fleet-swap
+      - sysctl-disable-mptcp
+  mcp-staging-runtime:
+    ssh: 0mcp_staging_runtime
+    hostname: 0mcp-staging-runtime
+    vm: {hypervisor: pve-0mcp, id: 200}
+    note: 0mcp staging runtime VM
+    files: [sysctl-hotplug-threads-max, sysctl-disable-mptcp]
+  coolify-apps-lv3:
+    ssh: 0mcp_coolify_apps
+    hostname: coolify-apps-lv3
+    vm: {hypervisor: pve-0mcp, id: 171}
+    note: Coolify application host of the 0mcp fleet
+    files:
+      - sysctl-hotplug-threads-max
+      - sysctl-fleet-swap
+      - sysctl-disable-mptcp
+  coolify:
+    ssh: 0mcp_coolify
+    hostname: coolify
+    vm: {hypervisor: pve-0mcp, id: 170}
+    note: Coolify control plane of the 0mcp fleet
+    files:
+      - sysctl-hotplug-threads-max
+      - sysctl-fleet-swap
+      - sysctl-disable-mptcp
+  postgres-data-lv3:
+    ssh: 0mcp_postgres_data
+    hostname: postgres-data-lv3
+    vm: {hypervisor: pve-0mcp, id: 154}
+    note: PostgreSQL VM of the 0mcp fleet
+    files: [sysctl-hotplug-threads-max, sysctl-disable-mptcp]
+  runtime-control-lv3:
+    ssh: 0mcp_runtime_control
+    hostname: runtime-control-lv3
+    vm: {hypervisor: pve-0mcp, id: 192}
+    note: 0mcp control runtime VM
+    files:
+      - sysctl-hotplug-threads-max
+      - sysctl-fleet-swap
+      - sysctl-disable-mptcp
+  artifact-cache:
+    ssh: 0mcp_artifact_cache
+    hostname: artifact-cache
+    vm: {hypervisor: pve-0mcp, id: 180}
+    note: 0mcp artifact cache VM
+    files:
+      - sysctl-hotplug-threads-max
+      - sysctl-fleet-swap
+      - sysctl-disable-mptcp
+  hermes-agent:
+    ssh: 0mcp_hermes
+    hostname: hermes-agent
+    vm: {hypervisor: pve-0mcp, id: 100}
+    note: Hermes agent VM of the 0mcp fleet
+    files:
+      - sysctl-hotplug-threads-max
+      - caddy-after-tailscale
+      - hermes-gateway-release-path
+      - sysctl-tailscale-rpfilter
+      - sysctl-disable-mptcp
+  monitoring-lv3:
+    ssh: 0mcp_monitoring
+    hostname: monitoring-lv3
+    vm: {hypervisor: pve-0mcp, id: 140}
+    note: the monitoring VM (Prometheus, alert rules)
+    files:
+      - sysctl-hotplug-threads-max
+      - node-exporter-restart-always
+      - sysctl-fleet-swap
+      - sysctl-disable-mptcp
+  runtime-comms:
+    ssh: 0mcp_comms
+    hostname: runtime-comms
+    vm: {hypervisor: pve-0mcp, id: 121}
+    note: 0mcp communications runtime VM
+    files: [sysctl-hotplug-threads-max, sysctl-disable-mptcp]
+  runtime-apps:
+    ssh: 0mcp_apps
+    hostname: runtime-apps
+    vm: {hypervisor: pve-0mcp, id: 122}
+    note: 0mcp applications runtime VM
+    files:
+      - sysctl-hotplug-threads-max
+      - sysctl-fleet-swap
+      - sysctl-disable-mptcp
+  postgres-apps-lv3:
+    ssh: 0mcp_postgres_apps
+    hostname: postgres-apps-lv3
+    vm: {hypervisor: pve-0mcp, id: 152}
+    note: "PostgreSQL VM of the 0mcp fleet (applications; 2 GB: it boots with about 7000 threads like the larger hot-plug VMs)"
+    files: [sysctl-hotplug-threads-max, sysctl-disable-mptcp]
+  postgres-replica-lv3:
+    ssh: 0mcp_postgres_replica
+    hostname: postgres-replica-lv3
+    vm: {hypervisor: pve-0mcp, id: 151}
+    note: "PostgreSQL replica VM of the 0mcp fleet (2 GB)"
+    files: [sysctl-hotplug-threads-max, sysctl-disable-mptcp]
+  runtime-ai-lv3:
+    ssh: 0mcp_runtime_ai
+    hostname: runtime-ai-lv3
+    vm: {hypervisor: pve-0mcp, id: 190}
+    note: "0mcp AI runtime VM (3 GB)"
+    files: [sysctl-hotplug-threads-max, sysctl-disable-mptcp]
+  pve-0mcp:
+    ssh: operator-bastion
+    hostname: debian-base-template
+    note: "the 0mcp hypervisor (Proxmox, public 203.0.113.1 side)"
+    files:
+      - socket-no-default-deps.lv3-tailscale-proxy-coolify
+      - socket-no-default-deps.lv3-tailscale-proxy-gitea
+      - socket-no-default-deps.lv3-tailscale-proxy-matrix-synapse
+      - socket-no-default-deps.lv3-tailscale-proxy-mattermost
+      - socket-no-default-deps.lv3-tailscale-proxy-netbox
+      - socket-no-default-deps.lv3-tailscale-proxy-nomad
+      - socket-no-default-deps.lv3-tailscale-proxy-ntopng
+      - socket-no-default-deps.lv3-tailscale-proxy-openbao
+      - socket-no-default-deps.lv3-tailscale-proxy-openfga
+      - socket-no-default-deps.lv3-tailscale-proxy-plane
+      - socket-no-default-deps.lv3-tailscale-proxy-platform-context-api
+      - socket-no-default-deps.lv3-tailscale-proxy-portainer
+      - socket-no-default-deps.lv3-tailscale-proxy-postgres
+      - socket-no-default-deps.lv3-tailscale-proxy-semaphore
+      - socket-no-default-deps.lv3-tailscale-proxy-step-ca
+      - socket-no-default-deps.lv3-tailscale-proxy-typesense
+      - socket-no-default-deps.lv3-tailscale-proxy-vaultwarden
+      - socket-no-default-deps.lv3-tailscale-proxy-windmill
+      - socket-no-default-deps.lv3-tailscale-proxy-woodpecker
+      - socket-no-default-deps.woodpecker-0exec-build-metrics-proxy
+      - socket-no-default-deps.zmcp-runtime-general-metrics-proxy
+      - socket-free-bind.lv3-tailscale-proxy-coolify
+      - socket-free-bind.lv3-tailscale-proxy-gitea
+      - socket-free-bind.lv3-tailscale-proxy-matrix-synapse
+      - socket-free-bind.lv3-tailscale-proxy-mattermost
+      - socket-free-bind.lv3-tailscale-proxy-netbox
+      - socket-free-bind.lv3-tailscale-proxy-nomad
+      - socket-free-bind.lv3-tailscale-proxy-ntopng
+      - socket-free-bind.lv3-tailscale-proxy-openbao
+      - socket-free-bind.lv3-tailscale-proxy-openfga
+      - socket-free-bind.lv3-tailscale-proxy-plane
+      - socket-free-bind.lv3-tailscale-proxy-platform-context-api
+      - socket-free-bind.lv3-tailscale-proxy-portainer
+      - socket-free-bind.lv3-tailscale-proxy-postgres
+      - socket-free-bind.lv3-tailscale-proxy-semaphore
+      - socket-free-bind.lv3-tailscale-proxy-step-ca
+      - socket-free-bind.lv3-tailscale-proxy-typesense
+      - socket-free-bind.lv3-tailscale-proxy-vaultwarden
+      - socket-free-bind.lv3-tailscale-proxy-windmill
+      - socket-free-bind.lv3-tailscale-proxy-woodpecker
+      - socket-free-bind.zmcp-runtime-general-metrics-proxy
+      - tailscale0-wants-lv3-proxies
+      - node-exporter-after-tailscale
+      - proxmox-incident-control-sync-metric
+      - proxmox-incident-control-restore-verify-metric
+      - sysctl-0mcp-ip-forwarding
+      - sysctl-0mpc-ip-forwarding
+      - aivoicebus-observer
+      - sysctl-disable-mptcp
+  pve-0infer:
+    ssh: 0infer_bastion
+    hostname: pve01
+    note: "the 0infer hypervisor (its hostname is pve01, like the 0database one: the ssh alias tells them apart)"
+    files:
+      - node-exporter-after-tailscale
+      - nftables-infer-preload
+      - sysctl-infer-proxmox-forwarding
+      - aivoicebus-observer
+      - sysctl-disable-mptcp
+  dockerhost:
+    ssh: dockerhost
+    hostname: ubuntuvm1
+    vm: {hypervisor: bastion, id: 100}
+    note: "VM100 ubuntu-24-04 on the 0docker hypervisor: about 460 containers, the keystore writer, the hub Prometheus"
+    files:
+      - node-exporter-after-tailscale
+      - sysctl-fleet-neigh-gc
+      - sysctl-docker-fleet
+      - docker-limits
+      - fstrim-hourly
+      - fleet-container-audit-oo-auth
+      - sysctl-disable-mptcp
+  0own-build-worker:
+    ssh: 0own_build_worker
+    hostname: 0own-build-worker
+    vm: {hypervisor: pve-0own, id: 610}
+    note: "0own build worker VM (NFS export of the CT108 worktrees)"
+    files:
+      - nfs-server-after-tailscale
+      - rpcbind-socket-v4-only
+      - sysctl-disable-mptcp
+  0own-staging-runtime:
+    ssh: 0own_staging_runtime
+    hostname: 0own-staging-runtime
+    vm: {hypervisor: pve-0own, id: 660}
+    note: "0own staging runtime VM (pool replicas)"
+    files:
+      - node-exporter-wait-for-tailscale
+      - sysctl-hotplug-threads-max
+      - sysctl-disable-mptcp
+  pve-0own:
+    ssh: 0own_bastion
+    hostname: "0own"
+    sudo: false
+    note: "the 0own hypervisor (root login, no sudo; 64 GB, boots with a limit of about 470000); its zram swap unit is a whole unit file, kept in config/0own/zram-swap (a drop-in cannot fix its boot ordering)"
+    files: [sysctl-disable-mptcp]
+  pve-0pipe:
+    ssh: 0pipe_bastion
+    hostname: "0pipe"
+    sudo: false
+    note: "the 0pipe hypervisor (Hetzner HEL1 bare metal, Proxmox VE 9.2, 125 GB, root login, no sudo; public side is default-deny in /etc/nftables.conf, table fw0pipe + nat0pipe for vmbr10 10.80.10.0/24; threads-max boots far above the floor)"
+    files: [sysctl-disable-mptcp]
+  0pipe-build:
+    ssh: 0pipe_build_worker
+    hostname: 0pipe-build
+    sudo: false
+    vm: {hypervisor: pve-0pipe, id: 100}
+    note: "0pipe build VM (32 vCPU, 104 GiB static memory, no balloon; Docker + Woodpecker agents; reached through the host with ProxyJump)"
+    files:
+      - docker-limits
+      - sysctl-disable-mptcp
+  0pipe-runtime:
+    hostname: 0pipe-runtime
+    vm: {hypervisor: pve-0pipe, id: 101}
+    note: "0pipe runtime VM (VM 101, 4 vCPU, 8 GiB, 60 GiB disk, Debian 13; Docker + Compose; restricted canary fleet pool member, cluster 0pipe; LAN 10.80.10.11, tailnet tag:pool-runtime 100.83.124.115; rebuildable, no state but Docker images). No ssh alias on the operator's machine yet, so it is reached through the hypervisor's guest agent; give it `ssh:` (and `sudo: false` when the login is root) once the alias exists"
+    files:
+      - node-exporter-wait-for-tailscale
+      - sysctl-hotplug-threads-max
+      - sysctl-disable-mptcp
+  own-pbs:
+    ssh: 0own_pbs
+    hostname: own-pbs
+    vm: {hypervisor: pve-0own, id: 620}
+    note: "Proxmox Backup Server #1, the datastore every fleet writes to"
+    files: [sysctl-hotplug-threads-max, node-exporter-wait-for-tailscale, sysctl-disable-mptcp]
+  0own-openobserve:
+    ssh: 0own_openobserve
+    hostname: 0own-openobserve
+    vm: {hypervisor: pve-0own, id: 630}
+    note: "OpenObserve (logs and traces) on 0own"
+    files: [sysctl-hotplug-threads-max, node-exporter-wait-for-tailscale, sysctl-disable-mptcp]
+  github-mirror:
+    ssh: 0own_github_mirror
+    hostname: github-mirror
+    vm: {hypervisor: pve-0own, id: 640}
+    note: "private GitHub repository mirror VM on 0own"
+    files: [sysctl-hotplug-threads-max, node-exporter-wait-for-tailscale, sysctl-disable-mptcp]
+  pyroscope-canary:
+    ssh: 0own_pyroscope_canary
+    hostname: pyroscope-canary
+    vm: {hypervisor: pve-0own, id: 650}
+    note: "Pyroscope canary VM on 0own"
+    files: [sysctl-hotplug-threads-max, sysctl-disable-mptcp]
+  pdm:
+    ssh: 0own_pdm
+    hostname: pdm
+    vm: {hypervisor: pve-0own, id: 670}
+    note: "Proxmox Datacenter Manager on 0own"
+    files: [sysctl-hotplug-threads-max, node-exporter-wait-for-tailscale, sysctl-disable-mptcp]
+  docker-prod:
+    ssh: 0docker_docker_prod
+    hostname: docker-prod
+    vm: {hypervisor: bastion, id: 101}
+    note: "VM101 on 0docker: DomainScope prod API and cron (kernel.threads-max 2000000 since provisioning)"
+    files: [sysctl-disable-mptcp]
+  0docker-builder:
+    ssh: 0docker_builder
+    hostname: 0docker-builder
+    vm: {hypervisor: bastion, id: 108}
+    note: "CT108, the Builder (an LXC container: it shares the 0docker hypervisor's kernel limits)"
+    files: [user-0-slice-memory.0docker-builder, sysctl-disable-mptcp]
+  scrapetheworld:
+    ssh: 0docker_scrapetheworld
+    hostname: scrapetheworld
+    vm: {hypervisor: bastion, id: 109}
+    sudo: false
+    note: "CT109 on 0docker (LXC, shares the hypervisor's kernel limits)"
+    files: [sysctl-disable-mptcp]
+  pve-exporter:
+    ssh: 0docker_pve_exporter
+    hostname: pve-exporter
+    vm: {hypervisor: bastion, id: 107}
+    sudo: false
+    note: "CT107 on 0docker (LXC, shares the hypervisor's kernel limits)"
+    files: [sysctl-disable-mptcp]
+  infer-spire:
+    vm: {hypervisor: pve-0infer, id: 705}
+    hostname: infer-spire
+    note: "SPIRE prod servers (0exec :8081, 0crawl :8082) on 0infer, restored 2026-10-20 00:40Z from the backup of VM 103 (2 GB, static memory, boots at 15590 threads); no operator ssh key, so it is reached through the hypervisor's guest agent. VM 103 stays listed until it is destroyed (the inventory then reports it GONE)"
+    files: [sysctl-hotplug-threads-max, sysctl-disable-mptcp]

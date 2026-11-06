@@ -5,6 +5,8 @@ policy_out: ACCEPT
 
 {% set policy = network_policy %}
 {% set guest_ip_map = dict(proxmox_guests | map(attribute='name') | zip(proxmox_guests | map(attribute='ipv4'))) %}
+{# Guests that opt out of the `all_guests` fan-out (`network_policy_all_guests: false` on the guest): named-source rules still render for them, an `all_guests` rule does not name them as a source (least privilege, ADR 0494). #}
+{% set all_guests_excluded = proxmox_guests | selectattr('network_policy_all_guests', 'defined') | rejectattr('network_policy_all_guests') | map(attribute='name') | list %}
 {% set guest_policy = policy.guests[guest.name] %}
 {% set guest_local_only_sources = ['172.16.0.0/12', '192.168.0.0/16'] %}
 {% macro render_line(rule, source=None, port=None) -%}
@@ -38,7 +40,7 @@ IN ACCEPT{% if source %} -source {{ source }}{% endif %} -p {{ rule.protocol }}{
 {% endfor %}
 {% endif %}
 {% elif rule.source == 'all_guests' %}
-{% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != guest.name %}
+{% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != guest.name and guest_name not in all_guests_excluded %}
 {% if rule.protocol == 'vrrp' or rule.protocol == 'icmp' %}
 {{ render_line(rule, source=guest_ip ~ '/32') }}
 {% else %}

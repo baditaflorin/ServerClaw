@@ -1,6 +1,40 @@
 {
   "schema_version": "1.1.0",
   "services": {
+    "agent_history": {
+      "service_name": "agent-history",
+      "owning_vm": "agent-history",
+      "role": "agent_history_runtime",
+      "verify_file": "roles/agent_history_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The store answers its health endpoint on the guest's loopback address (200 when Postgres answers, 503 when it does not; no token).",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8080/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The store and its Postgres are ready to accept ingest from the collectors.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8080/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Private, tailnet-only service; there is no public name to monitor. Availability comes from the metrics bridge and Prometheus rules."
+      }
+    },
     "alertmanager": {
       "service_name": "alertmanager",
       "owning_vm": "monitoring",

@@ -1,0 +1,149 @@
+# promtool unit tests for PostgresUnitNotActive in config/prometheus/rules/fleet-postgres-unit.yml (run by tests/test_fleet_postgres_unit_alert.py when promtool is
+# installed; written 2026-10-19). Time starts at 0 and every series is sampled once a minute. The shape of the real outage: the unit is active, the kernel OOM killer
+# shoots the helper processes, systemd stops the unit (failed, result oom-kill) and nothing starts it again for 21 minutes.
+rule_files:
+  - ../../config/prometheus/rules/fleet-postgres-unit.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: "the cluster stays active, the umbrella unit is active and an unrelated unit is inactive: nothing fires"
+    interval: 1m
+    input_series:
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="active"}'
+        values: "1x60"
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="failed"}'
+        values: "0x60"
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql.service",state="active"}'
+        values: "1x60"
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="docker.service",state="active"}'
+        values: "0x60"
+    alert_rule_test:
+      - {eval_time: 30m, alertname: PostgresUnitNotActive, exp_alerts: []}
+      - {eval_time: 59m, alertname: PostgresUnitNotActive, exp_alerts: []}
+
+  - name: "the cluster unit fails at 10 m and is started again at 40 m (the 2026-10-19 shape): quiet for the 3 m delay, then critical and named, resolved after the start"
+    interval: 1m
+    input_series:
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="active"}'
+        values: "1x10 0x30 1x20"
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="failed"}'
+        values: "0x10 1x30 0x20"
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql.service",state="active"}'
+        values: "1x60"
+    alert_rule_test:
+      - {eval_time: 9m, alertname: PostgresUnitNotActive, exp_alerts: []}
+      - {eval_time: 12m, alertname: PostgresUnitNotActive, exp_alerts: []}      # down for 2 m: still inside the delay
+      - eval_time: 14m
+        alertname: PostgresUnitNotActive
+        exp_alerts:
+          - exp_labels: {severity: critical, service: postgres, host: infer-pg-primary, instance: "100.64.0.22:9100", name: postgresql@18-main.service}
+            exp_annotations:
+              summary: "PostgreSQL postgresql@18-main.service is not active on infer-pg-primary"
+              description: "postgresql@18-main.service on infer-pg-primary (100.64.0.22:9100) has not been active for 3 minutes (failed, stopped or stuck starting). The 2026-10-19 outage of the production database was this: journalctl -k | grep -i oom showed the kernel OOM killer shooting the checkpointer and io workers, and the unit sat in failed with result oom-kill. On the host: systemctl status postgresql@18-main.service; if it is failed, sudo systemctl reset-failed postgresql@18-main.service then sudo systemctl start postgresql@18-main.service (a start runs crash recovery, about a minute), then check that the standby is streaming again."
+      - eval_time: 39m
+        alertname: PostgresUnitNotActive
+        exp_alerts:
+          - exp_labels: {severity: critical, service: postgres, host: infer-pg-primary, instance: "100.64.0.22:9100", name: postgresql@18-main.service}
+            exp_annotations:
+              summary: "PostgreSQL postgresql@18-main.service is not active on infer-pg-primary"
+              description: "postgresql@18-main.service on infer-pg-primary (100.64.0.22:9100) has not been active for 3 minutes (failed, stopped or stuck starting). The 2026-10-19 outage of the production database was this: journalctl -k | grep -i oom showed the kernel OOM killer shooting the checkpointer and io workers, and the unit sat in failed with result oom-kill. On the host: systemctl status postgresql@18-main.service; if it is failed, sudo systemctl reset-failed postgresql@18-main.service then sudo systemctl start postgresql@18-main.service (a start runs crash recovery, about a minute), then check that the standby is streaming again."
+      - {eval_time: 45m, alertname: PostgresUnitNotActive, exp_alerts: []}
+
+  - name: "a two minute stop (a planned restart) does not page"
+    interval: 1m
+    input_series:
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="active"}'
+        values: "1x10 0x2 1x40"
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="failed"}'
+        values: "0x52"
+    alert_rule_test:
+      - {eval_time: 11m, alertname: PostgresUnitNotActive, exp_alerts: []}
+      - {eval_time: 13m, alertname: PostgresUnitNotActive, exp_alerts: []}
+      - {eval_time: 20m, alertname: PostgresUnitNotActive, exp_alerts: []}
+
+  - name: "two Postgres hosts, one healthy and one down: only the down one is named"
+    interval: 1m
+    input_series:
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="active"}'
+        values: "1x60"
+      - series: 'node_systemd_unit_state{host="pg-standby",instance="10.9.9.9:9100",name="postgresql@18-main.service",state="active"}'
+        values: "1x5 0x55"
+      - series: 'node_systemd_unit_state{host="pg-standby",instance="10.9.9.9:9100",name="postgresql@18-main.service",state="failed"}'
+        values: "0x5 1x55"
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: PostgresUnitNotActive
+        exp_alerts:
+          - exp_labels: {severity: critical, service: postgres, host: pg-standby, instance: "10.9.9.9:9100", name: postgresql@18-main.service}
+            exp_annotations:
+              summary: "PostgreSQL postgresql@18-main.service is not active on pg-standby"
+              description: "postgresql@18-main.service on pg-standby (10.9.9.9:9100) has not been active for 3 minutes (failed, stopped or stuck starting). The 2026-10-19 outage of the production database was this: journalctl -k | grep -i oom showed the kernel OOM killer shooting the checkpointer and io workers, and the unit sat in failed with result oom-kill. On the host: systemctl status postgresql@18-main.service; if it is failed, sudo systemctl reset-failed postgresql@18-main.service then sudo systemctl start postgresql@18-main.service (a start runs crash recovery, about a minute), then check that the standby is streaming again."
+
+  # ---- PostgresIoStall (2026-10-19): the counter is seconds of "some" I/O wait, so +3 per minute is 5 %, +51 per minute is 85 %.
+  - name: "quiet database (5 %), and the periodic 30 minute read burst (35 % for 6 minutes): nothing fires"
+    interval: 1m
+    input_series:
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="active"}'
+        values: "1x120"
+      # 24 minutes at 5 %, 6 minutes at 35 %, repeated four times
+      - series: 'node_pressure_io_waiting_seconds_total{host="infer-pg-primary",instance="100.64.0.22:9100"}'
+        values: "0+3x24 72+21x6 198+3x24 270+21x6 396+3x24 468+21x6 594+3x24 666+21x6"
+    alert_rule_test:
+      - {eval_time: 30m, alertname: PostgresIoStall, exp_alerts: []}
+      - {eval_time: 66m, alertname: PostgresIoStall, exp_alerts: []}
+      - {eval_time: 118m, alertname: PostgresIoStall, exp_alerts: []}
+
+  - name: "the 2026-10-19 shape: wait pressure goes from 5 % to 85 % at 10 m and stays: quiet for the 10 m delay, then critical, resolved after it ends at 70 m"
+    interval: 1m
+    input_series:
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="active"}'
+        values: "1x120"
+      - series: 'node_pressure_io_waiting_seconds_total{host="infer-pg-primary",instance="100.64.0.22:9100"}'
+        values: "0+3x10 30+51x60 3090+3x50"
+    alert_rule_test:
+      - {eval_time: 15m, alertname: PostgresIoStall, exp_alerts: []}        # the 5 m rate has not crossed 60 % yet
+      - {eval_time: 22m, alertname: PostgresIoStall, exp_alerts: []}        # over 60 % for under 10 m
+      - eval_time: 40m
+        alertname: PostgresIoStall
+        exp_alerts:
+          - exp_labels: {severity: critical, service: postgres, host: infer-pg-primary, instance: "100.64.0.22:9100"}
+            exp_annotations:
+              summary: "infer-pg-primary (a Postgres host) has waited on its disk 85 % of the time for 10 minutes"
+              description: "I/O wait pressure of a host that runs a Postgres cluster has been above 60 % for 10 minutes: the database is barely writing. On 2026-10-19 01:15-02:45Z this was the nightly snapshot backup of infer-pg-primary being throttled by the slow PBS (copy-before-write): writes fell to about 0 MiB/s, a checkpoint took 5258 s and DomainScope categorize was effectively down. First check the hypervisor backup task status and storage latency; the documented infer-pg-nightly-pbs job uses local fleecing. Never cancel a running backup or kill vzdump/pvescheduler; let the backup complete, then review storage performance, local fleecing and the backup window before its next run. Also inspect guest I/O, a runaway checkpoint or vacuum, and the disk."
+      - {eval_time: 90m, alertname: PostgresIoStall, exp_alerts: []}
+
+  - name: "a six minute stall (a heavy checkpoint) does not page"
+    interval: 1m
+    input_series:
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="active"}'
+        values: "1x60"
+      - series: 'node_pressure_io_waiting_seconds_total{host="infer-pg-primary",instance="100.64.0.22:9100"}'
+        values: "0+3x10 30+51x6 336+3x44"
+    alert_rule_test:
+      - {eval_time: 14m, alertname: PostgresIoStall, exp_alerts: []}
+      - {eval_time: 25m, alertname: PostgresIoStall, exp_alerts: []}
+
+  - name: "a host without a Postgres unit (the Docker host at 85 %) and a Postgres host whose unit is down are not judged by this rule"
+    interval: 1m
+    input_series:
+      - series: 'node_pressure_io_waiting_seconds_total{host="dockerhost",instance="100.64.0.7:9100"}'
+        values: "0+51x60"
+      - series: 'node_pressure_io_waiting_seconds_total{host="pg-standby",instance="10.9.9.9:9100"}'
+        values: "0+51x60"
+      - series: 'node_systemd_unit_state{host="pg-standby",instance="10.9.9.9:9100",name="postgresql@18-main.service",state="active"}'
+        values: "0x60"
+    alert_rule_test:
+      - {eval_time: 40m, alertname: PostgresIoStall, exp_alerts: []}
+
+  - name: "a heavy but working hour at 40 % wait does not page (the rule starts at 60 %)"
+    interval: 1m
+    input_series:
+      - series: 'node_systemd_unit_state{host="infer-pg-primary",instance="100.64.0.22:9100",name="postgresql@18-main.service",state="active"}'
+        values: "1x90"
+      - series: 'node_pressure_io_waiting_seconds_total{host="infer-pg-primary",instance="100.64.0.22:9100"}'
+        values: "0+3x10 30+24x60 1470+3x20"
+    alert_rule_test:
+      - {eval_time: 40m, alertname: PostgresIoStall, exp_alerts: []}
+      - {eval_time: 68m, alertname: PostgresIoStall, exp_alerts: []}
+

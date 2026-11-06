@@ -1,0 +1,32 @@
+#!/bin/bash
+# managed-by: role=agent_history_runtime adr=0494 agent={{ lookup('env', 'LV3_AGENT_SESSION') | default('operator') }}
+# Unlock the LUKS2 data volume, mount it and start the compose project (ADR 0494). Run by the owner after every reboot.
+#
+# The passphrase is read from standard input and nowhere else: never put it in an argument, an environment variable or a
+# file. cryptsetup does not strip a trailing newline when the key comes from a pipe, so pipe it without one:
+#
+#   <fetch the passphrase from OpenBao without printing it> | ssh <guest> sudo {{ agent_history_helper_dir }}/agent-history-unlock
+#
+# Re-running is safe: an unlocked and mounted volume is left alone.
+set -euo pipefail
+umask 077
+
+mount_point="{{ agent_history_data_mount }}"
+mapper="/dev/mapper/{{ agent_history_luks_name }}"
+
+if mountpoint -q "$mount_point"; then
+  echo "agent-history-unlock: $mount_point is already mounted"
+else
+  if [ ! -e "$mapper" ]; then
+    if [ -t 0 ]; then
+      echo "agent-history-unlock: the passphrase is read from standard input; pipe it in (no trailing newline)" >&2
+      exit 2
+    fi
+    cryptsetup open --type luks2 --allow-discards --key-file=- "{{ agent_history_data_device }}" "{{ agent_history_luks_name }}"
+  fi
+  mount -o noatime,nodev,nosuid "$mapper" "$mount_point"
+  install -d -m 0700 -o 999 -g 999 "{{ agent_history_pgdata_dir }}"
+fi
+
+systemctl start agent-history.service
+echo "agent-history-unlock: volume mounted, agent-history.service started"

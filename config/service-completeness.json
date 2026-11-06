@@ -21,6 +21,19 @@
     }
   },
   "services": {
+    "agent_history": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_api_gateway": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "requires_dashboard": false,
+      "requires_data_catalog": true,
+      "requires_alert_rules": false,
+      "requires_slo": false,
+      "notes": "Private, tailnet-only. No subdomain, OIDC client or API gateway route, by design (ADR 0049 operator-only, ADR 0494). The store's secrets (database password, read, write and metrics tokens, LUKS passphrase) are created by the OpenBao administrator and the owner and never pass through the controller, so there is no controller-local mirror to catalogue (config/secret-catalog.json models controller-local files). No blackbox SLO: the monitoring guest has no route to the loopback listener on purpose; availability and ingest health come from the metrics bridge and the alert rules in config/prometheus/rules/agent-history.yml, which are a separate change. No dashboard yet."
+    },
     "alertmanager": {
       "service_type": "vm-service",
       "requires_subdomain": false,

@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+# domainscope-search-probe-run: what domainscope-search-probe.service runs on CT108 (docs/runbooks/domainscope-search-probe.md).
+#
+# Checks that PRODUCTION DomainScope search answers with real results: runs the DomainScope repository's own probe
+# (scripts/search-probe.sh --all --markets 20, from baditaflorin/go-url-categorizer-api at origin/main, fetched on every run) against
+# https://domainscope.scrapetheworld.org and puts its Prometheus textfile metrics where the builder's node exporter reads them. On
+# 2026-10-20 semantic search answered 500 for hours and country searches 0 rows while every route-level check passed; the alerts on
+# these metrics are config/prometheus/rules/domainscope-search.yml.
+#
+# The probe is fetched code, so it runs WITHOUT root: as DSPROBE_USER (default nobody), with an empty environment, in a run directory
+# of its own; only its metrics file comes back, and only lines of the domainscope_search_probe_* families are accepted. A run that
+# leaves no valid metrics (crash, timeout, a probe that cannot write them) is recorded as a failed run (success 0), never as green.
+# It only reads: anonymous GET requests to the public search API, about 46 per run.
+#
+# Environment (the unit sets none; an override goes in /etc/default/domainscope-search-probe):
+#   DSPROBE_REPO_URL      default https://github.com/baditaflorin/go-url-categorizer-api (git uses CT108's credential helper)
+#   DSPROBE_BASE_URL      default https://domainscope.scrapetheworld.org
+#   DSPROBE_MARKETS       random /markets cells per run, default 20
+#   DSPROBE_USER          the user the probe runs as when this runs as root, default nobody; empty = the current user
+#   DSPROBE_TIMEOUT_SECONDS  default 720 (a run takes about 4.5 minutes)
+#   DSPROBE_STATE, DSPROBE_TEXTFILE_DIR  default /var/lib/domainscope-search-probe, /var/lib/prometheus-node-exporter/textfile
+# Exit: 0 search is fine, 2 a search check failed (the alert is the signal, not a unit failure), 3 the probe could not run or
+# wrote no valid metrics (a failed unit; the metrics say success 0).
+set -uo pipefail
+
+STATE=${DSPROBE_STATE:-/var/lib/domainscope-search-probe}
+TEXTFILE=${DSPROBE_TEXTFILE_DIR:-/var/lib/prometheus-node-exporter/textfile}
+REPO_URL=${DSPROBE_REPO_URL:-https://github.com/baditaflorin/go-url-categorizer-api}
+BASE_URL=${DSPROBE_BASE_URL:-https://domainscope.scrapetheworld.org}
+MARKETS=${DSPROBE_MARKETS:-20}
+RUN_AS=${DSPROBE_USER-nobody}
+TIMEOUT=${DSPROBE_TIMEOUT_SECONDS:-720}
+PROM=domainscope_search_probe.prom
+# What the probe reads from its repository: the script, the golden queries and the market catalog it picks cells from.
+PATHS=(scripts/search-probe.sh scripts/search-golden-queries.tsv src/internal/marketcell/catalog.json
+  frontend/src/features/market-cells/marketCells.snapshot.json)
+
+log() { echo "domainscope-search-probe: $*"; }
+err() { echo "domainscope-search-probe: $*" >&2; }
+for n in "$MARKETS" "$TIMEOUT"; do
+  [[ "$n" =~ ^[0-9]+$ ]] || { err "DSPROBE_MARKETS and DSPROBE_TIMEOUT_SECONDS must be whole numbers (got '$n')"; exit 3; }
+done
+start=$(date +%s)
+
+# write_failed_run <reason>: the metrics of a run that produced none of its own: success 0, one failed check. Same families as the probe.
+write_failed_run() {
+  local end target tmp
+  end=$(date +%s)
+  target=${BASE_URL//\\/\\\\}; target=${target//\"/\\\"}
+  tmp="$TEXTFILE/.$PROM.tmp.$$"
+  {
+    echo "# The probe left no valid metrics; written by domainscope-search-probe-run: $1"
+    for kv in "success 0" "failed_checks 1" "checks_total 0" "known_failing_checks 0" "known_failing_failed_checks 0" \
+      "duration_seconds $((end - start))" "last_run_timestamp_seconds $end"; do
+      echo "# TYPE domainscope_search_probe_${kv%% *} gauge"
+      echo "domainscope_search_probe_${kv%% *}{target=\"$target\"} ${kv#* }"
+    done
+  } > "$tmp" && chmod 0644 "$tmp" && mv -f "$tmp" "$TEXTFILE/$PROM" || { rm -f "$tmp"; err "could not write $TEXTFILE/$PROM"; }
+}
+
+# valid_metrics <file>: only the probe's own families, well formed, with the two series the alerts read.
+valid_metrics() {
+  [[ -s "$1" ]] || return 1
+  grep -qvE '^(# (HELP|TYPE) domainscope_search_probe_[a-z_]+ .*|domainscope_search_probe_[a-z_]+\{target="[^"\\]*"\} -?[0-9]+(\.[0-9]+)?)$' "$1" && return 1
+  grep -qE '^domainscope_search_probe_success\{[^}]*\} [01]$' "$1" && grep -qE '^domainscope_search_probe_last_run_timestamp_seconds\{' "$1"
+}
+
+# has_metrics_flag <rev>: 0 = the probe at <rev> has --metrics-file, 1 = it has not, 2 = the probe could not be read. The whole blob is read
+# first and matched after: `git show | grep -q` under pipefail failed 83 of 200 tries on CT108 (2026-10-21), because grep -q exits at the
+# first match (line 11), git gets SIGPIPE writing the rest and the pipeline reports 141, which read as "no --metrics-file".
+has_metrics_flag() {
+  local text
+  text=$(git -C "$STATE/repo" show "$1:scripts/search-probe.sh" 2>/dev/null) || return 2
+  [[ "$text" == *--metrics-file* ]]
+}
+
+export GIT_TERMINAL_PROMPT=0
+install -d -m 0755 "$STATE"
+
+# The probe at origin/main, fetched now (a blobless depth-1 clone: only the four files' blobs are ever downloaded). A fetch that fails runs
+# the last probe fetched: production search is still checked, by code that was on main a little earlier.
+ref="" sha=""
+if [[ ! -d "$STATE/repo/.git" ]]; then
+  rm -rf "$STATE/repo"
+  git clone --quiet --filter=blob:none --no-checkout --depth 1 --branch main "$REPO_URL" "$STATE/repo" 2>&1 || err "clone of $REPO_URL failed"
+fi
+if [[ -d "$STATE/repo/.git" ]] && git -C "$STATE/repo" remote set-url origin "$REPO_URL" &&
+  git -C "$STATE/repo" fetch --quiet --depth 1 origin "+refs/heads/main:refs/remotes/origin/main"; then
+  sha=$(git -C "$STATE/repo" rev-parse --verify -q refs/remotes/origin/main) && ref=main
+  if [[ -n "$ref" ]]; then
+    has_metrics_flag "$sha"; flag=$?
+    if [[ $flag -eq 1 ]]; then
+      err "the probe on main (${sha:0:9}) has no --metrics-file"
+      write_failed_run "the probe on main cannot write metrics"
+      exit 3
+    elif [[ $flag -ne 0 ]]; then
+      # the blob could not be fetched (a lazy fetch of the partial clone failed): like a failed fetch, run the last probe fetched
+      err "could not read scripts/search-probe.sh at ${sha:0:9}"
+      ref=""
+    fi
+  fi
+fi
+tree="$STATE/tree"
+if [[ -n "$ref" ]]; then
+  rm -rf "$tree.new" && mkdir -p "$tree.new" &&
+    git -C "$STATE/repo" archive "$sha" -- "${PATHS[@]}" | tar -x -C "$tree.new" &&
+    [[ -f "$tree.new/scripts/search-probe.sh" ]] || { err "could not read the probe at ${sha:0:9}"; rm -rf "$tree.new"; write_failed_run "could not read the probe"; exit 3; }
+  echo "$sha" > "$tree.new/.sha"
+  rm -rf "$tree" && mv "$tree.new" "$tree"
+elif [[ -f "$tree/scripts/search-probe.sh" ]]; then
+  err "fetch of $REPO_URL (or of the probe at main) failed; running the last fetched probe ($(cut -c1-9 "$tree/.sha" 2>/dev/null))"
+  ref="last fetched"
+else
+  err "fetch of $REPO_URL failed and no probe was fetched before"
+  exit 3
+fi
+log "probe $(cut -c1-9 "$tree/.sha") from $ref against $BASE_URL"
+
+# A run directory the probe may write to (its temp files and its metrics), nothing else.
+run="$STATE/run"
+rm -rf "$run" && install -d -m 0755 "$run" && install -d -m 0700 "$run/out" "$run/tmp"
+chmod -R a+rX "$tree"
+as=()
+if [[ -n "$RUN_AS" && "$(id -u)" -eq 0 ]]; then
+  chown "$RUN_AS:" "$run/out" "$run/tmp" || { err "no user $RUN_AS"; exit 3; }
+  as=(setpriv --reuid="$(id -u "$RUN_AS")" --regid="$(id -g "$RUN_AS")" --clear-groups --no-new-privs)
+fi
+timeout --kill-after=30 "$TIMEOUT" "${as[@]}" env -i PATH=/usr/local/bin:/usr/bin:/bin HOME="$run/tmp" TMPDIR="$run/tmp" LANG=C.UTF-8 \
+  bash "$tree/scripts/search-probe.sh" --all --markets "$MARKETS" --metrics-file "$run/out/$PROM" "$BASE_URL"
+rc=$?
+
+# The run directory was empty before this run: a metrics file there was written by this run.
+if valid_metrics "$run/out/$PROM"; then
+  tmp="$TEXTFILE/.$PROM.tmp.$$"
+  if cp "$run/out/$PROM" "$tmp" && chmod 0644 "$tmp" && mv -f "$tmp" "$TEXTFILE/$PROM"; then :; else
+    rm -f "$tmp"; err "could not write $TEXTFILE/$PROM"; exit 3
+  fi
+else
+  case $rc in 124|137) why="the probe ran past ${TIMEOUT}s and was stopped" ;; *) why="the probe exited $rc without valid metrics" ;; esac
+  err "$why"
+  write_failed_run "$why"
+  exit 3
+fi
+case $rc in
+  0) exit 0 ;;
+  1) exit 2 ;;
+  *) err "the probe exited $rc"; exit 3 ;;
+esac

@@ -1,0 +1,82 @@
+id: ws-0541-proxmox-vm-firewall-tag
+adr: "0067"
+title: "proxmox_network: a proxmox-vm-firewall tag that renders only the per-VM Proxmox firewall files"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/proxmox-vm-firewall-scope
+worktree_path: .claude/worktrees/vm-firewall-scope
+doc: docs/workstreams/ws-0541-proxmox-vm-firewall-tag.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+  - collections/ansible_collections/lv3/platform/roles/proxmox_network/README.md
+  - playbooks/guest-network-policy.yml
+  - collections/ansible_collections/lv3/platform/playbooks/guest-network-policy.yml
+  - tests/test_proxmox_network_vm_firewall_tag.py
+  - docs/runbooks/configure-guest-network-policy.md
+  - docs/runbooks/configure-agent-history.md
+  - build/platform-manifest.json
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0541-proxmox-vm-firewall-tag.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0541-proxmox-vm-firewall-tag.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0541_tracking
+      paths:
+        - docs/workstreams/ws-0541-proxmox-vm-firewall-tag.md
+      mode: exclusive
+    - id: proxmox_vm_firewall_scope
+      paths:
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/tasks/main.yml
+        - collections/ansible_collections/lv3/platform/roles/proxmox_network/README.md
+        - playbooks/guest-network-policy.yml
+        - collections/ansible_collections/lv3/platform/playbooks/guest-network-policy.yml
+        - tests/test_proxmox_network_vm_firewall_tag.py
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: proxmox_vm_firewall_runbook
+      paths:
+        - docs/runbooks/configure-guest-network-policy.md
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: proxmox_vm_firewall_agent_history_runbook
+      paths:
+        - docs/runbooks/configure-agent-history.md
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: proxmox_vm_firewall_platform_manifest
+      paths:
+        - build/platform-manifest.json
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-0541-proxmox-vm-firewall-tag.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "Add a proxmox-vm-firewall tag to the proxmox_network role: guest-network-policy.yml --tags proxmox-vm-firewall renders and installs only /etc/pve/firewall/<vmid>.fw, compiles, and restarts pve-firewall when a file changed, without replaying interfaces, nftables or forwarding and without stopping or starting a guest; the placeholder-address safety guards carry the always tag."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: "Until now the per-VM Proxmox firewall files were only rendered by the first play of guest-network-policy.yml, which a --limit on a guest skips and a full run replays together with the whole hypervisor network, so on 2026-10-29 one OpenBao rule for the agent-history guest was appended to /etc/pve/firewall/192.fw by hand. This adds a scoped, tagged way to render only those files. Nothing is applied by this change and no host is contacted; the first live use is a separate operator step."
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: "Tag the per-VM firewall tasks and the guards, keep the guest play from gathering facts in a scoped run, add the pinning test, the runbook section and the role README"
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not merged, no live-apply marker, nothing applied)
+    status: in_progress

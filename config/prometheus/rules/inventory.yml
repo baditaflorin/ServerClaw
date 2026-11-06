@@ -200,14 +200,14 @@ groups:
   - name: scanopy_backup
     rules:
       - alert: ScanopyBackupStale
-        expr: (time() - scanopy_backup_last_success_timestamp_seconds) > 36 * 3600
+        expr: (time() - scanopy_backup_last_success_timestamp_seconds) > 4 * 3600
         for: 10m
         labels:
           severity: warning
           service: inventory
         annotations:
-          summary: "No verified Scanopy database dump for more than 36h"
-          description: "scanopy-backup pulls a pg_dump of the Scanopy database from the 0docker hypervisor every night at 03:20 UTC and the last verified one is older than 36 hours. Losing that hypervisor now would lose daemon keys, credentials, tags and schedules. Check `journalctl -u scanopy-backup` on monitoring-lv3, SSH from it with /etc/scanopy-backup/id_ed25519 to the hypervisor (forced command `dump`; the host key is pinned in /etc/scanopy-backup/known_hosts), and that the scanopy-postgres-1 container runs."
+          summary: "No verified Scanopy database dump for more than 4h"
+          description: "scanopy-backup pulls a pg_dump of the Scanopy database from the 0docker hypervisor every hour at :20 UTC and the last verified one is older than 4 hours (a planned 0docker outage of an hour or two stays below this). Losing that hypervisor now would lose daemon keys, credentials, tags and schedules. Check `journalctl -u scanopy-backup` on monitoring-lv3, SSH from it with /etc/scanopy-backup/id_ed25519 to the hypervisor (forced command `dump`; the host key is pinned in /etc/scanopy-backup/known_hosts), and that the scanopy-postgres-1 container runs."
 
       - alert: ScanopyBackupMetricsAbsent
         expr: absent(scanopy_backup_last_success_timestamp_seconds)
@@ -238,3 +238,47 @@ groups:
         annotations:
           summary: "scanopy_backup_drill_* metrics are missing"
           description: "The scanopy-backup-drill textfile metrics are not being scraped (timer not running, no successful drill yet, textfile removed or unreadable by node_exporter, or monitoring-lv3 node_exporter not scraped). Check `systemctl status scanopy-backup-drill.timer` on monitoring-lv3."
+
+  # Added 2026-10-17 (scanopy-standby). A warm standby of the Scanopy server on the monitoring VM (0mcp fleet): the newest hourly dump is
+  # restored into a persistent Postgres there, the standby server stays stopped until a failover and is boot-tested weekly.
+  - name: scanopy_standby
+    rules:
+      - alert: ScanopyStandbyStale
+        expr: (time() - scanopy_standby_last_success_timestamp_seconds) > 6 * 3600
+        for: 30m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "The Scanopy standby database has not been refreshed for more than 6 hours"
+          description: "scanopy-standby-sync restores the newest hourly dump into the standby Postgres on monitoring-lv3 every hour. It has not completed for 6 hours: either no new verified dump arrives (see ScanopyBackupStale; the primary on 0docker may be down) or the restore fails. Check `journalctl -u scanopy-standby-sync` and `docker ps` on monitoring-lv3. While the standby is stale a failover would lose that much history."
+
+      - alert: ScanopyStandbyBootTestStale
+        expr: (time() - scanopy_standby_boot_test_last_success_timestamp_seconds) > 10 * 86400
+        for: 1h
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "The Scanopy standby server has not been boot-tested for more than 10 days"
+          description: "scanopy-standby-boot-test starts the standby Scanopy server against the restored data every Sunday 04:40 UTC and checks its health and daemon list. The last success is older than 10 days, so a failover may not work (image, memory, or a restore that does not boot). Run `sudo systemctl start scanopy-standby-boot-test.service` on monitoring-lv3 and read its journal."
+
+      - alert: ScanopyStandbyMetricsAbsent
+        expr: absent(scanopy_standby_last_success_timestamp_seconds)
+        for: 2h
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "scanopy_standby_* metrics are missing"
+          description: "The scanopy-standby textfile metrics are not being scraped (timer not running, no successful sync yet, textfile removed or unreadable by node_exporter, or monitoring-lv3 node_exporter not scraped). Check `systemctl status scanopy-standby-sync.timer` on monitoring-lv3."
+
+      - alert: ScanopyStandbyFailoverActive
+        expr: scanopy_standby_failover_active == 1
+        for: 5m
+        labels:
+          severity: warning
+          service: inventory
+        annotations:
+          summary: "The Scanopy standby server is running on monitoring-lv3"
+          description: "The standby Scanopy server (scanopy-standby-server) is up, which means a failover is in progress or was forgotten after a test. The hourly standby refresh is paused so the live data is not overwritten. Follow the 'Warm standby' section of docs/runbooks/scanopy-service-discovery.md to finish or roll back the failover."

@@ -43,6 +43,13 @@ playbooks:
       - service:artifact-cache-vm
       - inventory/hosts.yml
       - inventory/host_vars/proxmox-host.yml
+  playbooks/agent-history-vm.yml:
+    playbook_id: agent-history-vm
+    mutation_scope: platform
+    shared_surfaces:
+      - service:agent-history-vm
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox-host.yml
   playbooks/control-plane-recovery.yml:
     playbook_id: control-plane-recovery
     mutation_scope: platform

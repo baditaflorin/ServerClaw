@@ -1,0 +1,21 @@
+groups:
+  - name: pbs-usage
+    rules:
+      - alert: PBSUnreferencedChunksLingering
+        expr: pbs_usage_unreferenced_bytes > 3e11 and (pbs_usage_unreferenced_bytes offset 7d) > 3e11
+        for: 1h
+        labels:
+          severity: warning
+          service: pbs_datastore
+        annotations:
+          summary: "PBS holds {{ $value | humanize1024 }}B of unreferenced chunks, still high a week later"
+          description: "The weekly usage report found more than 300 GB of chunks that no snapshot references, and the previous report did too. Garbage normally disappears within about two GC cycles after a prune; if it lingers, check the GC schedule/last run (`proxmox-backup-manager garbage-collection list`) and `/var/lib/pbs-usage/last-report.txt` on the PBS VM."
+      - alert: PBSUsageReportStale
+        expr: time() - pbs_usage_last_run_timestamp_seconds > 10 * 86400
+        for: 1h
+        labels:
+          severity: warning
+          service: pbs_datastore
+        annotations:
+          summary: "The weekly PBS usage report has not run for over 10 days"
+          description: "pbs-usage-report.timer on the 0own PBS VM did not produce a report; the capacity breakdown and the unreferenced-chunk check are blind."

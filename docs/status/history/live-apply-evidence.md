@@ -8,6 +8,14 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
+| `image_gc_monitoring` | `2026-11-06-image-gc-monitoring-live-apply` |
+| `domainscope_live_drive_figures` | `2026-11-06-domainscope-live-drive-figures-live-apply` |
+| `docker_prod_logrotate` | `2026-11-06-retention-mainline-live-apply` |
+| `bounded_journal_retention` | `2026-11-06-retention-mainline-live-apply` |
+| `fleet_job_caches_trim_alerts` | `2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply` |
+| `pve_host_memory_budget_alert` | `2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply` |
+| `pve_backup_weekly_freshness` | `2026-10-30-pve-backup-weekly-freshness-monitoring-live-apply` |
+| `pve_host_free_space_alert` | `2026-10-26-pve-host-daily-low-alert-monitoring-live-apply` |
 | `grafana_sso` | `2026-10-14-ws-0512-grafana-sso-live-apply` |
 | `fork_services` | `2026-04-27-ws-0372-0fork-services-all-7-deployed` |
 | `restic_config_backup` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
@@ -190,6 +198,8 @@ This generated ledger records every capability-to-receipt mapping currently trac
 | `semaphore` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
 | `public_edge_publication` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
 | `plausible` | `ws-0520-plausible-clickhouse-log-retention-apply-receipt` |
+| `infer_runtime_docker` | `ws-0528-0infer-runtime-docker-apply-receipt` |
+| `infer_ci_postgres_access` | `ws-0528-0infer-ci-worker-apply-receipt` |
 | `identity_provider` | `adr-0491-authentik-keycloak-sunset-2026-08-30-apply-receipt` |
 | `authentik` | `ws-0517-authentik-runtime-upgrade-apply-receipt` |
 | `artifact_cache_slo` | `ws-0512-artifact-cache-prometheus-slo-20261012` |

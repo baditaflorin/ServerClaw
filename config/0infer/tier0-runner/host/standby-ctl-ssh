@@ -1,0 +1,18 @@
+#!/bin/bash
+# Forced command for the failover runner's ssh key on this hypervisor:
+#   restrict,from="10.70.10.40",command="/usr/local/sbin/standby-ctl-ssh" ssh-ed25519 ... t0runner-standby@infer-tier0
+# The key can run exactly the verbs below, nothing else. Matching is on the WHOLE string (no patterns, no word splitting of anything unvalidated); stdin is passed through
+# (a config bundle for --bundle). Every call is logged to the journal.
+logger -t standby-ctl-ssh "from=${SSH_CLIENT%% *} cmd=${SSH_ORIGINAL_COMMAND:-}"
+case "${SSH_ORIGINAL_COMMAND:-}" in
+  "status")            exec /usr/local/sbin/standby-ctl status ;;
+  "check")             exec /usr/local/sbin/standby-ctl check ;;
+  "check --bundle")    exec /usr/local/sbin/standby-ctl check --bundle ;;
+  "rehearse")          exec /usr/local/sbin/standby-ctl rehearse ;;
+  "rehearse --bundle") exec /usr/local/sbin/standby-ctl rehearse --bundle ;;
+  "activate")          exec /usr/local/sbin/standby-ctl activate ;;
+  "activate --bundle") exec /usr/local/sbin/standby-ctl activate --bundle ;;
+  "start-cron")        exec /usr/local/sbin/standby-ctl start-cron ;;
+  "deactivate")        exec /usr/local/sbin/standby-ctl deactivate ;;
+  *) echo '{"ok": false, "refusing": "command not allowed for this key"}'; exit 126 ;;
+esac

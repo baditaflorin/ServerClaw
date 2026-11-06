@@ -1,0 +1,11 @@
+[Unit]
+Description=Prune unused Docker images and old build cache
+Documentation=file:///usr/local/sbin/fleet-docker-prune
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/fleet-docker-prune
+Nice=10
+IOSchedulingClass=idle

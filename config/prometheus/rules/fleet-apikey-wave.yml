@@ -1,0 +1,63 @@
+# Added 2026-10-22. Alerts for apikey-wave, the unattended tool on the builder CT108 that moves pool replicas from the edge keystore URL to
+# their local keystore node (fleet-state scripts/ct108/apikey-wave.py, systemd apikey-wave.timer; claude_team KEYSTORE-MESH-PLAN section 33,
+# docs/runbooks/apikey-wave.md). Metrics come from its textfile /var/lib/prometheus-node-exporter/textfile/apikey-wave.prom, scraped from the
+# builder's node exporter (instance 100.114.37.21:9100).
+#
+# Three shapes: the tool stopped itself because something failed after a replica was rolled or a container check failed (`ApikeyWaveHalted`),
+# the tool stopped running while work remains (`ApikeyWaveSilent`), and the tool runs but nothing moves (`ApikeyWaveStalled`, for instance
+# Fleet Graph's /brief timing out for every pool while the dockerhost is saturated, as on 2026-10-22). All three are only about work that remains:
+# once every pool of the plan is done they fall silent by themselves, so the timer can be disabled and the textfile left behind.
+# The builder is stopped about 10 to 60 minutes every night by its vzdump job; the 3 hour threshold and the 10 minute waits outlast that.
+groups:
+  - name: fleet-apikey-wave
+    rules:
+      - alert: ApikeyWaveHalted
+        expr: fleet_apikey_wave_halted == 1
+        for: 10m
+        labels:
+          severity: warning
+          service: apikey-wave
+        annotations:
+          summary: "The keystore apikey wave halted itself and waits for a person"
+          description: >-
+            A pool failed after one of its replicas was rolled, or the check of its containers failed. The tool reverted the keys it had set but not
+            rolled and does nothing until it is resumed. On the builder: `python3 /usr/local/bin/apikey-wave.py --status` names the pool and the reason,
+            the pool's log is in /root/fleet-state/deploy-logs/apikey-wave/. Look, fix the pool, then `--resume`.
+          runbook_url: docs/runbooks/apikey-wave.md
+      - alert: ApikeyWaveSilent
+        expr: >-
+          ((time() - fleet_apikey_wave_last_run_timestamp_seconds) > 3 * 3600)
+          and on (instance)
+          ((fleet_apikey_wave_pools{state="total"} - ignoring (state) fleet_apikey_wave_pools{state="done"}) > 0)
+        for: 10m
+        labels:
+          severity: warning
+          service: apikey-wave
+        annotations:
+          summary: "The keystore apikey wave has not run for 3 hours and pools remain"
+          description: >-
+            fleet_apikey_wave_last_run_timestamp_seconds is old while pools of the plan are not done: apikey-wave.timer on the builder is disabled or
+            stopped, or the run dies before it writes its metrics (`systemctl status apikey-wave.service apikey-wave.timer`, `journalctl -u apikey-wave.service`).
+          runbook_url: docs/runbooks/apikey-wave.md
+      - alert: ApikeyWaveStalled
+        # `offset 24h`: only a series that already existed a day ago can have been flat for a day (a new wave with no pool done yet is not stalled)
+        # `max by (instance, host)` over a subquery: the target labels `identity` (verified/stale), `via` ... change when the builder is stopped by its nightly vzdump job (CT108, 01:30Z)
+        # and each value makes a series of its own. On 2026-10-22 02:03Z one sample of `done` carried identity="stale" (value 6); `delta(done[24h])` of that one-sample series is 0, so
+        # this alert fired from 22:03Z for a wave that had done 82 pools since. Merging the series first gives one continuous count; it moves, so it is not stalled.
+        expr: >-
+          (delta(max by (instance, host) (fleet_apikey_wave_pools{state="done"})[24h:5m]) == 0)
+          and on (instance)
+          (fleet_apikey_wave_pools{state="total"} offset 24h)
+          and on (instance)
+          ((fleet_apikey_wave_pools{state="total"} - ignoring (state) fleet_apikey_wave_pools{state="done"}) > 0)
+        for: 1h
+        labels:
+          severity: warning
+          service: apikey-wave
+        annotations:
+          summary: "The keystore apikey wave moved no pool in 24 hours"
+          description: >-
+            The tool runs but every pool is refused or waits: the events say why (`tail /root/fleet-state/state/apikey-wave/events.jsonl`). Usual causes: the
+            runner's preflight cannot get Fleet Graph's /brief while the dockerhost is saturated (environmental refusals, retried every 30 minutes), a
+            keystore node that does not answer /health, a closed PAUSE file, or the backup window. Nothing is broken by waiting; the point is to know.
+          runbook_url: docs/runbooks/apikey-wave.md

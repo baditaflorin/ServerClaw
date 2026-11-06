@@ -208,8 +208,8 @@ def test_committed_policy_passes_offline_checks_and_pins_mac_and_bastions():
     assert tps.check_policy(REAL_POLICY.read_text(), guard) == []
     pairs = {(g["src"], g["dst"]) for g in guard["required_accept"]}
     # operator Mac (florins-macbook-air) -> 0mcp and 0docker hypervisors/bastions on :22
-    assert ("100.116.198.31", "203.0.113.6:22") in pairs
-    assert ("100.116.198.31", "203.0.113.5:22") in pairs
+    assert ("100.116.198.31", "100.64.0.6:22") in pairs
+    assert ("100.116.198.31", "100.64.0.5:22") in pairs
 
 
 # --- metrics -----------------------------------------------------------------------------------------------------
@@ -397,3 +397,123 @@ def test_default_credential_route_is_the_documented_vault_wrapper():
     cmd = tps.VAULT_CMD
     assert cmd[0] == "systemd-run" and "/root/bin/fleet-vault.py" in cmd
     assert cmd[-2:] == ["raw", "tailscale_policy_oauth_client"]
+
+
+# --- Tailscale's stored form (hujson.Format) ---------------------------------------------------------------------
+
+VECTORS = json.loads((FIXTURES / "hujson-format-vectors.json").read_text(encoding="utf-8"))["cases"]
+WRITTEN_526 = (FIXTURES / "stored-form" / "written-like-526.hujson").read_text()
+STORED_527 = (FIXTURES / "stored-form" / "stored-like-527.hujson").read_text()
+
+
+@pytest.mark.parametrize("case", VECTORS, ids=[f"hujson-{i}" for i in range(len(VECTORS))])
+def test_stored_form_matches_hujsons_own_format_table(case):
+    assert tps.stored_form(case["in"]) == case["want"].removeprefix("\n") + "\n"
+
+
+@pytest.mark.parametrize("case", VECTORS, ids=[f"hujson-{i}" for i in range(len(VECTORS))])
+def test_stored_form_is_idempotent(case):
+    once = tps.stored_form(case["in"])
+    assert tps.stored_form(once) == once
+
+
+def test_stored_form_rejects_what_hujson_rejects():
+    for bad in ("[null,false,true,invalid]", '{"a": 1', "[1, }", '{"a" 1}', "// no newline at the end", "[NaN]"):
+        with pytest.raises(tps.SyncError):
+            tps.stored_form(bad)
+
+
+def test_the_80_column_rule_counts_bytes_not_characters():
+    # [ + two 35-character strings + ", " after each + ] = 76 columns: one line in ASCII, but 142 bytes as 2-byte UTF-8
+    ascii_list = '["%s", "%s"]' % ("a" * 33, "b" * 33)
+    utf8_list = '["%s", "%s"]' % ("é" * 33, "è" * 33)
+    assert tps.stored_form(ascii_list) == ascii_list + "\n"
+    assert tps.stored_form(utf8_list) == '[\n\t"%s",\n\t"%s"\n]\n' % ("é" * 33, "è" * 33)  # standard JSON in, so no trailing comma
+
+
+def test_526_as_written_becomes_527_and_only_whitespace_changes():
+    assert tps.stored_form(WRITTEN_526) == STORED_527.replace("as Tailscale stores them (#527).", "as written by hand.", 1)
+    assert tps.parse_hujson(WRITTEN_526) == tps.parse_hujson(STORED_527)
+    assert tps.stored_form(GOOD) == GOOD  # the fixture is stored-form already
+
+
+def test_check_fails_on_526_as_written_and_passes_on_527(tmp_path, capsys):
+    guard = tmp_path / "guard.json"
+    guard.write_text(json.dumps(GUARD))
+    for name, text, want in (("526.hujson", WRITTEN_526, 1), ("527.hujson", STORED_527, 0)):
+        f = tmp_path / name
+        f.write_text(text)
+        assert tps.main(["check", "--file", str(f), "--guard", str(guard)]) == want, name
+    err = capsys.readouterr().err
+    assert "not in the form Tailscale stores" in err and "tailscale_policy_sync.py fmt" in err
+    assert err.count("FAIL") == 1  # only the #526 file
+    assert '+\t\t\t"ip": [\n+\t\t\t\t"tcp:3002",' in err  # the diff shows what Tailscale would change
+
+
+def test_fmt_rewrites_to_the_stored_form_and_check_mode_only_reports(tmp_path):
+    f = tmp_path / "policy.hujson"
+    f.write_text(WRITTEN_526)
+    assert tps.main(["fmt", "--file", str(f), "--check"]) == 1 and f.read_text() == WRITTEN_526
+    assert tps.main(["fmt", "--file", str(f)]) == 0
+    assert f.read_text() == tps.stored_form(WRITTEN_526)
+    assert tps.main(["fmt", "--file", str(f), "--check"]) == 0
+
+
+def _git_blob(rev: str, path: str = "config/tailscale/policy.hujson") -> str | None:
+    import shutil
+    import subprocess
+
+    if shutil.which("git") is None:
+        return None
+    res = subprocess.run(["git", "-C", str(REPO_ROOT), "show", f"{rev}:{path}"], capture_output=True, text=True)
+    return res.stdout if res.returncode == 0 else None
+
+
+@pytest.mark.parametrize(
+    "as_written, as_stored",
+    [
+        ("d5eab4b4", "86be94ed"),  # #526 as merged; #527, byte-identical to the live rollback copy of 2026-10-20 16:06Z
+        ("ea34b8c6", "f105a4ac"),  # #533 as the edge-grants job wrote it; #534, the live form after the 06:37Z hand apply
+    ],
+)
+def test_the_real_history_check_fails_as_written_and_passes_as_tailscale_stored_it(tmp_path, as_written, as_stored):
+    written, stored = _git_blob(as_written), _git_blob(as_stored)
+    if written is None or stored is None:
+        pytest.skip("needs git and the private repository's history (not in a shallow clone or the public snapshot)")
+    assert tps.stored_form(written) == stored  # what Tailscale did to the posted text
+    guard = tmp_path / "guard.json"
+    guard.write_text(json.dumps(GUARD))
+    for text, want in ((written, 1), (stored, 0)):
+        f = tmp_path / "policy.hujson"
+        f.write_text(text)
+        assert tps.stored_form_errors(text) == [] if want == 0 else tps.stored_form_errors(text)
+        assert tps.main(["fmt", "--file", str(f), "--check"]) == want
+
+
+def test_the_committed_policy_is_in_the_stored_form():
+    if not REAL_POLICY.exists():
+        pytest.skip("sanitized snapshot: the real policy is private-repo only")
+    assert tps.stored_form_errors(REAL_POLICY.read_text()) == []
+
+
+def test_apply_records_itself_for_the_reconciler(env):
+    run("plan", *env["base"], *env["state"])
+    assert run("apply", *env["base"], *env["state"], "--yes") == 0
+    log = env["tmp"] / "state" / tps.APPLIES_LOG
+    (entry,) = [json.loads(line) for line in log.read_text().splitlines()]
+    assert (entry["etag_before"], entry["etag_after"], entry["tool"]) == ('"etag-1"', '"etag-2"', "tailscale_policy_sync")
+    assert entry["file_sha256"] == tps.sha256(env["pol"].read_text()) and "rollback" in entry
+    assert oct(log.stat().st_mode & 0o777) == "0o600"
+
+
+def test_a_refused_apply_records_nothing(env):
+    env["fake"].set_status = 412
+    run("plan", *env["base"], *env["state"])
+    assert run("apply", *env["base"], *env["state"], "--yes") == 1
+    assert not (env["tmp"] / "state" / tps.APPLIES_LOG).exists()
+
+
+def test_apply_warns_that_it_bypasses_the_reconciler(env, capsys):
+    run("plan", *env["base"], *env["state"])
+    run("apply", *env["base"], *env["state"], "--yes")
+    assert "FleetTailnetPolicyChangedOutsideReconciler" in capsys.readouterr().err

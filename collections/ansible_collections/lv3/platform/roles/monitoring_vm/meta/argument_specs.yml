@@ -166,6 +166,12 @@ argument_specs:
         required: false
         description:
           - Known-real endpoints that Scanopy has no port data for, written to extra-endpoints.json.
+      monitoring_scanopy_sd_ignored_hosts:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Inventory host names that are switched off on purpose; no node_exporter is expected there while they do not answer (written to ignored-hosts.json).
       monitoring_scanopy_sd_node_drop_address_regex:
         type: str
         required: false
@@ -262,12 +268,12 @@ argument_specs:
         type: str
         required: false
         description:
-          - systemd OnCalendar expression of the timer (default every day 03:20 UTC).
+          - systemd OnCalendar expression of the timer (default every hour at :20 UTC).
       monitoring_scanopy_backup_environment:
         type: dict
         required: false
         description:
-          - Optional Environment= overrides for the backup unit (BACKUP_SSH, BACKUP_SSH_PORT, BACKUP_KEEP, BACKUP_MIN_BYTES).
+          - Optional Environment= overrides for the backup unit (BACKUP_SSH, BACKUP_SSH_PORT, BACKUP_KEEP_HOURS, BACKUP_KEEP_DAYS, BACKUP_MIN_BYTES).
       monitoring_scanopy_backup_drill_enabled:
         type: bool
         required: false
@@ -283,6 +289,31 @@ argument_specs:
         required: false
         description:
           - Image of the throwaway Postgres (same major version as the Scanopy database).
+      monitoring_scanopy_standby_enabled:
+        type: bool
+        required: false
+        description:
+          - Keep a warm standby of the Scanopy server on this VM (hourly restore of the newest dump, weekly boot test).
+      monitoring_scanopy_standby_server_image:
+        type: str
+        required: false
+        description:
+          - Scanopy server image of the standby; keep it on the primary's version.
+      monitoring_scanopy_standby_postgres_image:
+        type: str
+        required: false
+        description:
+          - Postgres image of the standby; keep the major version equal to the primary's (17).
+      monitoring_scanopy_standby_sync_on_calendar:
+        type: str
+        required: false
+        description:
+          - systemd OnCalendar expression of the hourly standby refresh (default every hour at :35 UTC).
+      monitoring_scanopy_standby_boot_test_on_calendar:
+        type: str
+        required: false
+        description:
+          - systemd OnCalendar expression of the weekly standby boot test (default Sundays 04:40 UTC).
       monitoring_influxdb_url:
         type: str
         required: true

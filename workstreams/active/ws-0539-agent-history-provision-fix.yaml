@@ -1,0 +1,66 @@
+id: ws-0539-agent-history-provision-fix
+adr: "0494"
+title: "Agent-history provisioning play: no stop before the guest's first boot has finished, and no docker.io in its cloud-init packages"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/agent-history-provision-fix
+worktree_path: .claude/worktrees/ah-provision
+doc: docs/workstreams/ws-0539-agent-history-provision-fix.md
+depends_on:
+  - ws-0534-agent-history-vm
+  - ws-0537-agent-history-activate
+conflicts_with: []
+shared_surfaces:
+  - playbooks/agent-history-vm.yml
+  - tests/test_agent_history_vm_playbook.py
+  - inventory/host_vars/proxmox-host.yml
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0539-agent-history-provision-fix.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0539-agent-history-provision-fix.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0539_tracking
+      paths:
+        - docs/workstreams/ws-0539-agent-history-provision-fix.md
+      mode: exclusive
+    - id: agent_history_provision_play
+      paths:
+        - playbooks/agent-history-vm.yml
+        - tests/test_agent_history_vm_playbook.py
+      mode: shared_contract
+      contract: agent-history-activation-v1
+    - id: agent_history_guest_declaration
+      paths:
+        - inventory/host_vars/proxmox-host.yml
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-0539-agent-history-provision-fix.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "Fix the agent-history provisioning play so it never stops the VM before cloud-init's first boot has finished (graceful restart only when hardware settings are pending), and drop docker.io from that guest's cloud-init packages."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: "Found on the first real provisioning of VM 155: a forced qm stop seconds after the first start cut cloud-init off and the guest never got its network. The fix defers any restart until the first boot is done and makes it graceful. docker.io is dropped from the guest's cloud-init packages because the docker_runtime role installs Docker CE and removes docker.io."
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: "Replace the forced stop with a deferred graceful restart, drop docker.io from the guest packages, add static tests"
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not merged, no live-apply marker, nothing applied)
+    status: in_progress

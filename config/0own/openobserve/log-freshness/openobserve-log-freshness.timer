@@ -1,0 +1,10 @@
+[Unit]
+Description=OpenObserve host_logs freshness per hypervisor, every 2 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+AccuracySec=15s
+
+[Install]
+WantedBy=timers.target

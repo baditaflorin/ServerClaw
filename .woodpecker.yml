@@ -18,8 +18,11 @@ steps:
       - ANSIBLE_CONFIG="$PWD/ansible.cfg" ANSIBLE_COLLECTIONS_PATH="$PWD/collections" make syntax-check-woodpecker
       - ./scripts/validate_repo.sh json health-probes agent-standards
       - uv run --with pytest --with pyyaml --with jsonschema --with jinja2 python -m pytest tests/test_generate_platform_vars.py tests/test_postgres_vm_access_policy.py tests/test_woodpecker_playbook.py tests/test_woodpecker_runtime_role.py tests/test_woodpecker_client.py tests/test_woodpecker_workflow_contract.py tests/test_authentik_identity_reconcile.py tests/test_gitea_authentik_e2e.py tests/test_gitea_runtime_role.py tests/test_validate_service_completeness.py tests/test_subdomain_catalog.py tests/test_linux_guest_firewall_role.py tests/test_grafana_sso_role.py tests/test_grafana_authentik_e2e.py tests/test_librechat_authentik_e2e.py tests/test_librechat_tool_specs.py tests/test_parse_lynis_report.py tests/test_security_posture_report.py tests/test_upgrade_container_image.py tests/test_sbom_scanner.py tests/test_container_image_policy.py tests/test_vulnerability_budget.py tests/test_patched_runtime_images.py tests/test_certificate_validator_retiring_routes.py tests/test_ws0456_deployment_aware_cert_validation.py tests/test_ws0461_cert_validator_multi_deployment.py -q
+      - uv run --with pytest --with pyyaml python -m pytest tests/test_fleet_job_caches_trim_rules.py -q
+      - python3 -m unittest discover -s tests -p test_domainscope_drive_figures.py
+      - uv run --with pytest --with pyyaml python -m pytest tests/test_fleet_image_gc_rules.py tests/test_adopted_prometheus_rules.py tests/test_publication_capture_manifest.py tests/test_publication_network_policy.py -q
       - uv run --with pytest --with pyyaml --with jinja2 python -m pytest tests/test_plausible_playbook.py tests/test_monitoring_prometheus_codification.py -q
-      - uv run --with pytest --with pyyaml python -m pytest tests/test_ci_provider_policy.py tests/test_api_gateway_runtime_role.py tests/test_fleet_backup_freshness.py -q
+      - uv run --with pytest --with pyyaml python -m pytest tests/test_ci_provider_policy.py tests/test_api_gateway_runtime_role.py tests/test_fleet_backup_freshness.py tests/test_tier0_vault_standby_drill.py tests/test_tier0_vault_standby_courier.py tests/test_tier0_vault_standby_receiver.py tests/test_pve_thp_reclaim.py tests/test_tier0_controller.py tests/test_tier0_controller_replay.py tests/test_tier0_executor.py tests/test_tier0_domainscope_path.py tests/test_standby_ctl.py tests/test_pbs_group_retention.py tests/test_pbs_prune_whatif.py tests/test_tier0_edge_compat_wrapper.py tests/test_tier0_rehearsal_metrics.py tests/test_tier0_keystore_mesh_promtool.py tests/test_public_edge_probe_target_alert.py tests/test_fleet_edge_probe_vantage_alert.py tests/test_fleet_postgres_unit_alert.py tests/test_fleet_loops_rules.py tests/test_standby_edge_grants.py tests/test_standby_edge_grants_job.py tests/test_tier0_edge_grants_wrapper.py tests/test_tier0_edge_grants_install.py tests/test_tailscale_policy_reconcile.py tests/test_tailscale_policy_sync.py tests/test_tier0_alert_rules.py tests/test_vzdump_guard_rules.py tests/test_tier0_vault_handback_wrapper.py tests/test_guest_cloud_init_keeps_ssh_hostkeys.py tests/test_fe_runs_janitor.py tests/test_domainscope_search_probe.py tests/test_domainscope_drive_refresh.py tests/test_dockerhost_state_backup.py tests/test_fleet_backup_offhost_check.py tests/test_fleet_backup_offhost_rules.py tests/test_fleet_ci_host_pressure_rules.py tests/test_fleet_disk_health_rules.py tests/test_fleet_ci_cache_prune_rules.py tests/test_fleet_pool_routing_rules.py tests/test_zram_swap_unit.py tests/test_dockerhost_pbs_relay.py tests/test_apikey_wave_rules.py tests/test_docker_build_lv3_config.py tests/test_ct_names_0own_scripts.py tests/test_public_policy_test_portability.py -q
     when:
       - event: [manual, push, pull_request]
 
@@ -30,8 +33,20 @@ steps:
   validate-tailscale-policy:
     image: python:3.12-slim
     commands:
+      # git: the tests that read the policy's own history (#526 -> #527, #533 -> #534) and the git source skip themselves without it
+      - apt-get update
+      - apt-get install -y --no-install-recommends git ca-certificates
       - python3 -m pip install --no-cache-dir pytest==8.3.4 pyyaml==6.0.2
-      - python3 scripts/tailscale_policy_sync.py check
+      # also fails a policy that is not in the form Tailscale stores (hujson.Format): `python3 scripts/tailscale_policy_sync.py fmt` writes it
+      - |
+        if [ -f config/tailscale/policy.hujson ]; then
+          python3 scripts/tailscale_policy_sync.py check
+        elif [ -f config/publication-sanitization.yaml ]; then
+          echo 'Missing deployment policy in the private source checkout' >&2
+          exit 1
+        else
+          echo 'Deployment policy is excluded from the public snapshot; fixture tests still run'
+        fi
       - python3 scripts/tailscale_policy_reconcile.py --help > /dev/null
       - python3 -m pytest tests/test_tailscale_policy_sync.py tests/test_tailscale_policy_reconcile.py -q
     when:
@@ -46,6 +61,69 @@ steps:
             - tests/test_tailscale_policy_sync.py
             - tests/test_tailscale_policy_reconcile.py
             - tests/fixtures/tailscale/**
+            - .woodpecker.yml
+
+  # Network policy as code (config/network-policy/): the one place the allowed flows of the VMs of a hypervisor are decided
+  # (Proxmox VM firewall, guest nftables, DOCKER-USER). Offline checks ONLY: the file is valid, every layer renders back to what it
+  # describes, and it introduces no finding beyond the baseline. CI holds no credential and never reads a host; the live drift
+  # check runs on CT108 (docs/runbooks/network-policy.md). The apply path is tested against fake qm/nft/pve-firewall/systemd-run shims
+  # (tests/test_netpolicy_apply.py): CI never touches a host for it either.
+  validate-network-policy:
+    image: python:3.12-slim
+    commands:
+      # git and bash: tests/test_netpolicy_run.py (the CT108 wrapper against a local git origin) skips itself without them, and did in CI until now
+      - apt-get update
+      - apt-get install -y --no-install-recommends bash git ca-certificates
+      - python3 -m pip install --no-cache-dir pytest==8.3.4 pyyaml==6.0.2
+      - python3 scripts/netpolicy.py check
+      - python3 -m pytest tests/test_netpolicy.py tests/test_netpolicy_apply.py tests/test_netpolicy_rules.py tests/test_netpolicy_run.py -q
+    when:
+      - event: manual
+      - event: [push, pull_request]
+        path:
+          include:
+            - config/network-policy/**
+            - config/0docker/docker-prod-lan-ports/**
+            - config/systemd/netpolicy-*
+            - config/prometheus/rules/netpolicy.yml
+            - scripts/netpolicy.py
+            - scripts/netpolicy-*
+            - tests/test_netpolicy.py
+            - tests/test_netpolicy_apply.py
+            - tests/test_netpolicy_rules.py
+            - tests/test_netpolicy_run.py
+            - tests/promtool/netpolicy_rules_test.yml
+            - .woodpecker.yml
+
+  # Host-local configuration as code (config/hostconf/): the systemd drop-ins, sysctl files and Postgres conf.d files that live on a host and
+  # nowhere else, with the setting each must produce. Offline checks ONLY: the manifest and the files are valid, nothing credential-like is in
+  # them, and the tool's apply path (atomic write, backup, reload, verify, rollback) runs against fake systemctl/sysctl/psql shims in a temporary
+  # root. CI holds no credential and never reads a host; drift and apply are run by an operator (docs/runbooks/host-local-config.md).
+  # The daily check that ships the result to the monitoring VM (scripts/hostconf-scheduled.sh) runs here against a shim ssh and a fake tool, and the
+  # alerts on its metrics (config/prometheus/rules/fleet-hostconf.yml) are checked against what the tool writes; promtool itself runs on the monitoring VM.
+  validate-hostconf:
+    image: python:3.12-slim
+    commands:
+      # git: the job's sparse depth-1 checkout of main is tested against a local origin, and the test skips itself without it
+      - apt-get update
+      - apt-get install -y --no-install-recommends git ca-certificates
+      - python3 -m pip install --no-cache-dir pytest==8.3.4 pyyaml==6.0.2
+      - python3 scripts/hostconf.py check
+      - python3 -m pytest tests/test_hostconf.py tests/test_hostconf_rules.py tests/test_hostconf_scheduled.py -q
+    when:
+      - event: manual
+      - event: [push, pull_request]
+        path:
+          include:
+            - config/hostconf/**
+            - config/prometheus/rules/fleet-hostconf.yml
+            - scripts/hostconf.py
+            - scripts/hostconf-scheduled.sh
+            - tests/test_hostconf.py
+            - tests/test_hostconf_rules.py
+            - tests/test_hostconf_scheduled.py
+            - tests/promtool/fleet_hostconf_rules_test.yml
+            - docs/runbooks/host-local-config.md
             - .woodpecker.yml
 
   validate-secret-contract:

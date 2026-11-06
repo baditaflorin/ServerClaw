@@ -1,0 +1,16 @@
+[Unit]
+Description=Sample Woodpecker step container resource usage
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=root
+EnvironmentFile=/etc/default/woodpecker-build-resources
+ExecStart=/usr/bin/python3 /usr/local/libexec/fleet-woodpecker-build-resources --worker ${WOODPECKER_METRICS_WORKER} --output ${WOODPECKER_METRICS_OUTPUT}
+RuntimeMaxSec=25s
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+ReadWritePaths=/var/lib/woodpecker-build-metrics /var/lib/prometheus/node-exporter /var/lib/prometheus-node-exporter/textfile

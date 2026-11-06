@@ -107,7 +107,46 @@ def jobs_by_name(config: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {job["job_name"]: job for job in config["scrape_configs"]}
 
 
-def test_production_render_restores_fleet_exporters_public_edge_and_remote_write() -> None:
+def test_scanopy_relabel_keeps_cleanup_alert_inputs_without_broad_systemd_cardinality() -> None:
+    relabels = jobs_by_name(render_prometheus(use_host_vars=True))["node_exporter"]["metric_relabel_configs"]
+
+    def retained(metric: str, **labels: str) -> dict[str, str] | None:
+        labels = {"__name__": metric, **labels}
+        for config in relabels:
+            regex = config.get("regex", "(.*)")
+            value = ";".join(labels.get(key, "") for key in config.get("source_labels", []))
+            action = config.get("action", "replace")
+            match = re.fullmatch(regex, value)
+            if action == "drop" and match:
+                return None
+            if action == "replace" and match:
+                labels[config["target_label"]] = config.get("replacement", "$1")
+            if action == "labeldrop":
+                labels = {key: value for key, value in labels.items() if not re.fullmatch(regex, key)}
+        return labels
+
+    for name in ("fleet-image-gc-infer.service", "fleet-image-gc-mcp-vm120.service"):
+        result = retained("node_systemd_unit_state", name=name, state="failed")
+        assert result == {"__name__": "node_systemd_unit_state", "name": name, "state": "failed"}
+    assert retained("node_systemd_timer_last_trigger_seconds", name="fleet-image-gc-infer.timer")
+    assert retained("fleet_image_gc_timer_expected_since_seconds", name="fleet-image-gc-infer.timer")
+    assert retained("node_systemd_unit_state", name="postgresql@17-main.service", state="active")
+    assert retained("node_systemd_unit_state", name="postgresql@18-main.service", state="active")
+    assert retained("node_systemd_unit_state", name="builder-disk-gc.service", state="failed")
+    assert retained("node_systemd_unit_state", name="builder-disk-gc.service", state="active") is None
+    assert retained("node_systemd_unit_state", name="builder-disk-gc-other.service", state="failed") is None
+    assert retained("node_systemd_unit_state", name="postgresql@17-main.service", state="failed") is None
+    assert retained("node_systemd_unit_state", name="postgresql.service", state="active") is None
+    for metric, name in (("node_systemd_unit_state", "unrelated.service"),
+                         ("node_systemd_unit_start_time_seconds", "fleet-image-gc-infer.service"),
+                         ("node_systemd_timer_last_trigger_seconds", "unrelated.timer")):
+        assert retained(metric, name=name) is None
+    assert retained("node_network_receive_bytes_total", device="veth123") is None
+    assert retained("node_network_receive_bytes_total", device="eth0")
+    assert retained("node_boot_time_seconds")
+
+
+def test_production_render_restores_fleet_exporters_and_public_edge_without_remote_write() -> None:
     config = render_prometheus(use_host_vars=True)
     jobs = jobs_by_name(config)
 
@@ -123,13 +162,8 @@ def test_production_render_restores_fleet_exporters_public_edge_and_remote_write
         "/etc/prometheus/file_sd/public-critical-targets.yml"
     ]
 
-    remote_write = config["remote_write"]
-    assert len(remote_write) == 1
-    assert remote_write[0]["url"].endswith("/api/default/prometheus/api/v1/write")
-    assert remote_write[0]["basic_auth"]["password_file"] == (
-        "/run/credentials/0mcp-prometheus.service/openobserve_password"
-    )
-    assert "password" not in remote_write[0]["basic_auth"]
+    # OpenObserve remote_write was disabled on 2026-10-14 (about 2,200 unqueried metric streams duplicating this Prometheus).
+    assert "remote_write" not in config
 
 
 def test_production_render_static_jobs_are_exactly_the_reviewed_set() -> None:
@@ -138,6 +172,10 @@ def test_production_render_static_jobs_are_exactly_the_reviewed_set() -> None:
 
     # Anything added here must be a reviewed, reachable target; node_exporter targets come from Scanopy file_sd.
     assert static_jobs == {
+        "infer_node_exporter_via_tailscale",  # 0infer hypervisor + PostgreSQL VM: Scanopy SD has no 10.70.10.0/24 fleet yet
+        "pipe_node_exporter_via_tailscale",  # 0pipe Proxmox host + build VM 100 + runtime VM 101: Scanopy SD does not cover its 10.80.10.0/24 LAN; tailnet only (host and build VM up 2026-10-29)
+        "tier0_node_exporter",  # tier-0 VM (infer-tier0) node_exporter through the 0infer host forward :9101
+        "alertmanager_tier0",  # Alertmanager #2 (HA mesh replica) on the tier-0 VM; kept out of job "alertmanager" on purpose
         "prometheus",
         "tempo",
         "otelcol-contrib",
@@ -190,7 +228,7 @@ def test_production_render_uses_scanopy_file_sd_for_inventory_targets() -> None:
         render_prometheus(use_host_vars=True, monitoring_scanopy_sd_node_drop_address_regex="100\\.1\\.1\\.1:9100")
     )["node_exporter"]
     drop = next(rule for rule in guarded["relabel_configs"] if rule.get("action") == "drop")
-    assert re.fullmatch(drop["regex"], "100.1.1.1:9100") and not re.fullmatch(drop["regex"], "203.0.113.3:9100")
+    assert re.fullmatch(drop["regex"], "100.1.1.1:9100") and not re.fullmatch(drop["regex"], "100.64.0.3:9100")
 
     blackbox = jobs["scanopy-blackbox"]
     assert blackbox["file_sd_configs"][0]["files"] == ["/etc/prometheus/file_sd/scanopy-blackbox.json"]
@@ -209,7 +247,7 @@ def test_stale_catalog_targets_are_dropped_from_the_generated_blackbox_jobs() ->
             "https://100.64.0.1/health",
         ):
             assert re.fullmatch(first["regex"], stale), f"{stale} must be dropped"
-        for live in ("https://ci.0exec.com/", "http://203.0.113.9:9100/"):
+        for live in ("https://ci.0exec.com/", "http://100.64.0.9:9100/"):
             assert not re.fullmatch(first["regex"], live), f"{live} must be kept"
 
 
@@ -272,9 +310,9 @@ def test_remote_write_credential_is_a_systemd_credential_reference_never_a_value
     assert names.index("Refuse to continue when an encrypted Prometheus credential is missing") < names.index(
         "Render Prometheus configuration"
     )
-    assert host_vars["monitoring_prometheus_remote_write_credentials"] == [
-        {"name": "openobserve_password", "encrypted_file": "/etc/credstore.encrypted/openobserve_password"}
-    ]
+    # remote_write is disabled in production (see inventory/host_vars/monitoring.yml); the mechanism above stays for when it is restored.
+    assert host_vars["monitoring_prometheus_remote_write_credentials"] == []
+    assert host_vars["monitoring_prometheus_remote_write_targets"] == []
 
 
 def test_scanopy_tasks_keep_the_api_key_out_of_git_and_private() -> None:
@@ -339,6 +377,10 @@ def test_discovery_and_watchdog_rules_are_shipped_from_the_repo() -> None:
         "ScanopyBackupMetricsAbsent",
         "ScanopyBackupDrillStale",
         "ScanopyBackupDrillMetricsAbsent",
+        "ScanopyStandbyStale",
+        "ScanopyStandbyBootTestStale",
+        "ScanopyStandbyMetricsAbsent",
+        "ScanopyStandbyFailoverActive",
     }
     assert [rule["alert"] for rule in watchdog_rules] == ["Watchdog"]
     assert watchdog_rules[0]["expr"] == "vector(1)"
@@ -573,8 +615,8 @@ def test_scanopy_discover_is_off_by_default_and_schedules_every_target_once_per_
     assert include["when"] == "monitoring_scanopy_discover_enabled | bool"
     # One start per 15-minute run and every slot is a distinct quarter hour, so no two hosts are ever started together.
     assert (
-        len(times) == len(set(times)) == 41
-    )  # every Scanopy daemon: 16 Docker VMs, 4 hypervisor daemons, the rollout guests and the VMs without Docker
+        len(times) == len(set(times)) == 37
+    )  # every Scanopy daemon: Docker VMs, Proxmox daemons, rollout guests and VMs without Docker (43 until pve01's six left on 2026-10-21)
     assert all(re.fullmatch(r"([01][0-9]|2[0-3]):[0-5][0-9]", value) for value in times)
     assert all(int(value.split(":")[1]) % 15 == 0 for value in times)
     # The large Docker host keeps a 45-minute window to itself.
@@ -656,12 +698,12 @@ def test_scanopy_onboard_is_off_by_default_and_wired_into_the_role_and_monitorin
     assert include["ansible.builtin.include_tasks"] == "scanopy_onboard.yml"
     assert include["when"] == "monitoring_scanopy_onboard_enabled | bool"
     # One entry per hypervisor, each with the relay its guests poll (same relays as the retag/discover documentation).
-    assert set(fleets) == {"0docker", "0mcp", "0own", "pve01"}
+    assert set(fleets) == {"0docker", "0mcp", "0own", "0infer"}  # 0database (pve01) retired 2026-10-21
     assert {name: fleet["relay_url"] for name, fleet in fleets.items()} == {
         "0docker": "http://10.10.10.1:60072",
         "0mcp": "http://10.10.10.1:60072",
         "0own": "http://10.60.10.1:60072",
-        "pve01": "http://10.50.0.1:60072",
+        "0infer": "http://10.70.10.1:60072",
     }
     # The API key is the one the retag tasks install; this role never installs or replaces one.
     assert defaults["monitoring_scanopy_onboard_api_key_file"] == "{{ monitoring_scanopy_retag_api_key_file }}"
@@ -726,9 +768,13 @@ def test_scanopy_backup_is_off_by_default_hardened_and_alerted() -> None:
     defaults = yaml.safe_load((MONITORING_ROLE / "defaults" / "main.yml").read_text())
     host_vars = yaml.safe_load(MONITORING_HOST_VARS.read_text())
     main_tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "main.yml").read_text())
-    include = next(task for task in main_tasks if task.get("name") == "Install the nightly Scanopy database backup pull")
+    include = next(
+        task for task in main_tasks if task.get("name") == "Install the nightly Scanopy database backup pull"
+    )
     tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "scanopy_backup.yml").read_text())
-    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"]["options"]
+    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"][
+        "options"
+    ]
     context = _context(MONITORING_ROLE / "defaults" / "main.yml", host_vars)
     env = _environment(MONITORING_ROLE / "templates")
     service = env.get_template("scanopy-backup.service.j2").render(**context)
@@ -737,34 +783,122 @@ def test_scanopy_backup_is_off_by_default_hardened_and_alerted() -> None:
     group = next(group for group in inventory["groups"] if group["name"] == "scanopy_backup")
     rules = {rule["alert"]: rule for rule in group["rules"]}
 
-    assert defaults["monitoring_scanopy_backup_enabled"] is False and host_vars["monitoring_scanopy_backup_enabled"] is True
+    assert (
+        defaults["monitoring_scanopy_backup_enabled"] is False
+        and host_vars["monitoring_scanopy_backup_enabled"] is True
+    )
     assert include["ansible.builtin.include_tasks"] == "scanopy_backup.yml"
     assert include["when"] == "monitoring_scanopy_backup_enabled | bool"
     keygen = next(task for task in tasks if task["name"] == "Generate the dedicated backup SSH key (only when missing)")
     assert keygen["ansible.builtin.command"]["creates"] == "{{ monitoring_scanopy_backup_ssh_key_file }}"
-    private_dirs = [item for task in tasks if "ansible.builtin.file" in task for item in task["loop"] if item["path"].endswith("backup_dir }}")]
+    private_dirs = [
+        item
+        for task in tasks
+        if "ansible.builtin.file" in task
+        for item in task["loop"]
+        if item["path"].endswith("backup_dir }}")
+    ]
     assert private_dirs and all(item["mode"] == "0700" for item in private_dirs)  # dumps hold credential material
-    for name in ("monitoring_scanopy_backup_enabled", "monitoring_scanopy_backup_on_calendar", "monitoring_scanopy_backup_environment"):
+    for name in (
+        "monitoring_scanopy_backup_enabled",
+        "monitoring_scanopy_backup_on_calendar",
+        "monitoring_scanopy_backup_environment",
+    ):
         assert name in specs
     for hardening in ("NoNewPrivileges=yes", "ProtectSystem=strict", "PrivateTmp=yes", "ProtectHome=yes", "UMask=0077"):
         assert hardening in service
     assert "ReadWritePaths=/var/backups/scanopy /var/lib/prometheus/node-exporter /etc/scanopy-backup\n" in service
-    assert "OnCalendar=*-*-* 03:20:00 UTC" in timer
-    assert set(rules) == {"ScanopyBackupStale", "ScanopyBackupMetricsAbsent", "ScanopyBackupDrillStale", "ScanopyBackupDrillMetricsAbsent"}
-    assert rules["ScanopyBackupDrillStale"]["expr"] == "(time() - scanopy_backup_drill_last_success_timestamp_seconds) > 10 * 86400"
-    assert rules["ScanopyBackupDrillMetricsAbsent"]["expr"] == "absent(scanopy_backup_drill_last_success_timestamp_seconds)"
+    assert "OnCalendar=*-*-* *:20:00 UTC" in timer
+    assert set(rules) == {
+        "ScanopyBackupStale",
+        "ScanopyBackupMetricsAbsent",
+        "ScanopyBackupDrillStale",
+        "ScanopyBackupDrillMetricsAbsent",
+    }
+    assert (
+        rules["ScanopyBackupDrillStale"]["expr"]
+        == "(time() - scanopy_backup_drill_last_success_timestamp_seconds) > 10 * 86400"
+    )
+    assert (
+        rules["ScanopyBackupDrillMetricsAbsent"]["expr"]
+        == "absent(scanopy_backup_drill_last_success_timestamp_seconds)"
+    )
     drill_service = env.get_template("scanopy-backup-drill.service.j2").render(**context)
     drill_timer = env.get_template("scanopy-backup-drill.timer.j2").render(**context)
-    assert defaults["monitoring_scanopy_backup_drill_enabled"] is False and host_vars["monitoring_scanopy_backup_drill_enabled"] is True
+    assert (
+        defaults["monitoring_scanopy_backup_drill_enabled"] is False
+        and host_vars["monitoring_scanopy_backup_drill_enabled"] is True
+    )
     for hardening in ("NoNewPrivileges=yes", "ProtectSystem=strict", "PrivateTmp=yes", "ProtectHome=yes", "UMask=0077"):
         assert hardening in drill_service
-    assert "ReadOnlyPaths=/opt/scanopy-backup /var/backups/scanopy" in drill_service  # the drill never writes to the dumps
+    assert (
+        "ReadOnlyPaths=/opt/scanopy-backup /var/backups/scanopy" in drill_service
+    )  # the drill never writes to the dumps
     assert "DRILL_IMAGE=postgres:17-alpine" in drill_service
     assert "OnCalendar=Sun *-*-* 04:10:00 UTC" in drill_timer
-    for name in ("monitoring_scanopy_backup_drill_enabled", "monitoring_scanopy_backup_drill_on_calendar", "monitoring_scanopy_backup_drill_image"):
+    for name in (
+        "monitoring_scanopy_backup_drill_enabled",
+        "monitoring_scanopy_backup_drill_on_calendar",
+        "monitoring_scanopy_backup_drill_image",
+    ):
         assert name in specs
-    assert rules["ScanopyBackupStale"]["expr"] == "(time() - scanopy_backup_last_success_timestamp_seconds) > 36 * 3600"
+    assert rules["ScanopyBackupStale"]["expr"] == "(time() - scanopy_backup_last_success_timestamp_seconds) > 4 * 3600"
     assert rules["ScanopyBackupMetricsAbsent"]["expr"] == "absent(scanopy_backup_last_success_timestamp_seconds)"
+
+
+def test_the_switched_off_domainscope_replica_is_ignored_by_the_node_exporter_inventory_alert() -> None:
+    defaults = yaml.safe_load((MONITORING_ROLE / "defaults" / "main.yml").read_text())
+    host_vars = yaml.safe_load(MONITORING_HOST_VARS.read_text())
+    context = _context(MONITORING_ROLE / "defaults" / "main.yml", host_vars)
+    rendered = json.loads(_environment(MONITORING_ROLE / "templates").get_template("scanopy-sd-ignored-hosts.json.j2").render(**context))
+    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"]["options"]
+    tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "scanopy_sd.yml").read_text())
+
+    assert defaults["monitoring_scanopy_sd_ignored_hosts"] == []
+    assert host_vars["monitoring_scanopy_sd_ignored_hosts"] == ["domainscope-pg-replica"] == rendered
+    assert "monitoring_scanopy_sd_ignored_hosts" in specs
+    assert any(task.get("name") == "Render the Scanopy ignored-hosts list" for task in tasks)
+
+
+def test_scanopy_standby_is_wired_hardened_alerted_and_its_server_never_starts_by_default() -> None:
+    defaults = yaml.safe_load((MONITORING_ROLE / "defaults" / "main.yml").read_text())
+    host_vars = yaml.safe_load(MONITORING_HOST_VARS.read_text())
+    main_tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "main.yml").read_text())
+    include = next(task for task in main_tasks if task.get("name") == "Keep a warm standby of the Scanopy server")
+    tasks = yaml.safe_load((MONITORING_ROLE / "tasks" / "scanopy_standby.yml").read_text())
+    specs = yaml.safe_load((MONITORING_ROLE / "meta" / "argument_specs.yml").read_text())["argument_specs"]["main"]["options"]
+    context = _context(MONITORING_ROLE / "defaults" / "main.yml", host_vars)
+    env = _environment(MONITORING_ROLE / "templates")
+    compose = yaml.safe_load(env.get_template("scanopy-standby-compose.yml.j2").render(**context))
+    sync = env.get_template("scanopy-standby-sync.service.j2").render(**context)
+    boot = env.get_template("scanopy-standby-boot-test.service.j2").render(**context)
+    sync_timer = env.get_template("scanopy-standby-sync.timer.j2").render(**context)
+    boot_timer = env.get_template("scanopy-standby-boot-test.timer.j2").render(**context)
+    inventory = yaml.safe_load((RULES_DIR / "inventory.yml").read_text())
+    group = next(group for group in inventory["groups"] if group["name"] == "scanopy_standby")
+    rules = {rule["alert"]: rule for rule in group["rules"]}
+
+    assert defaults["monitoring_scanopy_standby_enabled"] is False and host_vars["monitoring_scanopy_standby_enabled"] is True
+    assert include["ansible.builtin.include_tasks"] == "scanopy_standby.yml" and include["when"] == "monitoring_scanopy_standby_enabled | bool"
+    keygen = next(task for task in tasks if task["name"] == "Generate the standby database password (only when missing)")
+    assert keygen["ansible.builtin.shell"]["creates"] == "{{ monitoring_scanopy_standby_env_file }}"
+    for name in ("monitoring_scanopy_standby_enabled", "monitoring_scanopy_standby_server_image", "monitoring_scanopy_standby_postgres_image",
+                 "monitoring_scanopy_standby_sync_on_calendar", "monitoring_scanopy_standby_boot_test_on_calendar"):
+        assert name in specs
+    # the server only exists in the failover profile (never started by `up`), the database runs and is not published
+    assert compose["services"]["server"]["profiles"] == ["failover"] and compose["services"]["server"]["restart"] == "no"
+    assert "profiles" not in compose["services"]["postgres"] and "ports" not in compose["services"]["postgres"]
+    assert compose["services"]["server"]["ports"] == ["${STANDBY_BIND:-127.0.0.1}:${STANDBY_PORT:-60072}:60072"]  # localhost unless told otherwise
+    assert compose["services"]["server"]["image"].endswith(":v0.17.22") and compose["services"]["postgres"]["image"] == "postgres:17-alpine"
+    for unit in (sync, boot):
+        for hardening in ("NoNewPrivileges=yes", "ProtectSystem=strict", "PrivateTmp=yes", "ProtectHome=yes", "UMask=0077"):
+            assert hardening in unit
+    assert "ReadOnlyPaths=/opt/scanopy-standby /var/backups/scanopy" in sync  # the sync never writes to the dumps
+    assert "OnCalendar=*-*-* *:35:00 UTC" in sync_timer and "OnCalendar=Sun *-*-* 04:40:00 UTC" in boot_timer  # after the :20 dump
+    assert set(rules) == {"ScanopyStandbyStale", "ScanopyStandbyBootTestStale", "ScanopyStandbyMetricsAbsent", "ScanopyStandbyFailoverActive"}
+    assert rules["ScanopyStandbyStale"]["expr"] == "(time() - scanopy_standby_last_success_timestamp_seconds) > 6 * 3600"
+    assert rules["ScanopyStandbyBootTestStale"]["expr"] == "(time() - scanopy_standby_boot_test_last_success_timestamp_seconds) > 10 * 86400"
+    assert rules["ScanopyStandbyFailoverActive"]["expr"] == "scanopy_standby_failover_active == 1"
 
 
 def test_guests_scraped_for_node_metrics_allow_the_monitoring_guest_on_9100() -> None:
@@ -805,7 +939,6 @@ def test_scanopy_relay_is_open_to_the_whole_guest_lan_in_the_canonical_host_fire
     assert guests and all(ip.startswith("10.10.10.") for ip in guests)  # every guest sits inside the allowed subnet
 
 
-
 def test_alertmanager_data_dir_belongs_to_the_user_alertmanager_runs_as() -> None:
     """Alertmanager runs as prometheus; a root-owned data dir made nflog and silences maintenance fail every 15 minutes."""
     tasks = yaml.safe_load((ALERTMANAGER_ROLE / "tasks" / "main.yml").read_text(encoding="utf-8"))
@@ -822,7 +955,11 @@ def test_alertmanager_metrics_are_scraped_and_rules_cover_them() -> None:
 
     rules = yaml.safe_load((RULES_DIR / "alertmanager-self.yml").read_text())
     by_alert = {rule["alert"]: rule for group in rules["groups"] for rule in group["rules"]}
-    assert set(by_alert) == {"AlertmanagerDown", "AlertmanagerNotificationsFailing", "AlertmanagerStatePersistenceFailing"}
+    assert set(by_alert) == {
+        "AlertmanagerDown",
+        "AlertmanagerNotificationsFailing",
+        "AlertmanagerStatePersistenceFailing",
+    }
     assert by_alert["AlertmanagerDown"]["expr"] == 'up{job="alertmanager"} == 0'
     assert "alertmanager_notifications_failed_total" in by_alert["AlertmanagerNotificationsFailing"]["expr"]
     assert by_alert["AlertmanagerNotificationsFailing"]["for"] == "15m"
@@ -870,4 +1007,23 @@ def test_alertmanager_has_a_load_test_route_and_collapses_edge_storms() -> None:
     assert triage["matchers"] == ['severity=~"critical|warning"']
     storm = next(route for route in routes if "FleetServiceEdgeDown" in route["matchers"][0])
     assert storm["group_by"] == ["cluster", "job", "severity"]
-    assert any(rule["target_matchers"] == ['alertname="FleetHypervisorMemAvailableLow"'] for rule in config["inhibit_rules"])
+    assert any(
+        rule["target_matchers"] == ['alertname="FleetHypervisorMemAvailableLow"'] for rule in config["inhibit_rules"]
+    )
+
+
+def test_replica_alertmanager_is_an_alert_target_but_not_part_of_the_alertmanager_scrape_job() -> None:
+    config = render_prometheus(use_host_vars=True)
+    targets = [t for block in config["alerting"]["alertmanagers"] for sc in block["static_configs"] for t in sc["targets"]]
+    assert targets == ["127.0.0.1:9093", "100.64.0.21:9093"]
+    jobs = jobs_by_name(config)
+    # AlertmanagerMeshDegraded counts members of job "alertmanager"; the replica has its own job for Tier0SiteAlertmanagerDown
+    assert jobs["alertmanager"]["static_configs"][0]["targets"] == ["127.0.0.1:9093"]
+    assert jobs["alertmanager_tier0"]["static_configs"][0]["targets"] == ["100.64.0.21:9093"]
+    assert jobs["tier0_node_exporter"]["static_configs"][0]["targets"] == ["100.64.0.21:9101"]
+
+
+def test_without_host_vars_prometheus_sends_alerts_only_to_the_local_alertmanager() -> None:
+    config = render_prometheus(use_host_vars=False)
+    targets = [t for block in config["alerting"]["alertmanagers"] for sc in block["static_configs"] for t in sc["targets"]]
+    assert targets == ["127.0.0.1:9093"]

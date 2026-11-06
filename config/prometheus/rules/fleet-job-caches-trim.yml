@@ -1,0 +1,64 @@
+# Added 2026-11-04. Step 3d of the 4-hourly GC on the CI build VM (docker-build-lv3, VM 130 on 0mcp; config/0mcp/docker-build-lv3/README.md) trims the Go build cache inside the
+# fleet-job-cache-* Docker volumes to a size cap. That trim is what keeps the VM's root off the disk-full line (the go-url-categorizer-api cache grew from 17 to 80 GiB in two days
+# before it existed, and on 2026-11-02 the step would have been skipped silently because its helper image had been pruned), and until now no rule read what it reports.
+# The numbers come from fleet-job-caches-trim.sh, which rewrites /var/lib/prometheus/node-exporter/fleet_job_caches_trim.prom at the end of every FULL run (not a dry run, not a run
+# of one volume): the time of the run, its result (0 it ran, 1 a volume failed or docker or the report was wrong, 2 skipped because the program, docker or a golang image is missing),
+# the bytes it freed and the volumes still over the size cap afterwards. A run that the step's 30 minute timeout kills writes nothing, so it shows as a stale file, not as result 1.
+# This Prometheus scrapes the VM's node_exporter (10.10.10.30:9100, every 30 s) as host="docker-build-lv3"; the 0docker Prometheus sees it too (host="0mcp-builder") and has no rule.
+# The rules name the host because their numbers are this host's timer (every 4 hours): a second host that gets the wrapper needs its own copy with its own delays.
+# `max by (host)` merges the duplicate series an exporter restart leaves.
+# Thresholds: the series were less than a day old when this was written (first run 2026-11-03 12:25Z; three runs, 12:25, 16:27 and 20:27Z, 4 h 02 m and 3 h 59 m apart, all result 0,
+# nothing over the cap), so they are reasoning checked against that, not a back-test, and no run has ever failed, been skipped or ended over its cap. The age of the file never went
+# above 4 h 03 m: 9 hours is two missed runs plus slack (one missed run peaks near 8 h 05 m, twice the gap seen). The over-cap flag is above 0 for hours in a CI burst by design (the
+# 12 hour floor for a volume in use beats the 20 GiB cap and the hot volume peaks at 35 to 45 GiB), so only a day of it is reported, and as info: Alertmanager drops info, the
+# root-filesystem alerts of fleet-disk.yml are what notifies when the disk is really at risk. Failed fires on a single bad run (a bad value stays up to 4 hours); asking for two
+# runs in a row would need a delay of 5h.
+groups:
+  - name: fleet_job_caches_trim
+    rules:
+      - alert: FleetJobCachesTrimFailed
+        expr: >-
+          max by (host) (fleet_job_caches_trim_last_result{host="docker-build-lv3"}) != 0
+        for: 1h
+        labels:
+          severity: warning
+          service: fleet_job_caches_trim
+        annotations:
+          summary: "The Go cache trim on {{ $labels.host }} failed or was skipped (last result {{ $value }}: 1 failed, 2 skipped)"
+          description: "The last full run of docker-build-gc step 3d on {{ $labels.host }} wrote result {{ $value }} (1: a volume failed, docker did not answer or the program's report was incomplete; 2: skipped because the program, docker or a golang image is missing and could not be pulled). The file is rewritten by full runs only, so the value stays until the next run, up to 4 hours, while the Go build caches keep growing (1.6 to 2.8 GiB an hour in a CI burst). Read the run with `ssh 0mcp_docker_build 'sudo -n journalctl -u docker-build-gc.service --since -5h --no-pager | grep fleet-job-caches-trim'` (sudo -n is needed: without it journalctl prints No entries, not an error); the WARNING lines say which volume or image. What to do for each alert: config/0mcp/docker-build-lv3/README.md, section Alerts on the trim."
+          runbook_url: docs/runbooks/fleet-observability.md#build-host-cache-trim-alerts
+
+      - alert: FleetJobCachesTrimStale
+        expr: >-
+          time() - max by (host) (fleet_job_caches_trim_last_run_timestamp_seconds{host="docker-build-lv3"}) > 9 * 3600
+        for: 30m
+        labels:
+          severity: warning
+          service: fleet_job_caches_trim
+        annotations:
+          summary: "The Go cache trim on {{ $labels.host }} has not run for 9 hours"
+          description: "No run of docker-build-gc step 3d on {{ $labels.host }} has written its metric file for {{ $value | humanizeDuration }}; the timer runs every 4 hours, so that is two missed runs plus slack. The GC did not run or died before step 3d, the step hit its 30 minute timeout (a killed run writes nothing), the GC was held by its lock, or step 3d was switched off on purpose (chmod -x on /usr/local/bin/fleet-job-caches-trim.sh is the documented kill switch: then this alert is right, silence it while the trim is off). Meanwhile nothing bounds the Go build cache volumes. Check `ssh 0mcp_docker_build 'systemctl status docker-build-gc.timer docker-build-gc.service --no-pager; ls -l /usr/local/bin/fleet-job-caches-trim.sh'`, then the journal as for FleetJobCachesTrimFailed."
+          runbook_url: docs/runbooks/fleet-observability.md#build-host-cache-trim-alerts
+
+      - alert: FleetJobCachesTrimMissing
+        expr: absent(fleet_job_caches_trim_last_run_timestamp_seconds{host="docker-build-lv3"})
+        for: 1d
+        labels:
+          severity: warning
+          service: fleet_job_caches_trim
+        annotations:
+          summary: "No Go cache trim metrics from {{ $labels.host }}"
+          description: "No series fleet_job_caches_trim_last_run_timestamp_seconds for {{ $labels.host }} for a day (FleetJobCachesTrimStale cannot fire on a series that does not exist). The file /var/lib/prometheus/node-exporter/fleet_job_caches_trim.prom is gone or was never written (step 3d off, no full run since, or the directory is missing, which the wrapper treats as no error), node_exporter dropped it (a malformed file sets node_textfile_scrape_error), or the VM is not scraped (its up series). Check `ssh 0mcp_docker_build 'ls -l /var/lib/prometheus/node-exporter/'` and, in Prometheus, up and node_textfile_scrape_error for the host."
+          runbook_url: docs/runbooks/fleet-observability.md#build-host-cache-trim-alerts
+
+      - alert: FleetJobCachesOverCap
+        expr: >-
+          max by (host) (fleet_job_caches_trim_volumes_over_cap{host="docker-build-lv3"}) > 0
+        for: 24h
+        labels:
+          severity: info
+          service: fleet_job_caches_trim
+        annotations:
+          summary: "{{ $value }} Go cache volume(s) on {{ $labels.host }} over the size cap at every run for 24 hours"
+          description: "Every full run of docker-build-gc step 3d for 24 hours (six in a row) left {{ $value }} fleet-job-cache-* volume(s) on {{ $labels.host }} over the size cap. For a few runs in a CI burst that is by design: while a container uses a volume nothing used within the last 12 hours is removed, so with the cache growing 1.6 to 2.8 GiB an hour the hot volume peaks at 35 to 45 GiB (the journal line says cap_unmet=yes). A day of it means the cap and the floor no longer fit the load (raise CACHE_TRIM_MAX_GIB, or lower CACHE_TRIM_BUSY_HOURS to 6, the program's minimum) or a container holds a volume busy for good. Which volume: `ssh 0mcp_docker_build 'sudo -n journalctl -u docker-build-gc.service --since -5h --no-pager | grep cap_unmet'`. Info only: FleetRootFilesystemLow and FleetRootFilesystemCritical are what notifies when the disk is really at risk."
+          runbook_url: docs/runbooks/fleet-observability.md#build-host-cache-trim-alerts

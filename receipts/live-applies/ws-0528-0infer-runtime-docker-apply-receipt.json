@@ -1,0 +1,63 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "ws-0528-0infer-runtime-docker-apply-receipt",
+  "applied_on": "2026-10-14",
+  "recorded_on": "2026-10-14",
+  "recorded_by": "codex",
+  "source_commit": "ae7a9a9b524d899ce410e0c08fefebf021bcefc2",
+  "repo_version_context": "0.179.51",
+  "workflow_id": "live-apply-service",
+  "adr": "0014",
+  "summary": "Install and verify the Docker runtime baseline on 0infer VM703, leaving the guest empty and without application database credentials.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "infer-runtime",
+      "vmid": "703",
+      "address": "LAN 10.70.10.30; Tailscale 100.64.0.24"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Docker runtime packages",
+      "result": "pass",
+      "observed": "Docker CE 5:29.9.0-1~debian.13~trixie, CLI 5:29.9.0-1~debian.13~trixie, containerd.io 2.4.1-2~debian.13~trixie, Buildx 0.38.0-1~debian.13~trixie, Compose 5.6.0-1~debian.13~trixie installed."
+    },
+    {
+      "check": "Docker daemon baseline",
+      "result": "pass",
+      "observed": "docker.service enabled and active; JSON file logs rotate at 10 MiB across 5 files; default address pools are 172.16.0.0/12, 192.168.0.0/16, and 10.200.0.0/16 with /24 networks."
+    },
+    {
+      "check": "Runtime workload state",
+      "result": "pass",
+      "observed": "VM703 has zero running Docker containers; no application image, service secret, or database credential was installed."
+    },
+    {
+      "check": "0database PostgreSQL TCP reachability",
+      "result": "pass",
+      "observed": "After Docker startup, nc from inside VM703 to 100.64.0.10:5432 succeeded."
+    },
+    {
+      "check": "0infer PostgreSQL TCP reachability",
+      "result": "pass",
+      "observed": "After Docker startup, nc from inside VM703 to 10.70.10.10:5432 succeeded."
+    },
+    {
+      "check": "SQL authentication",
+      "result": "partial",
+      "observed": "No PostgreSQL login or query was attempted; SQL credentials and grants remain application-specific."
+    }
+  ],
+  "evidence_refs": [
+    "docs/workstreams/ws-0528-0infer-ci-worker.md",
+    "workstreams/active/ws-0528-0infer-ci-worker.yaml",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "Only VM703 was changed (1 of 3 running guests on the 0infer Proxmox host); VM701 database and VM702 builder were not modified.",
+    "VM703 had no Docker packages, no containers, and 188 GiB free on its 200 GiB root volume before install; no reboot or database mutation occurred.",
+    "Rollback: remove Docker CE, CLI, containerd.io, Buildx and Compose packages plus /etc/apt/sources.list.d/docker.sources, /etc/apt/keyrings/docker.asc, and /etc/docker/daemon.json. There is no container data to preserve."
+  ]
+}

@@ -1,0 +1,53 @@
+id: ws-0530-ci-go-build-cache-grant
+adr: "0296"
+title: Let CI agents reach the shared Go build cache on the 0own build worker
+status: live_applied
+ready_to_merge: true
+live_applied: true
+owner: claude
+branch: claude/ci-gocache-grant-applied
+worktree_path: .claude/worktrees/ci-gocache-grant
+doc: docs/workstreams/ws-0530-ci-go-build-cache-grant.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - config/tailscale/policy.hujson
+  - workstreams/active/ws-0530-ci-go-build-cache-grant.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0530-ci-go-build-cache-grant.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0530_tracking
+      paths:
+        - docs/workstreams/ws-0530-ci-go-build-cache-grant.md
+      mode: exclusive
+    - id: ci_go_build_cache_tailscale_permissions
+      paths:
+        - config/tailscale/policy.hujson
+      mode: shared_contract
+      contract: guest-network-policy-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-0530-ci-go-build-cache-grant.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: Allow the pve01, 0infer and 0mcp CI agents to reach only the shared Go build cache port on the 0own build worker.
+  release_bump: patch
+  included_in_repo_version: null
+context: >-
+  A shared Go build cache (GOCACHEPROG server) runs on the 0own build worker
+  so Go builds on any CI agent reuse compiled packages. Agents on other sites
+  reach 0own only over the tailnet, so the policy needs one narrow grant to
+  the cache port. The metrics port of the same server stays closed to agents.
+tasks:
+  - id: t1
+    title: Add the cache-port grant and accept/deny policy tests
+    status: completed
+  - id: t2
+    title: Validate against the live tailnet (plan) and apply from CT108
+    status: completed
+  - id: t3
+    title: Verify an agent on another site reaches the cache port and not the metrics port
+    status: completed

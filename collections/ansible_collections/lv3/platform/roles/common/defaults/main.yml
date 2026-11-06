@@ -152,3 +152,11 @@ common_verify_health_status_code: 200
 common_verify_health_assertions: []
 common_verify_health_assertion_msg: ""
 common_verify_extra_endpoints: []
+
+# Bound local supervisor logs independently of emergency low-disk cleanup.
+common_journal_retention_system_max_use: 1G
+common_journal_retention_system_keep_free: 5G
+common_journal_retention_runtime_max_use: 256M
+common_journal_retention_runtime_keep_free: 256M
+common_journal_retention_max_retention: 30day
+common_journal_retention_max_file_age: 1day

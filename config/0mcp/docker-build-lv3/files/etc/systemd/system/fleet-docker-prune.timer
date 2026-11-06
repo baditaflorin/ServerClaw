@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Docker image and build cache prune
+
+[Timer]
+OnCalendar=*-*-* 04:30:00
+RandomizedDelaySec=30m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

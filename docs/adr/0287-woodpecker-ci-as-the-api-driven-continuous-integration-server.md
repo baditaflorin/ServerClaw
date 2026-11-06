@@ -7,6 +7,13 @@
 - Implemented On: 2026-03-30
 - Date: 2026-03-29
 
+> **Correction, 2026-10-30.** This ADR was written for a Gitea forge. The two
+> production Woodpecker planes (`ci.0mcp` and `ci.0exec`) use a **GitHub**
+> forge, verified on 2026-10-30 (see "Which forge" in
+> `docs/runbooks/configure-woodpecker.md`). Read "Gitea" and "Gitea OAuth2"
+> below as the original design, not as the current forge. The decision
+> (Woodpecker as the API-driven CI server) is unchanged.
+
 ## Context
 
 The platform runs CI pipelines for Ansible roles, container image builds, and

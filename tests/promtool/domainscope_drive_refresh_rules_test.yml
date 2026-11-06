@@ -1,0 +1,95 @@
+# promtool unit tests for config/prometheus/rules/domainscope-drive-refresh.yml (run by tests/test_domainscope_drive_refresh.py when promtool
+# is installed; on the monitoring VM: promtool test rules tests/promtool/domainscope_drive_refresh_rules_test.yml from the repo root).
+# The textfile keeps its last values between daily runs, so the series are step functions with one sample per minute: "86400x1439" is the
+# timestamp 86400 held for a day. promtool's clock starts at the Unix epoch, so a timestamp equal to minute*60 is "this run just ended".
+rule_files:
+- ../../config/prometheus/rules/domainscope-drive-refresh.yml
+evaluation_interval: 1m
+tests:
+- name: a refresh that is good every day raises nothing
+  interval: 1m
+  input_series:
+  - series: domainscope_drive_refresh_ok{instance="100.114.37.21:9100",job="node_exporter"}
+    values: 1x7200
+  - series: domainscope_drive_refresh_last_success_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter"}
+    values: 0x1439 86400x1439 172800x1439 259200x1439 345600x1439
+  alert_rule_test:
+  - eval_time: 50h
+    alertname: DomainScopeDriveRefreshFailing
+    exp_alerts: []
+  - eval_time: 50h
+    alertname: DomainScopeDriveRefreshStale
+    exp_alerts: []
+  - eval_time: 100h
+    alertname: DomainScopeDriveRefreshStale
+    exp_alerts: []
+- name: one failed run alerts about half an hour after it and resolves with the next good run
+  interval: 1m
+  input_series:
+  - series: domainscope_drive_refresh_ok{instance="100.114.37.21:9100",job="node_exporter"}
+    values: 1x1440 0x1440 1x1440
+  - series: domainscope_drive_refresh_last_success_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter"}
+    values: 0x1440 86400x2880
+  alert_rule_test:
+  - eval_time: 24h10m
+    alertname: DomainScopeDriveRefreshFailing
+    exp_alerts: []
+  - eval_time: 26h
+    alertname: DomainScopeDriveRefreshFailing
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: domainscope
+        instance: 100.114.37.21:9100
+        job: node_exporter
+      exp_annotations:
+        summary: The DomainScope Drive data room refresh failed its last run
+        description: 'The last run of domainscope-drive-refresh on the builder (CT108) did not leave every listed Drive document current: a document failed or held no figure phrase,
+          data-room.json on main is older than 8 days, or the run could not fetch, build or read the vault. The documents it names are in `journalctl -u domainscope-drive-refresh.service -n 80`
+          on the builder.'
+        runbook_url: docs/runbooks/domainscope-drive-refresh.md
+  - eval_time: 49h
+    alertname: DomainScopeDriveRefreshFailing
+    exp_alerts: []
+- name: no good run for two days alerts, and a series that never appeared alerts too
+  interval: 1m
+  input_series:
+  - series: domainscope_drive_refresh_last_success_timestamp_seconds{instance="100.114.37.21:9100",job="node_exporter"}
+    values: 0x4320
+  alert_rule_test:
+  - eval_time: 40h
+    alertname: DomainScopeDriveRefreshStale
+    exp_alerts: []
+  - eval_time: 55h
+    alertname: DomainScopeDriveRefreshStale
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: domainscope
+      exp_annotations:
+        summary: No good DomainScope Drive data room refresh for 49 hours
+        description: 'The live figures in the Drive data room folder have not been checked for two days: domainscope-drive-refresh.timer on CT108 stopped, every run fails (see
+          DomainScopeDriveRefreshFailing), or the builder or its node exporter is down. On the builder: `systemctl status domainscope-drive-refresh.timer domainscope-drive-refresh.service`;
+          from the repository `scripts/domainscope-drive-refresh-install.sh --status`.'
+        runbook_url: docs/runbooks/domainscope-drive-refresh.md
+- name: with no series at all the stale alert fires after an hour of absence
+  interval: 1h
+  input_series:
+  - series: up{job="x"}
+    values: 1x200
+  alert_rule_test:
+  - eval_time: 30m
+    alertname: DomainScopeDriveRefreshStale
+    exp_alerts: []
+  - eval_time: 3h
+    alertname: DomainScopeDriveRefreshStale
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: domainscope
+      exp_annotations:
+        summary: No good DomainScope Drive data room refresh for 49 hours
+        description: 'The live figures in the Drive data room folder have not been checked for two days: domainscope-drive-refresh.timer on CT108 stopped, every run fails (see
+          DomainScopeDriveRefreshFailing), or the builder or its node exporter is down. On the builder: `systemctl status domainscope-drive-refresh.timer domainscope-drive-refresh.service`;
+          from the repository `scripts/domainscope-drive-refresh-install.sh --status`.'
+        runbook_url: docs/runbooks/domainscope-drive-refresh.md

@@ -1,0 +1,11 @@
+[Unit]
+Description=Scan the fleet for deploy drift every 30 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitInactiveSec=30min
+AccuracySec=1min
+Unit=fleet-runner-drift.service
+
+[Install]
+WantedBy=timers.target

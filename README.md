@@ -20,7 +20,7 @@
 # ServerClaw Platform
 
 Forkable infrastructure-as-code for taking a bare Debian 13 server to a
-fully managed Proxmox VE platform with 78+ self-hosted services — deployed,
+fully managed Proxmox VE platform with 79+ self-hosted services — deployed,
 monitored, and recoverable from a single repository.
 
 ## Platform Status
@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.51` |
-| Platform version | `0.179.51` |
+| Repository version | `0.179.57` |
+| Platform version | `0.179.59` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -44,7 +44,7 @@ monitored, and recoverable from a single repository.
 | Managed guest count | 17 |
 | Running guest count | 10 |
 | Template VM present | `true` |
-| Declared services | 71 |
+| Declared services | 72 |
 | Publicly published services | 47 |
 
 ### Service Exposure Summary
@@ -53,11 +53,19 @@ monitored, and recoverable from a single repository.
 | `edge-published` | 38 |
 | `edge-static` | 1 |
 | `informational-only` | 4 |
-| `private-only` | 28 |
+| `private-only` | 29 |
 
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
+| `image_gc_monitoring` | `2026-11-06-image-gc-monitoring-live-apply` |
+| `domainscope_live_drive_figures` | `2026-11-06-domainscope-live-drive-figures-live-apply` |
+| `docker_prod_logrotate` | `2026-11-06-retention-mainline-live-apply` |
+| `bounded_journal_retention` | `2026-11-06-retention-mainline-live-apply` |
+| `fleet_job_caches_trim_alerts` | `2026-11-04-fleet-job-caches-trim-alerts-monitoring-live-apply` |
+| `pve_host_memory_budget_alert` | `2026-11-03-pve-0mcp-memory-budget-alert-monitoring-live-apply` |
+| `pve_backup_weekly_freshness` | `2026-10-30-pve-backup-weekly-freshness-monitoring-live-apply` |
+| `pve_host_free_space_alert` | `2026-10-26-pve-host-daily-low-alert-monitoring-live-apply` |
 | `grafana_sso` | `2026-10-14-ws-0512-grafana-sso-live-apply` |
 | `fork_services` | `2026-04-27-ws-0372-0fork-services-all-7-deployed` |
 | `restic_config_backup` | `2026-04-21-adr-0373-service-registry-and-derived-defaults-mainline-live-apply` |
@@ -70,16 +78,8 @@ monitored, and recoverable from a single repository.
 | `repowise` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 | `redpanda` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
 | `minio` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
-| `livekit` | `2026-04-14-adr-0370-service-lifecycle-task-includes-mainline-live-apply` |
-| `litellm` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
-| `librechat` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
-| `gitea` | `2026-04-14-adr-0368-docker-compose-jinja2-macro-library-mainline-live-apply` |
-| `postgres_vm` | `2026-04-13-adr-0359-declarative-postgresql-client-registry-live-apply` |
-| `woodpecker` | `2026-04-12-ws-0025-compose-stack-lifecycle-mainline-live-apply` |
-| `ops_portal` | `2026-04-12-adr-0381-login-service-contracts-mainline-live-apply` |
-| `neko` | `2026-04-12-adr-0380-neko-exact-main-live-apply` |
 
-Showing 20 of 187 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 197 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 ## Version Summary
@@ -89,12 +89,12 @@ Showing 20 of 187 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.51` |
-| Platform version | `0.179.51` |
+| Repository version | `0.179.57` |
+| Platform version | `0.179.59` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
-| Declared services | 71 |
+| Declared services | 72 |
 <!-- END GENERATED: version-summary -->
 
 ## Quick Start
@@ -133,8 +133,8 @@ assistants (Claude Code, GPT, Codex) can read, understand, and execute them.
 
 - **[CLAUDE.md](CLAUDE.md)** — Claude Code session protocol with checklists and context
 - **[AGENTS.md](AGENTS.md)** — Multi-agent coordination rules and handoff protocol
-- **516+ ADRs** — Every architectural decision documented and indexed
-- **281+ runbooks** — Step-by-step procedures an AI agent can follow
+- **518+ ADRs** — Every architectural decision documented and indexed
+- **298+ runbooks** — Step-by-step procedures an AI agent can follow
 - **Workstream tracking** — Parallel agent sessions coordinate via YAML manifests
 
 Point Claude Code at this repo and it knows how to deploy, debug, and extend
@@ -168,11 +168,11 @@ self-hosted platform:
 
 | Layer | What | Count |
 |-------|------|-------|
-| Architecture decisions | `docs/adr/` | 516+ ADRs |
-| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 174 roles |
+| Architecture decisions | `docs/adr/` | 518+ ADRs |
+| Ansible roles | `collections/ansible_collections/lv3/platform/roles/` | 176 roles |
 | Playbooks | `collections/ansible_collections/lv3/platform/playbooks/` | 66 playbooks |
-| Operational runbooks | `docs/runbooks/` | 281+ runbooks |
-| Automation scripts | `scripts/` | 378+ scripts |
+| Operational runbooks | `docs/runbooks/` | 298+ runbooks |
+| Automation scripts | `scripts/` | 387+ scripts |
 | Validation tests | `tests/` | Automated regression suite |
 
 ### Services included
@@ -271,7 +271,7 @@ variables from it — no manual IP editing.
 ```
 .
 ├── collections/ansible_collections/lv3/platform/
-│   ├── roles/           # 174 Ansible roles
+│   ├── roles/           # 176 Ansible roles
 │   ├── playbooks/       # 66 playbooks
 │   └── plugins/         # Custom filters and callbacks
 ├── inventory/
@@ -286,10 +286,10 @@ variables from it — no manual IP editing.
 │   ├── minimal/         # Tier 1 compose (4 containers)
 │   └── full/            # Tier 2 compose (7 containers)
 ├── docs/
-│   ├── adr/             # 516+ architecture decision records
-│   ├── runbooks/        # 281+ operational runbooks
+│   ├── adr/             # 518+ architecture decision records
+│   ├── runbooks/        # 298+ operational runbooks
 │   └── templates/       # Jinja2 templates for generated docs (incl. this README)
-├── scripts/             # 378+ automation scripts
+├── scripts/             # 387+ automation scripts
 ├── local-overlay-template/  # Scaffold for .local/ secrets directory
 └── Makefile             # 35+ automation targets
 ```
@@ -357,7 +357,7 @@ Full layout: [.repo-structure.yaml](.repo-structure.yaml)
 <!-- BEGIN GENERATED: merged-workstreams -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](scripts/generate_status_docs.py). Do not edit this block by hand.
 
-Showing 25 of 350 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
+Showing 25 of 359 merged or live-applied workstreams. Full history: [merged workstream history](docs/status/history/merged-workstreams.md)
 
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
@@ -378,14 +378,14 @@ Showing 25 of 350 merged or live-applied workstreams. Full history: [merged work
 | `0336` | Verify ADR 0336 public entrypoint leakage validation on the latest origin/main | `merged` | [ws-0336-live-apply.md](docs/workstreams/ws-0336-live-apply.md) |
 | `0309` | Live apply task-oriented information architecture across the platform workbench from latest origin/main | `live_applied` | [ws-0309-live-apply.md](docs/workstreams/ws-0309-live-apply.md) |
 | `0297` | Resolve Gitea release bundle retention and Renovate PR validation checkout drift | `live_applied` | [ws-0315-gitea-followups.md](docs/workstreams/ws-0315-gitea-followups.md) |
+| `0296` | Remove the CI Go build cache grant to the 0own build worker | `live_applied` | [ws-0531-retire-ci-go-build-cache-grant.md](docs/workstreams/ws-0531-retire-ci-go-build-cache-grant.md) |
+| `0296` | Let CI agents reach the shared Go build cache on the 0own build worker | `live_applied` | [ws-0530-ci-go-build-cache-grant.md](docs/workstreams/ws-0530-ci-go-build-cache-grant.md) |
 | `0296` | Allow Builder metrics scraping over the private tailnet | `live_applied` | [ws-0513-builder-metrics-tailnet-firewall.md](docs/workstreams/ws-0513-builder-metrics-tailnet-firewall.md) |
 | `0296` | Deliver the cache-only GHCR proxy configuration through a one-shot reader bridge | `merged` | [ws-0504-cache-ghcr-secret-renderer.md](docs/workstreams/ws-0504-cache-ghcr-secret-renderer.md) |
 | `0295` | Live apply the shared artifact cache plane from latest origin/main | `live_applied` | [ws-0295-live-apply.md](docs/workstreams/ws-0295-live-apply.md) |
 | `0293` | Integrate ADR 0293 exact-main LiveKit replay onto main | `merged` | [ws-0293-main-integration.md](docs/workstreams/ws-0293-main-integration.md) |
 | `0259` | Integrate ADR 0259 exact-main replay onto current origin/main | `merged` | [ws-0259-main-merge.md](docs/workstreams/ws-0259-main-merge.md) |
 | `0252` | Integrate ADR 0252 exact-main replay onto current origin/main | `merged` | [ws-0252-main-merge.md](docs/workstreams/ws-0252-main-merge.md) |
-| `0238` | Integrate ADR 0238 operator grid into origin/main | `merged` | [ws-0238-main-integration.md](docs/workstreams/ws-0238-main-integration.md) |
-| `0237` | Live apply schema-first human forms via React Hook Form and Zod | `live_applied` | [ws-0237-live-apply.md](docs/workstreams/ws-0237-live-apply.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Requirements
@@ -411,6 +411,6 @@ and merge procedures.
 
 ---
 
-*Generated 2026-10-13 by [scripts/generate_readme.py](scripts/generate_readme.py)
+*Generated 2026-11-06 by [scripts/generate_readme.py](scripts/generate_readme.py)
 from [docs/templates/README.md.j2](docs/templates/README.md.j2).
 Run `make generate-readme` to refresh.*

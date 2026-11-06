@@ -73,6 +73,12 @@ class FakeScanopy:
                            "ip_addresses": [{"ip_address": ip, "mac_address": None} for ip in (ips or [])]
                            + [{"ip_address": "192.0.2.1", "mac_address": m} for m in (macs or [])]})
 
+    def add_host_with_daemon_service(self, host_id: str, name: str, ips: list[str], last_seen: str = "2026-10-15T20:00:00Z") -> None:
+        """A host Scanopy discovered by scanning, with the "Scanopy Daemon" service on it (no daemon bound to it)."""
+        self.hosts.append({"id": host_id, "name": name, "hidden": False, "tags": [], "updated_at": "t0", "credential_assignments": [],
+                           "ip_addresses": [{"ip_address": ip, "mac_address": None} for ip in ips],
+                           "services": [{"name": "Scanopy Daemon", "last_seen_at": last_seen}]})
+
     def add_schedule(self, daemon: str, cron: str, enabled=True) -> None:
         self.discoveries.append({"id": f"s-{daemon}", "daemon_id": f"d-{daemon}", "run_type": {
             "type": "Scheduled", "enabled": enabled, "cron_schedule": cron, "timezone": None, "last_run": None}})
@@ -173,6 +179,38 @@ def test_an_ip_shared_by_two_daemon_hosts_does_not_count_as_coverage(onboard, mo
     run(onboard, monkeypatch, scanopy, hv)
 
     assert metrics(onboard)["scanopy_onboard_guests_uncovered"] == 1
+
+
+def test_a_renamed_daemon_bound_to_a_docker_host_still_covers_its_guest_through_its_daemon_service(onboard, monkeypatch) -> None:
+    # pve01 -> 0database: the daemon was renamed and its registered host is the Docker engine host (container addresses
+    # only), so neither name, MAC nor IP of the daemon host matches; the VM's own host record carries the daemon service.
+    write_config(onboard)
+    monkeypatch.setattr(onboard.time, "time", lambda: 1_792_000_000.0)  # 2026-10-14, inside the 7-day freshness window
+    scanopy = FakeScanopy()
+    scanopy.add_daemon("vm-0database-runtime-1", "h-docker", ips=["172.18.0.2", "172.18.0.3"])
+    scanopy.add_host_with_daemon_service("h-vm102", "pve01-runtime-1", ["10.50.0.12"])
+    hv = FakeHypervisors(scanopy, {"0mcp": [guest(gid=102, name="pve01-runtime-1", ips=["10.50.0.12"], macs=["bc:24:11:91:1b:6d"])]})
+
+    run(onboard, monkeypatch, scanopy, hv)
+    run(onboard, monkeypatch, scanopy, hv)
+
+    assert hv.installs == [] and scanopy.provisioned == []
+    assert metrics(onboard)["scanopy_onboard_guests_uncovered"] == 0
+
+
+def test_a_stale_daemon_service_or_an_ambiguous_address_does_not_count_as_coverage(onboard, monkeypatch) -> None:
+    write_config(onboard)
+    monkeypatch.setattr(onboard.time, "time", lambda: 1_792_000_000.0)
+    scanopy = FakeScanopy()
+    scanopy.add_host_with_daemon_service("h-old", "gone", ["10.10.10.31"], last_seen="2026-09-01T00:00:00Z")  # daemon removed weeks ago
+    scanopy.add_host_with_daemon_service("h-a", "dup-a", ["10.10.10.32"])
+    scanopy.add_host_with_daemon_service("h-b", "dup-b", ["10.10.10.32"])  # same address on two hosts: proves nothing
+    hv = FakeHypervisors(scanopy, {"0mcp": [guest(gid=331, name="stale", ips=["10.10.10.31"], macs=["bc:24:11:00:03:31"]),
+                                            guest(gid=332, name="ambiguous", ips=["10.10.10.32"], macs=["bc:24:11:00:03:32"])]})
+
+    run(onboard, monkeypatch, scanopy, hv)
+
+    assert metrics(onboard)["scanopy_onboard_guests_uncovered"] == 2
 
 
 def test_a_guest_is_onboarded_on_its_second_uncovered_run_and_finished_in_scanopy(onboard, monkeypatch) -> None:

@@ -1,0 +1,13 @@
+[Unit]
+Description=Private Woodpecker %i proxy socket
+After=network-online.target tailscaled.service
+Wants=network-online.target
+Requires=tailscaled.service
+
+[Socket]
+ListenStream=100.64.0.5:%i
+BindToDevice=tailscale0
+NoDelay=true
+
+[Install]
+WantedBy=sockets.target

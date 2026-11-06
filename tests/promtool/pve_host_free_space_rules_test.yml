@@ -1,0 +1,56 @@
+# promtool unit tests for PveHostFilesystemDailyLowNarrow in config/prometheus/rules/pve-host-incident.yml (run by tests/test_pve_host_free_space_rules.py when
+# promtool is installed; written 2026-10-25). The two series are the hypervisor root filesystem's available and total bytes: with a size of 100 the available
+# value is the free percentage. The alert looks at the lowest value of the last 24 hours on a 5-minute grid, so a dip stays visible for a day.
+rule_files:
+  - ../../config/prometheus/rules/pve-host-incident.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: a day that never goes under 16 percent raises nothing, and another host's disk is ignored
+    interval: 5m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"}'
+        values: "17x600"
+      - series: 'node_filesystem_size_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"}'
+        values: "100x600"
+      # a root filesystem of another host at 5 percent free is not this alert's business
+      - series: 'node_filesystem_avail_bytes{job="node_exporter",device="/dev/sda1",mountpoint="/"}'
+        values: "5x600"
+      - series: 'node_filesystem_size_bytes{job="node_exporter",device="/dev/sda1",mountpoint="/"}'
+        values: "100x600"
+    alert_rule_test:
+      - {eval_time: 24h, alertname: PveHostFilesystemDailyLowNarrow, exp_alerts: []}
+      - {eval_time: 40h, alertname: PveHostFilesystemDailyLowNarrow, exp_alerts: []}
+
+  - name: exactly 16 percent is not under 16 percent
+    interval: 5m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"}'
+        values: "20x30 16x6 20x600"
+      - series: 'node_filesystem_size_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"}'
+        values: "100x700"
+    alert_rule_test:
+      - {eval_time: 4h, alertname: PveHostFilesystemDailyLowNarrow, exp_alerts: []}
+
+  - name: a dip to 15 percent raises the warning for a day and then clears
+    interval: 5m
+    input_series:
+      # 71 samples (just under 6 hours) at 20 percent, three samples at 15 percent, then 20 percent again
+      - series: 'node_filesystem_avail_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"}'
+        values: "20x71 15x3 20x700"
+      - series: 'node_filesystem_size_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"}'
+        values: "100x800"
+    alert_rule_test:
+      - {eval_time: 5h, alertname: PveHostFilesystemDailyLowNarrow, exp_alerts: []}
+      - eval_time: 6h30m
+        alertname: PveHostFilesystemDailyLowNarrow
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pve_storage, job: pve_0docker_host_node_exporter_via_tailscale, device: /dev/md3, mountpoint: /}
+            exp_annotations: {summary: "0docker hypervisor root came within two points of the CI admission hold in the last 24 hours", description: "The lowest free space of /dev/md3 over the last 24 hours is under 16% (CI admission stops at 14%). Usual causes: a guest wrote and removed a large temporary file and its disk file has not shrunk yet, or an application database log grew. Inspect df -h /, pvesm status --storage local and the guests' trim timers, and look at the free-space history before reclaiming anything."}
+      - eval_time: 28h                                    # about 22 hours after the dip: still inside the 24 hour memory
+        alertname: PveHostFilesystemDailyLowNarrow
+        exp_alerts:
+          - exp_labels: {severity: warning, service: pve_storage, job: pve_0docker_host_node_exporter_via_tailscale, device: /dev/md3, mountpoint: /}
+            exp_annotations: {summary: "0docker hypervisor root came within two points of the CI admission hold in the last 24 hours", description: "The lowest free space of /dev/md3 over the last 24 hours is under 16% (CI admission stops at 14%). Usual causes: a guest wrote and removed a large temporary file and its disk file has not shrunk yet, or an application database log grew. Inspect df -h /, pvesm status --storage local and the guests' trim timers, and look at the free-space history before reclaiming anything."}
+      - {eval_time: 31h, alertname: PveHostFilesystemDailyLowNarrow, exp_alerts: []}   # more than 24 hours after the dip: cleared

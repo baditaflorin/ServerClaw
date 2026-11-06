@@ -1,0 +1,79 @@
+id: ws-0541-gate-stacked-base-ref
+adr: "0087"
+title: Pre-push gate - a branch stacked on an unmerged branch names its parent as the validation base
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/gate-stacked-base-ref
+worktree_path: .claude/worktrees/gate-stacked-base
+doc: docs/workstreams/ws-0541-gate-stacked-base-ref.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - scripts/remote_exec.sh
+  - scripts/validate_repo.sh
+  - tests/test_remote_exec.py
+  - tests/test_validate_repo_cache.py
+  - tests/test_workstream_surface_ownership.py
+  - docs/runbooks/validation-gate.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-0541-gate-stacked-base-ref.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-0541-gate-stacked-base-ref.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_0541_gate_stacked_base_ref_tracking
+      paths:
+        - docs/workstreams/ws-0541-gate-stacked-base-ref.md
+      mode: exclusive
+    - id: gate_stacked_base_ref_scripts
+      paths:
+        - scripts/remote_exec.sh
+        - scripts/validate_repo.sh
+      mode: shared_contract
+      contract: pre-push-gate-v1
+    - id: gate_stacked_base_ref_tests
+      paths:
+        - tests/test_remote_exec.py
+        - tests/test_validate_repo_cache.py
+        - tests/test_workstream_surface_ownership.py
+      mode: shared_contract
+      contract: pre-push-gate-v1
+    - id: gate_stacked_base_ref_runbook
+      paths:
+        - docs/runbooks/validation-gate.md
+      mode: shared_contract
+      contract: pre-push-gate-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-0541-gate-stacked-base-ref.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: A branch stacked on an unmerged branch can pass the pre-push gate by setting LV3_VALIDATION_BASE_REF to its parent's ref; remote_exec.sh keeps it, computes the changed files against it and refuses one that does not resolve, and workstream-surfaces uses it. Unset, nothing changes.
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: >-
+  The gate diffed every branch against origin/main in two places (scripts/remote_exec.sh built the changed-file list and
+  exported the base, scripts/validate_repo.sh passed origin/main to the workstream surface check), so a branch stacked on an
+  unmerged parent was judged on the parent's files too and failed workstream-surfaces on every builder; the pre-push hook
+  then fell back to a local run on the laptop, which the fleet forbids. The caller can now name the parent
+  (LV3_VALIDATION_BASE_REF=origin/claude/parent). Nothing else changes: with the variable unset the behaviour is as before.
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: Keep a caller-supplied base in remote_exec.sh, use it in validate_workstream_surfaces, add the tests and the runbook section
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not merged, no live-apply marker, nothing applied)
+    status: in_progress

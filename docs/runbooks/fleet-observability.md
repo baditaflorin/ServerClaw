@@ -94,10 +94,10 @@ line changes, which is not expected on any host today.
 |---|---|---|
 | node_exporter listen address(es), textfile directory and its owner/mode, extra flags | `fleet_node_exporter` | host variables `fleet_node_exporter_*` |
 | 0docker hypervisor socket proxy (tailnet `:9100` to the internal exporter), 0mcp runtime-general proxy (`:9101`) | `fleet_node_exporter` | `fleet_node_exporter_socket_proxies` |
-| 0mcp hypervisor build-metrics proxy `woodpecker-0exec-build-metrics-proxy.{socket,service}`: tailnet `203.0.113.6:9103` (`FreeBind=true`) to `10.10.10.30:9100` (docker-build VM exporter); consumer CT108 `100.114.37.21` | `fleet_node_exporter` | `fleet_node_exporter_socket_proxies` (`free_bind: true`, `consumer`, `consumer_grants`) |
+| 0mcp hypervisor build-metrics proxy `woodpecker-0exec-build-metrics-proxy.{socket,service}`: tailnet `100.64.0.6:9103` (`FreeBind=true`) to `10.10.10.30:9100` (docker-build VM exporter); consumer CT108 `100.114.37.21` | `fleet_node_exporter` | `fleet_node_exporter_socket_proxies` (`free_bind: true`, `consumer`, `consumer_grants`) |
 | 0docker hypervisor stale `woodpecker-exec-proxy@9100.socket`: kept stopped and disabled (`state: disabled`) | `fleet_node_exporter` | `fleet_node_exporter_socket_proxies` |
-| PVE host firewall line `100.114.37.21/32 -> 203.0.113.6 tcp 9103` on the 0mcp hypervisor | `proxmox_security` (`host.fw.j2`) | `proxmox_host_additional_tcp_rules` in `inventory/host_vars/proxmox-host.yml` |
-| Tailnet grant `tag:builder-metrics-controller -> 203.0.113.6/32 tcp:9103` and its policy test | `config/tailscale/policy.hujson` | applied with `scripts/tailscale_policy_sync.py` (see `docs/runbooks/tailscale-metrics-grants.md`) |
+| PVE host firewall line `100.114.37.21/32 -> 100.64.0.6 tcp 9103` on the 0mcp hypervisor | `proxmox_security` (`host.fw.j2`) | `proxmox_host_additional_tcp_rules` in `inventory/host_vars/proxmox-host.yml` |
+| Tailnet grant `tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9103` and its policy test | `config/tailscale/policy.hujson` | applied with `scripts/tailscale_policy_sync.py` (see `docs/runbooks/tailscale-metrics-grants.md`) |
 | CT108 `tailscale serve --tcp=9100` to the internal exporter | `fleet_node_exporter` | `fleet_node_exporter_tailscale_serve_tcp` |
 | github-mirror nftables (tcp 9100 only from the monitoring VM on `tailscale0`) | `fleet_guest_firewall` | `fleet_guest_firewall_allowed_inbound` |
 | Advertised subnet routes (0docker hypervisor `.109/32`, 0own hypervisor `.50/32`, plus the pre-existing ones) | `fleet_tailscale_node` | `fleet_tailscale_node_advertise_routes` |
@@ -109,7 +109,7 @@ line changes, which is not expected on any host today.
 | Hypervisor memory alerts (`FleetHypervisorMemAvailableLow` <5% 10m, `FleetHypervisorMemAvailableCritical` <3% 5m, `FleetHypervisorSwapExhausted` >90% swap 15m; every `role="hypervisor"` node_exporter) | `monitoring_vm` | `config/prometheus/rules/fleet-hypervisor-memory.yml` |
 | Alertmanager self-monitoring: scrape job `alertmanager` (127.0.0.1:9093/metrics), `AlertmanagerDown`, `AlertmanagerNotificationsFailing`, `AlertmanagerStatePersistenceFailing` | `monitoring_vm` | `prometheus.yml.j2`, `config/prometheus/rules/alertmanager-self.yml` |
 | Root-filesystem alerts (`FleetRootFilesystemLow` <15% free 30m, `FleetRootFilesystemCritical` <7% 10m, `FleetRootFilesystemFillingFast` predicted full within 24h) and `FleetDockerPruneStale` | `monitoring_vm` | `config/prometheus/rules/fleet-disk.yml` (copied to `/etc/prometheus/rules/fleet-disk.yml` on the monitoring VM) |
-| Dead-man and finding alerts for the pool guardian and horizon loops on the 0docker builder (`FleetPoolGuardianSilent`, `FleetPoolGuardianNotReporting`, `FleetPoolGuardianCriticalFinding`, `FleetPoolGuardianCircuitOpen`, `FleetPoolGuardianPaused`, `FleetHorizonSilent`, `FleetHorizonNotReporting`, `FleetHorizonCriticalFinding`) | `monitoring_vm` | `config/prometheus/rules/fleet-loops.yml` (copied to `/etc/prometheus/rules/fleet-loops.yml` on the monitoring VM) |
+| Dead-man and finding alerts for the pool guardian and horizon loops on the 0docker builder (`FleetPoolGuardianSlow`, `FleetPoolGuardianSilent`, `FleetPoolGuardianLockedOut`, `FleetPoolGuardianNotReporting`, `FleetPoolGuardianCriticalFinding`, `FleetPoolGuardianCircuitOpen`, `FleetPoolGuardianPaused`, `FleetHorizonSilent`, `FleetHorizonNotReporting`, `FleetHorizonCriticalFinding`) | `monitoring_vm` | `config/prometheus/rules/fleet-loops.yml` (copied to `/etc/prometheus/rules/fleet-loops.yml` on the monitoring VM) |
 | the nginx guest's tcp 9100 rule | already in PR #299: `network_policy.guests.nginx` rendered by `linux_guest_firewall` | `inventory/host_vars/proxmox-host.yml` |
 
 ### Docker prune and disk alerts
@@ -120,7 +120,7 @@ host and `/` stood at 83% with 91 images (two 2.4 GB Playwright images among the
 
 - The timer removes only unused images and old build cache; it does not touch containers, volumes or networks.
 - The alert rules apply to every host the 0mcp Prometheus scrapes with `mountpoint="/"`. That includes docker-build
-  (`10.10.10.30`), Builder CT108 (`100.114.37.21`) and the 0docker hypervisor (`203.0.113.5`), which it reaches over
+  (`10.10.10.30`), Builder CT108 (`100.114.37.21`) and the 0docker hypervisor (`100.64.0.5`), which it reaches over
   Tailscale. A fleet-wide `/` alert for hosts that only the 0docker Prometheus scrapes would live with that fleet's
   monitoring, not here.
 - Verified live on 2026-10-12: the rules load healthy, `node_filesystem_avail_bytes{mountpoint="/"}` returns docker-build,
@@ -174,10 +174,10 @@ The roles only reference these, by path, and only check existence, owner and mod
 
 1. **Resolved 2026-10-12 (user approved removal): the stale grant and cluster rule for the old build-metrics port `:9100`.**
    `woodpecker-0exec-build-metrics-proxy.socket` moved from tailnet `:9100` (now the hypervisor exporter) to `:9103`.
-   The tailnet grant `tag:builder-metrics-controller -> 203.0.113.6/32 tcp:9100` and the cluster firewall rule
+   The tailnet grant `tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9100` and the cluster firewall rule
    `100.114.37.21/32` tcp 9100 were removed from the live tailnet policy, `config/tailscale/policy.hujson` and
    `proxmox_cluster_additional_tcp_rules`. Nothing used them. The monitoring VM keeps `tag:prometheus-monitoring ->
-   203.0.113.6/32 tcp:9100`.
+   100.64.0.6/32 tcp:9100`.
 2. **`woodpecker-exec-proxy@9100.socket` on the 0docker hypervisor** was enabled but inactive and is now **disabled**
    live and modelled as `state: disabled` (its drop-in forwarded to the same `10.10.10.1:9100` as
    `zdocker-hypervisor-metrics-proxy`, and both want the same tailnet `:9100`). The role keeps it stopped and
@@ -194,13 +194,13 @@ The roles only reference these, by path, and only check existence, owner and mod
 
 ```
 CT108 (0docker-builder, tailnet 100.114.37.21, userspace tailscaled, socks5 127.0.0.1:1055)
-   -> tailnet grant  tag:builder-metrics-controller -> 203.0.113.6/32 tcp:9103
-   -> PVE host.fw    IN ACCEPT -source 100.114.37.21/32 -dest 203.0.113.6 -p tcp -dport 9103
-   -> woodpecker-0exec-build-metrics-proxy.socket  ListenStream=203.0.113.6:9103  FreeBind=true
+   -> tailnet grant  tag:builder-metrics-controller -> 100.64.0.6/32 tcp:9103
+   -> PVE host.fw    IN ACCEPT -source 100.114.37.21/32 -dest 100.64.0.6 -p tcp -dport 9103
+   -> woodpecker-0exec-build-metrics-proxy.socket  ListenStream=100.64.0.6:9103  FreeBind=true
    -> systemd-socket-proxyd 10.10.10.30:9100  (docker-build VM130 node_exporter, nodename=docker-build)
 ```
 
-Port plan of the tailnet address `203.0.113.6`: `:9100` hypervisor exporter, `:9101` runtime-general proxy, `:9102`
+Port plan of the tailnet address `100.64.0.6`: `:9100` hypervisor exporter, `:9101` runtime-general proxy, `:9102`
 hypervisor exporter, `:9103` build-metrics proxy.
 
 Why `FreeBind=true`: a socket unit binds its address when it starts. When tailscaled restarts, `tailscale0` can briefly
@@ -213,7 +213,7 @@ Checks (read-only):
 
 ```sh
 ssh operator-bastion 'systemctl show -p FreeBind -p Listen woodpecker-0exec-build-metrics-proxy.socket; ss -ltn | grep :9103'
-ssh 0docker_bastion 'pct exec 108 -- bash -lc "curl -s --socks5-hostname 127.0.0.1:1055 http://203.0.113.6:9103/metrics | grep -m1 ^node_uname_info"'   # nodename="docker-build"
+ssh 0docker_bastion 'pct exec 108 -- bash -lc "curl -s --socks5-hostname 127.0.0.1:1055 http://100.64.0.6:9103/metrics | grep -m1 ^node_uname_info"'   # nodename="docker-build"
 python3 scripts/fleet_observability_render.py diff-live operator-bastion
 python3 scripts/fleet_observability_render.py diff-live 0docker_bastion
 scripts/tailscale-policy-ct108.sh plan        # semantic changes must be empty
@@ -232,8 +232,10 @@ scripts/tailscale-policy-ct108.sh plan        # semantic changes must be empty
 | vzdump hook / pgBackRest files | restore the `.bak` copy; the hook only writes the `.prom` file and the state directory |
 | PBS storage or job settings | the DRIFT line prints the old value: `pvesh set /storage/<id> --<key> <old>` or `pvesh set /cluster/backup/<id> --<key> <old>` |
 | Docker prune timer | `systemctl disable --now fleet-docker-prune.timer`, remove the two unit files and `/usr/local/sbin/fleet-docker-prune`, `systemctl daemon-reload`; pruned images are re-pulled on demand |
+| Build host cache trim alerts | delete `/etc/prometheus/rules/fleet-job-caches-trim.yml` on the monitoring VM and reload Prometheus; also remove the name from `monitoring_prometheus_adopted_rule_files`, or the next converge puts it back |
 | Disk alert rules | delete `/etc/prometheus/rules/fleet-disk.yml` on the monitoring VM and reload Prometheus |
 | Fleet loops rules | delete `/etc/prometheus/rules/fleet-loops.yml` on the monitoring VM and reload Prometheus |
+| CI cache prune alerts | delete `/etc/prometheus/rules/fleet-ci-cache-prune.yml` on the monitoring VM and reload Prometheus; also remove the name from `monitoring_prometheus_adopted_rule_files`, or the next converge puts it back |
 | Hypervisor memory reclaim timer | `systemctl disable --now fleet-hypervisor-memory-reclaim.timer`, remove the two unit files and `/usr/local/sbin/fleet-hypervisor-memory-reclaim`, `systemctl daemon-reload` |
 | Hypervisor memory / Alertmanager self rules | delete `/etc/prometheus/rules/fleet-hypervisor-memory.yml` / `alertmanager-self.yml`, reload Prometheus; the `alertmanager` scrape job: restore `/etc/prometheus/prometheus.yml.pre-am-scrape-<ts>` |
 | PBS ACL / prune job | `proxmox-backup-manager acl update <path> NoAccess --auth-id <id>` / `prune-job update` with the old value; user and token deletion is deliberately not automated |
@@ -267,9 +269,17 @@ Two unattended loops run on the 0docker builder (CT108) from systemd timers; bot
 - `fleet-pool-guardian.timer` (every 10 minutes) observes the service pools, repairs what is safe and escalates the rest. `fleet-horizon.timer` (every 6 hours) watches what expires or degrades slowly: certificates, the GitHub token, domains, Tailscale keys, RAID, disks, backups.
 - Each loop writes a textfile (`/var/lib/prometheus-node-exporter/textfile/fleet_pool_guardian.prom`, `fleet_horizon.prom`) that the builder's node exporter serves; this Prometheus scrapes it through the builder's `tailscale serve` forward on port 9100. The files must be mode 0644: the exporter runs as another user, and `fleet-runner` before v0.7.340 wrote them 0600, which hid both loops from this Prometheus.
 - Alerts live in `config/prometheus/rules/fleet-loops.yml`. `*Silent` fires when the heartbeat timestamp is old (guardian 45 minutes, horizon 13 hours). `*NotReporting` fires when the series is absent: a staleness expression returns nothing when the target is down, so without `absent()` a dead builder would silence its own alert. The nightly `ct108-nightly` backup stops the builder for about 10 minutes, which every `for:` outlasts.
+- Guardian kept out by the lock (added 2026-10-19): `FleetPoolGuardianSlow` (warning, no finished run for 45 minutes) and `FleetPoolGuardianSilent` (critical, 2 hours) say the guardian has not FINISHED a run, which has two very different causes. A run takes about 20 minutes and never starts while a tool holds the pools lock (`/root/fleet-state/state/pool-guardian/lock`) exclusively: a `deploy-pool`, an `nginx-render` batch such as `/root/rerender_batches.sh`; the timer's tick then says `another run holds the lock; nothing to do` in `journalctl -u fleet-pool-guardian.service` and exits 0 (on 2026-10-19 a batch re-render of 278 pooled vhosts and the deploys queued behind it did that for 2 h 8 min). Since fleet-runner v0.7.672 such a tick writes `fleet_pool_guardian_lock_skip_timestamp_seconds` (`/var/lib/prometheus-node-exporter/textfile/fleet_pool_guardian_lock_skip.prom`), and while that heartbeat is fresh (a tick in the last 75 minutes) `FleetPoolGuardianLockedOut` (warning) fires instead of the critical. The critical comes back when the heartbeat stops (the timer died, or a scan hung on an ssh child) and after 8 hours without a finished run (something holds the lock far too long). To see who holds the lock, on the builder: `ino=$(stat -c %i /root/fleet-state/state/pool-guardian/lock); grep ":$ino " /proc/locks` (the line without an arrow is the holder, the pid is the fifth column; lines with `->` wait), then `ps -o pid,args -p <pid>`. The guardian does not queue behind deploys on purpose (its observation holds the shared lock for a whole scan, which would sit in front of every deploy waiting for the exclusive lock); nothing needs doing unless the holder is stuck.
 - `FleetHorizonCriticalFinding` and `FleetPoolGuardianCriticalFinding` repeat what the loops page through their own ntfy topic, as an independent second path. While the 0docker hypervisor runs on one NVMe (four degraded md arrays), `FleetHorizonCriticalFinding` fires; it resolves when the missing disk is replaced and re-added.
-- Runner-config drift (added 2026-10-14): `runner-config-drift.timer` (hourly, from fleet-state `systemd/ct108/`) compares the config fleet-runner reads from `/root/fleet-state` (`service-pools.json`, `nginx-upstreams.json`, `builder-pool.json`, `cluster-gateway-upstreams.json`) with master of the private fleet-state repository and writes `fleet_runner_config_drift{file}`. `FleetRunnerConfigDrift` fires when a file has differed for an hour (a standby builder is bootstrapped from git, so a live-only change is lost on failover; found on 2026-10-14: a pool added live and a changed upstream port), `FleetRunnerConfigCheckFailing` when the repository cannot be read for 3 hours, `FleetRunnerConfigCheckSilent` / `FleetRunnerConfigNotReporting` are its dead-man pair. A pool's `weights` counts as runtime state when it has `base_weights`, so pool-balance's capacity adjustments are not drift.
+- Runner-config drift (added 2026-10-14): `runner-config-drift.timer` (hourly, from fleet-state `systemd/ct108/`) compares the config fleet-runner reads from `/root/fleet-state` (`service-pools.json`, `nginx-upstreams.json`, `builder-pool.json`, `cluster-gateway-upstreams.json`) with master of the private fleet-state repository and writes `fleet_runner_config_drift{file}`. The check also runs right after every successful `fleet-pool-config-mirror` run (every 30 minutes, `OnSuccess=` in the mirror unit, fleet-state #540, 2026-10-22): the hourly phase (:41) always fell a few minutes before the mirror, so while rollouts edit the live pools file all day (the least_conn waves, the keystore wave) the check saw "ahead of git" every time. Compared right after the mirror, drift is an edit made in the last seconds or a mirror that does not work; the hourly timer stays as the fallback for a dead mirror (`journalctl -u fleet-pool-config-mirror.service`). `FleetRunnerConfigDrift` fires when a file has differed for an hour (a standby builder is bootstrapped from git, so a live-only change is lost on failover; found on 2026-10-14: a pool added live and a changed upstream port), `FleetRunnerConfigCheckFailing` when the repository cannot be read for 3 hours, `FleetRunnerConfigCheckSilent` / `FleetRunnerConfigNotReporting` are its dead-man pair. A pool's `weights` counts as runtime state when it has `base_weights`, so pool-balance's capacity adjustments are not drift.
+- Pool balance (added 2026-10-14): `fleet-pool-balance.timer` (every 15 minutes) runs `fleet-runner pool-balance`, which turns `pool-plan`'s capacity proposals into weight changes through `nginx-render` (gate: the render may differ in weights only; rollback on any failure; docs/architecture/pool-balance.md in go_fleet_runner). It runs report-only until `FLEET_BALANCE_ARGS="--apply"` is set in `/etc/fleet-runner/pool-balance.env`. Metrics `fleet_pool_balance_*` (`last_run_timestamp_seconds`, `apply_enabled`, `paused`, `pools`, `proposals_pending`, `applied`, `failed`). `FleetPoolBalanceSilent` / `FleetPoolBalanceNotReporting` are the dead-man pair, `FleetPoolBalanceFailed` fires when a change failed or was rolled back. Kill switch: the pool guardian's PAUSE file.
 - Triage on the builder: `systemctl status fleet-pool-guardian.timer fleet-horizon.timer`, `journalctl -u fleet-pool-guardian.service -u fleet-horizon.service`, state under `/root/fleet-state/state/pool-guardian/` and `.../horizon/` (`latest.json`, `events.jsonl`). The guardian's kill switch is a `PAUSE` file in its state directory (or `FLEET_GUARDIAN_PAUSE`); the horizon's accepted problems are acknowledged in the `ACK` file there, one per line, each with a mandatory `until=YYYY-MM-DD`.
+
+## Rule files adopted from the live monitoring VM (added 2026-10-14)
+
+Seven rule files were running on the monitoring VM with no copy in git, so a rebuilt VM would have lost them: `fleet-edge-probe.yml`, `node-placement.yml` (placement score, `FleetHostOverloaded`, `FleetHostDiskCritical`, hypervisor memory pressure and `FleetHypervisorContentionMismatch`), `node-thermal-alerts.yml`, `prometheus-capacity.yml`, `pve-host-incident.yml`, `pve-recovery-alerts.yml` and `pve-storage-capacity.yml`. They are now in `config/prometheus/rules/` and shipped by the `monitoring_vm` role (`monitoring_prometheus_adopted_rule_files`, mode 0640 root:prometheus, Prometheus reload on change); the live copies were byte-identical when adopted, except `node-placement.yml`, which carries the fix below (backup `node-placement.yml.bak-pre-mismatch-fix-20261014T0604Z`).
+
+`FleetHypervisorContentionMismatch` matched with a bare `and on()`, so any hot hypervisor made every host under 30% busy alert (26 pending at once when the 0docker hypervisor peaked on 2026-10-14). The only hypervisor series is the 0docker Proxmox host, so the alert now looks only at guests with `fleet="0docker"` (joined through their `instance`). `tests/promtool/node_placement_rules_test.yml` fails on the old expression.
 
 ## Boot ordering of the tailnet socket proxies (added 2026-10-13)
 
@@ -338,3 +348,106 @@ Found in the 2026-10-13 re-audit of the 0mcp fleet; every item was applied live 
 - **Dead-man's switch for the 0mcp monitoring.** CT108 probes the 0mcp Prometheus and Alertmanager every minute over the tailnet and
   the 0docker Prometheus alerts on the result: `baditaflorin/go-fleet-metrics-hub`, `prometheus/rules/mcp-monitoring-deadman.yml`
   and `ops/mcp-monitoring-probe/`.
+
+## CI host pressure alerts
+
+Added 2026-10-26 with the graded Woodpecker admission (services-registry PR 1000/1001). Rules: `config/prometheus/rules/fleet-ci-host-pressure.yml`; unit tests: `tests/promtool/fleet_ci_host_pressure_rules_test.yml`.
+
+| Alert | Fires when | Back-test (7 days) |
+| --- | --- | --- |
+| `FleetCiHostCpuPressureHigh` | CPU pressure (some task waited for a CPU) over 40% for 30 minutes on `0docker-builder`, `docker-build-lv3`, `0own-build-worker`, `infer-builder-ci` or `0pipe-build` | 2 episodes |
+| `FleetCiHostIoPressureHigh` | IO pressure (all tasks stalled) over 50% for 30 minutes on the same hosts | 4 episodes, all on `0own-build-worker` (shared HDD mirror) |
+| `FleetCiHostPressureMissing` | fewer than 5 of those hosts report `node_pressure_*` for 15 minutes (a check that reads nothing must not stay green) | not seen |
+
+What to do: the graded load controller (`woodpecker-load-controller@ci.0exec`, `@ci.0mcp` on CT108) should already be closing slots; read its journal for `node_graded` / `agent_graded_closed`, then compare the open slots on ci.0exec.com with the host. If the host is saturated with every slot closed, the load is not CI: look at the guests of its hypervisor (0own: VMs 610, 630, 660 on the 2 HDDs). The infer builder (VM 702) joined on 2026-10-27: node_exporter on its tailnet address `100.64.0.23:9100`, grant `tag:prometheus-monitoring -> tag:infer-builder-ci:9100` in `config/tailscale/policy.hujson`, target in the `infer_node_exporter_via_tailscale` job (`inventory/host_vars/monitoring.yml`). A fifth CI host goes into the three regexes and the count `4` of `FleetCiHostPressureMissing` and its unit test.
+
+## Build host cache trim alerts
+
+Added 2026-11-04. Rules: `config/prometheus/rules/fleet-job-caches-trim.yml`; unit tests: `tests/promtool/fleet_job_caches_trim_rules_test.yml`. Step 3d of the build VM's 4-hourly GC (`docker-build-lv3`, VM 130 on 0mcp; `docker-build-gc.timer` at :23 of hours 0, 4, 8, 12, 16 and 20 UTC) trims the Go build cache inside the `fleet-job-cache-*` Docker volumes to a 20 GiB cap, which is what keeps the VM's root off the disk-full line, and at the end of every full run writes `fleet_job_caches_trim.prom` into node_exporter's textfile directory: `fleet_job_caches_trim_last_run_timestamp_seconds`, `fleet_job_caches_trim_last_result` (0 ran, 1 failed, 2 skipped), `fleet_job_caches_trim_freed_bytes` and `fleet_job_caches_trim_volumes_over_cap`. The 0mcp Prometheus scrapes that node_exporter as `host="docker-build-lv3"`; the 0docker one sees it as `host="0mcp-builder"` and gets no rule.
+
+| Alert | Fires when | Severity |
+| --- | --- | --- |
+| `FleetJobCachesTrimFailed` | the last full run wrote result 1 or 2 and it stayed for an hour (the file is rewritten by full runs only, so a bad value stays up to 4 hours) | warning |
+| `FleetJobCachesTrimStale` | no run has written the file for 9 hours (two missed runs plus slack), for 30 minutes | warning |
+| `FleetJobCachesTrimMissing` | no `fleet_job_caches_trim_last_run_timestamp_seconds` series for `docker-build-lv3` for a day (a check that reads nothing must not stay green) | warning |
+| `FleetJobCachesOverCap` | a volume still over its cap after every run for 24 hours; above 0 for hours in a CI burst by design, so only a day of it is reported | info (Alertmanager drops it) |
+
+State when written: the rule file is in git only. It is not on the monitoring VM, Prometheus was not reloaded, and the four expressions return nothing on the live Prometheus (three automatic runs on 2026-11-03, all result 0, nothing over the cap), so applying it fires nothing. The file is in `monitoring_prometheus_adopted_rule_files`, so a converge of the `monitoring_vm` role copies it (mode 0640 root:prometheus) and reloads Prometheus; a copy by hand works too (`promtool check rules`, copy to `/etc/prometheus/rules/`, reload). Shipping it is a separate step on the owner's yes.
+
+What to do: for each alert the commands (the journal of `docker-build-gc.service` needs `sudo -n`), the metric file, the kill switch and its effect on `FleetJobCachesTrimStale` are in `config/0mcp/docker-build-lv3/README.md`, section "Alerts on the trim". Where the delays come from, and that they are reasoning checked against less than a day of history, is in the header of the rule file.
+
+## Disk health alerts
+
+Added 2026-10-29 with the 0pipe build server. Rules: `config/prometheus/rules/fleet-disk-health.yml`; unit tests: `tests/promtool/fleet_disk_health_rules_test.yml`. The collector (`proxmox-storage-metrics.timer`, fleet-state `scripts/proxmox-storage-metrics.py`, installed on 0docker, 0mcp, 0infer, 0own and 0pipe with `scripts/install-proxmox-storage-metrics.sh <host> <checkout>`) exports the SMART facts as `fleet_disk_*`; before these rules nothing alerted on them. On the day they were written one 0docker mirror half (`nvme1n1`) had failed SMART at 110% wear and 0pipe's only SSD (a used auction disk) was at 80% wear after 15.7k hours.
+
+| Alert | Fires when | Today (2026-10-29) |
+| --- | --- | --- |
+| `FleetDiskSmartFailed` (critical) | a drive's SMART overall self-assessment is FAILED for 10 minutes | `0docker/nvme1n1` |
+| `FleetDiskWearCritical` (critical) | rated endurance used >= 95% for 1 hour | `0docker/nvme1n1` (110%) |
+| `FleetDiskWearHigh` (warning) | rated endurance used 80-94% for 1 hour | `0pipe/sda` (80%) |
+| `FleetDiskWearForecast` (warning) | at the 3 day trend the disk reaches 100% within 30 days (disks between 60 and 100% only) for 6 hours | none yet (needs 3 days of 0pipe data) |
+| `FleetDiskBadSectors` (warning) | a reallocated, pending, offline-uncorrectable or media-error counter is above 0 for 30 minutes | none: every such counter was 0 fleet-wide |
+| `FleetDiskHot` (warning) | a disk above 65 C for 30 minutes (fleet disks run at 31-52 C) | none |
+| `FleetDiskHealthMissing` (warning) | fewer than 5 hosts report `fleet_disk_smart_passed` for 30 minutes (a check that reads nothing must not stay green) | none |
+
+What to do: SMART failed or wear critical on a mirror: replace the drive before the other half follows (check `mdadm --detail`, then the vendor's replacement). On 0pipe (single SATA SSD, no RAID, nothing unique on it) a failing disk means rebuilding the host from the private repo `baditaflorin/0pipe` and moving the Woodpecker agents; open a Hetzner support ticket with the `smartctl -a` output to ask for a drive swap while the disk still works. To see what writes to a disk: `node_disk_written_bytes_total{device="sda"}` per host in Prometheus.
+
+## Docker network pool alerts
+
+Added 2026-10-29. Rules: `config/prometheus/rules/fleet-docker-networks.yml`; unit tests: `tests/promtool/fleet_docker_networks_rules_test.yml`. The numbers come from fleet-state `scripts/docker-network-gc.py`, a systemd timer (every 30 minutes) on every Docker host in fleet-state `scripts/docker-network-gc.hosts`, installed and checked with fleet-state `scripts/install-docker-network-gc.sh install|status --all`.
+
+Why: each bridge network takes one subnet from the Docker daemon's `default-address-pools`. Docker's built-in pools hold 31; the fleet's usual `daemon.json` pools (172.16.0.0/12, 192.168.0.0/16, 10.200.0.0/16 cut into /24s) hold about 4,600. A Woodpecker agent that loses its Docker socket or is killed leaves its per-workflow network `wp_<ulid>_<n>_default` behind; on 2026-10-28 these filled infer-builder-ci and every workflow on agent 110 failed with "could not find an available, non-overlapping IPv4 address pool among the defaults". The timer removes a network only when its name matches `^wp_[0-9a-z]+_[0-9]+_default$`, no container is attached and it is older than 6 hours (Woodpecker's longest pipeline timeout is 2 h). It never runs `docker network prune`, which would also take a workflow's network before its first container exists and every stopped compose project's network.
+
+| Alert | Fires when |
+| --- | --- |
+| `DockerNetworkPoolNearlyFull` | fewer than 5 pool subnets left on a host for 5 minutes |
+| `DockerNetworkPoolExhausted` (critical) | no pool subnet left for 1 minute: every new network on that host fails |
+| `DockerNetworkGcStale` | the timer has not completed a run on a host for 3 hours |
+| `DockerNetworkGcHostsMissing` / `DockerNetworkGcHostsMissingNone` | fewer than 21 scraped Docker hosts report the metrics, or none at all, for 30 minutes |
+
+What to do: on the host, `docker network ls --filter name=wp_` and `docker network inspect -f '{{.Name}} {{.Created}} {{len .Containers}}'` on them; leaked networks younger than 6 hours come in bursts (about 15 within 20 minutes when an agent lost its socket on 2026-10-28) and can be removed by hand once no container is attached and the agent that created them has been restarted. The lasting fix for a host on the built-in 31 is larger `default-address-pools` in `/etc/docker/daemon.json`, which needs a dockerd restart: drain the host's agents in the load controller first. Metrics per host: `docker_network_pool_capacity_subnets`, `docker_network_pool_used_subnets`, `docker_network_pool_configured`, `docker_networks_total`, `woodpecker_leaked_networks`, `woodpecker_leaked_networks_removed_total`, `docker_network_gc_last_success_timestamp_seconds`. infer-runtime and 0mcp-staging-runtime run the timer but have no node_exporter scrape target, so their numbers reach no alert yet; coolify-apps-lv3 does not run it (its node_exporter is a `prom/node-exporter` container with no textfile mount; 4,608-subnet pools, no Woodpecker agent). A newly scraped Docker host goes into the count `21` of `DockerNetworkGcHostsMissing` and its unit test.
+
+## CI cache prune alerts
+
+Added 2026-11-02. Rules: `config/prometheus/rules/fleet-ci-cache-prune.yml`; unit tests: `tests/promtool/fleet_ci_cache_prune_rules_test.yml`. The host-local Go/npm CI cache of the Woodpecker pilot agent `0own-build-worker` (VM 610; services-registry PR #806 and its runbook `docs/runbooks/woodpecker-ci-go-cache-pilot.md`) is trimmed by `woodpecker-ci-cache-prune.timer` at about 03:15 UTC. From 2026-10-21 to 11-01 `go-build` ended every run above its 8 GB cap (14 to 27 GB) and nothing alerted: `prune.sh` logged a line and exited 0. It now exits 3 in that case and, with `--prom /var/lib/prometheus/node-exporter/ci-cache-prune.prom`, writes the textfile these rules read: `ci_cache_prune_size_bytes`, `ci_cache_prune_cap_bytes` and `ci_cache_prune_over_cap` per `cache` (`go-build`, `go-mod`, `npm`) and `ci_cache_prune_last_run_timestamp_seconds`. That host's second node-exporter (`100.88.44.116:9101`, textfile directory `/var/lib/prometheus/node-exporter`) is already scraped through the Scanopy `file_sd` list with `host="0own-build-worker"` (read on the monitoring VM, 2026-11-02).
+
+| Alert | Fires when |
+| --- | --- |
+| `CiCacheOverCap` | a cache is still over its cap after the nightly run deleted everything it may, for 5 minutes (the flag is written by that run, so it stays 1 until the next run) |
+| `CiCachePruneStale` | no run has finished for 36 hours (30 minute wait) |
+| `CiCachePruneMissing` | no `ci_cache_prune_*` series at all for 3 days (a check that reads nothing must not stay green) |
+
+State when written: the new `prune.sh` is not on the pilot host yet and the pilot PR is not merged, so there are no series; the first two rules stay quiet and `CiCachePruneMissing` would speak after 3 days. The file is in `monitoring_prometheus_adopted_rule_files`, so a converge of the `monitoring_vm` role copies it (mode 0640 root:prometheus) and reloads Prometheus; a copy by hand works too (`promtool check rules`, copy to `/etc/prometheus/rules/`, reload).
+
+What to do: `CiCacheOverCap`: on the host read `journalctl -u woodpecker-ci-cache-prune.service --since -2d`; its `ALERT` line names the cache. Either one working day needs more than the cap (`go-build` measured 14 to 27 GB per working day in 11-2026): raise the flag in the unit's drop-in `/etc/systemd/system/woodpecker-ci-cache-prune.service.d/caps.conf` (an empty `ExecStart=` line, then the full command), `systemctl daemon-reload`; or something other than the pipelines writes into `/var/cache/woodpecker-ci` (`du -sh` of the three directories, newest files first). `CiCachePruneStale` and `CiCachePruneMissing`: `systemctl status woodpecker-ci-cache-prune.timer woodpecker-ci-cache-prune.service`, then `ls -l /var/lib/prometheus/node-exporter/ci-cache-prune.prom` and `curl -s http://100.88.44.116:9101/metrics | grep ci_cache_prune`. A second agent host that gets the host-local cache needs no change here: its series carry its own `host` label.
+
+## Woodpecker agent record alerts
+
+Added 2026-10-29. Rules: `config/prometheus/rules/fleet-woodpecker-agent-records.yml`; unit tests: `tests/promtool/fleet_woodpecker_agent_records_rules_test.yml`. On 2026-10-28 eight agent records on ci.0exec lost their name (a `PATCH /api/agents/{id}` without `name` stores an empty one; labels survive), the CT108 load controller logged `node_missing` ~1,500 times per node and managed no infer, 0own or 0mcp slot for about a day, and nothing alerted. The metrics come from services-registry `bin/woodpecker_agent_names_check.py`, run every minute by `woodpecker-agent-names-check.timer` on CT108 (textfile `woodpecker-agent-names.prom`).
+
+| Alert | Fires when | Fix |
+| --- | --- | --- |
+| `WoodpeckerAgentRecordUnnamed` | an agent record has an empty name for 10 minutes | restart the idle agent (`GET /api/agents/<id>/tasks` empty first); it re-registers `WOODPECKER_HOSTNAME` |
+| `WoodpeckerControllerNodeMissingAgents` | a controller config node lists names no agent has, for 10 minutes | as above, or remove the stale name from `/etc/woodpecker-load-controller/<plane>.json` (backup first) |
+| `WoodpeckerAgentNamesBeingWiped` | the check restored an emptied name in the last 15 minutes (a caller PATCHes agents without `name`) | the wipe is already undone; find the caller (nginx access log on VM104, `PATCH /api/agents`, user agent) and make it send `name` and `no_schedule` |
+| `WoodpeckerAgentRecordCheckBlind` | the check cannot read a plane, or its series is absent, for 15 minutes | check the timer and the plane's API token on CT108 |
+
+Every script that PATCHes an agent must send `name` and `no_schedule` (a body without `name` stores an empty name). Since 2026-10-30 the check runs with `--repair` and restores a wiped name within a minute (state `/var/lib/woodpecker-agent-names/state.json` on CT108), so the alert above is the only trace of the caller.
+
+## Woodpecker exporter alerts
+
+Added 2026-10-30. Rules: `config/prometheus/rules/fleet-woodpecker-exporter.yml`; unit tests: `tests/promtool/fleet_woodpecker_exporter_rules_test.yml`. The exporter is the private repo `baditaflorin/fleet-woodpecker-metrics` (script, units, `scripts/install.sh`, `scripts/check-drift.sh`), run every five minutes by `fleet-woodpecker-metrics.timer` on CT108, textfile `woodpecker.prom`.
+
+- `WoodpeckerControlPlaneUnreachable` (warning, 10 m): `woodpecker_control_plane_up` is 0 for a plane. The exporter's API call failed: the server is down, the token file is unreadable, or the private proxy is. Check `curl` against the plane from CT108 and `systemctl show fleet-woodpecker-metrics.service -p Result`.
+- `WoodpeckerExporterMissing` (warning, 15 m): the series is gone: the timer is stopped or every run fails. `systemctl status fleet-woodpecker-metrics.service` and `journalctl -u fleet-woodpecker-metrics` on CT108; if the script changed, `scripts/check-drift.sh` and roll back with the `.bak-<UTC>` copy.
+
+## Hypervisor log shipping alerts
+
+Added 2026-11-01. Rules: `config/prometheus/rules/fleet-log-shipping.yml`; unit tests: `tests/promtool/fleet_log_shipping_rules_test.yml`. Until 2026-10-30 the 0mcp, 0infer and 0pipe hypervisors sent nothing to OpenObserve `host_logs` (only the build VM and the guests shipped) and nothing noticed. The metrics come from `config/0own/openobserve/log-freshness/openobserve-log-freshness.py`, run every 2 minutes by `openobserve-log-freshness.timer` on VM 630 (textfile `openobserve-log-freshness.prom`); the host list is the `HYPERVISORS` constant in the script, so a new hypervisor shipper must be added there.
+
+| Alert | Fires when | Fix |
+| --- | --- | --- |
+| `HypervisorLogShippingSilent` | a listed hypervisor has no event in `host_logs` for over 2 hours (a host not seen in the 6 h window counts as silent), for 10 minutes | `systemctl status vector` and `journalctl -u vector` on the host; reinstall with 0pipe `scripts/install-vector-host.sh <alias> <label>`. 0mcp once kept its live journal in `/run` (tmpfs): `journalctl --flush` |
+| `LogFreshnessProbeBlind` | the probe cannot query OpenObserve, or its series is absent, for 15 minutes | `systemctl status openobserve-log-freshness.timer` and `journalctl -u openobserve-log-freshness` on VM 630 (`ssh 0own_openobserve`); OpenObserve on 127.0.0.1:5080 |
+
+The probe never reports hosts silent when it could not read: a failed query writes only `openobserve_log_freshness_up 0`.

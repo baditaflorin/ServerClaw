@@ -1,0 +1,18 @@
+# infer-pg-primary (VM701, 10.70.10.10) tailscale direct path (2026-10-17). Same pattern as infer-runtime-tailscale-direct.nft (VM 10.70.10.30, UDP 41642).
+# Why: the hypervisor's own tailscaled owns UDP 41641 on 203.0.113.20, and VM701's tailscaled (default port 41641) was masqueraded to a random source port,
+# so no direct path to it ever formed and every peer (docker-prod VM101, the dockerhost, ...) reached 100.64.0.22 through the DERP relay:
+# `select 1` took 16-22 ms per round trip instead of ~0.4 ms. VM701's tailscaled now listens on UDP 41643 and this table forwards exactly that port to it
+# (one port, one VM, VM701's source port is kept so the endpoint it learns by STUN is the forwarded one).
+# The matching forward-accept rule lives in the filter table (infer-proxmox.nft); install-host.sh adds it, marked "pg-primary tailscale direct path".
+# Undo: ./install-host.sh --undo (or: delete this file, its include in /etc/nftables.conf and the marked forward rule in infer-proxmox.nft,
+# `nft delete table ip infer_pg_ts_direct`), then ./install-vm.sh --undo on VM701 (PORT="41641" in /etc/default/tailscaled, restart tailscaled).
+table ip infer_pg_ts_direct {
+    chain prerouting {
+        type nat hook prerouting priority dstnat; policy accept;
+        iifname "eno1" ip daddr 203.0.113.20 udp dport 41643 dnat to 10.70.10.10:41643
+    }
+    chain postrouting {
+        type nat hook postrouting priority srcnat - 1; policy accept;
+        ip saddr 10.70.10.10 udp sport 41643 oifname "eno1" snat to 203.0.113.20:41643
+    }
+}

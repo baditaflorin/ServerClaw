@@ -1,0 +1,11 @@
+[Unit]
+Description=Remove node_modules of idle front-end run dirs under /home/ops/fe_runs (regenerable; run dirs and outputs untouched)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/fe-runs-janitor
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=6
+TimeoutStartSec=1800

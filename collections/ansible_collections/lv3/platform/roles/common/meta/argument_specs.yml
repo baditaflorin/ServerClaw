@@ -9,6 +9,27 @@ argument_specs:
   main:
     short_description: Shared task entrypoints for reusable Ansible role patterns.
     options: {}
+  journal_retention:
+    short_description: Bound local journal storage and retention on a systemd host or guest.
+    options:
+      common_journal_retention_system_max_use:
+        type: str
+        default: 1G
+      common_journal_retention_system_keep_free:
+        type: str
+        default: 5G
+      common_journal_retention_runtime_max_use:
+        type: str
+        default: 256M
+      common_journal_retention_runtime_keep_free:
+        type: str
+        default: 256M
+      common_journal_retention_max_retention:
+        type: str
+        default: 30day
+      common_journal_retention_max_file_age:
+        type: str
+        default: 1day
   assert_vars:
     short_description: Validate required variables before role tasks continue.
     options:

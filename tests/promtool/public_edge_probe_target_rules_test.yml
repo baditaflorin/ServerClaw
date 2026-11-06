@@ -1,0 +1,37 @@
+# promtool unit test for the PublicEdgeProbeTargetBroken alert in config/prometheus/rules/public-edge-critical.yml (run by tests/test_public_edge_probe_target_alert.py when promtool is installed).
+# The firing state is read from the ALERTS series. A probe target the blackbox exporter answers 400 for ("Unknown module") has up == 0 and produces NO probe_success: the other two alerts of the
+# file cannot see it, this one must.
+rule_files:
+  - ../../config/prometheus/rules/public-edge-critical.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: healthy probes raise nothing
+    interval: 1m
+    input_series:
+      - series: 'up{job="public-edge-critical",instance="https://catalog.0exec.com/",service="catalog.0exec.com",probe_vantage="monitoring-vm-public-egress"}'
+        values: "1x120"
+      - series: 'up{job="public-edge-critical",instance="https://10.10.10.10/",service="ci.example.org",probe_vantage="0mcp-internal-gateway"}'
+        values: "1x120"
+    promql_expr_test:
+      - expr: ALERTS{alertname="PublicEdgeProbeTargetBroken", alertstate="firing"}
+        eval_time: 100m
+        exp_samples: []
+
+  - name: a target the exporter cannot probe warns after thirty minutes, not before
+    interval: 1m
+    input_series:
+      - series: 'up{job="public-edge-critical",instance="https://10.10.10.10/",service="ci.example.org",probe_vantage="0mcp-internal-gateway",probe_module="http_2xx_ci0mcp_internal"}'
+        values: "0x120"
+      - series: 'up{job="public-edge-critical",instance="https://catalog.0exec.com/",service="catalog.0exec.com",probe_vantage="monitoring-vm-public-egress"}'
+        values: "1x120"
+    promql_expr_test:
+      - expr: ALERTS{alertname="PublicEdgeProbeTargetBroken", alertstate="firing"}
+        eval_time: 25m
+        exp_samples: []
+      - expr: ALERTS{alertname="PublicEdgeProbeTargetBroken", alertstate="firing"}
+        eval_time: 40m
+        exp_samples:
+          - labels: 'ALERTS{alertname="PublicEdgeProbeTargetBroken", alertstate="firing", job="public-edge-critical", instance="https://10.10.10.10/", service="ci.example.org", probe_vantage="0mcp-internal-gateway", probe_module="http_2xx_ci0mcp_internal", severity="warning"}'
+            value: 1

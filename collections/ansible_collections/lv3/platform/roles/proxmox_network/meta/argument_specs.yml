@@ -124,3 +124,36 @@ argument_specs:
         default: /etc/systemd/system/lv3-proxmox-firewall-conntrack.service
         description:
           - Managed systemd unit that reapplies the conntrack-zone helper on boot.
+      proxmox_network_allow_rule_removal:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Whether the per-VM firewall install may remove rules or managed blocks that the live file has and the render does not. Off by default; the install fails before writing anything when a removal is found.
+      proxmox_network_firewall_live_dir:
+        type: path
+        required: false
+        default: /etc/pve/firewall
+        description:
+          - Directory of the live per-VM Proxmox firewall files (`<vmid>.fw`).
+      proxmox_network_firewall_stage_dir:
+        type: path
+        required: false
+        default: /root
+        description:
+          - Directory that holds the rendered staging copies (`.lv3-vm-<vmid>.fw`) the live files are compared with.
+      proxmox_network_firewall_backup_root:
+        type: path
+        required: false
+        default: /root
+        description:
+          - Directory in which each install run saves the files it replaces as `fw-backup-<timestamp>/`, with a `restore.sh`.
+      proxmox_network_firewall_vmids:
+        type: list
+        elements: int
+        required: false
+        default: []
+        description:
+          - >-
+            VM ids whose per-VM firewall files this run renders, compares and installs. Empty means every declared guest
+            that exists on the host. On the command line pass -e proxmox_network_firewall_vmids=155 (or 155,191).

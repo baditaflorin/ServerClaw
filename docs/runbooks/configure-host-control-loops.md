@@ -84,6 +84,26 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox-host_server/.local/ssh/hetz
 
 ## Notes
 
+- Host journals have explicit retention in
+  `/etc/systemd/journald.conf.d/60-fleet-retention.conf`: 1 GiB persistent,
+  256 MiB volatile, 30 days, and one-day journal files. The persistent journal
+  also leaves 5 GiB free. These caps operate continuously; they do not depend
+  on the emergency low-disk recovery timer. Size caps may expire logs sooner
+  than 30 days; central log shipping remains the longer-term query surface.
+- To apply only these limits, run the Proxmox playbook with
+  `--tags journal-retention`. The role backs up an existing drop-in and restarts
+  only `systemd-journald` when the file changes. Verify with
+  `systemd-analyze cat-config systemd/journald.conf`,
+  `systemctl is-active systemd-journald`, and `journalctl --disk-usage`.
+  Roll back by restoring the saved drop-in (or moving the new one aside if
+  none existed) and restarting `systemd-journald`; expired logs cannot be
+  restored by changing the limits.
+- The same helper supports guests through `playbooks/journal-retention.yml`.
+  For an explicit SSH alias, pass a one-host inventory and
+  `-e journal_retention_hosts=<alias>`. This playbook changes only the journal
+  configuration, so it does not replay Proxmox roles on a guest. The shared
+  defaults live under `common_journal_retention_*` in the common role.
+
 - The current loop records execution state only; ADR 0225 will later replace
   the placeholder reconcile body with a repo-managed `ansible-pull` path.
 - The reconcile service is a bounded `oneshot` unit. Retry comes from the next

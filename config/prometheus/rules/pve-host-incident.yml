@@ -1,0 +1,198 @@
+groups:
+  - name: pve_host_incident
+    rules:
+      - alert: PveHostNodeExporterUnavailable
+        expr: up{job="pve_0docker_host_node_exporter_via_tailscale"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: pve_storage
+        annotations:
+          summary: "0docker Proxmox host metrics are unreachable"
+          description: "The dedicated host node exporter scrape failed. Check the Tailscale 9100 proxy on 0docker and the host node-exporter service."
+
+      - alert: PveHostExporterIdentityMismatch
+        expr: |
+          (up{job="pve_0docker_host_node_exporter_via_tailscale"} == 1)
+          unless on (job, instance)
+          node_uname_info{job="pve_0docker_host_node_exporter_via_tailscale",nodename="Debian-bookworm-latest-amd64-base"}
+        for: 2m
+        labels:
+          severity: critical
+          service: pve_storage
+        annotations:
+          summary: "0docker host metrics target is not the Proxmox host"
+          description: "The host metrics route no longer reports the verified Proxmox hostname. Check the Tailscale proxy destination before trusting disk, RAID, or I/O alerts."
+
+      - alert: PveHostFilesystemLowHeadroom
+        expr: node_filesystem_avail_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"} / node_filesystem_size_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"} < 0.15
+        for: 5m
+        labels:
+          severity: warning
+          service: pve_storage
+        annotations:
+          summary: "0docker Proxmox host filesystem is below 15% free"
+          description: "The real hypervisor root filesystem /dev/md3 is below the early-warning threshold. CI admission stops at 14%; inspect df -h /, pvesm status --storage local, and the storage recovery timer."
+
+      - alert: PveHostFilesystemAdmissionHold
+        expr: node_filesystem_avail_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"} / node_filesystem_size_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"} < 0.14
+        for: 2m
+        labels:
+          severity: critical
+          service: pve_storage
+        annotations:
+          summary: "0docker CI admission must stay held for low host headroom"
+          description: "Hypervisor /dev/md3 is below the 14% admission floor. Check df -h / and reclaim only approved inactive cache data; the controller retains a 50 GiB recovery floor."
+
+      # The free fraction swings by several points within minutes (a guest writes and removes a large temporary file; its disk file only shrinks at the
+      # guest's next trim), so the 15% warning above gives no lead time and no memory. This one looks at the lowest value of the last 24 hours: it does not
+      # fire on ordinary days and stays on for a day after a dip that came within two points of the hold. Tests: tests/promtool/pve_host_free_space_rules_test.yml.
+      - alert: PveHostFilesystemDailyLowNarrow
+        expr: min_over_time((node_filesystem_avail_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"} / node_filesystem_size_bytes{job="pve_0docker_host_node_exporter_via_tailscale",device="/dev/md3",mountpoint="/"})[24h:5m]) < 0.16
+        for: 0m
+        labels:
+          severity: warning
+          service: pve_storage
+        annotations:
+          summary: "0docker hypervisor root came within two points of the CI admission hold in the last 24 hours"
+          description: "The lowest free space of /dev/md3 over the last 24 hours is under 16% (CI admission stops at 14%). Usual causes: a guest wrote and removed a large temporary file and its disk file has not shrunk yet, or an application database log grew. Inspect df -h /, pvesm status --storage local and the guests' trim timers, and look at the free-space history before reclaiming anything."
+
+      - alert: PveRaidArrayDegraded
+        expr: node_md_disks{job="pve_0docker_host_node_exporter_via_tailscale",device=~"md[0-3]",state="active"} < on(job,device) group_left node_md_disks_required{job="pve_0docker_host_node_exporter_via_tailscale",device=~"md[0-3]"}
+        for: 1m
+        labels:
+          severity: critical
+          service: pve_storage
+        annotations:
+          summary: "RAID array {{ $labels.device }} on 0docker is degraded"
+          description: "Only {{ $value }} active member(s) are available. Inspect /proc/mdstat and replace the missing NVMe member before another disk failure."
+
+      - alert: PveHostKernelIoErrors
+        expr: proxmox_host_kernel_io_errors_recent{job="pve_0docker_host_node_exporter_via_tailscale"} > 0
+        for: 1m
+        labels:
+          severity: critical
+          service: pve_storage
+        annotations:
+          summary: "Recent kernel I/O errors on the 0docker Proxmox host"
+          description: "The host kernel logged I/O errors in the last ten minutes. Check journalctl -k --since '30 minutes ago' and the NVMe/RAID state."
+
+      - alert: PveGuestStorageIoError
+        expr: proxmox_guest_storage_error{job="pve_0docker_host_node_exporter_via_tailscale"} == 1
+        for: 1m
+        labels:
+          severity: critical
+          service: pve_storage
+        annotations:
+          summary: "Guest {{ $labels.guest_id }} has a storage error on 0docker"
+          description: "The guest is in an I/O error or unknown state. Check qm status or pct status for this guest, then inspect host storage before resuming."
+
+      - alert: PveLocalStorageUnavailable
+        expr: proxmox_local_storage_up{job="pve_0docker_host_node_exporter_via_tailscale"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: pve_storage
+        annotations:
+          summary: "0docker Proxmox local storage is unavailable"
+          description: "The host probe cannot confirm local storage is active. Check pvesm status --storage local and the host filesystem."
+
+      - alert: PveHostHealthMetricsStale
+        expr: time() - proxmox_host_health_metrics_collection_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"} > 600
+        for: 2m
+        labels:
+          severity: critical
+          service: pve_storage
+        annotations:
+          summary: "0docker host health probe stopped updating"
+          description: "The host-side PVE task, guest-state, and kernel-error metrics are more than ten minutes old. Check pve-host-health-metrics.timer."
+
+      # How old the last success may be, per guest: 30 hours, except for a guest the collector marks as weekly. CT 108 (the builder) has had a weekly job since 2026-10-28
+      # (ct108-nightly, "sun 03:30"), so a fixed 30 hours fired from the day after each run until the next one (about 5.75 days of every 7). The collector (fleet-state hypervisor-0docker/libexec/pve-host-health-metrics.py, since
+      # 2026-10-28) reads each guest's schedule, publishes proxmox_backup_max_age_seconds (36 h for a daily guest, 8.5 days for a weekly one) and, for a weekly guest only, looks
+      # back 10 days instead of 48 h, so its last-success value is not 0 between runs. "Weekly" here means a published limit over 48 hours: a daily guest, and any guest whose
+      # limit series is missing, stays at 30 hours exactly as before (the collector's own 36 h is not used: it would loosen the daily guests). Never seen (0) is stale for every guest.
+      - alert: PveBackupFreshnessLow
+        expr: |
+          (proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale"} == 1)
+          and on (guest_id)
+          (
+            (proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"} == 0)
+            or
+            (
+              time() - proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"}
+              >
+              on (guest_id)
+              (
+                (proxmox_backup_max_age_seconds{job="pve_0docker_host_node_exporter_via_tailscale"} > 48 * 3600)
+                or on (guest_id)
+                (proxmox_backup_expected_guest{job="pve_0docker_host_node_exporter_via_tailscale"} * 30 * 3600)
+              )
+            )
+          )
+        for: 10m
+        labels:
+          severity: critical
+          service: pve_backup
+        annotations:
+          summary: "Guest {{ $labels.guest_id }} has no fresh successful backup"
+          description: "No successful scheduled vzdump was observed for this guest inside its limit: 30 hours for a daily job, 8.5 days (the collector's proxmox_backup_max_age_seconds) for a weekly one. Check the latest PVE task log, PBS permissions/ownership, and datastore capacity."
+
+      - alert: PveBackupFailureRecent
+        expr: |
+          (proxmox_backup_last_failure_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"} > 0)
+          and on (guest_id)
+          (
+            proxmox_backup_last_failure_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"}
+            > on (guest_id)
+            proxmox_backup_last_success_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"}
+          )
+          and on (guest_id)
+          (
+            time() - proxmox_backup_last_failure_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"} < 86400
+          )
+        for: 5m
+        labels:
+          severity: critical
+          service: pve_backup
+        annotations:
+          summary: "Latest backup for guest {{ $labels.guest_id }} failed"
+          description: "A recent vzdump task failed and has not been followed by a later successful task. Inspect the PVE task log and the configured ntfy recipient."
+
+      # vzdump-guard (fleet-state hypervisor-0docker, installed 2026-10-19): stops a snapshot backup of VM 100 (the Docker host) when that guest's own load or
+      # I/O wait collapses while the backup runs. It writes vzdump-guard.prom (textfile) every minute; the metrics are the ones below.
+      - alert: VzdumpGuardTripped
+        expr: |
+          (vzdump_guard_last_trip_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"} > 0)
+          and
+          (time() - vzdump_guard_last_trip_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"} < 86400)
+        for: 1m
+        labels:
+          severity: warning
+          service: pve_backup
+        annotations:
+          summary: "vzdump-guard stopped the backup of the Docker host (VM 100) to protect it"
+          description: "Within the last 24 hours the guard on the 0docker hypervisor stopped a snapshot backup because the guest's load or I/O wait collapsed while it ran (journalctl -u vzdump-guard on the hypervisor has the numbers). VM 100 has no new backup from that run, so PveBackupFailureRecent and PbsBackupGroupStale follow. Usual causes: PBS slower than the guest's write rate, the worn nvme1n1 mirror, CT108 builds. See hypervisor-0docker/README.md in fleet-state."
+
+      - alert: VzdumpGuardSilent
+        expr: |
+          (time() - vzdump_guard_last_run_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"} > 300)
+          or
+          absent(vzdump_guard_last_run_timestamp_seconds{job="pve_0docker_host_node_exporter_via_tailscale"})
+        for: 5m
+        labels:
+          severity: warning
+          service: pve_backup
+        annotations:
+          summary: "vzdump-guard on the 0docker hypervisor has stopped running"
+          description: "The guard that protects the Docker host (VM 100) from its own snapshot backup has not written its metrics for more than five minutes (it runs every minute). Until it is back, a backup of VM 100 can spiral the host unattended (twice on 2026-10-19). Check systemctl status vzdump-guard.timer and journalctl -u vzdump-guard on the hypervisor; the next VM 100 backup starts at 04:30Z."
+
+      - alert: VzdumpGuardDisabled
+        expr: vzdump_guard_enabled{job="pve_0docker_host_node_exporter_via_tailscale"} == 0
+        for: 1h
+        labels:
+          severity: warning
+          service: pve_backup
+        annotations:
+          summary: "vzdump-guard is disabled (it only logs, it stops nothing)"
+          description: "/etc/vzdump-guard/disabled exists on the 0docker hypervisor, so the guard only logs WOULD STOP. The kill switch is for a deliberate window; remove the file (rm /etc/vzdump-guard/disabled) when it is over."

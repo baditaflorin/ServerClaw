@@ -6,23 +6,23 @@
 # ============================================================================
 
 schema_version: 2
-generated: '2026-10-14'
+generated: '2026-11-06'
 purpose: Compact ADR discovery manifest that points readers to shard-sized ADR metadata surfaces.
-total_adrs: 516
+total_adrs: 518
 adr_number_range:
   first: '0001'
-  last: 0493
-  next_available: 0494
+  last: 0495
+  next_available: 0496
 implementation_status_summary:
   Implemented: 379
-  Partial: 4
-  Not Implemented: 33
+  Partial: 5
+  Not Implemented: 34
   Deprecated: 14
   Accepted: 31
   Proposed: 55
 decision_status_summary:
-  Accepted: 365
-  Proposed: 62
+  Accepted: 366
+  Proposed: 63
   Deprecated: 38
   Implemented: 51
 facets:
@@ -49,9 +49,9 @@ facets:
       last_adr: 0399
     - label: 0400-0499
       path: docs/adr/index/by-range/0400-0499.yaml
-      count: 84
+      count: 86
       first_adr: '0400'
-      last_adr: 0493
+      last_adr: 0495
   by_concern:
     - concern: agent-coordination
       path: docs/adr/index/by-concern/agent-coordination.yaml
@@ -106,7 +106,7 @@ facets:
       count: 6
     - concern: vm-topology
       path: docs/adr/index/by-concern/vm-topology.yaml
-      count: 48
+      count: 50
   by_status:
     - implementation_status: Implemented
       slug: implemented
@@ -115,11 +115,11 @@ facets:
     - implementation_status: Partial
       slug: partial
       path: docs/adr/index/by-status/partial.yaml
-      count: 4
+      count: 5
     - implementation_status: Not Implemented
       slug: not-implemented
       path: docs/adr/index/by-status/not-implemented.yaml
-      count: 33
+      count: 34
     - implementation_status: Deprecated
       slug: deprecated
       path: docs/adr/index/by-status/deprecated.yaml
@@ -137,8 +137,20 @@ reservation_ledger:
   total_reservations: 0
   active_reservations: 0
   expired_candidates: 0
-  next_available_adr: 0494
+  next_available_adr: 0496
 latest_adrs:
+  - adr: 0495
+    title: The production Postgres VM701 bounds the shared memory its parallel queries can take
+    implementation_status: Partial
+    currently_describes: mixed_state
+    concern: vm-topology
+    path: docs/adr/0495-pg-primary-memory-guardrails.md
+  - adr: 0494
+    title: The agent-history store runs on its own guest with its own Postgres
+    implementation_status: Not Implemented
+    currently_describes: goal_state
+    concern: vm-topology
+    path: docs/adr/0494-agent-history.md
   - adr: 0493
     title: Bound Plausible ClickHouse diagnostic log storage
     implementation_status: Implemented
@@ -189,18 +201,6 @@ latest_adrs:
     currently_describes: goal_state
     concern: bootstrap
     path: docs/adr/0483-hands-off-bootstrap.md
-  - adr: 0482
-    title: Capacity-Aware Dynamic VM Sizing
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: vm-topology
-    path: docs/adr/0482-capacity-aware-dynamic-sizing.md
-  - adr: 0481
-    title: Migrate ethical-pentest microservice fleet from 0docker to 0mcp/florin via Coolify
-    implementation_status: Proposed
-    currently_describes: goal_state
-    concern: testing
-    path: docs/adr/0481-pentest-fleet-coolify-migration.md
 discovery_queries:
   how do we bootstrap:
     - '0001'

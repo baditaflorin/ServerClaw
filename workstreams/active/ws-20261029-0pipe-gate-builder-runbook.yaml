@@ -1,0 +1,56 @@
+id: ws-20261029-0pipe-gate-builder-runbook
+adr: "0087"
+title: "Validation gate runbook: running the gate on an alternate build server, and how the gate really runs ansible-lint"
+status: in_progress
+ready_to_merge: false
+live_applied: false
+owner: claude
+branch: claude/0pipe-gate-builder-runbook
+worktree_path: .claude/worktrees/0pipe-gate-builder
+doc: docs/workstreams/ws-20261029-0pipe-gate-builder-runbook.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - docs/runbooks/validation-gate.md
+  - docs/diagrams/agent-coordination-map.excalidraw
+  - workstreams/active/ws-20261029-0pipe-gate-builder-runbook.yaml
+  - workstreams.yaml
+  - docs/workstreams/ws-20261029-0pipe-gate-builder-runbook.md
+ownership_manifest:
+  owned_surfaces:
+    - id: ws_20261029_0pipe_gate_builder_tracking
+      paths:
+        - docs/workstreams/ws-20261029-0pipe-gate-builder-runbook.md
+      mode: exclusive
+    - id: validation_gate_runbook
+      paths:
+        - docs/runbooks/validation-gate.md
+      mode: shared_contract
+      contract: validation-gate-runbook-v1
+    - id: agent_coordination_map
+      paths:
+        - docs/diagrams/agent-coordination-map.excalidraw
+      mode: shared_contract
+      contract: generated-artifacts-v1
+    - id: workstream_registry
+      paths:
+        - workstreams/active/ws-20261029-0pipe-gate-builder-runbook.yaml
+        - workstreams.yaml
+      mode: shared_contract
+      contract: workstream-registry-v1
+canonical_truth:
+  changelog_entry: "Validation gate runbook: how to run the gate on an alternate build server (REMOTE_EXEC_CONFIG, never a local fallback, shared workers, workspace retention) and how the gate really runs ansible-lint (uv tool run with ansible-core 2.17.10, not the native binary)."
+  release_bump: patch
+  included_in_repo_version: null
+  latest_receipts: {}
+context: "Docs only. A second build server was set up on 2026-10-29 as an alternate gate builder; its toolchain installer, config generator and parity check live in the private repository baditaflorin/0pipe (the owner moved everything about that server there), so this repository only gets the generic gate facts, without real hostnames or addresses (ADR 0409)."
+tasks:
+  - id: t1
+    title: Register the workstream
+    status: completed
+  - id: t2
+    title: "Write the alternate-server section and the ansible-lint explanation in the gate runbook"
+    status: completed
+  - id: t3
+    title: Pass the pre-push gate on a build server and open the pull request (not merged, no live-apply marker, nothing applied)
+    status: in_progress

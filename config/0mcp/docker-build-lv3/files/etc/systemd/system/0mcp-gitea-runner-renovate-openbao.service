@@ -1,0 +1,20 @@
+[Unit]
+Description=OpenBao Agent systemd credential delivery for gitea-runner-renovate
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker rm -f gitea-runner-renovate-openbao-agent
+ExecStart=/usr/bin/docker run --rm --name gitea-runner-renovate-openbao-agent --network host --user 0:0 --cap-drop ALL --security-opt no-new-privileges:true --read-only --tmpfs /tmp:mode=1777,exec --entrypoint /bin/vault -v /opt/gitea-runner/openbao/renovate:/openbao-agent:ro -v /opt/gitea-runner/credentials/renovate:/opt/gitea-runner/credentials/renovate:rw docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b agent -config=/openbao-agent/agent.hcl
+ExecStartPost=/bin/bash -lc 'for attempt in $(seq 1 30); do if [ -s "/opt/gitea-runner/credentials/renovate/renovate.env" ]; then exit 0; fi; sleep 1; done; echo "OpenBao Agent did not render systemd credentials for gitea-runner-renovate in time" >&2; exit 1'
+ExecStop=-/usr/bin/docker stop gitea-runner-renovate-openbao-agent
+Restart=always
+RestartSec=5s
+TimeoutStartSec=60
+TimeoutStopSec=20
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

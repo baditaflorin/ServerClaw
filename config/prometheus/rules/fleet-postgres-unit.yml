@@ -1,0 +1,43 @@
+# Postgres cluster unit state, from the node_exporter systemd collector (node_systemd_unit_state), on every host that exposes it. Written 2026-10-19.
+#
+# Why: on 2026-10-19 the production DomainScope database (infer-pg-primary, VM 701 on 0infer, Postgres 18) was killed by the kernel OOM killer at 11:31Z (a burst of
+# ~125 new connections on a 48 GB VM with no swap) and systemd stopped the whole unit (OOMPolicy=stop, Restart=no); it stayed down until 11:52Z. Nothing watched the
+# database itself: there is no postgres exporter, and no rule used node_systemd_unit_state. The first alert was FleetServiceEdgeDown (critical, the edge probe's 15 minute
+# hard-fail delay) at 11:48Z, 17 minutes after the crash. The unit's series were there all along (failed=1 from 11:32Z), so this rule would have fired at about 11:36Z.
+#
+# Only the per-cluster instance units match (postgresql@18-main.service). The umbrella postgresql.service stays "active (exited)" when the cluster is down, so it is left out.
+# A host whose node_exporter does not run the systemd collector, or whose unit has been garbage collected after a clean stop, exposes no series and is not covered here:
+# the generic target-down alerts cover a dead host, FleetServiceEdgeDown covers the services that depend on the database.
+groups:
+  - name: fleet_postgres_unit
+    interval: 1m
+    rules:
+      - alert: PostgresUnitNotActive
+        expr: max by (host, instance, name) (node_systemd_unit_state{name=~"postgresql@.+[.]service", state="active"}) == 0
+        for: 3m
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: "PostgreSQL {{ $labels.name }} is not active on {{ $labels.host }}"
+          description: "{{ $labels.name }} on {{ $labels.host }} ({{ $labels.instance }}) has not been active for 3 minutes (failed, stopped or stuck starting). The 2026-10-19 outage of the production database was this: journalctl -k | grep -i oom showed the kernel OOM killer shooting the checkpointer and io workers, and the unit sat in failed with result oom-kill. On the host: systemctl status {{ $labels.name }}; if it is failed, sudo systemctl reset-failed {{ $labels.name }} then sudo systemctl start {{ $labels.name }} (a start runs crash recovery, about a minute), then check that the standby is streaming again."
+  - name: fleet_postgres_io
+    interval: 1m
+    rules:
+      # 2026-10-19 01:15-02:45Z: the nightly snapshot backup of infer-pg-primary (VM 701, the production primary since 10-18) onto the slow PBS#1 throttled the guest's writes (copy-before-write):
+      # its I/O wait pressure sat at 71-90 % for 90 minutes while disk writes fell to ~0 MiB/s (normally 5-7), a checkpoint took 5258 s instead of ~810 s, 1616 statements ran 10 s or more and
+      # DomainScope categorize was effectively down for 80 minutes. Load never passed 7 and blocked tasks never passed 4, so no load-based signal saw it and no alert fired. Normal: 2-7 % wait,
+      # with a periodic 30-minute burst of reads that reaches about 20-37 % for a few minutes, so 60 % for 10 minutes is a real stall. Only hosts that run a Postgres cluster unit are judged.
+      - alert: PostgresIoStall
+        expr: |
+          (100 * rate(node_pressure_io_waiting_seconds_total[5m]) > 60)
+          and on (instance)
+          (max by (instance) (node_systemd_unit_state{name=~"postgresql@.+[.]service", state="active"}) == 1)
+        for: 10m
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: '{{ $labels.host }} (a Postgres host) has waited on its disk {{ $value | printf "%.0f" }} % of the time for 10 minutes'
+          description: "I/O wait pressure of a host that runs a Postgres cluster has been above 60 % for 10 minutes: the database is barely writing. On 2026-10-19 01:15-02:45Z this was the nightly snapshot backup of infer-pg-primary being throttled by the slow PBS (copy-before-write): writes fell to about 0 MiB/s, a checkpoint took 5258 s and DomainScope categorize was effectively down. First check the hypervisor backup task status and storage latency; the documented infer-pg-nightly-pbs job uses local fleecing. Never cancel a running backup or kill vzdump/pvescheduler; let the backup complete, then review storage performance, local fleecing and the backup window before its next run. Also inspect guest I/O, a runaway checkpoint or vacuum, and the disk."
+

@@ -2,6 +2,9 @@ roles:
   _template:
     policy: exempt
     reason: Service scaffold template only; not a runnable Ansible role.
+  agent_history_runtime:
+    policy: tracked
+    reason: Recently added role; add a dedicated idempotency scenario before enforcement.
   alertmanager_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

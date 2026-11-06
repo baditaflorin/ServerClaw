@@ -1,0 +1,187 @@
+#!/usr/bin/env python3
+"""pbs-group-retention: per-group retention for the second Proxmox Backup Server (PBS #2, datastore `tier0` on infer-tier0).
+
+PBS prune jobs select by NAMESPACE only. On PBS #2 two groups hold most of the churn (0docker vm/100, the docker host, and 0database vm/100, pg-primary) and PBS #2 is the SECOND
+copy (PBS #1 on 0own keeps the longer history), so they get a shorter retention than the store-wide job `prune-tier0` (keep-last 3, keep-weekly 1, 07:00). This tool runs after that
+job (07:05) and prunes ONLY the groups listed in the config down to their newest `keep_last` snapshots, through the datastore's own per-group prune API (the same code path as the job).
+
+  pbs-group-retention                   dry run: print what would be deleted, change nothing (the default)
+  pbs-group-retention --apply           do it (what the timer runs)
+
+Guards, each of them tested (tests/test_pbs_group_retention.py): keep_last below 2 is refused (config error); a group that holds no more than keep_last snapshots is left alone; the dry run
+the datastore itself reports must agree with the arithmetic (exactly the oldest unprotected snapshots, never one of the newest keep_last, never a protected one) or nothing is deleted; a group
+whose NEWEST snapshot is older than `max_newest_age_h` is not pruned (the sync that feeds it is broken: shrinking history then only loses options) and the run reports failure, unless the group is
+marked `"frozen": true` (nothing feeds it on purpose: a paused or retired job; remove the flag when the job runs again); after a prune
+the newest keep_last snapshots must still be there. Garbage collection frees the chunks (24 h atime grace: about two daily GC cycles).
+Config /etc/pbs-group-retention.json. Metrics (textfile): pbs_group_retention_*. Exit 0 ok, 2 a group failed a guard or the prune, 3 bad config."""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+
+CONFIG = os.environ.get("PBS_GROUP_RETENTION_CONFIG", "/etc/pbs-group-retention.json")
+PROM = os.environ.get("PBS_GROUP_RETENTION_PROM", "/var/lib/prometheus/node-exporter/pbs_group_retention.prom")
+MIN_KEEP = 2                                    # no configuration can ask for less than two copies of a group
+SAFE = re.compile(r"^[A-Za-z0-9_.-]*$")
+
+
+class Failure(Exception):
+    pass
+
+
+class Api:
+    """The datastore API through `proxmox-backup-debug api` (runs as root on the PBS VM; no credentials)."""
+
+    def __init__(self, store: str):
+        self.store = store
+
+    def _call(self, method: str, path: str, *args: str):
+        p = subprocess.run(["proxmox-backup-debug", "api", method, path, *args, "--output-format", "json"], capture_output=True, text=True, timeout=600)
+        if p.returncode != 0:
+            raise Failure(f"proxmox-backup-debug api {method} {path} failed: {(p.stderr or p.stdout).strip()[:300]}")
+        try:
+            return json.loads(p.stdout or "null")
+        except ValueError:
+            raise Failure(f"unparseable answer from {path}: {p.stdout[:200]!r}")
+
+    @staticmethod
+    def _group(ns: str, typ: str, bid: str) -> list[str]:
+        return (["--ns", ns] if ns else []) + ["--backup-type", typ, "--backup-id", bid]
+
+    def snapshots(self, ns: str, typ: str, bid: str) -> list[dict]:
+        return self._call("get", f"/admin/datastore/{self.store}/snapshots", *self._group(ns, typ, bid)) or []
+
+    def prune(self, ns: str, typ: str, bid: str, keep_last: int, dry_run: bool) -> list[dict]:
+        return self._call("create", f"/admin/datastore/{self.store}/prune", *self._group(ns, typ, bid), "--keep-last", str(keep_last), "--dry-run", "true" if dry_run else "false") or []
+
+
+def load_config(path: str) -> dict:
+    cfg = json.load(open(path))
+    if not isinstance(cfg.get("groups"), list) or not cfg["groups"]:
+        raise ValueError("config has no groups")
+    for g in cfg["groups"]:
+        for k in ("ns", "type", "id"):
+            if not isinstance(g.get(k), str) or not SAFE.match(g[k]):
+                raise ValueError(f"group field {k!r} is missing or unsafe: {g!r}")
+        if g["type"] not in ("vm", "ct", "host") or not g["id"]:
+            raise ValueError(f"bad group type/id: {g!r}")
+        if not isinstance(g.get("keep_last"), int) or g["keep_last"] < MIN_KEEP:
+            raise ValueError(f"keep_last must be an integer >= {MIN_KEEP}: {g!r}")
+        if "frozen" in g and not isinstance(g["frozen"], bool):
+            raise ValueError(f"frozen must be true or false: {g!r}")
+    if not SAFE.match(cfg.get("store", "")) or not cfg.get("store"):
+        raise ValueError("config store is missing or unsafe")
+    return cfg
+
+
+def label(g: dict) -> str:
+    return f"{g['ns'] or 'root'}:{g['type']}/{g['id']}"
+
+
+def process_group(api, g: dict, apply: bool, max_age_s: float, now: float, log) -> dict:
+    """Returns {"group", "ok", "before", "after", "deleted", "note"}. Raises nothing for guard failures: they are results with ok=False."""
+    ns, typ, bid, keep = g["ns"], g["type"], g["id"], g["keep_last"]
+    res = {"group": label(g), "ok": False, "before": 0, "after": 0, "deleted": 0, "note": ""}
+    snaps = api.snapshots(ns, typ, bid)
+    times = sorted(s["backup-time"] for s in snaps)
+    protected = {s["backup-time"] for s in snaps if s.get("protected")}
+    res["before"] = res["after"] = len(times)
+    if not times:
+        res.update(ok=True, note="no snapshots in this group (moved or not synced yet): nothing to do")
+        return res
+    age = now - times[-1]
+    if age > max_age_s and g.get("frozen") is not True:   # frozen: nothing feeds the group on purpose (its job is paused or the guest is retired), so an old newest snapshot is expected
+        res["note"] = f"newest snapshot is {age / 3600:.0f} h old (limit {max_age_s / 3600:.0f} h): the sync that feeds this group looks broken, not pruning"
+        return res
+    if len(times) <= keep:
+        res.update(ok=True, note=f"{len(times)} snapshots <= keep_last {keep}: nothing to do")
+        return res
+    dry = api.prune(ns, typ, bid, keep, True)
+    dry_times = sorted(d["backup-time"] for d in dry)
+    if dry_times != times:
+        res["note"] = "the datastore's dry run does not list the same snapshots as the group: refusing"
+        return res
+    newest = set(times[-keep:])
+    to_delete = sorted(d["backup-time"] for d in dry if not d.get("keep"))
+    bad = [t for t in to_delete if t in newest or t in protected or d_protected(dry, t)]
+    if bad:
+        res["note"] = f"the dry run would delete a snapshot that must stay (one of the newest {keep}, or protected): refusing"
+        return res
+    log(f"{res['group']}: {len(times)} snapshots, keep_last {keep}: {'deleting' if apply else 'would delete'} {len(to_delete)} oldest ({', '.join(time.strftime('%m-%dT%H:%M', time.gmtime(t)) for t in to_delete) or 'none'})")
+    if not to_delete:
+        res.update(ok=True, note="nothing beyond keep_last that is not protected")
+        return res
+    if not apply:
+        res.update(ok=True, deleted=0, note=f"dry run: {len(to_delete)} would be deleted")
+        res["would_delete"] = len(to_delete)
+        return res
+    api.prune(ns, typ, bid, keep, False)
+    after = sorted(s["backup-time"] for s in api.snapshots(ns, typ, bid))
+    res["after"] = len(after)
+    if not newest.issubset(after):
+        res["note"] = "AFTER the prune a snapshot that must stay is missing: investigate at once"
+        return res
+    res.update(ok=True, deleted=len(times) - len(after), note=f"deleted {len(times) - len(after)}, {len(after)} left")
+    return res
+
+
+def d_protected(dry: list[dict], t: int) -> bool:
+    return any(d["backup-time"] == t and d.get("protected") for d in dry)
+
+
+def write_metrics(results: list[dict], now: float, ok: bool, path: str) -> None:
+    lines = ["# TYPE pbs_group_retention_last_run_timestamp_seconds gauge", f"pbs_group_retention_last_run_timestamp_seconds {int(now)}"]
+    if ok:
+        lines.append(f"pbs_group_retention_last_success_timestamp_seconds {int(now)}")
+    else:
+        try:   # keep the previous success so the staleness alert measures from it
+            for l in open(path):
+                if l.startswith("pbs_group_retention_last_success_timestamp_seconds"):
+                    lines.append(l.strip())
+        except OSError:
+            pass
+    for r in results:
+        g = r["group"]
+        lines += [f'pbs_group_retention_group_ok{{group="{g}"}} {1 if r["ok"] else 0}', f'pbs_group_retention_snapshots{{group="{g}"}} {r["after"]}',
+                  f'pbs_group_retention_deleted_snapshots{{group="{g}"}} {r["deleted"]}']
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path + ".tmp", "w") as f:
+        f.write("\n".join(lines) + "\n")
+    os.chmod(path + ".tmp", 0o644)
+    os.replace(path + ".tmp", path)
+
+
+def main(argv=None, api=None, now=None, log=print) -> int:
+    ap = argparse.ArgumentParser(description="per-group retention on PBS #2 (see the module docstring)")
+    ap.add_argument("--apply", action="store_true", help="really delete (default: dry run)")
+    ap.add_argument("--config", default=CONFIG)
+    args = ap.parse_args(argv)
+    try:
+        cfg = load_config(args.config)
+    except (OSError, ValueError) as e:
+        print(f"bad config {args.config}: {e}", file=sys.stderr)
+        return 3
+    api = api or Api(cfg["store"])
+    now = now if now is not None else time.time()
+    max_age = float(cfg.get("max_newest_age_h", 72)) * 3600
+    results = []
+    for g in cfg["groups"]:
+        try:
+            r = process_group(api, g, args.apply, max_age, now, log)
+        except Failure as e:
+            r = {"group": label(g), "ok": False, "before": 0, "after": 0, "deleted": 0, "note": str(e)}
+        log(f"{'ok  ' if r['ok'] else 'FAIL'} {r['group']}: {r['note']}")
+        results.append(r)
+    ok = all(r["ok"] for r in results)
+    if args.apply:
+        write_metrics(results, now, ok, PROM)
+    return 0 if ok else 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

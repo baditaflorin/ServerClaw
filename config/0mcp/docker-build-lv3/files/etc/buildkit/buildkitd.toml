@@ -1,0 +1,31 @@
+debug = false
+root = "/opt/builds/.buildkit-cache"
+
+[worker.oci]
+  enabled = true
+  gc = true
+
+[[worker.oci.gcpolicy]]
+  all = true
+  keepDuration = "336h"
+  keepBytes = 26843545600
+
+[registry."docker.io"]
+  mirrors = ["10.10.10.80:5001"]
+  http = true
+  insecure = true
+
+[registry."ghcr.io"]
+  mirrors = ["10.10.10.80:5002"]
+  http = true
+  insecure = true
+
+[registry."artifacts.plane.so"]
+  mirrors = ["10.10.10.80:5003"]
+  http = true
+  insecure = true
+
+[registry."docker.n8n.io"]
+  mirrors = ["10.10.10.80:5004"]
+  http = true
+  insecure = true

@@ -1,0 +1,11 @@
+[Unit]
+Description=Nightly file-level backup of the Docker host state (17:30Z: own-pbs and VM 100 are both at their quietest then, before the 22:00Z garbage collection)
+
+[Timer]
+OnCalendar=*-*-* 17:30:00 UTC
+RandomizedDelaySec=10min
+AccuracySec=1min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

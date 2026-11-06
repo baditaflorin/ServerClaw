@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly boot test of the Scanopy standby server
+
+[Timer]
+OnCalendar={{ monitoring_scanopy_standby_boot_test_on_calendar }}
+RandomizedDelaySec=300
+Persistent=true
+
+[Install]
+WantedBy=timers.target

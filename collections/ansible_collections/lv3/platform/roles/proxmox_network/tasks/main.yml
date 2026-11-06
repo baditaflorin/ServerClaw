@@ -5,6 +5,16 @@
 # Outputs: Host bridge configuration rendered, IPv4 forwarding enabled, nftables/proxmox-firewall helpers installed, and the managed network rules applied.
 # Idempotency: Yes; templates, packages, and systemd/service tasks reconcile host network state and only apply when drift is detected.
 # Dependencies: ADR 0165, ADR 0270, Proxmox VE host networking, nftables, and pve-firewall.
+# Scoped run: `--tags proxmox-vm-firewall` renders and installs only /etc/pve/firewall/<vmid>.fw, compiles the
+# result and restarts pve-firewall when a file changed. It never touches /etc/network/interfaces, nftables,
+# forwarding, the conntrack helper, a guest NIC or a guest's power state. The input and SAFETY GUARD asserts
+# below carry `always`, so no tag selection (including --skip-tags proxmox-vm-firewall) can skip them.
+# tests/test_proxmox_network_vm_firewall_tag.py pins which tasks carry which tag.
+# Install guard: the live per-VM files have other writers than the render (hand-authored rules, a migrated set,
+# managed blocks such as `# BEGIN fleet-pool-fw`), so the render is never copied over them blindly. files/pve_fw_guard.py
+# compares each render with the LIVE file (in --check mode too), shows the diff, fails before writing anything when the
+# install would remove a rule or a managed block unless -e proxmox_network_allow_rule_removal=true, and saves every file
+# it replaces to <backup root>/fw-backup-<timestamp>/ with a restore.sh. tests/test_pve_firewall_install_guard.py pins it.
 - name: Validate Proxmox network inputs
   ansible.builtin.assert:
     that:
@@ -16,6 +26,8 @@
       - proxmox_internal_ipv4 | length > 0
       - proxmox_internal_network | length > 0
     fail_msg: "proxmox_network requires management and internal bridge topology inputs."
+  tags:
+    - always
 
 - name: SAFETY GUARD — Reject a management interface that aliases the WAN bridge
   ansible.builtin.assert:
@@ -27,6 +39,8 @@
       the physical uplink as bridge-ports; self-referencing it can disconnect the
       Proxmox host. Remove the interface override from the identity overlay or set
       it to the verified physical uplink before applying this role.
+  tags:
+    - always
 
 # SAFETY GUARD: Writing a placeholder IP to /etc/network/interfaces causes total host
 # lockout on the next reboot or ifreload — the host gets the wrong IP and all traffic
@@ -51,6 +65,8 @@
       on the next reboot (wrong IP — server unreachable). Aborting convergence.
       Fix: ensure .local/identity.yml is injected via -e @.local/identity.yml.
       See incident postmortem 2026-04-12 (6h outage on 203.0.113.1).
+  tags:
+    - always
 
 - name: Validate optional staging bridge inputs
   ansible.builtin.assert:
@@ -161,18 +177,25 @@
 
 - name: Ensure Proxmox firewall configuration directory exists
   ansible.builtin.file:
-    path: /etc/pve/firewall
+    path: "{{ proxmox_network_firewall_live_dir }}"
     state: directory
     mode: "0755"
+  tags:
+    - proxmox-vm-firewall
 
+# Read only, so it runs in --check mode too: a skipped command reports rc 0, which would make a check run treat a guest
+# that does not exist yet as existing and plan a firewall file the real run never writes.
 - name: Read current guest configurations for firewall enablement
   ansible.builtin.command: "qm config {{ item.vmid }}"
   register: proxmox_network_guest_config
+  check_mode: false
   changed_when: false
   failed_when: false
   loop: "{{ proxmox_guests }}"
   loop_control:
     label: "{{ item.name }}"
+  tags:
+    - proxmox-vm-firewall
 
 - name: Record guests that currently exist on the Proxmox host
   ansible.builtin.set_fact:
@@ -183,34 +206,126 @@
         | map(attribute='item')
         | list
       }}
+  tags:
+    - proxmox-vm-firewall
 
+# Which guests' firewall files this run manages: all existing ones by default, or the ones named with
+# -e proxmox_network_firewall_vmids=155 (or 155,191, or a JSON list). Naming them is how one VM's additive file is installed
+# while another VM's live file still holds lines the render lacks (that VM would otherwise make the guard stop the whole
+# run). The ids are read as digit runs so that the string form of `-e key=value` and a list behave the same.
+- name: Select the guests whose firewall files this run manages
+  ansible.builtin.set_fact:
+    proxmox_network_firewall_guests: >-
+      {{
+        proxmox_network_existing_guests
+        | selectattr('vmid', 'in', proxmox_network_firewall_vmids | string | regex_findall('[0-9]+') | map('int') | list)
+        | list
+        if (proxmox_network_firewall_vmids | string | regex_findall('[0-9]+') | length) > 0
+        else proxmox_network_existing_guests
+      }}
+  tags:
+    - proxmox-vm-firewall
+
+- name: Refuse a firewall file selection that names a guest which does not exist
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          proxmox_network_firewall_vmids | string | regex_findall('[0-9]+') | map('int') | list
+          | difference(proxmox_network_existing_guests | map(attribute='vmid') | map('int') | list)
+        ) | length == 0
+    fail_msg: >-
+      proxmox_network_firewall_vmids names {{ proxmox_network_firewall_vmids }}, but only
+      {{ proxmox_network_existing_guests | map(attribute='vmid') | list }} are declared guests that exist on this host.
+    quiet: true
+  tags:
+    - proxmox-vm-firewall
+
+# check_mode and diff are off on purpose: the staging copy is scratch that Proxmox never reads. Writing it in a --check run
+# is what lets the comparison below test the render the real run would install; before this, check mode compared the new
+# render with the previous staging copy and the live files were never looked at.
 - name: Render per-guest Proxmox firewall policy to staging files
   ansible.builtin.template:
     src: vm.fw.j2
-    dest: "/root/.lv3-vm-{{ guest.vmid }}.fw"
+    dest: "{{ proxmox_network_firewall_stage_dir }}/.lv3-vm-{{ guest.vmid }}.fw"
     mode: "0644"
-  loop: "{{ proxmox_network_existing_guests }}"
+  check_mode: false
+  diff: false
+  loop: "{{ proxmox_network_firewall_guests }}"
   loop_control:
     loop_var: guest
     label: "{{ guest.name }}"
+  tags:
+    - proxmox-vm-firewall
 
+# Read only, so it runs in --check mode as well. Exit status 2 means "would remove live rules" and is handled below so that
+# the diff is printed before the play stops.
+- name: Compare per-guest Proxmox firewall policy with the live files
+  ansible.builtin.script:
+    cmd: >-
+      pve_fw_guard.py plan --format json
+      --live-dir {{ proxmox_network_firewall_live_dir | quote }}
+      --stage-dir {{ proxmox_network_firewall_stage_dir | quote }}
+      {{ '--allow-rule-removal' if proxmox_network_allow_rule_removal | bool else '' }}
+      {{ proxmox_network_firewall_guests | map(attribute='vmid') | map('string') | join(' ') }}
+    executable: python3
+  register: proxmox_network_vm_firewall_plan
+  check_mode: false
+  changed_when: false
+  failed_when: proxmox_network_vm_firewall_plan.rc not in [0, 2]
+  when: proxmox_network_firewall_guests | length > 0
+  tags:
+    - proxmox-vm-firewall
+
+- name: Show per-guest Proxmox firewall diff against the live files
+  ansible.builtin.debug:
+    msg: "{{ (proxmox_network_vm_firewall_plan.stdout | from_json).report }}"
+  when: proxmox_network_vm_firewall_plan.stdout is defined
+  tags:
+    - proxmox-vm-firewall
+
+- name: Refuse to remove live Proxmox firewall rules without an explicit operator decision
+  ansible.builtin.assert:
+    that:
+      - not (proxmox_network_vm_firewall_plan.stdout | from_json).refused
+    fail_msg: >-
+      REFUSED, nothing was written: the render would remove live rules or managed blocks from VM
+      {{ (proxmox_network_vm_firewall_plan.stdout | from_json).removal_vmids | join(', ') }} (the diff is printed above).
+      The render is not the source of truth for those lines. Add them to the inventory render, or, if removing them is
+      intended, run again with -e proxmox_network_allow_rule_removal=true; the play then copies each file it replaces to
+      {{ proxmox_network_firewall_backup_root }}/fw-backup-<timestamp>/ first.
+    quiet: true
+  when: proxmox_network_vm_firewall_plan.stdout is defined
+  tags:
+    - proxmox-vm-firewall
+
+# The script plans again with the same flags before it writes, so it refuses on its own if the assert above is ever removed.
+# The script module is skipped in --check mode, so nothing below this line writes in a check run.
 - name: Install per-guest Proxmox firewall policy
-  ansible.builtin.shell: |
-    set -euo pipefail
-    target=/etc/pve/firewall/{{ guest.vmid }}.fw
-    staged=/root/.lv3-vm-{{ guest.vmid }}.fw
-    if ! cmp -s "$staged" "$target" 2>/dev/null; then
-      cp "$staged" "$target"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: proxmox_network_guest_firewall_files
-  changed_when: "'changed' in proxmox_network_guest_firewall_files.stdout"
-  loop: "{{ proxmox_network_existing_guests }}"
-  loop_control:
-    loop_var: guest
-    label: "{{ guest.name }}"
+  ansible.builtin.script:
+    cmd: >-
+      pve_fw_guard.py apply --format json
+      --live-dir {{ proxmox_network_firewall_live_dir | quote }}
+      --stage-dir {{ proxmox_network_firewall_stage_dir | quote }}
+      --backup-root {{ proxmox_network_firewall_backup_root | quote }}
+      {{ '--allow-rule-removal' if proxmox_network_allow_rule_removal | bool else '' }}
+      {{ proxmox_network_firewall_guests | map(attribute='vmid') | map('string') | join(' ') }}
+    executable: python3
+  register: proxmox_network_vm_firewall_install
+  changed_when: >-
+    proxmox_network_vm_firewall_install.rc == 0 and
+    (proxmox_network_vm_firewall_install.stdout | from_json).installed_vmids | length > 0
+  failed_when: proxmox_network_vm_firewall_install.rc != 0
+  when: proxmox_network_firewall_guests | length > 0
+  tags:
+    - proxmox-vm-firewall
+
+- name: Show where the replaced Proxmox firewall files were saved
+  ansible.builtin.debug:
+    msg: "{{ (proxmox_network_vm_firewall_install.stdout | from_json).install_report }}"
+  when: proxmox_network_vm_firewall_install is changed
+  tags:
+    - proxmox-vm-firewall
 
 - name: Enable Proxmox firewall on each guest net0 interface
   ansible.builtin.command:
@@ -259,16 +374,22 @@
 - name: Compile Proxmox firewall configuration
   ansible.builtin.command: pve-firewall compile
   changed_when: false
+  tags:
+    - proxmox-vm-firewall
 
+# The net0 enablement task is outside the proxmox-vm-firewall slice, so in a scoped run its register
+# is never defined; the explicit default keeps this condition from relying on undefined-attribute chaining.
 - name: Restart Proxmox firewall after guest policy changes
   ansible.builtin.command: pve-firewall restart
   when: >
     (
-      proxmox_network_guest_firewall_files.results | selectattr('changed') | list | length
-    ) > 0 or (
-      proxmox_network_guest_firewall_interfaces.results | default([]) | selectattr('changed') | list | length
+      proxmox_network_vm_firewall_install.changed | default(false)
+    ) or (
+      (proxmox_network_guest_firewall_interfaces | default({})).results | default([]) | selectattr('changed') | list | length
     ) > 0
   changed_when: true
+  tags:
+    - proxmox-vm-firewall
 
 - name: Ensure Proxmox firewall conntrack rule is active
   ansible.builtin.command: "{{ proxmox_network_conntrack_helper_path }}"
