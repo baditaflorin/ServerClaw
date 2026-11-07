@@ -56,6 +56,13 @@ failure makes the push fail visibly. The receiver still verifies each backup bef
 It writes the textfile metric `vault_standby_sync_*` (alerts `VaultStandbySyncStale|VeryStale|Missing`) and exits 1 if any push failed; a failed run still publishes
 `vault_standby_sync_last_success 0`.
 
+For each source the sender also reports `vault_standby_source_database_size_bytes` and `vault_standby_source_database_limit_bytes`, labelled `database="secrets"` or `database="keystore"`.
+The source reports its measured size and the same limit the snapshot enforces before checking memory or the limit, so even an oversized source remains visible when a transfer fails.
+The transient service's root-private `RuntimeDirectory` holds only short-lived source diagnostics and systemd removes it on exit. If telemetry cannot be captured, the transfer still runs.
+`VaultStandbyScratchNearLimit` warns at 75% of the limit for five minutes; `VaultStandbyScratchCritical` fires at 93% for two minutes. At the current 448 MiB limit those are 336 MiB and about 417 MiB.
+`VaultStandbyScratchSizeMissing` warns after 15 minutes if the courier is reporting runs but either source's size or limit is absent. On a Prometheus that does not scrape this courier, the missing-size alert stays quiet.
+Before raising the limit, check the 512 MiB tmpfs size, the 768 MiB unit memory cap, concurrent job headroom, and the source host's available memory; increase the related bounds together and test both backups.
+
 Needs on CT108, none of it in git: `/root/.ssh/tier0_sync` (private key; the public half is the single forced-command line in VM704's `vsync` authorized_keys),
 `/root/.ssh/known_hosts_tier0` (pins the host key of `[<0infer host>]:2240`, checked with `StrictHostKeyChecking=yes`), key-only ssh from CT108 to the dockerhost,
 tailscaled in userspace mode with its CONNECT proxy on `127.0.0.1:1056` (the script reaches the tailnet through `nc -X connect`), `nc`, and the node_exporter textfile

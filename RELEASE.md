@@ -1,14 +1,14 @@
-# Release 0.179.59
+# Release 0.179.60
 
 - Date: 2026-11-07
 
 ## Summary
-- Keep the standby courier’s temporary SQLite snapshots in bounded non-swappable RAM, preserving the established transfer and receiver checks.
-- Verify the live courier, both standby database integrity checks, and a measured reduction in temporary guest disk writes.
-- Record the merged source, guarded deployment and operational memory limits for the existing scheduled backup.
+- Warn before either standby courier source reaches its bounded RAM scratch limit, with a critical escalation closer to the limit.
+- Alert on missing size telemetry while allowing backup transfers to continue if telemetry cannot be captured.
+- Record the guarded deployment, scheduled backup verification and Prometheus rule tests.
 
 ## Platform Impact
-- Platform 0.179.61 records the verified standby courier deployment; no catalog application deployment.
+- Platform 0.179.62 records the verified courier and primary Prometheus alert deployment; no catalog application deployment.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

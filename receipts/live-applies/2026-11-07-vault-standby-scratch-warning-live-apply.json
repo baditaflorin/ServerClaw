@@ -1,0 +1,31 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-11-07-vault-standby-scratch-warning-live-apply",
+  "applied_on": "2026-11-07",
+  "recorded_on": "2026-11-07",
+  "recorded_by": "codex",
+  "source_commit": "15480f8fa6465598af528c586a56b2f07a73091f",
+  "repo_version_context": "0.179.59",
+  "workflow_id": "ws-20261107-vault-standby-scratch-warning",
+  "adr": "0100",
+  "service_ids": [],
+  "summary": "Publish measured standby source database sizes and their enforced limit, and warn before bounded RAM scratch is exhausted.",
+  "targets": [
+    {"kind": "container", "name": "builder", "vmid": "108"},
+    {"kind": "vm", "name": "dockerhost", "vmid": "100"},
+    {"kind": "vm", "name": "standby", "vmid": "704"},
+    {"kind": "vm", "name": "monitoring", "vmid": "140"}
+  ],
+  "verification": [
+    {"check": "Reviewed source and CI", "result": "pass", "observed": "PR 689 passed both primary checks, merged as 15480f8fa6465598af528c586a56b2f07a73091f, and merged-main pipeline 2430 passed. Courier, receiver and drill tests passed."},
+    {"check": "Prometheus alert tests", "result": "pass", "observed": "The primary Prometheus promtool validated all rules and simulated healthy, warning, critical, recovery, and missing-telemetry cases. Separate transaction fixtures verified sender and rule installation plus owned rollback."},
+    {"check": "Guarded sender installation", "result": "pass", "observed": "At 17:25 UTC the sender and unit were installed under the existing courier flock with private before-images. The timer remained active and the service was not restarted."},
+    {"check": "Scheduled backup and telemetry", "result": "pass", "observed": "The 17:26 UTC scheduled run verified both standby databases, published source sizes 121667584 and 223035392 bytes against a 469762048-byte limit, and removed its runtime directory. The five-minute encrypted job verified both replicas."},
+    {"check": "Live alert rules", "result": "pass", "observed": "At 17:27 UTC the primary Prometheus scraped both source sizes and loaded the warning, critical and missing-telemetry rules healthy; the original rule file was preserved in a private backup."}
+  ],
+  "limitations": [
+    "The warning depends on the primary Prometheus scrape; the standby Prometheus does not currently scrape this courier.",
+    "A database can grow past the hard limit between scheduled observations; failed or missing copies retain their existing separate alerts."
+  ]
+}

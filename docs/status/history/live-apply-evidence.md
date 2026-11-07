@@ -8,6 +8,7 @@ This generated ledger records every capability-to-receipt mapping currently trac
 
 | Capability | Receipt |
 | --- | --- |
+| `vault_standby_scratch_warning` | `2026-11-07-vault-standby-scratch-warning-live-apply` |
 | `vault_standby_ram_scratch` | `2026-11-07-vault-standby-ram-live-apply` |
 | `hypervisor_log_shipping_alerts` | `2026-11-07-log-shipping-labels-live-apply` |
 | `image_gc_monitoring` | `2026-11-06-image-gc-monitoring-live-apply` |

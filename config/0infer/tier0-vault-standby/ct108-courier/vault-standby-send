@@ -9,7 +9,20 @@ DST=(-o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=yes -o UserK
      -o "ProxyCommand=nc -X connect -x 127.0.0.1:1056 %h %p" -p 2240 -i /root/.ssh/tier0_sync)
 TARGET=vsync@100.64.0.21
 rc=0
+secrets_size=""; secrets_limit=""; keystore_size=""; keystore_limit=""
+# systemd removes this root-private directory even if a run is killed. When it
+# is unavailable, keep the backup working and let the missing-metric alert fire.
+R=/run/vault-standby-send
+if [[ ! -d $R || -L $R ]]; then
+  echo 'standby source-size telemetry unavailable: runtime directory missing' >&2
+  R=""
+fi
 push() {  # $1 allowlisted database label
+  local source_stderr=/dev/stderr line count=0 size="" limit=""
+  if [[ -n $R ]]; then
+    if { : >"$R/$1.stderr"; } 2>/dev/null; then source_stderr="$R/$1.stderr"
+    else echo "standby source-size telemetry unavailable for $1" >&2; fi
+  fi
   ssh "${SRC[@]}" "$DOCKERHOST" \
     "sudo -n /usr/bin/systemd-run --quiet --pipe --wait --collect \
       --property=TemporaryFileSystem=/tmp:rw,nodev,nosuid,noexec,noswap,size=512M,mode=0700 \
@@ -17,7 +30,7 @@ push() {  # $1 allowlisted database label
       --property=ProtectSystem=strict --property=PrivateNetwork=yes \
       --property=NoNewPrivileges=yes --property=TasksMax=16 \
       --property=RuntimeMaxSec=140s --property=TimeoutStopSec=5s \
-      /bin/bash -s -- '$1'" <<'REMOTE' | ssh "${DST[@]}" "$TARGET" "put $1" || { echo "push $1 FAILED" >&2; rc=1; }
+      /bin/bash -s -- '$1'" 2>"$source_stderr" <<'REMOTE' | ssh "${DST[@]}" "$TARGET" "put $1" || { echo "push $1 FAILED" >&2; rc=1; }
 set -euo pipefail
 umask 077
 case "$1" in
@@ -39,15 +52,20 @@ IFS=: read -r hierarchy controllers group < /proc/self/cgroup || unsafe
 [[ $(<"/sys/fs/cgroup$group/memory.max") == 805306368 &&
    $(<"/sys/fs/cgroup$group/memory.swap.max") == 0 ]] || unsafe
 
-available_kib=$(awk '$1 == "MemAvailable:" {print $2; exit}' /proc/meminfo)
-if [[ ! $available_kib =~ ^[0-9]+$ ]] || (( available_kib < 2 * 1024 * 1024 )); then
-  echo 'insufficient memory headroom for standby snapshot' >&2; exit 1
-fi
 if [[ ! -f $db || -L $db ]]; then
   echo 'standby source must be a regular non-symlink database' >&2; exit 1
 fi
 db_bytes=$(stat -c '%s' -- "$db")
-if [[ ! $db_bytes =~ ^[0-9]+$ ]] || (( db_bytes <= 0 || db_bytes > 448 * 1024 * 1024 )); then
+if [[ ! $db_bytes =~ ^[0-9]+$ ]]; then
+  echo 'cannot measure standby source database' >&2; exit 1
+fi
+limit_bytes=$((448 * 1024 * 1024))
+printf 'VAULT_STANDBY_SOURCE_BYTES=%s:%s\n' "$db_bytes" "$limit_bytes" >&2
+available_kib=$(awk '$1 == "MemAvailable:" {print $2; exit}' /proc/meminfo)
+if [[ ! $available_kib =~ ^[0-9]+$ ]] || (( available_kib < 2 * 1024 * 1024 )); then
+  echo 'insufficient memory headroom for standby snapshot' >&2; exit 1
+fi
+if (( db_bytes <= 0 || db_bytes > limit_bytes )); then
   echo 'standby source database exceeds scratch budget or is empty' >&2; exit 1
 fi
 
@@ -66,6 +84,24 @@ done
 echo 'snapshot failed after retries' >&2
 exit 1
 REMOTE
+  if [[ $source_stderr != /dev/stderr ]]; then
+    while IFS= read -r line || [[ -n $line ]]; do
+      if [[ $line =~ ^VAULT_STANDBY_SOURCE_BYTES=([0-9]{1,18}):([0-9]{1,18})$ ]]; then
+        count=$((count + 1)); size=${BASH_REMATCH[1]}; limit=${BASH_REMATCH[2]}
+      else
+        printf '%s\n' "$line" >&2
+      fi
+    done <"$source_stderr"
+    rm -f -- "$source_stderr"
+    if (( count == 1 )) && [[ $limit != 0 ]]; then
+      case $1 in
+        secrets) secrets_size=$size; secrets_limit=$limit ;;
+        keystore) keystore_size=$size; keystore_limit=$limit ;;
+      esac
+    elif (( count > 1 )); then
+      echo "duplicate standby source-size telemetry for $1" >&2
+    fi
+  fi
 }
 push secrets
 push keystore
@@ -76,6 +112,18 @@ if [ -d "$M" ]; then
     echo "vault_standby_sync_last_run_timestamp_seconds $(date +%s)"
     echo "vault_standby_sync_last_success $((1-rc))"
     if [ "$rc" = 0 ]; then echo "vault_standby_sync_last_success_timestamp_seconds $(date +%s)"; fi
+    echo '# TYPE vault_standby_source_database_size_bytes gauge'
+    echo '# TYPE vault_standby_source_database_limit_bytes gauge'
+    for name in secrets keystore; do
+      case $name in
+        secrets) size=$secrets_size; limit=$secrets_limit ;;
+        keystore) size=$keystore_size; limit=$keystore_limit ;;
+      esac
+      if [[ -n $size ]]; then
+        printf 'vault_standby_source_database_size_bytes{database="%s"} %s\n' "$name" "$size"
+        printf 'vault_standby_source_database_limit_bytes{database="%s"} %s\n' "$name" "$limit"
+      fi
+    done
   } > "$tmp"
   mv "$tmp" "$M/vault_standby_sync.prom"
 fi

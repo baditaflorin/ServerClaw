@@ -31,8 +31,8 @@ monitored, and recoverable from a single repository.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.59` |
-| Platform version | `0.179.61` |
+| Repository version | `0.179.60` |
+| Platform version | `0.179.62` |
 | Observed check date | `2026-04-03` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -58,6 +58,7 @@ monitored, and recoverable from a single repository.
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
+| `vault_standby_scratch_warning` | `2026-11-07-vault-standby-scratch-warning-live-apply` |
 | `vault_standby_ram_scratch` | `2026-11-07-vault-standby-ram-live-apply` |
 | `hypervisor_log_shipping_alerts` | `2026-11-07-log-shipping-labels-live-apply` |
 | `image_gc_monitoring` | `2026-11-06-image-gc-monitoring-live-apply` |
@@ -77,9 +78,8 @@ monitored, and recoverable from a single repository.
 | `directus` | `2026-04-15-adr-0372-data-driven-playbook-composition-mainline-live-apply` |
 | `validation_toolkit` | `2026-04-14-adr-0369-python-validation-toolkit-mainline-live-apply` |
 | `service_definition_catalog_assembly` | `2026-04-14-adr-0324-service-definition-catalog-assembly-mainline-live-apply` |
-| `repowise` | `2026-04-14-adr-0371-parameterized-service-verification-tasks-mainline-live-apply` |
 
-Showing 20 of 199 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
+Showing 20 of 200 capability receipts. Full history: [live-apply evidence history](docs/status/history/live-apply-evidence.md)
 <!-- END GENERATED: platform-status -->
 
 ## Version Summary
@@ -89,8 +89,8 @@ Showing 20 of 199 capability receipts. Full history: [live-apply evidence histor
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.179.59` |
-| Platform version | `0.179.61` |
+| Repository version | `0.179.60` |
+| Platform version | `0.179.62` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -411,6 +411,6 @@ and merge procedures.
 
 ---
 
-*Generated 2026-11-06 by [scripts/generate_readme.py](scripts/generate_readme.py)
+*Generated 2026-11-07 by [scripts/generate_readme.py](scripts/generate_readme.py)
 from [docs/templates/README.md.j2](docs/templates/README.md.j2).
 Run `make generate-readme` to refresh.*

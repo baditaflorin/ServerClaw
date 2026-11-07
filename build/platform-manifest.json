@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.59",
-  "platform_version": "0.179.61",
-  "generated_at": "2026-11-07T07:12:59Z",
-  "next_refresh_at": "2026-11-07T08:12:59Z",
+  "repo_version": "0.179.60",
+  "platform_version": "0.179.62",
+  "generated_at": "2026-11-07T17:29:35Z",
+  "next_refresh_at": "2026-11-07T18:29:35Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",
@@ -6437,10 +6437,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.58",
+    "last_version": "0.179.59",
     "deployed_at": "2026-11-07",
-    "summary": "Keep the standby courier\u2019s temporary SQLite snapshots in bounded non-swappable RAM, preserving the established transfer and receiver checks. Verify the live courier, both standby database integrity checks, and a measured reduction in temporary guest disk writes.",
-    "release_notes_url": "docs/release-notes/0.179.59.md"
+    "summary": "Warn before either standby courier source reaches its bounded RAM scratch limit, with a critical escalation closer to the limit. Alert on missing size telemetry while allowing backup transfers to continue if telemetry cannot be captured.",
+    "release_notes_url": "docs/release-notes/0.179.60.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
