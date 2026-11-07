@@ -1,14 +1,14 @@
-# Release 0.179.57
+# Release 0.179.58
 
-- Date: 2026-11-06
+- Date: 2026-11-07
 
 ## Summary
-- Keep sanitized Tailnet identities in generic shared-address space so exported network-policy checks retain their source classification.
-- Prune only accepted findings eliminated by the public projection; reject new non-info findings, malformed policy/baseline pairs and unsafe file aliases before writing exported baselines.
-- Run actual sanitized-policy regressions and portable foreign-source negative controls in Woodpecker while preserving private policy and baseline bytes.
+- Correct hypervisor log-shipping alert selection and grouping to preserve shipper_host independently of the collector guest scrape labels.
+- Exercise actual guest scrape labels in Prometheus fixtures and record native validation plus exact merged-main replay against both installed files.
+- Record five fresh shippers and healthy alert rules after an atomic reload without changing application deployment dates or credentials.
 
 ## Platform Impact
-- Publication automation only. Platform version remains 0.179.59; this release applies no runtime policy or application deployment.
+- Platform0.179.60 records the exact-main log-shipping alert correction; no catalog application deployment.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

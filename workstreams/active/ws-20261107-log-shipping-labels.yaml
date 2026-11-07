@@ -1,0 +1,61 @@
+id: ws-20261107-log-shipping-labels
+adr: '0250'
+title: Preserve hypervisor log-shipping alert identity across scrape labels
+status: ready
+ready_to_merge: true
+live_applied: true
+owner: codex
+branch: codex/log-shipping-release
+worktree_path: .
+doc: docs/workstreams/ws-20261107-log-shipping-labels.md
+depends_on: []
+conflicts_with: []
+shared_surfaces:
+  - workstreams.yaml
+ownership_manifest:
+  owned_surfaces:
+    - id: log_shipping_identity
+      mode: read_only
+      paths:
+        - config/0own/openobserve/log-freshness/openobserve-log-freshness.py
+        - config/prometheus/rules/fleet-log-shipping.yml
+        - tests/promtool/fleet_log_shipping_rules_test.yml
+        - tests/test_fleet_log_shipping_rules.py
+    - id: active_workstream_registry
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+        - workstreams.yaml
+    - id: log_shipping_release_integration
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+      paths:
+        - VERSION
+        - changelog.md
+        - versions/stack.yaml
+        - README.md
+        - RELEASE.md
+        - build/platform-manifest.json
+        - docs/status/**
+        - docs/release-notes/**
+        - docs/diagrams/agent-coordination-map.excalidraw
+        - docs/runbooks/fleet-observability.md
+        - docs/workstreams/ws-20261107-log-shipping-labels.md
+        - workstreams/active/ws-20261107-log-shipping-labels.yaml
+        - receipts/live-applies/2026-11-07-log-shipping-labels-live-apply.json
+canonical_truth:
+  changelog_entry: Select hypervisor log freshness by shipper_host so the collector guest's scrape labels cannot silence the alert.
+  release_bump: patch
+  included_in_repo_version: 0.179.58
+  latest_receipts:
+    hypervisor_log_shipping_alerts: 2026-11-07-log-shipping-labels-live-apply
+tasks:
+  - id: t1
+    title: Verify the live producer and alert mismatch
+    status: completed
+  - id: t2
+    title: Preserve source history and test actual guest scrape labels
+    status: completed
+  - id: t3
+    title: Verify exact merged main and prepare release metadata for the live correction
+    status: completed

@@ -451,3 +451,11 @@ Added 2026-11-01. Rules: `config/prometheus/rules/fleet-log-shipping.yml`; unit 
 | `LogFreshnessProbeBlind` | the probe cannot query OpenObserve, or its series is absent, for 15 minutes | `systemctl status openobserve-log-freshness.timer` and `journalctl -u openobserve-log-freshness` on VM 630 (`ssh 0own_openobserve`); OpenObserve on 127.0.0.1:5080 |
 
 The probe never reports hosts silent when it could not read: a failed query writes only `openobserve_log_freshness_up 0`.
+
+The timestamp's hypervisor identity is `shipper_host`. The collector itself is
+a guest, so its scrape target supplies its own `host` and `role="guest"`.
+Do not select these timestamps with `role="hypervisor"` or group them by the
+collector's `host`: that loses the hypervisors despite a healthy probe. The
+2026-11-07 exact-main replay verified five fresh per-shipper age series and
+both loaded rules healthy after a main-process reload; see the
+[live-apply receipt](../../receipts/live-applies/2026-11-07-log-shipping-labels-live-apply.json).
