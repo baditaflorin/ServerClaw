@@ -1,0 +1,93 @@
+rule_files:
+  - ../../config/prometheus/rules/tier0-standby.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: healthy databases stay below both thresholds
+    interval: 1m
+    input_series:
+      - series: 'vault_standby_source_database_size_bytes{database="secrets"}'
+        values: '120000000x30'
+      - series: 'vault_standby_source_database_limit_bytes{database="secrets"}'
+        values: '469762048x30'
+      - series: 'vault_standby_source_database_size_bytes{database="keystore"}'
+        values: '219000000x30'
+      - series: 'vault_standby_source_database_limit_bytes{database="keystore"}'
+        values: '469762048x30'
+      - series: 'vault_standby_sync_last_run_timestamp_seconds'
+        values: '123x30'
+    promql_expr_test:
+      - expr: 'ALERTS{alertname=~"VaultStandbyScratch.*",alertstate="firing"}'
+        eval_time: 20m
+        exp_samples: []
+
+  - name: warning begins at 75 percent and clears after recovery
+    interval: 1m
+    input_series:
+      - series: 'vault_standby_source_database_size_bytes{database="secrets"}'
+        values: '352321536x6 100000000x20'
+      - series: 'vault_standby_source_database_limit_bytes{database="secrets"}'
+        values: '469762048x30'
+      - series: 'vault_standby_source_database_size_bytes{database="keystore"}'
+        values: '352321535x30'
+      - series: 'vault_standby_source_database_limit_bytes{database="keystore"}'
+        values: '469762048x30'
+    promql_expr_test:
+      - expr: 'ALERTS{alertname="VaultStandbyScratchNearLimit",alertstate="firing"}'
+        eval_time: 4m
+        exp_samples: []
+      - expr: 'ALERTS{alertname="VaultStandbyScratchNearLimit",alertstate="firing"}'
+        eval_time: 6m
+        exp_samples:
+          - labels: 'ALERTS{alertname="VaultStandbyScratchNearLimit",alertstate="firing",database="secrets",severity="warning"}'
+            value: 1
+      - expr: 'ALERTS{alertname="VaultStandbyScratchNearLimit",alertstate="firing"}'
+        eval_time: 8m
+        exp_samples: []
+
+  - name: critical escalation fires near the hard limit
+    interval: 1m
+    input_series:
+      - series: 'vault_standby_source_database_size_bytes{database="keystore"}'
+        values: '440000000x20'
+      - series: 'vault_standby_source_database_limit_bytes{database="keystore"}'
+        values: '469762048x20'
+    promql_expr_test:
+      - expr: 'ALERTS{alertname="VaultStandbyScratchCritical",alertstate="firing"}'
+        eval_time: 1m
+        exp_samples: []
+      - expr: 'ALERTS{alertname="VaultStandbyScratchCritical",alertstate="firing"}'
+        eval_time: 3m
+        exp_samples:
+          - labels: 'ALERTS{alertname="VaultStandbyScratchCritical",alertstate="firing",database="keystore",severity="critical"}'
+            value: 1
+
+  - name: missing one database metric warns only where the courier is scraped
+    interval: 1m
+    input_series:
+      - series: 'vault_standby_source_database_size_bytes{database="secrets"}'
+        values: '120000000x30'
+      - series: 'vault_standby_source_database_limit_bytes{database="secrets"}'
+        values: '469762048x30'
+      - series: 'vault_standby_sync_last_run_timestamp_seconds'
+        values: '123x30'
+    promql_expr_test:
+      - expr: 'ALERTS{alertname="VaultStandbyScratchSizeMissing",alertstate="firing"}'
+        eval_time: 14m
+        exp_samples: []
+      - expr: 'ALERTS{alertname="VaultStandbyScratchSizeMissing",alertstate="firing"}'
+        eval_time: 16m
+        exp_samples:
+          - labels: 'ALERTS{alertname="VaultStandbyScratchSizeMissing",alertstate="firing",database="keystore",severity="warning"}'
+            value: 1
+
+  - name: a Prometheus without the courier scrape does not raise a telemetry alert
+    interval: 1m
+    input_series:
+      - series: 'up{job="unrelated"}'
+        values: '1x30'
+    promql_expr_test:
+      - expr: 'ALERTS{alertname="VaultStandbyScratchSizeMissing",alertstate="firing"}'
+        eval_time: 20m
+        exp_samples: []

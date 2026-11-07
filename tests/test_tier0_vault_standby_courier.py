@@ -37,34 +37,44 @@ case " $* " in
     printf '%s\n' "$*" >> "$S/src_calls"
     [ -n "${SRC_FAIL:-}" ] && exit 1
     case "${*: -1}" in
-      *"-- 'secrets'") printf 'gz-bytes-of-secrets.db\n' ;;
-      *"-- 'keystore'") printf 'gz-bytes-of-keys.db\n' ;;
+      *"-- 'secrets'") printf 'VAULT_STANDBY_SOURCE_BYTES=%s:469762048\n' "${SECRETS_BYTES:-120000000}" >&2; [ -z "${OVER_LIMIT:-}" ] || exit 1; printf 'gz-bytes-of-secrets.db\n' ;;
+      *"-- 'keystore'") printf 'VAULT_STANDBY_SOURCE_BYTES=%s:469762048\n' "${KEYSTORE_BYTES:-219000000}" >&2; printf 'gz-bytes-of-keys.db\n' ;;
       *) exit 1 ;;
     esac
+    [ -z "${DUPLICATE_SIZE:-}" ] || echo 'VAULT_STANDBY_SOURCE_BYTES=42:469762048' >&2
     exit 0 ;;
 esac
 """
 
 
 def _run(
-    tmp_path: Path, fail_label: str = "", src_fail: bool = False, with_textfile: bool = True
+    tmp_path: Path, fail_label: str = "", src_fail: bool = False, with_textfile: bool = True,
+    with_runtime: bool = True, duplicate_size: bool = False, over_limit: bool = False
 ) -> tuple[subprocess.CompletedProcess[str], Path, Path]:
-    state, bin_dir, textfile = tmp_path / "state", tmp_path / "bin", tmp_path / "textfile"
+    state, bin_dir, textfile, runtime = (tmp_path / name for name in ("state", "bin", "textfile", "runtime"))
     state.mkdir()
     bin_dir.mkdir()
     if with_textfile:
         textfile.mkdir()
+    if with_runtime:
+        runtime.mkdir(mode=0o700)
     (bin_dir / "ssh").write_text(SSH, encoding="utf-8")
     (bin_dir / "ssh").chmod(0o755)
     script = (COURIER / "vault-standby-send").read_text(encoding="utf-8")
     for host_path in (KEY, KNOWN_HOSTS, TEXTFILE):
         assert host_path in script, host_path
     script = script.replace(KEY, str(tmp_path / "key")).replace(KNOWN_HOSTS, str(tmp_path / "known_hosts")).replace(TEXTFILE, str(textfile))
+    script = script.replace("R=/run/vault-standby-send", f"R={runtime}")
     path = tmp_path / "send.sh"
     path.write_text(script, encoding="utf-8")
     env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}", "FAKE_STATE": str(state), "FAIL_LABEL": fail_label}
     if src_fail:
         env["SRC_FAIL"] = "1"
+    if duplicate_size:
+        env["DUPLICATE_SIZE"] = "1"
+    if over_limit:
+        env["OVER_LIMIT"] = "1"
+        env["SECRETS_BYTES"] = str(448 * 1024 * 1024 + 1)
     result = subprocess.run(["bash", str(path)], capture_output=True, text=True, env=env, timeout=60, check=False)
     return result, state, textfile
 
@@ -100,6 +110,10 @@ def test_both_databases_are_pushed_in_order_with_the_pinned_options(tmp_path: Pa
     assert "keys.db" in (state / "dest.1").read_text(encoding="utf-8")
     metrics = (textfile / "vault_standby_sync.prom").read_text(encoding="utf-8")
     assert "vault_standby_sync_last_success 1" in metrics and "vault_standby_sync_last_success_timestamp_seconds" in metrics
+    for name, size in (("secrets", 120000000), ("keystore", 219000000)):
+        assert f'vault_standby_source_database_size_bytes{{database="{name}"}} {size}' in metrics
+        assert f'vault_standby_source_database_limit_bytes{{database="{name}"}} 469762048' in metrics
+    assert list((tmp_path / "runtime").iterdir()) == []
     assert sorted(p.name for p in textfile.iterdir()) == ["vault_standby_sync.prom"]
 
 
@@ -110,6 +124,8 @@ def test_a_refused_push_exits_1_still_tries_the_other_and_publishes_the_failure(
     assert len(_lines(state, "dest_calls")) == 2  # keystore was still attempted
     metrics = (textfile / "vault_standby_sync.prom").read_text(encoding="utf-8")
     assert "vault_standby_sync_last_success 0" in metrics and "vault_standby_sync_last_success_timestamp_seconds" not in metrics
+    assert 'vault_standby_source_database_size_bytes{database="secrets"} 120000000' in metrics
+    assert 'vault_standby_source_database_size_bytes{database="keystore"} 219000000' in metrics
     assert sorted(p.name for p in textfile.iterdir()) == ["vault_standby_sync.prom"]
 
 
@@ -118,6 +134,31 @@ def test_a_failed_snapshot_on_the_dockerhost_fails_the_run(tmp_path: Path) -> No
     assert result.returncode == 1
     assert "push secrets FAILED" in result.stderr and "push keystore FAILED" in result.stderr
     assert "vault_standby_sync_last_success 0" in (textfile / "vault_standby_sync.prom").read_text(encoding="utf-8")
+    assert 'vault_standby_source_database_size_bytes{database=' not in (textfile / "vault_standby_sync.prom").read_text(encoding="utf-8")
+
+
+def test_unavailable_telemetry_does_not_prevent_backup(tmp_path: Path) -> None:
+    result, state, textfile = _run(tmp_path, with_runtime=False)
+    assert result.returncode == 0 and len(_lines(state, "dest_calls")) == 2
+    assert "source-size telemetry unavailable" in result.stderr
+    metrics = (textfile / "vault_standby_sync.prom").read_text(encoding="utf-8")
+    assert "vault_standby_sync_last_success 1" in metrics
+    assert 'vault_standby_source_database_size_bytes{database=' not in metrics
+
+
+def test_duplicate_source_telemetry_is_rejected_without_breaking_backup(tmp_path: Path) -> None:
+    result, _, textfile = _run(tmp_path, duplicate_size=True)
+    assert result.returncode == 0 and "duplicate standby source-size telemetry" in result.stderr
+    assert 'vault_standby_source_database_size_bytes{database=' not in (textfile / "vault_standby_sync.prom").read_text(encoding="utf-8")
+
+
+def test_source_size_stays_visible_when_the_source_rejects_an_oversized_database(tmp_path: Path) -> None:
+    result, state, textfile = _run(tmp_path, over_limit=True)
+    assert result.returncode == 1 and len(_lines(state, "dest_calls")) == 2
+    metrics = (textfile / "vault_standby_sync.prom").read_text(encoding="utf-8")
+    assert 'vault_standby_source_database_size_bytes{database="secrets"} 469762049' in metrics
+    assert 'vault_standby_source_database_limit_bytes{database="secrets"} 469762048' in metrics
+    assert "vault_standby_sync_last_success 0" in metrics
 
 
 def test_without_the_textfile_directory_the_metric_is_skipped_and_nothing_is_created(tmp_path: Path) -> None:
@@ -179,6 +220,7 @@ def test_remote_snapshot_stream_restores_and_cleans_its_unique_scratch(tmp_path:
         result = subprocess.run(["bash", "-s", "--", "secrets"], input=script.encode(), capture_output=True,
                                 env=env, timeout=10, check=False)
     assert result.returncode == 0, result.stderr
+    assert b"VAULT_STANDBY_SOURCE_BYTES=" in result.stderr
     assert list(scratch.iterdir()) == []
     restored = tmp_path / "restored.db"
     restored.write_bytes(gzip.decompress(result.stdout))
@@ -194,6 +236,7 @@ def test_remote_snapshot_stream_restores_and_cleans_its_unique_scratch(tmp_path:
         refused = subprocess.run(["bash", "-s", "--", "secrets"], input=script.encode(), capture_output=True,
                                  env={**env, "DB_BYTES": str(db_bytes)}, timeout=5, check=False)
         assert refused.returncode == 1 and refused.stdout == b"" and error in refused.stderr
+        assert f"VAULT_STANDBY_SOURCE_BYTES={db_bytes}:469762048".encode() in refused.stderr
         assert list(scratch.iterdir()) == []
 
 
@@ -202,6 +245,7 @@ def test_units_script_syntax_and_no_key_material() -> None:
     service = (COURIER / "vault-standby-send.service").read_text(encoding="utf-8")
     timer = (COURIER / "vault-standby-send.timer").read_text(encoding="utf-8")
     assert "Type=oneshot" in service and "TimeoutStartSec=300" in service
+    assert "RuntimeDirectory=vault-standby-send" in service and "RuntimeDirectoryMode=0700" in service
     assert "ExecStart=/usr/bin/flock -n /run/lock/vault-standby-send.lock /usr/local/sbin/vault-standby-send" in service
     assert "OnUnitActiveSec=120s" in timer and "WantedBy=timers.target" in timer
     for name in ("vault-standby-send", "vault-standby-send.service", "vault-standby-send.timer"):

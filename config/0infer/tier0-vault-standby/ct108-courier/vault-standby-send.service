@@ -4,6 +4,8 @@ After=network-online.target
 
 [Service]
 Type=oneshot
+RuntimeDirectory=vault-standby-send
+RuntimeDirectoryMode=0700
 ExecStart=/usr/bin/flock -n /run/lock/vault-standby-send.lock /usr/local/sbin/vault-standby-send
 Nice=10
 TimeoutStartSec=300

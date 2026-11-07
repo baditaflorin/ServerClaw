@@ -11880,6 +11880,70 @@ workstreams:
   - id: t2
     title: Publish and verify the 0.179.47 ServerClaw snapshot
     status: pending
+- id: ws-20261107-vault-standby-scratch-warning
+  adr: '0100'
+  title: Warn before standby SQLite sources outgrow RAM scratch
+  status: ready
+  ready_to_merge: true
+  live_applied: true
+  owner: codex
+  branch: codex/courier-size-release-060
+  worktree_path: .
+  doc: docs/workstreams/ws-20261107-vault-standby-scratch-warning.md
+  depends_on: []
+  conflicts_with: []
+  shared_surfaces:
+  - workstreams.yaml
+  ownership_manifest:
+    owned_surfaces:
+    - id: vault_standby_scratch_warning
+      mode: read_only
+      paths:
+      - config/0infer/tier0-vault-standby/README.md
+      - config/0infer/tier0-vault-standby/ct108-courier/vault-standby-send
+      - config/0infer/tier0-vault-standby/ct108-courier/vault-standby-send.service
+      - config/prometheus/rules/tier0-standby.yml
+      - tests/test_tier0_vault_standby_courier.py
+      - tests/test_vault_standby_scratch_promtool.py
+      - tests/promtool/vault_standby_scratch_rules_test.yml
+    - id: active_workstream_registry
+      mode: shared_contract
+      contract: workstream-registry-v1
+      paths:
+      - workstreams.yaml
+    - id: vault_standby_scratch_warning_release_integration
+      mode: shared_contract
+      contract: mainline-release-integration-v1
+      paths:
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      - README.md
+      - RELEASE.md
+      - build/platform-manifest.json
+      - docs/status/**
+      - docs/release-notes/**
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - docs/workstreams/ws-20261107-vault-standby-scratch-warning.md
+      - workstreams/active/ws-20261107-vault-standby-scratch-warning.yaml
+      - receipts/live-applies/2026-11-07-vault-standby-scratch-warning-live-apply.json
+  canonical_truth:
+    changelog_entry: Warn before standby courier sources exceed their bounded RAM
+      scratch limit.
+    release_bump: patch
+    included_in_repo_version: 0.179.60
+    latest_receipts:
+      vault_standby_scratch_warning: 2026-11-07-vault-standby-scratch-warning-live-apply
+  tasks:
+  - id: t1
+    title: Report each source database size and its actual enforced limit
+    status: completed
+  - id: t2
+    title: Test warning, critical and missing-telemetry alerts
+    status: completed
+  - id: t3
+    title: Apply the reviewed sender and alert rules and verify scheduled replication
+    status: completed
 - id: ws-20261107-vault-standby-ram-scratch
   adr: '0100'
   title: Bound the standby courier SQLite scratch in memory

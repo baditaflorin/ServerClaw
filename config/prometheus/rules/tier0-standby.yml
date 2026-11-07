@@ -25,6 +25,35 @@ groups:
         annotations:
           summary: "Vault standby sync metric is missing"
           description: "Prometheus has no vault_standby_sync_* series from the builder (CT108 textfile collector). The courier may not be running."
+      - alert: VaultStandbyScratchNearLimit
+        expr: vault_standby_source_database_size_bytes / vault_standby_source_database_limit_bytes >= 0.75
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.database }} standby source is approaching the RAM scratch limit"
+          description: "The source database is {{ $value | humanizePercentage }} of the courier's limit. Increase the bounded scratch budget safely before the source reaches the limit, or the standby copy will stop updating."
+      - alert: VaultStandbyScratchCritical
+        expr: vault_standby_source_database_size_bytes / vault_standby_source_database_limit_bytes >= 0.93
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.database }} standby source is close to the RAM scratch limit"
+          description: "The source database is {{ $value | humanizePercentage }} of the courier's limit. The standby copy can soon stop updating; increase the bounded scratch budget safely."
+      - alert: VaultStandbyScratchSizeMissing
+        expr: |
+          (absent(vault_standby_source_database_size_bytes{database="secrets"})
+           or absent(vault_standby_source_database_size_bytes{database="keystore"})
+           or absent(vault_standby_source_database_limit_bytes{database="secrets"})
+           or absent(vault_standby_source_database_limit_bytes{database="keystore"}))
+          and on() (vault_standby_sync_last_run_timestamp_seconds > 0)
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.database }} standby source-size telemetry is missing"
+          description: "The courier is reporting runs but not a source database size and its limit. Check the courier journal and source connection; scratch-capacity warnings cannot work without both metrics."
       - alert: AlertmanagerMeshDegraded
         expr: alertmanager_cluster_members{job="alertmanager"} < 2
         for: 10m

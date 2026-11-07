@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.179.59
-platform_version: 0.179.61
+repo_version: 0.179.60
+platform_version: 0.179.62
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -204,6 +204,7 @@ live_apply_evidence:
     api_gateway_typesense: ws-0512-authentik-api-gateway-typesense-20261013
     hypervisor_log_shipping_alerts: 2026-11-07-log-shipping-labels-live-apply
     vault_standby_ram_scratch: 2026-11-07-vault-standby-ram-live-apply
+    vault_standby_scratch_warning: 2026-11-07-vault-standby-scratch-warning-live-apply
 desired_state:
   host_id: proxmox-host
   provider: hetzner-dedicated
@@ -1198,8 +1199,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.179.59
+    current: 0.179.60
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.179.61
+    current: 0.179.62
     meaning: intended platform release for the actual server configuration
