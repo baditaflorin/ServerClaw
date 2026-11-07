@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.179.58",
-  "platform_version": "0.179.60",
-  "generated_at": "2026-11-07T00:19:16Z",
-  "next_refresh_at": "2026-11-07T01:19:16Z",
+  "repo_version": "0.179.59",
+  "platform_version": "0.179.61",
+  "generated_at": "2026-11-07T07:12:59Z",
+  "next_refresh_at": "2026-11-07T08:12:59Z",
   "environment": "production",
   "identity": {
     "platform_name": "example.org",
@@ -6437,10 +6437,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.179.57",
+    "last_version": "0.179.58",
     "deployed_at": "2026-11-07",
-    "summary": "Correct hypervisor log-shipping alert selection and grouping to preserve shipper_host independently of the collector guest scrape labels. Exercise actual guest scrape labels in Prometheus fixtures and record native validation plus exact merged-main replay against both installed files.",
-    "release_notes_url": "docs/release-notes/0.179.58.md"
+    "summary": "Keep the standby courier\u2019s temporary SQLite snapshots in bounded non-swappable RAM, preserving the established transfer and receiver checks. Verify the live courier, both standby database integrity checks, and a measured reduction in temporary guest disk writes.",
+    "release_notes_url": "docs/release-notes/0.179.59.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

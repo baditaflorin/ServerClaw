@@ -1,14 +1,14 @@
-# Release 0.179.58
+# Release 0.179.59
 
 - Date: 2026-11-07
 
 ## Summary
-- Correct hypervisor log-shipping alert selection and grouping to preserve shipper_host independently of the collector guest scrape labels.
-- Exercise actual guest scrape labels in Prometheus fixtures and record native validation plus exact merged-main replay against both installed files.
-- Record five fresh shippers and healthy alert rules after an atomic reload without changing application deployment dates or credentials.
+- Keep the standby courier’s temporary SQLite snapshots in bounded non-swappable RAM, preserving the established transfer and receiver checks.
+- Verify the live courier, both standby database integrity checks, and a measured reduction in temporary guest disk writes.
+- Record the merged source, guarded deployment and operational memory limits for the existing scheduled backup.
 
 ## Platform Impact
-- Platform0.179.60 records the exact-main log-shipping alert correction; no catalog application deployment.
+- Platform 0.179.61 records the verified standby courier deployment; no catalog application deployment.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
