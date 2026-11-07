@@ -48,6 +48,11 @@ The other half of the standby. It runs on the Builder, not on VM704, and was cop
 
 Every 2 minutes (`OnUnitActiveSec=120s`, run under `flock -n`) it takes a WAL-safe `sqlite3 .backup` of the vault and keystore databases on the dockerhost
 (over ssh as `ubuntu_vm` with sudo, retried 4 times), gzips them and streams each to `vsync@<0infer host>:2240`, which is forwarded to VM704's `vault-standby-receive`.
+Each source snapshot runs in a separate root transient systemd unit. The unit verifies its private 512 MiB `/tmp` tmpfs mount with swap disabled and its
+768 MiB memory limit before creating an exclusive scratch directory. It requires 2 GiB of available host memory and a regular source database of at most 448 MiB.
+The unit has a read-only system filesystem and no network access. It opens the live SQLite database read-only, streams gzip over the existing SSH route,
+and removes scratch on exit. The mount namespace is discarded when the unit stops, including on timeout. An invalid mount, insufficient space, or memory limit
+failure makes the push fail visibly. The receiver still verifies each backup before replacing its standby database.
 It writes the textfile metric `vault_standby_sync_*` (alerts `VaultStandbySyncStale|VeryStale|Missing`) and exits 1 if any push failed; a failed run still publishes
 `vault_standby_sync_last_success 0`.
 
@@ -65,8 +70,7 @@ and `data/{vault,keystore}/.last_sync` on VM704 must be seconds old.
 **While the standby runs** (the weekly drill, `tier0-secret` reading a secret for the runner's DNS stage and its daily rehearsal, or a manual `promote.sh`): `vault-standby-receive` refuses every upload while anything listens on the standby's published
 ports (`127.0.0.1:18021` keystore, `127.0.0.1:18140` vault; docker-proxy binds them as soon as a container starts, and the receiver, which runs as `vsync` without docker access,
 probes them with a connect). A refusal exits 5 with `refused: the standby is running (promoted?), not replacing its data`, writes nothing, creates no `.incoming` or history
-file, and first reads and discards the upload: leaving it unread would SIGPIPE the courier's snapshot step on the dockerhost, which then skips its cleanup and leaves a root-only
-copy of the database in its `/tmp`. The courier sees `push ... FAILED` and publishes `vault_standby_sync_last_success 0` for those runs; the sync alerts are timestamp based
+file, and drains the upload before closing the connection. The courier sees `push ... FAILED` and publishes `vault_standby_sync_last_success 0` for those runs; the sync alerts are timestamp based
 (stale after 15 minutes), so a drill or a rehearsal does not page, a long run does, which is correct because the copy is then not being refreshed. The check runs twice:
 before the upload is accepted and again right before the swap, so a standby that starts mid-upload is still refused. The ports it watches must match the `ports:` of `compose.yml`
 (a test compares them).
@@ -94,5 +98,6 @@ CT108 until that is decided. A persistent "promoted" fence for this directory wa
 real-promotion guard, stale copies, a record-count drop, containers that exit only after `stop` has returned, and containers that never
 stop. `tests/test_tier0_vault_standby_courier.py` does the same for `ct108-courier/vault-standby-send` with a stub `ssh`: both pushes in order with the pinned
 options, a failed push or snapshot (exit 1, metric `last_success 0` still published), and a missing textfile directory.
+It also checks that an invalid scratch mount fails before any database is copied, and restores a real synthetic WAL database from the streamed gzip when SQLite and gzip are installed.
 `tests/test_tier0_vault_standby_receiver.py` runs `vault-standby-receive` itself (stub `sqlite3`, real loopback listeners standing in for the standby): a normal swap, a refusal on either
 port with the upload drained and nothing touched, a standby that starts mid-upload, still-denied commands, and the watched ports equal to the compose ports.

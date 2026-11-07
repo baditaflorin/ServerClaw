@@ -1,0 +1,31 @@
+{
+  "$schema": "docs/schema/live-apply-receipt.schema.json",
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-11-07-vault-standby-ram-live-apply",
+  "applied_on": "2026-11-07",
+  "recorded_on": "2026-11-07",
+  "recorded_by": "codex",
+  "source_commit": "5da314fa69b5a626964a48d342f747d87f8c216f",
+  "repo_version_context": "0.179.58",
+  "workflow_id": "ws-20261107-vault-standby-ram-scratch",
+  "adr": "0100",
+  "service_ids": [],
+  "summary": "Use bounded non-swappable RAM for the standby courier's temporary SQLite snapshots while preserving the scheduled transfer and receiver integrity checks.",
+  "targets": [
+    {"kind": "container", "name": "builder", "vmid": "108"},
+    {"kind": "vm", "name": "dockerhost", "vmid": "100"},
+    {"kind": "vm", "name": "standby", "vmid": "704"}
+  ],
+  "verification": [
+    {"check": "Reviewed source and CI", "result": "pass", "observed": "PR687 head bd9c9640c1047e8bd83aa73c5cb712fb92e374e7 passed both primary checks, merged as 5da314fa69b5a626964a48d342f747d87f8c216f, and merged-main pipeline 2422 passed. Twenty focused courier, receiver, and drill tests passed independently."},
+    {"check": "Native synthetic restore", "result": "pass", "observed": "On the existing builder-to-source SSH and sudo route, an isolated systemd unit verified a 512 MiB noswap tmpfs, 768 MiB memory cap and zero swap allowance, then copied and restored a synthetic SQLite database. The fixture was removed and the host /tmp mount remained ext4."},
+    {"check": "Guarded installation", "result": "pass", "observed": "At 07:04:23 UTC the sender changed from SHA256 5c9a20c5aa0ea033512adfba7e151bbb243b15c7133cc19aca174651ddaff314 to 0d3350ec6f4bb67a370d6a9ad4908780c616f4e096119500f269154e6cc52bc9 under the existing courier flock. A root-private before-image was retained; service and timer were not restarted."},
+    {"check": "Scheduled receiver verification", "result": "pass", "observed": "The 07:05 and 07:07 UTC scheduled runs exited successfully. The receiver reported successful SQLite integrity and nonempty-table checks for both databases; both standby last-sync timestamps advanced, the timer stayed active, and the textfile success metric was 1."},
+    {"check": "Guest write comparison", "result": "pass", "observed": "A 135-second baseline and post-install window observed guest block writes of 494264320 and 169340928 bytes respectively. The old courier created two new disk scratch files totalling 339894272 logical bytes; the updated courier created none. The windows included other concurrent work."}
+  ],
+  "limitations": [
+    "Guest block and cgroup counters overlap and do not measure physical NAND writes; one comparison does not prove a sustained daily or fleet-wide reduction.",
+    "The private scratch filesystem is capped at 512 MiB and a source database above 448 MiB or low available memory stops that snapshot; existing standby-sync alerts remain the failure signal.",
+    "Scoped release metadata follows the documented WS0514 workflow. The previous global release manager refused unrelated active workstreams and waiver blockers before mutation; this receipt makes no global readiness claim."
+  ]
+}

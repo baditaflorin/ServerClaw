@@ -9,12 +9,66 @@ DST=(-o BatchMode=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=yes -o UserK
      -o "ProxyCommand=nc -X connect -x 127.0.0.1:1056 %h %p" -p 2240 -i /root/.ssh/tier0_sync)
 TARGET=vsync@100.64.0.21
 rc=0
-push() {  # $1 label  $2 source db path on the dockerhost
-  ssh "${SRC[@]}" "$DOCKERHOST" "set -e; t=\$(mktemp -u /tmp/snap.XXXXXX); ok=0; for i in 1 2 3 4; do if sudo sqlite3 -cmd '.timeout 30000' '$2' \".backup \$t\" 2>/dev/null; then ok=1; break; fi; sudo rm -f \$t; sleep 4; done; [ \$ok = 1 ] || { echo 'snapshot failed after retries' >&2; exit 1; }; sudo chmod 600 \$t; sudo gzip -1 -c \$t; sudo rm -f \$t" \
-    | ssh "${DST[@]}" "$TARGET" "put $1" || { echo "push $1 FAILED" >&2; rc=1; }
+push() {  # $1 allowlisted database label
+  ssh "${SRC[@]}" "$DOCKERHOST" \
+    "sudo -n /usr/bin/systemd-run --quiet --pipe --wait --collect \
+      --property=TemporaryFileSystem=/tmp:rw,nodev,nosuid,noexec,noswap,size=512M,mode=0700 \
+      --property=MemoryMax=768M --property=MemorySwapMax=0 --property=LimitCORE=0 \
+      --property=ProtectSystem=strict --property=PrivateNetwork=yes \
+      --property=NoNewPrivileges=yes --property=TasksMax=16 \
+      --property=RuntimeMaxSec=140s --property=TimeoutStopSec=5s \
+      /bin/bash -s -- '$1'" <<'REMOTE' | ssh "${DST[@]}" "$TARGET" "put $1" || { echo "push $1 FAILED" >&2; rc=1; }
+set -euo pipefail
+umask 077
+case "$1" in
+  secrets) db=/var/lib/docker/volumes/go-fleet-secrets_secrets-data/_data/secrets.db ;;
+  keystore) db=/opt/services/go_apikey_service/data/keys.db ;;
+  *) echo 'unrecognized standby database' >&2; exit 1 ;;
+esac
+
+unsafe() { echo 'standby snapshot requires bounded no-swap RAM scratch' >&2; exit 1; }
+read -r filesystem options < <(findmnt -n --mountpoint /tmp -o FSTYPE,OPTIONS) || unsafe
+[[ $filesystem == tmpfs && $(stat -c '%u:%g:%a' /tmp) == 0:0:700 ]] || unsafe
+for option in nodev nosuid noexec noswap; do
+  [[ ,$options, == *,$option,* ]] || unsafe
+done
+read -r block_size blocks < <(stat -f -c '%S %b' /tmp) || unsafe
+(( block_size * blocks == 512 * 1024 * 1024 )) || unsafe
+IFS=: read -r hierarchy controllers group < /proc/self/cgroup || unsafe
+[[ $hierarchy == 0 && -z $controllers && $group == /* ]] || unsafe
+[[ $(<"/sys/fs/cgroup$group/memory.max") == 805306368 &&
+   $(<"/sys/fs/cgroup$group/memory.swap.max") == 0 ]] || unsafe
+
+available_kib=$(awk '$1 == "MemAvailable:" {print $2; exit}' /proc/meminfo)
+if [[ ! $available_kib =~ ^[0-9]+$ ]] || (( available_kib < 2 * 1024 * 1024 )); then
+  echo 'insufficient memory headroom for standby snapshot' >&2; exit 1
+fi
+if [[ ! -f $db || -L $db ]]; then
+  echo 'standby source must be a regular non-symlink database' >&2; exit 1
+fi
+db_bytes=$(stat -c '%s' -- "$db")
+if [[ ! $db_bytes =~ ^[0-9]+$ ]] || (( db_bytes <= 0 || db_bytes > 448 * 1024 * 1024 )); then
+  echo 'standby source database exceeds scratch budget or is empty' >&2; exit 1
+fi
+
+export TMPDIR=/tmp SQLITE_TMPDIR=/tmp
+scratch=$(mktemp -d /tmp/vault-standby-snapshot.XXXXXXXX)
+trap 'rm -rf -- "$scratch"' EXIT
+file="$scratch/snapshot.db"
+for attempt in 1 2 3 4; do
+  if sqlite3 -readonly -cmd '.timeout 30000' "$db" ".backup $file" >/dev/null 2>&1 && [[ -s $file ]]; then
+    gzip -1 -c -- "$file"
+    exit
+  fi
+  rm -f -- "$file" "$file-journal" "$file-wal" "$file-shm"
+  [[ $attempt == 4 ]] || sleep 4
+done
+echo 'snapshot failed after retries' >&2
+exit 1
+REMOTE
 }
-push secrets  /var/lib/docker/volumes/go-fleet-secrets_secrets-data/_data/secrets.db
-push keystore /opt/services/go_apikey_service/data/keys.db
+push secrets
+push keystore
 M=/var/lib/prometheus-node-exporter/textfile    # the builder's node_exporter --collector.textfile.directory
 if [ -d "$M" ]; then
   tmp="$M/.vault_standby_sync.$$"
